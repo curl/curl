@@ -1,0 +1,70 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK swsclose
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib556
+</tool>
+<name>
+CONNECT_ONLY and doing a second curl_easy_perform
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout crlf="headers">
+HTTP/1.1 200 OK swsclose
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+Content-Length: 6
+Connection: close
+
+-foo-
+HTTP/1.1 200 OK swsclose
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+Content-Length: 6
+Connection: close
+
+-foo-
+</stdout>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: ninja
+
+GET /%TESTNUMBER HTTP/1.1
+Host: ninja
+
+</protocol>
+
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

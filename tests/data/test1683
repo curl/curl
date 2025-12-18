@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--no-clobber
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 200 OK
+Connection: close
+Content-Type: text/plain
+Content-Length: 4
+
+foo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+HTTP GET without clobber when 100 files already exist
+</name>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/exist%TESTNUMBER --no-clobber
+</command>
+<file name="%LOGDIR/exist%TESTNUMBER">
+to stay the same
+</file>
+<precheck>
+%PERL -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; open(FH, ">", $filename) or die $!; print FH "to stay the same" ; close(FH) }'
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+23
+</errorcode>
+<file name="%LOGDIR/exist%TESTNUMBER">
+to stay the same
+</file>
+<postcheck>
+%PERL -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; open(FH, "<", $filename) or die $!; (<FH> eq "to stay the same" and <FH> eq "") or die "incorrect $filename" ; close(FH) }'
+</postcheck>
+</verify>
+</testcase>

@@ -18,16 +18,13 @@ SFTP put
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP put with --ftp-create-dirs
- </name>
- <command>
---ftp-create-dirs --key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file624.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test624.dir/upload.624 --insecure
+</name>
+<command>
+--ftp-create-dirs --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/upload.%TESTNUMBER --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test610.pl move %PWD/log/test624.dir/upload.624 %PWD/log/upload.624 rmdir %PWD/log/test624.dir
-</postcheck>
-<file name="log/file624.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>
@@ -40,8 +37,8 @@ for ssh upload test
 Test data
 for ssh upload test
 </upload>
-<valgrind>
-disable
-</valgrind>
+<postcheck>
+%PERL %SRCDIR/libtest/test610.pl move %PWD/%LOGDIR/test%TESTNUMBER.dir/upload.%TESTNUMBER %PWD/%LOGDIR/upload.%TESTNUMBER rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
+</postcheck>
 </verify>
 </testcase>

@@ -19,13 +19,13 @@ Resume
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PASV upload resume from end of file
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/1038 -T log/upload1038 -C -
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C -
 </command>
-<file name="log/upload1038">
+<file name="%LOGDIR/upload%TESTNUMBER">
 this is the *****cr@p******** that we're gonna upload
 
 worx?
@@ -34,14 +34,14 @@ worx?
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 1038
-APPE 1038
+SIZE %TESTNUMBER
+APPE %TESTNUMBER
 QUIT
 </protocol>
 <upload>

@@ -6,6 +6,7 @@ HTTP GET
 CURLPAUSE_RECV
 chunked Transfer-Encoding
 Trailer:
+DELAY
 </keywords>
 </info>
 
@@ -30,11 +31,13 @@ HTTP/1.1 200 OK swsclose
 Transfer-Encoding: chunked
 Trailer: MyCoolTrailerHeader
 
-Got 4 bytes but pausing!
+Got bytes but pausing!
 datad474
 MyCoolTrailerHeader: amazingtrailer
 </datacheck>
-
+<servercmd>
+writedelay: 10
+</servercmd>
 </reply>
 # Client-side
 <client>
@@ -42,20 +45,20 @@ MyCoolTrailerHeader: amazingtrailer
 http
 </server>
 <tool>
-lib1540
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 chunked with trailers and pausing the receive
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1540
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-GET /1540 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

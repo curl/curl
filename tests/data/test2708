@@ -1,0 +1,74 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+<client>
+<name>
+ws: Automatic PONG
+</name>
+<features>
+Debug
+ws
+</features>
+<server>
+http
+</server>
+<tool>
+lib2700
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+<setenv>
+CURL_WS_FORCE_ZERO_MASK=1
+</setenv>
+</client>
+
+<reply>
+<servercmd>
+upgrade
+</servercmd>
+
+# PING "test"
+# CLOSE
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: server/%TESTNUMBER
+Upgrade: Websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%89%04test]hex%%hex[%88%00]hex%
+</data>
+</reply>
+
+<verify>
+
+# PONG "test" (payload MUST equal ping payload)
+#   see https://datatracker.ietf.org/doc/html/rfc6455#section-5.2
+# CLOSE
+<protocol nonewline="yes">
+%hex[%8A%84%00%00%00%00test%88%80%00%00%00%00]hex%
+</protocol>
+
+# PING is handled by lib and never given to application
+<stdout>
+close [0]
+</stdout>
+
+# CURLE_OK
+<errorcode>
+0
+</errorcode>
+
+# Strip HTTP header from <protocol>
+<strip>
+^GET /.*
+^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*
+^\s*$
+</strip>
+</verify>
+</testcase>

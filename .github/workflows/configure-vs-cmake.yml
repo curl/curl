@@ -1,0 +1,177 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: 'configure-vs-cmake'
+'on':
+  push:
+    branches:
+      - master
+    paths:
+      - '*.ac'
+      - '**/*.m4'
+      - '**/CMakeLists.txt'
+      - 'CMake/**'
+      - 'lib/curl_config.h.cmake'
+      - 'tests/cmake/**'
+      - '.github/scripts/cmp-config.pl'
+      - '.github/workflows/configure-vs-cmake.yml'
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '*.ac'
+      - '**/*.m4'
+      - '**/CMakeLists.txt'
+      - 'CMake/**'
+      - 'lib/curl_config.h.cmake'
+      - 'tests/cmake/**'
+      - '.github/scripts/cmp-config.pl'
+      - '.github/workflows/configure-vs-cmake.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  check-linux:
+    name: 'Linux'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'run configure --with-openssl'
+        run: |
+          autoreconf -fi
+          export PKG_CONFIG_DEBUG_SPEW=1
+          mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl
+
+      - name: 'run cmake'
+        run: cmake -B bld-cm -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
+
+      - name: 'configure log'
+        run: cat bld-am/config.log 2>/dev/null || true
+
+      - name: 'cmake log'
+        run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'dump generated files'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
+          done
+
+      - name: 'compare generated curl_config.h files'
+        run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
+
+      - name: 'compare generated libcurl.pc files'
+        run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
+
+      - name: 'compare generated curl-config files'
+        run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
+
+  check-macos:
+    name: 'macOS'
+    runs-on: macos-latest
+    steps:
+      - name: 'install packages'
+        run: |
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+
+      - name: 'toolchain versions'
+        run: echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'run configure --with-openssl'
+        run: |
+          autoreconf -fi
+          export PKG_CONFIG_DEBUG_SPEW=1
+          mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --disable-ldap --with-brotli --with-zstd --with-apple-sectrust
+
+      - name: 'run cmake'
+        run: |
+          cmake -B bld-cm -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DCURL_DISABLE_LDAP=ON \
+            -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+            -DCURL_USE_LIBSSH2=OFF -DUSE_APPLE_SECTRUST=ON
+
+      - name: 'configure log'
+        run: cat bld-am/config.log 2>/dev/null || true
+
+      - name: 'cmake log'
+        run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'dump generated files'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
+          done
+
+      - name: 'compare generated curl_config.h files'
+        run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
+
+      - name: 'compare generated libcurl.pc files'
+        run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
+
+      - name: 'compare generated curl-config files'
+        run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
+
+  check-windows:
+    name: 'Windows'
+    runs-on: ubuntu-latest
+    env:
+      TRIPLET: 'x86_64-w64-mingw32'
+    steps:
+      - name: 'install packages'
+        run: |
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'run configure --with-schannel'
+        run: |
+          autoreconf -fi
+          export PKG_CONFIG_DEBUG_SPEW=1
+          mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-schannel --without-libpsl --host="${TRIPLET}"
+
+      - name: 'run cmake'
+        run: |
+          cmake -B bld-cm -DCURL_WERROR=ON -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
+            -DCMAKE_SYSTEM_NAME=Windows \
+            -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
+            -DCMAKE_C_COMPILER="${TRIPLET}-gcc"
+
+      - name: 'configure log'
+        run: cat bld-am/config.log 2>/dev/null || true
+
+      - name: 'cmake log'
+        run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'dump generated files'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
+          done
+
+      - name: 'compare generated curl_config.h files'
+        run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
+
+      - name: 'compare generated libcurl.pc files'
+        run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
+
+      - name: 'compare generated curl-config files'
+        run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config

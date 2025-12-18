@@ -12,9 +12,6 @@ TrackMemory
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 TrackMemory
 </features>
@@ -30,14 +27,16 @@ curl memory tracking operational
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/memdump">
+<file name="%LOGDIR/memdump">
+MEM tool_cfgable.c
 MEM tool_paramhlp.c
+MEM tool_cfgable.c
 MEM tool_cfgable.c
 MEM tool_cfgable.c
 MEM tool_cfgable.c
 </file>
 <stripfile>
-$_ = '' if ((($_ !~ /tool_paramhlp/) && ($_ !~ /tool_cfgable/)) || ($_ =~ /free\(\(nil\)\)/))
+$_ = '' if((($_ !~ /tool_paramhlp/) && ($_ !~ /tool_cfgable/)) || ($_ =~ /free\(\(nil\)\)/))
 s/:\d+.*//
 s:^(MEM )(.*/)(.*):$1$3:
 </stripfile>

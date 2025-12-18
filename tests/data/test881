@@ -22,7 +22,7 @@ REPLY * -ERR AUTH exchange cancelled by client
 REPLY "AUTH PLAIN" +
 REPLY AHVzZXIAc2VjcmV0 +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -41,27 +41,28 @@ pop3
 </server>
 <features>
 !SSPI
-debug
+Debug
 crypto
+digest
 </features>
- <name>
+<name>
 POP3 DIGEST-MD5 authentication with SASL downgrade
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/881 -u user:secret
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH DIGEST-MD5
 *
 AUTH PLAIN
 AHVzZXIAc2VjcmV0
-RETR 881
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

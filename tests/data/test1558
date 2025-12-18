@@ -10,27 +10,20 @@ CURLINFO_PROTOCOL
 </reply>
 
 <client>
-<server>
-none
-</server>
 <features>
 file
 </features>
 <tool>
-lib1558
+lib%TESTNUMBER
 </tool>
 
 <name>
 CURLINFO_PROTOCOL for file:// transfer
 </name>
-<setenv>
-# force MSYS2 to not convert the file: URL
-MSYS2_ARG_CONV_EXCL=file:
-</setenv>
 <command>
-file:%FILE_PWD/log/data1558
+file://%FILE_PWD/%LOGDIR/data%TESTNUMBER
 </command>
-<file name="log/data1558">
+<file name="%LOGDIR/data%TESTNUMBER">
 hello
 </file>
 </client>

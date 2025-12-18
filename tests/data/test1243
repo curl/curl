@@ -12,13 +12,13 @@ TFTP WRQ
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP send without TFTP options requests
- </name>
- <command>
--T log/test1243.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options
+</name>
+<command>
+-T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options
 </command>
-<file name="log/test1243.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 a chunk of
 data
 sent
@@ -36,9 +36,9 @@ sent
  to server
 </upload>
 <protocol>
-opcode: 2
-mode: octet
-filename: /test1243.txt
+opcode = 2
+mode = octet
+filename = /test%TESTNUMBER.txt
 </protocol>
 </verify>
 </testcase>

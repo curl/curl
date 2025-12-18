@@ -21,11 +21,11 @@ REPLY PASS -ERR Login failure
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 invalid login
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/856 -u user:wrong
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:wrong
 </command>
 </client>
 
@@ -39,7 +39,7 @@ pop3://%HOSTIP:%POP3PORT/856 -u user:wrong
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS wrong

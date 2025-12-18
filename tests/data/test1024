@@ -10,54 +10,54 @@ cookies
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: ../data/10240002.txt
+Location: ../data/%TESTNUMBER0002.txt
 Set-Cookie: firstcookie=want; path=/want/
 Content-Length: 69
 
 This server reply is for testing a Location: following with cookies
 
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: ../want/10240003.txt
+Location: ../want/%TESTNUMBER0003.txt
 Set-Cookie: nextcookie=data; path=/data/
 Content-Length: 69
 
 This server reply is for testing a Location: following with cookies
 
 </data2>
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 200 Followed here fine
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
 If this is received, the location following worked
 
 </data3>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: ../data/10240002.txt
+Location: ../data/%TESTNUMBER0002.txt
 Set-Cookie: firstcookie=want; path=/want/
 Content-Length: 69
 
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: ../want/10240003.txt
+Location: ../want/%TESTNUMBER0003.txt
 Set-Cookie: nextcookie=data; path=/data/
 Content-Length: 69
 
 HTTP/1.1 200 Followed here fine
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -71,30 +71,33 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following with cookies
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/want/1024 -L -c log/jar1024
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c %LOGDIR/jar%TESTNUMBER
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /want/1024 HTTP/1.1
+<protocol crlf="headers">
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /data/10240002.txt HTTP/1.1
+GET /data/%TESTNUMBER0002.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/10240003.txt HTTP/1.1
+GET /want/%TESTNUMBER0003.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: firstcookie=want
 

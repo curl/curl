@@ -1,17 +1,47 @@
-# Shared between Makefile.am and CMakeLists.txt
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
 man_MANS = \
  curl_easy_cleanup.3 \
  curl_easy_duphandle.3 \
  curl_easy_escape.3 \
  curl_easy_getinfo.3 \
+ curl_easy_header.3 \
  curl_easy_init.3 \
+ curl_easy_nextheader.3 \
+ curl_easy_option_by_id.3 \
+ curl_easy_option_by_name.3 \
+ curl_easy_option_next.3 \
  curl_easy_pause.3 \
  curl_easy_perform.3 \
  curl_easy_recv.3 \
  curl_easy_reset.3 \
  curl_easy_send.3 \
  curl_easy_setopt.3 \
+ curl_easy_ssls_export.3 \
+ curl_easy_ssls_import.3 \
  curl_easy_strerror.3 \
  curl_easy_unescape.3 \
  curl_easy_upkeep.3 \
@@ -26,6 +56,7 @@ man_MANS = \
  curl_global_init.3 \
  curl_global_init_mem.3 \
  curl_global_sslset.3 \
+ curl_global_trace.3 \
  curl_mime_addpart.3 \
  curl_mime_data.3 \
  curl_mime_data_cb.3 \
@@ -43,8 +74,12 @@ man_MANS = \
  curl_multi_assign.3 \
  curl_multi_cleanup.3 \
  curl_multi_fdset.3 \
+ curl_multi_get_handles.3 \
+ curl_multi_get_offt.3 \
  curl_multi_info_read.3 \
  curl_multi_init.3 \
+ curl_multi_notify_disable.3 \
+ curl_multi_notify_enable.3 \
  curl_multi_perform.3 \
  curl_multi_poll.3 \
  curl_multi_remove_handle.3 \
@@ -55,6 +90,10 @@ man_MANS = \
  curl_multi_strerror.3 \
  curl_multi_timeout.3 \
  curl_multi_wait.3 \
+ curl_multi_waitfds.3 \
+ curl_multi_wakeup.3 \
+ curl_pushheader_byname.3 \
+ curl_pushheader_bynum.3 \
  curl_share_cleanup.3 \
  curl_share_init.3 \
  curl_share_setopt.3 \
@@ -69,9 +108,15 @@ man_MANS = \
  curl_url_dup.3 \
  curl_url_get.3 \
  curl_url_set.3 \
+ curl_url_strerror.3 \
  curl_version.3 \
  curl_version_info.3 \
+ curl_ws_meta.3 \
+ curl_ws_recv.3 \
+ curl_ws_send.3 \
+ curl_ws_start_frame.3 \
  libcurl-easy.3 \
+ libcurl-env-dbg.3 \
  libcurl-env.3 \
  libcurl-errors.3 \
  libcurl-multi.3 \
@@ -81,4 +126,5 @@ man_MANS = \
  libcurl-thread.3 \
  libcurl-tutorial.3 \
  libcurl-url.3 \
+ libcurl-ws.3 \
  libcurl.3

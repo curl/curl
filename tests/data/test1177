@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+CURL_VERSION
+documentation
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify that feature names and CURL_VERSION_* in lib and docs are in sync
+</name>
+
+<command type="perl">
+%SRCDIR/test1177.pl %PWD/../docs/libcurl/curl_version_info.3 %SRCDIR/../include/curl/curl.h %SRCDIR/../lib/version.c
+</command>
+</client>
+
+</testcase>

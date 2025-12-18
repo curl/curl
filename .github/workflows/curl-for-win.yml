@@ -1,0 +1,200 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+---
+name: 'curl-for-win'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  CW_NOGET: 'curl trurl'
+  CW_MAP: '0'
+  CW_JOBS: '5'
+  CW_NOPKG: '1'
+
+jobs:
+  linux-glibc-gcc:
+    name: 'Linux gcc glibc (amd64, arm64)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-unitybatch-linux-a64-x64-gcc'
+          export CW_REVISION="${GITHUB_SHA}"
+          . ./_versions.sh
+          export CW_CCSUFFIX='-15'
+          export CW_GCCSUFFIX='-12'
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${OCI_IMAGE_DEBIAN_STABLE}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${OCI_IMAGE_DEBIAN_STABLE}" \
+            sh -c ./_ci-linux-debian.sh
+
+  linux-glibc-gcc-minimal:  # use gcc to minimize installed packages
+    name: 'Linux gcc glibc minimal'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-unitybatch-prefill-zero-osnotls-osnoidn-nohttp-nocurltool-linux-x64-gcc'
+          export CW_REVISION="${GITHUB_SHA}"
+          . ./_versions.sh
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${OCI_IMAGE_DEBIAN}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${OCI_IMAGE_DEBIAN}" \
+            sh -c ./_ci-linux-debian.sh
+
+  linux-musl-llvm:
+    name: 'Linux llvm MUSL (amd64, riscv64)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-unitybatch-linux-musl-r64-x64'
+          export CW_REVISION="${GITHUB_SHA}"
+          . ./_versions.sh
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${OCI_IMAGE_DEBIAN}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${OCI_IMAGE_DEBIAN}" \
+            sh -c ./_ci-linux-debian.sh
+
+  mac-clang:
+    name: 'macOS clang (x86_64)'
+    runs-on: macos-latest
+    timeout-minutes: 10
+    env:
+      CW_JOBS: '4'
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-unitybatch-mac-x64'
+          export CW_REVISION="${GITHUB_SHA}"
+          sh -c ./_ci-mac-homebrew.sh
+
+  win-llvm:
+    name: 'Windows llvm (x64)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-unitybatch-win-x64'
+          export CW_REVISION="${GITHUB_SHA}"
+          . ./_versions.sh
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${OCI_IMAGE_DEBIAN}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${OCI_IMAGE_DEBIAN}" \
+            sh -c ./_ci-linux-debian.sh
+
+  win-gcc-zlibold-x64:
+    name: 'Windows gcc zlib-classic (x64)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-unitybatch-win-x64-gcc-zlibold'
+          export CW_REVISION="${GITHUB_SHA}"
+          . ./_versions.sh
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${OCI_IMAGE_DEBIAN}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${OCI_IMAGE_DEBIAN}" \
+            sh -c ./_ci-linux-debian.sh

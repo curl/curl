@@ -18,7 +18,7 @@ AUTH CRAM-MD5
 REPLY AUTH + PDE5NzIuOTg3NjU0MzIxQGN1cmw+
 REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -37,23 +37,24 @@ pop3
 </server>
 <features>
 crypto
+digest
 </features>
- <name>
+<name>
 POP3 CRAM-MD5 authentication
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/867 -u user:secret
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH CRAM-MD5
 dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
-RETR 867
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

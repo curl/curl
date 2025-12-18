@@ -12,7 +12,7 @@ PEM certificate
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 7
 
@@ -26,31 +26,27 @@ MooMoo
 <features>
 SSL
 SSLpinning
+!Schannel
+local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
- <name>
+<name>
 simple HTTPS GET with PEM public key pinning
- </name>
- <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.pem https://localhost:%HTTPSPORT/2037
+</name>
+<command>
+-4 --cacert %CERTDIR/certs/test-ca.crt --pinnedpubkey %CERTDIR/certs/test-localhost.pub.pem https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost because we're checking the host name
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /2037 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

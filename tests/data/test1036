@@ -27,32 +27,32 @@ REPLY EPSV 500 no such command
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download resume from end of file
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/1036 -C -
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C -
 </command>
-<file name="log/curl1036.out">
+<file name="%LOGDIR/curl%TESTNUMBER.out">
 This is the start!!
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 PASV
 TYPE I
-SIZE 1036
+SIZE %TESTNUMBER
 REST 20
-RETR 1036
+RETR %TESTNUMBER
 QUIT
 </protocol>
-<file name="log/curl1036.out">
+<file name="%LOGDIR/curl%TESTNUMBER.out">
 This is the start!!
 expected to be a file without the first part
 but we emulate that

@@ -9,9 +9,9 @@ HTTP GET
 
 #
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -31,33 +31,28 @@ http
 HTTP GET -o fname -J without Content-Disposition, -D file
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1368 -J -o log/outfile1368 -D log/heads1368
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -o %LOGDIR/outfile%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl log/1368
-</postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1368 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile1368">
+<file1 name="%LOGDIR/outfile%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/heads1368">
+<file2 name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -65,8 +60,11 @@ Content-Type: text/html
 
 </file2>
 
-<file3 name="log/stdout1368">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
+<notexists>
+%LOGDIR/%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

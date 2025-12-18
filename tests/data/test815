@@ -12,7 +12,7 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data1>
+<data1 crlf="yes">
 * 123 FETCH (FLAGS (\Seen \Deleted))
 </data1>
 </reply>
@@ -23,21 +23,21 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP STORE - delete message (CUSTOMREQUEST)
- </name>
- <command>
-imap://%HOSTIP:%IMAPPORT/815 -X 'STORE 123 +Flags \Deleted' -u user:secret -: imap://%HOSTIP:%IMAPPORT/815 -X CLOSE -u user:secret
+</name>
+<command>
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X 'STORE 123 +Flags \Deleted' -u user:secret -: imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X CLOSE -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 815
+A003 SELECT %TESTNUMBER
 A004 STORE 123 +Flags \Deleted
 A005 CLOSE
 A006 LOGOUT

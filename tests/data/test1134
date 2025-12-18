@@ -14,14 +14,14 @@ connection-monitor
 </servercmd>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 10
 
 contents1
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 10
 
 contents2
@@ -34,29 +34,28 @@ contents2
 <server>
 http
 </server>
- <name>
-HTTP connection re-use with different credentials
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1134 -u user1:password1 --next http://%HOSTIP:%HTTPPORT/11340001 -u 2user:password2
+<name>
+HTTP connection reuse with different credentials
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u 2user:password2
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1134 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjE6cGFzc3dvcmQx
+Authorization: Basic %b64[user1:password1]b64%
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /11340001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic MnVzZXI6cGFzc3dvcmQy
+Authorization: Basic %b64[2user:password2]b64%
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

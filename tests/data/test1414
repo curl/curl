@@ -28,29 +28,29 @@ REPLY EPRT 502 no such command
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PORT without SIZE or EPRT support
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/1414 -P -
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^(EPRT \|1\|)(.*)/$1/
-s/^(PORT)(.*)/$1/
+s/^(EPRT \|1\|)(\S*)/$1/
+s/^(PORT) *(\S*)/$1/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPRT |1|
 PORT
 TYPE I
-SIZE 1414
-RETR 1414
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

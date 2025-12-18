@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+curl tool
+cmdline
+parallel
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+parallel upload missing file
+</name>
+<command>
+0 -Z -Tz
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>

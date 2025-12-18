@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+DNS cache
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<dns>
+</dns>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+dns
+</server>
+<features>
+override-dns
+</features>
+<name>
+Get three URLs with bad host name - cache
+</name>
+<setenv>
+CURL_DNS_SERVER=127.0.0.1:%DNSPORT
+</setenv>
+<command>
+http://examplehost.example/%TESTNUMBER http://examplehost.example/%TESTNUMBER http://examplehost.example/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# curl: (6) Could not resolve host: examplehost.example
+<errorcode>
+6
+</errorcode>
+
+# Ignore HTTPS requests here
+<dns host="examplehost.example QTYPE A">
+QNAME examplehost.example QTYPE A
+QNAME examplehost.example QTYPE AAAA
+</dns>
+</verify>
+</testcase>

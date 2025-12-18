@@ -1,0 +1,19 @@
+<testcase>
+<info>
+<keywords>
+unittest
+cipher_suite
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+cipher suite name lookup
+</name>
+</client>
+</testcase>

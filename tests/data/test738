@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+IPFS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ipfs
+</features>
+<server>
+http
+</server>
+<setenv>
+IPFS_PATH=%LOGDIR/.ipfs/
+</setenv>
+<name>
+IPFS with IPFS_PATH, no gateway file
+</name>
+<command>
+ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
+</command>
+</client>
+
+#
+# Verify error code with no gateway file (detection fails)
+<verify>
+<errorcode>
+37
+</errorcode>
+</verify>
+</testcase>

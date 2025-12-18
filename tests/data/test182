@@ -23,20 +23,20 @@ ftp
 FTP download an empty file
 </name>
 <command>
-ftp://%HOSTIP:%FTPPORT/182
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 182
-RETR 182
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

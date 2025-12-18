@@ -18,13 +18,13 @@ FAILURE
 <server>
 scp
 </server>
- <name>
+<name>
 SCP upload failure
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file623.txt scp://%HOSTIP:%SSHPORT%POSIX_PWD/log/nonexistent-directory/nonexistent-file --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/nonexistent-directory/nonexistent-file --insecure
 </command>
-<file name="log/file623.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>
@@ -33,9 +33,6 @@ for ssh upload test
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 25
 </errorcode>

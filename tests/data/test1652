@@ -7,17 +7,12 @@ infof
 </info>
 
 <client>
-<server>
-none
-</server>
 <features>
 unittest
+verbose-strings
 </features>
 <name>
 infof
 </name>
-<tool>
-unit1652
-</tool>
 </client>
 </testcase>

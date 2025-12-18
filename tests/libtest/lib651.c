@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,15 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-static char buffer[17000]; /* more than 16K */
-
-int test(char *URL)
+static CURLcode test_lib651(const char *URL)
 {
+  static char testbuf[17000]; /* more than 16K */
+
   CURL *curl;
   CURLcode res = CURLE_OK;
   CURLFORMcode formrc;
@@ -35,31 +37,30 @@ int test(char *URL)
 
   /* create a buffer with AAAA...BBBBB...CCCC...etc */
   int i;
-  int size = (int)sizeof(buffer)/1000;
+  int size = (int)sizeof(testbuf)/1000;
 
   for(i = 0; i < size ; i++)
-    memset(&buffer[i * 1000], 65 + i, 1000);
+    memset(&testbuf[i * 1000], 65 + i, 1000);
 
-  buffer[ sizeof(buffer)-1] = 0; /* zero terminate */
+  testbuf[sizeof(testbuf)-1] = 0; /* null-terminate */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* Check proper name and data copying. */
   formrc = curl_formadd(&formpost, &lastptr,
                         CURLFORM_COPYNAME, "hello",
-                        CURLFORM_COPYCONTENTS, buffer,
+                        CURLFORM_COPYCONTENTS, testbuf,
                         CURLFORM_END);
-
   if(formrc)
-    printf("curl_formadd(1) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", formrc);
 
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_formfree(formpost);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;

@@ -9,7 +9,7 @@ GSS-API
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Content-Length: 23
 
@@ -29,7 +29,7 @@ GSS-API
 curl --fail --negotiate to unauthenticated service fails
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/2077 -u : --fail --negotiate
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail --negotiate
 </command>
 </client>
 

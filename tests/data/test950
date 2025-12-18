@@ -10,7 +10,7 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 250 <recipient@example.com>
 </data>
 </reply>
@@ -21,21 +21,21 @@ VRFY
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP VRFY with custom request
- </name>
+</name>
 
 # the custom request just does it lowercase to remain the same command
 <command>
-smtp://%HOSTIP:%SMTPPORT/950 --mail-rcpt recipient --request "vrfy"
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient --request "vrfy"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 950
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 vrfy recipient
 QUIT
 </protocol>

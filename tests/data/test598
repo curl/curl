@@ -12,9 +12,9 @@ curl_easy_reset
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -23,16 +23,16 @@ Content-Type: text/html
 </data>
 
 # since the request runs twice
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
 
 -foo-
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -49,29 +49,32 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib598
+lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 curl_easy_reset with referer and other strings set
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/598
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
+<features>
+cookies
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-GET /598 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: the-moo agent next generation
 Accept: */*
 Referer: http://example.com/the-moo
 Cookie: name=moo
 
-GET /598 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

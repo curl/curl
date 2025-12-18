@@ -1,0 +1,46 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+VRFY
+IDN
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+IDN
+!win32
+codeset-utf8
+</features>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
+<name>
+SMTP external VRFY without SMTPUTF8 (IDN) - UTF-8 recipient (host part)
+</name>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt user@%hex[%c3%a5%c3%a4%c3%b6]hex%.se
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+VRFY user@xn--4cab6c.se
+QUIT
+</protocol>
+</verify>
+</testcase>

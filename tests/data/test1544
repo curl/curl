@@ -1,0 +1,20 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify all string options are translated by OS/400 wrapper
+</name>
+
+<command type="perl">
+%SRCDIR/test1544.pl %SRCDIR/..
+</command>
+</client>
+
+</testcase>

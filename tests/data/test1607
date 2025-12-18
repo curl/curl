@@ -9,18 +9,11 @@ CURLOPT_RESOLVE
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 CURLOPT_RESOLVE parsing
- </name>
-<tool>
-unit1607
-</tool>
+</name>
 </client>
-
 </testcase>

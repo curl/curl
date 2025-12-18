@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -19,74 +19,40 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 
-# Yeah, I know, probably 1000 other persons already wrote a script like
-# this, but I'll tell ya:
+use strict;
+use warnings;
 
-# THEY DON'T FIT ME :-)
-
-# Get readme file as parameter:
-
-if($ARGV[0] eq "-c") {
-    $c=1;
+my $c = 0;
+if(@ARGV && $ARGV[0] eq "-c") {
+    $c = 1;
     shift @ARGV;
 }
 
-push @out, "                                  _   _ ____  _\n";
-push @out, "  Project                     ___| | | |  _ \\| |\n";
-push @out, "                             / __| | | | |_) | |\n";
-push @out, "                            | (__| |_| |  _ <| |___\n";
-push @out, "                             \\___|\\___/|_| \\_\\_____|\n";
+my @out;
 
-my $olen=0;
-while (<STDIN>) {
+push @out, "          _   _ ____  _\n";
+push @out, "      ___| | | |  _ \\| |\n";
+push @out, "     / __| | | | |_) | |\n";
+push @out, "    | (__| |_| |  _ <| |___\n";
+push @out, "     \\___|\\___/|_| \\_\\_____|\n";
+
+while(<STDIN>) {
     my $line = $_;
-
-    # this should be removed:
-    $line =~ s/(.|_)//g;
-
-    # remove trailing CR from line. msysgit checks out files as line+CRLF
-    $line =~ s/\r$//;
-
-    if($line =~ /^([ \t]*\n|curl)/i) {
-        # cut off headers and empty lines
-        $wline++; # count number of cut off lines
-        next;
-    }
-
-    my $text = $line;
-    $text =~ s/^\s+//g; # cut off preceding...
-    $text =~ s/\s+$//g; # and trailing whitespaces
-
-    $tlen = length($text);
-
-    if($wline && ($olen == $tlen)) {
-        # if the previous line with contents was exactly as long as
-        # this line, then we ignore the newlines!
-
-        # We do this magic because a header may abort a paragraph at
-        # any line, but we don't want that to be noticed in the output
-        # here
-        $wline=0;
-    }
-    $olen = $tlen;
-
-    if($wline) {
-        # we only make one empty line max
-        $wline = 0;
-        push @out, "\n";
-    }
     push @out, $line;
 }
-push @out, "\n"; # just an extra newline
 
 print <<HEAD
 /*
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
  */
-#ifdef USE_MANUAL
 #include "tool_hugehelp.h"
+#ifdef USE_MANUAL
+#include "tool_help.h"
+
 HEAD
     ;
 if($c) {
@@ -98,7 +64,7 @@ if($c) {
       IO::Compress::Gzip->import();
       1;
     };
-    print STDERR "Warning: compression requested but Gzip is not available\n" if (!$c)
+    print STDERR "Warning: compression requested but Gzip is not available\n" if(!$c)
 }
 
 if($c)
@@ -107,12 +73,12 @@ if($c)
     my $gzippedContent;
     IO::Compress::Gzip::gzip(
         \$content, \$gzippedContent, Level => 9, TextFlag => 1, Time=>0) or die "gzip failed:";
-    $gzip = length($content);
-    $gzipped = length($gzippedContent);
+    my $gzip = length($content);
+    my $gzipped = length($gzippedContent);
 
     print <<HEAD
 #include <zlib.h>
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 static const unsigned char hugehelpgz[] = {
   /* This mumbo-jumbo is the huge help text compressed with gzip.
      Thanks to this operation, the size of this data shrank from $gzip
@@ -122,12 +88,14 @@ HEAD
 ;
 
     my $c=0;
-    print " ";
     for(split(//, $gzippedContent)) {
         my $num=ord($_);
+        if(!($c % 12)) {
+            print " ";
+        }
         printf(" 0x%02x,", 0+$num);
         if(!(++$c % 12)) {
-            print "\n ";
+            print "\n";
         }
     }
     print "\n};\n";
@@ -136,49 +104,93 @@ HEAD
 #define BUF_SIZE 0x10000
 static voidpf zalloc_func(voidpf opaque, unsigned int items, unsigned int size)
 {
-  (void) opaque;
+  (void)opaque;
   /* not a typo, keep it calloc() */
   return (voidpf) calloc(items, size);
 }
 static void zfree_func(voidpf opaque, voidpf ptr)
 {
-  (void) opaque;
+  (void)opaque;
   free(ptr);
 }
+
+#define HEADERLEN 10
+
 /* Decompress and send to stdout a gzip-compressed buffer */
 void hugehelp(void)
 {
-  unsigned char* buf;
-  int status,headerlen;
+  unsigned char *buf;
+  int status;
   z_stream z;
 
   /* Make sure no gzip options are set */
-  if (hugehelpgz[3] & 0xfe)
+  if(hugehelpgz[3] & 0xfe)
     return;
 
-  headerlen = 10;
   memset(&z, 0, sizeof(z_stream));
   z.zalloc = (alloc_func)zalloc_func;
   z.zfree = (free_func)zfree_func;
-  z.avail_in = (unsigned int)(sizeof(hugehelpgz) - headerlen);
-  z.next_in = (unsigned char *)hugehelpgz + headerlen;
+  z.avail_in = (uInt)(sizeof(hugehelpgz) - HEADERLEN);
+  z.next_in = (z_const Bytef *)hugehelpgz + HEADERLEN;
 
-  if (inflateInit2(&z, -MAX_WBITS) != Z_OK)
+  if(inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;
 
   buf = malloc(BUF_SIZE);
-  if (buf) {
+  if(buf) {
     while(1) {
       z.avail_out = BUF_SIZE;
       z.next_out = buf;
       status = inflate(&z, Z_SYNC_FLUSH);
-      if (status == Z_OK || status == Z_STREAM_END) {
+      if(status == Z_OK || status == Z_STREAM_END) {
         fwrite(buf, BUF_SIZE - z.avail_out, 1, stdout);
-        if (status == Z_STREAM_END)
+        if(status == Z_STREAM_END)
           break;
       }
       else
-        break;    /* Error */
+        break;    /* error */
+    }
+    free(buf);
+  }
+  inflateEnd(&z);
+}
+/* Show the help text for the 'arg' curl argument on stdout */
+void showhelp(const char *trigger, const char *arg, const char *endarg)
+{
+  unsigned char *buf;
+  int status;
+  z_stream z;
+  struct scan_ctx ctx;
+  inithelpscan(&ctx, trigger, arg, endarg);
+
+  /* Make sure no gzip options are set */
+  if(hugehelpgz[3] & 0xfe)
+    return;
+
+  memset(&z, 0, sizeof(z_stream));
+  z.zalloc = (alloc_func)zalloc_func;
+  z.zfree = (free_func)zfree_func;
+  z.avail_in = (uInt)(sizeof(hugehelpgz) - HEADERLEN);
+  z.next_in = (z_const Bytef *)hugehelpgz + HEADERLEN;
+
+  if(inflateInit2(&z, -MAX_WBITS) != Z_OK)
+    return;
+
+  buf = malloc(BUF_SIZE);
+  if(buf) {
+    while(1) {
+      z.avail_out = BUF_SIZE;
+      z.next_out = buf;
+      status = inflate(&z, Z_SYNC_FLUSH);
+      if(status == Z_OK || status == Z_STREAM_END) {
+        size_t len = BUF_SIZE - z.avail_out;
+        if(!helpscan(buf, len, &ctx))
+          break;
+        if(status == Z_STREAM_END)
+          break;
+      }
+      else
+        break;    /* error */
     }
     free(buf);
   }
@@ -191,44 +203,59 @@ exit;
 }
 else {
     print <<HEAD
+static const char * const curlman[] = {
+HEAD
+        ;
+}
+
+my $blank;
+for my $n (@out) {
+    chomp $n;
+    $n =~ s/\\/\\\\/g;
+    $n =~ s/\"/\\\"/g;
+    $n =~ s/\t/\\t/g;
+
+    if(!$n) {
+        $blank++;
+    }
+    else {
+        $n =~ s/        /\\t/g;
+        printf("  \"%s%s\",\n", $blank?"\\n":"", $n);
+        $blank = 0;
+    }
+}
+
+print <<ENDLINE
+  NULL
+};
 void hugehelp(void)
 {
-   fputs(
-HEAD
-         ;
+  int i = 0;
+  while(curlman[i])
+    puts(curlman[i++]);
 }
 
-$outsize=0;
-for(@out) {
-    chop;
-
-    $new = $_;
-
-    $outsize += length($new)+1; # one for the newline
-
-    $new =~ s/\\/\\\\/g;
-    $new =~ s/\"/\\\"/g;
-
-    # gcc 2.96 claims ISO C89 only is required to support 509 letter strings
-    if($outsize > 500) {
-        # terminate and make another fputs() call here
-        print ", stdout);\n fputs(\n";
-        $outsize=length($new)+1;
-    }
-    printf("\"%s\\n\"\n", $new);
-
+/* Show the help text for the 'arg' curl argument on stdout */
+void showhelp(const char *trigger, const char *arg, const char *endarg)
+{
+  int i = 0;
+  struct scan_ctx ctx;
+  inithelpscan(&ctx, trigger, arg, endarg);
+  while(curlman[i]) {
+    size_t len = strlen(curlman[i]);
+    if(!helpscan((const unsigned char *)curlman[i], len, &ctx) ||
+       !helpscan((const unsigned char *)"\\n", 1, &ctx))
+      break;
+    i++;
+  }
 }
-
-print ", stdout) ;\n}\n";
+ENDLINE
+    ;
 
 foot();
 
 sub foot {
-  print <<FOOT
-#else /* !USE_MANUAL */
-/* built-in manual is disabled, blank function */
-#include "tool_hugehelp.h"
-void hugehelp(void) {}
+    print <<FOOT
 #endif /* USE_MANUAL */
 FOOT
   ;

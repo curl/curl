@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -18,31 +18,150 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
 # These are all libcurl example programs to be test compiled
-check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
-  fopen ftpget ftpgetresp ftpupload getinfo getinmemory http-post httpput  \
-  https multi-app multi-debugcallback multi-double multi-post multi-single \
-  persistent post-callback postit2 sepheaders simple simplepost simplessl  \
-  sendrecv httpcustomheader certinfo chkspeed ftpgetinfo ftp-wildcard      \
-  smtp-mail smtp-mime smtp-multi smtp-ssl smtp-tls smtp-vrfy smtp-expn     \
-  rtsp externalsocket resolve progressfunc pop3-retr pop3-list pop3-uidl   \
-  pop3-dele pop3-top pop3-stat pop3-noop pop3-ssl pop3-tls pop3-multi      \
-  imap-list imap-lsub imap-fetch imap-store imap-append imap-examine       \
-  imap-search imap-create imap-delete imap-copy imap-noop imap-ssl         \
-  imap-tls imap-multi url2file sftpget ftpsget postinmemory http2-download \
-  http2-upload http2-serverpush getredirect ftpuploadfrommem               \
-  ftpuploadresume sslbackend postit2-formadd multi-formadd                 \
-  shared-connection-cache sftpuploadresume http2-pushinmemory parseurl     \
-  urlapi imap-authzid pop3-authzid smtp-authzid http3 altsvc               \
-  http3-present
+check_PROGRAMS = \
+  10-at-a-time \
+  address-scope \
+  altsvc \
+  anyauthput \
+  block_ip \
+  certinfo \
+  chkspeed \
+  connect-to \
+  cookie_interface \
+  debug \
+  default-scheme \
+  externalsocket \
+  fileupload \
+  ftp-delete \
+  ftp-wildcard \
+  ftpget \
+  ftpgetinfo \
+  ftpgetresp \
+  ftpsget \
+  ftpupload \
+  ftpuploadfrommem \
+  ftpuploadresume \
+  getinfo \
+  getinmemory \
+  getredirect \
+  getreferrer \
+  headerapi \
+  hsts-preload \
+  http-options \
+  http-post \
+  http2-download \
+  http2-pushinmemory \
+  http2-serverpush \
+  http2-upload \
+  http3 \
+  http3-present \
+  httpcustomheader \
+  httpput \
+  httpput-postfields \
+  https \
+  imap-append \
+  imap-authzid \
+  imap-copy \
+  imap-create \
+  imap-delete \
+  imap-examine \
+  imap-fetch \
+  imap-list \
+  imap-lsub \
+  imap-multi \
+  imap-noop \
+  imap-search \
+  imap-ssl \
+  imap-store \
+  imap-tls \
+  interface \
+  ipv6 \
+  keepalive \
+  localport \
+  log_failed_transfers \
+  maxconnects \
+  multi-app \
+  multi-debugcallback \
+  multi-double \
+  multi-formadd \
+  multi-legacy \
+  multi-post \
+  multi-single \
+  netrc \
+  parseurl \
+  persistent \
+  pop3-authzid \
+  pop3-dele \
+  pop3-list \
+  pop3-multi \
+  pop3-noop \
+  pop3-retr \
+  pop3-ssl \
+  pop3-stat \
+  pop3-tls \
+  pop3-top \
+  pop3-uidl \
+  post-callback \
+  postinmemory \
+  postit2 \
+  postit2-formadd \
+  progressfunc \
+  protofeats \
+  range \
+  resolve \
+  rtsp-options \
+  sendrecv \
+  sepheaders \
+  sftpget \
+  sftpuploadresume \
+  shared-connection-cache \
+  simple \
+  simplepost \
+  simplessl \
+  smtp-authzid \
+  smtp-expn \
+  smtp-mail \
+  smtp-mime \
+  smtp-multi \
+  smtp-ssl \
+  smtp-tls \
+  smtp-vrfy \
+  sslbackend \
+  synctime \
+  unixsocket \
+  url2file \
+  urlapi \
+  websocket \
+  websocket-cb \
+  websocket-updown
+
+# These examples require external dependencies that may be available during
+# the build.
+COMPLICATED_MAY_BUILD = \
+  cacertinmem.c \
+  multi-uv.c \
+  multithread.c \
+  sessioninfo.c \
+  threaded-ssl.c \
+  usercertinmem.c
 
 # These examples require external dependencies that may not be commonly
-# available on POSIX systems, so don't bother attempting to compile them here.
-COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c \
-  ghiper.c hiperfifo.c htmltidy.c multithread.c opensslthreadlock.c \
-  sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
-  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp \
-  multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c \
-  threaded-shared-conn.c crawler.c ephiperfifo.c
+# available on POSIX systems, so do not bother attempting to compile them here.
+COMPLICATED_EXAMPLES = \
+  crawler.c \
+  ephiperfifo.c \
+  evhiperfifo.c \
+  ghiper.c \
+  hiperfifo.c \
+  htmltidy.c \
+  htmltitle.cpp \
+  multi-event.c \
+  smooth-gtk-thread.c \
+  version-check.pl \
+  xmlstream.c

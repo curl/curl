@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+--help
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+curl invalid category --help
+</name>
+<command>
+--help sdfafdsfadsfsd
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout mode="text">
+Unknown category provided, here is a list of all categories:
+
+ auth        Authentication methods
+ connection  Manage connections
+ curl        The command line tool itself
+ deprecated  Legacy
+ dns         Names and resolving
+ file        FILE protocol
+ ftp         FTP protocol
+ global      Global options
+ http        HTTP and HTTPS protocol
+ imap        IMAP protocol
+ ldap        LDAP protocol
+ output      File system output
+ pop3        POP3 protocol
+ post        HTTP POST specific
+ proxy       Options for proxies
+ scp         SCP protocol
+ sftp        SFTP protocol
+ smtp        SMTP protocol
+ ssh         SSH protocol
+ telnet      TELNET protocol
+ tftp        TFTP protocol
+ timeout     Timeouts and delays
+ tls         TLS/SSL related
+ upload      Upload, sending data
+ verbose     Tracing, logging etc
+</stdout>
+</verify>
+</testcase>

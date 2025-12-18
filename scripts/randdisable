@@ -1,0 +1,83 @@
+#!/usr/bin/env perl
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+# This script makes a "random" build using configure and verifies that it
+# builds curl correctly. It randomly adds a number of the available
+# --disable-* flags to configure. When it detects a problem the script stops,
+# otherwise it continues trying more combinations.
+#
+# 1. Figure out all existing configure --disable-* options
+# 2. Generate random command line using supported options + random TLS
+# 3. Run configure (exit if problem)
+# 4. run "make -sj10" to build (exit if problem)
+# 5. run curl -V (exit if problem)
+# 6. GOTO 2
+#
+# Tips:
+#
+# - edit the @tls array to include all TLS backends you can build with
+# - do a checkout in a ram-based file system
+#
+use strict;
+use warnings;
+
+use List::Util qw/shuffle/;
+
+my @disable;
+
+sub getoptions {
+    my @all = `./configure --help`;
+    for my $o (@all) {
+        chomp $o;
+        if($o =~ /(--disable-[^ ]*)/) {
+            if($1 !~ /FEATURE/) {
+                push @disable, $1;
+            }
+        }
+    }
+}
+
+getoptions();
+
+# options to select a TLS
+my @tls = ("--with-openssl",
+           "--with-wolfssl=/home/daniel/build-wolfssl",
+           "--with-gnutls",
+           "--with-mbedtls");
+
+do {
+
+    # get a random number of disable options
+    my $num = rand(scalar(@disable) - 2) + 2;
+
+    my $c = 0;
+    my $arg;
+    for my $d (shuffle @disable) {
+        $arg .= " $d";
+        if(++$c >= $num) {
+            last;
+        }
+    }
+
+    my @stls = shuffle @tls;
+    $arg.= " ".$stls[0];
+
+    system("make clean");
+    if(system("./configure $arg")) {
+        print STDERR "configure problem\n";
+        print STDERR "./configure $arg\n";
+        exit 1;
+    }
+    if(system("make -sj10")) {
+        print STDERR "Build problem\n";
+        print STDERR "./configure $arg\n";
+        exit 1;
+    }
+    if(system("./src/curl -V 2>/dev/null")) {
+        print STDERR "Running problem\n";
+        print STDERR "./configure $arg\n";
+        exit 1;
+    }
+} while(1);

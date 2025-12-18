@@ -9,15 +9,15 @@ HTTP Digest auth
 
 # Server-side
 <reply>
-<data>
-HTTP/1.1 401 authentication please swsbounce
+<data crlf="headers">
+HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144"
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 0
 
 </data>
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 A OK
 Server: Microsoft-IIS/6.0
 Content-Type: text/html; charset=iso-8859-1
@@ -26,8 +26,8 @@ Content-Length: 3
 ok
 </data1000>
 
-<datacheck>
-HTTP/1.1 401 authentication please swsbounce
+<datacheck crlf="headers">
+HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144"
 Content-Type: text/html; charset=iso-8859-1
@@ -52,6 +52,7 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <name>
 HTTP POST --digest with user-specified Content-Length header
@@ -60,25 +61,24 @@ HTTP POST --digest with user-specified Content-Length header
 # even when there is a user-specified Content-Length header.
 # https://github.com/curl/curl/pull/1242
 <command>
--H "Content-Length: 11" -u auser:apasswd --digest -d "junkelijunk" http://%HOSTIP:%HTTPPORT/1284
+-H "Content-Length: 11" -u auser:apasswd --digest -d "junkelijunk" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol nonewline="yes">
-POST /1284 HTTP/1.1
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST /1284 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1284", response="5763079608de439072861a59ac733515"
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="5763079608de439072861a59ac733515"
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 11
 Content-Type: application/x-www-form-urlencoded

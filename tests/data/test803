@@ -20,11 +20,11 @@ FAILURE
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP SELECT UIDVALIDITY Failure
- </name>
- <command>
-'imap://%HOSTIP:%IMAPPORT/803;UIDVALIDITY=12345/;MAILINDEX=123' -u user:secret
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER;UIDVALIDITY=12345/;MAILINDEX=123' -u user:secret
 </command>
 </client>
 
@@ -35,10 +35,10 @@ IMAP SELECT UIDVALIDITY Failure
 <errorcode>
 78
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 803
+A003 SELECT %TESTNUMBER
 A004 LOGOUT
 </protocol>
 </verify>

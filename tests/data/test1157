@@ -12,7 +12,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,25 +32,23 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Get -H headers from empty file
- </name>
-<file name="log/heads1157.txt">
+</name>
+<file name="%LOGDIR/heads%TESTNUMBER.txt">
 </file>
- <command>
-http://%HOSTIP:%HTTPPORT/1157 -H @log/heads1157.txt
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H @%LOGDIR/heads%TESTNUMBER.txt
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1157 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

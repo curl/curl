@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -30,10 +32,8 @@ struct data {
   char trace_ascii; /* 1 or 0 */
 };
 
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text, FILE *stream, unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -47,7 +47,7 @@ void dump(const char *text,
   fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
-  for(i = 0; i<size; i += width) {
+  for(i = 0; i < size; i += width) {
 
     fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
@@ -68,7 +68,7 @@ void dump(const char *text,
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)?ptr[i + c]:'.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
@@ -81,22 +81,17 @@ void dump(const char *text,
   fflush(stream);
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *curl, curl_infotype type,
+                    char *data, size_t size, void *userp)
 {
   struct data *config = (struct data *)userp;
   const char *text;
-  (void)handle; /* prevent compiler warning */
+  (void)curl;
 
   switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
-    /* FALLTHROUGH */
-  default: /* in case a new one is introduced to shock us */
     return 0;
-
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
     break;
@@ -115,6 +110,8 @@ int my_trace(CURL *handle, curl_infotype type,
   case CURLINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
     break;
+  default: /* in case a new one is introduced to shock us */
+    return 0;
   }
 
   dump(text, stderr, (unsigned char *)data, size, config->trace_ascii);
@@ -127,7 +124,11 @@ int main(void)
   CURLcode res;
   struct data config;
 
-  config.trace_ascii = 1; /* enable ascii tracing */
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
+  config.trace_ascii = 1; /* enable ASCII tracing */
 
   curl = curl_easy_init();
   if(curl) {
@@ -150,5 +151,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  return 0;
+  curl_global_cleanup();
+  return (int)res;
 }

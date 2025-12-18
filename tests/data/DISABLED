@@ -1,30 +1,69 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+#
 # This file can be used to specify test cases that should not run when all
 # test cases are run by runtests.pl. Just add the plain test case numbers, one
 # per line.
 # Lines starting with '#' letters are treated as comments.
+#
+# Uses SRP to "a server not supporting it" but modern stunnel versions
+# will silently accept it and remain happy
+323
+#
 594
-1209
-1211
-1316
-1512
 836
 882
 938
-# test 1801 causes problems on Mac OS X and github
-# https://github.com/curl/curl/issues/380
-1801
-# test 1510 causes problems on the CI on github
-# example: https://travis-ci.org/curl/curl/builds/81633600
-1510
-# Pipelining test that is causing false positives a little too often
-1903
+# test 1182 kills the test servers as a side effect
+# of running runtests.pl as a child of itself sharing
+# some of the directories.
+1182
+# test 1184 causes flakiness in CI builds
+1184
+1209
+1211
 # fnmatch differences are just too common to make testing them sensible
 1307
-# Pipelining is deprecated
-530
-536
-584
-1900
-1901
-1902
-2033
+1316
+1512
+# test 1801 causes problems in CI builds
+# https://github.com/curl/curl/issues/380
+1801
+#
+2043
+%if WinIDN
+165
+%endif
+# Windows non-Unicode builds fail to receive Unicode text via the command-line
+%if win32
+%if !Unicode
+%if libidn2
+165
+1560
+%endif
+1448
+2046
+2047
+%endif
+%endif

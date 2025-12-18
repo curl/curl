@@ -8,9 +8,9 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -34,25 +34,29 @@ http
 lib500
 </tool>
 
- <name>
+<name>
 simple libcurl HTTP GET tool
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/500 log/ip500
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip500">
-IP: %HOSTIP
+<file name="%LOGDIR/ip%TESTNUMBER">
+IP %HOSTIP
 </file>
-<protocol>
-GET /500 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<limits>
+Allocations: 82
+Maximum allocated: 33400
+</limits>
 </verify>
 </testcase>

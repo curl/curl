@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+globbing
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+more cmdline options than URLs and --next
+</name>
+<command>
+-no1 -no2 --url "Qttp://internal.dxample.lol/status" -: --url "http"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# curl: (1) Protocol "qttp" not supported
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>

@@ -31,23 +31,24 @@ smtp
 </server>
 <features>
 crypto
+digest
 </features>
- <name>
+<name>
 SMTP CRAM-MD5 authentication with SASL downgrade
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 mail body
 </stdin>
- <command>
-smtp://%HOSTIP:%SMTPPORT/935 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 935
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 AUTH CRAM-MD5
 *
 AUTH PLAIN
@@ -57,7 +58,7 @@ RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

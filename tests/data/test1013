@@ -13,23 +13,20 @@ curl-config
 #
 # Client-side
 <client>
-<server>
-none
-</server>
- <name>
+<name>
 Compare curl --version with curl-config --protocols
- </name>
- <command>
+</name>
+<command>
 --version
 </command>
-<postcheck>
-%SRCDIR/libtest/test1013.pl ../curl-config log/stdout1013 protocols
-</postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
+<postcheck>
+%SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER protocols
+</postcheck>
 <errorcode>
 0
 </errorcode>

@@ -25,14 +25,14 @@ http
 <features>
 telnet
 </features>
- <name>
+<name>
 TELNET to HTTP server
- </name>
-<stdin>
-GET /we/want/1326 HTTP/1.0
+</name>
+<stdin crlf="headers">
+GET /we/want/%TESTNUMBER HTTP/1.0
 
 </stdin>
- <command>
+<command>
 telnet://%HOSTIP:%HTTPPORT --upload-file -
 </command>
 </client>
@@ -40,8 +40,8 @@ telnet://%HOSTIP:%HTTPPORT --upload-file -
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-GET /we/want/1326 HTTP/1.0
+<protocol crlf="headers">
+GET /we/want/%TESTNUMBER HTTP/1.0
 
 </protocol>
 </verify>

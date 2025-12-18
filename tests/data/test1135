@@ -9,101 +9,121 @@ CURL_EXTERN
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 # The VMS and OS/400 builds extract the CURL_EXTERN protos and use in
 # the build. We break binary compatibility by changing order. Only add
 # new entries last or bump the SONAME.
 #
- <name>
+<name>
 Verify CURL_EXTERN order
- </name>
+</name>
 
 <command type="perl">
-%SRCDIR/extern-scan.pl %SRCDIR/..
+%SRCDIR/test1135.pl %SRCDIR/..
 </command>
 </client>
 
 <verify>
 <stdout>
-CURL_EXTERN int curl_strequal(const char *s1, const char *s2);
-CURL_EXTERN int curl_strnequal(const char *s1, const char *s2, size_t n);
-CURL_EXTERN curl_mime *curl_mime_init(CURL *easy);
-CURL_EXTERN void curl_mime_free(curl_mime *mime);
-CURL_EXTERN curl_mimepart *curl_mime_addpart(curl_mime *mime);
-CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part, const char *name);
-CURL_EXTERN CURLcode curl_mime_filename(curl_mimepart *part,
-CURL_EXTERN CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
-CURL_EXTERN CURLcode curl_mime_encoder(curl_mimepart *part,
-CURL_EXTERN CURLcode curl_mime_data(curl_mimepart *part,
-CURL_EXTERN CURLcode curl_mime_filedata(curl_mimepart *part,
-CURL_EXTERN CURLcode curl_mime_data_cb(curl_mimepart *part,
-CURL_EXTERN CURLcode curl_mime_subparts(curl_mimepart *part,
-CURL_EXTERN CURLcode curl_mime_headers(curl_mimepart *part,
-CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
-CURL_EXTERN int curl_formget(struct curl_httppost *form, void *arg,
-CURL_EXTERN void curl_formfree(struct curl_httppost *form);
-CURL_EXTERN char *curl_getenv(const char *variable);
-CURL_EXTERN char *curl_version(void);
-CURL_EXTERN char *curl_easy_escape(CURL *handle,
-CURL_EXTERN char *curl_escape(const char *string,
-CURL_EXTERN char *curl_easy_unescape(CURL *handle,
-CURL_EXTERN char *curl_unescape(const char *string,
-CURL_EXTERN void curl_free(void *p);
-CURL_EXTERN CURLcode curl_global_init(long flags);
-CURL_EXTERN CURLcode curl_global_init_mem(long flags,
-CURL_EXTERN void curl_global_cleanup(void);
-CURL_EXTERN CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
-CURL_EXTERN struct curl_slist *curl_slist_append(struct curl_slist *,
-CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
-CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
-CURL_EXTERN CURLSH *curl_share_init(void);
-CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *, CURLSHoption option, ...);
-CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *);
-CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
-CURL_EXTERN const char *curl_easy_strerror(CURLcode);
-CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
-CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
-CURL_EXTERN CURL *curl_easy_init(void);
-CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
-CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
-CURL_EXTERN void curl_easy_cleanup(CURL *curl);
-CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
-CURL_EXTERN CURL *curl_easy_duphandle(CURL *curl);
-CURL_EXTERN void curl_easy_reset(CURL *curl);
-CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
-CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
-CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
-CURL_EXTERN int curl_mprintf(const char *format, ...);
-CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...);
-CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...);
-CURL_EXTERN int curl_msnprintf(char *buffer, size_t maxlength,
-CURL_EXTERN int curl_mvprintf(const char *format, va_list args);
-CURL_EXTERN int curl_mvfprintf(FILE *fd, const char *format, va_list args);
-CURL_EXTERN int curl_mvsprintf(char *buffer, const char *format, va_list args);
-CURL_EXTERN int curl_mvsnprintf(char *buffer, size_t maxlength,
-CURL_EXTERN char *curl_maprintf(const char *format, ...);
-CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args);
-CURL_EXTERN CURLM *curl_multi_init(void);
-CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
-CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
-CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
-CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
-CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
-CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
-CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
-CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
+curl_strequal
+curl_strnequal
+curl_mime_init
+curl_mime_free
+curl_mime_addpart
+curl_mime_name
+curl_mime_filename
+curl_mime_type
+curl_mime_encoder
+curl_mime_data
+curl_mime_filedata
+curl_mime_data_cb
+curl_mime_subparts
+curl_mime_headers
+curl_formadd
+curl_formget
+curl_formfree
+curl_getenv
+curl_version
+curl_easy_escape
+curl_escape
+curl_easy_unescape
+curl_unescape
+curl_free
+curl_global_init
+curl_global_init_mem
+curl_global_cleanup
+curl_global_trace
+curl_global_sslset
+curl_slist_append
+curl_slist_free_all
+curl_getdate
+curl_share_init
+curl_share_setopt
+curl_share_cleanup
+curl_version_info
+curl_easy_strerror
+curl_share_strerror
+curl_easy_pause
+curl_easy_ssls_import
+curl_easy_ssls_export
+curl_easy_init
+curl_easy_setopt
+curl_easy_perform
+curl_easy_cleanup
+curl_easy_getinfo
+curl_easy_duphandle
+curl_easy_reset
+curl_easy_recv
+curl_easy_send
+curl_easy_upkeep
+curl_easy_header
+curl_easy_nextheader
+curl_mprintf
+curl_mfprintf
+curl_msprintf
+curl_msnprintf
+curl_mvprintf
+curl_mvfprintf
+curl_mvsprintf
+curl_mvsnprintf
+curl_maprintf
+curl_mvaprintf
+curl_multi_init
+curl_multi_add_handle
+curl_multi_remove_handle
+curl_multi_fdset
+curl_multi_wait
+curl_multi_poll
+curl_multi_wakeup
+curl_multi_perform
+curl_multi_cleanup
+curl_multi_info_read
+curl_multi_strerror
+curl_multi_socket
+curl_multi_socket_action
+curl_multi_socket_all
+curl_multi_timeout
+curl_multi_setopt
+curl_multi_assign
+curl_multi_get_handles
+curl_multi_get_offt
+curl_pushheader_bynum
+curl_pushheader_byname
+curl_multi_waitfds
+curl_multi_notify_disable
+curl_multi_notify_enable
+curl_easy_option_by_name
+curl_easy_option_by_id
+curl_easy_option_next
+curl_url
+curl_url_cleanup
+curl_url_dup
+curl_url_get
+curl_url_set
+curl_url_strerror
+curl_ws_recv
+curl_ws_send
+curl_ws_start_frame
+curl_ws_meta
 </stdout>
 </verify>
 

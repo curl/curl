@@ -2,7 +2,7 @@
 #
 # xc-lt-iface.m4
 #
-# Copyright (c) 2013 Daniel Stenberg <daniel@haxx.se>
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,8 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# SPDX-License-Identifier: ISC
 #
 #---------------------------------------------------------------------------
 
@@ -72,7 +74,7 @@ fi
 if test "x$xc_lt_want_enable_shared" = 'xyes' &&
   test "x$xc_lt_want_enable_static" = 'xyes'; then
   case $host_os in @%:@ (
-    pw32* | cegcc* | os2* | aix*)
+    cegcc* | os2* | aix*)
       xc_lt_want_enable_static='no'
       ;;
   esac
@@ -119,7 +121,7 @@ if test "x$xc_lt_want_with_pic" = 'xdefault'; then
   case $host_cpu in @%:@ (
     x86_64 | amd64 | ia64)
       case $host_os in @%:@ (
-        linux* | freebsd*)
+        linux* | freebsd* | midnightbsd*)
           xc_lt_want_with_pic='yes'
           ;;
       esac
@@ -263,7 +265,7 @@ elif test "x$allow_undefined_flag" = 'xunsupported'; then
   xc_lt_shlib_use_no_undefined='yes'
 fi
 case $host_os in @%:@ (
-  cygwin* | mingw* | pw32* | cegcc* | os2* | aix*)
+  cygwin* | mingw* | cegcc* | os2* | aix*)
     xc_lt_shlib_use_no_undefined='yes'
     ;;
 esac
@@ -317,7 +319,7 @@ dnl   xc_lt_build_static_with_pic
 m4_define([_XC_CHECK_LT_BUILD_WITH_PIC],
 [dnl
 #
-# Find out whether libtool libraries would be built wit PIC
+# Find out whether libtool libraries would be built with PIC
 #
 
 case "x$pic_mode" in @%:@ ((((

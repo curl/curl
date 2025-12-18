@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: curl
+# SPDX-FileCopyrightText: Daniel Stenberg, <daniel@haxx.se>, et al.
+
+# This file describes the licensing and copyright situation for files that
+# cannot be annotated directly, for example because of being simply
+# uncommentable. Unless this is the case, a file should be annotated directly.
+#
+# This follows the REUSE specification: https://reuse.software/spec-3.2/#reusetoml
+
+version = 1
+SPDX-PackageName = "curl"
+SPDX-PackageDownloadLocation = "https://curl.se/"
+
+[[annotations]]
+path = [
+  "docs/FAQ",
+  "docs/INSTALL",
+  "docs/KNOWN_BUGS",
+  "docs/libcurl/symbols-in-versions",
+  "docs/MAIL-ETIQUETTE",
+  "docs/options-in-versions",
+  "docs/THANKS",
+  "docs/TODO",
+  "lib/libcurl.vers.in",
+  "lib/libcurl.def",
+  "packages/OS400/README.OS400",
+  "packages/vms/build_vms.com",
+  "packages/vms/curl_release_note_start.txt",
+  "packages/vms/curlmsg.sdl",
+  "packages/vms/macro32_exactcase.patch",
+  "packages/vms/readme",
+  "plan9/README",
+  "projects/Windows/**",
+  "README",
+  "RELEASE-NOTES",
+  "renovate.json",
+  "tests/certs/**",
+  "tests/data/test**",
+  "tests/valgrind.supp",
+]
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+# If there is licensing/copyright information in or next to these files, prefer that
+precedence = "closest"

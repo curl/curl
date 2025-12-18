@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+VRFY
+IDN
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPA SMTPUTF8
+</servercmd>
+<data crlf="yes">
+252 Send some mail and I'll try my best
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+IDN
+!win32
+codeset-utf8
+</features>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
+<name>
+SMTP external VRFY with SMTPUTF8 support
+</name>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Anv%hex[%c3%a4]hex%ndaren@%hex[%c3%a5%c3%a4%c3%b6]hex%.se
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+VRFY Anv%hex[%c3%a4]hex%ndaren@xn--4cab6c.se SMTPUTF8
+QUIT
+</protocol>
+</verify>
+</testcase>

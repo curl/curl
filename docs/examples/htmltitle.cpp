@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -41,7 +43,7 @@
 //  Case-insensitive string comparison
 //
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define COMPARE(a, b) (!_stricmp((a), (b)))
 #else
 #define COMPARE(a, b) (!strcasecmp((a), (b)))
@@ -69,8 +71,8 @@ static std::string buffer;
 //  libcurl write callback function
 //
 
-static int writer(char *data, size_t size, size_t nmemb,
-                  std::string *writerData)
+static size_t writer(char *data, size_t size, size_t nmemb,
+                     std::string *writerData)
 {
   if(writerData == NULL)
     return 0;
@@ -84,43 +86,43 @@ static int writer(char *data, size_t size, size_t nmemb,
 //  libcurl connection initialization
 //
 
-static bool init(CURL *&conn, char *url)
+static bool init(CURL *&curl, const char *url)
 {
-  CURLcode code;
+  CURLcode res;
 
-  conn = curl_easy_init();
+  curl = curl_easy_init();
 
-  if(conn == NULL) {
-    fprintf(stderr, "Failed to create CURL connection\n");
-    exit(EXIT_FAILURE);
-  }
-
-  code = curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, errorBuffer);
-  if(code != CURLE_OK) {
-    fprintf(stderr, "Failed to set error buffer [%d]\n", code);
+  if(!curl) {
+    fprintf(stderr, "Failed to create CURL handle\n");
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_URL, url);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
+  if(res != CURLE_OK) {
+    fprintf(stderr, "Failed to set error buffer [%d]\n", res);
+    return false;
+  }
+
+  res = curl_easy_setopt(curl, CURLOPT_URL, url);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, writer);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &buffer);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
     return false;
   }
@@ -138,11 +140,11 @@ static void StartElement(void *voidContext,
 {
   Context *context = static_cast<Context *>(voidContext);
 
-  if(COMPARE(reinterpret_cast<char *>(name), "TITLE")) {
+  if(COMPARE(reinterpret_cast<const char *>(name), "TITLE")) {
     context->title = "";
     context->addTitle = true;
   }
-  (void) attributes;
+  (void)attributes;
 }
 
 //
@@ -154,7 +156,7 @@ static void EndElement(void *voidContext,
 {
   Context *context = static_cast<Context *>(voidContext);
 
-  if(COMPARE(reinterpret_cast<char *>(name), "TITLE"))
+  if(COMPARE(reinterpret_cast<const char *>(name), "TITLE"))
     context->addTitle = false;
 }
 
@@ -167,7 +169,8 @@ static void handleCharacters(Context *context,
                              int length)
 {
   if(context->addTitle)
-    context->title.append(reinterpret_cast<char *>(chars), length);
+    context->title.append(reinterpret_cast<const char *>(chars),
+                          (unsigned long)length);
 }
 
 //
@@ -228,6 +231,11 @@ static htmlSAXHandler saxHandler =
   NULL,
   NULL,
   cdata,
+  NULL,
+  0,
+  0,
+  0,
+  0,
   NULL
 };
 
@@ -244,7 +252,7 @@ static void parseHtml(const std::string &html,
   ctxt = htmlCreatePushParserCtxt(&saxHandler, &context, "", 0, "",
                                   XML_CHAR_ENCODING_NONE);
 
-  htmlParseChunk(ctxt, html.c_str(), html.size(), 0);
+  htmlParseChunk(ctxt, html.c_str(), (int)html.size(), 0);
   htmlParseChunk(ctxt, "", 0, 1);
 
   htmlFreeParserCtxt(ctxt);
@@ -254,34 +262,37 @@ static void parseHtml(const std::string &html,
 
 int main(int argc, char *argv[])
 {
-  CURL *conn = NULL;
-  CURLcode code;
+  CURL *curl = NULL;
+  CURLcode res;
   std::string title;
 
   // Ensure one argument is given
 
   if(argc != 2) {
     fprintf(stderr, "Usage: %s <url>\n", argv[0]);
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
-  // Initialize CURL connection
+  // Initialize CURL handle
 
-  if(!init(conn, argv[1])) {
-    fprintf(stderr, "Connection initializion failed\n");
-    exit(EXIT_FAILURE);
+  if(!init(curl, argv[1])) {
+    fprintf(stderr, "Handle initialization failed\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
   }
 
   // Retrieve content for the URL
 
-  code = curl_easy_perform(conn);
-  curl_easy_cleanup(conn);
+  res = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
 
-  if(code != CURLE_OK) {
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
   // Parse the (assumed) HTML code
@@ -290,5 +301,5 @@ int main(int argc, char *argv[])
   // Display the extracted title
   printf("Title: %s\n", title.c_str());
 
-  return EXIT_SUCCESS;
+  return (int)res;
 }

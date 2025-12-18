@@ -1,0 +1,88 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP MIME POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+<datacheck crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<features>
+Mime
+</features>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+HTTP chunked mimepost using single-byte read callback with encoder
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
+</strippart>
+# Note that the stripping above removes 12 bytes from every occurrence of the
+# boundary string and since 5 of them are in the body contents, we see
+# (5*12) == 60 bytes less
+<protocol crlf="yes">
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: multipart/form-data; boundary=----------------------------
+Expect: 100-continue
+
+85
+------------------------------
+Content-Disposition: form-data; name="field"
+Content-Transfer-Encoding: base64
+
+
+4
+ZHVt
+3a
+bXk=
+--------------------------------
+
+0
+
+</protocol>
+</verify>
+</testcase>

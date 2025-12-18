@@ -29,9 +29,6 @@ REPLY welcome HTTP/1.1 200 OK\r\nContent-Length: 21\r\n\r\n500 Weird FTP Reply
 #
 # Client-side
 <client>
-<features>
-none
-</features>
 <server>
 ftp
 </server>

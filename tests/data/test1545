@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<features>
+form-api
+</features>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+use curl_formadd() data twice with unreadable file
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

@@ -23,11 +23,11 @@ REPLY PWD 530 No ACCT, go away
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP ACCT request without --ftp-account
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/295/
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/
 </command>
 </client>
 
@@ -37,7 +37,7 @@ ftp://%HOSTIP:%FTPPORT/295/
 <errorcode>
 67
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 </protocol>

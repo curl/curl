@@ -13,24 +13,21 @@ warning
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
-unix-sockets
+UnixSockets
 </features>
- <name>
-file name argument looks like a flag
- </name>
- <command>
---stderr log/moo1268 --unix-socket -k hej://moo
+<name>
+filename argument looks like a flag
+</name>
+<command>
+--stderr %LOGDIR/moo%TESTNUMBER --unix-socket -q hej://moo
 </command>
 </client>
 
 <verify>
-<file name="log/moo1268" mode="text">
-Warning: The file name argument '-k' looks like a flag.
-curl: (1) Protocol "hej" not supported or disabled in libcurl
+<file name="%LOGDIR/moo%TESTNUMBER" mode="text">
+Warning: The filename argument '-q' looks like a flag.
+curl: (1) Protocol "hej" not supported
 </file>
 
 # we expect an error since we provide a weird URL

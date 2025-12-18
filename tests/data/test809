@@ -11,8 +11,8 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data>
-* STATUS 809 (MESSAGES 231 UIDNEXT 44292)
+<data crlf="yes">
+* STATUS %TESTNUMBER (MESSAGES 231 UIDNEXT 44292)
 </data>
 </reply>
 
@@ -22,21 +22,21 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP mailbox STATUS (CUSTOMREQUEST)
- </name>
- <command>
-imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS 809 (UIDNEXT MESSAGES)'
+</name>
+<command>
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS %TESTNUMBER (UIDNEXT MESSAGES)'
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 STATUS 809 (UIDNEXT MESSAGES)
+A003 STATUS %TESTNUMBER (UIDNEXT MESSAGES)
 A004 LOGOUT
 </protocol>
 </verify>

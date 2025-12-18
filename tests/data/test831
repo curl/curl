@@ -28,23 +28,15 @@ imap
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
- <name>
+<name>
 IMAP NTLM graceful cancellation
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-'imap://%HOSTIP:%IMAPPORT/831/;MAILINDEX=1' -u testuser:testpass
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u testuser:testpass
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 #
@@ -57,7 +49,7 @@ chkhostname curlhost
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "LOGOUT"
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE NTLM
 TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

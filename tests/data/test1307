@@ -10,19 +10,12 @@ wildcardmatch
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 ftp
 </features>
- <name>
+<name>
 internal Curl_fnmatch() testing
- </name>
-<tool>
-unit1307
-</tool>
+</name>
 </client>
-
 </testcase>

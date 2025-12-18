@@ -1,0 +1,28 @@
+<testcase>
+<info>
+<keywords>
+cmdline
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+use a bad short option letter that does not exist (after one does exist)
+</name>
+
+# the second option is outside the normal accepted range
+<command>
+%hex[curl -v%08 http://example.com]hex%
+</command>
+</client>
+
+#
+# Verify errorcode
+<verify>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>

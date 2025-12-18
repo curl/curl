@@ -15,11 +15,11 @@ SSL
 <server>
 ftp
 </server>
- <name>
+<name>
 FTPS operation to FTP port
- </name>
- <command>
--m 5 -k ftps://%HOSTIP:%FTPPORT/path/to/file/405
+</name>
+<command>
+-m 5 --insecure ftps://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER
 </command>
 </client>
 

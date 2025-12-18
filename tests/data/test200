@@ -20,13 +20,13 @@ moo
 <server>
 file
 </server>
- <name>
+<name>
 basic file:// file
- </name>
+</name>
 <command option="no-include">
-file://localhost/%PWD/log/test200.txt
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test200.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar

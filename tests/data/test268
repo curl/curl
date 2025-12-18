@@ -2,27 +2,27 @@
 <info>
 <keywords>
 HTTP
-HTTP POST
+variables
 </keywords>
 </info>
+
 #
 # Server-side
 <reply>
-<data>
-HTTP/1.0 200 OK
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
 Content-Type: text/html
-Content-Length: 0
+Funny-head: yesyes
 
-this is data even though Content-Length is set to zero
+-foo-
 </data>
-<datacheck>
-HTTP/1.0 200 OK
-Server: test-server/fake
-Content-Type: text/html
-Content-Length: 0
-
-</datacheck>
 </reply>
 
 #
@@ -31,27 +31,29 @@ Content-Length: 0
 <server>
 http
 </server>
- <name>
-HTTP POST a non-existing file
- </name>
- <command>
- -d @nonesuchfile http://%HOSTIP:%HTTPPORT/268
+<name>
+JSON encoding of Unicode string
+</name>
+<file name="%LOGDIR/junk" nonewline="yes">
+%hex[%e2%80%9c]hex%
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable hello@%LOGDIR/junk --expand-data {{hello:json}}
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-POST /268 HTTP/1.1
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 0
+Content-Length: 3
 Content-Type: application/x-www-form-urlencoded
 
+%hex[%e2%80%9c]hex%
 </protocol>
 </verify>
 </testcase>

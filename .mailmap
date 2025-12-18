@@ -1,12 +1,16 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
 Guenter Knauf <lists@gknw.net> <gk@gknw.de>
-Gisle Vanem <gisle.vanem@gmail.com> <gvanem@yahoo.no>
-Gisle Vanem <gisle.vanem@gmail.com> <gvanem@broadpark.no>
+Gisle Vanem <gvanem@yahoo.no> <gisle.vanem@gmail.com>
+Gisle Vanem <gvanem@yahoo.no> <gvanem@broadpark.no>
 Alessandro Ghedini <alessandro@ghedini.me> <alessandro@cloudflare.com>
 Alessandro Ghedini <alessandro@ghedini.me> <al3xbio@gmail.com>
 Björn Stenberg <bjorn@haxx.se>
 Björn Stenberg <bjorn@haxx.se> <bjst@bjorn>
-Viktor Szakats <commit@vszakats.net>
-Viktor Szakats <commit@vszakats.net> <vszakats@users.noreply.github.com>
+Viktor Szakats <commit@vsz.me> <commit@vszakats.net>
+Viktor Szakats <commit@vsz.me> <vszakats@users.noreply.github.com>
 Daniel Gustafsson <daniel@yesql.se> <dgustafsson@pivotal.io>
 Daniel Gustafsson <daniel@yesql.se> <daniel@hobbit.se>
 Linus Nielsen <linus@haxx.se>
@@ -48,8 +52,71 @@ Max Savenkov <max.savenkov@gmail.com>
 Daniel Jelinski <daniel.jelinski@thomsonreuters.com> <30433125+djelinski@users.noreply.github.com>
 Amit Katyal <amkatyal@cisco.com>
 Giorgos Oikonomou <giorgos.n.oikonomou@gmail.com>
-Evgeny Grin <k2k@narod.ru>
+Evgeny Grin (Karlson2k) <k2k@narod.ru> <k2k@yandex.ru>
+Evgeny Grin (Karlson2k) <k2k@narod.ru>
 Peter Pih <railsnewbie257@gmail.com>
 Anton Malov <malov.anton@gmail.com>
 Marquis de Muesli <marquis.de.muesli@gmail.com>
 Kyohei Kadota <lufia@lufia.org>
+Lucas Pardue <lucaspardue.24.7@gmail.com> <lucas@cloudflare.com>
+Massimiliano Fantuzzi <superfantuz@gmail.com>
+Niall O'Reilly <Niall.oReilly@ucd.ie>
+Mohammad Hasbini <mohammad.hasbini@gmail.com>
+Andrew Ishchuk <andrew_ishchuk@office.targem.ru>
+Nicolas Guillier <59726521+nicoguillier@users.noreply.github.com>
+Julian Z <julianz@example.com> <jzinn@users.noreply.github.com>
+Jessa Chandler <jessachandler@gmail.com>
+Gökhan Şengün <gsengun@linux-5d7d.site> <gokhansengun@gmai.com>
+Svyatoslav Mishyn <juef@openmailbox.org>
+Douglas Steinwand <dzs-curl@dzs.fx.org>
+James Fuller <jim@webcomposite.com> <jfuller@redhat.com>
+James Fuller <jim@webcomposite.com> Jim Fuller <jim@webcomposite.com>
+Don J Olmstead <don.j.olmstead@gmail.com>
+Nicolas Sterchele <sterchelen@gmail.com>
+Sergey Raevskiy <ccik@inbox.ru>
+SecuritySense on github <si@securitysense.co.uk>
+Mipsters on github <tomaviv57@gmail.com>
+Pavel Novikov <paul.skeptic@yandex.ru>
+apique13 on github <apique@PC42.isdom.isoft.fr>
+Daniel Hwang <danielleehwang@gmail.com>
+Jon Rumsey <jrumsey@uk.ibm.com>
+Tobias Nyholm <tobias.nyholm@gmail.com>
+Timur Artikov <t.artikov@2gis.ru>
+Michał Antoniak <47522782+MAntoniak@users.noreply.github.com>
+Gleb Ivanovsky <gl.ivanovsky@gmail.com>
+Max Dymond <max.dymond@microsoft.com> <max.dymond@metaswitch.com>
+Max Dymond <max.dymond@microsoft.com> <cmeister2@gmail.com>
+Abhinav Singh <theawless@gmail.com>
+Malik Idrees Hasan Khan <77000356+MalikIdreesHasanKhan@users.noreply.github.com>
+Yongkang Huang <hyk68691@hotmail.com>
+Xiaoke Wang <xkernel.wang@foxmail.com>
+Philip H <47042125+pheiduck@users.noreply.github.com>
+neutric on github <5984479+neutric@users.noreply.github.com>
+Jan-Piet Mens <jp@mens.de>
+Henrik Holst <henrik.holst@millistream.com>
+Christian Schmitz <support@monkeybreadsoftware.de>
+Max Mehl <max.mehl@fsfe.org>
+rzrymiak on github <106121613+rzrymiak@users.noreply.github.com>
+Oliver Roberts <oliver@futaura.co.uk>
+opensignature on github <antonio@piumarossa.it>
+Cering on github <gfypm@qq.com>
+a1346054 on github <36859588+a1346054@users.noreply.github.com>
+zhanghu on xiaomi <zhanghu6@xiaomi.com>
+Philip Heiduck <pheiduck@Philips-MBP.lan> <47042125+pheiduck@users.noreply.github.com>
+bsergean on github <bsergean@gmail.com>
+Stefan Eissing <stefan@eissing.org> <stefan.eissing@greenbytes.de>
+Michael Musset <mickamusset@gmail.com>
+Andy Alt <arch_stanton5995@protonmail.com>
+Thomas1664 on github <46387399+Thomas1664@users.noreply.github.com>
+dengjfzh on github <dengjfzh@gmail.com>
+Brad Harder <brad.harder@gmail.com>
+Derzsi Dániel <daniel@tohka.us>
+Michael Osipov <michael.osipov@siemens.com> <1983-01-06@gmx.net>
+Michael Osipov <michael.osipov@siemens.com> <michael-o@users.sf.net>
+Christian Weisgerber <naddy@mips.inka.de> <curl-library@lists.haxx.se>
+Moritz Buhl <git@moritzbuhl.de>
+Aki Sakurai <75532970+AkiSakurai@users.noreply.github.com>
+Sinkevich Artem <artsin666@gmail.com>
+Andrew Kirillov <akirillo@uk.ibm.com>
+Stephen Farrell <stephen.farrell@cs.tcd.ie>
+Calvin Ruocco <calvin.ruocco@vector.com>

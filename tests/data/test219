@@ -2,6 +2,7 @@
 <info>
 <keywords>
 proxy
+unsupported scheme
 </keywords>
 </info>
 
@@ -13,17 +14,15 @@ proxy
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
+proxy
 </features>
- <name>
+<name>
 try using proxy with unsupported scheme
- </name>
- <command>
--x foo://%HOSTIP:%HTTPPORT/219 http://%HOSTIP:%HTTPPORT/219
+</name>
+<command>
+-x foo://%HOSTIP:%NOLISTENPORT/%TESTNUMBER http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 

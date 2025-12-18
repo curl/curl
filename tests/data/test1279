@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+CURL_EXTERN
+libcurl.def
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify libcurl.def against CURL_EXTERN declarations
+</name>
+
+<command type="perl">
+%SRCDIR/test1135.pl --heading=EXPORTS --sort %SRCDIR/..
+</command>
+</client>
+
+<verify>
+<stdout loadfile="%SRCDIR/../lib/libcurl.def">
+</stdout>
+</verify>
+
+</testcase>

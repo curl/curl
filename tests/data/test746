@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+cmdline
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+too large numerical value passed to -m
+</name>
+<command>
+http://neverused.example/ -m 22222242222222222
+</command>
+</client>
+
+<verify>
+<errorcode>
+2
+</errorcode>
+<stderr mode="text">
+curl: option -m: expected a proper numerical parameter
+%if manual
+curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
+</stderr>
+</verify>
+</testcase>

@@ -9,16 +9,12 @@ memory-includes
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
- <name>
+<name>
 Verify memory #include files in libcurl's C source files
- </name>
+</name>
 
 <command type="perl">
-%SRCDIR/mem-include-scan.pl %SRCDIR/../lib
+%SRCDIR/test1132.pl %SRCDIR/../lib
 </command>
 </client>
 

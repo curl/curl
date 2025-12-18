@@ -2,6 +2,9 @@
 <info>
 <keywords>
 FTP
+timeout
+FAILURE
+DELAY
 </keywords>
 </info>
 
@@ -20,11 +23,11 @@ ftp
 <killserver>
 ftp
 </killserver>
- <name>
+<name>
 FTP download with strict timeout and slow CWD
- </name>
- <command timeout="1">
-ftp://%HOSTIP:%FTPPORT/path/to/file/190 -m %FTPTIME2
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER -m 10
 </command>
 </client>
 
@@ -34,7 +37,7 @@ ftp://%HOSTIP:%FTPPORT/path/to/file/190 -m %FTPTIME2
 <errorcode>
 28
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+VRFY
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+!win32
+codeset-utf8
+</features>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
+<name>
+SMTP external VRFY without SMTPUTF8 - UTF-8 recipient (local part only)
+</name>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Anv%hex[%c3%a4]hex%ndaren@example.com
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 8 - CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+VRFY Anv%hex[%c3%a4]hex%ndaren@example.com
+QUIT
+</protocol>
+</verify>
+</testcase>

@@ -7,7 +7,7 @@ HTTP GET
 </info>
 
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -25,12 +25,12 @@ Connection: close
 http
 </server>
 <tool>
-lib556
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 send and recv HTTP
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT
 </command>
 </client>
@@ -38,11 +38,8 @@ http://%HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /556 HTTP/1.2
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: ninja
 
 </protocol>

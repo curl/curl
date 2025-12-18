@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+CURL_DISABLE_PROXY
+</keywords>
+</info>
+
+<client>
+<features>
+!proxy
+</features>
+<name>
+Disabled proxy should make curl fail with --proxy
+</name>
+<command>
+-x wohoo http://example.com/
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+curl: proxy support is disabled in this libcurl
+</stderr>
+<errorcode>
+4
+</errorcode>
+</verify>
+</testcase>

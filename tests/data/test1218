@@ -11,7 +11,7 @@ cookies
 # This test is very similar to 1216, only that it sets the cookies from the
 # first site instead of reading from a file
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 25 Sep 2001 19:37:44 GMT
 Set-Cookie: bug=fixed; domain=.example.fake;
@@ -26,33 +26,37 @@ This server says moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookies and domains with same prefix
- </name>
- <command>
-http://example.fake/c/1218 http://example.fake/c/1218 http://bexample.fake/c/1218 -b nonexisting -x %HOSTIP:%HTTPPORT
+</name>
+<command>
+http://example.fake/c/%TESTNUMBER http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+cookies
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://example.fake/c/1218 HTTP/1.1
+<protocol crlf="headers">
+GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://example.fake/c/1218 HTTP/1.1
+GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: bug=fixed
 
-GET http://bexample.fake/c/1218 HTTP/1.1
+GET http://bexample.fake/c/%TESTNUMBER HTTP/1.1
 Host: bexample.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

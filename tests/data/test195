@@ -17,11 +17,11 @@ REPLY PASS 530 temporarily not available
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP response 530 after PASS, temporarily not allowed access
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/195
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -30,7 +30,7 @@ ftp://%HOSTIP:%FTPPORT/195
 <errorcode>
 67
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 </protocol>

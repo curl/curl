@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,8 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_strdup.h"
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifndef HAVE_STRDUP
 char *strdup(const char *str)
@@ -30,18 +33,24 @@ char *strdup(const char *str)
   if(!str)
     return (char *)NULL;
 
-  len = strlen(str);
+  len = strlen(str) + 1;
 
-  if(len >= ((size_t)-1) / sizeof(char))
-    return (char *)NULL;
-
-  newstr = malloc((len + 1)*sizeof(char));
+  newstr = malloc(len);
   if(!newstr)
     return (char *)NULL;
 
-  memcpy(newstr, str, (len + 1)*sizeof(char));
-
+  memcpy(newstr, str, len);
   return newstr;
-
 }
 #endif
+
+char *memdup0(const char *data, size_t len)
+{
+  char *p = malloc(len + 1);
+  if(!p)
+    return NULL;
+  if(len)
+    memcpy(p, data, len);
+  p[len] = 0;
+  return p;
+}

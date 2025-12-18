@@ -1,0 +1,31 @@
+<testcase>
+<info>
+<keywords>
+runtests.pl
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify that runtests.pl accepts an -L option
+</name>
+
+<command type="perl">
+%SRCDIR/runtests.pl -L %PWD/%LOGDIR/test%TESTNUMBER-library.pl
+</command>
+# Create a simple perl snippet that lets runtests.pl
+# exit with a code we can check.
+<file name="%LOGDIR/test%TESTNUMBER-library.pl">
+exit 123
+</file>
+</client>
+
+<verify>
+<errorcode>
+123
+</errorcode>
+</verify>
+
+</testcase>

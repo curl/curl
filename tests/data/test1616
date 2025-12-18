@@ -1,0 +1,19 @@
+<testcase>
+<info>
+<keywords>
+unittest
+uint_hash
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+Internal uint_hash create/add/destroy testing, exercising clean functions
+</name>
+</client>
+</testcase>

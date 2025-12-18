@@ -9,19 +9,14 @@ stripcredentials
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
-https
 </features>
- <name>
+<name>
 unit tests for stripcredentials from URL
- </name>
+</name>
 <tool>
-unit1621
+tool%TESTNUMBER
 </tool>
 </client>
-
 </testcase>

@@ -27,25 +27,25 @@ REPLY EPSV 500 no such command
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR --ignore-content-length
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/1137 --ignore-content-length
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ignore-content-length
 </command>
 
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 PASV
 TYPE I
-RETR 1137
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

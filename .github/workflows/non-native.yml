@@ -1,0 +1,329 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+
+name: 'non-native'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  CURL_CI: github
+
+jobs:
+  netbsd:
+    name: 'NetBSD, CM clang openssl ${{ matrix.arch }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        arch: ['x86_64']
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: 'cmake'
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
+        env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
+        with:
+          environment_variables: MATRIX_ARCH
+          operating_system: 'netbsd'
+          version: '10.1'
+          architecture: ${{ matrix.arch }}
+          run: |
+            # https://pkgsrc.se/
+            time sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
+            time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+              -DCURL_USE_OPENSSL=ON \
+              -DCURL_USE_GSSAPI=ON \
+              || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            time cmake --build bld
+            time cmake --install bld
+            bld/src/curl --disable --version
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
+              time cmake --build bld --target testdeps
+              export TFLAGS='-j8'
+              time cmake --build bld --target test-ci
+            fi
+            echo '::group::build examples'
+            time cmake --build bld --target curl-examples-build
+            echo '::endgroup::'
+
+  openbsd:
+    name: 'OpenBSD, CM clang libressl ${{ matrix.arch }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        arch: ['x86_64']
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: 'cmake'
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
+        env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
+        with:
+          environment_variables: MATRIX_ARCH
+          operating_system: 'openbsd'
+          version: '7.8'
+          architecture: ${{ matrix.arch }}
+          run: |
+            # https://openbsd.app/
+            # https://www.openbsd.org/faq/faq15.html
+            time sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
+            time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+              -DCURL_USE_OPENSSL=ON \
+              || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            time cmake --build bld
+            time cmake --install bld
+            bld/src/curl --disable --version
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
+              time cmake --build bld --target testdeps
+              export TFLAGS='-j8 !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
+              time cmake --build bld --target test-ci
+            fi
+            echo '::group::build examples'
+            time cmake --build bld --target curl-examples-build
+            echo '::endgroup::'
+
+  freebsd:
+    name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        include:
+          - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
+          - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
+          - { build: 'autotools', arch: 'arm64' , compiler: 'clang' }
+          - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: '${{ matrix.build }}'
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
+        env:
+          CC: '${{ matrix.compiler }}'
+          MATRIX_ARCH: '${{ matrix.arch }}'
+          MATRIX_BUILD: '${{ matrix.build }}'
+          MATRIX_DESC: '${{ matrix.desc }}'
+          MATRIX_OPTIONS: '${{ matrix.options }}'
+        with:
+          environment_variables: CC MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
+          operating_system: 'freebsd'
+          version: '14.3'
+          architecture: ${{ matrix.arch }}
+          run: |
+            export CURL_CI=github
+
+            # https://ports.freebsd.org/
+            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+              time sudo pkg install -y cmake-core ninja perl5 \
+                pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+            else
+              time sudo pkg install -y autoconf automake libtool \
+                pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+              export MAKEFLAGS=-j3
+            fi
+
+            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+              time cmake -B bld -G Ninja \
+                -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+                -DCMAKE_C_COMPILER="${CC}" \
+                -DCMAKE_UNITY_BUILD=ON \
+                -DCURL_WERROR=ON \
+                -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+                -DCURL_USE_OPENSSL=ON \
+                -DCURL_USE_GSSAPI=ON \
+                ${MATRIX_OPTIONS} \
+                || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            else
+              time autoreconf -fi
+              if [ "${MATRIX_ARCH}" != 'x86_64' ]; then
+                options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
+              fi
+              mkdir bld && cd bld
+              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
+                --prefix="$HOME"/curl-install \
+                --with-openssl \
+                --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
+                --disable-dependency-tracking --enable-option-checking=fatal \
+                ${options} \
+                ${MATRIX_OPTIONS} \
+                || { tail -n 1000 config.log; false; }
+              cd ..
+            fi
+
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+
+            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+              time cmake --build bld
+              time cmake --install bld
+            else
+              time make -C bld install
+            fi
+
+            bld/src/curl --disable --version
+
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
+              if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+                time cmake --build bld --target testdeps
+              else
+                time make -C bld -C tests
+              fi
+              if [ "${MATRIX_DESC#*!runtests*}" = "${MATRIX_DESC}" ]; then
+                export TFLAGS='-j8'
+                if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+                  time cmake --build bld --verbose --target test-ci
+                else
+                  time make -C bld V=1 test-ci
+                fi
+              fi
+            fi
+
+            if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
+              echo '::group::build examples'
+              if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+                time cmake --build bld --target curl-examples-build
+              else
+                time make -C bld examples
+              fi
+              echo '::endgroup::'
+            fi
+
+  android:
+    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 25
+    env:
+      MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
+    strategy:
+      matrix:
+        include:
+          - { build: 'autotools', platform: '21', name: "!ssl !zstd",
+              options: '--without-ssl --without-libpsl --without-zstd' }
+
+          - { build: 'cmake'    , platform: '21', name: "!ssl !zstd",
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
+
+          - { build: 'autotools', platform: '35', name: "!ssl !zstd",
+              options: '--without-ssl --without-libpsl --without-zstd' }
+
+          - { build: 'cmake'    , platform: '35', name: "!ssl !zstd",
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
+
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'autoreconf'
+        if: ${{ matrix.build == 'autotools' }}
+        run: autoreconf -fi
+
+      - name: 'configure'
+        env:
+          MATRIX_OPTIONS: '${{ matrix.options }}'
+          MATRIX_PLATFORM: '${{ matrix.platform }}'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
+            cmake -B bld -G Ninja \
+              -DANDROID_ABI=arm64-v8a \
+              -DANDROID_PLATFORM="android-${MATRIX_PLATFORM}" \
+              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              ${MATRIX_OPTIONS}
+          else
+            TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
+              CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
+              AR="$TOOLCHAIN/bin/llvm-ar" \
+              RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
+              --host="aarch64-linux-android${MATRIX_PLATFORM}" \
+              ${MATRIX_OPTIONS}
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose
+          else
+            make -C bld V=1
+          fi
+
+      - name: 'curl info'
+        run: find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -exec file '{}' \;
+
+      - name: 'build tests'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -C bld -C tests
+          fi
+
+      - name: 'build examples'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --target curl-examples-build
+          else
+            make -C bld examples
+          fi

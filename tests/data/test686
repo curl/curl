@@ -1,0 +1,31 @@
+<testcase>
+<info>
+<keywords>
+errorcode
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+verify return code for missing URL after --next
+</name>
+<command>
+htdhdhdtp://localhost --next
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>

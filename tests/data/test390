@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+FTP
+parallel
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 10001
+Content-Type: text/html
+
+%repeat[1000 x hellohttp!]%
+</data>
+
+<data2 nocheck="yes">
+%repeat[1000 x hello ftp!]%
+</data2>
+
+</reply>
+
+#
+# Client-side
+<client>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+%repeat[1000 x hellofile!]%
+</file>
+<server>
+http
+ftp
+</server>
+<name>
+curl HTTP, FILE and FTP in parallel
+</name>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 --parallel -o %LOGDIR/%TESTNUMBER.a -o %LOGDIR/%TESTNUMBER.b -o %LOGDIR/%TESTNUMBER.c
+</command>
+</client>
+
+#
+<verify>
+</verify>
+</testcase>

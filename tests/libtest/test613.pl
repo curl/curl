@@ -1,9 +1,34 @@
 #!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+use strict;
+use warnings;
+
 # Prepare a directory with known files and clean up afterwards
 use Time::Local;
 
-if ( $#ARGV < 1 )
-{
+if($#ARGV < 1) {
     print "Usage: $0 prepare|postprocess dir [logfile]\n";
     exit 1;
 }
@@ -14,8 +39,7 @@ sub errout {
     exit 1;
 }
 
-if ($ARGV[0] eq "prepare")
-{
+if($ARGV[0] eq "prepare") {
     my $dirname = $ARGV[1];
     mkdir $dirname || errout "$!";
     chdir $dirname;
@@ -31,34 +55,49 @@ if ($ARGV[0] eq "prepare")
     print FILE "Test file to support curl test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
-    # represented exactly on a FAT filesystem.
+    # represented exactly on a FAT file system.
     utime time, timegm(0,0,12,1,0,100), "plainfile.txt";
     chmod 0666, "plainfile.txt";
+
+    open(FILE, ">emptyfile.txt") || errout "$!";
+    binmode FILE;
+    close(FILE);
+    # The mtime is specifically chosen to be an even number so that it can be
+    # represented exactly on a FAT file system.
+    utime time, timegm(0,0,12,1,0,100), "emptyfile.txt";
+    chmod 0666, "emptyfile.txt";
 
     open(FILE, ">rofile.txt") || errout "$!";
     binmode FILE;
     print FILE "Read-only test file to support curl test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
-    # represented exactly on a FAT filesystem.
+    # represented exactly on a FAT file system.
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
+    if($^O eq 'cygwin') {
+      system "chattr +r rofile.txt";
+    }
 
     exit 0;
 }
-elsif ($ARGV[0] eq "postprocess")
-{
+elsif($ARGV[0] eq "postprocess") {
     my $dirname = $ARGV[1];
     my $logfile = $ARGV[2];
 
     # Clean up the test directory
+    if($^O eq 'cygwin') {
+      system "chattr -r $dirname/rofile.txt";
+    }
+    chmod 0666, "$dirname/rofile.txt";
     unlink "$dirname/rofile.txt";
+    unlink "$dirname/emptyfile.txt";
     unlink "$dirname/plainfile.txt";
     rmdir "$dirname/asubdir";
 
     rmdir $dirname || die "$!";
 
-    if ($logfile) {
+    if($logfile && -s $logfile) {
         # Process the directory file to remove all information that
         # could be inconsistent from one test run to the next (e.g.
         # file date) or may be unsupported on some platforms (e.g.
@@ -75,16 +114,23 @@ elsif ($ARGV[0] eq "postprocess")
 
         my @canondir;
         open(IN, "<$logfile") || die "$!";
-        while (<IN>) {
-            /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)(.*)$/;
-            if ($1 eq "d") {
+        while(<IN>) {
+            /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)\s+(.*)$/;
+            if($1 eq "d") {
+                # Skip current and parent directory listing, because some SSH
+                # servers (eg. OpenSSH for Windows) are not listing those
+                if($8 eq "." || $8 eq "..") {
+                    next;
+                }
                 # Erase all directory metadata except for the name, as it is not
-                # consistent for across all test systems and filesystems
-                push @canondir, "d?????????    N U         U               N ???  N NN:NN$8\n";
-            } elsif ($1 eq "-") {
+                # consistent for across all test systems and file systems
+                push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
+            } elsif($1 eq "-") {
+                # Ignore group and other permissions, because these may vary on
+                # some systems (e.g. on Windows)
                 # Erase user and group names, as they are not consistent across
                 # all test systems
-                my $line = sprintf("%s%s?%s?%s?%5d U         U %15d %s%s\n", $1,$2,$3,$4,$5,$6,$7,$8);
+                my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
                 push @canondir, $line;
             } else {
                 # Unexpected format; just pass it through and let the test fail

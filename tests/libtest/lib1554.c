@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,47 +18,61 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
+
 #include "memdebug.h"
 
-static void my_lock(CURL *handle, curl_lock_data data,
-                    curl_lock_access laccess, void *useptr)
+static const char *ldata_names[] = {
+  "NONE",
+  "SHARE",
+  "COOKIE",
+  "DNS",
+  "SESSION",
+  "CONNECT",
+  "PSL",
+  "HSTS",
+  "NULL",
+};
+
+static void t1554_test_lock(CURL *curl, curl_lock_data data,
+                            curl_lock_access laccess, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)laccess;
   (void)useptr;
-  printf("-> Mutex lock\n");
+  curl_mprintf("-> Mutex lock %s\n", ldata_names[data]);
 }
 
-static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t1554_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)useptr;
-  printf("<- Mutex unlock\n");
+  curl_mprintf("<- Mutex unlock %s\n", ldata_names[data]);
 }
 
 /* test function */
-int test(char *URL)
+static CURLcode test_lib1554(const char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURLSH *share;
+  CURLSH *share = NULL;
   int i;
 
   global_init(CURL_GLOBAL_ALL);
 
   share = curl_share_init();
   if(!share) {
-    fprintf(stderr, "curl_share_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    curl_mfprintf(stderr, "curl_share_init() failed\n");
+    goto test_cleanup;
   }
 
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, my_lock);
-  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, my_unlock);
+  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, t1554_test_lock);
+  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, t1554_test_unlock);
 
   /* Loop the transfer and cleanup the handle properly every lap. This will
      still reuse connections since the pool is in the shared object! */
@@ -73,18 +87,22 @@ int test(char *URL)
 
       /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
-      /* Check for errors */
-      if(res != CURLE_OK)
-        fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
 
       /* always cleanup */
       curl_easy_cleanup(curl);
+
+      /* Check for errors */
+      if(res != CURLE_OK) {
+        curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+        goto test_cleanup;
+      }
     }
   }
 
+test_cleanup:
   curl_share_cleanup(share);
   curl_global_cleanup();
 
-  return 0;
+  return res;
 }

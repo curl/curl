@@ -11,17 +11,19 @@ documentation
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
- <name>
+<name>
 Verify that all libcurl options have man pages
- </name>
+</name>
 
 <command type="perl">
-%SRCDIR/manpage-scan.pl %SRCDIR/.. %PWD/..
+%SRCDIR/test1139.pl %SRCDIR/.. %PWD/..
 </command>
 </client>
+
+<verify>
+<stderr>
+0
+</stderr>
+</verify>
 
 </testcase>

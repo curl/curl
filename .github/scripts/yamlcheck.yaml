@@ -1,0 +1,17 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+#
+# Docs: https://yamllint.readthedocs.io/en/stable/configuration.html
+
+extends: default
+
+rules:
+  line-length:
+    max: 500
+    level: warning
+
+  braces: disable
+  commas: disable
+  comments: disable
+  document-start: disable

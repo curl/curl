@@ -5,31 +5,27 @@ HTTP
 multi
 resolve
 speedcheck
+flaky
+timing-dependent
 </keywords>
 </info>
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <tool>
-lib1592
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP request, remove handle while resolving, don't block
- </name>
+</name>
 
- <command>
-http://a-site-never-accessed.example.org/1592
+<command>
+http://a-site-never-accessed.example.org/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 0
 </errorcode>

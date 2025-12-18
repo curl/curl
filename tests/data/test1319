@@ -12,7 +12,7 @@ HTTP proxy
 # Server-side
 <reply>
 
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 pop3: sure hit me
 
@@ -50,32 +50,30 @@ http-proxy
 </server>
 <features>
 http
+proxy
 </features>
- <name>
+<name>
 POP3 fetch tunneled through HTTP proxy
- </name>
- <command>
-pop3://pop.1319:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
+</name>
+<command>
+pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:
-</strip>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret
-RETR 1319
+RETR %TESTNUMBER
 QUIT
 </protocol>
-<proxy>
-CONNECT pop.1319:%POP3PORT HTTP/1.1
-Host: pop.1319:%POP3PORT
-User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
+<proxy crlf="headers">
+CONNECT pop.%TESTNUMBER:%POP3PORT HTTP/1.1
+Host: pop.%TESTNUMBER:%POP3PORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>

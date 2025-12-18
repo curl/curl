@@ -1,0 +1,29 @@
+<testcase>
+<info>
+<keywords>
+multi
+wakeup
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<features>
+wakeup
+</features>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+wakeup before poll with no easy handles
+</name>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

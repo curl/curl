@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
-HTTP GET
+HTTP PUT
 HTTP CONNECT
 HTTP proxy
 proxytunnel
@@ -12,25 +12,27 @@ CURLOPT_PROXYHEADER
 
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 
 </connect>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
+
 </data>
 <datacheck>
 HTTP/1.1 200 OK
 
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
+
 </datacheck>
 
 </reply>
@@ -41,32 +43,34 @@ http
 http-proxy
 </server>
 <tool>
-lib1525
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 CURLOPT_PROXYHEADER is ignored CURLHEADER_UNIFIED
- </name>
- <command>
- http://the.old.moo.1525:%HTTPPORT/1525 %HOSTIP:%PROXYPORT
+</name>
+<command>
+ http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
-CONNECT the.old.moo.1525:%HTTPPORT HTTP/1.1
-Host: the.old.moo.1525:%HTTPPORT
+<proxy crlf="headers">
+CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive
 User-Agent: Http Agent
 
 </proxy>
-<protocol>
-PUT /1525 HTTP/1.1
-Host: the.old.moo.1525:%HTTPPORT
+<protocol crlf="headers">
+PUT /%TESTNUMBER HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Accept: */*
 User-Agent: Http Agent
 Content-Length: 13
-Expect: 100-continue
 
 Hello Cloud!
 </protocol>

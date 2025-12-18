@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+warn about Unicode quote character read from config file
+</name>
+<file name="%LOGDIR/input%TESTNUMBER">
+-H %hex[%e2%80%9c]hex%host:fake%hex[%e2%80%9d]hex%
+</file>
+<command>
+%HOSTIP:%HTTPPORT --no-progress-meter -K "%LOGDIR/input%TESTNUMBER"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+%hex[Warning: The argument '%e2%80%9chost:fake%e2%80%9d' starts with a Unicode character. Maybe ]hex%
+Warning: ASCII was intended?
+</stderr>
+</verify>
+</testcase>

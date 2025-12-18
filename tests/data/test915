@@ -16,31 +16,31 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP without --mail-from
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 From: different
 To: another
 
 body
 </stdin>
- <command>
-smtp://%HOSTIP:%SMTPPORT/915 --mail-rcpt recipient@example.com -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 915
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 MAIL FROM:<>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

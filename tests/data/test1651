@@ -9,18 +9,18 @@ x509
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 x509 parsing
- </name>
-<tool>
-unit1651
-</tool>
-</client>
+</name>
 
+<verify>
+<limits>
+Allocations: 14000
+</limits>
+</verify>
+
+</client>
 </testcase>

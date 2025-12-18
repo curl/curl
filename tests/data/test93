@@ -25,23 +25,24 @@ bing
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with failed proxy auth
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/93 -x %HOSTIP:%HTTPPORT
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://%HOSTIP:%HTTPPORT/93 HTTP/1.1
+<protocol crlf="headers">
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

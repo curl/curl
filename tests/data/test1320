@@ -11,7 +11,7 @@ HTTP proxy
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 smtp: sure hit me
 
@@ -27,45 +27,43 @@ http-proxy
 </server>
 <features>
 http
+proxy
 </features>
- <name>
+<name>
 SMTP send tunneled through HTTP proxy
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 From: different
 To: another
 
 body
 </stdin>
- <command>
-smtp://smtp.1320:%SMTPPORT/1320 --mail-rcpt recipient@example.com --mail-from sender@example.com -T - -p -x %HOSTIP:%PROXYPORT
+<command>
+smtp://smtp.%TESTNUMBER:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T - -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol>
-EHLO 1320
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 
 body
 .
 </upload>
-<proxy>
-CONNECT smtp.1320:%SMTPPORT HTTP/1.1
-Host: smtp.1320:%SMTPPORT
-User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
+<proxy crlf="headers">
+CONNECT smtp.%TESTNUMBER:%SMTPPORT HTTP/1.1
+Host: smtp.%TESTNUMBER:%SMTPPORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>

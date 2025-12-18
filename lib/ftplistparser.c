@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -44,17 +46,15 @@
 #include "urldata.h"
 #include "fileinfo.h"
 #include "llist.h"
-#include "strtoofft.h"
 #include "ftp.h"
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
-#include "curl_memory.h"
 #include "multiif.h"
-/* The last #include file should be: */
-#include "memdebug.h"
+#include "curlx/strparse.h"
 
-/* allocs buffer which will contain one line of LIST command response */
-#define FTP_BUFFER_ALLOCSIZE 160
+/* The last 2 #include files should be in this order */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 typedef enum {
   PL_UNIX_TOTALSIZE = 0,
@@ -179,6 +179,43 @@ struct ftp_parselist_data {
   } offsets;
 };
 
+static void fileinfo_dtor(void *user, void *element)
+{
+  (void)user;
+  Curl_fileinfo_cleanup(element);
+}
+
+CURLcode Curl_wildcard_init(struct WildcardData *wc)
+{
+  Curl_llist_init(&wc->filelist, fileinfo_dtor);
+  wc->state = CURLWC_INIT;
+
+  return CURLE_OK;
+}
+
+void Curl_wildcard_dtor(struct WildcardData **wcp)
+{
+  struct WildcardData *wc = *wcp;
+  if(!wc)
+    return;
+
+  if(wc->dtor) {
+    wc->dtor(wc->ftpwc);
+    wc->dtor = ZERO_NULL;
+    wc->ftpwc = NULL;
+  }
+  DEBUGASSERT(wc->ftpwc == NULL);
+
+  Curl_llist_destroy(&wc->filelist, NULL);
+  free(wc->path);
+  wc->path = NULL;
+  free(wc->pattern);
+  wc->pattern = NULL;
+  wc->state = CURLWC_INIT;
+  free(wc);
+  *wcp = NULL;
+}
+
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 {
   return calloc(1, sizeof(struct ftp_parselist_data));
@@ -203,9 +240,9 @@ CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data)
 
 #define FTP_LP_MALFORMATED_PERM 0x01000000
 
-static int ftp_pl_get_permission(const char *str)
+static unsigned int ftp_pl_get_permission(const char *str)
 {
-  int permissions = 0;
+  unsigned int permissions = 0;
   /* USER */
   if(str[0] == 'r')
     permissions |= 1 << 8;
@@ -268,19 +305,19 @@ static int ftp_pl_get_permission(const char *str)
   return permissions;
 }
 
-static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
+static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                                     struct fileinfo *infop)
 {
   curl_fnmatch_callback compare;
-  struct WildcardData *wc = &conn->data->wildcard;
-  struct ftp_wc *ftpwc = wc->protdata;
-  struct curl_llist *llist = &wc->filelist;
+  struct WildcardData *wc = data->wildcard;
+  struct ftp_wc *ftpwc = wc->ftpwc;
+  struct Curl_llist *llist = &wc->filelist;
   struct ftp_parselist_data *parser = ftpwc->parser;
   bool add = TRUE;
   struct curl_fileinfo *finfo = &infop->info;
 
-  /* move finfo pointers to b_data */
-  char *str = finfo->b_data;
+  /* set the finfo pointers */
+  char *str = curlx_dyn_ptr(&infop->buf);
   finfo->filename       = str + parser->offsets.filename;
   finfo->strings.group  = parser->offsets.group ?
                           str + parser->offsets.group : NULL;
@@ -293,13 +330,13 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
                           str + parser->offsets.user : NULL;
 
   /* get correct fnmatch callback */
-  compare = conn->data->set.fnmatch;
+  compare = data->set.fnmatch;
   if(!compare)
     compare = Curl_fnmatch;
 
   /* filter pattern-corresponding filenames */
-  Curl_set_in_callback(conn->data, true);
-  if(compare(conn->data->set.fnmatch_data, wc->pattern,
+  Curl_set_in_callback(data, TRUE);
+  if(compare(data->set.fnmatch_data, wc->pattern,
              finfo->filename) == 0) {
     /* discard symlink which is containing multiple " -> " */
     if((finfo->filetype == CURLFILETYPE_SYMLINK) && finfo->strings.target &&
@@ -310,10 +347,10 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   else {
     add = FALSE;
   }
-  Curl_set_in_callback(conn->data, false);
+  Curl_set_in_callback(data, FALSE);
 
   if(add) {
-    Curl_llist_insert_next(llist, llist->tail, finfo, &infop->list);
+    Curl_llist_append(llist, finfo, &infop->list);
   }
   else {
     Curl_fileinfo_cleanup(infop);
@@ -323,16 +360,677 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#define MAX_FTPLIST_BUFFER 10000 /* arbitrarily set */
+
+static CURLcode unix_filetype(const char c, curlfiletype *t)
+{
+  switch(c) {
+  case '-':
+    *t = CURLFILETYPE_FILE;
+    break;
+  case 'd':
+    *t = CURLFILETYPE_DIRECTORY;
+    break;
+  case 'l':
+    *t = CURLFILETYPE_SYMLINK;
+    break;
+  case 'p':
+    *t = CURLFILETYPE_NAMEDPIPE;
+    break;
+  case 's':
+    *t = CURLFILETYPE_SOCKET;
+    break;
+  case 'c':
+    *t = CURLFILETYPE_DEVICE_CHAR;
+    break;
+  case 'b':
+    *t = CURLFILETYPE_DEVICE_BLOCK;
+    break;
+  case 'D':
+    *t = CURLFILETYPE_DOOR;
+    break;
+  default:
+    return CURLE_FTP_BAD_FILE_LIST;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_totalsize(struct ftp_parselist_data *parser,
+                                     struct fileinfo *infop,
+                                     const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  switch(parser->state.UNIX.sub.total_dirsize) {
+  case PL_UNIX_TOTALSIZE_INIT:
+    if(c == 't') {
+      parser->state.UNIX.sub.total_dirsize = PL_UNIX_TOTALSIZE_READING;
+      parser->item_length++;
+    }
+    else {
+      parser->state.UNIX.main = PL_UNIX_FILETYPE;
+      /* continue to fall through */
+    }
+    break;
+  case PL_UNIX_TOTALSIZE_READING:
+    parser->item_length++;
+    if(c == '\r') {
+      parser->item_length--;
+      if(len)
+        curlx_dyn_setlen(&infop->buf, --len);
+    }
+    else if(c == '\n') {
+      mem[parser->item_length - 1] = 0;
+      if(!strncmp("total ", mem, 6)) {
+        const char *endptr = mem + 6;
+        /* here we can deal with directory size, pass the leading
+           whitespace and then the digits */
+        curlx_str_passblanks(&endptr);
+        while(ISDIGIT(*endptr))
+          endptr++;
+        if(*endptr) {
+          return CURLE_FTP_BAD_FILE_LIST;
+        }
+        parser->state.UNIX.main = PL_UNIX_FILETYPE;
+        curlx_dyn_reset(&infop->buf);
+      }
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+
+    }
+    break;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_permission(struct ftp_parselist_data *parser,
+                                      struct fileinfo *infop,
+                                      const char c)
+{
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  parser->item_length++;
+  if((parser->item_length <= 9) && !strchr("rwx-tTsS", c))
+    return CURLE_FTP_BAD_FILE_LIST;
+
+  else if(parser->item_length == 10) {
+    unsigned int perm;
+    if(c != ' ')
+      return CURLE_FTP_BAD_FILE_LIST;
+
+    mem[10] = 0; /* terminate permissions */
+    perm = ftp_pl_get_permission(mem + parser->item_offset);
+    if(perm & FTP_LP_MALFORMATED_PERM)
+      return CURLE_FTP_BAD_FILE_LIST;
+
+    parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_PERM;
+    parser->file_data->info.perm = perm;
+    parser->offsets.perm = parser->item_offset;
+
+    parser->item_length = 0;
+    parser->state.UNIX.main = PL_UNIX_HLINKS;
+    parser->state.UNIX.sub.hlinks = PL_UNIX_HLINKS_PRESPACE;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_hlinks(struct ftp_parselist_data *parser,
+                                  struct fileinfo *infop,
+                                  const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+
+  switch(parser->state.UNIX.sub.hlinks) {
+  case PL_UNIX_HLINKS_PRESPACE:
+    if(c != ' ') {
+      if(ISDIGIT(c) && len) {
+        parser->item_offset = len - 1;
+        parser->item_length = 1;
+        parser->state.UNIX.sub.hlinks = PL_UNIX_HLINKS_NUMBER;
+      }
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+    }
+    break;
+  case PL_UNIX_HLINKS_NUMBER:
+    parser->item_length ++;
+    if(c == ' ') {
+      const char *p = &mem[parser->item_offset];
+      curl_off_t hlinks;
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+
+      if(!curlx_str_number(&p, &hlinks, LONG_MAX)) {
+        parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_HLINKCOUNT;
+        parser->file_data->info.hardlinks = (long)hlinks;
+      }
+      parser->item_length = 0;
+      parser->item_offset = 0;
+      parser->state.UNIX.main = PL_UNIX_USER;
+      parser->state.UNIX.sub.user = PL_UNIX_USER_PRESPACE;
+    }
+    else if(!ISDIGIT(c))
+      return CURLE_FTP_BAD_FILE_LIST;
+
+    break;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_user(struct ftp_parselist_data *parser,
+                                struct fileinfo *infop,
+                                const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  switch(parser->state.UNIX.sub.user) {
+  case PL_UNIX_USER_PRESPACE:
+    if(c != ' ' && len) {
+      parser->item_offset = len - 1;
+      parser->item_length = 1;
+      parser->state.UNIX.sub.user = PL_UNIX_USER_PARSING;
+    }
+    break;
+  case PL_UNIX_USER_PARSING:
+    parser->item_length++;
+    if(c == ' ') {
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+      parser->offsets.user = parser->item_offset;
+      parser->state.UNIX.main = PL_UNIX_GROUP;
+      parser->state.UNIX.sub.group = PL_UNIX_GROUP_PRESPACE;
+      parser->item_offset = 0;
+      parser->item_length = 0;
+    }
+    break;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_group(struct ftp_parselist_data *parser,
+                                 struct fileinfo *infop,
+                                 const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  switch(parser->state.UNIX.sub.group) {
+  case PL_UNIX_GROUP_PRESPACE:
+    if(c != ' ' && len) {
+      parser->item_offset = len - 1;
+      parser->item_length = 1;
+      parser->state.UNIX.sub.group = PL_UNIX_GROUP_NAME;
+    }
+    break;
+  case PL_UNIX_GROUP_NAME:
+    parser->item_length++;
+    if(c == ' ') {
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+      parser->offsets.group = parser->item_offset;
+      parser->state.UNIX.main = PL_UNIX_SIZE;
+      parser->state.UNIX.sub.size = PL_UNIX_SIZE_PRESPACE;
+      parser->item_offset = 0;
+      parser->item_length = 0;
+    }
+    break;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_size(struct ftp_parselist_data *parser,
+                                struct fileinfo *infop,
+                                const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  switch(parser->state.UNIX.sub.size) {
+  case PL_UNIX_SIZE_PRESPACE:
+    if(c != ' ') {
+      if(ISDIGIT(c) && len) {
+        parser->item_offset = len - 1;
+        parser->item_length = 1;
+        parser->state.UNIX.sub.size = PL_UNIX_SIZE_NUMBER;
+      }
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+    }
+    break;
+  case PL_UNIX_SIZE_NUMBER:
+    parser->item_length++;
+    if(c == ' ') {
+      const char *p = mem + parser->item_offset;
+      curl_off_t fsize;
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+      if(!curlx_str_numblanks(&p, &fsize)) {
+        if(p[0] == '\0' && fsize != CURL_OFF_T_MAX) {
+          parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
+          parser->file_data->info.size = fsize;
+        }
+        parser->item_length = 0;
+        parser->item_offset = 0;
+        parser->state.UNIX.main = PL_UNIX_TIME;
+        parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART1;
+      }
+    }
+    else if(!ISDIGIT(c))
+      return CURLE_FTP_BAD_FILE_LIST;
+
+    break;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_time(struct ftp_parselist_data *parser,
+                                struct fileinfo *infop,
+                                const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  struct curl_fileinfo *finfo = &infop->info;
+
+  switch(parser->state.UNIX.sub.time) {
+  case PL_UNIX_TIME_PREPART1:
+    if(c != ' ') {
+      if(ISALNUM(c) && len) {
+        parser->item_offset = len -1;
+        parser->item_length = 1;
+        parser->state.UNIX.sub.time = PL_UNIX_TIME_PART1;
+      }
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+    }
+    break;
+  case PL_UNIX_TIME_PART1:
+    parser->item_length++;
+    if(c == ' ')
+      parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART2;
+
+    else if(!ISALNUM(c) && c != '.')
+      return CURLE_FTP_BAD_FILE_LIST;
+
+    break;
+  case PL_UNIX_TIME_PREPART2:
+    parser->item_length++;
+    if(c != ' ') {
+      if(ISALNUM(c))
+        parser->state.UNIX.sub.time = PL_UNIX_TIME_PART2;
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+    }
+    break;
+  case PL_UNIX_TIME_PART2:
+    parser->item_length++;
+    if(c == ' ')
+      parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART3;
+    else if(!ISALNUM(c) && c != '.')
+      return CURLE_FTP_BAD_FILE_LIST;
+    break;
+  case PL_UNIX_TIME_PREPART3:
+    parser->item_length++;
+    if(c != ' ') {
+      if(ISALNUM(c))
+        parser->state.UNIX.sub.time = PL_UNIX_TIME_PART3;
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+    }
+    break;
+  case PL_UNIX_TIME_PART3:
+    parser->item_length++;
+    if(c == ' ') {
+      mem[parser->item_offset + parser->item_length -1] = 0;
+      parser->offsets.time = parser->item_offset;
+      if(finfo->filetype == CURLFILETYPE_SYMLINK) {
+        parser->state.UNIX.main = PL_UNIX_SYMLINK;
+        parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRESPACE;
+      }
+      else {
+        parser->state.UNIX.main = PL_UNIX_FILENAME;
+        parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_PRESPACE;
+      }
+    }
+    else if(!ISALNUM(c) && c != '.' && c != ':')
+      return CURLE_FTP_BAD_FILE_LIST;
+    break;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode parse_unix_filename(struct Curl_easy *data,
+                                    struct ftp_parselist_data *parser,
+                                    struct fileinfo *infop,
+                                    const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  CURLcode result = CURLE_OK;
+
+  switch(parser->state.UNIX.sub.filename) {
+  case PL_UNIX_FILENAME_PRESPACE:
+    if(c != ' ' && len) {
+      parser->item_offset = len - 1;
+      parser->item_length = 1;
+      parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_NAME;
+    }
+    break;
+  case PL_UNIX_FILENAME_NAME:
+    parser->item_length++;
+    if(c == '\r')
+      parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_WINDOWSEOL;
+
+    else if(c == '\n') {
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+      parser->offsets.filename = parser->item_offset;
+      parser->state.UNIX.main = PL_UNIX_FILETYPE;
+      result = ftp_pl_insert_finfo(data, infop);
+    }
+    break;
+  case PL_UNIX_FILENAME_WINDOWSEOL:
+    if(c == '\n') {
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+      parser->offsets.filename = parser->item_offset;
+      parser->state.UNIX.main = PL_UNIX_FILETYPE;
+      result = ftp_pl_insert_finfo(data, infop);
+    }
+    else
+      result = CURLE_FTP_BAD_FILE_LIST;
+    break;
+  }
+  return result;
+}
+
+static CURLcode parse_unix_symlink(struct Curl_easy *data,
+                                   struct ftp_parselist_data *parser,
+                                   struct fileinfo *infop,
+                                   const char c)
+{
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  CURLcode result = CURLE_OK;
+
+  switch(parser->state.UNIX.sub.symlink) {
+  case PL_UNIX_SYMLINK_PRESPACE:
+    if(c != ' ' && len) {
+      parser->item_offset = len - 1;
+      parser->item_length = 1;
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
+    }
+    break;
+  case PL_UNIX_SYMLINK_NAME:
+    parser->item_length++;
+    if(c == ' ')
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET1;
+
+    else if(c == '\r' || c == '\n')
+      return CURLE_FTP_BAD_FILE_LIST;
+
+    break;
+  case PL_UNIX_SYMLINK_PRETARGET1:
+    parser->item_length++;
+    if(c == '-')
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET2;
+
+    else if(c == '\r' || c == '\n')
+      return CURLE_FTP_BAD_FILE_LIST;
+    else
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
+    break;
+  case PL_UNIX_SYMLINK_PRETARGET2:
+    parser->item_length++;
+    if(c == '>')
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET3;
+    else if(c == '\r' || c == '\n')
+      return CURLE_FTP_BAD_FILE_LIST;
+    else
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
+
+    break;
+  case PL_UNIX_SYMLINK_PRETARGET3:
+    parser->item_length++;
+    if(c == ' ') {
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET4;
+      /* now place where is symlink following */
+      mem[parser->item_offset + parser->item_length - 4] = 0;
+      parser->offsets.filename = parser->item_offset;
+      parser->item_length = 0;
+      parser->item_offset = 0;
+    }
+    else if(c == '\r' || c == '\n')
+      return CURLE_FTP_BAD_FILE_LIST;
+    else
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
+    break;
+  case PL_UNIX_SYMLINK_PRETARGET4:
+    if(c != '\r' && c != '\n' && len) {
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_TARGET;
+      parser->item_offset = len - 1;
+      parser->item_length = 1;
+    }
+    else
+      return CURLE_FTP_BAD_FILE_LIST;
+
+    break;
+  case PL_UNIX_SYMLINK_TARGET:
+    parser->item_length++;
+    if(c == '\r')
+      parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_WINDOWSEOL;
+
+    else if(c == '\n') {
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+      parser->offsets.symlink_target = parser->item_offset;
+      result = ftp_pl_insert_finfo(data, infop);
+      if(result)
+        break;
+
+      parser->state.UNIX.main = PL_UNIX_FILETYPE;
+    }
+    break;
+  case PL_UNIX_SYMLINK_WINDOWSEOL:
+    if(c == '\n') {
+      mem[parser->item_offset + parser->item_length - 1] = 0;
+      parser->offsets.symlink_target = parser->item_offset;
+      result = ftp_pl_insert_finfo(data, infop);
+      if(result)
+        break;
+
+      parser->state.UNIX.main = PL_UNIX_FILETYPE;
+    }
+    else
+      result = CURLE_FTP_BAD_FILE_LIST;
+
+    break;
+  }
+  return result;
+}
+
+static CURLcode parse_unix(struct Curl_easy *data,
+                           struct ftp_parselist_data *parser,
+                           struct fileinfo *infop,
+                           const char c)
+{
+  struct curl_fileinfo *finfo = &infop->info;
+  CURLcode result = CURLE_OK;
+
+  switch(parser->state.UNIX.main) {
+  case PL_UNIX_TOTALSIZE:
+    result = parse_unix_totalsize(parser, infop, c);
+    if(result)
+      break;
+    if(parser->state.UNIX.main != PL_UNIX_FILETYPE)
+      break;
+    FALLTHROUGH();
+  case PL_UNIX_FILETYPE:
+    result = unix_filetype(c, &finfo->filetype);
+    if(!result) {
+      parser->state.UNIX.main = PL_UNIX_PERMISSION;
+      parser->item_length = 0;
+      parser->item_offset = 1;
+    }
+    break;
+  case PL_UNIX_PERMISSION:
+    result = parse_unix_permission(parser, infop, c);
+    break;
+  case PL_UNIX_HLINKS:
+    result = parse_unix_hlinks(parser, infop, c);
+    break;
+  case PL_UNIX_USER:
+    result = parse_unix_user(parser, infop, c);
+    break;
+  case PL_UNIX_GROUP:
+    result = parse_unix_group(parser, infop, c);
+    break;
+  case PL_UNIX_SIZE:
+    result = parse_unix_size(parser, infop, c);
+    break;
+  case PL_UNIX_TIME:
+    result = parse_unix_time(parser, infop, c);
+    break;
+  case PL_UNIX_FILENAME:
+    result = parse_unix_filename(data, parser, infop, c);
+    break;
+  case PL_UNIX_SYMLINK:
+    result = parse_unix_symlink(data, parser, infop, c);
+    break;
+  }
+  return result;
+}
+
+static CURLcode parse_winnt(struct Curl_easy *data,
+                            struct ftp_parselist_data *parser,
+                            struct fileinfo *infop,
+                            const char c)
+{
+  struct curl_fileinfo *finfo = &infop->info;
+  size_t len = curlx_dyn_len(&infop->buf);
+  char *mem = curlx_dyn_ptr(&infop->buf);
+  CURLcode result = CURLE_OK;
+
+  switch(parser->state.NT.main) {
+  case PL_WINNT_DATE:
+    parser->item_length++;
+    if(parser->item_length < 9) {
+      if(!strchr("0123456789-", c)) { /* only simple control */
+        return CURLE_FTP_BAD_FILE_LIST;
+      }
+    }
+    else if(parser->item_length == 9) {
+      if(c == ' ') {
+        parser->state.NT.main = PL_WINNT_TIME;
+        parser->state.NT.sub.time = PL_WINNT_TIME_PRESPACE;
+      }
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+    }
+    else
+      return CURLE_FTP_BAD_FILE_LIST;
+    break;
+  case PL_WINNT_TIME:
+    parser->item_length++;
+    switch(parser->state.NT.sub.time) {
+    case PL_WINNT_TIME_PRESPACE:
+      if(!ISBLANK(c))
+        parser->state.NT.sub.time = PL_WINNT_TIME_TIME;
+      break;
+    case PL_WINNT_TIME_TIME:
+      if(c == ' ') {
+        parser->offsets.time = parser->item_offset;
+        mem[parser->item_offset + parser->item_length -1] = 0;
+        parser->state.NT.main = PL_WINNT_DIRORSIZE;
+        parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_PRESPACE;
+        parser->item_length = 0;
+      }
+      else if(!strchr("APM0123456789:", c))
+        return CURLE_FTP_BAD_FILE_LIST;
+      break;
+    }
+    break;
+  case PL_WINNT_DIRORSIZE:
+    switch(parser->state.NT.sub.dirorsize) {
+    case PL_WINNT_DIRORSIZE_PRESPACE:
+      if(c != ' ' && len) {
+        parser->item_offset = len - 1;
+        parser->item_length = 1;
+        parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_CONTENT;
+      }
+      break;
+    case PL_WINNT_DIRORSIZE_CONTENT:
+      parser->item_length ++;
+      if(c == ' ') {
+        mem[parser->item_offset + parser->item_length - 1] = 0;
+        if(strcmp("<DIR>", mem + parser->item_offset) == 0) {
+          finfo->filetype = CURLFILETYPE_DIRECTORY;
+          finfo->size = 0;
+        }
+        else {
+          const char *p = mem + parser->item_offset;
+          if(curlx_str_numblanks(&p, &finfo->size)) {
+            return CURLE_FTP_BAD_FILE_LIST;
+          }
+          /* correct file type */
+          parser->file_data->info.filetype = CURLFILETYPE_FILE;
+        }
+
+        parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
+        parser->item_length = 0;
+        parser->state.NT.main = PL_WINNT_FILENAME;
+        parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
+      }
+      break;
+    }
+    break;
+  case PL_WINNT_FILENAME:
+    switch(parser->state.NT.sub.filename) {
+    case PL_WINNT_FILENAME_PRESPACE:
+      if(c != ' ' && len) {
+        parser->item_offset = len -1;
+        parser->item_length = 1;
+        parser->state.NT.sub.filename = PL_WINNT_FILENAME_CONTENT;
+      }
+      break;
+    case PL_WINNT_FILENAME_CONTENT:
+      parser->item_length++;
+      if(!len)
+        return CURLE_FTP_BAD_FILE_LIST;
+      if(c == '\r') {
+        parser->state.NT.sub.filename = PL_WINNT_FILENAME_WINEOL;
+        mem[len - 1] = 0;
+      }
+      else if(c == '\n') {
+        parser->offsets.filename = parser->item_offset;
+        mem[len - 1] = 0;
+        result = ftp_pl_insert_finfo(data, infop);
+        if(result)
+          return result;
+
+        parser->state.NT.main = PL_WINNT_DATE;
+        parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
+      }
+      break;
+    case PL_WINNT_FILENAME_WINEOL:
+      if(c == '\n') {
+        parser->offsets.filename = parser->item_offset;
+        result = ftp_pl_insert_finfo(data, infop);
+        if(result)
+          return result;
+
+        parser->state.NT.main = PL_WINNT_DATE;
+        parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
+      }
+      else
+        return CURLE_FTP_BAD_FILE_LIST;
+
+      break;
+    }
+    break;
+  }
+
+  return CURLE_OK;
+}
+
 size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                           void *connptr)
 {
   size_t bufflen = size*nmemb;
-  struct connectdata *conn = (struct connectdata *)connptr;
-  struct ftp_wc *ftpwc = conn->data->wildcard.protdata;
+  struct Curl_easy *data = (struct Curl_easy *)connptr;
+  struct ftp_wc *ftpwc = data->wildcard->ftpwc;
   struct ftp_parselist_data *parser = ftpwc->parser;
-  struct fileinfo *infop;
-  struct curl_fileinfo *finfo;
-  unsigned long i = 0;
+  size_t i = 0;
   CURLcode result;
   size_t retsize = bufflen;
 
@@ -340,7 +1038,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
     /* scenario:
      * 1. call => OK..
      * 2. call => OUT_OF_MEMORY (or other error)
-     * 3. (last) call => is skipped RIGHT HERE and the error is hadled later
+     * 3. (last) call => is skipped RIGHT HERE and the error is handled later
      *    in wc_statemach()
      */
     goto fail;
@@ -348,656 +1046,43 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
 
   if(parser->os_type == OS_TYPE_UNKNOWN && bufflen > 0) {
     /* considering info about FILE response format */
-    parser->os_type = (buffer[0] >= '0' && buffer[0] <= '9') ?
-                       OS_TYPE_WIN_NT : OS_TYPE_UNIX;
+    parser->os_type = ISDIGIT(buffer[0]) ? OS_TYPE_WIN_NT : OS_TYPE_UNIX;
   }
 
   while(i < bufflen) { /* FSM */
-
     char c = buffer[i];
+    struct fileinfo *infop;
     if(!parser->file_data) { /* tmp file data is not allocated yet */
       parser->file_data = Curl_fileinfo_alloc();
       if(!parser->file_data) {
         parser->error = CURLE_OUT_OF_MEMORY;
         goto fail;
       }
-      parser->file_data->info.b_data = malloc(FTP_BUFFER_ALLOCSIZE);
-      if(!parser->file_data->info.b_data) {
-        parser->error = CURLE_OUT_OF_MEMORY;
-        goto fail;
-      }
-      parser->file_data->info.b_size = FTP_BUFFER_ALLOCSIZE;
       parser->item_offset = 0;
       parser->item_length = 0;
+      curlx_dyn_init(&parser->file_data->buf, MAX_FTPLIST_BUFFER);
     }
 
     infop = parser->file_data;
-    finfo = &infop->info;
-    finfo->b_data[finfo->b_used++] = c;
 
-    if(finfo->b_used >= finfo->b_size - 1) {
-      /* if it is important, extend buffer space for file data */
-      char *tmp = realloc(finfo->b_data,
-                          finfo->b_size + FTP_BUFFER_ALLOCSIZE);
-      if(tmp) {
-        finfo->b_size += FTP_BUFFER_ALLOCSIZE;
-        finfo->b_data = tmp;
-      }
-      else {
-        Curl_fileinfo_cleanup(parser->file_data);
-        parser->file_data = NULL;
-        parser->error = CURLE_OUT_OF_MEMORY;
-        goto fail;
-      }
+    if(curlx_dyn_addn(&infop->buf, &c, 1)) {
+      parser->error = CURLE_OUT_OF_MEMORY;
+      goto fail;
     }
 
     switch(parser->os_type) {
     case OS_TYPE_UNIX:
-      switch(parser->state.UNIX.main) {
-      case PL_UNIX_TOTALSIZE:
-        switch(parser->state.UNIX.sub.total_dirsize) {
-        case PL_UNIX_TOTALSIZE_INIT:
-          if(c == 't') {
-            parser->state.UNIX.sub.total_dirsize = PL_UNIX_TOTALSIZE_READING;
-            parser->item_length++;
-          }
-          else {
-            parser->state.UNIX.main = PL_UNIX_FILETYPE;
-            /* start FSM again not considering size of directory */
-            finfo->b_used = 0;
-            continue;
-          }
-          break;
-        case PL_UNIX_TOTALSIZE_READING:
-          parser->item_length++;
-          if(c == '\r') {
-            parser->item_length--;
-            finfo->b_used--;
-          }
-          else if(c == '\n') {
-            finfo->b_data[parser->item_length - 1] = 0;
-            if(strncmp("total ", finfo->b_data, 6) == 0) {
-              char *endptr = finfo->b_data + 6;
-              /* here we can deal with directory size, pass the leading white
-                 spaces and then the digits */
-              while(ISSPACE(*endptr))
-                endptr++;
-              while(ISDIGIT(*endptr))
-                endptr++;
-              if(*endptr != 0) {
-                parser->error = CURLE_FTP_BAD_FILE_LIST;
-                goto fail;
-              }
-              parser->state.UNIX.main = PL_UNIX_FILETYPE;
-              finfo->b_used = 0;
-            }
-            else {
-              parser->error = CURLE_FTP_BAD_FILE_LIST;
-              goto fail;
-            }
-          }
-          break;
-        }
-        break;
-      case PL_UNIX_FILETYPE:
-        switch(c) {
-        case '-':
-          finfo->filetype = CURLFILETYPE_FILE;
-          break;
-        case 'd':
-          finfo->filetype = CURLFILETYPE_DIRECTORY;
-          break;
-        case 'l':
-          finfo->filetype = CURLFILETYPE_SYMLINK;
-          break;
-        case 'p':
-          finfo->filetype = CURLFILETYPE_NAMEDPIPE;
-          break;
-        case 's':
-          finfo->filetype = CURLFILETYPE_SOCKET;
-          break;
-        case 'c':
-          finfo->filetype = CURLFILETYPE_DEVICE_CHAR;
-          break;
-        case 'b':
-          finfo->filetype = CURLFILETYPE_DEVICE_BLOCK;
-          break;
-        case 'D':
-          finfo->filetype = CURLFILETYPE_DOOR;
-          break;
-        default:
-          parser->error = CURLE_FTP_BAD_FILE_LIST;
-          goto fail;
-        }
-        parser->state.UNIX.main = PL_UNIX_PERMISSION;
-        parser->item_length = 0;
-        parser->item_offset = 1;
-        break;
-      case PL_UNIX_PERMISSION:
-        parser->item_length++;
-        if(parser->item_length <= 9) {
-          if(!strchr("rwx-tTsS", c)) {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-        }
-        else if(parser->item_length == 10) {
-          unsigned int perm;
-          if(c != ' ') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          finfo->b_data[10] = 0; /* terminate permissions */
-          perm = ftp_pl_get_permission(finfo->b_data + parser->item_offset);
-          if(perm & FTP_LP_MALFORMATED_PERM) {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_PERM;
-          parser->file_data->info.perm = perm;
-          parser->offsets.perm = parser->item_offset;
-
-          parser->item_length = 0;
-          parser->state.UNIX.main = PL_UNIX_HLINKS;
-          parser->state.UNIX.sub.hlinks = PL_UNIX_HLINKS_PRESPACE;
-        }
-        break;
-      case PL_UNIX_HLINKS:
-        switch(parser->state.UNIX.sub.hlinks) {
-        case PL_UNIX_HLINKS_PRESPACE:
-          if(c != ' ') {
-            if(c >= '0' && c <= '9') {
-              parser->item_offset = finfo->b_used - 1;
-              parser->item_length = 1;
-              parser->state.UNIX.sub.hlinks = PL_UNIX_HLINKS_NUMBER;
-            }
-            else {
-              parser->error = CURLE_FTP_BAD_FILE_LIST;
-              goto fail;
-            }
-          }
-          break;
-        case PL_UNIX_HLINKS_NUMBER:
-          parser->item_length ++;
-          if(c == ' ') {
-            char *p;
-            long int hlinks;
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            hlinks = strtol(finfo->b_data + parser->item_offset, &p, 10);
-            if(p[0] == '\0' && hlinks != LONG_MAX && hlinks != LONG_MIN) {
-              parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_HLINKCOUNT;
-              parser->file_data->info.hardlinks = hlinks;
-            }
-            parser->item_length = 0;
-            parser->item_offset = 0;
-            parser->state.UNIX.main = PL_UNIX_USER;
-            parser->state.UNIX.sub.user = PL_UNIX_USER_PRESPACE;
-          }
-          else if(c < '0' || c > '9') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        }
-        break;
-      case PL_UNIX_USER:
-        switch(parser->state.UNIX.sub.user) {
-        case PL_UNIX_USER_PRESPACE:
-          if(c != ' ') {
-            parser->item_offset = finfo->b_used - 1;
-            parser->item_length = 1;
-            parser->state.UNIX.sub.user = PL_UNIX_USER_PARSING;
-          }
-          break;
-        case PL_UNIX_USER_PARSING:
-          parser->item_length++;
-          if(c == ' ') {
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            parser->offsets.user = parser->item_offset;
-            parser->state.UNIX.main = PL_UNIX_GROUP;
-            parser->state.UNIX.sub.group = PL_UNIX_GROUP_PRESPACE;
-            parser->item_offset = 0;
-            parser->item_length = 0;
-          }
-          break;
-        }
-        break;
-      case PL_UNIX_GROUP:
-        switch(parser->state.UNIX.sub.group) {
-        case PL_UNIX_GROUP_PRESPACE:
-          if(c != ' ') {
-            parser->item_offset = finfo->b_used - 1;
-            parser->item_length = 1;
-            parser->state.UNIX.sub.group = PL_UNIX_GROUP_NAME;
-          }
-          break;
-        case PL_UNIX_GROUP_NAME:
-          parser->item_length++;
-          if(c == ' ') {
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            parser->offsets.group = parser->item_offset;
-            parser->state.UNIX.main = PL_UNIX_SIZE;
-            parser->state.UNIX.sub.size = PL_UNIX_SIZE_PRESPACE;
-            parser->item_offset = 0;
-            parser->item_length = 0;
-          }
-          break;
-        }
-        break;
-      case PL_UNIX_SIZE:
-        switch(parser->state.UNIX.sub.size) {
-        case PL_UNIX_SIZE_PRESPACE:
-          if(c != ' ') {
-            if(c >= '0' && c <= '9') {
-              parser->item_offset = finfo->b_used - 1;
-              parser->item_length = 1;
-              parser->state.UNIX.sub.size = PL_UNIX_SIZE_NUMBER;
-            }
-            else {
-              parser->error = CURLE_FTP_BAD_FILE_LIST;
-              goto fail;
-            }
-          }
-          break;
-        case PL_UNIX_SIZE_NUMBER:
-          parser->item_length++;
-          if(c == ' ') {
-            char *p;
-            curl_off_t fsize;
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            if(!curlx_strtoofft(finfo->b_data + parser->item_offset,
-                                &p, 10, &fsize)) {
-              if(p[0] == '\0' && fsize != CURL_OFF_T_MAX &&
-                 fsize != CURL_OFF_T_MIN) {
-                parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
-                parser->file_data->info.size = fsize;
-              }
-              parser->item_length = 0;
-              parser->item_offset = 0;
-              parser->state.UNIX.main = PL_UNIX_TIME;
-              parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART1;
-            }
-          }
-          else if(!ISDIGIT(c)) {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        }
-        break;
-      case PL_UNIX_TIME:
-        switch(parser->state.UNIX.sub.time) {
-        case PL_UNIX_TIME_PREPART1:
-          if(c != ' ') {
-            if(ISALNUM(c)) {
-              parser->item_offset = finfo->b_used -1;
-              parser->item_length = 1;
-              parser->state.UNIX.sub.time = PL_UNIX_TIME_PART1;
-            }
-            else {
-              parser->error = CURLE_FTP_BAD_FILE_LIST;
-              goto fail;
-            }
-          }
-          break;
-        case PL_UNIX_TIME_PART1:
-          parser->item_length++;
-          if(c == ' ') {
-            parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART2;
-          }
-          else if(!ISALNUM(c) && c != '.') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        case PL_UNIX_TIME_PREPART2:
-          parser->item_length++;
-          if(c != ' ') {
-            if(ISALNUM(c)) {
-              parser->state.UNIX.sub.time = PL_UNIX_TIME_PART2;
-            }
-            else {
-              parser->error = CURLE_FTP_BAD_FILE_LIST;
-              goto fail;
-            }
-          }
-          break;
-        case PL_UNIX_TIME_PART2:
-          parser->item_length++;
-          if(c == ' ') {
-            parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART3;
-          }
-          else if(!ISALNUM(c) && c != '.') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        case PL_UNIX_TIME_PREPART3:
-          parser->item_length++;
-          if(c != ' ') {
-            if(ISALNUM(c)) {
-              parser->state.UNIX.sub.time = PL_UNIX_TIME_PART3;
-            }
-            else {
-              parser->error = CURLE_FTP_BAD_FILE_LIST;
-              goto fail;
-            }
-          }
-          break;
-        case PL_UNIX_TIME_PART3:
-          parser->item_length++;
-          if(c == ' ') {
-            finfo->b_data[parser->item_offset + parser->item_length -1] = 0;
-            parser->offsets.time = parser->item_offset;
-            /*
-              if(ftp_pl_gettime(parser, finfo->b_data + parser->item_offset)) {
-                parser->file_data->flags |= CURLFINFOFLAG_KNOWN_TIME;
-              }
-            */
-            if(finfo->filetype == CURLFILETYPE_SYMLINK) {
-              parser->state.UNIX.main = PL_UNIX_SYMLINK;
-              parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRESPACE;
-            }
-            else {
-              parser->state.UNIX.main = PL_UNIX_FILENAME;
-              parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_PRESPACE;
-            }
-          }
-          else if(!ISALNUM(c) && c != '.' && c != ':') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        }
-        break;
-      case PL_UNIX_FILENAME:
-        switch(parser->state.UNIX.sub.filename) {
-        case PL_UNIX_FILENAME_PRESPACE:
-          if(c != ' ') {
-            parser->item_offset = finfo->b_used - 1;
-            parser->item_length = 1;
-            parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_NAME;
-          }
-          break;
-        case PL_UNIX_FILENAME_NAME:
-          parser->item_length++;
-          if(c == '\r') {
-            parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_WINDOWSEOL;
-          }
-          else if(c == '\n') {
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            parser->offsets.filename = parser->item_offset;
-            parser->state.UNIX.main = PL_UNIX_FILETYPE;
-            result = ftp_pl_insert_finfo(conn, infop);
-            if(result) {
-              parser->error = result;
-              goto fail;
-            }
-          }
-          break;
-        case PL_UNIX_FILENAME_WINDOWSEOL:
-          if(c == '\n') {
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            parser->offsets.filename = parser->item_offset;
-            parser->state.UNIX.main = PL_UNIX_FILETYPE;
-            result = ftp_pl_insert_finfo(conn, infop);
-            if(result) {
-              parser->error = result;
-              goto fail;
-            }
-          }
-          else {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        }
-        break;
-      case PL_UNIX_SYMLINK:
-        switch(parser->state.UNIX.sub.symlink) {
-        case PL_UNIX_SYMLINK_PRESPACE:
-          if(c != ' ') {
-            parser->item_offset = finfo->b_used - 1;
-            parser->item_length = 1;
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
-          }
-          break;
-        case PL_UNIX_SYMLINK_NAME:
-          parser->item_length++;
-          if(c == ' ') {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET1;
-          }
-          else if(c == '\r' || c == '\n') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        case PL_UNIX_SYMLINK_PRETARGET1:
-          parser->item_length++;
-          if(c == '-') {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET2;
-          }
-          else if(c == '\r' || c == '\n') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          else {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
-          }
-          break;
-        case PL_UNIX_SYMLINK_PRETARGET2:
-          parser->item_length++;
-          if(c == '>') {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET3;
-          }
-          else if(c == '\r' || c == '\n') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          else {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
-          }
-          break;
-        case PL_UNIX_SYMLINK_PRETARGET3:
-          parser->item_length++;
-          if(c == ' ') {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRETARGET4;
-            /* now place where is symlink following */
-            finfo->b_data[parser->item_offset + parser->item_length - 4] = 0;
-            parser->offsets.filename = parser->item_offset;
-            parser->item_length = 0;
-            parser->item_offset = 0;
-          }
-          else if(c == '\r' || c == '\n') {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          else {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
-          }
-          break;
-        case PL_UNIX_SYMLINK_PRETARGET4:
-          if(c != '\r' && c != '\n') {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_TARGET;
-            parser->item_offset = finfo->b_used - 1;
-            parser->item_length = 1;
-          }
-          else {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        case PL_UNIX_SYMLINK_TARGET:
-          parser->item_length++;
-          if(c == '\r') {
-            parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_WINDOWSEOL;
-          }
-          else if(c == '\n') {
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            parser->offsets.symlink_target = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
-            if(result) {
-              parser->error = result;
-              goto fail;
-            }
-            parser->state.UNIX.main = PL_UNIX_FILETYPE;
-          }
-          break;
-        case PL_UNIX_SYMLINK_WINDOWSEOL:
-          if(c == '\n') {
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            parser->offsets.symlink_target = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
-            if(result) {
-              parser->error = result;
-              goto fail;
-            }
-            parser->state.UNIX.main = PL_UNIX_FILETYPE;
-          }
-          else {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        }
-        break;
-      }
+      result = parse_unix(data, parser, infop, c);
       break;
     case OS_TYPE_WIN_NT:
-      switch(parser->state.NT.main) {
-      case PL_WINNT_DATE:
-        parser->item_length++;
-        if(parser->item_length < 9) {
-          if(!strchr("0123456789-", c)) { /* only simple control */
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-        }
-        else if(parser->item_length == 9) {
-          if(c == ' ') {
-            parser->state.NT.main = PL_WINNT_TIME;
-            parser->state.NT.sub.time = PL_WINNT_TIME_PRESPACE;
-          }
-          else {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-        }
-        else {
-          parser->error = CURLE_FTP_BAD_FILE_LIST;
-          goto fail;
-        }
-        break;
-      case PL_WINNT_TIME:
-        parser->item_length++;
-        switch(parser->state.NT.sub.time) {
-        case PL_WINNT_TIME_PRESPACE:
-          if(!ISSPACE(c)) {
-            parser->state.NT.sub.time = PL_WINNT_TIME_TIME;
-          }
-          break;
-        case PL_WINNT_TIME_TIME:
-          if(c == ' ') {
-            parser->offsets.time = parser->item_offset;
-            finfo->b_data[parser->item_offset + parser->item_length -1] = 0;
-            parser->state.NT.main = PL_WINNT_DIRORSIZE;
-            parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_PRESPACE;
-            parser->item_length = 0;
-          }
-          else if(!strchr("APM0123456789:", c)) {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        }
-        break;
-      case PL_WINNT_DIRORSIZE:
-        switch(parser->state.NT.sub.dirorsize) {
-        case PL_WINNT_DIRORSIZE_PRESPACE:
-          if(c != ' ') {
-            parser->item_offset = finfo->b_used - 1;
-            parser->item_length = 1;
-            parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_CONTENT;
-          }
-          break;
-        case PL_WINNT_DIRORSIZE_CONTENT:
-          parser->item_length ++;
-          if(c == ' ') {
-            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            if(strcmp("<DIR>", finfo->b_data + parser->item_offset) == 0) {
-              finfo->filetype = CURLFILETYPE_DIRECTORY;
-              finfo->size = 0;
-            }
-            else {
-              char *endptr;
-              if(curlx_strtoofft(finfo->b_data +
-                                 parser->item_offset,
-                                 &endptr, 10, &finfo->size)) {
-                parser->error = CURLE_FTP_BAD_FILE_LIST;
-                goto fail;
-              }
-              /* correct file type */
-              parser->file_data->info.filetype = CURLFILETYPE_FILE;
-            }
-
-            parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
-            parser->item_length = 0;
-            parser->state.NT.main = PL_WINNT_FILENAME;
-            parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
-          }
-          break;
-        }
-        break;
-      case PL_WINNT_FILENAME:
-        switch(parser->state.NT.sub.filename) {
-        case PL_WINNT_FILENAME_PRESPACE:
-          if(c != ' ') {
-            parser->item_offset = finfo->b_used -1;
-            parser->item_length = 1;
-            parser->state.NT.sub.filename = PL_WINNT_FILENAME_CONTENT;
-          }
-          break;
-        case PL_WINNT_FILENAME_CONTENT:
-          parser->item_length++;
-          if(c == '\r') {
-            parser->state.NT.sub.filename = PL_WINNT_FILENAME_WINEOL;
-            finfo->b_data[finfo->b_used - 1] = 0;
-          }
-          else if(c == '\n') {
-            parser->offsets.filename = parser->item_offset;
-            finfo->b_data[finfo->b_used - 1] = 0;
-            parser->offsets.filename = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
-            if(result) {
-              parser->error = result;
-              goto fail;
-            }
-            parser->state.NT.main = PL_WINNT_DATE;
-            parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
-          }
-          break;
-        case PL_WINNT_FILENAME_WINEOL:
-          if(c == '\n') {
-            parser->offsets.filename = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
-            if(result) {
-              parser->error = result;
-              goto fail;
-            }
-            parser->state.NT.main = PL_WINNT_DATE;
-            parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
-          }
-          else {
-            parser->error = CURLE_FTP_BAD_FILE_LIST;
-            goto fail;
-          }
-          break;
-        }
-        break;
-      }
+      result = parse_winnt(data, parser, infop, c);
       break;
     default:
       retsize = bufflen + 1;
+      goto fail;
+    }
+    if(result) {
+      parser->error = result;
       goto fail;
     }
 

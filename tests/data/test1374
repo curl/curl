@@ -8,14 +8,14 @@ HTTP GET
 
 #
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1374; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 12345
 </data>
@@ -31,51 +31,50 @@ http
 HTTP GET -o fname -i and Content-Disposition, -D file
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1374 -i -o log/outfile1374 -D log/heads1374
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -i -o %LOGDIR/outfile%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl log/1374 log/name1374
-</postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1374 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile1374">
+<file1 name="%LOGDIR/outfile%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1374; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 12345
 </file1>
 
-<file2 name="log/heads1374">
+<file2 name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1374; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 </file2>
 
-<file3 name="log/stdout1374">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
+<notexists>
+%LOGDIR/%TESTNUMBER
+%LOGDIR/name%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

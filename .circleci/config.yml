@@ -1,0 +1,208 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+# View these jobs in the browser: https://app.circleci.com/pipelines/github/curl/curl
+
+# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/configuration-reference/
+version: 2.1
+
+commands:
+  install-cares:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y libc-ares-dev
+
+  install-libssh:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y libssh-dev
+
+  install-deps:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
+            sudo python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+
+  install-wolfssl:
+    steps:
+      - run:
+          command: |
+            # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+            WOLFSSL_VERSION=5.8.0
+            echo "Installing wolfSSL $WOLFSSL_VERSION"
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+              --location "https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VERSION-stable.tar.gz" | tar -xz
+            cd wolfssl-$WOLFSSL_VERSION-stable
+            ./autogen.sh
+            ./configure --disable-dependency-tracking --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
+            make install
+
+  configure:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
+              --with-openssl \
+              || { tail -1000 config.log; false; }
+
+  configure-no-proxy:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror \
+              --with-openssl --disable-proxy \
+              || { tail -1000 config.log; false; }
+
+  configure-libssh:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
+              --with-openssl --with-libssh \
+              || { tail -1000 config.log; false; }
+
+  configure-cares:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
+              --with-openssl --enable-ares \
+              || { tail -1000 config.log; false; }
+
+  configure-cares-debug:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-debug \
+              --with-openssl --enable-ares \
+              || { tail -1000 config.log; false; }
+
+  build:
+    steps:
+      - run: make -j3 V=1
+      - run: make -j3 V=1 examples
+
+  test:
+    steps:
+      - run: make -j3 V=1 test-ci TFLAGS='-j14'
+
+executors:
+  ubuntu:
+    machine:
+      image: ubuntu-2004:2024.01.1
+
+jobs:
+  basic:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - configure
+      - build
+      - test
+
+  no-proxy:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - configure-no-proxy
+      - build
+      - test
+
+  cares:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - install-cares
+      - configure-cares
+      - build
+      - test
+
+  libssh:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - install-libssh
+      - configure-libssh
+      - build
+      - test
+
+  arm:
+    machine:
+      image: ubuntu-2004:2024.01.1
+    resource_class: arm.medium
+    steps:
+      - checkout
+      - install-deps
+      - configure
+      - build
+      - test
+
+  arm-cares:
+    machine:
+      image: ubuntu-2004:2024.01.1
+    resource_class: arm.medium
+    steps:
+      - checkout
+      - install-deps
+      - install-cares
+      - configure-cares-debug
+      - build
+      - test
+
+workflows:
+  x86-openssl:
+    jobs:
+      - basic
+
+  openssl-c-ares:
+    jobs:
+      - cares
+
+  openssl-libssh:
+    jobs:
+      - libssh
+
+  openssl-no-proxy:
+    jobs:
+      - no-proxy
+
+  arm-openssl:
+    jobs:
+      - arm
+
+  arm-openssl-c-ares:
+    jobs:
+      - arm-cares

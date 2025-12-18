@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -31,9 +33,9 @@
 static const char data[]="Lorem ipsum dolor sit amet, consectetur adipiscing "
   "elit. Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
   "laoreet rhoncus, odio ipsum semper metus, at tempus ante urna in mauris. "
-  "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a varius "
+  "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a ______ "
   "eget, mattis vitae ligula. Fusce ut pharetra est. Ut ullamcorper mi ac "
-  "sollicitudin semper. Praesent sit amet tellus varius, posuere nulla non, "
+  "sollicitudin semper. Praesent sit amet tellus ______, posuere nulla non, "
   "rhoncus ipsum.";
 
 struct WriteThis {
@@ -41,7 +43,7 @@ struct WriteThis {
   size_t sizeleft;
 };
 
-static size_t read_callback(void *dest, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *dest, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *wt = (struct WriteThis *)userp;
   size_t buffer_size = size*nmemb;
@@ -71,13 +73,13 @@ int main(void)
   wt.readptr = data;
   wt.sizeleft = strlen(data);
 
-  /* In windows, this will init the winsock stuff */
+  /* In Windows, this inits the Winsock stuff */
   res = curl_global_init(CURL_GLOBAL_DEFAULT);
   /* Check for errors */
   if(res != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed: %s\n",
             curl_easy_strerror(res));
-    return 1;
+    return (int)res;
   }
 
   /* get a curl handle */
@@ -90,7 +92,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* pointer to pass to our read function */
     curl_easy_setopt(curl, CURLOPT_READDATA, &wt);
@@ -99,7 +101,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     /*
-      If you use POST to a HTTP 1.1 server, you can send data without knowing
+      If you use POST to an HTTP 1.1 server, you can send data without knowing
       the size before starting the POST if you use chunked encoding. You
       enable this by adding a header like "Transfer-Encoding: chunked" with
       CURLOPT_HTTPHEADER. With HTTP 1.0 or without chunked transfer, you must
@@ -139,7 +141,7 @@ int main(void)
     }
 #endif
 
-    /* Perform the request, res will get the return code */
+    /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

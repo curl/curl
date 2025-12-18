@@ -25,22 +25,22 @@ REPLY c2VjcmV0 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP login authentication
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 mail body
 </stdin>
- <command>
-smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 904
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 AUTH LOGIN
 dXNlcg==
 c2VjcmV0
@@ -49,7 +49,7 @@ RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

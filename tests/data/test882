@@ -4,7 +4,7 @@
 POP3
 Clear Text
 RETR
-connection re-use
+connection reuse
 </keywords>
 </info>
 
@@ -14,7 +14,7 @@ connection re-use
 <servercmd>
 REPLY "PASS secret" +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -31,27 +31,27 @@ body
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 multiple connection authentication
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/882001 -u user.one:secret -: pop3://%HOSTIP:%POP3PORT/882002 -u user.two:secret
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER001 -u user.one:secret -: pop3://%HOSTIP:%POP3PORT/%TESTNUMBER002 -u user.two:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user.one
 PASS secret
-RETR 882001
+RETR %TESTNUMBER001
 QUIT
 CAPA
 USER user.two
 PASS secret
-RETR 882002
+RETR %TESTNUMBER002
 QUIT
 </protocol>
 </verify>

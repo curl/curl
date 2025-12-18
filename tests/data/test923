@@ -9,9 +9,6 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
-250 <recipient@example.com>
-</data>
 </reply>
 
 #
@@ -20,19 +17,19 @@ VRFY
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP VRFY
- </name>
- <command>
-smtp://%HOSTIP:%SMTPPORT/923 --mail-rcpt recipient
+</name>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 923
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 VRFY recipient
 QUIT
 </protocol>

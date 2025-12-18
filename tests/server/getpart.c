@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "server_setup.h"
-
-#include "getpart.h"
-
-#define ENABLE_CURLX_PRINTF
-/* make the curlx header define all printf() functions to use the curlx_*
-   versions instead */
-#include "curlx.h" /* from the private lib dir */
-
-/* just to please curl_base64.h we create a fake struct */
-struct Curl_easy {
-  int fake;
-};
-
-#include "curl_base64.h"
-#include "curl_memory.h"
-
-/* include memdebug.h last */
-#include "memdebug.h"
+#include "first.h"
 
 #define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
 
@@ -49,50 +33,31 @@ struct Curl_easy {
 #define show(x) Curl_nop_stmt
 #endif
 
-#if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
-#endif
-
-curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
-curl_free_callback Curl_cfree = (curl_free_callback)free;
-curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
-curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
-#endif
-
-#if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(default:4232) /* MSVC extension, dllimport identity */
-#endif
-
-
 /*
- * Curl_convert_clone() returns a malloced copy of the source string (if
- * returning CURLE_OK), with the data converted to network format. This
- * function is used by base64 code in libcurl built to support data
- * conversion. This is a DUMMY VERSION that returns data unmodified - for
- * use by the test server only.
+ * line_length()
+ *
+ * Counts the number of characters in a line including a new line.
+ * Unlike strlen() it does not stop at nul bytes.
+ *
  */
-CURLcode Curl_convert_clone(struct Curl_easy *data,
-                            const char *indata,
-                            size_t insize,
-                            char **outbuf);
-CURLcode Curl_convert_clone(struct Curl_easy *data,
-                            const char *indata,
-                            size_t insize,
-                            char **outbuf)
+static size_t line_length(const char *buffer, int bytestocheck)
 {
-  char *convbuf;
-  (void)data;
+  size_t length = 1;
 
-  convbuf = malloc(insize);
-  if(!convbuf)
-    return CURLE_OUT_OF_MEMORY;
+  while(*buffer != '\n' && --bytestocheck) {
+    length++;
+    buffer++;
+  }
+  if(*buffer != '\n') {
+    /*
+     * We didn't find a new line so the last byte must be a
+     * '\0' character inserted by fgets() which we should not
+     * count.
+     */
+    length--;
+  }
 
-  memcpy(convbuf, indata, insize);
-  *outbuf = convbuf;
-  return CURLE_OK;
+  return length;
 }
 
 /*
@@ -112,36 +77,38 @@ CURLcode Curl_convert_clone(struct Curl_easy *data,
  *   GPE_END_OF_FILE
  *   GPE_OK
  */
-
-static int readline(char **buffer, size_t *bufsize, FILE *stream)
+static int readline(char **buffer, size_t *bufsize, size_t *length,
+                    FILE *stream)
 {
   size_t offset = 0;
   char *newptr;
 
   if(!*buffer) {
-    *buffer = malloc(128);
+    *buffer = calloc(1, 128);
     if(!*buffer)
       return GPE_OUT_OF_MEMORY;
     *bufsize = 128;
   }
 
   for(;;) {
-    size_t length;
     int bytestoread = curlx_uztosi(*bufsize - offset);
 
-    if(!fgets(*buffer + offset, bytestoread, stream))
+    if(!fgets(*buffer + offset, bytestoread, stream)) {
+      *length = 0;
       return (offset != 0) ? GPE_OK : GPE_END_OF_FILE;
+    }
 
-    length = offset + strlen(*buffer + offset);
-    if(*(*buffer + length - 1) == '\n')
+    *length = offset + line_length(*buffer + offset, bytestoread);
+    if(*(*buffer + *length - 1) == '\n')
       break;
-    offset = length;
-    if(length < *bufsize - 1)
+    offset = *length;
+    if(*length < *bufsize - 1)
       continue;
 
     newptr = realloc(*buffer, *bufsize * 2);
     if(!newptr)
       return GPE_OUT_OF_MEMORY;
+    memset(&newptr[*bufsize], 0, *bufsize);
     *buffer = newptr;
     *bufsize *= 2;
   }
@@ -163,7 +130,7 @@ static int readline(char **buffer, size_t *bufsize, FILE *stream)
  *
  * If the source buffer is indicated to be base64 encoded, this appends the
  * decoded data, binary or whatever, to the destination. The source buffer
- * may not hold binary data, only a null terminated string is valid content.
+ * may not hold binary data, only a null-terminated string is valid content.
  *
  * Destination buffer will be enlarged and relocated as needed.
  *
@@ -174,15 +141,14 @@ static int readline(char **buffer, size_t *bufsize, FILE *stream)
  *   GPE_OUT_OF_MEMORY
  *   GPE_OK
  */
-
 static int appenddata(char  **dst_buf,   /* dest buffer */
                       size_t *dst_len,   /* dest buffer data length */
                       size_t *dst_alloc, /* dest buffer allocated size */
                       char   *src_buf,   /* source buffer */
+                      size_t  src_len,   /* source buffer length */
                       int     src_b64)   /* != 0 if source is base64 encoded */
 {
   size_t need_alloc = 0;
-  size_t src_len = strlen(src_buf);
 
   if(!src_len)
     return GPE_OK;
@@ -227,14 +193,14 @@ static int decodedata(char  **buf,   /* dest buffer */
     return GPE_OK;
 
   /* base64 decode the given buffer */
-  error = Curl_base64_decode(*buf, &buf64, &src_len);
+  error = curlx_base64_decode(*buf, &buf64, &src_len);
   if(error)
     return GPE_OUT_OF_MEMORY;
 
   if(!src_len) {
     /*
     ** currently there is no way to tell apart an OOM condition in
-    ** Curl_base64_decode() from zero length decoded data. For now,
+    ** curlx_base64_decode() from zero length decoded data. For now,
     ** let's just assume it is an OOM condition, currently we have
     ** no input for this function that decodes to zero length data.
     */
@@ -264,7 +230,7 @@ static int decodedata(char  **buf,   /* dest buffer */
  * and the size of the data is stored at the addresses that caller specifies.
  *
  * If the returned data is a string the returned size will be the length of
- * the string excluding null termination. Otherwise it will just be the size
+ * the string excluding null-termination. Otherwise it will just be the size
  * of the returned binary data.
  *
  * Calling function is responsible to free returned buffer.
@@ -274,16 +240,15 @@ static int decodedata(char  **buf,   /* dest buffer */
  *   GPE_OUT_OF_MEMORY
  *   GPE_OK
  */
-
 int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
-# define MAX_TAG_LEN 79
-  char couter[MAX_TAG_LEN + 1]; /* current outermost section */
-  char cmain[MAX_TAG_LEN + 1];  /* current main section */
-  char csub[MAX_TAG_LEN + 1];   /* current sub section */
-  char ptag[MAX_TAG_LEN + 1];   /* potential tag */
-  char patt[MAX_TAG_LEN + 1];   /* potential attributes */
+# define MAX_TAG_LEN 200
+  char curouter[MAX_TAG_LEN + 1]; /* current outermost section */
+  char curmain[MAX_TAG_LEN + 1];  /* current main section */
+  char cursub[MAX_TAG_LEN + 1];   /* current sub section */
+  char ptag[MAX_TAG_LEN + 1];     /* potential tag */
+  char patt[MAX_TAG_LEN + 1];     /* potential attributes */
   char *buffer = NULL;
   char *ptr;
   char *end;
@@ -293,8 +258,10 @@ int getpart(char **outbuf, size_t *outlen,
   } len;
   size_t bufsize = 0;
   size_t outalloc = 256;
+  size_t datalen;
   int in_wanted_part = 0;
   int base64 = 0;
+  int nonewline = 0;
   int error;
 
   enum {
@@ -311,9 +278,9 @@ int getpart(char **outbuf, size_t *outlen,
     return GPE_OUT_OF_MEMORY;
   *(*outbuf) = '\0';
 
-  couter[0] = cmain[0] = csub[0] = ptag[0] = patt[0] = '\0';
+  curouter[0] = curmain[0] = cursub[0] = ptag[0] = patt[0] = '\0';
 
-  while((error = readline(&buffer, &bufsize, stream)) == GPE_OK) {
+  while((error = readline(&buffer, &bufsize, &datalen, stream)) == GPE_OK) {
 
     ptr = buffer;
     EAT_SPACE(ptr);
@@ -321,7 +288,8 @@ int getpart(char **outbuf, size_t *outlen,
     if('<' != *ptr) {
       if(in_wanted_part) {
         show(("=> %s", buffer));
-        error = appenddata(outbuf, outlen, &outalloc, buffer, base64);
+        error = appenddata(outbuf, outlen, &outalloc, buffer, datalen,
+                           base64);
         if(error)
           break;
       }
@@ -346,49 +314,44 @@ int getpart(char **outbuf, size_t *outlen,
       memcpy(ptag, ptr, len.uns);
       ptag[len.uns] = '\0';
 
-      if((STATE_INSUB == state) && !strcmp(csub, ptag)) {
+      if((STATE_INSUB == state) && !strcmp(cursub, ptag)) {
         /* end of current sub section */
         state = STATE_INMAIN;
-        csub[0] = '\0';
+        cursub[0] = '\0';
         if(in_wanted_part) {
-          /* end of wanted part */
-          in_wanted_part = 0;
-
           /* Do we need to base64 decode the data? */
           if(base64) {
             error = decodedata(outbuf, outlen);
             if(error)
               return error;
           }
+          if(nonewline)
+            (*outlen)--;
           break;
         }
       }
-      else if((STATE_INMAIN == state) && !strcmp(cmain, ptag)) {
+      else if((STATE_INMAIN == state) && !strcmp(curmain, ptag)) {
         /* end of current main section */
         state = STATE_OUTER;
-        cmain[0] = '\0';
+        curmain[0] = '\0';
         if(in_wanted_part) {
-          /* end of wanted part */
-          in_wanted_part = 0;
-
           /* Do we need to base64 decode the data? */
           if(base64) {
             error = decodedata(outbuf, outlen);
             if(error)
               return error;
           }
+          if(nonewline)
+            (*outlen)--;
           break;
         }
       }
-      else if((STATE_OUTER == state) && !strcmp(couter, ptag)) {
+      else if((STATE_OUTER == state) && !strcmp(curouter, ptag)) {
         /* end of outermost file section */
         state = STATE_OUTSIDE;
-        couter[0] = '\0';
-        if(in_wanted_part) {
-          /* end of wanted part */
-          in_wanted_part = 0;
+        curouter[0] = '\0';
+        if(in_wanted_part)
           break;
-        }
       }
 
     }
@@ -430,27 +393,31 @@ int getpart(char **outbuf, size_t *outlen,
 
       if(STATE_OUTSIDE == state) {
         /* outermost element (<testcase>) */
-        strcpy(couter, ptag);
+        strcpy(curouter, ptag);
         state = STATE_OUTER;
         continue;
       }
       else if(STATE_OUTER == state) {
         /* start of a main section */
-        strcpy(cmain, ptag);
+        strcpy(curmain, ptag);
         state = STATE_INMAIN;
         continue;
       }
       else if(STATE_INMAIN == state) {
         /* start of a sub section */
-        strcpy(csub, ptag);
+        strcpy(cursub, ptag);
         state = STATE_INSUB;
-        if(!strcmp(cmain, main) && !strcmp(csub, sub)) {
+        if(!strcmp(curmain, main) && !strcmp(cursub, sub)) {
           /* start of wanted part */
           in_wanted_part = 1;
           if(strstr(patt, "base64="))
               /* bit rough test, but "mostly" functional, */
               /* treat wanted part data as base64 encoded */
               base64 = 1;
+          if(strstr(patt, "nonewline=")) {
+            show(("* setting nonewline\n"));
+            nonewline = 1;
+          }
         }
         continue;
       }
@@ -459,7 +426,7 @@ int getpart(char **outbuf, size_t *outlen,
 
     if(in_wanted_part) {
       show(("=> %s", buffer));
-      error = appenddata(outbuf, outlen, &outalloc, buffer, base64);
+      error = appenddata(outbuf, outlen, &outalloc, buffer, datalen, base64);
       if(error)
         break;
     }

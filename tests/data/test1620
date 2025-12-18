@@ -9,18 +9,11 @@ URL
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 unit tests for url.c
- </name>
-<tool>
-unit1620
-</tool>
+</name>
 </client>
-
 </testcase>

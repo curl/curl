@@ -9,21 +9,21 @@ globbing
 </info>
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 moo
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 foo
 </data2>
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
@@ -37,50 +37,44 @@ hoo
 <server>
 http
 </server>
- <name>
+<name>
 multiple requests using {} in URL
- </name>
- <command>
-"%HOSTIP:%HTTPPORT/{18,180002,180003}"
+</name>
+<command>
+"%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0002,%TESTNUMBER0003}"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /18 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /180002 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /180003 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
---_curl_--%HOSTIP:%HTTPPORT/18
+<stdout crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 moo
---_curl_--%HOSTIP:%HTTPPORT/180002
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 foo
---_curl_--%HOSTIP:%HTTPPORT/180003
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4

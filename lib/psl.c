@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -29,8 +31,7 @@
 #include "psl.h"
 #include "share.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -38,7 +39,7 @@ void Curl_psl_destroy(struct PslCache *pslcache)
 {
   if(pslcache->psl) {
     if(pslcache->dynamic)
-      psl_free((psl_ctx_t *) pslcache->psl);
+      psl_free((psl_ctx_t *)CURL_UNCONST(pslcache->psl));
     pslcache->psl = NULL;
     pslcache->dynamic = FALSE;
   }
@@ -46,7 +47,7 @@ void Curl_psl_destroy(struct PslCache *pslcache)
 
 static time_t now_seconds(void)
 {
-  struct curltime now = Curl_now();
+  struct curltime now = curlx_now();
 
   return now.tv_sec;
 }
@@ -79,7 +80,7 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
       psl = psl_latest(NULL);
       dynamic = psl != NULL;
       /* Take care of possible time computation overflow. */
-      expires = now < TIME_T_MAX - PSL_TTL? now + PSL_TTL: TIME_T_MAX;
+      expires = now < TIME_T_MAX - PSL_TTL ? now + PSL_TTL : TIME_T_MAX;
 
       /* Only get the built-in PSL if we do not already have the "latest". */
       if(!psl && !pslcache->dynamic)

@@ -1,11 +1,12 @@
 <testcase>
 <info>
-# This test is a copy of test 67, modified to use a HTTP proxy.
+# This test is a copy of test 67, modified to use an HTTP proxy.
 <keywords>
 HTTP
 HTTP GET
 HTTP NTLM auth
 HTTP proxy
+NTLM
 </keywords>
 </info>
 # Server-side
@@ -58,46 +59,35 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
-debug
+proxy
 </features>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with server NTLM authorization using a proxy
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/1215 -u testuser:testpass --ntlm --proxy http://%HOSTIP:%HTTPPORT
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm --proxy http://%HOSTIP:%HTTPPORT
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://%HOSTIP:%HTTPPORT/1215 HTTP/1.1
+<protocol crlf="headers">
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.30.0-DEV
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://%HOSTIP:%HTTPPORT/1215 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
-User-Agent: curl/7.30.0-DEV
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

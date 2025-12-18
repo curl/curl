@@ -12,9 +12,9 @@ type=
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -33,27 +33,25 @@ http
 </server>
 <features>
 ftp
+proxy
 </features>
 <tool>
 lib549
 </tool>
- <name>
+<name>
 FTP RETR with CURLOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
- </name>
+</name>
 # first URL then proxy
- <command>
-"ftp://www.example.com/moo/561;type=i" http://%HOSTIP:%HTTPPORT ascii
+<command>
+"ftp://www.example.com/moo/%TESTNUMBER;type=i" http://%HOSTIP:%HTTPPORT ascii
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET ftp://www.example.com/moo/561;type=i HTTP/1.1
+<protocol crlf="headers">
+GET ftp://www.example.com/moo/%TESTNUMBER;type=i HTTP/1.1
 Host: www.example.com:21
 Accept: */*
 Proxy-Connection: Keep-Alive

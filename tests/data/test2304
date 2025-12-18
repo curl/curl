@@ -1,0 +1,71 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+#
+# Close connection during websocket upgrade
+<reply>
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets swsclose
+Server: test-server/fake
+Upgrade: websocket
+Connection: Upgrade
+Something: else
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+</data>
+# allow upgrade
+<servercmd>
+upgrade
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+# require Debug for the forced CURL_ENTROPY
+<features>
+Debug
+ws
+</features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<server>
+http
+</server>
+<name>
+WebSockets curl_ws_recv() with closed connection
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# PONG with no data and the 32 bit mask
+#
+<verify>
+<protocol crlf="headers" nocheck="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: websocket/%TESTNUMBER
+Accept: */*
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+Connection: Upgrade
+
+</protocol>
+
+# This test used to check that "connection closed" was output, but
+# that is flaky since the outgoing PING just before might fail already
+# and then the test exists before the output gets to be written
+</verify>
+</testcase>

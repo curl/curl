@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,29 +18,31 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
 #include <curl/multi.h>
 
-int test(char *URL)
+static CURLcode test_lib1550(const char *URL)
 {
-  CURLM *handle;
-  int res = CURLE_OK;
+  CURLM *multi;
+  CURLcode res = CURLE_OK;
   static const char * const bl_servers[] =
      {"Microsoft-IIS/6.0", "nginx/0.8.54", NULL};
   static const char * const bl_sites[] =
-     {"curl.haxx.se:443", "example.com:80", NULL};
+     {"curl.se:443", "example.com:80", NULL};
 
   global_init(CURL_GLOBAL_ALL);
-  handle = curl_multi_init();
-  (void)URL; /* unused */
+  multi = curl_multi_init();
+  (void)URL;
 
-  curl_multi_setopt(handle, CURLMOPT_PIPELINING_SERVER_BL, bl_servers);
-  curl_multi_setopt(handle, CURLMOPT_PIPELINING_SITE_BL, bl_sites);
-  curl_multi_cleanup(handle);
+  curl_multi_setopt(multi, CURLMOPT_PIPELINING_SERVER_BL, bl_servers);
+  curl_multi_setopt(multi, CURLMOPT_PIPELINING_SITE_BL, bl_sites);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
-  return 0;
+  return CURLE_OK;
 }

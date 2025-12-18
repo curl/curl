@@ -1,0 +1,171 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# This workflow contains tests that operate on documentation files only. Some
+# checks modify the source so they cannot be combined into a single job.
+
+name: 'Docs'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths:
+      - '.github/workflows/checkdocs.yml'
+      - '.github/scripts/mdlinkcheck'
+      - '/scripts/**'
+      - '**.md'
+      - 'docs/*'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/checkdocs.yml'
+      - '.github/scripts/**'
+      - '.github/scripts/mdlinkcheck'
+      - '**.md'
+      - 'docs/*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  #  proselint:
+  #    name: 'proselint'
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+  #        with:
+  #          persist-credentials: false
+  #
+  #      - name: 'install prereqs'
+  #        run: |
+  #          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+  #          sudo apt-get -o Dpkg::Use-Pty=0 update
+  #          sudo rm -f /var/lib/man-db/auto-update
+  #          sudo apt-get -o Dpkg::Use-Pty=0 install python3-proselint
+  #
+  #      # config file help: https://github.com/amperser/proselint/
+  #      - name: 'create proselint config'
+  #        run: |
+  #          cat <<JSON > ~/.proselintrc.json
+  #          {
+  #            "checks": {
+  #              "typography.diacritical_marks": false,
+  #              "typography.symbols": false,
+  #              "annotations.misc": false,
+  #              "security.password": false,
+  #              "misc.annotations": false
+  #            }
+  #          }
+  #          JSON
+  #
+  #      - name: 'trim headers off all *.md files'
+  #        run: git ls-files -z '*.md' | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
+  #
+  #      - name: 'check prose'
+  #        run: git ls-files -z '*.md' | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint -- README
+  #
+  #      # This is for CHECKSRC and files with aggressive exclamation mark needs
+  #      - name: 'create second proselint config'
+  #        run: |
+  #          cat <<JSON > ~/.proselintrc.json
+  #          {
+  #            "checks": {
+  #              "typography.diacritical_marks": false,
+  #              "typography.symbols": false,
+  #              "typography.exclamation": false,
+  #              "lexical_illusions.misc": false,
+  #              "annotations.misc": false
+  #            }
+  #          }
+  #          JSON
+  #
+  #      - name: 'check special prose'
+  #        run: proselint docs/internals/CHECKSRC.md docs/libcurl/curl_mprintf.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
+
+  linkcheck:
+    name: 'linkcheck'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'mdlinkcheck'
+        run: ./scripts/mdlinkcheck
+
+  pyspelling:
+    name: 'pyspelling'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'trim all *.md files in docs/'
+        run: |
+          # shellcheck disable=SC2046
+          .github/scripts/cleancmd.pl $(find docs -name '*.md')
+
+      - name: 'install'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install aspell aspell-en
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-docs.txt
+
+      - name: 'check spelling'
+        run: |
+          source ~/venv/bin/activate
+          # setup the custom wordlist
+          grep -v '^#' .github/scripts/pyspelling.words > wordlist.txt
+          aspell --version
+          pyspelling --version
+          pyspelling --verbose --jobs 5 --config .github/scripts/pyspelling.yaml
+
+  badwords-synopsis:
+    name: 'badwords, synopsis'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'badwords'
+        run: |
+          # shellcheck disable=SC2046
+          .github/scripts/badwords.pl < .github/scripts/badwords.txt $(git ls-files '**.md') docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400
+
+      - name: 'verify synopsis'
+        run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
+
+  man-examples:
+    name: 'man-examples'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'verify examples'
+        run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+
+  miscchecks:
+    name: 'spacecheck'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'spacecheck'
+        run: .github/scripts/spacecheck.pl

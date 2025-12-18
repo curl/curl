@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 7
 
@@ -28,23 +28,22 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 simple HTTPS GET
- </name>
- <command>
--k https://%HOSTIP:%HTTPSPORT/300
+</name>
+# Using '-k' over '--insecure' to also test the short form
+<command>
+-k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /300 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

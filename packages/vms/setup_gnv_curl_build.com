@@ -1,13 +1,11 @@
 $! File: setup_gnv_curl_build.com
 $!
-$! $Id$
-$!
 $! Set up build environment for building Curl under GNV on VMS.
 $!
 $! GNV needs some files moved into the other directories to help with
 $! the configure script and the build.
 $!
-$! Copyright 2009, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +19,7 @@ $! WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
-$! 30-May-2009  J. Malmberg
+$! SPDX-License-Identifier: ISC
 $!
 $!=======================================================================
 $!
@@ -68,9 +66,9 @@ $! Set the compiler options for GNV CC wrapper to inherit.
 $ cc :== cc'clist''cnames'/nested_include_directory=none
 $ cxx :== cxx'clist''cnames'/nested_include_directory=none
 $ pointer_size = "32"
-$! Note 64 bit pointers requires all libraries to either have
-$! 64 bit pointers or have #pragma directives.
-$! Currently building curl on VMS with 64 bit pointers does not work.
+$! Note 64-bit pointers requires all libraries to either have
+$! 64-bit pointers or have #pragma directives.
+$! Currently building curl on VMS with 64-bit pointers does not work.
 $!
 $! A logical name to make it easier to find some of the hacks.
 $ define/job gnv_hacks 'base_dir'
@@ -104,7 +102,7 @@ $ define/job decc$system_include prj_root:[.include.curl],-
     gnv$zlib_include:,-
     sys$sysroot:[kerberos.include]
 $!
-$! Set up a include list for the compiler to find all the header files
+$! Set up an include list for the compiler to find all the header files
 $! that they need.
 $!
 $ define/job decc$user_include src_root:[.include.curl]

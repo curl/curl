@@ -25,11 +25,11 @@ SSL
 <server>
 ftps
 </server>
- <name>
+<name>
 Get two FTPS files from the same remote dir: no second CWD
- </name>
- <command>
--k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/a/path/407 ftps://%HOSTIP:%FTPSPORT/a/path/407
+</name>
+<command>
+--insecure --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/a/path/%TESTNUMBER ftps://%HOSTIP:%FTPSPORT/a/path/%TESTNUMBER
 </command>
 <stdout>
 data blobb
@@ -39,7 +39,7 @@ data blobb
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PBSZ 0
@@ -49,11 +49,11 @@ CWD a
 CWD path
 EPSV
 TYPE I
-SIZE 407
-RETR 407
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 407
-RETR 407
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

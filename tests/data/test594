@@ -12,6 +12,8 @@ STOR
 multi
 EPRT refused
 NODATACONN
+timeout
+FAILURE
 </keywords>
 </info>
 
@@ -33,14 +35,14 @@ ftp
 <tool>
 lib591
 </tool>
- <name>
+<name>
 FTP multi PORT upload, no data conn and no positive prelim. reply
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/path/594 %FTPTIME2 log/upload594
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload594">
-Moooooooooooo for 594
+<file name="%LOGDIR/upload%TESTNUMBER">
+Moooooooooooo for %TESTNUMBER
  upload this
 </file>
 </client>
@@ -49,10 +51,10 @@ Moooooooooooo for 594
 <verify>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
-s/^PORT (.*)/PORT/
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^PORT (\S*)/PORT/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -60,7 +62,7 @@ CWD path
 EPRT |1|
 PORT
 TYPE I
-STOR 594
+STOR %TESTNUMBER
 QUIT
 </protocol>
 <errorcode>

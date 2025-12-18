@@ -1,11 +1,34 @@
 #!/bin/sh
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
 #
 #       libcurl compilation script for the OS/400.
 #
 
-SCRIPTDIR=`dirname "${0}"`
+SCRIPTDIR=$(dirname "${0}")
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}/lib"
+cd "${TOPDIR}/lib" || exit 1
 
 #       Need to have IFS access to the mih/cipher header file.
 
@@ -17,41 +40,33 @@ fi
 
 #      Create and compile the identification source file.
 
-echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c
-echo '#pragma comment(user, __DATE__)' >> os400.c
-echo '#pragma comment(user, __TIME__)' >> os400.c
-echo '#pragma comment(copyright, "Copyright (C) 1998-2016 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
-make_module     OS400           os400.c
+{
+        echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")'
+        echo '#pragma comment(user, __DATE__)'
+        echo '#pragma comment(user, __TIME__)'
+        echo '#pragma comment(copyright, "Copyright (C) Daniel Stenberg et al. OS/400 version by P. Monnerat")'
+} > os400.c
+make_module     OS400           os400.c         BUILDING_LIBCURL
 LINK=                           # No need to rebuild service program yet.
 MODULES=
 
 
-#       Get source list.
+#       Get source list (CSOURCES variable).
 
-sed -e ':begin'                                                         \
-    -e '/\\$/{'                                                         \
-    -e 's/\\$/ /'                                                       \
-    -e 'N'                                                              \
-    -e 'bbegin'                                                         \
-    -e '}'                                                              \
-    -e 's/\n//g'                                                        \
-    -e 's/[[:space:]]*$//'                                              \
-    -e 's/^\([A-Za-z][A-Za-z0-9_]*\)[[:space:]]*=[[:space:]]*\(.*\)/\1="\2"/' \
-    -e 's/\$(\([A-Za-z][A-Za-z0-9_]*\))/${\1}/g'                        \
-        < Makefile.inc > tmpscript.sh
-. ./tmpscript.sh
+get_make_vars Makefile.inc
 
 
 #       Compile the sources into modules.
 
-INCLUDES="'`pwd`'"
+# shellcheck disable=SC2034
+INCLUDES="'$(pwd)'"
 
-make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"
-make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"
+make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"       BUILDING_LIBCURL
+make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"      BUILDING_LIBCURL
 
 for SRC in ${CSOURCES}
-do      MODULE=`db2_name "${SRC}"`
-        make_module "${MODULE}" "${SRC}"
+do      MODULE=$(db2_name "${SRC}")
+        make_module "${MODULE}" "${SRC}" BUILDING_LIBCURL
 done
 
 
@@ -61,16 +76,16 @@ if action_needed "${LIBIFSNAME}/${STATBNDDIR}.BNDDIR"
 then    LINK=YES
 fi
 
-if [ "${LINK}" ]
+if [ -n "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${STATBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${STATBNDDIR})"
         CMD="${CMD} TEXT('LibCurl API static binding directory')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 
         for MODULE in ${MODULES}
         do      CMD="ADDBNDDIRE BNDDIR(${TARGETLIB}/${STATBNDDIR})"
                 CMD="${CMD} OBJ((${TARGETLIB}/${MODULE} *MODULE))"
-                system "${CMD}"
+                CLcommand "${CMD}"
         done
 fi
 
@@ -81,20 +96,26 @@ fi
 if action_needed "${LIBIFSNAME}/TOOLS.FILE"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/TOOLS) RCDLEN(112)"
         CMD="${CMD} TEXT('curl: build tools')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 fi
 
 
 #       Gather the list of symbols to export.
+#       - Unfold lines from the header files so that they contain a semicolon.
+#       - Keep only CURL_EXTERN definitions.
+#       - Remove the CURL_DEPRECATED and CURL_TEMP_PRINTF macro calls.
+#       - Drop the parenthesized function arguments and what follows.
+#       - Keep the trailing function name only.
 
-EXPORTS=`grep '^CURL_EXTERN[[:space:]]'                                 \
-              "${TOPDIR}"/include/curl/*.h                              \
-              "${SCRIPTDIR}/ccsidcurl.h"                                |
-         sed -e 's/^.*CURL_EXTERN[[:space:]]\(.*\)(.*$/\1/'             \
-             -e 's/[[:space:]]*$//'                                     \
-             -e 's/^.*[[:space:]][[:space:]]*//'                        \
-             -e 's/^\*//'                                               \
-             -e 's/(\(.*\))/\1/'`
+EXPORTS=$(cat "${TOPDIR}"/include/curl/*.h "${SCRIPTDIR}/ccsidcurl.h"   |
+         sed -e 'H;s/.*//;x;s/\n//;s/.*/& /'                            \
+             -e '/^CURL_EXTERN[[:space:]]/!d'                           \
+             -e '/\;/!{x;d;}'                                           \
+             -e 's/ CURL_DEPRECATED([^)]*)//g'                          \
+             -e 's/ CURL_TEMP_PRINTF([^)]*)//g'                         \
+             -e 's/[[:space:]]*(.*$//'                                  \
+             -e 's/^.*[^A-Za-z0-9_]\([A-Za-z0-9_]*\)$/\1/')
+
 
 #       Create the service program exportation file in DB2 member if needed.
 
@@ -104,7 +125,7 @@ if action_needed "${BSF}" Makefile.am
 then    LINK=YES
 fi
 
-if [ "${LINK}" ]
+if [ -n "${LINK}" ]
 then    echo " STRPGMEXP PGMLVL(*CURRENT) SIGNATURE('LIBCURL_${SONAME}')" \
             > "${BSF}"
         for EXPORT in ${EXPORTS}
@@ -121,7 +142,7 @@ if action_needed "${LIBIFSNAME}/${SRVPGM}.SRVPGM"
 then    LINK=YES
 fi
 
-if [ "${LINK}" ]
+if [ -n "${LINK}" ]
 then    CMD="CRTSRVPGM SRVPGM(${TARGETLIB}/${SRVPGM})"
         CMD="${CMD} SRCFILE(${TARGETLIB}/TOOLS) SRCMBR(BNDSRC)"
         CMD="${CMD} MODULE(${TARGETLIB}/OS400)"
@@ -138,7 +159,7 @@ then    CMD="CRTSRVPGM SRVPGM(${TARGETLIB}/${SRVPGM})"
         CMD="${CMD} BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)"
         CMD="${CMD} TEXT('curl API library')"
         CMD="${CMD} TGTRLS(${TGTRLS})"
-        system "${CMD}"
+        CLcommand "${CMD}"
         LINK=YES
 fi
 
@@ -149,56 +170,12 @@ if action_needed "${LIBIFSNAME}/${DYNBNDDIR}.BNDDIR"
 then    LINK=YES
 fi
 
-if [ "${LINK}" ]
+if [ -n "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${DYNBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
         CMD="${CMD} TEXT('LibCurl API dynamic binding directory')"
-        system "${CMD}"
+        CLcommand "${CMD}"
         CMD="ADDBNDDIRE BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
         CMD="${CMD} OBJ((*LIBL/${SRVPGM} *SRVPGM))"
-        system "${CMD}"
-fi
-
-
-#       Rebuild the formdata test if needed.
-
-if [ "${TEST_FORMDATA}" ]
-then    MODULES=
-        make_module TFORMDATA   formdata.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TSTREQUAL   strequal.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TMEMDEBUG   memdebug.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TMPRINTF    mprintf.c       "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TSTRERROR   strerror.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        #       The following modules should not be needed (see comment in
-        #               formdata.c. However, there are some unsatisfied
-        #               external references leading in the following
-        #               modules to be (recursively) needed.
-        MODULES="${MODULES} EASY STRDUP SSLGEN GSKIT HOSTIP HOSTIP4 HOSTIP6"
-        MODULES="${MODULES} URL HASH TRANSFER GETINFO COOKIE SENDF SELECT"
-        MODULES="${MODULES} INET_NTOP SHARE HOSTTHRE MULTI LLIST FTP HTTP"
-        MODULES="${MODULES} HTTP_DIGES HTTP_CHUNK HTTP_NEGOT TIMEVAL HOSTSYN"
-        MODULES="${MODULES} CONNECT SOCKS PROGRESS ESCAPE INET_PTON GETENV"
-        MODULES="${MODULES} DICT LDAP TELNET FILE TFTP NETRC PARSEDATE"
-        MODULES="${MODULES} SPEEDCHECK SPLAY BASE64 SECURITY IF2IP MD5"
-        MODULES="${MODULES} KRB5 OS400SYS"
-
-        PGMIFSNAME="${LIBIFSNAME}/TFORMDATA.PGM"
-
-        if action_needed "${PGMIFSNAME}"
-        then    LINK=YES
-        fi
-
-        if [ "${LINK}" ]
-        then    CMD="CRTPGM PGM(${TARGETLIB}/TFORMDATA)"
-                CMD="${CMD} ENTMOD(QADRT/QADRTMAIN2)"
-                CMD="${CMD} MODULE("
-
-                for MODULE in ${MODULES}
-                do      CMD="${CMD} ${TARGETLIB}/${MODULE}"
-                done
-
-                CMD="${CMD} ) BNDSRVPGM(QADRTTS)"
-                CMD="${CMD} TGTRLS(${TGTRLS})"
-                system "${CMD}"
-        fi
+        CLcommand "${CMD}"
 fi

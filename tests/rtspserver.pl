@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -19,19 +19,22 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 #***************************************************************************
+
+use strict;
+use warnings;
 
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
 }
 
-use strict;
-use warnings;
-
 use serverhelp qw(
     server_pidfilename
     server_logfilename
+    server_exe
     );
 
 my $verbose = 0;     # set to 1 for debugging
@@ -40,6 +43,7 @@ my $ipvnum = 4;      # default IP version of rtsp server
 my $idnum = 1;       # default rtsp server instance number
 my $proto = 'rtsp';  # protocol the rtsp server speaks
 my $pidfile;         # rtsp server pid file
+my $portfile;
 my $logfile;         # rtsp server log file
 my $srcdir;
 
@@ -54,9 +58,21 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--portfile') {
+        if($ARGV[1]) {
+            $portfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
             $logfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -93,17 +109,25 @@ while(@ARGV) {
     shift @ARGV;
 }
 
+#***************************************************************************
+# Initialize command line option dependent variables
+#
+
+if(!$pidfile) {
+    $pidfile = server_pidfilename($path, $proto, $ipvnum, $idnum);
+}
 if(!$srcdir) {
     $srcdir = $ENV{'srcdir'} || '.';
-}
-if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+$flags .= "--pidfile \"$pidfile\" ".
+    "--portfile \"$portfile\" ".
+    "--logfile \"$logfile\" ".
+    "--logdir \"$logdir\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
-exec("server/rtspd $flags");
+$| = 1;
+exec("exec ".server_exe('rtspd')." $flags");

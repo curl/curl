@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,18 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
 /* Test CURLINFO_PROTOCOL */
 
-int test(char *URL)
+static CURLcode test_lib1535(const char *URL)
 {
   CURL *curl, *dupe = NULL;
   long protocol;
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -39,14 +41,17 @@ int test(char *URL)
   */
 
   res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(protocol != 0) {
-    fprintf(stderr, "%s:%d protocol init failed; expected 0 but is %ld\n",
-            __FILE__, __LINE__, protocol);
+  if(protocol) {
+    curl_mfprintf(stderr,
+                  "%s:%d protocol init failed; expected 0 but is %ld\n",
+                  __FILE__, __LINE__, protocol);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
@@ -55,8 +60,9 @@ int test(char *URL)
 
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 
@@ -64,15 +70,18 @@ int test(char *URL)
   */
 
   res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
   if(protocol != CURLPROTO_HTTP) {
-    fprintf(stderr, "%s:%d protocol of http resource is incorrect; "
-            "expected %d but is %ld\n",
-            __FILE__, __LINE__, CURLPROTO_HTTP, protocol);
+    curl_mfprintf(stderr,
+                  "%s:%d protocol of http resource is incorrect; "
+                  "expected %ld but is %ld\n",
+                  __FILE__, __LINE__, CURLPROTO_HTTP, protocol);
     res = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }
@@ -82,25 +91,27 @@ int test(char *URL)
 
   dupe = curl_easy_duphandle(curl);
   if(!dupe) {
-    fprintf(stderr, "%s:%d curl_easy_duphandle() failed\n",
-            __FILE__, __LINE__);
+    curl_mfprintf(stderr, "%s:%d curl_easy_duphandle() failed\n",
+                  __FILE__, __LINE__);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
   res = curl_easy_getinfo(dupe, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(protocol != 0) {
-    fprintf(stderr, "%s:%d protocol init failed; expected 0 but is %ld\n",
-            __FILE__, __LINE__, protocol);
+  if(protocol) {
+    curl_mfprintf(stderr,
+                  "%s:%d protocol init failed; expected 0 but is %ld\n",
+                  __FILE__, __LINE__, protocol);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
-
 
   /* Test that a protocol is properly initialized on curl_easy_reset.
   */
@@ -108,14 +119,17 @@ int test(char *URL)
   curl_easy_reset(curl);
 
   res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(protocol != 0) {
-    fprintf(stderr, "%s:%d protocol init failed; expected 0 but is %ld\n",
-            __FILE__, __LINE__, protocol);
+  if(protocol) {
+    curl_mfprintf(stderr,
+                  "%s:%d protocol init failed; expected 0 but is %ld\n",
+                  __FILE__, __LINE__, protocol);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }

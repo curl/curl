@@ -8,7 +8,7 @@ cookies
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Server: Microsoft-IIS/4.0
 Date: Tue, 25 Sep 2001 19:37:44 GMT
@@ -25,27 +25,28 @@ This server says moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, junk session cookies
- </name>
- <command>
-%HOSTIP:%HTTPPORT/want/53 -b log/injar53 -j
+</name>
+<command>
+%HOSTIP:%HTTPPORT/want/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -j
 </command>
-<file name="log/injar53">
-%HOSTIP	FALSE	/	FALSE	2139150993	mooo	indeed
+<file name="%LOGDIR/injar%TESTNUMBER">
+%HOSTIP	FALSE	/	FALSE	22139150993	mooo	indeed
 %HOSTIP	FALSE	/	FALSE	0		moo1	indeed
 %HOSTIP	FALSE	/	FALSE	1		moo2	indeed
 </file>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /want/53 HTTP/1.1
+<protocol crlf="headers">
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: mooo=indeed
 

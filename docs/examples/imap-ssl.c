@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example using SSL
+ * IMAP with implicit SSL
  * </DESC>
  */
 
@@ -38,7 +40,10 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -46,12 +51,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will fetch message 1 from the user's inbox. Note the use of
-    * imaps:// rather than imap:// to request a SSL based connection. */
+    /* This fetches message 1 from the user's inbox. Note the use of
+    * imaps:// rather than imap:// to request an SSL based connection. */
     curl_easy_setopt(curl, CURLOPT_URL,
                      "imaps://imap.example.com/INBOX/;UID=1");
 
-    /* If you want to connect to a site who isn't using a certificate that is
+    /* If you want to connect to a site who is not using a certificate that is
      * signed by one of the certs in the CA bundle you have, you can skip the
      * verification of the server's certificate. This makes the connection
      * A LOT LESS SECURE.
@@ -63,15 +68,15 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
 
-    /* If the site you're connecting to uses a different host name that what
+    /* If the site you are connecting to uses a different host name that what
      * they have mentioned in their server certificate's commonName (or
-     * subjectAltName) fields, libcurl will refuse to connect. You can skip
-     * this check, but this will make the connection less secure. */
+     * subjectAltName) fields, libcurl refuses to connect. You can skip this
+     * check, but it makes the connection insecure. */
 #ifdef SKIP_HOSTNAME_VERIFICATION
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 #endif
 
-    /* Since the traffic will be encrypted, it is very useful to turn on debug
+    /* Since the traffic is encrypted, it is useful to turn on debug
      * information within libcurl to see what is happening during the
      * transfer */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -87,6 +92,8 @@ int main(void)
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

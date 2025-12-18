@@ -1,122 +1,56 @@
 <testcase>
 <info>
 <keywords>
-HTTP
+HTTPS
 HTTP GET
-HTTP Basic auth
-HTTP NTLM auth
-pipelining
-flaky
+PEM certificate
 </keywords>
 </info>
+
+#
 # Server-side
 <reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
 
-<!-- Basic auth -->
-<data100>
-HTTP/1.1 401 Need Basic or NTLM auth
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
-WWW-Authenticate: NTLM
-WWW-Authenticate: Basic realm="testrealm"
-
-This is a bad password page!
-</data100>
-
-<!-- NTLM auth -->
-<data200>
-HTTP/1.1 401 Need Basic or NTLM auth (2)
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 27
-WWW-Authenticate: NTLM
-WWW-Authenticate: Basic realm="testrealm"
-
-This is not the real page!
-</data200>
-
-<data1201>
-HTTP/1.1 401 NTLM intermediate (2)
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 33
-WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
-
-This is still not the real page!
-</data1201>
-
-<data1202>
-HTTP/1.1 200 Things are fine in server land
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 32
-
-Finally, this is the real page!
-</data1202>
-
-<datacheck>
-Data connection 0: 228
-Data connection 1: 228
-Data connection 2: 402
-</datacheck>
-
+MooMoo
+</data>
 </reply>
 
+#
 # Client-side
 <client>
 <features>
-NTLM
-!SSPI
+SSL
+SSLpinning
+Schannel
+local-http
 </features>
 <server>
-http
+https test-localhost.pem
 </server>
-<tool>
-lib2033
-</tool>
-
- <name>
-NTLM connection mapping, pipelining enabled
- </name>
+<name>
+simple HTTPS GET with DER public key pinning (Schannel variant)
+</name>
  <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+# This test is pointless if we are not using the Schannel backend
+CURL_SSL_BACKEND=schannel
  </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/2032
+<command>
+-4 --cacert %CERTDIR/certs/test-ca.crt --pinnedpubkey %CERTDIR/certs/test-localhost.pub.der --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
+#
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /20320100 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
-Accept: */*
-
-GET /20320100 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
-Accept: */*
-
-GET /20320200 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-Accept: */*
-
-GET /20320200 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoABAI+/Fp9IERAQ74OsdNPbBpg7o8CVwLSO4DtFyIcZHUMKVktWIu92s2892OVpd2JzqnRlc3R1c2VyY3VybGhvc3Q=
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: localhost:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-int test(char *URL)
+static CURLcode test_lib1511(const char *URL)
 {
   long unmet;
   CURL *curl = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -35,7 +37,7 @@ int test(char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_HEADER, 1L);
-  easy_setopt(curl, CURLOPT_TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
+  easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
 
   /* TIMEVALUE in the future */
   easy_setopt(curl, CURLOPT_TIMEVALUE, 1566210680L);
@@ -58,7 +60,7 @@ int test(char *URL)
     goto test_cleanup;
 
   curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
-  if(unmet != 0L) {
+  if(unmet) {
     res = TEST_ERR_FAILURE; /* not correct */
     goto test_cleanup;
   }

@@ -9,13 +9,8 @@ HTTP GET
 #
 # Server-side
 <reply>
-# perl -e 'print "swsclose" . "\0" x 200;' | base64
-# 'swsclose' is there to force server to close after send
-<data nocheck="yes" base64="yes">
-c3dzY2xvc2UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+<data nocheck="yes" nonewline="yes">
+swsclose%repeat[200 x %00]%
 </data>
 </reply>
 
@@ -25,23 +20,21 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
 <server>
 http
 </server>
- <name>
+<name>
 HTTP/0.9 GET and all zeroes
- </name>
+</name>
  <command option="force-output">
-http://%HOSTIP:%HTTPPORT/1164 -w '%{size_download}\n' --http0.9
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{size_download}\n' --http0.9
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1164 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,31 +20,31 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curl_setup.h"
 
 #include <curl/curl.h>
 
+#include "llist.h"
+
 struct Cookie {
-  struct Cookie *next; /* next in the chain */
-  char *name;        /* <this> = value */
-  char *value;       /* name = <this> */
+  struct Curl_llist_node node; /* for the main cookie list */
+  struct Curl_llist_node getnode; /* for getlist */
+  char *name;         /* <this> = value */
+  char *value;        /* name = <this> */
   char *path;         /* path = <this> which is in Set-Cookie: */
   char *spath;        /* sanitized cookie path */
-  char *domain;      /* domain = <this> */
-  curl_off_t expires;  /* expires = <this> */
-  char *expirestr;   /* the plain text version */
-  bool tailmatch;    /* whether we do tail-matching of the domain name */
-
-  /* RFC 2109 keywords. Version=1 means 2109-compliant cookie sending */
-  char *version;     /* Version = <value> */
-  char *maxage;      /* Max-Age = <value> */
-
-  bool secure;       /* whether the 'secure' keyword was used */
-  bool livecookie;   /* updated from a server, not a stored file */
-  bool httponly;     /* true if the httponly directive is present */
-  int creationtime;  /* time when the cookie was written */
-  unsigned char prefix; /* bitmap fields indicating which prefix are set */
+  char *domain;       /* domain = <this> */
+  curl_off_t expires; /* expires = <this> */
+  unsigned int creationtime; /* time when the cookie was written */
+  BIT(tailmatch);     /* tail-match the domain name */
+  BIT(secure);        /* the 'secure' keyword was used */
+  BIT(livecookie);    /* updated from a server, not a stored file */
+  BIT(httponly);      /* the httponly directive is present */
+  BIT(prefix_secure); /* secure prefix is set */
+  BIT(prefix_host);   /* host prefix is set */
 };
 
 /*
@@ -54,51 +54,72 @@ struct Cookie {
 #define COOKIE_PREFIX__SECURE (1<<0)
 #define COOKIE_PREFIX__HOST (1<<1)
 
-#define COOKIE_HASH_SIZE 256
+#define COOKIE_HASH_SIZE 63
 
 struct CookieInfo {
-  /* linked list of cookies we know of */
-  struct Cookie *cookies[COOKIE_HASH_SIZE];
-
-  char *filename;  /* file we read from/write to */
-  bool running;    /* state info, for cookie adding information */
-  long numcookies; /* number of cookies in the "jar" */
-  bool newsession; /* new session, discard session cookies on load */
-  int lastct;      /* last creation-time used in the jar */
+  /* linked lists of cookies we know of */
+  struct Curl_llist cookielist[COOKIE_HASH_SIZE];
+  curl_off_t next_expiration; /* the next time at which expiration happens */
+  unsigned int numcookies;  /* number of cookies in the "jar" */
+  unsigned int lastct;      /* last creation-time used in the jar */
+  BIT(running);    /* state info, for cookie adding information */
+  BIT(newsession); /* new session, discard session cookies on load */
 };
 
-/* This is the maximum line length we accept for a cookie line. RFC 2109
-   section 6.3 says:
+/* The maximum sizes we accept for cookies. RFC 6265 section 6.1 says
+   "general-use user agents SHOULD provide each of the following minimum
+   capabilities":
 
-   "at least 4096 bytes per cookie (as measured by the size of the characters
-   that comprise the cookie non-terminal in the syntax description of the
-   Set-Cookie header)"
-
-   We allow max 5000 bytes cookie header. Max 4095 bytes length per cookie
-   name and value. Name + value may not exceed 4096 bytes.
-
+   - At least 4096 bytes per cookie (as measured by the sum of the length of
+     the cookie's name, value, and attributes).
+   In the 6265bis draft document section 5.4 it is phrased even stronger: "If
+   the sum of the lengths of the name string and the value string is more than
+   4096 octets, abort these steps and ignore the set-cookie-string entirely."
 */
+
+/** Limits for INCOMING cookies **/
+
+/* The longest we allow a line to be when reading a cookie from an HTTP header
+   or from a cookie jar */
 #define MAX_COOKIE_LINE 5000
 
-/* This is the maximum length of a cookie name or content we deal with: */
+/* Maximum length of an incoming cookie name or content we deal with. Longer
+   cookies are ignored. */
 #define MAX_NAME 4096
-#define MAX_NAME_TXT "4095"
+
+/* Maximum number of Set-Cookie: lines accepted in a single response. If more
+   such header lines are received, they are ignored. This value must be less
+   than 256 since an unsigned char is used to count. */
+#define MAX_SET_COOKIE_AMOUNT 50
+
+/** Limits for OUTGOING cookies **/
+
+/* Maximum size for an outgoing cookie line libcurl will use in an http
+   request. This is the default maximum length used in some versions of Apache
+   httpd. */
+#define MAX_COOKIE_HEADER_LEN 8190
+
+/* Maximum number of cookies libcurl will send in a single request, even if
+   there might be more cookies that match. One reason to cap the number is to
+   keep the maximum HTTP request within the maximum allowed size. */
+#define MAX_COOKIE_SEND_AMOUNT 150
 
 struct Curl_easy;
+struct connectdata;
+
 /*
  * Add a cookie to the internal list of cookies. The domain and path arguments
  * are only used if the header boolean is TRUE.
  */
 
+bool Curl_secure_context(struct connectdata *conn, const char *host);
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
-                               struct CookieInfo *, bool header, bool noexpiry,
-                               char *lineptr,
+                               struct CookieInfo *c, bool header,
+                               bool noexpiry, const char *lineptr,
                                const char *domain, const char *path,
                                bool secure);
-
-struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
-                                   const char *, bool);
-void Curl_cookie_freelist(struct Cookie *cookies);
+int Curl_cookie_getlist(struct Curl_easy *data, struct connectdata *conn,
+                        const char *host, struct Curl_llist *list);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
 
@@ -109,10 +130,11 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies);
 #define Curl_cookie_cleanup(x) Curl_nop_stmt
 #define Curl_flush_cookies(x,y) Curl_nop_stmt
 #else
-void Curl_flush_cookies(struct Curl_easy *data, int cleanup);
-void Curl_cookie_cleanup(struct CookieInfo *);
+void Curl_flush_cookies(struct Curl_easy *data, bool cleanup);
+void Curl_cookie_cleanup(struct CookieInfo *c);
 struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
-                                    const char *, struct CookieInfo *, bool);
+                                    const char *file, struct CookieInfo *inc,
+                                    bool newsession);
 struct curl_slist *Curl_cookie_list(struct Curl_easy *data);
 void Curl_cookie_loadfiles(struct Curl_easy *data);
 #endif

@@ -8,25 +8,20 @@ Range
 
 # Server-side
 <reply>
-<data>
-</data>
 </reply>
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 file
 </features>
- <name>
+<name>
 -Y range on a file:// URL to stdout
- </name>
+</name>
 <command option="no-include">
--r -9 file://localhost/%PWD/log/test1020.txt 
+-r -9 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test1020.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 1234567890
 1234567890
 </file>

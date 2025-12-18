@@ -17,11 +17,11 @@ REPLY CWD 314 bluah you f00l!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download, failed CWD
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/path/to/file/125
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER
 </command>
 </client>
 
@@ -30,7 +30,7 @@ ftp://%HOSTIP:%FTPPORT/path/to/file/125
 <errorcode>
 9
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

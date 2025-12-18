@@ -10,9 +10,9 @@ HTTP proxy Basic auth
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -27,23 +27,24 @@ the content goes here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy authorization
- </name>
- <command>
- -U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x %HOSTIP:%HTTPPORT http://we.want.that.site.com/16
+</name>
+<command>
+ -U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x %HOSTIP:%HTTPPORT http://we.want.that.site.com/%TESTNUMBER
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://we.want.that.site.com/16 HTTP/1.1
+<protocol crlf="headers">
+GET http://we.want.that.site.com/%TESTNUMBER HTTP/1.1
 Host: we.want.that.site.com
-Proxy-Authorization: Basic ZmFrZUB1c2VyOmxvb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29uZw==
+Proxy-Authorization: Basic %b64[fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong]b64%
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

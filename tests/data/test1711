@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<name>
+Send >64K over SMTP
+</name>
+<file name="%LOGDIR/email%TESTNUMBER" crlf="yes">
+From: different
+To: another
+
+%repeat[5000 x test in body... ]%
+</file>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/email%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload crlf="yes">
+From: different
+To: another
+
+%repeat[5000 x test in body... ]%
+.
+</upload>
+</verify>
+</testcase>

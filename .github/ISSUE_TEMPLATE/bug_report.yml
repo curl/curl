@@ -1,0 +1,55 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Bug Report on code
+description: Tell us about your problem with curl or libcurl
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+        Only file bugs here! Ask questions on the mailing lists https://curl.se/mail/
+
+        **SECURITY RELATED?** Post it here: https://hackerone.com/curl
+
+        There are collections of known issues to be aware of:
+
+        - https://curl.se/docs/knownbugs.html
+        - https://curl.se/docs/todo.html
+
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: I did this
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-behaviour
+    attributes:
+      label: I expected the following
+    validations:
+      required: false
+
+  - type: textarea
+    id: version
+    attributes:
+      label: curl/libcurl version
+      description: |
+        Please paste the output of `curl -V` here.
+      placeholder: 'curl 8.2.0'
+    validations:
+      required: true
+
+  - type: textarea
+    id: os
+    attributes:
+      label: operating system
+      description: |
+        On Unix please post the output of `uname -a` here.
+      placeholder: 'Fedora Linux 38'
+    validations:
+      required: true

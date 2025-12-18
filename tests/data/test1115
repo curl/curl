@@ -8,7 +8,7 @@ HTTP 1xx response code
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 104 Experiment
 Server: Microsoft-IIS/5.0
 Date: Sun, 03 Apr 2005 14:57:45 GMT
@@ -25,26 +25,24 @@ Content-Length: 0
 
 # Client-side
 <client>
-# 
+#
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with unexpected 1xx response
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1115
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1115 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

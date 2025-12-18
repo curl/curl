@@ -19,21 +19,21 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP CHECK mailbox (CUSTOMREQUEST)
- </name>
- <command>
-imap://%HOSTIP:%IMAPPORT/814 -u user:secret -X 'CHECK'
+</name>
+<command>
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -u user:secret -X 'CHECK'
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 814
+A003 SELECT %TESTNUMBER
 A004 CHECK
 A005 LOGOUT
 </protocol>

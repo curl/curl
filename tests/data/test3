@@ -9,7 +9,7 @@ HTTP Basic auth
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html
@@ -17,7 +17,7 @@ Content-Length: 0
 
 this is data even though Content-Length is set to zero
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html
@@ -32,24 +32,22 @@ Content-Length: 0
 <server>
 http
 </server>
- <name>
+<name>
 HTTP POST with auth and contents but with content-length set to 0
- </name>
- <command>
- -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/3
+</name>
+<command>
+ -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol nonewline="yes">
-POST /3 HTTP/1.1
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic ZmFrZTotdXNlcg==
+Authorization: Basic %b64[fake:-user]b64%
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 37
 Content-Type: application/x-www-form-urlencoded

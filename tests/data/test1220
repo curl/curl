@@ -17,13 +17,13 @@ URL
 <server>
 file
 </server>
- <name>
+<name>
 file:// URLs with query string
- </name>
+</name>
 <command option="no-include">
-file://localhost/%PWD/log/test1220.txt?a_query=foobar#afragment
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt?a_query=foobar#afragment
 </command>
-<file name="log/test1220.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 contents in a single file
 </file>
 </client>

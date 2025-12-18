@@ -21,7 +21,7 @@ works
 <servercmd>
 REPLY RETR 550 the file doesn't exist
 COUNT RETR 1
-REPLY SIZE 550 Can't check for file existence
+REPLY SIZE 500 Can't check for file existence
 COUNT SIZE 1
 </servercmd>
 </reply>
@@ -34,28 +34,28 @@ ftp
 <tool>
 lib533
 </tool>
- <name>
+<name>
 FTP RETR a non-existing file then a found one using the multi interface
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/path/546 ftp://%HOSTIP:%FTPPORT/path/546
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 CWD path
 EPSV
 TYPE I
-SIZE 546
-RETR 546
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 546
-RETR 546
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 <stdout>

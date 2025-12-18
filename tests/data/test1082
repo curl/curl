@@ -10,7 +10,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Mon, 28 Jul 2008 14:49:00 GMT
 Server: test-server/fake
@@ -28,26 +28,24 @@ Content-Type: text/plain
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with localhost --interface
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1082 --interface localhost
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -4 --interface 127.0.0.1
 </command>
 <precheck>
-perl -e "print 'Test requires default test client host address' if ( '%CLIENTIP' ne '127.0.0.1' );"
+%PERL -e "print 'Test requires default test client host address' if('%CLIENTIP' ne '127.0.0.1');"
 </precheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1082 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

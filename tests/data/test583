@@ -18,26 +18,23 @@ multi
 sftp
 </server>
 <tool>
-lib583
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 SFTP with multi interface, remove handle early
- </name>
+</name>
 
 # The command here uses 'localhost' just to make sure that curl_multi_perform
 # won't reach too far in the first invoke. When using c-ares at least, the
 # name resolve will cause it to return rather quickly and thus we could trigger
 # the problem we're looking to verify.
- <command>
-sftp://localhost:%SSHPORT%POSIX_PWD/log/upload583.txt %USER:
+<command>
+sftp://localhost:%SSHPORT%SFTP_PWD/%LOGDIR/upload%TESTNUMBER.txt %USER: %LOGDIR/server/curl_client_key.pub %LOGDIR/server/curl_client_key
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 0
 </errorcode>

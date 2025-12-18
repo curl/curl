@@ -10,17 +10,19 @@ documentation
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
- <name>
-Basic man page syntax check
- </name>
+<name>
+Manpage syntax checks
+</name>
 
 <command type="perl">
-%SRCDIR/manpage-syntax.pl %SRCDIR/../docs/*.1  %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3
+%SRCDIR/test1173.pl %SRCDIR/../docs/libcurl/symbols-in-versions %PWD/../docs/*.1  %PWD/../docs/cmdline-opts/*.1 %PWD/../docs/libcurl/*.3 %PWD/../docs/libcurl/opts/*.3
 </command>
 </client>
+
+<verify>
+<stderr>
+ok
+</stderr>
+</verify>
 
 </testcase>

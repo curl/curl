@@ -14,15 +14,12 @@ curlx_tvdiff
 #
 # Client-side
 <client>
-<server>
-none
-</server>
+<features>
+unittest
+</features>
 <name>
 curlx_tvdiff
 </name>
-<tool>
-unit1323
-</tool>
 </client>
 
 #

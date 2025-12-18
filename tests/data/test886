@@ -18,7 +18,7 @@ RFC5034
 AUTH EXTERNAL
 REPLY AUTH +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -35,21 +35,21 @@ body
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 external authentication with initial response without credentials
- </name>
- <command>
-'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/886' --sasl-ir
+</name>
+<command>
+'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/%TESTNUMBER' --sasl-ir
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH EXTERNAL =
-RETR 886
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -21,11 +21,11 @@ PASV
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR PASV
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/161
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -34,14 +34,14 @@ ftp://%HOSTIP:%FTPPORT/161
 <verify>
 # This doesn't send QUIT because of known bug:
 # "7.8 Premature transfer end but healthy control channel"
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 161
-RETR 161
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 </protocol>
 # CURLE_PARTIAL_FILE = 18
 <errorcode>

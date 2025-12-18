@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+documentation
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify that error codes in headers and libcurl-errors.3 are in sync
+</name>
+
+<command type="perl">
+%SRCDIR/test1477.pl %SRCDIR/.. %PWD/..
+</command>
+</client>
+
+<verify>
+<stdout>
+Result
+</stdout>
+</verify>
+
+</testcase>

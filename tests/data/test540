@@ -16,7 +16,7 @@ connection-monitor
 </servercmd>
 
 # this is returned first since we get no proxy-auth
-<data>
+<data crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Content-Length: 33
@@ -25,7 +25,7 @@ And you should ignore this data.
 </data>
 
 # then this is returned when we get proxy-auth
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 21
 Server: no
@@ -33,7 +33,7 @@ Server: no
 Nice proxy auth sir!
 </data1000>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Content-Length: 33
@@ -62,45 +62,44 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib540
+lib%TESTNUMBER
 </tool>
 <features>
 !SSPI
 crypto
+proxy
+digest
 </features>
- <name>
-HTTP proxy auth Digest multi API re-using connection
- </name>
- <command>
-http://test.remote.example.com/path/540 http://%HOSTIP:%HTTPPORT silly:person custom.set.host.name
+<name>
+HTTP proxy auth Digest multi API reusing connection
+</name>
+<command>
+http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT silly:person custom.set.host.name
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol>
-GET http://test.remote.example.com/path/540 HTTP/1.1
+<protocol crlf="headers">
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/540 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/%TESTNUMBER", response="ca507dcf189196b6a5374d3233042261"
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/540 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/540 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/%TESTNUMBER", response="ca507dcf189196b6a5374d3233042261"
 Accept: */*
 Proxy-Connection: Keep-Alive
 

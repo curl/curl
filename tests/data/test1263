@@ -13,17 +13,14 @@ HTTP GET
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
- <name>
+<name>
 HTTP URL with rubbish after IPv6 bracket
- </name>
- <command>
--g "http://[%HOSTIP]test:%HTTPPORT/we/want/1263" "http://[%HOSTIP][%HOSTIP]:%HTTPPORT/we/want/1263" "http://user@[::1]@localhost"
+</name>
+<command>
+-g "http://[%HOSTIP]test:%NOLISTENPORT/we/want/%TESTNUMBER" "http://[%HOSTIP][%HOSTIP]:%NOLISTENPORT/we/want/%TESTNUMBER" "http://user@[::1]@localhost"
 </command>
 </client>
 

@@ -9,8 +9,8 @@ HTTP/0.9
 
 <reply>
 <data nocheck="yes">
-HTTP/1.1 2345 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+HTTP/1.1 999 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,19 +32,19 @@ http
 </server>
 
 <name>
-HTTP GET with 4-digit response code
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1429 --write-out '%{response_code}' --http0.9
+HTTP GET with 999 response code
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{response_code}'
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout nonewline="yes">
-HTTP/1.1 2345 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+<stdout crlf="headers" nonewline="yes">
+HTTP/1.1 999 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -55,14 +55,12 @@ Content-Type: text/html
 Funny-head: yesyes
 
 -foo-
-234
+999
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1429 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

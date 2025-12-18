@@ -12,11 +12,11 @@ FAILURE
 <server>
 scp
 </server>
- <name>
+<name>
 SCP invalid user login (password authentication)
- </name>
- <command>
--u not-a-valid-user: scp://%HOSTIP:%SSHPORT%POSIX_PWD/irrelevant-file --insecure
+</name>
+<command>
+-u not-a-valid-user: scp://%HOSTIP:%SSHPORT%SCP_PWD/irrelevant-file --insecure
 </command>
 </client>
 
@@ -26,8 +26,5 @@ SCP invalid user login (password authentication)
 <errorcode>
 67
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

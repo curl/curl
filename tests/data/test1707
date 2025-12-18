@@ -1,0 +1,24 @@
+<testcase>
+<info>
+<keywords>
+curl
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+manual
+</features>
+
+<name>
+Verify curl -h --insecure
+</name>
+
+<command type="perl">
+%SRCDIR/test1707.pl %CURL --insecure %LOGDIR/help%TESTNUMBER ../docs/cmdline-opts/curl.txt
+</command>
+</client>
+
+</testcase>

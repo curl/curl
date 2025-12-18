@@ -9,18 +9,11 @@ speedcheck
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 verify speedcheck
- </name>
-<tool>
-unit1606
-</tool>
+</name>
 </client>
-
 </testcase>

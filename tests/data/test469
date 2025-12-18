@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+!win32
+</features>
+<server>
+http
+</server>
+<name>
+warn about Unicode quote character
+</name>
+<command>
+-H %hex[%e2%80%9c]hex%host: %HOSTIP:%HTTPPORT/%hex[%e2%80%9c]hex% -s
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr>
+%hex[Warning: The argument '%e2%80%9chost:' starts with a Unicode character. Maybe ASCII ]hex%
+Warning: was intended?
+</stderr>
+</verify>
+</testcase>

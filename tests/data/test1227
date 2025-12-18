@@ -23,25 +23,25 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP fetch a file from the root directory with nocwd
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT//1227 --ftp-method nocwd
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT//%TESTNUMBER --ftp-method nocwd
 </command>
 
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE /1227
-RETR /1227
+SIZE /%TESTNUMBER
+RETR /%TESTNUMBER
 QUIT
 </protocol>
 </verify>

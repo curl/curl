@@ -11,23 +11,17 @@ missing URL
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib501
+lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 simple libcurl attempt operation without URL set
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/501
-</command>
+</name>
 </client>
 
 #

@@ -1,0 +1,41 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+server key check
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+test
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+<name>
+SFTP correct host key
+</name>
+<command>
+--hostpubmd5 %SSHSRVMD5 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/file%TESTNUMBER.txt">
+test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

@@ -1,0 +1,20 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify curl prefix of public symbols in header files
+</name>
+
+<command type="perl">
+%SRCDIR/test1167.pl %SRCDIR/..
+</command>
+</client>
+
+</testcase>

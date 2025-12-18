@@ -19,11 +19,11 @@ FAILURE
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with nothing returned from server
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/37
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -33,12 +33,10 @@ http://%HOSTIP:%HTTPPORT/37
 <errorcode>
 52
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /37 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

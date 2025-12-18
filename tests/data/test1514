@@ -10,11 +10,12 @@ chunked Transfer-Encoding
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Sun, 19 Jan 2014 18:50:58 GMT
 Server: test-server/fake swsclose
 Connection: close
+
 </data>
 </reply>
 
@@ -24,13 +25,13 @@ Connection: close
 http
 </server>
 <tool>
-lib1514
+lib%TESTNUMBER
 </tool>
 <name>
 HTTP POST with read callback and unknown data size
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1514
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -38,8 +39,8 @@ http://%HOSTIP:%HTTPPORT/1514
 <verify>
 # Content-Length header is not present
 # Transfer-Encoding header is added automatically
-<protocol>
-POST /1514 HTTP/1.1
+<protocol crlf="yes">
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked

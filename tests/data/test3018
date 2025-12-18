@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+MQTT
+MQTT SUBSCRIBE
+--max-filesize
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+hello
+</data>
+<datacheck hex="yes">
+00 04 33 30 31 38   68 65 6c 6c 6f 5b 4c 46 5d 0a
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+mqtt
+</features>
+<server>
+mqtt
+</server>
+<name>
+MQTT SUBSCRIBE with PUBLISH larger than --max-filesize
+</name>
+<command option="binary-trace">
+mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER --max-filesize 11
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# These are hexadecimal protocol dumps from the client
+#
+# Strip out the random part of the client id from the CONNECT message
+# before comparison
+<strippart>
+s/^(.* 00044d5154540402003c000c6375726c).*/$1/
+</strippart>
+# on Windows the disconnect is never seen - no idea why
+<strip>
+^server DISCONNECT 0 e000
+</strip>
+<protocol>
+client CONNECT 18 00044d5154540402003c000c6375726c
+server CONNACK 2 20020000
+client SUBSCRIBE 9 000100043330313800
+server SUBACK 3 9003000100
+server PUBLISH c 300c00043330313868656c6c6f0a
+</protocol>
+
+# 63 is CURLE_FILESIZE_EXCEEDED
+<errorcode>
+63
+</errorcode>
+</verify>
+</testcase>

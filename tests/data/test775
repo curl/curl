@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP NTLM auth
+NTLM
+</keywords>
+</info>
+# Server-side
+<reply>
+
+# This is supposed to be returned when the server gets a first
+# Authorization: NTLM line passed-in from the client
+<data1001 crlf="headers">
+HTTP/1.1 401 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+This is not the real page either!
+</data1001>
+
+<datacheck crlf="headers">
+HTTP/1.1 401 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<features>
+NTLM
+SSL
+!SSPI
+</features>
+<server>
+http
+</server>
+<name>
+HTTP with NTLM with too long user name
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser%repeat[1100 x A]%:testpass --ntlm
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+100
+</errorcode>
+</verify>
+</testcase>

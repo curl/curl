@@ -1,5 +1,5 @@
-# Mostly a duplicate of test168
 <testcase>
+# Mostly a duplicate of test168
 <info>
 <keywords>
 HTTP
@@ -61,39 +61,38 @@ http
 <features>
 !SSPI
 crypto
+proxy
+digest
 </features>
- <name>
+<name>
 HTTP with proxy Digest and site Digest with creds in URLs
- </name>
- <command>
-http://digest:alot@data.from.server.requiring.digest.hohoho.com/335 --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
+</name>
+<command>
+http://digest:a-lot@data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol>
-GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+<protocol crlf="headers">
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="f61609cd8f5bb205ef4e169b2c5626cb"
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
-Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/335", response="08a2e2e684047f4219a38ddc189ac00c"
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="f61609cd8f5bb205ef4e169b2c5626cb"
+Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="ea0f4cb7a119a1a6f6c6c6c2e4190860"
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

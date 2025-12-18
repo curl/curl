@@ -1,4 +1,5 @@
-*.html
-*.pdf
-*.3.dist
-libcurl-symbols.3
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+libcurl-symbols.md

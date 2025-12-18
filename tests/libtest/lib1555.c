@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /*
  * Verify that some API functions are locked from being called inside callback
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-static CURL *curl;
+static CURL *t1555_curl;
 
 static int progressCallback(void *arg,
                             double dltotal,
@@ -35,7 +37,7 @@ static int progressCallback(void *arg,
                             double ultotal,
                             double ulnow)
 {
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   char buffer[256];
   size_t n = 0;
   (void)arg;
@@ -43,36 +45,36 @@ static int progressCallback(void *arg,
   (void)dlnow;
   (void)ultotal;
   (void)ulnow;
-  res = curl_easy_recv(curl, buffer, 256, &n);
-  printf("curl_easy_recv returned %d\n", res);
-  res = curl_easy_send(curl, buffer, n, &n);
-  printf("curl_easy_send returned %d\n", res);
+  res = curl_easy_recv(t1555_curl, buffer, 256, &n);
+  curl_mprintf("curl_easy_recv returned %d\n", res);
+  res = curl_easy_send(t1555_curl, buffer, n, &n);
+  curl_mprintf("curl_easy_send returned %d\n", res);
 
   return 1;
 }
 
-int test(char *URL)
+static CURLcode test_lib1555(const char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(curl);
+  easy_init(t1555_curl);
 
-  easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_TIMEOUT, (long)7);
-  easy_setopt(curl, CURLOPT_NOSIGNAL, (long)1);
-  easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progressCallback);
-  easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
-  easy_setopt(curl, CURLOPT_NOPROGRESS, (long)0);
+  easy_setopt(t1555_curl, CURLOPT_URL, URL);
+  easy_setopt(t1555_curl, CURLOPT_TIMEOUT, 7L);
+  easy_setopt(t1555_curl, CURLOPT_NOSIGNAL, 1L);
+  easy_setopt(t1555_curl, CURLOPT_PROGRESSFUNCTION, progressCallback);
+  easy_setopt(t1555_curl, CURLOPT_PROGRESSDATA, NULL);
+  easy_setopt(t1555_curl, CURLOPT_NOPROGRESS, 0L);
 
-  res = curl_easy_perform(curl);
+  res = curl_easy_perform(t1555_curl);
 
 test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_easy_cleanup(curl);
+  curl_easy_cleanup(t1555_curl);
   curl_global_cleanup();
 
   return res;

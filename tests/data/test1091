@@ -20,26 +20,27 @@ bla bla bla
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP URL with type=i
- </name>
- <command>
-"ftp://%HOSTIP:%FTPPORT/%2ftmp/moo/1091;type=i" --use-ascii
+</name>
+<command>
+"ftp://%HOSTIP:%FTPPORT/%2ftmp/moo/%TESTNUMBER;type=i" --use-ascii
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD /tmp
+CWD /
+CWD tmp
 CWD moo
 EPSV
 TYPE I
-SIZE 1091
-RETR 1091
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

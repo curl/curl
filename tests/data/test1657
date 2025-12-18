@@ -1,0 +1,19 @@
+<testcase>
+<info>
+<keywords>
+unittest
+Curl_x509_getASN1Element
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+Curl_x509_getASN1Element unit tests
+</name>
+</client>
+</testcase>

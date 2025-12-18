@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+FETCH
+--login-options
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+<name>
+IMAP with --login-options 'AUTH=dummy' (failing)
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/895/;MAILINDEX=1' -u '"user:sec"ret{' --login-options 'AUTH=dummy'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 3 == CURLE_URL_MALFORMAT
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

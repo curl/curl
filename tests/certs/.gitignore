@@ -1,0 +1,14 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+test-*.crl
+test-*.crt
+test-*.csr
+test-*.der
+test-*.key*
+test-*.pem
+test-ca.cacert
+test-ca.cnt*
+test-ca.db*
+test-ca.raw*
+test-ca.srl

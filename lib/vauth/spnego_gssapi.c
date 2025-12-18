@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,27 +18,34 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  * RFC4178 Simple and Protected GSS-API Negotiation Mechanism
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && defined(USE_SPNEGO)
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "urldata.h"
-#include "curl_base64.h"
-#include "curl_gssapi.h"
-#include "warnless.h"
-#include "curl_multibyte.h"
-#include "sendf.h"
+#include "vauth.h"
+#include "../urldata.h"
+#include "../curlx/base64.h"
+#include "../curl_gssapi.h"
+#include "../curlx/warnless.h"
+#include "../curlx/multibyte.h"
+#include "../sendf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 /*
  * Curl_auth_is_spnego_supported()
@@ -63,10 +70,10 @@ bool Curl_auth_is_spnego_supported(void)
  * Parameters:
  *
  * data        [in]     - The session handle.
- * userp       [in]     - The user name in the format User or Domain\User.
+ * userp       [in]     - The username in the format User or Domain\User.
  * passwdp     [in]     - The user's password.
  * service     [in]     - The service type such as http, smtp, pop or imap.
- * host        [in]     - The host name.
+ * host        [in]     - The hostname.
  * chlg64      [in]     - The optional base64 encoded challenge message.
  * nego        [in/out] - The Negotiate data struct being used and modified.
  *
@@ -86,22 +93,27 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   OM_uint32 major_status;
   OM_uint32 minor_status;
   OM_uint32 unused_status;
-  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+  gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
+#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+  struct gss_channel_bindings_struct chan;
+#endif
 
-  (void) user;
-  (void) password;
+  (void)user;
+  (void)password;
 
   if(nego->context && nego->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server
-     * rejected it (since we're again here). Exit with an error since we
-     * can't invent anything better */
+     * rejected it (since we are again here). Exit with an error since we
+     * cannot invent anything better */
     Curl_auth_cleanup_spnego(nego);
     return CURLE_LOGIN_DENIED;
   }
 
   if(!nego->spn) {
+    gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
+
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
@@ -130,15 +142,14 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
-      result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+      result = curlx_base64_decode(chlg64, &chlg, &chlglen);
       if(result)
         return result;
     }
 
     /* Ensure we have a valid challenge message */
     if(!chlg) {
-      infof(data, "SPNEGO handshake failure (empty challenge message)\n");
-
+      infof(data, "SPNEGO handshake failure (empty challenge message)");
       return CURLE_BAD_CONTENT_ENCODING;
     }
 
@@ -147,13 +158,23 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     input_token.length = chlglen;
   }
 
+  /* Set channel binding data if available */
+#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+  if(curlx_dyn_len(&nego->channel_binding_data)) {
+    memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
+    chan.application_data.length = curlx_dyn_len(&nego->channel_binding_data);
+    chan.application_data.value = curlx_dyn_ptr(&nego->channel_binding_data);
+    chan_bindings = &chan;
+  }
+#endif
+
   /* Generate our challenge-response message */
   major_status = Curl_gss_init_sec_context(data,
                                            &minor_status,
                                            &nego->context,
                                            nego->spn,
                                            &Curl_spnego_mech_oid,
-                                           GSS_C_NO_CHANNEL_BINDINGS,
+                                           chan_bindings,
                                            &input_token,
                                            &output_token,
                                            TRUE,
@@ -205,18 +226,16 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
-                                         struct negotiatedata *nego,
+CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
                                          char **outptr, size_t *outlen)
 {
   CURLcode result;
   OM_uint32 minor_status;
 
   /* Base64 encode the already generated response */
-  result = Curl_base64_encode(data,
-                              nego->output_token.value,
-                              nego->output_token.length,
-                              outptr, outlen);
+  result = curlx_base64_encode(nego->output_token.value,
+                               nego->output_token.length,
+                               outptr, outlen);
 
   if(result) {
     gss_release_buffer(&minor_status, &nego->output_token);
@@ -253,7 +272,8 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 
   /* Free our security context */
   if(nego->context != GSS_C_NO_CONTEXT) {
-    gss_delete_sec_context(&minor_status, &nego->context, GSS_C_NO_BUFFER);
+    Curl_gss_delete_sec_context(&minor_status, &nego->context,
+                                GSS_C_NO_BUFFER);
     nego->context = GSS_C_NO_CONTEXT;
   }
 
@@ -262,7 +282,6 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
     gss_release_buffer(&minor_status, &nego->output_token);
     nego->output_token.value = NULL;
     nego->output_token.length = 0;
-
   }
 
   /* Free the SPN */
@@ -278,5 +297,9 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->havenegdata = FALSE;
   nego->havemultiplerequests = FALSE;
 }
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif /* HAVE_GSSAPI && USE_SPNEGO */

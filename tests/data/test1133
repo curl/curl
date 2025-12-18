@@ -7,9 +7,9 @@ HTTP FORMPOST
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 10
 
@@ -19,17 +19,20 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP RFC1867-type formposting with filename/data contains ',', ';', '"'
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/we/want/1133 -F "file=@\"log/test1133,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"log/test1133,and;.txt"' -F 'file3=@"log/test1133,and;.txt";type=m/f,"log/test1133,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "file=@\"%LOGDIR/test%TESTNUMBER,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"%LOGDIR/test%TESTNUMBER,and;.txt"' -F 'file3=@"%LOGDIR/test%TESTNUMBER,and;.txt";type=m/f,"%LOGDIR/test%TESTNUMBER,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
 </command>
 # We create this file before the command is invoked!
-<file name="log/test1133,and;.txt">
+<file name="%LOGDIR/test%TESTNUMBER,and;.txt">
 foo bar
 This is a bar foo
 bar
@@ -40,15 +43,14 @@ foo
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
+^(Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
 </strip>
 <protocol>
-POST /we/want/1133 HTTP/1.1
-User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 1264
-Expect: 100-continue
+Content-Length: 1324
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
 
 ------------------------------24e78000bd32
@@ -61,7 +63,7 @@ bar
 foo
 
 ------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="test1133,and;.txt"
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER,and;.txt"
 Content-Type: text/plain
 
 foo bar
@@ -73,7 +75,7 @@ foo
 Content-Disposition: form-data; name="file3"
 Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
 
-Content-Disposition: attachment; filename="test1133,and;.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"
 Content-Type: m/f
 
 foo bar
@@ -81,7 +83,7 @@ This is a bar foo
 bar
 foo
 
-Content-Disposition: attachment; filename="test1133,and;.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"
 Content-Type: text/plain
 
 foo bar

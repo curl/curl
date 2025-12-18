@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+secure
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Content-Type: text/html
+Funny-head: yesyes
+Set-Cookie: foobar=name; path=/; secure
+
+boo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP secure cookies over localhost
+</name>
+
+<setenv>
+TZ=GMT
+</setenv>
+<command>
+-4 http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
+</command>
+<features>
+cookies
+local-http
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: localhost:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: localhost:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: foobar=name
+
+</protocol>
+</verify>
+</testcase>

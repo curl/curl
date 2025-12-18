@@ -1,0 +1,28 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+symbols-in-versions
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+
+<name>
+Verify that typecheck-gcc and curl.h are in sync
+</name>
+
+<command type="perl">
+%SRCDIR/test745.pl %SRCDIR/..
+</command>
+</client>
+
+<verify>
+<stdout>
+OK
+</stdout>
+</verify>
+
+</testcase>

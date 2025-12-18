@@ -10,7 +10,7 @@ FETCH
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -28,27 +28,28 @@ body
 #
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP cleanup before a connection was created
- </name>
+</name>
 # tool is what to use instead of 'curl'
 <tool>
-lib1553
+lib%TESTNUMBER
 </tool>
 
 # this MUST use a host name that doesn't resolve
 <command>
-imap://non-existing-host.haxx.se:%IMAPPORT/1553
+imap://non-existing-host.haxx.se:%IMAPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 </verify>
 </testcase>

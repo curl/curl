@@ -18,15 +18,15 @@ multi
 sftp
 </server>
 <tool>
-lib582
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 SFTP upload using multi interface
- </name>
- <command>
-Sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/upload582.txt %PWD/log/file582.txt %USER:
+</name>
+<command>
+Sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/upload%TESTNUMBER.txt %PWD/%LOGDIR/file%TESTNUMBER.txt %USER: %LOGDIR/server/curl_client_key.pub %LOGDIR/server/curl_client_key
 </command>
-<file name="log/file582.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Moooooooooooo
  upload this
 </file>
@@ -34,14 +34,7 @@ Moooooooooooo
 
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
-<strip>
-</strip>
-<protocol>
-</protocol>
-<file name="log/file582.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Moooooooooooo
  upload this
 </file>

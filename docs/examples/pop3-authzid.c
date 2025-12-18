@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example showing how to retrieve e-mails from a shared mailbox
+ * Retrieve emails from a shared POP3 mailbox
  * </DESC>
  */
 
@@ -37,7 +39,10 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -45,13 +50,13 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* Set the authorisation identity (identity to act as) */
+    /* Set the authorization identity (identity to act as) */
     curl_easy_setopt(curl, CURLOPT_SASL_AUTHZID, "shared-mailbox");
 
     /* Force PLAIN authentication */
     curl_easy_setopt(curl, CURLOPT_LOGIN_OPTIONS, "AUTH=PLAIN");
 
-    /* This will retrieve message 1 from the user's mailbox */
+    /* This retrieves message 1 from the user's mailbox */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
 
     /* Perform the retr */
@@ -65,6 +70,8 @@ int main(void)
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

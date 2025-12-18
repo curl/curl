@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,71 +20,88 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
+#include "llist.h"
+#include "hash.h"
 #include "conncache.h"
-#include "curl/multi.h"
+#include "cshutdn.h"
+#include "hostip.h"
+#include "multi_ev.h"
+#include "multi_ntfy.h"
 #include "psl.h"
+#include "socketpair.h"
+#include "uint-bset.h"
+#include "uint-spbset.h"
+#include "uint-table.h"
+
+struct connectdata;
+struct Curl_easy;
 
 struct Curl_message {
-  struct curl_llist_element list;
+  struct Curl_llist_node list;
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
 };
 
-/* NOTE: if you add a state here, add the name to the statename[] array as
-   well!
-*/
+/* NOTE: if you add a state here, add the name to the statenames[] array
+ * in curl_trc.c as well!
+ */
 typedef enum {
-  CURLM_STATE_INIT,         /* 0 - start in this state */
-  CURLM_STATE_CONNECT_PEND, /* 1 - no connections, waiting for one */
-  CURLM_STATE_CONNECT,      /* 2 - resolve/connect has been sent off */
-  CURLM_STATE_WAITRESOLVE,  /* 3 - awaiting the resolve to finalize */
-  CURLM_STATE_WAITCONNECT,  /* 4 - awaiting the TCP connect to finalize */
-  CURLM_STATE_WAITPROXYCONNECT, /* 5 - awaiting HTTPS proxy SSL initialization
-                                   to complete and/or proxy CONNECT to
-                                   finalize */
-  CURLM_STATE_SENDPROTOCONNECT, /* 6 - initiate protocol connect procedure */
-  CURLM_STATE_PROTOCONNECT, /* 7 - completing the protocol-specific connect
-                                   phase */
-  CURLM_STATE_DO,           /* 8 - start send off the request (part 1) */
-  CURLM_STATE_DOING,        /* 9 - sending off the request (part 1) */
-  CURLM_STATE_DO_MORE,      /* 10 - send off the request (part 2) */
-  CURLM_STATE_DO_DONE,      /* 11 - done sending off request */
-  CURLM_STATE_PERFORM,      /* 12 - transfer data */
-  CURLM_STATE_TOOFAST,      /* 13 - wait because limit-rate exceeded */
-  CURLM_STATE_DONE,         /* 14 - post data transfer operation */
-  CURLM_STATE_COMPLETED,    /* 15 - operation complete */
-  CURLM_STATE_MSGSENT,      /* 16 - the operation complete message is sent */
-  CURLM_STATE_LAST          /* 17 - not a true state, never use this */
+  MSTATE_INIT,         /* 0 - start in this state */
+  MSTATE_PENDING,      /* 1 - no connections, waiting for one */
+  MSTATE_SETUP,        /* 2 - start a new transfer */
+  MSTATE_CONNECT,      /* 3 - resolve/connect has been sent off */
+  MSTATE_RESOLVING,    /* 4 - awaiting the resolve to finalize */
+  MSTATE_CONNECTING,   /* 5 - awaiting the TCP connect to finalize */
+  MSTATE_TUNNELING,    /* 6 - awaiting HTTPS proxy SSL initialization to
+                          complete and/or proxy CONNECT to finalize */
+  MSTATE_PROTOCONNECT, /* 7 - initiate protocol connect procedure */
+  MSTATE_PROTOCONNECTING, /* 8 - completing the protocol-specific connect
+                             phase */
+  MSTATE_DO,           /* 9 - start send off the request (part 1) */
+  MSTATE_DOING,        /* 10 - sending off the request (part 1) */
+  MSTATE_DOING_MORE,   /* 11 - send off the request (part 2) */
+  MSTATE_DID,          /* 12 - done sending off request */
+  MSTATE_PERFORMING,   /* 13 - transfer data */
+  MSTATE_RATELIMITING, /* 14 - wait because limit-rate exceeded */
+  MSTATE_DONE,         /* 15 - post data transfer operation */
+  MSTATE_COMPLETED,    /* 16 - operation complete */
+  MSTATE_MSGSENT,      /* 17 - the operation complete message is sent */
+  MSTATE_LAST          /* 18 - not a true state, never use this */
 } CURLMstate;
 
-/* we support N sockets per easy handle. Set the corresponding bit to what
-   action we should wait for */
-#define MAX_SOCKSPEREASYHANDLE 5
-#define GETSOCK_READABLE (0x00ff)
-#define GETSOCK_WRITABLE (0xff00)
-
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
+
+#ifndef CURL_DISABLE_SOCKETPAIR
+#define ENABLE_WAKEUP
+#endif
+
+/* value for MAXIMUM CONCURRENT STREAMS upper limit */
+#define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
-  long type;
+  unsigned int magic;
 
-  /* We have a doubly-linked circular list with easy handles */
-  struct Curl_easy *easyp;
-  struct Curl_easy *easylp; /* last node */
+  unsigned int xfers_alive; /* amount of added transfers that have
+                               not yet reached COMPLETE state */
+  curl_off_t xfers_total_ever; /* total of added transfers, ever. */
+  struct uint_tbl xfers; /* transfers added to this multi */
+  /* Each transfer's mid may be present in at most one of these */
+  struct uint_bset process; /* transfer being processed */
+  struct uint_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
+  struct uint_bset pending; /* transfers in waiting (conn limit etc.) */
+  struct uint_bset msgsent; /* transfers done with message for application */
 
-  int num_easy; /* amount of entries in the linked list above. */
-  int num_alive; /* amount of easy handles that are added but have not yet
-                    reached COMPLETE state */
+  struct Curl_llist msglist; /* a list of messages from completed transfers */
 
-  struct curl_llist msglist; /* a list of messages from completed transfers */
-
-  struct curl_llist pending; /* Curl_easys that are in the
-                                CURLM_STATE_CONNECT_PEND state */
+  struct Curl_easy *admin; /* internal easy handle for admin operations.
+                              gets assigned `mid` 0 on multi init */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;
@@ -94,8 +111,8 @@ struct Curl_multi {
   curl_push_callback push_cb;
   void *push_userp;
 
-  /* Hostname cache */
-  struct curl_hash hostcache;
+  struct Curl_dnscache dnscache; /* DNS cache */
+  struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
@@ -106,21 +123,31 @@ struct Curl_multi {
      times of all currently set timers */
   struct Curl_tree *timetree;
 
-  /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
-     the pluralis form, there can be more than one easy handle waiting on the
-     same actual socket) */
-  struct curl_hash sockhash;
+  /* buffer used for transfer data, lazy initialized */
+  char *xfer_buf; /* the actual buffer */
+  size_t xfer_buf_len;      /* the allocated length */
+  /* buffer used for upload data, lazy initialized */
+  char *xfer_ulbuf; /* the actual buffer */
+  size_t xfer_ulbuf_len;      /* the allocated length */
+  /* buffer used for socket I/O operations, lazy initialized */
+  char *xfer_sockbuf; /* the actual buffer */
+  size_t xfer_sockbuf_len; /* the allocated length */
 
-  /* multiplexing wanted */
-  bool multiplexing;
+  /* multi event related things */
+  struct curl_multi_ev ev;
+  /* multi notification related things */
+  struct curl_multi_ntfy ntfy;
 
-  bool recheckstate; /* see Curl_multi_connchanged */
+  /* `proto_hash` is a general key-value store for protocol implementations
+   * with the lifetime of the multi handle. The number of elements kept here
+   * should be in the order of supported protocols (and sub-protocols like
+   * TLS), *not* in the order of connections or current transfers!
+   * Elements need to be added with their own destructor to be invoked when
+   * the multi handle is cleaned up (see Curl_hash_add2()).*/
+  struct Curl_hash proto_hash;
 
-  /* Shared connection cache (bundles)*/
-  struct conncache conn_cache;
-
-  long maxconnects; /* if >0, a fixed limit of the maximum number of entries
-                       we're allowed to grow the connection cache to */
+  struct cshutdn cshutdn; /* connection shutdown handling */
+  struct cpool cpool;     /* connection pool (bundles) */
 
   long max_host_connections; /* if >0, a fixed limit of the maximum number
                                 of connections per host */
@@ -131,9 +158,41 @@ struct Curl_multi {
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
-  struct curltime timer_lastcall; /* the fixed time for the timeout for the
-                                    previous callback */
-  bool in_callback;            /* true while executing a callback */
+  long last_timeout_ms;        /* the last timeout value set via timer_cb */
+  struct curltime last_expire_ts; /* timestamp of last expiry */
+
+#ifdef USE_WINSOCK
+  WSAEVENT wsa_event; /* Winsock event used for waits */
+#else
+#ifdef ENABLE_WAKEUP
+  curl_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for
+                                   wakeup 0 is used for read, 1 is used
+                                   for write */
+#endif
+#endif
+  unsigned int max_concurrent_streams;
+  unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
+                               entries we are allowed to grow the connection
+                               cache to */
+#define IPV6_UNKNOWN 0
+#define IPV6_DEAD    1
+#define IPV6_WORKS   2
+  unsigned char ipv6_up;       /* IPV6_* defined */
+  BIT(multiplexing);           /* multiplexing wanted */
+  BIT(recheckstate);           /* see Curl_multi_connchanged */
+  BIT(in_callback);            /* true while executing a callback */
+  BIT(in_ntfy_callback);       /* true while dispatching notifications */
+#ifdef USE_OPENSSL
+  BIT(ssl_seeded);
+#endif
+  BIT(dead); /* a callback returned error, everything needs to crash and
+                burn */
+  BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
+  BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
+  BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */
+#ifdef DEBUGBUILD
+  BIT(warned);                 /* true after user warned of DEBUGBUILD */
+#endif
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

@@ -10,60 +10,74 @@ FORM
 #
 # Server-side
 <reply>
-<data>
-HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 301 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
+Location: /%TESTNUMBER0002
 
 hello
 </data>
+<data2 crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data2>
 </reply>
 
 # Client-side
 <client>
+<features>
+form-api
+</features>
 <server>
 http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib650
+lib%TESTNUMBER
 </tool>
 
- <name>
-HTTP formpost using form API
- </name>
+<name>
+HTTP formpost using form API - with redirect and re-POST
+</name>
 <stdin>
  Some data from stdin
 </stdin>
- <command>
-http://%HOSTIP:%HTTPPORT/650 log/test650.filedata
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/test%TESTNUMBER.filedata
 </command>
-<file name="log/test650.filedata">
+<file name="%LOGDIR/test%TESTNUMBER.filedata">
 This is data from a file.
 </file>
 </client>
 
 #
-# Verify data after the test has been "shot"
+# Verify data bbter the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 # Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /650 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-60a
+385
 ------------------------------
 Content-Disposition: form-data; name="fieldname"
 Content-Type: text/plain
@@ -80,21 +94,25 @@ Content-Disposition: form-data; name="multifile"
 Content-Type: multipart/mixed; boundary=----------------------------
 
 ------------------------------
-Content-Disposition: attachment; filename="test650.filedata"
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: application/octet-stream
 
 This is data from a file.
 
 ------------------------------
-Content-Disposition: attachment; filename="test650.filedata"
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: text/whatever
 
+
+ab
 This is data from a file.
 
 ------------------------------
-Content-Disposition: attachment; filename="test650.filedata"
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: text/whatever
 
+
+bb
 This is data from a file.
 
 --------------------------------
@@ -102,17 +120,95 @@ This is data from a file.
 ------------------------------
 Content-Disposition: form-data; name="filecontents"
 
+
+11b
 This is data from a file.
 
 ------------------------------
 Content-Disposition: form-data; name="formlength"
 
-1367
+1433
 ------------------------------
 Content-Disposition: form-data; name="standardinput"
 Content-Type: application/octet-stream
 
+
+16
  Some data from stdin
+
+36
+
+--------------------------------
+
+0
+
+POST /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: multipart/form-data; boundary=----------------------------
+Expect: 100-continue
+
+385
+------------------------------
+Content-Disposition: form-data; name="fieldname"
+Content-Type: text/plain
+X-customheader-1: Header 1 data
+X-customheader-2: Header 2 data
+
+this is what we post to the silly web server
+------------------------------
+Content-Disposition: form-data; name="fieldnam"
+
+uhis is what we post to the silly web serve
+------------------------------
+Content-Disposition: form-data; name="multifile"
+Content-Type: multipart/mixed; boundary=----------------------------
+
+------------------------------
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
+Content-Type: application/octet-stream
+
+This is data from a file.
+
+------------------------------
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
+Content-Type: text/whatever
+
+
+ab
+This is data from a file.
+
+------------------------------
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
+Content-Type: text/whatever
+
+
+bb
+This is data from a file.
+
+--------------------------------
+
+------------------------------
+Content-Disposition: form-data; name="filecontents"
+
+
+11b
+This is data from a file.
+
+------------------------------
+Content-Disposition: form-data; name="formlength"
+
+1433
+------------------------------
+Content-Disposition: form-data; name="standardinput"
+Content-Type: application/octet-stream
+
+
+16
+ Some data from stdin
+
+36
 
 --------------------------------
 

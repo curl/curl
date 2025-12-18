@@ -27,26 +27,26 @@ REPLY PRET 200 fine
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR PASV with PRET
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/1107 --ftp-pret
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-pret
 </command>
 
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
-PRET RETR 1107
+PRET RETR %TESTNUMBER
 EPSV
 TYPE I
-SIZE 1107
-RETR 1107
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

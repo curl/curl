@@ -1,0 +1,19 @@
+<testcase>
+<info>
+<keywords>
+unittest
+size
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+struct size checks
+</name>
+</client>
+</testcase>

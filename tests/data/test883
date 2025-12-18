@@ -18,7 +18,7 @@ AUTH EXTERNAL
 REPLY AUTH +
 REPLY dXNlcg== +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -35,22 +35,22 @@ body
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 external authentication
- </name>
- <command>
-'pop3://user;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/883'
+</name>
+<command>
+'pop3://user;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/%TESTNUMBER'
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH EXTERNAL
 dXNlcg==
-RETR 883
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

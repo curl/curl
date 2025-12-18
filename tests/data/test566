@@ -8,9 +8,9 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -30,25 +30,25 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib566
+lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP GET with CURLINFO_CONTENT_LENGTH_DOWNLOAD and 0 bytes transfer
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/566 log/ip566
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
-</client> 
+</client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip566">
-CL: 0
+<file name="%LOGDIR/ip%TESTNUMBER">
+CL 0
 </file>
-<protocol>
-GET /566 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

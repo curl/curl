@@ -1,0 +1,20 @@
+<testcase>
+<info>
+<keywords>
+unittest
+SHA-512/256
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+sha512-256
+</features>
+<name>
+SHA-512/256 unit tests
+</name>
+</client>
+</testcase>

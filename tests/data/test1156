@@ -11,7 +11,7 @@ Range
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Type: text/html
 Content-Length: 5
@@ -19,7 +19,7 @@ Content-Length: 5
 body
 </data>
 
-<data1 nocheck="yes">
+<data1 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Type: text/html
 Content-Length: 5
@@ -28,7 +28,7 @@ Content-Range: bytes 3/7
 body
 </data1>
 
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Content-Type: text/html
 Content-Length: 5
@@ -36,7 +36,7 @@ Content-Length: 5
 body
 </data2>
 
-<data3 nocheck="yes">
+<data3 crlf="headers" nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Content-Type: text/html
 Content-Length: 5
@@ -52,20 +52,23 @@ body
 http
 </server>
 <tool>
-lib1156
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP resume/range fail range-error content-range combinations
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/want/1156
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
+<stdout>
 0
-</errorcode>
+</stdout>
+<limits>
+Allocations: 1300
+</limits>
 </verify>
 </testcase>

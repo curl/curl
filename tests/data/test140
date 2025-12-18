@@ -20,22 +20,22 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download file with -z, expected to not transfer
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/140 -z "1 jan 2004"
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -z "1 jan 2004"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 CWD blalbla
-MDTM 140
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

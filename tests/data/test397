@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+compressed
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+# Length of not-encoded content is 16512 what is greater than default value of
+# CURL_MAX_WRITE_SIZE (16384)
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Content-Encoding: zstd
+Content-Length: 47
+
+%hex[%28%b5%2f%fd%64%80%3f%0d%01%00%88%30%31%32%33%34%35%36%37%38%39%41%42%43%44%45%46]hex%
+%hex[%04%00%7c%9f%60%78%00%04%1a%1d%d2%ab%4d%3a%97%82%af%b9%9c]hex%
+</data>
+
+<datacheck crlf="headers" nonewline="yes">
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Content-Encoding: zstd
+Content-Length: 47
+
+%repeat[128 x 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF%0a]%
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+zstd
+</features>
+<server>
+http
+</server>
+<name>
+HTTP GET zstd compressed content of size more than CURL_MAX_WRITE_SIZE
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+</verify>
+</testcase>

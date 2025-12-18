@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -47,7 +49,22 @@ typedef enum {
   CURLUE_NO_HOST,             /* 14 */
   CURLUE_NO_PORT,             /* 15 */
   CURLUE_NO_QUERY,            /* 16 */
-  CURLUE_NO_FRAGMENT          /* 17 */
+  CURLUE_NO_FRAGMENT,         /* 17 */
+  CURLUE_NO_ZONEID,           /* 18 */
+  CURLUE_BAD_FILE_URL,        /* 19 */
+  CURLUE_BAD_FRAGMENT,        /* 20 */
+  CURLUE_BAD_HOSTNAME,        /* 21 */
+  CURLUE_BAD_IPV6,            /* 22 */
+  CURLUE_BAD_LOGIN,           /* 23 */
+  CURLUE_BAD_PASSWORD,        /* 24 */
+  CURLUE_BAD_PATH,            /* 25 */
+  CURLUE_BAD_QUERY,           /* 26 */
+  CURLUE_BAD_SCHEME,          /* 27 */
+  CURLUE_BAD_SLASHES,         /* 28 */
+  CURLUE_BAD_USER,            /* 29 */
+  CURLUE_LACKS_IDN,           /* 30 */
+  CURLUE_TOO_LARGE,           /* 31 */
+  CURLUE_LAST
 } CURLUcode;
 
 typedef enum {
@@ -77,6 +94,15 @@ typedef enum {
 #define CURLU_URLENCODE (1<<7)          /* URL encode on set */
 #define CURLU_APPENDQUERY (1<<8)        /* append a form style part */
 #define CURLU_GUESS_SCHEME (1<<9)       /* legacy curl-style guessing */
+#define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
+                                           scheme is unknown. */
+#define CURLU_ALLOW_SPACE (1<<11)       /* Allow spaces in the URL */
+#define CURLU_PUNYCODE (1<<12)          /* get the hostname in punycode */
+#define CURLU_PUNY2IDN (1<<13)          /* punycode => IDN conversion */
+#define CURLU_GET_EMPTY (1<<14)         /* allow empty queries and fragments
+                                           when extracting the URL or the
+                                           components */
+#define CURLU_NO_GUESS_SCHEME (1<<15)   /* for get, do not accept a guess */
 
 typedef struct Curl_URL CURLU;
 
@@ -97,14 +123,14 @@ CURL_EXTERN void curl_url_cleanup(CURLU *handle);
  * curl_url_dup() duplicates a CURLU handle and returns a new copy. The new
  * handle must also be freed with curl_url_cleanup().
  */
-CURL_EXTERN CURLU *curl_url_dup(CURLU *in);
+CURL_EXTERN CURLU *curl_url_dup(const CURLU *in);
 
 /*
  * curl_url_get() extracts a specific part of the URL from a CURLU
  * handle. Returns error code. The returned pointer MUST be freed with
  * curl_free() afterwards.
  */
-CURL_EXTERN CURLUcode curl_url_get(CURLU *handle, CURLUPart what,
+CURL_EXTERN CURLUcode curl_url_get(const CURLU *handle, CURLUPart what,
                                    char **part, unsigned int flags);
 
 /*
@@ -115,6 +141,12 @@ CURL_EXTERN CURLUcode curl_url_get(CURLU *handle, CURLUPart what,
 CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
                                    const char *part, unsigned int flags);
 
+/*
+ * curl_url_strerror() turns a CURLUcode value into the equivalent human
+ * readable error string. This is useful for printing meaningful error
+ * messages.
+ */
+CURL_EXTERN const char *curl_url_strerror(CURLUcode);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

@@ -9,7 +9,7 @@ HTTP PUT
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 blablabla
@@ -22,13 +22,13 @@ blablabla
 <server>
 http
 </server>
- <name>
+<name>
 simple HTTP PUT from file
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/we/want/10 -T log/test10.txt
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test10.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -43,15 +43,12 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-PUT /we/want/10 HTTP/1.1
+<protocol crlf="headers">
+PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
-Expect: 100-continue
 
 Weird
      file

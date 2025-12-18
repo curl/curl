@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+globbing
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+too many {} globs
+</name>
+<command>
+http://testingthis/{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+3
+</errorcode>
+<stderr mode="text">
+curl: (3) too many {} sets in URL position 403:
+http://testingthis/{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a
+</stderr>
+</verify>
+</testcase>

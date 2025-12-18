@@ -17,11 +17,11 @@ REPLY USER 314 bluah you fewl!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download, failed login: USER not valid
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/113
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -30,7 +30,7 @@ ftp://%HOSTIP:%FTPPORT/113
 <errorcode>
 67
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 </protocol>
 </verify>

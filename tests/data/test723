@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+IPFS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ipfs
+</features>
+<server>
+http
+</server>
+<name>
+IPFS with malformed gateway URL (bad function argument error)
+</name>
+<command>
+--ipfs-gateway http://nonexisting,local:8080 ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# malformed gateway URL (bad function argument error)
+<errorcode>
+43
+</errorcode>
+</verify>
+</testcase>

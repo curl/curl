@@ -19,10 +19,10 @@ CUSTOMREQUEST
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 RSET (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT -u user:secret -X RSET -I
 </command>
 </client>
@@ -30,7 +30,7 @@ pop3://%HOSTIP:%POP3PORT -u user:secret -X RSET -I
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret

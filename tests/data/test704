@@ -19,12 +19,15 @@ FAILURE
 <server>
 http
 </server>
- <name>
+<name>
 Attempt connect to non-listening SOCKS4 proxy
- </name>
- <command>
---socks4 %HOSTIP:60000 http://%HOSTIP:%HTTPPORT/704
+</name>
+<command>
+--socks4 %HOSTIP:%NOLISTENPORT http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

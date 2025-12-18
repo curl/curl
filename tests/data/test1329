@@ -11,12 +11,15 @@ HTTP proxy
 <server>
 http
 </server>
- <name>
+<name>
 /-prefixed proxy name
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/1329 -x "/server"
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -x "/server"
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

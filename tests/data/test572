@@ -10,7 +10,7 @@ GET_PARAMETER
 
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -18,7 +18,7 @@ CSeq: 1
 
 </data1>
 
-<data2>
+<data2 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -31,7 +31,7 @@ speed=ludicrous
 
 </data2>
 
-<data3>
+<data3 crlf="headers">
 RTSP/1.0 204 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -39,7 +39,7 @@ Cseq: 3
 
 </data3>
 
-<data4>
+<data4 crlf="headers">
 RTSP/1.0 200 Okie Dokie
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -49,7 +49,7 @@ Content-Length: 37
 packets_received: 1000
 jitter: 0.314
 </data4>
-<data5>
+<data5 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -66,17 +66,17 @@ Informational: Empty Options Response
 rtsp
 </server>
 <tool>
-lib572
+lib%TESTNUMBER
 </tool>
 
 <name>
 RTSP GET_PARAMETER (Put/Heartbeat/Post)
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/572
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/file%TESTNUMBER.txt
 </command>
 # file written before test command runs
-<file name="log/file572.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 scale
 speed
 </file>
@@ -86,12 +86,12 @@ speed
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol>
-SETUP rtsp://%HOSTIP:%RTSPPORT/5720001 RTSP/1.0
+<protocol crlf="headers">
+SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Transport: Planes/Trains/Automobiles
 
-GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720002 RTSP/1.0
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0002 RTSP/1.0
 CSeq: 2
 Session: getparams-test
 Content-Length: 12
@@ -99,11 +99,11 @@ Content-Type: text/parameters
 
 scale
 speed
-GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720003 RTSP/1.0
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0003 RTSP/1.0
 CSeq: 3
 Session: getparams-test
 
-GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720004 RTSP/1.0
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0004 RTSP/1.0
 CSeq: 4
 Session: getparams-test
 Content-Length: 24
@@ -111,7 +111,7 @@ Content-Type: text/parameters
 
 packets_received
 jitter
-OPTIONS rtsp://%HOSTIP:%RTSPPORT/5720005 RTSP/1.0
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0005 RTSP/1.0
 CSeq: 5
 Session: getparams-test
 

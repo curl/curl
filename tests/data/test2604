@@ -1,0 +1,19 @@
+<testcase>
+<info>
+<keywords>
+unittest
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+sftp
+</features>
+<name>
+Curl_get_pathname unit test
+</name>
+</client>
+</testcase>

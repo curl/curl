@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,37 +18,37 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "hostip.h"
 
+#ifndef CURL_DISABLE_SHUFFLE_DNS
+
 CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                           Curl_addrinfo **addr);
+                           struct Curl_addrinfo **addr);
 
-#define NUM_ADDRS 8
-static struct Curl_addrinfo addrs[NUM_ADDRS];
+static struct Curl_addrinfo addrs[8];
 
-static CURLcode unit_setup(void)
+static CURLcode t1608_setup(void)
 {
-  int i;
-  for(i = 0; i < NUM_ADDRS - 1; i++) {
+  size_t i;
+  for(i = 0; i < CURL_ARRAYSIZE(addrs) - 1; i++) {
     addrs[i].ai_next = &addrs[i + 1];
   }
 
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static CURLcode test_unit1608(const char *arg)
 {
+  UNITTEST_BEGIN(t1608_setup())
 
-}
-
-UNITTEST_START
-{
   int i;
   CURLcode code;
-  struct Curl_addrinfo* addrhead = addrs;
+  struct Curl_addrinfo *addrhead = addrs;
 
   struct Curl_easy *easy = curl_easy_init();
   abort_unless(easy, "out of memory");
@@ -69,6 +69,15 @@ UNITTEST_START
 
   abort_unless(addrhead != addrs, "addresses are not being reordered");
 
-  return 0;
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP
+
+#else
+
+static CURLcode test_unit1608(const char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
+}
+
+#endif

@@ -4,14 +4,16 @@
 HTTP
 HTTP GET
 HTTP Basic auth
+HTTP proxy
+http_proxy
 NO_PROXY
 </keywords>
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 4
 Content-Type: text/html
@@ -25,28 +27,26 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 NO_PROXY test, with user name in URL
- </name>
+</name>
 
 <setenv>
 no_proxy=%HOSTIP
 http_proxy=http://non-existing-host.haxx.se:3128/
 </setenv>
- <command>
-http://user:secret@%HOSTIP:%HTTPPORT/gimme/1101
+<command>
+http://user:secret@%HOSTIP:%HTTPPORT/gimme/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /gimme/1101 HTTP/1.1
+<protocol crlf="headers">
+GET /gimme/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjpzZWNyZXQ=
+Authorization: Basic %b64[user:secret]b64%
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

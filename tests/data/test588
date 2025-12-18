@@ -31,13 +31,13 @@ ftp
 <tool>
 lib525
 </tool>
- <name>
+<name>
 FTP PORT upload using multi interface, EPRT doesn't work
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/path/588 log/upload588
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload588">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo
  upload this
 </file>
@@ -47,10 +47,10 @@ Moooooooooooo
 <verify>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
-s/^PORT (.*)/PORT/
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
+s/^PORT (\S*)/PORT/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -58,7 +58,7 @@ CWD path
 EPRT |1|
 PORT
 TYPE I
-STOR 588
+STOR %TESTNUMBER
 QUIT
 </protocol>
 <upload>

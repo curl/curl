@@ -2,62 +2,59 @@
 <info>
 <keywords>
 HTTP
-pipelining
-multi
-flaky
+HTTP POST
+CURLOPT_READFUNCTION
 </keywords>
 </info>
 
 # Server-side
 <reply>
-<data>
-Adding handle 0
-Handle 0 Completed with status 0
-Adding handle 1
-Adding handle 2
-Adding handle 3
-Adding handle 4
-Adding handle 5
-Adding handle 6
-Handle 2 Completed with status 0
-Handle 3 Completed with status 0
-Handle 4 Completed with status 0
-Handle 1 Completed with status 0
-Handle 5 Completed with status 0
-Handle 6 Completed with status 0
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/html
+
+-foo-
 </data>
 </reply>
 
 # Client-side
 <client>
 <server>
-http-pipe
-</server>
-<features>
 http
-</features>
+</server>
+
+<name>
+Chunked HTTP POST from callback with CURLOPT_POSTFIELDSIZE set
+</name>
 <tool>
-lib1900
+lib%TESTNUMBER
 </tool>
- <name>
-HTTP GET using pipelining, blacklisted site
- </name>
- <command>
-http://%HOSTIP:%HTTPPIPEPORT/ log/urls1901.txt
+
+<command>
+http://%HOSTIP:%HTTPPORT/boom
 </command>
-<file name="log/urls1901.txt">
-blacklist_site 127.0.0.1:%HTTPPIPEPORT
-0 1k.txt
-1000 100k.txt
-0 1k.txt
-0 1k.txt
-0 1k.txt
-0 1k.txt
-0 1k.txt
-</file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
+<protocol crlf="yes">
+POST /boom HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: application/x-www-form-urlencoded
+
+3
+one
+3
+two
+5
+three
+4
+four
+0
+
+</protocol>
 </verify>
 </testcase>

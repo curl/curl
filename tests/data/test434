@@ -1,0 +1,46 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--config
+</keywords>
+</info>
+
+#
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/1
+
+-foo-
+</data>
+</reply>
+
+#
+<client>
+<file name="%LOGDIR/config%TESTNUMBER" nonewline="yes">
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER
+</file>
+<server>
+http
+</server>
+<name>
+-K with a single line without newline
+</name>
+<command>
+-K %LOGDIR/config%TESTNUMBER
+</command>
+</client>
+
+#
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

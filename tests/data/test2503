@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/3
+HTTPS
+-w
+%header
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+http/3
+nghttpx-h3
+headers-api
+</features>
+<server>
+http/3
+</server>
+<name>
+HTTP/3 header-api
+</name>
+<setenv>
+</setenv>
+<command>
+-w '%{header_json}\n' --http3-only --cacert %CERTDIR/certs/test-ca.crt --resolve localhost:%HTTP3PORT:%HOSTIP https://localhost:%HTTP3PORT/%TESTNUMBER
+</command>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout crlf="headers">
+HTTP/3 200%spc%
+date: Tue, 09 Nov 2010 14:49:00 GMT
+content-length: 6
+content-type: text/html
+funny-head: yesyes
+via: 1.1 nghttpx
+
+-foo-
+{"date":["Tue, 09 Nov 2010 14:49:00 GMT"],
+"content-length":["6"],
+"content-type":["text/html"],
+"funny-head":["yesyes"],
+"via":["1.1 nghttpx"]
+}
+</stdout>
+</verify>
+</testcase>

@@ -20,16 +20,13 @@ NOBODY
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP quote remove file with NOBODY
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -I -Q "rm %PWD/log/file627.txt" sftp://%HOSTIP:%SSHPORT --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -I -Q "rm %SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt" sftp://%HOSTIP:%SSHPORT --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/log/test627.txt
-</postcheck>
-<file name="log/file627.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Dummy test file for remove test
 </file>
 </client>
@@ -37,10 +34,8 @@ Dummy test file for remove test
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
-<protocol>
-</protocol>
+<postcheck>
+%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/test%TESTNUMBER.txt
+</postcheck>
 </verify>
 </testcase>

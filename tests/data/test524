@@ -18,13 +18,13 @@ UPLOAD
 ftp
 </server>
 <tool>
-lib524
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP upload with target URL ending with slash
- </name>
+</name>
 # first URL then proxy
- <command>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/to/
 </command>
 </client>
@@ -32,7 +32,7 @@ ftp://%HOSTIP:%FTPPORT/path/to/
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

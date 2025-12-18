@@ -2,6 +2,7 @@
 <info>
 <keywords>
 FTP
+MDTM
 </keywords>
 </info>
 
@@ -16,10 +17,10 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP upload time condition evaluates TRUE => skip upload
- </name>
-<file name="log/test247.txt">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
       see
@@ -27,20 +28,18 @@ that FTP
 works
   so does it?
 </file>
- <command>
-ftp://%HOSTIP:%FTPPORT/247 -T log/test247.txt -z "apr 1 2005 08:00:00"
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -z "apr 1 2005 08:00:00"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<upload>
-</upload>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 247
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

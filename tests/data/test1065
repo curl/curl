@@ -8,7 +8,7 @@ HTTP GET
 </info>
 
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1
@@ -16,7 +16,7 @@ Content-Length: 3
 
 ok
 </data>
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1
@@ -28,39 +28,38 @@ still ok
 
 # Client-side
 <client>
-# 
+#
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with one file but two URLs
- </name>
- <command>
--H "Expect:" -T log/1065 http://%HOSTIP:%HTTPPORT/1065.upload1 http://%HOSTIP:%HTTPPORT/10650002.url2
+</name>
+<command>
+-H "Expect:" -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002.url2
 </command>
-<file name="log/1065">
+<file name="%LOGDIR/%TESTNUMBER">
 test
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-PUT /1065.upload1 HTTP/1.1
+<protocol crlf="headers">
+PUT /%TESTNUMBER.upload1 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 5
 
 test
-GET /10650002.url2 HTTP/1.1
+GET /%TESTNUMBER0002.url2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1

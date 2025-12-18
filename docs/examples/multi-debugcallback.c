@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -27,20 +29,13 @@
 #include <stdio.h>
 #include <string.h>
 
-/* somewhat unix-specific */
-#include <sys/time.h>
-#include <unistd.h>
-
 /* curl stuff */
 #include <curl/curl.h>
 
-typedef char bool;
 #define TRUE 1
 
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
-          bool nohex)
+static void dump(const char *text, FILE *stream, unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -54,7 +49,7 @@ void dump(const char *text,
   fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
-  for(i = 0; i<size; i += width) {
+  for(i = 0; i < size; i += width) {
 
     fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
@@ -75,7 +70,7 @@ void dump(const char *text,
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)?ptr[i + c]:'.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
@@ -88,23 +83,19 @@ void dump(const char *text,
   fflush(stream);
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             unsigned char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *curl, curl_infotype type,
+                    unsigned char *data, size_t size,
+                    void *userp)
 {
   const char *text;
 
   (void)userp;
-  (void)handle; /* prevent compiler warning */
+  (void)curl;
 
   switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
-    /* FALLTHROUGH */
-  default: /* in case a new one is introduced to shock us */
     return 0;
-
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
     break;
@@ -117,6 +108,8 @@ int my_trace(CURL *handle, curl_infotype type,
   case CURLINFO_DATA_IN:
     text = "<= Recv data";
     break;
+  default: /* in case a new one is introduced to shock us */
+    return 0;
   }
 
   dump(text, stderr, data, size, TRUE);
@@ -124,108 +117,55 @@ int my_trace(CURL *handle, curl_infotype type,
 }
 
 /*
- * Simply download a HTTP file.
+ * Simply download an HTTP file.
  */
 int main(void)
 {
-  CURL *http_handle;
-  CURLM *multi_handle;
+  CURL *curl;
 
-  int still_running = 0; /* keep number of running handles */
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
-  http_handle = curl_easy_init();
+  curl = curl_easy_init();
+  if(curl) {
 
-  /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
+    CURLM *multi;
 
-  curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
-  curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
+    /* set the options (I left out a few, you get the point anyway) */
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
-  /* init a multi stack */
-  multi_handle = curl_multi_init();
+    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  /* add the individual transfers */
-  curl_multi_add_handle(multi_handle, http_handle);
+    /* init a multi stack */
+    multi = curl_multi_init();
+    if(multi) {
 
-  /* we start some action by calling perform right away */
-  curl_multi_perform(multi_handle, &still_running);
+      int still_running = 0; /* keep number of running handles */
 
-  while(still_running) {
-    struct timeval timeout;
-    int rc; /* select() return code */
-    CURLMcode mc; /* curl_multi_fdset() return code */
+      /* add the individual transfers */
+      curl_multi_add_handle(multi, curl);
 
-    fd_set fdread;
-    fd_set fdwrite;
-    fd_set fdexcep;
-    int maxfd = -1;
+      do {
+        CURLMcode mc = curl_multi_perform(multi, &still_running);
 
-    long curl_timeo = -1;
+        if(still_running)
+          /* wait for activity, timeout or "nothing" */
+          mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    FD_ZERO(&fdread);
-    FD_ZERO(&fdwrite);
-    FD_ZERO(&fdexcep);
+        if(mc)
+          break;
 
-    /* set a suitable timeout to play around with */
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
+      } while(still_running);
 
-    curl_multi_timeout(multi_handle, &curl_timeo);
-    if(curl_timeo >= 0) {
-      timeout.tv_sec = curl_timeo / 1000;
-      if(timeout.tv_sec > 1)
-        timeout.tv_sec = 1;
-      else
-        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+      curl_multi_cleanup(multi);
     }
 
-    /* get file descriptors from the transfers */
-    mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
-
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
-      break;
-    }
-
-    /* On success the value of maxfd is guaranteed to be >= -1. We call
-       select(maxfd + 1, ...); specially in case of (maxfd == -1) there are
-       no fds ready yet so we call select(0, ...) --or Sleep() on Windows--
-       to sleep 100ms, which is the minimum suggested value in the
-       curl_multi_fdset() doc. */
-
-    if(maxfd == -1) {
-#ifdef _WIN32
-      Sleep(100);
-      rc = 0;
-#else
-      /* Portable sleep for platforms other than Windows. */
-      struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
-      rc = select(0, NULL, NULL, NULL, &wait);
-#endif
-    }
-    else {
-      /* Note that on some platforms 'timeout' may be modified by select().
-         If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
-    }
-
-    switch(rc) {
-    case -1:
-      /* select error */
-      still_running = 0;
-      printf("select() returns error, this is badness\n");
-      break;
-    case 0:
-    default:
-      /* timeout or readable/writable sockets */
-      curl_multi_perform(multi_handle, &still_running);
-      break;
-    }
+    curl_easy_cleanup(curl);
   }
 
-  curl_multi_cleanup(multi_handle);
-
-  curl_easy_cleanup(http_handle);
+  curl_global_cleanup();
 
   return 0;
 }

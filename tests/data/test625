@@ -18,16 +18,13 @@ SFTP put
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP put with --ftp-create-dirs twice
- </name>
- <command>
---ftp-create-dirs --key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file625.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test625.a/upload.625 -T log/file625.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test625.b/upload.625 --insecure
+</name>
+<command>
+--ftp-create-dirs --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.a/upload.%TESTNUMBER -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.b/upload.%TESTNUMBER --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test610.pl move %PWD/log/test625.a/upload.625 %PWD/log/upload.625 rmdir %PWD/log/test625.a rm %PWD/log/test625.b/upload.625 rmdir %PWD/log/test625.b
-</postcheck>
-<file name="log/file625.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>
@@ -40,8 +37,8 @@ for ssh upload test
 Test data
 for ssh upload test
 </upload>
-<valgrind>
-disable
-</valgrind>
+<postcheck>
+%PERL %SRCDIR/libtest/test610.pl move %PWD/%LOGDIR/test%TESTNUMBER.a/upload.%TESTNUMBER %PWD/%LOGDIR/upload.%TESTNUMBER rmdir %PWD/%LOGDIR/test%TESTNUMBER.a rm %PWD/%LOGDIR/test%TESTNUMBER.b/upload.%TESTNUMBER rmdir %PWD/%LOGDIR/test%TESTNUMBER.b
+</postcheck>
 </verify>
 </testcase>

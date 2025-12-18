@@ -15,19 +15,16 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 insecure HTTPS without permission
- </name>
- <command>
-https://%HOSTIP:%HTTPSPORT/want/305 --cacert moooo
+</name>
+<command>
+https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER --cacert moooo --no-ca-native
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 77
 </errorcode>

@@ -16,13 +16,13 @@ multi
 <servercmd>
 connection-monitor
 </servercmd>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 
 </connect>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,7 +32,7 @@ ETag: "21025-dc7-39462498"
 HTTP/1.1 200 Mighty fine indeed
 
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -48,16 +48,18 @@ http-proxy
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib503
+lib%TESTNUMBER
 </tool>
-
- <name>
+<features>
+proxy
+</features>
+<name>
 simple multi http:// through proxytunnel with authentication info
- </name>
- <command>
-http://machine.503:%HTTPPORT/503 %HOSTIP:%PROXYPORT
+</name>
+<command>
+http://machine.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
-<file name="log/test503.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar
@@ -68,17 +70,18 @@ moo
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
-CONNECT machine.503:%HTTPPORT HTTP/1.1
-Host: machine.503:%HTTPPORT
-Proxy-Authorization: Basic dGVzdDppbmc=
+<proxy crlf="headers">
+CONNECT machine.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: machine.%TESTNUMBER:%HTTPPORT
+Proxy-Authorization: Basic %b64[test%2520:ing%2541]b64%
 Proxy-Connection: Keep-Alive
 
+[DISCONNECT]
 </proxy>
-<protocol>
-GET /503 HTTP/1.1
-Host: machine.503:%HTTPPORT
-Authorization: Basic dGVzdDppbmc=
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: machine.%TESTNUMBER:%HTTPPORT
+Authorization: Basic %b64[test:ing]b64%
 Accept: */*
 
 [DISCONNECT]

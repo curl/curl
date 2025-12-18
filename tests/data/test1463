@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+FILE
+--help
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+file
+</features>
+<name>
+curl file category --help
+</name>
+<command>
+--help file
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout mode="text">
+file: FILE protocol
+     --create-file-mode <mode>  File mode for created files
+ -I, --head                     Show document info only
+ -l, --list-only                List only mode
+ -r, --range <range>            Retrieve only the bytes within RANGE
+</stdout>
+</verify>
+</testcase>

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,286 +18,34 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
-
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
-#include "curlx.h"
 
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
-#include "tool_homedir.h"
+#include "tool_findfile.h"
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
-
+#include "tool_util.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 /* only acknowledge colon or equals as separators if the option was not
    specified with an initial dash! */
 #define ISSEP(x,dash) (!dash && (((x) == '=') || ((x) == ':')))
 
-static const char *unslashquote(const char *line, char *param);
-static char *my_get_line(FILE *fp);
-
-#ifdef WIN32
-static FILE *execpath(const char *filename)
-{
-  char filebuffer[512];
-  /* Get the filename of our executable. GetModuleFileName is already declared
-   * via inclusions done in setup header file.  We assume that we are using
-   * the ASCII version here.
-   */
-  unsigned long len = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
-  if(len > 0 && len < sizeof(filebuffer)) {
-    /* We got a valid filename - get the directory part */
-    char *lastdirchar = strrchr(filebuffer, '\\');
-    if(lastdirchar) {
-      size_t remaining;
-      *lastdirchar = 0;
-      /* If we have enough space, build the RC filename */
-      remaining = sizeof(filebuffer) - strlen(filebuffer);
-      if(strlen(filename) < remaining - 1) {
-        msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
-        return fopen(filebuffer, FOPEN_READTEXT);
-      }
-    }
-  }
-
-  return NULL;
-}
-#endif
-
-
-/* return 0 on everything-is-fine, and non-zero otherwise */
-int parseconfig(const char *filename, struct GlobalConfig *global)
-{
-  FILE *file = NULL;
-  bool usedarg = FALSE;
-  int rc = 0;
-  struct OperationConfig *operation = global->first;
-  char *pathalloc = NULL;
-
-  if(!filename || !*filename) {
-    /* NULL or no file name attempts to load .curlrc from the homedir! */
-
-    char *home = homedir();    /* portable homedir finder */
-#ifndef WIN32
-    if(home) {
-      pathalloc = curl_maprintf("%s%s.curlrc", home, DIR_CHAR);
-      if(!pathalloc) {
-        free(home);
-        return 1; /* out of memory */
-      }
-      filename = pathalloc;
-    }
-#else /* Windows */
-    if(home) {
-      int i = 0;
-      char prefix = '.';
-      do {
-        /* check for .curlrc then _curlrc in the home dir */
-        pathalloc = curl_maprintf("%s%s%ccurlrc", home, DIR_CHAR, prefix);
-        if(!pathalloc) {
-          free(home);
-          return 1; /* out of memory */
-        }
-
-        /* Check if the file exists - if not, try _curlrc */
-        file = fopen(pathalloc, FOPEN_READTEXT);
-        if(file) {
-          filename = pathalloc;
-          break;
-        }
-        prefix = '_';
-      } while(++i < 2);
-    }
-    if(!filename) {
-      /* check for .curlrc then _curlrc in the dir of the executable */
-      file = execpath(".curlrc");
-      if(!file)
-        file = execpath("_curlrc");
-    }
-#endif
-
-    Curl_safefree(home); /* we've used it, now free it */
-  }
-
-  if(!file && filename) { /* no need to fopen() again */
-    if(strcmp(filename, "-"))
-      file = fopen(filename, FOPEN_READTEXT);
-    else
-      file = stdin;
-  }
-
-  if(file) {
-    char *line;
-    char *aline;
-    char *option;
-    char *param;
-    int lineno = 0;
-    bool dashed_option;
-
-    while(NULL != (aline = my_get_line(file))) {
-      int res;
-      bool alloced_param = FALSE;
-      lineno++;
-      line = aline;
-
-      /* line with # in the first non-blank column is a comment! */
-      while(*line && ISSPACE(*line))
-        line++;
-
-      switch(*line) {
-      case '#':
-      case '/':
-      case '\r':
-      case '\n':
-      case '*':
-      case '\0':
-        Curl_safefree(aline);
-        continue;
-      }
-
-      /* the option keywords starts here */
-      option = line;
-
-      /* the option starts with a dash? */
-      dashed_option = option[0]=='-'?TRUE:FALSE;
-
-      while(*line && !ISSPACE(*line) && !ISSEP(*line, dashed_option))
-        line++;
-      /* ... and has ended here */
-
-      if(*line)
-        *line++ = '\0'; /* zero terminate, we have a local copy of the data */
-
-#ifdef DEBUG_CONFIG
-      fprintf(stderr, "GOT: %s\n", option);
-#endif
-
-      /* pass spaces and separator(s) */
-      while(*line && (ISSPACE(*line) || ISSEP(*line, dashed_option)))
-        line++;
-
-      /* the parameter starts here (unless quoted) */
-      if(*line == '\"') {
-        /* quoted parameter, do the quote dance */
-        line++;
-        param = malloc(strlen(line) + 1); /* parameter */
-        if(!param) {
-          /* out of memory */
-          Curl_safefree(aline);
-          rc = 1;
-          break;
-        }
-        alloced_param = TRUE;
-        (void)unslashquote(line, param);
-      }
-      else {
-        param = line; /* parameter starts here */
-        while(*line && !ISSPACE(*line))
-          line++;
-
-        if(*line) {
-          *line = '\0'; /* zero terminate */
-
-          /* to detect mistakes better, see if there's data following */
-          line++;
-          /* pass all spaces */
-          while(*line && ISSPACE(*line))
-            line++;
-
-          switch(*line) {
-          case '\0':
-          case '\r':
-          case '\n':
-          case '#': /* comment */
-            break;
-          default:
-            warnf(operation->global, "%s:%d: warning: '%s' uses unquoted "
-                  "white space in the line that may cause side-effects!\n",
-                  filename, lineno, option);
-          }
-        }
-        if(!*param)
-          /* do this so getparameter can check for required parameters.
-             Otherwise it always thinks there's a parameter. */
-          param = NULL;
-      }
-
-#ifdef DEBUG_CONFIG
-      fprintf(stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
-#endif
-      res = getparameter(option, param, &usedarg, global, operation);
-
-      if(!res && param && *param && !usedarg)
-        /* we passed in a parameter that wasn't used! */
-        res = PARAM_GOT_EXTRA_PARAMETER;
-
-      if(res == PARAM_NEXT_OPERATION) {
-        if(operation->url_list && operation->url_list->url) {
-          /* Allocate the next config */
-          operation->next = malloc(sizeof(struct OperationConfig));
-          if(operation->next) {
-            /* Initialise the newly created config */
-            config_init(operation->next);
-
-            /* Set the global config pointer */
-            operation->next->global = global;
-
-            /* Update the last operation pointer */
-            global->last = operation->next;
-
-            /* Move onto the new config */
-            operation->next->prev = operation;
-            operation = operation->next;
-          }
-          else
-            res = PARAM_NO_MEM;
-        }
-      }
-
-      if(res != PARAM_OK && res != PARAM_NEXT_OPERATION) {
-        /* the help request isn't really an error */
-        if(!strcmp(filename, "-")) {
-          filename = "<stdin>";
-        }
-        if(res != PARAM_HELP_REQUESTED &&
-           res != PARAM_MANUAL_REQUESTED &&
-           res != PARAM_VERSION_INFO_REQUESTED &&
-           res != PARAM_ENGINES_REQUESTED) {
-          const char *reason = param2text(res);
-          warnf(operation->global, "%s:%d: warning: '%s' %s\n",
-                filename, lineno, option, reason);
-        }
-      }
-
-      if(alloced_param)
-        Curl_safefree(param);
-
-      Curl_safefree(aline);
-    }
-    if(file != stdin)
-      fclose(file);
-  }
-  else
-    rc = 1; /* couldn't open the file */
-
-  free(pathalloc);
-  return rc;
-}
-
 /*
- * Copies the string from line to the buffer at param, unquoting
- * backslash-quoted characters and NUL-terminating the output string.
- * Stops at the first non-backslash-quoted double quote character or the
- * end of the input string. param must be at least as long as the input
- * string.  Returns the pointer after the last handled input character.
+ * Copies the string from line to the param dynbuf, unquoting backslash-quoted
+ * characters and null-terminating the output string. Stops at the first
+ * non-backslash-quoted double quote character or the end of the input string.
+ * param must be at least as long as the input string. Returns 0 on success.
  */
-static const char *unslashquote(const char *line, char *param)
+static int unslashquote(const char *line, struct dynbuf *param)
 {
+  curlx_dyn_reset(param);
+
   while(*line && (*line != '\"')) {
     if(*line == '\\') {
       char out;
@@ -320,51 +68,271 @@ static const char *unslashquote(const char *line, char *param)
         out = '\v';
         break;
       }
-      *param++ = out;
+      if(curlx_dyn_addn(param, &out, 1))
+        return 1;
       line++;
     }
-    else
-      *param++ = *line++;
+    else if(curlx_dyn_addn(param, line++, 1))
+      return 1;
   }
-  *param = '\0'; /* always zero terminate */
-  return line;
+  return 0; /* ok */
+}
+
+#define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
+
+/* return 0 on everything-is-fine, and non-zero otherwise */
+ParameterError parseconfig(const char *filename, int max_recursive)
+{
+  FILE *file = NULL;
+  bool usedarg = FALSE;
+  ParameterError err = PARAM_OK;
+  struct OperationConfig *config = global->last;
+  char *pathalloc = NULL;
+
+  if(!filename) {
+    /* NULL means load .curlrc from homedir! */
+    char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
+    if(curlrc) {
+      file = curlx_fopen(curlrc, FOPEN_READTEXT);
+      if(!file) {
+        free(curlrc);
+        return PARAM_READ_ERROR;
+      }
+      filename = pathalloc = curlrc;
+    }
+#if defined(_WIN32) && !defined(UNDER_CE)
+    else {
+      char *fullp;
+      /* check for .curlrc then _curlrc in the dir of the executable */
+      file = tool_execpath(".curlrc", &fullp);
+      if(!file)
+        file = tool_execpath("_curlrc", &fullp);
+      if(file)
+        /* this is the filename we read from */
+        filename = fullp;
+    }
+#endif
+  }
+  else {
+    if(strcmp(filename, "-"))
+      file = curlx_fopen(filename, FOPEN_READTEXT);
+    else
+      file = stdin;
+  }
+
+  if(file) {
+    char *line;
+    char *option;
+    char *param;
+    int lineno = 0;
+    bool dashed_option;
+    struct dynbuf buf;
+    struct dynbuf pbuf;
+    bool fileerror = FALSE;
+    curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
+    curlx_dyn_init(&pbuf, MAX_CONFIG_LINE_LENGTH);
+    DEBUGASSERT(filename);
+
+    while(!err && my_get_line(file, &buf, &fileerror)) {
+      ParameterError res;
+      lineno++;
+      line = curlx_dyn_ptr(&buf);
+      if(!line) {
+        err = PARAM_NO_MEM; /* out of memory */
+        break;
+      }
+
+      /* the option keywords starts here */
+      option = line;
+
+      /* the option starts with a dash? */
+      dashed_option = (option[0] == '-');
+
+      while(*line && !ISBLANK(*line) && !ISSEP(*line, dashed_option))
+        line++;
+      /* ... and has ended here */
+
+      if(*line)
+        *line++ = '\0'; /* null-terminate, we have a local copy of the data */
+
+#ifdef DEBUG_CONFIG
+      curl_mfprintf(tool_stderr, "GOT: %s\n", option);
+#endif
+
+      /* pass spaces and separator(s) */
+      while(ISBLANK(*line) || ISSEP(*line, dashed_option))
+        line++;
+
+      /* the parameter starts here (unless quoted) */
+      if(*line == '\"') {
+        /* quoted parameter, do the quote dance */
+        int rc = unslashquote(++line, &pbuf);
+        if(rc) {
+          err = PARAM_BAD_USE;
+          break;
+        }
+        param = curlx_dyn_len(&pbuf) ? curlx_dyn_ptr(&pbuf) : CURL_UNCONST("");
+      }
+      else {
+        param = line; /* parameter starts here */
+        while(*line && !ISSPACE(*line)) /* stop also on CRLF */
+          line++;
+
+        if(*line) {
+          *line = '\0'; /* null-terminate */
+
+          /* to detect mistakes better, see if there is data following */
+          line++;
+          /* pass all spaces */
+          while(ISBLANK(*line))
+            line++;
+
+          switch(*line) {
+          case '\0':
+          case '\r':
+          case '\n':
+          case '#': /* comment */
+            break;
+          default:
+            warnf("%s:%d: warning: '%s' uses unquoted whitespace. "
+                  "This may cause side-effects. Consider double quotes.",
+                  filename, lineno, option);
+          }
+        }
+        if(!*param)
+          /* do this so getparameter can check for required parameters.
+             Otherwise it always thinks there is a parameter. */
+          param = NULL;
+      }
+
+#ifdef DEBUG_CONFIG
+      curl_mfprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
+#endif
+      res = getparameter(option, param, &usedarg, config, max_recursive);
+      config = global->last;
+
+      if(!res && param && *param && !usedarg)
+        /* we passed in a parameter that was not used! */
+        res = PARAM_GOT_EXTRA_PARAMETER;
+
+      if(res == PARAM_NEXT_OPERATION) {
+        if(config->url_list && config->url_list->url) {
+          /* Allocate the next config */
+          config->next = config_alloc();
+          if(config->next) {
+            /* Update the last operation pointer */
+            global->last = config->next;
+
+            /* Move onto the new config */
+            config->next->prev = config;
+            config = config->next;
+          }
+          else
+            res = PARAM_NO_MEM;
+        }
+      }
+
+      if(res != PARAM_OK && res != PARAM_NEXT_OPERATION) {
+        /* the help request is not really an error */
+        if(!strcmp(filename, "-")) {
+          filename = "<stdin>";
+        }
+        if(res != PARAM_HELP_REQUESTED &&
+           res != PARAM_MANUAL_REQUESTED &&
+           res != PARAM_VERSION_INFO_REQUESTED &&
+           res != PARAM_ENGINES_REQUESTED &&
+           res != PARAM_CA_EMBED_REQUESTED) {
+          /* only show error in the first level config call */
+          if(max_recursive == CONFIG_MAX_LEVELS) {
+            const char *reason = param2text(res);
+            errorf("%s:%d: '%s' %s", filename, lineno, option, reason);
+          }
+          err = res;
+        }
+      }
+    }
+    curlx_dyn_free(&buf);
+    curlx_dyn_free(&pbuf);
+    if(file != stdin)
+      curlx_fclose(file);
+    if(fileerror)
+      err = PARAM_READ_ERROR;
+  }
+  else
+    err = PARAM_READ_ERROR; /* could not open the file */
+
+  if((err == PARAM_READ_ERROR) && filename)
+    errorf("cannot read config from '%s'", filename);
+
+  free(pathalloc);
+  return err;
+}
+
+
+static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
+{
+  CURLcode result;
+  char buffer[128];
+  curlx_dyn_reset(buf);
+  while(1) {
+    char *b = fgets(buffer, sizeof(buffer), input);
+
+    if(b) {
+      size_t rlen = strlen(b);
+
+      if(!rlen)
+        break;
+
+      result = curlx_dyn_addn(buf, b, rlen);
+      if(result) {
+        /* too long line or out of memory */
+        *error = TRUE;
+        return FALSE; /* error */
+      }
+
+      else if(b[rlen-1] == '\n') {
+        /* end of the line, drop the newline */
+        size_t len = curlx_dyn_len(buf);
+        if(len)
+          curlx_dyn_setlen(buf, len - 1);
+        return TRUE; /* all good */
+      }
+
+      else if(feof(input))
+        return TRUE; /* all good */
+    }
+    else if(curlx_dyn_len(buf))
+      return TRUE; /* all good */
+    else
+      break;
+  }
+  return FALSE;
 }
 
 /*
- * Reads a line from the given file, ensuring is NUL terminated.
- * The pointer must be freed by the caller.
- * NULL is returned on an out of memory condition.
+ * Returns a line from the given file. Every line is null-terminated (no
+ * newline). Skips #-commented and space/tabs-only lines automatically.
  */
-static char *my_get_line(FILE *fp)
+bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
 {
-  char buf[4096];
-  char *nl = NULL;
-  char *line = NULL;
-
+  bool retcode;
   do {
-    if(NULL == fgets(buf, sizeof(buf), fp))
-      break;
-    if(!line) {
-      line = strdup(buf);
-      if(!line)
-        return NULL;
-    }
-    else {
-      char *ptr;
-      size_t linelen = strlen(line);
-      ptr = realloc(line, linelen + strlen(buf) + 1);
-      if(!ptr) {
-        Curl_safefree(line);
-        return NULL;
+    retcode = get_line(input, buf, error);
+    if(!*error && retcode) {
+      size_t len = curlx_dyn_len(buf);
+      if(len) {
+        const char *line = curlx_dyn_ptr(buf);
+        while(ISBLANK(*line))
+          line++;
+
+        /* a line with # in the first non-blank column is a comment! */
+        if((*line == '#') || !*line)
+          continue;
       }
-      line = ptr;
-      strcpy(&line[linelen], buf);
+      else
+        continue; /* avoid returning an empty line */
     }
-    nl = strchr(line, '\n');
-  } while(!nl);
-
-  if(nl)
-    *nl = '\0';
-
-  return line;
+    break;
+  } while(retcode);
+  return retcode;
 }

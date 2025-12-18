@@ -17,13 +17,13 @@ SFTP put
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP put
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file602.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/upload.602 --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/upload.%TESTNUMBER --insecure
 </command>
-<file name="log/file602.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>
@@ -36,8 +36,5 @@ for ssh upload test
 Test data
 for ssh upload test
 </upload>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

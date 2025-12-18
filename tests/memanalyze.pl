@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 #
@@ -27,17 +29,22 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
+use strict;
+use warnings;
+
 my $mallocs=0;
 my $callocs=0;
 my $reallocs=0;
 my $strdups=0;
 my $wcsdups=0;
-my $showlimit;
+my $showlimit=0;
 my $sends=0;
 my $recvs=0;
 my $sockets=0;
+my $verbose=0;
+my $trace=0;
 
-while(1) {
+while(@ARGV) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
         shift @ARGV;
@@ -56,18 +63,19 @@ while(1) {
     }
 }
 
-my $maxmem;
+my $memsum = 0; # the total number of memory allocated over the lifetime
+my $maxmem = 0; # the high water mark
 
 sub newtotal {
     my ($newtot)=@_;
     # count a max here
 
     if($newtot > $maxmem) {
-        $maxmem= $newtot;
+        $maxmem = $newtot;
     }
 }
 
-my $file = $ARGV[0];
+my $file = $ARGV[0] || '';
 
 if(! -f $file) {
     print "Usage: memanalyze.pl [options] <dump file>\n",
@@ -78,24 +86,49 @@ if(! -f $file) {
     exit;
 }
 
-open(FILE, "<$file");
+open(my $fileh, "<", "$file");
 
 if($showlimit) {
-    while(<FILE>) {
+    while(<$fileh>) {
         if(/^LIMIT.*memlimit$/) {
             print $_;
             last;
         }
     }
-    close(FILE);
+    close($fileh);
     exit;
 }
 
+my %sizeataddr;
+my %getmem;
 
-my $lnum=0;
-while(<FILE>) {
+my $totalmem = 0;
+my $frees = 0;
+
+my $dup;
+my $size;
+my $addr;
+
+my %filedes;
+my %getfile;
+
+my %fopen;
+my %fopenfile;
+my $openfile = 0;
+my $fopens = 0;
+
+my %addrinfo;
+my %addrinfofile;
+my $addrinfos = 0;
+
+my $source;
+my $linenum;
+my $function;
+
+my $lnum = 0;
+while(<$fileh>) {
     chomp $_;
-    $line = $_;
+    my $line = $_;
     $lnum++;
     if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
@@ -142,14 +175,15 @@ while(<FILE>) {
             $size = $1;
             $addr = $2;
 
-            if($sizeataddr{$addr}>0) {
+            if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile ($source:$linenum at line $lnum), rebuild curl now\n";
                 print "We think $sizeataddr{$addr} bytes are already allocated at that memory address: $addr!\n";
             }
 
-            $sizeataddr{$addr}=$size;
+            $sizeataddr{$addr} = $size;
             $totalmem += $size;
+            $memsum += $size;
 
             if($trace) {
                 print "MALLOC: malloc($size) at $source:$linenum",
@@ -165,16 +199,17 @@ while(<FILE>) {
             $size = $1*$2;
             $addr = $3;
 
-            $arg1 = $1;
-            $arg2 = $2;
+            my $arg1 = $1;
+            my $arg2 = $2;
 
-            if($sizeataddr{$addr}>0) {
+            if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile, rebuild curl now\n";
             }
 
             $sizeataddr{$addr}=$size;
             $totalmem += $size;
+            $memsum += $size;
 
             if($trace) {
                 print "CALLOC: calloc($arg1,$arg2) at $source:$linenum",
@@ -189,13 +224,20 @@ while(<FILE>) {
         elsif($function =~ /realloc\((\(nil\)|0x([0-9a-f]*)), (\d*)\) = 0x([0-9a-f]*)/) {
             my ($oldaddr, $newsize, $newaddr) = ($2, $3, $4);
 
-            $totalmem -= $sizeataddr{$oldaddr};
-            if($trace) {
-                printf("REALLOC: %d less bytes and ", $sizeataddr{$oldaddr});
+            if($oldaddr) {
+                my $oldsize = $sizeataddr{$oldaddr} ? $sizeataddr{$oldaddr} : 0;
+
+                $totalmem -= $oldsize;
+                if($trace) {
+                    printf("REALLOC: %d less bytes and ", $oldsize);
+                }
+                $sizeataddr{$oldaddr}=0;
+
+                $getmem{$oldaddr}="";
             }
-            $sizeataddr{$oldaddr}=0;
 
             $totalmem += $newsize;
+            $memsum += $newsize;
             $sizeataddr{$newaddr}=$newsize;
 
             if($trace) {
@@ -205,7 +247,6 @@ while(<FILE>) {
             newtotal($totalmem);
             $reallocs++;
 
-            $getmem{$oldaddr}="";
             $getmem{$newaddr}="$source:$linenum";
         }
         elsif($function =~ /strdup\(0x([0-9a-f]*)\) \((\d*)\) = 0x([0-9a-f]*)/) {
@@ -218,6 +259,7 @@ while(<FILE>) {
             $sizeataddr{$addr}=$size;
 
             $totalmem += $size;
+            $memsum += $size;
 
             if($trace) {
                 printf("STRDUP: $size bytes at %s, makes totally: %d bytes\n",
@@ -237,6 +279,7 @@ while(<FILE>) {
             $sizeataddr{$addr}=$size;
 
             $totalmem += $size;
+            $memsum += $size;
 
             if($trace) {
                 printf("WCSDUP: $size bytes at %s, makes totally: %d bytes\n",
@@ -335,7 +378,7 @@ while(<FILE>) {
         $function = $3;
 
         if($function =~ /getaddrinfo\(\) = (\(nil\)|0x([0-9a-f]*))/) {
-            my $add = $2;
+            my $add = $1;
             if($add eq "(nil)") {
                 ;
             }
@@ -349,12 +392,13 @@ while(<FILE>) {
             }
         }
         # fclose(0x1026c8)
-        elsif($function =~ /freeaddrinfo\(0x([0-9a-f]*)\)/) {
-            if(!$addrinfo{$1}) {
+        elsif($function =~ /freeaddrinfo\((0x[0-9a-f]*)\)/) {
+            my $addr = $1;
+            if(!$addrinfo{$addr}) {
                 print "freeaddrinfo() without getaddrinfo(): $line\n";
             }
             else {
-                $addrinfo{$1}=0;
+                $addrinfo{$addr}=0;
                 $addrinfos--;
             }
             if($trace) {
@@ -367,7 +411,7 @@ while(<FILE>) {
         print "Not recognized prefix line: $line\n";
     }
 }
-close(FILE);
+close($fileh);
 
 if($totalmem) {
     print "Leak detected: memory still allocated: $totalmem bytes\n";
@@ -422,4 +466,5 @@ if($verbose) {
         "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sends + $recvs + $sockets)."\n";
 
     print "Maximum allocated: $maxmem\n";
+    print "Total allocated: $memsum\n";
 }

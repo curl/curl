@@ -9,18 +9,11 @@ base64
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 base64 encode/decode unit tests
- </name>
-<tool>
-unit1302
-</tool>
+</name>
 </client>
-
 </testcase>

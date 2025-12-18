@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,22 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* Testing Retry-After header parser */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-int test(char *URL)
+static CURLcode test_lib1594(const char *URL)
 {
   struct curl_slist *header = NULL;
   curl_off_t retry;
   CURL *curl = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -47,13 +49,7 @@ int test(char *URL)
   if(res)
     goto test_cleanup;
 
-#ifdef LIB1596
-  /* we get a relative number of seconds, so add the number of seconds
-     we're at to make it a somewhat stable number. Then remove accuracy. */
-  retry += time(NULL);
-  retry /= 10000;
-#endif
-  printf("Retry-After: %" CURL_FORMAT_CURL_OFF_T "\n", retry);
+  curl_mprintf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry);
 
 test_cleanup:
 

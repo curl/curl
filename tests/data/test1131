@@ -12,7 +12,7 @@ Expect: 100-continue
 <reply>
 <data nocheck="yes">
 HTTP/1.1 400 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
@@ -22,7 +22,7 @@ FAILURE1
 
 <data1>
 HTTP/1.1 400 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
@@ -30,8 +30,9 @@ Content-Type: text/html
 FAILURE2
 </data1>
 
-# we use skip to make the test server never read the full payload off
-# the socket and instead return the response at once 
+# We use skip to make the test server never read the full payload off
+# the socket and instead return the response at once. In actuality, the
+# long --expect100-timeout means that it will never get a chance to read this.
 <servercmd>
 skip: 100
 </servercmd>
@@ -41,17 +42,17 @@ skip: 100
 # Client-side
 <client>
 # 100 x 'x'
-<file name="log/file1131">
+<file name="%LOGDIR/file%TESTNUMBER">
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 </file>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT expect 100-continue with a 400
- </name>
+</name>
  <command option="no-output">
--T log/file1131 http://%HOSTIP:%HTTPPORT/1131 -T log/file1131 http://%HOSTIP:%HTTPPORT/11310001
+-H "Expect: 100-continue" -T %LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 --expect100-timeout 99
 </command>
 </client>
 
@@ -60,35 +61,34 @@ HTTP PUT expect 100-continue with a 400
 <verify>
 <stdout>
 HTTP/1.1 400 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
 
 FAILURE1
 HTTP/1.1 400 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
 
 FAILURE2
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-PUT /1131 HTTP/1.1
+<protocol crlf="headers">
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 100
 Expect: 100-continue
+Content-Length: 100
 
-PUT /11310001 HTTP/1.1
+PUT /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 100
 Expect: 100-continue
+Content-Length: 100
 
 </protocol>
 </verify>

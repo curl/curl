@@ -22,9 +22,9 @@ This is the proof it works
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with config file on stdin
- </name>
+</name>
  <stdin>
 #
 # Use a silly request without '--':
@@ -36,17 +36,17 @@ request MOOO
 # long option *with* '--':
 --max-time 180
  </stdin>
- <command>
--K - %HOSTIP:%HTTPPORT/that.site.com/17
+<command>
+-K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-MOOO /that.site.com/17 HTTP/1.1
+<protocol crlf="yes">
+MOOO /that.site.com/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: agent007 license to drill	
+User-Agent: agent007 license to drill%tab%
 Accept: */*
 
 </protocol>

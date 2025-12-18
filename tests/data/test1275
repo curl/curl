@@ -1,0 +1,21 @@
+<testcase>
+<info>
+<keywords>
+documentation
+markdown
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify capital letters after period in markdown files
+</name>
+
+<command type="perl">
+%SRCDIR/test1275.pl %SRCDIR/..
+</command>
+</client>
+
+</testcase>

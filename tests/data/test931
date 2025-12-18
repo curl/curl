@@ -11,11 +11,11 @@ CRLF-in-URL
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with URL-encoded CR LF in the URL
- </name>
- <command>
-smtp://%HOSTIP:%SMTPPORT/%0d%0a/931
+</name>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%0d%0a/%TESTNUMBER
 </command>
 </client>
 

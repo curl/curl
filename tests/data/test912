@@ -20,31 +20,31 @@ CAPA SIZE
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with SIZE support
- </name>
-<file name="log/test912.eml">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 
 body
 </file>
- <command>
-smtp://%HOSTIP:%SMTPPORT/912 --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test912.eml
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/test%TESTNUMBER.eml
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 912
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com> SIZE=38
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

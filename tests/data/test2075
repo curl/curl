@@ -12,9 +12,6 @@ HTTP
 <features>
 http
 </features>
-<server>
-none
-</server>
 <name>
 Verify usernames are not allowed in url
 </name>

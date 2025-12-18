@@ -10,18 +10,15 @@ crash
 </reply>
 
 <client>
-<server>
-none
-</server>
 <tool>
-lib1557
+lib%TESTNUMBER
 </tool>
 
 <name>
-Removing easy handle that's in the pending connections list doesn't leave behind a dangling entry
+Remove easy handle in pending connections doesn't leave dangling entry
 </name>
 <command>
-nothing
+hostname.invalid
 </command>
 </client>
 

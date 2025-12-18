@@ -28,12 +28,13 @@ imap
 </server>
 <features>
 crypto
+digest
 </features>
- <name>
+<name>
 IMAP CRAM-MD5 graceful cancellation
- </name>
- <command>
-'imap://%HOSTIP:%IMAPPORT/830/;MAILINDEX=1' -u user:secret
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
@@ -47,7 +48,7 @@ IMAP CRAM-MD5 graceful cancellation
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "LOGOUT"
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE CRAM-MD5
 *

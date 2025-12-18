@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 curl release procedure - how to do a release
 ============================================
 
@@ -8,20 +14,19 @@ in the source code repo
 
 - update `docs/THANKS`
 
+- update the "past releases" section in `docs/VERSIONS.md`
+
 - make sure all relevant changes are committed on the master branch
 
 - tag the git repo in this style: `git tag -a curl-7_34_0`. -a annotates the
   tag and we use underscores instead of dots in the version number. Make sure
   the tag is GPG signed (using -s).
 
-- run "./maketgz 7.34.0" to build the release tarballs. It is important that
-  you run this on a machine with the correct set of autotools etc installed
-  as this is what then will be shipped and used by most users on \*nix like
-  systems.
+- run `./scripts/dmaketgz 7.34.0` to build the release tarballs.
 
 - push the git commits and the new tag
 
-- gpg sign the 4 tarballs as maketgz suggests
+- GPG sign the 4 tarballs as `maketgz` suggests
 
 - upload the 8 resulting files to the primary download directory
 
@@ -29,8 +34,6 @@ in the curl-www repo
 --------------------
 
 - edit `Makefile` (version number and date),
-
-- edit `_newslog.html` (announce the new release) and
 
 - edit `_changes.html` (insert changes+bugfixes from RELEASE-NOTES)
 
@@ -40,9 +43,9 @@ in the curl-www repo
 
 - make sure all relevant changes are committed and pushed on the master branch
 
-  (the web site then updates its contents automatically)
+  (the website then updates its contents automatically)
 
-on github
+on GitHub
 ---------
 
 - edit the newly made release tag so that it is listed as the latest release
@@ -53,6 +56,10 @@ inform
 - send an email to curl-users, curl-announce and curl-library. Insert the
   RELEASE-NOTES into the mail.
 
+- if there are any advisories associated with the release, send each markdown
+  file to the above lists as well as to `oss-security@lists.openwall.com`
+  (unless the problem is unique to the non-open operating systems)
+
 celebrate
 ---------
 
@@ -61,38 +68,79 @@ celebrate
 curl release scheduling
 =======================
 
-Basics
-------
+Release Cycle
+-------------
 
-We do releases every 8 weeks on Wednesdays. If critical problems arise, we can
-insert releases outside of the schedule or we can move the release date - but
-this is very rare.
+We normally do releases every 8 weeks on Wednesdays. If important problems
+arise, we can insert releases outside the schedule or we can move the release
+date.
 
-Each 8 week release cycle is split in two 4-week periods.
+Each 8 week (56 days) release cycle is divided into three distinct periods:
 
-- During the first 4 weeks after a release, we allow new features and changes
-  to curl and libcurl. If we accept any such changes, we bump the minor number
-  used for the next release.
+- During the first 10 calendar days after a release, we are in "cool down". We
+  do not merge features but only bug-fixes. If a regression is reported, we
+  might do a follow-up patch release.
 
-- During the second 4-week period we do not merge any features or changes, we
-  then only focus on fixing bugs and polishing things to make a solid coming
-  release.
+- During the following 3 weeks (21 days) there is a feature window: we allow
+  new features and changes to curl and libcurl. If we accept any such changes,
+  we bump the minor number used for the next release.
+
+- During the next 25 days we are in feature freeze. We do not merge any
+  features or changes, and we only focus on fixing bugs and polishing things
+  to make the pending release a solid one.
+
+If a future release date happens to end up on a "bad date", like in the middle
+of common public holidays or when the lead release manager is unavailable, the
+release date can be moved forwards or backwards a full week. This is then
+advertised well in advance.
+
+Release Candidates
+------------------
+
+We ship release candidate tarballs on three occasions in preparation for the
+pending release:
+
+- Release candidate one (**rc1**) ships the same Saturday the feature freeze
+  starts. Twenty-five days before the release. Tagged like `rc-7_34_0-1`.
+
+- Release candidate two (**rc2**) ships nine days later, sixteen days before
+  the release. On a Monday. Tagged like `rc-7_34_0-2`.
+
+- Release candidate tree (**rc3**) ships nine days later, seven days before
+  the release. On a Wednesday. Tagged like `rc-7_34_0-3`.
+
+Release candidate tarballs are ephemeral and each such tarball is only kept
+around for a few weeks. They are provided on their dedicated webpage at:
+https://curl.se/rc/
+
+The git tags for release candidate are temporary and remain set only for a
+limited period of time.
+
+**Do not use release candidates in production**. They are work in progress.
+Use them for testing and verification only. Use actual releases in production.
+
+Critical problems
+-----------------
+
+We can break the release cycle and do a patch release at any point if a
+critical enough problem is reported. There is no exact definition of how to
+assess such criticality, but if an issue is highly disturbing or has a
+security impact on a large enough share of the user population it might
+qualify.
+
+If you think an issue qualifies, bring it to the curl-library mailing list and
+push for it.
 
 Coming dates
 ------------
 
-Based on the description above, here are some planned release dates (at the
-time of this writing):
+Based on the description above, here are some planned future release dates:
 
-- May 22, 2019
-- July 17, 2019
-- September 11, 2019
-- November 6, 2019
-- January 8, 2020 (moved)
-- February 27, 2020
-- April 22, 2020
-- June 17, 2020
-
-The above (and more) curl-related dates are published in
-[iCalendar format](https://calendar.google.com/calendar/ical/c9u5d64odop9js55oltfarjk6g%40group.calendar.google.com/public/basic.ics)
-as well.
+- September 10, 2025
+- November 5, 2025
+- January 7, 2026
+- March 4, 2026
+- April 29, 2026
+- June 24, 2026
+- August 19, 2026
+- October 14, 2026

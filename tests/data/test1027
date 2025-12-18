@@ -13,20 +13,12 @@
 #
 # Client-side
 <client>
-<server>
-none
-</server>
- <name>
+<name>
 curl --help
- </name>
- <command>
+</name>
+<command>
 --help
 </command>
-# Search for these two sentinel lines in the help output; if they are found,
-# then chances are good the entire help is there.
-<postcheck>
-perl -e 'open(IN,$ARGV[0]); my $lines=grep(/(Usage: curl )|(--version\s*Show version)/, <IN>); exit ($lines != 2); # Let this file pass an XML syntax check: </IN>' log/stdout1027
-</postcheck>
 </client>
 
 #
@@ -35,5 +27,10 @@ perl -e 'open(IN,$ARGV[0]); my $lines=grep(/(Usage: curl )|(--version\s*Show ver
 <errorcode>
 0
 </errorcode>
+# Search for these two sentinel lines in the help output; if they are found,
+# then chances are good the entire help is there.
+<postcheck>
+%PERL -e 'open(IN,$ARGV[0]); my $lines=grep(/(Usage: curl )|(--version\s*Show version)/, <IN>); exit ($lines != 2); # Let this file pass an XML syntax check: </IN>' %LOGDIR/stdout%TESTNUMBER
+</postcheck>
 </verify>
 </testcase>

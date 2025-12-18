@@ -12,17 +12,14 @@ HTTP GET
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
- <name>
+<name>
 HTTP URL with space in host name
- </name>
- <command>
--g "http://127.0.0.1 www.example.com/we/want/1264"
+</name>
+<command>
+-g "http://127.0.0.1 www.example.com/we/want/%TESTNUMBER"
 </command>
 </client>
 

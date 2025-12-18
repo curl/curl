@@ -16,25 +16,25 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with multiple --mail-rcpt
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 From: different
 To: another
 
 body
 </stdin>
- <command>
-smtp://%HOSTIP:%SMTPPORT/917 --mail-rcpt recipient.one@example.com --mail-rcpt recipient.two@example.com --mail-rcpt recipient.three@example.com --mail-rcpt recipient.four@example.com --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient.one@example.com --mail-rcpt recipient.two@example.com --mail-rcpt recipient.three@example.com --mail-rcpt recipient.four@example.com --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 917
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient.one@example.com>
 RCPT TO:<recipient.two@example.com>
@@ -44,7 +44,7 @@ RCPT TO:<recipient.five@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

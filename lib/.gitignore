@@ -1,12 +1,10 @@
-*.a
-*.imp
-*.nlm
-*.orig
-*.rej
-*.res
-TAGS
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+Makefile.soname.cmake
 curl_config.h
 curl_config.h.in
-libcurl.plist.dist
 libcurl.vers
-stamp-h1
+libcurl_unity.c
+unitprotos.h

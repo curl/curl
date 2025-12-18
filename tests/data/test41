@@ -12,14 +12,17 @@ FAILURE
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP formpost with missing file
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/want/41 -F moo=@boo
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -F moo=@boo
 </command>
 </client>
 

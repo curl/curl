@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,22 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
-#include "x509asn1.h"
+#include "vtls/x509asn1.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test_unit1651(const char *arg)
 {
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
+#if defined(USE_GNUTLS) || defined(USE_SCHANNEL)
 
-}
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
-
-/* cert captured from gdb when connecting to curl.haxx.se on October 26
-   2018 */
-static unsigned char cert[] = {
+  /* cert captured from gdb when connecting to curl.se on October 26
+     2018 */
+  static unsigned char cert[] = {
   0x30, 0x82, 0x0F, 0x5B, 0x30, 0x82, 0x0E, 0x43, 0xA0, 0x03, 0x02, 0x01, 0x02,
   0x02, 0x0C, 0x08, 0x77, 0x99, 0x2C, 0x6B, 0x67, 0xE1, 0x18, 0xD6, 0x66, 0x66,
   0x9E, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01,
@@ -341,48 +337,43 @@ static unsigned char cert[] = {
   0x70, 0x77, 0x54, 0x57, 0x09, 0x03, 0x56, 0x4A, 0x33, 0x60, 0x00, 0x27, 0xFE,
   0xA7, 0xD7, 0xA9, 0xC4, 0xEC, 0x17, 0x17, 0x8D, 0x87, 0x70, 0x6B, 0x48, 0x88,
   0x61, 0x54, 0x4A, 0x2B, 0xB7, 0x6A, 0x12, 0x08, 0xFB,
-};
+  };
 
-UNITTEST_START
-{
   CURLcode result;
-  struct connectdata conn;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
-  struct Curl_easy *data = curl_easy_init();
+  struct Curl_easy *data;
   int i;
   int byte;
-  if(!data)
-    return 2;
 
-  memset(&conn, 0, sizeof(struct connectdata));
-  /* this is a lot of assuming, but we expect the parsing function to only
-     really need the easy handle pointer */
-  conn.data = data;
-  result = Curl_extract_certinfo(&conn, 0, beg, end);
-
-  fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
-
-  /* a poor man's fuzzing of some initial data to make sure nothing bad
-     happens */
-  for(byte = 1 ; byte < 255; byte += 17) {
-    for(i = 0; i < 45; i++) {
-      char backup = cert[i];
-      cert[i] = (unsigned char)byte&0xff;
-      (void) Curl_extract_certinfo(&conn, 0, beg, end);
-      cert[i] = backup;
-    }
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
   }
-  curl_easy_cleanup(data);
-}
-UNITTEST_STOP
 
+  data = curl_easy_init();
+  if(data) {
+    result = Curl_extract_certinfo(data, 0, beg, end);
+
+    fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
+
+    /* a poor man's fuzzing of some initial data to make sure nothing bad
+       happens */
+    for(byte = 1 ; byte < 255; byte += 17) {
+      for(i = 0; i < 45; i++) {
+        unsigned char backup = cert[i];
+        cert[i] = (unsigned char) (byte & 0xff);
+        (void)Curl_extract_certinfo(data, 0, beg, end);
+        cert[i] = backup;
+      }
+    }
+
+    curl_easy_cleanup(data);
+  }
+  curl_global_cleanup();
 #else
-
-UNITTEST_START
-{
-  puts("not tested since Curl_extract_certinfo() is not built-in");
-}
-UNITTEST_STOP
-
+  puts("not tested since Curl_extract_certinfo() is not built in");
 #endif
+
+  UNITTEST_END_SIMPLE
+}

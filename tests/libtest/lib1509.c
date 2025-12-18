@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,24 +18,24 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-size_t WriteOutput(void *ptr, size_t size, size_t nmemb, void *stream);
-size_t WriteHeader(void *ptr, size_t size, size_t nmemb, void *stream);
+size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream);
+size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream);
 
-static unsigned long realHeaderSize = 0;
+static size_t realHeaderSize = 0;
 
-int test(char *URL)
+static CURLcode test_lib1509(const char *URL)
 {
   long headerSize;
   CURLcode code;
   CURL *curl = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -53,24 +53,24 @@ int test(char *URL)
 
   code = curl_easy_perform(curl);
   if(CURLE_OK != code) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+    curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed, "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, code, curl_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   code = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
   if(CURLE_OK != code) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+    curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, code, curl_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
-  printf("header length is ........: %ld\n", headerSize);
-  printf("header length should be..: %lu\n", realHeaderSize);
+  curl_mprintf("header length is ........: %ld\n", headerSize);
+  curl_mprintf("header length should be..: %zu\n", realHeaderSize);
 
 test_cleanup:
 
@@ -80,18 +80,18 @@ test_cleanup:
   return res;
 }
 
-size_t WriteOutput(void *ptr, size_t size, size_t nmemb, void *stream)
+size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
   return nmemb * size;
 }
 
-size_t WriteHeader(void *ptr, size_t size, size_t nmemb, void *stream)
+size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)ptr;
   (void)stream;
 
-  realHeaderSize += curlx_uztoul(size * nmemb);
+  realHeaderSize += size * nmemb;
 
   return nmemb * size;
 }

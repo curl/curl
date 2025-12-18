@@ -1,7 +1,0 @@
-See https://curl.haxx.se/changes.html for the edited and human readable online
-version of what has changed over the years in different curl releases.
-
-Generate a CHANGES file like the one present in every release like this:
-
-$ git log --pretty=fuller --no-color --date=short --decorate=full | \
-  ./scripts/log2changes.pl

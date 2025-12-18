@@ -13,13 +13,16 @@ multiple HTTP requests
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
- <name>
+<name>
 use curl with multiple request methods
- </name>
- <command>
+</name>
+<command>
 -I -d FOOO -F moo=moo localhost
 </command>
 </client>

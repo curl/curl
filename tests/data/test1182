@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+runtests.pl
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify that runtests.pl accepts an exclude file with the -E option
+</name>
+
+<command type="perl">
+%SRCDIR/runtests.pl -o TESTDIR=%LOGDIR/data -o LOGDIR=%LOGDIR/log -E %LOGDIR/test%TESTNUMBER-exclude-file 1
+</command>
+<precheck>
+mkdir %LOGDIR/data ; mkdir %LOGDIR/log; cp %SRCDIR/data/test1 %LOGDIR/data; echo 'test:1:Test should not run for unit test %TESTNUMBER' > %LOGDIR/test%TESTNUMBER-exclude-file
+</precheck>
+</client>
+
+<verify>
+<errorcode>
+1
+</errorcode>
+<postcheck>
+grep -q "Test should not run for unit test %TESTNUMBER" %LOGDIR/stdout%TESTNUMBER
+</postcheck>
+</verify>
+
+</testcase>

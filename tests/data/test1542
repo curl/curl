@@ -1,0 +1,71 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+connection reuse
+persistent connection
+CURLOPT_MAXLIFETIME_CONN
+verbose logs
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+verbose-strings
+</features>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+connection reuse with CURLOPT_MAXLIFETIME_CONN
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
+== Info: Connection #0 to host %HOSTIP:%HTTPPORT left intact
+== Info: Connection #0 to host %HOSTIP:%HTTPPORT left intact
+== Info: Connection #0 to host %HOSTIP:%HTTPPORT left intact
+== Info: shutting down connection #0
+== Info: Connection #1 to host %HOSTIP:%HTTPPORT left intact
+</file>
+<stripfile>
+$_ = '' if(($_ !~ /left intact/) && ($_ !~ /(closing|shutting down) connection #\d+/))
+</stripfile>
+</verify>
+</testcase>

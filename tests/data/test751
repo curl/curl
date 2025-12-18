@@ -1,0 +1,31 @@
+<testcase>
+<info>
+<keywords>
+MULTI
+</keywords>
+</info>
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+multi - add many easy handles
+</name>
+</client>
+
+# 1000 easy handles needs memory
+<verify>
+<limits>
+Maximum allocated: 6000000
+Allocations: 7000
+</limits>
+</verify>
+</testcase>

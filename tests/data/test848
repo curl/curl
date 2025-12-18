@@ -16,7 +16,7 @@ AUTH PLAIN
 REPLY AUTHENTICATE +
 REPLY c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ= A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -33,22 +33,22 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP plain authentication with alternative authorization identity
- </name>
- <command>
-'imap://%HOSTIP:%IMAPPORT/848/;MAILINDEX=1' -u user:secret --sasl-authzid shared-mailbox
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret --sasl-authzid shared-mailbox
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
 c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ=
-A003 SELECT 848
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

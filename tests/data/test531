@@ -25,13 +25,13 @@ ftp
 <tool>
 lib525
 </tool>
- <name>
+<name>
 FTP PORT upload using multi interface and get 425 response
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/path/531 log/upload531
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload531">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo
 don't upload this
 </file>
@@ -44,14 +44,14 @@ don't upload this
 ^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
 ^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
 </strip>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 CWD path
 PORT 127,0,0,1,5,109
 TYPE I
-STOR 531
+STOR %TESTNUMBER
 QUIT
 </protocol>
 

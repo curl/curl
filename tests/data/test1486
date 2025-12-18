@@ -1,0 +1,28 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+docs
+--write-out
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify that write-out.md and tool_writeout.c are in sync
+</name>
+
+<command type="perl">
+%SRCDIR/test1486.pl %SRCDIR
+</command>
+</client>
+
+<verify>
+<stdout>
+OK
+</stdout>
+</verify>
+
+</testcase>

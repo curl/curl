@@ -18,13 +18,13 @@ FAILURE
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP invalid quote command
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "invalid-command foo bar" sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file626.txt --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "invalid-command foo bar" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
-<file name="log/file626.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test file for rename test
 </file>
 </client>
@@ -35,8 +35,5 @@ Test file for rename test
 <errorcode>
 21
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

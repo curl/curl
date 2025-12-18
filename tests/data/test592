@@ -33,14 +33,14 @@ ftp
 <tool>
 lib591
 </tool>
- <name>
+<name>
 FTP multi PORT and 421 on upload
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/path/592 %FTPTIME2 log/upload592
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload592">
-Moooooooooooo for 592
+<file name="%LOGDIR/upload%TESTNUMBER">
+Moooooooooooo for %TESTNUMBER
  upload this
 </file>
 </client>
@@ -49,11 +49,11 @@ Moooooooooooo for 592
 <verify>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
-s/^PORT (.*)/PORT/
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^PORT (\S*)/PORT/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
 # a 421 response must prevent further commands from being sent
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -61,7 +61,7 @@ CWD path
 EPRT |1|
 PORT
 TYPE I
-STOR 592
+STOR %TESTNUMBER
 QUIT
 </protocol>
 # CURLE_FTP_ACCEPT_FAILED = 10

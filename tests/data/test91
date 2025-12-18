@@ -4,11 +4,12 @@
 HTTP
 HTTP GET
 HTTP NTLM auth
+NTLM
 </keywords>
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Magic-Negotiate
@@ -22,7 +23,7 @@ Connection: close
 
 # This is supposed to be returned when the server gets a first
 # Authorization: NTLM line passed-in from the client
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Length: 34
@@ -34,7 +35,7 @@ This is not the real page either!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<data1002 crlf="headers">
 HTTP/1.1 200 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -43,7 +44,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1002>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Magic-Negotiate
@@ -73,50 +74,38 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
-debug
 </features>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with NTLM/Negotiate/Basic, anyauth and user with domain, with size 0
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/91 --anyauth -u mydomain\\myself:secret
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --anyauth -u mydomain\\myself:secret
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /91 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /91 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /91 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAgACABwAAAABgAGAHgAAAAIAAgAfgAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAAKBS3rdGYZEGsqW8otYHWXWBxC5mCuFmYm15ZG9tYWlubXlzZWxmY3VybGhvc3Q=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAgACABwAAAABgAGAHgAAAALAAsAfgAAAAAAAAAAAAAAhoIBAMIyJpR5mHpg2FZha5kRaFZ9436GAxPu0C5llxexSQ5QzVkiLSfkcpVyRgCXXqR+Am15ZG9tYWlubXlzZWxmV09SS1NUQVRJT04=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

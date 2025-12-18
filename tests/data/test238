@@ -8,7 +8,7 @@ FTP
 # Server-side
 <reply>
 <servercmd>
-REPLY EPSV 229 Entering Passiv Mode (|||1000000|)
+REPLY EPSV 229 Entering Passive Mode (|||1000000|)
 </servercmd>
 </reply>
 
@@ -17,11 +17,11 @@ REPLY EPSV 229 Entering Passiv Mode (|||1000000|)
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP getting bad port in response to EPSV
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/238
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -31,7 +31,7 @@ ftp://%HOSTIP:%FTPPORT/238
 <errorcode>
 13
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

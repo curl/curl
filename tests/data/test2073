@@ -10,14 +10,14 @@ HTTP FORMPOST
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 10
 
 contents1
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 10
 
 contents2
@@ -27,14 +27,17 @@ contents2
 #
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP form posts with handle reset
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/2073 -F 'name=a;filename=a.pdf' --next http://%HOSTIP:%HTTPPORT/2073 -F 'name=b;filename=b.jpg'
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F 'name=a;filename=a.pdf' --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F 'name=b;filename=b.jpg'
 </command>
 </client>
 
@@ -42,22 +45,24 @@ http://%HOSTIP:%HTTPPORT/2073 -F 'name=a;filename=a.pdf' --next http://%HOSTIP:%
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|------------).*
+^(Content-Type: multipart/form-data;|------------).*
 </strip>
-<protocol>
-POST /2073 HTTP/1.1
+<protocol crlf="yes">
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 189
+Content-Length: 201
 
 Content-Disposition: form-data; name="name"; filename="a.pdf"
 Content-Type: application/pdf
 
 a
-POST /2073 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 184
+Content-Length: 196
 
 Content-Disposition: form-data; name="name"; filename="b.jpg"
 Content-Type: image/jpeg

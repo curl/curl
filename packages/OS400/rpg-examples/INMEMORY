@@ -1,0 +1,159 @@
+      * Curl get in memory and count HTML tags
+      *
+     h DFTACTGRP(*NO) ACTGRP(*NEW)
+     h OPTION(*NOSHOWCPY)
+     h BNDDIR('CURL')
+      *
+      **************************************************************************
+      *                                  _   _ ____  _
+      *  Project                     ___| | | |  _ \| |
+      *                             / __| | | | |_) | |
+      *                            | (__| |_| |  _ <| |___
+      *                             \___|\___/|_| \_\_____|
+      *
+      * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+      *
+      * This software is licensed as described in the file COPYING, which
+      * you should have received as part of this distribution. The terms
+      * are also available at https://curl.se/docs/copyright.html.
+      *
+      * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+      * copies of the Software, and permit persons to whom the Software is
+      * furnished to do so, under the terms of the COPYING file.
+      *
+      * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+      * ANY KIND, either express or implied.
+      *
+      * SPDX-License-Identifier: curl
+      *
+      **************************************************************************
+      *
+      /include H,CURL.INC
+      *
+      * Example to request the URL given as command line parameter and count
+      * HTML tags in its response.
+      *
+     d                 pi
+     d url                          120
+      *
+     d countdata       ds                  qualified based(###dummyptr)         User data type
+     d  tagcount                     10u 0                                      Tag counter
+     d  tagopen                        n                                        Possible opening tag
+      *
+     d urllen          s             10u 0                                      URL length
+      *
+      **************************************************************************
+
+        urllen = trimmed_length(url: %len(url));
+
+        // Do the curl stuff.
+
+        curl_global_init(CURL_GLOBAL_ALL);
+        main();
+        curl_global_cleanup();
+        *inlr = *on;            // Exit
+      *
+      **************************************************************************
+      * Main procedure: do the curl job.
+      **************************************************************************
+      *
+     p main            b
+     d main            pi
+      *
+     d h               s               *                                        Easy handle
+     d result          s                   like(CURLcode)                       Curl return code
+     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d errmsgp         s               *                                        Error string pointer
+     d response        s             52                                         For error display
+     d counter         ds                  likeds(countdata)                    HTML tag counter
+
+        counter.tagcount = 0;
+        counter.tagopen = *off;
+
+            // Create and fill curl handle.
+
+        h = curl_easy_init();
+        if h <> *NULL;
+            curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen): 0);
+            curl_easy_setopt(h: CURLOPT_FOLLOWLOCATION: 1);
+            curl_easy_setopt(h: CURLOPT_WRITEFUNCTION: %paddr(in_data_cb));
+            curl_easy_setopt(h: CURLOPT_WRITEDATA: %addr(counter));
+
+            // Perform the request.
+
+            result = curl_easy_perform(h);
+            curl_easy_cleanup(h);       // Release handle
+        endif;
+
+        // Check for error and report if some.
+
+        if result <> CURLE_OK;
+            errmsgp = curl_easy_strerror_ccsid(result: 0);
+            response = %str(errmsgp);
+            dsply '' '*EXT' response;
+        else;
+            // Display the tag count.
+
+            response = 'Tag count: ' + %char(counter.tagcount);
+            dsply '' '*EXT' response;
+        endif;
+     p main            e
+      *
+      **************************************************************************
+      * Data input callback procedure.
+      **************************************************************************
+      *
+     p in_data_cb      b
+     d in_data_cb      pi            10u 0
+     d  ptr                            *   value                                Input data pointer
+     d  size                         10u 0 value                                Data element size
+     d  nmemb                        10u 0 value                                Data element count
+     d  userdata                       *   value                                User data pointer
+      *
+     d counter         ds                  likeds(countdata) based(userdata)    HTML tag counter
+     d ebcdata         s               *                                        EBCDIC data pointer
+     d chars           s              1    based(ebcdata) dim(1000000)
+     d i               s             10u 0                                      Character position
+      *
+        size = size * nmemb;                                   // The size in bytes.
+        ebcdata = curl_to_ccsid(%str(ptr: size): 0);           // Convert to EBCDIC.
+        i = 1;
+        dow i <= size;
+            if counter.tagopen;                                // Did we see '<' ?
+                counter.tagopen = *off;
+                if chars(i) <> '/';                            // Reject closing tag.
+                    counter.tagcount = counter.tagcount + 1;   // Count this tag.
+                endif;
+            else;
+                i = %scan('<': %str(ebcdata): i);              // Search next possible tag.
+                if i = 0;
+                    leave;
+                endif;
+                counter.tagopen = *on;                         // Found one: flag it.
+            endif;
+            i = i + 1;
+        enddo;
+        curl_free(ebcdata);
+        return size;
+     p in_data_cb      e
+      *
+      **************************************************************************
+      * Get the length of right-trimmed string
+      **************************************************************************
+      *
+     p trimmed_length  b
+     d trimmed_length  pi            10u 0
+     d  string                   999999    const options(*varsize)
+     d  length                       10u 0 value
+      *
+     d len             s             10u 0
+      *
+        len = %scan(X'00': string: 1: length); // Limit to null-terminated string
+        if len = 0;
+            len = length + 1;
+        endif;
+        if len <= 1;
+            return 0;
+        endif;
+        return %checkr(' ': string: len - 1);  // Trim right
+     p trimmed_length  e

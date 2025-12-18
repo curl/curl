@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+
+<name>
+Pre-request callback for FTP
+</name>
+<tool>
+lib2082
+</tool>
+
+<command>
+ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stripfile>
+s/^Local port = \d+/Local port = stripped/
+</stripfile>
+<stdout>
+Connected to %HOSTIP
+Connected from %CLIENTIP
+Remote port = %FTPPORT
+Local port = stripped
+Returning = 0
+</stdout>
+</verify>
+</testcase>

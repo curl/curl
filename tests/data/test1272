@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+GOPHER
+GOPHERS
+INDEX
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+iMenu results		error.host	1
+0Selector 	/bar	bar.foo.invalid	70
+.
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+gophers
+</server>
+<killserver>
+gophers
+</killserver>
+<name>
+Gophers index
+</name>
+<command>
+--insecure gophers://%HOSTIP:%GOPHERSPORT/1/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+/%TESTNUMBER
+</protocol>
+</verify>
+</testcase>

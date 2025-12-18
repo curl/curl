@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* <DESC>
- * A multi-threaded example that uses pthreads to fetch several files at once
+ * A multi-threaded program using pthreads to fetch several files at once
  * </DESC>
  */
+
+/* Requires: HAVE_PTHREAD_H */
 
 #include <stdio.h>
 #include <pthread.h>
@@ -33,27 +37,30 @@
 /*
   List of URLs to fetch.
 
-  If you intend to use a SSL-based protocol here you might need to setup TLS
+  If you intend to use an SSL-based protocol here you might need to setup TLS
   library mutex callbacks as described here:
 
-  https://curl.haxx.se/libcurl/c/threadsafe.html
+  https://curl.se/libcurl/c/threadsafe.html
 
 */
-const char * const urls[NUMT]= {
-  "https://curl.haxx.se/",
-  "ftp://cool.haxx.se/",
-  "https://www.cag.se/",
-  "www.haxx.se"
+static const char * const urls[NUMT]= {
+  "https://curl.se/",
+  "ftp://example.com/",
+  "https://example.net/",
+  "www.example"
 };
 
-static void *pull_one_url(void *url)
+static void *pull_one_url(void *pindex)
 {
   CURL *curl;
 
   curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  curl_easy_perform(curl); /* ignores error */
-  curl_easy_cleanup(curl);
+  if(curl) {
+    int i = *(int *)pindex;
+    curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
+    (void)curl_easy_perform(curl); /* ignores error */
+    curl_easy_cleanup(curl);
+  }
 
   return NULL;
 }
@@ -65,30 +72,33 @@ static void *pull_one_url(void *url)
    void * (*start_func)(void *), void *arg);
 */
 
-int main(int argc, char **argv)
+int main(void)
 {
+  CURLcode res;
   pthread_t tid[NUMT];
   int i;
 
   /* Must initialize libcurl before any threads are started */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
-  for(i = 0; i< NUMT; i++) {
+  for(i = 0; i < NUMT; i++) {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
-                               (void *)urls[i]);
-    if(0 != error)
+                               (void *)&i);
+    if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }
 
   /* now wait for all threads to terminate */
-  for(i = 0; i< NUMT; i++) {
+  for(i = 0; i < NUMT; i++) {
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
-
+  curl_global_cleanup();
   return 0;
 }

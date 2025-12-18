@@ -12,7 +12,7 @@ LIST
 <reply>
 <servercmd>
 # include the '.\r\n' 3-byte trailer to end the transfer properly!
-REPLY LIST +OK 851 100\r\n.
+REPLY LIST +OK %TESTNUMBER 100\r\n.
 </servercmd>
 </reply>
 
@@ -22,22 +22,22 @@ REPLY LIST +OK 851 100\r\n.
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 LIST one message
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/851 -l -u user:secret
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -l -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret
-LIST 851
+LIST %TESTNUMBER
 QUIT
 </protocol>
 </verify>

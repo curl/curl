@@ -4,14 +4,15 @@
 HTTPS
 HTTP GET
 timeout
+FAILURE
 </keywords>
 </info>
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 _data_result_data_
@@ -29,22 +30,23 @@ SSL
 <server>
 https
 </server>
- <name>
+<killserver>
+https
+</killserver>
+<name>
 HTTPS with 8 secs timeout
- </name>
- <command>
--k https://%HOSTIP:%HTTPSPORT/want/303 -m 8
+</name>
+<command>
+--insecure https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER -m 8
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /want/303 HTTP/1.1
+<protocol crlf="headers">
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

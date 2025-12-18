@@ -11,9 +11,9 @@ Content-Range
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Accept-Ranges: bytes
 Content-Length: 0
@@ -28,10 +28,10 @@ Content-Type: text/html
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with resume from end of already-uploaded file
- </name>
-<file name="log/test1041.txt">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
 012345678
 012345678
@@ -43,25 +43,22 @@ HTTP PUT with resume from end of already-uploaded file
 012345678
 012345678
 </file>
- <command>
-http://%HOSTIP:%HTTPPORT/1041 -Tlog/test1041.txt -C -
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C -
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 # curl doesn't do a HEAD request on the remote file so it has no idea whether
 # it can skip part of the file or not.  Instead, it sends the entire file.
-<protocol>
-PUT /1041 HTTP/1.1
+<protocol crlf="headers">
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 0-99/100
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 100
-Expect: 100-continue
 
 012345678
 012345678

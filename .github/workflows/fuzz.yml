@@ -1,0 +1,47 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: 'Fuzzer'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '**/CMakeLists.txt'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'CMake/**'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'tests/data/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '**/CMakeLists.txt'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'CMake/**'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'tests/data/**'
+
+concurrency:
+  # Hard-coded workflow name to avoid colliding with curl-fuzzer's group
+  group: curl-fuzz-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  Fuzzing:
+    uses: curl/curl-fuzzer/.github/workflows/ci.yml@master

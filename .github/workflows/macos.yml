@@ -1,0 +1,709 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: 'macOS'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+# Deprecated Apple APIs and the macos-version-min value required to avoid
+# deprecation warnings with llvm/clang:
+#
+# - 10.7  Lion (2011)          - GSS
+# - 10.9  Mavericks (2013)     - LDAP
+#
+
+env:
+  CURL_CI: github
+  MAKEFLAGS: -j 4
+  LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
+
+jobs:
+  ios:
+    name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
+    runs-on: 'macos-latest'
+    timeout-minutes: 10
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
+      CC: ${{ matrix.build.compiler || 'clang' }}
+      LDFLAGS: ''
+      MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
+      MATRIX_OPTIONS: ${{ matrix.build.options }}
+      # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
+      LIBRESSL_VERSION: 4.2.1
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - name: 'libressl'
+            install_steps: libressl
+            configure: --with-openssl=/Users/runner/libressl --without-libpsl
+
+          - name: 'libressl'
+            install_steps: libressl
+            # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
+            generate: >-
+              -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
+              -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
+              -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
+              -DCURL_USE_LIBPSL=OFF
+
+          - name: 'libressl'
+            install_steps: libressl
+            generator: Xcode
+            options: --config Debug
+            generate: >-
+              -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
+              -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
+              -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
+              -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
+              -DCURL_USE_LIBPSL=OFF
+
+    steps:
+      - name: 'brew install'
+        if: ${{ matrix.build.configure }}
+        run: |
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+
+      - name: 'toolchain versions'
+        run: |
+          command -v "${CC}"; "${CC}" --version || true
+          xcodebuild -version || true
+          xcodebuild -sdk -version | grep '^Path:' || true
+          xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || true
+          xcrun --sdk iphoneos --show-sdk-version || true
+          echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
+          echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+
+      - name: 'cache libressl'
+        if: ${{ contains(matrix.build.install_steps, 'libressl') }}
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-libressl
+        env:
+          cache-name: cache-libressl
+        with:
+          path: ~/libressl
+          key: iOS-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+
+      - name: 'build libressl'
+        if: ${{ contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true' }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
+          cd "libressl-${LIBRESSL_VERSION}"
+          cmake -B . -G Ninja \
+            -DCMAKE_INSTALL_PREFIX=/Users/runner/libressl \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBRESSL_APPS=OFF \
+            -DLIBRESSL_TESTS=OFF
+          cmake --build .
+          cmake --install . --verbose
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'autoreconf'
+        if: ${{ matrix.build.configure }}
+        run: autoreconf -fi
+
+      - name: 'configure'
+        env:
+          MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
+          MATRIX_GENERATE: '${{ matrix.build.generate }}'
+          MATRIX_GENERATOR: '${{ matrix.build.generator }}'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
+            [ -n "${MATRIX_GENERATOR}" ] && options="-G ${MATRIX_GENERATOR}"
+            cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+              -DCMAKE_SYSTEM_NAME=iOS \
+              -DUSE_APPLE_IDN=ON \
+              ${MATRIX_GENERATE} ${options}
+          else
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+              --disable-dependency-tracking --enable-option-checking=fatal \
+              CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)" \
+              --host=aarch64-apple-darwin \
+              --with-apple-idn \
+              ${MATRIX_CONFIGURE}
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --verbose
+          else
+            make -C bld V=1
+          fi
+
+      - name: 'curl info'
+        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file '{}' \;
+
+      - name: 'build tests'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target testdeps --verbose
+          else
+            make -C bld V=1 -C tests
+          fi
+
+      - name: 'build examples'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples-build --verbose
+          else
+            make -C bld examples V=1
+          fi
+
+  macos:
+    name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.build.name }}"
+    runs-on: 'macos-15'
+    timeout-minutes: 45
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
+      CC: '${{ matrix.compiler }}'
+      MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
+      MATRIX_COMPILER: '${{ matrix.compiler }}'
+      MATRIX_INSTALL: '${{ matrix.build.install }}'
+      MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
+      MATRIX_MACOS_VERSION_MIN: '${{ matrix.build.macos-version-min }}'
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [clang, llvm@18, gcc-12]
+        build:
+          # autotools
+          - name: '!ssl !debug brotli zstd'
+            compiler: clang
+            install: brotli zstd
+            configure: --without-ssl --with-brotli --with-zstd
+          - name: '!ssl !debug'
+            compiler: gcc-12
+            configure: --without-ssl
+          - name: '!ssl'
+            compiler: clang
+            configure: --enable-debug --without-ssl
+          - name: '!ssl libssh2 AppleIDN'
+            compiler: clang
+            configure: --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2 --without-ssl --with-apple-idn
+          - name: 'OpenSSL libssh c-ares'
+            compiler: clang
+            install: libssh
+            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --enable-ares --with-fish-functions-dir --with-zsh-functions-dir
+          - name: 'OpenSSL libssh'
+            compiler: llvm@18
+            install: libssh libnghttp3
+            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --with-openssl-quic
+          - name: '!ssl c-ares'
+            compiler: clang
+            configure: --enable-debug --enable-ares --without-ssl
+          - name: '!ssl HTTP-only'
+            compiler: clang
+            configure: >-
+              --enable-debug
+              --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
+              --disable-ldap --disable-pop3 --without-librtmp --disable-rtsp
+              --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
+              --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp
+              --without-libssh2 --without-libssh
+              --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
+
+            macos-version-min: '10.15'  # Catalina (2019)
+          - name: 'LibreSSL !ldap +examples'
+            compiler: clang
+            install: libressl
+            install_steps: pytest
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl --disable-ldap
+          - name: 'OpenSSL 10.15'
+            compiler: clang
+            install: libnghttp3 libngtcp2
+            install_steps: pytest
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2
+            macos-version-min: '10.15'
+          - name: 'OpenSSL SecTrust'
+            compiler: clang
+            install: libnghttp3 libngtcp2
+            install_steps: pytest
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust
+          - name: 'OpenSSL event-based'
+            compiler: clang
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+            tflags: --test-event
+          # cmake
+          - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
+            install: libnghttp3 libngtcp2 gsasl rtmpdump
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
+          - name: 'MultiSSL AppleIDN clang-tidy +examples'
+            compiler: clang
+            install: llvm brotli zstd gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
+            install_steps: clang-tidy skiprun
+            chkprefill: _chkprefill
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DEFAULT_SSL_BACKEND=openssl
+              -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON
+              -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
+              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
+              -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
+
+          - name: 'HTTP/3 clang-tidy'
+            compiler: clang
+            install: llvm brotli zstd libnghttp3 libngtcp2 openldap krb5
+            install_steps: clang-tidy skipall
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
+              -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
+              -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
+              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
+
+          - name: 'LibreSSL openldap krb5 c-ares +examples'
+            install: libressl krb5 openldap
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
+          - name: 'wolfSSL !ldap brotli zstd'
+            install: brotli wolfssl zstd
+            install_steps: pytest
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
+          - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
+            compiler: llvm@18
+            install: brotli mbedtls zstd
+            install_steps: codeset-test
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DUSE_APPLE_IDN=ON
+          - name: 'GnuTLS !ldap krb5 +examples'
+            install: gnutls nettle krb5
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+          - name: 'aws-lc'
+            compiler: gcc-12
+            install: aws-lc
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/aws-lc -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+          - name: 'Rustls'
+            compiler: clang
+            install: rustls-ffi
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
+          - name: 'OpenSSL torture !FTP'
+            compiler: clang
+            install: libnghttp3
+            install_steps: torture
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            tflags: -t --shallow=25 !FTP
+          - name: 'OpenSSL torture FTP'
+            compiler: clang
+            install: libnghttp3
+            install_steps: torture
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            tflags: -t --shallow=20 FTP
+        exclude:
+          # opt out jobs from combinations that have the compiler set manually
+          - { compiler: llvm@18, build: { compiler: 'clang' } }
+          - { compiler: llvm@18, build: { compiler: 'gcc-12' } }
+          - { compiler: gcc-12, build: { compiler: 'clang' } }
+          - { compiler: gcc-12, build: { compiler: 'llvm@18' } }
+          - { compiler: clang, build: { compiler: 'gcc-12' } }
+          - { compiler: clang, build: { compiler: 'llvm@18' } }
+
+    steps:
+      - name: 'brew install'
+        # Run this command with retries because of spurious failures seen
+        # while running the tests, for example
+        # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
+        env:
+          INSTALL_PACKAGES: >-
+            ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'nghttp2 stunnel' || '' }}
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
+
+        run: |
+          echo pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+
+      - name: 'brew unlink openssl'
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') }}
+        run: |
+          if [ -d /opt/homebrew/include/openssl ]; then
+            brew unlink openssl
+          fi
+
+      - name: 'toolchain versions'
+        run: |
+          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
+          [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
+          command -v "${CC}"; "${CC}" --version || true
+          xcodebuild -version || true
+          xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
+          xcrun --sdk macosx --show-sdk-version || true
+          ls -l /Library/Developer/CommandLineTools/SDKs || true
+          echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'autoreconf'
+        if: ${{ matrix.build.configure }}
+        run: autoreconf -fi
+
+      - name: 'configure'
+        env:
+          MATRIX_CHKPREFILL: '${{ matrix.build.chkprefill }}'
+          MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
+          MATRIX_GENERATE: '${{ matrix.build.generate }}'
+        run: |
+          if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
+            sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
+          else
+            sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+          fi
+
+          if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
+            CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
+            CC+=" --sysroot=${sysroot}"
+            CC+=" --target=$(uname -m)-apple-darwin"
+          fi
+
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
+              options=''
+              [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
+              [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' -DVSFTPD=NO'  # Skip ~20 tests that stretch run time by 7x on macOS
+              [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+              cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
+                -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+                -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+                -DCMAKE_OSX_SYSROOT="${sysroot}" \
+                -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
+                ${MATRIX_GENERATE} ${options}
+            done
+            if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
+              echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+              false
+            fi
+          else
+            export CFLAGS
+            if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
+              options+=" --target=$(uname -m)-apple-darwin"
+            fi
+            if [ "${MATRIX_COMPILER}" != 'clang' ]; then
+              options+=" --with-sysroot=${sysroot}"
+              CFLAGS+=" --sysroot=${sysroot}"
+            fi
+            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
+            [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
+            mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror \
+              --disable-dependency-tracking --enable-option-checking=fatal \
+              --with-libpsl=/opt/homebrew/opt/libpsl \
+              ${MATRIX_CONFIGURE} ${options}
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'test configs'
+        run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
+
+      - name: 'build'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose
+          else
+            make -C bld V=1
+          fi
+
+      - name: 'curl -V'
+        run: bld/src/curl --disable --version
+
+      - name: 'curl install'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --install bld --strip
+          else
+            make -C bld V=1 install
+          fi
+
+      - name: 'build tests'
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target testdeps
+          else
+            make -C bld V=1 -C tests
+          fi
+
+      - name: 'install test prereqs'
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
+        run: |
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+
+      - name: 'run tests'
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
+        timeout-minutes: ${{ contains(matrix.build.install_steps, 'torture') && 20 || 10 }}
+        env:
+          TEST_TARGET: ${{ contains(matrix.build.install_steps, 'torture') && 'test-torture' || 'test-ci' }}
+          TFLAGS: '${{ matrix.build.tflags }}'
+        run: |
+          TFLAGS="-j20 ${TFLAGS}"
+          source ~/venv/bin/activate
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+            locale || true
+            export LC_ALL=C
+            export LC_CTYPE=C
+            export LC_NUMERIC=fr_FR.UTF-8
+          fi
+          rm -f ~/.curlrc
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target "${TEST_TARGET}"
+          else
+            make -C bld V=1 "${TEST_TARGET}"
+          fi
+
+      - name: 'install pytest prereqs'
+        if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+        run: |
+          [ -d ~/venv ] || python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+
+      - name: 'run pytest'
+        if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+        env:
+          PYTEST_ADDOPTS: '--color=yes'
+          PYTEST_XDIST_AUTO_NUM_WORKERS: 4
+        run: |
+          source ~/venv/bin/activate
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-pytest-ci
+          else
+            make -C bld V=1 pytest-ci
+          fi
+
+      - name: 'build examples'
+        if: ${{ contains(matrix.build.name, '+examples') }}
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples-build
+          else
+            make -C bld examples V=1
+          fi
+
+  combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
+    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
+    runs-on: ${{ matrix.image }}
+    timeout-minutes: 10
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
+      CC: '${{ matrix.compiler }}'
+      MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_COMPILER: '${{ matrix.compiler }}'
+      MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_MACOS_VERSION_MIN: '${{ matrix.macos-version-min }}'
+    strategy:
+      fail-fast: false
+      matrix:
+        # Sources:
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
+        compiler: [gcc-12, gcc-13, gcc-15, llvm@15, llvm@18, llvm@20, clang]
+        # Xcode support matrix as of 2025-10, with default macOS SDK versions and OS names, years:
+        # * = default Xcode on the runner.
+        # macos-14: 15.0.1, 15.1, 15.2, 15.3,*15.4
+        # macos-15:                                 16.0, 16.1, 16.2, 16.3,*16.4, 26.0
+        # macos-26:                                                         16.4 *26.0
+        # macOSSDK: 14.0,   14.2, 14.2, 14.4, 14.5, 15.0, 15.1, 15.2, 15.4, 15.5, 26.0
+        #           Sonoma (2023)                   Sequoia (2024)                Tahoe (2025)
+        # https://github.com/actions/runner-images/tree/main/images/macos
+        # https://en.wikipedia.org/wiki/MacOS_version_history
+        image: [macos-14, macos-15, macos-26]
+        # Can skip these to reduce jobs:
+        #   15.1 has the same default macOS SDK as 15.2 and identical test results.
+        #   15.4 not revealing new fallouts.
+        #xcode: ['15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0', '16.1']  # all Xcode
+        #xcode: ['15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
+        #xcode: ['15.0.1'        , '15.2', '15.3'        , '16.0'        ]  # coverage
+        xcode: ['']  # default Xcodes
+        macos-version-min: ['']
+        build: [autotools, cmake]
+        exclude:
+          # Combinations not covered by runner images:
+          - { image: macos-14, xcode: '16.0'   }
+          - { image: macos-14, xcode: '16.1'   }
+          - { image: macos-14, xcode: '16.2'   }
+          - { image: macos-14, xcode: '16.3'   }
+          - { image: macos-14, xcode: '16.4'   }
+          - { image: macos-14, xcode: '26.0'   }
+          - { image: macos-15, xcode: '15.0.1' }
+          - { image: macos-15, xcode: '15.1'   }
+          - { image: macos-15, xcode: '15.2'   }
+          - { image: macos-15, xcode: '15.3'   }
+          - { image: macos-15, xcode: '15.4'   }
+          - { image: macos-26, xcode: '15.0.1' }
+          - { image: macos-26, xcode: '15.1'   }
+          - { image: macos-26, xcode: '15.2'   }
+          - { image: macos-26, xcode: '15.3'   }
+          - { image: macos-26, xcode: '15.4'   }
+          - { image: macos-26, xcode: '16.0'   }
+          - { image: macos-26, xcode: '16.1'   }
+          - { image: macos-26, xcode: '16.2'   }
+          - { image: macos-26, xcode: '16.3'   }
+          - { image: macos-14, compiler: 'llvm@18' }
+          - { image: macos-14, compiler: 'llvm@20' }
+          - { image: macos-15, compiler: 'llvm@15' }
+          - { image: macos-15, compiler: 'llvm@20' }
+          - { image: macos-26, compiler: 'llvm@15' }
+          - { image: macos-26, compiler: 'llvm@18' }
+          - { image: macos-26, compiler: 'gcc-12' }
+          # Reduce build combinations, by dropping less interesting ones
+          - { compiler: gcc-13, build: cmake }
+          - { compiler: gcc-14, build: autotools }
+          - { compiler: gcc-15, build: autotools }
+    steps:
+      - name: 'install autotools'
+        if: ${{ matrix.build == 'autotools' }}
+        run: |
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+
+      - name: 'toolchain versions'
+        run: |
+          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
+          [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
+          command -v "${CC}"; "${CC}" --version || true
+          xcodebuild -version || true
+          xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
+          xcrun --sdk macosx --show-sdk-version || true
+          ls -l /Library/Developer/CommandLineTools/SDKs || true
+          echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
+          echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'autoreconf'
+        if: ${{ matrix.build == 'autotools' }}
+        run: autoreconf -fi
+
+      - name: 'configure / ${{ matrix.build }}'
+        run: |
+          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ] ; then
+            # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
+            /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
+          fi
+
+          if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
+            sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
+          else
+            sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+          fi
+
+          if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
+            CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
+            CC+=" --sysroot=${sysroot}"
+            CC+=" --target=$(uname -m)-apple-darwin"
+          fi
+
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
+            # would pick up nghttp2, libidn2, and libssh2
+            cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+              -DCMAKE_OSX_SYSROOT="${sysroot}" \
+              -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
+              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
+              -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
+              -DCURL_USE_OPENSSL=ON \
+              -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
+              -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
+              ${options}
+          else
+            export CFLAGS
+            if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
+              options+=" --target=$(uname -m)-apple-darwin"
+            fi
+            if [ "${MATRIX_COMPILER}" != 'clang' ]; then
+              options+=" --with-sysroot=${sysroot}"
+              CFLAGS+=" --sysroot=${sysroot}"
+            fi
+            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
+            # would pick up nghttp2, libidn2, but libssh2 is disabled by default
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+              --disable-dependency-tracking --enable-option-checking=fatal \
+              --disable-docs --disable-manual \
+              --with-openssl="$(brew --prefix openssl)" \
+              --without-nghttp2 --without-libidn2 \
+              --without-libpsl \
+              ${options}
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build / ${{ matrix.build }}'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose
+          else
+            make -C bld V=1
+          fi
+
+      - name: 'curl -V'
+        run: bld/src/curl --disable --version

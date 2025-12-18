@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+Location: /%TESTNUMBER0002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# this relies on the Debug feature which allows tests to set the time
+<features>
+SSL
+Debug
+crypto
+aws
+</features>
+
+<name>
+HTTP AWS_SIGV4 without X-Xxx-Content-Sha256
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^Content-Type:.*
+^Accept:.*
+</strip>
+<protocol crlf="yes">
+GET /aws_sigv4/testapi/test HTTP/1.1
+Host: exam.ple.com:9000
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test2;test3;test_space;x-xxx-date, Signature=dd39202e9fb7b836ebf2abb83b114cae11ff3b6a169f0c64b290a774a873db9d
+X-Xxx-Date: 19700101T000000Z
+test3: 1234
+test2:
+test_space: t%tab%s  m%tab%   end%repeat[4 x  ]%
+tesMixCase: MixCase
+
+</protocol>
+</verify>
+</testcase>

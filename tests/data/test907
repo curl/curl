@@ -15,7 +15,7 @@ RFC4954
 <servercmd>
 AUTH DIGEST-MD5
 REPLY AUTH 334 cmVhbG09ImN1cmwiLG5vbmNlPSI1MzAwZDE3YTFkNjk1YmQ0MTFlNGNkZjk2Zjk1NDhjMjNjZWQ2MTc1IixhbGdvcml0aG09bWQ1LXNlc3MscW9wPSJhdXRoIg==
-REPLY dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJzbXRwL2N1cmwiLHJlc3BvbnNlPTk0M2YxNjk1OWYxY2M2ZjA3ZTZmMDk0ZjVkYmQ0NzNlLHFvcD1hdXRo 334
+REPLY dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJzbXRwLzEyNy4wLjAuMSIscmVzcG9uc2U9YTI3YzQzOTVmMzM4Njc0M2JlMTIyMDdiN2QxMTIxYzUscW9wPWF1dGg= 334 cnNwYXV0aD05ZWE4NTljYjlkOTBjMzdjYTMwZDQ5ZDM1Mzc4NjMwYw==
 REPLY  235 Authenticated
 </servercmd>
 </reply>
@@ -28,34 +28,38 @@ smtp
 </server>
 <features>
 !SSPI
-debug
+Debug
 crypto
+digest
 </features>
- <name>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<name>
 SMTP DIGEST-MD5 authentication
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 mail body
 </stdin>
- <command>
-smtp://%HOSTIP:%SMTPPORT/907 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 907
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 AUTH DIGEST-MD5
-dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJzbXRwL2N1cmwiLHJlc3BvbnNlPTk0M2YxNjk1OWYxY2M2ZjA3ZTZmMDk0ZjVkYmQ0NzNlLHFvcD1hdXRo
+dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJzbXRwLzEyNy4wLjAuMSIscmVzcG9uc2U9YTI3YzQzOTVmMzM4Njc0M2JlMTIyMDdiN2QxMTIxYzUscW9wPWF1dGg=
 
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

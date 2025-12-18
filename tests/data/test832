@@ -28,14 +28,15 @@ imap
 </server>
 <features>
 !SSPI
-debug
+Debug
 crypto
+digest
 </features>
- <name>
+<name>
 IMAP DIGEST-MD5 graceful cancellation
- </name>
- <command>
-'imap://%HOSTIP:%IMAPPORT/832/;MAILINDEX=1' -u user:secret
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
@@ -49,7 +50,7 @@ IMAP DIGEST-MD5 graceful cancellation
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "LOGOUT"
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE DIGEST-MD5
 *

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,44 +18,41 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include <fcntl.h>
-
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 30 * 1000
-
-/* 500 milliseconds allowed. An extreme number but lets be really conservative
-   to allow old and slow machines to run this test too */
-#define MAX_BLOCKED_TIME_MS 500
-
-int test(char *URL)
+static CURLcode test_lib1501(const char *URL)
 {
-  CURL *handle = NULL;
-  CURLM *mhandle = NULL;
-  int res = 0;
+  static const long HANG_TIMEOUT = 30 * 1000;
+  /* 500 milliseconds allowed. An extreme number but lets be really
+     conservative to allow old and slow machines to run this test too */
+  static const int MAX_BLOCKED_TIME_MS = 500;
+
+  CURL *curl = NULL;
+  CURLM *multi = NULL;
+  CURLcode res = CURLE_OK;
   int still_running = 0;
 
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(handle);
+  easy_init(curl);
 
-  easy_setopt(handle, CURLOPT_URL, URL);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  multi_init(mhandle);
+  multi_init(multi);
 
-  multi_add_handle(mhandle, handle);
+  multi_add_handle(multi, curl);
 
-  multi_perform(mhandle, &still_running);
+  multi_perform(multi, &still_running);
 
-  abort_on_test_timeout();
+  abort_on_test_timeout_custom(HANG_TIMEOUT);
 
   while(still_running) {
     struct timeval timeout;
@@ -63,9 +60,9 @@ int test(char *URL)
     fd_set fdwrite;
     fd_set fdexcep;
     int maxfd = -99;
-    struct timeval before;
-    struct timeval after;
-    long e;
+    struct curltime before;
+    struct curltime after;
+    timediff_t e;
 
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000L; /* 100 ms */
@@ -74,27 +71,27 @@ int test(char *URL)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
     select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    abort_on_test_timeout();
+    abort_on_test_timeout_custom(HANG_TIMEOUT);
 
-    fprintf(stderr, "ping\n");
-    before = tutil_tvnow();
+    curl_mfprintf(stderr, "ping\n");
+    before = curlx_now();
 
-    multi_perform(mhandle, &still_running);
+    multi_perform(multi, &still_running);
 
-    abort_on_test_timeout();
+    abort_on_test_timeout_custom(HANG_TIMEOUT);
 
-    after = tutil_tvnow();
-    e = tutil_tvdiff(after, before);
-    fprintf(stderr, "pong = %ld\n", e);
+    after = curlx_now();
+    e = curlx_timediff(after, before);
+    curl_mfprintf(stderr, "pong = %ld\n", (long)e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
-      res = 100;
+      res = CURLE_TOO_LARGE;
       break;
     }
   }
@@ -103,8 +100,8 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(mhandle);
-  curl_easy_cleanup(handle);
+  curl_multi_cleanup(multi);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,67 +18,72 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /*
  * This test case is based on the sample code provided by Saqib Ali
- * https://curl.haxx.se/mail/lib-2011-03/0066.html
+ * https://curl.se/mail/lib-2011-03/0066.html
  */
 
-#include "test.h"
-
-#include <sys/stat.h>
+#include "first.h"
 
 #include "memdebug.h"
 
-int test(char *URL)
+static CURLcode test_lib583(const char *URL)
 {
   int stillRunning;
-  CURLM *multiHandle = NULL;
+  CURLM *multi = NULL;
   CURL *curl = NULL;
-  CURLMcode res = CURLM_OK;
+  CURLcode res = CURLE_OK;
+  CURLMcode mres;
+
+  assert(test_argc >= 4);
 
   global_init(CURL_GLOBAL_ALL);
 
-  multi_init(multiHandle);
+  multi_init(multi);
 
   easy_init(curl);
 
   easy_setopt(curl, CURLOPT_USERPWD, libtest_arg2);
-  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, "curl_client_key.pub");
-  easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, "curl_client_key");
+  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE,  test_argv[3]);
+  easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, test_argv[4]);
 
   easy_setopt(curl, CURLOPT_UPLOAD, 1L);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_INFILESIZE, (long)5);
+  easy_setopt(curl, CURLOPT_INFILESIZE, 5L);
 
-  multi_add_handle(multiHandle, curl);
+  multi_add_handle(multi, curl);
 
   /* this tests if removing an easy handle immediately after multi
      perform has been called succeeds or not. */
 
-  fprintf(stderr, "curl_multi_perform()...\n");
+  curl_mfprintf(stderr, "curl_multi_perform()...\n");
 
-  multi_perform(multiHandle, &stillRunning);
+  multi_perform(multi, &stillRunning);
 
-  fprintf(stderr, "curl_multi_perform() succeeded\n");
+  curl_mfprintf(stderr, "curl_multi_perform() succeeded\n");
 
-  fprintf(stderr, "curl_multi_remove_handle()...\n");
-  res = curl_multi_remove_handle(multiHandle, curl);
-  if(res)
-    fprintf(stderr, "curl_multi_remove_handle() failed, "
-            "with code %d\n", (int)res);
+  curl_mfprintf(stderr, "curl_multi_remove_handle()...\n");
+  mres = curl_multi_remove_handle(multi, curl);
+  if(mres) {
+    curl_mfprintf(stderr, "curl_multi_remove_handle() failed, with code %d\n",
+                  mres);
+    res = TEST_ERR_MULTI;
+  }
   else
-    fprintf(stderr, "curl_multi_remove_handle() succeeded\n");
+    curl_mfprintf(stderr, "curl_multi_remove_handle() succeeded\n");
 
 test_cleanup:
 
   /* undocumented cleanup sequence - type UB */
 
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(multiHandle);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

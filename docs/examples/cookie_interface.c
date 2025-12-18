@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -27,13 +29,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <time.h>
 
 #include <curl/curl.h>
 
-static void
-print_cookies(CURL *curl)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
+static int print_cookies(CURL *curl)
 {
   CURLcode res;
   struct curl_slist *cookies;
@@ -45,7 +49,7 @@ print_cookies(CURL *curl)
   if(res != CURLE_OK) {
     fprintf(stderr, "Curl curl_easy_getinfo failed: %s\n",
             curl_easy_strerror(res));
-    exit(1);
+    return 1;
   }
   nc = cookies;
   i = 1;
@@ -58,6 +62,8 @@ print_cookies(CURL *curl)
     printf("(none)\n");
   }
   curl_slist_free_all(cookies);
+
+  return 0;
 }
 
 int
@@ -66,10 +72,13 @@ main(void)
   CURL *curl;
   CURLcode res;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   curl = curl_easy_init();
   if(curl) {
-    char nline[256];
+    char nline[512];
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -89,14 +98,11 @@ main(void)
 
     printf("-----------------------------------------------\n"
            "Setting a cookie \"PREF\" via cookie interface:\n");
-#ifdef WIN32
-#define snprintf _snprintf
-#endif
     /* Netscape format cookie */
-    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%lu\t%s\t%s",
+    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%.0f\t%s\t%s",
              ".example.com", "TRUE", "/", "FALSE",
-             (unsigned long)time(NULL) + 31337UL,
-             "PREF", "hello example, i like you very much!");
+             difftime(time(NULL) + 31337, (time_t)0),
+             "PREF", "hello example, I like you!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
       fprintf(stderr, "Curl curl_easy_setopt failed: %s\n",
@@ -104,11 +110,10 @@ main(void)
       return 1;
     }
 
-    /* HTTP-header style cookie. If you use the Set-Cookie format and don't
-    specify a domain then the cookie is sent for any domain and will not be
-    modified, likely not what you intended. Starting in 7.43.0 any-domain
-    cookies will not be exported either. For more information refer to the
-    CURLOPT_COOKIELIST documentation.
+    /* HTTP-header style cookie. If you use the Set-Cookie format and do not
+       specify a domain then the cookie is sent for any domain and is not
+       modified, likely not what you intended. For more information refer to
+       the CURLOPT_COOKIELIST documentation.
     */
     snprintf(nline, sizeof(nline),
       "Set-Cookie: OLD_PREF=3d141414bf4209321; "

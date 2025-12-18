@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+globbing
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+glob '{,'
+</name>
+<command>
+"{,,,,,,,}" "{," "{,,,"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# curl: (3) unmatched brace in URL position 1:
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

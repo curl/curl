@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example using TLS
+ * IMAP using TLS
  * </DESC>
  */
 
@@ -38,7 +40,10 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -46,18 +51,18 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will fetch message 1 from the user's inbox */
+    /* This fetches message 1 from the user's inbox */
     curl_easy_setopt(curl, CURLOPT_URL,
                      "imap://imap.example.com/INBOX/;UID=1");
 
-    /* In this example, we'll start with a plain text connection, and upgrade
-     * to Transport Layer Security (TLS) using the STARTTLS command. Be careful
-     * of using CURLUSESSL_TRY here, because if TLS upgrade fails, the transfer
-     * will continue anyway - see the security discussion in the libcurl
+    /* In this example, we start with a plain text connection, and upgrade to
+     * Transport Layer Security (TLS) using the STARTTLS command. Be careful
+     * of using CURLUSESSL_TRY here, because if TLS upgrade fails, the
+     * transfer continues anyway - see the security discussion in the libcurl
      * tutorial for more details. */
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
-    /* If your server doesn't have a valid certificate, then you can disable
+    /* If your server does not have a valid certificate, then you can disable
      * part of the Transport Layer Security protection by setting the
      * CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST options to 0 (false).
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -71,7 +76,7 @@ int main(void)
      * for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
-    /* Since the traffic will be encrypted, it is very useful to turn on debug
+    /* Since the traffic is encrypted, it is useful to turn on debug
      * information within libcurl to see what is happening during the
      * transfer */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -87,6 +92,8 @@ int main(void)
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

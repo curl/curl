@@ -1,0 +1,108 @@
+      * Curl simple URL request
+      *
+     h DFTACTGRP(*NO) ACTGRP(*NEW)
+     h OPTION(*NOSHOWCPY)
+     h BNDDIR('CURL')
+      *
+      **************************************************************************
+      *                                  _   _ ____  _
+      *  Project                     ___| | | |  _ \| |
+      *                             / __| | | | |_) | |
+      *                            | (__| |_| |  _ <| |___
+      *                             \___|\___/|_| \_\_____|
+      *
+      * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+      *
+      * This software is licensed as described in the file COPYING, which
+      * you should have received as part of this distribution. The terms
+      * are also available at https://curl.se/docs/copyright.html.
+      *
+      * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+      * copies of the Software, and permit persons to whom the Software is
+      * furnished to do so, under the terms of the COPYING file.
+      *
+      * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+      * ANY KIND, either express or implied.
+      *
+      * SPDX-License-Identifier: curl
+      *
+      **************************************************************************
+      *
+      /include H,CURL.INC
+      *
+      * Simple example to request the URL given as command line parameter and
+      * output its response.
+      *
+     d                 pi
+     d url                          120
+      *
+     d urllen          s             10u 0                                      URL length
+      *
+      **************************************************************************
+      *
+     c                   eval      urllen = trimmed_length(url: %len(url))
+      *
+      * Do the curl stuff.
+      *
+     c                   callp     curl_global_init(CURL_GLOBAL_ALL)
+     c                   callp     main
+     c                   callp     curl_global_cleanup()
+     c                   seton                                            lr    Exit
+      *
+      **************************************************************************
+      * Main procedure: do the curl job.
+      **************************************************************************
+      *
+     p main            b
+     d main            pi
+      *
+     d h               s               *                                        Easy handle
+     d result          s                   like(CURLcode)                       Curl return code
+     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d errmsgp         s               *                                        Error string pointer
+     d response        s             52                                         For error display
+      *
+      * Create and fill curl handle.
+      *
+     c                   eval      h = curl_easy_init()
+     c                   if        h <> *NULL
+     c                   callp     curl_easy_setopt_ccsid(h: CURLOPT_URL:
+     c                               %subst(url: 1: urllen): 0)
+     c                   callp     curl_easy_setopt_long(h:
+     c                               CURLOPT_FOLLOWLOCATION: 1)
+      *
+      * Perform the request.
+      *
+     c                   eval      result = curl_easy_perform(h)
+     c                   callp     curl_easy_cleanup(h)                         Release handle
+     c                   endif
+      *
+      * Check for error and report if some.
+      *
+     c                   if        result <> CURLE_OK
+     c                   eval      errmsgp = curl_easy_strerror_ccsid(result: 0)
+     c                   eval      response = %str(errmsgp)
+     c                   dsply                   response
+     c                   endif
+     p main            e
+      *
+      **************************************************************************
+      * Get the length of right-trimmed string
+      **************************************************************************
+      *
+     p trimmed_length  b
+     d trimmed_length  pi            10u 0
+     d  string                   999999    const options(*varsize)
+     d  length                       10u 0 value
+      *
+     d len             s             10u 0
+      *
+     c                   eval      len = %scan(X'00': string: 1: length)        Limit null-terminated
+     c                   if        len = 0
+     c                   eval      len = length + 1
+     c                   endif
+     c                   if        len <= 1
+     c                   return    0
+     c                   endif
+     c                   return    %checkr(' ': string: len - 1)                Trim right
+     p trimmed_length  e

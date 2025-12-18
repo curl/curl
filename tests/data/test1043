@@ -9,7 +9,7 @@ Resume
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 206 Partial Content
 Date: Mon, 13 Nov 2007 13:41:09 GMT
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -54,13 +54,13 @@ Content-Range: bytes 40-99/100
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with resume from end of file
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1043 -C -
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C -
 </command>
-<file name="log/curl1043.out">
+<file name="%LOGDIR/curl%TESTNUMBER.out">
 012345678
 012345678
 012345678
@@ -70,13 +70,11 @@ http://%HOSTIP:%HTTPPORT/1043 -C -
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1043 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=40-
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

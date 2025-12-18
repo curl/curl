@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+-K
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+-K with missing file causes error
+</name>
+<command>
+-K %LOGDIR/missing http://localhost
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+curl: cannot read config from '%LOGDIR/missing'
+curl: option -K: error encountered when reading a file
+%if manual
+curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
+</stderr>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>

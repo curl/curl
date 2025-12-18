@@ -11,13 +11,13 @@ SFTP
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP retrieval of two files
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file618.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file618.txt --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
-<file name="log/file618.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>
@@ -26,9 +26,6 @@ for ssh test
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <stdout>
 Test data
 for ssh test

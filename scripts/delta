@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2018-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -28,59 +30,97 @@
 #
 # In the git clone root, invoke 'scripts/delta [release tag]'
 
-$start = $ARGV[0];
+use strict;
+use warnings;
 
-if($start eq "") {
+use POSIX;
+use Time::Piece;
+
+my $start = $ARGV[0] || '';
+
+if($start eq "-h") {
     print "Usage: summary [tag]\n";
     exit;
 }
+elsif($start eq "") {
+    $start = `git tag --sort=taggerdate | grep "^curl-" | tail -1`;
+    chomp $start;
+}
 
-$commits = `git log --oneline $start.. | wc -l`;
-$committers = `git shortlog -s $start.. | wc -l`;
-$bcommitters = `git shortlog -s $start | wc -l`;
+my $commits = `git log --oneline $start.. | wc -l`;
+my $committers = `git shortlog -s $start.. | wc -l`;
+my $bcommitters = `git shortlog -s $start | wc -l`;
 
-$acommits = `git log --oneline | wc -l`;
-$acommitters = `git shortlog -s | wc -l`;
+my $acommits = `git log --oneline | wc -l`;
+my $acommitters = `git shortlog -s | wc -l`;
 
 # delta from now compared to before
-$ncommitters = $acommitters - $bcommitters;
+my $ncommitters = $acommitters - $bcommitters;
 
-# number of contributors right now (according to THANKS)
-$acontribs = `cat docs/THANKS | grep -c '^[^ ]'`;
-# number when the tag tag was set
-$bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
+# number of contributors right now
+my $acontribs = `./scripts/contrithanks.sh stdout | wc -l`;
+# number when the tag was set
+my $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
-$contribs = $acontribs - $bcontribs;
+my $contribs = $acontribs - $bcontribs;
 
 # number of setops:
-$asetopts=`grep "^  CINIT" include/curl/curl.h  | grep -cv OBSOLETE`;
-$bsetopts=`git show $start:include/curl/curl.h | grep "^  CINIT" | grep -cv OBSOLETE`;
-$nsetopts = $asetopts - $bsetopts;
+sub setopts {
+    my ($f)=@_;
+    open(H, "$f");
+    my $opts;
+    while(<H>) {
+        if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/)) {
+            $opts++;
+        }
+    }
+    close(H);
+    return $opts;
+}
+my $asetopts = setopts("<include/curl/curl.h");
+my $bsetopts = setopts("git show $start:include/curl/curl.h|");
+my $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
-$aoptions=`grep -c '{"....--' src/tool_help.c`;
-$boptions=`git show $start:src/tool_help.c | grep -c '{"....--'`;
-$noptions=$aoptions - $boptions;
+my $aoptions=`grep -c '{"....--' src/tool_listhelp.c`;
+my $boptions=`git show $start:src/tool_listhelp.c 2>/dev/null | grep -c '{"....--'`;
+my $noptions=$aoptions - $boptions;
 
+# current local branch
+my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
+chomp $branch;
 # Number of files in git
-$afiles=`git ls-files | wc -l`;
-$deletes=`git diff-tree --diff-filter=A -r --summary origin/master $start | wc -l`;
-$creates=`git diff-tree --diff-filter=D -r --summary origin/master $start | wc -l`;
+my $afiles=`git ls-files | wc -l`;
+my $deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/dev/null | wc -l`;
+my $creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null | wc -l`;
 
 # Time since that tag
-$tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # unix timestamp
-$taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
+my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # Unix timestamp
+my $taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
 chomp $taggednice;
-$now=`date +%s`;
-$elapsed=$now - $tagged; # number of seconds since tag
+my $now=POSIX::strftime("%s", localtime());
+my $elapsed=$now - $tagged; # number of seconds since tag
+my $total=$now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
+my $totalhttpget=$now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
 
 # Number of public functions in libcurl
-$apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
-$bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
-$public = $apublic - $bpublic;
+my $apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
+my $bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
+my $public = $apublic - $bpublic;
+
+# diffstat
+my ($fileschanged, $insertions, $deletions);
+my $diffstat=`git diff --stat $start.. | tail -1`;
+if($diffstat =~ /^ *(\d+) files changed, (\d+) insertions\(\+\), (\d+)/) {
+    ($fileschanged, $insertions, $deletions)=($1, $2, $3);
+}
 
 # Changes/bug-fixes currently logged
+my $numchanges = 0;
+my $numbugfixes = 0;
+my $numcontributors = 0;
 open(F, "<RELEASE-NOTES");
+my $mode=0;
 while(<F>) {
     if($_ =~ /following changes:/) {
         $mode=1;
@@ -111,27 +151,31 @@ close(F);
 ########################################################################
 # Produce the summary
 
-print "== Since $start ==\n";
-printf "Commits: %d (out of %d)\n",
+print "== Since $start $taggednice ==\n";
+my $days = $elapsed / 3600 / 24;
+printf "Elapsed time:                   %.1f days (total %d / %d)\n",
+    $days, $total / 3600 / 24, $totalhttpget / 3600 / 24;
+printf "Commits:                        %d (total %d)\n",
     $commits, $acommits;
-printf "Commit authors: %d out of which %d are new (out of %d)\n",
+printf "Commit authors:                 %d, %d new (total %d)\n",
     $committers, $ncommitters, $acommitters;
-printf "Contributors in RELEASE-NOTES: %d\n",
-    $numcontributors;
-printf "New contributors (in THANKS): %d (out of %d)\n",
-    $contribs, $acontribs;
-printf "New curl_easy_setopt() options: %d (out of %d)\n",
-    $nsetopts, $asetopts;
-printf "New command line options: %d (out of %d)\n",
-    $noptions, $aoptions;
-
-printf "Deleted %d files, added %d files (total %d)\n",
-    $deletes, $creates, $afiles;
-
-printf "Elapsed time: %.1f days (since$taggednice)\n",
-    $elapsed / 3600 / 24;
-printf "Changes logged: %d\n", $numchanges;
-printf "Bugfixes logged: %d\n", $numbugfixes;
-
-printf "New public functions: %d (out of %d)\n",
+printf "Contributors:                   %d, %d new (total %d)\n",
+    $numcontributors, $contribs, $acontribs;
+printf "New public functions:           %d (total %d)\n",
     $public, $apublic;
+printf "New curl_easy_setopt() options: %d (total %d)\n",
+    $nsetopts, $asetopts;
+printf "New command line options:       %d (total %d)\n",
+    $noptions, $aoptions;
+printf "Changes logged:                 %d\n", $numchanges;
+printf "Bugfixes logged:                %d (%.2f per day)\n",
+    $numbugfixes, $numbugfixes / $days;
+printf "Added files:                    %d (total %d)\n",
+    $creates, $afiles;
+printf "Deleted files:                  %d (delta: %d)\n", $deletes,
+    $creates - $deletes;
+print "Diffstat:$diffstat" if(!$fileschanged);
+printf "Files changed:                  %d (%.2f%%)\n", $fileschanged, $fileschanged*100/$afiles;
+printf "Lines inserted:                 %d\n", $insertions;
+printf "Lines deleted:                  %d (delta: %d)\n", $deletions,
+    $insertions - $deletions;

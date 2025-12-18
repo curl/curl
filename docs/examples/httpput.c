@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -28,8 +30,16 @@
 #include <sys/stat.h>
 #include <curl/curl.h>
 
+#ifdef _WIN32
+#undef stat
+#define stat _stat
+#undef fstat
+#define fstat _fstat
+#define fileno _fileno
+#endif
+
 /*
- * This example shows a HTTP PUT operation. PUTs a file given as a command
+ * This example shows an HTTP PUT operation. PUTs a file given as a command
  * line argument to the URL also given on the command line.
  *
  * This example also uses its own read callback.
@@ -38,20 +48,20 @@
  * http://www.apacheweek.com/features/put
  */
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t retcode;
-  curl_off_t nread;
+  unsigned long nread;
 
   /* in real-world cases, this would probably get this data differently
      as this fread() stuff is exactly what the library already would do
      by default internally */
   retcode = fread(ptr, size, nmemb, stream);
 
-  nread = (curl_off_t)retcode;
-
-  fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
-          " bytes from file\n", nread);
+  if(retcode > 0) {
+    nread = (unsigned long)retcode;
+    fprintf(stderr, "*** We read %lu bytes from file\n", nread);
+  }
 
   return retcode;
 }
@@ -72,28 +82,39 @@ int main(int argc, char **argv)
   file = argv[1];
   url = argv[2];
 
-  /* get the file size of the local file */
-  stat(file, &file_info);
-
   /* get a FILE * of the same file, could also be made with
      fdopen() from the previous descriptor, but hey this is just
      an example! */
   hd_src = fopen(file, "rb");
+  if(!hd_src)
+    return 2;
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  /* get the file size of the local file */
+#ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
+  if(stat(file, &file_info) != 0) {
+#else
+  if(fstat(fileno(hd_src), &file_info) != 0) {
+#endif
+    fclose(hd_src);
+    return 1; /* cannot continue */
+  }
+
+  /* In Windows, this inits the Winsock stuff */
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    fclose(hd_src);
+    return (int)res;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
-    /* enable uploading */
+    /* enable uploading (implies PUT over HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-
-    /* HTTP PUT please */
-    curl_easy_setopt(curl, CURLOPT_PUT, 1L);
 
     /* specify target URL, and note that this URL should include a file
        name, not only a directory */
@@ -102,12 +123,12 @@ int main(int argc, char **argv)
     /* now specify which file to upload */
     curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
 
-    /* provide the size of the upload, we specicially typecast the value
-       to curl_off_t since we must be sure to use the correct data size */
+    /* provide the size of the upload, we typecast the value to curl_off_t
+       since we must be sure to use the correct data size */
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
                      (curl_off_t)file_info.st_size);
 
-    /* Now run off and do what you've been told! */
+    /* Now run off and do what you have been told! */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)
@@ -120,5 +141,5 @@ int main(int argc, char **argv)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

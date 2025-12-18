@@ -3,13 +3,14 @@
 <keywords>
 HTTP
 HTTP GET
+CURLINFO_FILETIME
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.0 200 OK swsclose
 Last-Modified: Thu, 01 Jan 1970 00:00:30 GMT
 Content-Length: 0
@@ -24,21 +25,21 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib1534
+lib%TESTNUMBER
 </tool>
 <name>
 CURLINFO_FILETIME init and reset
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1534
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-GET /1534 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

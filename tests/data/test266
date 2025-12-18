@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 chunked Transfer-Encoding
+DELAY
 </keywords>
 </info>
 #
@@ -37,6 +38,9 @@ Connection: mooo
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
 chunky-trailer: header data
 </datacheck>
+<servercmd>
+writedelay: 10
+</servercmd>
 </reply>
 
 #
@@ -45,27 +49,25 @@ chunky-trailer: header data
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with chunked Transfer-Encoding and chunked trailer
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/266 -D log/heads266
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /266 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/heads266">
+<file name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked

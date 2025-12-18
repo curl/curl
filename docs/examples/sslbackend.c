@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -47,7 +49,7 @@ int main(int argc, char **argv)
     const curl_ssl_backend **list;
     int i;
 
-    result = curl_global_sslset(-1, NULL, &list);
+    result = curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
     assert(result == CURLSSLSET_UNKNOWN_BACKEND);
 
     for(i = 0; list[i]; i++)
@@ -56,13 +58,13 @@ int main(int argc, char **argv)
 
     return 0;
   }
-  else if(isdigit(*name)) {
+  else if(isdigit((int)(unsigned char)*name)) {
     int id = atoi(name);
 
     result = curl_global_sslset((curl_sslbackend)id, NULL, NULL);
   }
   else
-    result = curl_global_sslset(-1, name, NULL);
+    result = curl_global_sslset(CURLSSLBACKEND_NONE, name, NULL);
 
   if(result == CURLSSLSET_UNKNOWN_BACKEND) {
     fprintf(stderr, "Unknown SSL backend id: %s\n", name);

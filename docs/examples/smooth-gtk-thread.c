@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -58,57 +60,51 @@ const char * const urls[]= {
   "90030"
 };
 
-size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
+size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
-  /* printf("write_file\n"); */
   return fwrite(ptr, size, nmemb, stream);
 }
 
-/* https://weather.com/weather/today/l/46214?cc=*&dayf=5&unit=i */
-void *pull_one_url(void *NaN)
+static void run_one(gchar *http, int j)
 {
-  /* Stop threads from entering unless j is incremented */
-  pthread_mutex_lock(&lock);
-  while(j < num_urls) {
-    CURL *curl;
-    gchar *http;
+  CURL *curl;
 
+  curl = curl_easy_init();
+  if(curl) {
     printf("j = %d\n", j);
 
-    http =
-      g_strdup_printf("xoap.weather.com/weather/local/%s?cc=*&dayf=5&unit=i\n",
-                      urls[j]);
-
-    printf("http %s", http);
-
-    curl = curl_easy_init();
-    if(curl) {
-
-      FILE *outfile = fopen(urls[j], "wb");
-
+    FILE *outfile = fopen(urls[j], "wb");
+    if(outfile) {
       /* Set the URL and transfer type */
       curl_easy_setopt(curl, CURLOPT_URL, http);
 
       /* Write to the file */
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
-
-      j++;  /* critical line */
-      pthread_mutex_unlock(&lock);
-
-      curl_easy_perform(curl);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+      (void)curl_easy_perform(curl);
 
       fclose(outfile);
-      printf("fclose\n");
-
-      curl_easy_cleanup(curl);
     }
-    g_free(http);
+    curl_easy_cleanup(curl);
+  }
+}
 
-    /* Adds more latency, testing the mutex.*/
-    sleep(1);
-
-  } /* end while */
+void *pull_one_url(void *NaN)
+{
+  /* protect the reading and increasing of 'j' with a mutex */
+  pthread_mutex_lock(&lock);
+  while(j < num_urls) {
+    int i = j;
+    j++;
+    pthread_mutex_unlock(&lock);
+    http = g_strdup_printf("https://example.com/%s", urls[i]);
+    if(http) {
+      run_one(http, i);
+      g_free(http);
+    }
+    pthread_mutex_lock(&lock);
+  }
+  pthread_mutex_unlock(&lock);
   return NULL;
 }
 
@@ -119,8 +115,8 @@ gboolean pulse_bar(gpointer data)
   gtk_progress_bar_pulse(GTK_PROGRESS_BAR (data));
   gdk_threads_leave();
 
-  /* Return true so the function will be called again;
-   * returning false removes this timeout function.
+  /* Return true so the function is called again; returning false removes this
+   * timeout function.
    */
   return TRUE;
 }
@@ -130,13 +126,13 @@ void *create_thread(void *progress_bar)
   pthread_t tid[NUMT];
   int i;
 
-  /* Make sure I don't create more threads than urls. */
+  /* Make sure I do not create more threads than urls. */
   for(i = 0; i < NUMT && i < num_urls ; i++) {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
                                NULL);
-    if(0 != error)
+    if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
@@ -175,7 +171,9 @@ int main(int argc, char **argv)
   GtkWidget *top_window, *outside_frame, *inside_frame, *progress_bar;
 
   /* Must initialize libcurl before any threads are started */
-  curl_global_init(CURL_GLOBAL_ALL);
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   /* Init thread */
   g_thread_init(NULL);
@@ -214,11 +212,13 @@ int main(int argc, char **argv)
                    G_CALLBACK(cb_delete), NULL);
 
   if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
-    g_warning("can't create the thread");
+    g_warning("cannot create the thread");
 
   gtk_main();
   gdk_threads_leave();
   printf("gdk_threads_leave\n");
+
+  curl_global_cleanup();
 
   return 0;
 }

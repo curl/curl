@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+FTP
+URL
+FAILURE
+</keywords>
+</info>
+
+# Client-side
+<client>
+<name>
+Space in FTP upload URL
+</name>
+<command>
+"ftp://%HOSTIP:%NOLISTENPORT/%TESTNUMBER%/with space/" -T %LOGDIR/irrelevant-file
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 3 == CURLE_URL_MALFORMAT
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

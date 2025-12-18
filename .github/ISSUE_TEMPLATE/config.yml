@@ -1,0 +1,18 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question (without email)
+    url: https://github.com/curl/curl/discussions
+    about: Use the Discussion forum here on GitHub
+  - name: Ask a question (using email)
+    url: https://curl.se/mail/
+    about: Send question to the suitable mailing list
+  - name: Commercial support
+    url: https://curl.se/support.html
+    about: Pay for fast quality support for and help with curl/libcurl
+  - name: Feature request
+    url: https://curl.se/mail/
+    about: To propose new features or enhancements, please bring that discussion to a suitable curl mailing list.

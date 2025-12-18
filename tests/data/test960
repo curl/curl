@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+!IDN
+!win32
+codeset-utf8
+</features>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
+<name>
+SMTP without SMTPUTF8 support - UTF-8 based recipient (host part only)
+</name>
+<stdin crlf="yes">
+From: different
+To: another
+
+body
+</stdin>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@%hex[%c3%a5%c3%a4%c3%b6]hex%.se --mail-from sender@example.com -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 55 - CURLE_SEND_ERROR
+<errorcode>
+55
+</errorcode>
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@%hex[%c3%a5%c3%a4%c3%b6]hex%.se>
+QUIT
+</protocol>
+</verify>
+</testcase>

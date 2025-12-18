@@ -1,0 +1,76 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+#
+# Sends a PING + a 5 byte hello TEXT
+<reply>
+<data crlf="headers" nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: test-server/fake
+Upgrade: websocket
+Connection: Upgrade
+Something: else
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%89%00%81%05hello]hex%
+</data>
+# allow upgrade
+<servercmd>
+upgrade
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+# require Debug for the forced CURL_ENTROPY
+<features>
+Debug
+ws
+</features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<server>
+http
+</server>
+<name>
+WebSockets via callback (frame mode) + curl_ws_send()
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# PONG with no data and the 32 bit mask
+#
+<verify>
+<protocol crlf="yes" nonewline="yes" nocheck="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: webbie-sox/3
+Accept: */*
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+Connection: Upgrade
+
+%hex[%8a%808321]hex%
+</protocol>
+<stdout mode="text">
+68 65 6c 6c 6f%spc%
+RECFLAGS: 1
+</stdout>
+<limits>
+Maximum allocated: 1300000
+</limits>
+</verify>
+</testcase>

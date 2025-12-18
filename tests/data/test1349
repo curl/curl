@@ -16,51 +16,43 @@ mooo
 
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -O output in, using the CURL_TESTDIR variable
-<features>
-debug
-</features>
 <server>
 ftp
 </server>
 <name>
 FTP download, file without C-D inside, using -O -D file
 </name>
-<setenv>
-CURL_TESTDIR=%PWD/log
-</setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1349 -O -D log/heads1349
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -D %LOGDIR/heads%TESTNUMBER --output-dir %LOGDIR
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1349
-RETR file1349
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file1349">
+<file1 name="%LOGDIR/file%TESTNUMBER">
 fooo
 mooo
 </file1>
 
 # The final "221 bye bye baby" response to QUIT will not be recorded
 # since that is not considered part of this particular transfer!
-<file2 name="log/heads1349">
-220-        _   _ ____  _     
-220-    ___| | | |  _ \| |    
-220-   / __| | | | |_) | |    
-220-  | (__| |_| |  _ {| |___ 
+<file2 name="%LOGDIR/heads%TESTNUMBER" crlf="yes">
+220-        _   _ ____  _%spc%%spc%%spc%%spc%%spc%
+220-    ___| | | |  _ \| |%spc%%spc%%spc%%spc%
+220-   / __| | | | |_) | |%spc%%spc%%spc%%spc%
+220-  | (__| |_| |  _ {| |___%spc%
 220    \___|\___/|_| \_\_____|
 331 We are happy you popped in!
 230 Welcome you silly person
@@ -69,14 +61,14 @@ mooo
 229 Entering Passive Mode (stripped)
 200 I modify TYPE as you wanted
 213 10
-150 Binary data connection for 1349 () (10 bytes).
+150 Binary data connection for %TESTNUMBER () (10 bytes).
 226 File transfer complete
 </file2>
 <stripfile2>
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 </stripfile2>
 
-<file3 name="log/stdout1349">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
 </verify>

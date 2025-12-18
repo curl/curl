@@ -28,25 +28,25 @@ Range
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP retrieve a byte-range
- </name>
- <command>
--r 4-16 ftp://%HOSTIP:%FTPPORT/135
+</name>
+<command>
+-r 4-16 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 135
+SIZE %TESTNUMBER
 REST 4
-RETR 135
+RETR %TESTNUMBER
 ABOR
 QUIT
 </protocol>

@@ -2,6 +2,7 @@
 <info>
 <keywords>
 CURLOPT_URL
+verbose logs
 </keywords>
 </info>
 
@@ -9,16 +10,14 @@ CURLOPT_URL
 </reply>
 
 <client>
-<server>
-none
-</server>
 
 # require HTTP so that CURLOPT_POSTFIELDS works as assumed
 <features>
 http
+verbose-strings
 </features>
 <tool>
-lib1559
+lib%TESTNUMBER
 </tool>
 
 <name>
@@ -35,10 +34,13 @@ Set excessive URL lengths
 <stdout>
 CURLOPT_URL 10000000 bytes URL == 43
 CURLOPT_POSTFIELDS 10000000 bytes data == 0
-CURLUPART_URL 10000000 bytes URL == 3
-CURLUPART_SCHEME 10000000 bytes scheme == 3
-CURLUPART_USER 10000000 bytes user == 3
+CURLUPART_URL 10000000 bytes URL == 3 (Malformed input to a URL function)
+CURLUPART_SCHEME 10000000 bytes scheme == 3 (Malformed input to a URL function)
+CURLUPART_USER 10000000 bytes user == 3 (Malformed input to a URL function)
 </stdout>
+<limits>
+Maximum allocated: 10010000
+</limits>
 </verify>
 
 </testcase>

@@ -13,7 +13,7 @@ HTTP Digest auth
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data>
+<data crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
@@ -21,14 +21,14 @@ And you should ignore this data.
 </data>
 
 # then this is returned since we get no server-auth
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 401 Authorization to the remote host as well swsbounce swsclose
 WWW-Authenticate: Digest realm="realmweirdo", nonce="123456"
 
 you should ignore this data too
 </data1000>
 
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: no
 Content-Length: 15
@@ -36,7 +36,7 @@ Content-Length: 15
 Nice auth sir!
 </data1001>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
@@ -59,39 +59,38 @@ http
 <features>
 !SSPI
 crypto
+proxy
+digest
 </features>
- <name>
+<name>
 HTTP with proxy-requiring-Digest to site-requiring-Digest
- </name>
- <command>
-http://data.from.server.requiring.digest.hohoho.com/168 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:alot
+</name>
+<command>
+http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:a-lot
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol>
-GET http://data.from.server.requiring.digest.hohoho.com/168 HTTP/1.1
+<protocol crlf="headers">
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/168 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/168", response="fb8608e00ad9239a3dedb14bc8575976"
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="fb8608e00ad9239a3dedb14bc8575976"
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/168 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/168", response="fb8608e00ad9239a3dedb14bc8575976"
-Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/168", response="ca87f2d768a231e2d637a55698d5c416"
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="fb8608e00ad9239a3dedb14bc8575976"
+Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="bfecb43898f3db12543650d45493313b"
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

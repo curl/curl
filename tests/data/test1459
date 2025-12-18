@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+known_hosts
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+<features>
+sftp
+!oldlibssh
+</features>
+<name>
+SFTP with corrupted known_hosts
+</name>
+<command>
+-u : sftp://%HOSTIP:%SSHPORT/ -l --knownhosts %LOGDIR/known%TESTNUMBER
+</command>
+<file name="%LOGDIR/known%TESTNUMBER">
+|1|qy29Y1x/+/F39AzdG5515YSSw+c=|iB2WX5jrU3ZTWc+ZfGau7HHEvBc= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAynDN8cDJ3xNzRjTNNGciSHSxpubxhZ6YnkLdp1TkrGW8n\
+R93Ey5VtBeBblYTRlFXBWJgKFcTKBRJ/O4qBZwbUgt10AHj31i6h8NehfT19tR8wG/YCmj3KtYLHmwdzmW1edEL9G2NdX2KiKYv7/zuly3QvmP0QA0NhWkAz0KdWNM=
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# old libssh installs return the wrong thing
+<errorcode>
+60
+</errorcode>
+</verify>
+</testcase>

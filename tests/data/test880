@@ -22,7 +22,7 @@ REPLY * -ERR AUTH exchange cancelled by client
 REPLY "AUTH PLAIN" +
 REPLY AHVzZXIAc2VjcmV0 +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -41,36 +41,28 @@ pop3
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
- <name>
+<name>
 POP3 NTLM authentication with SASL downgrade
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-pop3://%HOSTIP:%POP3PORT/880 -u user:secret
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH NTLM
 TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 *
 AUTH PLAIN
 AHVzZXIAc2VjcmV0
-RETR 880
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

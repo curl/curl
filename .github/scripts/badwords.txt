@@ -1,0 +1,76 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+back-end:backend
+e-mail:email
+run-time:runtime
+set-up:setup
+tool chain:toolchain
+tool-chain:toolchain
+wild-card:wildcard
+wild card:wildcard
+i'm:I am
+you've:You have
+we've:we have
+we're:we are
+we'll:we will
+we'd:we would
+they've:They have
+they're:They are
+they'll:They will
+they'd:They would
+you've:you have
+you'd:you would
+you'll:you will
+you're:you are
+should've:should have
+don't=do not
+could've:could have
+doesn't:does not
+isn't:is not
+aren't:are not
+ a html: an html
+ a http: an http
+ a ftp: an ftp
+ a IPv4: an IPv4
+ a IPv6: an IPv6
+ url =URL
+internet\b=Internet
+isation:ization
+\bit's:it is
+it'd:it would
+there's:there is
+[^.]\. And: Rewrite it somehow?
+^(And|So|But) = Rewrite it somehow?
+\. But: Rewrite it somehow?
+\. So : Rewrite without "so" ?
+ dir :directory
+sub-director:subdirector
+can't:cannot
+that's:that is
+web page:webpage
+host name\b:hostname
+host names\b:hostnames
+file name\b:filename
+file names\b:filenames
+\buser name\b:username
+\buser names\b:usernames
+\bpass phrase:passphrase
+didn't:did not
+doesn't:does not
+won't:will not
+couldn't:could not
+\bwill\b:rewrite to present tense
+\b32bit=32-bit
+\b64bit=64-bit
+32 bit\b=32-bit
+64 bit\b=64-bit
+64-bits:64 bits or 64-bit
+32-bits:32 bits or 32-bit
+\bvery\b:rephrase using an alternative word
+\bCurl\b=curl
+\bLibcurl\b=libcurl
+---WWW::Curl
+---NET::Curl
+---Curl Corporation

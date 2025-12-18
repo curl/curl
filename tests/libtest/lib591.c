@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
-
 /* lib591 is used for test cases 591, 592, 593 and 594 */
 
-#include <limits.h>
+#include "first.h"
 
-#include <fcntl.h>
-
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-int test(char *URL)
+static CURLcode test_lib591(const char *URL)
 {
-  CURL *easy = NULL;
+  CURL *curl = NULL;
   CURLM *multi = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   int running;
   int msgs_left;
   CURLMsg *msg;
@@ -45,44 +39,44 @@ int test(char *URL)
 
   start_test_timing();
 
-  upload = fopen(libtest_arg3, "rb");
+  upload = curlx_fopen(libtest_arg3, "rb");
   if(!upload) {
-    fprintf(stderr, "fopen() failed with error: %d (%s)\n",
-            errno, strerror(errno));
-    fprintf(stderr, "Error opening file: (%s)\n", libtest_arg3);
+    char errbuf[STRERROR_LEN];
+    curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg3);
     return TEST_ERR_FOPEN;
   }
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    fclose(upload);
+    curlx_fclose(upload);
     return res;
   }
 
-  easy_init(easy);
+  easy_init(curl);
 
   /* go verbose */
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* specify target */
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* enable uploading */
-  easy_setopt(easy, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* data pointer for the file read function */
-  easy_setopt(easy, CURLOPT_READDATA, upload);
+  easy_setopt(curl, CURLOPT_READDATA, upload);
 
   /* use active mode FTP */
-  easy_setopt(easy, CURLOPT_FTPPORT, "-");
+  easy_setopt(curl, CURLOPT_FTPPORT, "-");
 
   /* server connection timeout */
-  easy_setopt(easy, CURLOPT_ACCEPTTIMEOUT_MS,
-              strtol(libtest_arg2, NULL, 10)*1000);
+  easy_setopt(curl, CURLOPT_ACCEPTTIMEOUT_MS, atol(libtest_arg2)*1000);
 
   multi_init(multi);
 
-  multi_add_handle(multi, easy);
+  multi_add_handle(multi, curl);
 
   for(;;) {
     struct timeval interval;
@@ -112,7 +106,12 @@ int test(char *URL)
     /* At this point, timeout is guaranteed to be greater or equal than -1. */
 
     if(timeout != -1L) {
-      int itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+      int itimeout;
+#if LONG_MAX > INT_MAX
+      itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+#else
+      itimeout = (int)timeout;
+#endif
       interval.tv_sec = itimeout/1000;
       interval.tv_usec = (itimeout%1000)*1000;
     }
@@ -135,11 +134,11 @@ test_cleanup:
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   /* close the local file */
-  fclose(upload);
+  curlx_fclose(upload);
 
   return res;
 }

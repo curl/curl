@@ -29,14 +29,15 @@ pop3
 </server>
 <features>
 !SSPI
-debug
+Debug
 crypto
+digest
 </features>
- <name>
+<name>
 POP3 DIGEST-MD5 graceful cancellation
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/878 -u user:secret
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -50,7 +51,7 @@ pop3://%HOSTIP:%POP3PORT/878 -u user:secret
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH DIGEST-MD5
 *

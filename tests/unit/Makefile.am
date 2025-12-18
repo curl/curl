@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
@@ -29,51 +31,62 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
-# $(top_builddir)/ares is for in-tree c-ares's generated ares_build.h file
-# $(top_srcdir)/ares is for in-tree c-ares's external include files
+# $(srcdir) for the generated bundle source to find included test sources
 
-if USE_EMBEDDED_ARES
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
-              -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest  \
-              -I$(top_builddir)/ares         \
-              -I$(top_srcdir)/ares
-else
-AM_CPPFLAGS = -I$(top_srcdir)/include        \
-              -I$(top_builddir)/lib          \
-              -I$(top_srcdir)/lib            \
-              -I$(top_srcdir)/src            \
-              -I$(top_srcdir)/tests/libtest
-endif
+              -I$(srcdir)
 
-EXTRA_DIST = Makefile.inc CMakeLists.txt
+# Get BUNDLE, FIRST_C, TESTS_C variables
+include Makefile.inc
+
+EXTRA_DIST = CMakeLists.txt README.md $(TESTS_C)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-LDADD = $(top_builddir)/src/libcurltool.la   \
-        $(top_builddir)/lib/libcurlu.la      \
-        @LDFLAGS@ @LIBCURL_LIBS@
-
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
+if DEBUGBUILD
+AM_CPPFLAGS += -DDEBUGBUILD
+endif
+if CURLDEBUG
+AM_CPPFLAGS += -DCURLDEBUG
+endif
+# unit tests are small pretend-libcurl-programs, pass BUILDING_LIBCURL to reflect that
+AM_CPPFLAGS += -DBUILDING_LIBCURL
 
-# Makefile.inc provides neat definitions
-include Makefile.inc
+if BUILD_UNITTESTS
+$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C) $(top_builddir)/lib/unitprotos.h
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > $(BUNDLE).c
+
+$(top_builddir)/lib/unitprotos.h:
+	(cd $(top_builddir)/lib && $(MAKE) unitprotos.h)
+
+noinst_PROGRAMS = $(BUNDLE)
+LDADD = $(top_builddir)/lib/libcurlu.la
+CLEANFILES = $(BUNDLE).c
+else
+noinst_PROGRAMS =
+endif
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
 CS_1 =
 CS_ = $(CS_0)
 
+# ignore generated C files since they play by slightly different rules!
 checksrc:
-	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
+	  -W$(srcdir)/$(BUNDLE).c \
+	  $(srcdir)/*.[ch])
 
-if BUILD_UNITTESTS
-noinst_PROGRAMS = $(UNITPROGS)
-else
-noinst_PROGRAMS =
+if NOT_CURL_CI
+all-local: checksrc
 endif
+
+clean-local:
+	rm -f $(BUNDLE)

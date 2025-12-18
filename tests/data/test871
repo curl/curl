@@ -18,7 +18,7 @@ RFC5034
 AUTH PLAIN
 REPLY AUTH +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -35,21 +35,21 @@ body
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 plain authentication with initial response
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/871 -u user:secret --sasl-ir
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-ir
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH PLAIN AHVzZXIAc2VjcmV0
-RETR 871
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

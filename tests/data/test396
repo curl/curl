@@ -1,0 +1,183 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+compressed
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Content-Encoding: zstd
+Content-Length: 1309
+
+%hex[%28%b5%2f%fd%64%b1%12%7d%28%00%86%3f%bd%28%e0%d0%ba%01%b0%03%b6%72%a6%27%9f%a8%20%8c%5a%e1%02%85%fd%81%fe%40%32%f0%ef%9a%08%df%c9%f3%9b%10%a3%65%98%a1%8d%c0%cc%0b%b7%00%b3%00%ac%00%f3%21%b7%f6%a4%da%73%bb%79%1a%1e%dd%da%fb%ba%6e%9b%3d%d0%be%b3%49%9f%ac%f1%51%da%6d%18%52%ef%34%ec%ba%ed%bc%a6%b7%58%19%46%aa%81%aa%1a%a8%a6%77%51%90%89%82%58%d3%54%61%92%eb%18%56%aa%01%6a%1a%b0%a6%47%55%90%6b%82%5c%95]hex%
+%hex[%85%c9%96%32%6a%fa%46%c9%b0%a2%26%14%26%a7%e6%3d%08%83%10%f6%90%57%4a%96%34%41%1e%b2%6d%58%d6%be%d0%62%c6%b7%ab%74%63%6f%9d%6f%df%30%0f%70%f7%76%1e%cf%c1%92%c1%54%60%1e%a7%ce%fb%93%42%ae%d6%16%d6%b9%67%89%a8%c8%1c%40%20%00%40%08%2b%78%50%90%8a%e4%ba%20%10%18%86%07%01%a7%4e%69%b5%da%ef%31%49%d4%83%a0%da%f9%de%9e%47%b7%8c%02%18%d3%53%fb%9b%13%3b%4e%8d%14%72%4c%d5%f3%f6%58%7b%df%d7%99%bd%f6%f8%da%bb%93%81%1c%52%77%ee%8b%34%32%c8%21%db%1b%c3%72%ef%e7%f7%cc%b0%ce%bd%f5%ce%bc%1b%6e%d4%e6%66%5e%6f%0d%72%5c%30%98%6c%eb%ea%75%2b%dd%62%fc%47%ee%45%b2%b7%ee%db%21%47%24%a3%a5%5c%f7%be%e7%85%b5%da%8b%6e%17%dd%b7%1c%24%3e%4a%1b%03%72%7c%7c%91%84%65%21%02%42%21%b2%5c%18%12%5e%14%61%80%70%79%51%c6%f2%70%b1%64%5e%94%39%60%40%48%80%1c%51%44%26%e1%45%98%28%22%93%59%78%7f%dd%72%5c%f7%ef%32%3c%29%23%de%aa%f1%df%41%8e%6f%3a%37%1e%df%cf%c7%50%7a%ef%cd%d7%e8%f7%5d%24%26%5e%cb%b5%b5%49%ed%06%d9%ad%fb%dc%20%bf%e7%3d%ef%61%88%f5%c7%8e%e6%1d%64%f9%59%c6%db%8c%b7%59%cb%ac%e5%c6%f9%c6%39%64%8e%a5%cd%a9%b1%a3%71%f3%c3%cd%4f%f5%c9%aa%4f%f6%e1%dc%0f%e7%42%66%9f%b2%bd%37%db%61%c8%fc%58%73%22%a7%a1%de%31%bc%b4%8b%9b%46%c0%34%1d%ad%46%cf%22%d8%57%3b%2f%37%5d%fb%ac%7b%86%91%8b%21%55%61%b7%76%56%d3%30%9c%24%d2%15%9d%a1%64%62%48%5d%52%84%62%68%49%24%ab%22%99%78%a4%1d%67%39%86%95%09%85%5d%d4%e8%0c%27%94%14%c1%6e%6d%cd%9b%63%48%91%48%d6%45%91%60%ed%56%7b%8d%c6%9d%34%de%e9%61%08%39%a4%bf%b5%b7%6a%3d%0c%21%8c%e1%b7%47%88%56%45%24%96%45%a3%dc%66%2f%50%ac%a9%8a%64%93%7e%28%49%a4%a2%22%d6%44%a3%65%28%10%f0%2e%18%4c%6d%ee%ce%cb%d0%9a%58%14%4c%4e%86%d3%43%6e%9b%d5%da%1f%04%cd%69%dc%a7%d1%53%ab%2d%6b%73%2d%21%c3%88%84%9a%2a%57%c5%9a%50%d3%34%55%d4%75%51%91%49%55%31%ac%3c%d6%ef%8d%75%6e%d3%19%32%43%ef%8a%01%81%35%b5%ce%90%bd%25%27%66%1b%d4%3b%86%1c%ef%ac%f6%c5%3c%da%b3%c6%77%db%b9%5d%64%88%65%5b%d7%b9%9a%6b%3b%5f%bb%5d%7b%c8%72%4a%ae%69%42%61%58%49%15%25%51%30%4d%d3%76%cd%65%78%79%5b%37%af%db%af%f6%e0%51%70%86%c1%01%eb%0f%80%e8%a0%81%95%73%68%66%40%06%00%20%80%41%01%40%42%c2%20%23%4a%03%21%f3%e7%0c%f9%1a%bf%b7%48%ca]hex%
+%hex[%ce%88%93%e0%97%05%94%c4%49%f0%4d%01%55%d0%62%92%5f%16%24%63%8d%05%9e%44%ae%c1%39%87%63%a3%bb%91%d6%0e%76%79%d0%b6%68%7d%bb%9c%a8%a4%7c%aa%58%ff%82%f3%36%a4%ff%09%b4%c5%f5%7f%85%c7%bf%8b%32%f9%3f%72%50%30%87%b3%d6%26%26%6c%39%86%71%96%a3%02%d9%5a%00%b4%fe%3e%eb%4c%cc%89%46%76%37%2a%bc%11%76%3f%f0%5d%31%66%8e%71%6e%71%f6%6e%ff%de%03%99%f8%de%10%33%85%cf%40%b4%7f%76%20%61%65%2c%23%ed%98%3b%d6%15%5c%6b%62%33%70%09%4c%db%32%e6%3e%8a%f6%39%00%28%b7%b0%e5%b4%42%44%9a%8c%62%a9%68%19%5c%36%33%42%47%7f%86%65%49%e7%89%68%1b%31%e8%0d%b8%b8%8c%ad%84%2d%b8%26%c4%d6%19%4e%dc%34%13%f4%34%bd%ea%6c%d3%cc%22%59%64%8e%3d%67%f7%92%1f%d9%6d%1c%42%86%e9%60%36%86%17%68%da%d5%b8%e0%e4%c0%1e%c4%16%b9%19%64%89%63%69%06%4e%c4%46%c2%41%1d%dc%07%79%aa%21%b7%cd%64%a6%5d%01%9b%ed%5c%07%cc%fb%ec%91%49%43%c8%bb%9e%9d%73%e6%94%61%1a%8c%8c%b2%bd%c6%75%0e%7b%3d%4b%64%6e%d8%6d%d8%3b%93%87%10%76%4d%bb%86%99%4b%c3%2e%1b%91%8f%ad%99%01%35%bb%13%0c%c0%d0%06%0d%2b%af%f1%0c%d8%65%b9%00%a7%fd%81%98%91%94%83%40%cc%f4%39%96%da%a0%05%21%42%18%d3%88%1d%81%83%32%38%39%30%da%61%8b%5b%08%99%1d%d6%70%62%81%88%80%3c%b0%ce%b8%99%d0%10%d2%cc%44%6f%ce%17%48%11%73%a6%5c%7c%37%68%f3%d0%ee%60%b9%2f%c6%78%d7%da%aa%0e%eb%c8%ba%ce%cd%2a%09%2a%ad%9a%25%46%9d%2d%08%05%b4%b5%7a%51%c7%f3%3b%0d%bd%ea%90%6b%d3%f9%ac%fa%b1%e6%9d%3b%39%8e%79%82%d1%ea%8b%50%a5%7b%da%5e%18%9b%71%d8%92%49%e6%70%4b%18%40%fe%75%35%44%19%1a%4b%5c%8e%dd%b8%f3%9c%a8%6c%d2%5e%5e%ff%d2%f6%9c%c7%de%78%2e%3a%86%25%df%a9%80%6e%38%8c%8d%85%c3%90%8c%08%fb%b3%74%24%c8%87%ce%bb%3b%cb%75%af%48%e1%59]hex%
+</data>
+
+<datacheck>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Content-Encoding: zstd
+Content-Length: 1309
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE project-listing SYSTEM "http://freshmeat.net/backend/fm-projects-0.4.dtd">
+<project-listing>
+  <project>
+    <project_id>1612</project_id>
+    <date_added>1998-08-21 04:01:29</date_added>
+    <date_updated>2004-10-18 02:22:23</date_updated>
+    <projectname_short>curl</projectname_short>
+    <projectname_full>curl and libcurl</projectname_full>
+    <desc_short>Command line tool and library for client-side URL transfers.</desc_short>
+    <desc_full>curl and libcurl is a tool for transferring files
+using URL syntax. It supports HTTP, HTTPS, FTP,
+FTPS, DICT, TELNET, LDAP, FILE, and GOPHER, as
+well as HTTP-post, HTTP-put, cookies, FTP upload,
+resumed transfers, passwords, portnumbers, SSL
+certificates, Kerberos, and proxies. It is powered
+by libcurl, the client-side URL transfer library.
+There are bindings to libcurl for over 20
+languages and environments.
+</desc_full>
+    <vitality_score>5784.57</vitality_score>
+    <vitality_percent>3.16</vitality_percent>
+    <vitality_rank>169</vitality_rank>
+    <popularity_score>6594.54</popularity_score>
+    <popularity_percent>13.81</popularity_percent>
+    <popularity_rank>105</popularity_rank>
+    <rating>8.50</rating>
+    <rating_count>21</rating_count>
+    <rating_rank>183</rating_rank>
+    <subscriptions>323</subscriptions>
+    <branch_name>Default</branch_name>
+    <url_project_page>http://freshmeat.net/projects/curl/</url_project_page>
+    <url_homepage>http://freshmeat.net/redir/curl/1612/url_homepage/</url_homepage>
+    <url_tgz>http://freshmeat.net/redir/curl/1612/url_tgz/</url_tgz>
+    <url_bz2>http://freshmeat.net/redir/curl/1612/url_bz2/</url_bz2>
+    <url_zip>http://freshmeat.net/redir/curl/1612/url_zip/</url_zip>
+    <url_changelog>http://freshmeat.net/redir/curl/1612/url_changelog/</url_changelog>
+    <url_rpm>http://freshmeat.net/redir/curl/1612/url_rpm/</url_rpm>
+    <url_deb>http://freshmeat.net/redir/curl/1612/url_deb/</url_deb>
+    <url_osx>http://freshmeat.net/redir/curl/1612/url_osx/</url_osx>
+    <url_bsdport>http://freshmeat.net/redir/curl/1612/url_bsdport/</url_bsdport>
+    <url_purchase></url_purchase>
+    <url_cvs>http://freshmeat.net/redir/curl/1612/url_cvs/</url_cvs>
+    <url_list>http://freshmeat.net/redir/curl/1612/url_list/</url_list>
+    <url_mirror>http://freshmeat.net/redir/curl/1612/url_mirror/</url_mirror>
+    <url_demo></url_demo>
+    <license>MIT/X Consortium License</license>
+    <latest_release>
+      <latest_release_version>7.12.2</latest_release_version>
+      <latest_release_id>176085</latest_release_id>
+      <latest_release_date>2004-10-18 02:22:23</latest_release_date>
+    </latest_release>
+    <screenshot_thumb></screenshot_thumb>
+    <authors>
+      <author>
+        <author_name>Daniel Stenberg</author_name>
+        <author_url>http://freshmeat.net/~bagder/</author_url>
+        <author_role>Owner</author_role>
+      </author>
+    </authors>
+    <descriminators>
+      <trove_id>12</trove_id>
+      <trove_id>226</trove_id>
+      <trove_id>3</trove_id>
+      <trove_id>2</trove_id>
+      <trove_id>188</trove_id>
+      <trove_id>216</trove_id>
+      <trove_id>200</trove_id>
+      <trove_id>220</trove_id>
+      <trove_id>164</trove_id>
+      <trove_id>90</trove_id>
+      <trove_id>89</trove_id>
+      <trove_id>809</trove_id>
+      <trove_id>150</trove_id>
+      <trove_id>224</trove_id>
+      <trove_id>900</trove_id>
+      <trove_id>839</trove_id>
+    </descriminators>
+    <dependencies>
+      <dependency type="recommended">
+        <dependency_release_id>0</dependency_release_id>
+        <dependency_branch_id>7464</dependency_branch_id>
+        <dependency_project_id>7464</dependency_project_id>
+        <dependency_project_title>OpenSSL (Default)</dependency_project_title>
+      </dependency>
+      <dependency type="optional">
+        <dependency_release_id>0</dependency_release_id>
+        <dependency_branch_id>0</dependency_branch_id>
+        <dependency_project_id>7443</dependency_project_id>
+        <dependency_project_title>OpenLDAP</dependency_project_title>
+      </dependency>
+      <dependency type="optional">
+        <dependency_release_id>0</dependency_release_id>
+        <dependency_branch_id>0</dependency_branch_id>
+        <dependency_project_id>12351</dependency_project_id>
+        <dependency_project_title>zlib</dependency_project_title>
+      </dependency>
+      <dependency type="optional">
+        <dependency_release_id>0</dependency_release_id>
+        <dependency_branch_id>0</dependency_branch_id>
+        <dependency_project_id>32047</dependency_project_id>
+        <dependency_project_title>Heimdal</dependency_project_title>
+      </dependency>
+      <dependency type="optional">
+        <dependency_release_id>0</dependency_release_id>
+        <dependency_branch_id>0</dependency_branch_id>
+        <dependency_project_id>44532</dependency_project_id>
+        <dependency_project_title>c-ares</dependency_project_title>
+      </dependency>
+    </dependencies>
+  </project>
+</project-listing>
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+zstd
+</features>
+<server>
+http
+</server>
+<name>
+HTTP GET zstd compressed content
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+</verify>
+</testcase>

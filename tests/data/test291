@@ -23,24 +23,24 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download maximum filesize not exceeded
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/291 --max-filesize 100
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --max-filesize 100
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 291
-RETR 291
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

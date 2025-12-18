@@ -8,7 +8,7 @@ HTTP GET
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Server: thebest/1.0
 Content-Type: text/plain
@@ -16,7 +16,7 @@ Content-Length: 6
 
 first
 </data>
-<data1 nocheck="yes">
+<data1 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Server: thebest/1.0
 Content-Type: text/plain
@@ -31,26 +31,25 @@ second
 <server>
 http
 </server>
- <name>
+<name>
 HTTP --dump-header - with two URLs
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/want/1066 http://%HOSTIP:%HTTPPORT/want/10660001 --dump-header -
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER0001 --dump-header -
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /want/1066 HTTP/1.1
+<protocol crlf="headers">
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/10660001 HTTP/1.1
+GET /want/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

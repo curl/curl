@@ -9,9 +9,9 @@ multi
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 47
 
@@ -33,30 +33,30 @@ http
 <tool>
 lib526
 </tool>
- <name>
+<name>
 HTTP GET same file using different handles but same connection
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/path/528
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-GET /path/528 HTTP/1.1
+<protocol crlf="headers">
+GET /path/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/528 HTTP/1.1
+GET /path/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/528 HTTP/1.1
+GET /path/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/528 HTTP/1.1
+GET /path/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

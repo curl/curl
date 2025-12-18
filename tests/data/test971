@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+options-in-versions
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify that options-in-versions and docs/cmdline-opts are in sync
+</name>
+
+<command type="perl">
+%SRCDIR/test971.pl %SRCDIR/../docs/options-in-versions %SRCDIR/../docs/cmdline-opts %SRCDIR/../docs/VERSIONS.md
+</command>
+</client>
+
+<verify>
+<stderr>
+ok
+</stderr>
+</verify>
+</testcase>

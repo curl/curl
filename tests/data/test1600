@@ -9,19 +9,12 @@ NTLM
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 NTLM
 </features>
- <name>
+<name>
 NTLM unit tests
- </name>
-<tool>
-unit1600
-</tool>
+</name>
 </client>
-
 </testcase>

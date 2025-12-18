@@ -1,0 +1,55 @@
+#!/bin/sh
+# docker-maketgz
+#
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+set -eu
+
+version="${1:-}"
+
+if [ -z "$version" ]; then
+    echo "Specify a version number!"
+    exit
+fi
+
+timestamp="${2:-$(date -u +%s)}"
+
+if test -f Makefile; then
+    make distclean
+fi
+docker build \
+       --no-cache \
+       --build-arg SOURCE_DATE_EPOCH="$timestamp" \
+       --build-arg UID="$(id -u)" \
+       --build-arg GID="$(id -g)" \
+       -t curl/curl .
+
+docker run --rm -u "$(id -u):$(id -g)" \
+       -v "$(pwd):/usr/src" -w /usr/src curl/curl sh -c "
+  set -e
+  autoreconf -fi
+  ./configure --without-ssl --without-libpsl
+  make -sj8
+  ./scripts/maketgz $version"

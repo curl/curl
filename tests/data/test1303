@@ -9,18 +9,11 @@ Curl_timeleft
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 Curl_timeleft unit tests
- </name>
-<tool>
-unit1303
-</tool>
+</name>
 </client>
-
 </testcase>

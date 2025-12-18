@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,9 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* <DESC>
- * HTTP PUT upload with authentiction using "any" method. libcurl picks the
+ * HTTP PUT upload with authentication using "any" method. libcurl picks the
  * one the server supports/wants.
  * </DESC>
  */
@@ -31,12 +33,12 @@
 
 #include <curl/curl.h>
 
-#ifdef WIN32
-#  include <io.h>
-#  define READ_3RD_ARG unsigned int
-#else
-#  include <unistd.h>
-#  define READ_3RD_ARG size_t
+#ifdef _WIN32
+#undef stat
+#define stat _stat
+#undef fstat
+#define fstat _fstat
+#define fileno _fileno
 #endif
 
 #if LIBCURL_VERSION_NUM < 0x070c03
@@ -44,63 +46,47 @@
 #endif
 
 /*
- * This example shows a HTTP PUT operation with authentiction using "any"
+ * This example shows an HTTP PUT operation with authentication using "any"
  * type. It PUTs a file given as a command line argument to the URL also given
  * on the command line.
  *
- * Since libcurl 7.12.3, using "any" auth and POST/PUT requires a set ioctl
+ * Since libcurl 7.12.3, using "any" auth and POST/PUT requires a set seek
  * function.
  *
  * This example also uses its own read callback.
  */
 
-/* ioctl callback function */
-static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
+/* seek callback function */
+static int my_seek(void *userp, curl_off_t offset, int origin)
 {
-  int *fdp = (int *)userp;
-  int fd = *fdp;
+  FILE *fp = (FILE *) userp;
 
-  (void)handle; /* not used in here */
+  if(fseek(fp, (long) offset, origin) == -1)
+    /* could not seek */
+    return CURL_SEEKFUNC_CANTSEEK;
 
-  switch(cmd) {
-  case CURLIOCMD_RESTARTREAD:
-    /* mr libcurl kindly asks as to rewind the read data stream to start */
-    if(-1 == lseek(fd, 0, SEEK_SET))
-      /* couldn't rewind */
-      return CURLIOE_FAILRESTART;
-
-    break;
-
-  default: /* ignore unknown commands */
-    return CURLIOE_UNKNOWNCMD;
-  }
-  return CURLIOE_OK; /* success! */
+  return CURL_SEEKFUNC_OK; /* success! */
 }
 
 /* read callback function, fread() look alike */
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  ssize_t retcode;
-  curl_off_t nread;
+  size_t nread;
 
-  int *fdp = (int *)stream;
-  int fd = *fdp;
+  nread = fread(ptr, size, nmemb, stream);
 
-  retcode = read(fd, ptr, (READ_3RD_ARG)(size * nmemb));
+  if(nread > 0) {
+    fprintf(stderr, "*** We read %lu bytes from file\n", (unsigned long)nread);
+  }
 
-  nread = (curl_off_t)retcode;
-
-  fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
-          " bytes from file\n", nread);
-
-  return retcode;
+  return nread;
 }
 
 int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  int hd;
+  FILE *fp;
   struct stat file_info;
 
   char *file;
@@ -113,26 +99,41 @@ int main(int argc, char **argv)
   url = argv[2];
 
   /* get the file size of the local file */
-  hd = open(file, O_RDONLY);
-  fstat(hd, &file_info);
+  fp = fopen(file, "rb");
+  if(!fp)
+    return 2;
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+#ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
+  if(stat(file, &file_info) != 0) {
+#else
+  if(fstat(fileno(fp), &file_info) != 0) {
+#endif
+    fclose(fp);
+    return 1; /* cannot continue */
+  }
+
+  /* In Windows, this inits the Winsock stuff */
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    fclose(fp);
+    return (int)res;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void *)&hd);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void *) fp);
 
-    /* set the ioctl function */
-    curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
+    /* set the seek function */
+    curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
 
-    /* pass the file descriptor to the ioctl callback as well */
-    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void *)&hd);
+    /* pass the file descriptor to the seek callback as well */
+    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *) fp);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -149,12 +150,12 @@ int main(int argc, char **argv)
     /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
        data twice!!! */
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
     /* set user name and password for the authentication */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");
 
-    /* Now run off and do what you've been told! */
+    /* Now run off and do what you have been told! */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)
@@ -164,8 +165,8 @@ int main(int argc, char **argv)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  close(hd); /* close the local file */
+  fclose(fp); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

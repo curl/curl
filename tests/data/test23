@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-unsupported protocol
+unsupported scheme
 FAILURE
 </keywords>
 </info>
@@ -16,10 +16,10 @@ FAILURE
 <server>
 http
 </server>
- <name>
+<name>
 unsupported protocol:// URL
- </name>
- <command>
+</name>
+<command>
 htfp://%HOSTIP:%HTTPPORT/none.htfml
 </command>
 </client>

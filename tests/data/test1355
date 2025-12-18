@@ -16,45 +16,37 @@ mooo
 
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -O output in, using the CURL_TESTDIR variable
-<features>
-debug
-</features>
 <server>
 ftp
 </server>
 <name>
 FTP download, file without C-D inside, using -O -i, without -D
 </name>
-<setenv>
-CURL_TESTDIR=%PWD/log
-</setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1355 -O -i
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -i --output-dir %LOGDIR
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1355
-RETR file1355
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file1355">
+<file1 name="%LOGDIR/file%TESTNUMBER">
 fooo
 mooo
 </file1>
 
-<file2 name="log/stdout1355">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
 
 </verify>

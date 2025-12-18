@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+followlocation
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK swsclose
+Location: data2.html/%TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK swsclose
+Location: this should be ignored
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+body
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+<name>
+Pre-request callback for HTTP with location following
+</name>
+<tool>
+lib2082
+</tool>
+
+<command>
+%HOSTIP:%HTTPPORT/%TESTNUMBER#redir
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stripfile>
+s/^Local port = \d+/Local port = stripped/
+</stripfile>
+<stdout>
+Connected to %HOSTIP
+Connected from %CLIENTIP
+Remote port = %HTTPPORT
+Local port = stripped
+Returning = 0
+Connected to %HOSTIP
+Connected from %CLIENTIP
+Remote port = %HTTPPORT
+Local port = stripped
+Returning = 0
+</stdout>
+</verify>
+</testcase>

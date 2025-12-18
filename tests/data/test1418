@@ -4,7 +4,7 @@
 HTTP
 HTTP GET
 HTTP NTLM auth
-connection re-use
+connection reuse
 </keywords>
 </info>
 # Server-side
@@ -13,7 +13,7 @@ connection re-use
 connection-monitor
 </servercmd>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authentication please!
 Content-Length: 20
 WWW-Authenticate: Digest realm="loonie", nonce="314156592"
@@ -22,7 +22,7 @@ WWW-Authenticate: Basic
 Please auth with me
 </data>
 
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 401 Authentication please!
 Content-Length: 20
 WWW-Authenticate: Digest realm="loonie", nonce="314156592"
@@ -33,7 +33,7 @@ Please auth with me
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Length: 4
@@ -41,7 +41,7 @@ Content-Length: 4
 moo
 </data1000>
 
-<data1003>
+<data1003 crlf="headers">
 HTTP/1.1 200 OK
 Server: Another one/1.0
 Content-Length: 4
@@ -50,7 +50,7 @@ boo
 </data1003>
 
 # This is the first reply after the redirection
-<data1011>
+<data1011 crlf="headers">
 HTTP/1.1 200 OK
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -59,7 +59,7 @@ Content-Length: 34
 This is not the real page either!
 </data1011>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authentication please!
 Content-Length: 20
 WWW-Authenticate: Digest realm="loonie", nonce="314156592"
@@ -82,37 +82,39 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
- <name>
-HTTP with --anyauth and connection re-use
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1418 -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/14180003
+<name>
+HTTP with --anyauth and connection reuse
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1418 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1418 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/1418", response="986238b7e0077754944c966f56d9bc77"
+Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/%TESTNUMBER", response="986238b7e0077754944c966f56d9bc77"
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14180003 HTTP/1.1
+GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14180003 HTTP/1.1
+GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/14180003", response="1c6390a67bac3283a9b023402f3b3540"
+Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/%TESTNUMBER0003", response="1c6390a67bac3283a9b023402f3b3540"
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

@@ -12,7 +12,7 @@ FAILURE
 # Server-side
 <reply>
 
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 And you should ignore this data.
@@ -24,15 +24,16 @@ And you should ignore this data.
 <client>
 <features>
 SSL
+proxy
 </features>
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS GET over HTTP proxy fails
- </name>
- <command>
--k -U fake:user -x %HOSTIP:%HTTPPORT https://bad.fakeurl-to.test:302/slash/302
+</name>
+<command>
+--insecure -U fake:user -x %HOSTIP:%HTTPPORT https://bad.fakeurl-to.test:%TESTNUMBER/slash/%TESTNUMBER
 </command>
 </client>
 
@@ -42,9 +43,6 @@ HTTPS GET over HTTP proxy fails
 <errorcode>
 56
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <data>
 </data>
 </verify>

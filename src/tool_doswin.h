@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,15 +20,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(MSDOS) || defined(WIN32)
+#if defined(_WIN32) || defined(MSDOS)
 
-#define SANITIZE_ALLOW_COLONS    (1<<0)  /* Allow colons */
 #define SANITIZE_ALLOW_PATH      (1<<1)  /* Allow path separators and colons */
 #define SANITIZE_ALLOW_RESERVED  (1<<2)  /* Allow reserved device names */
-#define SANITIZE_ALLOW_TRUNCATE  (1<<3)  /* Allow truncating a long filename */
 
 typedef enum {
   SANITIZE_ERR_OK = 0,           /* 0 - OK */
@@ -40,30 +40,27 @@ typedef enum {
 
 SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
                                 int flags);
-#ifdef UNITTESTS
-SANITIZEcode truncate_dryrun(const char *path, const size_t truncate_pos);
-SANITIZEcode msdosify(char **const sanitized, const char *file_name,
-                      int flags);
-SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
-                                                const char *file_name,
-                                                int flags);
-#endif /* UNITTESTS */
 
-#if defined(MSDOS) && (defined(__DJGPP__) || defined(__GO32__))
-
+#ifdef __DJGPP__
 char **__crt0_glob_function(char *arg);
+#endif
 
-#endif /* MSDOS && (__DJGPP__ || __GO32__) */
+#ifdef _WIN32
 
-#ifdef WIN32
-
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
+  !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
 CURLcode FindWin32CACert(struct OperationConfig *config,
-                         curl_sslbackend backend,
-                         const char *bundle_file);
+                         const TCHAR *bundle_file);
+#endif
 struct curl_slist *GetLoadedModulePaths(void);
+CURLcode win32_init(void);
 
-#endif /* WIN32 */
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+curl_socket_t win32_stdin_read_thread(void);
+#endif /* !CURL_WINDOWS_UWP && !UNDER_CE */
 
-#endif /* MSDOS || WIN32 */
+#endif /* _WIN32 */
+
+#endif /* _WIN32 || MSDOS */
 
 #endif /* HEADER_CURL_TOOL_DOSWIN_H */

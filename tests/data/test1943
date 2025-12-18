@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_header
+CONNECT
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Transfer-Encoding: chunked
+Trailer: server
+Connection: mooo
+
+40
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+30
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+21;heresatest=moooo
+cccccccccccccccccccccccccccccccc
+
+0
+Server: sent-as-trailer
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+http
+headers-api
+</features>
+<server>
+http
+</server>
+
+<name>
+curl_easy_header with trailers
+</name>
+<tool>
+lib1940
+</tool>
+
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+ Date == Thu, 09 Nov 2010 14:49:00 GMT
+ Server == fakeit/0.9 fakeitbad/1.0
+ Server == sent-as-trailer
+</stdout>
+</verify>
+</testcase>

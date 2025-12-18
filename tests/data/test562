@@ -20,16 +20,16 @@ over FTP
 ftp
 </server>
 <tool>
-lib562
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP a type=A URL and CURLOPT_PORT set
- </name>
+</name>
 
 # note that we need quotes around the URL below to make sure the shell doesn't
 # treat the semicolon as a separator!
- <command>
-'ftp://%HOSTIP:23456/562;type=A' %FTPPORT
+<command>
+'ftp://%HOSTIP:23456/%TESTNUMBER;type=A' %FTPPORT
 </command>
 
 </client>
@@ -39,14 +39,13 @@ FTP a type=A URL and CURLOPT_PORT set
 # There's no MTDM in the protocol here since this code doesn't ask for the
 # time/date of the file
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE A
-SIZE 562
-RETR 562
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

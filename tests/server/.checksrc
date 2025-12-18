@@ -1,0 +1,18 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+allowfunc accept
+allowfunc fclose
+allowfunc fopen
+allowfunc fprintf
+allowfunc freeaddrinfo
+allowfunc getaddrinfo
+allowfunc open
+allowfunc printf
+allowfunc recv
+allowfunc send
+allowfunc snprintf
+allowfunc socket
+allowfunc sscanf
+allowfunc vsnprintf

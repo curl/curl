@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* <DESC>
  * Set your system time from a remote HTTP server's Date: header.
@@ -25,169 +27,158 @@
  */
 /* This example code only builds as-is on Windows.
  *
- * While Unix/Linux user, you do not need this software.
- * You can achieve the same result as synctime using curl, awk and date.
- * Set proxy as according to your network, but beware of proxy Cache-Control.
- *
- * To set your system clock, root access is required.
- * # date -s "`curl -sI https://nist.time.gov/timezone.cgi?UTC/s/0 \
- *        | awk -F': ' '/Date: / {print $2}'`"
- *
- * To view remote webserver date and time.
- * $ curl -sI https://nist.time.gov/timezone.cgi?UTC/s/0 \
- *        | awk -F': ' '/Date: / {print $2}'
- *
  * Synchronising your computer clock via Internet time server usually relies
  * on DAYTIME, TIME, or NTP protocols. These protocols provide good accurate
- * time synchronisation but it does not work very well through a
- * firewall/proxy. Some adjustment has to be made to the firewall/proxy for
- * these protocols to work properly.
+ * time synchronization but it does not work well through a firewall/proxy.
+ * Some adjustment has to be made to the firewall/proxy for these protocols to
+ * work properly.
  *
  * There is an indirect method. Since most webserver provide server time in
  * their HTTP header, therefore you could synchronise your computer clock
  * using HTTP protocol which has no problem with firewall/proxy.
  *
  * For this software to work, you should take note of these items.
- * 1. Your firewall/proxy must allow your computer to surf internet.
+ * 1. Your firewall/proxy must allow your computer to surf Internet.
  * 2. Webserver system time must in sync with the NTP time server,
  *    or at least provide an accurate time keeping.
  * 3. Webserver HTTP header does not provide the milliseconds units,
- *    so there is no way to get very accurate time.
+ *    so there is no way to get an accurate time.
  * 4. This software could only provide an accuracy of +- a few seconds,
  *    as Round-Trip delay time is not taken into consideration.
  *    Compensation of network, firewall/proxy delay cannot be simply divide
  *    the Round-Trip delay time by half.
- * 5. Win32 SetSystemTime() API will set your computer clock according to
+ * 5. Win32 SetSystemTime() API sets your computer clock according to
  *    GMT/UTC time. Therefore your computer timezone must be properly set.
  * 6. Webserver data should not be cached by the proxy server. Some
  *    webserver provide Cache-Control to prevent caching.
  *
- * References:
- * https://web.archive.org/web/20100228012139/ \
- *    tf.nist.gov/timefreq/service/its.htm
- * https://web.archive.org/web/20100409024302/ \
- *    tf.nist.gov/timefreq/service/firewall.htm
- *
  * Usage:
- * This software will synchronise your computer clock only when you issue
+ * This software synchronises your computer clock only when you issue
  * it with --synctime. By default, it only display the webserver's clock.
- *
- * Written by: Frank (contributed to libcurl)
- *
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
- *
- * IN NO EVENT SHALL THE AUTHOR OF THIS SOFTWARE BE LIABLE FOR
- * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
- * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
- * OF THIS SOFTWARE.
- *
  */
 
 #include <stdio.h>
-#include <time.h>
-#ifndef __CYGWIN__
-#include <winsock2.h>
-#include <windows.h>
+
+#ifndef _WIN32
+int main(void) { printf("Platform not supported.\n"); return 1; }
+#else
+
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+   defined(WINAPI_FAMILY)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_UWP
+#  endif
 #endif
+
+#ifdef CURL_WINDOWS_UWP
+int main(void) { printf("Platform not supported.\n"); return 1; }
+#else
+
+#include <time.h>
+
 #include <curl/curl.h>
 
+#include <windows.h>
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
 
 #define MAX_STRING              256
 #define MAX_STRING1             MAX_STRING + 1
 
 #define SYNCTIME_UA "synctime/1.0"
 
-typedef struct
-{
+struct conf {
   char http_proxy[MAX_STRING1];
   char proxy_user[MAX_STRING1];
   char timeserver[MAX_STRING1];
-} conf_t;
+};
 
-const char DefaultTimeServer[3][MAX_STRING1] =
+static const char DefaultTimeServer[3][MAX_STRING1] =
 {
   "https://nist.time.gov/",
   "https://www.google.com/"
 };
 
-const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-const char *MthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+static const char *DayStr[] = {
+  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+static const char *MthStr[] = {
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-int  ShowAllHeader;
-int  AutoSyncTime;
-SYSTEMTIME SYSTime;
-SYSTEMTIME LOCALTime;
+static int ShowAllHeader;
+static int AutoSyncTime;
+static SYSTEMTIME SYSTime;
+static SYSTEMTIME LOCALTime;
 
 #define HTTP_COMMAND_HEAD       0
 #define HTTP_COMMAND_GET        1
 
-
-size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
-                                 void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb,
+                                        void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
-  return (nmemb*size);
+  return nmemb * size;
 }
 
-size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
-                                 void *stream)
+/* Remember: do not assume headers are passed on null terminated! */
+static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
+                                        void *stream)
 {
-  char  TmpStr1[26], TmpStr2[26];
+  char TmpStr1[26], TmpStr2[26];
 
   (void)stream;
 
   if(ShowAllHeader == 1)
-    fprintf(stderr, "%s", (char *)(ptr));
+    fprintf(stderr, "%.*s", (int)nmemb, (char *)ptr);
 
-  if(strncmp((char *)(ptr), "Date:", 5) == 0) {
+  if((nmemb >= 5) && !strncmp((char *)ptr, "Date:", 5)) {
     if(ShowAllHeader == 0)
-      fprintf(stderr, "HTTP Server. %s", (char *)(ptr));
+      fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
     if(AutoSyncTime == 1) {
+      int RetVal = 0;
+      char *field = ptr;
       *TmpStr1 = 0;
       *TmpStr2 = 0;
-      if(strlen((char *)(ptr)) > 50) /* Can prevent buffer overflow to
-                                         TmpStr1 & 2? */
-        AutoSyncTime = 0;
-      else {
-        int RetVal = sscanf((char *)(ptr), "Date: %s %hu %s %hu %hu:%hu:%hu",
-                            TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
-                            &SYSTime.wHour, &SYSTime.wMinute,
-                            &SYSTime.wSecond);
+      if(nmemb && (field[nmemb] == '\n')) {
+        field[nmemb] = 0; /* null terminated */
+        RetVal = sscanf(field, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
+                        TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
+                        &SYSTime.wHour, &SYSTime.wMinute,
+                        &SYSTime.wSecond);
+      }
 
-        if(RetVal == 7) {
-          int i;
-          SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
-          for(i = 0; i<12; i++) {
-            if(strcmp(MthStr[i], TmpStr2) == 0) {
-              SYSTime.wMonth = i + 1;
-              break;
-            }
+      if(RetVal == 7) {
+        int i;
+        SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
+        for(i = 0; i < 12; i++) {
+          if(strcmp(MthStr[i], TmpStr2) == 0) {
+            SYSTime.wMonth = (WORD)(i + 1);
+            break;
           }
-          AutoSyncTime = 3;       /* Computer clock will be adjusted */
         }
-        else {
-          AutoSyncTime = 0;       /* Error in sscanf() fields conversion */
-        }
+        AutoSyncTime = 3;       /* Computer clock is adjusted */
+      }
+      else {
+        AutoSyncTime = 0;       /* Error in sscanf() fields conversion */
       }
     }
   }
 
-  if(strncmp((char *)(ptr), "X-Cache: HIT", 12) == 0) {
+  if((nmemb >= 12) && !strncmp((char *)ptr, "X-Cache: HIT", 12)) {
     fprintf(stderr, "ERROR: HTTP Server data is cached."
             " Server Date is no longer valid.\n");
     AutoSyncTime = 0;
   }
-  return (nmemb*size);
+  return nmemb * size;
 }
 
-void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
-                        char *proxy_user_password)
+static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,
+                               const char *proxy_user_password)
 {
   if(strlen(proxy_port) > 0)
     curl_easy_setopt(curl, CURLOPT_PROXY, proxy_port);
@@ -195,15 +186,13 @@ void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
   if(strlen(proxy_user_password) > 0)
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, proxy_user_password);
 
-#ifdef SYNCTIME_UA
   curl_easy_setopt(curl, CURLOPT_USERAGENT, SYNCTIME_UA);
-#endif
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, *SyncTime_CURL_WriteOutput);
-  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, *SyncTime_CURL_WriteHeader);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
 }
 
-int SyncTime_CURL_Fetch(CURL *curl, char *URL_Str, char *OutFileName,
-                        int HttpGetBody)
+static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
+                                    const char *OutFileName, int HttpGetBody)
 {
   FILE *outfile;
   CURLcode res;
@@ -218,16 +207,16 @@ int SyncTime_CURL_Fetch(CURL *curl, char *URL_Str, char *OutFileName,
 
   curl_easy_setopt(curl, CURLOPT_URL, URL_Str);
   res = curl_easy_perform(curl);
-  if(outfile != NULL)
+  if(outfile)
     fclose(outfile);
   return res;  /* (CURLE_OK) */
 }
 
-void showUsage(void)
+static void showUsage(void)
 {
-  fprintf(stderr, "SYNCTIME: Synchronising computer clock with time server"
+  fprintf(stderr, "synctime: Synchronising computer clock with time server"
           " using HTTP protocol.\n");
-  fprintf(stderr, "Usage   : SYNCTIME [Option]\n");
+  fprintf(stderr, "Usage   : synctime [Option]\n");
   fprintf(stderr, "Options :\n");
   fprintf(stderr, " --server=WEBSERVER        Use this time server instead"
           " of default.\n");
@@ -243,22 +232,23 @@ void showUsage(void)
   return;
 }
 
-int conf_init(conf_t *conf)
+static int conf_init(struct conf *conf)
 {
   int i;
 
-  *conf->http_proxy       = 0;
-  for(i = 0; i<MAX_STRING1; i++)
-    conf->proxy_user[i]     = 0;    /* Clean up password from memory */
-  *conf->timeserver       = 0;
+  *conf->http_proxy = 0;
+  for(i = 0; i < MAX_STRING1; i++)
+    conf->proxy_user[i] = 0;    /* Clean up password from memory */
+  *conf->timeserver = 0;
   return 1;
 }
 
 int main(int argc, char *argv[])
 {
-  CURL    *curl;
-  conf_t  conf[1];
-  int     RetValue;
+  CURLcode res;
+  CURL *curl;
+  struct conf conf[1];
+  int RetValue;
 
   ShowAllHeader   = 0;    /* Do not show HTTP Header */
   AutoSyncTime    = 0;    /* Do not synchronise computer clock */
@@ -266,7 +256,7 @@ int main(int argc, char *argv[])
   conf_init(conf);
 
   if(argc > 1) {
-    int OptionIndex = 0;
+    int OptionIndex = 1;
     while(OptionIndex < argc) {
       if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
         snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
@@ -296,7 +286,10 @@ int main(int argc, char *argv[])
     snprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
 
   /* Init CURL before usage */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   curl = curl_easy_init();
   if(curl) {
     struct tm *lt;
@@ -320,10 +313,10 @@ int main(int argc, char *argv[])
     tzonediffFloat = difftime(tt_local, tt_gmt);
     tzonediffWord  = (int)(tzonediffFloat/3600.0);
 
-    if((double)(tzonediffWord * 3600) == tzonediffFloat)
-      snprintf(tzoneBuf, 15, "%+03d'00'", tzonediffWord);
+    if(tzonediffWord == (int)(tzonediffFloat/3600.0))
+      snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
-      snprintf(tzoneBuf, 15, "%+03d'30'", tzonediffWord);
+      snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
 
     /* Get current system time and local time */
     GetSystemTime(&SYSTime);
@@ -371,5 +364,10 @@ int main(int argc, char *argv[])
     conf_init(conf);
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
+
   return RetValue;
 }
+#endif /* CURL_WINDOWS_UWP */
+#endif /* _WIN32 */

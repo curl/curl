@@ -18,11 +18,11 @@ REPLY PASS 430 temporarily not available
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP transient error, retry request once
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/196 --retry 1
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --retry 1 -w '%{num_retries}\n'
 </command>
 </client>
 
@@ -32,11 +32,14 @@ ftp://%HOSTIP:%FTPPORT/196 --retry 1
 <errorcode>
 67
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 USER anonymous
 PASS ftp@example.com
 </protocol>
+<stdout>
+1
+</stdout>
 </verify>
 </testcase>

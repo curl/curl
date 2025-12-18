@@ -1,0 +1,19 @@
+<testcase>
+<info>
+<keywords>
+unittest
+SHA256
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+SHA256 unit tests
+</name>
+</client>
+</testcase>

@@ -1,0 +1,129 @@
+      * Curl MIME post data and display response
+      *
+     h DFTACTGRP(*NO) ACTGRP(*NEW)
+     h OPTION(*NOSHOWCPY)
+     h BNDDIR('CURL')
+      *
+      **************************************************************************
+      *                                  _   _ ____  _
+      *  Project                     ___| | | |  _ \| |
+      *                             / __| | | | |_) | |
+      *                            | (__| |_| |  _ <| |___
+      *                             \___|\___/|_| \_\_____|
+      *
+      * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+      *
+      * This software is licensed as described in the file COPYING, which
+      * you should have received as part of this distribution. The terms
+      * are also available at https://curl.se/docs/copyright.html.
+      *
+      * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+      * copies of the Software, and permit persons to whom the Software is
+      * furnished to do so, under the terms of the COPYING file.
+      *
+      * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+      * ANY KIND, either express or implied.
+      *
+      * SPDX-License-Identifier: curl
+      *
+      **************************************************************************
+      *
+      /include H,CURL.INC
+      *
+      * Example to HTTP POST data using the MIME API. Displays the response.
+      *
+     d                 pi
+     d userinput                    120                                         User data to post
+      *
+     d url             c                   'http://httpbin.org/anything'
+      *
+      *
+     d inputlen        s             10u 0                                      User input length
+      **************************************************************************
+
+        inputlen = trimmed_length(userinput: %len(userinput));
+
+        // Do the curl stuff.
+
+        curl_global_init(CURL_GLOBAL_ALL);
+        main();
+        curl_global_cleanup();
+        *inlr = *on;            // Exit
+      *
+      **************************************************************************
+      * Main procedure: do the curl job.
+      **************************************************************************
+      *
+     p main            b
+     d main            pi
+      *
+     d h               s               *                                        Easy handle
+     d result          s                   like(CURLcode)                       Curl return code
+     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d errmsgp         s               *                                        Error string pointer
+     d response        s             52                                         For error display
+     d mime            s               *                                        MIME handle
+     d mimepart        s               *                                        MIME part handle
+     d parthdrs        s               *   inz(*NULL)                           Part headers
+
+            // Create and fill curl handle.
+
+        h = curl_easy_init();
+        if h <> *NULL;
+            curl_easy_setopt_ccsid(h: CURLOPT_URL: url: 0);
+            curl_easy_setopt(h: CURLOPT_FOLLOWLOCATION: 1);
+            mime = curl_mime_init(h);
+            mimepart = curl_mime_addpart(mime);
+            curl_mime_name_ccsid(mimepart: 'autofield': 0);
+            curl_mime_data_ccsid(mimepart: 'program-generated value':
+                                 CURL_ZERO_TERMINATED: 0);
+            mimepart = curl_mime_addpart(mime);
+            curl_mime_name_ccsid(mimepart: 'userfield': 0);
+            curl_mime_data_ccsid(mimepart: %subst(userinput: 1: inputlen):
+                                 CURL_ZERO_TERMINATED: 0);
+            mimepart = curl_mime_addpart(mime);
+            curl_mime_name_ccsid(mimepart: 'ebcdicfield': 0);
+            curl_mime_data(mimepart: %subst(userinput: 1: inputlen): inputlen);
+            curl_mime_encoder_ccsid(mimepart: 'base64': 0);
+            // Avoid server to convert base64 to text.
+            parthdrs = curl_slist_append_ccsid(parthdrs:
+                                       'Content-Transfer-Encoding: bit': 0);
+            curl_mime_headers(mimepart: parthdrs: 1);
+            curl_easy_setopt(h: CURLOPT_MIMEPOST: mime);
+
+            // Perform the request.
+
+            result = curl_easy_perform(h);
+            curl_mime_free(mime);
+            curl_easy_cleanup(h);       // Release handle
+        endif;
+
+        // Check for error and report if some.
+
+        if result <> CURLE_OK;
+            errmsgp = curl_easy_strerror_ccsid(result: 0);
+            response = %str(errmsgp);
+            dsply '' '*EXT' response;
+        endif;
+     p main            e
+      *
+      **************************************************************************
+      * Get the length of right-trimmed string
+      **************************************************************************
+      *
+     p trimmed_length  b
+     d trimmed_length  pi            10u 0
+     d  string                   999999    const options(*varsize)
+     d  length                       10u 0 value
+      *
+     d len             s             10u 0
+      *
+        len = %scan(X'00': string: 1: length); // Limit to null-terminated string
+        if len = 0;
+            len = length + 1;
+        endif;
+        if len <= 1;
+            return 0;
+        endif;
+        return %checkr(' ': string: len - 1);  // Trim right
+     p trimmed_length  e

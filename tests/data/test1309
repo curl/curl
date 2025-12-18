@@ -9,18 +9,12 @@ splay
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 splay unit tests
- </name>
-<tool>
-unit1309
-</tool>
+</name>
 </client>
 
 <verify>
@@ -1564,5 +1558,4 @@ removed payload 1013[1]
 removed payload 1013[2]
 </stdout>
 </verify>
-
 </testcase>

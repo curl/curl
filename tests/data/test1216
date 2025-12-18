@@ -10,7 +10,7 @@ cookies
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Server: Microsoft-IIS/4.0
 Date: Tue, 25 Sep 2001 19:37:44 GMT
@@ -27,34 +27,37 @@ This server says moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookie domains tailmatching the host name
- </name>
- <command>
-http://example.fake/c/1216 http://bexample.fake/c/1216 -b log/injar1216 -x %HOSTIP:%HTTPPORT
+</name>
+<command>
+http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
-<file name="log/injar1216">
-example.fake	FALSE	/a	FALSE	2139150993	mooo	indeed
+<file name="%LOGDIR/injar%TESTNUMBER">
+example.fake	FALSE	/a	FALSE	22139150993	mooo	indeed
 example.fake	FALSE	/b	FALSE	0		moo1	indeed
-example.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
-example.fake	TRUE	/c	FALSE	2139150993	moo3	indeed
+example.fake	FALSE	/c	FALSE	22139150993	moo2	indeed
+example.fake	TRUE	/c	FALSE	22139150993	moo3	indeed
 </file>
+<features>
+cookies
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://example.fake/c/1216 HTTP/1.1
+<protocol crlf="headers">
+GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: moo3=indeed; moo2=indeed
 
-GET http://bexample.fake/c/1216 HTTP/1.1
+GET http://bexample.fake/c/%TESTNUMBER HTTP/1.1
 Host: bexample.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

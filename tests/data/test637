@@ -19,13 +19,13 @@ Range
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP retrieval with invalid X- range
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file637.txt -r 99- --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt -r 99- --insecure
 </command>
-<file name="log/file637.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>
@@ -37,8 +37,5 @@ for ssh test
 <errorcode>
 36
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

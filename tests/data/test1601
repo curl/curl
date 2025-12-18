@@ -9,18 +9,11 @@ MD5
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 MD5 unit tests
- </name>
-<tool>
-unit1601
-</tool>
+</name>
 </client>
-
 </testcase>

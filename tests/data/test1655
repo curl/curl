@@ -1,0 +1,20 @@
+<testcase>
+<info>
+<keywords>
+unittest
+DOH
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+DoH
+</features>
+<name>
+unit test for doh_req_encode
+</name>
+</client>
+</testcase>

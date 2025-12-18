@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+curl_multi_remove_handle
+</keywords>
+</info>
+
+
+#
+# Client-side
+<client>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+curl_multi_remove_handle twice
+</name>
+<command>
+-
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

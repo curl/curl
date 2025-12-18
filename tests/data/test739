@@ -1,0 +1,37 @@
+<testcase>
+<info>
+<keywords>
+IPFS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ipfs
+</features>
+<server>
+http
+</server>
+<name>
+IPNS path and query args for gateway and IPFS url (malformed gateway url)
+</name>
+<command>
+--ipfs-gateway "http://%HOSTIP:%HTTPPORT/some/path?biz=baz" "ipns://fancy.tld/a/b?foo=bar&aaa=bbb"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

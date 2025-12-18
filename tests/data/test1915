@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HSTS
+CURLOPT_HSTSREADFUNCTION
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<features>
+HSTS
+http
+</features>
+
+<name>
+HSTS read/write callbacks
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 7 CURLE_COULDNT_CONNECT (expected since there's nothing listening there)
+# 42 CURLE_ABORTED_BY_CALLBACK
+<errorcode>
+42
+</errorcode>
+<stdout>
+%if large-time
+[0/4] 1.example.com 25250320 01:02:03
+[1/4] 2.example.com 25250320 03:02:01
+[2/4] 3.example.com 25250319 01:02:03
+%else
+[0/4] 1.example.com 20370320 01:02:03
+[1/4] 2.example.com 20370320 03:02:01
+[2/4] 3.example.com 20370319 01:02:03
+%endif
+[3/4] 4.example.com unlimited
+First request returned 7
+Second request returned 42
+</stdout>
+</verify>
+</testcase>

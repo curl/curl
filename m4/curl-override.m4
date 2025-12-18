@@ -1,4 +1,27 @@
 #***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+#***************************************************************************
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
@@ -21,15 +44,14 @@ dnl -------------------------------------------------
 dnl This is done to prevent compiler warning
 dnl 'function declaration isn't a prototype'
 dnl in function main. This requires at least
-dnl a c89 compiler and does not support K&R.
+dnl a C89 compiler and does not support K&R.
 
 m4_define([AC_LANG_PROGRAM(C)],
 [$1
-int main (void)
+int main(void)
 {
 $2
- ;
- return 0;
+  return 0;
 }])
 
 dnl Override Autoconf's AC_LANG_CALL (C)
@@ -70,6 +92,6 @@ extern "C"
 #endif
 char $1 ();
 #if defined __stub_$1 || defined __stub___$1
-choke me
+#error force compilation error
 #endif
 ], [return $1 ();])])

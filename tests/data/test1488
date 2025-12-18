@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+documentation
+symbols-in-versions
+manpages
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+symbols-in-versions and manpages agree on added-in versions
+</name>
+
+<command type="perl">
+%SRCDIR/test1488.pl %SRCDIR/.. ../include/curl %SRCDIR/../docs/VERSIONS.md
+</command>
+</client>
+
+<verify>
+<stdout>
+OK
+</stdout>
+</verify>
+</testcase>

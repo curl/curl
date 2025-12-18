@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
-/* get_line() makes sure to only return complete whole lines that fit in 'len'
- * bytes and end with a newline. */
-char *Curl_get_line(char *buf, int len, FILE *input);
+#include "curlx/dynbuf.h"
+
+/* Curl_get_line() returns complete lines that end with a newline. */
+CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof);
 
 #endif /* HEADER_CURL_GET_LINE_H */

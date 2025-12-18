@@ -9,9 +9,9 @@ HTTP proxy
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Accept-Ranges: bytes
 Content-Length: 6
@@ -24,31 +24,30 @@ hello
 <client>
 <features>
 ftp
+proxy
 </features>
 <server>
 http
 </server>
- <name>
+<name>
 FTP URL and with ftp_proxy environment variable set
- </name>
+</name>
 
 <setenv>
 ftp_proxy=http://%HOSTIP:%HTTPPORT/
 </setenv>
- <command>
-ftp://%HOSTIP:23456/1106
+<command>
+ftp://%HOSTIP:23456/%TESTNUMBER
 </command>
 
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET ftp://%HOSTIP:23456/1106 HTTP/1.1
+<protocol crlf="headers">
+GET ftp://%HOSTIP:23456/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:23456
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

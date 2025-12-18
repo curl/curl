@@ -16,17 +16,17 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with multiple and invalid --mail-rcpt
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 From: different
 To: another
 
 body
 </stdin>
- <command>
-smtp://%HOSTIP:%SMTPPORT/918 --mail-rcpt recipient.one@example.com --mail-rcpt invalid --mail-rcpt recipient.three@example.com --mail-rcpt sTrAnGe --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient.one@example.com --mail-rcpt invalid --mail-rcpt recipient.three@example.com --mail-rcpt sTrAnGe --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -37,8 +37,8 @@ smtp://%HOSTIP:%SMTPPORT/918 --mail-rcpt recipient.one@example.com --mail-rcpt i
 <errorcode>
 55
 </errorcode>
-<protocol>
-EHLO 918
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient.one@example.com>
 RCPT TO:<invalid>

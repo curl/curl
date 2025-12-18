@@ -1,0 +1,21 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+symbols-in-versions
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify that symbols-in-versions and libcurl-errors.3 are in sync
+</name>
+
+<command type="perl">
+%SRCDIR/test1175.pl %SRCDIR/..
+</command>
+</client>
+
+</testcase>

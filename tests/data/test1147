@@ -12,7 +12,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,10 +32,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Get -H headers from a file
- </name>
-<file name="log/heads1147.txt">
+</name>
+<file name="%LOGDIR/heads%TESTNUMBER.txt">
 One: 1
 Two: 2
 no-colon
@@ -43,16 +43,16 @@ no-colon
  And A Funny One : wohoo
 User-Agent:
 </file>
- <command>
-http://%HOSTIP:%HTTPPORT/1147 -H @log/heads1147.txt
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H @%LOGDIR/heads%TESTNUMBER.txt
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-GET /1147 HTTP/1.1
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 One: 1

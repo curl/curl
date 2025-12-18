@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 HTTP Digest auth
 HTTP NTLM auth
+NTLM
 </keywords>
 </info>
 # Server-side
@@ -26,7 +27,7 @@ ensure that the order doesn't matter. -->
 
 
 <!-- First request has NTLM auth, wrong password -->
-<data100>
+<data100 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -37,7 +38,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="1"
 This is not the real page!
 </data100>
 
-<data1101>
+<data1101 crlf="headers">
 HTTP/1.1 401 NTLM intermediate
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -47,7 +48,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1101>
 
-<data1102>
+<data1102 crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -59,7 +60,7 @@ This is a bad password page!
 </data1102>
 
 <!-- Second request has Digest auth, right password -->
-<data200>
+<data200 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -70,7 +71,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="3"
 This is not the real page!
 </data200>
 
-<data1200>
+<data1200 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -80,7 +81,7 @@ Finally, this is the real page!
 </data1200>
 
 <!-- Third request has NTLM auth, wrong password -->
-<data300>
+<data300 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -91,7 +92,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data300>
 
-<data1301>
+<data1301 crlf="headers">
 HTTP/1.1 401 NTLM intermediate (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -101,7 +102,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1301>
 
-<data1302>
+<data1302 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -113,7 +114,7 @@ This is a bad password page!
 </data1302>
 
 <!-- Fourth request has Digest auth, wrong password -->
-<data400>
+<data400 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (4)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -124,7 +125,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data400>
 
-<data1400>
+<data1400 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -136,7 +137,7 @@ This is a bad password page!
 </data1400>
 
 <!-- Fifth request has Digest auth, right password -->
-<data500>
+<data500 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (5)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -147,7 +148,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data500>
 
-<data1500>
+<data1500 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -156,7 +157,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1500>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 NTLM intermediate
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -220,76 +221,66 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
+digest
 </features>
 <server>
 http
 </server>
 <tool>
-libauthretry
+lib2023
 </tool>
 
- <name>
+<name>
 HTTP authorization retry (NTLM switching to Digest)
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/2030 ntlm digest
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER ntlm digest
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /20300100 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 
-GET /20300100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyV09SS1NUQVRJT04=
 Accept: */*
 
-GET /20300200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/20300200", response="2f2d784ba53a0a307758a90e98d25c27"
+Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/%TESTNUMBER0200", response="2f2d784ba53a0a307758a90e98d25c27"
 Accept: */*
 
-GET /20300300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 
-GET /20300300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyV09SS1NUQVRJT04=
 Accept: */*
 
-GET /20300400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20300400", response="d6262e9147db08c62ff2f53b515861e8"
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/%TESTNUMBER0400", response="d6262e9147db08c62ff2f53b515861e8"
 Accept: */*
 
-GET /20300400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20300400", response="d6262e9147db08c62ff2f53b515861e8"
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/%TESTNUMBER0400", response="d6262e9147db08c62ff2f53b515861e8"
 Accept: */*
 
-GET /20300500 HTTP/1.1
+GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/20300500", response="198757e61163a779cf24ed4c49c1ad7d"
+Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/%TESTNUMBER0500", response="198757e61163a779cf24ed4c49c1ad7d"
 Accept: */*
 
 </protocol>

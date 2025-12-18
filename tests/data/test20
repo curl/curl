@@ -9,22 +9,17 @@ non-existing host
 
 # Server-side
 <reply>
-<data>
-</data>
 </reply>
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
- <name>
+<name>
 attempt connect to non-existing host name
- </name>
- <command>
+</name>
+<command>
 --ipv4 non-existing-host.haxx.se.
 </command>
 </client>

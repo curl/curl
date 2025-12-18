@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+etag
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+--etag-save with bad path - no transfer
+</name>
+<command>
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --etag-save %LOGDIR/nowhere/etag%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>

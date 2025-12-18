@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,71 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 
-#use strict;
+package getpart;
 
-my @xml;
+use strict;
+use warnings;
+
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        compareparts
+        fulltest
+        getpart
+        getpartattr
+        loadarray
+        loadtest
+        partexists
+        striparray
+        writearray
+    );
+}
+
+use Memoize;
+
+my @xml;      # test data file contents
+my $xmlfile;  # test data file name
 
 my $warning=0;
 my $trace=0;
 
-sub decode_base64 {
-  tr:A-Za-z0-9+/::cd;                   # remove non-base64 chars
-  tr:A-Za-z0-9+/: -_:;                  # convert to uuencoded format
-  my $len = pack("c", 32 + 0.75*length);   # compute length byte
-  return unpack("u", $len . $_);         # uudecode and print
+# Normalize the part function arguments for proper caching. This includes the
+# file name in the arguments since that is an implied parameter that affects the
+# return value.  Any error messages will only be displayed the first time, but
+# those are disabled by default anyway, so should never been seen outside
+# development.
+sub normalize_part {
+    push @_, $xmlfile;
+    return join("\t", @_);
+}
+
+sub decode_hex {
+    my $s = $_;
+    # remove everything not hex
+    $s =~ s/[^A-Fa-f0-9]//g;
+    # encode everything
+    $s =~ s/([a-fA-F0-9][a-fA-F0-9])/chr(hex($1))/eg;
+    return $s;
+}
+
+sub testcaseattr {
+    my %hash;
+    for(@xml) {
+        if(($_ =~ /^ *\<testcase ([^>]*)/)) {
+            my $attr=$1;
+            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|([^\> ]*))//) {
+                my ($var, $cont)=($1, $2);
+                $cont =~ s/^\"(.*)\"$/$1/;
+                $hash{$var}=$cont;
+            }
+        }
+    }
+    return %hash;
 }
 
 sub getpartattr {
@@ -50,7 +101,7 @@ sub getpartattr {
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
-        if((1 ==$inside) && ( ($_ =~ /^ *\<$part([^>]*)/) ||
+        if((1 ==$inside) && ( ($_ =~ /^ *\<$part ([^>]*)/) ||
                               !(defined($part)) )
              ) {
             $inside++;
@@ -73,18 +124,18 @@ sub getpartattr {
     }
     return %hash;
 }
+memoize('getpartattr', NORMALIZER => 'normalize_part');  # cache each result
 
 sub getpart {
     my ($section, $part)=@_;
 
     my @this;
     my $inside=0;
-    my $base64=0;
-
- #   print "Section: $section, part: $part\n";
+    my $hex=0;
+    my $line;
 
     for(@xml) {
- #       print "$inside: $_";
+        $line++;
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
@@ -92,9 +143,9 @@ sub getpart {
             if($inside > 1) {
                 push @this, $_;
             }
-            elsif($_ =~ /$part [^>]*base64=/) {
-                # attempt to detect our base64 encoded part
-                $base64=1;
+            elsif($_ =~ /$part [^>]*hex=/) {
+                # attempt to detect a hex-encoded part
+                $hex=1;
             }
             $inside++;
         }
@@ -105,16 +156,20 @@ sub getpart {
             $inside--;
         }
         elsif(($inside >= 1) && ($_ =~ /^ *\<\/$section/)) {
+            if($inside > 1) {
+                print STDERR "$xmlfile:$line:1: error: missing </$part> tag before </$section>\n";
+                @this = ("format error in $xmlfile");
+            }
             if($trace && @this) {
                 print STDERR "*** getpart.pm: $section/$part returned data!\n";
             }
             if($warning && !@this) {
                 print STDERR "*** getpart.pm: $section/$part returned empty!\n";
             }
-            if($base64) {
+            if($hex) {
                 # decode the whole array before returning it!
                 for(@this) {
-                    my $decoded = decode_base64($_);
+                    my $decoded = decode_hex($_);
                     $_ = $decoded;
                 }
             }
@@ -136,6 +191,7 @@ sub getpart {
     }
     return @this;
 }
+memoize('getpart', NORMALIZER => 'normalize_part');  # cache each result
 
 sub partexists {
     my ($section, $part)=@_;
@@ -155,23 +211,55 @@ sub partexists {
     }
     return 0; # does not exist
 }
-
-# Return entire document as list of lines
-sub getall {
-    return @xml;
-}
+# The code currently never calls this more than once per part per file, so
+# caching a result that will never be used again just slows things down.
+# memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
     my ($file)=@_;
 
-    undef @xml;
+    if(defined $xmlfile && $file eq $xmlfile) {
+        # This test is already loaded
+        return
+    }
 
-    if(open(XML, "<$file")) {
-        binmode XML; # for crapage systems, use binary
-        while(<XML>) {
+    undef @xml;
+    $xmlfile = "";
+
+    if(open(my $xmlh, "<", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
+        while(<$xmlh>) {
             push @xml, $_;
         }
-        close(XML);
+        close($xmlh);
+    }
+    else {
+        # failure
+        if($warning) {
+            print STDERR "file $file wouldn't open!\n";
+        }
+        return 1;
+    }
+    $xmlfile = $file;
+    return 0;
+}
+
+
+# Return entire document as list of lines
+sub fulltest {
+    return @xml;
+}
+
+# write the test to the given file
+sub savetest {
+    my ($file)=@_;
+
+    if(open(my $xmlh, ">", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
+        for(@xml) {
+            print $xmlh $_;
+        }
+        close($xmlh);
     }
     else {
         # failure
@@ -205,23 +293,56 @@ sub striparray {
 # pass array *REFERENCES* !
 #
 sub compareparts {
- my ($firstref, $secondref)=@_;
+    my ($firstref, $secondref)=@_;
 
- my $first = join("", @$firstref);
- my $second = join("", @$secondref);
+    # we cannot compare arrays index per index since with data chunks,
+    # they may not be "evenly" distributed
+    my $first = join("", @$firstref);
+    my $second = join("", @$secondref);
 
- # we cannot compare arrays index per index since with the base64 chunks,
- # they may not be "evenly" distributed
+    if($first =~ /%alternatives\[/) {
+        die "bad use of compareparts\n";
+    }
 
- # NOTE: this no longer strips off carriage returns from the arrays. Is that
- # really necessary? It ruins the testing of newlines. I believe it was once
- # added to enable tests on win32.
+    if($second =~ /%alternatives\[([^,]*),([^\]]*)\]/) {
+        # there can be many %alternatives in this chunk, so we call
+        # this function recursively
+        my $alt = $second;
+        $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$1/;
 
- if($first ne $second) {
-     return 1;
- }
+        # check first alternative
+        {
+            my @f;
+            my @s;
+            push @f, $first;
+            push @s, $alt;
+            if(!compareparts(\@f, \@s)) {
+                return 0;
+            }
+        }
 
- return 0;
+        $alt = $second;
+        $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$2/;
+        # check second alternative
+        {
+            my @f;
+            my @s;
+            push @f, $first;
+            push @s, $alt;
+            if(!compareparts(\@f, \@s)) {
+                return 0;
+            }
+        }
+
+        # neither matched
+        return 1;
+    }
+
+    if($first ne $second) {
+        return 1;
+    }
+
+    return 0;
 }
 
 #
@@ -230,12 +351,12 @@ sub compareparts {
 sub writearray {
     my ($filename, $arrayref)=@_;
 
-    open(TEMP, ">$filename");
-    binmode(TEMP,":raw"); # cygwin fix by Kevin Roth
+    open(my $temp, ">", "$filename") || die "Failure writing file";
+    binmode($temp,":raw");  # Cygwin fix by Kevin Roth
     for(@$arrayref) {
-        print TEMP $_;
+        print $temp $_;
     }
-    close(TEMP);
+    close($temp) || die "Failure writing file";
 }
 
 #
@@ -245,49 +366,13 @@ sub loadarray {
     my ($filename)=@_;
     my @array;
 
-    open(TEMP, "<$filename");
-    while(<TEMP>) {
-        push @array, $_;
+    if(open(my $temp, "<", "$filename")) {
+        while(<$temp>) {
+            push @array, $_;
+        }
+        close($temp);
     }
-    close(TEMP);
     return @array;
-}
-
-# Given two array references, this function will store them in two temporary
-# files, run 'diff' on them, store the result and return the diff output!
-
-sub showdiff {
-    my ($logdir, $firstref, $secondref)=@_;
-
-    my $file1="$logdir/check-generated";
-    my $file2="$logdir/check-expected";
-
-    open(TEMP, ">$file1");
-    for(@$firstref) {
-        my $l = $_;
-        $l =~ s/\r/[CR]/g;
-        $l =~ s/\n/[LF]/g;
-        print TEMP $l;
-        print TEMP "\n";
-    }
-    close(TEMP);
-
-    open(TEMP, ">$file2");
-    for(@$secondref) {
-        my $l = $_;
-        $l =~ s/\r/[CR]/g;
-        $l =~ s/\n/[LF]/g;
-        print TEMP $l;
-        print TEMP "\n";
-    }
-    close(TEMP);
-    my @out = `diff -u $file2 $file1 2>/dev/null`;
-
-    if(!$out[0]) {
-        @out = `diff -c $file2 $file1 2>/dev/null`;
-    }
-
-    return @out;
 }
 
 

@@ -20,16 +20,13 @@ Dummy test file for remove test
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP post-quote remove file
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file612.txt -Q "-rm %PWD/log/file612.txt" sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/upload.612  --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt -Q "-rm %SFTP_PWD/%LOGDIR/upload.%TESTNUMBER" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/upload.%TESTNUMBER --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/log/test612.txt
-</postcheck>
-<file name="log/file612.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Dummy test file for remove test
 </file>
 </client>
@@ -37,11 +34,8 @@ Dummy test file for remove test
 #
 # Verify data after the test has been "shot"
 <verify>
-<upload>
-Dummy test file for remove test
-</upload>
-<valgrind>
-disable
-</valgrind>
+<postcheck>
+%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/upload.%TESTNUMBER
+</postcheck>
 </verify>
 </testcase>

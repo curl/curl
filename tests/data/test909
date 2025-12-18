@@ -16,31 +16,31 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP without SIZE support
- </name>
-<file name="log/test909.eml">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 
 body
 </file>
- <command>
-smtp://%HOSTIP:%SMTPPORT/909 --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test909.eml
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/test%TESTNUMBER.eml
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 909
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

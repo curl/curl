@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTPS PUT
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+https
+</server>
+<name>
+HTTPS PUT of small file
+</name>
+<command>
+--insecure https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+%repeat[200 x banana]%
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+PUT /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 1201
+
+%repeat[200 x banana]%
+</protocol>
+</verify>
+</testcase>

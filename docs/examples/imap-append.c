@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to send e-mails
+ * Send email with IMAP
  * </DESC>
  */
 
@@ -39,41 +41,42 @@
 #define TO      "<addressee@example.net>"
 #define CC      "<info@example.org>"
 
-static const char *payload_text[] = {
-  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
-  "To: " TO "\r\n",
-  "From: " FROM "(Example User)\r\n",
-  "Cc: " CC "(Another example User)\r\n",
+static const char *payload_text =
+  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
+  "To: " TO "\r\n"
+  "From: " FROM "(Example User)\r\n"
+  "Cc: " CC "(Another example User)\r\n"
   "Message-ID: "
-  "<dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
-  "Subject: IMAP example message\r\n",
-  "\r\n", /* empty line to divide headers from body, see RFC5322 */
-  "The body of the message starts here.\r\n",
-  "\r\n",
-  "It could be a lot of lines, could be MIME encoded, whatever.\r\n",
-  "Check RFC5322.\r\n",
-  NULL
-};
+  "<dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n"
+  "Subject: IMAP example message\r\n"
+  "\r\n" /* empty line to divide headers from body, see RFC 5322 */
+  "The body of the message starts here.\r\n"
+  "\r\n"
+  "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
+  "Check RFC 5322.\r\n";
 
 struct upload_status {
-  int lines_read;
+  size_t bytes_read;
 };
 
-static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
+  size_t room = size * nmemb;
 
   if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
     return 0;
   }
 
-  data = payload_text[upload_ctx->lines_read];
+  data = &payload_text[upload_ctx->bytes_read];
 
-  if(data) {
+  if(*data) {
     size_t len = strlen(data);
+    if(room < len)
+      len = room;
     memcpy(ptr, data, len);
-    upload_ctx->lines_read++;
+    upload_ctx->bytes_read += len;
 
     return len;
   }
@@ -84,36 +87,34 @@ static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
-    const char **p;
-    long infilesize;
-    struct upload_status upload_ctx;
-
-    upload_ctx.lines_read = 0;
+    size_t filesize;
+    long infilesize = LONG_MAX;
+    struct upload_status upload_ctx = { 0 };
 
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will create a new message 100. Note that you should perform an
-     * EXAMINE command to obtain the UID of the next message to create and a
-     * SELECT to ensure you are creating the message in the OUTBOX. */
-    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/100");
+    /* This creates a new message in folder "Sent". */
+    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/Sent");
 
-    /* In this case, we're using a callback function to specify the data. You
+    /* In this case, we are using a callback function to specify the data. You
      * could just use the CURLOPT_READDATA option to specify a FILE pointer to
      * read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-    infilesize = 0;
-    for(p = payload_text; *p; ++p) {
-      infilesize += (long)strlen(*p);
-    }
+    filesize = strlen(payload_text);
+    if(filesize <= LONG_MAX)
+      infilesize = (long)filesize;
     curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
 
     /* Perform the append */
@@ -127,6 +128,8 @@ int main(void)
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

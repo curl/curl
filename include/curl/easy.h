@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,23 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Flag bits in the curl_blob struct: */
+#define CURL_BLOB_COPY   1 /* tell libcurl to copy the data */
+#define CURL_BLOB_NOCOPY 0 /* tell libcurl to NOT copy the data */
+
+struct curl_blob {
+  void *data;
+  size_t len;
+  unsigned int flags; /* bit 0 is defined, the rest are reserved and should be
+                         left zeroes */
+};
 
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
@@ -35,13 +48,13 @@ CURL_EXTERN void curl_easy_cleanup(CURL *curl);
  *
  * DESCRIPTION
  *
- * Request internal information from the curl session with this function.  The
- * third argument MUST be a pointer to a long, a pointer to a char * or a
- * pointer to a double (as the documentation describes elsewhere).  The data
- * pointed to will be filled in accordingly and can be relied upon only if the
- * function returns CURLE_OK.  This function is intended to get used *AFTER* a
- * performed transfer, all results from this function are undefined until the
- * transfer is completed.
+ * Request internal information from the curl session with this function.
+ * The third argument MUST be pointing to the specific type of the used option
+ * which is documented in each manpage of the option. The data pointed to
+ * will be filled in accordingly and can be relied upon only if the function
+ * returns CURLE_OK. This function is intended to get used *AFTER* a performed
+ * transfer, all results from this function are undefined until the transfer
+ * is completed.
  */
 CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
 
@@ -65,7 +78,7 @@ CURL_EXTERN CURL *curl_easy_duphandle(CURL *curl);
  *
  * DESCRIPTION
  *
- * Re-initializes a CURL handle to the default values. This puts back the
+ * Re-initializes a curl handle to the default values. This puts back the
  * handle to the same state as it was in when it was just created.
  *
  * It does keep: live connections, the Session ID cache, the DNS cache and the
@@ -105,8 +118,8 @@ CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
  */
 CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 
-#ifdef  __cplusplus
-}
+#ifdef __cplusplus
+} /* end of extern "C" */
 #endif
 
 #endif

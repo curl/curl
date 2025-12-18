@@ -21,17 +21,17 @@ moo
 <server>
 file
 </server>
- <name>
+<name>
 file:/path URL with a single slash
- </name>
+</name>
 <setenv>
 # Needed for MSYS2 to not convert
 MSYS2_ARG_CONV_EXCL=file:
 </setenv>
 <command option="no-include">
-file:%FILE_PWD/log/test203.txt
+file:%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test203.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar

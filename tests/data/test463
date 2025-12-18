@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+-d
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+
+ok!
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP with -d @file with file containing CR, LF and null byte
+</name>
+<file name="%LOGDIR/input463">
+%hex[one%0dtwo%0dthree]hex%
+%hex[four%00five]hex%
+</file>
+<command>
+-d @%LOGDIR/input463 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 19
+Content-Type: application/x-www-form-urlencoded
+
+onetwothreefourfive
+</protocol>
+</verify>
+</testcase>

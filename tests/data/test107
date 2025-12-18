@@ -12,10 +12,10 @@ STOR
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PASV upload file
- </name>
-<file name="log/test107.txt">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
       see
@@ -23,8 +23,8 @@ that FTP
 works
   so does it?
 </file>
- <command>
-ftp://%HOSTIP:%FTPPORT/107 -T log/test107.txt
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 </client>
 
@@ -38,13 +38,13 @@ that FTP
 works
   so does it?
 </upload>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-STOR 107
+STOR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

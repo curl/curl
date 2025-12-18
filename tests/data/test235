@@ -2,11 +2,15 @@
 <info>
 <keywords>
 FTP
+STOR
 </keywords>
 </info>
 
 # Server-side
 <reply>
+<servercmd>
+REPLY SIZE 500 command not understood
+</servercmd>
 </reply>
 
 # Client-side
@@ -14,13 +18,13 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP resumed upload but no file present remotely
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/235 -T log/upload235 -C -
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C -
 </command>
-<file name="log/upload235">
+<file name="%LOGDIR/upload%TESTNUMBER">
 this is the *****crap******** that we're gonna upload
 
 worx?
@@ -29,14 +33,14 @@ worx?
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 235
-STOR 235
+SIZE %TESTNUMBER
+STOR %TESTNUMBER
 QUIT
 </protocol>
 <upload>

@@ -10,9 +10,9 @@ HTTP proxy Basic auth
 
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
 Content-Length: 27
 
@@ -25,23 +25,24 @@ the content would go here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy string including http:// and user only
- </name>
- <command>
-http://we.want.that.site.com/279 -x http://f%61ke@%HOSTIP:%HTTPPORT
+</name>
+<command>
+http://we.want.that.site.com/%TESTNUMBER -x http://f%61ke@%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://we.want.that.site.com/279 HTTP/1.1
+<protocol crlf="headers">
+GET http://we.want.that.site.com/%TESTNUMBER HTTP/1.1
 Host: we.want.that.site.com
-Proxy-Authorization: Basic ZmFrZTo=
+Proxy-Authorization: Basic %b64[fake:]b64%
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

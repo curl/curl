@@ -24,24 +24,26 @@ returned
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve with --local-port
- </name>
- <command>
-tftp://%HOSTIP:%TFTPPORT//1009 --local-port 44444-45444
+</name>
+<command>
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --local-port 44444-45444
 </command>
 </client>
 
 #
 # Verify pseudo protocol after the test has been "shot"
 <verify>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
-opcode: 1
-mode: octet
-tsize: 0
-blksize: 512
-timeout: 6
-filename: /1009
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 512
+filename = /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

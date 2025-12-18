@@ -13,17 +13,15 @@ FAILURE
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
+proxy
 </features>
- <name>
-Provide illegal proxy name 
- </name>
- <command>
---proxy "http://a:b@/x" http://%HOSTIP:%HTTPPORT
+<name>
+Provide illegal proxy name
+</name>
+<command>
+--proxy "http://a:b@/x" http://%HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

@@ -1,1 +1,6 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+github: curl
 open_collective: curl

@@ -21,13 +21,13 @@ SSL
 <server>
 ftps
 </server>
- <name>
+<name>
 FTPS PORT upload with CWD
- </name>
- <command>
--k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/CWD/STOR/RETR/408 -T log/upload408 -P -
+</name>
+<command>
+--insecure --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/CWD/STOR/RETR/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -P -
 </command>
-<file name="log/upload408">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo
  upload this
 </file>
@@ -40,7 +40,7 @@ Moooooooooooo
 ^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
 ^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
 </strip>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PBSZ 0
@@ -51,7 +51,7 @@ CWD STOR
 CWD RETR
 PORT 127,0,0,1,5,109
 TYPE I
-STOR 408
+STOR %TESTNUMBER
 QUIT
 </protocol>
 <upload>

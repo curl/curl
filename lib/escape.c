@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -27,42 +29,17 @@
 
 #include <curl/curl.h>
 
+struct Curl_easy;
+
 #include "urldata.h"
-#include "warnless.h"
-#include "non-ascii.h"
+#include "curlx/warnless.h"
 #include "escape.h"
-#include "strdup.h"
-/* The last 3 #include files should be in this order */
+#include "curlx/strparse.h"
 #include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
-
-/* Portable character check (remember EBCDIC). Do not use isalnum() because
-   its behavior is altered by the current locale.
-   See https://tools.ietf.org/html/rfc3986#section-2.3
-*/
-bool Curl_isunreserved(unsigned char in)
-{
-  switch(in) {
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-    case 'a': case 'b': case 'c': case 'd': case 'e':
-    case 'f': case 'g': case 'h': case 'i': case 'j':
-    case 'k': case 'l': case 'm': case 'n': case 'o':
-    case 'p': case 'q': case 'r': case 's': case 't':
-    case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
-    case 'A': case 'B': case 'C': case 'D': case 'E':
-    case 'F': case 'G': case 'H': case 'I': case 'J':
-    case 'K': case 'L': case 'M': case 'N': case 'O':
-    case 'P': case 'Q': case 'R': case 'S': case 'T':
-    case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
-    case '-': case '.': case '_': case '~':
-      return TRUE;
-    default:
-      break;
-  }
-  return FALSE;
-}
 
 /* for ABI-compatibility with previous versions */
 char *curl_escape(const char *string, int inlength)
@@ -76,132 +53,109 @@ char *curl_unescape(const char *string, int length)
   return curl_easy_unescape(NULL, string, length, NULL);
 }
 
-char *curl_easy_escape(struct Curl_easy *data, const char *string,
+/* Escapes for URL the given unescaped string of given length.
+ * 'data' is ignored since 7.82.0.
+ */
+char *curl_easy_escape(CURL *data, const char *string,
                        int inlength)
 {
-  size_t alloc;
-  char *ns;
-  char *testing_ptr = NULL;
-  size_t newlen;
-  size_t strindex = 0;
   size_t length;
-  CURLcode result;
+  struct dynbuf d;
+  (void)data;
 
-  if(inlength < 0)
+  if(!string || (inlength < 0))
     return NULL;
 
-  alloc = (inlength?(size_t)inlength:strlen(string)) + 1;
-  newlen = alloc;
+  length = (inlength ? (size_t)inlength : strlen(string));
+  if(!length)
+    return strdup("");
 
-  ns = malloc(alloc);
-  if(!ns)
-    return NULL;
+  curlx_dyn_init(&d, length * 3 + 1);
 
-  length = alloc-1;
   while(length--) {
-    unsigned char in = *string; /* we need to treat the characters unsigned */
+    /* treat the characters unsigned */
+    unsigned char in = (unsigned char)*string++;
 
-    if(Curl_isunreserved(in))
-      /* just copy this */
-      ns[strindex++] = in;
+    if(ISUNRESERVED(in)) {
+      /* append this */
+      if(curlx_dyn_addn(&d, &in, 1))
+        return NULL;
+    }
     else {
       /* encode it */
-      newlen += 2; /* the size grows with two, since this'll become a %XX */
-      if(newlen > alloc) {
-        alloc *= 2;
-        testing_ptr = Curl_saferealloc(ns, alloc);
-        if(!testing_ptr)
-          return NULL;
-        ns = testing_ptr;
-      }
-
-      result = Curl_convert_to_network(data, (char *)&in, 1);
-      if(result) {
-        /* Curl_convert_to_network calls failf if unsuccessful */
-        free(ns);
+      unsigned char out[3]={'%'};
+      Curl_hexbyte(&out[1], in);
+      if(curlx_dyn_addn(&d, out, 3))
         return NULL;
-      }
-
-      msnprintf(&ns[strindex], 4, "%%%02X", in);
-
-      strindex += 3;
     }
-    string++;
   }
-  ns[strindex] = 0; /* terminate it */
-  return ns;
+
+  return curlx_dyn_ptr(&d);
 }
 
 /*
  * Curl_urldecode() URL decodes the given string.
  *
- * Optionally detects control characters (byte codes lower than 32) in the
- * data and rejects such data.
- *
  * Returns a pointer to a malloced string in *ostring with length given in
  * *olen. If length == 0, the length is assumed to be strlen(string).
  *
- * 'data' can be set to NULL but then this function can't convert network
- * data to host for non-ascii.
+ * ctrl options:
+ * - REJECT_NADA: accept everything
+ * - REJECT_CTRL: rejects control characters (byte codes lower than 32) in
+ *                the data
+ * - REJECT_ZERO: rejects decoded zero bytes
+ *
+ * The values for the enum starts at 2, to make the assert detect legacy
+ * invokes that used TRUE/FALSE (0 and 1).
  */
-CURLcode Curl_urldecode(struct Curl_easy *data,
-                        const char *string, size_t length,
+
+CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
-                        bool reject_ctrl)
+                        enum urlreject ctrl)
 {
-  size_t alloc = (length?length:strlen(string)) + 1;
-  char *ns = malloc(alloc);
-  size_t strindex = 0;
-  unsigned long hex;
-  CURLcode result = CURLE_OK;
+  size_t alloc;
+  char *ns;
+
+  DEBUGASSERT(string);
+  DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
+
+  alloc = (length ? length : strlen(string));
+  ns = malloc(alloc + 1);
 
   if(!ns)
     return CURLE_OUT_OF_MEMORY;
 
-  while(--alloc > 0) {
-    unsigned char in = *string;
+  /* store output string */
+  *ostring = ns;
+
+  while(alloc) {
+    unsigned char in = (unsigned char)*string;
     if(('%' == in) && (alloc > 2) &&
        ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
       /* this is two hexadecimal digits following a '%' */
-      char hexstr[3];
-      char *ptr;
-      hexstr[0] = string[1];
-      hexstr[1] = string[2];
-      hexstr[2] = 0;
-
-      hex = strtoul(hexstr, &ptr, 16);
-
-      in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
-
-      if(data) {
-        result = Curl_convert_from_network(data, (char *)&in, 1);
-        if(result) {
-          /* Curl_convert_from_network calls failf if unsuccessful */
-          free(ns);
-          return result;
-        }
-      }
-
-      string += 2;
-      alloc -= 2;
+      in = (unsigned char)((Curl_hexval(string[1]) << 4) |
+                           Curl_hexval(string[2]));
+      string += 3;
+      alloc -= 3;
+    }
+    else {
+      string++;
+      alloc--;
     }
 
-    if(reject_ctrl && (in < 0x20)) {
-      free(ns);
+    if(((ctrl == REJECT_CTRL) && (in < 0x20)) ||
+       ((ctrl == REJECT_ZERO) && (in == 0))) {
+      Curl_safefree(*ostring);
       return CURLE_URL_MALFORMAT;
     }
 
-    ns[strindex++] = in;
-    string++;
+    *ns++ = (char)in;
   }
-  ns[strindex] = 0; /* terminate it */
+  *ns = 0; /* terminate it */
 
   if(olen)
     /* store output size */
-    *olen = strindex;
-
-  /* store output string */
-  *ostring = ns;
+    *olen = ns - *ostring;
 
   return CURLE_OK;
 }
@@ -211,16 +165,18 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
  * pointer to a malloced string with length given in *olen.
  * If length == 0, the length is assumed to be strlen(string).
  * If olen == NULL, no output length is stored.
+ * 'data' is ignored since 7.82.0.
  */
-char *curl_easy_unescape(struct Curl_easy *data, const char *string,
+char *curl_easy_unescape(CURL *data, const char *string,
                          int length, int *olen)
 {
   char *str = NULL;
-  if(length >= 0) {
-    size_t inputlen = length;
+  (void)data;
+  if(string && (length >= 0)) {
+    size_t inputlen = (size_t)length;
     size_t outputlen;
-    CURLcode res = Curl_urldecode(data, string, inputlen, &str, &outputlen,
-                                  FALSE);
+    CURLcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
+                                  REJECT_NADA);
     if(res)
       return NULL;
 
@@ -241,4 +197,39 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
 void curl_free(void *p)
 {
   free(p);
+}
+
+/*
+ * Curl_hexencode()
+ *
+ * Converts binary input to lowercase hex-encoded ASCII output.
+ * Null-terminated.
+ */
+void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
+                    unsigned char *out, size_t olen) /* output buffer size */
+{
+  DEBUGASSERT(src && len && (olen >= 3));
+  if(src && len && (olen >= 3)) {
+    while(len-- && (olen >= 3)) {
+      out[0] = Curl_ldigits[*src >> 4];
+      out[1] = Curl_ldigits[*src & 0x0F];
+      ++src;
+      out += 2;
+      olen -= 2;
+    }
+    *out = 0;
+  }
+  else if(olen)
+    *out = 0;
+}
+
+/* Curl_hexbyte
+ *
+ * Output a single unsigned char as a two-digit UPPERCASE hex number.
+ */
+void Curl_hexbyte(unsigned char *dest, /* must fit two bytes */
+                  unsigned char val)
+{
+  dest[0] = Curl_udigits[val >> 4];
+  dest[1] = Curl_udigits[val & 0x0F];
 }

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,15 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
+#include "testtrace.h"
 #include "memdebug.h"
 
-struct transfer_status {
-  CURL *easy;
+struct t1540_transfer_status {
+  CURL *curl;
   int halted;
   int counter; /* count write callback invokes */
   int please;  /* number of times xferinfo is called while halted */
@@ -38,7 +39,7 @@ static int please_continue(void *userp,
                            curl_off_t ultotal,
                            curl_off_t ulnow)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1540_transfer_status *st = (struct t1540_transfer_status *)userp;
   (void)dltotal;
   (void)dlnow;
   (void)ultotal;
@@ -47,15 +48,15 @@ static int please_continue(void *userp,
     st->please++;
     if(st->please == 2) {
       /* waited enough, unpause! */
-      curl_easy_pause(st->easy, CURLPAUSE_CONT);
+      curl_easy_pause(st->curl, CURLPAUSE_CONT);
     }
   }
-  fprintf(stderr, "xferinfo: paused %d\n", st->halted);
+  curl_mfprintf(stderr, "xferinfo: paused %d\n", st->halted);
   return 0; /* go on */
 }
 
-static size_t header_callback(void *ptr, size_t size, size_t nmemb,
-                              void *userp)
+static size_t t1540_header_callback(char *ptr, size_t size, size_t nmemb,
+                                    void *userp)
 {
   size_t len = size * nmemb;
   (void)userp;
@@ -63,9 +64,9 @@ static size_t header_callback(void *ptr, size_t size, size_t nmemb,
   return len;
 }
 
-static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1540_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1540_transfer_status *st = (struct t1540_transfer_status *)userp;
   size_t len = size * nmemb;
   st->counter++;
   if(st->counter > 1) {
@@ -74,17 +75,17 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
     fwrite(ptr, size, nmemb, stdout);
     return len;
   }
-  printf("Got %d bytes but pausing!\n", (int)len);
+  if(len)
+    curl_mprintf("Got bytes but pausing!\n");
   st->halted = 1;
   return CURL_WRITEFUNC_PAUSE;
 }
 
-int test(char *URL)
+static CURLcode test_lib1540(const char *URL)
 {
-  CURL *curls = NULL;
-  int i = 0;
-  int res = 0;
-  struct transfer_status st;
+  CURL *curl = NULL;
+  CURLcode res = CURLE_OK;
+  struct t1540_transfer_status st;
 
   start_test_timing();
 
@@ -92,28 +93,31 @@ int test(char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(curls);
-  st.easy = curls; /* to allow callbacks access */
+  easy_init(curl);
+  st.curl = curl; /* to allow callbacks access */
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, write_callback);
-  easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, header_callback);
-  easy_setopt(curls, CURLOPT_HEADERDATA, &st);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1540_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEDATA, &st);
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, t1540_header_callback);
+  easy_setopt(curl, CURLOPT_HEADERDATA, &st);
 
-  easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, please_continue);
-  easy_setopt(curls, CURLOPT_XFERINFODATA, &st);
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);
+  easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, please_continue);
+  easy_setopt(curl, CURLOPT_XFERINFODATA, &st);
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-  res = curl_easy_perform(curls);
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
+  test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+  res = curl_easy_perform(curl);
 
 test_cleanup:
 
-  curl_easy_cleanup(curls);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  if(res)
-    i = res;
-
-  return i; /* return the final return code */
+  return res; /* return the final return code */
 }

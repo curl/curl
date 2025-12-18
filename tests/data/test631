@@ -13,11 +13,11 @@ server key check
 <server>
 scp
 </server>
- <name>
+<name>
 SCP incorrect host key
- </name>
- <command>
---hostpubmd5 00000000000000000000000000000000 --key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%POSIX_PWD/log/irrelevant-file --insecure
+</name>
+<command>
+--hostpubmd5 00000000000000000000000000000000 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/irrelevant-file --insecure
 </command>
 </client>
 
@@ -27,8 +27,5 @@ SCP incorrect host key
 <errorcode>
 60
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

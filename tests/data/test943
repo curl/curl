@@ -25,22 +25,22 @@ REPLY = 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP external authentication without credentials
- </name>
-<stdin>
+</name>
+<stdin crlf="yes">
 mail body
 </stdin>
- <command>
-'smtp://;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/943' --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+<command>
+'smtp://;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/%TESTNUMBER' --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 943
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 AUTH EXTERNAL
 =
 MAIL FROM:<sender@example.com>
@@ -48,7 +48,7 @@ RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

@@ -23,21 +23,21 @@ ftp
 <tool>
 lib504
 </tool>
- <name>
+<name>
 FTP multi-interface download, failed login: PASS not valid
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/538
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
-# TEST_ERR_SUCCESS is errorcode 120
+# TEST_ERR_SUCCESS is errorcode 41
 <verify>
 <errorcode>
-120
+41
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 </protocol>

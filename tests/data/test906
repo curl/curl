@@ -5,6 +5,7 @@ SMTP
 SASL
 SASL AUTH NTLM
 RFC4954
+NTLM
 </keywords>
 </info>
 
@@ -15,7 +16,7 @@ RFC4954
 AUTH NTLM
 REPLY AUTH 334 NTLM supported
 REPLY TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA= 334 TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
-REPLY TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q= 235 Authenticated
+REPLY TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04= 235 Authenticated
 </servercmd>
 </reply>
 
@@ -27,43 +28,34 @@ smtp
 </server>
 <features>
 NTLM
+SSL
 !SSPI
-debug
 </features>
- <name>
+<name>
 SMTP NTLM authentication
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
-<stdin>
+</name>
+<stdin crlf="yes">
 mail body
 </stdin>
- <command>
-smtp://%HOSTIP:%SMTPPORT/906 --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 906
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 AUTH NTLM
 TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
+TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

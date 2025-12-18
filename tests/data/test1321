@@ -12,12 +12,12 @@ HTTP proxy
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 imap: sure hit me
 
 </connect>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -26,7 +26,7 @@ body
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -46,32 +46,30 @@ http-proxy
 </server>
 <features>
 http
+proxy
 </features>
- <name>
+<name>
 IMAP FETCH tunneled through HTTP proxy
- </name>
- <command>
-'imap://imap.1321:%IMAPPORT/1321/;MAILINDEX=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
+</name>
+<command>
+'imap://imap.%TESTNUMBER:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 1321
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
-<proxy>
-CONNECT imap.1321:%IMAPPORT HTTP/1.1
-Host: imap.1321:%IMAPPORT
-User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
+<proxy crlf="headers">
+CONNECT imap.%TESTNUMBER:%IMAPPORT HTTP/1.1
+Host: imap.%TESTNUMBER:%IMAPPORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>

@@ -17,7 +17,7 @@ CAPA SASL-IR
 REPLY AUTHENTICATE + UGFzc3dvcmQ6
 REPLY c2VjcmV0 A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -34,22 +34,22 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP login authentication with initial response
- </name>
- <command>
-'imap://%HOSTIP:%IMAPPORT/826/;MAILINDEX=1' -u user:secret
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE LOGIN dXNlcg==
 c2VjcmV0
-A003 SELECT 826
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

@@ -2,14 +2,14 @@
 <info>
 <keywords>
 HTTP
-PUT
+HTTP PUT
 </keywords>
 </info>
 
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,26 +32,24 @@ http
 </server>
 
 # make sure there's no Expect: 100-continue when there's no file to send!
- <name>
+<name>
 HTTP with zero size file PUT
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1411 -T log/empty1411
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/empty%TESTNUMBER
 </command>
 # create an empty file
-<file name="log/empty1411">
+<file name="%LOGDIR/empty%TESTNUMBER">
 </file>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-PUT /1411 HTTP/1.1
+<protocol crlf="headers">
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0
 

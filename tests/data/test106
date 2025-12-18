@@ -25,17 +25,17 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP GET with type=A style ASCII URL using %20 codes
- </name>
- <command>
-"ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces//and%20things2/106;type=A"
+</name>
+<command>
+"ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces//and%20things2/%TESTNUMBER;type=A"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -44,8 +44,7 @@ CWD path with  spaces
 CWD and things2
 EPSV
 TYPE A
-SIZE 106
-RETR 106
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

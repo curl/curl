@@ -5,13 +5,14 @@ HTTP
 HTTP POST
 HTTP proxy
 HTTP proxy NTLM auth
+NTLM
 </keywords>
 </info>
 
 # Server-side
 <reply>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 407 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 Proxy-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
@@ -24,7 +25,7 @@ This is not the real page
 </data>
 
 # this is returned first since we get no proxy-auth
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 Content-Length: 34
@@ -34,7 +35,7 @@ Hey you, authenticate or go away!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<data1002 crlf="headers">
 HTTP/1.1 200 Things are fine in proxy land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -43,7 +44,7 @@ Content-Length: 42
 Contents of that page you requested, sir.
 </data1002>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 407 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 Proxy-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
@@ -72,58 +73,44 @@ http
 </server>
 # tool to use
 <tool>
-lib548
+lib547
 </tool>
 <features>
 NTLM
+SSL
 !SSPI
-debug
+proxy
 </features>
- <name>
+<name>
 HTTP proxy auth NTLM with POST data from CURLOPT_POSTFIELDS
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://test.remote.example.com/path/548 http://%HOSTIP:%HTTPPORT testuser:testpass
+</name>
+<command>
+http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT testuser:testpass
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol>
-POST http://test.remote.example.com/path/548 HTTP/1.1
+<protocol crlf="headers">
+POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
 Content-Type: application/x-www-form-urlencoded
 
 this is the blurb we want to upload
-POST http://test.remote.example.com/path/548 HTTP/1.1
+POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST http://test.remote.example.com/path/548 HTTP/1.1
+POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36

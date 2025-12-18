@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #ifndef CURL_DISABLE_TELNET
@@ -54,12 +56,14 @@ static const char * const telnetoptions[]=
   "TERM SPEED",  "LFLOW",          "LINEMODE",      "XDISPLOC",
   "OLD-ENVIRON", "AUTHENTICATION", "ENCRYPT",       "NEW-ENVIRON"
 };
+#define CURL_TELOPT(x)    telnetoptions[x]
+#else
+#define CURL_TELOPT(x)    ""
 #endif
 
 #define CURL_TELOPT_MAXIMUM CURL_TELOPT_NEW_ENVIRON
 
 #define CURL_TELOPT_OK(x) ((x) <= CURL_TELOPT_MAXIMUM)
-#define CURL_TELOPT(x)    telnetoptions[x]
 
 #define CURL_NTELOPTS 40
 
@@ -73,7 +77,7 @@ static const char * const telnetoptions[]=
 #define CURL_GA   249 /* Go Ahead, reverse the line */
 #define CURL_SB   250 /* SuBnegotiation */
 #define CURL_WILL 251 /* Our side WILL use this option */
-#define CURL_WONT 252 /* Our side WON'T use this option */
+#define CURL_WONT 252 /* Our side will not use this option */
 #define CURL_DO   253 /* DO use this option! */
 #define CURL_DONT 254 /* DON'T use this option! */
 #define CURL_IAC  255 /* Interpret As Command */
@@ -101,7 +105,12 @@ static const char * const telnetcmds[]=
 
 #define CURL_TELCMD_OK(x) ( ((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
                        ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM) )
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 #define CURL_TELCMD(x)    telnetcmds[(x)-CURL_TELCMD_MINIMUM]
+#else
+#define CURL_TELCMD(x)    ""
+#endif
 
 #endif /* CURL_DISABLE_TELNET */
 

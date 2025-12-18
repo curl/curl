@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
+# no Server-side
+
+# Client-side
+<client>
+<server>
+file
+</server>
+<name>
+"upload" with file:// overwriting existing
+</name>
+<command option="no-include">
+file://localhost%FILE_PWD/%LOGDIR/result%TESTNUMBER.txt -T %LOGDIR/upload%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/upload%TESTNUMBER.txt">
+data
+in
+file
+to
+write
+</file>
+<file2 name="%LOGDIR/result%TESTNUMBER.txt">
+already existing
+</file2>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<file name="%LOGDIR/result%TESTNUMBER.txt">
+data
+in
+file
+to
+write
+</file>
+</verify>
+</testcase>

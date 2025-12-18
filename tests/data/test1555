@@ -2,12 +2,13 @@
 <info>
 <keywords>
 RECURSIVE_API_CALL
+DELAY
 </keywords>
 </info>
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 204 PARTIAL
 X-Comment: partial response to keep the client waiting
 </data>
@@ -22,22 +23,20 @@ wait 10
 http
 </server>
 <tool>
-lib1555
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 verify api is protected against calls from callbacks
- </name>
+</name>
 
 # this server/host won't be used for real
- <command>
-http://%HOSTIP:%HTTPPORT/1555
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 # 42 == CURLE_ABORTED_BY_CALLBACK
 <errorcode>
 42

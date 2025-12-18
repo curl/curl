@@ -16,10 +16,10 @@ RFC5034
 <servercmd>
 AUTH DIGEST-MD5
 REPLY AUTH + cmVhbG09ImN1cmwiLG5vbmNlPSI1MzAwZDE3YTFkNjk1YmQ0MTFlNGNkZjk2Zjk1NDhjMjNjZWQ2MTc1IixhbGdvcml0aG09bWQ1LXNlc3MscW9wPSJhdXRoIg==
-REPLY dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvY3VybCIscmVzcG9uc2U9YzNhMGFiZTc5NDYyNTIyNGY5Njg3YTYzMTc3ZmRhNWIscW9wPWF1dGg= +
+REPLY dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvMTI3LjAuMC4xIixyZXNwb25zZT0xODMxNTU0OGM3ZjNhMzdlNzE2ZmE4ZTkwZGZhYjliNixxb3A9YXV0aA== + cnNwYXV0aD1mZWNiMzZiNzA4NmUwYjk1ZDkwNjQ1OWVmYThjYzI5ZQ==
 REPLY  +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -38,26 +38,30 @@ pop3
 </server>
 <features>
 !SSPI
-debug
+Debug
 crypto
+digest
 </features>
- <name>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<name>
 POP3 DIGEST-MD5 authentication
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/869 -u user:secret
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH DIGEST-MD5
-dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvY3VybCIscmVzcG9uc2U9YzNhMGFiZTc5NDYyNTIyNGY5Njg3YTYzMTc3ZmRhNWIscW9wPWF1dGg=
+dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvMTI3LjAuMC4xIixyZXNwb25zZT0xODMxNTU0OGM3ZjNhMzdlNzE2ZmE4ZTkwZGZhYjliNixxb3A9YXV0aA==
 
-RETR 869
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

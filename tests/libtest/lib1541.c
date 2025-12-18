@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,134 +18,133 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-#include <time.h>
-
-/* number of threads to fire up in parallel */
-#define NUM_THREADS 67
-
-/* for how many seconds each thread will loop */
-#define RUN_FOR_SECONDS 7
-
-static pthread_mutex_t connlock;
-
-static size_t write_db(void *ptr, size_t size, size_t nmemb, void *data)
-{
-  /* not interested in the downloaded bytes, return the size */
-  (void)ptr;  /* unused */
-  (void)data; /* unused */
-  return (size_t)(size * nmemb);
-}
-
-static void lock_cb(CURL *handle, curl_lock_data data,
-                    curl_lock_access access, void *userptr)
-{
-  (void)access; /* unused */
-  (void)userptr; /* unused */
-  (void)handle; /* unused */
-  (void)data; /* unused */
-  pthread_mutex_lock(&connlock);
-}
-
-static void unlock_cb(CURL *handle, curl_lock_data data,
-                      void *userptr)
-{
-  (void)userptr; /* unused */
-  (void)handle;  /* unused */
-  (void)data;    /* unused */
-  pthread_mutex_unlock(&connlock);
-}
-
-static void init_locks(void)
-{
-  pthread_mutex_init(&connlock, NULL);
-}
-
-static void kill_locks(void)
-{
-  pthread_mutex_destroy(&connlock);
-}
-
-struct initurl {
-  const char *url;
-  CURLSH *share;
-  int threadno;
+struct t1541_transfer_status {
+  CURL *curl;
+  int hd_count;
+  int bd_count;
+  CURLcode result;
 };
 
-static void *run_thread(void *ptr)
+#define KN(a)   a, #a
+
+static void t1541_geterr(const char *name, CURLcode val, int lineno)
 {
-  struct initurl *u = (struct initurl *)ptr;
-  int i;
-  time_t end = time(NULL) + RUN_FOR_SECONDS;
-
-  for(i = 0; time(NULL) < end; i++) {
-    CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_URL, u->url);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-    curl_easy_setopt(curl, CURLOPT_SHARE, u->share);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_db);
-    curl_easy_perform(curl); /* ignores error */
-    curl_easy_cleanup(curl);
-    fprintf(stderr, "Thread %d transfer %d\n", u->threadno, i);
-  }
-
-  return NULL;
+  curl_mprintf("CURLINFO_%s returned %d, \"%s\" on line %d\n",
+               name, val, curl_easy_strerror(val), lineno);
 }
 
-int test(char *URL)
+static void report_time(const char *key, const char *where, curl_off_t time,
+                        bool ok)
 {
-  pthread_t tid[NUM_THREADS];
-  int i;
-  CURLSH *share;
-  struct initurl url[NUM_THREADS];
+  if(ok)
+    curl_mprintf("%s on %s is OK\n", key, where);
+  else
+    curl_mprintf("%s on %s is WRONG: %" CURL_FORMAT_CURL_OFF_T "\n",
+                 key, where, time);
+}
 
-  /* Must initialize libcurl before any threads are started */
-  curl_global_init(CURL_GLOBAL_ALL);
-
-  share = curl_share_init();
-  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, lock_cb);
-  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, unlock_cb);
-  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-
-  init_locks();
-
-  for(i = 0; i< NUM_THREADS; i++) {
-    int error;
-    url[i].url = URL;
-    url[i].share = share;
-    url[i].threadno = i;
-    error = pthread_create(&tid[i], NULL, run_thread, &url[i]);
-    if(0 != error)
-      fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
-    else
-      fprintf(stderr, "Thread %d, gets %s\n", i, URL);
+static void check_time(CURL *curl, int key, const char *name,
+                       const char *where)
+{
+  curl_off_t tval;
+  CURLcode res = curl_easy_getinfo(curl, (CURLINFO)key, &tval);
+  if(res) {
+    t1541_geterr(name, res, __LINE__);
   }
+  else
+    report_time(name, where, tval, tval > 0);
+}
 
-  /* now wait for all threads to terminate */
-  for(i = 0; i< NUM_THREADS; i++) {
-    pthread_join(tid[i], NULL);
-    fprintf(stderr, "Thread %d terminated\n", i);
+static void check_time0(CURL *curl, int key, const char *name,
+                        const char *where)
+{
+  curl_off_t tval;
+  CURLcode res = curl_easy_getinfo(curl, (CURLINFO)key, &tval);
+  if(res) {
+    t1541_geterr(name, res, __LINE__);
   }
+  else
+    report_time(name, where, tval, !tval);
+}
 
-  kill_locks();
+static size_t t1541_header_callback(char *ptr, size_t size, size_t nmemb,
+                                    void *userp)
+{
+  struct t1541_transfer_status *st = (struct t1541_transfer_status *)userp;
+  size_t len = size * nmemb;
 
-  curl_share_cleanup(share);
+  (void)ptr;
+  if(!st->hd_count++) {
+    /* first header, check some CURLINFO value to be reported. See #13125 */
+    check_time(st->curl, KN(CURLINFO_CONNECT_TIME_T), "1st header");
+    check_time(st->curl, KN(CURLINFO_PRETRANSFER_TIME_T), "1st header");
+    check_time(st->curl, KN(CURLINFO_STARTTRANSFER_TIME_T), "1st header");
+    /* continuously updated */
+    check_time(st->curl, KN(CURLINFO_TOTAL_TIME_T), "1st header");
+    /* no SSL, must be 0 */
+    check_time0(st->curl, KN(CURLINFO_APPCONNECT_TIME_T), "1st header");
+    /* download not really started */
+    check_time0(st->curl, KN(CURLINFO_SPEED_DOWNLOAD_T), "1st header");
+  }
+  (void)fwrite(ptr, size, nmemb, stdout);
+  return len;
+}
+
+static size_t t1541_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
+{
+  struct t1541_transfer_status *st = (struct t1541_transfer_status *)userp;
+
+  (void)ptr;
+  (void)st;
+  fwrite(ptr, size, nmemb, stdout);
+  return size * nmemb;
+}
+
+static CURLcode test_lib1541(const char *URL)
+{
+  CURL *curl = NULL;
+  CURLcode res = CURLE_OK;
+  struct t1541_transfer_status st;
+
+  start_test_timing();
+
+  memset(&st, 0, sizeof(st));
+
+  global_init(CURL_GLOBAL_ALL);
+
+  easy_init(curl);
+  st.curl = curl; /* to allow callbacks access */
+
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1541_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEDATA, &st);
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, t1541_header_callback);
+  easy_setopt(curl, CURLOPT_HEADERDATA, &st);
+
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+
+  res = curl_easy_perform(curl);
+
+  check_time(curl, KN(CURLINFO_CONNECT_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_PRETRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_POSTTRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_STARTTRANSFER_TIME_T), "done");
+  /* no SSL, must be 0 */
+  check_time0(curl, KN(CURLINFO_APPCONNECT_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_SPEED_DOWNLOAD_T), "done");
+  check_time(curl, KN(CURLINFO_TOTAL_TIME_T), "done");
+
+test_cleanup:
+
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return 0;
-}
 
-#else /* without pthread, this test doesn't work */
-int test(char *URL)
-{
-  (void)URL;
-  return 0;
+  return res; /* return the final return code */
 }
-#endif

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -19,31 +19,26 @@ config file
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
-idn
+IDN
 http
+proxy
+codeset-utf8
 </features>
 <setenv>
-LC_ALL=
-LC_CTYPE=en_US.UTF-8
+LC_ALL=C.UTF-8
 </setenv>
-<precheck>
-perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
-</precheck>
- <name>
+<name>
 HTTP over proxy with malformatted IDN host name
- </name>
+</name>
 
 # This host name contains an invalid UTF-8 byte sequence that can't be
 # converted into an IDN name
 <stdin>
-url = "http://invalid-utf8-â.local/page/1034"
+url = "http://invalid-utf8-%hex[%e2%90]hex%.local/page/%TESTNUMBER"
 </stdin>
- <command>
--K - -x %HOSTIP:%HTTPPORT
+<command>
+-K - -x %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

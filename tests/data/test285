@@ -12,13 +12,13 @@ TFTP WRQ
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP send
- </name>
- <command>
--T log/test285.txt tftp://%HOSTIP:%TFTPPORT//
+</name>
+<command>
+-T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT// --connect-timeout 549
 </command>
-<file name="log/test285.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 a chunk of
 data
 sent
@@ -36,12 +36,12 @@ sent
  to server
 </upload>
 <protocol>
-opcode: 2
-mode: octet
-tsize: 32
-blksize: 512
-timeout: 6
-filename: /test285.txt
+opcode = 2
+mode = octet
+tsize = 32
+blksize = 512
+timeout = 10
+filename = /test%TESTNUMBER.txt
 </protocol>
 </verify>
 </testcase>

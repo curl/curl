@@ -12,19 +12,13 @@ URL escape
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <tool>
-lib1537
+lib%TESTNUMBER
 </tool>
 
 <name>
 libcurl URL escape/unescape tests
 </name>
-<command>
-nothing
-</command>
 </client>
 
 #

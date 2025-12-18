@@ -1,0 +1,356 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: 'dist'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  MAKEFLAGS: -j 5
+
+jobs:
+  maketgz-and-verify-in-tree:
+    name: 'AM in-tree & maketgz'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'remove preinstalled curl libcurl4{-doc}'
+        run: |
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
+
+      - name: 'autoreconf'
+        run: autoreconf -fi
+
+      - name: 'configure'
+        run: ./configure --without-ssl --without-libpsl
+
+      - name: 'make'
+        run: make V=1
+
+      - name: 'maketgz'
+        run: SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
+
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: 'release-tgz'
+          path: 'curl-99.98.97.tar.gz'
+          retention-days: 1
+
+      - name: 'configure build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          ./configure --prefix="$HOME"/temp --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl
+          make
+          make test-ci
+          make install
+          popd
+          # basic check of the installed files
+          bash scripts/installcheck.sh "$HOME"/temp
+          rm -rf curl-99.98.97
+
+  verify-out-of-tree-docs:
+    name: 'AM out-of-tree docs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: 'release-tgz'
+
+      - name: 'configure build & docs'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
+          mkdir build
+          pushd build
+          ../curl-99.98.97/configure --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl
+          make
+          make test-ci
+          popd
+          rm -rf build
+          rm -rf curl-99.98.97
+
+  verify-out-of-tree-autotools-debug:
+    name: 'AM out-of-tree (debug)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          mkdir build
+          pushd build
+          ../configure --prefix="$PWD"/curl-install --enable-option-checking=fatal --enable-werror --without-ssl --enable-debug --without-libpsl
+          make
+          make test-ci
+          make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+          popd
+          scripts/checksrc-all.pl
+
+  verify-out-of-tree-autotools:
+    name: 'AM out-of-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          mkdir build
+          pushd build
+          ../configure --prefix="$PWD"/curl-install --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
+          make
+          make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+          popd
+
+  verify-in-tree-autotools:
+    name: 'AM in-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          ./configure --prefix="$PWD"/curl-install --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
+          make
+          make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+
+  verify-out-of-tree-cmake:
+    name: 'CM out-of-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
+          cmake --build build
+          cmake --install build
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+
+  verify-in-tree-cmake:
+    name: 'CM in-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          cmake . -G Ninja -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
+          cmake --build .
+          cmake --install .
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+
+  missing-files:
+    name: 'missing files'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: 'release-tgz'
+
+      - name: 'detect files missing from release tarball'
+        run: .github/scripts/distfiles.sh curl-99.98.97.tar.gz
+
+  reproducible-releases:
+    name: 'reproducible releases'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'remove preinstalled curl libcurl4{-doc}'
+        run: |
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
+
+      - name: 'generate release tarballs'
+        run: ./scripts/dmaketgz 9.10.11
+
+      - name: 'verify release tarballs'
+        run: |
+          mkdir _verify
+          mv curl-9.10.11.tar.gz _verify
+          cd _verify
+          ../scripts/verify-release curl-9.10.11.tar.gz
+
+  cmake-integration:
+    name: 'CM integration ${{ matrix.image }}'
+    runs-on: ${{ matrix.image }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: ${{ contains(matrix.image, 'windows') && 'msys2 {0}' || 'bash' }}
+    env:
+      CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
+      MAKEFLAGS: ${{ contains(matrix.image, 'macos') && '-j 4' || '-j 5' }}
+      MATRIX_IMAGE: '${{ matrix.image }}'
+      TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
+      OLD_CMAKE_VERSION: 3.11.4
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ubuntu-latest, macos-latest, windows-2022]
+    steps:
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
+        if: ${{ contains(matrix.image, 'windows') }}
+        with:
+          msystem: mingw64
+          release: false
+          update: false
+          cache: false
+          path-type: inherit
+          install: >-
+            mingw-w64-x86_64-zlib mingw-w64-x86_64-zstd mingw-w64-x86_64-libpsl mingw-w64-x86_64-libssh2 mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-openssl
+
+      - name: 'install prereqs'
+        run: |
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
+            cd ~
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-win64-x64.zip" --output bin.zip
+            unzip -q bin.zip
+            rm -f bin.zip
+            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-win64-x64/bin/cmake.exe > ~/old-cmake-path.txt
+          elif [[ "${MATRIX_IMAGE}" = *'ubuntu'* ]]; then
+            sudo rm -f /var/lib/man-db/auto-update
+            sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
+            cd ~
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Linux-x86_64.tar.gz" | tar -xz
+            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Linux-x86_64/bin/cmake > ~/old-cmake-path.txt
+          else
+            brew install libpsl openssl
+            cd ~
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64.tar.gz" | tar -xz
+            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Darwin-x86_64/CMake.app/Contents/bin/cmake > ~/old-cmake-path.txt
+          fi
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'via ExternalProject'
+        if: ${{ !contains(matrix.image, 'ubuntu') }}
+        run: ./tests/cmake/test.sh ExternalProject ${TESTOPTS}
+      - name: 'via FetchContent'
+        run: ./tests/cmake/test.sh FetchContent ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+      - name: 'via add_subdirectory'
+        run: ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+      - name: 'via find_package'
+        run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+
+      - name: 'via ExternalProject (old cmake)'
+        if: ${{ contains(matrix.image, 'ubuntu') }}
+        run: |
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+          fi
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
+            export TEST_CMAKE_GENERATOR='MSYS Makefiles'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc'
+          fi
+          ./tests/cmake/test.sh ExternalProject ${TESTOPTS}
+
+      - name: 'via add_subdirectory OpenSSL (old cmake)'
+        run: |
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+            export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
+          fi
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
+            export TEST_CMAKE_GENERATOR='MSYS Makefiles'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
+          fi
+          ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+
+      - name: 'via find_package OpenSSL (old cmake)'
+        run: |
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+            export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
+          fi
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
+            export TEST_CMAKE_GENERATOR='MSYS Makefiles'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
+          fi
+          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON

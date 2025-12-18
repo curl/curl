@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,85 +18,99 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
 
 #include "tool_cfgable.h"
+#include "tool_formparse.h"
+#include "tool_paramhlp.h"
 #include "tool_main.h"
-
+#include "tool_msgs.h"
 #include "memdebug.h" /* keep this as LAST include */
 
-void config_init(struct OperationConfig* config)
-{
-  memset(config, 0, sizeof(struct OperationConfig));
+static struct GlobalConfig globalconf;
+struct GlobalConfig *global;
 
-  config->postfieldsize = -1;
+struct OperationConfig *config_alloc(void)
+{
+  struct OperationConfig *config =
+    calloc(1, sizeof(struct OperationConfig));
+  if(!config)
+    return NULL;
+
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;
-  config->proto = CURLPROTO_ALL;
   config->proto_present = FALSE;
-  config->proto_redir = CURLPROTO_ALL & /* All except FILE, SCP and SMB */
-    ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
-      CURLPROTO_SMBS);
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
   config->tcp_nodelay = TRUE; /* enabled by default */
   config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
   config->http09_allowed = FALSE;
+  config->ftp_skip_ip = TRUE;
+  config->file_clobber_mode = CLOBBER_DEFAULT;
+  config->upload_flags = CURLULFLAG_SEEN;
+  curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
+  return config;
 }
 
 static void free_config_fields(struct OperationConfig *config)
 {
   struct getout *urlnode;
 
-  Curl_safefree(config->random_file);
-  Curl_safefree(config->egd_file);
-  Curl_safefree(config->useragent);
-  Curl_safefree(config->altsvc);
-  Curl_safefree(config->cookie);
-  Curl_safefree(config->cookiejar);
-  Curl_safefree(config->cookiefile);
+  tool_safefree(config->useragent);
+  tool_safefree(config->altsvc);
+  tool_safefree(config->hsts);
+  tool_safefree(config->haproxy_clientip);
+  curl_slist_free_all(config->cookies);
+  tool_safefree(config->cookiejar);
+  curl_slist_free_all(config->cookiefiles);
 
-  Curl_safefree(config->postfields);
-  Curl_safefree(config->referer);
+  curlx_dyn_free(&config->postdata);
+  tool_safefree(config->query);
+  tool_safefree(config->referer);
 
-  Curl_safefree(config->headerfile);
-  Curl_safefree(config->ftpport);
-  Curl_safefree(config->iface);
+  tool_safefree(config->headerfile);
+  tool_safefree(config->ftpport);
+  tool_safefree(config->iface);
 
-  Curl_safefree(config->range);
+  tool_safefree(config->range);
 
-  Curl_safefree(config->userpwd);
-  Curl_safefree(config->tls_username);
-  Curl_safefree(config->tls_password);
-  Curl_safefree(config->tls_authtype);
-  Curl_safefree(config->proxy_tls_username);
-  Curl_safefree(config->proxy_tls_password);
-  Curl_safefree(config->proxy_tls_authtype);
-  Curl_safefree(config->proxyuserpwd);
-  Curl_safefree(config->proxy);
+  tool_safefree(config->userpwd);
+  tool_safefree(config->tls_username);
+  tool_safefree(config->tls_password);
+  tool_safefree(config->tls_authtype);
+  tool_safefree(config->proxy_tls_username);
+  tool_safefree(config->proxy_tls_password);
+  tool_safefree(config->proxy_tls_authtype);
+  tool_safefree(config->proxyuserpwd);
+  tool_safefree(config->proxy);
 
-  Curl_safefree(config->dns_ipv6_addr);
-  Curl_safefree(config->dns_ipv4_addr);
-  Curl_safefree(config->dns_interface);
-  Curl_safefree(config->dns_servers);
+  tool_safefree(config->dns_ipv6_addr);
+  tool_safefree(config->dns_ipv4_addr);
+  tool_safefree(config->dns_interface);
+  tool_safefree(config->dns_servers);
 
-  Curl_safefree(config->noproxy);
+  tool_safefree(config->noproxy);
 
-  Curl_safefree(config->mail_from);
+  tool_safefree(config->mail_from);
   curl_slist_free_all(config->mail_rcpt);
-  Curl_safefree(config->mail_auth);
+  tool_safefree(config->mail_auth);
 
-  Curl_safefree(config->netrc_file);
+  tool_safefree(config->netrc_file);
+  tool_safefree(config->output_dir);
+  tool_safefree(config->proto_str);
+  tool_safefree(config->proto_redir_str);
 
   urlnode = config->url_list;
   while(urlnode) {
     struct getout *next = urlnode->next;
-    Curl_safefree(urlnode->url);
-    Curl_safefree(urlnode->outfile);
-    Curl_safefree(urlnode->infile);
-    Curl_safefree(urlnode);
+    tool_safefree(urlnode->url);
+    tool_safefree(urlnode->outfile);
+    tool_safefree(urlnode->infile);
+    tool_safefree(urlnode);
     urlnode = next;
   }
   config->url_list = NULL;
@@ -104,40 +118,48 @@ static void free_config_fields(struct OperationConfig *config)
   config->url_get = NULL;
   config->url_out = NULL;
 
-  Curl_safefree(config->doh_url);
-  Curl_safefree(config->cipher_list);
-  Curl_safefree(config->proxy_cipher_list);
-  Curl_safefree(config->cert);
-  Curl_safefree(config->proxy_cert);
-  Curl_safefree(config->cert_type);
-  Curl_safefree(config->proxy_cert_type);
-  Curl_safefree(config->cacert);
-  Curl_safefree(config->proxy_cacert);
-  Curl_safefree(config->capath);
-  Curl_safefree(config->proxy_capath);
-  Curl_safefree(config->crlfile);
-  Curl_safefree(config->pinnedpubkey);
-  Curl_safefree(config->proxy_pinnedpubkey);
-  Curl_safefree(config->proxy_crlfile);
-  Curl_safefree(config->key);
-  Curl_safefree(config->proxy_key);
-  Curl_safefree(config->key_type);
-  Curl_safefree(config->proxy_key_type);
-  Curl_safefree(config->key_passwd);
-  Curl_safefree(config->proxy_key_passwd);
-  Curl_safefree(config->pubkey);
-  Curl_safefree(config->hostpubmd5);
-  Curl_safefree(config->engine);
-  Curl_safefree(config->request_target);
-  Curl_safefree(config->customrequest);
-  Curl_safefree(config->krblevel);
-
-  Curl_safefree(config->oauth_bearer);
-  Curl_safefree(config->sasl_authzid);
-
-  Curl_safefree(config->unix_socket_path);
-  Curl_safefree(config->writeout);
-  Curl_safefree(config->proto_default);
+#ifndef CURL_DISABLE_IPFS
+  tool_safefree(config->ipfs_gateway);
+#endif /* !CURL_DISABLE_IPFS */
+  tool_safefree(config->doh_url);
+  tool_safefree(config->cipher_list);
+  tool_safefree(config->proxy_cipher_list);
+  tool_safefree(config->cipher13_list);
+  tool_safefree(config->proxy_cipher13_list);
+  tool_safefree(config->cert);
+  tool_safefree(config->proxy_cert);
+  tool_safefree(config->cert_type);
+  tool_safefree(config->proxy_cert_type);
+  tool_safefree(config->cacert);
+  tool_safefree(config->login_options);
+  tool_safefree(config->proxy_cacert);
+  tool_safefree(config->capath);
+  tool_safefree(config->proxy_capath);
+  tool_safefree(config->crlfile);
+  tool_safefree(config->pinnedpubkey);
+  tool_safefree(config->proxy_pinnedpubkey);
+  tool_safefree(config->proxy_crlfile);
+  tool_safefree(config->key);
+  tool_safefree(config->proxy_key);
+  tool_safefree(config->key_type);
+  tool_safefree(config->proxy_key_type);
+  tool_safefree(config->key_passwd);
+  tool_safefree(config->proxy_key_passwd);
+  tool_safefree(config->pubkey);
+  tool_safefree(config->hostpubmd5);
+  tool_safefree(config->hostpubsha256);
+  tool_safefree(config->engine);
+  tool_safefree(config->etag_save_file);
+  tool_safefree(config->etag_compare_file);
+  tool_safefree(config->ssl_ec_curves);
+  tool_safefree(config->request_target);
+  tool_safefree(config->customrequest);
+  tool_safefree(config->krblevel);
+  tool_safefree(config->oauth_bearer);
+  tool_safefree(config->sasl_authzid);
+  tool_safefree(config->unix_socket_path);
+  tool_safefree(config->writeout);
+  tool_safefree(config->proto_default);
 
   curl_slist_free_all(config->quote);
   curl_slist_free_all(config->postquote);
@@ -156,12 +178,16 @@ static void free_config_fields(struct OperationConfig *config)
   curl_slist_free_all(config->resolve);
   curl_slist_free_all(config->connect_to);
 
-  Curl_safefree(config->preproxy);
-  Curl_safefree(config->proxy_service_name);
-  Curl_safefree(config->service_name);
-
-  Curl_safefree(config->ftp_account);
-  Curl_safefree(config->ftp_alternative_to_user);
+  tool_safefree(config->preproxy);
+  tool_safefree(config->proxy_service_name);
+  tool_safefree(config->service_name);
+  tool_safefree(config->ftp_account);
+  tool_safefree(config->ftp_alternative_to_user);
+  tool_safefree(config->aws_sigv4);
+  tool_safefree(config->ech);
+  tool_safefree(config->ech_config);
+  tool_safefree(config->ech_public);
+  tool_safefree(config->knownhosts);
 }
 
 void config_free(struct OperationConfig *config)
@@ -177,4 +203,82 @@ void config_free(struct OperationConfig *config)
 
     last = prev;
   }
+}
+
+/*
+ * This is the main global constructor for the app. Call this before
+ * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
+ * used, or havoc may be the result.
+ */
+CURLcode globalconf_init(void)
+{
+  CURLcode result = CURLE_OK;
+  global = &globalconf;
+
+#ifdef __DJGPP__
+  /* stop stat() wasting time */
+  _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
+#endif
+
+  /* Initialise the global config */
+  global->showerror = FALSE;          /* show errors when silent */
+  global->styled_output = TRUE;       /* enable detection */
+  global->parallel_max = PARALLEL_DEFAULT;
+
+  /* Allocate the initial operate config */
+  global->first = global->last = config_alloc();
+  if(global->first) {
+    /* Perform the libcurl initialization */
+    result = curl_global_init(CURL_GLOBAL_DEFAULT);
+    if(!result) {
+      /* Get information about libcurl */
+      result = get_libcurl_info();
+
+      if(result) {
+        errorf("error retrieving curl library information");
+        free(global->first);
+      }
+    }
+    else {
+      errorf("error initializing curl library");
+      free(global->first);
+    }
+  }
+  else {
+    errorf("error initializing curl");
+    result = CURLE_FAILED_INIT;
+  }
+
+  return result;
+}
+
+static void free_globalconfig(void)
+{
+  tool_safefree(global->trace_dump);
+
+  if(global->trace_fopened && global->trace_stream)
+    curlx_fclose(global->trace_stream);
+  global->trace_stream = NULL;
+
+  tool_safefree(global->libcurl);
+#if defined(_WIN32) && !defined(UNDER_CE)
+  free(global->term.buf);
+#endif
+}
+
+/*
+ * This is the main global destructor for the app. Call this after _all_
+ * libcurl usage is done.
+ */
+void globalconf_free(void)
+{
+  /* Cleanup the easy handle */
+  /* Main cleanup */
+  curl_global_cleanup();
+  free_globalconfig();
+
+  /* Free the OperationConfig structures */
+  config_free(global->last);
+  global->first = NULL;
+  global->last = NULL;
 }

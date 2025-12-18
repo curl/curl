@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
+FORM
 flaky
 </keywords>
 </info>
@@ -16,40 +17,30 @@ flaky
 
 # Client-side
 <client>
+<features>
+form-api
+</features>
 <server>
 http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib587
+lib554
 </tool>
 
- <name>
+<name>
 HTTP multi-part formpost with aborted read callback
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/587
+</name>
+# Add a delay to give server time to write its output since we otherwise might
+# not even give it enough time to write its lock file.
+ <command delay="1">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
-</strippart>
-<protocol>
-POST /587 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Length: 744
-Content-Type: multipart/form-data; boundary=----------------------------
-
-------------------------------
-Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
-
-</protocol>
 # CURLE_ABORTED_BY_CALLBACK (42)
 <errorcode>
 42

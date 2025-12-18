@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 HTTP Basic auth
 HTTP NTLM auth
+NTLM
 </keywords>
 </info>
 # Server-side
@@ -14,7 +15,7 @@ HTTP NTLM auth
 ensure that the order doesn't matter. -->
 
 <!-- First request has NTLM auth, wrong password -->
-<data100>
+<data100 crlf="headers">
 HTTP/1.1 401 Need Basic or NTLM auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -25,7 +26,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is not the real page!
 </data100>
 
-<data1101>
+<data1101 crlf="headers">
 HTTP/1.1 401 NTLM intermediate
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -35,7 +36,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1101>
 
-<data1102>
+<data1102 crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -47,7 +48,7 @@ This is a bad password page!
 </data1102>
 
 <!-- Second request has Basic auth, right password -->
-<data200>
+<data200 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -57,7 +58,7 @@ Finally, this is the real page!
 </data200>
 
 <!-- Third request has NTLM auth, wrong password -->
-<data300>
+<data300 crlf="headers">
 HTTP/1.1 401 Need Basic or NTLM auth (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -68,7 +69,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is not the real page!
 </data300>
 
-<data1301>
+<data1301 crlf="headers">
 HTTP/1.1 401 NTLM intermediate (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -78,7 +79,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1301>
 
-<data1302>
+<data1302 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -90,7 +91,7 @@ This is a bad password page!
 </data1302>
 
 <!-- Fourth request has Basic auth, wrong password -->
-<data400>
+<data400 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -102,7 +103,7 @@ This is a bad password page!
 </data400>
 
 <!-- Fifth request has Basic auth, right password -->
-<data500>
+<data500 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -111,7 +112,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data500>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 NTLM intermediate
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -168,71 +169,60 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
 <server>
 http
 </server>
 <tool>
-libauthretry
+lib2023
 </tool>
 
- <name>
+<name>
 HTTP authorization retry (NTLM switching to Basic)
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/2029 ntlm basic
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER ntlm basic
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /20290100 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 
-GET /20290100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyV09SS1NUQVRJT04=
 Accept: */*
 
-GET /20290200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 Accept: */*
 
-GET /20290300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 
-GET /20290300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoABANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyV09SS1NUQVRJT04=
 Accept: */*
 
-GET /20290400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
+Authorization: Basic %b64[testuser:wrongpass]b64%
 Accept: */*
 
-GET /20290500 HTTP/1.1
+GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 Accept: */*
 
 </protocol>

@@ -1,0 +1,71 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP/2
+HTTPS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 201 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Connection: close
+Content-Length: 0
+Funny-head: yesyes
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+Debug
+http/2
+SSL
+</features>
+<server>
+http/2
+</server>
+<name>
+HTTP/2 POST over HTTPS
+</name>
+<setenv>
+</setenv>
+<command>
+--insecure --http2 "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER" -d "moo"
+</command>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout crlf="headers">
+HTTP/2 201%spc%
+date: Tue, 09 Nov 2010 14:49:00 GMT
+content-length: 0
+funny-head: yesyes
+server: nghttpx
+via: 1.1 nghttpx
+
+</stdout>
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTP2TLSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+X-Forwarded-Proto: https
+Via: 2 nghttpx
+
+moo
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+Location: /%TESTNUMBER0002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# this relies on the Debug feature which allows tests to set the time
+<features>
+SSL
+Debug
+crypto
+aws
+</features>
+
+<name>
+HTTP POST with AWS_SIGV4 for binary data
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^Content-Type:.*
+^Accept:.*
+</strip>
+<protocol crlf="headers" nonewline="yes">
+POST /%TESTNUMBER/testapi/test HTTP/1.1
+Host: 127.0.0.1:9000
+Authorization: PROVIDER14-HMAC-SHA256 Credential=keyId/19700101/region/service/provider14_request, SignedHeaders=content-type;host;x-provider2-date, Signature=3436256c7c23adeb66dc15984eaa527edc4a504def61da2e0bf4b01ace4f3c0b
+X-Provider2-Date: 19700101T000000Z
+Content-Length: 9
+
+%hex[post%00Data]hex%
+</protocol>
+</verify>
+</testcase>

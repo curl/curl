@@ -6,18 +6,15 @@ CURLOPT_OPENSOCKETFUNCTION
 </info>
 
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
 <tool>
-lib1530
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 CURLOPT_OPENSOCKETFUNCTION returns bad socket
- </name>
+</name>
 </client>
 
 # it should be detected and an error should be reported

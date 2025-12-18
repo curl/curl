@@ -19,11 +19,11 @@ REPLY EPSV 314 bluah you f00l!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download, failed PASV
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/115
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -32,7 +32,7 @@ ftp://%HOSTIP:%FTPPORT/115
 <errorcode>
 13
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

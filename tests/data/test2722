@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+<client>
+<name>
+ws: Invalid fragmented message without initial frame
+</name>
+<features>
+Debug
+ws
+</features>
+<server>
+http
+</server>
+<tool>
+lib2700
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+<setenv>
+CURL_WS_FORCE_ZERO_MASK=1
+</setenv>
+</client>
+
+<reply>
+<servercmd>
+upgrade
+</servercmd>
+
+# Full list of frames: see <verify.stdout> below
+#   First a valid BINARY frame
+#   Second a fragmented message with the first frame missing
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: server/%TESTNUMBER
+Upgrade: Websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%82%01b]hex%%hex[%00%02m2]hex%%hex[%80%02m3]hex%
+</data>
+</reply>
+
+<verify>
+
+# Echo of reply data with additional masking up to the missing initial frame
+<protocol nonewline="yes">
+%hex[%82%81%00%00%00%00b]hex%
+</protocol>
+
+# Only frames up to the missing initial frame
+<stdout>
+bin fin [1] b
+</stdout>
+
+# CURLE_RECV_ERROR
+<errorcode>
+56
+</errorcode>
+
+# Strip HTTP header from <protocol>
+<strip>
+^GET /.*
+^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*
+^\s*$
+</strip>
+</verify>
+</testcase>

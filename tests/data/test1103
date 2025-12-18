@@ -23,25 +23,25 @@ REPLY SYST 215  unknown-OS runs this server
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP non-OS/400 server
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/1103
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 SYST
 EPSV
 TYPE I
-SIZE 1103
-RETR 1103
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

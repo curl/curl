@@ -1,0 +1,19 @@
+<testcase>
+<info>
+<keywords>
+unittest
+MD4
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+MD4 unit tests
+</name>
+</client>
+</testcase>

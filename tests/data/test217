@@ -15,7 +15,7 @@ followlocation
 <reply>
 
 # this is returned first since we get no proxy-auth
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 And you should ignore this data.
@@ -28,22 +28,23 @@ And you should ignore this data.
 <server>
 http
 </server>
- <name>
+<name>
 HTTP proxy CONNECT to proxy returning 405
- </name>
- <command>
-http://test.remote.example.com.217:%HTTPPORT/path/2170002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -w "%{http_code} %{http_connect}\n"
+</name>
+<command>
+http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -w "%{http_code} %{http_connect}\n"
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol>
-CONNECT test.remote.example.com.217:%HTTPPORT HTTP/1.1
-Host: test.remote.example.com.217:%HTTPPORT
+<protocol crlf="headers">
+CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>
@@ -51,7 +52,7 @@ Proxy-Connection: Keep-Alive
 <errorcode>
 56
 </errorcode>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 000 405

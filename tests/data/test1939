@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+CONNECT
+curl_easy_cleanup
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+Location: /%TESTNUMBER0002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<features>
+proxy
+</features>
+<server>
+https
+http-proxy
+</server>
+
+<name>
+curl_easy_cleanup without curl_multi_remove_handle - in CONNECT
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+https://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%PROXYPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

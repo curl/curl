@@ -8,7 +8,7 @@ FTP
 # Server-side
 <reply>
 <servercmd>
-REPLY PASV 227 Entering Passiv Mode (1216,256,2,127,127,127)
+REPLY PASV 227 Entering Passive Mode (1216,256,2,127,127,127)
 </servercmd>
 </reply>
 
@@ -17,11 +17,11 @@ REPLY PASV 227 Entering Passiv Mode (1216,256,2,127,127,127)
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP getting bad host in 227-response to PASV
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/237 --disable-epsv
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --disable-epsv
 </command>
 </client>
 
@@ -34,7 +34,7 @@ ftp://%HOSTIP:%FTPPORT/237 --disable-epsv
 <errorcode>
 14
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

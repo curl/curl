@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
+<reply>
+<data>
+foo
+   bar
+bar
+   foo
+moo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+<features>
+Unicode
+win32
+</features>
+<name>
+basic file:// file with UTF-8 characters
+</name>
+<command option="no-include">
+file://localhost%FILE_PWD/%LOGDIR/%E3%83%86%E3%82%B9%E3%83%88%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/%hex[%E3%83%86%E3%82%B9%E3%83%88]hex%%TESTNUMBER.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

@@ -1,0 +1,163 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# This workflow contains checks at the source code level only.
+
+name: 'Source'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'plan9/**'
+      - 'tests/data/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'plan9/**'
+      - 'tests/data/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  checksrc:
+    name: 'checksrc'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'check'
+        run: scripts/checksrc-all.pl
+
+  linters:
+    name: 'spellcheck, linters, REUSE'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'install prereqs'
+        run: |
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
+            -r .github/scripts/requirements.txt \
+            -r tests/http/requirements.txt \
+            -r tests/requirements.txt
+
+      - name: 'REUSE check'
+        run: |
+          source ~/venv/bin/activate
+          reuse lint
+
+      - name: 'codespell'
+        run: |
+          source ~/venv/bin/activate
+          codespell --version
+          .github/scripts/codespell.sh
+
+      - name: 'typos'
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          typos --version
+          .github/scripts/typos.sh
+
+      - name: 'cmakelint'
+        run: |
+          source ~/venv/bin/activate
+          scripts/cmakelint.sh
+
+      - name: 'perlcheck'
+        run: |
+          scripts/perlcheck.sh
+
+      - name: 'pytype'
+        run: |
+          source ~/venv/bin/activate
+          find . -name '*.py' -exec pytype -j auto -k {} +
+
+      - name: 'ruff'
+        run: |
+          source ~/venv/bin/activate
+          scripts/pythonlint.sh
+
+  complexity:
+    name: 'complexity'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'install pmccabe'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
+            pmccabe
+
+      - name: 'check scores'
+        run: ./scripts/top-complexity
+
+  miscchecks:
+    name: 'misc checks'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 'install prereqs'
+        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'zizmor GHA'
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
+
+      - name: 'shellcheck CI'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          shellcheck --version
+          .github/scripts/shellcheck-ci.sh
+
+      - name: 'shellcheck'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          shellcheck --version
+          .github/scripts/shellcheck.sh
+
+      - name: 'spacecheck'
+        run: .github/scripts/spacecheck.pl
+
+      - name: 'yamlcheck'
+        run: .github/scripts/yamlcheck.sh
+
+      # we allow some extra in source code
+      - name: 'badwords'
+        run: |
+          # shellcheck disable=SC2046
+          grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
+          .github/scripts/badwords.pl $(git ls-files -- src lib include)

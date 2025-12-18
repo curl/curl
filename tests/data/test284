@@ -47,24 +47,26 @@ condition in the TFTP receive code.
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve of boundary case 512 byte file
- </name>
- <command>
-tftp://%HOSTIP:%TFTPPORT//284
+</name>
+<command>
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify pseudo protocol after the test has been "shot"
 <verify>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
-opcode: 1
-mode: octet
-tsize: 0
-blksize: 512
-timeout: 6
-filename: /284
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 512
+filename = /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

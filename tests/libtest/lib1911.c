@@ -1,0 +1,94 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+#include "first.h"
+
+#include "memdebug.h"
+
+/* The maximum string length limit (CURL_MAX_INPUT_LENGTH) is an internal
+   define not publicly exposed so we set our own */
+#define MAX_INPUT_LENGTH 8000000
+
+static CURLcode test_lib1911(const char *URL)
+{
+  static char testbuf[MAX_INPUT_LENGTH + 2];
+
+  const struct curl_easyoption *o;
+  CURL *curl;
+  int error = 0;
+  (void)URL;
+
+  curl_global_init(CURL_GLOBAL_ALL);
+  curl = curl_easy_init();
+  if(!curl) {
+    curl_global_cleanup();
+    return TEST_ERR_EASY_INIT;
+  }
+
+  /* make it a null-terminated C string with just As */
+  memset(testbuf, 'A', MAX_INPUT_LENGTH + 1);
+  testbuf[MAX_INPUT_LENGTH + 1] = 0;
+
+  curl_mprintf("string length: %zu\n", strlen(testbuf));
+
+  for(o = curl_easy_option_next(NULL);
+      o;
+      o = curl_easy_option_next(o)) {
+    if(o->type == CURLOT_STRING) {
+      CURLcode result;
+      /*
+       * Whitelist string options that are safe for abuse
+       */
+      switch(o->id) {
+      case CURLOPT_PROXY_TLSAUTH_TYPE:
+      case CURLOPT_TLSAUTH_TYPE:
+      case CURLOPT_RANDOM_FILE:
+      case CURLOPT_EGDSOCKET:
+        continue;
+      default:
+        /* check this */
+        break;
+      }
+
+      /* This is a string. Make sure that passing in a string longer
+         CURL_MAX_INPUT_LENGTH returns an error */
+      result = curl_easy_setopt(curl, o->id, testbuf);
+      switch(result) {
+      case CURLE_BAD_FUNCTION_ARGUMENT: /* the most normal */
+      case CURLE_UNKNOWN_OPTION: /* left out from the build */
+      case CURLE_NOT_BUILT_IN: /* not supported */
+      case CURLE_UNSUPPORTED_PROTOCOL: /* detected by protocol2num() */
+        break;
+      default:
+        /* all other return codes are unexpected */
+        curl_mfprintf(stderr, "curl_easy_setopt(%s...) returned %d\n",
+                      o->name, result);
+        error++;
+        break;
+      }
+    }
+  }
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+  return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
+}

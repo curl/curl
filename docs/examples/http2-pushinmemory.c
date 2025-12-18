@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -27,10 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* somewhat unix-specific */
-#include <sys/time.h>
-#include <unistd.h>
-
 /* curl stuff */
 #include <curl/curl.h>
 
@@ -39,8 +37,7 @@ struct Memory {
   size_t size;
 };
 
-static size_t
-write_cb(void *contents, size_t size, size_t nmemb, void *userp)
+static size_t write_cb(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct Memory *mem = (struct Memory *)userp;
@@ -69,46 +66,46 @@ static void init_memory(struct Memory *chunk)
   chunk->size = 0;            /* no data at this point */
 }
 
-static void setup(CURL *hnd)
+static void setup(CURL *curl)
 {
   /* set the same URL */
-  curl_easy_setopt(hnd, CURLOPT_URL, "https://localhost:8443/index.html");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://localhost:8443/index.html");
 
   /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
   /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   /* write data to a struct  */
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
   init_memory(&files[0]);
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &files[0]);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &files[0]);
 
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 }
 
-/* called when there's an incoming push */
+/* called when there is an incoming push */
 static int server_push_callback(CURL *parent,
-                                CURL *easy,
+                                CURL *curl,
                                 size_t num_headers,
                                 struct curl_pushheaders *headers,
                                 void *userp)
 {
   char *headp;
   int *transfers = (int *)userp;
-  (void)parent; /* we have no use for this */
-  (void)num_headers; /* unused */
+  (void)parent;
+  (void)num_headers;
 
   if(pushindex == MAX_FILES)
-    /* can't fit anymore */
+    /* cannot fit anymore */
     return CURL_PUSH_DENY;
 
   /* write to this buffer */
   init_memory(&files[pushindex]);
-  curl_easy_setopt(easy, CURLOPT_WRITEDATA, &files[pushindex]);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &files[pushindex]);
   pushindex++;
 
   headp = curl_pushheader_byname(headers, ":path");
@@ -125,30 +122,35 @@ static int server_push_callback(CURL *parent,
  */
 int main(void)
 {
-  CURL *easy;
+  CURL *curl;
   CURLM *multi;
-  int still_running; /* keep number of running handles */
   int transfers = 1; /* we start with one */
   int i;
-  struct CURLMsg *m;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   /* init a multi stack */
   multi = curl_multi_init();
 
-  easy = curl_easy_init();
+  curl = curl_easy_init();
 
   /* set options */
-  setup(easy);
+  setup(curl);
 
   /* add the easy transfer */
-  curl_multi_add_handle(multi, easy);
+  curl_multi_add_handle(multi, curl);
 
   curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
   curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, server_push_callback);
   curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &transfers);
 
   while(transfers) {
+    struct CURLMsg *m;
+    int still_running; /* keep number of running handles */
     int rc;
+
     CURLMcode mcode = curl_multi_perform(multi, &still_running);
     if(mcode)
       break;
@@ -157,26 +159,24 @@ int main(void)
     if(mcode)
       break;
 
-
     /*
      * When doing server push, libcurl itself created and added one or more
      * easy handles but *we* need to clean them up when they are done.
      */
     do {
-      int msgq = 0;;
+      int msgq = 0;
       m = curl_multi_info_read(multi, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+        curl = m->easy_handle;
         transfers--;
-        curl_multi_remove_handle(multi, e);
-        curl_easy_cleanup(e);
+        curl_multi_remove_handle(multi, curl);
+        curl_easy_cleanup(curl);
       }
     } while(m);
-
   }
 
-
   curl_multi_cleanup(multi);
+  curl_global_cleanup();
 
   /* 'pushindex' is now the number of received transfers */
   for(i = 0; i < pushindex; i++) {

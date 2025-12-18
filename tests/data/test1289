@@ -18,7 +18,7 @@ globbing
 http
 </server>
 <name>
-globbing with overflow and bad syntxx
+globbing with overflow and bad syntax
 </name>
 <command>
 http://ur%20[0-60000000000000000000
@@ -27,7 +27,7 @@ http://ur%20[0-60000000000000000000
 
 # Verify data after the test has been "shot"
 <verify>
-# curl: (3) [globbing] bad range in column 
+# curl: (3) [globbing] bad range in column
 <errorcode>
 3
 </errorcode>

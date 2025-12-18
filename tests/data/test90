@@ -6,12 +6,13 @@ HTTP GET
 HTTP NTLM auth
 --anyauth
 followlocation
+NTLM
 </keywords>
 </info>
 # Server-side
 <reply>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Basic
@@ -25,7 +26,7 @@ This is not the real page
 
 # This is supposed to be returned when the server gets a first
 # Authorization: NTLM line passed-in from the client
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -37,16 +38,16 @@ This is not the real page either!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<data1002 crlf="headers">
 HTTP/1.1 301 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Connection: close
-Location: /you/900010
+Location: /you/%TESTNUMBER0010
 
 </data1002>
 
 # This is the first reply after the redirection
-<data10>
+<data10 crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Basic
@@ -58,7 +59,7 @@ Content-Length: 26
 This is not the real page
 </data10>
 
-<data1011>
+<data1011 crlf="headers">
 HTTP/1.1 401 Now gimme that second round of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -70,7 +71,7 @@ This is not the real page either!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1012>
+<data1012 crlf="headers">
 HTTP/1.1 200 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -79,7 +80,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1012>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Basic
@@ -97,7 +98,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4Ab
 HTTP/1.1 301 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Connection: close
-Location: /you/900010
+Location: /you/%TESTNUMBER0010
 
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
@@ -127,65 +128,55 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
-debug
 </features>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with NTLM via --anyauth, and then follow-location with NTLM again
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/90 -u testuser:testpass --anyauth -L
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth -L
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /90 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /90 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /90 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /you/900010 HTTP/1.1
+GET /you/%TESTNUMBER0010 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /you/900010 HTTP/1.1
+GET /you/%TESTNUMBER0010 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.10.8-pre1 (i686-pc-linux-gnu) libcurl/7.10.8-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3 GSS
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /you/900010 HTTP/1.1
+GET /you/%TESTNUMBER0010 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADYzMjE3MzIxAAAAAAAAAAAAAAAAAAAAAEcJ4YHOeb5ga2TCPwDhkyUIuHjBUHcLaHRlc3R1c2VyY3VybGhvc3Q=
-User-Agent: curl/7.10.8-pre1 (i686-pc-linux-gnu) libcurl/7.10.8-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3 GSS
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

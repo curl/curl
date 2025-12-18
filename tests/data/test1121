@@ -7,7 +7,7 @@ HTTP
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html
@@ -23,23 +23,21 @@ blaha
 <server>
 http
 </server>
- <name>
+<name>
 HTTP multiple provided Host: headers
- </name>
- <command>
--H "Host: host1" -H "Host: host2" -H "Host: host3" http://%HOSTIP:%HTTPPORT/1121
+</name>
+<command>
+-H "Host: host1" -H "Host: host2" -H "Host: host3" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1121 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: host1
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

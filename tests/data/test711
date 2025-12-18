@@ -22,6 +22,9 @@ silly content
 #
 # Client-side
 <client>
+<features>
+proxy
+</features>
 <server>
 ftp
 socks5
@@ -29,25 +32,25 @@ socks5
 <setenv>
 all_proxy=socks5://%HOSTIP:%SOCKSPORT
 </setenv>
- <name>
+<name>
 FTP fetch with all_proxy set to socks5
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/711
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 711
-RETR 711
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

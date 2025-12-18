@@ -1,0 +1,21 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+documentation
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+Verify lib/optiontable.pl
+</name>
+
+<command type="perl">
+%SRCDIR/test1276.pl %SRCDIR/..
+</command>
+</client>
+
+</testcase>

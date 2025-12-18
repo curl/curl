@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -19,21 +19,25 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 #***************************************************************************
 
 # This is the HTTPS, FTPS, POP3S, IMAPS, SMTPS, server used for curl test
 # harness. Actually just a layer that runs stunnel properly using the
 # non-secure test harness servers.
 
+use strict;
+use warnings;
+
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
 }
 
-use strict;
-use warnings;
 use Cwd;
 use Cwd 'abs_path';
+use File::Basename;
 
 use serverhelp qw(
     server_pidfilename
@@ -66,8 +70,9 @@ my $ipvnum = 4;       # default IP version of stunneled server
 my $idnum = 1;        # default stunneled server instance number
 my $proto = 'https';  # default secure server protocol
 my $conffile;         # stunnel configuration file
-my $capath;           # certificate chain PEM folder
+my $cafile;           # certificate CA PEM file
 my $certfile;         # certificate chain PEM file
+my $mtls = 0;         # Whether to verify client certificates
 
 #***************************************************************************
 # stunnel requires full path specification for several files.
@@ -75,6 +80,7 @@ my $certfile;         # certificate chain PEM file
 my $path   = getcwd();
 my $srcdir = $path;
 my $logdir = $path .'/log';
+my $piddir;
 
 #***************************************************************************
 # Signal handler to remove our stunnel 4.00 and newer configuration file.
@@ -118,12 +124,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--stunnel') {
         if($ARGV[1]) {
-            if($ARGV[1] =~ /^([\w\/]+)$/) {
-                $stunnel = $ARGV[1];
-            }
-            else {
-                $stunnel = "\"". $ARGV[1] ."\"";
-            }
+            $stunnel = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -165,6 +166,15 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = "$path/". $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--mtls') {
+        $mtls = 1;
+    }
     else {
         print STDERR "\nWarning: secureserver.pl unknown parameter: $ARGV[0]\n";
     }
@@ -174,26 +184,34 @@ while(@ARGV) {
 #***************************************************************************
 # Initialize command line option dependent variables
 #
-if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+if($pidfile) {
+    # Use our pidfile directory to store the conf files
+    $piddir = dirname($pidfile);
+}
+else {
+    # Use the current directory to store the conf files
+    $piddir = $path;
+    $pidfile = server_pidfilename($piddir, $proto, $ipvnum, $idnum);
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$conffile = "$path/${proto}_stunnel.conf";
+$conffile = "$piddir/${proto}_stunnel.conf";
 
-$capath = abs_path($path);
-$certfile = "$srcdir/". ($stuncert?"certs/$stuncert":"stunnel.pem");
+$cafile = abs_path("$path/certs/test-ca.cacert");
+$certfile = $stuncert ? "certs/$stuncert" : "certs/test-localhost.pem";
 $certfile = abs_path($certfile);
 
 my $ssltext = uc($proto) ." SSL/TLS:";
+
+my $host_ip = ($ipvnum == 6)? '::1' : '127.0.0.1';
 
 #***************************************************************************
 # Find out version info for the given stunnel binary
 #
 foreach my $veropt (('-version', '-V')) {
-    foreach my $verstr (qx($stunnel $veropt 2>&1)) {
+    foreach my $verstr (qx("$stunnel" $veropt 2>&1)) {
         if($verstr =~ /^stunnel (\d+)\.(\d+) on /) {
             $ver_major = $1;
             $ver_minor = $2;
@@ -206,7 +224,7 @@ foreach my $veropt (('-version', '-V')) {
     }
     last if($ver_major);
 }
-if((!$ver_major) || (!$ver_minor)) {
+if((!$ver_major) || !defined($ver_minor)) {
     if(-x "$stunnel" && ! -d "$stunnel") {
         print "$ssltext Unknown stunnel version\n";
     }
@@ -228,11 +246,11 @@ if($stunnel_version < 310) {
 #***************************************************************************
 # Find out if we are running on Windows using the tstunnel binary
 #
-if($stunnel =~ /tstunnel(\.exe)?"?$/) {
+if($stunnel =~ /tstunnel(\.exe)?$/) {
     $tstunnel_windows = 1;
 
-    # convert Cygwin/MinGW paths to Win32 format
-    $capath = pathhelp::sys_native_abs_path($capath);
+    # convert Cygwin/MinGW paths to Windows format
+    $cafile = pathhelp::sys_native_abs_path($cafile);
     $certfile = pathhelp::sys_native_abs_path($certfile);
 }
 
@@ -243,7 +261,9 @@ if($stunnel_version < 400) {
     if($stunnel_version >= 319) {
         $socketopt = "-O a:SO_REUSEADDR=1";
     }
-    $cmd  = "$stunnel -p $certfile -P $pidfile ";
+    # TODO: we do not use $host_ip in this old version. I simply find
+    # no documentation how to. But maybe ipv6 is not available anyway?
+    $cmd  = "\"$stunnel\" -p $certfile -P $pidfile ";
     $cmd .= "-d $accept_port -r $target_port -f -D $loglevel ";
     $cmd .= ($socketopt) ? "$socketopt " : "";
     $cmd .= ">$logfile 2>&1";
@@ -269,32 +289,35 @@ if($stunnel_version >= 400) {
         # but does not work together with SO_REUSEADDR being on.
         $socketopt .= "\nsocket = a:SO_EXCLUSIVEADDRUSE=0";
     }
-    $cmd  = "$stunnel $conffile ";
+    $cmd  = "\"$stunnel\" $conffile ";
     $cmd .= ">$logfile 2>&1";
     # setup signal handler
     $SIG{INT} = \&exit_signal_handler;
     $SIG{TERM} = \&exit_signal_handler;
     # stunnel configuration file
-    if(open(STUNCONF, ">$conffile")) {
-        print STUNCONF "CApath = $capath\n";
-        print STUNCONF "cert = $certfile\n";
-        print STUNCONF "debug = $loglevel\n";
-        print STUNCONF "socket = $socketopt\n";
+    if(open(my $stunconf, ">", "$conffile")) {
+        print $stunconf "cert = $certfile\n";
+        print $stunconf "debug = $loglevel\n";
+        print $stunconf "socket = $socketopt\n";
+        if($mtls) {
+            print $stunconf "CAfile = $cafile\n";
+            print $stunconf "verifyChain = yes\n";
+        }
         if($fips_support) {
             # disable fips in case OpenSSL doesn't support it
-            print STUNCONF "fips = no\n";
+            print $stunconf "fips = no\n";
         }
         if(!$tstunnel_windows) {
             # do not use Linux-specific options on Windows
-            print STUNCONF "output = $logfile\n";
-            print STUNCONF "pid = $pidfile\n";
-            print STUNCONF "foreground = yes\n";
+            print $stunconf "output = $logfile\n";
+            print $stunconf "pid = $pidfile\n";
+            print $stunconf "foreground = yes\n";
         }
-        print STUNCONF "\n";
-        print STUNCONF "[curltest]\n";
-        print STUNCONF "accept = $accept_port\n";
-        print STUNCONF "connect = $target_port\n";
-        if(!close(STUNCONF)) {
+        print $stunconf "\n";
+        print $stunconf "[curltest]\n";
+        print $stunconf "accept = $host_ip:$accept_port\n";
+        print $stunconf "connect = $host_ip:$target_port\n";
+        if(!close($stunconf)) {
             print "$ssltext Error closing file $conffile\n";
             exit 1;
         }
@@ -306,22 +329,11 @@ if($stunnel_version >= 400) {
     if($verbose) {
         print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
-        print "CApath = $capath\n";
-        print "cert = $certfile\n";
-        print "debug = $loglevel\n";
-        print "socket = $socketopt\n";
-        if($fips_support) {
-            print "fips = no\n";
-        }
-        if(!$tstunnel_windows) {
-            print "pid = $pidfile\n";
-            print "output = $logfile\n";
-            print "foreground = yes\n";
-        }
+        print "stunnel config at $conffile:\n";
+        open (my $writtenconf, '<', "$conffile") or die "$ssltext could not open the config file after writing\n";
+        print <$writtenconf>;
         print "\n";
-        print "[curltest]\n";
-        print "accept = $accept_port\n";
-        print "connect = $target_port\n";
+        close ($writtenconf);
     }
 }
 
@@ -329,20 +341,26 @@ if($stunnel_version >= 400) {
 # Set file permissions on certificate pem file.
 #
 chmod(0600, $certfile) if(-f $certfile);
+print STDERR "RUN: $cmd\n" if($verbose);
 
 #***************************************************************************
 # Run tstunnel on Windows.
 #
 if($tstunnel_windows) {
     # Fake pidfile for tstunnel on Windows.
-    if(open(OUT, ">$pidfile")) {
-        print OUT $$ . "\n";
-        close(OUT);
+    if(open(my $out, ">", "$pidfile")) {
+        print $out $$ . "\n";
+        close($out);
     }
 
+    # Flush output.
+    $| = 1;
+
     # Put an "exec" in front of the command so that the child process
-    # keeps this child's process ID.
+    # keeps this child's process ID by being tied to the spawned shell.
     exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    # exec() will create a new process, but ties the existence of the
+    # new process to the parent waiting perl.exe and sh.exe processes.
 
     # exec() should never return back here to this process. We protect
     # ourselves by calling die() just in case something goes really bad.

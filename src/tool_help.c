@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,596 +18,369 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
-#if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H)
-#include <strings.h>
-#endif
 
-#include "tool_panykey.h"
 #include "tool_help.h"
 #include "tool_libinfo.h"
+#include "tool_util.h"
 #include "tool_version.h"
+#include "tool_cb_prg.h"
+#include "tool_hugehelp.h"
+#include "tool_getparam.h"
+#include "tool_cfgable.h"
+#include "terminal.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifdef MSDOS
-#  define USE_WATT32
-#endif
-
-/*
- * The help output is generated with the following command
- ---------------------------------------------------------
-
-  cd $srcroot/docs/cmdline-opts
-  ./gen.pl listhelp
- */
-
-struct helptxt {
+struct category_descriptors {
   const char *opt;
   const char *desc;
+  unsigned int category;
 };
 
-static const struct helptxt helptext[] = {
-  {"    --abstract-unix-socket <path>",
-   "Connect via abstract Unix domain socket"},
-  {"    --alt-svc <file name>",
-   "Enable alt-svc with this cache file"},
-  {"    --anyauth",
-   "Pick any authentication method"},
-  {"-a, --append",
-   "Append to target file when uploading"},
-  {"    --basic",
-   "Use HTTP Basic Authentication"},
-  {"    --cacert <file>",
-   "CA certificate to verify peer against"},
-  {"    --capath <dir>",
-   "CA directory to verify peer against"},
-  {"-E, --cert <certificate[:password]>",
-   "Client certificate file and password"},
-  {"    --cert-status",
-   "Verify the status of the server certificate"},
-  {"    --cert-type <type>",
-   "Certificate file type (DER/PEM/ENG)"},
-  {"    --ciphers <list of ciphers>",
-   "SSL ciphers to use"},
-  {"    --compressed",
-   "Request compressed response"},
-  {"    --compressed-ssh",
-   "Enable SSH compression"},
-  {"-K, --config <file>",
-   "Read config from a file"},
-  {"    --connect-timeout <seconds>",
-   "Maximum time allowed for connection"},
-  {"    --connect-to <HOST1:PORT1:HOST2:PORT2>",
-   "Connect to host"},
-  {"-C, --continue-at <offset>",
-   "Resumed transfer offset"},
-  {"-b, --cookie <data|filename>",
-   "Send cookies from string/file"},
-  {"-c, --cookie-jar <filename>",
-   "Write cookies to <filename> after operation"},
-  {"    --create-dirs",
-   "Create necessary local directory hierarchy"},
-  {"    --crlf",
-   "Convert LF to CRLF in upload"},
-  {"    --crlfile <file>",
-   "Get a CRL list in PEM format from the given file"},
-  {"-d, --data <data>",
-   "HTTP POST data"},
-  {"    --data-ascii <data>",
-   "HTTP POST ASCII data"},
-  {"    --data-binary <data>",
-   "HTTP POST binary data"},
-  {"    --data-raw <data>",
-   "HTTP POST data, '@' allowed"},
-  {"    --data-urlencode <data>",
-   "HTTP POST data url encoded"},
-  {"    --delegation <LEVEL>",
-   "GSS-API delegation permission"},
-  {"    --digest",
-   "Use HTTP Digest Authentication"},
-  {"-q, --disable",
-   "Disable .curlrc"},
-  {"    --disable-eprt",
-   "Inhibit using EPRT or LPRT"},
-  {"    --disable-epsv",
-   "Inhibit using EPSV"},
-  {"    --disallow-username-in-url",
-   "Disallow username in url"},
-  {"    --dns-interface <interface>",
-   "Interface to use for DNS requests"},
-  {"    --dns-ipv4-addr <address>",
-   "IPv4 address to use for DNS requests"},
-  {"    --dns-ipv6-addr <address>",
-   "IPv6 address to use for DNS requests"},
-  {"    --dns-servers <addresses>",
-   "DNS server addrs to use"},
-  {"    --doh-url <URL>",
-   "Resolve host names over DOH"},
-  {"-D, --dump-header <filename>",
-   "Write the received headers to <filename>"},
-  {"    --egd-file <file>",
-   "EGD socket path for random data"},
-  {"    --engine <name>",
-   "Crypto engine to use"},
-  {"    --expect100-timeout <seconds>",
-   "How long to wait for 100-continue"},
-  {"-f, --fail",
-   "Fail silently (no output at all) on HTTP errors"},
-  {"    --fail-early",
-   "Fail on first transfer error, do not continue"},
-  {"    --false-start",
-   "Enable TLS False Start"},
-  {"-F, --form <name=content>",
-   "Specify multipart MIME data"},
-  {"    --form-string <name=string>",
-   "Specify multipart MIME data"},
-  {"    --ftp-account <data>",
-   "Account data string"},
-  {"    --ftp-alternative-to-user <command>",
-   "String to replace USER [name]"},
-  {"    --ftp-create-dirs",
-   "Create the remote dirs if not present"},
-  {"    --ftp-method <method>",
-   "Control CWD usage"},
-  {"    --ftp-pasv",
-   "Use PASV/EPSV instead of PORT"},
-  {"-P, --ftp-port <address>",
-   "Use PORT instead of PASV"},
-  {"    --ftp-pret",
-   "Send PRET before PASV"},
-  {"    --ftp-skip-pasv-ip",
-   "Skip the IP address for PASV"},
-  {"    --ftp-ssl-ccc",
-   "Send CCC after authenticating"},
-  {"    --ftp-ssl-ccc-mode <active/passive>",
-   "Set CCC mode"},
-  {"    --ftp-ssl-control",
-   "Require SSL/TLS for FTP login, clear for transfer"},
-  {"-G, --get",
-   "Put the post data in the URL and use GET"},
-  {"-g, --globoff",
-   "Disable URL sequences and ranges using {} and []"},
-  {"    --happy-eyeballs-timeout-ms <milliseconds>",
-   "How long to wait in milliseconds for IPv6 before trying IPv4"},
-  {"    --haproxy-protocol",
-   "Send HAProxy PROXY protocol v1 header"},
-  {"-I, --head",
-   "Show document info only"},
-  {"-H, --header <header/@file>",
-   "Pass custom header(s) to server"},
-  {"-h, --help",
-   "This help text"},
-  {"    --hostpubmd5 <md5>",
-   "Acceptable MD5 hash of the host public key"},
-  {"    --http0.9",
-   "Allow HTTP 0.9 responses"},
-  {"-0, --http1.0",
-   "Use HTTP 1.0"},
-  {"    --http1.1",
-   "Use HTTP 1.1"},
-  {"    --http2",
-   "Use HTTP 2"},
-  {"    --http2-prior-knowledge",
-   "Use HTTP 2 without HTTP/1.1 Upgrade"},
-  {"    --http3",
-   "Use HTTP v3"},
-  {"    --ignore-content-length",
-   "Ignore the size of the remote resource"},
-  {"-i, --include",
-   "Include protocol response headers in the output"},
-  {"-k, --insecure",
-   "Allow insecure server connections when using SSL"},
-  {"    --interface <name>",
-   "Use network INTERFACE (or address)"},
-  {"-4, --ipv4",
-   "Resolve names to IPv4 addresses"},
-  {"-6, --ipv6",
-   "Resolve names to IPv6 addresses"},
-  {"-j, --junk-session-cookies",
-   "Ignore session cookies read from file"},
-  {"    --keepalive-time <seconds>",
-   "Interval time for keepalive probes"},
-  {"    --key <key>",
-   "Private key file name"},
-  {"    --key-type <type>",
-   "Private key file type (DER/PEM/ENG)"},
-  {"    --krb <level>",
-   "Enable Kerberos with security <level>"},
-  {"    --libcurl <file>",
-   "Dump libcurl equivalent code of this command line"},
-  {"    --limit-rate <speed>",
-   "Limit transfer speed to RATE"},
-  {"-l, --list-only",
-   "List only mode"},
-  {"    --local-port <num/range>",
-   "Force use of RANGE for local port numbers"},
-  {"-L, --location",
-   "Follow redirects"},
-  {"    --location-trusted",
-   "Like --location, and send auth to other hosts"},
-  {"    --login-options <options>",
-   "Server login options"},
-  {"    --mail-auth <address>",
-   "Originator address of the original email"},
-  {"    --mail-from <address>",
-   "Mail from this address"},
-  {"    --mail-rcpt <address>",
-   "Mail to this address"},
-  {"-M, --manual",
-   "Display the full manual"},
-  {"    --max-filesize <bytes>",
-   "Maximum file size to download"},
-  {"    --max-redirs <num>",
-   "Maximum number of redirects allowed"},
-  {"-m, --max-time <seconds>",
-   "Maximum time allowed for the transfer"},
-  {"    --metalink",
-   "Process given URLs as metalink XML file"},
-  {"    --negotiate",
-   "Use HTTP Negotiate (SPNEGO) authentication"},
-  {"-n, --netrc",
-   "Must read .netrc for user name and password"},
-  {"    --netrc-file <filename>",
-   "Specify FILE for netrc"},
-  {"    --netrc-optional",
-   "Use either .netrc or URL"},
-  {"-:, --next",
-   "Make next URL use its separate set of options"},
-  {"    --no-alpn",
-   "Disable the ALPN TLS extension"},
-  {"-N, --no-buffer",
-   "Disable buffering of the output stream"},
-  {"    --no-keepalive",
-   "Disable TCP keepalive on the connection"},
-  {"    --no-npn",
-   "Disable the NPN TLS extension"},
-  {"    --no-sessionid",
-   "Disable SSL session-ID reusing"},
-  {"    --noproxy <no-proxy-list>",
-   "List of hosts which do not use proxy"},
-  {"    --ntlm",
-   "Use HTTP NTLM authentication"},
-  {"    --ntlm-wb",
-   "Use HTTP NTLM authentication with winbind"},
-  {"    --oauth2-bearer <token>",
-   "OAuth 2 Bearer Token"},
-  {"-o, --output <file>",
-   "Write to file instead of stdout"},
-  {"-Z, --parallel",
-   "Perform transfers in parallel"},
-  {"    --parallel-max",
-   "Maximum concurrency for parallel transfers"},
-  {"    --pass <phrase>",
-   "Pass phrase for the private key"},
-  {"    --path-as-is",
-   "Do not squash .. sequences in URL path"},
-  {"    --pinnedpubkey <hashes>",
-   "FILE/HASHES Public key to verify peer against"},
-  {"    --post301",
-   "Do not switch to GET after following a 301"},
-  {"    --post302",
-   "Do not switch to GET after following a 302"},
-  {"    --post303",
-   "Do not switch to GET after following a 303"},
-  {"    --preproxy [protocol://]host[:port]",
-   "Use this proxy first"},
-  {"-#, --progress-bar",
-   "Display transfer progress as a bar"},
-  {"    --proto <protocols>",
-   "Enable/disable PROTOCOLS"},
-  {"    --proto-default <protocol>",
-   "Use PROTOCOL for any URL missing a scheme"},
-  {"    --proto-redir <protocols>",
-   "Enable/disable PROTOCOLS on redirect"},
-  {"-x, --proxy [protocol://]host[:port]",
-   "Use this proxy"},
-  {"    --proxy-anyauth",
-   "Pick any proxy authentication method"},
-  {"    --proxy-basic",
-   "Use Basic authentication on the proxy"},
-  {"    --proxy-cacert <file>",
-   "CA certificate to verify peer against for proxy"},
-  {"    --proxy-capath <dir>",
-   "CA directory to verify peer against for proxy"},
-  {"    --proxy-cert <cert[:passwd]>",
-   "Set client certificate for proxy"},
-  {"    --proxy-cert-type <type>",
-   "Client certificate type for HTTPS proxy"},
-  {"    --proxy-ciphers <list>",
-   "SSL ciphers to use for proxy"},
-  {"    --proxy-crlfile <file>",
-   "Set a CRL list for proxy"},
-  {"    --proxy-digest",
-   "Use Digest authentication on the proxy"},
-  {"    --proxy-header <header/@file>",
-   "Pass custom header(s) to proxy"},
-  {"    --proxy-insecure",
-   "Do HTTPS proxy connections without verifying the proxy"},
-  {"    --proxy-key <key>",
-   "Private key for HTTPS proxy"},
-  {"    --proxy-key-type <type>",
-   "Private key file type for proxy"},
-  {"    --proxy-negotiate",
-   "Use HTTP Negotiate (SPNEGO) authentication on the proxy"},
-  {"    --proxy-ntlm",
-   "Use NTLM authentication on the proxy"},
-  {"    --proxy-pass <phrase>",
-   "Pass phrase for the private key for HTTPS proxy"},
-  {"    --proxy-pinnedpubkey <hashes>",
-   "FILE/HASHES public key to verify proxy with"},
-  {"    --proxy-service-name <name>",
-   "SPNEGO proxy service name"},
-  {"    --proxy-ssl-allow-beast",
-   "Allow security flaw for interop for HTTPS proxy"},
-  {"    --proxy-tls13-ciphers <list>",
-   "TLS 1.3 ciphersuites for proxy (OpenSSL)"},
-  {"    --proxy-tlsauthtype <type>",
-   "TLS authentication type for HTTPS proxy"},
-  {"    --proxy-tlspassword <string>",
-   "TLS password for HTTPS proxy"},
-  {"    --proxy-tlsuser <name>",
-   "TLS username for HTTPS proxy"},
-  {"    --proxy-tlsv1",
-   "Use TLSv1 for HTTPS proxy"},
-  {"-U, --proxy-user <user:password>",
-   "Proxy user and password"},
-  {"    --proxy1.0 <host[:port]>",
-   "Use HTTP/1.0 proxy on given port"},
-  {"-p, --proxytunnel",
-   "Operate through an HTTP proxy tunnel (using CONNECT)"},
-  {"    --pubkey <key>",
-   "SSH Public key file name"},
-  {"-Q, --quote",
-   "Send command(s) to server before transfer"},
-  {"    --random-file <file>",
-   "File for reading random data from"},
-  {"-r, --range <range>",
-   "Retrieve only the bytes within RANGE"},
-  {"    --raw",
-   "Do HTTP \"raw\"; no transfer decoding"},
-  {"-e, --referer <URL>",
-   "Referrer URL"},
-  {"-J, --remote-header-name",
-   "Use the header-provided filename"},
-  {"-O, --remote-name",
-   "Write output to a file named as the remote file"},
-  {"    --remote-name-all",
-   "Use the remote file name for all URLs"},
-  {"-R, --remote-time",
-   "Set the remote file's time on the local output"},
-  {"-X, --request <command>",
-   "Specify request command to use"},
-  {"    --request-target",
-   "Specify the target for this request"},
-  {"    --resolve <host:port:address[,address]...>",
-   "Resolve the host+port to this address"},
-  {"    --retry <num>",
-   "Retry request if transient problems occur"},
-  {"    --retry-connrefused",
-   "Retry on connection refused (use with --retry)"},
-  {"    --retry-delay <seconds>",
-   "Wait time between retries"},
-  {"    --retry-max-time <seconds>",
-   "Retry only within this period"},
-  {"    --sasl-authzid <identity> ",
-   "Use this identity to act as during SASL PLAIN authentication"},
-  {"    --sasl-ir",
-   "Enable initial response in SASL authentication"},
-  {"    --service-name <name>",
-   "SPNEGO service name"},
-  {"-S, --show-error",
-   "Show error even when -s is used"},
-  {"-s, --silent",
-   "Silent mode"},
-  {"    --socks4 <host[:port]>",
-   "SOCKS4 proxy on given host + port"},
-  {"    --socks4a <host[:port]>",
-   "SOCKS4a proxy on given host + port"},
-  {"    --socks5 <host[:port]>",
-   "SOCKS5 proxy on given host + port"},
-  {"    --socks5-basic",
-   "Enable username/password auth for SOCKS5 proxies"},
-  {"    --socks5-gssapi",
-   "Enable GSS-API auth for SOCKS5 proxies"},
-  {"    --socks5-gssapi-nec",
-   "Compatibility with NEC SOCKS5 server"},
-  {"    --socks5-gssapi-service <name>",
-   "SOCKS5 proxy service name for GSS-API"},
-  {"    --socks5-hostname <host[:port]>",
-   "SOCKS5 proxy, pass host name to proxy"},
-  {"-Y, --speed-limit <speed>",
-   "Stop transfers slower than this"},
-  {"-y, --speed-time <seconds>",
-   "Trigger 'speed-limit' abort after this time"},
-  {"    --ssl",
-   "Try SSL/TLS"},
-  {"    --ssl-allow-beast",
-   "Allow security flaw to improve interop"},
-  {"    --ssl-no-revoke",
-   "Disable cert revocation checks (Schannel)"},
-  {"    --ssl-reqd",
-   "Require SSL/TLS"},
-  {"-2, --sslv2",
-   "Use SSLv2"},
-  {"-3, --sslv3",
-   "Use SSLv3"},
-  {"    --stderr",
-   "Where to redirect stderr"},
-  {"    --styled-output",
-   "Enable styled output for HTTP headers"},
-  {"    --suppress-connect-headers",
-   "Suppress proxy CONNECT response headers"},
-  {"    --tcp-fastopen",
-   "Use TCP Fast Open"},
-  {"    --tcp-nodelay",
-   "Use the TCP_NODELAY option"},
-  {"-t, --telnet-option <opt=val>",
-   "Set telnet option"},
-  {"    --tftp-blksize <value>",
-   "Set TFTP BLKSIZE option"},
-  {"    --tftp-no-options",
-   "Do not send any TFTP options"},
-  {"-z, --time-cond <time>",
-   "Transfer based on a time condition"},
-  {"    --tls-max <VERSION>",
-   "Set maximum allowed TLS version"},
-  {"    --tls13-ciphers <list>",
-   "TLS 1.3 ciphersuites (OpenSSL)"},
-  {"    --tlsauthtype <type>",
-   "TLS authentication type"},
-  {"    --tlspassword",
-   "TLS password"},
-  {"    --tlsuser <name>",
-   "TLS user name"},
-  {"-1, --tlsv1",
-   "Use TLSv1.0 or greater"},
-  {"    --tlsv1.0",
-   "Use TLSv1.0 or greater"},
-  {"    --tlsv1.1",
-   "Use TLSv1.1 or greater"},
-  {"    --tlsv1.2",
-   "Use TLSv1.2 or greater"},
-  {"    --tlsv1.3",
-   "Use TLSv1.3 or greater"},
-  {"    --tr-encoding",
-   "Request compressed transfer encoding"},
-  {"    --trace <file>",
-   "Write a debug trace to FILE"},
-  {"    --trace-ascii <file>",
-   "Like --trace, but without hex output"},
-  {"    --trace-time",
-   "Add time stamps to trace/verbose output"},
-  {"    --unix-socket <path>",
-   "Connect through this Unix domain socket"},
-  {"-T, --upload-file <file>",
-   "Transfer local FILE to destination"},
-  {"    --url <url>",
-   "URL to work with"},
-  {"-B, --use-ascii",
-   "Use ASCII/text transfer"},
-  {"-u, --user <user:password>",
-   "Server user and password"},
-  {"-A, --user-agent <name>",
-   "Send User-Agent <name> to server"},
-  {"-v, --verbose",
-   "Make the operation more talkative"},
-  {"-V, --version",
-   "Show version number and quit"},
-  {"-w, --write-out <format>",
-   "Use output FORMAT after completion"},
-  {"    --xattr",
-   "Store metadata in extended file attributes"},
-  { NULL, NULL }
+static const struct category_descriptors categories[] = {
+  /* important is left out because it is the default help page */
+  {"auth", "Authentication methods", CURLHELP_AUTH},
+  {"connection", "Manage connections", CURLHELP_CONNECTION},
+  {"curl", "The command line tool itself", CURLHELP_CURL},
+  {"deprecated", "Legacy", CURLHELP_DEPRECATED},
+  {"dns", "Names and resolving", CURLHELP_DNS},
+  {"file", "FILE protocol", CURLHELP_FILE},
+  {"ftp", "FTP protocol", CURLHELP_FTP},
+  {"global", "Global options", CURLHELP_GLOBAL},
+  {"http", "HTTP and HTTPS protocol", CURLHELP_HTTP},
+  {"imap", "IMAP protocol", CURLHELP_IMAP},
+  {"ldap", "LDAP protocol", CURLHELP_LDAP},
+  {"output", "File system output", CURLHELP_OUTPUT},
+  {"pop3", "POP3 protocol", CURLHELP_POP3},
+  {"post", "HTTP POST specific", CURLHELP_POST},
+  {"proxy", "Options for proxies", CURLHELP_PROXY},
+  {"scp", "SCP protocol", CURLHELP_SCP},
+  {"sftp", "SFTP protocol", CURLHELP_SFTP},
+  {"smtp", "SMTP protocol", CURLHELP_SMTP},
+  {"ssh", "SSH protocol", CURLHELP_SSH},
+  {"telnet", "TELNET protocol", CURLHELP_TELNET},
+  {"tftp", "TFTP protocol", CURLHELP_TFTP},
+  {"timeout", "Timeouts and delays", CURLHELP_TIMEOUT},
+  {"tls", "TLS/SSL related", CURLHELP_TLS},
+  {"upload", "Upload, sending data", CURLHELP_UPLOAD},
+  {"verbose", "Tracing, logging etc", CURLHELP_VERBOSE}
 };
 
-#ifdef NETWARE
-#  define PRINT_LINES_PAUSE 23
-#endif
-
-#ifdef __SYMBIAN32__
-#  define PRINT_LINES_PAUSE 16
-#endif
-
-struct feat {
-  const char *name;
-  int bitmask;
-};
-
-static const struct feat feats[] = {
-  {"AsynchDNS",      CURL_VERSION_ASYNCHDNS},
-  {"Debug",          CURL_VERSION_DEBUG},
-  {"TrackMemory",    CURL_VERSION_CURLDEBUG},
-  {"IDN",            CURL_VERSION_IDN},
-  {"IPv6",           CURL_VERSION_IPV6},
-  {"Largefile",      CURL_VERSION_LARGEFILE},
-  {"SSPI",           CURL_VERSION_SSPI},
-  {"GSS-API",        CURL_VERSION_GSSAPI},
-  {"Kerberos",       CURL_VERSION_KERBEROS5},
-  {"SPNEGO",         CURL_VERSION_SPNEGO},
-  {"NTLM",           CURL_VERSION_NTLM},
-  {"NTLM_WB",        CURL_VERSION_NTLM_WB},
-  {"SSL",            CURL_VERSION_SSL},
-  {"libz",           CURL_VERSION_LIBZ},
-  {"brotli",         CURL_VERSION_BROTLI},
-  {"CharConv",       CURL_VERSION_CONV},
-  {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
-  {"HTTP2",          CURL_VERSION_HTTP2},
-  {"HTTP3",          CURL_VERSION_HTTP3},
-  {"UnixSockets",    CURL_VERSION_UNIX_SOCKETS},
-  {"HTTPS-proxy",    CURL_VERSION_HTTPS_PROXY},
-  {"MultiSSL",       CURL_VERSION_MULTI_SSL},
-  {"PSL",            CURL_VERSION_PSL},
-  {"alt-svc",        CURL_VERSION_ALTSVC},
-};
-
-void tool_help(void)
+static void print_category(unsigned int category, unsigned int cols)
 {
-  int i;
-  puts("Usage: curl [options...] <url>");
-  for(i = 0; helptext[i].opt; i++) {
-    printf(" %-19s %s\n", helptext[i].opt, helptext[i].desc);
-#ifdef PRINT_LINES_PAUSE
-    if(i && ((i % PRINT_LINES_PAUSE) == 0))
-      tool_pressanykey();
-#endif
+  unsigned int i;
+  size_t longopt = 5;
+  size_t longdesc = 5;
+
+  for(i = 0; helptext[i].opt; ++i) {
+    size_t len;
+    if(!(helptext[i].categories & category))
+      continue;
+    len = strlen(helptext[i].opt);
+    if(len > longopt)
+      longopt = len;
+    len = strlen(helptext[i].desc);
+    if(len > longdesc)
+      longdesc = len;
+  }
+  if(longopt + longdesc > cols)
+    longopt = cols - longdesc;
+
+  for(i = 0; helptext[i].opt; ++i)
+    if(helptext[i].categories & category) {
+      size_t opt = longopt;
+      size_t desclen = strlen(helptext[i].desc);
+      if(opt + desclen >= (cols - 2)) {
+        if(desclen < (cols - 2))
+          opt = (cols - 3) - desclen;
+        else
+          opt = 0;
+      }
+      curl_mprintf(" %-*s  %s\n", (int)opt, helptext[i].opt, helptext[i].desc);
+    }
+}
+
+/* Prints category if found. If not, it returns 1 */
+static int get_category_content(const char *category, unsigned int cols)
+{
+  unsigned int i;
+  for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
+    if(curl_strequal(categories[i].opt, category)) {
+      curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
+      print_category(categories[i].category, cols);
+      return 0;
+    }
+  return 1;
+}
+
+/* Prints all categories and their description */
+static void get_categories(void)
+{
+  unsigned int i;
+  for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
+    curl_mprintf(" %-11s %s\n", categories[i].opt, categories[i].desc);
+}
+
+/* Prints all categories as a comma-separated list of given width */
+static void get_categories_list(unsigned int width)
+{
+  unsigned int i;
+  size_t col = 0;
+  for(i = 0; i < CURL_ARRAYSIZE(categories); ++i) {
+    size_t len = strlen(categories[i].opt);
+    if(i == CURL_ARRAYSIZE(categories) - 1) {
+      /* final category */
+      if(col + len + 1 < width)
+        curl_mprintf("%s.\n", categories[i].opt);
+      else
+        /* start a new line first */
+        curl_mprintf("\n%s.\n", categories[i].opt);
+    }
+    else if(col + len + 2 < width) {
+      curl_mprintf("%s, ", categories[i].opt);
+      col += len + 2;
+    }
+    else {
+      /* start a new line first */
+      curl_mprintf("\n%s, ", categories[i].opt);
+      col = len + 2;
+    }
   }
 }
 
-static int
-featcomp(const void *p1, const void *p2)
+#ifdef USE_MANUAL
+
+void inithelpscan(struct scan_ctx *ctx,
+                  const char *trigger,
+                  const char *arg,
+                  const char *endarg)
 {
-  /* The arguments to this function are "pointers to pointers to char", but
-     the comparison arguments are "pointers to char", hence the following cast
-     plus dereference */
-#ifdef HAVE_STRCASECMP
-  return strcasecmp(* (char * const *) p1, * (char * const *) p2);
-#elif defined(HAVE_STRCMPI)
-  return strcmpi(* (char * const *) p1, * (char * const *) p2);
-#else
-  return strcmp(* (char * const *) p1, * (char * const *) p2);
+  ctx->trigger = trigger;
+  ctx->tlen = strlen(trigger);
+  ctx->arg = arg;
+  ctx->flen = strlen(arg);
+  ctx->endarg = endarg;
+  ctx->elen = strlen(endarg);
+  DEBUGASSERT((ctx->elen < sizeof(ctx->rbuf)) ||
+              (ctx->flen < sizeof(ctx->rbuf)));
+  ctx->show = 0;
+  ctx->olen = 0;
+  memset(ctx->rbuf, 0, sizeof(ctx->rbuf));
+}
+
+bool helpscan(const unsigned char *buf, size_t len, struct scan_ctx *ctx)
+{
+  size_t i;
+  for(i = 0; i < len; i++) {
+    if(!ctx->show) {
+      /* wait for the trigger */
+      memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->tlen - 1);
+      ctx->rbuf[ctx->tlen - 1] = buf[i];
+      if(!memcmp(ctx->rbuf, ctx->trigger, ctx->tlen))
+        ctx->show++;
+      continue;
+    }
+    /* past the trigger */
+    if(ctx->show == 1) {
+      memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->flen - 1);
+      ctx->rbuf[ctx->flen - 1] = buf[i];
+      if(!memcmp(ctx->rbuf, ctx->arg, ctx->flen)) {
+        /* match, now output until endarg */
+        fputs(&ctx->arg[1], stdout);
+        ctx->show++;
+      }
+      continue;
+    }
+    /* show until the end */
+    memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->elen - 1);
+    ctx->rbuf[ctx->elen - 1] = buf[i];
+    if(!memcmp(ctx->rbuf, ctx->endarg, ctx->elen))
+      return FALSE;
+
+    if(buf[i] == '\n') {
+      DEBUGASSERT(ctx->olen < sizeof(ctx->obuf));
+      if(ctx->olen == sizeof(ctx->obuf))
+        return FALSE; /* bail out */
+      ctx->obuf[ctx->olen++] = 0;
+      ctx->olen = 0;
+      puts(ctx->obuf);
+    }
+    else {
+      DEBUGASSERT(ctx->olen < sizeof(ctx->obuf));
+      if(ctx->olen == sizeof(ctx->obuf))
+        return FALSE; /* bail out */
+      ctx->obuf[ctx->olen++] = buf[i];
+    }
+  }
+  return TRUE;
+}
+
 #endif
+
+void tool_help(const char *category)
+{
+  unsigned int cols = get_terminal_columns();
+  /* If no category was provided */
+  if(!category) {
+    const char *category_note = "\nThis is not the full help; this "
+      "menu is split into categories.\nUse \"--help category\" to get "
+      "an overview of all categories, which are:";
+    const char *category_note2 =
+      "Use \"--help all\" to list all options"
+#ifdef USE_MANUAL
+      "\nUse \"--help [option]\" to view documentation for a given option"
+#endif
+      ;
+    puts("Usage: curl [options...] <url>");
+    print_category(CURLHELP_IMPORTANT, cols);
+    puts(category_note);
+    get_categories_list(cols);
+    puts(category_note2);
+  }
+  /* Lets print everything if "all" was provided */
+  else if(curl_strequal(category, "all"))
+    /* Print everything */
+    print_category(CURLHELP_ALL, cols);
+  /* Lets handle the string "category" differently to not print an errormsg */
+  else if(curl_strequal(category, "category"))
+    get_categories();
+  else if(category[0] == '-') {
+#ifdef USE_MANUAL
+    /* command line option help */
+    const struct LongShort *a = NULL;
+    if(category[1] == '-') {
+      const char *lookup = &category[2];
+      bool noflagged = FALSE;
+      if(!strncmp(lookup, "no-", 3)) {
+        lookup += 3;
+        noflagged = TRUE;
+      }
+      a = findlongopt(lookup);
+      if(a && noflagged && (ARGTYPE(a->desc) != ARG_BOOL))
+        /* a --no- prefix for a non-boolean is not specifying a proper
+           option */
+        a = NULL;
+    }
+    else if(!category[2])
+      a = findshortopt(category[1]);
+    if(!a) {
+      curl_mfprintf(tool_stderr, "Incorrect option name to show help for,"
+                    " see curl -h\n");
+    }
+    else {
+      char cmdbuf[80];
+      if(a->letter != ' ')
+        curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    -%c, --", a->letter);
+      else if(a->desc & ARG_NO)
+        curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    --no-%s", a->lname);
+      else
+        curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    %s", category);
+#ifdef USE_MANUAL
+      if(a->cmd == C_XATTR)
+        /* this is the last option, which then ends when FILES starts */
+        showhelp("\nALL OPTIONS\n", cmdbuf, "\nFILES");
+      else
+        showhelp("\nALL OPTIONS\n", cmdbuf, "\n    -");
+#endif
+    }
+#else
+    curl_mfprintf(tool_stderr, "Cannot comply. "
+                  "This curl was built without built-in manual\n");
+#endif
+  }
+  /* Otherwise print category and handle the case if the cat was not found */
+  else if(get_category_content(category, cols)) {
+    puts("Unknown category provided, here is a list of all categories:\n");
+    get_categories();
+  }
+}
+
+static bool is_debug(void)
+{
+  const char *const *builtin;
+  for(builtin = feature_names; *builtin; ++builtin)
+    if(curl_strequal("debug", *builtin))
+      return TRUE;
+  return FALSE;
 }
 
 void tool_version_info(void)
 {
-  const char *const *proto;
+  const char *const *builtin;
+  if(is_debug())
+    curl_mfprintf(tool_stderr, "WARNING: this libcurl is Debug-enabled, "
+                  "do not use in production\n\n");
 
-  printf(CURL_ID "%s\n", curl_version());
+  curl_mprintf(CURL_ID "%s\n", curl_version());
 #ifdef CURL_PATCHSTAMP
-  printf("Release-Date: %s, security patched: %s\n",
-         LIBCURL_TIMESTAMP, CURL_PATCHSTAMP);
+  curl_mprintf("Release-Date: %s, security patched: %s\n",
+               LIBCURL_TIMESTAMP, CURL_PATCHSTAMP);
 #else
-  printf("Release-Date: %s\n", LIBCURL_TIMESTAMP);
+  curl_mprintf("Release-Date: %s\n", LIBCURL_TIMESTAMP);
 #endif
-  if(curlinfo->protocols) {
-    printf("Protocols: ");
-    for(proto = curlinfo->protocols; *proto; ++proto) {
-      printf("%s ", *proto);
+  if(built_in_protos[0]) {
+#ifndef CURL_DISABLE_IPFS
+    const char *insert = NULL;
+    /* we have ipfs and ipns support if libcurl has http support */
+    for(builtin = built_in_protos; *builtin; ++builtin) {
+      if(insert) {
+        /* update insertion so ipfs will be printed in alphabetical order */
+        if(strcmp(*builtin, "ipfs") < 0)
+          insert = *builtin;
+        else
+          break;
+      }
+      else if(!strcmp(*builtin, "http")) {
+        insert = *builtin;
+      }
+    }
+#endif /* !CURL_DISABLE_IPFS */
+    curl_mprintf("Protocols:");
+    for(builtin = built_in_protos; *builtin; ++builtin) {
+      /* Special case: do not list rtmp?* protocols.
+         They may only appear together with "rtmp" */
+      if(!curl_strnequal(*builtin, "rtmp", 4) || !builtin[0][4])
+        curl_mprintf(" %s", *builtin);
+#ifndef CURL_DISABLE_IPFS
+      if(insert && insert == *builtin) {
+        curl_mprintf(" ipfs ipns");
+        insert = NULL;
+      }
+#endif /* !CURL_DISABLE_IPFS */
     }
     puts(""); /* newline */
   }
-  if(curlinfo->features) {
-    char *featp[ sizeof(feats) / sizeof(feats[0]) + 1];
-    size_t numfeat = 0;
-    unsigned int i;
-    printf("Features:");
-    for(i = 0; i < sizeof(feats)/sizeof(feats[0]); i++) {
-      if(curlinfo->features & feats[i].bitmask)
-        featp[numfeat++] = (char *)feats[i].name;
-    }
-#ifdef USE_METALINK
-    featp[numfeat++] = (char *)"Metalink";
+  if(feature_names[0]) {
+    const char **feat_ext;
+    size_t feat_ext_count = feature_count;
+#ifdef CURL_CA_EMBED
+    ++feat_ext_count;
 #endif
-    qsort(&featp[0], numfeat, sizeof(char *), featcomp);
-    for(i = 0; i< numfeat; i++)
-      printf(" %s", featp[i]);
-    puts(""); /* newline */
+    feat_ext = malloc(sizeof(*feature_names) * (feat_ext_count + 1));
+    if(feat_ext) {
+      memcpy((void *)feat_ext, feature_names,
+             sizeof(*feature_names) * feature_count);
+      feat_ext_count = feature_count;
+#ifdef CURL_CA_EMBED
+      feat_ext[feat_ext_count++] = "CAcert";
+#endif
+      feat_ext[feat_ext_count] = NULL;
+      qsort((void *)feat_ext, feat_ext_count, sizeof(*feat_ext),
+            struplocompare4sort);
+      curl_mprintf("Features:");
+      for(builtin = feat_ext; *builtin; ++builtin)
+        curl_mprintf(" %s", *builtin);
+      puts(""); /* newline */
+      free((void *)feat_ext);
+    }
   }
   if(strcmp(CURL_VERSION, curlinfo->version)) {
-    printf("WARNING: curl and libcurl versions do not match. "
-           "Functionality may be affected.\n");
+    curl_mprintf("WARNING: curl and libcurl versions do not match. "
+                 "Functionality may be affected.\n");
   }
 }
 
@@ -622,7 +395,7 @@ void tool_list_engines(void)
   puts("Build-time engines:");
   if(engines) {
     for(; engines; engines = engines->next)
-      printf("  %s\n", engines->data);
+      curl_mprintf("  %s\n", engines->data);
   }
   else {
     puts("  <none>");

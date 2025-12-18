@@ -9,9 +9,9 @@ HTTP proxy
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -26,25 +26,26 @@ the content goes here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy and host-only URL
- </name>
+</name>
 # the thing here is that this sloppy form is accepted and we convert it
 # for normal server use, and we need to make sure it gets converted to
 # RFC style even for proxies
- <command>
--x %HOSTIP:%HTTPPORT we.want.that.site.com.1213
+<command>
+-x %HOSTIP:%HTTPPORT we.want.that.site.com.%TESTNUMBER
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://we.want.that.site.com.1213/ HTTP/1.1
-Host: we.want.that.site.com.1213
+<protocol crlf="headers">
+GET http://we.want.that.site.com.%TESTNUMBER/ HTTP/1.1
+Host: we.want.that.site.com.%TESTNUMBER
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

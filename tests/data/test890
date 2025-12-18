@@ -17,7 +17,7 @@ RFC7628
 <reply>
 <servercmd>
 AUTH OAUTHBEARER
-REPLY AUTH + eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0
+REPLY AUTH + %b64[{"status":"invalid_token","scope":"example_scope","openid-configuration":"https://example.com/.well-known/openid-configuration"}]b64%
 REPLY AQ== -ERR Authentication failed
 </servercmd>
 </reply>
@@ -28,17 +28,12 @@ REPLY AQ== -ERR Authentication failed
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 OAuth 2.0 (OAUTHBEARER) failure as continuation with initial response
- </name>
- <command>
-pop3://%HOSTIP:%POP3PORT/890 -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
-# base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%POP3PORT' ne '9001' );"
-</precheck>
 </client>
 
 #
@@ -51,9 +46,9 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
-<protocol>
+<protocol crlf="yes">
 CAPA
-AUTH OAUTHBEARER bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+AUTH OAUTHBEARER %b64[n,a=user,%01host=127.0.0.1%01port=%POP3PORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 AQ==
 </protocol>
 </verify>

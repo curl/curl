@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2019, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,35 +18,40 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#ifdef _WIN32
 
 #include <curl/curl.h>
 #include "system_win32.h"
+#include "curlx/version_win32.h"
 #include "curl_sspi.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
-LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
-
+#ifndef HAVE_IF_NAMETOINDEX
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
 
-/* Curl_win32_init() performs win32 global initialization */
+/* This is used to dynamically load DLLs */
+static HMODULE curl_load_library(LPCTSTR filename);
+#endif
+
+/* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
-     is just for Winsock at the moment. Any required win32 initialization
+     is just for Winsock at the moment. Any required Win32 initialization
      should take place after this block. */
   if(flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
@@ -54,16 +59,11 @@ CURLcode Curl_win32_init(long flags)
     WSADATA wsaData;
     int res;
 
-#if defined(ENABLE_IPV6) && (USE_WINSOCK < 2)
-#error IPV6_requires_winsock2
-#endif
-
-    wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
-
+    wVersionRequested = MAKEWORD(2, 2);
     res = WSAStartup(wVersionRequested, &wsaData);
 
-    if(res != 0)
-      /* Tell the user that we couldn't find a usable */
+    if(res)
+      /* Tell the user that we could not find a usable */
       /* winsock.dll.     */
       return CURLE_FAILED_INIT;
 
@@ -75,16 +75,16 @@ CURLcode Curl_win32_init(long flags)
 
     if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
        HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-      /* Tell the user that we couldn't find a usable */
+      /* Tell the user that we could not find a usable */
 
       /* winsock.dll. */
       WSACleanup();
       return CURLE_FAILED_INIT;
     }
     /* The Windows Sockets DLL is acceptable. Proceed. */
-  #elif defined(USE_LWIPSOCK)
+#elif defined(USE_LWIPSOCK)
     lwip_init();
-  #endif
+#endif
   } /* CURL_GLOBAL_WIN32 */
 
 #ifdef USE_WINDOWS_SSPI
@@ -95,36 +95,48 @@ CURLcode Curl_win32_init(long flags)
   }
 #endif
 
-  s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
+#ifndef HAVE_IF_NAMETOINDEX
+  s_hIpHlpApiDll = curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
+#ifdef UNDER_CE
+    #define CURL_TEXT(n) TEXT(n)
+#else
+    #define CURL_TEXT(n) (n)
+#endif
     IF_NAMETOINDEX_FN pIfNameToIndex =
       CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
-                          (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
+                          GetProcAddress(s_hIpHlpApiDll,
+                                         CURL_TEXT("if_nametoindex")));
 
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
   }
+#endif
 
-  if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
-                                 VERSION_GREATER_THAN_EQUAL)) {
+  /* curlx_verify_windows_version must be called during init at least once
+     because it has its own initialization routine. */
+  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                  VERSION_GREATER_THAN_EQUAL)) {
     Curl_isVistaOrGreater = TRUE;
-    QueryPerformanceFrequency(&Curl_freq);
   }
   else
     Curl_isVistaOrGreater = FALSE;
 
+  QueryPerformanceFrequency(&Curl_freq);
   return CURLE_OK;
 }
 
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
+#ifndef HAVE_IF_NAMETOINDEX
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
     Curl_if_nametoindex = NULL;
   }
+#endif
 
 #ifdef USE_WINDOWS_SSPI
   Curl_sspi_global_cleanup();
@@ -137,11 +149,13 @@ void Curl_win32_cleanup(long init_flags)
   }
 }
 
-#if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
+#ifndef HAVE_IF_NAMETOINDEX
+
+#ifndef LOAD_WITH_ALTERED_SEARCH_PATH
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
 #endif
 
-#if !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
+#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
 #define LOAD_LIBRARY_SEARCH_SYSTEM32   0x00000800
 #endif
 
@@ -150,7 +164,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 
 /* See function definitions in winbase.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
+#  ifdef UNDER_CE
 #    define LOADLIBARYEX  L"LoadLibraryExW"
 #  else
 #    define LOADLIBARYEX  "LoadLibraryExW"
@@ -160,199 +174,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 #endif
 
 /*
- * Curl_verify_windows_version()
- *
- * This is used to verify if we are running on a specific windows version.
- *
- * Parameters:
- *
- * majorVersion [in] - The major version number.
- * minorVersion [in] - The minor version number.
- * platform     [in] - The optional platform identifier.
- * condition    [in] - The test condition used to specifier whether we are
- *                     checking a version less then, equal to or greater than
- *                     what is specified in the major and minor version
- *                     numbers.
- *
- * Returns TRUE if matched; otherwise FALSE.
- */
-bool Curl_verify_windows_version(const unsigned int majorVersion,
-                                 const unsigned int minorVersion,
-                                 const PlatformIdentifier platform,
-                                 const VersionCondition condition)
-{
-  bool matched = FALSE;
-
-#if defined(CURL_WINDOWS_APP)
-  /* We have no way to determine the Windows version from Windows apps,
-     so let's assume we're running on the target Windows version. */
-  const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);
-  const WORD targetVersion = (WORD)_WIN32_WINNT;
-
-  switch(condition) {
-  case VERSION_LESS_THAN:
-    matched = targetVersion < fullVersion;
-    break;
-
-  case VERSION_LESS_THAN_EQUAL:
-    matched = targetVersion <= fullVersion;
-    break;
-
-  case VERSION_EQUAL:
-    matched = targetVersion == fullVersion;
-    break;
-
-  case VERSION_GREATER_THAN_EQUAL:
-    matched = targetVersion >= fullVersion;
-    break;
-
-  case VERSION_GREATER_THAN:
-    matched = targetVersion > fullVersion;
-    break;
-  }
-
-  if(matched && (platform == PLATFORM_WINDOWS)) {
-    /* we're always running on PLATFORM_WINNT */
-    matched = FALSE;
-  }
-#elif !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
-    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
-  OSVERSIONINFO osver;
-
-  memset(&osver, 0, sizeof(osver));
-  osver.dwOSVersionInfoSize = sizeof(osver);
-
-  /* Find out Windows version */
-  if(GetVersionEx(&osver)) {
-    /* Verify the Operating System version number */
-    switch(condition) {
-    case VERSION_LESS_THAN:
-      if(osver.dwMajorVersion < majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion < minorVersion))
-        matched = TRUE;
-      break;
-
-    case VERSION_LESS_THAN_EQUAL:
-      if(osver.dwMajorVersion < majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion <= minorVersion))
-        matched = TRUE;
-      break;
-
-    case VERSION_EQUAL:
-      if(osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion)
-        matched = TRUE;
-      break;
-
-    case VERSION_GREATER_THAN_EQUAL:
-      if(osver.dwMajorVersion > majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion >= minorVersion))
-        matched = TRUE;
-      break;
-
-    case VERSION_GREATER_THAN:
-      if(osver.dwMajorVersion > majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion > minorVersion))
-        matched = TRUE;
-      break;
-    }
-
-    /* Verify the platform identifier (if necessary) */
-    if(matched) {
-      switch(platform) {
-      case PLATFORM_WINDOWS:
-        if(osver.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
-          matched = FALSE;
-        break;
-
-      case PLATFORM_WINNT:
-        if(osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
-          matched = FALSE;
-
-      default: /* like platform == PLATFORM_DONT_CARE */
-        break;
-      }
-    }
-  }
-#else
-  ULONGLONG cm = 0;
-  OSVERSIONINFOEX osver;
-  BYTE majorCondition;
-  BYTE minorCondition;
-  BYTE spMajorCondition;
-  BYTE spMinorCondition;
-
-  switch(condition) {
-  case VERSION_LESS_THAN:
-    majorCondition = VER_LESS;
-    minorCondition = VER_LESS;
-    spMajorCondition = VER_LESS_EQUAL;
-    spMinorCondition = VER_LESS_EQUAL;
-    break;
-
-  case VERSION_LESS_THAN_EQUAL:
-    majorCondition = VER_LESS_EQUAL;
-    minorCondition = VER_LESS_EQUAL;
-    spMajorCondition = VER_LESS_EQUAL;
-    spMinorCondition = VER_LESS_EQUAL;
-    break;
-
-  case VERSION_EQUAL:
-    majorCondition = VER_EQUAL;
-    minorCondition = VER_EQUAL;
-    spMajorCondition = VER_GREATER_EQUAL;
-    spMinorCondition = VER_GREATER_EQUAL;
-    break;
-
-  case VERSION_GREATER_THAN_EQUAL:
-    majorCondition = VER_GREATER_EQUAL;
-    minorCondition = VER_GREATER_EQUAL;
-    spMajorCondition = VER_GREATER_EQUAL;
-    spMinorCondition = VER_GREATER_EQUAL;
-    break;
-
-  case VERSION_GREATER_THAN:
-    majorCondition = VER_GREATER;
-    minorCondition = VER_GREATER;
-    spMajorCondition = VER_GREATER_EQUAL;
-    spMinorCondition = VER_GREATER_EQUAL;
-    break;
-
-  default:
-    return FALSE;
-  }
-
-  memset(&osver, 0, sizeof(osver));
-  osver.dwOSVersionInfoSize = sizeof(osver);
-  osver.dwMajorVersion = majorVersion;
-  osver.dwMinorVersion = minorVersion;
-  if(platform == PLATFORM_WINDOWS)
-    osver.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
-  else if(platform == PLATFORM_WINNT)
-    osver.dwPlatformId = VER_PLATFORM_WIN32_NT;
-
-  cm = VerSetConditionMask(cm, VER_MAJORVERSION, majorCondition);
-  cm = VerSetConditionMask(cm, VER_MINORVERSION, minorCondition);
-  cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, spMajorCondition);
-  cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, spMinorCondition);
-  if(platform != PLATFORM_DONT_CARE)
-    cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
-
-  if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
-                                VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-                       cm))
-    matched = TRUE;
-#endif
-
-  return matched;
-}
-
-/*
- * Curl_load_library()
+ * curl_load_library()
  *
  * This is used to dynamically load DLLs using the most secure method available
  * for the version of Windows that we are running on.
@@ -365,13 +187,13 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
  *
  * Returns the handle of the module on success; otherwise NULL.
  */
-HMODULE Curl_load_library(LPCTSTR filename)
+static HMODULE curl_load_library(LPCTSTR filename)
 {
-#ifndef CURL_WINDOWS_APP
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
-  /* Get a handle to kernel32 so we can access it's functions at runtime */
+  /* Get a handle to kernel32 so we can access its functions at runtime */
   HMODULE hKernel32 = GetModuleHandle(TEXT("kernel32"));
   if(!hKernel32)
     return NULL;
@@ -380,9 +202,9 @@ HMODULE Curl_load_library(LPCTSTR filename)
      and above */
   pLoadLibraryEx =
     CURLX_FUNCTION_CAST(LOADLIBRARYEX_FN,
-                        (GetProcAddress(hKernel32, LOADLIBARYEX)));
+                        GetProcAddress(hKernel32, LOADLIBARYEX));
 
-  /* Detect if there's already a path in the filename and load the library if
+  /* Detect if there is already a path in the filename and load the library if
      there is. Note: Both back slashes and forward slashes have been supported
      since the earlier days of DOS at an API level although they are not
      supported by command prompt */
@@ -392,7 +214,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
       pLoadLibraryEx(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
       LoadLibrary(filename);
   }
-  /* Detect if KB2533623 is installed, as LOAD_LIBARY_SEARCH_SYSTEM32 is only
+  /* Detect if KB2533623 is installed, as LOAD_LIBRARY_SEARCH_SYSTEM32 is only
      supported on Windows Vista, Windows Server 2008, Windows 7 and Windows
      Server 2008 R2 with this patch or natively on Windows 8 and above */
   else if(pLoadLibraryEx && GetProcAddress(hKernel32, "AddDllDirectory")) {
@@ -403,7 +225,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
     /* Attempt to get the Windows system path */
     UINT systemdirlen = GetSystemDirectory(NULL, 0);
     if(systemdirlen) {
-      /* Allocate space for the full DLL path (Room for the null terminator
+      /* Allocate space for the full DLL path (Room for the null-terminator
          is included in systemdirlen) */
       size_t filenamelen = _tcslen(filename);
       TCHAR *path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));
@@ -417,17 +239,17 @@ HMODULE Curl_load_library(LPCTSTR filename)
         hModule = pLoadLibraryEx ?
           pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
           LoadLibrary(path);
-
       }
       free(path);
     }
   }
   return hModule;
 #else
-  /* the Universal Windows Platform (UWP) can't do this */
+  /* the Universal Windows Platform (UWP) cannot do this */
   (void)filename;
   return NULL;
 #endif
 }
+#endif /* !HAVE_IF_NAMETOINDEX */
 
-#endif /* WIN32 */
+#endif /* _WIN32 */

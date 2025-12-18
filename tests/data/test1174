@@ -22,23 +22,21 @@ HTTP/0.9
 <server>
 http
 </server>
- <name>
+<name>
 HTTP/0.9 GET response denied by default
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1174
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1174 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -18,19 +18,19 @@ CUSTOMREQUEST
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP RSET (CUSTOMREQUEST)
- </name>
- <command>
-smtp://%HOSTIP:%SMTPPORT/930 -X RSET -I
+</name>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X RSET -I
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-EHLO 930
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 RSET
 QUIT
 </protocol>

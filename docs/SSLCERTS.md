@@ -1,173 +1,156 @@
-SSL Certificate Verification
-============================
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SSL is TLS
-----------
+SPDX-License-Identifier: curl
+-->
 
-SSL is the old name. It is called TLS these days.
+# TLS Certificate Verification
 
+## Native vs file based
 
-Native SSL
-----------
+If curl was built with Schannel support, then curl uses the Windows native CA
+store for verification. On Apple operating systems, it is possible to use Apple's
+"SecTrust" services for certain TLS backends, details below.
+All other TLS libraries use a file based CA store by
+default.
 
-If libcurl was built with Schannel or Secure Transport support (the native SSL
-libraries included in Windows and Mac OS X), then this does not apply to
-you. Scroll down for details on how the OS-native engines handle SSL
-certificates. If you're not sure, then run "curl -V" and read the results. If
-the version string says "WinSSL" in it, then it was built with Schannel
-support.
+## Verification
 
-It is about trust
------------------
+Every trusted server certificate is digitally signed by a Certificate
+Authority, a CA.
 
-This system is about trust. In your local CA certificate store you have certs
-from *trusted* Certificate Authorities that you then can use to verify that the
-server certificates you see are valid. They're signed by one of the CAs you
-trust.
+In your local CA store you have a collection of certificates from *trusted*
+certificate authorities that TLS clients like curl use to verify servers.
 
-Which CAs do you trust? You can decide to trust the same set of companies your
-operating system trusts, or the set one of the known browsers trust. That's
-basically trust via someone else you trust. You should just be aware that
-modern operating systems and browsers are setup to trust *hundreds* of
-companies and recent years several such CAs have been found untrustworthy.
-
-Certificate Verification
-------------------------
-
-libcurl performs peer SSL certificate verification by default.  This is done
-by using a CA certificate store that the SSL library can use to make sure the
-peer's server certificate is valid.
+curl does certificate verification by default. This is done by verifying the
+signature and making sure the certificate was crafted for the server name
+provided in the URL.
 
 If you communicate with HTTPS, FTPS or other TLS-using servers using
-certificates that are signed by CAs present in the store, you can be sure
-that the remote server really is the one it claims to be.
+certificates signed by a CA whose certificate is present in the store, you can
+be sure that the remote server really is the one it claims to be.
 
-If the remote server uses a self-signed certificate, if you don't install a CA
-cert store, if the server uses a certificate signed by a CA that isn't
+If the remote server uses a self-signed certificate, if you do not install a
+CA cert store, if the server uses a certificate signed by a CA that is not
 included in the store you use or if the remote host is an impostor
-impersonating your favorite site, and you want to transfer files from this
-server, do one of the following:
+impersonating your favorite site, the certificate check fails and reports an
+error.
 
- 1. Tell libcurl to *not* verify the peer. With libcurl you disable this with
-    `curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);`
+If you think it wrongly failed the verification, consider one of the following
+sections.
 
-    With the curl command line tool, you disable this with -k/--insecure.
+### Skip verification
 
- 2. Get a CA certificate that can verify the remote server and use the proper
-    option to point out this CA cert for verification when connecting. For
-    libcurl hackers: `curl_easy_setopt(curl, CURLOPT_CAPATH, capath);`
+Tell curl to *not* verify the peer with `-k`/`--insecure`.
 
-    With the curl command line tool: --cacert [file]
+We **strongly** recommend this is avoided and that even if you end up doing
+this for experimentation or development, **never** skip verification in
+production.
 
- 3. Add the CA cert for your server to the existing default CA certificate
-    store. The default CA certificate store can changed at compile time with the
-    following configure options:
+### Use a custom CA store
 
-    --with-ca-bundle=FILE: use the specified file as CA certificate store. CA
-    certificates need to be concatenated in PEM format into this file.
+Get a CA certificate that can verify the remote server and use the proper
+option to point out this CA cert for verification when connecting - for this
+specific transfer only.
 
-    --with-ca-path=PATH: use the specified path as CA certificate store. CA
-    certificates need to be stored as individual PEM files in this directory.
-    You may need to run c_rehash after adding files there.
+With the curl command line tool: `--cacert [file]`
 
-    If neither of the two options is specified, configure will try to auto-detect
-    a setting. It's also possible to explicitly not hardcode any default store
-    but rely on the built in default the crypto library may provide instead.
-    You can achieve that by passing both --without-ca-bundle and
-    --without-ca-path to the configure script.
+If you use the curl command line tool without a native CA store, then you can
+specify your own CA cert file by setting the environment variable
+`CURL_CA_BUNDLE` to the path of your choice. `SSL_CERT_FILE` and `SSL_CERT_DIR`
+are also supported.
 
-    If you use Internet Explorer, this is one way to get extract the CA cert
-    for a particular server:
+If you are using the curl command line tool on Windows, curl searches for a CA
+cert file named `curl-ca-bundle.crt` in these directories and in this order:
+  1. application's directory
+  2. current working directory
+  3. Windows System directory (e.g. C:\Windows\System32)
+  4. Windows Directory (e.g. C:\Windows)
+  5. all directories along %PATH%
 
-     - View the certificate by double-clicking the padlock
-     - Find out where the CA certificate is kept (Certificate>
-       Authority Information Access>URL)
-     - Get a copy of the crt file using curl
-     - Convert it from crt to PEM using the openssl tool:
-       openssl x509 -inform DES -in yourdownloaded.crt \
-       -out outcert.pem -text
-     - Add the 'outcert.pem' to the CA certificate store or use it stand-alone
-       as described below.
+curl 8.11.0 added a build-time option to disable this search behavior, and
+another option to restrict search to the application's directory.
 
-    If you use the 'openssl' tool, this is one way to get extract the CA cert
-    for a particular server:
+### Use the native store
 
-     - `openssl s_client -showcerts -servername server -connect server:443 > cacert.pem`
-     - type "quit", followed by the "ENTER" key
-     - The certificate will have "BEGIN CERTIFICATE" and "END CERTIFICATE"
-       markers.
-     - If you want to see the data in the certificate, you can do: "openssl
-       x509 -inform PEM -in certfile -text -out certdata" where certfile is
-       the cert you extracted from logfile. Look in certdata.
-     - If you want to trust the certificate, you can add it to your CA
-       certificate store or use it stand-alone as described. Just remember that
-       the security is no better than the way you obtained the certificate.
+In several environments, in particular on Microsoft and Apple operating
+systems, you can ask curl to use the system's native CA store when verifying
+the certificate. Depending on how curl was built, this may already be the
+default.
 
- 4. If you're using the curl command line tool, you can specify your own CA
-    cert path by setting the environment variable `CURL_CA_BUNDLE` to the path
-    of your choice.
+With the curl command line tool: `--ca-native`.
 
-    If you're using the curl command line tool on Windows, curl will search
-    for a CA cert file named "curl-ca-bundle.crt" in these directories and in
-    this order:
-      1. application's directory
-      2. current working directory
-      3. Windows System directory (e.g. C:\windows\system32)
-      4. Windows Directory (e.g. C:\windows)
-      5. all directories along %PATH%
+### Modify the CA store
 
- 5. Get a better/different/newer CA cert bundle! One option is to extract the
-    one a recent Firefox browser uses by running 'make ca-bundle' in the curl
-    build tree root, or possibly download a version that was generated this
-    way for you: [CA Extract](https://curl.haxx.se/docs/caextract.html)
+Add the CA cert for your server to the existing default CA certificate store.
 
-Neglecting to use one of the above methods when dealing with a server using a
-certificate that isn't signed by one of the certificates in the installed CA
-certificate store, will cause SSL to report an error ("certificate verify
-failed") during the handshake and SSL will then refuse further communication
-with that server.
+Usually you can figure out the path to the local CA store by looking at the
+verbose output that `curl -v` shows when you connect to an HTTPS site.
 
-Certificate Verification with NSS
----------------------------------
+### Change curl's default CA store
 
-If libcurl was built with NSS support, then depending on the OS distribution,
-it is probably required to take some additional steps to use the system-wide
-CA cert db. RedHat ships with an additional module, libnsspem.so, which
-enables NSS to read the OpenSSL PEM CA bundle. On openSUSE you can install
-p11-kit-nss-trust which makes NSS use the system wide CA certificate store. NSS
-also has a new [database format](https://wiki.mozilla.org/NSS_Shared_DB).
+The default CA certificate store curl uses is set at build time. When you
+build curl you can point out your preferred path.
 
-Starting with version 7.19.7, libcurl automatically adds the 'sql:' prefix to
-the certdb directory (either the hardcoded default /etc/pki/nssdb or the
-directory configured with SSL_DIR environment variable). To check which certdb
-format your distribution provides, examine the default certdb location:
-/etc/pki/nssdb; the new certdb format can be identified by the filenames
-cert9.db, key4.db, pkcs11.txt; filenames of older versions are cert8.db,
-key3.db, secmod.db.
+### Extract CA cert from a server
 
-Certificate Verification with Schannel and Secure Transport
------------------------------------------------------------
+    curl -w %{certs} https://example.com > cacert.pem
 
-If libcurl was built with Schannel (Microsoft's native TLS engine) or Secure
-Transport (Apple's native TLS engine) support, then libcurl will still perform
-peer certificate verification, but instead of using a CA cert bundle, it will
-use the certificates that are built into the OS. These are the same
-certificates that appear in the Internet Options control panel (under Windows)
-or Keychain Access application (under OS X). Any custom security rules for
-certificates will be honored.
+The certificate has `BEGIN CERTIFICATE` and `END CERTIFICATE` markers.
 
-Schannel will run CRL checks on certificates unless peer verification is
-disabled. Secure Transport on iOS will run OCSP checks on certificates unless
-peer verification is disabled. Secure Transport on OS X will run either OCSP
-or CRL checks on certificates if those features are enabled, and this behavior
-can be adjusted in the preferences of Keychain Access.
+### Get the Mozilla CA store
 
-HTTPS proxy
------------
+Download a version of the Firefox CA store converted to PEM format on the [CA
+Extract](https://curl.se/docs/caextract.html) page. It always features the
+latest Firefox bundle.
 
-Since version 7.52.0, curl can do HTTPS to the proxy separately from the
-connection to the server. This TLS connection is handled separately from the
-server connection so instead of `--insecure` and `--cacert` to control the
+## Native CA store
+
+### Windows + Schannel
+
+If curl was built with Schannel, then curl uses the certificates that are
+built into the OS. These are the same certificates that appear in the
+Internet Options control panel (under Windows).
+Any custom security rules for certificates are honored.
+
+Schannel runs CRL checks on certificates unless peer verification is disabled.
+
+### Apple + OpenSSL/GnuTLS
+
+When curl is built with Apple SecTrust enabled and uses an OpenSSL compatible
+TLS backend or GnuTLS, the default verification is handled by that Apple
+service. As in:
+
+    curl https://example.com
+
+You may still provide your own certificates on the command line, such as:
+
+    curl --cacert mycerts.pem https://example.com
+
+In this situation, Apple SecTrust is **not** used and verification is done
+**only** with the trust anchors found in `mycerts.pem`. If you want **both**
+Apple SecTrust and your own file to be considered, use:
+
+    curl --ca-native --cacert mycerts.pem https://example.com
+
+
+#### Other Combinations
+
+How well the use of native CA stores work in all other combinations depends
+on the TLS backend and the OS. Many TLS backends offer functionality to access
+the native CA on a range of operating systems. Some provide this only on specific
+configurations.
+
+Specific support in curl exists for Windows and OpenSSL compatible TLS backends.
+It tries to load the certificates from the Windows "CA" and "ROOT" stores for
+transfers requesting the native CA. Due to Window's delayed population of those
+stores, this might not always find all certificates.
+
+## HTTPS proxy
+
+curl can do HTTPS to the proxy separately from the connection to the server.
+This TLS connection is handled and verified separately from the server
+connection so instead of `--insecure` and `--cacert` to control the
 certificate verification, you use `--proxy-insecure` and `--proxy-cacert`.
 With these options, you make sure that the TLS connection and the trust of the
 proxy can be kept totally separate from the TLS connection to the server.

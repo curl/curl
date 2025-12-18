@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,14 +20,28 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
 
-bool Curl_isunreserved(unsigned char in);
-CURLcode Curl_urldecode(struct Curl_easy *data,
-                        const char *string, size_t length,
+#include "curl_ctype.h"
+
+enum urlreject {
+  REJECT_NADA = 2,
+  REJECT_CTRL,
+  REJECT_ZERO
+};
+
+CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
-                        bool reject_crlf);
+                        enum urlreject ctrl);
+
+void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
+                    unsigned char *out, size_t olen); /* output buffer size */
+
+void Curl_hexbyte(unsigned char *dest, /* must fit two bytes */
+                  unsigned char val);
 
 #endif /* HEADER_CURL_ESCAPE_H */

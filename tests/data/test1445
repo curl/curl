@@ -15,21 +15,21 @@ FILE
 file
 </server>
 <precheck>
-perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test1445.dir
+%PERL %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
- <name>
+<name>
 file:// with --remote-time
- </name>
- <command>
-file://localhost/%PWD/log/test1445.dir/plainfile.txt --remote-time
+</name>
+<command>
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt --remote-time
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test1445.dir && \
-perl -e 'exit((stat("log/curl1445.out"))[9] != 946728000)'
-</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
+<postcheck>
+%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir && \
+%PERL -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 946728000)'
+</postcheck>
 </verify>
 </testcase>

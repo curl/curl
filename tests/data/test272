@@ -18,22 +18,22 @@ RETR
 <server>
 ftp
 </server>
- <name>
-FTP timed conditioned get file with identical time stamp 
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/272 -z "2004 jan 1 12:12:12 UTC"
+<name>
+FTP timed conditioned get file with identical time stamp
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -z "2004 jan 1 12:12:12 UTC"
 </command>
 
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 272
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

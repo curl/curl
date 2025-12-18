@@ -9,9 +9,9 @@ HTTP GET
 
 #
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -24,45 +24,35 @@ Content-Type: text/html
 #
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -O and -J output in, using the CURL_TESTDIR variable
-<features>
-debug
-</features>
 <server>
 http
 </server>
 <name>
 HTTP GET with -O -J without Content-Disposition, -D file
 </name>
-<setenv>
-CURL_TESTDIR=%PWD/log
-</setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1338 -J -O -D log/heads1338
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D %LOGDIR/heads%TESTNUMBER --output-dir %LOGDIR
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1338 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/1338">
+<file1 name="%LOGDIR/%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/heads1338">
+<file2 name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -70,7 +60,7 @@ Content-Type: text/html
 
 </file2>
 
-<file3 name="log/stdout1338">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
 </verify>

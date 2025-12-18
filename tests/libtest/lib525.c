@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,62 +18,58 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include <fcntl.h>
-
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-int test(char *URL)
+static CURLcode test_lib525(const char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = NULL;
+  char errbuf[STRERROR_LEN];
   FILE *hd_src = NULL;
   int hd;
   struct_stat file_info;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   int running;
 
   start_test_timing();
 
   if(!libtest_arg2) {
-#ifdef LIB529
-    /* test 529 */
-    fprintf(stderr, "Usage: lib529 [url] [uploadfile]\n");
-#else
-    /* test 525 */
-    fprintf(stderr, "Usage: lib525 [url] [uploadfile]\n");
-#endif
+    curl_mfprintf(stderr, "Usage: test [url] [uploadfile]\n");
     return TEST_ERR_USAGE;
   }
 
-  hd_src = fopen(libtest_arg2, "rb");
-  if(NULL == hd_src) {
-    fprintf(stderr, "fopen failed with error: %d (%s)\n",
-            errno, strerror(errno));
-    fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
+  hd_src = curlx_fopen(libtest_arg2, "rb");
+  if(!hd_src) {
+    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
 
   /* get the file size of the local file */
+#ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
+  hd = stat(libtest_arg2, &file_info);
+#else
   hd = fstat(fileno(hd_src), &file_info);
+#endif
   if(hd == -1) {
     /* can't open file, bail out */
-    fprintf(stderr, "fstat() failed with error: %d (%s)\n",
-            errno, strerror(errno));
-    fprintf(stderr, "ERROR: cannot open file (%s)\n", libtest_arg2);
-    fclose(hd_src);
+    curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
+    curlx_fclose(hd_src);
     return TEST_ERR_FSTAT;
   }
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return res;
   }
 
@@ -105,9 +101,9 @@ int test(char *URL)
      make sure that to pass in a type 'long' argument. */
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
   for(;;) {
     struct timeval interval;
@@ -117,7 +113,7 @@ int test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    multi_perform(m, &running);
+    multi_perform(multi, &running);
 
     abort_on_test_timeout();
 
@@ -128,7 +124,7 @@ int test(char *URL)
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    multi_fdset(m, &rd, &wr, &exc, &maxfd);
+    multi_fdset(multi, &rd, &wr, &exc, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -139,24 +135,23 @@ int test(char *URL)
 
 test_cleanup:
 
-#ifdef LIB529
-  /* test 529 */
-  /* proper cleanup sequence - type PA */
-  curl_multi_remove_handle(m, curl);
-  curl_multi_cleanup(m);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
-#else
-  /* test 525 */
-  /* proper cleanup sequence - type PB */
-  curl_multi_remove_handle(m, curl);
-  curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
-#endif
+  if(testnum == 529) {
+    /* proper cleanup sequence - type PA */
+    curl_multi_remove_handle(multi, curl);
+    curl_multi_cleanup(multi);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+  }
+  else { /* testnum == 525 */
+    /* proper cleanup sequence - type PB */
+    curl_multi_remove_handle(multi, curl);
+    curl_easy_cleanup(curl);
+    curl_multi_cleanup(multi);
+    curl_global_cleanup();
+  }
 
   /* close the local file */
-  fclose(hd_src);
+  curlx_fclose(hd_src);
 
   return res;
 }

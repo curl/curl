@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+IPFS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ipfs
+</features>
+<server>
+http
+</server>
+<setenv>
+#
+# Set a home that doesn't have a ".ipfs" folder. %PWD should be good.
+# This is to prevent the automatic gateway detection from finding a gateway file in your home folder.
+HOME=%PWD
+</setenv>
+<name>
+IPFS with no gateway URL (no environment or home file either)
+</name>
+<command>
+ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
+</command>
+</client>
+
+#
+# Verify with no gateway url and no auto detection
+<verify>
+<errorcode>
+37
+</errorcode>
+</verify>
+</testcase>

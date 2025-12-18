@@ -9,7 +9,11 @@ early response
 </keywords>
 </info>
 #
-# This reproduces issue #657, fixed with PR #668 - on Windows
+# This test checks to make sure curl can call recv() without failing after a
+# send() fails on the same socket (#657). Most OSes should support this
+# natively. On Windows there were reported problems and a workaround via
+# define USE_RECV_BEFORE_SEND_WORKAROUND was added.
+# This proved problematic in other cases and was removed again.
 #
 # Server-side
 <reply>
@@ -32,19 +36,23 @@ This is a virtual description of server virtual error.
 
 # Client-side
 <client>
+# Windows TCP does not deliver response data but reports CONNABORTED
+<features>
+!cygwin
+!win32
+</features>
 <server>
 http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib1517
+lib%TESTNUMBER
 </tool>
-
- <name>
+<name>
 HTTP POST, server responds before completed send
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1517
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -54,8 +62,8 @@ http://%HOSTIP:%HTTPPORT/1517
 <strippart>
 s/^(this is what we post to the silly web server)(\r)?\n//
 </strippart>
-<protocol>
-POST /1517 HTTP/1.1
+<protocol crlf="headers">
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 45

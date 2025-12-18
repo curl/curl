@@ -10,25 +10,25 @@ HTTP MIME POST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
 
 hello
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
 
 hello
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -39,19 +39,22 @@ hello
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib645
+lib643
 </tool>
 
- <name>
+<name>
 HTTP multi-part chunked mimepost using read callback for the file part
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/645
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -59,30 +62,56 @@ http://%HOSTIP:%HTTPPORT/645
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 # Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /645 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-2ce
+7c
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
 
-this is what we post to the silly web server
+d
+1
+u
+1
+m
+1
+m
+1
+y
+1
+
+
+6b
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
 
-this is what we post to the silly web server
+
+1
+d
+1
+u
+1
+m
+1
+m
+1
+y
+1
+
+
+1b2
 
 ------------------------------
 Content-Disposition: form-data; name="filename"
@@ -101,23 +130,49 @@ blah blah
 
 0
 
-POST /645 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-2dc
+8a
 ------------------------------
 Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
 
-this is what we post to the silly web server
+d
+1
+u
+1
+m
+1
+m
+1
+y
+1
+
+
+6b
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
 
-this is what we post to the silly web server
+
+1
+d
+1
+u
+1
+m
+1
+m
+1
+y
+1
+
+
+1b2
 
 ------------------------------
 Content-Disposition: form-data; name="filename"

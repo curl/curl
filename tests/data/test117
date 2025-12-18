@@ -18,11 +18,11 @@ REPLY TYPE 314 bluah you f00l!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download, failed TYPE
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/117
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -31,7 +31,7 @@ ftp://%HOSTIP:%FTPPORT/117
 <errorcode>
 17
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

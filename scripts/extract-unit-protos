@@ -1,0 +1,96 @@
+#!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+use strict;
+use warnings;
+
+my @proto;
+my %inc;
+
+sub scanfile {
+    my ($file) = @_;
+    open(F, "<$file") || die "$file failed";
+    while(<F>) {
+        if($_ =~ /^UNITTEST .*\);/) {
+            push @proto, $_;
+            $inc{$file} = 1;
+        }
+    }
+    close(F);
+}
+
+foreach my $f (@ARGV) {
+    scanfile($f);
+}
+
+print <<HEAD
+#ifndef UNITTESTPROTOS_H
+#define UNITTESTPROTOS_H
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \\| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \\___|\\___/|_| \\_\\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ * Generated-by: extract-unit-protos
+ *
+ ***************************************************************************/
+HEAD
+    ;
+
+for my $f (sort keys %inc) {
+    # convert to suitable header file
+    $f =~ s/\.c/.h/; # .h extension
+
+    if(-f $f) {
+        $f =~ s/.*\///; # cut the path off
+        print "#include \"$f\"\n";
+    }
+}
+
+for my $p (@proto) {
+    print $p;
+}
+
+print <<FOOT
+#endif /* UNITTESTPROTOS_H */
+FOOT
+    ;

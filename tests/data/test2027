@@ -21,7 +21,7 @@ HTTP Digest auth
 -->
 
 <!-- First request has Digest auth, wrong password -->
-<data100>
+<data100 crlf="headers">
 HTTP/1.1 401 Need Digest auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -31,7 +31,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="1"
 This is not the real page!
 </data100>
 
-<data1100>
+<data1100 crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -42,7 +42,7 @@ This is a bad password page!
 </data1100>
 
 <!-- Second request has Digest auth, right password -->
-<data200>
+<data200 crlf="headers">
 HTTP/1.1 401 Need Digest auth (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -52,7 +52,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="3"
 This is not the real page!
 </data200>
 
-<data1200>
+<data1200 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -62,7 +62,7 @@ Finally, this is the real page!
 </data1200>
 
 <!-- Third request has Digest auth, wrong password -->
-<data300>
+<data300 crlf="headers">
 HTTP/1.1 401 Need Digest auth (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -72,7 +72,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="4"
 This is not the real page!
 </data300>
 
-<data1300>
+<data1300 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -83,7 +83,7 @@ This is a bad password page!
 </data1300>
 
 <!-- Fourth request has Digest auth, wrong password -->
-<data400>
+<data400 crlf="headers">
 HTTP/1.1 401 Need Digest auth (4)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -93,7 +93,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="6"
 This is not the real page!
 </data400>
 
-<data1400>
+<data1400 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -104,7 +104,7 @@ This is a bad password page!
 </data1400>
 
 <!-- Fifth request has Digest auth, right password -->
-<data1500>
+<data1500 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -113,7 +113,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1500>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Need Digest auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -177,70 +177,59 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <tool>
-libauthretry
+lib2023
 </tool>
 
- <name>
+<name>
 HTTP authorization retry (Digest)
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/2027 digest digest
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER digest digest
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /20270100 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /20270100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20270100", response="f7fd60eefaff5225971bf9b3d80d6ba6"
+Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/%TESTNUMBER0100", response="f7fd60eefaff5225971bf9b3d80d6ba6"
 Accept: */*
 
-GET /20270200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/20270200", response="785ca3ef511999f7e9c178195f5b388c"
+Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/%TESTNUMBER0200", response="785ca3ef511999f7e9c178195f5b388c"
 Accept: */*
 
-GET /20270300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /20270300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="4", uri="/20270300", response="4c735d2360fd6848e7cb32a11ae3612b"
+Authorization: Digest username="testuser", realm="testrealm", nonce="4", uri="/%TESTNUMBER0300", response="4c735d2360fd6848e7cb32a11ae3612b"
 Accept: */*
 
-GET /20270400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20270400", response="f5906785511fb60a2af8b1cd53008ead"
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/%TESTNUMBER0400", response="f5906785511fb60a2af8b1cd53008ead"
 Accept: */*
 
-GET /20270400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20270400", response="f5906785511fb60a2af8b1cd53008ead"
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/%TESTNUMBER0400", response="f5906785511fb60a2af8b1cd53008ead"
 Accept: */*
 
-GET /20270500 HTTP/1.1
+GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/20270500", response="8ef4d935fd964a46c3965c0863b52cf1"
+Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/%TESTNUMBER0500", response="8ef4d935fd964a46c3965c0863b52cf1"
 Accept: */*
 
 </protocol>

@@ -27,27 +27,29 @@ This server says moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP using proxy and cookies with path checks
- </name>
- <command>
-http://supertrooper.fake/c/179 -b log/injar179 -x %HOSTIP:%HTTPPORT
+</name>
+<command>
+http://supertrooper.fake/c/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
-<file name="log/injar179">
-supertrooper.fake	FALSE	/a	FALSE	2139150993	mooo	indeed
+<file name="%LOGDIR/injar%TESTNUMBER">
+supertrooper.fake	FALSE	/a	FALSE	22139150993	mooo	indeed
 supertrooper.fake	FALSE	/b	FALSE	0		moo1	indeed
-supertrooper.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
+supertrooper.fake	FALSE	/c	FALSE	22139150993	moo2	indeed
 </file>
+<features>
+cookies
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://supertrooper.fake/c/179 HTTP/1.1
+<protocol crlf="headers">
+GET http://supertrooper.fake/c/%TESTNUMBER HTTP/1.1
 Host: supertrooper.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: moo2=indeed

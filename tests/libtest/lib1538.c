@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,35 +18,45 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-int test(char *URL)
+static CURLcode test_lib1538(const char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   CURLcode easyret;
   CURLMcode multiret;
   CURLSHcode shareret;
+  CURLUcode urlret;
   (void)URL;
 
-  curl_easy_strerror(INT_MAX);
-  curl_multi_strerror(INT_MAX);
-  curl_share_strerror(INT_MAX);
-  curl_easy_strerror(-INT_MAX);
-  curl_multi_strerror(-INT_MAX);
-  curl_share_strerror(-INT_MAX);
+  /* NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange) */
+  curl_easy_strerror((CURLcode)INT_MAX);
+  curl_multi_strerror((CURLMcode)INT_MAX);
+  curl_share_strerror((CURLSHcode)INT_MAX);
+  curl_url_strerror((CURLUcode)INT_MAX);
+  curl_easy_strerror((CURLcode)-INT_MAX);
+  curl_multi_strerror((CURLMcode)-INT_MAX);
+  curl_share_strerror((CURLSHcode)-INT_MAX);
+  curl_url_strerror((CURLUcode)-INT_MAX);
+  /* NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange) */
   for(easyret = CURLE_OK; easyret <= CURL_LAST; easyret++) {
-    printf("e%d: %s\n", (int)easyret, curl_easy_strerror(easyret));
+    curl_mprintf("e%d: %s\n", easyret, curl_easy_strerror(easyret));
   }
   for(multiret = CURLM_CALL_MULTI_PERFORM; multiret <= CURLM_LAST;
       multiret++) {
-    printf("m%d: %s\n", (int)multiret, curl_multi_strerror(multiret));
+    curl_mprintf("m%d: %s\n", multiret, curl_multi_strerror(multiret));
   }
   for(shareret = CURLSHE_OK; shareret <= CURLSHE_LAST; shareret++) {
-    printf("s%d: %s\n", (int)shareret, curl_share_strerror(shareret));
+    curl_mprintf("s%d: %s\n", shareret, curl_share_strerror(shareret));
+  }
+  for(urlret = CURLUE_OK; urlret <= CURLUE_LAST; urlret++) {
+    curl_mprintf("u%d: %s\n", urlret, curl_url_strerror(urlret));
   }
 
-  return (int)res;
+  return res;
 }

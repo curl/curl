@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+cmdline
+wrong option
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+# make this test require manual as the error message is different without it
+<features>
+manual
+</features>
+<name>
+error when using unknown command line option
+</name>
+<command>
+--never-implemented http://never.use.this.example.com/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+2
+</errorcode>
+<stderr mode="text">
+curl: option --never-implemented: is unknown
+curl: try 'curl --help' or 'curl --manual' for more information
+</stderr>
+</verify>
+</testcase>

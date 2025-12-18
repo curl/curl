@@ -1,0 +1,29 @@
+<testcase>
+<info>
+<keywords>
+curl
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+manual
+</features>
+
+<name>
+Verify curl -h with bad option name
+</name>
+
+<command>
+-h --badone
+</command>
+</client>
+
+<verify>
+<stderr mode="text">
+Incorrect option name to show help for, see curl -h
+</stderr>
+</verify>
+</testcase>

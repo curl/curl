@@ -1,516 +1,270 @@
-# Ciphers
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-With curl's options
-[`CURLOPT_SSL_CIPHER_LIST`](https://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
-and
-[`--ciphers`](https://curl.haxx.se/docs/manpage.html#--ciphers)
-users can control which ciphers to consider when negotiating TLS connections.
+SPDX-License-Identifier: curl
+-->
 
-TLS 1.3 ciphers are supported since curl 7.61 for OpenSSL 1.1.1+ with options
-[`CURLOPT_TLS13_CIPHERS`](https://curl.haxx.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
-and
-[`--tls13-ciphers`](https://curl.haxx.se/docs/manpage.html#--tls13-ciphers)
-. If you are using a different SSL backend you can try setting TLS 1.3 cipher
-suites by using the respective regular cipher option.
+## curl cipher options
 
-The names of the known ciphers differ depending on which TLS backend that
-libcurl was built to use. This is an attempt to list known cipher names.
+A TLS handshake involves many parameters which take part in the negotiation
+between client and server in order to agree on the TLS version and set of
+algorithms to use for a connection.
 
-## OpenSSL
+What has become known as a "cipher" or better "cipher suite" in TLS
+are names for specific combinations of
+[key exchange](https://en.wikipedia.org/wiki/Key_exchange),
+[bulk encryption](https://en.wikipedia.org/wiki/Link_encryption),
+[message authentication code](https://en.wikipedia.org/wiki/Message_authentication_code)
+and with TLSv1.3 the
+[authenticated encryption](https://en.wikipedia.org/wiki/Authenticated_encryption).
+In addition, there are other parameters that influence the TLS handshake, like
+[DHE](https://en.wikipedia.org/wiki/Diffie%e2%80%93Hellman_key_exchange) "groups"
+and [ECDHE](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%e2%80%93Hellman)
+with its "curves".
 
-(based on [OpenSSL docs](https://www.openssl.org/docs/man1.1.0/apps/ciphers.html))
+### History
 
-When specifying multiple cipher names, separate them with colon (`:`).
+curl's way of letting users configure these settings closely followed OpenSSL
+in its API. TLS learned new parameters, OpenSSL added new API functions and
+curl added command line options.
 
-### SSL3 cipher suites
+Several other TLS backends followed the OpenSSL approach, more or less closely,
+and curl maps the command line options to these TLS backends. Some TLS
+backends do not support all of it and command line options are either
+ignored or lead to an error.
 
-`NULL-MD5`
-`NULL-SHA`
-`RC4-MD5`
-`RC4-SHA`
-`IDEA-CBC-SHA`
-`DES-CBC3-SHA`
-`DH-DSS-DES-CBC3-SHA`
-`DH-RSA-DES-CBC3-SHA`
-`DHE-DSS-DES-CBC3-SHA`
-`DHE-RSA-DES-CBC3-SHA`
-`ADH-RC4-MD5`
-`ADH-DES-CBC3-SHA`
+Many examples below show the OpenSSL-like use of these options. GnuTLS
+however chose a different approach. These are described in a separate
+section further below.
 
-### TLS v1.0 cipher suites
+## ciphers, the OpenSSL way
 
-`NULL-MD5`
-`NULL-SHA`
-`RC4-MD5`
-`RC4-SHA`
-`IDEA-CBC-SHA`
-`DES-CBC3-SHA`
-`DHE-DSS-DES-CBC3-SHA`
-`DHE-RSA-DES-CBC3-SHA`
-`ADH-RC4-MD5`
-`ADH-DES-CBC3-SHA`
+With curl's option
+[`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
+or
+[`CURLOPT_TLS13_CIPHERS`](https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
+users can control which cipher suites to consider when negotiating TLS 1.3
+connections. With option
+[`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
+or
+[`CURLOPT_SSL_CIPHER_LIST`](https://curl.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+users can control which cipher suites to consider when negotiating
+TLS 1.2 (1.1, 1.0) connections.
 
-### AES ciphersuites from RFC3268, extending TLS v1.0
+By default, curl may negotiate TLS 1.3 and TLS 1.2 connections, so the cipher
+suites considered when negotiating a TLS connection are a union of the TLS 1.3
+and TLS 1.2 cipher suites. If you want curl to consider only TLS 1.3 cipher
+suites for the connection, you have to set the minimum TLS version to 1.3 by
+using [`--tlsv1.3`](https://curl.se/docs/manpage.html#--tlsv13)
+or [`CURLOPT_SSLVERSION`](https://curl.se/libcurl/c/CURLOPT_SSLVERSION.html)
+with `CURL_SSLVERSION_TLSv1_3`.
 
-`AES128-SHA`
-`AES256-SHA`
-`DH-DSS-AES128-SHA`
-`DH-DSS-AES256-SHA`
-`DH-RSA-AES128-SHA`
-`DH-RSA-AES256-SHA`
-`DHE-DSS-AES128-SHA`
-`DHE-DSS-AES256-SHA`
-`DHE-RSA-AES128-SHA`
-`DHE-RSA-AES256-SHA`
-`ADH-AES128-SHA`
-`ADH-AES256-SHA`
+Both the TLS 1.3 and TLS 1.2 cipher options expect a list of cipher suites
+separated by colons (`:`). This list is parsed opportunistically, cipher suites
+that are not recognized or implemented are ignored. As long as there is at
+least one recognized cipher suite in the list, the list is considered valid.
 
-### SEED ciphersuites from RFC4162, extending TLS v1.0
-
-`SEED-SHA`
-`DH-DSS-SEED-SHA`
-`DH-RSA-SEED-SHA`
-`DHE-DSS-SEED-SHA`
-`DHE-RSA-SEED-SHA`
-`ADH-SEED-SHA`
-
-### GOST ciphersuites, extending TLS v1.0
-
-`GOST94-GOST89-GOST89`
-`GOST2001-GOST89-GOST89`
-`GOST94-NULL-GOST94`
-`GOST2001-NULL-GOST94`
-
-### Elliptic curve cipher suites
-
-`ECDHE-RSA-NULL-SHA`
-`ECDHE-RSA-RC4-SHA`
-`ECDHE-RSA-DES-CBC3-SHA`
-`ECDHE-RSA-AES128-SHA`
-`ECDHE-RSA-AES256-SHA`
-`ECDHE-ECDSA-NULL-SHA`
-`ECDHE-ECDSA-RC4-SHA`
-`ECDHE-ECDSA-DES-CBC3-SHA`
-`ECDHE-ECDSA-AES128-SHA`
-`ECDHE-ECDSA-AES256-SHA`
-`AECDH-NULL-SHA`
-`AECDH-RC4-SHA`
-`AECDH-DES-CBC3-SHA`
-`AECDH-AES128-SHA`
-`AECDH-AES256-SHA`
-
-### TLS v1.2 cipher suites
-
-`NULL-SHA256`
-`AES128-SHA256`
-`AES256-SHA256`
-`AES128-GCM-SHA256`
-`AES256-GCM-SHA384`
-`DH-RSA-AES128-SHA256`
-`DH-RSA-AES256-SHA256`
-`DH-RSA-AES128-GCM-SHA256`
-`DH-RSA-AES256-GCM-SHA384`
-`DH-DSS-AES128-SHA256`
-`DH-DSS-AES256-SHA256`
-`DH-DSS-AES128-GCM-SHA256`
-`DH-DSS-AES256-GCM-SHA384`
-`DHE-RSA-AES128-SHA256`
-`DHE-RSA-AES256-SHA256`
-`DHE-RSA-AES128-GCM-SHA256`
-`DHE-RSA-AES256-GCM-SHA384`
-`DHE-DSS-AES128-SHA256`
-`DHE-DSS-AES256-SHA256`
-`DHE-DSS-AES128-GCM-SHA256`
-`DHE-DSS-AES256-GCM-SHA384`
-`ECDHE-RSA-AES128-SHA256`
-`ECDHE-RSA-AES256-SHA384`
-`ECDHE-RSA-AES128-GCM-SHA256`
-`ECDHE-RSA-AES256-GCM-SHA384`
-`ECDHE-ECDSA-AES128-SHA256`
-`ECDHE-ECDSA-AES256-SHA384`
-`ECDHE-ECDSA-AES128-GCM-SHA256`
-`ECDHE-ECDSA-AES256-GCM-SHA384`
-`ADH-AES128-SHA256`
-`ADH-AES256-SHA256`
-`ADH-AES128-GCM-SHA256`
-`ADH-AES256-GCM-SHA384`
-`AES128-CCM`
-`AES256-CCM`
-`DHE-RSA-AES128-CCM`
-`DHE-RSA-AES256-CCM`
-`AES128-CCM8`
-`AES256-CCM8`
-`DHE-RSA-AES128-CCM8`
-`DHE-RSA-AES256-CCM8`
-`ECDHE-ECDSA-AES128-CCM`
-`ECDHE-ECDSA-AES256-CCM`
-`ECDHE-ECDSA-AES128-CCM8`
-`ECDHE-ECDSA-AES256-CCM8`
-
-### Camellia HMAC-Based ciphersuites from RFC6367, extending TLS v1.2
-
-`ECDHE-ECDSA-CAMELLIA128-SHA256`
-`ECDHE-ECDSA-CAMELLIA256-SHA384`
-`ECDHE-RSA-CAMELLIA128-SHA256`
-`ECDHE-RSA-CAMELLIA256-SHA384`
+For both the TLS 1.3 and TLS 1.2 cipher options, the order in which the
+cipher suites are specified determine the preference of them. When negotiating
+a TLS connection the server picks a cipher suite from the intersection of the
+cipher suites supported by the server and the cipher suites sent by curl. If
+the server is configured to honor the client's cipher preference, the first
+common cipher suite in the list sent by curl is chosen.
 
 ### TLS 1.3 cipher suites
 
-(Note these ciphers are set with `CURLOPT_TLS13_CIPHERS` and `--tls13-ciphers`)
+Setting TLS 1.3 cipher suites is supported by curl with
+OpenSSL (1.1.1+, curl 7.61.0+), LibreSSL (3.4.1+, curl 8.3.0+),
+wolfSSL (curl 8.10.0+) and mbedTLS (3.6.0+, curl 8.10.0+).
 
-`TLS_AES_256_GCM_SHA384`
-`TLS_CHACHA20_POLY1305_SHA256`
-`TLS_AES_128_GCM_SHA256`
-`TLS_AES_128_CCM_8_SHA256`
-`TLS_AES_128_CCM_SHA256`
+The list of cipher suites that can be used for the `--tls13-ciphers` option:
+```
+TLS_AES_128_GCM_SHA256
+TLS_AES_256_GCM_SHA384
+TLS_CHACHA20_POLY1305_SHA256
+TLS_AES_128_CCM_SHA256
+TLS_AES_128_CCM_8_SHA256
+```
 
-## NSS
+#### wolfSSL notes
 
-### Totally insecure
+In addition to above list the following cipher suites can be used:
+`TLS_SM4_GCM_SM3` `TLS_SM4_CCM_SM3` `TLS_SHA256_SHA256` `TLS_SHA384_SHA384`.
+Usage of these cipher suites is not recommended. (The last two cipher suites
+are NULL ciphers, offering no encryption whatsoever.)
 
-`rc4`
-`rc4-md5`
-`rc4export`
-`rc2`
-`rc2export`
-`des`
-`desede3`
+### TLS 1.2 (1.1, 1.0) cipher suites
 
-###  SSL3/TLS cipher suites
+Setting TLS 1.2 cipher suites is supported by curl with OpenSSL, LibreSSL,
+BoringSSL, mbedTLS (curl 8.8.0+), wolfSSL (curl 7.53.0+). Schannel does not
+support setting cipher suites directly, but does support setting algorithms
+(curl 7.61.0+), see Schannel notes below.
 
-`rsa_rc4_128_md5`
-`rsa_rc4_128_sha`
-`rsa_3des_sha`
-`rsa_des_sha`
-`rsa_rc4_40_md5`
-`rsa_rc2_40_md5`
-`rsa_null_md5`
-`rsa_null_sha`
-`fips_3des_sha`
-`fips_des_sha`
-`fortezza`
-`fortezza_rc4_128_sha`
-`fortezza_null`
+For TLS 1.2 cipher suites there are multiple naming schemes, the two most used
+are with OpenSSL names (e.g. `ECDHE-RSA-AES128-GCM-SHA256`) and IANA names
+(e.g. `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`). IANA names of TLS 1.2 cipher
+suites look similar to TLS 1.3 cipher suite names, to distinguish them note
+that TLS 1.2 names contain `_WITH_`, while TLS 1.3 names do not. When setting
+TLS 1.2 cipher suites with curl it is recommended that you use OpenSSL names
+as these are most widely recognized by the supported SSL backends.
 
-### TLS 1.0 Exportable 56-bit Cipher Suites
+The complete list of cipher suites that may be considered for the `--ciphers`
+option is extensive, it consists of more than 300 ciphers suites. However,
+nowadays for most of them their usage is discouraged, and support for a lot of
+them have been removed from the various SSL backends, if ever implemented at
+all.
 
-`rsa_des_56_sha`
-`rsa_rc4_56_sha`
+A shortened list (based on [recommendations by
+Mozilla](https://wiki.mozilla.org/Security/Server_Side_TLS)) of cipher suites,
+which are (mostly) supported by all SSL backends, that can be used for the
+`--ciphers` option:
+```
+ECDHE-ECDSA-AES128-GCM-SHA256
+ECDHE-RSA-AES128-GCM-SHA256
+ECDHE-ECDSA-AES256-GCM-SHA384
+ECDHE-RSA-AES256-GCM-SHA384
+ECDHE-ECDSA-CHACHA20-POLY1305
+ECDHE-RSA-CHACHA20-POLY1305
+DHE-RSA-AES128-GCM-SHA256
+DHE-RSA-AES256-GCM-SHA384
+DHE-RSA-CHACHA20-POLY1305
+ECDHE-ECDSA-AES128-SHA256
+ECDHE-RSA-AES128-SHA256
+ECDHE-ECDSA-AES128-SHA
+ECDHE-RSA-AES128-SHA
+ECDHE-ECDSA-AES256-SHA384
+ECDHE-RSA-AES256-SHA384
+ECDHE-ECDSA-AES256-SHA
+ECDHE-RSA-AES256-SHA
+DHE-RSA-AES128-SHA256
+DHE-RSA-AES256-SHA256
+AES128-GCM-SHA256
+AES256-GCM-SHA384
+AES128-SHA256
+AES256-SHA256
+AES128-SHA
+AES256-SHA
+DES-CBC3-SHA
+```
 
-### AES ciphers
+See this [list](https://github.com/curl/curl/blob/master/docs/CIPHERS-TLS12.md)
+for a complete list of TLS 1.2 cipher suites.
 
-`dhe_dss_aes_128_cbc_sha`
-`dhe_dss_aes_256_cbc_sha`
-`dhe_rsa_aes_128_cbc_sha`
-`dhe_rsa_aes_256_cbc_sha`
-`rsa_aes_128_sha`
-`rsa_aes_256_sha`
+#### OpenSSL notes
 
-### ECC ciphers
+In addition to specifying a list of cipher suites, OpenSSL also accepts a
+format with specific cipher strings (like `TLSv1.2`, `AESGCM`, `CHACHA20`) and
+`!`, `-` and `+` operators. Refer to the
+[OpenSSL cipher documentation](https://docs.openssl.org/master/man1/openssl-ciphers/#cipher-list-format)
+for further information on that format.
 
-`ecdh_ecdsa_null_sha`
-`ecdh_ecdsa_rc4_128_sha`
-`ecdh_ecdsa_3des_sha`
-`ecdh_ecdsa_aes_128_sha`
-`ecdh_ecdsa_aes_256_sha`
-`ecdhe_ecdsa_null_sha`
-`ecdhe_ecdsa_rc4_128_sha`
-`ecdhe_ecdsa_3des_sha`
-`ecdhe_ecdsa_aes_128_sha`
-`ecdhe_ecdsa_aes_256_sha`
-`ecdh_rsa_null_sha`
-`ecdh_rsa_128_sha`
-`ecdh_rsa_3des_sha`
-`ecdh_rsa_aes_128_sha`
-`ecdh_rsa_aes_256_sha`
-`ecdhe_rsa_null`
-`ecdhe_rsa_rc4_128_sha`
-`ecdhe_rsa_3des_sha`
-`ecdhe_rsa_aes_128_sha`
-`ecdhe_rsa_aes_256_sha`
-`ecdh_anon_null_sha`
-`ecdh_anon_rc4_128sha`
-`ecdh_anon_3des_sha`
-`ecdh_anon_aes_128_sha`
-`ecdh_anon_aes_256_sha`
+#### Schannel notes
 
-### HMAC-SHA256 cipher suites
+Schannel does not support setting individual TLS 1.2 cipher suites directly.
+It only allows the enabling and disabling of encryption algorithms. These are
+in the form of `CALG_xxx`, see the [Schannel `ALG_ID`
+documentation](https://learn.microsoft.com/windows/win32/seccrypto/alg-id)
+for a list of these algorithms. Also, (since curl 7.77.0)
+`SCH_USE_STRONG_CRYPTO` can be given to pass that flag to Schannel, lookup the
+[documentation for the Windows version in
+use](https://learn.microsoft.com/windows/win32/secauthn/cipher-suites-in-schannel)
+to see how that affects the cipher suite selection. When not specifying the
+`--ciphers` and `--tls13-ciphers` options curl passes this flag by default.
 
-`rsa_null_sha_256`
-`rsa_aes_128_cbc_sha_256`
-`rsa_aes_256_cbc_sha_256`
-`dhe_rsa_aes_128_cbc_sha_256`
-`dhe_rsa_aes_256_cbc_sha_256`
-`ecdhe_ecdsa_aes_128_cbc_sha_256`
-`ecdhe_rsa_aes_128_cbc_sha_256`
+### Examples
 
-### AES GCM cipher suites in RFC 5288 and RFC 5289
+```sh
+curl \
+  --tls13-ciphers TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256 \
+  --ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:\
+ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305 \
+  https://example.com/
+```
+Restrict ciphers to `aes128-gcm` and `chacha20`. Works with OpenSSL, LibreSSL,
+mbedTLS and wolfSSL.
 
-`rsa_aes_128_gcm_sha_256`
-`dhe_rsa_aes_128_gcm_sha_256`
-`dhe_dss_aes_128_gcm_sha_256`
-`ecdhe_ecdsa_aes_128_gcm_sha_256`
-`ecdh_ecdsa_aes_128_gcm_sha_256`
-`ecdhe_rsa_aes_128_gcm_sha_256`
-`ecdh_rsa_aes_128_gcm_sha_256`
+```sh
+curl \
+  --tlsv1.3 \
+  --tls13-ciphers TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256 \
+  https://example.com/
+```
+Restrict to only TLS 1.3 with `aes128-gcm` and `chacha20` ciphers. Works with
+OpenSSL, LibreSSL, mbedTLS, wolfSSL and Schannel.
 
-### cipher suites using SHA384
+```sh
+curl \
+  --ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:\
+ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305 \
+  https://example.com/
+```
+Restrict TLS 1.2 ciphers to `aes128-gcm` and `chacha20`, use default TLS 1.3
+ciphers (if TLS 1.3 is available). Works with OpenSSL, LibreSSL, BoringSSL,
+mbedTLS and wolfSSL.
 
-`rsa_aes_256_gcm_sha_384`
-`dhe_rsa_aes_256_gcm_sha_384`
-`dhe_dss_aes_256_gcm_sha_384`
-`ecdhe_ecdsa_aes_256_sha_384`
-`ecdhe_rsa_aes_256_sha_384`
-`ecdhe_ecdsa_aes_256_gcm_sha_384`
-`ecdhe_rsa_aes_256_gcm_sha_384`
+## ciphers, the GnuTLS way
 
-### chacha20-poly1305 cipher suites
+With GnuTLS, curl allows configuration of all TLS parameters via option
+[`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
+or
+[`CURLOPT_SSL_CIPHER_LIST`](https://curl.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+only. The option
+[`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
+or
+[`CURLOPT_TLS13_CIPHERS`](https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
+is being ignored.
 
-`ecdhe_rsa_chacha20_poly1305_sha_256`
-`ecdhe_ecdsa_chacha20_poly1305_sha_256`
-`dhe_rsa_chacha20_poly1305_sha_256`
+`--ciphers` is used to set the GnuTLS **priority string** in
+the following way:
 
-### TLS 1.3 cipher suites
+* When the set string starts with '+', '-' or '!' it is *appended* to the
+  priority string libcurl itself generates (separated by ':'). This initial
+  priority depends other settings such as CURLOPT_SSLVERSION(3),
+  CURLOPT_TLSAUTH_USERNAME(3) (for SRP) or if HTTP/3 (QUIC)
+  is being negotiated.
+* Otherwise, the set string fully *replaces* the libcurl generated one. While
+  giving full control to the application, the set priority needs to
+  provide for everything the transfer may need to negotiate. Example: if
+  the set priority only allows TLSv1.2, all HTTP/3 attempts fail.
 
-`aes_128_gcm_sha_256`
-`aes_256_gcm_sha_384`
-`chacha20_poly1305_sha_256`
+Users may specify via `--ciphers` anything that GnuTLS supports: ciphers,
+key exchange, MAC, compression, TLS versions, signature algorithms, groups,
+elliptic curves, certificate types. In addition, GnuTLS has a variety of
+other keywords that tweak its operations. Applications or a system
+may define new alias names for priority strings that can then be used here.
 
-## GSKit
+Since the order of items in priority strings is significant, it makes no
+sense for curl to puzzle other ssl options somehow together. `--ciphers`
+is the single way to change priority.
 
-Ciphers are internally defined as
-[numeric codes](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm),
-but libcurl maps them to the following case-insensitive names.
+### Examples
 
-### SSL2 cipher suites (insecure: disabled by default)
+```sh
+curl \
+  --ciphers '-CIPHER_ALL:+AES-128-GCM:+CHACHA20-POLY1305' \
+  https://example.com/
+```
+Restrict ciphers to `aes128-gcm` and `chacha20` in GnuTLS.
 
-`rc2-md5`
-`rc4-md5`
-`exp-rc2-md5`
-`exp-rc4-md5`
-`des-cbc-md5`
-`des-cbc3-md5`
+```sh
+curl \
+  --ciphers 'NORMAL:-VERS-ALL:+TLS1.3:-AES-256-GCM' \
+  https://example.com/
+```
+Restrict to only TLS 1.3 without the `aes256-gcm` cipher.
 
-### SSL3 cipher suites
+```sh
+curl \
+  --ciphers 'NORMAL:-VERS-ALL:+TLS1.2:-CIPHER_ALL:+CAMELLIA-128-GCM' \
+  https://example.com/
+```
+Restrict to only TLS 1.2 with the `CAMELLIA-128-GCM` cipher.
 
-`null-md5`
-`null-sha`
-`rc4-md5`
-`rc4-sha`
-`exp-rc2-cbc-md5`
-`exp-rc4-md5`
-`exp-des-cbc-sha`
-`des-cbc3-sha`
-
-### TLS v1.0 cipher suites
-
-`null-md5`
-`null-sha`
-`rc4-md5`
-`rc4-sha`
-`exp-rc2-cbc-md5`
-`exp-rc4-md5`
-`exp-des-cbc-sha`
-`des-cbc3-sha`
-`aes128-sha`
-`aes256-sha`
-
-### TLS v1.1 cipher suites
-
-`null-md5`
-`null-sha`
-`rc4-md5`
-`rc4-sha`
-`exp-des-cbc-sha`
-`des-cbc3-sha`
-`aes128-sha`
-`aes256-sha`
-
-### TLS v1.2 cipher suites
-
-`null-md5`
-`null-sha`
-`null-sha256`
-`rc4-md5`
-`rc4-sha`
-`des-cbc3-sha`
-`aes128-sha`
-`aes256-sha`
-`aes128-sha256`
-`aes256-sha256`
-`aes128-gcm-sha256`
-`aes256-gcm-sha384`
-
-## WolfSSL
-
-`RC4-SHA`,
-`RC4-MD5`,
-`DES-CBC3-SHA`,
-`AES128-SHA`,
-`AES256-SHA`,
-`NULL-SHA`,
-`NULL-SHA256`,
-`DHE-RSA-AES128-SHA`,
-`DHE-RSA-AES256-SHA`,
-`DHE-PSK-AES256-GCM-SHA384`,
-`DHE-PSK-AES128-GCM-SHA256`,
-`PSK-AES256-GCM-SHA384`,
-`PSK-AES128-GCM-SHA256`,
-`DHE-PSK-AES256-CBC-SHA384`,
-`DHE-PSK-AES128-CBC-SHA256`,
-`PSK-AES256-CBC-SHA384`,
-`PSK-AES128-CBC-SHA256`,
-`PSK-AES128-CBC-SHA`,
-`PSK-AES256-CBC-SHA`,
-`DHE-PSK-AES128-CCM`,
-`DHE-PSK-AES256-CCM`,
-`PSK-AES128-CCM`,
-`PSK-AES256-CCM`,
-`PSK-AES128-CCM-8`,
-`PSK-AES256-CCM-8`,
-`DHE-PSK-NULL-SHA384`,
-`DHE-PSK-NULL-SHA256`,
-`PSK-NULL-SHA384`,
-`PSK-NULL-SHA256`,
-`PSK-NULL-SHA`,
-`HC128-MD5`,
-`HC128-SHA`,
-`HC128-B2B256`,
-`AES128-B2B256`,
-`AES256-B2B256`,
-`RABBIT-SHA`,
-`NTRU-RC4-SHA`,
-`NTRU-DES-CBC3-SHA`,
-`NTRU-AES128-SHA`,
-`NTRU-AES256-SHA`,
-`AES128-CCM-8`,
-`AES256-CCM-8`,
-`ECDHE-ECDSA-AES128-CCM`,
-`ECDHE-ECDSA-AES128-CCM-8`,
-`ECDHE-ECDSA-AES256-CCM-8`,
-`ECDHE-RSA-AES128-SHA`,
-`ECDHE-RSA-AES256-SHA`,
-`ECDHE-ECDSA-AES128-SHA`,
-`ECDHE-ECDSA-AES256-SHA`,
-`ECDHE-RSA-RC4-SHA`,
-`ECDHE-RSA-DES-CBC3-SHA`,
-`ECDHE-ECDSA-RC4-SHA`,
-`ECDHE-ECDSA-DES-CBC3-SHA`,
-`AES128-SHA256`,
-`AES256-SHA256`,
-`DHE-RSA-AES128-SHA256`,
-`DHE-RSA-AES256-SHA256`,
-`ECDH-RSA-AES128-SHA`,
-`ECDH-RSA-AES256-SHA`,
-`ECDH-ECDSA-AES128-SHA`,
-`ECDH-ECDSA-AES256-SHA`,
-`ECDH-RSA-RC4-SHA`,
-`ECDH-RSA-DES-CBC3-SHA`,
-`ECDH-ECDSA-RC4-SHA`,
-`ECDH-ECDSA-DES-CBC3-SHA`,
-`AES128-GCM-SHA256`,
-`AES256-GCM-SHA384`,
-`DHE-RSA-AES128-GCM-SHA256`,
-`DHE-RSA-AES256-GCM-SHA384`,
-`ECDHE-RSA-AES128-GCM-SHA256`,
-`ECDHE-RSA-AES256-GCM-SHA384`,
-`ECDHE-ECDSA-AES128-GCM-SHA256`,
-`ECDHE-ECDSA-AES256-GCM-SHA384`,
-`ECDH-RSA-AES128-GCM-SHA256`,
-`ECDH-RSA-AES256-GCM-SHA384`,
-`ECDH-ECDSA-AES128-GCM-SHA256`,
-`ECDH-ECDSA-AES256-GCM-SHA384`,
-`CAMELLIA128-SHA`,
-`DHE-RSA-CAMELLIA128-SHA`,
-`CAMELLIA256-SHA`,
-`DHE-RSA-CAMELLIA256-SHA`,
-`CAMELLIA128-SHA256`,
-`DHE-RSA-CAMELLIA128-SHA256`,
-`CAMELLIA256-SHA256`,
-`DHE-RSA-CAMELLIA256-SHA256`,
-`ECDHE-RSA-AES128-SHA256`,
-`ECDHE-ECDSA-AES128-SHA256`,
-`ECDH-RSA-AES128-SHA256`,
-`ECDH-ECDSA-AES128-SHA256`,
-`ECDHE-RSA-AES256-SHA384`,
-`ECDHE-ECDSA-AES256-SHA384`,
-`ECDH-RSA-AES256-SHA384`,
-`ECDH-ECDSA-AES256-SHA384`,
-`ECDHE-RSA-CHACHA20-POLY1305`,
-`ECDHE-ECDSA-CHACHA20-POLY1305`,
-`DHE-RSA-CHACHA20-POLY1305`,
-`ECDHE-RSA-CHACHA20-POLY1305-OLD`,
-`ECDHE-ECDSA-CHACHA20-POLY1305-OLD`,
-`DHE-RSA-CHACHA20-POLY1305-OLD`,
-`ADH-AES128-SHA`,
-`QSH`,
-`RENEGOTIATION-INFO`,
-`IDEA-CBC-SHA`,
-`ECDHE-ECDSA-NULL-SHA`,
-`ECDHE-PSK-NULL-SHA256`,
-`ECDHE-PSK-AES128-CBC-SHA256`,
-`PSK-CHACHA20-POLY1305`,
-`ECDHE-PSK-CHACHA20-POLY1305`,
-`DHE-PSK-CHACHA20-POLY1305`,
-`EDH-RSA-DES-CBC3-SHA`,
-
-## Schannel
-
-Schannel allows the enabling and disabling of encryption algorithms, but not
-specific ciphersuites. They are
-[defined](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id) by
-Microsoft.
-
-There is also the case that the selected algorithm is not supported by the
-protocol or does not match the ciphers offered by the server during the SSL
-negotiation. In this case curl will return error
-`CURLE_SSL_CONNECT_ERROR (35) SEC_E_ALGORITHM_MISMATCH`
-and the request will fail.
-
-`CALG_MD2`,
-`CALG_MD4`,
-`CALG_MD5`,
-`CALG_SHA`,
-`CALG_SHA1`,
-`CALG_MAC`,
-`CALG_RSA_SIGN`,
-`CALG_DSS_SIGN`,
-`CALG_NO_SIGN`,
-`CALG_RSA_KEYX`,
-`CALG_DES`,
-`CALG_3DES_112`,
-`CALG_3DES`,
-`CALG_DESX`,
-`CALG_RC2`,
-`CALG_RC4`,
-`CALG_SEAL`,
-`CALG_DH_SF`,
-`CALG_DH_EPHEM`,
-`CALG_AGREEDKEY_ANY`,
-`CALG_HUGHES_MD5`,
-`CALG_SKIPJACK`,
-`CALG_TEK`,
-`CALG_CYLINK_MEK`,
-`CALG_SSL3_SHAMD5`,
-`CALG_SSL3_MASTER`,
-`CALG_SCHANNEL_MASTER_HASH`,
-`CALG_SCHANNEL_MAC_KEY`,
-`CALG_SCHANNEL_ENC_KEY`,
-`CALG_PCT1_MASTER`,
-`CALG_SSL2_MASTER`,
-`CALG_TLS1_MASTER`,
-`CALG_RC5`,
-`CALG_HMAC`,
-`CALG_TLS1PRF`,
-`CALG_HASH_REPLACE_OWF`,
-`CALG_AES_128`,
-`CALG_AES_192`,
-`CALG_AES_256`,
-`CALG_AES`,
-`CALG_SHA_256`,
-`CALG_SHA_384`,
-`CALG_SHA_512`,
-`CALG_ECDH`,
-`CALG_ECMQV`,
-`CALG_ECDSA`,
-`CALG_ECDH_EPHEM`,
+## Further reading
+- [OpenSSL cipher suite names documentation](https://docs.openssl.org/master/man1/openssl-ciphers/#cipher-suite-names)
+- [wolfSSL cipher support documentation](https://www.wolfssl.com/documentation/manuals/wolfssl/chapter04.html#cipher-support)
+- [mbedTLS cipher suites reference](https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/ssl__ciphersuites_8h/)
+- [Schannel cipher suites documentation](https://learn.microsoft.com/windows/win32/secauthn/cipher-suites-in-schannel)
+- [IANA cipher suites list](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4)
+- [Wikipedia cipher suite article](https://en.wikipedia.org/wiki/Cipher_suite)
+- [GnuTLS Priority Strings](https://gnutls.org/manual/html_node/Priority-Strings.html)

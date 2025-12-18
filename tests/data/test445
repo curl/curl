@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 503 no just no
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+
+-foo-
+</connect>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+gopher
+dict
+http
+ftp
+imap
+ldap
+mqtt
+pop3
+rtsp
+scp
+sftp
+smb
+smtp
+</features>
+<server>
+http-proxy
+</server>
+<name>
+Refuse tunneling protocols through HTTP proxy
+</name>
+<command>
+-x http://%HOSTIP:%PROXYPORT/%TESTNUMBER -p gopher://127.0.0.1 dict://127.0.0.1 http://moo https://example telnet://another ftp://yes ftps://again imap://more ldap://perhaps mqtt://yes pop3://mail rtsp://harder scp://copy sftp://files smb://wird smtp://send --insecure
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# refused in the CONNECT
+<errorcode>
+56
+</errorcode>
+<limits>
+Allocations: 1700
+</limits>
+</verify>
+</testcase>

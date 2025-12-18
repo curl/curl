@@ -8,17 +8,14 @@ unittest
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 unit test for parse_cert_parameter()
- </name>
+</name>
 <tool>
-unit1394
+tool%TESTNUMBER
 </tool>
 </client>
 
@@ -26,5 +23,4 @@ unit1394
 <stdout mode="text">
 </stdout>
 </verify>
-
 </testcase>

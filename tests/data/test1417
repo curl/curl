@@ -45,27 +45,25 @@ chunky-trailer: header data
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with chunked encoding and chunked trailer without CRs
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1417 -D log/heads1417
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1417 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/heads1417">
+<file name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked

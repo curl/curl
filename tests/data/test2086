@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+IPv6
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+http
+IPv6
+</features>
+<server>
+http-ipv6
+</server>
+
+<name>
+Pre-request callback for HTTP IPv6
+</name>
+<tool>
+lib2082
+</tool>
+
+<command>
+%HOST6IP:%HTTP6PORT/%TESTNUMBER#ipv6
+</command>
+<setenv>
+# Needed for MSYS2 to not treat the URL as a path list
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stripfile>
+s/^Local port = \d+/Local port = stripped/
+</stripfile>
+<stdout>
+Connected to %HOST6IP
+Connected from %CLIENT6IP
+Remote port = %HTTP6PORT
+Local port = stripped
+Returning = 0
+</stdout>
+</verify>
+</testcase>

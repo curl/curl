@@ -8,6 +8,9 @@ SMTP
 #
 # Server-side
 <reply>
+<servercmd>
+REPLY MAIL 501 not fine enough
+</servercmd>
 </reply>
 
 #
@@ -16,17 +19,17 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP invalid --mail-from
- </name>
-<file name="log/test914.eml">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 
 body
 </file>
- <command>
-smtp://%HOSTIP:%SMTPPORT/914 --mail-rcpt recipient@example.com --mail-from invalid -T log/test914.eml
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from invalid -T %LOGDIR/test%TESTNUMBER.eml
 </command>
 </client>
 
@@ -37,8 +40,8 @@ smtp://%HOSTIP:%SMTPPORT/914 --mail-rcpt recipient@example.com --mail-from inval
 <errorcode>
 55
 </errorcode>
-<protocol>
-EHLO 914
+<protocol crlf="yes">
+EHLO %TESTNUMBER
 MAIL FROM:<invalid>
 QUIT
 </protocol>

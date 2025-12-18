@@ -10,7 +10,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Mon, 28 Jul 2008 14:49:00 GMT
 Server: test-server/fake
@@ -28,23 +28,21 @@ Content-Type: text/plain
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with numeric localhost --interface
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1045 --interface %CLIENTIP
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --interface %CLIENTIP
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET /1045 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

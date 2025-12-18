@@ -1,0 +1,219 @@
+<testcase>
+<info>
+<keywords>
+checksrc
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<name>
+checksrc
+</name>
+
+<command type="perl">
+%SRCDIR/../scripts/checksrc.pl -bmagicbad -balsobad %LOGDIR/code%TESTNUMBER.c
+</command>
+<file name="%LOGDIR/code%TESTNUMBER.c">
+/* test source code
+ * Violate each rule at least once.
+ **/
+int hello; /*------------------------------------------------------------------*/
+int%tab%tab;
+int trailing_space;
+int a = func ();
+int b = func( b);
+int b = func(b );
+func(a, b , c);
+
+int hello()
+{
+  return(2);
+}
+func(a, b,c);
+
+if(a == 2) {
+  ;
+} else {
+  moo = 2;
+}
+
+if(a == 2){ /* followed by comment */
+  ;
+}
+
+func_return() ;
+
+a = sprintf(buffer, "%s", moo);
+
+FILE *f = curlx_fopen("filename", "r");
+
+void startfunc(int a, int b) {
+  func();
+}
+
+ for(;;) {
+     func(1);
+ } while(1);
+
+ char * name = "hello";
+ char* name = "hello";
+
+ int foo=bar;
+ int foo= bar;
+ int foo = bar;
+ int foo = bar;foo++;
+ for(;;)  {
+ }
+
+ int a = sizeof int;
+ int a = magicbad(buffer, alsobad(buffer), "%d", 99);
+ int moo = hej?wrong:a>b;
+ int moo2 = wrong2:(a)>(b);
+
+ if(a) b++;
+
+ if(sprintf(buffer, "%s", moo)) {}
+ *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
+
+ // CPP comment ?
+
+ /* comment doesn't end
+
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+./%LOGDIR/code1185.c:4:82: warning: Longer than 79 columns (LONGLINE)
+ int hello; /*------------------------------------------------------------------*/
+./%LOGDIR/code1185.c:5:4: error: Contains TAB character (TABS)
+ int%tab%tab;
+    ^
+./%LOGDIR/code1185.c:7:13: warning:  func with space (SPACEBEFOREPAREN)
+ int a = func ();
+             ^
+./%LOGDIR/code1185.c:8:14: warning: space after open parenthesis (SPACEAFTERPAREN)
+ int b = func( b);
+              ^
+./%LOGDIR/code1185.c:9:16: warning: space before close parenthesis (SPACEBEFORECLOSE)
+ int b = func(b );
+                ^
+./%LOGDIR/code1185.c:10:11: warning: space before comma (SPACEBEFORECOMMA)
+ func(a, b , c);
+           ^
+./%LOGDIR/code1185.c:14:9: warning: return without space before paren (RETURNNOSPACE)
+   return(2);
+         ^
+./%LOGDIR/code1185.c:16:11: warning: comma without following space (COMMANOSPACE)
+ func(a, b,c);
+           ^
+./%LOGDIR/code1185.c:18:12: warning: wrongly placed open brace (BRACEPOS)
+ if(a == 2) {
+            ^
+./%LOGDIR/code1185.c:20:1: warning: else after closing brace on same line (BRACEELSE)
+ } else {
+ ^
+./%LOGDIR/code1185.c:24:11: warning: missing space after close paren (PARENBRACE)
+ if(a == 2){%spc%%spc%
+           ^
+./%LOGDIR/code1185.c:28:14: warning: no space before semicolon (SPACESEMICOLON)
+ func_return() ;
+              ^
+./%LOGDIR/code1185.c:30:5: warning: use of sprintf is banned (BANNEDFUNC)
+ a = sprintf(buffer, "%s", moo);
+     ^
+./%LOGDIR/code1185.c:32:11: warning: use of non-binary fopen without FOPEN_* macro: r (FOPENMODE)
+ FILE *f = curlx_fopen("filename", "r");
+           ^
+./%LOGDIR/code1185.c:34:30: warning: wrongly placed open brace (BRACEPOS)
+ void startfunc(int a, int b) {
+                              ^
+./%LOGDIR/code1185.c:39:6: warning: not indented 2 steps (uses 4) (INDENTATION)
+      func(1);
+      ^
+./%LOGDIR/code1185.c:42:8: warning: space after declarative asterisk (ASTERISKSPACE)
+  char * name = "hello";
+        ^
+./%LOGDIR/code1185.c:43:7: warning: space after declarative asterisk (ASTERISKSPACE)
+  char* name = "hello";
+       ^
+./%LOGDIR/code1185.c:43:6: warning: no space before asterisk (ASTERISKNOSPACE)
+  char* name = "hello";
+      ^
+./%LOGDIR/code1185.c:45:10: warning: no space after equals sign (EQUALSNOSPACE)
+  int foo=bar;
+          ^
+./%LOGDIR/code1185.c:46:9: warning: no space before equals sign (NOSPACEEQUALS)
+  int foo= bar;
+         ^
+./%LOGDIR/code1185.c:48:16: warning: no space after semicolon (SEMINOSPACE)
+  int foo = bar;foo++;
+                ^
+./%LOGDIR/code1185.c:49:10: warning: multiple spaces (MULTISPACE)
+  for(;;)  {
+          ^
+./%LOGDIR/code1185.c:50:2: warning: not indented 2 steps (uses 0) (INDENTATION)
+  }
+  ^
+./%LOGDIR/code1185.c:52:16: warning: sizeof without parenthesis (SIZEOFNOPAREN)
+  int a = sizeof int;
+                ^
+./%LOGDIR/code1185.c:53:10: warning: use of magicbad is banned (BANNEDFUNC)
+  int a = magicbad(buffer, alsobad(buffer), "%d", 99);
+          ^
+./%LOGDIR/code1185.c:53:27: warning: use of alsobad is banned (BANNEDFUNC)
+  int a = magicbad(buffer, alsobad(buffer), "%d", 99);
+                           ^
+./%LOGDIR/code1185.c:54:21: warning: missing space before colon (NOSPACEC)
+  int moo = hej?wrong:a>b;
+                     ^
+./%LOGDIR/code1185.c:54:22: warning: missing space after colon (NOSPACEC)
+  int moo = hej?wrong:a>b;
+                      ^
+./%LOGDIR/code1185.c:54:15: warning: missing space before question mark (NOSPACEQ)
+  int moo = hej?wrong:a>b;
+               ^
+./%LOGDIR/code1185.c:54:16: warning: missing space after question mark (NOSPACEQ)
+  int moo = hej?wrong:a>b;
+                ^
+./%LOGDIR/code1185.c:54:23: warning: missing space before less or greater than (NOSPACETHAN)
+  int moo = hej?wrong:a>b;
+                       ^
+./%LOGDIR/code1185.c:54:23: warning: missing space after less or greater than (NOSPACETHAN)
+  int moo = hej?wrong:a>b;
+                       ^
+./%LOGDIR/code1185.c:55:23: warning: missing space before less or greater than (NOSPACETHAN)
+  int moo2 = wrong2:(a)>(b);
+                       ^
+./%LOGDIR/code1185.c:55:23: warning: missing space after less or greater than (NOSPACETHAN)
+  int moo2 = wrong2:(a)>(b);
+                       ^
+./%LOGDIR/code1185.c:57:7: warning: conditional block on the same line (ONELINECONDITION)
+  if(a) b++;
+       ^
+./%LOGDIR/code1185.c:59:5: warning: use of sprintf is banned (BANNEDFUNC)
+  if(sprintf(buffer, "%s", moo)) {}
+     ^
+./%LOGDIR/code1185.c:60:25: warning: use of alsobad is banned (BANNEDFUNC)
+  *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
+                         ^
+./%LOGDIR/code1185.c:62:2: warning: // comment (CPPCOMMENTS)
+  // CPP comment ?
+  ^
+./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
+%spc%
+ ^
+./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
+%spc%
+ ^
+checksrc: 0 errors and 41 warnings
+</stdout>
+<errorcode>
+5
+</errorcode>
+</verify>
+</testcase>

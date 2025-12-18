@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,9 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* <DESC>
- * Use CURLOPT_RESOLVE to feed custom IP addresses for given host name + port
+ * Use CURLOPT_RESOLVE to feed custom IP addresses for given hostname + port
  * number combinations.
  * </DESC>
  */
@@ -30,15 +32,18 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
 
   /* Each single name resolve string should be written using the format
-     HOST:PORT:ADDRESS where HOST is the name libcurl will try to resolve,
-     PORT is the port number of the service where libcurl wants to connect to
-     the HOST and ADDRESS is the numerical IP address
+     HOST:PORT:ADDRESS where HOST is the name libcurl tries to resolve, PORT
+     is the port number of the service where libcurl wants to connect to the
+     HOST and ADDRESS is the numerical IP address
    */
   struct curl_slist *host = curl_slist_append(NULL,
                                               "example.com:443:127.0.0.1");
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -51,6 +56,7 @@ int main(void)
   }
 
   curl_slist_free_all(host);
+  curl_global_cleanup();
 
   return (int)res;
 }

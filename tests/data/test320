@@ -46,9 +46,9 @@ httptls+srp
 <features>
 TLS-SRP
 </features>
- <name>
+<name>
 simple TLS-SRP HTTPS GET, check user in response
- </name>
+</name>
 <command>
 --insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword abc -A curl-test-suite https://%HOSTIP:%HTTPTLSPORT
 </command>
@@ -56,9 +56,7 @@ simple TLS-SRP HTTPS GET, check user in response
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
-<file name="log/curl320.out">
+<file name="%LOGDIR/curl%TESTNUMBER.out" crlf="headers">
 HTTP/1.0 200 OK
 Content-type: text/html
 

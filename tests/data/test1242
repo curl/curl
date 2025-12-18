@@ -23,11 +23,11 @@ returned
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve without TFTP options requests
- </name>
- <command>
-tftp://%HOSTIP:%TFTPPORT//1242 --tftp-no-options
+</name>
+<command>
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-no-options
 </command>
 </client>
 
@@ -35,9 +35,9 @@ tftp://%HOSTIP:%TFTPPORT//1242 --tftp-no-options
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <protocol>
-opcode: 1
-mode: octet
-filename: /1242
+opcode = 1
+mode = octet
+filename = /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

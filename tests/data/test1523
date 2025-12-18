@@ -2,6 +2,7 @@
 <info>
 <keywords>
 CURLINFO_LOW_SPEED_LIMIT
+DELAY
 </keywords>
 </info>
 
@@ -9,7 +10,7 @@ CURLINFO_LOW_SPEED_LIMIT
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Connection: close
 Funny-head: yesyes
@@ -17,7 +18,7 @@ Funny-head: yesyes
 AA
 </data>
 <servercmd>
-writedelay: 1
+writedelay: 1000
 </servercmd>
 </reply>
 #
@@ -27,7 +28,7 @@ writedelay: 1
 http
 </server>
 <tool>
-lib1523
+lib%TESTNUMBER
 </tool>
 
 <name>
@@ -35,7 +36,7 @@ CURLINFO_LOW_SPEED_LIMIT
 </name>
 
 <command>
-http://%HOSTIP:%HTTPPORT/1523
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <killserver>
 http

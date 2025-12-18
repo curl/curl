@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,8 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 #
 # This script is aimed to help scan for and detect globally declared functions
@@ -26,40 +28,36 @@
 #
 # Use it like this:
 #
-# $ ./scripts/singleuse.pl lib/.libs/libcurl.a
+# $ ./scripts/singleuse.pl [--unit] lib/.libs/libcurl.a
 #
-# Be aware that it might cause false positives due to various build options.
+# --unit : built to support unit tests
 #
 
-my $file = $ARGV[0];
+use strict;
+use warnings;
+
+my $unittests="";
+if(@ARGV && $ARGV[0] eq "--unit") {
+    $unittests = "tests/unit ";
+    shift @ARGV;
+}
+
+my $file = $ARGV[0] || '';
 
 my %wl = (
-    'Curl_none_cert_status_request' => 'multiple TLS backends',
-    'Curl_none_check_cxn' => 'multiple TLS backends',
-    'Curl_none_cleanup' => 'multiple TLS backends',
-    'Curl_none_close_all' => 'multiple TLS backends',
-    'Curl_none_data_pending' => 'multiple TLS backends',
-    'Curl_none_engines_list' => 'multiple TLS backends',
-    'Curl_none_init' => 'multiple TLS backends',
-    'Curl_none_md5sum' => 'multiple TLS backends',
-    'Curl_none_random' => 'multiple TLS backends',
-    'Curl_none_session_free' => 'multiple TLS backends',
-    'Curl_none_set_engine' => 'multiple TLS backends',
-    'Curl_none_set_engine_default' => 'multiple TLS backends',
-    'Curl_none_shutdown' => 'multiple TLS backends',
-    'Curl_multi_dump' => 'debug build only',
-    'Curl_parse_port' => 'UNITTEST',
-    'Curl_shuffle_addr' => 'UNITTEST',
-    'de_cleanup' => 'UNITTEST',
-    'doh_decode' => 'UNITTEST',
-    'doh_encode' => 'UNITTEST',
-    'Curl_auth_digest_get_pair' => 'by digest_sspi',
-    'curlx_uztoso' => 'cmdline tool use',
-    'curlx_uztoul' => 'by krb5_sspi',
-    'curlx_uitous' => 'by schannel',
-    'Curl_islower' => 'by curl_fnmatch',
-    'getaddressinfo' => 'UNITTEST',
-    );
+    'Curl_xfer_write_resp' => 'internal api',
+    'Curl_creader_def_init' => 'internal api',
+    'Curl_creader_def_close' => 'internal api',
+    'Curl_creader_def_read' => 'internal api',
+    'Curl_creader_def_total_length' => 'internal api',
+    'Curl_meta_reset' => 'internal api',
+    'Curl_thread_destroy' => 'internal api',
+    'Curl_trc_dns' => 'internal api',
+    'curlx_base64_decode' => 'internal api',
+    'curlx_base64_encode' => 'internal api',
+    'curlx_base64url_encode' => 'internal api',
+    'Curl_multi_clear_dirty' => 'internal api',
+);
 
 my %api = (
     'curl_easy_cleanup' => 'API',
@@ -73,9 +71,14 @@ my %api = (
     'curl_easy_reset' => 'API',
     'curl_easy_send' => 'API',
     'curl_easy_setopt' => 'API',
+    'curl_easy_ssls_export' => 'API',
+    'curl_easy_ssls_import' => 'API',
     'curl_easy_strerror' => 'API',
     'curl_easy_unescape' => 'API',
     'curl_easy_upkeep' => 'API',
+    'curl_easy_option_by_id' => 'API',
+    'curl_easy_option_by_name' => 'API',
+    'curl_easy_option_next' => 'API',
     'curl_escape' => 'API',
     'curl_formadd' => 'API',
     'curl_formfree' => 'API',
@@ -87,6 +90,7 @@ my %api = (
     'curl_global_init' => 'API',
     'curl_global_init_mem' => 'API',
     'curl_global_sslset' => 'API',
+    'curl_global_trace' => 'API',
     'curl_maprintf' => 'API',
     'curl_mfprintf' => 'API',
     'curl_mime_addpart' => 'API',
@@ -108,17 +112,24 @@ my %api = (
     'curl_multi_assign' => 'API',
     'curl_multi_cleanup' => 'API',
     'curl_multi_fdset' => 'API',
+    'curl_multi_get_handles' => 'API',
+    'curl_multi_get_offt' => 'API',
     'curl_multi_info_read' => 'API',
     'curl_multi_init' => 'API',
+    'curl_multi_notify_disable' => 'API',
+    'curl_multi_notify_enable' => 'API',
     'curl_multi_perform' => 'API',
     'curl_multi_remove_handle' => 'API',
     'curl_multi_setopt' => 'API',
     'curl_multi_socket' => 'API',
     'curl_multi_socket_action' => 'API',
     'curl_multi_socket_all' => 'API',
+    'curl_multi_poll' => 'API',
     'curl_multi_strerror' => 'API',
     'curl_multi_timeout' => 'API',
     'curl_multi_wait' => 'API',
+    'curl_multi_waitfds' => 'API',
+    'curl_multi_wakeup' => 'API',
     'curl_mvaprintf' => 'API',
     'curl_mvfprintf' => 'API',
     'curl_mvprintf' => 'API',
@@ -140,33 +151,60 @@ my %api = (
     'curl_url_dup' => 'API',
     'curl_url_get' => 'API',
     'curl_url_set' => 'API',
+    'curl_url_strerror' => 'API',
     'curl_version' => 'API',
     'curl_version_info' => 'API',
+    'curl_easy_header' => 'API',
+    'curl_easy_nextheader' => 'API',
+    'curl_ws_meta' => 'API',
+    'curl_ws_recv' => 'API',
+    'curl_ws_send' => 'API',
+    'curl_ws_start_frame' => 'API',
 
     # the following functions are provided globally in debug builds
     'curl_easy_perform_ev' => 'debug-build',
     );
+
+sub doublecheck {
+    my ($f, $used) = @_;
+    open(F, "git grep -Fwle '$f' -- lib ${unittests}packages|");
+    my @also;
+    while(<F>) {
+        my $e = $_;
+        chomp $e;
+        if($e =~ /\.[c]$/) {
+            if($e !~ /^lib\/${used}\.c/) {
+                push @also, $e;
+            }
+        }
+    }
+    close(F);
+    return @also;
+}
 
 open(N, "nm $file|") ||
     die;
 
 my %exist;
 my %uses;
-my $file;
-while (<N>) {
+while(<N>) {
     my $l = $_;
     chomp $l;
 
     if($l =~ /^([0-9a-z_-]+)\.o:/) {
         $file = $1;
     }
-    if($l =~ /^([0-9a-f]+) T (.*)/) {
+    # libcurl.a(unity_0_c.c.o):
+    elsif($l =~ /\(([0-9a-z_.-]+)\.o\):/) {  # Apple nm
+        $file = $1;
+    }
+    if($l =~ /^([0-9a-f]+) T _?(.*)/) {
         my ($name)=($2);
         #print "Define $name in $file\n";
         $file =~ s/^libcurl_la-//;
         $exist{$name} = $file;
     }
-    elsif($l =~ /^                 U (.*)/) {
+    elsif($l =~ /^                 U _?(.*)/) {
         my ($name)=($1);
         #print "Uses $name in $file\n";
         $uses{$name} .= "$file, ";
@@ -174,35 +212,45 @@ while (<N>) {
 }
 close(N);
 
-my $err;
+my $err = 0;
 for(sort keys %exist) {
     #printf "%s is defined in %s, used by: %s\n", $_, $exist{$_}, $uses{$_};
     if(!$uses{$_}) {
         # this is a symbol with no "global" user
-        if($_ =~ /^curl_/) {
+        if($_ =~ /^curl_dbg_/) {
+            # we ignore the memdebug symbols
+        }
+        elsif($_ =~ /^curl_/) {
             if(!$api{$_}) {
                 # not present in the API, or for debug-builds
                 print STDERR "Bad curl-prefix: $_\n";
                 $err++;
             }
         }
-        elsif($_ =~ /^curl_dbg_/) {
-            # we ignore the memdebug symbols
-        }
         elsif($wl{$_}) {
             #print "$_ is WL\n";
         }
         else {
-            printf "%s is defined in %s, but not used outside\n", $_, $exist{$_};
-            $err++;
+            my $c = $_;
+            my @also = doublecheck($c, $exist{$c});
+            if(!scalar(@also)) {
+                printf "%s in %s\n", $c, $exist{$c};
+                $err++;
+            }
+            #    foreach my $a (@also) {
+            #        print "  $a\n";
+            #    }
         }
     }
     elsif($_ =~ /^curl_/) {
         # global prefix, make sure it is "blessed"
         if(!$api{$_}) {
             # not present in the API, or for debug-builds
-            print STDERR "Bad curl-prefix $_\n";
-            $err++;
+            if($_ !~ /^curl_dbg_/) {
+                # ignore the memdebug symbols
+                print STDERR "Bad curl-prefix $_\n";
+                $err++;
+            }
         }
     }
 }

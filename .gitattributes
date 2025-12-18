@@ -1,4 +1,7 @@
-*.dsw -crlf
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
 buildconf eol=lf
 configure.ac eol=lf
 *.m4 eol=lf
@@ -6,3 +9,7 @@ configure.ac eol=lf
 *.am eol=lf
 *.sh eol=lf
 *.[ch] whitespace=tab-in-indent
+
+# Batch files must be run with CRLF line endings.
+# Refer to https://github.com/curl/curl/pull/6442
+*.bat text eol=crlf

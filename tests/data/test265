@@ -6,6 +6,7 @@ HTTP POST
 HTTP CONNECT
 HTTP proxy
 HTTP proxy NTLM auth
+NTLM
 </keywords>
 </info>
 
@@ -13,18 +14,19 @@ HTTP proxy NTLM auth
 <reply>
 
 # this is returned first since we get no proxy-auth
-<connect1001>
+<connect1001 crlf="headers">
 HTTP/1.0 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Connection: Keep-Alive
 Content-Length: 1033
 
 And you should ignore this data.
-QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
+%repeat[999 x Q]%
 </connect1001>
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<connect1002>
+<connect1002 crlf="headers">
 HTTP/1.1 200 Things are fine in proxy land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -34,7 +36,7 @@ Content-Type: text/html; charset=iso-8859-1
 # this is returned when we get a GET!
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html
@@ -54,6 +56,7 @@ Nice proxy auth sir!
 <datacheck>
 HTTP/1.0 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Connection: Keep-Alive
 Content-Length: 1033
 
 HTTP/1.1 200 Things are fine in proxy land
@@ -61,7 +64,7 @@ Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html
@@ -78,45 +81,36 @@ http
 </server>
 <features>
 NTLM
+SSL
 !SSPI
-debug
+proxy
 </features>
- <name>
+<name>
 HTTP proxy CONNECT auth NTLM and then POST, response-body in the 407
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
-http://test.remote.example.com.265:%HTTPPORT/path/2650002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --proxytunnel -d "postit"
+</name>
+<command>
+http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --proxytunnel -d "postit"
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
-<protocol nonewline="yes">
-CONNECT test.remote.example.com.265:%HTTPPORT HTTP/1.1
-Host: test.remote.example.com.265:%HTTPPORT
+<protocol crlf="yes" nonewline="yes">
+CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.example.com.265:%HTTPPORT HTTP/1.1
-Host: test.remote.example.com.265:%HTTPPORT
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
+CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-POST /path/2650002 HTTP/1.1
-User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
-Host: test.remote.example.com.265:%HTTPPORT
+POST /path/%TESTNUMBER0002 HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 6
 Content-Type: application/x-www-form-urlencoded

@@ -1,14 +1,20 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 How to contribute to curl
 =========================
 
 Join the community
 ------------------
 
- 1. Click 'watch' on the github repo
+ 1. Click 'watch' on the GitHub repo
 
- 2. Subscribe to the suitable [mailing lists](https://curl.haxx.se/mail/)
+ 2. Subscribe to the suitable [mailing lists](https://curl.se/mail/)
 
-Read [CONTRIBUTE](../docs/CONTRIBUTE.md)
+Read [CONTRIBUTE](/docs/CONTRIBUTE.md)
 ---------------------------------------
 
 Send your suggestions using one of these methods:
@@ -20,4 +26,4 @@ Send your suggestions using one of these methods:
 
  3. as an [issue](https://github.com/curl/curl/issues)
 
-/ The curl team!
+/ The curl team

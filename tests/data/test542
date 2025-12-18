@@ -16,7 +16,7 @@ that FTP
 works
   so does it?
 </data>
-<datacheck>
+<datacheck crlf="yes">
 Content-Length: 51
 Accept-ranges: bytes
 </datacheck>
@@ -28,13 +28,13 @@ Accept-ranges: bytes
 ftp
 </server>
 <tool>
-lib542
+lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP a file with NOBODY yes and HEADER no
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/542
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 
 </client>
@@ -44,12 +44,12 @@ ftp://%HOSTIP:%FTPPORT/542
 # There's no MTDM in the protocol here since this code doesn't ask for the
 # time/date of the file
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 TYPE I
-SIZE 542
+SIZE %TESTNUMBER
 REST 0
 QUIT
 </protocol>

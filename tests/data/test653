@@ -10,25 +10,25 @@ MIME
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
 
 hello
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
 
 hello
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -39,19 +39,22 @@ hello
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib653
+lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 Reuse of handle after altering mime data
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/653
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -59,17 +62,17 @@ http://%HOSTIP:%HTTPPORT/653
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 # Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
-<protocol>
-POST /653 HTTP/1.1
+<protocol crlf="yes">
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 150
+Content-Length: 162
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
@@ -77,10 +80,10 @@ Content-Disposition: form-data; name="name"
 
 short value
 --------------------------------
-POST /653 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 167
+Content-Length: 179
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
