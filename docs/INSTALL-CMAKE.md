@@ -465,6 +465,7 @@ Details via CMake
 - `WOLFSSL_LIBRARY`:                        Absolute path to `wolfssl` library.
 - `ZSTD_INCLUDE_DIR`:                       Absolute path to zstd include directory.
 - `ZSTD_LIBRARY`:                           Absolute path to `zstd` library.
+- `ZSTD_USE_STATIC_LIBS`:                   Configure for static zstd libraries.
 
 Examples:
 
