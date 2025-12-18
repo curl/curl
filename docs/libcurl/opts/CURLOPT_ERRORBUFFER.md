@@ -69,7 +69,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     char errbuf[CURL_ERROR_SIZE];
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
@@ -81,20 +81,20 @@ int main(void)
     errbuf[0] = 0;
 
     /* perform the request */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* if the request did not complete correctly, show the error
     information. if no detailed error information was written to errbuf
     show the more generic information from curl_easy_strerror instead.
     */
-    if(res != CURLE_OK) {
+    if(result != CURLE_OK) {
       size_t len = strlen(errbuf);
-      fprintf(stderr, "\nlibcurl: (%d) ", res);
+      fprintf(stderr, "\nlibcurl: (%d) ", result);
       if(len)
         fprintf(stderr, "%s%s", errbuf,
                 ((errbuf[len - 1] != '\n') ? "\n" : ""));
       else
-        fprintf(stderr, "%s\n", curl_easy_strerror(res));
+        fprintf(stderr, "%s\n", curl_easy_strerror(result));
     }
   }
 }

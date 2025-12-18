@@ -30,7 +30,6 @@
 
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_ex(struct Curl_easy *data,
-                    const struct curltime *nowp,
                     timediff_t milli, expire_id id);
 bool Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
@@ -162,5 +161,7 @@ unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);
 void Curl_multi_mark_dirty(struct Curl_easy *data);
 /* Clear transfer from the dirty set. */
 void Curl_multi_clear_dirty(struct Curl_easy *data);
+
+void Curl_multi_set_now(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_MULTIIF_H */

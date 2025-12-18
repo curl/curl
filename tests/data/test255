@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ EPRT
 --disable-eprt
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data mode="text">
@@ -26,7 +26,6 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -43,7 +42,6 @@ FTP IPv6 dir list with EPRT and --disable-eprt
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>

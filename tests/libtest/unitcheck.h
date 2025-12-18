@@ -92,6 +92,7 @@
     goto unit_test_abort;                                           \
   } while(0)
 
+/* begin/end macros */
 
 #define UNITTEST_BEGIN_SIMPLE                   \
   (void)arg;                                    \

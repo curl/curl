@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -98,7 +99,7 @@ Accept: */*
 www.example.com	FALSE	/	TRUE	0	__Host-SID	12346
 .example.com	TRUE	/	TRUE	0	supersupersuper	secret
 .example.com	TRUE	/	TRUE	0	__SecURE-SID	12346
-.example.com	TRUE	/%TESTNUMBER/login/	TRUE	0	supersuper	secret
+.example.com	TRUE	/%TESTNUMBER/login	TRUE	0	supersuper	secret
 .example.com	TRUE	/1561	TRUE	0	super	secret
 </file>
 

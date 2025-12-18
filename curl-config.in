@@ -149,7 +149,7 @@ while test "$#" -gt 0; do
     ;;
 
   --libs)
-    if test "@libdir@" != '/usr/lib' -a "@libdir@" != '/usr/lib64'; then
+    if test "@libdir@" != '/usr/lib' && test "@libdir@" != '/usr/lib64'; then
       curllibdir="-L@libdir@ "
     else
       curllibdir=''

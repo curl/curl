@@ -135,7 +135,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   /* CA cert in PEM format, replace the XXXs */
   char *mypem =
     "-----BEGIN CERTIFICATE-----\n"
@@ -156,15 +156,15 @@ int main(void)
 
   curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, mypem);
-  res = curl_easy_perform(curl);
-  if(!res)
+  result = curl_easy_perform(curl);
+  if(!result)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }
 ~~~
 

@@ -38,6 +38,8 @@
 #endif
 #endif
 
+#define MAX_CONFIG_LINE_LENGTH (10 * 1024 * 1024)
+
 #define checkprefix(a, b) curl_strnequal(b, STRCONST(a))
 
 #define tool_safefree(ptr) \

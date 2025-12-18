@@ -1,9 +1,8 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
-#
 # For this test the server rejects the EPRT command,
 # code in lib591 makes use of curl_multi_timeout()
 # and server does not establish data connection.
-#
 <info>
 <keywords>
 FTP

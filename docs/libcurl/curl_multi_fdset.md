@@ -91,7 +91,7 @@ int main(void)
   fd_set fdexcep;
   int maxfd;
   int rc;
-  CURLMcode mc;
+  CURLMcode mresult;
   struct timeval timeout = { 1, 0 };
 
   CURLM *multi = curl_multi_init();
@@ -105,17 +105,17 @@ int main(void)
     FD_ZERO(&fdexcep);
 
     /* get file descriptors from the transfers */
-    mc = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+    mresult = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+    if(mresult != CURLM_OK) {
+      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mresult);
       break;
     }
 
     /* wait for activity on one of the sockets */
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-  } while(!mc);
+  } while(!mresult);
 }
 ~~~
 

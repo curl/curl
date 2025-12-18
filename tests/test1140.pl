@@ -36,13 +36,10 @@ if(!$docsroot || ($docsroot eq "-g")) {
     exit;
 }
 
-
 shift @ARGV;
 
 my @f = @ARGV;
-
 my %manp;
-
 my $errors = 0;
 
 sub manpresent {

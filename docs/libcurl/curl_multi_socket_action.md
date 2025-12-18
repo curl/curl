@@ -111,9 +111,9 @@ int main(void)
 
   CURLM *multi = curl_multi_init();
 
-  CURLMcode mc = curl_multi_socket_action(multi, fd, bitmask, &running);
-  if(mc)
-    printf("error: %s\n", curl_multi_strerror(mc));
+  CURLMcode mresult = curl_multi_socket_action(multi, fd, bitmask, &running);
+  if(mresult)
+    printf("error: %s\n", curl_multi_strerror(mresult));
 }
 ~~~
 

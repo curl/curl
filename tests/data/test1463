@@ -1,18 +1,16 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 FILE
 --help
-notxml
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -26,18 +24,13 @@ curl file category --help
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0
 </errorcode>
 <stdout mode="text">
-file: FILE protocol
-     --create-file-mode <mode>  File mode for created files
- -I, --head                     Show document info only
- -l, --list-only                List only mode
- -r, --range <range>            Retrieve only the bytes within RANGE
+%includetext %SRCDIR/data/data%TESTNUMBER.txt%
 </stdout>
 </verify>
 </testcase>

@@ -39,6 +39,8 @@ static CURLcode test_unit1397(const char *arg)
   };
 
   static const struct testcase tests[] = {
+    { ".hello.com", "*.hello.com", FALSE },
+    { "a.hello.com", "*.hello.com", TRUE },
     { "", "", FALSE },
     { "a", "", FALSE },
     { "", "b", FALSE },

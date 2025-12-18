@@ -45,21 +45,21 @@ static const char *descr_flags(int flags)
 
 static CURLcode send_header(CURL *curl, int flags, size_t size)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t nsent;
 
 retry:
-  res = curl_ws_send(curl, NULL, 0, &nsent, (curl_off_t)size,
+  result = curl_ws_send(curl, NULL, 0, &nsent, (curl_off_t)size,
                      flags | CURLWS_OFFSET);
-  if(res == CURLE_AGAIN) {
+  if(result == CURLE_AGAIN) {
     assert(nsent == 0);
     goto retry;
   }
-  if(res) {
+  if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     assert(nsent == 0);
-    return res;
+    return result;
   }
 
   assert(nsent == 0);
@@ -70,7 +70,7 @@ retry:
 static CURLcode recv_header(CURL *curl, int *flags, curl_off_t *offset,
                             curl_off_t *bytesleft)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t nread;
   const struct curl_ws_frame *meta;
 
@@ -79,16 +79,16 @@ static CURLcode recv_header(CURL *curl, int *flags, curl_off_t *offset,
   *bytesleft = 0;
 
 retry:
-  res = curl_ws_recv(curl, NULL, 0, &nread, &meta);
-  if(res == CURLE_AGAIN) {
+  result = curl_ws_recv(curl, NULL, 0, &nread, &meta);
+  if(result == CURLE_AGAIN) {
     assert(nread == 0);
     goto retry;
   }
-  if(res) {
+  if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     assert(nread == 0);
-    return res;
+    return result;
   }
 
   assert(nread == 0);
@@ -106,9 +106,9 @@ retry:
   if(meta->bytesleft > 0)
     curl_mfprintf(stdout, " ");
 
-  res = send_header(curl, meta->flags, (size_t)meta->bytesleft);
-  if(res)
-    return res;
+  result = send_header(curl, meta->flags, (size_t)meta->bytesleft);
+  if(result)
+    return result;
 
   return CURLE_OK;
 }
@@ -116,20 +116,21 @@ retry:
 static CURLcode send_chunk(CURL *curl, int flags, const char *buffer,
                            size_t size, size_t *offset)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t nsent;
 
 retry:
-  res = curl_ws_send(curl, buffer + *offset, size - *offset, &nsent, 0, flags);
-  if(res == CURLE_AGAIN) {
+  result = curl_ws_send(curl, buffer + *offset, size - *offset, &nsent,
+                        0, flags);
+  if(result == CURLE_AGAIN) {
     assert(nsent == 0);
     goto retry;
   }
-  if(res) {
+  if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     assert(nsent == 0);
-    return res;
+    return result;
   }
 
   assert(nsent <= size - *offset);
@@ -142,23 +143,23 @@ retry:
 static CURLcode recv_chunk(CURL *curl, int flags, curl_off_t *offset,
                            curl_off_t *bytesleft)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char buffer[256];
   size_t nread;
   const struct curl_ws_frame *meta;
   size_t sendoffset = 0;
 
 retry:
-  res = curl_ws_recv(curl, buffer, sizeof(buffer), &nread, &meta);
-  if(res == CURLE_AGAIN) {
+  result = curl_ws_recv(curl, buffer, sizeof(buffer), &nread, &meta);
+  if(result == CURLE_AGAIN) {
     assert(nread == 0);
     goto retry;
   }
-  if(res) {
+  if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     assert(nread == 0);
-    return res;
+    return result;
   }
 
   assert(nread <= sizeof(buffer));
@@ -173,9 +174,9 @@ retry:
   fwrite(buffer, 1, nread, stdout);
 
   while(sendoffset < nread) {
-    res = send_chunk(curl, flags, buffer, nread, &sendoffset);
-    if(res)
-      return res;
+    result = send_chunk(curl, flags, buffer, nread, &sendoffset);
+    if(result)
+      return result;
   }
 
   return CURLE_OK;
@@ -183,19 +184,19 @@ retry:
 
 static CURLcode recv_frame(CURL *curl, bool *stop)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int flags = 0;
   curl_off_t offset = 0;
   curl_off_t bytesleft = 0;
 
-  res = recv_header(curl, &flags, &offset, &bytesleft);
-  if(res)
-    return res;
+  result = recv_header(curl, &flags, &offset, &bytesleft);
+  if(result)
+    return result;
 
   while(bytesleft > 0) {
-    res = recv_chunk(curl, flags, &offset, &bytesleft);
-    if(res)
-      return res;
+    result = recv_chunk(curl, flags, &offset, &bytesleft);
+    if(result)
+      return result;
   }
 
   if(flags & CURLWS_CLOSE)
@@ -203,14 +204,14 @@ static CURLcode recv_frame(CURL *curl, bool *stop)
 
   curl_mfprintf(stdout, "\n");
 
-  return res;
+  return result;
 }
 #endif
 
 static CURLcode test_lib2700(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   bool stop = false;
   CURL *curl;
 
@@ -229,24 +230,24 @@ static CURLcode test_lib2700(const char *URL)
   if(testnum != 2708)
     easy_setopt(curl, CURLOPT_WS_OPTIONS, CURLWS_NOAUTOPONG);
 
-  res = curl_easy_perform(curl);
-  if(res) {
+  result = curl_easy_perform(curl);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
   while(!stop) {
-    res = recv_frame(curl, &stop);
-    if(res)
+    result = recv_frame(curl, &stop);
+    if(result)
       goto test_cleanup;
   }
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 #else
   NO_SUPPORT_BUILT_IN
 #endif

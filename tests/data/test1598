@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTP
 HTTP POST
 CURLOPT_HTTPTRAILER_FUNCTION
 CURLOPT_HTTPTRAILER_DATA
-notxml
 </keywords>
 </info>
 
@@ -50,7 +50,7 @@ Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded
 
 11
-xxx=yyy&aaa=bbbbb
+xxx=yyy%AMPaaa=bbbbb
 0
 my-super-awesome-trailer: trail1
 my-other-awesome-trailer: trail2

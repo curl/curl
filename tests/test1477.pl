@@ -78,7 +78,6 @@ sub scanmanpage {
     close(H);
 }
 
-
 opendir(my $dh, $curlh) || die "Cannot opendir $curlh: $!";
 my @hfiles = grep { /\.h$/ } readdir($dh);
 closedir $dh;

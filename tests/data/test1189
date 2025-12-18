@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP FORMPOST
-notxml
 </keywords>
 </info>
 # Server-side
@@ -34,7 +34,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --form-escape
 -F name=daniel
 -F tool=curl
 --form-string "str1=@literal"
---form-string "str2=<verbatim;type=xxx/yyy"
+--form-string "str2=%LTverbatim;type=xxx/yyy"
 -F "file=@%LOGDIR/test%TESTNUMBER.txt;type=moo/foobar;filename=fakerfile"
 -F file2=@%LOGDIR/test%TESTNUMBER.txt
 -F "file3=@\"%LOGDIR/test%TESTNUMBER.txt\";type=mo/foo;filename=\"f\\\\\\\\ak\\\\\\er,\\\\an\\d;.t\\\"xt\""
@@ -77,7 +77,7 @@ Content-Disposition: form-data; name="str1"%CR
 ------------------------------24e78000bd32%CR
 Content-Disposition: form-data; name="str2"%CR
 %CR
-<verbatim;type=xxx/yyy%CR
+%LTverbatim;type=xxx/yyy%CR
 ------------------------------24e78000bd32%CR
 Content-Disposition: form-data; name="file"; filename="fakerfile"%CR
 Content-Type: moo/foobar%CR

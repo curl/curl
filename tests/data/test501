@@ -1,10 +1,10 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 missing URL
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 </reply>
@@ -24,7 +24,6 @@ simple libcurl attempt operation without URL set
 </name>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

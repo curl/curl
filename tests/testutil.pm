@@ -38,6 +38,8 @@ BEGIN {
         runclientoutput
         setlogfunc
         exerunner
+        subtextfile
+        subchars
         subbase64
         subnewlines
         subsha256base64file
@@ -61,7 +63,6 @@ use globalconfig qw(
 
 my $logfunc;      # optional reference to function for logging
 my @logmessages;  # array holding logged messages
-
 
 #######################################################################
 # Log an informational message
@@ -96,7 +97,6 @@ sub clearlogs {
     return $loglines;
 }
 
-
 #######################################################################
 
 sub includefile {
@@ -108,6 +108,25 @@ sub includefile {
     my @a = <F>;
     close(F);
     return join("", @a);
+}
+
+sub subtextfile {
+    my ($thing) = @_;
+
+    my $count = ($$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge);
+
+    return $count > 0;
+}
+
+sub subchars {
+    my ($thing) = @_;
+
+    $$thing =~ s/%SP/ /g;    # space
+    $$thing =~ s/%TAB/\t/g;  # horizontal tab
+    $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
+    $$thing =~ s/%LT/</g;
+    $$thing =~ s/%GT/>/g;
+    $$thing =~ s/%AMP/&/g;
 }
 
 sub subbase64 {
@@ -149,16 +168,6 @@ sub subbase64 {
         my $d2 = $d + 60;
         $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
     }
-
-    # include a file, expand space macros
-    $$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
-
-    $$thing =~ s/%SP/ /g;    # space
-    $$thing =~ s/%TAB/\t/g;  # horizontal tab
-    $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
-    $$thing =~ s/%LT/</g;
-    $$thing =~ s/%GT/>/g;
-    $$thing =~ s/%AMP/&/g;
 
     # include a file
     $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1, 0)/ge;

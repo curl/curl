@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ integer overflow
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <name>
@@ -16,7 +16,6 @@ http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER -m 184467440737095510
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

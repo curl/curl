@@ -16,7 +16,6 @@ name: 'Source'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
-      - 'tests/data/**'
   pull_request:
     branches:
       - master
@@ -25,7 +24,6 @@ name: 'Source'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
-      - 'tests/data/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -38,7 +36,7 @@ jobs:
     name: 'checksrc'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -49,7 +47,7 @@ jobs:
     name: 'spellcheck, linters, REUSE'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -112,7 +110,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             pmccabe
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -132,16 +130,12 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libxml2-utils
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
       - name: 'check'
-        run: |
-          {
-            git grep -z -i -l -E '^<\?xml' || true
-            git grep -z -L -F 'notxml' 'tests/data/test*' || true
-          } | xargs -0 -r xmllint >/dev/null
+        run: git grep -z -i -l -E '^<\?xml' | xargs -0 -r xmllint --output /dev/null
 
   miscchecks:
     name: 'misc checks'
@@ -152,7 +146,7 @@ jobs:
         timeout-minutes: 2
         run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 

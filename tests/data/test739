@@ -1,17 +1,15 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 IPFS
-notxml
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -24,11 +22,10 @@ http
 IPNS path and query args for gateway and IPFS URL (malformed gateway URL)
 </name>
 <command>
---ipfs-gateway "http://%HOSTIP:%HTTPPORT/some/path?biz=baz" "ipns://fancy.tld/a/b?foo=bar&aaa=bbb"
+--ipfs-gateway "http://%HOSTIP:%HTTPPORT/some/path?biz=baz" "ipns://fancy.tld/a/b?foo=bar%AMPaaa=bbb"
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

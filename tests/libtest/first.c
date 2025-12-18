@@ -161,10 +161,11 @@ char *hexdump(const unsigned char *buf, size_t len)
 CURLcode ws_send_ping(CURL *curl, const char *send_payload)
 {
   size_t sent;
-  CURLcode res = curl_ws_send(curl, send_payload, strlen(send_payload),
-                              &sent, 0, CURLWS_PING);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n", res, sent);
-  return res;
+  CURLcode result = curl_ws_send(curl, send_payload, strlen(send_payload),
+                                 &sent, 0, CURLWS_PING);
+  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n",
+                result, sent);
+  return result;
 }
 
 CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
@@ -172,11 +173,11 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
   size_t rlen;
   const struct curl_ws_frame *meta;
   char buffer[256];
-  CURLcode res = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(res) {
+  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  if(result) {
     curl_mfprintf(stderr, "ws: curl_ws_recv returned %u, received %zu\n",
-                  res, rlen);
-    return res;
+                  result, rlen);
+    return result;
   }
 
   if(!(meta->flags & CURLWS_PONG)) {
@@ -189,7 +190,7 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
   if(rlen == strlen(expected_payload) &&
      !memcmp(expected_payload, buffer, rlen)) {
     curl_mfprintf(stderr, "ws: got the same payload back\n");
-    return CURLE_OK;  /* lib2304 returned 'res' here. Intentional? */
+    return CURLE_OK;
   }
   curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
   return CURLE_RECV_ERROR;
@@ -199,15 +200,16 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
 void ws_close(CURL *curl)
 {
   size_t sent;
-  CURLcode res = curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n", res, sent);
+  CURLcode result = curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
+  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n",
+                result, sent);
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
 int main(int argc, const char **argv)
 {
   const char *URL = "";
-  CURLcode res;
+  CURLcode result;
   entry_func_t entry_func;
   const char *entry_name;
   const char *env;
@@ -274,8 +276,8 @@ int main(int argc, const char **argv)
       testnum = (int)num;
   }
 
-  res = entry_func(URL);
-  curl_mfprintf(stderr, "Test ended with result %d\n", res);
+  result = entry_func(URL);
+  curl_mfprintf(stderr, "Test ended with result %d\n", result);
 
 #ifdef _WIN32
   /* flush buffers of all streams regardless of mode */
@@ -284,5 +286,5 @@ int main(int argc, const char **argv)
 
   /* Regular program status codes are limited to 0..127 and 126 and 127 have
    * special meanings by the shell, so limit a normal return code to 125 */
-  return (int)res <= 125 ? (int)res : 125;
+  return (int)result <= 125 ? (int)result : 125;
 }

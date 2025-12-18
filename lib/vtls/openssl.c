@@ -53,6 +53,7 @@
 #include "openssl.h"
 #include "../connect.h"
 #include "../slist.h"
+#include "../progress.h"
 #include "../select.h"
 #include "../curlx/wait.h"
 #include "vtls.h"
@@ -1442,7 +1443,6 @@ fail:
     return 0; /* failure! */
   return 1;
 }
-
 
 static CURLcode client_cert(struct Curl_easy *data,
                             SSL_CTX* ctx,
@@ -3196,6 +3196,7 @@ struct ossl_x509_share {
   X509_STORE *store;    /* cached X509 store or NULL if none */
   struct curltime time; /* when the cached store was created */
   BIT(store_is_empty);  /* no certs/paths/blobs are in the store */
+  BIT(no_partialchain); /* keep partial chain state */
 };
 
 static void oss_x509_share_free(void *key, size_t key_len, void *p)
@@ -3212,15 +3213,14 @@ static void oss_x509_share_free(void *key, size_t key_len, void *p)
   curlx_free(share);
 }
 
-static bool ossl_cached_x509_store_expired(const struct Curl_easy *data,
+static bool ossl_cached_x509_store_expired(struct Curl_easy *data,
                                            const struct ossl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   if(cfg->ca_cache_timeout < 0)
     return FALSE;
   else {
-    struct curltime now = curlx_now();
-    timediff_t elapsed_ms = curlx_timediff_ms(now, mb->time);
+    timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &mb->time);
     timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
     return elapsed_ms >= timeout_ms;
@@ -3228,17 +3228,21 @@ static bool ossl_cached_x509_store_expired(const struct Curl_easy *data,
 }
 
 static bool ossl_cached_x509_store_different(struct Curl_cfilter *cf,
+                                             const struct Curl_easy *data,
                                              const struct ossl_x509_share *mb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config =
+    Curl_ssl_cf_get_config(cf, CURL_UNCONST(data));
+  if(mb->no_partialchain != ssl_config->no_partialchain)
+    return TRUE;
   if(!mb->CAfile || !conn_config->CAfile)
     return mb->CAfile != conn_config->CAfile;
-
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
 static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
-                                              const struct Curl_easy *data,
+                                              struct Curl_easy *data,
                                               bool *pempty)
 {
   struct Curl_multi *multi = data->multi;
@@ -3252,7 +3256,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
                                  sizeof(MPROTO_OSSL_X509_KEY) - 1) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
-     !ossl_cached_x509_store_different(cf, share)) {
+     !ossl_cached_x509_store_different(cf, data, share)) {
     store = share->store;
     *pempty = share->store_is_empty;
   }
@@ -3261,7 +3265,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
 }
 
 static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
-                                       const struct Curl_easy *data,
+                                       struct Curl_easy *data,
                                        X509_STORE *store,
                                        bool is_empty)
 {
@@ -3291,6 +3295,8 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
 
   if(X509_STORE_up_ref(store)) {
     char *CAfile = NULL;
+    struct ssl_config_data *ssl_config =
+      Curl_ssl_cf_get_config(cf, CURL_UNCONST(data));
 
     if(conn_config->CAfile) {
       CAfile = curlx_strdup(conn_config->CAfile);
@@ -3305,10 +3311,11 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       curlx_free(share->CAfile);
     }
 
-    share->time = curlx_now();
+    share->time = *Curl_pgrs_now(data);
     share->store = store;
     share->store_is_empty = is_empty;
     share->CAfile = CAfile;
+    share->no_partialchain = ssl_config->no_partialchain;
   }
 }
 
@@ -3622,7 +3629,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                                      alpns_requested, sess_reuse_cb);
 }
 
-
 static CURLcode ossl_init_method(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct ssl_peer *peer,
@@ -3821,7 +3827,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      OpenSSL supports processing "jumbo TLS record" (8 TLS records) in one go
      for some algorithms, so match that here.
      Experimentation shows that a slightly larger buffer is needed
-      to avoid short reads.
+     to avoid short reads.
 
      However using a large buffer (8 packets) actually decreases performance.
      4 packets is better.
@@ -4661,7 +4667,6 @@ out:
   return result;
 }
 #endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
-
 
 #ifdef USE_APPLE_SECTRUST
 struct ossl_certs_ctx {

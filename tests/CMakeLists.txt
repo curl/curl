@@ -120,15 +120,15 @@ configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/configurehelp.pm.in"
   "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" @ONLY)
 
-curl_add_runtests(tests          "-a -w")  # Avoid 'test', which is a reserved target name in CMake
-curl_add_runtests(test-quiet     "-a -w -s")
-curl_add_runtests(test-am        "-a -w -am")
-curl_add_runtests(test-full      "-a -w -p -r")
+curl_add_runtests(tests          "-a")  # Avoid 'test', which is a reserved target name in CMake
+curl_add_runtests(test-quiet     "-a -s")
+curl_add_runtests(test-am        "-a -am")
+curl_add_runtests(test-full      "-a -p -r")
 # ~flaky means that it ignores results of tests using the flaky keyword
-curl_add_runtests(test-nonflaky  "-a -w -p ~flaky ~timing-dependent")
+curl_add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
 curl_add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r --retry=5 -j20 --buildinfo")
-curl_add_runtests(test-torture   "-a -w -t -j20")
-curl_add_runtests(test-event     "-a -w -e")
+curl_add_runtests(test-torture   "-a -t -j20")
+curl_add_runtests(test-event     "-a -e")
 
 curl_add_pytests(curl-pytest      "-n auto")
 curl_add_pytests(curl-pytest-ci   "-n auto -v")

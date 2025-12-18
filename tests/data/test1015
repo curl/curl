@@ -1,14 +1,13 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP POST
 --data-urlencode
-notxml
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -19,7 +18,6 @@ Content-Length: 0
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -29,14 +27,17 @@ http
 --data-urlencode
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@%LOGDIR/%TESTNUMBER.txt" --data-urlencode @%LOGDIR/%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--data-urlencode "my name is moo[]"
+--data-urlencode "y e s=s_i_r"
+--data-urlencode "v_alue@%LOGDIR/%TESTNUMBER.txt"
+--data-urlencode @%LOGDIR/%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/%TESTNUMBER.txt">
 content to _?!#$'|%LT%GT
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
@@ -47,7 +48,7 @@ Accept: */*
 Content-Length: 119
 Content-Type: application/x-www-form-urlencoded
 
-my+name+is+moo%5B%5D&y e s=s_i_r&v_alue=content+to+_%3F%21%23%24%27%7C%3C%3E%0A&content+to+_%3F%21%23%24%27%7C%3C%3E%0A
+my+name+is+moo%5B%5D%AMPy e s=s_i_r%AMPv_alue=content+to+_%3F%21%23%24%27%7C%3C%3E%0A%AMPcontent+to+_%3F%21%23%24%27%7C%3C%3E%0A
 </protocol>
 </verify>
 </testcase>

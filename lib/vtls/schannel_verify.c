@@ -371,10 +371,12 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   LPTSTR current_pos = NULL;
   DWORD i;
 
-/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
-#ifdef CERT_NAME_SEARCH_ALL_NAMES_FLAG
   /* CERT_NAME_SEARCH_ALL_NAMES_FLAG is available from Windows 8 onwards. */
   if(Win8_compat) {
+/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
+#ifndef CERT_NAME_SEARCH_ALL_NAMES_FLAG
+#define CERT_NAME_SEARCH_ALL_NAMES_FLAG 0x2
+#endif
     /* CertGetNameString will provide the 8-bit character string without
      * any decoding */
     DWORD name_flags =
@@ -387,10 +389,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                       length);
     return actual_length;
   }
-#else
-  (void)cert_context;
-  (void)Win8_compat;
-#endif
 
   if(!alt_name_info)
     return 0;

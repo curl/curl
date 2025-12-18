@@ -110,10 +110,9 @@ test736 test737 test738 test739 test740 test741 test742 test743 test744 \
 test745 test746 test747 test748 test749 test750 test751 test752 test753 \
 test754 test755 test756 test757 test758 test759 test760 test761 test762 \
 test763 test764 test765 test766 test767 test768 test769 test770 test771 \
-test772 test773 test774 test775 test776 test777 \
-test780 test781 test782 test783 test784 test785 test786 test787 test788 \
-test789 test790 test791 test792 test793 test794         test796 test797 \
-\
+test772 test773 test774 test775 test776 test777 test778 test779 test780 \
+test781 test782 test783 test784 test785 test786 test787 test788 test789 \
+test790 test791 test792 test793 test794 test795 test796 test797 test798 \
 test799 test800 test801 test802 test803 test804 test805 test806 test807 \
 test808 test809 test810 test811 test812 test813 test814 test815 test816 \
 test817 test818 test819 test820 test821 test822 test823 test824 test825 \
@@ -222,7 +221,7 @@ test1630 test1631 test1632 test1633 test1634 test1635 \
 \
 test1650 test1651 test1652 test1653 test1654 test1655 test1656 test1657 \
 test1658 \
-test1660 test1661 test1662 test1663 test1664 \
+test1660 test1661 test1662 test1663 test1664 test1665 \
 \
 test1670 test1671 \
 \
@@ -254,7 +253,7 @@ test2056 test2057 test2058 test2059 test2060 test2061 test2062 test2063 \
 test2064 test2065 test2066 test2067 test2068 test2069 test2070 test2071 \
 test2072 test2073 test2074 test2075 test2076 test2077 test2078 test2079 \
 test2080 test2081 test2082 test2083 test2084 test2085 test2086 test2087 \
-test2088 test2089 \
+test2088 test2089 test2090 \
 test2100 test2101 test2102 test2103 test2104 \
 \
 test2200 test2201 test2202 test2203 test2204 test2205 \
@@ -284,4 +283,9 @@ test3200 test3201 test3202 test3203 test3204 test3205 test3206 test3207 test3208
 test3209 test3210 test3211 test3212 test3213 test3214 test3215 test3216 \
 test4000 test4001
 
-EXTRA_DIST = $(TESTCASES) DISABLED data-xml1
+EXTRA_DIST = $(TESTCASES) DISABLED data-xml1 data320.html \
+data1461.txt data1463.txt  \
+data1400.c data1401.c data1402.c data1403.c data1404.c data1405.c data1406.c \
+data1407.c data1420.c data1465.c data1481.c \
+data1705-1.md data1705-2.md data1705-3.md data1705-4.md data1705-stdout.1 \
+data1706-1.md data1706-2.md data1706-3.md data1706-4.md data1706-stdout.txt

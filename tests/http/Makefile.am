@@ -34,6 +34,7 @@ testenv/httpd.py                      \
 testenv/mod_curltest/mod_curltest.c   \
 testenv/nghttpx.py                    \
 testenv/ports.py                      \
+testenv/sshd.py                       \
 testenv/vsftpd.py                     \
 testenv/ws_echo_server.py
 
@@ -65,7 +66,9 @@ test_20_websockets.py  \
 test_30_vsftpd.py      \
 test_31_vsftpds.py     \
 test_32_ftps_vsftpd.py \
-test_40_socks.py \
+test_40_socks.py       \
+test_50_scp.py         \
+test_51_sftp.py        \
 $(TESTENV)
 
 clean-local:

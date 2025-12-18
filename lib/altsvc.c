@@ -40,6 +40,7 @@
 #include "strdup.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 #include "connect.h"
 
 #define MAX_ALTSVC_LINE    4095
@@ -241,7 +242,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
   const char *dst6_post = "";
   const char *src6_pre = "";
   const char *src6_post = "";
-  CURLcode result = Curl_gmtime(as->expires, &stamp);
+  CURLcode result = curlx_gmtime(as->expires, &stamp);
   if(result)
     return result;
 #ifdef USE_IPV6
@@ -622,7 +623,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,
                         int srcport,
                         struct altsvc **dstentry,
-                        const int versions) /* one or more bits */
+                        const int versions, /* one or more bits */
+                        bool *psame_destination)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *n;
@@ -631,6 +633,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   DEBUGASSERT(srchost);
   DEBUGASSERT(dstentry);
 
+  *psame_destination = FALSE;
   for(e = Curl_llist_head(&asi->list); e; e = n) {
     struct altsvc *as = Curl_node_elem(e);
     n = Curl_node_next(e);
@@ -646,6 +649,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
        (versions & (int)as->dst.alpnid)) {
       /* match */
       *dstentry = as;
+      *psame_destination = (srcport == as->dst.port) &&
+                           hostcompare(srchost, as->dst.host);
       return TRUE;
     }
   }

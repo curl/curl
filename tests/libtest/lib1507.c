@@ -36,7 +36,7 @@ static CURLcode test_lib1507(const char *URL)
 {
   static const int MULTI_PERFORM_HANG_TIMEOUT = 60 * 1000;
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   CURLM *multi = NULL;
   int still_running = 1;
@@ -135,5 +135,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

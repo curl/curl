@@ -282,7 +282,6 @@ static const char *myssh_statename(sshstate state)
 #define myssh_statename(x)    ""
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
-
 #define myssh_to(x, y, z) myssh_set_state(x, y, z)
 
 /*
@@ -2500,7 +2499,7 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
       if(result)
         break;
 
-      left_ms = Curl_timeleft_ms(data, NULL, FALSE);
+      left_ms = Curl_timeleft_ms(data, FALSE);
       if(left_ms < 0) {
         failf(data, "Operation timed out");
         return CURLE_OPERATION_TIMEDOUT;

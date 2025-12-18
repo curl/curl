@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ chunked Transfer-Encoding
 DELAY
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -40,7 +40,6 @@ another-header: yes%CR
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -54,7 +53,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

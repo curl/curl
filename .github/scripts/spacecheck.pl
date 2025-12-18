@@ -31,11 +31,19 @@ my @tabs = (
     "Makefile\\.(am|example)\$",
     "/mkfile",
     "\\.sln\$",
+    "^tests/data/data1706-stdout.txt",
     "^tests/data/test",
 );
 
 my @need_crlf = (
     "\\.(bat|sln)\$",
+);
+
+my @double_empty_lines = (
+    "^lib/.+\\.(c|h)\$",
+    "^packages/",
+    "^tests/data/test",
+    "\\.(m4|py)\$",
 );
 
 my @non_ascii_allowed = (
@@ -99,7 +107,7 @@ while(my $filename = <$git_ls_files>) {
     my @err = ();
 
     if(!fn_match($filename, @tabs) &&
-        $content =~ /\t/) {
+       $content =~ /\t/) {
         push @err, "content: has tab";
     }
 
@@ -110,12 +118,12 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($eol ne "crlf" &&
-        fn_match($filename, @need_crlf)) {
+       fn_match($filename, @need_crlf)) {
         push @err, "content: must use CRLF EOL for this file type";
     }
 
     if($eol ne "lf" && $content ne "" &&
-        !fn_match($filename, @need_crlf)) {
+       !fn_match($filename, @need_crlf)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
@@ -130,18 +138,25 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($content ne "" &&
-        $content !~ /\n\z/) {
+       $content !~ /\n\z/) {
         push @err, "content: has no EOL at EOF";
     }
 
     if($content =~ /\n\n\z/ ||
-        $content =~ /\r\n\r\n\z/) {
+       $content =~ /\r\n\r\n\z/) {
         push @err, "content: has multiple EOL at EOF";
     }
 
     if($content =~ /\n\n\n\n/ ||
-        $content =~ /\r\n\r\n\r\n\r\n/) {
+       $content =~ /\r\n\r\n\r\n\r\n/) {
         push @err, "content: has 3 or more consecutive empty lines";
+    }
+
+    if(!fn_match($filename, @double_empty_lines)) {
+        if($content =~ /\n\n\n/ ||
+           $content =~ /\r\n\r\n\r\n/) {
+            push @err, "content: has 2 consecutive empty lines";
+        }
     }
 
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {

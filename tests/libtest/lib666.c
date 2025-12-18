@@ -28,7 +28,7 @@ static CURLcode test_lib666(const char *URL)
   static char testbuf[17000]; /* more than 16K */
 
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   curl_mime *mime = NULL;
   curl_mimepart *part;
   size_t i;
@@ -50,7 +50,7 @@ static CURLcode test_lib666(const char *URL)
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
@@ -58,32 +58,32 @@ static CURLcode test_lib666(const char *URL)
   mime = curl_mime_init(curl);
   if(!mime) {
     curl_mfprintf(stderr, "curl_mime_init() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   part = curl_mime_addpart(mime);
   if(!part) {
     curl_mfprintf(stderr, "curl_mime_addpart() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  res = curl_mime_name(part, "upfile");
-  if(res) {
+  result = curl_mime_name(part, "upfile");
+  if(result) {
     curl_mfprintf(stderr, "curl_mime_name() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_filename(part, "myfile.txt");
-  if(res) {
+  result = curl_mime_filename(part, "myfile.txt");
+  if(result) {
     curl_mfprintf(stderr, "curl_mime_filename() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_data(part, testbuf, sizeof(testbuf));
-  if(res) {
+  result = curl_mime_data(part, testbuf, sizeof(testbuf));
+  if(result) {
     curl_mfprintf(stderr, "curl_mime_data() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_encoder(part, "binary");
-  if(res) {
+  result = curl_mime_encoder(part, "binary");
+  if(result) {
     curl_mfprintf(stderr, "curl_mime_encoder() failed\n");
     goto test_cleanup;
   }
@@ -103,8 +103,8 @@ static CURLcode test_lib666(const char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -116,5 +116,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

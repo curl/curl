@@ -48,7 +48,7 @@ static size_t t1901_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 static CURLcode test_lib1901(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct curl_slist *chunk = NULL;
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -76,12 +76,12 @@ static CURLcode test_lib1901(const char *URL)
         easy_setopt(curl, CURLOPT_HTTPHEADER, n);
     }
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_slist_free_all(chunk);
 
   curl_global_cleanup();
-  return res;
+  return result;
 }

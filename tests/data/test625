@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,12 +8,10 @@ SFTP put
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -33,7 +32,6 @@ for ssh upload test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <upload>

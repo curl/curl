@@ -51,5 +51,10 @@ int main(int argc, char **argv)
     return 99;
   }
 
+#ifdef _WIN32
+  if(win32_init())
+    return 2;
+#endif
+
   return entry_func(argc - 1, argv + 1);
 }

@@ -83,7 +83,7 @@ static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
     NoMoreHandles
   };
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLM *multi = NULL;
   int running;
   int i;
@@ -105,9 +105,9 @@ static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
   }
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(result) {
     curlx_free(full_url);
-    return res;
+    return result;
   }
 
   multi_init(multi);
@@ -147,7 +147,7 @@ static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
       multi_add_handle(multi, ntlm_curls[num_handles]);
       num_handles += 1;
       state = NeedSocketForNewHandle;
-      res = ntlmcb_res;
+      result = ntlmcb_res;
     }
 
     multi_perform(multi, &running);
@@ -229,5 +229,5 @@ test_cleanup:
 
   curlx_free(full_url);
 
-  return res;
+  return result;
 }

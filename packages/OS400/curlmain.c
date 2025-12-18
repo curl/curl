@@ -41,14 +41,12 @@ extern int      QadrtFreeConversionTable(void);
 extern int      QadrtFreeEnviron(void);
 extern char *   setlocale_a(int, const char *);
 
-
 /* The ASCII main program. */
-extern int      main_a(int argc, char * * argv);
+extern int      main_a(int argc, char **argv);
 
 /* Global values of original EBCDIC arguments. */
 int             ebcdic_argc;
 char **         ebcdic_argv;
-
 
 int main(int argc, char **argv)
 {
@@ -63,8 +61,8 @@ int main(int argc, char **argv)
   char dummybuf[128];
   /* To/From codes are 32 byte long strings with
      reserved fields initialized to ZEROs */
-  const char tocode[32]   = {"IBMCCSID01208"}; /* Use UTF-8. */
-  const char fromcode[32] = {"IBMCCSID000000000010"};
+  const char tocode[32]   = { "IBMCCSID01208" }; /* Use UTF-8. */
+  const char fromcode[32] = { "IBMCCSID000000000010" };
 
   ebcdic_argc = argc;
   ebcdic_argv = argv;
@@ -88,10 +86,10 @@ int main(int argc, char **argv)
   }
 
   /* Allocate memory for the ASCII arguments and vector. */
-  argv = (char **) malloc((argc + 1) * sizeof(*argv) + bytecount);
+  argv = (char **)malloc((argc + 1) * sizeof(*argv) + bytecount);
 
   /* Build the vector and convert argument encoding. */
-  outbuf = (char *) (argv + argc + 1);
+  outbuf = (char *)(argv + argc + 1);
   outbytesleft = bytecount;
 
   for(i = 0; i < argc; i++) {
@@ -112,7 +110,7 @@ int main(int argc, char **argv)
   i = main_a(argc, argv);
 
   /* Clean-up allocated items. */
-  free((char *) argv);
+  free((char *)argv);
   QadrtFreeConversionTable();
   QadrtFreeEnviron();
 

@@ -78,7 +78,7 @@ static CURLcode test_unit1309(const char *arg)
     key.tv_usec = (541 * i) % 1023;
     storage[i] = key.tv_usec;
     Curl_splayset(&nodes[i], &storage[i]);
-    root = Curl_splayinsert(key, root, &nodes[i]);
+    root = Curl_splayinsert(&key, root, &nodes[i]);
   }
 
   puts("Result:");
@@ -111,7 +111,7 @@ static CURLcode test_unit1309(const char *arg)
     for(j = 0; j <= i % 3; j++) {
       storage[i * 3 + j] = key.tv_usec * 10 + j;
       Curl_splayset(&nodes[i * 3 + j], &storage[i * 3 + j]);
-      root = Curl_splayinsert(key, root, &nodes[i * 3 + j]);
+      root = Curl_splayinsert(&key, root, &nodes[i * 3 + j]);
     }
   }
 
@@ -119,12 +119,12 @@ static CURLcode test_unit1309(const char *arg)
   for(i = 0; i <= 1100; i += 100) {
     curl_mprintf("Removing nodes not larger than %d\n", i);
     tv_now.tv_usec = i;
-    root = Curl_splaygetbest(tv_now, root, &removed);
+    root = Curl_splaygetbest(&tv_now, root, &removed);
     while(removed) {
       curl_mprintf("removed payload %zu[%zu]\n",
                    *(size_t *)Curl_splayget(removed) / 10,
                    *(size_t *)Curl_splayget(removed) % 10);
-      root = Curl_splaygetbest(tv_now, root, &removed);
+      root = Curl_splaygetbest(&tv_now, root, &removed);
     }
   }
 

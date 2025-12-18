@@ -1205,7 +1205,6 @@ sub scanfile {
 
 }
 
-
 if($errors || $warnings || $verbose) {
     printf "checksrc: %d errors and %d warnings\n", $errors, $warnings;
     if($suppressed) {

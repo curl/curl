@@ -58,7 +58,7 @@ static CURLcode test_lib553(const char *URL)
   static char testbuf[SIZE_HEADERS + 100];
 
   CURL *curl;
-  CURLcode res = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
   int i;
   struct curl_slist *headerlist = NULL, *hl;
 
@@ -97,7 +97,7 @@ static CURLcode test_lib553(const char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_READFUNCTION, myreadfunc);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -107,5 +107,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

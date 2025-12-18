@@ -160,7 +160,6 @@ struct timeval {
 #endif
 #endif /* HAVE_RECV */
 
-
 #ifdef __minix
 /* Minix does not support send on TCP sockets */
 #define swrite(x, y, z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
@@ -264,7 +263,7 @@ typedef unsigned int bit;
 #ifdef DEBUGBUILD
 #define DEBUGF(x) x
 #else
-#define DEBUGF(x) do { } while(0)
+#define DEBUGF(x) do {} while(0)
 #endif
 
 /*
@@ -274,7 +273,7 @@ typedef unsigned int bit;
 #ifdef DEBUGBUILD
 #define DEBUGASSERT(x) assert(x)
 #else
-#define DEBUGASSERT(x) do { } while(0)
+#define DEBUGASSERT(x) do {} while(0)
 #endif
 
 /*

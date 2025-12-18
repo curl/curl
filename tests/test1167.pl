@@ -134,7 +134,6 @@ sub scanheader {
     close H;
 }
 
-
 opendir(my $dh, $incdir) || die "Cannot opendir $incdir: $!";
 my @hfiles = grep { /\.h$/ } readdir($dh);
 closedir $dh;

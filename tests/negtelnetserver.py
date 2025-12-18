@@ -43,11 +43,9 @@ log = logging.getLogger(__name__)
 HOST = "localhost"
 IDENT = "NTEL"
 
-
 # The strings that indicate the test framework is checking our aliveness
 VERIFIED_REQ = "verifiedserver"
 VERIFIED_RSP = "WE ROOLZ: {pid}"
-
 
 def telnetserver(options):
     """Start up a TCP server with a telnet handler and serve DICT requests forever."""
@@ -68,7 +66,6 @@ def telnetserver(options):
         server.serve_forever()
     # leaving `with` calls server.close() automatically
     return ScriptRC.SUCCESS
-
 
 class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
     """Handler class for Telnet connections."""
@@ -112,7 +109,6 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
 
         except IOError:
             log.exception("IOError hit during request")
-
 
 class Negotiator(object):
     NO_NEG = 0
@@ -242,7 +238,6 @@ class Negotiator(object):
         log.debug("Sending WONT %s", option_str)
         self.send_iac([NegTokens.WONT, NegOptions.to_val(option_str)])
 
-
 class NegBase(object):
     @classmethod
     def to_val(cls, name):
@@ -255,7 +250,6 @@ class NegBase(object):
                 return k
 
         return "<unknown>"
-
 
 class NegTokens(NegBase):
     # The start of a negotiation sequence
@@ -274,7 +268,6 @@ class NegTokens(NegBase):
     # The end of sub-negotiation options.
     SE = 240
 
-
 class NegOptions(NegBase):
     # Binary Transmission
     BINARY = 0
@@ -286,7 +279,6 @@ class NegOptions(NegBase):
     NEW_ENVIRON = 39
     # Charset option
     CHARSET = 42
-
 
 def get_options():
     parser = argparse.ArgumentParser()
@@ -305,7 +297,6 @@ def get_options():
                         help="IPv4 flag")
 
     return parser.parse_args()
-
 
 def setup_logging(options):
     """Set up logging from the command line options."""
@@ -339,14 +330,12 @@ def setup_logging(options):
         stdout_handler.setLevel(logging.DEBUG)
         root_logger.addHandler(stdout_handler)
 
-
 class ScriptRC(object):
     """Enum for script return codes."""
 
     SUCCESS = 0
     FAILURE = 1
     EXCEPTION = 2
-
 
 if __name__ == '__main__':
     # Get the options from the user.

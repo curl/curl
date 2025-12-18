@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -14,7 +15,7 @@ cookies
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
-Set-Cookie: ____________%hex[%ff]hex%=         ;%repeat[117 x %20]%%hex[%ff]hex%%repeat[2602 x %20]%%repeat[434 x z]%%hex[%86%85%85%80]hex%%repeat[49 x z]%%hex[%fa]hex%%repeat[540 x z]%%hex[%f3%a0%81%96]hex%zzzzzzzzzzzz~%repeat[82 x z]%%hex[%b6]hex%%repeat[364 x z]%
+Set-Cookie: %repeat[4000 x n]%=%repeat[4096 x v]%
 
 </data>
 </reply>

@@ -49,6 +49,9 @@ CURLX_C = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
 
+TOOLX_C = \
+  ../../src/toolx/tool_time.c
+
 # All test servers
 TESTS_C = \
   dnsd.c \

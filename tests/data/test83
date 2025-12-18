@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ HTTP Basic auth
 proxytunnel
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -39,7 +39,6 @@ contents
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -57,7 +56,6 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">

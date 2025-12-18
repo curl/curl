@@ -27,7 +27,7 @@ static CURLcode test_lib1510(const char *URL)
 {
   static const int NUM_URLS = 4;
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   int i;
   char target_url[256];
@@ -76,8 +76,8 @@ static CURLcode test_lib1510(const char *URL)
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl, CURLOPT_URL, target_url);
 
-    res = curl_easy_perform(curl);
-    if(res)
+    result = curl_easy_perform(curl);
+    if(result)
       goto test_cleanup;
 
     abort_on_test_timeout();
@@ -93,5 +93,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -38,7 +38,6 @@ Funny-head: yesyes
 </data2>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -60,7 +59,6 @@ http
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>

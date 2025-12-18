@@ -43,7 +43,6 @@
 #include "curlx/strparse.h"
 #include "curlx/warnless.h"
 
-
 /***
     RFC 6455 Section 5.2
 
@@ -769,7 +768,6 @@ static const struct Curl_cwtype ws_cw_decode = {
   ws_cw_close,
   sizeof(struct ws_cw_ctx)
 };
-
 
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
@@ -1696,7 +1694,7 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
 
       CURL_TRC_WS(data, "ws_send_raw_blocking() partial, %zu left to send",
                   buflen);
-      left_ms = Curl_timeleft_ms(data, NULL, FALSE);
+      left_ms = Curl_timeleft_ms(data, FALSE);
       if(left_ms < 0) {
         failf(data, "[WS] Timeout waiting for socket becoming writable");
         return CURLE_SEND_ERROR;
@@ -1914,7 +1912,7 @@ const struct Curl_handler Curl_handler_ws = {
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
+  ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
@@ -1941,7 +1939,7 @@ const struct Curl_handler Curl_handler_wss = {
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
+  ZERO_NULL,                            /* connect_it */
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
   NULL,                                 /* proto_pollset */

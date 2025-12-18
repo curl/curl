@@ -81,15 +81,15 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://127.0.0.1");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_PROXY) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_PROXY) {
       long proxycode;
-      res = curl_easy_getinfo(curl, CURLINFO_PROXY_ERROR, &proxycode);
-      if(!res && proxycode)
+      result = curl_easy_getinfo(curl, CURLINFO_PROXY_ERROR, &proxycode);
+      if(!result && proxycode)
         printf("The detailed proxy error: %ld\n", proxycode);
     }
     curl_easy_cleanup(curl);

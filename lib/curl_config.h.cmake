@@ -391,6 +391,9 @@
 /* Define to 1 if you have the <locale.h> header file. */
 #cmakedefine HAVE_LOCALE_H 1
 
+/* Define to 1 if you have a working localtime_r function. */
+#cmakedefine HAVE_LOCALTIME_R 1
+
 /* Define to 1 if the compiler supports the 'long long' data type. */
 #cmakedefine HAVE_LONGLONG 1
 
@@ -760,9 +763,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS 1
-
-/* Define to 1 if you are building a Windows target with large file support. */
-#cmakedefine USE_WIN32_LARGE_FILES 1
 
 /* to enable SSPI support */
 #cmakedefine USE_WINDOWS_SSPI 1

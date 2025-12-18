@@ -44,12 +44,16 @@ typedef enum {
   TIMER_LAST /* must be last */
 } timerid;
 
+/* Get the current timestamp of the transfer */
+const struct curltime *Curl_pgrs_now(struct Curl_easy *data);
+
 int Curl_pgrsDone(struct Curl_easy *data);
 void Curl_pgrsStartNow(struct Curl_easy *data);
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size);
 
-void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size);
+void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta);
+void Curl_pgrs_upload_inc(struct Curl_easy *data, size_t delta);
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
 
 /* perform progress update, invoking callbacks at intervals */
@@ -68,7 +72,7 @@ void Curl_pgrsReset(struct Curl_easy *data);
 /* Reset sizes for up- and download. */
 void Curl_pgrsResetTransferSizes(struct Curl_easy *data);
 
-struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer);
+void Curl_pgrsTime(struct Curl_easy *data, timerid timer);
 /**
  * Update progress timer with the elapsed time from its start to `timestamp`.
  * This allows updating timers later and is used by happy eyeballing, where
@@ -81,7 +85,7 @@ void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent);
 
 #ifdef UNITTESTS
 UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
-                                  struct curltime *pnow);
+                                  const struct curltime *pnow);
 #endif
 
 #endif /* HEADER_CURL_PROGRESS_H */

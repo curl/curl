@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP POST
-notxml
 </keywords>
 </info>
 
@@ -31,7 +31,7 @@ http
 HTTP multipart formpost with contents from a file
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=<%LOGDIR/field%TESTNUMBER" -F tool=curl
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=%LT%LOGDIR/field%TESTNUMBER" -F tool=curl
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/field%TESTNUMBER">

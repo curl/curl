@@ -255,7 +255,6 @@ sub sha256 {
     return $result;
 }
 
-
 sub oldhash {
     my $hash = "";
     open(C, "<$_[0]") || return 0;

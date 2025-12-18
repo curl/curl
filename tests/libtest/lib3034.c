@@ -37,7 +37,7 @@ static size_t t3034_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib3034(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
@@ -53,11 +53,11 @@ static CURLcode test_lib3034(const char *URL)
   test_setopt(curl, CURLOPT_INFILESIZE, 5L);
   test_setopt(curl, CURLOPT_READFUNCTION, t3034_read_cb);
 
-  res = curl_easy_perform(curl);
-  if(res != CURLE_SEND_FAIL_REWIND) {
+  result = curl_easy_perform(curl);
+  if(result != CURLE_SEND_FAIL_REWIND) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
@@ -68,10 +68,10 @@ static CURLcode test_lib3034(const char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_URL, URL);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

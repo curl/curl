@@ -31,7 +31,7 @@ static CURLcode test_lib674(const char *URL)
 {
   CURL *curl = NULL;
   CURL *curl2;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLU *urlp = NULL;
   CURLUcode uc = CURLUE_OK;
 
@@ -57,17 +57,17 @@ static CURLcode test_lib674(const char *URL)
   easy_setopt(curl, CURLOPT_CURLU, urlp);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
-  if(res) {
+  if(result) {
     curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
   curl2 = curl_easy_duphandle(curl);
-  res = curl_easy_perform(curl2);
+  result = curl_easy_perform(curl2);
   curl_easy_cleanup(curl2);
 
 test_cleanup:
@@ -76,5 +76,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

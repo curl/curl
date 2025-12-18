@@ -142,7 +142,6 @@ struct IMAP {
   BIT(uidvalidity_set);
 };
 
-
 /* Local API functions */
 static CURLcode imap_regular_transfer(struct Curl_easy *data,
                                       struct IMAP *imap,
@@ -1308,13 +1307,13 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
-
   (void)instate;
 
   if(imapcode == '*') {
     /* See if this is an UIDVALIDITY response */
-    if(checkprefix("OK [UIDVALIDITY ", line + 2)) {
+    const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
+    size_t len = curlx_dyn_len(&imapc->pp.recvbuf);
+    if((len >= 18) && checkprefix("OK [UIDVALIDITY ", &line[2])) {
       curl_off_t value;
       const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
       if(!curlx_str_number(&p, &value, UINT_MAX)) {
@@ -1995,7 +1994,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
   curlx_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
-  Curl_pp_init(pp);
+  Curl_pp_init(pp, Curl_pgrs_now(data));
 
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))
     return CURLE_OUT_OF_MEMORY;

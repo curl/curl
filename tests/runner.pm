@@ -101,6 +101,8 @@ use testutil qw(
     logmsg
     runclient
     exerunner
+    subtextfile
+    subchars
     subbase64
     subsha256base64file
     substrippemfile
@@ -108,7 +110,6 @@ use testutil qw(
     );
 use valgrind;
 use memanalyzer;
-
 
 #######################################################################
 # Global variables set elsewhere but used only by this package
@@ -367,6 +368,10 @@ sub prepro {
                 $data_crlf = "";
             }
             subvariables(\$s, $testnum, "%");
+            if(subtextfile(\$s)) {
+                subvariables(\$s, $testnum, "%");
+            }
+            subchars(\$s);
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
@@ -377,7 +382,6 @@ sub prepro {
     }
     return @out;
 }
-
 
 #######################################################################
 # Load test keywords into %keywords hash
@@ -392,7 +396,6 @@ sub readtestkeywords {
         $keywords{$k} = 1;
     }
 }
-
 
 #######################################################################
 # Return a list of log locks that still exist
@@ -579,7 +582,6 @@ sub torture {
     return 0;
 }
 
-
 #######################################################################
 # restore environment variables that were modified in test
 sub restore_test_env {
@@ -596,7 +598,6 @@ sub restore_test_env {
         }
     }
 }
-
 
 #######################################################################
 # Start the servers needed to run this test case
@@ -633,7 +634,6 @@ sub singletest_startservers {
     return ($why, $error);
 }
 
-
 #######################################################################
 # Generate preprocessed test file
 sub singletest_preprocess {
@@ -656,7 +656,6 @@ sub singletest_preprocess {
     # in case the process changed the file, reload it
     loadtest("$LOGDIR/test${testnum}");
 }
-
 
 #######################################################################
 # Set up the test environment to run this test case
@@ -686,7 +685,6 @@ sub singletest_setenv {
         $ENV{HTTPS_PROXY} = $proxy_address;
     }
 }
-
 
 #######################################################################
 # Check that test environment is fine to run this test case
@@ -724,7 +722,6 @@ sub singletest_precheck {
     }
     return $why;
 }
-
 
 #######################################################################
 # Prepare the test environment to run this test case
@@ -797,7 +794,6 @@ sub singletest_prepare {
     }
     return 0;
 }
-
 
 #######################################################################
 # Run the test command
@@ -1066,7 +1062,6 @@ sub singletest_run {
     return (0, $cmdres, $dumped_core, $CURLOUT, $tool, use_valgrind() && !$disablevalgrind);
 }
 
-
 #######################################################################
 # Clean up after test command
 sub singletest_clean {
@@ -1167,14 +1162,13 @@ sub singletest_postcheck {
         }
     }
 
-    if($checktests && checktest("${TESTDIR}/test${testnum}")) {
+    if(checktest("${TESTDIR}/test${testnum}")) {
         logmsg " $testnum: postcheck FAILED: issue(s) found in test data\n";
         return -1;
     }
 
     return 0;
 }
-
 
 ###################################################################
 # Get ready to run a single test case
@@ -1232,7 +1226,6 @@ sub runner_test_preprocess {
     }
     return ($why, $error, clearlogs(), \%testtimings);
 }
-
 
 ###################################################################
 # Run a single test case with an environment that already been prepared
@@ -1431,7 +1424,6 @@ sub runnerar_ready {
     return (undef, undef);
 }
 
-
 ###################################################################
 # Cleanly abort and exit the runner
 # This uses print since there is no longer any controller to write logs.
@@ -1530,6 +1522,5 @@ sub runner_shutdown {
     close($runnerw);
     undef $runnerw;
 }
-
 
 1;

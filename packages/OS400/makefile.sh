@@ -67,7 +67,7 @@ fi
 #       Copy some documentation files if needed.
 
 for TEXT in "${TOPDIR}/COPYING" "${SCRIPTDIR}/README.OS400"             \
-    "${TOPDIR}/CHANGES.md" "${TOPDIR}/docs/THANKS" "${TOPDIR}/docs/FAQ"    \
+    "${TOPDIR}/CHANGES.md" "${TOPDIR}/docs/THANKS" "${TOPDIR}/docs/FAQ.md"    \
     "${TOPDIR}/docs/FEATURES" "${TOPDIR}/docs/SSLCERTS.md"              \
     "${TOPDIR}/docs/RESOURCES" "${TOPDIR}/docs/VERSIONS.md"             \
     "${TOPDIR}/docs/HISTORY.md"

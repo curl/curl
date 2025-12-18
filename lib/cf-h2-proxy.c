@@ -1088,7 +1088,7 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
   }
   DEBUGASSERT(ts->authority);
 
-  if(Curl_timeleft_ms(data, NULL, TRUE) < 0) {
+  if(Curl_timeleft_ms(data, TRUE) < 0) {
     failf(data, "Proxy CONNECT aborted due to timeout");
     result = CURLE_OPERATION_TIMEDOUT;
     goto out;

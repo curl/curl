@@ -158,10 +158,10 @@ struct num_ip_data {
 };
 
 HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
-                                               const struct Curl_easy *data);
+                                               struct Curl_easy *data);
 
 bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
-                                         const struct Curl_easy *data,
+                                         struct Curl_easy *data,
                                          HCERTSTORE cert_store);
 
 #endif /* USE_SCHANNEL */

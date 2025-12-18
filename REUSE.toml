@@ -13,14 +13,11 @@ SPDX-PackageDownloadLocation = "https://curl.se/"
 
 [[annotations]]
 path = [
-  "docs/FAQ",
   "docs/INSTALL",
-  "docs/KNOWN_BUGS",
   "docs/libcurl/symbols-in-versions",
   "docs/MAIL-ETIQUETTE",
   "docs/options-in-versions",
   "docs/THANKS",
-  "docs/TODO",
   "lib/libcurl.vers.in",
   "lib/libcurl.def",
   "packages/OS400/README.OS400",

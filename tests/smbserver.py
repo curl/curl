@@ -54,7 +54,6 @@ TESTS_MAGIC = "TESTS_MAGIC"
 VERIFIED_REQ = "verifiedserver"
 VERIFIED_RSP = "WE ROOLZ: {pid}\n"
 
-
 class ShutdownHandler(threading.Thread):
     """
     Cleanly shut down the SMB server.

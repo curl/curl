@@ -116,7 +116,6 @@ bool Curl_ipv6works(struct Curl_easy *data);
 #define Curl_ipv6works(x) FALSE
 #endif
 
-
 /* unlink a dns entry, potentially shared with a cache */
 void Curl_resolv_unlink(struct Curl_easy *data,
                         struct Curl_dns_entry **pdns);
@@ -132,7 +131,7 @@ void Curl_dnscache_prune(struct Curl_easy *data);
 /* clear the DNS cache */
 void Curl_dnscache_clear(struct Curl_easy *data);
 
-/* IPv4 threadsafe resolve function used for synch and asynch builds */
+/* IPv4 thread-safe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
 CURLcode Curl_once_resolved(struct Curl_easy *data,

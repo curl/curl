@@ -214,13 +214,13 @@ SPDX-License-Identifier: curl
   to drown in output. The newly introduced *connection filters* allows one to
   dynamically increase log verbosity for a particular *filter type*. Example:
 
-    CURL_DEBUG=ssl curl -v https://curl.se
+    CURL_DEBUG=ssl curl -v https://curl.se/
 
   makes the `ssl` connection filter log more details. One may do that for
   every filter type and also use a combination of names, separated by `,` or
   space.
 
-    CURL_DEBUG=ssl,http/2 curl -v https://curl.se
+    CURL_DEBUG=ssl,http/2 curl -v https://curl.se/
 
    The order of filter type names is not relevant. Names used here are
    case insensitive. Note that these names are implementation internals and

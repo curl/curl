@@ -59,13 +59,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/foo.bin");
 
     /* ask libcurl to allocate a larger upload buffer */
     curl_easy_setopt(curl, CURLOPT_UPLOAD_BUFFERSIZE, 120000L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }

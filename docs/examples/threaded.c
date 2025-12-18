@@ -25,8 +25,18 @@
  * A multi-threaded program using pthreads to fetch several files at once
  * </DESC>
  */
+/* A multi-threaded example that uses pthreads and fetches 4 remote files at
+ * once over HTTPS.
+ *
+ * Recent versions of OpenSSL and GnuTLS are thread-safe by design, assuming
+ * support for the underlying OS threading API is built-in. Older revisions
+ * of this example demonstrated locking callbacks for the SSL library, which
+ * are no longer necessary. An older revision with callbacks can be found at
+ * https://github.com/curl/curl/blob/curl-7_88_1/docs/examples/threaded-ssl.c
+ */
 
 /* Requires: HAVE_PTHREAD_H */
+/* Also requires TLS support to run */
 
 #include <stdio.h>
 
@@ -36,15 +46,7 @@
 
 #define NUMT 4
 
-/*
-  List of URLs to fetch.
-
-  If you intend to use an SSL-based protocol here you might need to setup TLS
-  library mutex callbacks as described here:
-
-  https://curl.se/libcurl/c/threadsafe.html
-
-*/
+/* List of URLs to fetch. */
 static const char * const urls[NUMT] = {
   "https://curl.se/",
   "ftp://example.com/",
@@ -59,10 +61,10 @@ struct targ {
 static void *pull_one_url(void *p)
 {
   CURL *curl;
-  struct targ *targ = p;
 
   curl = curl_easy_init();
   if(curl) {
+    struct targ *targ = p;
     curl_easy_setopt(curl, CURLOPT_URL, targ->url);
     (void)curl_easy_perform(curl); /* ignores error */
     curl_easy_cleanup(curl);
@@ -73,21 +75,21 @@ static void *pull_one_url(void *p)
 
 /*
    int pthread_create(pthread_t *new_thread_ID,
-   const pthread_attr_t *attr,
-   void * (*start_func)(void *), void *arg);
+                      const pthread_attr_t *attr,
+                      void * (*start_func)(void *), void *arg);
 */
 
 int main(void)
 {
-  CURLcode res;
+  CURLcode result;
   pthread_t tid[NUMT];
   struct targ targs[NUMT];
   int i;
 
   /* Must initialize libcurl before any threads are started */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   for(i = 0; i < NUMT; i++) {
     int error;
@@ -107,6 +109,8 @@ int main(void)
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
+
   curl_global_cleanup();
+
   return 0;
 }

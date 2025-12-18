@@ -1,8 +1,7 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Test case inspired by this question on stackoverflow:
-#
 # https://stackoverflow.com/questions/10017165/use-libcurl-with-bluecoat-cookie-proxy
-#
 <info>
 <keywords>
 HTTP
@@ -49,8 +48,6 @@ Content-Length: 6
 
 hello
 </datacheck>
-
-
 </reply>
 
 # Client-side

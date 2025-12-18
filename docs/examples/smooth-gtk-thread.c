@@ -22,8 +22,8 @@
  *
  ***************************************************************************/
 /* <DESC>
- * A multi threaded application that uses a progress bar to show
- * status.  It uses Gtk+ to make a smooth pulse.
+ * A multi-threaded application that uses a progress bar to show
+ * status. It uses Gtk+ to make a smooth pulse.
  * </DESC>
  */
 /*
@@ -168,9 +168,9 @@ int main(int argc, char **argv)
   GtkWidget *top_window, *outside_frame, *inside_frame, *progress_bar;
 
   /* Must initialize libcurl before any threads are started */
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* Init thread */
   g_thread_init(NULL);

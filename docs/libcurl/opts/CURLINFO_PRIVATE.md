@@ -41,19 +41,19 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     void *pointer = (void *)0x2345454;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
     /* set the private pointer */
     curl_easy_setopt(curl, CURLOPT_PRIVATE, pointer);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* extract the private pointer again */
-    res = curl_easy_getinfo(curl, CURLINFO_PRIVATE, &pointer);
+    result = curl_easy_getinfo(curl, CURLINFO_PRIVATE, &pointer);
 
-    if(res)
-      printf("error: %s\n", curl_easy_strerror(res));
+    if(result)
+      printf("error: %s\n", curl_easy_strerror(result));
 
     curl_easy_cleanup(curl);
   }

@@ -76,9 +76,10 @@ sub testcaseattr {
     for(@xml) {
         if(($_ =~ /^ *\<testcase ([^>]*)/)) {
             my $attr=$1;
-            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|([^\> ]*))//) {
+            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|\'([^\']*)\')//) {
                 my ($var, $cont)=($1, $2);
                 $cont =~ s/^\"(.*)\"$/$1/;
+                $cont =~ s/^\'(.*)\'$/$1/;
                 $hash{$var}=$cont;
             }
         }
@@ -102,24 +103,25 @@ sub getpartattr {
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
-        if((1 ==$inside) && ( ($_ =~ /^ *\<$part ([^>]*)/) ||
-                              !(defined($part)) )
+        if((1 == $inside) && (($_ =~ /^ *\<$part ([^>]*)/) ||
+                              !(defined($part)))
              ) {
             $inside++;
             my $attr=$1;
 
-            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|([^\> ]*))//) {
+            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|\'([^\']*)\')//) {
                 my ($var, $cont)=($1, $2);
                 $cont =~ s/^\"(.*)\"$/$1/;
+                $cont =~ s/^\'(.*)\'$/$1/;
                 $hash{$var}=$cont;
             }
             last;
         }
         # detect end of section when part was not found
-        elsif((1 ==$inside) && ($_ =~ /^ *\<\/$section\>/)) {
+        elsif((1 == $inside) && ($_ =~ /^ *\<\/$section\>/)) {
             last;
         }
-        elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {
+        elsif((2 == $inside) && ($_ =~ /^ *\<\/$part/)) {
             $inside--;
         }
     }
@@ -238,6 +240,10 @@ sub loadtest {
             push @xml, $_;
         }
         close($xmlh);
+        if(!@xml) {
+            print STDERR "file $file is empty!\n";
+            return 1;
+        }
     }
     else {
         # failure
@@ -249,7 +255,6 @@ sub loadtest {
     $xmlfile = $file;
     return 0;
 }
-
 
 # Return entire document as list of lines
 sub fulltest {
@@ -286,6 +291,11 @@ sub checktest {
         my $content = do { local $/; <$xmlh> };
         close($xmlh);
 
+        if(index($content, '<?xml version="1.0" encoding="US-ASCII"?>') != 0) {
+            print STDERR "*** getpart.pm: $xmlfile is missing the XML prolog.\n";
+            return 1;
+        }
+
         my $eol = eol_detect($content);
         if($eol eq '') {
             print STDERR "*** getpart.pm: $xmlfile has mixed newlines. Replace significant carriage return with %CR macro, or convert to consistent newlines.\n";
@@ -321,7 +331,6 @@ sub savetest {
 # Strip off all lines that match the specified pattern and return
 # the new array.
 #
-
 sub striparray {
     my ($pattern, $arrayref) = @_;
 
@@ -420,6 +429,5 @@ sub loadarray {
     }
     return @array;
 }
-
 
 1;

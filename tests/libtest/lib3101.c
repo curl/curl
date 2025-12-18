@@ -25,7 +25,7 @@
 
 static CURLcode test_lib3101(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -49,9 +49,9 @@ static CURLcode test_lib3101(const char *URL)
   test_setopt(curl, CURLOPT_PASSWORD, "password");
   test_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "https");
 
-  res = curl_easy_perform(curl);
-  if(res != CURLE_OK) {
-    res = TEST_ERR_MAJOR_BAD;
+  result = curl_easy_perform(curl);
+  if(result != CURLE_OK) {
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
@@ -59,5 +59,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -34,7 +34,7 @@ static CURLcode test_lib575(const char *URL)
   CURL *curl = NULL;
   CURL *curldupe = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int still_running = 0;
 
   start_test_timing();
@@ -47,12 +47,12 @@ static CURLcode test_lib575(const char *URL)
   easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   curldupe = curl_easy_duphandle(curl);
@@ -104,5 +104,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

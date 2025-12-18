@@ -44,8 +44,7 @@ int getfiletime(const char *filename, curl_off_t *stamp)
   TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar(filename);
 
   hfile = CreateFile(tchar_filename, FILE_READ_ATTRIBUTES,
-                     (FILE_SHARE_READ | FILE_SHARE_WRITE |
-                      FILE_SHARE_DELETE),
+                     (FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE),
                      NULL, OPEN_EXISTING, 0, NULL);
   curlx_free(tchar_filename);
   if(hfile != INVALID_HANDLE_VALUE) {
@@ -110,8 +109,7 @@ void setfiletime(curl_off_t filetime, const char *filename)
   }
 
   hfile = CreateFile(tchar_filename, FILE_WRITE_ATTRIBUTES,
-                     (FILE_SHARE_READ | FILE_SHARE_WRITE |
-                      FILE_SHARE_DELETE),
+                     (FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE),
                      NULL, OPEN_EXISTING, 0, NULL);
   curlx_free(tchar_filename);
   if(hfile != INVALID_HANDLE_VALUE) {

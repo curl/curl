@@ -138,7 +138,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example:80");
     curl_easy_perform(curl);
   }
 }

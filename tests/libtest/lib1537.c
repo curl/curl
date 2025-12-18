@@ -27,7 +27,7 @@ static CURLcode test_lib1537(const char *URL)
 {
   const unsigned char a[] = { 0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                               0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7 };
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char *ptr = NULL;
   int asize;
   int outlen = 0;
@@ -48,7 +48,7 @@ static CURLcode test_lib1537(const char *URL)
   /* deprecated API */
   ptr = curl_escape((const char *)a, asize);
   if(!ptr) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   curl_mprintf("%s\n", ptr);
@@ -62,7 +62,7 @@ static CURLcode test_lib1537(const char *URL)
   /* deprecated API */
   raw = curl_unescape(ptr, (int)strlen(ptr));
   if(!raw) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   outlen = (int)strlen(raw);
@@ -85,5 +85,5 @@ test_cleanup:
   curl_free(ptr);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -50,6 +50,12 @@ RTMP in curl is powered by the 3rd party library librtmp.
 
 Support for RTMP in libcurl gets removed in April 2026.
 
+## CMake 3.17 and earlier
+
+We remove support for CMake <3.18 in April 2026.
+
+CMake 3.18 was released on 2020-07-15.
+
 ## Past removals
 
  - axTLS (removed in 7.63.0)

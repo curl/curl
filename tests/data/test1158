@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP FORMPOST
-notxml
 </keywords>
 </info>
 # Server-side
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
 -F 'file3=@"%LOGDIR/test%TESTNUMBER\".txt";type=m/f,"%LOGDIR/test%TESTNUMBER\".txt"'
 </command>
 # We create this file before the command is invoked!
-<file name=%LOGDIR/test%TESTNUMBER".txt>
+<file name='%LOGDIR/test%TESTNUMBER".txt'>
 foo bar
 This is a bar foo
 bar

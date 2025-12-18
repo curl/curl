@@ -42,6 +42,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h"
@@ -314,12 +315,12 @@ void Curl_trc_easy_timers(struct Curl_easy *data)
   if(CURL_TRC_TIMER_is_verbose(data)) {
     struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
     if(e) {
-      struct curltime now = curlx_now();
+      const struct curltime *pnow = Curl_pgrs_now(data);
       while(e) {
         struct time_node *n = Curl_node_elem(e);
         e = Curl_node_next(e);
         CURL_TRC_TIMER(data, n->eid, "expires in %" FMT_TIMEDIFF_T "ns",
-                       curlx_timediff_us(n->time, now));
+                       curlx_ptimediff_us(&n->time, pnow));
       }
     }
   }
@@ -332,7 +333,6 @@ static const char * const Curl_trc_mstate_names[] = {
   "CONNECT",
   "RESOLVING",
   "CONNECTING",
-  "TUNNELING",
   "PROTOCONNECT",
   "PROTOCONNECTING",
   "DO",

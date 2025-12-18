@@ -53,7 +53,7 @@ static CURLcode run(CURL *curl, long limit, long time)
 
 static CURLcode test_lib1523(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   char buffer[CURL_ERROR_SIZE];
   curl_global_init(CURL_GLOBAL_ALL);
@@ -64,18 +64,18 @@ static CURLcode test_lib1523(const char *URL)
   curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);
 
-  res = run(curl, 1, 2);
-  if(res)
-    curl_mfprintf(stderr, "error (%d) %s\n", res, buffer);
+  result = run(curl, 1, 2);
+  if(result)
+    curl_mfprintf(stderr, "error (%d) %s\n", result, buffer);
 
-  res = run(curl, 12000, 1);
-  if(res != CURLE_OPERATION_TIMEDOUT)
-    curl_mfprintf(stderr, "error (%d) %s\n", res, buffer);
+  result = run(curl, 12000, 1);
+  if(result != CURLE_OPERATION_TIMEDOUT)
+    curl_mfprintf(stderr, "error (%d) %s\n", result, buffer);
   else
-    res = CURLE_OK;
+    result = CURLE_OK;
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

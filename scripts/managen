@@ -85,7 +85,6 @@ sub manpageify {
     return "--$k$trail";
 }
 
-
 my $colwidth=79; # max number of columns
 
 sub prefixline {
@@ -499,7 +498,6 @@ sub render {
         $d =~ s/\\([><])/$1/g;
         # convert single backslash to double-backslash
         $d =~ s/\\/\\\\/g if($manpage);
-
 
         if($manpage) {
             if(!$quote && $d =~ /--/) {
@@ -1047,7 +1045,6 @@ sub header {
     printdesc($manpage, 0, @d);
 }
 
-
 sub sourcecategories {
     my ($dir) = @_;
     my %cats;
@@ -1130,7 +1127,7 @@ HEAD
                 $bitmask .= ' | ';
             }
         }
-        $bitmask =~ s/(?=.{76}).{1,76}\|/$&\n  /g;
+        $bitmask =~ s/(?=.{76}).{1,76}\|/$&\n   /g;
         my $arg = $arglong{$long};
         if($arg) {
             $opt .= " $arg";
@@ -1138,7 +1135,7 @@ HEAD
         my $desc = $helplong{$f};
         $desc =~ s/\"/\\\"/g; # escape double quotes
 
-        my $line = sprintf "  {\"%s\",\n   \"%s\",\n  %s},\n", $opt, $desc, $bitmask;
+        my $line = sprintf "  { \"%s\",\n    \"%s\",\n   %s },\n", $opt, $desc, $bitmask;
 
         if(length($opt) > 78) {
             print STDERR "WARN: the --$long name is too long\n";

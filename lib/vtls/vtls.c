@@ -145,22 +145,28 @@ static const struct alpn_spec ALPN_SPEC_H2 = {
 static const struct alpn_spec ALPN_SPEC_H2_H11 = {
   { ALPN_H2, ALPN_HTTP_1_1 }, 2
 };
+static const struct alpn_spec ALPN_SPEC_H11_H2 = {
+  { ALPN_HTTP_1_1, ALPN_H2 }, 2
+};
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
-static const struct alpn_spec *alpn_get_spec(http_majors allowed,
+static const struct alpn_spec *alpn_get_spec(http_majors wanted,
+                                             http_majors preferred,
                                              bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
 #ifdef USE_HTTP2
-  if(allowed & CURL_HTTP_V2x) {
-    if(allowed & CURL_HTTP_V1x)
-      return &ALPN_SPEC_H2_H11;
+  if(wanted & CURL_HTTP_V2x) {
+    if(wanted & CURL_HTTP_V1x)
+      return (preferred == CURL_HTTP_V1x) ?
+        &ALPN_SPEC_H11_H2 : &ALPN_SPEC_H2_H11;
     return &ALPN_SPEC_H2;
   }
 #else
-  (void)allowed;
+  (void)wanted;
+  (void)preferred;
 #endif
   /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
      Avoid "http/1.0" because some servers do not support it. */
@@ -1364,8 +1370,9 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
 
   if(!result && *done) {
     cf->connected = TRUE;
-    if(connssl->state == ssl_connection_complete)
-      connssl->handshake_done = curlx_now();
+    if(connssl->state == ssl_connection_complete) {
+      connssl->handshake_done = *Curl_pgrs_now(data);
+    }
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||
                 connssl->state == ssl_connection_deferred);
@@ -1718,6 +1725,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
   ctx = cf_ctx_new(data, NULL);
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
+                                       data->state.http_neg.preferred,
                                        conn->bits.tls_enable_alpn));
 #endif
   if(!ctx) {
@@ -1770,17 +1778,17 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   CURLcode result;
   /* ALPN is default, but if user explicitly disables it, obey */
   bool use_alpn = data->set.ssl_enable_alpn;
-  http_majors allowed = CURL_HTTP_V1x;
+  http_majors wanted = CURL_HTTP_V1x;
 
   (void)conn;
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
-    allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x);
+    wanted = (CURL_HTTP_V1x | CURL_HTTP_V2x);
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(allowed, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1832,7 +1840,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
 
   *done = FALSE;
   while(!result && !*done && loop--) {
-    timeout_ms = Curl_shutdown_timeleft(cf->conn, cf->sockindex, NULL);
+    timeout_ms = Curl_shutdown_timeleft(data, cf->conn, cf->sockindex);
 
     if(timeout_ms < 0) {
       /* no need to continue if time is already up */
@@ -1879,7 +1887,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
     if(cf->cft == &Curl_cft_ssl) {
       bool done;
       CURL_TRC_CF(data, cf, "shutdown and remove SSL, start");
-      Curl_shutdown_start(data, sockindex, 0, NULL);
+      Curl_shutdown_start(data, sockindex, 0);
       result = vtls_shutdown_blocking(cf, data, send_shutdown, &done);
       Curl_shutdown_clear(data, sockindex);
       if(!result && !done) /* blocking failed? */

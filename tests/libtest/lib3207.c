@@ -35,7 +35,7 @@
 struct Ctx {
   const char *URL;
   CURLSH *share;
-  CURLcode res;
+  CURLcode result;
   size_t thread_id;
   struct curl_slist *contents;
 };
@@ -73,7 +73,7 @@ static unsigned int test_thread(void *ptr)
 #endif
 {
   struct Ctx *ctx = (struct Ctx *)ptr;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   int i;
 
@@ -92,22 +92,22 @@ static unsigned int test_thread(void *ptr)
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, ptr);
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
+      /* Perform the request, result will get the return code */
+      result = curl_easy_perform(curl);
 
       /* always cleanup */
       curl_easy_cleanup(curl);
       /* Check for errors */
-      if(res != CURLE_OK) {
+      if(result != CURLE_OK) {
         curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(res));
+                      curl_easy_strerror(result));
         goto test_cleanup;
       }
     }
   }
 
 test_cleanup:
-  ctx->res = res;
+  ctx->result = result;
   return 0;
 }
 
@@ -173,7 +173,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 
 static CURLcode test_lib3207(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t i;
   CURLSH *share;
   struct Ctx ctx[THREAD_SIZE];
@@ -190,15 +190,15 @@ static CURLcode test_lib3207(const char *URL)
     ctx[i].share = share;
     ctx[i].URL = URL;
     ctx[i].thread_id = i;
-    ctx[i].res = CURLE_OK;
+    ctx[i].result = CURLE_OK;
     ctx[i].contents = NULL;
   }
 
   execute(share, ctx);
 
   for(i = 0; i < CURL_ARRAYSIZE(ctx); i++) {
-    if(ctx[i].res) {
-      res = ctx[i].res;
+    if(ctx[i].result) {
+      result = ctx[i].result;
     }
     else {
       struct curl_slist *item = ctx[i].contents;
@@ -214,5 +214,5 @@ test_cleanup:
   if(share)
     curl_share_cleanup(share);
   curl_global_cleanup();
-  return res;
+  return result;
 }

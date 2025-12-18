@@ -11,10 +11,9 @@ XML. All data for a single test case resides in a single ASCII file. Labels
 mark the beginning and the end of all sections, and each label must be written
 in its own line. Comments are either XML-style (enclosed with `<!--` and
 `-->`) or shell script style (beginning with `#`) and must appear on their own
-lines and not alongside actual test data. Most test data files are
-syntactically-valid XML (a few files are not); lack of support for character
-entities is a big difference but macros like %CR fill that particular role
-here.
+lines and not alongside actual test data. Test data files are syntactically
+valid XML; lack of support for character entities is a big difference but macros
+like %CR fill that particular role here.
 
 Each test case source exists as a file matching the format
 `tests/data/testNUM`, where `NUM` is the unique test number, and must begin
@@ -115,7 +114,8 @@ the include instruction:
     %include filename%
 
 Or, a variant of the above where the file is loaded as a newline-agnostic
-text file, and `%CR`, `%SP`, `%TAB` macros are expanded after inclusion:
+text file, and whitespace, special character macros and variables expanded
+after inclusion:
 
     %includetext filename%
 
@@ -255,11 +255,6 @@ often run on overloaded machines with unpredictable timing.
 
 Tests using non-7-bit-ASCII characters must provide them with `%hex[]` or
 similar.
-
-In most cases test files comply with the XML format, and pass xmllint cleanly.
-If the data file uses the `&` character, or has other, non-compliant content,
-and making it XML-compliant is not possible or unpractical, use the `notxml`
-keyword to exclude it from linter checks.
 
 ## `<reply>`
 

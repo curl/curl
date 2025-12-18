@@ -185,7 +185,6 @@ my %opts = (
     '--wdebug' => 6,
     );
 
-
 #########################################################################
 # parse the curl code that parses the command line arguments!
 open($r, "<", "$root/src/tool_getparam.c") ||
@@ -257,7 +256,6 @@ while(<$r>) {
 }
 close($r);
 
-
 #########################################################################
 # parse the curl code that outputs the curl -h list
 open($r, "<", "$root/src/tool_listhelp.c") ||
@@ -266,7 +264,7 @@ my @toolhelp; # store all parsed parameters
 while(<$r>) {
     chomp;
     my $l= $_;
-    if(/^  \{\" *(.*)/) {
+    if(/^  \{ \" *(.*)/) {
         my $str=$1;
         my $combo;
         if($str =~ /^-(.), --([a-z0-9.-]*)/) {
