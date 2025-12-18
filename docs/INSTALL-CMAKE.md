@@ -404,6 +404,7 @@ Details via CMake
 - `BROTLI_INCLUDE_DIR`:                     Absolute path to brotli include directory.
 - `BROTLICOMMON_LIBRARY`:                   Absolute path to `brotlicommon` library.
 - `BROTLIDEC_LIBRARY`:                      Absolute path to `brotlidec` library.
+- `BROTLI_USE_STATIC_LIBS`:                 Configure for static brotli libraries.
 - `CARES_INCLUDE_DIR`:                      Absolute path to c-ares include directory.
 - `CARES_LIBRARY`:                          Absolute path to `cares` library.
 - `CARES_USE_STATIC_LIBS`:                  Configure for static c-ares libraries.
