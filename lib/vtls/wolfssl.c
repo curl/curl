@@ -456,8 +456,6 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 #endif /* WOLFSSL_DUAL_ALG_CERTS */
-
-
 #ifdef HAVE_ALPN
   if(conn->bits.tls_enable_alpn) {
     char protocols[128];
