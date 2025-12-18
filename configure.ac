@@ -2153,7 +2153,12 @@ AS_HELP_STRING([--disable-ca-search],[Disable unsafe CA bundle search in PATH on
       fi
       ;;
     esac ],
-      AC_MSG_RESULT([yes])
+      if test "$ca_native_opt" = "1"; then
+        AC_MSG_RESULT([no])
+        ca_search=0
+      else
+        AC_MSG_RESULT([yes])
+      fi
   )
   if test "$ca_search" = "0"; then
     AC_DEFINE(CURL_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
