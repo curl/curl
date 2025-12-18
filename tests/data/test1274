@@ -55,7 +55,7 @@ Server: test-server/ fake folded
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Content-Length: 6
-Connection:%repeat[46 x  ]%   close
+Connection: close
 
 </file>
 </verify>

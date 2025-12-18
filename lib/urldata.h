@@ -1135,6 +1135,7 @@ struct UrlState {
   BIT(http_hd_upgrade); /* Added HTTP header Upgrade: */
   BIT(http_hd_h2_settings); /* Added HTTP header H2Settings: */
   BIT(maybe_folded);
+  BIT(leading_unfold); /* unfold started, this is the leading bytes */
 #endif
 };
 
