@@ -28,7 +28,6 @@
 
 #include "curl_trc.h"
 #include "urldata.h"
-#include "easyif.h"
 #include "cfilters.h"
 #include "multiif.h"
 

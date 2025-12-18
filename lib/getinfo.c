@@ -31,7 +31,6 @@
 #include "cfilters.h"
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
-#include "progress.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
 

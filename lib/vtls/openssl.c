@@ -52,7 +52,6 @@
 #include "../curlx/inet_pton.h"
 #include "openssl.h"
 #include "../connect.h"
-#include "../slist.h"
 #include "../progress.h"
 #include "../select.h"
 #include "../curlx/wait.h"

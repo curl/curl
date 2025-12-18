@@ -54,9 +54,9 @@
 #include "getinfo.h"
 #include "hostip.h"
 #include "strdup.h"
-#include "progress.h"
 #include "easyif.h"
 #include "multiif.h"
+#include "multi_ev.h"
 #include "select.h"
 #include "cfilters.h"
 #include "sendf.h" /* for failf function prototype */
