@@ -58,11 +58,11 @@ CURLcode vquic_ctx_init(struct Curl_easy *data,
                         struct cf_quic_ctx *qctx);
 void vquic_ctx_free(struct cf_quic_ctx *qctx);
 
-void vquic_ctx_set_time(struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx);
+void vquic_ctx_set_time(struct cf_quic_ctx *qctx,
+                        const struct curltime *pnow);
 
-void vquic_ctx_update_time(struct Curl_easy *data,
-                           struct cf_quic_ctx *qctx);
+void vquic_ctx_update_time(struct cf_quic_ctx *qctx,
+                           const struct curltime *pnow);
 
 void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
                             struct cf_quic_ctx *qctx,

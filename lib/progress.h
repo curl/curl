@@ -44,16 +44,8 @@ typedef enum {
   TIMER_LAST /* must be last */
 } timerid;
 
-#define CURL_PGRS_NOW_MONOTONIC
-
-/* Set current time in data->progress.now */
-void Curl_pgrs_now_set(struct Curl_easy *data);
-/* Advance `now` timestamp at least to given timestamp.
- * No effect it data's `now` is already later than `pts`. */
-void Curl_pgrs_now_at_least(struct Curl_easy *data, struct curltime *pts);
-/* `data` progressing continues after `other` processing. Advance `data`s
- * now timestamp to at least `other's` timestamp. */
-void Curl_pgrs_now_update(struct Curl_easy *data, struct Curl_easy *other);
+/* Get the current timestamp of the transfer */
+const struct curltime *Curl_pgrs_now(struct Curl_easy *data);
 
 int Curl_pgrsDone(struct Curl_easy *data);
 void Curl_pgrsStartNow(struct Curl_easy *data);
@@ -93,7 +85,7 @@ void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent);
 
 #ifdef UNITTESTS
 UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
-                                  struct curltime *pnow);
+                                  const struct curltime *pnow);
 #endif
 
 #endif /* HEADER_CURL_PROGRESS_H */

@@ -26,6 +26,8 @@
 
 #include "curlx/timeval.h"
 
+struct Curl_easy;
+
 /* This is a rate limiter that provides "tokens" to be consumed
  * per second with a "burst" rate limitation. Example:
  * A rate limit of 1 megabyte per second with a burst rate of 1.5MB.
@@ -62,14 +64,14 @@ struct Curl_rlimit {
 void Curl_rlimit_init(struct Curl_rlimit *r,
                       curl_off_t rate_per_s,
                       curl_off_t burst_per_s,
-                      struct curltime *pts);
+                      const struct curltime *pts);
 
 /* Start ratelimiting with the given timestamp. Resets available tokens. */
-void Curl_rlimit_start(struct Curl_rlimit *r, struct curltime *pts);
+void Curl_rlimit_start(struct Curl_rlimit *r, const struct curltime *pts);
 
 /* How many milliseconds to wait until token are available again. */
 timediff_t Curl_rlimit_wait_ms(struct Curl_rlimit *r,
-                               struct curltime *pts);
+                               const struct curltime *pts);
 
 /* Return if rate limiting of tokens is active */
 bool Curl_rlimit_active(struct Curl_rlimit *r);
@@ -77,16 +79,16 @@ bool Curl_rlimit_is_blocked(struct Curl_rlimit *r);
 
 /* Return how many tokens are available to spend, may be negative */
 curl_off_t Curl_rlimit_avail(struct Curl_rlimit *r,
-                             struct curltime *pts);
+                             const struct curltime *pts);
 
 /* Drain tokens from the ratelimit, return how many are now available. */
 void Curl_rlimit_drain(struct Curl_rlimit *r,
                        size_t tokens,
-                       struct curltime *pts);
+                       const struct curltime *pts);
 
 /* Block/unblock ratelimiting. A blocked ratelimit has 0 tokens available. */
 void Curl_rlimit_block(struct Curl_rlimit *r,
                        bool activate,
-                       struct curltime *pts);
+                       const struct curltime *pts);
 
 #endif /* HEADER_Curl_rlimit_H */

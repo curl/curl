@@ -116,6 +116,8 @@ struct Curl_multi {
   struct PslCache psl;
 #endif
 
+  /* current time for transfers running in this multi handle */
+  struct curltime now;
   /* timetree points to the splay-tree of time nodes to figure out expire
      times of all currently set timers */
   struct Curl_tree *timetree;
@@ -170,6 +172,9 @@ struct Curl_multi {
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
                                entries we are allowed to grow the connection
                                cache to */
+#ifdef DEBUGBUILD
+  unsigned int now_access_count;
+#endif
 #define IPV6_UNKNOWN 0
 #define IPV6_DEAD    1
 #define IPV6_WORKS   2

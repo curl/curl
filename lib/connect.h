@@ -40,6 +40,9 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *str);
    to the timeouts set */
 timediff_t Curl_timeleft_ms(struct Curl_easy *data,
                             bool duringconnect);
+timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
+                                const struct curltime *pnow,
+                                bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 

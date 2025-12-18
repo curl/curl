@@ -389,10 +389,11 @@ static void pktx_update_time(struct Curl_easy *data,
                              struct Curl_cfilter *cf)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  const struct curltime *pnow = Curl_pgrs_now(data);
 
-  vquic_ctx_update_time(data, &ctx->q);
-  pktx->ts = (ngtcp2_tstamp)ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
-             (ngtcp2_tstamp)ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
+  vquic_ctx_update_time(&ctx->q, pnow);
+  pktx->ts = (ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS +
+             (ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static void pktx_init(struct pkt_io_ctx *pktx,
@@ -400,13 +401,14 @@ static void pktx_init(struct pkt_io_ctx *pktx,
                       struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  const struct curltime *pnow = Curl_pgrs_now(data);
 
   pktx->cf = cf;
   pktx->data = data;
   ngtcp2_path_storage_zero(&pktx->ps);
-  vquic_ctx_set_time(data, &ctx->q);
-  pktx->ts = (ngtcp2_tstamp)ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
-             (ngtcp2_tstamp)ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
+  vquic_ctx_set_time(&ctx->q, pnow);
+  pktx->ts = (ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS +
+             (ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
@@ -505,8 +507,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   if(!ctx || !data)
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
-  Curl_pgrs_now_set(data); /* real change */
-  ctx->handshake_at = data->progress.now;
+  ctx->handshake_at = *Curl_pgrs_now(data);
   ctx->tls_handshake_complete = TRUE;
   Curl_vquic_report_handshake(&ctx->tls, cf, data);
 
@@ -520,7 +521,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
                 "ms, remote transport[max_udp_payload=%" PRIu64
                 ", initial_max_data=%" PRIu64
                 "]",
-               curlx_timediff_ms(ctx->handshake_at, ctx->started_at),
+               curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at),
                rp->max_udp_payload_size, rp->initial_max_data);
   }
 #endif
@@ -1058,7 +1059,8 @@ static void cf_ngtcp2_ack_stream(struct Curl_cfilter *cf,
   /* How many byte to ack on the stream? */
 
   /* how much does rate limiting allow us to acknowledge? */
-  avail = Curl_rlimit_avail(&data->progress.dl.rlimit, &data->progress.now);
+  avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
+                            Curl_pgrs_now(data));
   if(avail == CURL_OFF_T_MAX) { /* no rate limit, ack all */
     ack_len = stream->download_unacked;
   }
@@ -1082,7 +1084,6 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct Curl_easy *data = stream_user_data;
-  struct Curl_easy *calling = CF_DATA_CURRENT(cf);
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   (void)conn;
@@ -1090,8 +1091,6 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
 
   if(!stream)
     return NGHTTP3_ERR_CALLBACK_FAILURE;
-  if(calling)
-    Curl_pgrs_now_update(data, calling);
 
   h3_xfer_write_resp(cf, data, stream, (const char *)buf, blen, FALSE);
   CURL_TRC_CF(data, cf, "[%" PRId64 "] DATA len=%zu", stream->id, blen);
@@ -2637,7 +2636,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->qconn) {
-    ctx->started_at = data->progress.now;
+    ctx->started_at = *Curl_pgrs_now(data);
     result = cf_connect_start(cf, data, &pktx);
     if(result)
       goto out;
@@ -2750,7 +2749,8 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
-      timediff_t ms = curlx_timediff_ms(ctx->q.first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_ptimediff_ms(&ctx->q.first_byte_at,
+                                         &ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -2812,7 +2812,7 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
   rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
   if(rp && rp->max_idle_timeout) {
     timediff_t idletime_ms =
-      curlx_timediff_ms(data->progress.now, ctx->q.last_io);
+      curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->q.last_io);
     if(idletime_ms > 0) {
       uint64_t max_idle_ms =
         (uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS);

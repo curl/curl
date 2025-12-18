@@ -57,6 +57,7 @@
 #include "multiif.h"
 #include "doh.h"
 #include "curlx/warnless.h"
+#include "progress.h"
 #include "select.h"
 #include "strcase.h"
 #include "easy_lock.h"
@@ -191,7 +192,7 @@ static int dnscache_entry_is_stale(void *datap, void *hc)
 
   if(dns->timestamp.tv_sec || dns->timestamp.tv_usec) {
     /* get age in milliseconds */
-    timediff_t age = curlx_timediff_ms(prune->now, dns->timestamp);
+    timediff_t age = curlx_ptimediff_ms(&prune->now, &dns->timestamp);
     if(!dns->addr)
       age *= 2; /* negative entries age twice as fast */
     if(age >= prune->max_age_ms)
@@ -265,7 +266,7 @@ void Curl_dnscache_prune(struct Curl_easy *data)
   do {
     /* Remove outdated and unused entries from the hostcache */
     timediff_t oldest_ms =
-      dnscache_prune(&dnscache->entries, timeout_ms, data->progress.now);
+      dnscache_prune(&dnscache->entries, timeout_ms, *Curl_pgrs_now(data));
 
     if(Curl_hash_count(&dnscache->entries) > MAX_DNS_CACHE_SIZE)
       /* prune the ones over half this age */
@@ -331,7 +332,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     /* See whether the returned entry is stale. Done before we release lock */
     struct dnscache_prune_data user;
 
-    user.now = data->progress.now;
+    user.now = *Curl_pgrs_now(data);
     user.max_age_ms = data->set.dns_cache_timeout_ms;
     user.oldest_ms = 0;
 
@@ -520,7 +521,7 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
     dns->timestamp.tv_usec = 0; /* an entry that never goes stale */
   }
   else {
-    dns->timestamp = data->progress.now;
+    dns->timestamp = *Curl_pgrs_now(data);
   }
   dns->hostport = port;
   if(hostlen)
@@ -1136,8 +1137,8 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    timediff_t elapsed_secs = curlx_timediff_ms(data->progress.now,
-                                                data->conn->created) / 1000;
+    timediff_t elapsed_secs = curlx_ptimediff_ms(Curl_pgrs_now(data),
+                                                 &data->conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);

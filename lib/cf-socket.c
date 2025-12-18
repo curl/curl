@@ -1081,7 +1081,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   (void)data;
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
-  ctx->started_at = data->progress.now;
+  ctx->started_at = *Curl_pgrs_now(data);
 #ifdef SOCK_NONBLOCK
   /* Do not tuck SOCK_NONBLOCK into socktype when opensocket callback is set
    * because we would not know how socketype is about to be used in the
@@ -1208,7 +1208,7 @@ out:
   }
   else if(isconnected) {
     set_local_ip(cf, data);
-    ctx->connected_at = data->progress.now;
+    ctx->connected_at = *Curl_pgrs_now(data);
     cf->connected = TRUE;
   }
   CURL_TRC_CF(data, cf, "cf_socket_open() -> %d, fd=%" FMT_SOCKET_T,
@@ -1327,7 +1327,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
     if(verifyconnect(ctx->sock, &ctx->error)) {
       /* we are connected with TCP, awesome! */
-      ctx->connected_at = data->progress.now;
+      ctx->connected_at = *Curl_pgrs_now(data);
       set_local_ip(cf, data);
       *done = TRUE;
       cf->connected = TRUE;
@@ -1409,7 +1409,8 @@ static void win_update_sndbuf_size(struct Curl_easy *data,
   ULONG ideal;
   DWORD ideallen;
 
-  if(curlx_timediff_ms(data->progress.now, ctx->last_sndbuf_query_at) > 1000) {
+  if(curlx_ptimediff_ms(Curl_pgrs_now(data),
+                        &ctx->last_sndbuf_query_at) > 1000) {
     if(!WSAIoctl(ctx->sock, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
                  &ideal, sizeof(ideal), &ideallen, 0, 0) &&
        ideal != ctx->sndbuf_size &&
@@ -1417,7 +1418,7 @@ static void win_update_sndbuf_size(struct Curl_easy *data,
                    (const char *)&ideal, sizeof(ideal))) {
       ctx->sndbuf_size = ideal;
     }
-    ctx->last_sndbuf_query_at = data->progress.now;
+    ctx->last_sndbuf_query_at = *Curl_pgrs_now(data);
   }
 }
 
@@ -1564,7 +1565,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
   if(!result && !ctx->got_first_byte) {
-    ctx->first_byte_at = data->progress.now;
+    ctx->first_byte_at = *Curl_pgrs_now(data);
     ctx->got_first_byte = TRUE;
   }
   return result;
@@ -1678,7 +1679,8 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     return CURLE_OK;
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->got_first_byte) {
-      timediff_t ms = curlx_timediff_ms(ctx->first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_ptimediff_ms(&ctx->first_byte_at,
+                                         &ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -2011,7 +2013,7 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
     timeout_ms = other_ms;
   else {
     /* subtract elapsed time */
-    timeout_ms -= curlx_timediff_ms(data->progress.now, ctx->started_at);
+    timeout_ms -= curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->started_at);
     if(!timeout_ms)
       /* avoid returning 0 as that means no timeout! */
       timeout_ms = -1;
@@ -2147,7 +2149,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   cf_tcp_set_accepted_remote_ip(cf, data);
   set_local_ip(cf, data);
   ctx->active = TRUE;
-  ctx->connected_at = data->progress.now;
+  ctx->connected_at = *Curl_pgrs_now(data);
   cf->connected = TRUE;
   CURL_TRC_CF(data, cf, "accepted_set(sock=%" FMT_SOCKET_T
               ", remote=%s port=%d)",
@@ -2213,7 +2215,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
 
-  ctx->started_at = data->progress.now;
+  ctx->started_at = *Curl_pgrs_now(data);
   conn->sock[sockindex] = ctx->sock;
   set_local_ip(cf, data);
   CURL_TRC_CF(data, cf, "set filter for listen socket fd=%" FMT_SOCKET_T

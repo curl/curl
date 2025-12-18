@@ -499,7 +499,6 @@ static void cf_quiche_recv_body(struct Curl_cfilter *cf,
 }
 
 static void cf_quiche_process_ev(struct Curl_cfilter *cf,
-                                 struct Curl_easy *calling,
                                  struct Curl_easy *data,
                                  struct h3_stream_ctx *stream,
                                  quiche_h3_event *ev)
@@ -507,7 +506,6 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
   if(!stream)
     return;
 
-  Curl_pgrs_now_update(data, calling);
   switch(quiche_h3_event_type(ev)) {
   case QUICHE_H3_EVENT_HEADERS: {
     struct cb_ctx cb_ctx;
@@ -563,7 +561,6 @@ struct cf_quich_disp_ctx {
   uint64_t stream_id;
   struct Curl_cfilter *cf;
   struct Curl_multi *multi;
-  struct Curl_easy *calling;
   quiche_h3_event *ev;
 };
 
@@ -575,7 +572,7 @@ static bool cf_quiche_disp_event(uint32_t mid, void *val, void *user_data)
   if(stream->id == dctx->stream_id) {
     struct Curl_easy *sdata = Curl_multi_get_easy(dctx->multi, mid);
     if(sdata)
-      cf_quiche_process_ev(dctx->cf, dctx->calling, sdata, stream, dctx->ev);
+      cf_quiche_process_ev(dctx->cf, sdata, stream, dctx->ev);
     return FALSE; /* stop iterating */
   }
   return TRUE;
@@ -602,7 +599,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
       stream = H3_STREAM_CTX(ctx, data);
       if(stream && stream->id == (uint64_t)rv) {
         /* event for calling transfer */
-        cf_quiche_process_ev(cf, data, data, stream, ev);
+        cf_quiche_process_ev(cf, data, stream, ev);
         quiche_h3_event_free(ev);
         if(stream->xfer_result)
           return stream->xfer_result;
@@ -613,7 +610,6 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
         struct cf_quich_disp_ctx dctx;
         dctx.stream_id = (uint64_t)rv;
         dctx.cf = cf;
-        dctx.calling = data;
         dctx.multi = data->multi;
         dctx.ev = ev;
         Curl_uint32_hash_visit(&ctx->streams, cf_quiche_disp_event, &dctx);
@@ -869,7 +865,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   *pnread = 0;
   (void)buf;
   (void)blen;
-  vquic_ctx_update_time(data, &ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   if(!stream)
     return CURLE_RECV_ERROR;
@@ -1079,7 +1075,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result;
 
   *pnwritten = 0;
-  vquic_ctx_update_time(data, &ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   result = cf_process_ingress(cf, data);
   if(result)
@@ -1356,7 +1352,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  vquic_ctx_update_time(data, &ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   if(!ctx->qconn) {
     result = cf_quiche_ctx_open(cf, data);
@@ -1379,7 +1375,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   if(quiche_conn_is_established(ctx->qconn)) {
     ctx->handshake_at = ctx->q.last_op;
     CURL_TRC_CF(data, cf, "handshake complete after %" FMT_TIMEDIFF_T "ms",
-                curlx_timediff_ms(ctx->handshake_at, ctx->started_at));
+                curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at));
     result = cf_quiche_verify_peer(cf, data);
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
@@ -1438,7 +1434,7 @@ static CURLcode cf_quiche_shutdown(struct Curl_cfilter *cf,
     int err;
 
     ctx->shutdown_started = TRUE;
-    vquic_ctx_update_time(data, &ctx->q);
+    vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
     err = quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
     if(err) {
       CURL_TRC_CF(data, cf, "error %d adding shutdown packet, "
@@ -1509,7 +1505,8 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
-      timediff_t ms = curlx_timediff_ms(ctx->q.first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_ptimediff_ms(&ctx->q.first_byte_at,
+                                         &ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else

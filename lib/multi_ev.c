@@ -538,8 +538,7 @@ CURLMcode Curl_multi_ev_assess_conn(struct Curl_multi *multi,
 }
 
 CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
-                                         struct uint32_bset *set,
-                                         struct curltime *pnow)
+                                         struct uint32_bset *set)
 {
   uint32_t mid;
   CURLMcode mresult = CURLM_OK;
@@ -548,7 +547,6 @@ CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(data) {
-        Curl_pgrs_now_at_least(data, pnow);
         mresult = Curl_multi_ev_assess_xfer(multi, data);
       }
     } while(!mresult && Curl_uint32_bset_next(set, mid, &mid));

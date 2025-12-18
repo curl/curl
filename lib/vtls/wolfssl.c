@@ -724,11 +724,11 @@ static void wssl_x509_share_free(void *key, size_t key_len, void *p)
   curlx_free(share);
 }
 
-static bool wssl_cached_x509_store_expired(const struct Curl_easy *data,
+static bool wssl_cached_x509_store_expired(struct Curl_easy *data,
                                            const struct wssl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  timediff_t elapsed_ms = curlx_timediff_ms(data->progress.now, mb->time);
+  timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &mb->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
@@ -748,7 +748,7 @@ static bool wssl_cached_x509_store_different(struct Curl_cfilter *cf,
 }
 
 static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
-                                                  const struct Curl_easy *data)
+                                                      struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct wssl_x509_share *share;
@@ -768,7 +768,7 @@ static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
 }
 
 static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
-                                       const struct Curl_easy *data,
+                                       struct Curl_easy *data,
                                        WOLFSSL_X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -811,7 +811,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
       curlx_free(share->CAfile);
     }
 
-    share->time = data->progress.now;
+    share->time = *Curl_pgrs_now(data);
     share->store = store;
     share->CAfile = CAfile;
   }

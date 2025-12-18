@@ -53,14 +53,10 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
      supposed to govern the response for any given server response, not for
      the time from connect to the given server response. */
 
-  /* pingpong can spend some time processing, always update
-   * the transfer timestamp before checking timeouts. */
-  Curl_pgrs_now_set(data);
-
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
   timeout_ms = response_time -
-               curlx_timediff_ms(data->progress.now, pp->response);
+               curlx_ptimediff_ms(Curl_pgrs_now(data), &pp->response);
 
   if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much overall remains */
@@ -139,7 +135,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 }
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct pingpong *pp, struct curltime *pnow)
+void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow)
 {
   DEBUGASSERT(!pp->initialised);
   pp->nread_resp = 0;
@@ -212,7 +208,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   else {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = data->progress.now;
+    pp->response = *Curl_pgrs_now(data);
   }
 
   return CURLE_OK;
@@ -403,7 +399,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   else {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = data->progress.now;
+    pp->response = *Curl_pgrs_now(data);
   }
   return CURLE_OK;
 }
