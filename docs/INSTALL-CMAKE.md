@@ -430,6 +430,7 @@ Details via CMake
 - `LIBSSH_USE_STATIC_LIBS`:                 Configure for static libssh libraries.
 - `LIBSSH2_INCLUDE_DIR`:                    Absolute path to libssh2 include directory.
 - `LIBSSH2_LIBRARY`:                        Absolute path to `libssh2` library.
+- `LIBSSH2_USE_STATIC_LIBS`:                Configure for static libssh2 libraries.
 - `LIBUV_INCLUDE_DIR`:                      Absolute path to libuv include directory.
 - `LIBUV_LIBRARY`:                          Absolute path to `libuv` library.
 - `MATH_LIBRARY`:                           Absolute path to `m` library. (for Rustls, wolfSSL)
