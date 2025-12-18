@@ -57,6 +57,7 @@ if(_nghttp2_FOUND)
 else()
   find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h")
   if(NGHTTP2_USE_STATIC_LIBS)
+    set(_nghttp2_CFLAGS "-DNGHTTP2_STATICLIB")
     find_library(NGHTTP2_LIBRARY NAMES "nghttp2_static" "nghttp2")
   else()
     find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
@@ -101,7 +102,6 @@ if(NGHTTP2_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_nghttp2_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_nghttp2_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_nghttp2_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_nghttp2_LIBRARIES}"
-      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:NGHTTP2_USE_STATIC_LIBS>:NGHTTP2_STATICLIB>")
+      INTERFACE_LINK_LIBRARIES "${_nghttp2_LIBRARIES}")
   endif()
 endif()

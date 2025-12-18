@@ -58,6 +58,7 @@ if(_cares_FOUND)
 else()
   find_path(CARES_INCLUDE_DIR NAMES "ares.h")
   if(CARES_USE_STATIC_LIBS)
+    set(_cares_CFLAGS "-DCARES_STATICLIB")
     find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares_static" "cares")
   else()
     find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
@@ -116,7 +117,6 @@ if(CARES_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_cares_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_cares_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_cares_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_cares_LIBRARIES}"
-      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:CARES_USE_STATIC_LIBS>:CARES_STATICLIB>")
+      INTERFACE_LINK_LIBRARIES "${_cares_LIBRARIES}")
   endif()
 endif()

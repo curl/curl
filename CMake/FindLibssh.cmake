@@ -58,6 +58,7 @@ if(_libssh_FOUND)
 else()
   find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
   if(LIBSSH_USE_STATIC_LIBS)
+    set(_libssh_CFLAGS "-DLIBSSH_STATIC")
     find_library(LIBSSH_LIBRARY NAMES "ssh_static" "libssh_static" "ssh" "libssh")
   else()
     find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
@@ -116,7 +117,6 @@ if(LIBSSH_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_libssh_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_libssh_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_libssh_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_libssh_LIBRARIES}"
-      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:LIBSSH_USE_STATIC_LIBS>:LIBSSH_STATIC>")
+      INTERFACE_LINK_LIBRARIES "${_libssh_LIBRARIES}")
   endif()
 endif()

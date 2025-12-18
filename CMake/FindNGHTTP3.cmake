@@ -57,6 +57,7 @@ if(_nghttp3_FOUND)
 else()
   find_path(NGHTTP3_INCLUDE_DIR NAMES "nghttp3/nghttp3.h")
   if(NGHTTP2_USE_STATIC_LIBS)
+    set(_nghttp3_CFLAGS "-DNGHTTP3_STATICLIB")
     find_library(NGHTTP3_LIBRARY NAMES "nghttp3_static" "nghttp3")
   else()
     find_library(NGHTTP3_LIBRARY NAMES "nghttp3")
@@ -101,7 +102,6 @@ if(NGHTTP3_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_nghttp3_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_nghttp3_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_nghttp3_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_nghttp3_LIBRARIES}"
-      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:NGHTTP3_USE_STATIC_LIBS>:NGHTTP3_STATICLIB>")
+      INTERFACE_LINK_LIBRARIES "${_nghttp3_LIBRARIES}")
   endif()
 endif()
