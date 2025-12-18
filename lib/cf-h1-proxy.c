@@ -43,7 +43,6 @@
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
-#include "multiif.h"
 #include "curlx/strparse.h"
 
 

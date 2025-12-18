@@ -58,7 +58,6 @@
 #include "../curlx/timeval.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */

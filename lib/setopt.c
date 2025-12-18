@@ -48,7 +48,6 @@
 #include "hostip.h"
 #include "http2.h"
 #include "setopt.h"
-#include "multiif.h"
 #include "altsvc.h"
 #include "hsts.h"
 #include "tftp.h"

@@ -37,7 +37,6 @@
 #include "url.h"
 #include "escape.h"
 #include "curlx/warnless.h"
-#include "multiif.h"
 #include "rand.h"
 
 /* first byte is command.

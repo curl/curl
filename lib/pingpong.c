@@ -34,7 +34,6 @@
 #include "select.h"
 #include "progress.h"
 #include "pingpong.h"
-#include "multiif.h"
 #include "vtls/vtls.h"
 
 #ifdef USE_PINGPONG
