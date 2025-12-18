@@ -204,7 +204,7 @@ static int do_file_type(const char *type)
 
 #ifdef WOLFSSL_DUAL_ALG_CERTS
 /* Set our preference for verification to be for both the native and
- * alternative chains. Ultimately, it is the server's choice. This will be
+ * alternative chains. Ultimately, it is the server's choice. This is
  * used in the call to wolfSSL_UseCKS(). */
 static byte cks_order[3] = {
   WOLFSSL_CKS_SIGSPEC_BOTH,
