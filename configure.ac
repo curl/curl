@@ -2099,7 +2099,7 @@ dnl --------------------------------
 
 ca_native_by_default=0
 AC_MSG_CHECKING([whether to use native CA store by default])
-AC_ARG_ENABLE(ca-native,
+AC_ARG_ENABLE(ca-native-by-default,
 AS_HELP_STRING([--enable-ca-native-by-default],[Enable native CA store by default])
 AS_HELP_STRING([--disable-ca-native-by-default],[Disable native CA store by default (default)]),
 [ case "$enableval" in
