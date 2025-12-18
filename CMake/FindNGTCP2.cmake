@@ -89,7 +89,7 @@ if(_ngtcp2_FOUND)
 else()
   find_path(NGTCP2_INCLUDE_DIR NAMES "ngtcp2/ngtcp2.h")
   if(NGTCP2_USE_STATIC_LIBS)
-    find_library(NGTCP2_LIBRARY NAMES "ngtcp2_static")
+    find_library(NGTCP2_LIBRARY NAMES "ngtcp2_static" "ngtcp2")
   else()
     find_library(NGTCP2_LIBRARY NAMES "ngtcp2" "ngtcp2_static")
   endif()
@@ -111,7 +111,7 @@ else()
       get_filename_component(_ngtcp2_library_dir "${NGTCP2_LIBRARY}" DIRECTORY)
     endif()
     if(NGTCP2_USE_STATIC_LIBS)
-      find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower}_static
+      find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower}_static ${_crypto_library_lower}
         HINTS ${_ngtcp2_library_dir})
     else()
       find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} ${_crypto_library_lower}_static
