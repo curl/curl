@@ -2093,17 +2093,6 @@ elif test "$VALID_DEFAULT_SSL_BACKEND" = "yes"; then
   AC_DEFINE_UNQUOTED([CURL_DEFAULT_SSL_BACKEND], ["$DEFAULT_SSL_BACKEND"], [Default SSL backend])
 fi
 
-dnl **********************************************************************
-dnl Check for the CA bundle
-dnl **********************************************************************
-
-if test -n "$check_for_ca_bundle"; then
-  CURL_CHECK_CA_BUNDLE
-  CURL_CHECK_CA_EMBED
-fi
-
-AM_CONDITIONAL(CURL_CA_EMBED_SET, test -n "$CURL_CA_EMBED")
-
 dnl --------------------------------
 dnl check native CA store by default
 dnl --------------------------------
@@ -2125,6 +2114,17 @@ AS_HELP_STRING([--disable-ca-native-by-default],[Disable native CA store by defa
   esac ],
     AC_MSG_RESULT([no])
 )
+
+dnl **********************************************************************
+dnl Check for the CA bundle
+dnl **********************************************************************
+
+if test -n "$check_for_ca_bundle"; then
+  CURL_CHECK_CA_BUNDLE
+  CURL_CHECK_CA_EMBED
+fi
+
+AM_CONDITIONAL(CURL_CA_EMBED_SET, test -n "$CURL_CA_EMBED")
 
 dnl ----------------------
 dnl check unsafe CA search
