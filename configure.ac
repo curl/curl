@@ -2108,6 +2108,7 @@ dnl --------------------------------
 dnl check native CA store by default
 dnl --------------------------------
 
+ca_native_by_default=0
 AC_MSG_CHECKING([whether to use native CA store by default in the curl tool])
 AC_ARG_ENABLE(ca-native,
 AS_HELP_STRING([--enable-ca-native-by-default],[Enable native CA store by default in the curl tool])
@@ -2116,6 +2117,7 @@ AS_HELP_STRING([--disable-ca-native-by-default],[Disable native CA store by defa
   yes)
     AC_MSG_RESULT([yes])
     AC_DEFINE(CURL_CA_NATIVE_BY_DEFAULT, 1, [If native CA store by default in the curl tool is enabled])
+    ca_native_by_default=1
     ;;
   *)
     AC_MSG_RESULT([no])
@@ -2129,21 +2131,33 @@ dnl check unsafe CA search
 dnl ----------------------
 
 if test "$curl_cv_native_windows" = "yes"; then
+  ca_search=1
   AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
   AC_ARG_ENABLE(ca-search,
-AS_HELP_STRING([--enable-ca-search],[Enable unsafe CA bundle search in PATH on Windows (default)])
+AS_HELP_STRING([--enable-ca-search],[Enable unsafe CA bundle search in PATH on Windows])
 AS_HELP_STRING([--disable-ca-search],[Disable unsafe CA bundle search in PATH on Windows]),
   [ case "$enableval" in
     no)
       AC_MSG_RESULT([no])
-      AC_DEFINE(CURL_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
+      ca_search=0
+      ;;
+    yes)
+      AC_MSG_RESULT([yes])
       ;;
     *)
-      AC_MSG_RESULT([yes])
+      if test "$ca_native_by_default" = "1"; then
+        AC_MSG_RESULT([no])
+        ca_search=0
+      else
+        AC_MSG_RESULT([yes])
+      fi
       ;;
     esac ],
       AC_MSG_RESULT([yes])
   )
+  if test "$ca_search" = "0"; then
+    AC_DEFINE(CURL_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
+  fi
 fi
 
 dnl --------------------
