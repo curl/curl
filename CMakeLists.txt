@@ -1315,6 +1315,11 @@ endif()
 # CA handling
 #
 option(CURL_CA_NATIVE_BY_DEFAULT "Use native CA store by default in the curl tool" OFF)
+if(CURL_CA_NATIVE_BY_DEFAULT)
+  set(_curl_disable_ca_search_default ON)
+else()
+  set(_curl_disable_ca_search_default OFF)
+endif()
 
 if(_curl_ca_bundle_supported)
   set(_ca_opt_desc "Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
@@ -1409,7 +1414,7 @@ if(_curl_ca_bundle_supported)
 endif()
 
 if(WIN32)
-  option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" OFF)
+  option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" ${_curl_disable_ca_search_default})
   option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" OFF)
 endif()
 
