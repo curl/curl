@@ -225,13 +225,6 @@ static const char *disabled[] = {
   "ON"
 #endif
   ,
-  "default-native-ca: "
-#ifdef CURL_CA_NATIVE_BY_DEFAULT
-  "ON"
-#else
-  "OFF"
-#endif
-  ,
 
   "--libcurl: "
 #ifdef CURL_DISABLE_LIBCURL_OPTION
