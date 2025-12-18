@@ -51,7 +51,6 @@
 #include "hash.h"
 #include "multiif.h"
 #include "select.h"
-#include "curl_share.h"
 #include "url.h"
 
 /***********************************************************************

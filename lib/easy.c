@@ -53,7 +53,6 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
-#include "curl_share.h"
 #include "strdup.h"
 #include "progress.h"
 #include "easyif.h"

@@ -26,7 +26,6 @@
 #include "urldata.h"
 #include "connect.h"
 #include "progress.h"
-#include "curl_share.h"
 
 static CURLcode t1607_setup(void)
 {

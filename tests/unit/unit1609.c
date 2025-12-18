@@ -25,7 +25,6 @@
 
 #include "urldata.h"
 #include "connect.h"
-#include "curl_share.h"
 
 static CURLcode t1609_setup(void)
 {

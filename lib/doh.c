@@ -33,7 +33,6 @@
 #include "sendf.h"
 #include "multiif.h"
 #include "url.h"
-#include "curl_share.h"
 #include "curlx/base64.h"
 #include "connect.h"
 #include "strdup.h"
