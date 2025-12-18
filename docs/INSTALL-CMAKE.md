@@ -438,6 +438,7 @@ Details via CMake
 - `MBEDTLS_LIBRARY`:                        Absolute path to `mbedtls` library.
 - `MBEDX509_LIBRARY`:                       Absolute path to `mbedx509` library.
 - `MBEDCRYPTO_LIBRARY`:                     Absolute path to `mbedcrypto` library.
+- `MBEDTLS_USE_STATIC_LIBS`:                Configure for static mbedtls libraries.
 - `NGHTTP2_INCLUDE_DIR`:                    Absolute path to nghttp2 include directory.
 - `NGHTTP2_LIBRARY`:                        Absolute path to `nghttp2` library.
 - `NGHTTP2_USE_STATIC_LIBS`:                Configure for static nghttp2 libraries.
