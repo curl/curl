@@ -44,7 +44,8 @@ This iteration has the following properties:
 
 * entries in the table can be added/removed safely.
 * all entries that are not removed during the iteration are visited.
-* the table may be resized to a larger capacity without affecting visited entries.
+* the table may be resized to a larger capacity without affecting visited
+  entries.
 * entries added with a larger index than the current are visited.
 
 ### Memory
