@@ -450,7 +450,7 @@ Details via CMake
 - `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Absolute path to `ngtcp2_crypto_ossl` library.
 - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Absolute path to `ngtcp2_crypto_quictls` library. (also for LibreSSL with ngtcp2 <1.15.0)
 - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Absolute path to `ngtcp2_crypto_wolfssl` library.
-- `NGTCP2_USE_STATIC_LIBS`:                 Configure for static ngtcp2 libraries.
+- `NGTCP2_USE_STATIC_LIBS`:                 Configure for static `ngtcp2` libraries.
 - `NETTLE_INCLUDE_DIR`:                     Absolute path to nettle include directory.
 - `NETTLE_LIBRARY`:                         Absolute path to `nettle` library.
 - `PTHREAD_LIBRARY`:                        Absolute path to `pthread` library. (for Rustls)
