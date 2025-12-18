@@ -29,7 +29,7 @@
 # - `MBEDTLS_LIBRARY`:          Absolute path to `mbedtls` library.
 # - `MBEDX509_LIBRARY`:         Absolute path to `mbedx509` library.
 # - `MBEDCRYPTO_LIBRARY`:       Absolute path to `mbedcrypto` library.
-# - `MBEDTLS_USE_STATIC_LIBS`:  Configure for static mbedtls libraries.
+# - `MBEDTLS_USE_STATIC_LIBS`:  Configure for static mbedTLS libraries.
 #
 # Defines:
 #
