@@ -88,7 +88,6 @@
 #include "http_negotiate.h"
 #include "select.h"
 #include "multiif.h"
-#include "easyif.h"
 #include "curlx/warnless.h"
 #include "getinfo.h"
 #include "pop3.h"

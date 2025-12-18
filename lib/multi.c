@@ -32,7 +32,6 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "progress.h"
-#include "easyif.h"
 #include "curl_share.h"
 #include "psl.h"
 #include "multiif.h"
