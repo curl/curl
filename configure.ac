@@ -2097,7 +2097,7 @@ dnl ---------------------
 dnl check native CA store
 dnl ---------------------
 
-ca_native=0
+ca_native_opt=0
 AC_MSG_CHECKING([whether to use native CA store])
 AC_ARG_ENABLE(ca-native,
 AS_HELP_STRING([--enable-ca-native],[Enable native CA store])
@@ -2106,7 +2106,7 @@ AS_HELP_STRING([--disable-ca-native],[Disable native CA store (default)]),
   yes)
     AC_MSG_RESULT([yes])
     AC_DEFINE(CURL_CA_NATIVE, 1, [If native CA store is enabled])
-    ca_native=1
+    ca_native_opt=1
     ;;
   *)
     AC_MSG_RESULT([no])
@@ -2145,7 +2145,7 @@ AS_HELP_STRING([--disable-ca-search],[Disable unsafe CA bundle search in PATH on
       AC_MSG_RESULT([yes])
       ;;
     *)
-      if test "$ca_native" = "1"; then
+      if test "$ca_native_opt" = "1"; then
         AC_MSG_RESULT([no])
         ca_search=0
       else
@@ -5322,7 +5322,7 @@ fi
 
 if test "$APPLE_SECTRUST_ENABLED" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
-elif test "$ca_native" = "1"; then
+elif test "$ca_native_opt" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES NativeCA"
 fi
 
