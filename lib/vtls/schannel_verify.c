@@ -39,6 +39,7 @@
 #include "schannel.h"
 #include "schannel_int.h"
 
+#include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
@@ -254,34 +255,24 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
                                         struct Curl_easy *data)
 {
   CURLcode result;
-  HANDLE ca_file_handle = INVALID_HANDLE_VALUE;
+  HANDLE ca_file_handle;
   LARGE_INTEGER file_size;
   char *ca_file_buffer = NULL;
-  TCHAR *ca_file_tstr = NULL;
   size_t ca_file_bufsize = 0;
   DWORD total_bytes_read = 0;
-
-  ca_file_tstr = curlx_convert_UTF8_to_tchar(ca_file);
-  if(!ca_file_tstr) {
-    char buffer[WINAPI_ERROR_LEN];
-    failf(data, "schannel: invalid path name for CA file '%s': %s", ca_file,
-          curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
-    result = CURLE_SSL_CACERT_BADFILE;
-    goto cleanup;
-  }
 
   /*
    * Read the CA file completely into memory before parsing it. This
    * optimizes for the common case where the CA file will be relatively
    * small ( < 1 MiB ).
    */
-  ca_file_handle = CreateFile(ca_file_tstr,
-                              GENERIC_READ,
-                              FILE_SHARE_READ,
-                              NULL,
-                              OPEN_EXISTING,
-                              FILE_ATTRIBUTE_NORMAL,
-                              NULL);
+  ca_file_handle = curlx_CreateFile(ca_file,
+                                    GENERIC_READ,
+                                    FILE_SHARE_READ,
+                                    NULL,
+                                    OPEN_EXISTING,
+                                    FILE_ATTRIBUTE_NORMAL,
+                                    NULL);
   if(ca_file_handle == INVALID_HANDLE_VALUE) {
     char buffer[WINAPI_ERROR_LEN];
     failf(data, "schannel: failed to open CA file '%s': %s", ca_file,
@@ -347,7 +338,6 @@ cleanup:
     CloseHandle(ca_file_handle);
   }
   Curl_safefree(ca_file_buffer);
-  curlx_free(ca_file_tstr);
 
   return result;
 }

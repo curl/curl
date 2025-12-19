@@ -43,6 +43,8 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #include <share.h>  /* for _SH_DENYNO */
 
+#include "multibyte.h"
+
 #ifdef CURLDEBUG
 /*
  * Use system allocators to avoid infinite recursion when called by curl's
@@ -247,6 +249,49 @@ cleanup:
 #endif
   return *out ? true : false;
 }
+
+#ifndef CURL_WINDOWS_UWP
+HANDLE curlx_CreateFile(const char *filename,
+                        DWORD dwDesiredAccess,
+                        DWORD dwShareMode,
+                        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                        DWORD dwCreationDisposition,
+                        DWORD dwFlagsAndAttributes,
+                        HANDLE hTemplateFile)
+{
+  HANDLE handle = INVALID_HANDLE_VALUE;
+
+#ifdef UNICODE
+  TCHAR *filename_t = curlx_convert_UTF8_to_wchar(filename);
+#else
+  const TCHAR *filename_t = filename;
+#endif
+
+  if(filename_t) {
+    TCHAR *fixed = NULL;
+    const TCHAR *target = NULL;
+
+    if(fix_excessive_path(filename_t, &fixed))
+      target = fixed;
+    else
+      target = filename_t;
+    /* !checksrc! disable BANNEDFUNC 1 */
+    handle = CreateFile(target,
+                        dwDesiredAccess,
+                        dwShareMode,
+                        lpSecurityAttributes,
+                        dwCreationDisposition,
+                        dwFlagsAndAttributes,
+                        hTemplateFile);
+    CURLX_FREE(fixed);
+#ifdef UNICODE
+    curlx_free(filename_t);
+#endif
+  }
+
+  return handle;
+}
+#endif /* !CURL_WINDOWS_UWP */
 
 int curlx_win32_open(const char *filename, int oflag, ...)
 {
