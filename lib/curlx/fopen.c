@@ -279,9 +279,6 @@ HANDLE curlx_CreateFile(const char *filename,
                         hTemplateFile);
     curlx_free(filename_w);
   }
-  else
-    /* !checksrc! disable ERRNOVAR 1 */
-    errno = EINVAL;
 #else
   if(fix_excessive_path(filename, &fixed))
     target = fixed;
