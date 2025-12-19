@@ -27,7 +27,6 @@
 
 #ifdef USE_FAKE_GETADDRINFO
 
-#include <stdlib.h>
 #include <ares.h>
 
 void r_freeaddrinfo(struct addrinfo *cahead)
