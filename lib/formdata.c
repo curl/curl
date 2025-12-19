@@ -27,6 +27,7 @@
 struct Curl_easy;
 
 #include "formdata.h"
+
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
 
 #include "urldata.h" /* for struct Curl_easy */

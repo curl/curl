@@ -25,6 +25,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "urldata.h"
 
 #ifndef CURL_DISABLE_PROXY

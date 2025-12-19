@@ -25,6 +25,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "hash.h"
 #include "curl_addrinfo.h"
 #include "curlx/timeval.h" /* for timediff_t */

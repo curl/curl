@@ -22,8 +22,6 @@
  *
  ***************************************************************************/
 
-#include "rename.h"
-
 #include "curl_setup.h"
 
 #if (!defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES)) || \
@@ -31,6 +29,7 @@
 
 #include "curlx/multibyte.h"
 #include "curlx/timeval.h"
+#include "rename.h"
 
 /* return 0 on success, 1 on error */
 int Curl_rename(const char *oldpath, const char *newpath)

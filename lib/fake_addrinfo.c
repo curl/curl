@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "fake_addrinfo.h"
 
 #ifdef USE_FAKE_GETADDRINFO

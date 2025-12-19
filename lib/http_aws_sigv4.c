@@ -36,10 +36,9 @@
 #include "escape.h"
 #include "curlx/strparse.h"
 #include "curlx/timeval.h"
+#include "slist.h"
 
 #include <time.h>
-
-#include "slist.h"
 
 #define HMAC_SHA256(k, kl, d, dl, o)                \
   do {                                              \
