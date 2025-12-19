@@ -250,6 +250,7 @@ cleanup:
   return *out ? true : false;
 }
 
+#ifndef CURL_WINDOWS_UWP
 HANDLE curlx_CreateFile(const char *filename,
                         DWORD dwDesiredAccess,
                         DWORD dwShareMode,
@@ -297,6 +298,7 @@ HANDLE curlx_CreateFile(const char *filename,
   CURLX_FREE(fixed);
   return handle;
 }
+#endif /* !CURL_WINDOWS_UWP */
 
 int curlx_win32_open(const char *filename, int oflag, ...)
 {
