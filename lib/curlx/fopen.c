@@ -248,6 +248,55 @@ cleanup:
   return *out ? true : false;
 }
 
+HANDLE curlx_CreateFile(const char *filename,
+                        DWORD dwDesiredAccess,
+                        DWORD dwShareMode,
+                        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                        DWORD dwCreationDisposition,
+                        DWORD dwFlagsAndAttributes,
+                        HANDLE hTemplateFile)
+{
+  HANDLE handle = INVALID_HANDLE_VALUE;
+  TCHAR *fixed = NULL;
+  const TCHAR *target = NULL;
+
+#ifdef _UNICODE
+  wchar_t *filename_w = fn_convert_UTF8_to_wchar(filename);
+  if(filename_w) {
+    if(fix_excessive_path(filename_w, &fixed))
+      target = fixed;
+    else
+      target = filename_w;
+    handle = CreateFile(target,
+                        dwDesiredAccess,
+                        dwShareMode,
+                        lpSecurityAttributes,
+                        dwCreationDisposition,
+                        dwFlagsAndAttributes,
+                        hTemplateFile);
+    CURLX_FREE(filename_w);
+  }
+  else
+    /* !checksrc! disable ERRNOVAR 1 */
+    errno = EINVAL;
+#else
+  if(fix_excessive_path(filename, &fixed))
+    target = fixed;
+  else
+    target = filename;
+  handle = CreateFile(target,
+                      dwDesiredAccess,
+                      dwShareMode,
+                      lpSecurityAttributes,
+                      dwCreationDisposition,
+                      dwFlagsAndAttributes,
+                      hTemplateFile);
+#endif
+
+  CURLX_FREE(fixed);
+  return handle;
+}
+
 int curlx_win32_open(const char *filename, int oflag, ...)
 {
   int pmode = 0;

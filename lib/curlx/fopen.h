@@ -35,6 +35,13 @@
 int curlx_fseek(void *stream, curl_off_t offset, int whence);
 
 #ifdef _WIN32
+HANDLE curlx_CreateFile(const char *filename,
+                        DWORD dwDesiredAccess,
+                        DWORD dwShareMode,
+                        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                        DWORD dwCreationDisposition,
+                        DWORD dwFlagsAndAttributes,
+                        HANDLE hTemplateFile);
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
 FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fh);
 int curlx_win32_stat(const char *path, struct_stat *buffer);
