@@ -2339,7 +2339,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_RUSTLS
   #   USE_WIN32_LDAP CURL_DISABLE_LDAP
   #   USE_WOLFSSL
-  configure_package_config_file("CMake/curl-config.cmake.in"
+  configure_package_config_file("CMake/curl-config.in.cmake"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR)

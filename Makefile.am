@@ -28,7 +28,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 CMAKE_DIST =                                    \
  CMake/cmake_uninstall.cmake.in                 \
- CMake/curl-config.cmake.in                     \
+ CMake/curl-config.in.cmake                     \
  CMake/CurlSymbolHiding.cmake                   \
  CMake/CurlTests.c                              \
  CMake/FindBrotli.cmake                         \
