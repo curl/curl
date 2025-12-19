@@ -139,7 +139,7 @@ authentication.
 curl users should consider switching to servers and options that use modern
 and secure algorithms.
 
-## compression bombs
+## Compression bombs
 
 When asking curl or libcurl to automatically decompress data on arrival, there
 is a risk that the size of the output from the decompression process ends up
