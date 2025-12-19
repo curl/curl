@@ -27,7 +27,7 @@ AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
 CMAKE_DIST =                                    \
- CMake/cmake_uninstall.cmake.in                 \
+ CMake/cmake_uninstall.in.cmake                 \
  CMake/curl-config.in.cmake                     \
  CMake/CurlSymbolHiding.cmake                   \
  CMake/CurlTests.c                              \
