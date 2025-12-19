@@ -26,5 +26,5 @@ If this option is used and the server sends an unsupported encoding, curl
 reports an error. This is a request, not an order; the server may or may not
 deliver data compressed.
 
-Warning: when decompressing data, even tiny transfers might be expanded and
-generate a huge amount of bytes.
+**WARNING**: when decompressing data, even tiny transfers might be expanded
+and generate a huge amount of bytes.
