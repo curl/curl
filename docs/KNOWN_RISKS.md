@@ -9,6 +9,8 @@ SPDX-License-Identifier: curl
 This is an incomplete list of known risks when running and using curl and
 libcurl.
 
+# Risks
+
 ## Insecure transfers
 
 When using curl to perform transfers with protocols that are insecure or the
@@ -136,3 +138,9 @@ authentication.
 
 curl users should consider switching to servers and options that use modern
 and secure algorithms.
+
+## Compression bombs
+
+When asking curl or libcurl to automatically decompress data on arrival, there
+is a risk that the size of the output from the decompression process ends up
+many times larger than the input data size.
