@@ -422,7 +422,7 @@ class ScoreRunner:
             curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True,
-                              supress_cl=self.suppress_cl)
+                              suppress_cl=self.suppress_cl)
             err = self._check_uploads(r, 1)
             if err:
                 errors.append(err)
@@ -442,7 +442,7 @@ class ScoreRunner:
             curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True,
-                              supress_cl=self.suppress_cl)
+                              suppress_cl=self.suppress_cl)
             err = self._check_uploads(r, count)
             if err:
                 errors.append(err)
@@ -463,7 +463,7 @@ class ScoreRunner:
             curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True,
-                              supress_cl=self.suppress_cl,
+                              suppress_cl=self.suppress_cl,
                               extra_args=[
                                    '--parallel',
                                    '--parallel-max', str(max_parallel),
