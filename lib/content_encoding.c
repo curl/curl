@@ -25,7 +25,6 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include <stddef.h>
 
 #ifdef HAVE_LIBZ
 #include <zlib.h>
