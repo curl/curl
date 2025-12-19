@@ -174,6 +174,7 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
       mntfy_chunk_append(tail, data, (uint32_t)type);
     else
       multi->ntfy.failure = CURLM_OUT_OF_MEMORY;
+    multi->ntfy.has_entries = TRUE;
   }
 }
 
@@ -201,5 +202,7 @@ CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi)
     multi->ntfy.failure = CURLM_OK; /* reset, once delivered */
     return mresult;
   }
+  else
+    multi->ntfy.has_entries = FALSE;
   return CURLM_OK;
 }
