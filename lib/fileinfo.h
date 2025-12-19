@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
 #include "llist.h"
 #include "curlx/dynbuf.h"
 

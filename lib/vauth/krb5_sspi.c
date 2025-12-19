@@ -28,8 +28,6 @@
 
 #if defined(USE_WINDOWS_SSPI) && defined(USE_KERBEROS5)
 
-#include <curl/curl.h>
-
 #include "vauth.h"
 #include "../curlx/warnless.h"
 #include "../sendf.h"

@@ -26,8 +26,6 @@
 
 #ifdef __AMIGA__
 
-#include <curl/curl.h>
-
 #include "hostip.h"
 #include "amigaos.h"
 

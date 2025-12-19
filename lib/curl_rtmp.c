@@ -35,7 +35,7 @@
 #include "transfer.h"
 #include "bufref.h"
 #include "curlx/warnless.h"
-#include <curl/curl.h>
+
 #include <librtmp/rtmp.h>
 
 #if defined(USE_WINSOCK) || defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)

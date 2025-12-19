@@ -28,8 +28,6 @@
 
 #ifdef USE_WINDOWS_SSPI
 
-#include <curl/curl.h>
-
 /*
  * When including the following three headers, it is mandatory to define either
  * SECURITY_WIN32 or SECURITY_KERNEL, indicating who is compiling the code.

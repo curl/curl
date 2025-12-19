@@ -26,7 +26,6 @@
 
 #ifdef USE_WINDOWS_SSPI
 
-#include <curl/curl.h>
 #include "curl_sspi.h"
 #include "strdup.h"
 #include "curlx/multibyte.h"

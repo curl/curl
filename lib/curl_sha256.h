@@ -25,10 +25,11 @@
  *
  ***************************************************************************/
 
+#include "curl_setup.h"
+
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) || \
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
-#include <curl/curl.h>
 #include "curl_hmac.h"
 
 extern const struct HMAC_params Curl_HMAC_SHA256;

@@ -28,8 +28,6 @@
 
 #if defined(HAVE_GSSAPI) && defined(USE_SPNEGO)
 
-#include <curl/curl.h>
-
 #include "vauth.h"
 #include "../curlx/base64.h"
 #include "../curl_gssapi.h"

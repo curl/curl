@@ -35,7 +35,6 @@
 #endif
 #endif
 
-#include <curl/curl.h>
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"

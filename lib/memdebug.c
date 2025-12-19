@@ -26,8 +26,6 @@
 
 #ifdef CURLDEBUG
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "curl_threads.h"
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */

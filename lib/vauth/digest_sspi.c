@@ -29,8 +29,6 @@
 
 #if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
-#include <curl/curl.h>
-
 #include "vauth.h"
 #include "digest.h"
 #include "../curlx/warnless.h"

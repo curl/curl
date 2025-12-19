@@ -26,7 +26,6 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "curlx/dynbuf.h"
 #include "sendf.h"

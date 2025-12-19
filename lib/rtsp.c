@@ -27,7 +27,6 @@
 #ifndef CURL_DISABLE_RTSP
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "multiif.h"

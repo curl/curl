@@ -33,7 +33,6 @@
 #define wakeup_close         close
 #define wakeup_create(p, nb) Curl_eventfd(p, nb)
 
-#include <curl/curl.h>
 int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
 
 #elif defined(HAVE_PIPE)
@@ -43,7 +42,6 @@ int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
 #define wakeup_close         close
 #define wakeup_create(p, nb) Curl_pipe(p, nb)
 
-#include <curl/curl.h>
 int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
 
 #else /* !USE_EVENTFD && !HAVE_PIPE */
@@ -73,8 +71,6 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
 #endif /* USE_EVENTFD */
 
 #ifndef CURL_DISABLE_SOCKETPAIR
-#include <curl/curl.h>
-
 int Curl_socketpair(int domain, int type, int protocol,
                     curl_socket_t socks[2], bool nonblocking);
 #endif

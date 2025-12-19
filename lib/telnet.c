@@ -48,7 +48,6 @@
 
 #include "urldata.h"
 #include "url.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "telnet.h"
