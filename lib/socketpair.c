@@ -111,11 +111,9 @@ int Curl_socketpair(int domain, int type, int protocol,
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* IPPROTO_TCP */
 #endif
-
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
