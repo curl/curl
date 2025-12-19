@@ -40,11 +40,9 @@ echo "parallel: ${procs}"
   if [ -n "${1:-}" ]; then
     for A in "$@"; do printf '%s\n' "$A"; done
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    {
-      git ls-files | grep -E '\.(pl|pm)$'
-      git grep -l '^#!/usr/bin/env perl'
-    } | sort -u
+    git ls-files '*.pl' '*.pm'
+    git grep -l '^#!/usr/bin/env perl'
   else
     find . -type f \( -name '*.pl' -o -name '*.pm' \)
   fi
-} | xargs -n 1 -P "${procs}" perl -c -Itests --
+} | sort -u | xargs -n 1 -P "${procs}" perl -c -Itests --
