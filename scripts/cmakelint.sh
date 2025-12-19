@@ -51,7 +51,7 @@ cd "$(dirname "$0")"/..
   else
     find . -type f \( -name CMakeLists.txt -o -name '*.cmake' \)
   fi
-} | xargs \
+} | sort | xargs \
   cmake-lint \
     --suppress-decorations \
     --disable \
