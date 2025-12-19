@@ -4344,6 +4344,23 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
     size_t consumed;
     size_t hlen;
     char *hd;
+    size_t unfold_len = 0;
+
+    if(data->state.leading_unfold) {
+      /* immediately after an unfold, keep only a single whitespace */
+      while(blen && ISBLANK(buf[0])) {
+        buf++;
+        blen--;
+        unfold_len++;
+      }
+      if(blen) {
+        /* insert a single space */
+        result = curlx_dyn_addn(&data->state.headerb, " ", 1);
+        if(result)
+          return result;
+        data->state.leading_unfold = FALSE; /* done now */
+      }
+    }
 
     end_ptr = memchr(buf, '\n', blen);
     if(!end_ptr) {
@@ -4352,7 +4369,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       result = curlx_dyn_addn(&data->state.headerb, buf, blen);
       if(result)
         return result;
-      *pconsumed += blen;
+      *pconsumed += blen + unfold_len;
 
       if(!k->headerline) {
         /* check if this looks like a protocol header */
@@ -4388,22 +4405,6 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       /* preserve the whole original header piece size */
       size_t header_piece = consumed;
 
-      if(data->state.leading_unfold) {
-        /* immediately after an unfold, keep only a single whitespace */
-        while(consumed && ISBLANK(buf[0])) {
-          consumed--;
-          buf++;
-          blen--;
-        }
-        if(consumed) {
-          /* insert a single space */
-          result = curlx_dyn_addn(&data->state.headerb, " ", 1);
-          if(result)
-            return result;
-          data->state.leading_unfold = FALSE; /* done now */
-        }
-      }
-
       if(consumed) {
         result = curlx_dyn_addn(&data->state.headerb, buf, consumed);
         if(result)
@@ -4411,7 +4412,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
         blen -= consumed;
         buf += consumed;
       }
-      *pconsumed += header_piece;
+      *pconsumed += header_piece + unfold_len;
     }
 
     /****
