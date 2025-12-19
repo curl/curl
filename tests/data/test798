@@ -22,6 +22,9 @@ Set-Cookie: flavor=tasty;
 
 boo
 </data>
+<servercmd>
+writedelay: 20
+</servercmd>
 </reply>
 
 # Client-side
