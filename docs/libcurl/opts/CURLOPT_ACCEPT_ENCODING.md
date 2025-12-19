@@ -56,9 +56,9 @@ You can also opt to just include the Accept-Encoding: header in your request
 with CURLOPT_HTTPHEADER(3) but then there is no automatic decompressing when
 receiving data.
 
-This option is a request, not an order; the server may or may not do it. This
-option must be set (to any non-NULL value) or else any unsolicited encoding
-done by the server is ignored.
+Setting this option is a request, not an order; the server may or may not do
+it. It must be set (to any non-NULL value) or else any encoding done by the
+server is ignored.
 
 Servers might respond with Content-Encoding even without getting a
 Accept-Encoding: in the request. Servers might respond with a different
