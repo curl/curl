@@ -353,6 +353,9 @@ This is the full list of functions generally banned.
     atoi
     atol
     calloc
+    CreateFile
+    CreateFileA
+    CreateFileW
     fclose
     fdopen
     fopen
