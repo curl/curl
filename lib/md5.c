@@ -28,7 +28,6 @@
   !defined(CURL_DISABLE_DIGEST_AUTH)
 
 #include <string.h>
-#include <curl/curl.h>
 
 #include "curl_md5.h"
 #include "curl_hmac.h"

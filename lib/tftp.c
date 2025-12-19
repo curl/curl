@@ -47,7 +47,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "transfer.h"

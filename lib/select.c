@@ -36,8 +36,6 @@
 #include <unistd.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
