@@ -47,7 +47,6 @@
 #include "../transfer.h"
 #include "../url.h"
 #include "../bufref.h"
-#include "../curlx/inet_pton.h"
 #include "../curlx/warnless.h"
 #include "../vtls/openssl.h"
 #include "../vtls/keylog.h"

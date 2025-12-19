@@ -47,7 +47,6 @@
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
-#include "curl_share.h"
 #include "url.h"
 
 

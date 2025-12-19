@@ -28,7 +28,6 @@
 #include "cfilters.h"
 #include "curlx/dynbuf.h"
 #include "doh.h"
-#include "multiif.h"
 #include "progress.h"
 #include "request.h"
 #include "sendf.h"

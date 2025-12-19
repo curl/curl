@@ -65,14 +65,12 @@
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_ntop.h"
-#include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
 #include "progress.h"
 #include "curlx/warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "curl_share.h"
 #include "http_proxy.h"
 #include "socks.h"
 

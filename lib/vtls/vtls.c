@@ -63,8 +63,6 @@
 #include "../strcase.h"
 #include "../url.h"
 #include "../progress.h"
-#include "../curl_share.h"
-#include "../multiif.h"
 #include "../curlx/fopen.h"
 #include "../curlx/timeval.h"
 #include "../curl_sha256.h"

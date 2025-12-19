@@ -31,7 +31,6 @@
 #include "urldata.h"
 #include "url.h"
 #include "sendf.h"
-#include "multiif.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "progress.h"

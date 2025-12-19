@@ -44,7 +44,6 @@
 #include "../curlx/dynbuf.h"
 #include "../http1.h"
 #include "../select.h"
-#include "../curlx/inet_pton.h"
 #include "../uint-hash.h"
 #include "vquic.h"
 #include "vquic_int.h"

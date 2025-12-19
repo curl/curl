@@ -57,7 +57,6 @@
 
 #include "../urldata.h"
 #include "../sendf.h"
-#include "../curlx/inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
@@ -67,7 +66,6 @@
 #include "../select.h"
 #include "../strdup.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>

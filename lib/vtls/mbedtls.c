@@ -61,7 +61,6 @@
 #include "cipher_suite.h"
 #include "../urldata.h"
 #include "../sendf.h"
-#include "../curlx/inet_pton.h"
 #include "mbedtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
@@ -69,7 +68,6 @@
 #include "x509asn1.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../select.h"
-#include "../multiif.h"
 #include "../strdup.h"
 #include "../curl_sha256.h"
 

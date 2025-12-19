@@ -42,7 +42,6 @@
 
 #include "../urldata.h"
 #include "../sendf.h"
-#include "../curlx/inet_pton.h"
 #include "keylog.h"
 #include "gtls.h"
 #include "vtls.h"
@@ -59,7 +58,6 @@
 #include "../curlx/timeval.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */
