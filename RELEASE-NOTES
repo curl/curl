@@ -4,7 +4,7 @@ curl and libcurl 8.18.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3559
+ Contributors:                 3562
 
 This release includes the following changes:
 
@@ -30,15 +30,18 @@ This release includes the following bugfixes:
  o autotools: drop autoconf <2.59 compatibility code (zz60-xc-ovr) [70]
  o autotools: fix LargeFile feature display on Windows (after prev patch) [276]
  o autotools: tidy-up `if` expressions [275]
+ o badwords: catch and fix threading-related words [320]
  o badwords: fix issues found in scripts and other files [142]
  o badwords: fix issues found in tests [156]
  o build: add build-level `CURL_DISABLE_TYPECHECK` options [163]
  o build: exclude clang prereleases from compiler warning options [154]
+ o build: replace `-pedantic` with `-Wpedantic` when supported [306]
  o build: set `-Wno-format-signedness` [288]
  o build: tidy-up MSVC CRT warning suppression macros [140]
  o ccsidcurl: make curl_mime_data_ccsid() use the converted size [74]
  o cf-https-connect: allocate ctx at first in cf_hc_create() [79]
  o cf-socket: drop feature check for `IPV6_V6ONLY` on Windows [210]
+ o cf-socket: enable Win10 `TCP_KEEP*` options with old SDKs [323]
  o cf-socket: limit use of `TCP_KEEP*` to Windows 10.0.16299+ at runtime [157]
  o cf-socket: trace ignored errors [97]
  o cfilters: make conn_forget_socket a private libssh function [109]
@@ -48,9 +51,12 @@ This release includes the following bugfixes:
  o cmake: disable `CURL_CA_PATH` auto-detection if `USE_APPLE_SECTRUST=ON` [16]
  o cmake: fix `ws2_32` reference in `curl-config.cmake` [201]
  o cmake: honor `CURL_DISABLE_INSTALL` and `CURL_ENABLE_EXPORT_TARGET` [106]
+ o cmake: replace deprecated `OPENSSL_FOUND` with `OpenSSL_FOUND` [310]
+ o cmake: replace deprecated `PERL_FOUND` with `Perl_FOUND` [312]
  o cmake: save and restore `CMAKE_MODULE_PATH` in `curl-config.cmake` [222]
  o code: minor indent fixes before closing braces [107]
  o CODE_STYLE.md: sync banned function list with checksrc.pl [243]
+ o compressed.md: might generate a huge amount of bytes [227]
  o config-win32.h: delete obsolete, non-Windows comments [295]
  o config-win32.h: drop unused/obsolete `CURL_HAS_OPENLDAP_LDAPSDK` [278]
  o config2setopts: bail out if curl_url_get() returns OOM [102]
@@ -60,6 +66,7 @@ This release includes the following bugfixes:
  o conncontrol: reuse handling [170]
  o connect: reshuffle Curl_timeleft_ms to avoid 'redundant condition' [100]
  o connection: attached transfer count [228]
+ o cookie. return proper error on OOM [330]
  o cookie: allocate the main struct once cookie is fine [259]
  o cookie: only keep and use the canonical cleaned up path [256]
  o cookie: propagate errors better, cleanup the internal API [118]
@@ -74,10 +81,12 @@ This release includes the following bugfixes:
  o curl_setup.h: document more funcs flagged by `_CRT_SECURE_NO_WARNINGS` [124]
  o curl_setup.h: drop stray `#undef stat` (Windows) [103]
  o curl_setup.h: drop superfluous parenthesis from `Curl_safefree` macro [242]
+ o curl_trc: delete unused DoH remains [272]
  o CURLINFO: remove 'get' and 'get the' from each short desc [50]
  o CURLINFO_SCHEME/PROTOCOL: they return the "scheme" for a "transfer" [48]
  o CURLINFO_TLS_SSL_PTR.md: remove CURLINFO_TLS_SESSION text [49]
  o CURLMOPT_SOCKETFUNCTION.md: fix the callback argument use [206]
+ o CURLOPT_ACCEPT_ENCODING.md: warn about the expansion [224]
  o CURLOPT_FOLLOWLOCATION.md: s/Authentication:/Authorization:/ [283]
  o CURLOPT_READFUNCTION.md: clarify the size of the buffer [47]
  o CURLOPT_SSH_KEYFUNCTION.md: fix minor indent mistake in example
@@ -99,14 +108,18 @@ This release includes the following bugfixes:
  o docs/libcurl: fix C formatting nits [207]
  o docs: clarify how to do unix domain sockets with SOCKS proxy [240]
  o docs: fix checksrc `EQUALSPACE` warnings [21]
+ o docs: fix time_posttransfer output unit as seconds [335]
  o docs: mention umask need when curl creates files [56]
  o docs: remove dead URLs
+ o docs: rename CURLcode variables to 'result'
  o docs: spell it Rustls with a capital R [181]
  o docs: switch more URLs to https:// [229]
  o docs: use .example URLs for proxies
+ o docs: use mresult as variable name for CURLMcode
  o example: fix formatting nits [232]
  o examples/crawler: fix variable [92]
  o examples/multi-uv: fix invalid req->data access [177]
+ o examples/threaded-ssl: delete in favor of `examples/threaded` [318]
  o examples/threaded: fix race condition [101]
  o examples: fix minor typo [203]
  o examples: make functions/data static where missing [139]
@@ -119,6 +132,7 @@ This release includes the following bugfixes:
  o ftp: make EPRT connections non-blocking [268]
  o ftp: refactor a piece of code by merging the repeated part [40]
  o ftp: remove #ifdef for define that is always defined [76]
+ o getenv: drop internal 1-to-1 wrapper [334]
  o getinfo: improve perf in debug mode [99]
  o gnutls: add PROFILE_MEDIUM as default [233]
  o gnutls: report accurate error when TLS-SRP is not built-in [18]
@@ -143,6 +157,7 @@ This release includes the following bugfixes:
  o http: the :authority header should never contain user+password [147]
  o http: unfold response headers earlier [277]
  o idn: avoid allocations and wcslen on Windows [247]
+ o idn: clarify null-termination on Windows [324]
  o idn: fix memory leak in `win32_ascii_to_idn()` [173]
  o idn: use curlx allocators on Windows [165]
  o imap: check buffer length before accessing it [308]
@@ -156,12 +171,14 @@ This release includes the following bugfixes:
  o ldap: provide version for "legacy" ldap as well [254]
  o lib/sendf.h: forward declare two structs [221]
  o lib: cleanup for some typos about spaces and code style [3]
+ o lib: create unitprotos.h in the builddir, not srcdir [322]
  o lib: eliminate size_t casts [112]
  o lib: error for OOM when extracting URL query [127]
  o lib: fix formatting nits (part 2) [253]
  o lib: fix formatting nits (part 3) [248]
  o lib: fix formatting nits [215]
  o lib: fix gssapi.h include on IBMi [55]
+ o lib: name the main CURLMcode variable 'mresult' [316]
  o lib: refactor the type of funcs which have useless return and checks [1]
  o lib: replace `_tcsncpy`/`wcsncpy`/`wcscpy` with `_s` counterparts (Windows) [164]
  o lib: timer stats improvements [190]
@@ -173,6 +190,7 @@ This release includes the following bugfixes:
  o libssh: properly free sftp_attributes [153]
  o libtests: replace `atoi()` with `curlx_str_number()` [120]
  o limit-rate: add example using --limit-rate and --max-time together [89]
+ o localtime: detect thread-safe alternatives and use them [325]
  o m4/sectrust: fix test(1) operator [4]
  o manage: expand the 'libcurl support required' message [208]
  o mbedtls: fix potential use of uninitialized `nread` [8]
@@ -202,6 +220,7 @@ This release includes the following bugfixes:
  o openssl: release ssl_session if sess_reuse_cb fails [43]
  o openssl: remove code handling default version [28]
  o openssl: simplify `HAVE_KEYLOG_CALLBACK` guard [212]
+ o openssl: toggling CURLSSLOPT_NO_PARTIALCHAIN makes a different CA cache [313]
  o OS400/ccsidcurl: fix curl_easy_setopt_ccsid for non-converted blobs [94]
  o OS400/makefile.sh: fix shellcheck warning SC2038 [86]
  o osslq: code readability [5]
@@ -210,6 +229,7 @@ This release includes the following bugfixes:
  o pytest fixes and improvements [159]
  o pytest: add tests using sshd [303]
  o pytest: disable two H3 earlydata tests for all platforms (was: macOS) [116]
+ o pytest: do not ignore server issues [329]
  o pytest: fix and improve reliability [251]
  o pytest: improve stragglers [252]
  o pytest: quiche flakiness [280]
@@ -233,6 +253,7 @@ This release includes the following bugfixes:
  o schannel: cap the maximum allowed size for loading cert [274]
  o schannel: fix memory leak of cert_store_path on four error paths [23]
  o schannel: replace atoi() with curlx_str_number() [119]
+ o schannel: use Win8 `CERT_NAME_SEARCH_ALL_NAMES_FLAG` with old SDKs [321]
  o schannel_verify: fix a memory leak of cert_context [152]
  o scripts: fix shellcheck SC2046 warnings [90]
  o scripts: use end-of-options marker in `find -exec` commands [87]
@@ -268,8 +289,10 @@ This release includes the following bugfixes:
  o tests/server: fix initialization on Windows Vista+ [216]
  o tests/server: replace `atoi()` and `atol()` with `curlx_str_number()` [110]
  o tests: add `%AMP` macro, use it in two tests [245]
+ o tests: add a standard log line for alloc failures [319]
  o tests: allow 2500-2503 to use ~2MB malloc [31]
  o tests: fix formatting nits [225]
+ o tests: rename CURLMcode variables to mresult
  o tftp: release filename if conn_get_remote_addr fails [42]
  o tftpd: fix/tidy up `open()` mode flags [57]
  o tidy-up: avoid `(())`, clang-format fixes and more [141]
@@ -305,6 +328,7 @@ This release includes the following bugfixes:
  o vquic-tls/gnutls: call Curl_gtls_verifyserver unconditionally [96]
  o vquic: do not pass invalid mode flags to `open()` (Windows) [58]
  o vquic: do_sendmsg full init [171]
+ o vquic: ignore 0-length UDP packets [336]
  o vtls: fix CURLOPT_CAPATH use [51]
  o vtls: handle possible malicious certs_num from peer [53]
  o vtls: pinned key check [98]
@@ -316,6 +340,7 @@ This release includes the following bugfixes:
  o wolfssl: fix a potential memory leak of session [6]
  o wolfssl: fix cipher list, skip 5.8.4 regression [117]
  o wolfssl: fix possible assert with `!HAVE_NO_EX` wolfSSL builds [261]
+ o wolfssl: proof use of wolfSSL_i2d_SSL_SESSION [314]
  o wolfssl: simplify wssl_send_earlydata [111]
 
 This release includes the following known bugs:
@@ -343,15 +368,16 @@ advice from friends like these:
   Christian Schmitz, Dan Fandrich, Daniel McCarney, Daniel Stenberg,
   Denis Goleshchikhin, Deniz Parlak, dependabot[bot], Fabian Keil,
   Fd929c2CE5fA on github, ffath-vo on github, Gabriel Marin,
-  Georg Schulz-Allgaier, Gisle Vanem, Greg Hudson, Harry Sintonen, Jiyong Yang,
-  Juliusz Sosinowicz, Kai Pastor, Leonardo Taccari, letshack9707 on hackerone,
-  Marc Aldorasi, Marcel Raad, Max Faxälv, nait-furry, ncaklovic on github,
-  Nick Korepanov, Omdahake on github, Patrick Monnerat, pelioro on hackerone,
-  Ray Satiro, renovate[bot], Robert W. Van Kirk, Samuel Henrique,
+  Georg Schulz-Allgaier, Gisle Vanem, Greg Hudson, Harry Sintonen, Jeff King,
+  Jiyong Yang, John Haugabook, Juliusz Sosinowicz, Kai Pastor,
+  Leonardo Taccari, letshack9707 on hackerone, Marc Aldorasi, Marcel Raad,
+  Max Faxälv, nait-furry, ncaklovic on github, Nick Korepanov,
+  Omdahake on github, Patrick Monnerat, pelioro on hackerone, Ray Satiro,
+  renovate[bot], Robert W. Van Kirk, Samuel Henrique, Sergey Katsubo,
   st751228051 on github, Stanislav Fort, Stefan Eissing, Sunny, Theo Buehler,
   Thomas Klausner, Viktor Szakats, Wesley Moore, Xiaoke Wang, Yedaya Katsman,
   Yuhao Jiang, yushicheng7788 on github
-  (53 contributors)
+  (56 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -577,8 +603,10 @@ References to bug reports and discussions on issues:
  [221] = https://curl.se/bug/?i=19761
  [222] = https://curl.se/bug/?i=16973
  [223] = https://curl.se/bug/?i=16973
+ [224] = https://curl.se/bug/?i=20031
  [225] = https://curl.se/bug/?i=19754
  [226] = https://curl.se/bug/?i=19751
+ [227] = https://curl.se/bug/?i=20028
  [228] = https://curl.se/bug/?i=19836
  [229] = https://curl.se/bug/?i=19872
  [230] = https://curl.se/bug/?i=19745
@@ -621,6 +649,7 @@ References to bug reports and discussions on issues:
  [267] = https://curl.se/bug/?i=19858
  [268] = https://curl.se/bug/?i=19753
  [269] = https://curl.se/bug/?i=19965
+ [272] = https://curl.se/bug/?i=20026
  [274] = https://curl.se/bug/?i=19964
  [275] = https://curl.se/bug/?i=18189
  [276] = https://curl.se/bug/?i=19922
@@ -645,7 +674,26 @@ References to bug reports and discussions on issues:
  [303] = https://curl.se/bug/?i=19934
  [304] = https://curl.se/bug/?i=19944
  [305] = https://curl.se/bug/?i=19891
+ [306] = https://curl.se/bug/?i=20010
  [307] = https://curl.se/bug/?i=19875
  [308] = https://curl.se/bug/?i=19887
  [309] = https://curl.se/bug/?i=19886
+ [310] = https://curl.se/bug/?i=20012
  [311] = https://curl.se/bug/?i=19938
+ [312] = https://curl.se/bug/?i=20011
+ [313] = https://curl.se/bug/?i=20009
+ [314] = https://curl.se/bug/?i=20008
+ [316] = https://curl.se/bug/?i=19997
+ [318] = https://curl.se/bug/?i=20002
+ [319] = https://curl.se/bug/?i=19995
+ [320] = https://curl.se/bug/?i=20001
+ [321] = https://curl.se/bug/?i=20000
+ [322] = https://curl.se/bug/?i=19966
+ [323] = https://curl.se/bug/?i=19999
+ [324] = https://curl.se/bug/?i=19980
+ [325] = https://curl.se/bug/?i=19957
+ [329] = https://curl.se/bug/?i=19996
+ [330] = https://curl.se/bug/?i=19992
+ [334] = https://curl.se/bug/?i=19984
+ [335] = https://curl.se/bug/?i=19986
+ [336] = https://curl.se/bug/?i=19978
