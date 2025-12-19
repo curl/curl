@@ -32,7 +32,6 @@
  * as defined in asyn.h, nothing else belongs in this file!
  **********************************************************************/
 
-#include <limits.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

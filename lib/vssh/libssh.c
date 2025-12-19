@@ -29,8 +29,6 @@
 
 #ifdef USE_LIBSSH
 
-#include <limits.h>
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

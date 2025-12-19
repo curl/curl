@@ -77,8 +77,6 @@
 
 #include "curl_setup.h"
 
-#include <limits.h>
-
 #include "curlx/warnless.h"
 #include "parsedate.h"
 #include "curlx/strparse.h"

@@ -28,8 +28,6 @@
 #error "We cannot compile without select() support."
 #endif
 
-#include <limits.h>
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)

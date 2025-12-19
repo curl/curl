@@ -53,8 +53,6 @@
 #endif
 #endif
 
-#include <limits.h>
-
 #include "../urldata.h"
 #include "../sendf.h"
 #include "vtls.h"

@@ -31,8 +31,6 @@
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 
-#include <limits.h>
-
 /* Wincrypt must be included before anything that could include OpenSSL. */
 #ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
