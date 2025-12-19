@@ -254,7 +254,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
                                         struct Curl_easy *data)
 {
   CURLcode result;
-  HANDLE ca_file_handle = INVALID_HANDLE_VALUE;
+  HANDLE ca_file_handle;
   LARGE_INTEGER file_size;
   char *ca_file_buffer = NULL;
   size_t ca_file_bufsize = 0;
