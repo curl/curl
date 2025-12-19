@@ -43,6 +43,8 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #include <share.h>  /* for _SH_DENYNO */
 
+#include "multibyte.h"
+
 #ifdef CURLDEBUG
 /*
  * Use system allocators to avoid infinite recursion when called by curl's
@@ -261,7 +263,7 @@ HANDLE curlx_CreateFile(const char *filename,
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *filename_w = fn_convert_UTF8_to_wchar(filename);
+  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
   if(filename_w) {
     if(fix_excessive_path(filename_w, &fixed))
       target = fixed;
@@ -275,7 +277,7 @@ HANDLE curlx_CreateFile(const char *filename,
                         dwCreationDisposition,
                         dwFlagsAndAttributes,
                         hTemplateFile);
-    CURLX_FREE(filename_w);
+    curlx_free(filename_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
