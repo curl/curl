@@ -44,6 +44,7 @@ static void t1940_showem(CURL *curl, int header_request, unsigned int type)
     "fold",
     "blank",
     "Blank2",
+    "Test",
     NULL
   };
 
