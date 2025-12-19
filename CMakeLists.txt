@@ -1786,6 +1786,17 @@ if(WIN32)
   if(USE_WINDOWS_SSPI)
     list(APPEND CURL_LIBS "secur32")
   endif()
+  if(USE_SCHANNEL)
+    set(HAVE_NCRYPT ON)
+    if((HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0600) OR WINCE)
+      # ncrypt.dll (CNG APIs) require Windows Vista / Server 2008 +
+      set(HAVE_NCRYPT OFF)
+    endif()
+
+    if(HAVE_NCRYPT)
+      list(APPEND CURL_LIBS "ncrypt")
+    endif()
+  endif()
 endif()
 
 list(APPEND CURL_LIBS ${CURL_NETWORK_AND_TIME_LIBS})

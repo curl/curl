@@ -770,6 +770,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
 
+/* to enable Windows CNG APIs available in Vista and above */
+#cmakedefine HAVE_NCRYPT 1
+
 /* if Watt-32 is in use */
 #cmakedefine USE_WATT32 1
 
