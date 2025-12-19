@@ -24,6 +24,7 @@
 
 #include "curl_setup.h"
 #include "curl_range.h"
+#include "curl_trc.h"
 #include "curlx/strparse.h"
 
 /* Only include this function if one or more of FTP, FILE are enabled. */
