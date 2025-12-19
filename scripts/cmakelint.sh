@@ -45,7 +45,7 @@ cd "$(dirname "$0")"/..
 
 {
   if [ -n "${1:-}" ]; then
-    for A in "$@"; do printf "%s\n" "$A"; done
+    for A in "$@"; do printf '%s\n' "$A"; done
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git ls-files '**CMakeLists.txt' '*.cmake'
   else
