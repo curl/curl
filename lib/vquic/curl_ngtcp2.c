@@ -78,8 +78,11 @@
 /* A stream window is the maximum amount we need to buffer for
  * each active transfer.
  * Chunk size is large enough to take a full DATA frame */
-#define H3_STREAM_WINDOW_SIZE (64 * 1024)
-#define H3_STREAM_CHUNK_SIZE  (16 * 1024)
+#define H3_STREAM_WINDOW_SIZE_INITIAL (32 * 1024)
+#define H3_STREAM_WINDOW_SIZE_MAX     (10 * 1024 * 1024)
+#define H3_CONN_WINDOW_SIZE_MAX     (100 * H3_STREAM_WINDOW_SIZE_MAX)
+
+#define H3_STREAM_CHUNK_SIZE  (64 * 1024)
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #endif
@@ -89,12 +92,11 @@
  * The benefit of the pool is that stream buffer to not keep
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
-#define H3_STREAM_POOL_SPARES \
-  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE) / 2
+#define H3_STREAM_POOL_SPARES      2
 /* Receive and Send max number of chunks just follows from the
  * chunk size and window size */
 #define H3_STREAM_SEND_CHUNKS \
-  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_WINDOW_SIZE_MAX / H3_STREAM_CHUNK_SIZE)
 
 /*
  * Store ngtcp2 version info in this buffer.
@@ -131,7 +133,6 @@ struct cf_ngtcp2_ctx {
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct dynbuf scratch;             /* temp buffer for header construction */
   struct uint_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
-  size_t max_stream_window;          /* max flow window for one stream */
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   size_t earlydata_max;              /* max amount of early data supported by
@@ -158,7 +159,6 @@ static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
   DEBUGASSERT(!ctx->initialized);
   ctx->qlogfd = -1;
   ctx->version = NGTCP2_PROTO_VER_MAX;
-  ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
@@ -235,6 +235,7 @@ struct h3_stream_ctx {
   uint64_t error3;              /* HTTP/3 stream error code */
   curl_off_t upload_left;       /* number of request bytes left to upload */
   uint64_t download_unacked;    /* bytes not acknowledged yet */
+  uint64_t window_size_max;     /* max flow control window set for stream */
   int status_code;              /* HTTP status code */
   CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
   BIT(resp_hds_complete);       /* we have a complete, final response */
@@ -279,6 +280,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   Curl_bufq_initp(&stream->sendbuf, &ctx->stream_bufcp,
                   H3_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);
   stream->sendbuf_len_in_flight = 0;
+  stream->window_size_max = H3_STREAM_WINDOW_SIZE_INITIAL;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
   if(!Curl_uint32_hash_set(&ctx->streams, data->mid, stream)) {
@@ -470,18 +472,18 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->initial_ts = pktx->ts;
   s->handshake_timeout = (data->set.connecttimeout > 0) ?
     data->set.connecttimeout * NGTCP2_MILLISECONDS : QUIC_HANDSHAKE_TIMEOUT;
-  s->max_window = 100 * ctx->max_stream_window;
-  s->max_stream_window = ctx->max_stream_window;
+  s->max_window = H3_CONN_WINDOW_SIZE_MAX;
+  s->max_stream_window = 0; /* H3_STREAM_WINDOW_SIZE_MAX; */
   s->no_pmtud = FALSE;
 #ifdef NGTCP2_SETTINGS_V3
   /* try ten times the ngtcp2 defaults here for problems with Caddy */
   s->glitch_ratelim_burst = 1000 * 10;
   s->glitch_ratelim_rate = 33 * 10;
 #endif
-  t->initial_max_data = 10 * ctx->max_stream_window;
-  t->initial_max_stream_data_bidi_local = ctx->max_stream_window;
-  t->initial_max_stream_data_bidi_remote = ctx->max_stream_window;
-  t->initial_max_stream_data_uni = ctx->max_stream_window;
+  t->initial_max_data = s->max_window;
+  t->initial_max_stream_data_bidi_local = H3_STREAM_WINDOW_SIZE_INITIAL;
+  t->initial_max_stream_data_bidi_remote = H3_STREAM_WINDOW_SIZE_INITIAL;
+  t->initial_max_stream_data_uni = t->initial_max_data;
   t->initial_max_streams_bidi = QUIC_MAX_STREAMS;
   t->initial_max_streams_uni = QUIC_MAX_STREAMS;
   t->max_idle_timeout = 0; /* no idle timeout from our side */
@@ -1047,6 +1049,28 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
   }
 }
 
+static void cf_ngtcp2_stream_update_window(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct h3_stream_ctx *stream)
+{
+  /* stream receive max window size for flow control. We can only
+   * grow it from the initial window size */
+  uint64_t swin_max = data->progress.dl.rlimit.rate_per_step ?
+    data->progress.dl.rlimit.rate_per_step : H3_STREAM_WINDOW_SIZE_MAX;
+  if(swin_max > stream->window_size_max) {
+    struct cf_ngtcp2_ctx *ctx = cf->ctx;
+    int rc = ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id,
+      swin_max - stream->window_size_max);
+    if(rc) {
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] extend_max_stream_offset to %"
+                  PRIu64 " -> %s (%d)",
+                  stream->id, swin_max, ngtcp2_strerror(rc), rc);
+      DEBUGASSERT(0);
+    }
+    stream->window_size_max = swin_max;
+  }
+}
+
 static void cf_ngtcp2_ack_stream(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct h3_stream_ctx *stream)
@@ -1074,6 +1098,8 @@ static void cf_ngtcp2_ack_stream(struct Curl_cfilter *cf,
     ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, ack_len);
     stream->download_unacked -= ack_len;
   }
+
+  cf_ngtcp2_stream_update_window(cf, data, stream);
 }
 
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
@@ -1634,6 +1660,8 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     result = CURLE_SEND_ERROR;
     goto out;
   }
+
+  cf_ngtcp2_stream_update_window(cf, data, stream);
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRId64 "] OPENED stream for %s",
