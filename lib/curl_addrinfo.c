@@ -45,7 +45,7 @@
 #  include <inet.h>
 #endif
 
-#include <stddef.h>
+#include <stddef.h>  /* for offsetof() */
 
 #include "curl_addrinfo.h"
 #include "fake_addrinfo.h"

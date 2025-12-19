@@ -26,6 +26,8 @@
 
 #ifdef CURLDEBUG
 
+#include <stddef.h>  /* for offsetof() */
+
 #include "urldata.h"
 #include "curl_threads.h"
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
