@@ -112,7 +112,7 @@ int Curl_socketpair(int domain, int type, int protocol,
 #include <netdb.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h> /* IPPROTO_TCP */
+#include <netinet/in.h> /* for IPPROTO_TCP */
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -120,7 +120,7 @@ int Curl_socketpair(int domain, int type, int protocol,
 
 #ifndef INADDR_LOOPBACK
 #define INADDR_LOOPBACK 0x7f000001
-#endif /* !INADDR_LOOPBACK */
+#endif
 
 #include "curlx/nonblock.h" /* for curlx_nonblock */
 #include "curlx/timeval.h"  /* needed before select.h */
