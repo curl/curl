@@ -36,7 +36,6 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#include "curlx/dynbuf.h"
 
 #ifndef CURL_DISABLE_IMAP
 
@@ -54,7 +53,7 @@
 #include <inet.h>
 #endif
 
-#include <curl/curl.h>
+#include "curlx/dynbuf.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"

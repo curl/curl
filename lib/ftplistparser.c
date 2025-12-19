@@ -41,8 +41,6 @@
 
 #ifndef CURL_DISABLE_FTP
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "fileinfo.h"
 #include "llist.h"

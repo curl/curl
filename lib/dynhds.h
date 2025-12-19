@@ -25,7 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
 #include "curlx/dynbuf.h"
 
 struct dynbuf;

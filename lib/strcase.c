@@ -24,8 +24,6 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "strcase.h"
 
 /* Mapping table to go from lowercase to uppercase for plain ASCII.*/

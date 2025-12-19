@@ -26,7 +26,6 @@
 
 #ifdef _WIN32
 
-#include <curl/curl.h>
 #include "system_win32.h"
 #include "curlx/version_win32.h"
 #include "curl_sspi.h"

@@ -25,7 +25,7 @@
  ***************************************************************************/
 
 #include "../curl_setup.h"
-#include <curl/curl.h>
+
 #include "../urldata.h"
 
 CURLcode Curl_getworkingpath(struct Curl_easy *data,

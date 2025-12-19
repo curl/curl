@@ -27,8 +27,6 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 struct Curl_easy;
 
 #include "urldata.h"

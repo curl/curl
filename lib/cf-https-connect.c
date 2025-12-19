@@ -27,7 +27,6 @@
 #ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "curl_trc.h"
 #include "cfilters.h"
 #include "connect.h"

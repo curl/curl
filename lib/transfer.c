@@ -56,9 +56,8 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
-#include "netrc.h"
 
+#include "netrc.h"
 #include "content_encoding.h"
 #include "hostip.h"
 #include "cfilters.h"

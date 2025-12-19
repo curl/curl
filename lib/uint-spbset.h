@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 /* A "sparse" bitset for uint32_t values.
  * It can hold any uint32_t value.
  *

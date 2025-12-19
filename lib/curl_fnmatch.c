@@ -24,7 +24,6 @@
 
 #include "curl_setup.h"
 #ifndef CURL_DISABLE_FTP
-#include <curl/curl.h>
 
 #include "curl_fnmatch.h"
 

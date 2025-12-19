@@ -39,9 +39,7 @@
   !defined(CURL_DISABLE_POP3) || \
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include <curl/curl.h>
 #include "urldata.h"
-
 #include "curlx/base64.h"
 #include "vauth/vauth.h"
 #include "cfilters.h"

@@ -34,8 +34,6 @@
 #include <netinet/tcp.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "sendf.h"
 #include "transfer.h"

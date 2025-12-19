@@ -26,7 +26,7 @@
 
 #ifdef CURLDEBUG
 
-#include <curl/curl.h>
+#include <stddef.h>  /* for offsetof() */
 
 #include "urldata.h"
 #include "curl_threads.h"

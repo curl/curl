@@ -32,8 +32,6 @@
 #  endif
 #endif
 
-#include <curl/curl.h>
-
 #include "winapi.h"
 #include "snprintf.h"
 #include "strerr.h"

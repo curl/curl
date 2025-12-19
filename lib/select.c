@@ -28,15 +28,11 @@
 #error "We cannot compile without select() or poll() support."
 #endif
 
-#include <limits.h>
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
-
-#include <curl/curl.h>
 
 #include "urldata.h"
 #include "connect.h"

@@ -26,7 +26,6 @@
 
 #ifndef CURL_DISABLE_PROXY
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-haproxy.h"

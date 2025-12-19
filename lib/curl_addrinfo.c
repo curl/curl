@@ -24,8 +24,6 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
 #endif
@@ -47,7 +45,7 @@
 #  include <inet.h>
 #endif
 
-#include <stddef.h>
+#include <stddef.h>  /* for offsetof() */
 
 #include "curl_addrinfo.h"
 #include "fake_addrinfo.h"

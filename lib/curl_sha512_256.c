@@ -65,7 +65,6 @@
             (__NetBSD_Version__ >= 1099000000 &&  \
              __NetBSD_Version__ <  1099001100)
 #          define NEED_NETBSD_SHA512_256_WORKAROUND 1
-#          include <string.h>
 #        endif
 #      endif
 #    endif

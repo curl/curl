@@ -32,8 +32,6 @@
    knowledge about the system we are building this on */
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 typedef CURLcode (*entry_func_t)(const char *);
 
 struct entry_s {

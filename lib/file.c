@@ -55,7 +55,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "progress.h"
 #include "sendf.h"
 #include "escape.h"

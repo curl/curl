@@ -66,8 +66,6 @@
 #include <iphlpapi.h>
 #endif
 
-#include <limits.h>
-
 #include "doh.h"
 #include "urldata.h"
 #include "netrc.h"

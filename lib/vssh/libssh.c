@@ -29,8 +29,6 @@
 
 #ifdef USE_LIBSSH
 
-#include <limits.h>
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -45,7 +43,6 @@
 #include <inet.h>
 #endif
 
-#include <curl/curl.h>
 #include "../urldata.h"
 #include "../sendf.h"
 #include "../hostip.h"

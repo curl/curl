@@ -37,7 +37,6 @@
 #define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
 #endif
 
-#include <curl/curl.h>
 #include "../urldata.h"
 #include "../curl_ctype.h"
 #include "hostcheck.h"

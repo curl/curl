@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-#include <curl/curl.h>
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 

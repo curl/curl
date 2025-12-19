@@ -924,7 +924,7 @@ extern curl_calloc_callback Curl_ccalloc;
     (ptr) = NULL;          \
   } while(0)
 
-#include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
+#include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
 #ifdef CURLDEBUG
 #ifdef __clang__
