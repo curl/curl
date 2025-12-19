@@ -119,7 +119,6 @@
 #include "curl_md5.h"
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
-#include "curl_endian.h"
 #include "curl_md4.h"
 
 #ifdef USE_CURL_DES_SET_ODD_PARITY
