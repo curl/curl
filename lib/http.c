@@ -4391,19 +4391,16 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
 
       if(data->state.leading_unfold) {
         /* immediately after an unfold, keep only a single whitespace */
-        const size_t iblen = blen;
         while(consumed && ISBLANK(buf[0])) {
           consumed--;
           buf++;
           blen--;
         }
         if(consumed) {
-          if(iblen > blen) {
-            /* take one step back */
-            consumed++;
-            buf--;
-            blen++;
-          }
+          /* insert a single space */
+          result = curlx_dyn_addn(&data->state.headerb, " ", 1);
+          if(result)
+            return result;
           data->state.leading_unfold = FALSE; /* done now */
         }
       }
