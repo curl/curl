@@ -270,7 +270,7 @@ HANDLE curlx_CreateFile(const char *filename,
       target = fixed;
     else
       target = filename_w;
-    /* !checksrc! disable ERRNOVAR 1 */
+    /* !checksrc! disable BANNEDFUNC 1 */
     handle = CreateFile(target,
                         dwDesiredAccess,
                         dwShareMode,
@@ -285,7 +285,7 @@ HANDLE curlx_CreateFile(const char *filename,
     target = fixed;
   else
     target = filename;
-  /* !checksrc! disable ERRNOVAR 1 */
+  /* !checksrc! disable BANNEDFUNC 1 */
   handle = CreateFile(target,
                       dwDesiredAccess,
                       dwShareMode,
