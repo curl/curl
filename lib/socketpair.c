@@ -111,7 +111,6 @@ int Curl_socketpair(int domain, int type, int protocol,
 /*
  * This is a socketpair() implementation for Windows.
  */
-#include <string.h>
 #ifdef HAVE_IO_H
 #include <io.h>
 #endif

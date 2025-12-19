@@ -25,7 +25,6 @@
 
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 #include "cipher_suite.h"
-#include <string.h>
 
 /*
  * To support the CURLOPT_SSL_CIPHER_LIST option on SSL backends

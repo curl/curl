@@ -27,7 +27,6 @@
 
 #ifdef USE_FAKE_GETADDRINFO
 
-#include <string.h>
 #include <stdlib.h>
 #include <ares.h>
 
