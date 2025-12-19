@@ -49,7 +49,7 @@ cd "$(dirname "$0")"/..
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git ls-files '**CMakeLists.txt' '*.cmake'
   else
-    find . -type f \( -name CMakeLists.txt -o -name '*.cmake' \)
+    find . -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \)
   fi
 } | sort | xargs \
   cmake-lint \
