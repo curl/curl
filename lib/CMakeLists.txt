@@ -26,7 +26,7 @@ set(LIBCURL_OUTPUT_NAME "${LIB_NAME}" CACHE STRING "Basename of the curl library
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${CURL_DEBUG_MACROS} "BUILDING_LIBCURL")
 
-configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
+configure_file("curl_config-cmake.h.in" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # Get CSOURCES, HHEADERS, LIB_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")

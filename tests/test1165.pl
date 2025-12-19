@@ -30,7 +30,7 @@ use warnings;
 my %disable;
 # the DISABLE options that can be set by CMakeLists.txt
 my %disable_cmake;
-# the DISABLE options propagated via curl_config.h.cmake
+# the DISABLE options propagated via curl_config-cmake.h.in
 my %disable_cmake_config_h;
 # the DISABLE options that are used in C files
 my %file;
@@ -83,7 +83,7 @@ sub scan_cmake {
 }
 
 sub scan_cmake_config_h {
-    scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config.h.cmake");
+    scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config-cmake.h.in");
 }
 
 my %whitelisted = ('CURL_DISABLE_DEPRECATION' => 1);
@@ -165,10 +165,10 @@ for my $s (sort keys %disable_cmake) {
     }
 }
 
-# Check the CMakeLists.txt symbols for use in curl_config.h.cmake
+# Check the CMakeLists.txt symbols for use in curl_config-cmake.h.in
 for my $s (sort keys %disable_cmake) {
     if(!$disable_cmake_config_h{$s}) {
-        printf "Present in CMakeLists.txt, not propagated via curl_config.h.cmake: %s\n", $s;
+        printf "Present in CMakeLists.txt, not propagated via curl_config-cmake.h.in: %s\n", $s;
         $error++;
     }
 }

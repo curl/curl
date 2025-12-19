@@ -26,7 +26,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # Get CSOURCES, HHEADERS, LIB_RCFILES variables
 include Makefile.inc
 
-CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
+CMAKE_DIST = CMakeLists.txt curl_config-cmake.h.in
 
 EXTRA_DIST = config-mac.h config-os400.h config-plan9.h config-riscos.h \
   config-win32.h curl_config.h.in $(LIB_RCFILES) libcurl.def            \
