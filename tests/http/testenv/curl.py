@@ -784,6 +784,7 @@ class CurlClient:
                  with_stats: bool = True,
                  with_headers: bool = False,
                  with_profile: bool = False,
+                 suppress_cl: bool = False,
                  extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
@@ -797,6 +798,11 @@ class CurlClient:
         if with_stats:
             extra_args.extend([
                 '-w', '%{json}\\n'
+            ])
+        if suppress_cl:
+            extra_args.extend([
+                '-H', 'Content-Length:',
+                '-H', 'Transfer-Encoding: chunked',
             ])
         return self._raw(urls, intext=data,
                          alpn_proto=alpn_proto, options=extra_args,
