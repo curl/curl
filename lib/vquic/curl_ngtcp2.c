@@ -80,7 +80,7 @@
  * Chunk size is large enough to take a full DATA frame */
 #define H3_STREAM_WINDOW_SIZE_INITIAL (32 * 1024)
 #define H3_STREAM_WINDOW_SIZE_MAX     (10 * 1024 * 1024)
-#define H3_CONN_WINDOW_SIZE_MAX     (100 * H3_STREAM_WINDOW_SIZE_MAX)
+#define H3_CONN_WINDOW_SIZE_MAX       (100 * H3_STREAM_WINDOW_SIZE_MAX)
 
 #define H3_STREAM_CHUNK_SIZE  (64 * 1024)
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
@@ -473,7 +473,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->handshake_timeout = (data->set.connecttimeout > 0) ?
     data->set.connecttimeout * NGTCP2_MILLISECONDS : QUIC_HANDSHAKE_TIMEOUT;
   s->max_window = H3_CONN_WINDOW_SIZE_MAX;
-  s->max_stream_window = 0; /* H3_STREAM_WINDOW_SIZE_MAX; */
+  s->max_stream_window = 0; /* disable ngtcp2 auto-tuning of window */
   s->no_pmtud = FALSE;
 #ifdef NGTCP2_SETTINGS_V3
   /* try ten times the ngtcp2 defaults here for problems with Caddy */
