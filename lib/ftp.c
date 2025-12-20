@@ -445,8 +445,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
     /* there is pending control data still in the buffer to read */
     response = TRUE;
   else {
-    int socketstate = Curl_socket_check(ctrl_sock, CURL_SOCKET_BAD,
-                                        CURL_SOCKET_BAD, 0);
+    int socketstate = SOCKET_READABLE(ctrl_sock, 0);
     /* see if the connection request is already here */
     switch(socketstate) {
     case -1: /* error */
