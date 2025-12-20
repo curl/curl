@@ -33,7 +33,6 @@
 #include <nghttp3/nghttp3.h>
 
 #include "../urldata.h"
-#include "../hash.h"
 #include "../sendf.h"
 #include "../multiif.h"
 #include "../cfilters.h"
