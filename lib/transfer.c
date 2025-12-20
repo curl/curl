@@ -57,7 +57,6 @@
 
 #include "urldata.h"
 
-#include "netrc.h"
 #include "hostip.h"
 #include "cfilters.h"
 #include "cw-out.h"
