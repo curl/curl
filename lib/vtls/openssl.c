@@ -66,7 +66,6 @@
 #include "../strdup.h"
 #include "apple.h"
 
-#include <openssl/ssl.h>
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
 #ifndef OPENSSL_NO_DSA
