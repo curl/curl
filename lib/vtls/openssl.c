@@ -52,7 +52,6 @@
 #include "../connect.h"
 #include "../progress.h"
 #include "../select.h"
-#include "../curlx/wait.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
@@ -66,7 +65,6 @@
 #include "../strdup.h"
 #include "apple.h"
 
-#include <openssl/ssl.h>
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
 #ifndef OPENSSL_NO_DSA
@@ -74,12 +72,10 @@
 #endif
 #include <openssl/dh.h>
 #include <openssl/err.h>
-#include <openssl/md5.h>
 #include <openssl/conf.h>
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
 #include <openssl/bio.h>
-#include <openssl/buffer.h>
 #include <openssl/pkcs12.h>
 #include <openssl/tls1.h>
 #include <openssl/evp.h>

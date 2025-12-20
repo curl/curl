@@ -52,8 +52,7 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
       CURL_NETWORK_AND_TIME_LIBS="-lamisslstubs -lamisslauto $CURL_NETWORK_AND_TIME_LIBS"
       AC_DEFINE(USE_AMISSL, 1, [if AmiSSL is in use])
       AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use])
-      AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
-                       openssl/pem.h openssl/ssl.h openssl/err.h)
+      AC_CHECK_HEADERS(openssl/rsa.h openssl/crypto.h openssl/pem.h openssl/ssl.h openssl/err.h)
     ],[
       AC_MSG_RESULT([no])
     ])
