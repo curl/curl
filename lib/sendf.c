@@ -48,7 +48,6 @@
 #include "http2.h"
 #include "progress.h"
 #include "curlx/warnless.h"
-#include "ws.h"
 
 
 static CURLcode do_init_writer_stack(struct Curl_easy *data);
