@@ -450,6 +450,7 @@ int curlx_win32_rename(const char *oldpath, const char *newpath)
   TCHAR *tchar_newpath = curlx_convert_UTF8_to_tchar(newpath);
   for(;;) {
     timediff_t diff;
+    /* !checksrc! disable BANNEDFUNC 1 */
     if(MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING)) {
       curlx_free(tchar_oldpath);
       curlx_free(tchar_newpath);

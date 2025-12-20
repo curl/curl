@@ -375,12 +375,16 @@ This is the full list of functions generally banned.
     localtime
     malloc
     mbstowcs
+    MoveFileEx
+    MoveFileExA
+    MoveFileExW
     msnprintf
     mvsnprintf
     open
     printf
     realloc
     recv
+    rename
     send
     snprintf
     socket
