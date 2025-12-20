@@ -23,9 +23,11 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "socketpair.h"
 #include "urldata.h"
 #include "rand.h"
+#include "curlx/nonblock.h" /* for curlx_nonblock */
 
 #ifdef USE_EVENTFD
 
@@ -122,7 +124,6 @@ int Curl_socketpair(int domain, int type, int protocol,
 #define INADDR_LOOPBACK 0x7f000001
 #endif
 
-#include "curlx/nonblock.h" /* for curlx_nonblock */
 #include "curlx/timeval.h"  /* needed before select.h */
 #include "select.h"   /* for Curl_poll */
 

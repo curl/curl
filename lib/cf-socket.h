@@ -25,7 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/nonblock.h" /* for curlx_nonblock() */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 
 struct Curl_addrinfo;
