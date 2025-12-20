@@ -27,7 +27,6 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "headers.h"
-#include "curlx/strparse.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
