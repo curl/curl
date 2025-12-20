@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,11 +6,10 @@ HTTP
 HTTP GET
 </keywords>
 </info>
-#
 # This reproduces the #11101 issue, when the second response comes back
 # with the first header being "folded"
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -24,7 +24,7 @@ Funny-head: yesyes
 </data>
 <data2 nocheck="yes">
 HTTP/1.1 200 OK swsclose
-	Access-Control-Allow-Origin: *
+%TABAccess-Control-Allow-Origin: *
 Connection: Keep-Alive
 Content-Type: text/html; charset=utf-8
 Date: Wed, 10 May 2023 14:58:08 GMT
@@ -51,10 +51,9 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

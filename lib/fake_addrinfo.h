@@ -31,7 +31,7 @@
 #endif
 
 #if defined(CURLDEBUG) && defined(USE_ARES) && defined(HAVE_GETADDRINFO) && \
-  (ARES_VERSION >= 0x011a00) /* >= 1.26. 0 */
+  (ARES_VERSION >= 0x011a00) /* >= 1.26.0 */
 #define USE_FAKE_GETADDRINFO 1
 #endif
 

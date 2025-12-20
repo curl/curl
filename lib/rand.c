@@ -24,23 +24,16 @@
 
 #include "curl_setup.h"
 
-#include <limits.h>
-
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
 #include "curlx/timeval.h"
 #include "rand.h"
 #include "escape.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #ifdef _WIN32
 
@@ -50,10 +43,6 @@
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
 #    pragma comment(lib, "bcrypt.lib")
-#  endif
-   /* Offered by mingw-w64 v3+. MS SDK v7.0A+. */
-#  ifndef BCRYPT_USE_SYSTEM_PREFERRED_RNG
-#  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
 #  endif
 #  ifndef STATUS_SUCCESS
 #  define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
@@ -127,7 +116,8 @@ static CURLcode weak_random(struct Curl_easy *data,
     static bool seeded = FALSE;
     unsigned int rnd;
     if(!seeded) {
-      struct curltime now = curlx_now();
+      struct curltime now;
+      curlx_pnow(&now);
       randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
       randseed = randseed * 1103515245 + 12345;
       randseed = randseed * 1103515245 + 12345;
@@ -235,8 +225,7 @@ CURLcode Curl_rand_bytes(struct Curl_easy *data,
  * size.
  */
 
-CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
-                       size_t num)
+CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd, size_t num)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   unsigned char buffer[128];
@@ -248,7 +237,7 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   memset(buffer, 0, sizeof(buffer));
 #endif
 
-  if((num/2 >= sizeof(buffer)) || !(num&1)) {
+  if((num / 2 >= sizeof(buffer)) || !(num & 1)) {
     /* make sure it fits in the local buffer and that it is an odd number! */
     DEBUGF(infof(data, "invalid buffer size with Curl_rand_hex"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -256,11 +245,11 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
 
   num--; /* save one for null-termination */
 
-  result = Curl_rand(data, buffer, num/2);
+  result = Curl_rand(data, buffer, num / 2);
   if(result)
     return result;
 
-  Curl_hexencode(buffer, num/2, rnd, num + 1);
+  Curl_hexencode(buffer, num / 2, rnd, num + 1);
   return result;
 }
 

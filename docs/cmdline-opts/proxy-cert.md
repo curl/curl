@@ -12,7 +12,7 @@ See-also:
   - proxy-key
   - proxy-cert-type
 Example:
-  - --proxy-cert file -x https://proxy $URL
+  - --proxy-cert file -x https://proxy.example $URL
 ---
 
 # `--proxy-cert`

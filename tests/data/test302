@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,7 +13,7 @@ FAILURE
 # Server-side
 <reply>
 
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 And you should ignore this data.
@@ -37,7 +38,6 @@ HTTPS GET over HTTP proxy fails
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

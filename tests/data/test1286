@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", qop="auth"
@@ -18,7 +19,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 0
 
 </data>
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 302 Thanks for this, but we want to redir you!
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -26,7 +27,7 @@ Location: /%TESTNUMBER0001
 Content-Length: 0
 
 </data1000>
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 404 Not Found
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -34,7 +35,7 @@ Content-Length: 0
 
 </data1001>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", qop="auth"
@@ -58,7 +59,6 @@ Content-Length: 0
 
 # Client-side
 <client>
-#
 <server>
 http
 </server>
@@ -89,7 +89,7 @@ HTTP GET --digest increasing nonce-count
 <strippart>
 if(s/^(Authorization: Digest )([^\r\n]+)(\r?\n)$//) { $_ = $1 . join(', ', map { s/^(cnonce=)"[a-zA-Z0-9+\/=]+"$/$1REMOVED/; s/^(response=)"[a-f0-9]{32}"$/$1REMOVED/; s/^qop="auth"$/qop=auth/; $_ } sort split(/, */, $2)) . $3; }
 </strippart>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -25,7 +25,6 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#include <curl/curl.h>
 
 #ifdef USE_CURL_NTLM_CORE
 

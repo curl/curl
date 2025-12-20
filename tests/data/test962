@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,12 +7,10 @@ IDN
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -28,7 +27,7 @@ LC_ALL=C.UTF-8
 <name>
 SMTP without SMTPUTF8 support - UTF-8 based sender (host part only)
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -39,17 +38,16 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@xn--4cab6c.se>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@xn--4cab6c.se%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

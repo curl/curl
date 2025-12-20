@@ -34,7 +34,6 @@
 #endif
 
 #include "testutil.h"
-#include "memdebug.h"
 
 #define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))
 
@@ -90,14 +89,14 @@ static size_t rtp_write(char *data, size_t size, size_t nmemb, void *stream)
 
 static CURLcode test_lib571(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   char *stream_uri = NULL;
   int request = 1;
 
   FILE *protofile = curlx_fopen(libtest_arg2, "wb");
   if(!protofile) {
-    curl_mfprintf(stderr, "Couldn't open the protocol dump file\n");
+    curl_mfprintf(stderr, "Could not open the protocol dump file\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -118,7 +117,7 @@ static CURLcode test_lib571(const char *URL)
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -133,14 +132,14 @@ static CURLcode test_lib571(const char *URL)
   test_setopt(curl, CURLOPT_RTSP_TRANSPORT, "RTP/AVP/TCP;interleaved=0-1");
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* This PLAY starts the interleave */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -148,14 +147,14 @@ static CURLcode test_lib571(const char *URL)
   stream_uri = NULL;
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* The DESCRIBE request will try to consume data after the Content */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -163,13 +162,13 @@ static CURLcode test_lib571(const char *URL)
   stream_uri = NULL;
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -177,17 +176,17 @@ static CURLcode test_lib571(const char *URL)
   stream_uri = NULL;
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   curl_mfprintf(stderr, "PLAY COMPLETE\n");
 
   /* Use Receive to get the rest of the data */
-  while(!res && rtp_packet_count < 19) {
+  while(!result && rtp_packet_count < 19) {
     curl_mfprintf(stderr, "LOOPY LOOP!\n");
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_RECEIVE);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 
 test_cleanup:
@@ -199,5 +198,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

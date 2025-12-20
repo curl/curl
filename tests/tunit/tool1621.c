@@ -25,8 +25,6 @@
 
 #include "tool_xattr.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode test_tool1621(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE

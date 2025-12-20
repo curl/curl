@@ -10,7 +10,7 @@ See-also:
   - proxy
   - insecure
 Example:
-  - --proxy-insecure -x https://proxy $URL
+  - --proxy-insecure -x https://proxy.example $URL
 ---
 
 # `--proxy-insecure`

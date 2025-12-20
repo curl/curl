@@ -7,22 +7,38 @@ SPDX-License-Identifier: curl
 # IPFS
 For an overview about IPFS, visit the [IPFS project site](https://ipfs.tech/).
 
-In IPFS there are two protocols. IPFS and IPNS (their workings are explained in detail [here](https://docs.ipfs.tech/concepts/)). The ideal way to access data on the IPFS network is through those protocols. For example to access the Big Buck Bunny video the ideal way to access it is like: `ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi`
+In IPFS there are two protocols. IPFS and IPNS (their workings are explained
+in detail [here](https://docs.ipfs.tech/concepts/)). The ideal way to access
+data on the IPFS network is through those protocols. For example to access
+the Big Buck Bunny video the ideal way to access it is like:
+`ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi`
 
 ## IPFS Gateways
 
 IPFS Gateway acts as a bridge between traditional HTTP clients and IPFS.
-IPFS Gateway specifications of HTTP semantics can be found [here](https://specs.ipfs.tech/http-gateways/).
+IPFS Gateway specifications of HTTP semantics can be found
+[here](https://specs.ipfs.tech/http-gateways/).
 
 ### Deserialized responses
 
-By default, a gateway acts as a bridge between traditional HTTP clients and IPFS and performs necessary hash verification and deserialization. Through such gateway, users can download files, directories, and other content-addressed data stored with IPFS or IPNS as if they were stored in a traditional web server.
+By default, a gateway acts as a bridge between traditional HTTP clients and
+IPFS and performs necessary hash verification and deserialization. Through such
+gateway, users can download files, directories, and other content-addressed
+data stored with IPFS or IPNS as if they were stored in a traditional web
+server.
 
 ### Verifiable responses
 
-By explicitly requesting [application/vnd.ipld.raw](https://www.iana.org/assignments/media-types/application/vnd.ipld.raw) or [application/vnd.ipld.car](https://www.iana.org/assignments/media-types/application/vnd.ipld.car) responses, by means defined in [Trustless Gateway Specification](https://specs.ipfs.tech/http-gateways/trustless-gateway/), the user is able to fetch raw content-addressed data and [perform hash verification themselves](https://docs.ipfs.tech/reference/http/gateway/#trustless-verifiable-retrieval).
+By explicitly requesting
+[application/vnd.ipld.raw](https://www.iana.org/assignments/media-types/application/vnd.ipld.raw) or
+[application/vnd.ipld.car](https://www.iana.org/assignments/media-types/application/vnd.ipld.car)
+responses, by means defined in
+[Trustless Gateway Specification](https://specs.ipfs.tech/http-gateways/trustless-gateway/),
+the user is able to fetch raw content-addressed data and
+[perform hash verification themselves](https://docs.ipfs.tech/reference/http/gateway/#trustless-verifiable-retrieval).
 
-This enables users to use untrusted, public gateways without worrying they might return invalid/malicious bytes.
+This enables users to use untrusted, public gateways without worrying they
+might return invalid/malicious bytes.
 
 ## IPFS and IPNS protocol handling
 
@@ -43,9 +59,9 @@ in this link:
 
 `http://127.0.0.1:8080/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi`
 
-## cURL handling of the IPFS protocols
+## curl handling of the IPFS protocols
 
-The IPFS integration in cURL hides this gateway logic for you. Instead of
+The IPFS integration in curl hides this gateway logic for you. Instead of
 providing a full URL to a file on IPFS like this:
 
 ```
@@ -57,7 +73,7 @@ You can provide it with the IPFS protocol instead:
 curl ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 ```
 
-With the IPFS protocol way of asking a file, cURL still needs to know the
+With the IPFS protocol way of asking a file, curl still needs to know the
 gateway. curl essentially just rewrites the IPFS based URL to a gateway URL.
 
 ### IPFS_GATEWAY environment variable
@@ -67,7 +83,7 @@ gateway.
 
 ### Automatic gateway detection
 
-When you provide no additional details to cURL then it:
+When you provide no additional details to curl then it:
 
 1. First looks for the `IPFS_GATEWAY` environment variable and use that if it
    is set.
@@ -75,12 +91,12 @@ When you provide no additional details to cURL then it:
    means that you have a local gateway running and that file contains the URL
    to your local gateway.
 
-If cURL fails, you are presented with an error message and a link to this page
+If curl fails, you are presented with an error message and a link to this page
 to the option most applicable to solving the issue.
 
 ### `--ipfs-gateway` argument
 
-You can also provide a `--ipfs-gateway` argument to cURL. This overrules any
+You can also provide a `--ipfs-gateway` argument to curl. This overrules any
 other gateway setting. curl does not fallback to the other options if the
 provided gateway did not work.
 
@@ -107,21 +123,21 @@ option follows the redirect.
 
 ## Error messages and hints
 
-Depending on the arguments, cURL could present the user with an error.
+Depending on the arguments, curl could present the user with an error.
 
 ### Gateway file and environment variable
 
-cURL tried to look for the file: `~/.ipfs/gateway` but could not find it. It
+curl tried to look for the file: `~/.ipfs/gateway` but could not find it. It
 also tried to look for the `IPFS_GATEWAY` environment variable but could not
-find that either. This happens when no extra arguments are passed to cURL and
+find that either. This happens when no extra arguments are passed to curl and
 letting it try to figure it out [automatically](#automatic-gateway-detection).
 
 Any IPFS implementation that has gateway support should expose its URL in
 `~/.ipfs/gateway`. If you are already running a gateway, make sure it exposes
-the file where cURL expects to find it.
+the file where curl expects to find it.
 
 Alternatively you could set the `IPFS_GATEWAY` environment variable or pass
-the `--ipfs-gateway` flag to the cURL command.
+the `--ipfs-gateway` flag to the curl command.
 
 ### Malformed gateway URL
 

@@ -26,7 +26,6 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
-#include <curl/curl.h>
 #include "llist.h"
 
 struct althost {
@@ -65,10 +64,11 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,
                         int srcport,
                         struct altsvc **dstentry,
-                        const int versions); /* CURLALTSVC_H* bits */
+                        const int versions, /* CURLALTSVC_H* bits */
+                        bool *psame_destination);
 #else
 /* disabled */
-#define Curl_altsvc_save(a,b,c)
+#define Curl_altsvc_save(a, b, c)
 #define Curl_altsvc_cleanup(x)
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */
 #endif /* HEADER_CURL_ALTSVC_H */

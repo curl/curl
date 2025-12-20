@@ -33,7 +33,7 @@ void Curl_amiga_cleanup(void);
 
 #else
 
-#define Curl_amiga_init() CURLE_OK
+#define Curl_amiga_init()    CURLE_OK
 #define Curl_amiga_cleanup() Curl_nop_stmt
 
 #endif

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ RFC4954
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -19,7 +19,6 @@ REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== 235 Authenticated
 </servercmd>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -32,7 +31,7 @@ digest
 <name>
 SMTP CRAM-MD5 authentication
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>
@@ -40,19 +39,18 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH CRAM-MD5
 dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

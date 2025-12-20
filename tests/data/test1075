@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -13,7 +14,7 @@ HTTP Basic auth
 # The test server provides no way to respond differently to a subsequent
 # Basic authenticated request (we really want to respond with 200 for
 # the second), so just respond with 401 for both and let curl deal with it.
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required
 Server: testcurl
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
@@ -23,7 +24,7 @@ Content-Type: text/plain
 Content-Length: 0
 
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required
 Server: testcurl
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
@@ -64,7 +65,7 @@ four is the number of lines
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

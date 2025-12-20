@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,7 @@ HTTP POST
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 100 Continue swsclose
 Silly-header: yeeeees
 
@@ -37,7 +38,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F name=daniel
 ^Content-Type: multipart/form-data.*
 ^-----------------------.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

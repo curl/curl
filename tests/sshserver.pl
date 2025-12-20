@@ -107,7 +107,7 @@ my $error;
 my @cfgarr;
 
 #***************************************************************************
-# Returns a path of the given file name in the log directory (PiddirPath)
+# Returns a path of the given filename in the log directory (PiddirPath)
 #
 sub pp {
     my $file = $_[0];
@@ -191,7 +191,7 @@ while(@ARGV) {
         }
     }
     else {
-        print STDERR "\nWarning: sshserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: sshserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }
@@ -201,7 +201,7 @@ while(@ARGV) {
 #
 
 #***************************************************************************
-# Default ssh daemon pid file name & directory
+# Default ssh daemon pid filename & directory
 #
 if($pidfile) {
     # Use our pidfile directory to store server config files
@@ -214,7 +214,7 @@ else {
 }
 
 #***************************************************************************
-# ssh and sftp server log file names
+# ssh and sftp server log filenames
 #
 $sshdlog = server_logfilename($logdir, 'ssh', $ipvnum, $idnum);
 $sftplog = server_logfilename($logdir, 'sftp', $ipvnum, $idnum);
@@ -225,12 +225,11 @@ $logfile = "$logdir/sshserver.log";  # used by logmsg
 #
 my $loglevel = $debugprotocol?'DEBUG3':'DEBUG2';
 
-
 #***************************************************************************
 # Validate username
 #
 if(!$username) {
-    $error = 'Will not run ssh server without a user name';
+    $error = 'Will not run ssh server without a username';
 }
 elsif($username eq 'root') {
     $error = 'Will not run ssh server as root to mitigate security risks';
@@ -240,16 +239,14 @@ if($error) {
     exit 1;
 }
 
-
 #***************************************************************************
-# Find out ssh daemon canonical file name
+# Find out ssh daemon canonical filename
 #
 my $sshd = find_sshd();
 if(!$sshd) {
     logmsg "cannot find $sshdexe\n";
     exit 1;
 }
-
 
 #***************************************************************************
 # Find out ssh daemon version info
@@ -262,7 +259,6 @@ if(!$sshdid) {
     exit 1;
 }
 logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
-
 
 #***************************************************************************
 #  ssh daemon command line options we might use and version support
@@ -281,7 +277,6 @@ logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
 #  -t:  test config file     : SunSSH 1.0.0 and later
 #  -?:  sshd version info    : SunSSH 1.0.0 and later
 
-
 #***************************************************************************
 # Verify minimum ssh daemon version
 #
@@ -291,9 +286,8 @@ if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
     exit 1;
 }
 
-
 #***************************************************************************
-# Find out sftp server plugin canonical file name
+# Find out sftp server plugin canonical filename
 #
 my $sftpsrv = find_sftpsrv();
 if(!$sftpsrv) {
@@ -302,9 +296,8 @@ if(!$sftpsrv) {
 }
 logmsg "sftp server plugin found $sftpsrv\n" if($verbose);
 
-
 #***************************************************************************
-# Find out sftp client canonical file name
+# Find out sftp client canonical filename
 #
 my $sftp = find_sftp();
 if(!$sftp) {
@@ -313,9 +306,8 @@ if(!$sftp) {
 }
 logmsg "sftp client found $sftp\n" if($verbose);
 
-
 #***************************************************************************
-# Find out ssh keygen canonical file name
+# Find out ssh keygen canonical filename
 #
 my $sshkeygen = find_sshkeygen();
 if(!$sshkeygen) {
@@ -324,16 +316,14 @@ if(!$sshkeygen) {
 }
 logmsg "ssh keygen found $sshkeygen\n" if($verbose);
 
-
 #***************************************************************************
-# Find out ssh client canonical file name
+# Find out ssh client canonical filename
 #
 my $ssh = find_ssh();
 if(!$ssh) {
     logmsg "cannot find $sshexe\n";
     exit 1;
 }
-
 
 #***************************************************************************
 # Find out ssh client version info
@@ -346,7 +336,6 @@ if(!$sshid) {
     exit 1;
 }
 logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
-
 
 #***************************************************************************
 #  ssh client command line options we might use and version support
@@ -367,7 +356,6 @@ logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
 # -vv:  increase verbosity           : SunSSH 1.0.0 and later
 #  -V:  ssh version info             : SunSSH 1.0.0 and later
 
-
 #***************************************************************************
 # Verify minimum ssh client version
 #
@@ -376,7 +364,6 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-
 
 #***************************************************************************
 #  ssh keygen command line options we actually use and version support
@@ -406,7 +393,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
    (! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f)) ||
    (! -e pp($cliprvkeyf)) || (! -s pp($cliprvkeyf)) ||
    (! -e pp($clipubkeyf)) || (! -s pp($clipubkeyf))) {
-    # Make sure all files are gone so ssh-keygen doesn't complain
+    # Make sure all files are gone so ssh-keygen does not complain
     unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
 
@@ -435,7 +422,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         exit 1;
     }
     display_file_top(pp($cliprvkeyf)) if($verbose);
-    # Make sure that permissions are restricted so openssh doesn't complain
+    # Make sure that permissions are restricted so openssh does not complain
     chmod 0600, pp($hstprvkeyf);
     chmod 0600, pp($cliprvkeyf);
     if(($^O eq 'cygwin' || $^O eq 'msys') && -e "/bin/setfacl") {
@@ -472,7 +459,6 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         exit 1;
     }
 }
-
 
 #***************************************************************************
 # Convert paths for curl's tests running on Windows with Cygwin/MSYS OpenSSH
@@ -587,7 +573,6 @@ else {
 #  [2] Option specific for portable versions
 #  [3] Option not used in our ssh server config file
 
-
 #***************************************************************************
 # Initialize sshd config with options actually supported in OpenSSH 2.9.9
 #
@@ -662,7 +647,6 @@ if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
 push @cfgarr, 'X11Forwarding no';
 push @cfgarr, '#';
 
-
 #***************************************************************************
 # Write out initial sshd configuration file for curl's tests
 #
@@ -671,7 +655,6 @@ if($error) {
     logmsg "$error\n";
     exit 1;
 }
-
 
 #***************************************************************************
 # Verifies at run time if sshd supports a given configuration file option
@@ -702,7 +685,6 @@ sub sshd_supports_opt {
     return 0;
 }
 
-
 #***************************************************************************
 # Kerberos Authentication support may have not been built into sshd
 #
@@ -722,7 +704,6 @@ if(sshd_supports_opt('KerberosTicketCleanup','yes')) {
     push @cfgarr, 'KerberosTicketCleanup yes';
 }
 
-
 #***************************************************************************
 # Andrew File System support may have not been built into sshd
 #
@@ -730,14 +711,12 @@ if(sshd_supports_opt('AFSTokenPassing','no')) {
     push @cfgarr, 'AFSTokenPassing no';
 }
 
-
 #***************************************************************************
 # S/Key authentication support may have not been built into sshd
 #
 if(sshd_supports_opt('SkeyAuthentication','no')) {
     push @cfgarr, 'SkeyAuthentication no';
 }
-
 
 #***************************************************************************
 # GSSAPI Authentication support may have not been built into sshd
@@ -763,7 +742,6 @@ if(sshd_supports_opt('GSSUseSessionCredCache','no')) {
     push @cfgarr, 'GSSUseSessionCredCache no';
 }
 push @cfgarr, '#';
-
 
 #***************************************************************************
 # Options that might be supported or not in sshd OpenSSH 2.9.9 and later
@@ -824,7 +802,6 @@ if(sshd_supports_opt('X11UseLocalhost','yes')) {
 }
 push @cfgarr, '#';
 
-
 #***************************************************************************
 # Write out resulting sshd configuration file for curl's tests
 #
@@ -833,7 +810,6 @@ if($error) {
     logmsg "$error\n";
     exit 1;
 }
-
 
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
@@ -844,7 +820,6 @@ if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
     display_sshdconfig();
     exit 1;
 }
-
 
 #***************************************************************************
 # Generate ssh client host key database file for curl's tests
@@ -878,7 +853,6 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
     }
 }
 
-
 #***************************************************************************
 # Convert paths for curl's tests running on Windows using Cygwin OpenSSH
 #
@@ -898,7 +872,6 @@ else {
     $identity_config = abs_path(pp($identity));
     $knownhosts_config = abs_path(pp($knownhosts));
 }
-
 
 #***************************************************************************
 #  ssh client configuration file options we might use and version support
@@ -976,7 +949,6 @@ else {
 #  [2] Option specific for portable versions
 #  [3] Option not used in our ssh client config file
 
-
 #***************************************************************************
 # Initialize ssh config with options actually supported in OpenSSH 2.9.9
 #
@@ -1031,7 +1003,6 @@ if(!($sshid =~ /OpenSSH/) || ($sshvernum <= 730)) {
 push @cfgarr, 'StrictHostKeyChecking no';
 push @cfgarr, 'UsePrivilegedPort no';
 push @cfgarr, '#';
-
 
 #***************************************************************************
 # Options supported in ssh client newer than OpenSSH 2.9.9
@@ -1132,7 +1103,6 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 380)) {
 
 push @cfgarr, '#';
 
-
 #***************************************************************************
 # Write out resulting ssh client configuration file for curl's tests
 #
@@ -1141,7 +1111,6 @@ if($error) {
     logmsg "$error\n";
     exit 1;
 }
-
 
 #***************************************************************************
 # Initialize client sftp config with options actually supported.
@@ -1160,7 +1129,6 @@ for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
     }
 }
 
-
 #***************************************************************************
 # Write out resulting sftp client configuration file for curl's tests
 #
@@ -1170,7 +1138,6 @@ if($error) {
     exit 1;
 }
 @cfgarr = ();
-
 
 #***************************************************************************
 # Generate client sftp commands batch file for sftp server verification
@@ -1207,7 +1174,7 @@ if($sshdid =~ /OpenSSH-Windows/) {
 
     # Put an "exec" in front of the command so that the child process
     # keeps this child's process ID by being tied to the spawned shell.
-    exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    exec("exec $cmd") || die "Cannot exec() $cmd: $!";
     # exec() will create a new process, but ties the existence of the
     # new process to the parent waiting perl.exe and sh.exe processes.
 
@@ -1231,7 +1198,6 @@ elsif($rc & 127) {
 elsif($verbose && ($rc >> 8)) {
     logmsg sprintf("\"$sshd\" exited with %d\n", $rc >> 8);
 }
-
 
 #***************************************************************************
 # Clean up once the server has stopped

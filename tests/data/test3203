@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ FILE
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
@@ -16,7 +16,7 @@ file
 <name>
 GET a directory using file://
 </name>
-<!-- doesn't work on win32, see #6379 -->
+<!-- does not work on win32, see #6379 -->
 <features>
 !win32
 </features>
@@ -28,7 +28,6 @@ Contents of file are irrelevant
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

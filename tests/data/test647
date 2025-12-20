@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,12 +9,10 @@ MULTIPART
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -26,7 +25,18 @@ imap
 IMAP APPEND multipart using mime API
 </name>
 <command>
-imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;type=text/html" -F "=This is the plain text version" -F "=)" -F "=@%LOGDIR/test%TESTNUMBER.txt" -H "Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)" -H "From: Fred Foobar <foobar@example.com>" -H "To: joe@example.com" -H "Message-Id: <B27397-0100000@example.com>" -H "Subject: afternoon meeting" -u user:secret
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
+-F "=(;type=multipart/alternative"
+-F "= <body>This is the html version</body>;type=text/html"
+-F "=This is the plain text version"
+-F "=)"
+-F "=@%LOGDIR/test%TESTNUMBER.txt"
+-H "Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)"
+-H "From: Fred Foobar %LTfoobar@example.com%GT"
+-H "To: joe@example.com"
+-H "Message-Id: %LTB27397-0100000@example.com%GT"
+-H "Subject: afternoon meeting"
+-u user:secret
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 This is an attached file.
@@ -35,49 +45,48 @@ It may contain any type of data.
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/
 s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 APPEND %TESTNUMBER (\Seen) {940}
 A004 LOGOUT
 </protocol>
 <upload>
-Content-Type: multipart/mixed; boundary=----------------------------
-Mime-Version: 1.0
-Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
-From: Fred Foobar <foobar@example.com>
-To: joe@example.com
-Message-Id: <B27397-0100000@example.com>
-Subject: afternoon meeting
-
-------------------------------
-Content-Type: multipart/alternative; boundary=----------------------------
-
-------------------------------
-Content-Type: text/html
-Content-Transfer-Encoding: 8bit
-
-<body>This is the html version</body>
-------------------------------
-
-This is the plain text version
---------------------------------
-
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-
+Content-Type: multipart/mixed; boundary=----------------------------%CR
+Mime-Version: 1.0%CR
+Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)%CR
+From: Fred Foobar %LTfoobar@example.com%GT%CR
+To: joe@example.com%CR
+Message-Id: %LTB27397-0100000@example.com%GT%CR
+Subject: afternoon meeting%CR
+%CR
+------------------------------%CR
+Content-Type: multipart/alternative; boundary=----------------------------%CR
+%CR
+------------------------------%CR
+Content-Type: text/html%CR
+Content-Transfer-Encoding: 8bit%CR
+%CR
+<body>This is the html version</body>%CR
+------------------------------%CR
+%CR
+This is the plain text version%CR
+--------------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"%CR
+%CR
 This is an attached file.
 
 It may contain any type of data.
-
---------------------------------
+%CR
+--------------------------------%CR
 </upload>
 </verify>
 </testcase>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,12 +8,11 @@ compressed
 FAILURE
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 # this deflate chunk has three bytes removed from the beginning and is cut
 # short
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Mon, 29 Nov 2004 21:56:53 GMT
 Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
@@ -24,7 +24,7 @@ Content-Length: 1305
 %hex[%58%db%6e%e3%36%10%7d%37%90%7f%60%fd%d4%02%b6%6e%b6%13%39%70%b4%28%72%d9%04%cd%36%c1%da%05%ba%4f%06%2d%d1%36%1b%49%14%48%ca%b9%3c%f4%db%3b%94%28%89%b1%1c%af%77%83%be%04%48%62%72%e6%9c%c3%e1%0c%49%93%99%7c%7a%4a%62%b4%21%5c%50%96%9e%75%5d%cb%e9%22%92%86%2c%a2%e9%ea%ac%7b%33%bd%eb%fb%fe%68%dc%77%bb%9f%82%ce%e4%97%8b%bb%f3%d9%b7%fb%4b%94%71%f6%0f%09%65%3f%a6%42%02%10%4d%bf%4d%67%97%5f%50%77%2d%65%76%6a%db%4b%4e%c4%3a%21%58%5a%29%91%f6%02%87%0f%24%8d%ec%65%d2%d7%3c%d1%77%ac%a1%15%c9%a8%0b%a2%5b%5a%41%07%a1%ca%a6%da%4d%6f%4e%a3%c0%3d%76%bd%89%6d%18%4a%44%84%25%99%e3%28%22%80%18%8f%fd%be%e3%f7%3d%17%39%c3%53%c7%3d%f5%c6%13%db%f0%1b%84%3c%53%1f%51%e0%39%ce%b0%ef%3a%7d%d7%47%8e%77%ea%c1%cf%40%53%2a%c4%ab%38%52%9c%90%b9%58%33%2e%83%30%e7%71%1d%8e%61%6f%e3%97%79%1c%17%70%84%d3%08%c5%74%d1%a6%16%10%1d%1e%11%a1%96%3a%67%49%52%52%52%82%24%63%b5%00%c7%fc%19%2d%19%47%61%4c%49%2a%fb%82%46%04%fd%f5%f5%16%49%8e%53%b1%84%8a%5a%30%8b%46%c8%50%de%19%0c%a2%02%e1%72%04%a5%5a%a9%70%55%df%25%8d%89%38%ea%e4%42%75%d4%18%e2%39%95%f8%c9%42%37%12%89%3c%cb%40%5f%a0%eb%d9%ec%be%57%fc%9d%f6%d0%15%b4%8f%3a%57%45%fb%e2%e6%7c%d6%43%b3%cb%db%3f%2f%e1%f3%f6%e2%77%80%5d%dd%dc%5e%f6%8a%e1%3f%df%dd%5f%5f%7e%85%36%0c%f0%48%62%88%a9%94%ea%67%4c%c8%9e%6e%e6%d0]hex%
 </data>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Mon, 29 Nov 2004 21:56:53 GMT
 Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
@@ -37,7 +37,6 @@ Content-Length: 1305
 
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -54,13 +53,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
 </strippart>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

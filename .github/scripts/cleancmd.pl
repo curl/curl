@@ -16,7 +16,7 @@ use warnings;
 my @asyms;
 
 open(S, "<./docs/libcurl/symbols-in-versions")
-    || die "can't find symbols-in-versions";
+    || die "cannot find symbols-in-versions";
 while(<S>) {
     if(/^([^ ]*) /) {
         push @asyms, $1;
@@ -30,7 +30,7 @@ my @aopts = (
     );
 
 open(O, "<./docs/options-in-versions")
-    || die "can't find options-in-versions";
+    || die "cannot find options-in-versions";
 while(<O>) {
     chomp;
     if(/^([^ ]+)/) {
@@ -50,7 +50,7 @@ while(<O>) {
 close(O);
 
 open(C, "<./.github/scripts/spellcheck.curl")
-    || die "can't find spellcheck.curl";
+    || die "cannot find spellcheck.curl";
 while(<C>) {
     if(/^\#/) {
         next;
@@ -99,7 +99,7 @@ sub process {
         # *italics*
         $l =~ s/\*(\S.*?)\*//g;
 
-        # strip out https URLs, we don't want them spellchecked
+        # strip out https URLs, we do not want them spellchecked
         $l =~ s!https://[a-z0-9\#_/.-]+!!gi;
 
         $out .= $l;
@@ -119,6 +119,10 @@ sub process {
     }
 }
 
-for my $f (@ARGV) {
+my @filemasks = @ARGV;
+open(my $git_ls_files, '-|', 'git', 'ls-files', '--', @filemasks) or die "Failed running git ls-files: $!";
+while(my $f = <$git_ls_files>) {
+    chomp $f;
     process($f);
 }
+close $git_ls_files;

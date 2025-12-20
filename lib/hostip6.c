@@ -47,15 +47,9 @@
 #include "cfilters.h"
 #include "sendf.h"
 #include "hostip.h"
-#include "hash.h"
-#include "share.h"
 #include "url.h"
 #include "curlx/inet_pton.h"
 #include "connect.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #ifdef CURLRES_SYNCH
 

@@ -28,7 +28,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static size_t current_offset = 0;
 static char databuf[70000]; /* MUST be more than 64k OR
@@ -36,10 +35,10 @@ static char databuf[70000]; /* MUST be more than 64k OR
 
 static size_t t552_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes curl wants */
-  size_t  available = sizeof(databuf) - current_offset; /* What we have to
-                                                           give */
-  size_t  given = amount < available ? amount : available; /* What is given */
+  size_t amount = nmemb * size; /* Total bytes curl wants */
+  size_t available = sizeof(databuf) - current_offset; /* What we have to
+                                                          give */
+  size_t given = amount < available ? amount : available; /* What is given */
   (void)stream;
   memcpy(ptr, databuf + current_offset, given);
   current_offset += given;
@@ -54,7 +53,7 @@ static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return amount;
 }
 
-static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
+static curlioerr ioctl_callback(CURL *curl, int cmd, void *clientp)
 {
   (void)clientp;
   if(cmd == CURLIOCMD_RESTARTREAD) {
@@ -63,14 +62,14 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
     current_offset = 0;
     return CURLIOE_OK;
   }
-  (void)handle;
+  (void)curl;
   return CURLIOE_UNKNOWNCMD;
 }
 
 static CURLcode test_lib552(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t i;
   static const char fill[] = "test data";
 
@@ -110,11 +109,11 @@ static CURLcode test_lib552(const char *URL)
      might work too, not NTLM */
   test_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Send SMTP mime emails
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mime mail using libcurl's SMTP
@@ -38,9 +37,9 @@
  * Note that this example requires libcurl 7.56.0 or above.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+#define FROM "<sender@example.org>"
+#define TO   "<addressee@example.net>"
+#define CC   "<info@example.org>"
 
 static const char *headers_text[] = {
   "Date: Tue, 22 Aug 2017 14:08:43 +0100",
@@ -48,7 +47,7 @@ static const char *headers_text[] = {
   "From: " FROM " (Example User)",
   "Cc: " CC " (Another example User)",
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
-    "rfcpedant.example.org>",
+  "rfcpedant.example.org>",
   "Subject: example sending a MIME-formatted message",
   NULL
 };
@@ -67,14 +66,13 @@ static const char inline_html[] =
   "email viewers able to handle HTML.</p>"
   "</body></html>\r\n";
 
-
 int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -142,12 +140,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
 
     /* Send the message */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* Free lists. */
     curl_slist_free_all(recipients);
@@ -169,5 +167,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

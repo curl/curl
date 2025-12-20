@@ -32,21 +32,18 @@
 
 #include "cf-socket.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1663_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
-static void t1663_parse(
-  const char *input_data,
-  const char *exp_dev,
-  const char *exp_iface,
-  const char *exp_host,
-  CURLcode exp_rc)
+static void t1663_parse(const char *input_data,
+                        const char *exp_dev,
+                        const char *exp_iface,
+                        const char *exp_host,
+                        CURLcode exp_rc)
 {
   char *dev = NULL;
   char *iface = NULL;
@@ -67,9 +64,9 @@ static void t1663_parse(
                 "host should be equal to exp_host");
   }
 
-  free(dev);
-  free(iface);
-  free(host);
+  curlx_free(dev);
+  curlx_free(iface);
+  curlx_free(host);
 }
 
 static CURLcode test_unit1663(const char *arg)

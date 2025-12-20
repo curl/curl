@@ -30,23 +30,23 @@
 struct test_spec {
   const char *input;
   const char *exp_output;
-  CURLcode exp_result;
+  CURLcode exp_res;
 };
 
 static bool do_test(const struct test_spec *spec, size_t i,
                     struct dynbuf *dbuf)
 {
-  CURLcode result;
+  CURLcode res;
   const char *in = spec->input;
 
   curlx_dyn_reset(dbuf);
-  result = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
-  if(result != spec->exp_result) {
+  res = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
+  if(res != spec->exp_res) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
-                  i, spec->exp_result, result);
+                  i, spec->exp_res, res);
     return FALSE;
   }
-  else if(!result && strcmp(spec->exp_output, curlx_dyn_ptr(dbuf))) {
+  else if(!res && strcmp(spec->exp_output, curlx_dyn_ptr(dbuf))) {
     curl_mfprintf(stderr,
                   "test %zu: input '%s', expected output '%s', got '%s'\n",
                   i, in, spec->exp_output, curlx_dyn_ptr(dbuf));
@@ -61,39 +61,41 @@ static CURLcode test_unit1656(const char *arg)
   UNITTEST_BEGIN_SIMPLE
 
   static const struct test_spec test_specs[] = {
-  { "190321134340", "1903-21-13 43:40:00", CURLE_OK },
-  { "", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "0WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "19032113434", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "19032113434WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "190321134340.", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "190321134340.1", "1903-21-13 43:40:00.1", CURLE_OK },
-  { "19032113434017.0", "1903-21-13 43:40:17", CURLE_OK },
-  { "19032113434017.01", "1903-21-13 43:40:17.01", CURLE_OK },
-  { "19032113434003.001", "1903-21-13 43:40:03.001", CURLE_OK },
-  { "19032113434003.090", "1903-21-13 43:40:03.09", CURLE_OK },
-  { "190321134340Z", "1903-21-13 43:40:00 GMT", CURLE_OK },
-  { "19032113434017.0Z", "1903-21-13 43:40:17 GMT", CURLE_OK },
-  { "19032113434017.01Z", "1903-21-13 43:40:17.01 GMT", CURLE_OK },
-  { "19032113434003.001Z", "1903-21-13 43:40:03.001 GMT", CURLE_OK },
-  { "19032113434003.090Z", "1903-21-13 43:40:03.09 GMT", CURLE_OK },
-  { "190321134340CET", "1903-21-13 43:40:00 CET", CURLE_OK },
-  { "19032113434017.0CET", "1903-21-13 43:40:17 CET", CURLE_OK },
-  { "19032113434017.01CET", "1903-21-13 43:40:17.01 CET", CURLE_OK },
-  { "190321134340+02:30", "1903-21-13 43:40:00 UTC+02:30", CURLE_OK },
-  { "19032113434017.0+02:30", "1903-21-13 43:40:17 UTC+02:30", CURLE_OK },
-  { "19032113434017.01+02:30", "1903-21-13 43:40:17.01 UTC+02:30", CURLE_OK },
-  { "190321134340-3", "1903-21-13 43:40:00 UTC-3", CURLE_OK },
-  { "19032113434017.0-04", "1903-21-13 43:40:17 UTC-04", CURLE_OK },
-  { "19032113434017.01-01:10", "1903-21-13 43:40:17.01 UTC-01:10", CURLE_OK },
+    { "190321134340", "1903-21-13 43:40:00", CURLE_OK },
+    { "", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
+    { "WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
+    { "0WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
+    { "19032113434", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
+    { "19032113434WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
+    { "190321134340.", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
+    { "190321134340.1", "1903-21-13 43:40:00.1", CURLE_OK },
+    { "19032113434017.0", "1903-21-13 43:40:17", CURLE_OK },
+    { "19032113434017.01", "1903-21-13 43:40:17.01", CURLE_OK },
+    { "19032113434003.001", "1903-21-13 43:40:03.001", CURLE_OK },
+    { "19032113434003.090", "1903-21-13 43:40:03.09", CURLE_OK },
+    { "190321134340Z", "1903-21-13 43:40:00 GMT", CURLE_OK },
+    { "19032113434017.0Z", "1903-21-13 43:40:17 GMT", CURLE_OK },
+    { "19032113434017.01Z", "1903-21-13 43:40:17.01 GMT", CURLE_OK },
+    { "19032113434003.001Z", "1903-21-13 43:40:03.001 GMT", CURLE_OK },
+    { "19032113434003.090Z", "1903-21-13 43:40:03.09 GMT", CURLE_OK },
+    { "190321134340CET", "1903-21-13 43:40:00 CET", CURLE_OK },
+    { "19032113434017.0CET", "1903-21-13 43:40:17 CET", CURLE_OK },
+    { "19032113434017.01CET", "1903-21-13 43:40:17.01 CET", CURLE_OK },
+    { "190321134340+02:30", "1903-21-13 43:40:00 UTC+02:30", CURLE_OK },
+    { "19032113434017.0+02:30", "1903-21-13 43:40:17 UTC+02:30", CURLE_OK },
+    { "19032113434017.01+02:30", "1903-21-13 43:40:17.01 UTC+02:30",
+      CURLE_OK },
+    { "190321134340-3", "1903-21-13 43:40:00 UTC-3", CURLE_OK },
+    { "19032113434017.0-04", "1903-21-13 43:40:17 UTC-04", CURLE_OK },
+    { "19032113434017.01-01:10", "1903-21-13 43:40:17.01 UTC-01:10",
+      CURLE_OK },
   };
 
   size_t i;
   struct dynbuf dbuf;
   bool all_ok = TRUE;
 
-  curlx_dyn_init(&dbuf, 32*1024);
+  curlx_dyn_init(&dbuf, 32 * 1024);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

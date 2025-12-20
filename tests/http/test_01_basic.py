@@ -25,6 +25,7 @@
 ###########################################################################
 #
 import logging
+import re
 import pytest
 
 from testenv import Env
@@ -55,6 +56,7 @@ class TestBasic:
 
     # simple https: GET, h2 wanted and got
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_03_h2_get(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
@@ -64,6 +66,7 @@ class TestBasic:
 
     # simple https: GET, h2 unsupported, fallback to h1
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_04_h2_unsupported(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.domain2}:{env.https_port}/data.json'
@@ -82,10 +85,8 @@ class TestBasic:
 
     # simple download, check connect/handshake timings
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_01_06_timings(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
@@ -95,13 +96,14 @@ class TestBasic:
         # there are cases where time_connect is reported as 0
         assert r.stats[0]['time_connect'] >= 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
+        # ports are reported correctly
+        assert r.stats[0]['remote_port'] == env.port_for(proto), f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] > 0, f'{r.dump_logs()}'
 
     # simple https: HEAD
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     def test_01_07_head(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json'
         r = curl.http_download(urls=[url], with_stats=True, with_headers=True,
@@ -114,6 +116,7 @@ class TestBasic:
         assert r.stats[0]['size_download'] == 0, f'{r.stats[0]}'
 
     # http: GET for HTTP/2, see Upgrade:, 101 switch
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_08_h2_upgrade(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
@@ -126,6 +129,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # http: GET for HTTP/2 with prior knowledge
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_09_h2_prior_knowledge(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
@@ -137,6 +141,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # http: strip TE header in HTTP/2 requests
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_10_te_strip(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, "h2")}/data.json'
@@ -150,10 +155,8 @@ class TestBasic:
     # send 48KB+ sized response headers to check we handle that correctly
     # larger than 64KB headers expose a bug in Apache HTTP/2 that is not
     # RSTing the stream correctly when its internal limits are exceeded.
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_01_11_large_resp_headers(self, env: Env, httpd, proto):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             f'/curltest/tweak?x-hd={48 * 1024}'
@@ -165,7 +168,7 @@ class TestBasic:
     # http: response headers larger than what curl buffers for
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_12_xlarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             f'H2MaxHeaderBlockLen {130 * 1024}',
@@ -182,7 +185,7 @@ class TestBasic:
     # http: 1 response header larger than what curl buffers for
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_13_megalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
@@ -202,7 +205,7 @@ class TestBasic:
     # nghttp2 error -905: Too many CONTINUATION frames following a HEADER frame
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
@@ -221,7 +224,7 @@ class TestBasic:
     # http: one response header > 256 KB
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
@@ -238,10 +241,8 @@ class TestBasic:
             r.check_exit_code(100)  # CURLE_TOO_LARGE
 
     # http: invalid request headers, GET, issue #16998
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_01_16_inv_req_get(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
@@ -261,6 +262,7 @@ class TestBasic:
         pytest.param('gzip ;q=0.2;x="y,x", trailers', 'trailers', id='gzip+q+x+trailers'),
         pytest.param('gzip ;x="trailers", chunks', None, id='gzip+x+chunks'),
     ])
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_17_TE(self, env: Env, httpd, te_in, te_out):
         proto = 'h2'
         curl = CurlClient(env=env)
@@ -275,6 +277,7 @@ class TestBasic:
             assert 'request-te' not in r.responses[0]['header'], f'{r.responses[0]}'
 
     # check that an existing https: connection is not reused for http:
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_18_tls_reuse(self, env: Env, httpd):
         proto = 'h2'
         curl = CurlClient(env=env)
@@ -285,6 +288,7 @@ class TestBasic:
         assert r.total_connects == 2, f'{r.dump_logs()}'
 
     # check that an existing http: connection is not reused for https:
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_01_19_plain_reuse(self, env: Env, httpd):
         proto = 'h2'
         curl = CurlClient(env=env)
@@ -293,3 +297,25 @@ class TestBasic:
         r = curl.http_download(urls=[url1, url2], alpn_proto=proto, with_stats=True)
         assert len(r.stats) == 2
         assert r.total_connects == 2, f'{r.dump_logs()}'
+
+    # use a custom method containing a space
+    # check that h2/h3 did send that in the :method pseudo header. #19543
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs verbosecurl")
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    def test_01_20_method_space(self, env: Env, proto, httpd):
+        curl = CurlClient(env=env)
+        method = 'IN SANE'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
+                               extra_args=['-X', method])
+        if proto == 'h2' or proto == 'h3':
+            # h2+3 may close the connection for such invalid requests
+            re_m = re.compile(r'.*\[:method: ([^\]]+)\].*')
+            lines = [line for line in r.trace_lines if re_m.match(line)]
+            assert len(lines) == 1, f'{r.dump_logs()}'
+            m = re_m.match(lines[0])
+            assert m.group(1) == method, f'{r.dump_logs()}'
+        else:
+            # h1 should give us a real response
+            assert len(r.stats) == 1
+            r.check_response(http_status=400)

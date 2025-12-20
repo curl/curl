@@ -44,6 +44,7 @@ permissions: {}
 
 env:
   CURL_CI: github
+  CURL_TEST_MIN: 1700
   MAKEFLAGS: -j 4
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
 
@@ -54,12 +55,12 @@ jobs:
     timeout-minutes: 10
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
-      CC: ${{ matrix.build.compiler || 'clang' }}
+      CC: 'clang'
       LDFLAGS: ''
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_OPTIONS: ${{ matrix.build.options }}
       # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-      LIBRESSL_VERSION: 4.2.0
+      LIBRESSL_VERSION: 4.2.1
     strategy:
       fail-fast: false
       matrix:
@@ -81,6 +82,7 @@ jobs:
           - name: 'libressl'
             install_steps: libressl
             generator: Xcode
+            xcode: ''  # default Xcode. Set it once to silence actionlint.
             options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
@@ -93,6 +95,7 @@ jobs:
     steps:
       - name: 'brew install'
         if: ${{ matrix.build.configure }}
+        timeout-minutes: 5
         run: |
           # shellcheck disable=SC2181,SC2034
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
@@ -110,7 +113,7 @@ jobs:
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -134,7 +137,7 @@ jobs:
           cmake --build .
           cmake --install . --verbose
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -183,7 +186,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file '{}' \;
+        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file -- '{}' \;
 
       - name: 'build tests'
         run: |
@@ -204,7 +207,7 @@ jobs:
   macos:
     name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.build.name }}"
     runs-on: 'macos-15'
-    timeout-minutes: 45
+    timeout-minutes: 25
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: '${{ matrix.compiler }}'
@@ -216,22 +219,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, llvm@18, gcc-12]
+        compiler: [clang, llvm@18, gcc-13]
         build:
           # autotools
           - name: '!ssl !debug brotli zstd'
             compiler: clang
             install: brotli zstd
             configure: --without-ssl --with-brotli --with-zstd
+            tflags: '--min=1450'
+            xcode: ''  # default Xcode. Set it once to silence actionlint.
           - name: '!ssl !debug'
-            compiler: gcc-12
+            compiler: gcc-13
             configure: --without-ssl
+            tflags: '--min=950'
           - name: '!ssl'
             compiler: clang
             configure: --enable-debug --without-ssl
+            tflags: '--min=1500'
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
             configure: --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2 --without-ssl --with-apple-idn
+            tflags: '--min=1550'
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
             install: libssh
@@ -243,8 +251,10 @@ jobs:
           - name: '!ssl c-ares'
             compiler: clang
             configure: --enable-debug --enable-ares --without-ssl
+            tflags: '--min=1500'
           - name: '!ssl HTTP-only'
             compiler: clang
+            tflags: '--min=950'
             configure: >-
               --enable-debug
               --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
@@ -274,7 +284,7 @@ jobs:
           - name: 'OpenSSL event-based'
             compiler: clang
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
-            tflags: --test-event
+            tflags: '--test-event --min=1300'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
             install: libnghttp3 libngtcp2 gsasl rtmpdump
@@ -318,36 +328,38 @@ jobs:
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
           - name: 'aws-lc'
-            compiler: gcc-12
+            compiler: gcc-13
             install: aws-lc
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/aws-lc -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
           - name: 'Rustls'
             compiler: clang
             install: rustls-ffi
             generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
+            tflags: '--min=1650'
           - name: 'OpenSSL torture !FTP'
             compiler: clang
             install: libnghttp3
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: -t --shallow=25 !FTP
+            tflags: '-t --shallow=25 !FTP --min=1450'
           - name: 'OpenSSL torture FTP'
             compiler: clang
             install: libnghttp3
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: -t --shallow=20 FTP
+            tflags: '-t --shallow=20 FTP --min=260'
         exclude:
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@18, build: { compiler: 'clang' } }
-          - { compiler: llvm@18, build: { compiler: 'gcc-12' } }
-          - { compiler: gcc-12, build: { compiler: 'clang' } }
-          - { compiler: gcc-12, build: { compiler: 'llvm@18' } }
-          - { compiler: clang, build: { compiler: 'gcc-12' } }
+          - { compiler: llvm@18, build: { compiler: 'gcc-13' } }
+          - { compiler: gcc-13, build: { compiler: 'clang' } }
+          - { compiler: gcc-13, build: { compiler: 'llvm@18' } }
+          - { compiler: clang, build: { compiler: 'gcc-13' } }
           - { compiler: clang, build: { compiler: 'llvm@18' } }
 
     steps:
       - name: 'brew install'
+        timeout-minutes: 5
         # Run this command with retries because of spurious failures seen
         # while running the tests, for example
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
@@ -381,7 +393,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -495,6 +507,9 @@ jobs:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           TFLAGS="-j20 ${TFLAGS}"
+          if [ "${TEST_TARGET}" != 'test-ci' ]; then
+            TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
+          fi
           source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
             locale || true
@@ -538,7 +553,7 @@ jobs:
           fi
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
-    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
+    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }}"
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
     env:
@@ -555,7 +570,7 @@ jobs:
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
-        compiler: [gcc-12, gcc-13, gcc-15, llvm@15, llvm@18, llvm@20, clang]
+        compiler: [gcc-13, gcc-14, gcc-15, llvm@15, llvm@18, llvm@20, clang]
         # Xcode support matrix as of 2025-10, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
         # macos-14: 15.0.1, 15.1, 15.2, 15.3,*15.4
@@ -566,47 +581,20 @@ jobs:
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
         image: [macos-14, macos-15, macos-26]
-        # Can skip these to reduce jobs:
-        #   15.1 has the same default macOS SDK as 15.2 and identical test results.
-        #   15.4 not revealing new fallouts.
-        #xcode: ['15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0', '16.1']  # all Xcode
-        #xcode: ['15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
-        #xcode: ['15.0.1'        , '15.2', '15.3'        , '16.0'        ]  # coverage
         xcode: ['']  # default Xcodes
         macos-version-min: ['']
         build: [autotools, cmake]
         exclude:
           # Combinations not covered by runner images:
-          - { image: macos-14, xcode: '16.0'   }
-          - { image: macos-14, xcode: '16.1'   }
-          - { image: macos-14, xcode: '16.2'   }
-          - { image: macos-14, xcode: '16.3'   }
-          - { image: macos-14, xcode: '16.4'   }
-          - { image: macos-14, xcode: '26.0'   }
-          - { image: macos-15, xcode: '15.0.1' }
-          - { image: macos-15, xcode: '15.1'   }
-          - { image: macos-15, xcode: '15.2'   }
-          - { image: macos-15, xcode: '15.3'   }
-          - { image: macos-15, xcode: '15.4'   }
-          - { image: macos-26, xcode: '15.0.1' }
-          - { image: macos-26, xcode: '15.1'   }
-          - { image: macos-26, xcode: '15.2'   }
-          - { image: macos-26, xcode: '15.3'   }
-          - { image: macos-26, xcode: '15.4'   }
-          - { image: macos-26, xcode: '16.0'   }
-          - { image: macos-26, xcode: '16.1'   }
-          - { image: macos-26, xcode: '16.2'   }
-          - { image: macos-26, xcode: '16.3'   }
           - { image: macos-14, compiler: 'llvm@18' }
           - { image: macos-14, compiler: 'llvm@20' }
           - { image: macos-15, compiler: 'llvm@15' }
           - { image: macos-15, compiler: 'llvm@20' }
           - { image: macos-26, compiler: 'llvm@15' }
           - { image: macos-26, compiler: 'llvm@18' }
-          - { image: macos-26, compiler: 'gcc-12' }
           # Reduce build combinations, by dropping less interesting ones
-          - { compiler: gcc-13, build: cmake }
-          - { compiler: gcc-14, build: autotools }
+          - { image: macos-26, compiler: 'gcc-13' }
+          - { compiler: gcc-14, build: cmake }
           - { compiler: gcc-15, build: autotools }
     steps:
       - name: 'install autotools'
@@ -628,7 +616,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages preinstalled'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -638,7 +626,7 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ] ; then
+          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ]; then
             # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
             /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
           fi

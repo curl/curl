@@ -24,14 +24,14 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
+#include "curl_setup.h"
 
 char Curl_raw_toupper(char in);
 char Curl_raw_tolower(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
    argument is the string literal */
-#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
+#define checkprefix(a, b) curl_strnequal(b, STRCONST(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
 void Curl_strntolower(char *dest, const char *src, size_t n);

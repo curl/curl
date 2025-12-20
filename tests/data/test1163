@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,7 +11,6 @@ flaky
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -33,7 +33,7 @@ FTP wildcard with pattern ending with an open-bracket
 </command>
 </client>
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

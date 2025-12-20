@@ -38,6 +38,9 @@ single URL. When the object is first created, there is of course no components
 stored. They are then set in the object with the curl_url_set(3)
 function.
 
+The object must be destroyed with a call to curl_url_cleanup(3) when no
+longer needed.
+
 # %PROTOCOLS%
 
 # EXAMPLE

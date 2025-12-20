@@ -25,8 +25,6 @@
 
 /* test case and code based on https://github.com/curl/curl/issues/3927 */
 
-#include "memdebug.h"
-
 static int dload_progress_cb(void *a, curl_off_t b, curl_off_t c,
                              curl_off_t d, curl_off_t e)
 {
@@ -43,41 +41,41 @@ static size_t t1523_write_cb(char *d, size_t n, size_t l, void *p)
   /* take care of the data here, ignored in this example */
   (void)d;
   (void)p;
-  return n*l;
+  return n * l;
 }
 
-static CURLcode run(CURL *hnd, long limit, long time)
+static CURLcode run(CURL *curl, long limit, long time)
 {
-  curl_easy_setopt(hnd, CURLOPT_LOW_SPEED_LIMIT, limit);
-  curl_easy_setopt(hnd, CURLOPT_LOW_SPEED_TIME, time);
-  return curl_easy_perform(hnd);
+  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, limit);
+  curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, time);
+  return curl_easy_perform(curl);
 }
 
 static CURLcode test_lib1523(const char *URL)
 {
-  CURLcode ret;
-  CURL *hnd;
+  CURLcode result;
+  CURL *curl;
   char buffer[CURL_ERROR_SIZE];
   curl_global_init(CURL_GLOBAL_ALL);
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_URL, URL);
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, t1523_write_cb);
-  curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, buffer);
-  curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1523_write_cb);
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, buffer);
+  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+  curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);
 
-  ret = run(hnd, 1, 2);
-  if(ret)
-    curl_mfprintf(stderr, "error (%d) %s\n", ret, buffer);
+  result = run(curl, 1, 2);
+  if(result)
+    curl_mfprintf(stderr, "error (%d) %s\n", result, buffer);
 
-  ret = run(hnd, 12000, 1);
-  if(ret != CURLE_OPERATION_TIMEDOUT)
-    curl_mfprintf(stderr, "error (%d) %s\n", ret, buffer);
+  result = run(curl, 12000, 1);
+  if(result != CURLE_OPERATION_TIMEDOUT)
+    curl_mfprintf(stderr, "error (%d) %s\n", result, buffer);
   else
-    ret = CURLE_OK;
+    result = CURLE_OK;
 
-  curl_easy_cleanup(hnd);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return ret;
+  return result;
 }

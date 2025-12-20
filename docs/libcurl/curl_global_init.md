@@ -52,7 +52,7 @@ If this is not thread-safe (the bit mentioned above is not set), you must not
 call this function when any other thread in the program (i.e. a thread sharing
 the same memory) is running. This does not just mean no other thread that is
 using libcurl. Because curl_global_init(3) calls functions of other libraries
-that are similarly thread unsafe, it could conflict with any other thread that
+that are similarly thread-unsafe, it could conflict with any other thread that
 uses these other libraries.
 
 If you are initializing libcurl from a Windows DLL you should not initialize

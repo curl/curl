@@ -30,13 +30,11 @@
 #include <netinet/in6.h>
 #endif
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1664_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
 static CURLcode test_unit1664(const char *arg)
@@ -128,6 +126,7 @@ static CURLcode test_unit1664(const char *arg)
                    i, orgline, rc, (int)(line - orgline));
     }
   }
+
   {
     static const char *single[] = {
       "a",
@@ -171,6 +170,7 @@ static CURLcode test_unit1664(const char *arg)
                    i, orgline, rc, (int)(line - orgline));
     }
   }
+
   {
     static const char *nums[] = {
       "1",

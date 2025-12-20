@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * This example shows an FTP upload, with a rename of the file just after
  * a successful upload.
@@ -35,7 +33,7 @@
 static CURLcode test_lib505(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
@@ -54,21 +52,16 @@ static CURLcode test_lib505(const char *URL)
 
   hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
+    curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
   /* get the file size of the local file */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  hd = stat(libtest_arg2, &file_info);
-#else
   hd = fstat(fileno(hd_src), &file_info);
-#endif
   if(hd == -1) {
-    /* can't open file, bail out */
+    /* cannot open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
@@ -134,11 +127,10 @@ static CURLcode test_lib505(const char *URL)
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* and give the size of the upload (optional) */
-  test_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                   (curl_off_t)file_info.st_size);
+  test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
-  /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
+  /* Now run off and do what you have been told! */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -151,5 +143,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

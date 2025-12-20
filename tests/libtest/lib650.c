@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* This test attempts to use all form API features that are not
  * used elsewhere.
  */
@@ -32,7 +30,7 @@
 /* curl_formget callback to count characters. */
 static size_t count_chars(void *userp, const char *buf, size_t len)
 {
-  size_t *pcounter = (size_t *) userp;
+  size_t *pcounter = (size_t *)userp;
 
   (void)buf;
   *pcounter += len;
@@ -42,7 +40,7 @@ static size_t count_chars(void *userp, const char *buf, size_t len)
 static CURLcode test_lib650(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   CURLFORMcode formrc;
   struct curl_slist *headers, *headers2 = NULL;
   struct curl_httppost *formpost = NULL;
@@ -53,8 +51,7 @@ static CURLcode test_lib650(const char *URL)
   long contentlength = 0;
 
   static const char testname[] = "fieldname";
-  static char testdata[] =
-    "this is what we post to the silly web server";
+  static char testdata[] = "this is what we post to the silly web server";
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -143,7 +140,7 @@ static CURLcode test_lib650(const char *URL)
    * This is done before including stdin data because we want to reuse it
    * and stdin cannot be rewound.
    */
-  curl_formget(formpost, (void *) &formlength, count_chars);
+  curl_formget(formpost, (void *)&formlength, count_chars);
 
   /* Include length in data for external check. */
   curl_msnprintf(flbuf, sizeof(flbuf), "%zu", formlength);
@@ -192,8 +189,8 @@ static CURLcode test_lib650(const char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -206,5 +203,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

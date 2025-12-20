@@ -21,45 +21,47 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <string.h>
-
-#include <curl/curl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
-#include <errno.h>
-#endif
-#ifdef _WIN32
-#include <io.h>
-#undef stat
-#define stat _stat
-#undef fstat
-#define fstat _fstat
-#define fileno _fileno
-#else
-#include <unistd.h>
-#endif
-
 /* <DESC>
  * Performs an FTP upload and renames the file just after a successful
  * transfer.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), strerror() */
+#endif
+#endif
 
-#define LOCAL_FILE      "/tmp/uploadthis.txt"
-#define UPLOAD_FILE_AS  "while-uploading.txt"
-#define REMOTE_URL      "ftp://example.com/"  UPLOAD_FILE_AS
-#define RENAME_FILE_TO  "renamed-and-fine.txt"
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <curl/curl.h>
+
+#ifdef _WIN32
+#include <io.h>
+#undef stat
+#define stat _stati64
+#undef fstat
+#define fstat _fstati64
+#define fileno _fileno
+#else
+#include <unistd.h>
+#endif
+
+#define LOCAL_FILE     "/tmp/uploadthis.txt"
+#define UPLOAD_FILE_AS "while-uploading.txt"
+#define REMOTE_URL     "ftp://example.com/" UPLOAD_FILE_AS
+#define RENAME_FILE_TO "renamed-and-fine.txt"
 
 /* NOTE: if you want this example to work on Windows with libcurl as a DLL,
    you MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
    do so might give you a crash since a DLL may not use the variable's memory
    when passed in to it from an app like this. */
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   unsigned long nread;
   /* in real-world cases, this would probably get this data differently
@@ -78,7 +80,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   FILE *hd_src;
   struct stat file_info;
   curl_off_t fsize;
@@ -90,17 +92,12 @@ int main(void)
   /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");
   if(!hd_src) {
-    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    printf("Could not open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 2;
   }
 
   /* to get the file size */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(LOCAL_FILE, &file_info) != 0) {
-#else
   if(fstat(fileno(hd_src), &file_info) != 0) {
-#endif
     fclose(hd_src);
     return 1; /* cannot continue */
   }
@@ -109,10 +106,10 @@ int main(void)
   printf("Local file size: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", fsize);
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result) {
     fclose(hd_src);
-    return (int)res;
+    return (int)result;
   }
 
   /* get a curl handle */
@@ -123,7 +120,7 @@ int main(void)
     headerlist = curl_slist_append(headerlist, buf_2);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* enable uploading */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -144,11 +141,11 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, fsize);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* clean up the FTP commands list */
     curl_slist_free_all(headerlist);
@@ -159,5 +156,5 @@ int main(void)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

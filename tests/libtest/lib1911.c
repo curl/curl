@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* The maximum string length limit (CURL_MAX_INPUT_LENGTH) is an internal
    define not publicly exposed so we set our own */
 #define MAX_INPUT_LENGTH 8000000
@@ -34,13 +32,13 @@ static CURLcode test_lib1911(const char *URL)
   static char testbuf[MAX_INPUT_LENGTH + 2];
 
   const struct curl_easyoption *o;
-  CURL *easy;
+  CURL *curl;
   int error = 0;
   (void)URL;
 
   curl_global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
-  if(!easy) {
+  curl = curl_easy_init();
+  if(!curl) {
     curl_global_cleanup();
     return TEST_ERR_EASY_INIT;
   }
@@ -51,9 +49,7 @@ static CURLcode test_lib1911(const char *URL)
 
   curl_mprintf("string length: %zu\n", strlen(testbuf));
 
-  for(o = curl_easy_option_next(NULL);
-      o;
-      o = curl_easy_option_next(o)) {
+  for(o = curl_easy_option_next(NULL); o; o = curl_easy_option_next(o)) {
     if(o->type == CURLOT_STRING) {
       CURLcode result;
       /*
@@ -72,7 +68,7 @@ static CURLcode test_lib1911(const char *URL)
 
       /* This is a string. Make sure that passing in a string longer
          CURL_MAX_INPUT_LENGTH returns an error */
-      result = curl_easy_setopt(easy, o->id, testbuf);
+      result = curl_easy_setopt(curl, o->id, testbuf);
       switch(result) {
       case CURLE_BAD_FUNCTION_ARGUMENT: /* the most normal */
       case CURLE_UNKNOWN_OPTION: /* left out from the build */
@@ -88,7 +84,7 @@ static CURLcode test_lib1911(const char *URL)
       }
     }
   }
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
   return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
 }

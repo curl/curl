@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,9 +6,8 @@ WebSockets
 </keywords>
 </info>
 
-#
 <reply>
-<data nocheck="yes" nonewline="yes">
+<data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 200 Oblivious
 Server: test-server/fake
 Something: else
@@ -17,7 +17,6 @@ hello
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 # require Debug for the forced CURL_ENTROPY
@@ -43,7 +42,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: webbie-sox/3

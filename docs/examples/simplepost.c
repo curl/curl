@@ -22,11 +22,12 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Very simple HTTP POST
+ * Simple HTTP POST
  * </DESC>
  */
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 int main(void)
@@ -35,9 +36,9 @@ int main(void)
 
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -47,16 +48,16 @@ int main(void)
     /* if we do not provide POSTFIELDSIZE, libcurl calls strlen() by itself */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

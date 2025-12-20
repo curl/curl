@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* 3x download!
  * 1. normal
  * 2. dup handle
@@ -33,41 +31,41 @@
 
 static CURLcode test_lib575(const char *URL)
 {
-  CURL *handle = NULL;
-  CURL *duphandle = NULL;
-  CURLM *mhandle = NULL;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURL *curldupe = NULL;
+  CURLM *multi = NULL;
+  CURLcode result = CURLE_OK;
   int still_running = 0;
 
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(handle);
+  easy_init(curl);
 
-  easy_setopt(handle, CURLOPT_URL, URL);
-  easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(handle);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  res = curl_easy_perform(handle);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  duphandle = curl_easy_duphandle(handle);
-  if(!duphandle)
+  curldupe = curl_easy_duphandle(curl);
+  if(!curldupe)
     goto test_cleanup;
-  curl_easy_cleanup(handle);
-  handle = duphandle;
+  curl_easy_cleanup(curl);
+  curl = curldupe;
 
-  multi_init(mhandle);
+  multi_init(multi);
 
-  multi_add_handle(mhandle, handle);
+  multi_add_handle(multi, curl);
 
-  multi_perform(mhandle, &still_running);
+  multi_perform(multi, &still_running);
 
   abort_on_test_timeout();
 
@@ -85,7 +83,7 @@ static CURLcode test_lib575(const char *URL)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -93,7 +91,7 @@ static CURLcode test_lib575(const char *URL)
 
     abort_on_test_timeout();
 
-    multi_perform(mhandle, &still_running);
+    multi_perform(multi, &still_running);
 
     abort_on_test_timeout();
   }
@@ -102,9 +100,9 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(mhandle);
-  curl_easy_cleanup(handle);
+  curl_multi_cleanup(multi);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -64,7 +65,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://example.com/we/want/%TESTNUMBER HTTP/1.1
 Host: example.com
 User-Agent: curl/%VERSION

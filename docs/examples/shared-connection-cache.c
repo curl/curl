@@ -26,21 +26,22 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
-static void my_lock(CURL *handle, curl_lock_data data,
-                    curl_lock_access laccess, void *useptr)
+static void my_lock(CURL *curl, curl_lock_data data, curl_lock_access laccess,
+                    void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)laccess;
   (void)useptr;
   fprintf(stderr, "-> Mutex lock\n");
 }
 
-static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void my_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)useptr;
   fprintf(stderr, "<- Mutex unlock\n");
@@ -51,9 +52,9 @@ int main(void)
   CURLSH *share;
   int i;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   share = curl_share_init();
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
@@ -72,12 +73,12 @@ int main(void)
       /* use the share object */
       curl_easy_setopt(curl, CURLOPT_SHARE, share);
 
-      /* Perform the request, res gets the return code */
-      res = curl_easy_perform(curl);
+      /* Perform the request, result gets the return code */
+      result = curl_easy_perform(curl);
       /* Check for errors */
-      if(res != CURLE_OK)
+      if(result != CURLE_OK)
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
+                curl_easy_strerror(result));
 
       /* always cleanup */
       curl_easy_cleanup(curl);
@@ -86,5 +87,5 @@ int main(void)
 
   curl_share_cleanup(share);
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

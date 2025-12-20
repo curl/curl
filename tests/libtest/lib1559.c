@@ -23,13 +23,11 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1559(const char *URL)
 {
-  static const int EXCESSIVE = 10*1000*1000;
+  static const int EXCESSIVE = 10 * 1000 * 1000;
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   char *longurl = NULL;
   CURLU *u;
@@ -38,22 +36,22 @@ static CURLcode test_lib1559(const char *URL)
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
 
-  longurl = malloc(EXCESSIVE);
+  longurl = curlx_malloc(EXCESSIVE);
   if(!longurl) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   memset(longurl, 'a', EXCESSIVE);
-  longurl[EXCESSIVE-1] = 0;
+  longurl[EXCESSIVE - 1] = 0;
 
-  res = curl_easy_setopt(curl, CURLOPT_URL, longurl);
+  result = curl_easy_setopt(curl, CURLOPT_URL, longurl);
   curl_mprintf("CURLOPT_URL %d bytes URL == %d\n",
-               EXCESSIVE, res);
+               EXCESSIVE, result);
 
-  res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, longurl);
+  result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, longurl);
   curl_mprintf("CURLOPT_POSTFIELDS %d bytes data == %d\n",
-               EXCESSIVE, res);
+               EXCESSIVE, result);
 
   u = curl_url();
   if(u) {
@@ -70,9 +68,9 @@ static CURLcode test_lib1559(const char *URL)
   }
 
 test_cleanup:
-  free(longurl);
+  curlx_free(longurl);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res; /* return the final return code */
+  return result; /* return the final return code */
 }

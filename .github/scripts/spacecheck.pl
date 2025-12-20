@@ -31,10 +31,7 @@ my @tabs = (
     "Makefile\\.(am|example)\$",
     "/mkfile",
     "\\.sln\$",
-    "^tests/data/test",
-);
-
-my @mixed_eol = (
+    "^tests/data/data1706-stdout.txt",
     "^tests/data/test",
 );
 
@@ -42,8 +39,11 @@ my @need_crlf = (
     "\\.(bat|sln)\$",
 );
 
-my @space_at_eol = (
+my @double_empty_lines = (
+    "^lib/.+\\.(c|h)\$",
+    "^packages/",
     "^tests/data/test",
+    "\\.(m4|py)\$",
 );
 
 my @non_ascii_allowed = (
@@ -96,41 +96,38 @@ sub eol_detect {
 
 my $issues = 0;
 
-open my $git_ls_files, '-|', 'git ls-files' or die "Failed running git ls-files: $!";
+open(my $git_ls_files, '-|', 'git ls-files') or die "Failed running git ls-files: $!";
 while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
-    open my $fh, '<', $filename or die "Cannot open '$filename': $!";
+    open(my $fh, '<', $filename) or die "Cannot open '$filename': $!";
     my $content = do { local $/; <$fh> };
     close $fh;
 
     my @err = ();
 
     if(!fn_match($filename, @tabs) &&
-        $content =~ /\t/) {
+       $content =~ /\t/) {
         push @err, "content: has tab";
     }
 
     my $eol = eol_detect($content);
 
-    if($eol eq "" &&
-        !fn_match($filename, @mixed_eol)) {
+    if($eol eq "") {
         push @err, "content: has mixed EOL types";
     }
 
     if($eol ne "crlf" &&
-        fn_match($filename, @need_crlf)) {
+       fn_match($filename, @need_crlf)) {
         push @err, "content: must use CRLF EOL for this file type";
     }
 
     if($eol ne "lf" && $content ne "" &&
-        !fn_match($filename, @need_crlf) &&
-        !fn_match($filename, @mixed_eol)) {
+       !fn_match($filename, @need_crlf)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if(!fn_match($filename, @space_at_eol) &&
-       $content =~ /[ \t]\n/) {
+    if($content =~ /[ \t]\n/) {
         my $line;
         for my $l (split(/\n/, $content)) {
             $line++;
@@ -141,18 +138,25 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($content ne "" &&
-        $content !~ /\n\z/) {
+       $content !~ /\n\z/) {
         push @err, "content: has no EOL at EOF";
     }
 
     if($content =~ /\n\n\z/ ||
-        $content =~ /\r\n\r\n\z/) {
+       $content =~ /\r\n\r\n\z/) {
         push @err, "content: has multiple EOL at EOF";
     }
 
     if($content =~ /\n\n\n\n/ ||
-        $content =~ /\r\n\r\n\r\n\r\n/) {
+       $content =~ /\r\n\r\n\r\n\r\n/) {
         push @err, "content: has 3 or more consecutive empty lines";
+    }
+
+    if(!fn_match($filename, @double_empty_lines)) {
+        if($content =~ /\n\n\n/ ||
+           $content =~ /\r\n\r\n\r\n/) {
+            push @err, "content: has 2 consecutive empty lines";
+        }
     }
 
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {

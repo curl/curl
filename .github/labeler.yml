@@ -11,7 +11,7 @@
 # the files fit into the category, and the any-glob-to-any-file ones are added
 # as long as any file matches. The first ones are for "major" categories (the
 # PR is all about that one topic, like HTTP/3), while the second ones are
-# "addendums" that give useful information about a PR that's really mostly
+# "addendums" that give useful information about a PR that is really mostly
 # something else (e.g. CI if the PR also touches CI jobs).
 #
 # N.B. any-glob-to-all-files is misnamed; it acts like one-glob-to-all-files.
@@ -65,7 +65,7 @@ build:
               **/*.mk,\
               *.m4,\
               docs/INSTALL-CMAKE.md,\
-              lib/curl_config.h.cmake,\
+              lib/curl_config-cmake.h.in,\
               lib/libcurl*.in,\
               CMake/**,\
               CMakeLists.txt,\
@@ -98,7 +98,7 @@ cmake:
               **/CMakeLists.txt,\
               CMake/**,\
               docs/INSTALL-CMAKE.md,\
-              lib/curl_config.h.cmake,\
+              lib/curl_config-cmake.h.in,\
               tests/cmake/**\
               }"
 

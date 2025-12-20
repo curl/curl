@@ -24,7 +24,8 @@
  *
  ***************************************************************************/
 
-#define Curl_headersep(x) ((((x)==':') || ((x)==';')))
+#define Curl_headersep(x) ((((x) == ':') || ((x) == ';')))
+
 char *Curl_checkheaders(const struct Curl_easy *data,
                         const char *thisheader,
                         const size_t thislen);
@@ -33,7 +34,7 @@ void Curl_init_CONNECT(struct Curl_easy *data);
 
 CURLcode Curl_pretransfer(struct Curl_easy *data);
 
-CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp);
+CURLcode Curl_sendrecv(struct Curl_easy *data);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
 bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
 
@@ -142,8 +143,5 @@ bool Curl_xfer_recv_is_paused(struct Curl_easy *data);
 /* Enable/Disable pausing of send/recv for the transfer. */
 CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable);
 CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable);
-
-/* Query if transfer has expire timeout TOOFAST set. */
-bool Curl_xfer_is_too_fast(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_TRANSFER_H */

@@ -52,7 +52,6 @@
   curlx_convert_wchar_to_UTF8()
   curlx_convert_UTF8_to_tchar()
   curlx_convert_tchar_to_UTF8()
-  curlx_unicodefree()
 */
 
 #include "version_win32.h"

@@ -68,7 +68,6 @@
 #define SEND_TYPE_RETV int
 #endif
 
-
 #ifndef RECV_TYPE_ARG1
 #define RECV_TYPE_ARG1 int
 #endif

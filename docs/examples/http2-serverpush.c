@@ -25,20 +25,27 @@
  * HTTP/2 server push
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
+
+#ifndef CURLPIPE_MULTIPLEX
+#error "too old libcurl, cannot do HTTP/2 server push!"
+#endif
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf _snprintf
 #endif
 
-#ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, cannot do HTTP/2 server push!"
-#endif
+static FILE *out_download;
 
 static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
 {
@@ -76,7 +83,7 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
       }
       fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
+      /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
         i += (c + 3 - width);
@@ -87,11 +94,11 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
   }
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
+static int my_trace(CURL *curl, curl_infotype type,
                     char *data, size_t size, void *userp)
 {
   const char *text;
-  (void)handle;
+  (void)curl;
   (void)userp;
   switch(type) {
   case CURLINFO_TEXT:
@@ -125,40 +132,41 @@ static int my_trace(CURL *handle, curl_infotype type,
 
 #define OUTPUTFILE "dl"
 
-static int setup(CURL *hnd, const char *url)
+static int setup(CURL *curl, const char *url)
 {
-  FILE *out = fopen(OUTPUTFILE, "wb");
-  if(!out)
-    /* failed */
-    return 1;
-
-  /* write to this file */
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
+  out_download = fopen(OUTPUTFILE, "wb");
+  if(!out_download)
+    return 1; /* failed */
 
   /* set the same URL */
-  curl_easy_setopt(hnd, CURLOPT_URL, url);
-
-  /* please be verbose */
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
+  curl_easy_setopt(curl, CURLOPT_URL, url);
 
   /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
   /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-#if (CURLPIPE_MULTIPLEX > 0)
+  /* write to this file */
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, out_download);
+
+  /* please be verbose */
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+
+#if CURLPIPE_MULTIPLEX > 0
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 #endif
   return 0; /* all is good */
 }
 
+static FILE *out_push;
+
 /* called when there is an incoming push */
 static int server_push_callback(CURL *parent,
-                                CURL *easy,
+                                CURL *curl,
                                 size_t num_headers,
                                 struct curl_pushheaders *headers,
                                 void *userp)
@@ -167,7 +175,6 @@ static int server_push_callback(CURL *parent,
   size_t i;
   int *transfers = (int *)userp;
   char filename[128];
-  FILE *out;
   static unsigned int count = 0;
 
   (void)parent;
@@ -175,15 +182,15 @@ static int server_push_callback(CURL *parent,
   snprintf(filename, sizeof(filename), "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
-  out = fopen(filename, "wb");
-  if(!out) {
+  out_push = fopen(filename, "wb");
+  if(!out_push) {
     /* if we cannot save it, deny it */
     fprintf(stderr, "Failed to create output file for push\n");
     return CURL_PUSH_DENY;
   }
 
   /* write to this file */
-  curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, out_push);
 
   fprintf(stderr, "**** push callback approves stream %u, got %lu headers!\n",
           count, (unsigned long)num_headers);
@@ -199,57 +206,58 @@ static int server_push_callback(CURL *parent,
   }
 
   (*transfers)++; /* one more */
+
   return CURL_PUSH_OK;
 }
-
 
 /*
  * Download a file over HTTP/2, take care of server push.
  */
 int main(int argc, char *argv[])
 {
-  CURLcode res;
-  CURL *easy;
-  CURLM *multi_handle;
+  CURLcode result;
+  CURL *curl;
+  CURLM *multi;
   int transfers = 1; /* we start with one */
   const char *url = "https://localhost:8443/index.html";
 
   if(argc == 2)
     url = argv[1];
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
+  multi = curl_multi_init();
+  if(!multi)
+    goto error;
 
-  easy = curl_easy_init();
+  curl = curl_easy_init();
 
   /* set options */
-  if(setup(easy, url)) {
+  if(!curl || setup(curl, url)) {
     fprintf(stderr, "failed\n");
-    curl_global_cleanup();
-    return 1;
+    goto error;
   }
 
-  /* add the easy transfer */
-  curl_multi_add_handle(multi_handle, easy);
+  curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, server_push_callback);
+  curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &transfers);
 
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHFUNCTION, server_push_callback);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
+  /* add the easy transfer */
+  curl_multi_add_handle(multi, curl);
 
   do {
     struct CURLMsg *m;
     int still_running; /* keep number of running handles */
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if(mresult)
       break;
 
     /*
@@ -257,22 +265,29 @@ int main(int argc, char *argv[])
      * created and added one or more easy handles but we need to clean them up
      * when we are done.
      */
-
     do {
       int msgq = 0;
-      m = curl_multi_info_read(multi_handle, &msgq);
+      m = curl_multi_info_read(multi, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+        curl = m->easy_handle;
         transfers--;
-        curl_multi_remove_handle(multi_handle, e);
-        curl_easy_cleanup(e);
+        curl_multi_remove_handle(multi, curl);
+        curl_easy_cleanup(curl);
       }
     } while(m);
 
   } while(transfers); /* as long as we have transfers going */
 
-  curl_multi_cleanup(multi_handle);
+error:
+
+  if(multi)
+    curl_multi_cleanup(multi);
+
   curl_global_cleanup();
+
+  fclose(out_download);
+  if(out_push)
+    fclose(out_push);
 
   return 0;
 }

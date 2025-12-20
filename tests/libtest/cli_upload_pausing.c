@@ -26,7 +26,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static size_t total_read = 0;
 
@@ -85,8 +84,8 @@ static void usage_upload_pausing(const char *msg)
 
 static CURLcode test_cli_upload_pausing(const char *URL)
 {
-  CURL *curl;
-  CURLcode rc = CURLE_OK;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
@@ -126,35 +125,44 @@ static CURLcode test_cli_upload_pausing(const char *URL)
   }
   url = test_argv[0];
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
+
   curl_global_trace("ids,time");
 
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", url);
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     curl_mfprintf(stderr, "could not get host of '%s'\n", url);
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     curl_mfprintf(stderr, "could not get port of '%s'\n", url);
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   memset(&resolve, 0, sizeof(resolve));
-  curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
+  curl_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1",
                  host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "out of memory\n");
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   /* We want to use our own read function. */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -181,23 +189,25 @@ static CURLcode test_cli_upload_pausing(const char *URL)
      curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb) != CURLE_OK ||
      curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK) {
     curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");
-    return (CURLcode)2;
+    result = (CURLcode)2;
+    goto cleanup;
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
 
-  rc = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
-  if(curl) {
+cleanup:
+
+  if(curl)
     curl_easy_cleanup(curl);
-  }
-
   curl_slist_free_all(resolve);
   curl_free(host);
   curl_free(port);
-  curl_url_cleanup(cu);
+  if(cu)
+    curl_url_cleanup(cu);
   curl_global_cleanup();
 
-  return rc;
+  return result;
 }

@@ -1,12 +1,11 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 </keywords>
 </info>
-#
 # This reproduces issue #3340
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -40,16 +39,13 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
 
 </strippart>
-<protocol>
-</protocol>
 <stdout>
-res 0
+result 0
 status 302
 redirects 0
 effectiveurl http://%HOSTIP:%HTTPPORT/%TESTNUMBER

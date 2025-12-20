@@ -53,22 +53,15 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "escape.h"
-#include "progress.h"
 #include "dict.h"
 
-/* The last 2 #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-
-#define DICT_MATCH "/MATCH:"
-#define DICT_MATCH2 "/M:"
-#define DICT_MATCH3 "/FIND:"
-#define DICT_DEFINE "/DEFINE:"
+#define DICT_MATCH   "/MATCH:"
+#define DICT_MATCH2  "/M:"
+#define DICT_MATCH3  "/FIND:"
+#define DICT_DEFINE  "/DEFINE:"
 #define DICT_DEFINE2 "/D:"
 #define DICT_DEFINE3 "/LOOKUP:"
 
@@ -160,9 +153,9 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
     if(result)
       break;
 
-    Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written);
 
-    if((size_t)bytes_written != write_len) {
+    if(bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
          the size left and try again! */
       write_len -= bytes_written;
@@ -172,7 +165,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
       break;
   }
 
-  free(s); /* free the output string */
+  curlx_free(s); /* free the output string */
 
   return result;
 }
@@ -197,9 +190,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  if(curl_strnequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
-     curl_strnequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
-     curl_strnequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
+  if(curl_strnequal(path, DICT_MATCH, sizeof(DICT_MATCH) - 1) ||
+     curl_strnequal(path, DICT_MATCH2, sizeof(DICT_MATCH2) - 1) ||
+     curl_strnequal(path, DICT_MATCH3, sizeof(DICT_MATCH3) - 1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -244,9 +237,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
     Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
   }
-  else if(curl_strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
-          curl_strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
-          curl_strnequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
+  else if(curl_strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE) - 1) ||
+          curl_strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2) - 1) ||
+          curl_strnequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3) - 1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -310,8 +303,8 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   }
 
 error:
-  free(eword);
-  free(path);
+  curlx_free(eword);
+  curlx_free(path);
   return result;
 }
 #endif /* CURL_DISABLE_DICT */

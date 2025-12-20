@@ -41,7 +41,6 @@
  of URL's and creates some new easy handles to fetch each URL via the
  curl_multi "hiper" API.
 
-
  Thus, you can try a single URL:
  % echo http://www.yahoo.com > hiper.fifo
 
@@ -55,19 +54,20 @@
  callback.
 
 */
-
 #include <glib.h>
-#include <sys/stat.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sys/stat.h>
+
 #include <curl/curl.h>
 
-#define MSG_OUT g_print   /* Change to "g_error" to write to stderr */
-#define SHOW_VERBOSE 0L   /* Set to non-zero for libcurl messages */
-#define SHOW_PROGRESS 0   /* Set to non-zero to enable progress callback */
+#define MSG_OUT       g_print /* Change to "g_error" to write to stderr */
+#define SHOW_VERBOSE  0L      /* Set to non-zero for libcurl messages */
+#define SHOW_PROGRESS 0       /* Set to non-zero to enable progress callback */
 
 /* Global information, common to all connections */
 struct GlobalInfo {
@@ -78,7 +78,7 @@ struct GlobalInfo {
 
 /* Information associated with a specific easy handle */
 struct ConnInfo {
-  CURL *easy;
+  CURL *curl;
   char *url;
   struct GlobalInfo *global;
   char error[CURL_ERROR_SIZE];
@@ -87,7 +87,7 @@ struct ConnInfo {
 /* Information associated with a specific socket */
 struct SockInfo {
   curl_socket_t sockfd;
-  CURL *easy;
+  CURL *curl;
   int action;
   long timeout;
   GIOChannel *ch;
@@ -101,14 +101,27 @@ static void mcode_or_die(const char *where, CURLMcode code)
   if(CURLM_OK != code) {
     const char *s;
     switch(code) {
-    case     CURLM_BAD_HANDLE:         s = "CURLM_BAD_HANDLE";         break;
-    case     CURLM_BAD_EASY_HANDLE:    s = "CURLM_BAD_EASY_HANDLE";    break;
-    case     CURLM_OUT_OF_MEMORY:      s = "CURLM_OUT_OF_MEMORY";      break;
-    case     CURLM_INTERNAL_ERROR:     s = "CURLM_INTERNAL_ERROR";     break;
-    case     CURLM_BAD_SOCKET:         s = "CURLM_BAD_SOCKET";         break;
-    case     CURLM_UNKNOWN_OPTION:     s = "CURLM_UNKNOWN_OPTION";     break;
-    case     CURLM_LAST:               s = "CURLM_LAST";               break;
-    default: s = "CURLM_unknown";
+    case CURLM_BAD_HANDLE:
+      s = "CURLM_BAD_HANDLE";
+      break;
+    case CURLM_BAD_EASY_HANDLE:
+      s = "CURLM_BAD_EASY_HANDLE";
+      break;
+    case CURLM_OUT_OF_MEMORY:
+      s = "CURLM_OUT_OF_MEMORY";
+      break;
+    case CURLM_INTERNAL_ERROR:
+      s = "CURLM_INTERNAL_ERROR";
+      break;
+    case CURLM_BAD_SOCKET:
+      s = "CURLM_BAD_SOCKET";
+      break;
+    case CURLM_UNKNOWN_OPTION:
+      s = "CURLM_UNKNOWN_OPTION";
+      break;
+    default:
+      s = "CURLM_unknown";
+      break;
     }
     MSG_OUT("ERROR: %s returns %s\n", where, s);
     exit(code);
@@ -124,16 +137,16 @@ static void check_multi_info(struct GlobalInfo *g)
   MSG_OUT("REMAINING: %d\n", g->still_running);
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
-      CURL *easy = msg->easy_handle;
-      CURLcode res = msg->data.result;
+      CURL *curl = msg->easy_handle;
+      CURLcode result = msg->data.result;
       char *eff_url;
       struct ConnInfo *conn;
-      curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
-      curl_easy_getinfo(easy, CURLINFO_EFFECTIVE_URL, &eff_url);
-      MSG_OUT("DONE: %s => (%d) %s\n", eff_url, res, conn->error);
-      curl_multi_remove_handle(g->multi, easy);
+      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
+      MSG_OUT("DONE: %s => (%d) %s\n", eff_url, result, conn->error);
+      curl_multi_remove_handle(g->multi, curl);
       free(conn->url);
-      curl_easy_cleanup(easy);
+      curl_easy_cleanup(curl);
       free(conn);
     }
   }
@@ -143,11 +156,11 @@ static void check_multi_info(struct GlobalInfo *g)
 static gboolean timer_cb(gpointer data)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)data;
-  CURLMcode rc;
+  CURLMcode mresult;
 
-  rc = curl_multi_socket_action(g->multi,
+  mresult = curl_multi_socket_action(g->multi,
                                 CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", rc);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
   return FALSE;
 }
@@ -157,8 +170,8 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 {
   struct timeval timeout;
   struct GlobalInfo *g = (struct GlobalInfo *)userp;
-  timeout.tv_sec = timeout_ms/1000;
-  timeout.tv_usec = (timeout_ms%1000)*1000;
+  timeout.tv_sec = timeout_ms / 1000;
+  timeout.tv_usec = (timeout_ms % 1000) * 1000;
 
   MSG_OUT("*** update_timeout_cb %ld => %ld:%ld ***\n",
           timeout_ms, timeout.tv_sec, timeout.tv_usec);
@@ -177,16 +190,16 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 /* Called by glib when we get action on a multi socket */
 static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 {
-  struct GlobalInfo *g = (struct GlobalInfo*) data;
-  CURLMcode rc;
+  struct GlobalInfo *g = (struct GlobalInfo *)data;
+  CURLMcode mresult;
   int fd = g_io_channel_unix_get_fd(ch);
 
   int action =
     ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
     ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
 
-  rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
-  mcode_or_die("event_cb: curl_multi_socket_action", rc);
+  mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
+  mcode_or_die("event_cb: curl_multi_socket_action", mresult);
 
   check_multi_info(g);
   if(g->still_running) {
@@ -223,7 +236,7 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
 
   f->sockfd = s;
   f->action = act;
-  f->easy = e;
+  f->curl = e;
   if(f->ev) {
     g_source_remove(f->ev);
   }
@@ -231,23 +244,23 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
 }
 
 /* Initialize a new SockInfo structure */
-static void addsock(curl_socket_t s, CURL *easy, int action,
+static void addsock(curl_socket_t s, CURL *curl, int action,
                     struct GlobalInfo *g)
 {
   struct SockInfo *fdp = g_malloc0(sizeof(struct SockInfo));
 
   fdp->global = g;
   fdp->ch = g_io_channel_unix_new(s);
-  setsock(fdp, s, easy, action, g);
+  setsock(fdp, s, curl, action, g);
   curl_multi_assign(g->multi, s, fdp);
 }
 
 /* CURLMOPT_SOCKETFUNCTION */
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  struct GlobalInfo *g = (struct GlobalInfo*) cbp;
-  struct SockInfo *fdp = (struct SockInfo*) sockp;
-  static const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
+  struct GlobalInfo *g = (struct GlobalInfo *)cbp;
+  struct SockInfo *fdp = (struct SockInfo *)sockp;
+  static const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
 
   MSG_OUT("socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {
@@ -262,8 +275,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
       addsock(s, e, what, g);
     }
     else {
-      MSG_OUT(
-        "Changing action from %d to %d\n", fdp->action, what);
+      MSG_OUT("Changing action from %d to %d\n", fdp->action, what);
       setsock(fdp, s, e, what, g);
     }
   }
@@ -274,7 +286,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   size_t realsize = size * nmemb;
-  struct ConnInfo *conn = (struct ConnInfo*) data;
+  struct ConnInfo *conn = (struct ConnInfo *)data;
   (void)ptr;
   (void)conn;
   return realsize;
@@ -288,8 +300,8 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
-          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T "/"
+          "%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
@@ -297,34 +309,34 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
 static void new_conn(const char *url, struct GlobalInfo *g)
 {
   struct ConnInfo *conn;
-  CURLMcode rc;
+  CURLMcode mresult;
 
   conn = g_malloc0(sizeof(*conn));
   conn->error[0] = '\0';
-  conn->easy = curl_easy_init();
-  if(!conn->easy) {
+  conn->curl = curl_easy_init();
+  if(!conn->curl) {
     MSG_OUT("curl_easy_init() failed, exiting!\n");
     exit(2);
   }
   conn->global = g;
   conn->url = g_strdup(url);
-  curl_easy_setopt(conn->easy, CURLOPT_URL, conn->url);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, write_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, &conn);
-  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, SHOW_VERBOSE);
-  curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
-  curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, SHOW_PROGRESS ? 0L : 1L);
-  curl_easy_setopt(conn->easy, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_PROGRESSDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1L);
-  curl_easy_setopt(conn->easy, CURLOPT_CONNECTTIMEOUT, 30L);
-  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_LIMIT, 1L);
-  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_TIME, 30L);
+  curl_easy_setopt(conn->curl, CURLOPT_URL, conn->url);
+  curl_easy_setopt(conn->curl, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(conn->curl, CURLOPT_WRITEDATA, &conn);
+  curl_easy_setopt(conn->curl, CURLOPT_VERBOSE, SHOW_VERBOSE);
+  curl_easy_setopt(conn->curl, CURLOPT_ERRORBUFFER, conn->error);
+  curl_easy_setopt(conn->curl, CURLOPT_PRIVATE, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_NOPROGRESS, SHOW_PROGRESS ? 0L : 1L);
+  curl_easy_setopt(conn->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
+  curl_easy_setopt(conn->curl, CURLOPT_PROGRESSDATA, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(conn->curl, CURLOPT_CONNECTTIMEOUT, 30L);
+  curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
+  curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_TIME, 30L);
 
-  MSG_OUT("Adding easy %p to multi %p (%s)\n", conn->easy, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->easy);
-  mcode_or_die("new_conn: curl_multi_add_handle", rc);
+  MSG_OUT("Adding easy %p to multi %p (%s)\n", conn->curl, g->multi, url);
+  mresult = curl_multi_add_handle(g->multi, conn->curl);
+  mcode_or_die("new_conn: curl_multi_add_handle", mresult);
 
   /* note that add_handle() sets a timeout to trigger soon so that the
      necessary socket_action() gets called */
@@ -343,18 +355,18 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
     rv = g_io_channel_read_line(ch, &buf, &len, &tp, &err);
     if(buf) {
       if(tp) {
-        buf[tp]='\0';
+        buf[tp] = '\0';
       }
-      new_conn(buf, (struct GlobalInfo*)data);
+      new_conn(buf, (struct GlobalInfo *)data);
       g_free(buf);
     }
     else {
       buf = g_malloc(BUF_SIZE + 1);
       while(TRUE) {
-        buf[BUF_SIZE]='\0';
+        buf[BUF_SIZE] = '\0';
         g_io_channel_read_chars(ch, buf, BUF_SIZE, &len, &err);
         if(len) {
-          buf[len]='\0';
+          buf[len] = '\0';
           if(all) {
             tmp = all;
             all = g_strdup_printf("%s%s", tmp, buf);
@@ -369,7 +381,7 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
         }
       }
       if(all) {
-        new_conn(all, (struct GlobalInfo*)data);
+        new_conn(all, (struct GlobalInfo *)data);
         g_free(all);
       }
       g_free(buf);
@@ -417,13 +429,13 @@ int init_fifo(void)
 int main(void)
 {
   struct GlobalInfo *g = g_malloc0(sizeof(struct GlobalInfo));
-  GMainLoop*gmain;
+  GMainLoop *gmain;
   int fd;
-  GIOChannel* ch;
+  GIOChannel *ch;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   fd = init_fifo();
   if(fd == CURL_SOCKET_BAD) {

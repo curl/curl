@@ -23,7 +23,7 @@
 #
 ###########################################################################
 #
-# Scan manpage(s) and detect some simple and yet common formatting mistakes.
+# Scan man page(s) and detect some simple and yet common formatting mistakes.
 #
 # Output all deviances to stderr.
 
@@ -31,10 +31,10 @@ use strict;
 use warnings;
 use File::Basename;
 
-# get the file name first
+# get the filename first
 my $symbolsinversions=shift @ARGV;
 
-# we may get the dir roots pointed out
+# we may get the directory roots pointed out
 my @manpages=@ARGV;
 my $errors = 0;
 
@@ -94,7 +94,6 @@ sub allsymbols {
     close($f);
 }
 
-
 my %ref = (
     'curl.1' => 1
     );
@@ -119,7 +118,7 @@ sub checkref {
     }
 }
 
-# option-looking words that aren't options
+# option-looking words that are not options
 my %allownonref = (
     'CURLINFO_TEXT' => 1,
     'CURLINFO_HEADER_IN' => 1,
@@ -148,7 +147,7 @@ sub scanmanpage {
     open(my $m, "<", "$file") ||
         die "test1173.pl could not open $file";
     if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
-        # This is a manpage for libcurl. It requires an example unless it's
+        # This is a man page for libcurl. It requires an example unless it is
         # considered deprecated.
         $reqex = 1 unless defined $deprecated{'CURL'.$2};
         if($1 eq "CURL") {
@@ -159,12 +158,12 @@ sub scanmanpage {
     while(<$m>) {
         chomp;
         if($_ =~ /^.so /) {
-            # this manpage is just a referral
+            # this man page is just a referral
             close($m);
             return;
         }
         if(($_ =~ /^\.SH SYNOPSIS/i) && ($reqex)) {
-            # this is for libcurl manpage SYNOPSIS checks
+            # this is for libcurl man page SYNOPSIS checks
             $insynop = 1;
             $inexample = 0;
         }
@@ -254,7 +253,7 @@ sub scanmanpage {
         if($_ =~ /(.*)\\f([^BIP])/) {
             my ($pre, $format) = ($1, $2);
             if($pre !~ /\\\z/) {
-                # only if there wasn't another backslash before the \f
+                # only if there was not another backslash before the \f
                 print STDERR "$file:$line suspicious \\f format!\n";
                 $errors++;
             }
@@ -266,10 +265,9 @@ sub scanmanpage {
             $errors++;
         }
 
-
         if($optpage && $SH && ($SH !~ /^(SYNOPSIS|EXAMPLE|NAME|SEE ALSO)/i) &&
            ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_|SHOPT_)[A-Z0-9_]*)/)) {
-            # an option with its own manpage, check that it is tagged
+            # an option with its own man page, check that it is tagged
             # for linking
             my ($pref, $symbol) = ($1, $2);
             if($deprecated{$symbol}) {
@@ -318,7 +316,7 @@ sub scanmanpage {
         }
 
         if($shcount < 3) {
-            print STDERR "$file:$line too few manpage sections!\n";
+            print STDERR "$file:$line too few man page sections!\n";
             $errors++;
             return;
         }
@@ -372,7 +370,7 @@ sub scanmanpage {
 allsymbols();
 
 if(!$symbol{'CURLALTSVC_H1'}) {
-    print STDERR "didn't get the symbols-in-version!\n";
+    print STDERR "did not get the symbols-in-version!\n";
     exit;
 }
 

@@ -144,9 +144,10 @@ The CURLOPT_REDIR_PROTOCOLS_STR(3) and CURLOPT_NETRC(3) options can be
 used to mitigate against this kind of attack.
 
 A redirect can also specify a location available only on the machine running
-libcurl, including servers hidden behind a firewall from the attacker.
-E.g. **http://127.0.0.1/** or **http://intranet/delete-stuff.cgi?delete=all** or
-**tftp://bootp-server/pc-config-data**
+libcurl, including servers hidden behind a firewall from the attacker. E.g.
+**https://127.0.0.1/** or
+**https://intranet.example/delete-stuff.cgi?delete=all** or
+**tftp://bootp-server.example/pc-config-data**
 
 Applications can mitigate against this by disabling
 CURLOPT_FOLLOWLOCATION(3) and handling redirects itself, sanitizing URLs
@@ -172,11 +173,10 @@ way you did not intend such as injecting new headers.
 A user who can control the DNS server of a domain being passed in within a URL
 can change the address of the host to a local, private address which a
 server-side libcurl-using application could then use. E.g. the innocuous URL
-**http://fuzzybunnies.example.com/** could actually resolve to the IP
-address of a server behind a firewall, such as 127.0.0.1 or
-10.1.2.3. Applications can mitigate against this by setting a
-CURLOPT_OPENSOCKETFUNCTION(3) or CURLOPT_PREREQFUNCTION(3) and
-checking the address before a connection.
+**https://fuzzybunnies.example.com/** could actually resolve to the IP address
+of a server behind a firewall, such as 127.0.0.1 or 10.1.2.3. Applications can
+mitigate against this by setting a CURLOPT_OPENSOCKETFUNCTION(3) or
+CURLOPT_PREREQFUNCTION(3) and checking the address before a connection.
 
 All the malicious scenarios regarding redirected URLs apply just as well to
 non-redirected URLs, if the user is allowed to specify an arbitrary URL that
@@ -254,7 +254,7 @@ the request.
 If cookies are enabled and cached, then a user could craft a URL which
 performs some malicious action to a site whose authentication is already
 stored in a cookie. E.g.
-**http://mail.example.com/delete-stuff.cgi?delete=all** Applications can
+**https://mail.example.com/delete-stuff.cgi?delete=all** Applications can
 mitigate against this by disabling cookies or clearing them between requests.
 
 # Dangerous SCP URLs
@@ -315,8 +315,8 @@ if creative use of special characters are applied?
 
 If the user can set the URL, the user can also specify the scheme part to
 other protocols that you did not intend for users to use and perhaps did not
-consider. curl supports over 20 different URL schemes. "http://" might be what
-you thought, "ftp://" or "imap://" might be what the user gives your
+consider. curl supports over 27 different URL schemes. `https://` might be
+what you expect, `ftp://` or `imap://` might be what the user gives your
 application. Also, cross-protocol operations might be done by using a
 particular scheme in the URL but point to a server doing a different protocol
 on a non-standard port.

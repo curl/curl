@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Two FTP uploads, the second with no content sent.
  */
@@ -32,7 +30,7 @@
 static CURLcode test_lib541(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
@@ -45,21 +43,16 @@ static CURLcode test_lib541(const char *URL)
 
   hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
+    curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
   /* get the file size of the local file */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  hd = stat(libtest_arg2, &file_info);
-#else
   hd = fstat(fileno(hd_src), &file_info);
-#endif
   if(hd == -1) {
-    /* can't open file, bail out */
+    /* cannot open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
@@ -100,14 +93,14 @@ static CURLcode test_lib541(const char *URL)
   /* now specify which file to upload */
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
-  /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
-  if(res)
+  /* Now run off and do what you have been told! */
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -117,5 +110,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

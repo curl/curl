@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,10 +6,9 @@ netrc
 HTTP
 </keywords>
 </info>
-#
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -24,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -54,7 +53,7 @@ password $y$j9T$WUVjiVvDbRAWafDLs6cab1$01NX.oaZKf5lw8MR2Nk9Yaxv4CqbE0IaDF.GpGxPu
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://github.com/ HTTP/1.1
 Host: github.com
 Authorization: Basic %b64[daniel:$y$j9T$WUVjiVvDbRAWafDLs6cab1$01NX.oaZKf5lw8MR2Nk9Yaxv4CqbE0IaDF.GpGxPul1]b64%

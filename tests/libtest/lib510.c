@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t510_WriteThis {
   int counter;
 };
@@ -42,14 +40,14 @@ static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t510_WriteThis *pooh = (struct t510_WriteThis *)userp;
   const char *data;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   data = testpost[pooh->counter];
 
   if(data) {
     size_t len = strlen(data);
-    if(size*nmemb < len) {
+    if(size * nmemb < len) {
       curl_mfprintf(stderr, "read buffer is too small to run test\n");
       return 0;
     }
@@ -63,7 +61,7 @@ static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib510(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct curl_slist *slist = NULL;
   struct t510_WriteThis pooh;
   pooh.counter = 0;
@@ -114,8 +112,8 @@ static CURLcode test_lib510(const char *URL)
     test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
   }
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -127,5 +125,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

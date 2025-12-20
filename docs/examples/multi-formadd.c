@@ -25,12 +25,10 @@
  * using the multi interface to do a multipart formpost without blocking
  * </DESC>
  */
-
 /*
- * Warning: this example uses the deprecated form api. See "multi-post.c"
- *          for a similar example using the mime api.
+ * Warning: this example uses the deprecated form API. See "multi-post.c"
+ *          for a similar example using the mime API.
  */
-
 #include <stdio.h>
 #include <string.h>
 
@@ -45,13 +43,13 @@ int main(void)
   struct curl_slist *headerlist = NULL;
   static const char buf[] = "Expect:";
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   CURL_IGNORE_DEPRECATION(
     /* Fill in the file upload field. This makes libcurl load data from
-       the given file name when curl_easy_perform() is called. */
+       the given filename when curl_easy_perform() is called. */
     curl_formadd(&formpost,
                  &lastptr,
                  CURLFORM_COPYNAME, "sendfile",
@@ -79,10 +77,10 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    CURLM *multi_handle;
+    CURLM *multi;
 
-    multi_handle = curl_multi_init();
-    if(multi_handle) {
+    multi = curl_multi_init();
+    if(multi) {
 
       int still_running = 0;
 
@@ -96,21 +94,21 @@ int main(void)
         curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
       )
 
-      curl_multi_add_handle(multi_handle, curl);
+      curl_multi_add_handle(multi, curl);
 
       do {
-        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+        CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
         if(still_running)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+          mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-        if(mc)
+        if(mresult)
           break;
 
       } while(still_running);
 
-      curl_multi_cleanup(multi_handle);
+      curl_multi_cleanup(multi);
     }
 
     /* always cleanup */

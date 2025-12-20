@@ -25,20 +25,16 @@
 #
 # Input variables:
 #
-# - `MBEDTLS_INCLUDE_DIR`:   Absolute path to mbedTLS include directory.
-# - `MBEDTLS_LIBRARY`:       Absolute path to `mbedtls` library.
-# - `MBEDX509_LIBRARY`:      Absolute path to `mbedx509` library.
-# - `MBEDCRYPTO_LIBRARY`:    Absolute path to `mbedcrypto` library.
+# - `MBEDTLS_INCLUDE_DIR`:  Absolute path to mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:      Absolute path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:     Absolute path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:   Absolute path to `mbedcrypto` library.
 #
-# Result variables:
+# Defines:
 #
-# - `MBEDTLS_FOUND`:         System has mbedTLS.
-# - `MBEDTLS_INCLUDE_DIRS`:  The mbedTLS include directories.
-# - `MBEDTLS_LIBRARIES`:     The mbedTLS library names.
-# - `MBEDTLS_LIBRARY_DIRS`:  The mbedTLS library directories.
-# - `MBEDTLS_PC_REQUIRES`:   The mbedTLS pkg-config packages.
-# - `MBEDTLS_CFLAGS`:        Required compiler flags.
-# - `MBEDTLS_VERSION`:       Version of mbedTLS.
+# - `MBEDTLS_FOUND`:        System has mbedTLS.
+# - `MBEDTLS_VERSION`:      Version of mbedTLS.
+# - `CURL::mbedtls`:        mbedTLS library target.
 
 if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   message(WARNING "MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.")
@@ -46,7 +42,7 @@ if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   unset(MBEDTLS_INCLUDE_DIRS)
 endif()
 
-set(MBEDTLS_PC_REQUIRES "mbedtls" "mbedx509" "mbedcrypto")
+set(_mbedtls_pc_requires "mbedtls" "mbedx509" "mbedcrypto")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MBEDTLS_INCLUDE_DIR AND
@@ -54,16 +50,16 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MBEDX509_LIBRARY AND
    NOT DEFINED MBEDCRYPTO_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(MBEDTLS ${MBEDTLS_PC_REQUIRES})
+  pkg_check_modules(_mbedtls ${_mbedtls_pc_requires})
 endif()
 
-if(MBEDTLS_FOUND)
+if(_mbedtls_FOUND)
   set(MbedTLS_FOUND TRUE)
-  set(MBEDTLS_VERSION ${MBEDTLS_mbedtls_VERSION})
-  string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
-  message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
+  set(MBEDTLS_FOUND TRUE)
+  set(MBEDTLS_VERSION ${_mbedtls_mbedtls_VERSION})
+  message(STATUS "Found MbedTLS (via pkg-config): ${_mbedtls_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
-  set(MBEDTLS_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
+  set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h")
   find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls")
@@ -92,9 +88,25 @@ else()
   )
 
   if(MBEDTLS_FOUND)
-    set(MBEDTLS_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
-    set(MBEDTLS_LIBRARIES    ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
+    set(_mbedtls_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
+    set(_mbedtls_LIBRARIES    ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
   endif()
 
   mark_as_advanced(MBEDTLS_INCLUDE_DIR MBEDTLS_LIBRARY MBEDX509_LIBRARY MBEDCRYPTO_LIBRARY)
+endif()
+
+if(MBEDTLS_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_mbedtls_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::mbedtls)
+    add_library(CURL::mbedtls INTERFACE IMPORTED)
+    set_target_properties(CURL::mbedtls PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_mbedtls_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_mbedtls_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_mbedtls_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_mbedtls_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_mbedtls_LIBRARIES}")
+  endif()
 endif()

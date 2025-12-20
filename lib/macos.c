@@ -26,8 +26,6 @@
 
 #ifdef CURL_MACOS_CALL_COPYPROXIES
 
-#include <curl/curl.h>
-
 #include "macos.h"
 
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>

@@ -27,11 +27,13 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* silly test data to POST */
-static const char data[]="Lorem ipsum dolor sit amet, consectetur adipiscing "
-  "elit. Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
+static const char data[] =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+  "Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
   "laoreet rhoncus, odio ipsum semper metus, at tempus ante urna in mauris. "
   "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a ______ "
   "eget, mattis vitae ligula. Fusce ut pharetra est. Ut ullamcorper mi ac "
@@ -43,10 +45,10 @@ struct WriteThis {
   size_t sizeleft;
 };
 
-static size_t read_callback(char *dest, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *dest, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *wt = (struct WriteThis *)userp;
-  size_t buffer_size = size*nmemb;
+  size_t buffer_size = size * nmemb;
 
   if(wt->sizeleft) {
     /* copy as much as possible from the source to the destination */
@@ -60,13 +62,13 @@ static size_t read_callback(char *dest, size_t size, size_t nmemb, void *userp)
     return copy_this_much; /* we copied this many bytes */
   }
 
-  return 0; /* no more data left to deliver */
+  return 0;  /* no more data left to deliver */
 }
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   struct WriteThis wt;
 
@@ -74,12 +76,12 @@ int main(void)
   wt.sizeleft = strlen(data);
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_DEFAULT);
+  result = curl_global_init(CURL_GLOBAL_DEFAULT);
   /* Check for errors */
-  if(res != CURLE_OK) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed: %s\n",
-            curl_easy_strerror(res));
-    return (int)res;
+            curl_easy_strerror(result));
+    return (int)result;
   }
 
   /* get a curl handle */
@@ -92,7 +94,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* pointer to pass to our read function */
     curl_easy_setopt(curl, CURLOPT_READDATA, &wt);
@@ -112,7 +114,7 @@ int main(void)
       struct curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Transfer-Encoding: chunked");
-      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+      result = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
       /* use curl_slist_free_all() after the *perform() call to free this
          list again */
     }
@@ -135,18 +137,18 @@ int main(void)
       struct curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Expect:");
-      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+      result = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
       /* use curl_slist_free_all() after the *perform() call to free this
          list again */
     }
 #endif
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);

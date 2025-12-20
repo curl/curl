@@ -199,94 +199,115 @@ class EnvConfig:
             ]),
         ]
 
+        self.openssl = 'openssl'
+        p = subprocess.run(args=[self.openssl, 'version'],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            # no openssl in path
+            self.openssl = None
+            self.openssl_version = None
+        else:
+            self.openssl_version = p.stdout.strip()
+
         self.nghttpx = self.config['nghttpx']['nghttpx']
         if len(self.nghttpx.strip()) == 0:
             self.nghttpx = None
         self._nghttpx_version = None
         self.nghttpx_with_h3 = False
         if self.nghttpx is not None:
-            try:
-                self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
-                self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
-            except RuntimeError:
-                # not a working nghttpx
-                log.exception('checking nghttpx version')
-                self.nghttpx = None
+            self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
+            self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
 
         self.caddy = self.config['caddy']['caddy']
         self._caddy_version = None
         if len(self.caddy.strip()) == 0:
             self.caddy = None
         if self.caddy is not None:
-            try:
-                p = subprocess.run(args=[self.caddy, 'version'],
-                                   capture_output=True, text=True)
-                if p.returncode != 0:
-                    # not a working caddy
-                    self.caddy = None
-                m = re.match(r'v?(\d+\.\d+\.\d+).*', p.stdout)
-                if m:
-                    self._caddy_version = m.group(1)
-                else:
-                    raise RuntimeError(f'Unable to determine cadd version from: {p.stdout}')
-            # TODO: specify specific exceptions here
-            except:  # noqa: E722
+            p = subprocess.run(args=[self.caddy, 'version'],
+                               capture_output=True, text=True)
+            if p.returncode != 0:
+                # not a working caddy
                 self.caddy = None
+            m = re.match(r'v?(\d+\.\d+\.\d+).*', p.stdout)
+            if m:
+                self._caddy_version = m.group(1)
+            else:
+                raise RuntimeError(f'Unable to determine cadd version from: {p.stdout}')
 
         self.vsftpd = self.config['vsftpd']['vsftpd']
         if self.vsftpd == '':
             self.vsftpd = None
         self._vsftpd_version = None
         if self.vsftpd is not None:
-            try:
-                with tempfile.TemporaryFile('w+') as tmp:
-                    p = subprocess.run(args=[self.vsftpd, '-v'],
-                                       capture_output=True, text=True, stdin=tmp)
-                    if p.returncode != 0:
-                        # not a working vsftpd
-                        self.vsftpd = None
-                    if p.stderr:
-                        ver_text = p.stderr
-                    else:
-                        # Oddly, some versions of vsftpd write to stdin (!)
-                        # instead of stderr, which is odd but works. If there
-                        # is nothing on stderr, read the file on stdin and use
-                        # any data there instead.
-                        tmp.seek(0)
-                        ver_text = tmp.read()
-                m = re.match(r'vsftpd: version (\d+\.\d+\.\d+)', ver_text)
-                if m:
-                    self._vsftpd_version = m.group(1)
-                elif len(p.stderr) == 0:
-                    # vsftp does not use stdout or stderr for printing its version... -.-
-                    self._vsftpd_version = 'unknown'
+            with tempfile.TemporaryFile('w+') as tmp:
+                p = subprocess.run(args=[self.vsftpd, '-v'],
+                                   capture_output=True, text=True, stdin=tmp)
+                if p.returncode != 0:
+                    # not a working vsftpd
+                    self.vsftpd = None
+                if p.stderr:
+                    ver_text = p.stderr
                 else:
-                    raise Exception(f'Unable to determine VsFTPD version from: {p.stderr}')
-            except Exception:
-                self.vsftpd = None
+                    # Oddly, some versions of vsftpd write to stdin (!)
+                    # instead of stderr, which is odd but works. If there
+                    # is nothing on stderr, read the file on stdin and use
+                    # any data there instead.
+                    tmp.seek(0)
+                    ver_text = tmp.read()
+            m = re.match(r'vsftpd: version (\d+\.\d+\.\d+)', ver_text)
+            if m:
+                self._vsftpd_version = m.group(1)
+            elif len(p.stderr) == 0:
+                # vsftp does not use stdout or stderr for printing its version... -.-
+                self._vsftpd_version = 'unknown'
+            else:
+                raise Exception(f'Unable to determine VsFTPD version from: {p.stderr}')
 
         self.danted = self.config['danted']['danted']
         if self.danted == '':
             self.danted = None
         self._danted_version = None
         if self.danted is not None:
-            try:
-                p = subprocess.run(args=[self.danted, '-v'],
-                                   capture_output=True, text=True)
-                assert p.returncode == 0
-                if p.returncode != 0:
-                    # not a working vsftpd
-                    self.danted = None
-                m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stdout)
-                if not m:
-                    m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stderr)
-                if m:
-                    self._danted_version = m.group(1)
-                else:
-                    self.danted = None
-                    raise Exception(f'Unable to determine danted version from: {p.stderr}')
-            except Exception:
+            p = subprocess.run(args=[self.danted, '-v'],
+                               capture_output=True, text=True)
+            assert p.returncode == 0
+            if p.returncode != 0:
+                # not a working vsftpd
                 self.danted = None
+            m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stdout)
+            if not m:
+                m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stderr)
+            if m:
+                self._danted_version = m.group(1)
+            else:
+                self.danted = None
+                raise Exception(f'Unable to determine danted version from: {p.stderr}')
+
+        self.sshd = self.config['sshd']['sshd']
+        if self.sshd == '':
+            self.sshd = None
+        self._sshd_version = None
+        if self.sshd is not None:
+            p = subprocess.run(args=[self.sshd, '-V'],
+                               capture_output=True, text=True)
+            assert p.returncode == 0
+            if p.returncode != 0:
+                self.sshd = None
+            else:
+                m = re.match(r'^OpenSSH_(\d+\.\d+.*),.*', p.stderr)
+                assert m, f'version: {p.stderr}'
+                if m:
+                    self._sshd_version = m.group(1)
+                else:
+                    self.sshd = None
+                    raise Exception(f'Unable to determine sshd version from: {p.stderr}')
+
+        if self.sshd:
+            self.sftpd = self.config['sshd']['sftpd']
+            if self.sftpd == '':
+                self.sftpd = None
+        else:
+            self.sftpd = None
 
         self._tcpdump = shutil.which('tcpdump')
 
@@ -373,6 +394,10 @@ class Env:
         return Env.CONFIG.get_incomplete_reason()
 
     @staticmethod
+    def have_openssl() -> bool:
+        return Env.CONFIG.openssl is not None
+
+    @staticmethod
     def have_nghttpx() -> bool:
         return Env.CONFIG.nghttpx is not None
 
@@ -391,6 +416,12 @@ class Env:
     @staticmethod
     def have_h3_curl() -> bool:
         return 'http3' in Env.CONFIG.curl_props['features']
+
+    @staticmethod
+    def have_compressed_curl() -> bool:
+        return 'brotli' in Env.CONFIG.curl_props['libs'] or \
+               'zlib' in Env.CONFIG.curl_props['libs'] or \
+               'zstd' in Env.CONFIG.curl_props['libs']
 
     @staticmethod
     def curl_uses_lib(libname: str) -> bool:
@@ -487,6 +518,36 @@ class Env:
             Env.curl_uses_lib('ngtcp2')
 
     @staticmethod
+    def http_protos() -> List[str]:
+        # http protocols we can test
+        if Env.have_h2_curl():
+            if Env.have_h3():
+                return ['http/1.1', 'h2', 'h3']
+            else:
+                return ['http/1.1', 'h2']
+        else:
+            return ['http/1.1']
+
+    @staticmethod
+    def http_h1_h2_protos() -> List[str]:
+        # http 1+2 protocols we can test
+        if Env.have_h2_curl():
+            return ['http/1.1', 'h2']
+        else:
+            return ['http/1.1']
+
+    @staticmethod
+    def http_mplx_protos() -> List[str]:
+        # http multiplexing protocols we can test
+        if Env.have_h2_curl():
+            if Env.have_h3():
+                return ['h2', 'h3']
+            else:
+                return ['h2']
+        else:
+            return []
+
+    @staticmethod
     def have_h3() -> bool:
         return Env.have_h3_curl() and Env.have_h3_server()
 
@@ -527,6 +588,14 @@ class Env:
         return Env.CONFIG.danted is not None
 
     @staticmethod
+    def has_sshd() -> bool:
+        return Env.CONFIG.sshd is not None
+
+    @staticmethod
+    def has_sftpd() -> bool:
+        return Env.has_sshd() and Env.CONFIG.sftpd is not None
+
+    @staticmethod
     def tcpdump() -> Optional[str]:
         return Env.CONFIG.tcpdmp
 
@@ -540,7 +609,8 @@ class Env:
 
     def issue_certs(self):
         if self._ca is None:
-            ca_dir = os.path.join(self.CONFIG.gen_root, 'ca')
+            # ca_dir = os.path.join(self.CONFIG.gen_root, 'ca')
+            ca_dir = os.path.join(self.gen_dir, 'ca')
             os.makedirs(ca_dir, exist_ok=True)
             lock_file = os.path.join(ca_dir, 'ca.lock')
             with FileLock(lock_file):
@@ -548,6 +618,8 @@ class Env:
                                               store_dir=ca_dir,
                                               key_type="rsa2048")
                 self._ca.issue_certs(self.CONFIG.cert_specs)
+                if self.have_openssl():
+                    self._ca.create_hashdir(self.openssl)
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
@@ -702,6 +774,10 @@ class Env:
     @property
     def curl(self) -> str:
         return self.CONFIG.curl
+
+    @property
+    def openssl(self) -> Optional[str]:
+        return self.CONFIG.openssl
 
     @property
     def httpd(self) -> str:

@@ -23,15 +23,13 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib507(const char *URL)
 {
-  CURL *curls = NULL;
+  CURL *curl = NULL;
   CURLM *multi = NULL;
   int still_running;
   CURLcode i = TEST_ERR_MAJOR_BAD;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLMsg *msg;
 
   start_test_timing();
@@ -40,12 +38,12 @@ static CURLcode test_lib507(const char *URL)
 
   multi_init(multi);
 
-  easy_init(curls);
+  easy_init(curl);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
-  multi_add_handle(multi, curls);
+  multi_add_handle(multi, curl);
 
   multi_perform(multi, &still_running);
 
@@ -88,11 +86,11 @@ test_cleanup:
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(multi);
-  curl_easy_cleanup(curls);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  if(res)
-    i = res;
+  if(result)
+    i = result;
 
   return i; /* return the final return code */
 }

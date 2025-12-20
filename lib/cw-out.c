@@ -24,20 +24,13 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "cfilters.h"
-#include "headers.h"
 #include "multiif.h"
 #include "sendf.h"
 #include "transfer.h"
 #include "cw-out.h"
 #include "cw-pause.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 
 /**
@@ -85,7 +78,7 @@ struct cw_out_buf {
 
 static struct cw_out_buf *cw_out_buf_create(cw_out_type otype)
 {
-  struct cw_out_buf *cwbuf = calloc(1, sizeof(*cwbuf));
+  struct cw_out_buf *cwbuf = curlx_calloc(1, sizeof(*cwbuf));
   if(cwbuf) {
     cwbuf->type = otype;
     curlx_dyn_init(&cwbuf->b, DYN_PAUSE_BUFFER);
@@ -97,7 +90,7 @@ static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 {
   if(cwbuf) {
     curlx_dyn_free(&cwbuf->b);
-    free(cwbuf);
+    curlx_free(cwbuf);
   }
 }
 
@@ -252,7 +245,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   size_t wlen, nwritten;
   CURLcode result;
 
-  /* If we errored once, we do not invoke the client callback  again */
+  /* If we errored once, we do not invoke the client callback again */
   if(ctx->errored)
     return CURLE_WRITE_ERROR;
 
@@ -302,6 +295,7 @@ static CURLcode cw_out_buf_flush(struct cw_out_ctx *ctx,
                               &consumed);
     if(result && (result != CURLE_AGAIN))
       return result;
+    result = CURLE_OK;
 
     if(consumed) {
       if(consumed == curlx_dyn_len(&cwbuf->b)) {
@@ -452,7 +446,7 @@ static CURLcode cw_out_write(struct Curl_easy *data,
       return result;
   }
 
-  if(type & (CLIENTWRITE_HEADER|CLIENTWRITE_INFO)) {
+  if(type & (CLIENTWRITE_HEADER | CLIENTWRITE_INFO)) {
     result = cw_out_do_write(ctx, data, CW_OUT_HDS, flush_all, buf, blen);
     if(result)
       return result;

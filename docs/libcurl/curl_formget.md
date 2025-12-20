@@ -54,7 +54,7 @@ This, because first then does libcurl known which actual read callback to use.
 size_t print_httppost_callback(void *arg, const char *buf, size_t len)
 {
   fwrite(buf, len, 1, stdout);
-  (*(size_t *) arg) += len;
+  (*(size_t *)arg) += len;
   return len;
 }
 
@@ -62,7 +62,7 @@ size_t print_httppost(struct curl_httppost *post)
 {
   size_t total_size = 0;
   if(curl_formget(post, &total_size, print_httppost_callback)) {
-    return (size_t) -1;
+    return (size_t)-1;
   }
   return total_size;
 }

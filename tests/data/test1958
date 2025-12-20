@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -55,16 +56,15 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type:.*
 ^Accept:.*
 </strip>
-<protocol>
+<protocol crlf="headers">
 GET /aws_sigv4/testapi/test HTTP/1.1
 Host: exam.ple.com:9000
 Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;x-xxx-content-sha256;x-xxx-date, Signature=25b4cac711ea8f65010c485d3778885f5f3870d0b8ff0b3ab58a8d7eeab991ff
 X-Xxx-Date: 19700101T000000Z
-X-Xxx-Content-Sha256: 	arbitrary 
+X-Xxx-Content-Sha256: %TABarbitrary%SP
 
 </protocol>
 </verify>

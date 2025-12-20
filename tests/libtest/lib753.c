@@ -24,10 +24,9 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 struct t753_transfer_status {
-  CURL *easy;
+  CURL *curl;
   const char *name;
   bool pause;
   bool is_paused;
@@ -56,53 +55,53 @@ static size_t t753_hd_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   curl_mfprintf(stderr, "[%s] hd_cb '%.*s'\n", st->name, (int)len, ptr);
   if(!strcmp("230 Welcome you silly person\r\n", ptr)) {
     st->seen_welcome = TRUE;
-    st->easy = NULL;
+    st->curl = NULL;
   }
   return len;
 }
 
 static bool t753_setup(const char *URL, const char *name,
-                       CURL **peasy,
+                       CURL **pcurl,
                        struct t753_transfer_status *st)
 {
-  CURL *easy = NULL;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
 
-  *peasy = NULL;
+  *pcurl = NULL;
   memset(st, 0, sizeof(*st));
   st->name = name;
-  st->easy = easy;
+  st->curl = curl;
   st->pause = TRUE;
 
-  easy_init(easy);
+  easy_init(curl);
 
-  easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_WRITEFUNCTION, t753_write_cb);
-  easy_setopt(easy, CURLOPT_WRITEDATA, st);
-  easy_setopt(easy, CURLOPT_HEADERFUNCTION, t753_hd_cb);
-  easy_setopt(easy, CURLOPT_HEADERDATA, st);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t753_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEDATA, st);
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, t753_hd_cb);
+  easy_setopt(curl, CURLOPT_HEADERDATA, st);
 
-  easy_setopt(easy, CURLOPT_NOPROGRESS, 1L);
-  easy_setopt(easy, CURLOPT_DEBUGDATA, &debug_config);
-  easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  *peasy = easy;
+  *pcurl = curl;
   return TRUE;
 
 test_cleanup:
-  if(easy)
-    curl_easy_cleanup(easy);
+  if(curl)
+    curl_easy_cleanup(curl);
   return FALSE;
 }
 
 static CURLcode test_lib753(const char *URL)
 {
-  CURL *easy1 = NULL, *easy2 = NULL;
+  CURL *curl1 = NULL, *curl2 = NULL;
   CURLM *multi = NULL;
   struct t753_transfer_status st1, st2;
-  CURLcode res = CURLE_OK;
-  CURLMcode mres;
+  CURLcode result = CURLE_OK;
+  CURLMcode mresult;
   int still_running;
 
   start_test_timing();
@@ -115,14 +114,14 @@ static CURLcode test_lib753(const char *URL)
   curl_mfprintf(stderr, "init multi\n");
   multi = curl_multi_init();
   if(!multi) {
-    res = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
 
-  if(!t753_setup(URL, "EASY1", &easy1, &st1))
+  if(!t753_setup(URL, "EASY1", &curl1, &st1))
     goto test_cleanup;
 
-  multi_add_handle(multi, easy1);
+  multi_add_handle(multi, curl1);
 
   multi_perform(multi, &still_running);
   abort_on_test_timeout();
@@ -142,21 +141,21 @@ static CURLcode test_lib753(const char *URL)
      *    that the connection is NOT reused, e.g. all FTP commands
      *    are sent again on the new connection.
      */
-    if(easy1 && st1.seen_welcome) {
-      curl_easy_cleanup(easy1);
-      easy1 = NULL;
-      if(!easy2) {
-        if(!t753_setup(URL, "EASY2", &easy2, &st2))
+    if(curl1 && st1.seen_welcome) {
+      curl_easy_cleanup(curl1);
+      curl1 = NULL;
+      if(!curl2) {
+        if(!t753_setup(URL, "EASY2", &curl2, &st2))
           goto test_cleanup;
         st2.pause = FALSE;
-        multi_add_handle(multi, easy2);
+        multi_add_handle(multi, curl2);
       }
     }
 
-    mres = curl_multi_wait(multi, NULL, 0, 1, &num);
-    if(mres != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_wait() returned %d\n", mres);
-      res = TEST_ERR_MAJOR_BAD;
+    mresult = curl_multi_wait(multi, NULL, 0, 1, &num);
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_wait() returned %d\n", mresult);
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
 
@@ -170,15 +169,15 @@ static CURLcode test_lib753(const char *URL)
 
 test_cleanup:
 
-  if(res)
-    curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(res));
+  if(result)
+    curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(result));
 
-  if(easy1)
-    curl_easy_cleanup(easy1);
-  if(easy2)
-    curl_easy_cleanup(easy2);
+  if(curl1)
+    curl_easy_cleanup(curl1);
+  if(curl2)
+    curl_easy_cleanup(curl2);
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

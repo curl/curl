@@ -27,9 +27,10 @@
  */
 #include <stdio.h>
 #include <fcntl.h>
+
 #include <curl/curl.h>
 
-static const char olivertwist[]=
+static const char olivertwist[] =
   "Among other public buildings in a certain town, which for many reasons "
   "it will be prudent to refrain from mentioning, and to which I will assign "
   "no fictitious name, there is one anciently common to most towns, great or "
@@ -49,7 +50,7 @@ static const char olivertwist[]=
 int main(int argc, char **argv)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   char *url;
 
   if(argc < 2)
@@ -58,9 +59,9 @@ int main(int argc, char **argv)
   url = argv[1];
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -88,11 +89,11 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
@@ -102,5 +103,5 @@ int main(int argc, char **argv)
   }
 
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

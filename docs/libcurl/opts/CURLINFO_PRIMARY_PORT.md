@@ -16,7 +16,7 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLINFO_PRIMARY_PORT - get the latest destination port number
+CURLINFO_PRIMARY_PORT - last destination port number
 
 # SYNOPSIS
 
@@ -36,6 +36,11 @@ If a proxy was used for the most recent transfer, this is the port number of
 the proxy, if no proxy was used it is the port number of the most recently
 accessed URL.
 
+If the connection was done using QUIC, the port number is a UDP port number.
+
+If no connection was established or if the protocol does not use ports, -1
+is returned.
+
 # %PROTOCOLS%
 
 # EXAMPLE
@@ -45,13 +50,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK) {
       long port;
-      res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
-      if(!res)
+      result = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
+      if(!result)
         printf("Connected to remote port: %ld\n", port);
     }
     curl_easy_cleanup(curl);

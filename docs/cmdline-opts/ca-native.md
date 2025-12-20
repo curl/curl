@@ -34,8 +34,8 @@ Fedora, RHEL), macOS, Android and iOS. (Added in 8.3.0)
 This option works with GnuTLS (Added in 8.5.0) and also uses Apple
 SecTrust when libcurl is built with it. (Added in 8.17.0)
 
-This option works with rustls on Windows, macOS, Android and iOS. On Linux it
-is equivalent to using the Mozilla CA certificate bundle. When used with rustls
+This option works with Rustls on Windows, macOS, Android and iOS. On Linux it
+is equivalent to using the Mozilla CA certificate bundle. When used with Rustls
 _only_ the native CA store is consulted, not other locations set at run time or
 build time. (Added in 8.13.0)
 

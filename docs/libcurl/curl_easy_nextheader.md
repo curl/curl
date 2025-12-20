@@ -83,7 +83,7 @@ int main(void)
     }
 
     /* extract the normal headers + 1xx + trailers from the last request */
-    unsigned int origin = CURLH_HEADER| CURLH_1XX | CURLH_TRAILER;
+    unsigned int origin = CURLH_HEADER | CURLH_1XX | CURLH_TRAILER;
     while((h = curl_easy_nextheader(curl, origin, -1, prev))) {
       printf("%s: %s\n", h->name, h->value);
       prev = h;

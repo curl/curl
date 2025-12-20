@@ -25,28 +25,28 @@
 
 static CURLcode test_lib1545(const char *URL)
 {
-  CURL *eh = NULL;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
   struct curl_httppost *lastptr = NULL;
   struct curl_httppost *m_formpost = NULL;
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(eh);
+  easy_init(curl);
 
-  easy_setopt(eh, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
   curl_formadd(&m_formpost, &lastptr, CURLFORM_COPYNAME, "file",
                CURLFORM_FILE, "missing-file", CURLFORM_END);
-  curl_easy_setopt(eh, CURLOPT_HTTPPOST, m_formpost);
+  curl_easy_setopt(curl, CURLOPT_HTTPPOST, m_formpost);
 
-  (void)curl_easy_perform(eh);
-  (void)curl_easy_perform(eh);
+  (void)curl_easy_perform(curl);
+  (void)curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_formfree(m_formpost);
-  curl_easy_cleanup(eh);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTP
 HTTP FORMPOST
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -24,7 +24,6 @@ contents2
 </data1>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -41,13 +40,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F 'name=a;filename=a.pdf' --next http://%H
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strip>
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
-<protocol>
+<protocol crlf="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

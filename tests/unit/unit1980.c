@@ -98,7 +98,7 @@ static CURLcode test_unit1980(const char *arg)
                                       testcases[i].canonical_query);
     fail_unless(msnprintf_result >= 0, "curl_msnprintf fails");
     fail_unless(!result && canonical_query_ptr &&
-                !strcmp(canonical_query_ptr, testcases[i].canonical_query),
+                  !strcmp(canonical_query_ptr, testcases[i].canonical_query),
                 buffer);
     curlx_dyn_free(&canonical_query);
   }

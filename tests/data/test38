@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -27,7 +28,7 @@ http
 <name>
 HTTP resume request without server supporting it
 </name>
- <command option="no-output">
+<command option="no-output">
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o %LOGDIR/fewl%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/fewl%TESTNUMBER.txt">
@@ -41,7 +42,7 @@ download on.
 <errorcode>
 33
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=78-

@@ -58,11 +58,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* limit the connection cache for this handle to no more than 3 */
     curl_easy_setopt(curl, CURLOPT_MAXCONNECTS, 3L);
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

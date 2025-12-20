@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "doh.h" /* from the lib dir */
+#include "doh.h"
 
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
@@ -48,11 +48,11 @@ extern void doh_print_httpsrr(struct Curl_easy *data,
  */
 
 static char rrbuffer[256];
-static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
+static void rrresults(struct Curl_https_rrinfo *rr, CURLcode res)
 {
   char *p = rrbuffer;
   char *pend = rrbuffer + sizeof(rrbuffer);
-  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)result);
+  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)res);
   p += strlen(rrbuffer);
 
   if(rr) {

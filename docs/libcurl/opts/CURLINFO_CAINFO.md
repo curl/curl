@@ -17,7 +17,7 @@ Added-in: 7.84.0
 
 # NAME
 
-CURLINFO_CAINFO - get the default built-in CA certificate path
+CURLINFO_CAINFO - default built-in CA certificate path
 
 # SYNOPSIS
 

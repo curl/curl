@@ -23,11 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib3010(const char *URL)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   CURL *curl = NULL;
   curl_off_t retry_after;
   char *follow_url = NULL;
@@ -37,22 +35,22 @@ static CURLcode test_lib3010(const char *URL)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, URL);
-    ret = curl_easy_perform(curl);
-    if(ret) {
+    result = curl_easy_perform(curl);
+    if(result) {
       curl_mfprintf(stderr,
                     "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                    __FILE__, __LINE__, ret, curl_easy_strerror(ret));
+                    __FILE__, __LINE__, result, curl_easy_strerror(result));
       goto test_cleanup;
     }
     curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &follow_url);
     curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
     curl_mprintf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry_after);
     curl_easy_setopt(curl, CURLOPT_URL, follow_url);
-    ret = curl_easy_perform(curl);
-    if(ret) {
+    result = curl_easy_perform(curl);
+    if(result) {
       curl_mfprintf(stderr,
                     "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                    __FILE__, __LINE__, ret, curl_easy_strerror(ret));
+                    __FILE__, __LINE__, result, curl_easy_strerror(result));
       goto test_cleanup;
     }
 
@@ -65,5 +63,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return ret;
+  return result;
 }

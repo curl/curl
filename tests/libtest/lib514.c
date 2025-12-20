@@ -23,12 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib514(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -68,8 +66,8 @@ static CURLcode test_lib514(const char *URL)
 
   /* Now, we should be making a fine HEAD request */
 
-  /* Perform the request 2, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request 2, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -77,5 +75,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

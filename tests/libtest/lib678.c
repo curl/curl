@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static int loadfile(const char *filename, void **filedata, size_t *filesize)
 {
   size_t datasize = 0;
@@ -44,17 +42,16 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
       if(continue_reading)
         continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
       if(continue_reading)
-        data = malloc(datasize + 1);
-      if((!data) ||
-         ((int)fread(data, datasize, 1, fInCert) != 1))
+        data = curlx_malloc(datasize + 1);
+      if((!data) || ((int)fread(data, datasize, 1, fInCert) != 1))
         continue_reading = FALSE;
       curlx_fclose(fInCert);
       if(!continue_reading) {
-        free(data);
+        curlx_free(data);
         datasize = 0;
         data = NULL;
       }
-   }
+    }
   }
   *filesize = datasize;
   *filedata = data;
@@ -86,7 +83,7 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
     blob.len = certsize;
     blob.flags = CURL_BLOB_COPY;
     curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-    free(certdata);
+    curlx_free(certdata);
     code = curl_easy_perform(curl);
   }
   curl_easy_cleanup(curl);
@@ -96,24 +93,23 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
 
 static CURLcode test_lib678(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   curl_global_init(CURL_GLOBAL_DEFAULT);
   if(!strcmp("check", URL)) {
-    CURL *e;
     CURLcode w = CURLE_OK;
-    struct curl_blob blob = {0};
-    e = curl_easy_init();
-    if(e) {
-      w = curl_easy_setopt(e, CURLOPT_CAINFO_BLOB, &blob);
+    struct curl_blob blob = { 0 };
+    CURL *curl = curl_easy_init();
+    if(curl) {
+      w = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
       if(w)
         curl_mprintf("CURLOPT_CAINFO_BLOB is not supported\n");
-      curl_easy_cleanup(e);
+      curl_easy_cleanup(curl);
     }
-    res = w;
+    result = w;
   }
   else
-    res = test_cert_blob(URL, libtest_arg2);
+    result = test_cert_blob(URL, libtest_arg2);
 
   curl_global_cleanup();
-  return res;
+  return result;
 }

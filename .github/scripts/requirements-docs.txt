@@ -2,4 +2,4 @@
 #
 # SPDX-License-Identifier: curl
 
-pyspelling==2.11
+pyspelling==2.12.1

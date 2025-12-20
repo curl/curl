@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ RFC4422
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -17,7 +17,7 @@ AUTH EXTERNAL
 CAPA SASL-IR
 REPLY AUTHENTICATE A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -28,7 +28,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -42,10 +41,9 @@ IMAP external authentication with initial response without credentials
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE EXTERNAL =
 A003 SELECT %TESTNUMBER

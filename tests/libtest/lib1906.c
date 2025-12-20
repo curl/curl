@@ -23,11 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1906(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char *url_after = NULL;
   CURLU *curlu = curl_url();
   char error_buffer[CURL_ERROR_SIZE] = "";
@@ -43,18 +41,18 @@ static CURLcode test_lib1906(const char *URL)
   easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 5000L);
   /* set a port number that makes this request fail */
   easy_setopt(curl, CURLOPT_PORT, 1L);
-  res = curl_easy_perform(curl);
-  if(res != CURLE_COULDNT_CONNECT && res != CURLE_OPERATION_TIMEDOUT) {
+  result = curl_easy_perform(curl);
+  if(result != CURLE_COULDNT_CONNECT && result != CURLE_OPERATION_TIMEDOUT) {
     curl_mfprintf(stderr, "failure expected, "
                   "curl_easy_perform returned %d: <%s>, <%s>\n",
-                  res, curl_easy_strerror(res), error_buffer);
-    if(res == CURLE_OK)
-      res = TEST_ERR_MAJOR_BAD;  /* force an error return */
+                  result, curl_easy_strerror(result), error_buffer);
+    if(result == CURLE_OK)
+      result = TEST_ERR_MAJOR_BAD;  /* force an error return */
     goto test_cleanup;
   }
-  res = CURLE_OK;  /* reset for next use */
+  result = CURLE_OK;  /* reset for next use */
 
-  /* print the used url */
+  /* print the used URL */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
   curl_mfprintf(stderr, "curlu now: <%s>\n", url_after);
   curl_free(url_after);
@@ -63,13 +61,13 @@ static CURLcode test_lib1906(const char *URL)
   /* now reset CURLOP_PORT to go back to originally set port number */
   easy_setopt(curl, CURLOPT_PORT, 0L);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     curl_mfprintf(stderr, "success expected, "
                   "curl_easy_perform returned %d: <%s>, <%s>\n",
-                  res, curl_easy_strerror(res), error_buffer);
+                  result, curl_easy_strerror(result), error_buffer);
 
-  /* print url */
+  /* print URL */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
   curl_mfprintf(stderr, "curlu now: <%s>\n", url_after);
 
@@ -79,5 +77,5 @@ test_cleanup:
   curl_url_cleanup(curlu);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

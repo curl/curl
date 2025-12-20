@@ -29,32 +29,28 @@
 # - `LDAP_LIBRARY`:       Absolute path to `ldap` library.
 # - `LDAP_LBER_LIBRARY`:  Absolute path to `lber` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LDAP_FOUND`:         System has ldap.
-# - `LDAP_INCLUDE_DIRS`:  The ldap include directories.
-# - `LDAP_LIBRARIES`:     The ldap library names.
-# - `LDAP_LIBRARY_DIRS`:  The ldap library directories.
-# - `LDAP_PC_REQUIRES`:   The ldap pkg-config packages.
-# - `LDAP_CFLAGS`:        Required compiler flags.
 # - `LDAP_VERSION`:       Version of ldap.
+# - `CURL::ldap`:         ldap library target.
 
-set(LDAP_PC_REQUIRES "ldap" "lber")
+set(_ldap_pc_requires "ldap" "lber")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_INCLUDE_DIR AND
    NOT DEFINED LDAP_LIBRARY AND
    NOT DEFINED LDAP_LBER_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LDAP ${LDAP_PC_REQUIRES})
+  pkg_check_modules(_ldap ${_ldap_pc_requires})
 endif()
 
-if(LDAP_FOUND)
-  set(LDAP_VERSION ${LDAP_ldap_VERSION})
-  string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
-  message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
+if(_ldap_FOUND)
+  set(LDAP_FOUND TRUE)
+  set(LDAP_VERSION ${_ldap_ldap_VERSION})
+  message(STATUS "Found LDAP (via pkg-config): ${_ldap_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
-  set(LDAP_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
+  set(_ldap_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   # On Apple the SDK LDAP gets picked up from
   # 'MacOSX.sdk/System/Library/Frameworks/LDAP.framework/Headers', which contains
@@ -99,9 +95,25 @@ else()
   )
 
   if(LDAP_FOUND)
-    set(LDAP_INCLUDE_DIRS ${LDAP_INCLUDE_DIR})
-    set(LDAP_LIBRARIES    ${LDAP_LIBRARY} ${LDAP_LBER_LIBRARY})
+    set(_ldap_INCLUDE_DIRS ${LDAP_INCLUDE_DIR})
+    set(_ldap_LIBRARIES    ${LDAP_LIBRARY} ${LDAP_LBER_LIBRARY})
   endif()
 
   mark_as_advanced(LDAP_INCLUDE_DIR LDAP_LIBRARY LDAP_LBER_LIBRARY)
+endif()
+
+if(LDAP_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_ldap_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::ldap)
+    add_library(CURL::ldap INTERFACE IMPORTED)
+    set_target_properties(CURL::ldap PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_ldap_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_ldap_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_ldap_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_ldap_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_ldap_LIBRARIES}")
+  endif()
 endif()

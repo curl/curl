@@ -63,7 +63,7 @@ or just lacks features, it is easy to instead implement your own redirect
 follow logic with the use of curl_easy_getinfo(3)'s CURLINFO_REDIRECT_URL(3)
 option instead of using CURLOPT_FOLLOWLOCATION(3).
 
-By default, libcurl only sends `Authentication:` or explicitly set `Cookie:`
+By default, libcurl only sends `Authorization:` or explicitly set `Cookie:`
 headers to the initial host given in the original URL, to avoid leaking
 username + password to other sites. CURLOPT_UNRESTRICTED_AUTH(3) is provided
 to change that behavior.

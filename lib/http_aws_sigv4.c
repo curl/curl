@@ -32,18 +32,13 @@
 #include "http_aws_sigv4.h"
 #include "curl_sha256.h"
 #include "transfer.h"
-#include "parsedate.h"
 #include "sendf.h"
 #include "escape.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
+#include "slist.h"
 
 #include <time.h>
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-#include "slist.h"
 
 #define HMAC_SHA256(k, kl, d, dl, o)                \
   do {                                              \
@@ -137,7 +132,7 @@ static void trim_headers(struct curl_slist *head)
 }
 
 /* maximum length for the aws sivg4 parts */
-#define MAX_SIGV4_LEN 64
+#define MAX_SIGV4_LEN    64
 #define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
 
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
@@ -210,12 +205,12 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
       if(result)
         return result;
 
-      free(curr->data);
+      curlx_free(curr->data);
       curr->data = curlx_dyn_ptr(&buf);
 
       curr->next = next->next;
-      free(next->data);
-      free(next);
+      curlx_free(next->data);
+      curlx_free(next);
     }
     else {
       curr = curr->next;
@@ -269,11 +264,10 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(fullhost)
       head = Curl_slist_append_nodup(NULL, fullhost);
     if(!head) {
-      free(fullhost);
+      curlx_free(fullhost);
       goto fail;
     }
   }
-
 
   if(*content_sha256_header) {
     tmp_head = curl_slist_append(head, content_sha256_header);
@@ -308,13 +302,13 @@ static CURLcode make_headers(struct Curl_easy *data,
       ;
     if(!*ptr && ptr != sep + 1) /* a value of whitespace only */
       continue;
-    dupdata = strdup(l->data);
+    dupdata = curlx_strdup(l->data);
     if(!dupdata)
       goto fail;
     dupdata[sep - l->data] = ':';
     tmp_head = Curl_slist_append_nodup(head, dupdata);
     if(!tmp_head) {
-      free(dupdata);
+      curlx_free(dupdata);
       goto fail;
     }
     head = tmp_head;
@@ -329,6 +323,8 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
     head = tmp_head;
     *date_header = curl_maprintf("%s: %s\r\n", date_hdr_key, timestamp);
+    if(!*date_header)
+      goto fail;
   }
   else {
     const char *value;
@@ -403,14 +399,14 @@ fail:
 
 #define CONTENT_SHA256_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Content-Sha256"))
 /* add 2 for ": " between header name and value */
-#define CONTENT_SHA256_HDR_LEN (CONTENT_SHA256_KEY_LEN + 2 + \
-                                SHA256_HEX_LENGTH)
+#define CONTENT_SHA256_HDR_LEN (CONTENT_SHA256_KEY_LEN + 2 + SHA256_HEX_LENGTH)
 
 /* try to parse a payload hash from the content-sha256 header */
 static const char *parse_content_sha_hdr(struct Curl_easy *data,
                                          const char *provider1,
                                          size_t plen,
-                                         size_t *value_len) {
+                                         size_t *value_len)
+{
   char key[CONTENT_SHA256_KEY_LEN];
   size_t key_len;
   const char *value;
@@ -431,7 +427,7 @@ static const char *parse_content_sha_hdr(struct Curl_easy *data,
   curlx_str_passblanks(&value);
 
   len = strlen(value);
-  while(len > 0 && ISBLANK(value[len-1]))
+  while(len > 0 && ISBLANK(value[len - 1]))
     --len;
 
   *value_len = len;
@@ -451,7 +447,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  result = Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+  result = Curl_sha256it(sha_hash, (const unsigned char *)post_data,
                          post_data_len);
   if(!result)
     sha256_to_hex(sha_hex, sha_hash);
@@ -532,7 +528,6 @@ static int compare_func(const void *a, const void *b)
   compare = strcmp(curlx_dyn_ptr(&aa->value), curlx_dyn_ptr(&bb->value));
 
   return compare;
-
 }
 
 UNITTEST CURLcode canon_path(const char *q, size_t len,
@@ -574,14 +569,13 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   if(!query)
     return result;
 
-  result = split_to_dyn_array(query, &query_array[0],
-                              &num_query_components);
+  result = split_to_dyn_array(query, &query_array[0], &num_query_components);
   if(result) {
     goto fail;
   }
 
   /* Create list of pairs, each pair containing an encoded query
-    * component */
+   * component */
 
   for(index = 0; index < num_query_components; index++) {
     const char *in_key;
@@ -601,8 +595,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
       in_key_len = offset - in_key;
     }
 
-    curlx_dyn_init(&encoded_query_array[index].key, query_part_len*3 + 1);
-    curlx_dyn_init(&encoded_query_array[index].value, query_part_len*3 + 1);
+    curlx_dyn_init(&encoded_query_array[index].key, query_part_len * 3 + 1);
+    curlx_dyn_init(&encoded_query_array[index].value, query_part_len * 3 + 1);
     counted_query_components++;
 
     /* Decode/encode the key */
@@ -674,8 +668,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   const char *line;
   struct Curl_str provider0;
   struct Curl_str provider1;
-  struct Curl_str region = { NULL, 0};
-  struct Curl_str service = { NULL, 0};
+  struct Curl_str region = { NULL, 0 };
+  struct Curl_str service = { NULL, 0 };
   const char *hostname = conn->host.name;
   time_t clock;
   struct tm tm;
@@ -699,8 +693,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   char *str_to_sign = NULL;
   const char *user = data->state.aptr.user ? data->state.aptr.user : "";
   char *secret = NULL;
-  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = {0};
-  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char *auth_headers = NULL;
 
   if(data->set.path_as_is) {
@@ -784,7 +778,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
      * values like UNSIGNED-PAYLOAD */
     bool sign_as_s3 = curlx_str_casecompare(&provider0, "aws") &&
-      curlx_str_casecompare(&service, "s3");
+                      curlx_str_casecompare(&service, "s3");
 
     if(sign_as_s3)
       result = calc_s3_payload_hash(data, httpreq, curlx_str(&provider1),
@@ -811,7 +805,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
 #else
   clock = time(NULL);
 #endif
-  result = Curl_gmtime(clock, &tm);
+  result = curlx_gmtime(clock, &tm);
   if(result) {
     goto fail;
   }
@@ -866,7 +860,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     goto fail;
 
   infof(data, "aws_sigv4: Canonical request (enclosed in []) - [%s]",
-    canonical_request);
+        canonical_request);
 
   request_type = curl_maprintf("%.*s4_request",
                                (int)curlx_strlen(&provider0),
@@ -887,7 +881,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   if(!credential_scope)
     goto fail;
 
-  if(Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
+  if(Curl_sha256it(sha_hash, (unsigned char *)canonical_request,
                    strlen(canonical_request)))
     goto fail;
 
@@ -914,7 +908,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
                    curlx_strlen(&provider0));
 
   infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]",
-    str_to_sign);
+        str_to_sign);
 
   secret = curl_maprintf("%.*s4%s", (int)curlx_strlen(&provider0),
                          curlx_str(&provider0), data->state.aptr.passwd ?
@@ -962,7 +956,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
                    curlx_str(&provider0), curlx_strlen(&provider0));
 
-  free(data->state.aptr.userpwd);
+  curlx_free(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
   result = CURLE_OK;
@@ -972,18 +966,18 @@ fail:
   curlx_dyn_free(&canonical_path);
   curlx_dyn_free(&canonical_headers);
   curlx_dyn_free(&signed_headers);
-  free(canonical_request);
-  free(request_type);
-  free(credential_scope);
-  free(str_to_sign);
-  free(secret);
-  free(date_header);
+  curlx_free(canonical_request);
+  curlx_free(request_type);
+  curlx_free(credential_scope);
+  curlx_free(str_to_sign);
+  curlx_free(secret);
+  curlx_free(date_header);
   return result;
 }
 
 /*
-* Frees all allocated strings in a dynbuf pair array, and the dynbuf itself
-*/
+ * Frees all allocated strings in a dynbuf pair array, and the dynbuf itself
+ */
 
 static void pair_array_free(struct pair *pair_array, size_t num_elements)
 {
@@ -993,12 +987,11 @@ static void pair_array_free(struct pair *pair_array, size_t num_elements)
     curlx_dyn_free(&pair_array[index].key);
     curlx_dyn_free(&pair_array[index].value);
   }
-
 }
 
 /*
-* Frees all allocated strings in a split dynbuf, and the dynbuf itself
-*/
+ * Frees all allocated strings in a split dynbuf, and the dynbuf itself
+ */
 
 static void dyn_array_free(struct dynbuf *db, size_t num_elements)
 {
@@ -1009,10 +1002,10 @@ static void dyn_array_free(struct dynbuf *db, size_t num_elements)
 }
 
 /*
-* Splits source string by SPLIT_BY, and creates an array of dynbuf in db.
-* db is initialized by this function.
-* Caller is responsible for freeing the array elements with dyn_array_free
-*/
+ * Splits source string by SPLIT_BY, and creates an array of dynbuf in db.
+ * db is initialized by this function.
+ * Caller is responsible for freeing the array elements with dyn_array_free
+ */
 
 #define SPLIT_BY '&'
 
@@ -1034,8 +1027,7 @@ static CURLcode split_to_dyn_array(const char *source,
     if(source[pos] == SPLIT_BY) {
       if(segment_length) {
         curlx_dyn_init(&db[index], segment_length + 1);
-        result = curlx_dyn_addn(&db[index], &source[start],
-                                segment_length);
+        result = curlx_dyn_addn(&db[index], &source[start], segment_length);
         if(result)
           goto fail;
 
@@ -1066,7 +1058,6 @@ fail:
   return result;
 }
 
-
 static bool is_reserved_char(const char c)
 {
   return (ISALNUM(c) || ISURLPUNTCS(c));
@@ -1093,7 +1084,6 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
   return CURLE_OK;
 }
 
-
 static CURLcode encode_query_component(char *component, size_t len,
                                        struct dynbuf *db)
 {
@@ -1118,8 +1108,8 @@ static CURLcode encode_query_component(char *component, size_t len,
 }
 
 /*
-* Populates a dynbuf containing url_encode(url_decode(in))
-*/
+ * Populates a dynbuf containing url_encode(url_decode(in))
+ */
 
 static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
                                        struct dynbuf *out)
@@ -1139,10 +1129,10 @@ static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
 static bool should_urlencode(struct Curl_str *service_name)
 {
   /*
-   * These services require unmodified (not additionally url encoded) URL
+   * These services require unmodified (not additionally URL-encoded) URL
    * paths.
    * should_urlencode == true is equivalent to should_urlencode_uri_path
-   * from the AWS SDK. Urls are already normalized by the curl url parser
+   * from the AWS SDK. Urls are already normalized by the curl URL parser
    */
 
   if(curlx_str_cmp(service_name, "s3") ||

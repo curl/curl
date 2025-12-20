@@ -23,22 +23,24 @@ SPDX-License-Identifier: curl
     make test TFLAGS="-j10"
 
   "make test" builds the test suite support code and invokes the 'runtests.pl'
-  perl script to run all the tests. The value of `TFLAGS` is passed
-  directly to 'runtests.pl'.
+  perl script to run all the tests. The value of `TFLAGS` is passed directly
+  to 'runtests.pl'.
 
-  When you run tests via make, the flags `-a` and `-s` are passed, meaning
-  to continue running tests even after one fails, and to emit short output.
+  When you run tests via make, the flags `-a` and `-s` are passed, meaning to
+  continue running tests even after one fails, and to emit short output.
 
-  If you would like to not use those flags, you can run 'runtests.pl' directly.
-  You must `chdir` into the tests directory, then you can run it like so:
+  If you would like to not use those flags, you can run 'runtests.pl'
+  directly. You must `chdir` into the tests directory, then you can run it
+  like so:
 
     ./runtests.pl 303 410
 
   You must have run `make test` at least once first to build the support code.
 
-  To see what flags are available for runtests.pl, and what output it emits, run:
+  To see what flags are available for runtests.pl, and what output it emits,
+  run:
 
-    man ./tests/runtests.1
+    man ./docs/runtests.1
 
   After a test fails, examine the tests/log directory for stdout, stderr, and
   output from the servers used in the test.
@@ -212,13 +214,13 @@ SPDX-License-Identifier: curl
   to drown in output. The newly introduced *connection filters* allows one to
   dynamically increase log verbosity for a particular *filter type*. Example:
 
-    CURL_DEBUG=ssl curl -v https://curl.se
+    CURL_DEBUG=ssl curl -v https://curl.se/
 
   makes the `ssl` connection filter log more details. One may do that for
   every filter type and also use a combination of names, separated by `,` or
   space.
 
-    CURL_DEBUG=ssl,http/2 curl -v https://curl.se
+    CURL_DEBUG=ssl,http/2 curl -v https://curl.se/
 
    The order of filter type names is not relevant. Names used here are
    case insensitive. Note that these names are implementation internals and

@@ -47,15 +47,10 @@
 #include "../urldata.h"
 #include "../curl_trc.h"
 #include "../cfilters.h"
-#include "../multiif.h"
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
 #include "../vtls/vtls_scache.h"
 #include "vquic-tls.h"
-
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
 
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
@@ -147,7 +142,9 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
       return result;
   }
 #else
-  (void)ctx; (void)cf; (void)data;
+  (void)ctx;
+  (void)cf;
+  (void)data;
 #endif
   return CURLE_OK;
 }
@@ -168,26 +165,24 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   (void)conn_config;
   result = Curl_ossl_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
-  if(conn_config->verifyhost) {
-    result = Curl_gtls_verifyserver(cf, data, ctx->gtls.session,
-                                    conn_config, &data->set.ssl, peer,
-                                    data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
-    if(result)
-      return result;
-  }
+  result = Curl_gtls_verifyserver(cf, data, ctx->gtls.session,
+                                  conn_config, &data->set.ssl, peer,
+                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+  if(result)
+    return result;
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {
-    WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
+    WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
     if(!cert)
       result = CURLE_OUT_OF_MEMORY;
     else if(peer->sni &&
-      (wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0, NULL)
-       == WOLFSSL_FAILURE))
+            (wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0,
+                                     NULL) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     else if(!peer->sni &&
-      (wolfSSL_X509_check_ip_asc(cert, peer->hostname, 0)
-       == WOLFSSL_FAILURE))
+            (wolfSSL_X509_check_ip_asc(cert, peer->hostname,
+                                       0) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     wolfSSL_X509_free(cert);
   }
@@ -199,7 +194,6 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
     Curl_ssl_scache_remove_all(cf, data, peer->scache_key);
   return result;
 }
-
 
 bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
                                  bool give_ssl_ctx,

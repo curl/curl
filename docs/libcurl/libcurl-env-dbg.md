@@ -164,8 +164,3 @@ Make a blocking, graceful shutdown of all remaining connections when
 a multi handle is destroyed. This implicitly triggers for easy handles
 that are run via easy_perform. The value of the environment variable
 gives the shutdown timeout in milliseconds.
-
-## `CURL_H2_STREAM_WIN_MAX`
-
-Set to a positive 32-bit number to override the HTTP/2 stream window's
-default of 10MB. Used in testing to verify correct window update handling.

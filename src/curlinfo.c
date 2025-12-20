@@ -39,7 +39,7 @@
 #include "fake_addrinfo.h" /* for USE_FAKE_GETADDRINFO */
 #include <stdio.h>
 
-static const char *disabled[]={
+static const char *disabled[] = {
   "bindlocal: "
 #ifdef CURL_DISABLE_BINDLOCAL
   "OFF"
@@ -236,6 +236,13 @@ static const char *disabled[]={
 #else
   "OFF"
 #endif
+  ,
+  "ssl-sessions: "
+#ifdef USE_SSLS_EXPORT
+  "ON"
+#else
+  "OFF"
+#endif
 };
 
 int main(int argc, char **argv)
@@ -246,8 +253,7 @@ int main(int argc, char **argv)
   (void)argv;
 
   for(i = 0; i < CURL_ARRAYSIZE(disabled); i++)
-    /* !checksrc! disable BANNEDFUNC 1 */
-    printf("%s\n", disabled[i]);
+    puts(disabled[i]);
 
   return 0;
 }

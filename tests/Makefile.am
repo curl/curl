@@ -25,7 +25,6 @@
 # scripts used in test cases
 TESTSCRIPTS = \
  test1119.pl  \
- test1132.pl  \
  test1135.pl  \
  test1139.pl  \
  test1140.pl  \
@@ -62,6 +61,7 @@ EXTRA_DIST =        \
  http2-server.pl    \
  http3-server.pl    \
  memanalyze.pl      \
+ memanalyzer.pm     \
  negtelnetserver.py \
  nghttpx.conf       \
  pathhelp.pm        \
@@ -84,7 +84,7 @@ EXTRA_DIST =        \
  valgrind.supp      \
  $(TESTSCRIPTS)
 
-# we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
+# we have two variables here to make sure DIST_SUBDIRS does not get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
 if BUILD_UNITTESTS
@@ -108,7 +108,7 @@ curl:
 TEST_COMMON =
 
 if CROSSCOMPILING
-TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
+TEST = @echo "NOTICE: we cannot run the tests when cross-compiling!"
 PYTEST = $(TEST)
 else # if not cross-compiling:
 
@@ -124,11 +124,11 @@ TEST_F = -a -p -r
 TEST_T = -a -t -j20
 TEST_E = -a -e
 
-# ~<keyword> means that it will run all tests matching the keyword, but will
-# ignore their results (since these ones are likely to fail for no good reason)
+# ~<keyword> means that it runs all tests matching the keyword, but ignores
+# their results (since these ones are likely to fail for no good reason)
 TEST_NF = -a -p ~flaky ~timing-dependent
 
-# special CI target derived from nonflaky with CI-specific flags
+# special target for CI use
 TEST_CI = $(TEST_NF) -r --retry=5 -j20 --buildinfo
 
 PYTEST = pytest
@@ -178,8 +178,6 @@ checksrc:
 	(cd unit && $(MAKE) checksrc)
 	(cd tunit && $(MAKE) checksrc)
 	(cd server && $(MAKE) checksrc)
-	(cd client && $(MAKE) checksrc)
-	(cd http && $(MAKE) checksrc)
 
 all-local: $(MANFILES) build-certs
 

@@ -115,11 +115,9 @@ class TestSSLUse:
             else:
                 assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}\n{r.dump_logs()}'
 
-    # use host name with trailing dot, verify handshake
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    # use hostname with trailing dot, verify handshake
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_03_trailing_dot(self, env: Env, proto, httpd, nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         domain = f'{env.domain1}.'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
@@ -130,11 +128,9 @@ class TestSSLUse:
             # the SNI the server received is without trailing dot
             assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
 
-    # use host name with double trailing dot, verify handshake
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    # use hostname with double trailing dot, verify handshake
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_04_double_dot(self, env: Env, proto, httpd, nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         domain = f'{env.domain1}..'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
@@ -153,12 +149,10 @@ class TestSSLUse:
         assert r.exit_code in [7, 35, 60], f'{r}'
 
     # use ip address for connect
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_05_good_ip_addr(self, env: Env, proto, httpd, nghttpx):
         if env.curl_uses_lib('mbedtls'):
             pytest.skip("mbedTLS does use IP addresses in SNI")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         domain = '127.0.0.1'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
@@ -170,12 +164,10 @@ class TestSSLUse:
             assert 'SSL_TLS_SNI' not in r.json, f'{r.json}'
 
     # use IP address that is not in cert
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_05_bad_ip_addr(self, env: Env, proto,
                                httpd, configures_httpd,
                                nghttpx, configures_nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         httpd.set_domain1_cred_name('domain1-no-ip')
         httpd.reload_if_config_changed()
         if proto == 'h3':
@@ -187,16 +179,15 @@ class TestSSLUse:
         assert r.exit_code == 60, f'{r}'
 
     # use IP address that is in cert as DNS name (not really legal)
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_05_very_bad_ip_addr(self, env: Env, proto,
                                     httpd, configures_httpd,
                                     nghttpx, configures_nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         if env.curl_uses_lib('mbedtls'):
             pytest.skip("mbedtls falsely verifies a DNS: altname as IP address")
-        if env.curl_uses_lib('wolfssl'):
-            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address")
+        if env.curl_uses_lib('wolfssl') and \
+           env.curl_lib_version_before('wolfssl', '5.8.4'):
+            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address in 5.8.2 and before")
         httpd.set_domain1_cred_name('domain1-very-bad')
         httpd.reload_if_config_changed()
         if proto == 'h3':
@@ -208,10 +199,8 @@ class TestSSLUse:
         assert r.exit_code == 60, f'{r}'
 
     # use localhost for connect
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_06_localhost(self, env: Env, proto, httpd, nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         domain = 'localhost'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
@@ -269,6 +258,10 @@ class TestSSLUse:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
+        # see wolfSSL/wolfssl#9462
+        if env.curl_uses_lib('wolfssl') and env.curl_lib_version('wolfssl') == '5.8.4' \
+           and ciphers13 and 'TLS_CHACHA20_POLY1305_SHA256' in ciphers13:
+            pytest.skip('wolfSSL 5.8.4 is borked on ARM with CHACHA20')
         if env.curl_uses_lib('gnutls'):
             pytest.skip('GnuTLS does not support setting ciphers')
         elif env.curl_uses_lib('boringssl'):
@@ -297,10 +290,8 @@ class TestSSLUse:
         else:
             assert r.exit_code != 0, r.dump_logs()
 
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_08_cert_status(self, env: Env, proto, httpd, nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         if not env.curl_uses_lib('openssl') and \
            not env.curl_uses_lib('gnutls') and \
            not env.curl_uses_lib('quictls'):
@@ -417,22 +408,18 @@ class TestSSLUse:
                 reused_session = True
         assert reused_session, f'{r}\n{r.dump_logs()}'
 
-    # use host name server has no certificate for
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    # use hostname server has no certificate for
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_11_wrong_host(self, env: Env, proto, httpd, nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         domain = f'insecure.{env.tld}'
         url = f'https://{domain}:{env.port_for(proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto)
         assert r.exit_code == 60, f'{r}'
 
-    # use host name server has no cert for with --insecure
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    # use hostname server has no cert for with --insecure
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_12_insecure(self, env: Env, proto, httpd, nghttpx):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         domain = f'insecure.{env.tld}'
         url = f'https://{domain}:{env.port_for(proto)}/curltest/sslinfo'
@@ -443,10 +430,8 @@ class TestSSLUse:
         assert r.json, f'{r}'
 
     # connect to an expired certificate
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_17_14_expired_cert(self, env: Env, proto, httpd):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.expired_domain}:{env.port_for(proto)}/'
         r = curl.http_get(url=url, alpn_proto=proto)
@@ -569,10 +554,8 @@ class TestSSLUse:
         else:
             assert r.exit_code != 0, r.dump_logs()
 
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_19_wrong_pin(self, env: Env, proto, httpd):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    def test_17_19_wrong_pin(self, env: Env, proto, httpd, nghttpx):
         if env.curl_uses_lib('rustls-ffi'):
             pytest.skip('TLS backend ignores --pinnedpubkey')
         curl = CurlClient(env=env)
@@ -583,10 +566,8 @@ class TestSSLUse:
         # expect NOT_IMPLEMENTED or CURLE_SSL_PINNEDPUBKEYNOTMATCH
         assert r.exit_code in [2, 90], f'{r.dump_logs()}'
 
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_20_correct_pin(self, env: Env, proto, httpd):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    def test_17_20_correct_pin(self, env: Env, proto, httpd, nghttpx):
         curl = CurlClient(env=env)
         creds = env.get_credentials(env.domain1)
         assert creds
@@ -596,3 +577,29 @@ class TestSSLUse:
         ])
         # expect NOT_IMPLEMENTED or OK
         assert r.exit_code in [0, 2], f'{r.dump_logs()}'
+
+    @pytest.mark.skipif(condition=not Env.have_openssl(), reason="needs openssl command")
+    def test_17_21_capath_valid(self, env: Env, httpd):
+        if env.curl_uses_lib('rustls-ffi'):
+            pytest.skip('rustls does not support CURLOPT_CAPATH')
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '--capath', env.ca.hashdir
+        ])
+        assert r.exit_code == 0, f'{r.dump_logs()}'
+        assert r.json['HTTPS'] == 'on', f'{r.json}'
+
+    @pytest.mark.skipif(condition=not Env.have_openssl(), reason="needs openssl command")
+    def test_17_22_capath_invalid(self, env: Env, httpd):
+        # we can test all TLS backends here. the ones not supporting CAPATH
+        # need to fail as well as the ones which do, but get an invalid path.
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '--capath', os.path.join(env.gen_dir, 'ca/invalid')
+        ])
+        # CURLE_PEER_FAILED_VERIFICATION or CURLE_SSL_CACERT_BADFILE
+        assert r.exit_code in [60, 77], f'{r.dump_logs()}'

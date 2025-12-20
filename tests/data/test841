@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,39 +9,41 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 + Curl did not used to like this line
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 * 123 FETCH (BODY[1] {70}
+body
+
++ Curl did not used to like this line
+--
+  yours sincerely
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 imap
 </server>
 <name>
-IMAP custom request doesn't check continuation data
+IMAP custom request does not check continuation data
 </name>
 <command>
  imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 123 BODY[1]'
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER

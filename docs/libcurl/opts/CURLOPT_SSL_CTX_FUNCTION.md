@@ -134,9 +134,10 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 
 int main(void)
 {
-  CURL *ch;
-  CURLcode rv;
-  char *mypem = /* CA cert in PEM format, replace the XXXs */
+  CURL *curl;
+  CURLcode result;
+  /* CA cert in PEM format, replace the XXXs */
+  char *mypem =
     "-----BEGIN CERTIFICATE-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
@@ -147,23 +148,23 @@ int main(void)
     "-----END CERTIFICATE-----\n";
 
   curl_global_init(CURL_GLOBAL_ALL);
-  ch = curl_easy_init();
+  curl = curl_easy_init();
 
-  curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
-  curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
+  curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+  curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_DATA, mypem);
-  rv = curl_easy_perform(ch);
-  if(!rv)
+  curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
+  curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, mypem);
+  result = curl_easy_perform(curl);
+  if(!result)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
-  curl_easy_cleanup(ch);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return rv;
+  return (int)result;
 }
 ~~~
 

@@ -120,7 +120,7 @@ configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/configurehelp.pm.in"
   "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" @ONLY)
 
-curl_add_runtests(tests          "")  # Avoid 'test', which is a reserved target name in CMake
+curl_add_runtests(tests          "-a")  # Avoid 'test', which is a reserved target name in CMake
 curl_add_runtests(test-quiet     "-a -s")
 curl_add_runtests(test-am        "-a -am")
 curl_add_runtests(test-full      "-a -p -r")

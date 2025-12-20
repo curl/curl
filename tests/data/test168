@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -13,7 +14,7 @@ HTTP Digest auth
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data>
+<data crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
@@ -21,14 +22,14 @@ And you should ignore this data.
 </data>
 
 # then this is returned since we get no server-auth
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 401 Authorization to the remote host as well swsbounce swsclose
 WWW-Authenticate: Digest realm="realmweirdo", nonce="123456"
 
 you should ignore this data too
 </data1000>
 
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: no
 Content-Length: 15
@@ -36,7 +37,7 @@ Content-Length: 15
 Nice auth sir!
 </data1001>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
@@ -72,7 +73,7 @@ http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 User-Agent: curl/%VERSION

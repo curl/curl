@@ -23,18 +23,18 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#include <curl/curl.h>
+
 #include "curl_range.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "curlx/strparse.h"
 
 /* Only include this function if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
 
- /*
-  Check if this is a range download, and if so, set the internal variables
-  properly.
- */
+/*
+ Check if this is a range download, and if so, set the internal variables
+ properly.
+*/
 CURLcode Curl_range(struct Curl_easy *data)
 {
   if(data->state.use_range && data->state.range) {

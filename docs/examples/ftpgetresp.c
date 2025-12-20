@@ -21,34 +21,40 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Similar to ftpget.c but also stores the received response-lines
  * in a separate file using our own callback!
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+
+#include <curl/curl.h>
+
 static size_t write_response(void *ptr, size_t size, size_t nmemb, void *data)
 {
   FILE *writehere = (FILE *)data;
   return fwrite(ptr, size, nmemb, writehere);
 }
 
-#define FTPBODY "ftp-list"
+#define FTPBODY    "ftp-list"
 #define FTPHEADERS "ftp-responses"
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   FILE *ftpfile;
   FILE *respfile;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* local filename to store the file as */
   ftpfile = fopen(FTPBODY, "wb"); /* b is binary, needed on Windows */
@@ -74,20 +80,20 @@ int main(void)
        CURLOPT_WRITEFUNCTION as well */
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_response);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, respfile);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
 
-  fclose(ftpfile); /* close the local file */
+  fclose(ftpfile);  /* close the local file */
   fclose(respfile); /* close the response file */
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

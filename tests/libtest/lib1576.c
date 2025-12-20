@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static char t1576_testdata[] = "request indicates that the client, which made";
 
 static size_t t1576_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
@@ -49,7 +47,7 @@ static int t1576_seek_callback(void *ptr, curl_off_t offset, int origin)
 
 static CURLcode test_lib1576(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   struct curl_slist *pHeaderList = NULL;
 
@@ -84,12 +82,12 @@ static CURLcode test_lib1576(const char *URL)
   pHeaderList = curl_slist_append(pHeaderList, "Expect:");
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, pHeaderList);
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
   curl_slist_free_all(pHeaderList);
 
-  return res;
+  return result;
 }

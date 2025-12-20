@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,18 +12,18 @@ trailing-dot
 <reply>
 
 # we use this as response to a CONNECT
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 
 </connect>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 6
 Strict-Transport-Security: max-age=604800
 
 -foo-
 </data>
-<data2 crlf="yes">
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 6
 Strict-Transport-Security: max-age=6048000
@@ -58,7 +58,7 @@ HSTS with two URLs
 
 <verify>
 # we let it CONNECT to the server to confirm HSTS but deny from there
-<proxy crlf="yes">
+<proxy crlf="headers">
 GET http://this.hsts.example./%TESTNUMBER HTTP/1.1
 Host: this.hsts.example.
 User-Agent: curl/%VERSION

@@ -47,7 +47,7 @@ static int test_resolve(int argc, char *argv[])
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
@@ -79,21 +79,16 @@ static int test_resolve(int argc, char *argv[])
 #ifdef CURLRES_IPV6
          "\n --ipv6"
 #endif
-         );
+    );
     return 1;
   }
-
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
 
 #ifdef CURLRES_IPV6
   if(use_ipv6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
-      /* an IPv6 address was requested and we can't get/use one */
+      /* an IPv6 address was requested and we cannot get/use one */
       rc = -1;
     else {
       sclose(s);
@@ -128,7 +123,7 @@ static int test_resolve(int argc, char *argv[])
 #endif
 
   if(rc)
-    printf("Resolving %s '%s' didn't work\n", ipv_inuse, host);
+    printf("Resolving %s '%s' did not work\n", ipv_inuse, host);
 
   return !!rc;
 }

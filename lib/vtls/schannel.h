@@ -58,7 +58,7 @@
 /* <wincrypt.h> has been included via the above <schnlsp.h>.
  * Or in case of ldap.c, it was included via <winldap.h>.
  * And since <wincrypt.h> has this:
- *   #define X509_NAME  ((LPCSTR) 7)
+ *   #define X509_NAME  ((LPCSTR)7)
  *
  * And in BoringSSL's <openssl/base.h> there is:
  *  typedef struct X509_name_st X509_NAME;
@@ -69,15 +69,14 @@
  * (and only here).
  */
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
-# undef X509_NAME
-# undef X509_CERT_PAIR
-# undef X509_EXTENSIONS
+#undef X509_NAME
+#undef X509_CERT_PAIR
+#undef X509_EXTENSIONS
 #endif
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
-CURLcode Curl_verify_host(struct Curl_cfilter *cf,
-                          struct Curl_easy *data);
+CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data);
 
 CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data);
