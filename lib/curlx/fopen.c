@@ -444,27 +444,55 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
    when there are open handles to the file. */
 int curlx_win32_rename(const char *oldpath, const char *newpath)
 {
-  const int max_wait_ms = 1000;
-  struct curltime start = curlx_now();
+  int res = -1; /* fail */
+
   TCHAR *tchar_oldpath = curlx_convert_UTF8_to_tchar(oldpath);
   TCHAR *tchar_newpath = curlx_convert_UTF8_to_tchar(newpath);
-  for(;;) {
-    timediff_t diff;
-    /* !checksrc! disable BANNEDFUNC 1 */
-    if(MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING)) {
-      curlx_free(tchar_oldpath);
-      curlx_free(tchar_newpath);
-      break;
+
+  if(tchar_oldpath && tchar_newpath) {
+    const int max_wait_ms = 1000;
+    struct curltime start;
+
+    TCHAR *oldpath_fixed = NULL;
+    TCHAR *newpath_fixed = NULL;
+    const TCHAR *target_oldpath;
+    const TCHAR *target_newpath;
+
+    if(fix_excessive_path(tchar_oldpath, &oldpath_fixed))
+      target_oldpath = oldpath_fixed;
+    else
+      target_oldpath = tchar_oldpath;
+
+    if(fix_excessive_path(tchar_newpath, &newpath_fixed))
+      target_newpath = newpath_fixed;
+    else
+      target_newpath = tchar_newpath;
+
+    start = curlx_now();
+
+    for(;;) {
+      timediff_t diff;
+      /* !checksrc! disable BANNEDFUNC 1 */
+      if(MoveFileEx(target_oldpath, target_newpath,
+                    MOVEFILE_REPLACE_EXISTING)) {
+        res = 0; /* success */
+        break;
+      }
+      diff = curlx_timediff_ms(curlx_now(), start);
+      if(diff < 0 || diff > max_wait_ms) {
+        break;
+      }
+      Sleep(1);
     }
-    diff = curlx_timediff_ms(curlx_now(), start);
-    if(diff < 0 || diff > max_wait_ms) {
-      curlx_free(tchar_oldpath);
-      curlx_free(tchar_newpath);
-      return -1;
-    }
-    Sleep(1);
+
+    CURLX_FREE(oldpath_fixed);
+    CURLX_FREE(newpath_fixed);
   }
-  return 0;
+
+  curlx_free(tchar_oldpath);
+  curlx_free(tchar_newpath);
+
+  return res;
 }
 #endif
 
