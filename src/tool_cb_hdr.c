@@ -273,7 +273,6 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     else if(hdrcbdata->honor_cd_filename) {
       if((cb > 20) && checkprefix("Content-disposition:", str)) {
         size_t rc;
-        const char *p = str + 20;
 
         if(!handle_attachment_filename(per, ptr, cb, &rc)) {
           return rc;
