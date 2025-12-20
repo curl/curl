@@ -261,7 +261,7 @@ HANDLE curlx_CreateFile(const char *filename,
 {
   HANDLE handle = INVALID_HANDLE_VALUE;
 
-#ifdef _UNICODE
+#ifdef UNICODE
   TCHAR *filename_t = curlx_convert_UTF8_to_wchar(filename);
 #else
   const TCHAR *filename_t = filename;
@@ -284,7 +284,7 @@ HANDLE curlx_CreateFile(const char *filename,
                         dwFlagsAndAttributes,
                         hTemplateFile);
     CURLX_FREE(fixed);
-#ifdef _UNICODE
+#ifdef UNICODE
     curlx_free(filename_t);
 #endif
   }
