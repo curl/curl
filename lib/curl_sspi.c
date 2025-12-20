@@ -28,7 +28,6 @@
 
 #include "curl_sspi.h"
 #include "curlx/multibyte.h"
-#include "system_win32.h"
 #include "curlx/warnless.h"
 
 /* Pointer to SSPI dispatch table */
