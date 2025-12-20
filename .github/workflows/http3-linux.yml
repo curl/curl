@@ -725,7 +725,7 @@ jobs:
       - name: 'run tests (valgrind)'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
-          export TFLAGS='-j6 HTTP/3'
+          export TFLAGS='-j6 --min=4 HTTP/3'
           source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
