@@ -34,7 +34,6 @@
 
 #ifdef USE_OPENSSL
 
-#include <openssl/x509.h>
 #include <openssl/ssl.h>
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
