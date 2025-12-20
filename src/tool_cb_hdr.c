@@ -314,8 +314,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         return cb; /* done for now */
       }
     }
-    if(hdrcbdata->config->show_headers && per->config->sync
-      && (!per->last_modified || !per->outs.filename)) {
+    if(hdrcbdata->config->show_headers && per->config->sync &&
+       (!per->last_modified || !per->outs.filename)) {
       struct curl_slist *old = hdrcbdata->headlist;
       hdrcbdata->headlist = curl_slist_append(old, ptr);
       if(!hdrcbdata->headlist) {
