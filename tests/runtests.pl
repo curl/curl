@@ -3344,7 +3344,7 @@ else {
 
 if($mintotal) {
     if($total < $mintotal) {
-        logmsg "TESTFAIL: number of tests run was below the minimum of: $mintotal\n";
+        logmsg "TESTFAIL: number of tests run ($total) was below the minimum of: $mintotal\n";
         exit 1;
     }
     else {
