@@ -52,7 +52,6 @@
 
 #include "urldata.h"
 #include "sendf.h"
-#include "if2ip.h"
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -60,10 +59,7 @@
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
 #include "cf-socket.h"
-#include "select.h"
-#include "url.h" /* for Curl_safefree() */
 #include "multiif.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_ntop.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */

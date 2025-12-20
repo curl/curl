@@ -30,7 +30,6 @@
 
 #include "curlx/warnless.h"
 #include "curl_sha256.h"
-#include "curl_hmac.h"
 
 #ifdef USE_MBEDTLS
   #include <mbedtls/version.h>

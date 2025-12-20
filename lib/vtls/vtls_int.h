@@ -24,7 +24,9 @@
  *
  ***************************************************************************/
 #include "../curl_setup.h"
+
 #include "../cfilters.h"
+#include "../select.h"
 #include "../urldata.h"
 #include "vtls.h"
 

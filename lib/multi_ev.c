@@ -34,10 +34,8 @@
 #include "select.h"
 #include "uint-bset.h"
 #include "uint-spbset.h"
-#include "uint-table.h"
 #include "curlx/warnless.h"
 #include "multihandle.h"
-#include "socks.h"
 
 
 static void mev_in_callback(struct Curl_multi *multi, bool value)

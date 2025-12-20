@@ -31,7 +31,6 @@
 #include "sendf.h"
 #include "http.h"
 #include "url.h"
-#include "select.h"
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"

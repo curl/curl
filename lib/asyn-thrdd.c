@@ -58,7 +58,6 @@
 #include "cfilters.h"
 #include "sendf.h"
 #include "hostip.h"
-#include "hash.h"
 #include "url.h"
 #include "multiif.h"
 #include "curl_threads.h"

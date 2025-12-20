@@ -57,8 +57,6 @@
 
 #include "urldata.h"
 
-#include "netrc.h"
-#include "content_encoding.h"
 #include "hostip.h"
 #include "cfilters.h"
 #include "cw-out.h"
@@ -70,7 +68,6 @@
 #include "getinfo.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
-#include "select.h"
 #include "multiif.h"
 #include "connect.h"
 #include "http2.h"

@@ -29,7 +29,6 @@
 #include "strcase.h"
 #include "url.h"
 #include "escape.h"
-#include "curl_ctype.h"
 #include "curlx/inet_pton.h"
 #include "curlx/inet_ntop.h"
 #include "strdup.h"

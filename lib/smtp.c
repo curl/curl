@@ -65,7 +65,6 @@
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
 #include "mime.h"
-#include "socks.h"
 #include "smtp.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"

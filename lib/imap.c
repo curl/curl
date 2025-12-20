@@ -61,7 +61,6 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
 #include "imap.h"
 #include "mime.h"
 #include "curlx/strparse.h"
@@ -74,7 +73,6 @@
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "curlx/warnless.h"
-#include "curl_ctype.h"
 
 
 /* meta key for storing protocol meta at easy handle */

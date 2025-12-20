@@ -26,7 +26,6 @@
 #include "curl_setup.h"
 
 #include "curlx/nonblock.h" /* for curlx_nonblock() */
-#include "sockaddr.h"
 
 /**
  * Create a cfilter for making an "ip" connection to the

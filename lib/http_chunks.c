@@ -30,7 +30,6 @@
 #include "curl_trc.h"
 #include "sendf.h"   /* for the client write stuff */
 #include "curlx/dynbuf.h"
-#include "content_encoding.h"
 #include "http.h"
 #include "multiif.h"
 #include "curlx/strparse.h"

@@ -84,7 +84,6 @@
 #include "hsts.h"
 #include "ws.h"
 #include "bufref.h"
-#include "curl_ctype.h"
 #include "curlx/strparse.h"
 #include "curlx/timeval.h"
 

@@ -39,18 +39,15 @@
 #include "transfer.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "content_encoding.h"
 #include "cw-out.h"
 #include "cw-pause.h"
 #include "vtls/vtls.h"
 #include "vssh/ssh.h"
 #include "multiif.h"
 #include "strerror.h"
-#include "select.h"
 #include "http2.h"
 #include "progress.h"
 #include "curlx/warnless.h"
-#include "ws.h"
 
 
 static CURLcode do_init_writer_stack(struct Curl_easy *data);

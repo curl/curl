@@ -51,7 +51,6 @@
 #include "openssl.h"
 #include "../connect.h"
 #include "../progress.h"
-#include "../select.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"

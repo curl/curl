@@ -33,14 +33,11 @@
 #include "sendf.h"
 #include "cshutdn.h"
 #include "conncache.h"
-#include "http_negotiate.h"
-#include "http_ntlm.h"
 #include "curl_share.h"
 #include "sigpipe.h"
 #include "connect.h"
 #include "select.h"
 #include "curlx/strparse.h"
-#include "uint-table.h"
 
 
 #define CPOOL_IS_LOCKED(c)    ((c) && (c)->locked)

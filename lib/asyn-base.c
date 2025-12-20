@@ -48,7 +48,6 @@
 #include "asyn.h"
 #include "sendf.h"
 #include "hostip.h"
-#include "hash.h"
 #include "multiif.h"
 #include "select.h"
 #include "url.h"
