@@ -68,7 +68,6 @@
 
 #include "doh.h"
 #include "urldata.h"
-#include "netrc.h"
 #include "formdata.h"
 #include "mime.h"
 #include "bufref.h"
