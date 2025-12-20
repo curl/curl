@@ -74,7 +74,6 @@
 #include "curl_gethostname.h"
 #include "bufref.h"
 #include "curl_sasl.h"
-#include "curlx/warnless.h"
 #include "idn.h"
 #include "curlx/strparse.h"
 

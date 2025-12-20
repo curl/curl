@@ -57,7 +57,6 @@
 #include "../curlx/strparse.h"
 #include "../multiif.h"
 #include "../select.h"
-#include "../curlx/warnless.h"
 #include "vssh.h"
 
 #ifdef HAVE_UNISTD_H

@@ -52,7 +52,6 @@
 #include "curl_osslq.h"
 #include "../url.h"
 #include "../bufref.h"
-#include "../curlx/warnless.h"
 #include "../curlx/strerr.h"
 
 /* A stream window is the maximum amount we need to buffer for

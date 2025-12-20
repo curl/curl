@@ -56,7 +56,6 @@
 #include "curlx/inet_pton.h"
 #include "multiif.h"
 #include "doh.h"
-#include "curlx/warnless.h"
 #include "progress.h"
 #include "select.h"
 #include "strcase.h"

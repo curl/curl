@@ -55,7 +55,6 @@
 #include "progress.h"
 #include "arpa_telnet.h"
 #include "select.h"
-#include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
 #define SUBBUFSIZE 512

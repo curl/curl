@@ -34,7 +34,6 @@
 #include "curl_get_line.h"
 #include "parsedate.h"
 #include "sendf.h"
-#include "curlx/warnless.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "curlx/timeval.h"

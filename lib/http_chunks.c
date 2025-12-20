@@ -33,7 +33,6 @@
 #include "http.h"
 #include "multiif.h"
 #include "curlx/strparse.h"
-#include "curlx/warnless.h"
 
 /*
  * Chunk format (simplified):

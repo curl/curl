@@ -43,7 +43,6 @@
 #include "multiif.h"
 #include "sendf.h"
 #include "select.h"
-#include "curlx/warnless.h"
 #include "cf-h2-proxy.h"
 
 #define PROXY_H2_CHUNK_SIZE  (16 * 1024)

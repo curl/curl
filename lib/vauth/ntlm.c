@@ -38,7 +38,6 @@
 #include "vauth.h"
 #include "../sendf.h"
 #include "../curl_ntlm_core.h"
-#include "../curlx/warnless.h"
 #include "../rand.h"
 #include "../strdup.h"
 #include "../curl_endian.h"

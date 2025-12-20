@@ -72,7 +72,6 @@
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "curl_md5.h"
-#include "curlx/warnless.h"
 #include "strdup.h"
 
 /* Authentication type flags */

@@ -27,7 +27,6 @@
 struct Curl_easy;
 
 #include "mime.h"
-#include "curlx/warnless.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "transfer.h"

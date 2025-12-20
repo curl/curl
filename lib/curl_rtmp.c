@@ -34,7 +34,6 @@
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
 #include "bufref.h"
-#include "curlx/warnless.h"
 
 #include <librtmp/rtmp.h>
 

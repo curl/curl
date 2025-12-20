@@ -50,7 +50,6 @@
 #include "curl_addrinfo.h"
 #include "fake_addrinfo.h"
 #include "curlx/inet_pton.h"
-#include "curlx/warnless.h"
 
 /*
  * Curl_freeaddrinfo()

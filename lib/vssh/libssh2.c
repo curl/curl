@@ -56,7 +56,6 @@
 #include "../multiif.h"
 #include "../select.h"
 #include "../curlx/fopen.h"
-#include "../curlx/warnless.h"
 #include "vssh.h"
 #include "../curlx/strparse.h"
 #include "../curlx/base64.h" /* for base64 encoding/decoding */

@@ -38,7 +38,6 @@
 #include "curlx/timeval.h"
 #include "http.h"
 #include "select.h"
-#include "curlx/warnless.h"
 #include "curlx/wait.h"
 #include "conncache.h"
 #include "multihandle.h"

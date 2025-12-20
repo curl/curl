@@ -82,7 +82,6 @@
 #include "curl_share.h"
 #include "http_digest.h"
 #include "multiif.h"
-#include "curlx/warnless.h"
 #include "getinfo.h"
 #include "pop3.h"
 #include "urlapi-int.h"

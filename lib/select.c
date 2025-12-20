@@ -40,7 +40,6 @@
 #include "curl_trc.h"
 #include "curlx/timediff.h"
 #include "curlx/wait.h"
-#include "curlx/warnless.h"
 
 #ifndef HAVE_POLL
 /*

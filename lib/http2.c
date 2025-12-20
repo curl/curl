@@ -46,7 +46,6 @@
 #include "transfer.h"
 #include "bufref.h"
 #include "curlx/dynbuf.h"
-#include "curlx/warnless.h"
 #include "headers.h"
 
 #if (NGHTTP2_VERSION_NUM < 0x010c00)

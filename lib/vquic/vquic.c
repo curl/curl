@@ -34,7 +34,6 @@
 #include "../bufq.h"
 #include "../curlx/dynbuf.h"
 #include "../curlx/fopen.h"
-#include "../curlx/warnless.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "curl_ngtcp2.h"

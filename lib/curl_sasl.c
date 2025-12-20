@@ -44,7 +44,6 @@
 #include "vauth/vauth.h"
 #include "cfilters.h"
 #include "curl_sasl.h"
-#include "curlx/warnless.h"
 #include "sendf.h"
 
 /* Supported mechanisms */

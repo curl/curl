@@ -27,7 +27,6 @@
 #ifdef _WIN32
 
 #include "version_win32.h"
-#include "warnless.h"
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
    and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */

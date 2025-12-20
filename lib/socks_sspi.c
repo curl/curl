@@ -37,7 +37,6 @@
 #include "socks.h"
 #include "curl_sspi.h"
 #include "curlx/multibyte.h"
-#include "curlx/warnless.h"
 
 /*
  * Helper sspi error functions.
