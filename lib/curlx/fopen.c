@@ -367,14 +367,14 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *path_w = fn_convert_UTF8_to_wchar(path);
+  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
   if(path_w) {
     if(fix_excessive_path(path_w, &fixed))
       target = fixed;
     else
       target = path_w;
     result = _wstati64(target, buffer);
-    CURLX_FREE(path_w);
+    curlx_free(path_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
