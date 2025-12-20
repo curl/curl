@@ -54,6 +54,7 @@
 #include "multiif.h"
 #include "curlx/inet_pton.h"
 #include "connect.h"
+#include "select.h"
 #include "progress.h"
 #include "curlx/timediff.h"
 #include "httpsrr.h"
