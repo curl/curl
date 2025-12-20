@@ -68,7 +68,6 @@
 #include "getinfo.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
-#include "select.h"
 #include "multiif.h"
 #include "connect.h"
 #include "http2.h"

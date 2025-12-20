@@ -81,7 +81,6 @@
 #include "escape.h"
 #include "curl_share.h"
 #include "http_digest.h"
-#include "select.h"
 #include "multiif.h"
 #include "curlx/warnless.h"
 #include "getinfo.h"

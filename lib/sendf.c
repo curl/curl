@@ -45,7 +45,6 @@
 #include "vssh/ssh.h"
 #include "multiif.h"
 #include "strerror.h"
-#include "select.h"
 #include "http2.h"
 #include "progress.h"
 #include "curlx/warnless.h"

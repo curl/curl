@@ -58,7 +58,6 @@
 #include "cf-haproxy.h"
 #include "cf-ip-happy.h"
 #include "cf-socket.h"
-#include "select.h"
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_ntop.h"
