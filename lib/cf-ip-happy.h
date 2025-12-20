@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/nonblock.h" /* for curlx_nonblock() */
-
 /**
  * Create a cfilter for making an "ip" connection to the
  * given address, using parameters from `conn`. The "ip" connection

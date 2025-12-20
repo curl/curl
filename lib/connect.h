@@ -25,7 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/nonblock.h" /* for curlx_nonblock() */
 #include "curlx/timeval.h"
 
 struct Curl_dns_entry;
