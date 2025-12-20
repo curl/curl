@@ -38,7 +38,6 @@
 #include "connect.h"
 #include "select.h"
 #include "curlx/strparse.h"
-#include "uint-table.h"
 
 
 #define CPOOL_IS_LOCKED(c)    ((c) && (c)->locked)

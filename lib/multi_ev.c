@@ -34,7 +34,6 @@
 #include "select.h"
 #include "uint-bset.h"
 #include "uint-spbset.h"
-#include "uint-table.h"
 #include "curlx/warnless.h"
 #include "multihandle.h"
 
