@@ -63,7 +63,6 @@
 #include "cf-socket.h"
 #include "connect.h"
 #include "select.h"
-#include "url.h"
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_pton.h"
