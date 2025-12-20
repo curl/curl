@@ -35,7 +35,6 @@ struct Curl_easy;
 #include "vtls/vtls.h"
 #include "sendf.h"
 #include "strdup.h"
-#include "rand.h"
 #include "bufref.h"
 #include "curlx/fopen.h"
 #include "curlx/warnless.h"

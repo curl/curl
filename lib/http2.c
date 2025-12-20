@@ -43,7 +43,6 @@
 #include "urlapi-int.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "rand.h"
 #include "curlx/strparse.h"
 #include "transfer.h"
 #include "bufref.h"
