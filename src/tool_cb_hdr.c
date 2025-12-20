@@ -82,8 +82,9 @@ fail:
  * data. Returns FALSE on error and sets *rc; TRUE continues
  * header processing.
  */
-static bool handle_attachment_filename(struct per_transfer *per, const char *str,
-                                const size_t len, size_t *rc)
+static bool handle_attachment_filename(struct per_transfer *per,
+                                      const char *str,const size_t len,
+                                      size_t *rc)
 {
   const char *end = str + len;
   const char *p = str + 20;
