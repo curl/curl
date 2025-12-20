@@ -27,7 +27,7 @@
 #include "socketpair.h"
 #include "urldata.h"
 #include "rand.h"
-#include "curlx/nonblock.h" /* for curlx_nonblock */
+#include "curlx/nonblock.h"
 
 #ifdef USE_EVENTFD
 

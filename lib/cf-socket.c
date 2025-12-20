@@ -72,7 +72,7 @@
 #include "rand.h"
 #include "strdup.h"
 #include "system_win32.h"
-#include "curlx/nonblock.h" /* for curlx_nonblock() */
+#include "curlx/nonblock.h"
 #include "curlx/version_win32.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"

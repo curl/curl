@@ -32,7 +32,7 @@
 #include "sendf.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "curlx/nonblock.h" /* for curlx_nonblock */
+#include "curlx/nonblock.h"
 #include "curlx/timeval.h"
 #include "socks.h"
 #include "curlx/warnless.h"
