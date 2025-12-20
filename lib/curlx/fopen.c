@@ -446,8 +446,13 @@ int curlx_win32_rename(const char *oldpath, const char *newpath)
 {
   int res = -1; /* fail */
 
-  TCHAR *tchar_oldpath = curlx_convert_UTF8_to_tchar(oldpath);
-  TCHAR *tchar_newpath = curlx_convert_UTF8_to_tchar(newpath);
+#ifdef _UNICODE
+  TCHAR *tchar_oldpath = curlx_convert_UTF8_to_wchar(oldpath);
+  TCHAR *tchar_newpath = curlx_convert_UTF8_to_wchar(newpath);
+#else
+  const TCHAR *tchar_oldpath = oldpath;
+  const TCHAR *tchar_newpath = newpath;
+#endif
 
   if(tchar_oldpath && tchar_newpath) {
     const int max_wait_ms = 1000;
@@ -489,8 +494,10 @@ int curlx_win32_rename(const char *oldpath, const char *newpath)
     CURLX_FREE(newpath_fixed);
   }
 
+#ifdef _UNICODE
   curlx_free(tchar_oldpath);
   curlx_free(tchar_newpath);
+#endif
 
   return res;
 }
