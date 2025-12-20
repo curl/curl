@@ -44,6 +44,7 @@
 #include "vtls_scache.h"
 #include "../sendf.h"
 #include "../connect.h" /* for the connect timeout */
+#include "../strdup.h"
 #include "../strerror.h"
 #include "../select.h" /* for the socket readiness */
 #include "../curlx/fopen.h"
