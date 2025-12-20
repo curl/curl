@@ -107,7 +107,6 @@
 #include "imap.h"
 #include "url.h"
 #include "connect.h"
-#include "http_ntlm.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
 #include "mqtt.h"

@@ -33,7 +33,6 @@
 #include "sendf.h"
 #include "cshutdn.h"
 #include "conncache.h"
-#include "http_ntlm.h"
 #include "curl_share.h"
 #include "sigpipe.h"
 #include "connect.h"
