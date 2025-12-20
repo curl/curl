@@ -39,7 +39,6 @@
 #include "transfer.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "content_encoding.h"
 #include "cw-out.h"
 #include "cw-pause.h"
 #include "vtls/vtls.h"

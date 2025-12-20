@@ -81,7 +81,6 @@
 #include "strcase.h"
 #include "escape.h"
 #include "curl_share.h"
-#include "content_encoding.h"
 #include "http_digest.h"
 #include "http_negotiate.h"
 #include "select.h"
