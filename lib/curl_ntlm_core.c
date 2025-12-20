@@ -69,8 +69,6 @@
 
 #ifdef USE_OPENSSL
 #  include <openssl/des.h>
-#  include <openssl/ssl.h>
-#  include <openssl/rand.h>
 #  ifdef OPENSSL_IS_AWSLC  /* for versions 1.2.0 to 1.30.1 */
 #    define DES_set_key_unchecked (void)DES_set_key
 #  endif
@@ -78,8 +76,6 @@
 #else
 #  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
-#  include <wolfssl/openssl/ssl.h>
-#  include <wolfssl/openssl/rand.h>
 #  ifdef OPENSSL_COEXIST
 #    define DES_key_schedule      WOLFSSL_DES_key_schedule
 #    define DES_cblock            WOLFSSL_DES_cblock
