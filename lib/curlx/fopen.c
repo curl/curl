@@ -264,12 +264,16 @@ HANDLE curlx_CreateFile(const char *filename,
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
-  if(filename_w) {
-    if(fix_excessive_path(filename_w, &fixed))
+  TCHAR *filename_t = curlx_convert_UTF8_to_wchar(filename);
+#else
+  const TCHAR *filename_t = filename;
+#endif
+
+  if(filename_t) {
+    if(fix_excessive_path(filename_t, &fixed))
       target = fixed;
     else
-      target = filename_w;
+      target = filename_t;
     /* !checksrc! disable BANNEDFUNC 1 */
     handle = CreateFile(target,
                         dwDesiredAccess,
@@ -278,24 +282,12 @@ HANDLE curlx_CreateFile(const char *filename,
                         dwCreationDisposition,
                         dwFlagsAndAttributes,
                         hTemplateFile);
-    curlx_free(filename_w);
-  }
-#else
-  if(fix_excessive_path(filename, &fixed))
-    target = fixed;
-  else
-    target = filename;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  handle = CreateFile(target,
-                      dwDesiredAccess,
-                      dwShareMode,
-                      lpSecurityAttributes,
-                      dwCreationDisposition,
-                      dwFlagsAndAttributes,
-                      hTemplateFile);
+    CURLX_FREE(fixed);
+#ifdef _UNICODE
+    curlx_free(filename_t);
 #endif
+  }
 
-  CURLX_FREE(fixed);
   return handle;
 }
 #endif /* !CURL_WINDOWS_UWP */
