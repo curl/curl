@@ -73,7 +73,6 @@
 #endif
 #include <openssl/dh.h>
 #include <openssl/err.h>
-#include <openssl/md5.h>
 #include <openssl/conf.h>
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
