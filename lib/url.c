@@ -91,6 +91,16 @@
 #include "noproxy.h"
 #include "cfilters.h"
 #include "idn.h"
+#include "http_proxy.h"
+#include "conncache.h"
+#include "multihandle.h"
+#include "strdup.h"
+#include "setopt.h"
+#include "altsvc.h"
+#include "curlx/dynbuf.h"
+#include "headers.h"
+#include "curlx/strerr.h"
+#include "curlx/strparse.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -108,16 +118,7 @@
 #include "curl_rtmp.h"
 #include "gopher.h"
 #include "mqtt.h"
-#include "http_proxy.h"
-#include "conncache.h"
-#include "multihandle.h"
-#include "strdup.h"
-#include "setopt.h"
-#include "altsvc.h"
-#include "curlx/dynbuf.h"
-#include "headers.h"
-#include "curlx/strerr.h"
-#include "curlx/strparse.h"
+#include "ws.h"
 
 #ifdef USE_NGHTTP2
 static void data_priority_cleanup(struct Curl_easy *data);
