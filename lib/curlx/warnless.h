@@ -73,11 +73,4 @@ bool curlx_sotouz_fits(curl_off_t sonum, size_t *puznum);
  * and set 0 */
 bool curlx_sltouz(long sznum, size_t *puznum);
 
-#ifdef _WIN32
-#undef  read
-#define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
-#undef  write
-#define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
-#endif
-
 #endif /* HEADER_CURL_WARNLESS_H */
