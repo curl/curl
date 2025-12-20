@@ -52,7 +52,6 @@
 
 #include "urldata.h"
 #include "sendf.h"
-#include "if2ip.h"
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
