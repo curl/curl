@@ -27,7 +27,6 @@
 #include "urldata.h"
 #include "bufq.h"
 #include "cfilters.h"
-#include "headers.h"
 #include "sendf.h"
 #include "cw-pause.h"
 
