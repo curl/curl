@@ -23,56 +23,54 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* Test CURLINFO_SCHEME */
 
 static CURLcode test_lib1536(const char *URL)
 {
   CURL *curl, *dupe = NULL;
   char *scheme;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
 
   /* Test that scheme is properly initialized on curl_easy_init.
-  */
+   */
 
-  res = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
-  if(res) {
+  result = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(scheme) {
     curl_mfprintf(stderr,
                   "%s:%d scheme init failed; expected NULL\n",
                   __FILE__, __LINE__);
-    res = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
   easy_setopt(curl, CURLOPT_URL, URL);
 
-  res = curl_easy_perform(curl);
-  if(res) {
+  result = curl_easy_perform(curl);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
   /* Test that a scheme is properly set after receiving an HTTP resource.
-  */
+   */
 
-  res = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
-  if(res) {
+  result = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(!scheme || memcmp(scheme, "http", 5) != 0) {
@@ -80,51 +78,51 @@ static CURLcode test_lib1536(const char *URL)
                   "expected 'http' but is %s\n",
                   __FILE__, __LINE__,
                   (scheme == NULL ? "NULL" : "invalid"));
-    res = CURLE_HTTP_RETURNED_ERROR;
+    result = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }
 
   /* Test that a scheme is properly initialized on curl_easy_duphandle.
-  */
+   */
 
   dupe = curl_easy_duphandle(curl);
   if(!dupe) {
     curl_mfprintf(stderr, "%s:%d curl_easy_duphandle() failed\n",
                   __FILE__, __LINE__);
-    res = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
-  res = curl_easy_getinfo(dupe, CURLINFO_SCHEME, &scheme);
-  if(res) {
+  result = curl_easy_getinfo(dupe, CURLINFO_SCHEME, &scheme);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(scheme) {
     curl_mfprintf(stderr, "%s:%d scheme init failed; expected NULL\n",
                   __FILE__, __LINE__);
-    res = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
   /* Test that a scheme is properly initialized on curl_easy_reset.
-  */
+   */
 
   curl_easy_reset(curl);
 
-  res = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
-  if(res) {
+  result = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(scheme) {
     curl_mfprintf(stderr, "%s:%d scheme init failed; expected NULL\n",
                   __FILE__, __LINE__);
-    res = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
@@ -132,5 +130,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dupe);
   curl_global_cleanup();
-  return res;
+  return result;
 }

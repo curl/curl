@@ -23,66 +23,64 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Get a single URL without select().
  */
 
 static CURLcode test_lib751(const char *URL)
 {
-  CURL *easies[1000];
-  CURLM *m;
-  CURLcode res = CURLE_FAILED_INIT;
-  CURLMcode mres;
+  CURL *curls[1000];
+  CURLM *multi;
+  CURLcode result = CURLE_FAILED_INIT;
+  CURLMcode mresult;
   int i;
 
   (void)URL;
-  memset(easies, 0, sizeof(easies));
+  memset(curls, 0, sizeof(curls));
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  m = curl_multi_init();
-  if(!m) {
-    res = CURLE_OUT_OF_MEMORY;
+  multi = curl_multi_init();
+  if(!multi) {
+    result = CURLE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
 
   for(i = 0; i < 1000; i++) {
-    CURL *e = curl_easy_init();
-    if(!e) {
-      res = CURLE_OUT_OF_MEMORY;
+    CURL *curl = curl_easy_init();
+    if(!curl) {
+      result = CURLE_OUT_OF_MEMORY;
       goto test_cleanup;
     }
-    easies[i] = e;
+    curls[i] = curl;
 
-    res = curl_easy_setopt(e, CURLOPT_URL, "https://www.example.com/");
-    if(!res)
-      res = curl_easy_setopt(e, CURLOPT_VERBOSE, 1L);
-    if(res)
+    result = curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
+    if(!result)
+      result = curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if(result)
       goto test_cleanup;
 
-    mres = curl_multi_add_handle(m, e);
-    if(mres != CURLM_OK) {
-      curl_mfprintf(stderr, "MULTI ERROR: %s\n", curl_multi_strerror(mres));
-      res = CURLE_FAILED_INIT;
+    mresult = curl_multi_add_handle(multi, curl);
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "MULTI ERROR: %s\n", curl_multi_strerror(mresult));
+      result = CURLE_FAILED_INIT;
       goto test_cleanup;
     }
   }
 
 test_cleanup:
 
-  if(res)
-    curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(res));
+  if(result)
+    curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(result));
 
   for(i = 0; i < 1000; i++) {
-    if(easies[i]) {
-      curl_multi_add_handle(m, easies[i]);
-      curl_easy_cleanup(easies[i]);
-      easies[i] = NULL;
+    if(curls[i]) {
+      curl_multi_add_handle(multi, curls[i]);
+      curl_easy_cleanup(curls[i]);
+      curls[i] = NULL;
     }
   }
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

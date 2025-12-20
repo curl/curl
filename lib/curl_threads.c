@@ -24,16 +24,11 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
 #endif
 
 #include "curl_threads.h"
-#include "curl_memory.h"
-/* The last #include FILE should be: */
-#include "memdebug.h"
 
 #ifdef USE_THREADS_POSIX
 
@@ -48,7 +43,7 @@ static void *curl_thread_create_thunk(void *arg)
   unsigned int (*func)(void *) = ac->func;
   void *real_arg = ac->arg;
 
-  free(ac);
+  curlx_free(ac);
 
   (*func)(real_arg);
 
@@ -58,8 +53,8 @@ static void *curl_thread_create_thunk(void *arg)
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
-  curl_thread_t t = malloc(sizeof(pthread_t));
-  struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
+  curl_thread_t t = curlx_malloc(sizeof(pthread_t));
+  struct Curl_actual_call *ac = curlx_malloc(sizeof(struct Curl_actual_call));
   int rc;
   if(!(ac && t))
     goto err;
@@ -69,15 +64,15 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
 
   rc = pthread_create(t, NULL, curl_thread_create_thunk, ac);
   if(rc) {
-    CURL_SETERRNO(rc);
+    errno = rc;
     goto err;
   }
 
   return t;
 
 err:
-  free(t);
-  free(ac);
+  curlx_free(t);
+  curlx_free(ac);
   return curl_thread_t_null;
 }
 
@@ -85,7 +80,7 @@ void Curl_thread_destroy(curl_thread_t *hnd)
 {
   if(*hnd != curl_thread_t_null) {
     pthread_detach(**hnd);
-    free(*hnd);
+    curlx_free(*hnd);
     *hnd = curl_thread_t_null;
   }
 }
@@ -94,7 +89,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 {
   int ret = (pthread_join(**hnd, NULL) == 0);
 
-  free(*hnd);
+  curlx_free(*hnd);
   *hnd = curl_thread_t_null;
 
   return ret;
@@ -109,10 +104,9 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
   if(!t) {
     DWORD gle = GetLastError();
     /* !checksrc! disable ERRNOVAR 1 */
-    int err = (gle == ERROR_ACCESS_DENIED ||
-               gle == ERROR_NOT_ENOUGH_MEMORY) ?
-               EACCES : EINVAL;
-    CURL_SETERRNO(err);
+    errno = (gle == ERROR_ACCESS_DENIED ||
+             gle == ERROR_NOT_ENOUGH_MEMORY) ?
+             EACCES : EINVAL;
     return curl_thread_t_null;
   }
   return t;
@@ -128,11 +122,7 @@ void Curl_thread_destroy(curl_thread_t *hnd)
 
 int Curl_thread_join(curl_thread_t *hnd)
 {
-#ifdef UNDER_CE
-  int ret = (WaitForSingleObject(*hnd, INFINITE) == WAIT_OBJECT_0);
-#else
   int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);
-#endif
 
   Curl_thread_destroy(hnd);
 

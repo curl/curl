@@ -137,8 +137,7 @@ struct customdata {
   void *ptr;
 };
 
-static size_t writecb(char *buffer,
-                      size_t size, size_t nitems, void *p)
+static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
 {
   struct customdata *c = (struct customdata *)p;
   const struct curl_ws_frame *m = curl_ws_meta(c->easy);
@@ -158,7 +157,6 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &custom);
 
     curl_easy_perform(curl);
-
   }
   return 0;
 }

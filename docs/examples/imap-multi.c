@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Get IMAP email with the multi interface
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to fetch mail using libcurl's IMAP
@@ -40,16 +39,16 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
-    CURLM *mcurl;
+    CURLM *multi;
 
-    mcurl = curl_multi_init();
-    if(mcurl) {
+    multi = curl_multi_init();
+    if(multi) {
       int still_running = 1;
 
       /* Set username and password */
@@ -61,22 +60,22 @@ int main(void)
                        "INBOX/;UID=1");
 
       /* Tell the multi stack about our easy handle */
-      curl_multi_add_handle(mcurl, curl);
+      curl_multi_add_handle(multi, curl);
 
       do {
-        CURLMcode mc = curl_multi_perform(mcurl, &still_running);
+        CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
         if(still_running)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(mcurl, NULL, 0, 1000, NULL);
+          mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-        if(mc)
+        if(mresult)
           break;
       } while(still_running);
 
       /* Always cleanup */
-      curl_multi_remove_handle(mcurl, curl);
-      curl_multi_cleanup(mcurl);
+      curl_multi_remove_handle(multi, curl);
+      curl_multi_cleanup(multi);
     }
     curl_easy_cleanup(curl);
   }

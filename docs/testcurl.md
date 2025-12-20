@@ -102,7 +102,7 @@ snapshots automatically):
 
     $ mkdir curl-testing
     $ cd curl-testing
-    $ git clone https://github.com/curl/curl.git
+    $ git clone https://github.com/curl/curl
 
 With the curl sources checked out, or downloaded, you can start testing right
 away. If you want to use *testcurl* without command line arguments and to have

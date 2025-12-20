@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,7 +11,6 @@ followlocation
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -32,7 +32,6 @@ OK
 </data1>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -47,7 +46,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-Connection reuse with IDN host name over HTTP proxy
+Connection reuse with IDN hostname over HTTP proxy
 </name>
 
 <command>
@@ -55,10 +54,9 @@ http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se/%TESTNUMBER -x %HOSTIP:%HTTPPORT -w "%{nu
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://xn--4cab6c.se/%TESTNUMBER HTTP/1.1
 Host: xn--4cab6c.se
 User-Agent: curl/%VERSION

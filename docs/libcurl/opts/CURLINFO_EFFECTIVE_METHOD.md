@@ -16,7 +16,7 @@ Added-in: 7.72.0
 
 # NAME
 
-CURLINFO_EFFECTIVE_METHOD - get the last used HTTP method
+CURLINFO_EFFECTIVE_METHOD - last used HTTP request method
 
 # SYNOPSIS
 
@@ -48,12 +48,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "data");
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK) {
       char *method = NULL;
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &method);
       if(method)

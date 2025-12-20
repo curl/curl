@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -15,14 +16,13 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-Remove easy handle in pending connections doesn't leave dangling entry
+Remove easy handle in pending connections does not leave dangling entry
 </name>
 <command>
 hostname.invalid
 </command>
 </client>
 
-#
 # Verify that the test runs to completion without crashing
 <verify>
 <errorcode>

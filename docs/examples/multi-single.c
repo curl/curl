@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 /*
@@ -37,48 +36,49 @@
  */
 int main(void)
 {
-  CURL *http_handle;
+  CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
-  http_handle = curl_easy_init();
-  if(http_handle) {
+  curl = curl_easy_init();
+  if(curl) {
 
-    CURLM *multi_handle;
+    CURLM *multi;
     int still_running = 1; /* keep number of running handles */
 
     /* set the options (I left out a few, you get the point anyway) */
-    curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
     /* init a multi stack */
-    multi_handle = curl_multi_init();
-    if(multi_handle) {
+    multi = curl_multi_init();
+    if(multi) {
 
       /* add the individual transfers */
-      curl_multi_add_handle(multi_handle, http_handle);
+      curl_multi_add_handle(multi, curl);
 
       do {
-        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+        CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
-        if(!mc)
+        if(!mresult)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+          mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-        if(mc) {
-          fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mc);
+        if(mresult) {
+          fprintf(stderr, "curl_multi_poll() failed, code %d.\n",
+                  (int)mresult);
           break;
         }
 
       } while(still_running);
 
-      curl_multi_remove_handle(multi_handle, http_handle);
+      curl_multi_remove_handle(multi, curl);
 
-      curl_multi_cleanup(multi_handle);
+      curl_multi_cleanup(multi);
     }
 
-    curl_easy_cleanup(http_handle);
+    curl_easy_cleanup(curl);
   }
 
   curl_global_cleanup();

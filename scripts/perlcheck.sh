@@ -23,7 +23,7 @@
 #
 ###########################################################################
 
-# The xargs invocation is portable, but does not preserve spaces in file names.
+# The xargs invocation is portable, but does not preserve spaces in filenames.
 # If such a file is ever added, then this can be portably fixed by switching to
 # "xargs -I{}" and appending {} to the end of the xargs arguments (which will
 # call cmakelint once per file) or by using the GNU extension "xargs -d'\n'".
@@ -38,14 +38,11 @@ echo "parallel: ${procs}"
 
 {
   if [ -n "${1:-}" ]; then
-    for A in "$@"; do printf "%s\n" "$A"; done
+    for A in "$@"; do printf '%s\n' "$A"; done
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    {
-      git ls-files | grep -E '\.(pl|pm)$'
-      git grep -l -E '^#!/usr/bin/env perl'
-    } | sort -u
+    git ls-files '*.pl' '*.pm'
+    git grep -l '^#!/usr/bin/env perl'
   else
-    # strip off the leading ./ to make the grep regexes work properly
-    find . -type f \( -name '*.pl' -o -name '*.pm' \) | sed 's@^\./@@'
+    find . -type f \( -name '*.pl' -o -name '*.pm' \)
   fi
-} | xargs -n 1 -P "${procs}" perl -c -Itests --
+} | sort -u | xargs -n 1 -P "${procs}" perl -c -Itests --

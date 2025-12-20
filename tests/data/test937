@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,7 +12,6 @@ RFC4954
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -23,7 +23,6 @@ REPLY AHVzZXIAc2VjcmV0 235 Authenticated
 </servercmd>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -38,7 +37,7 @@ digest
 <name>
 SMTP DIGEST-MD5 authentication with SASL downgrade
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>
@@ -46,21 +45,20 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH DIGEST-MD5
 *
 AUTH PLAIN
 AHVzZXIAc2VjcmV0
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+IMAP
+followlocation
+</keywords>
+</info>
+# Server-side
+<reply>
+<servercmd>
+AUTH PLAIN
+CAPA SASL-IR
+REPLY AUTHENTICATE B002 OK AUTHENTICATE completed
+</servercmd>
+<data>
+HTTP/1.1 302 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Location: imap://v@host:%IMAPPORT/%TESTNUMBER0002/
+Content-Length: 8
+Connection: close
+
+contents
+</data>
+
+<datacheck>
+HTTP/1.1 302 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Location: imap://v@host:%IMAPPORT/%TESTNUMBER0002/
+Content-Length: 8
+Connection: close
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+imap
+</server>
+<name>
+HTTP with credentials redirects to IMAP
+</name>
+<command>
+http://@%HOSTIP:%HTTPPORT/page/%TESTNUMBER -u user:secret --location --proto-redir imap --resolve host:%IMAPPORT:%HOSTIP
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /page/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic %b64[user:secret]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+
+B001 CAPABILITY
+B002 AUTHENTICATE PLAIN AHYA
+B003 LIST "%TESTNUMBER0002" *
+B004 LOGOUT
+</protocol>
+</verify>
+</testcase>

@@ -28,6 +28,7 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 curl_add_manual_pages(man_MANS)
 add_custom_target(curl-opts-man DEPENDS ${man_MANS})
 add_dependencies(curl-man curl-opts-man)
+
 if(NOT CURL_DISABLE_INSTALL)
   set(_src "")
   foreach(_file IN LISTS man_MANS)

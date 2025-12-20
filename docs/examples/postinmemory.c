@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 struct MemoryStruct {
@@ -35,8 +36,7 @@ struct MemoryStruct {
   size_t size;
 };
 
-static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t write_cb(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
@@ -59,23 +59,23 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb,
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct MemoryStruct chunk;
   static const char *postthis = "Field=1&Field=2&Field=3";
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   chunk.memory = malloc(1);  /* grown as needed by realloc above */
-  chunk.size = 0;    /* no data at this point */
+  chunk.size = 0;            /* no data at this point */
 
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.org/");
 
     /* send all data to this function  */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* we pass our 'chunk' struct to the callback function */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
@@ -89,12 +89,12 @@ int main(void)
     /* if we do not provide POSTFIELDSIZE, libcurl calls strlen() by itself */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK) {
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     }
     else {
       /*
@@ -103,7 +103,7 @@ int main(void)
        *
        * Do something nice with it!
        */
-      printf("%s\n",chunk.memory);
+      printf("%s\n", chunk.memory);
     }
 
     /* always cleanup */

@@ -1,0 +1,9 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# Possibly not what we want, but cannot test, just silence the warnings
+allowfunc calloc
+allowfunc free
+allowfunc malloc
+allowfunc realloc

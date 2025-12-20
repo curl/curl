@@ -50,14 +50,13 @@ CURL_EXTERN void curl_easy_cleanup(CURL *curl);
  *
  * Request internal information from the curl session with this function.
  * The third argument MUST be pointing to the specific type of the used option
- * which is documented in each manpage of the option. The data pointed to
+ * which is documented in each man page of the option. The data pointed to
  * will be filled in accordingly and can be relied upon only if the function
  * returns CURLE_OK. This function is intended to get used *AFTER* a performed
  * transfer, all results from this function are undefined until the transfer
  * is completed.
  */
 CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
-
 
 /*
  * NAME curl_easy_duphandle()
@@ -67,7 +66,7 @@ CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
  * Creates a new curl session handle with the same options set for the handle
  * passed in. Duplicating a handle could only be a matter of cloning data and
  * options, internal state info and things like persistent connections cannot
- * be transferred. It is useful in multithreaded applications when you can run
+ * be transferred. It is useful in multi-threaded applications when you can run
  * curl_easy_duphandle() for each new thread to avoid a series of identical
  * curl_easy_setopt() invokes in every thread.
  */
@@ -107,7 +106,6 @@ CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
  */
 CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
                                     size_t buflen, size_t *n);
-
 
 /*
  * NAME curl_easy_upkeep()

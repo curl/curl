@@ -36,7 +36,6 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#include "curlx/dynbuf.h"
 
 #ifndef CURL_DISABLE_IMAP
 
@@ -54,7 +53,7 @@
 #include <inet.h>
 #endif
 
-#include <curl/curl.h>
+#include "curlx/dynbuf.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -62,7 +61,6 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
 #include "imap.h"
 #include "mime.h"
 #include "curlx/strparse.h"
@@ -71,16 +69,10 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "select.h"
-#include "multiif.h"
 #include "url.h"
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "curlx/warnless.h"
-#include "curl_ctype.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 
 /* meta key for storing protocol meta at easy handle */
@@ -146,7 +138,6 @@ struct IMAP {
   BIT(uidvalidity_set);
 };
 
-
 /* Local API functions */
 static CURLcode imap_regular_transfer(struct Curl_easy *data,
                                       struct IMAP *imap,
@@ -210,9 +201,9 @@ const struct Curl_handler Curl_handler_imap = {
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
   CURLPROTO_IMAP,                   /* family */
-  PROTOPT_CLOSEACTION|              /* flags */
-  PROTOPT_URLOPTIONS|
-  PROTOPT_SSL_REUSE
+  PROTOPT_CLOSEACTION |             /* flags */
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
@@ -243,7 +234,7 @@ const struct Curl_handler Curl_handler_imaps = {
   CURLPROTO_IMAPS,                  /* protocol */
   CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_URLOPTIONS
+  PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -351,46 +342,46 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
   /* Do we have an untagged command response? */
   if(len >= 2 && !memcmp("* ", line, 2)) {
     switch(imapc->state) {
-      /* States which are interested in untagged responses */
-      case IMAP_CAPABILITY:
-        if(!imap_matchresp(line, len, "CAPABILITY"))
-          return FALSE;
-        break;
-
-      case IMAP_LIST:
-        if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
-           (imap->custom && !imap_matchresp(line, len, imap->custom) &&
-            (!curl_strequal(imap->custom, "STORE") ||
-             !imap_matchresp(line, len, "FETCH")) &&
-            !curl_strequal(imap->custom, "SELECT") &&
-            !curl_strequal(imap->custom, "EXAMINE") &&
-            !curl_strequal(imap->custom, "SEARCH") &&
-            !curl_strequal(imap->custom, "EXPUNGE") &&
-            !curl_strequal(imap->custom, "LSUB") &&
-            !curl_strequal(imap->custom, "UID") &&
-            !curl_strequal(imap->custom, "GETQUOTAROOT") &&
-            !curl_strequal(imap->custom, "NOOP")))
-          return FALSE;
-        break;
-
-      case IMAP_SELECT:
-        /* SELECT is special in that its untagged responses do not have a
-           common prefix so accept anything! */
-        break;
-
-      case IMAP_FETCH:
-        if(!imap_matchresp(line, len, "FETCH"))
-          return FALSE;
-        break;
-
-      case IMAP_SEARCH:
-        if(!imap_matchresp(line, len, "SEARCH"))
-          return FALSE;
-        break;
-
-      /* Ignore other untagged responses */
-      default:
+    /* States which are interested in untagged responses */
+    case IMAP_CAPABILITY:
+      if(!imap_matchresp(line, len, "CAPABILITY"))
         return FALSE;
+      break;
+
+    case IMAP_LIST:
+      if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
+         (imap->custom && !imap_matchresp(line, len, imap->custom) &&
+          (!curl_strequal(imap->custom, "STORE") ||
+           !imap_matchresp(line, len, "FETCH")) &&
+          !curl_strequal(imap->custom, "SELECT") &&
+          !curl_strequal(imap->custom, "EXAMINE") &&
+          !curl_strequal(imap->custom, "SEARCH") &&
+          !curl_strequal(imap->custom, "EXPUNGE") &&
+          !curl_strequal(imap->custom, "LSUB") &&
+          !curl_strequal(imap->custom, "UID") &&
+          !curl_strequal(imap->custom, "GETQUOTAROOT") &&
+          !curl_strequal(imap->custom, "NOOP")))
+        return FALSE;
+      break;
+
+    case IMAP_SELECT:
+      /* SELECT is special in that its untagged responses do not have a
+         common prefix so accept anything! */
+      break;
+
+    case IMAP_FETCH:
+      if(!imap_matchresp(line, len, "FETCH"))
+        return FALSE;
+      break;
+
+    case IMAP_SEARCH:
+      if(!imap_matchresp(line, len, "SEARCH"))
+        return FALSE;
+      break;
+
+    /* Ignore other untagged responses */
+    default:
+      return FALSE;
     }
 
     *resp = '*';
@@ -404,16 +395,16 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
   if(!imap->custom && ((len == 3 && line[0] == '+') ||
                        (len >= 2 && !memcmp("+ ", line, 2)))) {
     switch(imapc->state) {
-      /* States which are interested in continuation responses */
-      case IMAP_AUTHENTICATE:
-      case IMAP_APPEND:
-        *resp = '+';
-        break;
+    /* States which are interested in continuation responses */
+    case IMAP_AUTHENTICATE:
+    case IMAP_APPEND:
+      *resp = '+';
+      break;
 
-      default:
-        failf(data, "Unexpected continuation response");
-        *resp = -1;
-        break;
+    default:
+      failf(data, "Unexpected continuation response");
+      *resp = -1;
+      break;
     }
 
     return TRUE;
@@ -475,7 +466,7 @@ static void imap_state(struct Curl_easy *data,
 {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
-  static const char * const names[]={
+  static const char * const names[] = {
     "STOP",
     "SERVERGREET",
     "CAPABILITY",
@@ -574,8 +565,8 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
          result, ssldone));
   if(!result && ssldone) {
     imapc->ssldone = ssldone;
-     /* perform CAPA now, changes imapc->state out of IMAP_UPGRADETLS */
-     result = imap_perform_capability(data, imapc);
+    /* perform CAPA now, changes imapc->state out of IMAP_UPGRADETLS */
+    result = imap_perform_capability(data, imapc);
   }
 out:
   return result;
@@ -617,8 +608,8 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
   result = imap_sendf(data, imapc, "LOGIN %s %s", user ? user : "",
                       passwd ? passwd : "");
 
-  free(user);
-  free(passwd);
+  curlx_free(user);
+  curlx_free(passwd);
 
   if(!result)
     imap_state(data, imapc, IMAP_LOGIN);
@@ -640,7 +631,7 @@ static CURLcode imap_perform_authenticate(struct Curl_easy *data,
   struct imap_conn *imapc =
     Curl_conn_meta_get(data->conn, CURL_META_IMAP_CONN);
   CURLcode result = CURLE_OK;
-  const char *ir = (const char *) Curl_bufref_ptr(initresp);
+  const char *ir = Curl_bufref_ptr(initresp);
 
   if(!imapc)
     return CURLE_FAILED_INIT;
@@ -672,8 +663,7 @@ static CURLcode imap_continue_authenticate(struct Curl_easy *data,
   (void)mech;
   if(!imapc)
     return CURLE_FAILED_INIT;
-  return Curl_pp_sendf(data, &imapc->pp,
-                       "%s", (const char *) Curl_bufref_ptr(resp));
+  return Curl_pp_sendf(data, &imapc->pp, "%s", Curl_bufref_ptr(resp));
 }
 
 /***********************************************************************
@@ -751,14 +741,14 @@ static CURLcode imap_perform_list(struct Curl_easy *data,
   else {
     /* Make sure the mailbox is in the correct atom format if necessary */
     char *mailbox = imap->mailbox ? imap_atom(imap->mailbox, TRUE)
-                                  : strdup("");
+                                  : curlx_strdup("");
     if(!mailbox)
       return CURLE_OUT_OF_MEMORY;
 
     /* Send the LIST command */
     result = imap_sendf(data, imapc, "LIST \"%s\" *", mailbox);
 
-    free(mailbox);
+    curlx_free(mailbox);
   }
 
   if(!result)
@@ -797,7 +787,7 @@ static CURLcode imap_perform_select(struct Curl_easy *data,
   /* Send the SELECT command */
   result = imap_sendf(data, imapc, "SELECT %s", mailbox);
 
-  free(mailbox);
+  curlx_free(mailbox);
 
   if(!result)
     imap_state(data, imapc, IMAP_SELECT);
@@ -947,7 +937,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
 
 cleanup:
   curlx_dyn_free(&flags);
-  free(mailbox);
+  curlx_free(mailbox);
 
   if(!result)
     imap_state(data, imapc, IMAP_APPEND);
@@ -1052,8 +1042,8 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
 
       /* Extract the word */
       for(wordlen = 0; line[wordlen] && line[wordlen] != ' ' &&
-            line[wordlen] != '\t' && line[wordlen] != '\r' &&
-            line[wordlen] != '\n';)
+                       line[wordlen] != '\t' && line[wordlen] != '\r' &&
+                       line[wordlen] != '\n';)
         wordlen++;
 
       /* Does the server support the STARTTLS capability? */
@@ -1197,8 +1187,105 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
 
   (void)instate;
 
-  if(imapcode == '*')
-    result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+  if(imapcode == '*') {
+    /* Check if this response contains a literal (e.g. FETCH responses with
+       body data). Literal syntax is {size}\r\n */
+    const char *cr = memchr(line, '\r', len);
+    size_t line_len = cr ? (size_t)(cr - line) : len;
+    const char *ptr = memchr(line, '{', line_len);
+    if(ptr) {
+      curl_off_t size = 0;
+      bool parsed = FALSE;
+      ptr++;
+      if(!curlx_str_number(&ptr, &size, CURL_OFF_T_MAX) &&
+         !curlx_str_single(&ptr, '}'))
+        parsed = TRUE;
+
+      if(parsed) {
+        struct pingpong *pp = &imapc->pp;
+        size_t buffer_len = curlx_dyn_len(&pp->recvbuf);
+        size_t after_header = buffer_len - pp->nfinal;
+
+        /* This is a literal response, setup to receive the body data */
+        infof(data, "Found %" FMT_OFF_T " bytes to download", size);
+
+        /* First write the header line */
+        result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+        if(result)
+          return result;
+
+        /* Handle data already in buffer after the header line */
+        if(after_header > 0) {
+          /* There is already data in the buffer that is part of the literal
+             body or subsequent responses */
+          size_t chunk = after_header;
+
+          /* Keep only the data after the header line */
+          curlx_dyn_tail(&pp->recvbuf, chunk);
+          pp->nfinal = 0; /* done */
+
+          /* Limit chunk to the literal size */
+          if(chunk > (size_t)size)
+            chunk = (size_t)size;
+
+          if(chunk) {
+            /* Write the literal body data */
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                       curlx_dyn_ptr(&pp->recvbuf), chunk);
+            if(result)
+              return result;
+          }
+
+          /* Handle remaining data in buffer (either more literal data or
+             subsequent responses) */
+          if(after_header > chunk) {
+            /* Keep the data after the literal body */
+            pp->overflow = after_header - chunk;
+            curlx_dyn_tail(&pp->recvbuf, pp->overflow);
+          }
+          else {
+            pp->overflow = 0;
+            curlx_dyn_reset(&pp->recvbuf);
+          }
+        }
+        else {
+          /* No data in buffer yet, reset overflow */
+          pp->overflow = 0;
+        }
+
+        if((CURL_OFF_T_MAX - size) < (curl_off_t)len)
+          /* unlikely to actually be a transfer this big, but avoid integer
+             overflow */
+          size = CURL_OFF_T_MAX;
+        else
+          size += len;
+
+        /* Progress size includes both header line and literal body */
+        Curl_pgrsSetDownloadSize(data, size);
+
+        if(data->req.bytecount == size)
+          /* All data already transferred (header + literal body) */
+          Curl_xfer_setup_nop(data);
+        else {
+          /* Setup to receive the literal body data.
+             maxdownload and transfer size include both header line and
+             literal body */
+          data->req.maxdownload = size;
+          Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
+        }
+        /* End of DO phase */
+        imap_state(data, imapc, IMAP_STOP);
+      }
+      else {
+        /* Failed to parse literal, just write the line */
+        result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+      }
+    }
+    else {
+      /* No literal, just write the line as-is */
+      result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+    }
+  }
   else if(imapcode != IMAP_RESP_OK)
     result = CURLE_QUOTE_ERROR;
   else
@@ -1216,20 +1303,19 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
-
   (void)instate;
 
   if(imapcode == '*') {
     /* See if this is an UIDVALIDITY response */
-    if(checkprefix("OK [UIDVALIDITY ", line + 2)) {
+    const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
+    size_t len = curlx_dyn_len(&imapc->pp.recvbuf);
+    if((len >= 18) && checkprefix("OK [UIDVALIDITY ", &line[2])) {
       curl_off_t value;
       const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
       if(!curlx_str_number(&p, &value, UINT_MAX)) {
         imapc->mb_uidvalidity = (unsigned int)value;
         imapc->mb_uidvalidity_set = TRUE;
       }
-
     }
   }
   else if(imapcode == IMAP_RESP_OK) {
@@ -1242,7 +1328,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
     else {
       /* Note the currently opened mailbox on this connection */
       DEBUGASSERT(!imapc->mailbox);
-      imapc->mailbox = strdup(imap->mailbox);
+      imapc->mailbox = curlx_strdup(imap->mailbox);
       if(!imapc->mailbox)
         return CURLE_OUT_OF_MEMORY;
 
@@ -1584,9 +1670,6 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done)
   if(!imapc)
     return CURLE_FAILED_INIT;
 
-  /* We always support persistent connections in IMAP */
-  connkeep(data->conn, "IMAP default");
-
   /* Parse the URL options */
   result = imap_parse_url_options(data->conn, imapc);
   if(result)
@@ -1631,10 +1714,13 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
     connclose(conn, "IMAP done with bad status"); /* marked for closure */
     result = status;         /* use the already set error code */
   }
-  else if(!data->set.connect_only && !imap->custom &&
-          (imap->uid || imap->mindex || data->state.upload ||
-          IS_MIME_POST(data))) {
-    /* Handle responses after FETCH or APPEND transfer has finished */
+  else if(!data->set.connect_only &&
+          ((!imap->custom && (imap->uid || imap->mindex)) ||
+           (imap->custom && data->req.maxdownload > 0) ||
+           data->state.upload || IS_MIME_POST(data))) {
+    /* Handle responses after FETCH or APPEND transfer has finished.
+       For custom commands, check if we set up a download which indicates
+       a FETCH-like command with literal data. */
 
     if(!data->state.upload && !IS_MIME_POST(data))
       imap_state(data, imapc, IMAP_FETCH_FINAL);
@@ -1704,7 +1790,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
     /* SEARCH the current mailbox */
     result = imap_perform_search(data, imapc, imap);
   else if(imap->mailbox && !selected &&
-         (imap->custom || imap->uid || imap->mindex || imap->query))
+          (imap->custom || imap->uid || imap->mindex || imap->query))
     /* SELECT the mailbox */
     result = imap_perform_select(data, imapc, imap);
   else
@@ -1839,10 +1925,7 @@ static CURLcode imap_regular_transfer(struct Curl_easy *data,
   data->req.size = -1;
 
   /* Set the progress data */
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   /* Carry out the perform */
   result = imap_perform(data, &connected, dophase_done);
@@ -1874,7 +1957,7 @@ static void imap_easy_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   imap_easy_reset(imap);
-  free(imap);
+  curlx_free(imap);
 }
 
 static void imap_conn_dtor(void *key, size_t klen, void *entry)
@@ -1885,7 +1968,7 @@ static void imap_conn_dtor(void *key, size_t klen, void *entry)
   Curl_pp_disconnect(&imapc->pp);
   curlx_dyn_free(&imapc->dyn);
   Curl_safefree(imapc->mailbox);
-  free(imapc);
+  curlx_free(imapc);
 }
 
 static CURLcode imap_setup_connection(struct Curl_easy *data,
@@ -1895,7 +1978,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   struct pingpong *pp;
   struct IMAP *imap;
 
-  imapc = calloc(1, sizeof(*imapc));
+  imapc = curlx_calloc(1, sizeof(*imapc));
   if(!imapc)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1907,12 +1990,12 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
   curlx_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
-  Curl_pp_init(pp);
+  Curl_pp_init(pp, Curl_pgrs_now(data));
 
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  imap = calloc(1, sizeof(struct IMAP));
+  imap = curlx_calloc(1, sizeof(struct IMAP));
   if(!imap ||
      Curl_meta_set(data, CURL_META_IMAP_EASY, imap, imap_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -1985,7 +2068,7 @@ static char *imap_atom(const char *str, bool escape_only)
   nclean = strcspn(str, "() {%*]\\\"");
   if(len == nclean)
     /* nothing to escape, return a strdup */
-    return strdup(str);
+    return curlx_strdup(str);
 
   curlx_dyn_init(&line, 2000);
 
@@ -2022,21 +2105,33 @@ static bool imap_is_bchar(char ch)
     return TRUE;
 
   switch(ch) {
-    /* bchar */
-    case ':': case '@': case '/':
-    /* bchar -> achar */
-    case '&': case '=':
-    /* bchar -> achar -> uchar -> unreserved (without alphanumeric) */
-    case '-': case '.': case '_': case '~':
-    /* bchar -> achar -> uchar -> sub-delims-sh */
-    case '!': case '$': case '\'': case '(': case ')': case '*':
-    case '+': case ',':
-    /* bchar -> achar -> uchar -> pct-encoded */
-    case '%': /* HEXDIG chars are already included above */
-      return TRUE;
+  /* bchar */
+  case ':':
+  case '@':
+  case '/':
+  /* bchar -> achar */
+  case '&':
+  case '=':
+  /* bchar -> achar -> uchar -> unreserved (without alphanumeric) */
+  case '-':
+  case '.':
+  case '_':
+  case '~':
+  /* bchar -> achar -> uchar -> sub-delims-sh */
+  case '!':
+  case '$':
+  case '\'':
+  case '(':
+  case ')':
+  case '*':
+  case '+':
+  case ',':
+  /* bchar -> achar -> uchar -> pct-encoded */
+  case '%': /* HEXDIG chars are already included above */
+    return TRUE;
 
-    default:
-      return FALSE;
+  default:
+    return FALSE;
   }
 }
 
@@ -2165,7 +2260,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
     result = Curl_urldecode(begin, ptr - begin, &value, &valuelen,
                             REJECT_CTRL);
     if(result) {
-      free(name);
+      curlx_free(name);
       return result;
     }
 
@@ -2186,7 +2281,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
           imap->uidvalidity = (unsigned int)num;
           imap->uidvalidity_set = TRUE;
         }
-        free(value);
+        curlx_free(value);
       }
       else if(curl_strequal(name, "UID") && !imap->uid) {
         imap->uid = value;
@@ -2201,23 +2296,25 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
         imap->partial = value;
       }
       else {
-        free(name);
-        free(value);
+        curlx_free(name);
+        curlx_free(value);
         return CURLE_URL_MALFORMAT;
       }
     }
     else
       /* blank? */
-      free(value);
-    free(name);
+      curlx_free(value);
+    curlx_free(name);
   }
 
   /* Does the URL contain a query parameter? Only valid when we have a mailbox
      and no UID as per RFC-5092 */
   if(imap->mailbox && !imap->uid && !imap->mindex) {
     /* Get the query parameter, URL decoded */
-    (void)curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
-                       CURLU_URLDECODE);
+    CURLUcode uc = curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
+                                CURLU_URLDECODE);
+    if(uc == CURLUE_OUT_OF_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   /* Any extra stuff at the end of the URL is an error */
@@ -2251,7 +2348,7 @@ static CURLcode imap_parse_custom_request(struct Curl_easy *data,
         params++;
 
       if(*params) {
-        imap->custom_params = strdup(params);
+        imap->custom_params = curlx_strdup(params);
         imap->custom[params - imap->custom] = '\0';
 
         if(!imap->custom_params)

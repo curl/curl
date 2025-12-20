@@ -221,11 +221,12 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_EXAMPLES`:                         Build libcurl examples. Default: `ON`
 - `BUILD_LIBCURL_DOCS`:                     Build libcurl man pages. Default: `ON`
 - `BUILD_MISC_DOCS`:                        Build misc man pages (e.g. `curl-config` and `mk-ca-bundle`). Default: `ON`
-- `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON`
-- `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF`
-- `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF`
+- `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON` (if target platform supports shared libs, otherwise `OFF`)
+- `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF` (turns to `ON`, when building static libcurl only)
+- `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF` (turns to `ON` if `BUILD_SHARED_LIBS` is `OFF`)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
+                                            If enabled, it implies `CMAKE_UNITY_BUILD=OFF` and `CURL_DISABLE_TYPECHECK=ON`.
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
 - `CURL_CODE_COVERAGE`:                     Enable code coverage build options. Default: `OFF`
 - `CURL_COMPLETION_FISH`:                   Install fish completions. Default: `OFF`
@@ -317,10 +318,11 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_SHUFFLE_DNS`:               Disable shuffle DNS feature. Default: `OFF`
 - `CURL_DISABLE_SMB`:                       Disable SMB. Default: `OFF`
 - `CURL_DISABLE_SMTP`:                      Disable SMTP. Default: `OFF`
-- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll. Default: `OFF`
+- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll(). Default: `OFF`
 - `CURL_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
 - `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
 - `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
+- `CURL_DISABLE_TYPECHECK`:                 Disable curl_easy_setopt()/curl_easy_getinfo() type checking. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
 - `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
 - `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
@@ -354,6 +356,7 @@ Details via CMake
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
+- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires build with TrackMemory and DWARF debug information. Default: `OFF`
 - `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
 - `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
 - `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
@@ -386,7 +389,7 @@ Details via CMake
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
 - `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
-- `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
+- `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
 
 ## Dependency options (tools)
 
@@ -410,6 +413,8 @@ Details via CMake
 - `LDAP_INCLUDE_DIR`:                       Absolute path to LDAP include directory.
 - `LDAP_LIBRARY`:                           Absolute path to `ldap` library.
 - `LDAP_LBER_LIBRARY`:                      Absolute path to `lber` library.
+- `LIBBACKTRACE_INCLUDE_DIR`:               Absolute path to libbacktrace include directory (https://github.com/ianlancetaylor/libbacktrace).
+- `LIBBACKTRACE_LIBRARY`:                   Absolute path to `libbacktrace` library.
 - `LIBGSASL_INCLUDE_DIR`:                   Absolute path to libgsasl include directory.
 - `LIBGSASL_LIBRARY`:                       Absolute path to `libgsasl` library.
 - `LIBIDN2_INCLUDE_DIR`:                    Absolute path to libidn2 include directory.
@@ -479,6 +484,8 @@ Examples:
 - `DANTED`:                                 Default: `danted`
 - `TEST_NGHTTPX`:                           Default: `nghttpx`
 - `VSFTPD`:                                 Default: `vsftps`
+- `SSHD`:                                   Default: `sshd`
+- `SFTPD`:                                  Default: `sftp-server`
 
 ## Feature detection variables
 
@@ -537,6 +544,9 @@ Note: These variables are internal and subject to change.
 - `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
 - `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
 - `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
+- `curl-listcats`:          Generate help category constants for `src/tool_help.h` from documentation.
+- `curl-listhelp`:          Generate `src/tool_listhelp.c` from documentation.
+- `curl-optiontable`:       Generate `lib/easyoptions.c` from documentation.
 
 # Migrating from Visual Studio IDE Project Files
 

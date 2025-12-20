@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ netrc
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -21,7 +21,6 @@ contents
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -44,10 +43,9 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET http://foo.host/%TESTNUMBER HTTP/1.1
 Host: foo.host
 Authorization: Basic %b64[foo:alone-in-the-dark]b64%

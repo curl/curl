@@ -21,15 +21,20 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <string.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Checks a single file's size and mtime from an FTP server.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for ctime(), fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+#include <string.h>
+
+#include <curl/curl.h>
 
 static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -44,14 +49,14 @@ int main(void)
 {
   char ftpurl[] = "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   long filetime = -1;
   curl_off_t filesize = 0;
   const char *filename = strrchr(ftpurl, '/') + 1;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -65,24 +70,24 @@ int main(void)
     /* Switch on full protocol/debug output */
     /* curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); */
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(CURLE_OK == res) {
+    if(CURLE_OK == result) {
       /* https://curl.se/libcurl/c/curl_easy_getinfo.html */
-      res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
-      if((CURLE_OK == res) && (filetime >= 0)) {
+      result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+      if((CURLE_OK == result) && (filetime >= 0)) {
         time_t file_time = (time_t)filetime;
         printf("filetime %s: %s", filename, ctime(&file_time));
       }
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                              &filesize);
-      if((CURLE_OK == res) && (filesize > 0))
+      result = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                                 &filesize);
+      if((CURLE_OK == result) && (filesize > 0))
         printf("filesize %s: %" CURL_FORMAT_CURL_OFF_T " bytes\n",
                filename, filesize);
     }
     else {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", res);
+      fprintf(stderr, "curl told us %d\n", result);
     }
 
     /* always cleanup */
@@ -91,5 +96,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

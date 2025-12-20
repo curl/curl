@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,13 +9,12 @@ connection reuse
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 REPLY "PASS secret" +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -25,7 +25,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -39,10 +38,9 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER001 -u user.one:secret -: pop3://%HOSTIP:%PO
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user.one
 PASS secret

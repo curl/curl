@@ -45,7 +45,7 @@ do not attempt to use SSL.
 ## CURLUSESSL_TRY
 
 Try using SSL, proceed as normal otherwise. Note that server may close the
-connection if the negotiation does not succeed.
+connection if the negotiation fails.
 
 ## CURLUSESSL_CONTROL
 

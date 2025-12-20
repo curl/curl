@@ -28,14 +28,12 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode send_request(CURL *curl, const char *url, int seq,
                              long auth_scheme, const char *userpwd)
 {
-  CURLcode res;
+  CURLcode result;
   size_t len = strlen(url) + 4 + 1;
-  char *full_url = malloc(len);
+  char *full_url = curlx_malloc(len);
   if(!full_url) {
     curl_mfprintf(stderr, "Not enough memory for full url\n");
     return CURLE_OUT_OF_MEMORY;
@@ -51,11 +49,11 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
   test_setopt(curl, CURLOPT_USERPWD, userpwd);
   test_setopt(curl, CURLOPT_HTTPAUTH, auth_scheme);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
-  free(full_url);
-  return res;
+  curlx_free(full_url);
+  return result;
 }
 
 static CURLcode send_wrong_password(CURL *curl, const char *url, int seq,
@@ -85,14 +83,14 @@ static long parse_auth_name(const char *arg)
 
 static CURLcode test_lib2023(const char *URL)  /* libauthretry */
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl = NULL;
 
   long main_auth_scheme = parse_auth_name(libtest_arg2);
   long fallback_auth_scheme = parse_auth_name(libtest_arg3);
 
   if(main_auth_scheme == CURLAUTH_NONE ||
-      fallback_auth_scheme == CURLAUTH_NONE) {
+     fallback_auth_scheme == CURLAUTH_NONE) {
     curl_mfprintf(stderr, "auth schemes not found on commandline\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -111,12 +109,12 @@ static CURLcode test_lib2023(const char *URL)  /* libauthretry */
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = send_wrong_password(curl, URL, 100, main_auth_scheme);
-  if(res != CURLE_OK)
+  result = send_wrong_password(curl, URL, 100, main_auth_scheme);
+  if(result != CURLE_OK)
     goto test_cleanup;
 
-  res = send_right_password(curl, URL, 200, fallback_auth_scheme);
-  if(res != CURLE_OK)
+  result = send_right_password(curl, URL, 200, fallback_auth_scheme);
+  if(result != CURLE_OK)
     goto test_cleanup;
 
   curl_easy_cleanup(curl);
@@ -129,16 +127,16 @@ static CURLcode test_lib2023(const char *URL)  /* libauthretry */
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = send_wrong_password(curl, URL, 300, main_auth_scheme);
-  if(res != CURLE_OK)
+  result = send_wrong_password(curl, URL, 300, main_auth_scheme);
+  if(result != CURLE_OK)
     goto test_cleanup;
 
-  res = send_wrong_password(curl, URL, 400, fallback_auth_scheme);
-  if(res != CURLE_OK)
+  result = send_wrong_password(curl, URL, 400, fallback_auth_scheme);
+  if(result != CURLE_OK)
     goto test_cleanup;
 
-  res = send_right_password(curl, URL, 500, fallback_auth_scheme);
-  if(res != CURLE_OK)
+  result = send_right_password(curl, URL, 500, fallback_auth_scheme);
+  if(result != CURLE_OK)
     goto test_cleanup;
 
 test_cleanup:
@@ -146,5 +144,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -39,7 +40,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C -
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -29,7 +29,7 @@
 # Stop on errors and on usage of unset variables.
 set -eu
 
-VERSION="2025.09.27"
+VERSION="2025.11.09"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
@@ -65,7 +65,7 @@ Options:
                            multiple times, only the last value is considered.
 
   --no-decode-filename: Don't percent-decode the output filename, even if the percent-encoding in
-                        the URL was done by wcurl, e.g.: The URL contained whitespaces.
+                        the URL was done by wcurl, e.g.: The URL contained whitespace.
 
   --dry-run: Don't actually execute curl, just print what would be invoked.
 
@@ -77,7 +77,7 @@ Options:
                  instead forwarded to the curl invocation.
 
   <URL>: URL to be downloaded. Anything that is not a parameter is considered
-         an URL. Whitespaces are percent-encoded and the URL is passed to curl, which
+         an URL. Whitespace is percent-encoded and the URL is passed to curl, which
          then performs the parsing. May be specified more than once.
 _EOF_
 }
@@ -85,7 +85,7 @@ _EOF_
 # Display an error message and bail out.
 error()
 {
-    printf "%s\n" "$*" > /dev/stderr
+    printf "%s\n" "$*" >&2
     exit 1
 }
 
@@ -113,6 +113,13 @@ readonly PER_URL_PARAMETERS="\
     --remote-time \
     --retry 5 "
 
+# Valid percent-encode codes that are considered unsafe to be decoded.
+# This is a list of space-separated percent-encoded uppercase
+# characters.
+# 2F = /
+# 5C = \
+readonly UNSAFE_PERCENT_ENCODE="%2F %5C"
+
 # Whether to invoke curl or not.
 DRY_RUN="false"
 
@@ -137,6 +144,20 @@ is_subset_of()
     esac
 }
 
+# Indicate via exit code whether the HTML code given in the first
+# parameter is safe to be decoded.
+is_safe_percent_encode()
+{
+    upper_str=$(printf "%s" "${1}" | tr "[:lower:]" "[:upper:]")
+    for unsafe in ${UNSAFE_PERCENT_ENCODE}; do
+        if [ "${unsafe}" = "${upper_str}" ]; then
+            return 1
+        fi
+    done
+
+    return 0
+}
+
 # Print the given string percent-decoded.
 percent_decode()
 {
@@ -151,9 +172,10 @@ percent_decode()
                 decode_out="${decode_out}${decode_hex2}"
                 # Skip decoding if this is a control character (00-1F).
                 # Skip decoding if DECODE_FILENAME is not "true".
-                if is_subset_of "${decode_hex1}" "23456789abcdefABCDEF" \
+                if [ "${DECODE_FILENAME}" = "true" ] \
+                    && is_subset_of "${decode_hex1}" "23456789abcdefABCDEF" \
                     && is_subset_of "${decode_hex2}" "0123456789abcdefABCDEF" \
-                    && [ "${DECODE_FILENAME}" = "true" ]; then
+                    && is_safe_percent_encode "${decode_out}"; then
                     # Use printf to decode it into octal and then decode it to the final format.
                     decode_out="$(printf "%b" "\\$(printf %o "0x${decode_hex1}${decode_hex2}")")"
                 fi
@@ -301,7 +323,7 @@ while [ -n "${1-}" ]; do
             # This is the start of the list of URLs.
             shift
             for url in "$@"; do
-                # Encode whitespaces into %20, since wget supports those URLs.
+                # Encode whitespace into %20, since wget supports those URLs.
                 newurl=$(printf "%s\n" "${url}" | sed 's/ /%20/g')
                 URLS="${URLS} ${newurl}"
             done
@@ -314,7 +336,7 @@ while [ -n "${1-}" ]; do
 
         *)
             # This must be a URL.
-            # Encode whitespaces into %20, since wget supports those URLs.
+            # Encode whitespace into %20, since wget supports those URLs.
             newurl=$(printf "%s\n" "${1}" | sed 's/ /%20/g')
             URLS="${URLS} ${newurl}"
             ;;

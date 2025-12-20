@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,12 +7,10 @@ UPLOAD
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -23,23 +22,22 @@ telnet
 <name>
 TELNET check of upload with stdout redirected
 </name>
-<stdin>
+<stdin crlf="headers">
 GET /ignore/for/%TESTNUMBER HTTP/1.0
 
 </stdin>
-<file name="%LOGDIR/%TESTNUMBER.txt">
+<file name="%LOGDIR/%TESTNUMBER.txt" crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </file>
- <command option="no-output">
+<command option="no-output">
 telnet://%HOSTIP:%HTTPPORT -T %LOGDIR/%TESTNUMBER.txt
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </protocol>

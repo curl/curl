@@ -26,7 +26,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # Get CSOURCES, HHEADERS, LIB_RCFILES variables
 include Makefile.inc
 
-CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
+CMAKE_DIST = CMakeLists.txt curl_config-cmake.h.in
 
 EXTRA_DIST = config-mac.h config-os400.h config-plan9.h config-riscos.h \
   config-win32.h curl_config.h.in $(LIB_RCFILES) libcurl.def            \
@@ -63,8 +63,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/include   \
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-AM_LDFLAGS =
-AM_CFLAGS =
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
 endif
@@ -136,12 +134,11 @@ libcurl_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
 endif
 
 libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_la_CPPFLAGS_EXTRA)
-libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(CURL_LDFLAGS_LIB) $(LIBCURL_PC_LIBS_PRIVATE)
-libcurl_la_CFLAGS = $(AM_CFLAGS) $(libcurl_la_CFLAGS_EXTRA)
+libcurl_la_LDFLAGS = $(libcurl_la_LDFLAGS_EXTRA) $(CURL_LDFLAGS_LIB) $(LIBCURL_PC_LIBS_PRIVATE)
+libcurl_la_CFLAGS = $(libcurl_la_CFLAGS_EXTRA)
 
 libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
-libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_PC_LIBS_PRIVATE)
-libcurlu_la_CFLAGS = $(AM_CFLAGS)
+libcurlu_la_LDFLAGS = -static $(LIBCURL_PC_LIBS_PRIVATE)
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -168,7 +165,7 @@ UNITV_ = $(UNITV_0)
 
 # UNITPROTOS depends on every C file in the lib/ dir
 $(UNITPROTOS): $(CSOURCES)
-	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES) > $(top_builddir)/lib/$(UNITPROTOS))
+	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
 
 # disable the tests that are mostly causing false positives
 TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.ArrayBound,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet

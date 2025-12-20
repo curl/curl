@@ -30,4 +30,4 @@ matrix:
             - 'strong'
             - 'em'
     sources:
-      - '**/*.md|!docs/BINDINGS.md|!docs/DISTROS.md|!docs/CIPHERS-TLS12.md|!docs/wcurl.md'
+      - '**/*.md|!docs/BINDINGS.md|!docs/DISTROS.md|!docs/CIPHERS-TLS12.md|!docs/wcurl.md|!tests/data/data*.md'

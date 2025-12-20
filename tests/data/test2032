@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -14,7 +15,7 @@ timing-dependent
 <reply>
 
 <!-- Basic auth -->
-<data100>
+<data100 crlf="headers">
 HTTP/1.1 401 Need Basic or NTLM auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -26,7 +27,7 @@ This is a bad password page!
 </data100>
 
 <!-- NTLM auth -->
-<data200>
+<data200 crlf="headers">
 HTTP/1.1 401 Need Basic or NTLM auth (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -37,7 +38,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is not the real page!
 </data200>
 
-<data1201>
+<data1201 crlf="headers">
 HTTP/1.1 401 NTLM intermediate (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -47,7 +48,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1201>
 
-<data1202>
+<data1202 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -88,7 +89,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[testuser:testpass]b64%

@@ -42,7 +42,7 @@ AC_BEFORE([$0],[AC_PROG_LIBTOOL])
 dnl Override Autoconf's AC_LANG_PROGRAM (C)
 dnl -------------------------------------------------
 dnl This is done to prevent compiler warning
-dnl 'function declaration isn't a prototype'
+dnl 'function declaration is not a prototype'
 dnl in function main. This requires at least
 dnl a C89 compiler and does not support K&R.
 

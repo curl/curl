@@ -26,7 +26,6 @@
 #include "curl_setup.h"
 
 #include "curlx/nonblock.h" /* for curlx_nonblock() */
-#include "sockaddr.h"
 
 /**
  * Create a cfilter for making an "ip" connection to the
@@ -43,16 +42,16 @@ typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
                                       struct connectdata *conn,
                                       const struct Curl_addrinfo *ai,
-                                      int transport);
+                                      uint8_t transport);
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  int transport);
+                                  uint8_t transport);
 
 extern struct Curl_cftype Curl_cft_ip_happy;
 
 #ifdef UNITTESTS
-void Curl_debug_set_transport_provider(int transport,
+void Curl_debug_set_transport_provider(uint8_t transport,
                                        cf_ip_connect_create *cf_create);
 #endif
 

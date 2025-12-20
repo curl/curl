@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Send SMTP email using implicit TLS
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's SMTP
@@ -39,9 +38,9 @@
  * Note that this example requires libcurl 7.20.0 or above.
  */
 
-#define FROM_MAIL     "<sender@example.com>"
-#define TO_MAIL       "<recipient@example.com>"
-#define CC_MAIL       "<info@example.com>"
+#define FROM_MAIL "<sender@example.com>"
+#define TO_MAIL   "<recipient@example.com>"
+#define CC_MAIL   "<info@example.com>"
 
 static const char *payload_text =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
@@ -61,38 +60,35 @@ struct upload_status {
   size_t bytes_read;
 };
 
-static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
   size_t room = size * nmemb;
+  size_t len;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 
   data = &payload_text[upload_ctx->bytes_read];
 
-  if(data) {
-    size_t len = strlen(data);
-    if(room < len)
-      len = room;
-    memcpy(ptr, data, len);
-    upload_ctx->bytes_read += len;
+  len = strlen(data);
+  if(room < len)
+    len = room;
+  memcpy(ptr, data, len);
+  upload_ctx->bytes_read += len;
 
-    return len;
-  }
-
-  return 0;
+  return len;
 }
 
 int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -148,7 +144,7 @@ int main(void)
     /* We are using a callback function to specify the payload (the headers and
      * body of the message). You could just use the CURLOPT_READDATA option to
      * specify a FILE pointer to read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
@@ -159,12 +155,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     /* Send the message */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* Free the list of recipients */
     curl_slist_free_all(recipients);
@@ -175,5 +171,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

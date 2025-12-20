@@ -25,34 +25,31 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "llist.h"
 
 struct Cookie {
-  struct Curl_llist_node node; /* for the main cookie list */
+  struct Curl_llist_node node;    /* for the main cookie list */
   struct Curl_llist_node getnode; /* for getlist */
-  char *name;         /* <this> = value */
-  char *value;        /* name = <this> */
-  char *path;         /* path = <this> which is in Set-Cookie: */
-  char *spath;        /* sanitized cookie path */
-  char *domain;       /* domain = <this> */
-  curl_off_t expires; /* expires = <this> */
-  unsigned int creationtime; /* time when the cookie was written */
-  BIT(tailmatch);     /* tail-match the domain name */
-  BIT(secure);        /* the 'secure' keyword was used */
-  BIT(livecookie);    /* updated from a server, not a stored file */
-  BIT(httponly);      /* the httponly directive is present */
-  BIT(prefix_secure); /* secure prefix is set */
-  BIT(prefix_host);   /* host prefix is set */
+  char *name;                     /* <this> = value */
+  char *value;                    /* name = <this> */
+  char *path;                     /* canonical path */
+  char *domain;                   /* domain = <this> */
+  curl_off_t expires;             /* expires = <this> */
+  unsigned int creationtime;      /* time when the cookie was written */
+  BIT(tailmatch);                 /* tail-match the domain name */
+  BIT(secure);                    /* the 'secure' keyword was used */
+  BIT(livecookie);                /* updated from server, not a stored file */
+  BIT(httponly);                  /* the httponly directive is present */
+  BIT(prefix_secure);             /* secure prefix is set */
+  BIT(prefix_host);               /* host prefix is set */
 };
 
 /*
  * Available cookie prefixes, as defined in
  * draft-ietf-httpbis-rfc6265bis-02
  */
-#define COOKIE_PREFIX__SECURE (1<<0)
-#define COOKIE_PREFIX__HOST (1<<1)
+#define COOKIE_PREFIX__SECURE (1 << 0)
+#define COOKIE_PREFIX__HOST   (1 << 1)
 
 #define COOKIE_HASH_SIZE 63
 
@@ -60,9 +57,9 @@ struct CookieInfo {
   /* linked lists of cookies we know of */
   struct Curl_llist cookielist[COOKIE_HASH_SIZE];
   curl_off_t next_expiration; /* the next time at which expiration happens */
-  unsigned int numcookies;  /* number of cookies in the "jar" */
-  unsigned int lastct;      /* last creation-time used in the jar */
-  BIT(running);    /* state info, for cookie adding information */
+  unsigned int numcookies;    /* number of cookies in the "jar" */
+  unsigned int lastct;        /* last creation-time used in the jar */
+  BIT(running);               /* state info, for cookie adding information */
   BIT(newsession); /* new session, discard session cookies on load */
 };
 
@@ -113,30 +110,31 @@ struct connectdata;
  */
 
 bool Curl_secure_context(struct connectdata *conn, const char *host);
-struct Cookie *Curl_cookie_add(struct Curl_easy *data,
-                               struct CookieInfo *c, bool header,
-                               bool noexpiry, const char *lineptr,
-                               const char *domain, const char *path,
-                               bool secure);
-int Curl_cookie_getlist(struct Curl_easy *data, struct connectdata *conn,
-                        const char *host, struct Curl_llist *list);
+CURLcode Curl_cookie_add(struct Curl_easy *data,
+                         struct CookieInfo *c, bool header,
+                         bool noexpiry, const char *lineptr,
+                         const char *domain, const char *path,
+                         bool secure) WARN_UNUSED_RESULT;
+CURLcode Curl_cookie_getlist(struct Curl_easy *data, struct connectdata *conn,
+                             bool *okay, const char *host,
+                             struct Curl_llist *list) WARN_UNUSED_RESULT;
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
 #define Curl_cookie_list(x) NULL
-#define Curl_cookie_loadfiles(x) Curl_nop_stmt
-#define Curl_cookie_init(x,y,z,w) NULL
+#define Curl_cookie_loadfiles(x) CURLE_OK
+#define Curl_cookie_init() NULL
+#define Curl_cookie_run(x) Curl_nop_stmt
 #define Curl_cookie_cleanup(x) Curl_nop_stmt
-#define Curl_flush_cookies(x,y) Curl_nop_stmt
+#define Curl_flush_cookies(x, y) Curl_nop_stmt
 #else
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup);
 void Curl_cookie_cleanup(struct CookieInfo *c);
-struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
-                                    const char *file, struct CookieInfo *inc,
-                                    bool newsession);
+struct CookieInfo *Curl_cookie_init(void);
 struct curl_slist *Curl_cookie_list(struct Curl_easy *data);
-void Curl_cookie_loadfiles(struct Curl_easy *data);
+CURLcode Curl_cookie_loadfiles(struct Curl_easy *data) WARN_UNUSED_RESULT;
+void Curl_cookie_run(struct Curl_easy *data);
 #endif
 
 #endif /* HEADER_CURL_COOKIE_H */

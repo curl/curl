@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,12 +7,10 @@ HTTP POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <name>
@@ -22,14 +21,13 @@ Reject using -T and -d at once
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
 2
 </errorcode>
 <stderr mode="text">
-Warning: You can only select one HTTP request method! You asked for both PUT 
+Warning: You can only select one HTTP request method! You asked for both PUT%SP
 Warning: (-T, --upload-file) and POST (-d, --data).
 </stderr>
 </verify>

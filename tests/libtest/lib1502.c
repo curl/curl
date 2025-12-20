@@ -31,23 +31,21 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1502(const char *URL)
 {
-  CURL *easy = NULL;
-  CURL *dup;
+  CURL *curl = NULL;
+  CURL *curldupe;
   CURLM *multi = NULL;
   int still_running;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char redirect[160];
 
   /* DNS cache injection */
   struct curl_slist *dns_cache_list;
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    return res;
+  if(result) {
+    return result;
   }
 
   curl_msnprintf(redirect, sizeof(redirect), "google.com:%s:%s", libtest_arg2,
@@ -62,27 +60,27 @@ static CURLcode test_lib1502(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  easy_init(easy);
+  easy_init(curl);
 
-  easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_HEADER, 1L);
-  easy_setopt(easy, CURLOPT_RESOLVE, dns_cache_list);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_RESOLVE, dns_cache_list);
 
-  dup = curl_easy_duphandle(easy);
-  if(dup) {
-    curl_easy_cleanup(easy);
-    easy = dup;
+  curldupe = curl_easy_duphandle(curl);
+  if(curldupe) {
+    curl_easy_cleanup(curl);
+    curl = curldupe;
   }
   else {
     curl_slist_free_all(dns_cache_list);
-    curl_easy_cleanup(easy);
+    curl_easy_cleanup(curl);
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
 
   multi_init(multi);
 
-  multi_add_handle(multi, easy);
+  multi_add_handle(multi, curl);
 
   multi_perform(multi, &still_running);
 
@@ -121,26 +119,26 @@ test_cleanup:
   default:
     /* undocumented cleanup sequence - type UA */
     curl_multi_cleanup(multi);
-    curl_easy_cleanup(easy);
+    curl_easy_cleanup(curl);
     curl_global_cleanup();
     break;
   case 1503:
     /* proper cleanup sequence - type PA */
-    curl_multi_remove_handle(multi, easy);
+    curl_multi_remove_handle(multi, curl);
     curl_multi_cleanup(multi);
-    curl_easy_cleanup(easy);
+    curl_easy_cleanup(curl);
     curl_global_cleanup();
     break;
   case 1504:
     /* undocumented cleanup sequence - type UB */
-    curl_easy_cleanup(easy);
+    curl_easy_cleanup(curl);
     curl_multi_cleanup(multi);
     curl_global_cleanup();
     break;
   case 1505:
     /* proper cleanup sequence - type PB */
-    curl_multi_remove_handle(multi, easy);
-    curl_easy_cleanup(easy);
+    curl_multi_remove_handle(multi, curl);
+    curl_easy_cleanup(curl);
     curl_multi_cleanup(multi);
     curl_global_cleanup();
     break;
@@ -148,5 +146,5 @@ test_cleanup:
 
   curl_slist_free_all(dns_cache_list);
 
-  return res;
+  return result;
 }

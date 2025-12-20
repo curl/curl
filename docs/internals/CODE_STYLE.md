@@ -24,8 +24,8 @@ need to copy the style already used in the source code and there are no
 particularly unusual rules in our set of rules.
 
 We also work hard on writing code that are warning-free on all the major
-platforms and in general on as many platforms as possible. Code that obviously
-causes warnings is not accepted as-is.
+platforms and in general on as many platforms as possible. Code that causes
+warnings is not accepted as-is.
 
 ## Readability
 
@@ -334,14 +334,36 @@ This is the full list of functions generally banned.
     _access
     _mbscat
     _mbsncat
+    _open
     _tcscat
     _tcsdup
     _tcsncat
+    _tcsncpy
     _waccess
     _wcscat
     _wcsdup
     _wcsncat
+    _wfopen
+    _wfreopen
+    _wopen
+    accept
+    accept4
     access
+    aprintf
+    atoi
+    atol
+    calloc
+    CreateFile
+    CreateFileA
+    CreateFileW
+    fclose
+    fdopen
+    fopen
+    fprintf
+    free
+    freeaddrinfo
+    freopen
+    getaddrinfo
     gets
     gmtime
     LoadLibrary
@@ -351,10 +373,27 @@ This is the full list of functions generally banned.
     LoadLibraryExW
     LoadLibraryW
     localtime
+    malloc
+    mbstowcs
+    MoveFileEx
+    MoveFileExA
+    MoveFileExW
+    msnprintf
+    mvsnprintf
+    open
+    printf
+    realloc
+    recv
+    rename
+    send
     snprintf
+    socket
+    socketpair
     sprintf
     sscanf
+    stat
     strcat
+    strdup
     strerror
     strncat
     strncpy
@@ -362,6 +401,15 @@ This is the full list of functions generally banned.
     strtok_r
     strtol
     strtoul
+    vaprintf
+    vfprintf
+    vprintf
     vsnprintf
     vsprintf
+    wcscpy
     wcsdup
+    wcsncpy
+    wcstombs
+    WSASocket
+    WSASocketA
+    WSASocketW

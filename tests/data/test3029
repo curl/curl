@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -23,7 +24,8 @@ http
 HTTP with multiple -D
 </name>
 <command>
--D %LOGDIR/heads%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next -D %LOGDIR/heads%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-D %LOGDIR/heads%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next
+-D %LOGDIR/heads%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

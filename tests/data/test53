@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,7 @@ cookies
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Server: Microsoft-IIS/4.0
 Date: Tue, 25 Sep 2001 19:37:44 GMT
@@ -43,7 +44,7 @@ cookies
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

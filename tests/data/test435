@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,17 +7,15 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Length: 0
 
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -30,10 +29,9 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w 'lo
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -51,7 +49,7 @@ Accept: */*
 <stripfile>
 s/local port == (\d+)/local port == [digits]/
 </stripfile>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 0
 

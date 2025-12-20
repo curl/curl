@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * From "KNOWN_BUGS" April 2009:
 
@@ -35,12 +33,16 @@
 
 static CURLcode test_lib562(const char *URL)
 {
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  curl_off_t port;
+
+  if(curlx_str_number(&libtest_arg2, &port, 0xffff))
+    return result;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
+    return result;
   }
 
   /* get a curl handle */
@@ -48,25 +50,25 @@ static CURLcode test_lib562(const char *URL)
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    return result;
   }
 
   /* enable verbose */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* set port number */
-  test_setopt(curl, CURLOPT_PORT, atol(libtest_arg2));
+  test_setopt(curl, CURLOPT_PORT, (long)port);
 
   /* specify target */
   test_setopt(curl, CURLOPT_URL, URL);
 
-  /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
+  /* Now run off and do what you have been told! */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

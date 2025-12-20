@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,7 @@ HTTP GET
 </info>
 
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -18,7 +19,6 @@ Connection: close
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -35,10 +35,9 @@ http://%HOSTIP:%HTTPPORT
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: ninja
 

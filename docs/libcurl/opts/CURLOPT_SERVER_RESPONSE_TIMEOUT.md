@@ -5,6 +5,7 @@ Title: CURLOPT_SERVER_RESPONSE_TIMEOUT
 Section: 3
 Source: libcurl
 See-also:
+  - CURLOPT_SERVER_RESPONSE_TIMEOUT_MS (3)
   - CURLOPT_CONNECTTIMEOUT (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
@@ -40,11 +41,9 @@ connection is considered dead and the transfer fails.
 It is recommended that if used in conjunction with CURLOPT_TIMEOUT(3), you set
 CURLOPT_SERVER_RESPONSE_TIMEOUT(3) to a value smaller than CURLOPT_TIMEOUT(3).
 
-This option was formerly known as CURLOPT_FTP_RESPONSE_TIMEOUT.
-
 # DEFAULT
 
-None
+60 seconds
 
 # %PROTOCOLS%
 
@@ -55,16 +54,20 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/slow.txt");
     /* wait no more than 23 seconds */
     curl_easy_setopt(curl, CURLOPT_SERVER_RESPONSE_TIMEOUT, 23L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }
 }
 ~~~
+
+# HISTORY
+
+This option was formerly known as CURLOPT_FTP_RESPONSE_TIMEOUT.
 
 # %AVAILABILITY%
 

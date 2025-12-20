@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t t1507_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   (void)ptr;
@@ -38,9 +36,9 @@ static CURLcode test_lib1507(const char *URL)
 {
   static const int MULTI_PERFORM_HANG_TIMEOUT = 60 * 1000;
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = NULL;
-  CURLM *mcurl = NULL;
+  CURLM *multi = NULL;
   int still_running = 1;
   struct curltime mp_start;
   struct curl_slist *rcpt_list = NULL;
@@ -49,7 +47,7 @@ static CURLcode test_lib1507(const char *URL)
 
   easy_init(curl);
 
-  multi_init(mcurl);
+  multi_init(multi);
 
   rcpt_list = curl_slist_append(rcpt_list, "<1507-recipient@example.com>");
 #if 0
@@ -66,12 +64,12 @@ static CURLcode test_lib1507(const char *URL)
   curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "<1507-realuser@example.com>");
   curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  multi_add_handle(mcurl, curl);
+  multi_add_handle(multi, curl);
 
   mp_start = curlx_now();
 
   /* we start some action by calling perform right away */
-  curl_multi_perform(mcurl, &still_running);
+  curl_multi_perform(multi, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -92,7 +90,7 @@ static CURLcode test_lib1507(const char *URL)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    curl_multi_timeout(mcurl, &curl_timeo);
+    curl_multi_timeout(multi, &curl_timeo);
     if(curl_timeo >= 0) {
       curlx_mstotv(&timeout, curl_timeo);
       if(timeout.tv_sec > 1) {
@@ -102,7 +100,7 @@ static CURLcode test_lib1507(const char *URL)
     }
 
     /* get file descriptors from the transfers */
-    curl_multi_fdset(mcurl, &fdread, &fdwrite, &fdexcep, &maxfd);
+    curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* In a real-world program you OF COURSE check the return code of the
        function calls.  On success, the value of maxfd is guaranteed to be
@@ -112,7 +110,7 @@ static CURLcode test_lib1507(const char *URL)
 
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    if(curlx_timediff(curlx_now(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
+    if(curlx_timediff_ms(curlx_now(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       curl_mfprintf(stderr, "ABORTING TEST, since it seems "
                     "that it would have run forever.\n");
       break;
@@ -124,7 +122,7 @@ static CURLcode test_lib1507(const char *URL)
       break;
     case 0: /* timeout */
     default: /* action */
-      curl_multi_perform(mcurl, &still_running);
+      curl_multi_perform(multi, &still_running);
       break;
     }
   }
@@ -132,10 +130,10 @@ static CURLcode test_lib1507(const char *URL)
 test_cleanup:
 
   curl_slist_free_all(rcpt_list);
-  curl_multi_remove_handle(mcurl, curl);
-  curl_multi_cleanup(mcurl);
+  curl_multi_remove_handle(multi, curl);
+  curl_multi_cleanup(multi);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

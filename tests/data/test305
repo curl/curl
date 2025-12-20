@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -19,14 +20,17 @@ https
 insecure HTTPS without permission
 </name>
 <command>
-https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER --cacert moooo --no-ca-native
+https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER --cacert "%LOGDIR/cacert" --no-ca-native
 </command>
+<file name="%LOGDIR/cacert">
+made up content
+</file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-77
+77,60
 </errorcode>
 </verify>
 </testcase>

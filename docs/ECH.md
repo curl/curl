@@ -22,9 +22,8 @@ To build the OpenSSL project's ECH feature branch:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/openssl/openssl
+git clone https://github.com/openssl/openssl --branch feature/ech
 cd openssl
-git checkout feature/ech
 ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
 ...stuff...
 make -j8
@@ -77,10 +76,8 @@ The above works for these test sites:
 
 ```sh
 https://defo.ie/ech-check.php
-https://draft-13.esni.defo.ie:8413/stats
-https://draft-13.esni.defo.ie:8414/stats
 https://crypto.cloudflare.com/cdn-cgi/trace
-https://tls-ech.dev
+https://tls-ech.dev/
 ```
 
 The list above has 4 different server technologies, implemented by 3 different

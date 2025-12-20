@@ -33,7 +33,8 @@ Deprecated. Use curl_easy_unescape(3) instead.
 This function converts the URL encoded string **input** to a "plain string"
 and return that as a new allocated string. All input characters that are URL
 encoded (%XX where XX is a two-digit hexadecimal number) are converted to
-their plain text versions.
+their plain text versions. Although not constrained by its type, the returned
+data may not be altered.
 
 If the **length** argument is set to 0, curl_unescape(3) calls
 strlen() on **input** to find out the size.

@@ -31,10 +31,6 @@
 #include "rand.h"
 #include "curl_fopen.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /*
   The dirslash() function breaks a null-terminated pathname string into
   directory and filename components then returns the directory component up
@@ -66,10 +62,10 @@ static char *dirslash(const char *path)
   n = strlen(path);
   if(n) {
     /* find the rightmost path separator, if any */
-    while(n && !IS_SEP(path[n-1]))
+    while(n && !IS_SEP(path[n - 1]))
       --n;
     /* skip over all the path separators, if any */
-    while(n && IS_SEP(path[n-1]))
+    while(n && IS_SEP(path[n - 1]))
       --n;
   }
   if(curlx_dyn_addn(&out, path, n))
@@ -93,25 +89,22 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   CURLcode result = CURLE_WRITE_ERROR;
   unsigned char randbuf[41];
   char *tempstore = NULL;
+#ifndef _WIN32
   struct_stat sb;
+#endif
   int fd = -1;
   char *dir = NULL;
   *tempname = NULL;
 
+#ifndef _WIN32
   *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
-  if(
-#ifdef UNDER_CE
-     /* !checksrc! disable BANNEDFUNC 1 */
-     stat(filename, &sb) == -1
-#else
-     fstat(fileno(*fh), &sb) == -1
-#endif
-     || !S_ISREG(sb.st_mode)) {
+  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
     return CURLE_OK;
   }
   curlx_fclose(*fh);
+#endif
   *fh = NULL;
 
   result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));
@@ -123,7 +116,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     /* The temp filename should not end up too long for the target file
        system */
     tempstore = curl_maprintf("%s%s.tmp", dir, randbuf);
-    free(dir);
+    curlx_free(dir);
   }
 
   if(!tempstore) {
@@ -132,13 +125,16 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   }
 
   result = CURLE_WRITE_ERROR;
-#if (defined(ANDROID) || defined(__ANDROID__)) && \
+#ifdef _WIN32
+  fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
+                  S_IREAD | S_IWRITE);
+#elif (defined(ANDROID) || defined(__ANDROID__)) && \
   (defined(__i386__) || defined(__arm__))
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  (mode_t)(0600 | sb.st_mode));
+                  (mode_t)(S_IRUSR | S_IWUSR | sb.st_mode));
 #else
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  0600 | sb.st_mode);
+                  S_IRUSR | S_IWUSR | sb.st_mode);
 #endif
   if(fd == -1)
     goto fail;
@@ -156,7 +152,7 @@ fail:
     unlink(tempstore);
   }
 
-  free(tempstore);
+  curlx_free(tempstore);
   return result;
 }
 

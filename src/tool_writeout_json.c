@@ -34,8 +34,7 @@
 
    Return 0 on success, non-zero on error.
 */
-int jsonquoted(const char *in, size_t len,
-               struct dynbuf *out, bool lowercase)
+int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
 {
   const unsigned char *i = (const unsigned char *)in;
   const unsigned char *in_end = &i[len];
@@ -143,8 +142,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
           if(++i >= a)
             break;
           fputc(',', stream);
-          if(curl_easy_header(per->curl, name, i, CURLH_HEADER,
-                              -1, &header))
+          if(curl_easy_header(per->curl, name, i, CURLH_HEADER, -1, &header))
             break;
         } while(1);
         fputc(']', stream);

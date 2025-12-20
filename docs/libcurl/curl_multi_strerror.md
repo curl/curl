@@ -41,9 +41,9 @@ int main(void)
   int still_running;
   CURLM *multi = curl_multi_init();
 
-  CURLMcode mc = curl_multi_perform(multi, &still_running);
-  if(mc)
-    printf("error: %s\n", curl_multi_strerror(mc));
+  CURLMcode mresult = curl_multi_perform(multi, &still_running);
+  if(mresult)
+    printf("error: %s\n", curl_multi_strerror(mresult));
 }
 ~~~
 

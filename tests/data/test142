@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -26,7 +27,7 @@ ftp://%HOSTIP:%FTPPORT/part1/part2/part3/part4/part5/part6/part7/part8/part9/par
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -188,6 +189,7 @@ QUIT
 </protocol>
 <limits>
 Allocations: 170
+Maximum allocated: 150000
 </limits>
 </verify>
 </testcase>

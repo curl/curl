@@ -20,6 +20,29 @@ use warnings;
 my @whitelist;
 my %alt;
 my %exactcase;
+my $skip_indented = 1;
+
+if($ARGV[0] eq "-a") {
+    shift @ARGV;
+    $skip_indented = 0;
+}
+my %wl;
+if($ARGV[0] eq "-w") {
+    shift @ARGV;
+    my $file = shift @ARGV;
+    open(W, "<$file") or die "Cannot open '$file': $!";
+    while(<W>) {
+        if(/^#/) {
+            # allow #-comments
+            next;
+        }
+        if(/^([^:]*):(\d*):(.*)/) {
+            $wl{"$1:$2:$3"}=1;
+            #print STDERR "whitelisted $1:$2:$3\n";
+        }
+    }
+    close(W);
+}
 
 my @w;
 while(<STDIN>) {
@@ -30,7 +53,7 @@ while(<STDIN>) {
     if($_ =~ /^---(.*)/) {
         push @whitelist, $1;
     }
-    elsif($_ =~ /^([^:=]*)([:=])(.*)/) {
+    elsif($_ =~ /^(.*)([:=])(.*)/) {
         my ($bad, $sep, $better)=($1, $2, $3);
         push @w, $bad;
         $alt{$bad} = $better;
@@ -50,7 +73,7 @@ sub file {
         my $in = $_;
         $l++;
         chomp $in;
-        if($in =~ /^    /) {
+        if($skip_indented && $in =~ /^    /) {
             next;
         }
         # remove the link part
@@ -67,8 +90,22 @@ sub file {
                ($in =~ /^(.*)$w/ && $case) ) {
                 my $p = $1;
                 my $c = length($p)+1;
+
+                my $ch = "$f:$l:$w";
+                if($wl{$ch}) {
+                    # whitelisted filename + line + word
+                    print STDERR "$ch found but whitelisted\n";
+                    next;
+                }
+                $ch = $f . "::" . $w;
+                if($wl{$ch}) {
+                    # whitelisted filename + word
+                    print STDERR "$ch found but whitelisted\n";
+                    next;
+                }
+
                 print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
-                printf STDERR " %4d | $in\n", $l;
+                printf STDERR " %4d | %s\n", $l, $in;
                 printf STDERR "      | %*s^%s\n", length($p), " ",
                     "~" x (length($w)-1);
                 printf STDERR " maybe use \"%s\" instead?\n", $alt{$w};
@@ -79,9 +116,11 @@ sub file {
     close(F);
 }
 
-my @files = @ARGV;
-
-foreach my $each (@files) {
+my @filemasks = @ARGV;
+open(my $git_ls_files, '-|', 'git', 'ls-files', '--', @filemasks) or die "Failed running git ls-files: $!";
+while(my $each = <$git_ls_files>) {
+    chomp $each;
     file($each);
 }
+close $git_ls_files;
 exit $errors;

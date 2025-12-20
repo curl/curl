@@ -49,6 +49,8 @@ BEGIN {
         $buildinfo
         $LOCKDIR
         $LOGDIR
+        $maxtime
+        $mintotal
         $memanalyze
         $MEMDUMP
         $perlcmd
@@ -83,7 +85,6 @@ use pathhelp qw(
 use Cwd qw(getcwd);
 use File::Spec;
 
-
 #######################################################################
 # global configuration variables
 #
@@ -101,6 +102,8 @@ our $anyway;          # continue anyway, even if a test fail
 our $CURLVERSION="";  # curl's reported version number
 our $CURLVERNUM="";   # curl's reported version number (without -DEV)
 our $randseed = 0;    # random number seed
+our $maxtime;         # curl command timeout override
+our $mintotal;        # minimum number of tests to run
 
 # paths
 our $pwd = getcwd();  # current working directory

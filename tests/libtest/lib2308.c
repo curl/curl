@@ -35,14 +35,14 @@ static size_t cb_curl(char *buffer, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib2308(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb_curl);
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  res = curl_easy_perform(curl);
-  curl_mprintf("Returned %d, should be %d.\n", res, CURLE_WRITE_ERROR);
+  result = curl_easy_perform(curl);
+  curl_mprintf("Returned %d, should be %d.\n", result, CURLE_WRITE_ERROR);
   fflush(stdout);
   curl_easy_cleanup(curl);
   curl_global_cleanup();

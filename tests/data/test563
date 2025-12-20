@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ HTTP proxy
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -38,7 +39,7 @@ proxy
 <setenv>
 ftp_proxy=http://%HOSTIP:%HTTPPORT/
 </setenv>
-# note that we need quotes around the URL below to make sure the shell doesn't
+# note that we need quotes around the URL below to make sure the shell does not
 # treat the semicolon as a separator!
 <command>
 "ftp://%HOSTIP:23456/%TESTNUMBER;type=A" %FTPPORT
@@ -48,7 +49,7 @@ ftp_proxy=http://%HOSTIP:%HTTPPORT/
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=A HTTP/1.1
 Host: %HOSTIP:%FTPPORT
 Accept: */*

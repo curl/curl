@@ -53,10 +53,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_HAPROXY_CLIENT_IP, "1.1.1.1");
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

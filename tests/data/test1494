@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,10 +8,9 @@ chunked Transfer-Encoding
 DELAY
 </keywords>
 </info>
-#
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: identity, identity
@@ -21,7 +21,6 @@ stuff server sends
 
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -35,10 +34,9 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

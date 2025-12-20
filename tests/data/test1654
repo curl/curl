@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -27,7 +28,7 @@ h2 example.com 443 h3 shiny.example.com 8443 "20191231 00:00:00" 0 0
 # a comment
 h2 foo.example.com 443 h3 shiny.example.com 8443 "20291231 23:30:00" 0 0
   h1 example.com 443 h3 shiny.example.com 8443 "20121231 00:00:01" 0 0
-	h3 example.com 443 h3 shiny.example.com 8443 "20131231 00:00:00" 0 0
+%TABh3 example.com 443 h3 shiny.example.com 8443 "20131231 00:00:00" 0 0
     # also a comment
 bad example.com 443 h3 shiny.example.com 8443 "20191231 00:00:00" 0 0
 rubbish

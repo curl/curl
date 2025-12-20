@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,8 +6,6 @@ curl_multi_remove_handle
 </keywords>
 </info>
 
-
-#
 # Client-side
 <client>
 <tool>
@@ -20,7 +19,6 @@ curl_multi_remove_handle twice
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 </verify>

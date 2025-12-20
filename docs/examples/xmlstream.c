@@ -32,12 +32,12 @@
  * gcc -Wall -I/usr/local/include xmlstream.c -lcurl -lexpat -o xmlstream
  *
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <expat.h>
+
 #include <curl/curl.h>
 
 struct MemoryStruct {
@@ -55,7 +55,7 @@ struct ParserStruct {
 static void startElement(void *userData, const XML_Char *name,
                          const XML_Char **atts)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   state->tags++;
   state->depth++;
 
@@ -70,7 +70,7 @@ static void startElement(void *userData, const XML_Char *name,
 
 static void characterDataHandler(void *userData, const XML_Char *s, int len)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   struct MemoryStruct *mem = &state->characters;
 
   char *ptr = realloc(mem->memory, mem->size + (unsigned long)len + 1);
@@ -89,18 +89,18 @@ static void characterDataHandler(void *userData, const XML_Char *s, int len)
 
 static void endElement(void *userData, const XML_Char *name)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   state->depth--;
 
   printf("%5lu   %10lu   %s\n", state->depth, state->characters.size, name);
 }
 
-static size_t parseStreamCallback(void *contents, size_t length, size_t nmemb,
-                                  void *userp)
+static size_t write_cb(void *contents, size_t length, size_t nmemb,
+                       void *userp)
 {
-  XML_Parser parser = (XML_Parser) userp;
+  XML_Parser parser = (XML_Parser)userp;
   size_t real_size = length * nmemb;
-  struct ParserStruct *state = (struct ParserStruct *) XML_GetUserData(parser);
+  struct ParserStruct *state = (struct ParserStruct *)XML_GetUserData(parser);
 
   /* Only parse if we are not already in a failure state. */
   if(state->ok && XML_Parse(parser, contents, (int)real_size, 0) == 0) {
@@ -116,14 +116,14 @@ static size_t parseStreamCallback(void *contents, size_t length, size_t nmemb,
 
 int main(void)
 {
-  CURL *curl_handle;
+  CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* Initialize a libcurl handle. */
-  curl_handle = curl_easy_init();
+  curl = curl_easy_init();
   if(curl) {
     XML_Parser parser;
     struct ParserStruct state;
@@ -138,21 +138,21 @@ int main(void)
     XML_SetElementHandler(parser, startElement, endElement);
     XML_SetCharacterDataHandler(parser, characterDataHandler);
 
-    curl_easy_setopt(curl_handle, CURLOPT_URL,
+    curl_easy_setopt(curl, CURLOPT_URL,
                      "https://www.w3schools.com/xml/simple.xml");
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, parseStreamCallback);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)parser);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)parser);
 
     printf("Depth   Characters   Closing Tag\n");
 
     /* Perform the request and any follow-up parsing. */
-    res = curl_easy_perform(curl_handle);
-    if(res != CURLE_OK) {
+    result = curl_easy_perform(curl);
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     }
     else if(state.ok) {
-      /* Expat requires one final call to finalize parsing. */
+      /* Expat requiresult one final call to finalize parsing. */
       if(XML_Parse(parser, NULL, 0, 1) == 0) {
         enum XML_Error error_code = XML_GetErrorCode(parser);
         fprintf(stderr, "Finalizing parsing failed with error code %d (%s).\n",
@@ -168,10 +168,10 @@ int main(void)
     free(state.characters.memory);
     XML_ParserFree(parser);
 
-    curl_easy_cleanup(curl_handle);
+    curl_easy_cleanup(curl);
   }
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

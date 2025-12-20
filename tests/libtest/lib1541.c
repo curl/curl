@@ -23,16 +23,13 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t1541_transfer_status {
-  CURL *easy;
+  CURL *curl;
   int hd_count;
   int bd_count;
-  CURLcode result;
 };
 
-#define KN(a)   a, #a
+#define KN(a) a, #a
 
 static void t1541_geterr(const char *name, CURLcode val, int lineno)
 {
@@ -50,25 +47,25 @@ static void report_time(const char *key, const char *where, curl_off_t time,
                  key, where, time);
 }
 
-static void check_time(CURL *easy, int key, const char *name,
+static void check_time(CURL *curl, int key, const char *name,
                        const char *where)
 {
   curl_off_t tval;
-  CURLcode res = curl_easy_getinfo(easy, (CURLINFO)key, &tval);
-  if(res) {
-    t1541_geterr(name, res, __LINE__);
+  CURLcode result = curl_easy_getinfo(curl, (CURLINFO)key, &tval);
+  if(result) {
+    t1541_geterr(name, result, __LINE__);
   }
   else
     report_time(name, where, tval, tval > 0);
 }
 
-static void check_time0(CURL *easy, int key, const char *name,
+static void check_time0(CURL *curl, int key, const char *name,
                         const char *where)
 {
   curl_off_t tval;
-  CURLcode res = curl_easy_getinfo(easy, (CURLINFO)key, &tval);
-  if(res) {
-    t1541_geterr(name, res, __LINE__);
+  CURLcode result = curl_easy_getinfo(curl, (CURLINFO)key, &tval);
+  if(result) {
+    t1541_geterr(name, result, __LINE__);
   }
   else
     report_time(name, where, tval, !tval);
@@ -83,15 +80,15 @@ static size_t t1541_header_callback(char *ptr, size_t size, size_t nmemb,
   (void)ptr;
   if(!st->hd_count++) {
     /* first header, check some CURLINFO value to be reported. See #13125 */
-    check_time(st->easy, KN(CURLINFO_CONNECT_TIME_T), "1st header");
-    check_time(st->easy, KN(CURLINFO_PRETRANSFER_TIME_T), "1st header");
-    check_time(st->easy, KN(CURLINFO_STARTTRANSFER_TIME_T), "1st header");
+    check_time(st->curl, KN(CURLINFO_CONNECT_TIME_T), "1st header");
+    check_time(st->curl, KN(CURLINFO_PRETRANSFER_TIME_T), "1st header");
+    check_time(st->curl, KN(CURLINFO_STARTTRANSFER_TIME_T), "1st header");
     /* continuously updated */
-    check_time(st->easy, KN(CURLINFO_TOTAL_TIME_T), "1st header");
+    check_time(st->curl, KN(CURLINFO_TOTAL_TIME_T), "1st header");
     /* no SSL, must be 0 */
-    check_time0(st->easy, KN(CURLINFO_APPCONNECT_TIME_T), "1st header");
+    check_time0(st->curl, KN(CURLINFO_APPCONNECT_TIME_T), "1st header");
     /* download not really started */
-    check_time0(st->easy, KN(CURLINFO_SPEED_DOWNLOAD_T), "1st header");
+    check_time0(st->curl, KN(CURLINFO_SPEED_DOWNLOAD_T), "1st header");
   }
   (void)fwrite(ptr, size, nmemb, stdout);
   return len;
@@ -109,8 +106,8 @@ static size_t t1541_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode test_lib1541(const char *URL)
 {
-  CURL *curls = NULL;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
   struct t1541_transfer_status st;
 
   start_test_timing();
@@ -119,32 +116,32 @@ static CURLcode test_lib1541(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(curls);
-  st.easy = curls; /* to allow callbacks access */
+  easy_init(curl);
+  st.curl = curl; /* to allow callbacks access */
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, t1541_write_cb);
-  easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, t1541_header_callback);
-  easy_setopt(curls, CURLOPT_HEADERDATA, &st);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1541_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEDATA, &st);
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, t1541_header_callback);
+  easy_setopt(curl, CURLOPT_HEADERDATA, &st);
 
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-  res = curl_easy_perform(curls);
+  result = curl_easy_perform(curl);
 
-  check_time(curls, KN(CURLINFO_CONNECT_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_PRETRANSFER_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_POSTTRANSFER_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_STARTTRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_CONNECT_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_PRETRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_POSTTRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_STARTTRANSFER_TIME_T), "done");
   /* no SSL, must be 0 */
-  check_time0(curls, KN(CURLINFO_APPCONNECT_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_SPEED_DOWNLOAD_T), "done");
-  check_time(curls, KN(CURLINFO_TOTAL_TIME_T), "done");
+  check_time0(curl, KN(CURLINFO_APPCONNECT_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_SPEED_DOWNLOAD_T), "done");
+  check_time(curl, KN(CURLINFO_TOTAL_TIME_T), "done");
 
 test_cleanup:
 
-  curl_easy_cleanup(curls);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res; /* return the final return code */
+  return result; /* return the final return code */
 }

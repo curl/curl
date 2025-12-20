@@ -17,7 +17,7 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLINFO_LOCAL_PORT - get the latest local port number
+CURLINFO_LOCAL_PORT - latest local port number
 
 # SYNOPSIS
 
@@ -35,6 +35,9 @@ connection done with this **curl** handle.
 If the connection was done using QUIC, the port number is a UDP port number,
 otherwise it is a TCP port number.
 
+If no connection was established or if the protocol does not use ports, -1
+is returned.
+
 # %PROTOCOLS%
 
 # EXAMPLE
@@ -43,18 +46,18 @@ otherwise it is a TCP port number.
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(CURLE_OK == res) {
+    if(CURLE_OK == result) {
       long port;
-      res = curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT, &port);
+      result = curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT, &port);
 
-      if(CURLE_OK == res) {
+      if(CURLE_OK == result) {
         printf("We used local port: %ld\n", port);
       }
     }

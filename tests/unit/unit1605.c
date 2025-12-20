@@ -27,7 +27,7 @@
 
 static CURLcode t1605_setup(CURL **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   *easy = curl_easy_init();
@@ -35,7 +35,7 @@ static CURLcode t1605_setup(CURL **easy)
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
-  return res;
+  return result;
 }
 
 static void t1605_stop(CURL *easy)
@@ -54,10 +54,10 @@ static CURLcode test_unit1605(const char *arg)
   char *esc;
 
   esc = curl_easy_escape(easy, "", -1);
-  fail_unless(esc == NULL, "negative string length can't work");
+  fail_unless(esc == NULL, "negative string length cannot work");
 
   esc = curl_easy_unescape(easy, "%41%41%41%41", -1, &len);
-  fail_unless(esc == NULL, "negative string length can't work");
+  fail_unless(esc == NULL, "negative string length cannot work");
 
   UNITTEST_END(t1605_stop(easy))
 }

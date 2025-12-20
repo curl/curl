@@ -107,36 +107,24 @@ int Curl_socketpair(int domain, int type, int protocol,
 }
 #endif /* USE_SOCKETPAIR */
 #else /* !HAVE_SOCKETPAIR */
-#ifdef _WIN32
-/*
- * This is a socketpair() implementation for Windows.
- */
-#include <string.h>
-#ifdef HAVE_IO_H
-#include <io.h>
-#endif
-#else
+
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h> /* IPPROTO_TCP */
+#include <netinet/in.h> /* for IPPROTO_TCP */
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+
 #ifndef INADDR_LOOPBACK
 #define INADDR_LOOPBACK 0x7f000001
-#endif /* !INADDR_LOOPBACK */
-#endif /* !_WIN32 */
+#endif
 
 #include "curlx/nonblock.h" /* for curlx_nonblock */
 #include "curlx/timeval.h"  /* needed before select.h */
 #include "select.h"   /* for Curl_poll */
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 int Curl_socketpair(int domain, int type, int protocol,
                     curl_socket_t socks[2], bool nonblocking)
@@ -228,7 +216,7 @@ int Curl_socketpair(int domain, int type, int protocol,
       if(nread == -1) {
         int sockerr = SOCKERRNO;
         /* Do not block forever */
-        if(curlx_timediff(curlx_now(), start) > (60 * 1000))
+        if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
           goto error;
         if(
 #ifdef USE_WINSOCK

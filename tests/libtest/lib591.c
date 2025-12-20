@@ -25,17 +25,19 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib591(const char *URL)
 {
-  CURL *easy = NULL;
+  CURL *curl = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int running;
   int msgs_left;
   CURLMsg *msg;
   FILE *upload = NULL;
+  curl_off_t accept_timeout;
+
+  if(curlx_str_number(&libtest_arg2, &accept_timeout, 65535))
+    return TEST_ERR_MAJOR_BAD;
 
   start_test_timing();
 
@@ -49,34 +51,34 @@ static CURLcode test_lib591(const char *URL)
   }
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(result) {
     curlx_fclose(upload);
-    return res;
+    return result;
   }
 
-  easy_init(easy);
+  easy_init(curl);
 
   /* go verbose */
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* specify target */
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* enable uploading */
-  easy_setopt(easy, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* data pointer for the file read function */
-  easy_setopt(easy, CURLOPT_READDATA, upload);
+  easy_setopt(curl, CURLOPT_READDATA, upload);
 
   /* use active mode FTP */
-  easy_setopt(easy, CURLOPT_FTPPORT, "-");
+  easy_setopt(curl, CURLOPT_FTPPORT, "-");
 
   /* server connection timeout */
-  easy_setopt(easy, CURLOPT_ACCEPTTIMEOUT_MS, atol(libtest_arg2)*1000);
+  easy_setopt(curl, CURLOPT_ACCEPTTIMEOUT_MS, (long)(accept_timeout * 1000));
 
   multi_init(multi);
 
-  multi_add_handle(multi, easy);
+  multi_add_handle(multi, curl);
 
   for(;;) {
     struct timeval interval;
@@ -112,8 +114,8 @@ static CURLcode test_lib591(const char *URL)
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
     else {
       interval.tv_sec = 0;
@@ -127,18 +129,18 @@ static CURLcode test_lib591(const char *URL)
 
   msg = curl_multi_info_read(multi, &msgs_left);
   if(msg)
-    res = msg->data.result;
+    result = msg->data.result;
 
 test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   /* close the local file */
   curlx_fclose(upload);
 
-  return res;
+  return result;
 }

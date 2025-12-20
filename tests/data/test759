@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ globbing
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <name>
@@ -16,7 +16,6 @@ glob '{,'
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # curl: (3) unmatched brace in URL position 1:

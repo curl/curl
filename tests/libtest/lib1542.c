@@ -33,51 +33,50 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static CURLcode test_lib1542(const char *URL)
 {
-  CURL *easy = NULL;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
-  res_easy_init(easy);
+  res_easy_init(curl);
 
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   debug_config.nohex = TRUE;
   debug_config.tracetime = FALSE;
-  easy_setopt(easy, CURLOPT_DEBUGDATA, &debug_config);
-  easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* CURLOPT_MAXLIFETIME_CONN is inclusive - the connection needs to be 2
    * seconds old */
   curlx_wait_ms(2000);
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  easy_setopt(easy, CURLOPT_MAXLIFETIME_CONN, 1L);
+  easy_setopt(curl, CURLOPT_MAXLIFETIME_CONN, 1L);
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
 test_cleanup:
 
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

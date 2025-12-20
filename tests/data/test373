@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,30 +10,30 @@ chunked Transfer-Encoding
 
 <reply>
 <data>
-HTTP/1.1 200 OK
-Date: Thu, 22 Jul 2010 11:22:33 GMT
-Connection: close
-Content-Type: text/html
-Transfer-Encoding: chunked
-X-Control: swsclose
-
-100
+HTTP/1.1 200 OK%CR
+Date: Thu, 22 Jul 2010 11:22:33 GMT%CR
+Connection: close%CR
+Content-Type: text/html%CR
+Transfer-Encoding: chunked%CR
+X-Control: swsclose%CR
+%CR
+100%CR
 %repeat[255 x %00]%
-
-100
+%CR
+100%CR
 %repeat[255 x %00]%
-
-100
+%CR
+100%CR
 %repeat[255 x %00]%
-
-100
+%CR
+100%CR
 %repeat[255 x %00]%
-
-0
-
+%CR
+0%CR
+%CR
 </data>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Thu, 22 Jul 2010 11:22:33 GMT
 Connection: close
@@ -64,7 +65,7 @@ http://%HOSTIP:%HTTPPORT/chunked-transfer-encoding/%TESTNUMBER
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /chunked-transfer-encoding/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

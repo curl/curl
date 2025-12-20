@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 struct data {
@@ -69,7 +70,7 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
       }
       fprintf(stream, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
+      /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
         i += (c + 3 - width);
@@ -81,12 +82,12 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
   fflush(stream);
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
+static int my_trace(CURL *curl, curl_infotype type,
                     char *data, size_t size, void *userp)
 {
   struct data *config = (struct data *)userp;
   const char *text;
-  (void)handle;
+  (void)curl;
 
   switch(type) {
   case CURLINFO_TEXT:
@@ -121,12 +122,12 @@ static int my_trace(CURL *handle, curl_infotype type,
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct data config;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   config.trace_ascii = 1; /* enable ASCII tracing */
 
@@ -142,15 +143,15 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

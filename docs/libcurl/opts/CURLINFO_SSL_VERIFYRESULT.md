@@ -18,7 +18,7 @@ Added-in: 7.5
 
 # NAME
 
-CURLINFO_SSL_VERIFYRESULT - get the result of the certificate verification
+CURLINFO_SSL_VERIFYRESULT - result of the certificate verification
 
 # SYNOPSIS
 
@@ -46,21 +46,21 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     long verifyresult;
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    res = curl_easy_perform(curl);
-    if(res) {
-      printf("error: %s\n", curl_easy_strerror(res));
+    result = curl_easy_perform(curl);
+    if(result) {
+      printf("error: %s\n", curl_easy_strerror(result));
       curl_easy_cleanup(curl);
       return 1;
     }
 
-    res = curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
-                            &verifyresult);
-    if(!res) {
+    result = curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
+                               &verifyresult);
+    if(!result) {
       printf("The peer verification said %s\n",
              (verifyresult ? "bad" : "fine"));
     }

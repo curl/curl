@@ -15,7 +15,8 @@ README
   available to be used by your software. Read the libcurl.3 man page to
   learn how.
 
-  You find answers to the most frequent questions we get in the FAQ document.
+  You find answers to the most frequent questions we get in the FAQ.md
+  document.
 
   Study the COPYING file for distribution terms.
 
@@ -38,7 +39,7 @@ GIT
 
   To download the latest source code off the GIT server, do this:
 
-    git clone https://github.com/curl/curl.git
+    git clone https://github.com/curl/curl
 
   (you will get a directory named curl created, filled with the source code)
 

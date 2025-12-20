@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -26,17 +27,13 @@ http
 <name>
 HTTP POST with *HUGE* request and chunked transfer-encoding
 </name>
- <stdin>
-#
+<stdin>
 data "we post this"
-#
 # enforce chunky post!
 header "Transfer-Encoding: chunked"
-#
 # Set the user-agent using a short-option:
 -A "%repeat[99999 x a]%"
-#
- </stdin>
+</stdin>
 <command>
 -K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>
@@ -44,7 +41,7 @@ header "Transfer-Encoding: chunked"
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 POST /that.site.com/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: %repeat[99999 x a]%

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,10 +8,9 @@ HTTP MIME POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -19,7 +19,7 @@ Content-Type: text/html
 
 hello
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -58,7 +58,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
@@ -69,66 +68,66 @@ s/boundary=------------------------[A-Za-z0-9]*/boundary=-----------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Length: 676
-Content-Type: multipart/form-data; boundary=----------------------------
-
-------------------------------
-Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
-
+POST /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+Accept: */*%CR
+Content-Length: 676%CR
+Content-Type: multipart/form-data; boundary=----------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="sendfile"; filename="postit2.c"%CR
+%CR
 dummy
-
-------------------------------
-Content-Disposition: form-data; name="callbackdata"
-
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="callbackdata"%CR
+%CR
 dummy
-
-------------------------------
-Content-Disposition: form-data; name="filename"
-
-postit2.c
-------------------------------
-Content-Disposition: form-data; name="submit"
-
-send
-------------------------------
-Content-Disposition: form-data; name="somename"; filename="somefile.txt"
-Content-Type: text/plain
-
-blah blah
---------------------------------
-POST /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Length: 690
-Content-Type: multipart/form-data; boundary=----------------------------
-
-------------------------------
-Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
-
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="filename"%CR
+%CR
+postit2.c%CR
+------------------------------%CR
+Content-Disposition: form-data; name="submit"%CR
+%CR
+send%CR
+------------------------------%CR
+Content-Disposition: form-data; name="somename"; filename="somefile.txt"%CR
+Content-Type: text/plain%CR
+%CR
+blah blah%CR
+--------------------------------%CR
+POST /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+Accept: */*%CR
+Content-Length: 690%CR
+Content-Type: multipart/form-data; boundary=----------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="sendfile alternative"; filename="filename 2 "%CR
+%CR
 dummy
-
-------------------------------
-Content-Disposition: form-data; name="callbackdata"
-
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="callbackdata"%CR
+%CR
 dummy
-
-------------------------------
-Content-Disposition: form-data; name="filename"
-
-postit2.c
-------------------------------
-Content-Disposition: form-data; name="submit"
-
-send
-------------------------------
-Content-Disposition: form-data; name="somename"; filename="somefile.txt"
-Content-Type: text/plain
-
-blah blah
---------------------------------
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="filename"%CR
+%CR
+postit2.c%CR
+------------------------------%CR
+Content-Disposition: form-data; name="submit"%CR
+%CR
+send%CR
+------------------------------%CR
+Content-Disposition: form-data; name="somename"; filename="somefile.txt"%CR
+Content-Type: text/plain%CR
+%CR
+blah blah%CR
+--------------------------------%CR
 </protocol>
 </verify>
 </testcase>

@@ -1,19 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 unittest
-Curl_timeleft
+Curl_timeleft_ms
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <features>
 unittest
 </features>
 <name>
-Curl_timeleft unit tests
+Curl_timeleft_ms unit tests
 </name>
 </client>
 </testcase>

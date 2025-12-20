@@ -65,7 +65,7 @@ struct WildcardData {
   unsigned char state; /* wildcard_states */
 };
 
-CURLcode Curl_wildcard_init(struct WildcardData *wc);
+void Curl_wildcard_init(struct WildcardData *wc);
 void Curl_wildcard_dtor(struct WildcardData **wcp);
 
 struct Curl_easy;

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,12 +6,10 @@ SMTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -19,29 +18,35 @@ smtp
 <name>
 SMTP with multiple and invalid --mail-rcpt
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient.one@example.com --mail-rcpt invalid --mail-rcpt recipient.three@example.com --mail-rcpt sTrAnGe --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
+--mail-rcpt recipient.one@example.com
+--mail-rcpt invalid
+--mail-rcpt recipient.three@example.com
+--mail-rcpt sTrAnGe
+--mail-rcpt recipient.five@example.com
+--mail-from sender@example.com
+-T -
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 55 - CURLE_SEND_ERROR
 <errorcode>
 55
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient.one@example.com>
-RCPT TO:<invalid>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient.one@example.com%GT
+RCPT TO:%LTinvalid%GT
 QUIT
 </protocol>
 </verify>

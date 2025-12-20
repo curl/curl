@@ -25,13 +25,19 @@
  * Upload to SFTP, resuming a previously aborted transfer.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* read data to upload */
-static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   FILE *f = (FILE *)stream;
   size_t n;
@@ -49,34 +55,35 @@ static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
  */
 static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
 {
-  CURLcode result = CURLE_GOT_NOTHING;
   curl_off_t remoteFileSizeByte = -1;
-  CURL *curlHandlePtr = curl_easy_init();
+  CURL *curl = curl_easy_init();
 
-  curl_easy_setopt(curlHandlePtr, CURLOPT_VERBOSE, 1L);
+  if(curl) {
+    CURLcode result;
 
-  curl_easy_setopt(curlHandlePtr, CURLOPT_URL, i_remoteFile);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_NOBODY, 1L);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_HEADER, 1L);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_FILETIME, 1L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  result = curl_easy_perform(curlHandlePtr);
-  if(CURLE_OK == result) {
-    result = curl_easy_getinfo(curlHandlePtr,
-                               CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                               &remoteFileSizeByte);
-    if(result)
-      return -1;
-    printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
+    curl_easy_setopt(curl, CURLOPT_URL, i_remoteFile);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
+
+    result = curl_easy_perform(curl);
+    if(CURLE_OK == result) {
+      result = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                              &remoteFileSizeByte);
+      if(result)
+        return -1;
+      printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curlHandlePtr);
 
   return remoteFileSizeByte;
 }
 
-
-static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
+static int sftpResumeUpload(CURL *curl, const char *remotepath,
                             const char *localpath)
 {
   FILE *f = NULL;
@@ -90,24 +97,22 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
 
   f = fopen(localpath, "rb");
   if(!f) {
-#ifndef UNDER_CE
     perror(NULL);
-#endif
     return 0;
   }
 
-  curl_easy_setopt(curlhandle, CURLOPT_UPLOAD, 1L);
-  curl_easy_setopt(curlhandle, CURLOPT_URL, remotepath);
-  curl_easy_setopt(curlhandle, CURLOPT_READFUNCTION, readfunc);
-  curl_easy_setopt(curlhandle, CURLOPT_READDATA, f);
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  curl_easy_setopt(curl, CURLOPT_URL, remotepath);
+  curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
+  curl_easy_setopt(curl, CURLOPT_READDATA, f);
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   _fseeki64(f, remoteFileSizeByte, SEEK_SET);
 #else
   fseek(f, (long)remoteFileSizeByte, SEEK_SET);
 #endif
-  curl_easy_setopt(curlhandle, CURLOPT_APPEND, 1L);
-  result = curl_easy_perform(curlhandle);
+  curl_easy_setopt(curl, CURLOPT_APPEND, 1L);
+  result = curl_easy_perform(curl);
 
   fclose(f);
 
@@ -121,22 +126,22 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
 
 int main(void)
 {
-  CURL *curlhandle = NULL;
+  CURL *curl = NULL;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
-  curlhandle = curl_easy_init();
-  if(curlhandle) {
+  curl = curl_easy_init();
+  if(curl) {
     const char *remote = "sftp://user:pass@example.com/path/filename";
     const char *filename = "filename";
 
-    if(!sftpResumeUpload(curlhandle, remote, filename)) {
+    if(!sftpResumeUpload(curl, remote, filename)) {
       printf("resumed upload using curl %s failed\n", curl_version());
     }
 
-    curl_easy_cleanup(curlhandle);
+    curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
 

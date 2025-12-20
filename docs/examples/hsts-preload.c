@@ -25,8 +25,15 @@
  * Preload domains to HSTS
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for strcpy() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 struct entry {
@@ -46,13 +53,12 @@ struct state {
 
 /* "read" is from the point of the library, it wants data from us. One domain
    entry per invoke. */
-static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
-                            void *userp)
+static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
 {
   const char *host;
   const char *expire;
   struct state *s = (struct state *)userp;
-  (void)easy;
+  (void)curl;
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
@@ -67,10 +73,10 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
   return CURLSTS_OK;
 }
 
-static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
+static CURLSTScode hstswrite(CURL *curl, struct curl_hstsentry *e,
                              struct curl_index *i, void *userp)
 {
-  (void)easy;
+  (void)curl;
   (void)userp; /* we have no custom input */
   printf("[%u/%u] %s %s\n", (unsigned int)i->index, (unsigned int)i->total,
          e->name, e->expire);
@@ -81,13 +87,13 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
-    struct state st = {0};
+    struct state st = { 0 };
 
     /* enable HSTS for this handle */
     curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
@@ -107,16 +113,16 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

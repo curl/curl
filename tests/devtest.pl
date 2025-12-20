@@ -24,13 +24,13 @@
 ###########################################################################
 
 # This script is intended for developers to test some internals of the
-# runtests.pl harness. Don't try to use this unless you know what you're
+# runtests.pl harness. Do not try to use this unless you know what you are
 # doing!
 
 # An example command-line that starts a test http server for test 11 and waits
 # for the user before stopping it:
 #   ./devtest.pl --verbose serverfortest https echo "Started https" protoport https preprocess 11 pause echo Stopping stopservers echo Done
-# curl can connect to the server while it's running like this:
+# curl can connect to the server while it is running like this:
 #   curl -vkL https://localhost:<protoport>/11
 
 use strict;
@@ -64,7 +64,6 @@ use testutil qw(
     );
 use getpart;
 
-
 #######################################################################
 # logmsg is our general message logging subroutine.
 # This function is currently required to be here by servers.pm
@@ -94,7 +93,7 @@ sub parseprotocols {
 
     # Generate a "proto-ipv6" version of each protocol to match the
     # IPv6 <server> name and a "proto-unix" to match the variant which
-    # uses Unix domain sockets. This works even if support isn't
+    # uses Unix domain sockets. This works even if support is not
     # compiled in because the <features> test will fail.
     push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
 
@@ -104,7 +103,6 @@ sub parseprotocols {
     # 'none' is used in test cases to mean no server
     push @protocols, 'none';
 }
-
 
 #######################################################################
 # Initialize @protocols from the curl binary under test
@@ -116,7 +114,6 @@ sub init_protocols {
         }
     }
 }
-
 
 #######################################################################
 # Initialize the test harness to run tests
@@ -176,7 +173,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "preprocess") {
         shift @ARGV;
-        loadtest("${TESTDIR}/test${ARGV[0]}");
+        loadtest("${TESTDIR}/test${ARGV[0]}", 1);
         readtestkeywords();
         singletest_preprocess($ARGV[0]);
     }

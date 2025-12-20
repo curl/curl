@@ -13,7 +13,8 @@
       "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
-      ]
+      ],
+      "enabled": false
     },
     {
       "matchUpdateTypes": [
@@ -21,7 +22,7 @@
         "pinDigest",
         "digest"
       ],
-      "commitMessagePrefix": "CI: ",
+      "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
       ]
@@ -30,7 +31,7 @@
       "matchManagers": [
         "custom.regex"
       ],
-      "commitMessagePrefix": "CI: ",
+      "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
       ]
@@ -45,11 +46,12 @@
       "enabled": false
     },
     {
-      "description": "Schedule CodeQL updates on the 10th of each month",
+      "description": "Schedule package updates on the 10th of each month",
       "matchPackageNames": [
-        "/codeql/i"
+        "/codeql/i",
+        "/ruff/i"
       ],
-      "groupName": "CodeQL",
+      "groupName": "monthly updates by name",
       "schedule": [
         "* * 10 * *"
       ]
@@ -59,7 +61,7 @@
       "matchSourceUrls": [
         "**/awslabs/**"
       ],
-      "groupName": "monthly updates",
+      "groupName": "monthly updates by URL",
       "schedule": [
         "* * 10 * *"
       ]

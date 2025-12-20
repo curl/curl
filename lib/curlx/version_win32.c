@@ -26,13 +26,8 @@
 
 #ifdef _WIN32
 
-#include <curl/curl.h>
 #include "version_win32.h"
 #include "warnless.h"
-
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
    and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */
@@ -111,12 +106,6 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
     /* we are always running on PLATFORM_WINNT */
     matched = FALSE;
   }
-#elif defined(UNDER_CE)
-  (void)majorVersion;
-  (void)minorVersion;
-  (void)buildVersion;
-  (void)platform;
-  (void)condition;
 #else
   ULONGLONG cm = 0;
   struct OUR_OSVERSIONINFOEXW osver;
@@ -139,7 +128,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
 #endif
     pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo"));
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo"));
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif

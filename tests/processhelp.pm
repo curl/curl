@@ -169,10 +169,29 @@ sub pidterm {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
                 } else {
-                    # https://ss64.com/nt/taskkill.html
-                    my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
-                    print "Executing: '$cmd'\n";
-                    system($cmd);
+                    # https://ss64.com/nt/tasklist.html
+                    my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
+                    $result =~ s/\r//g;
+                    $result =~ s/\n/ | /g;
+                    print "Task info for $pid before taskkill: '$result'\n";
+
+                    $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result =~ s/\r//g;
+                    print "Task child processes for $pid before taskkill:\n";
+                    print "$result\n";
+
+                    if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
+                        # https://ss64.com/nt/taskkill.html
+                        my $cmd;
+                        if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
+                            $cmd = "taskkill -f    -pid $pid >$dev_null 2>&1";
+                        }
+                        else {
+                            $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        }
+                        print "Executing: '$cmd'\n";
+                        system($cmd);
+                    }
                 }
                 return;
             }
@@ -198,10 +217,29 @@ sub pidkill {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
                 } else {
-                    # https://ss64.com/nt/taskkill.html
-                    my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
-                    print "Executing: '$cmd'\n";
-                    system($cmd);
+                    # https://ss64.com/nt/tasklist.html
+                    my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
+                    $result =~ s/\r//g;
+                    $result =~ s/\n/ | /g;
+                    print "Task info for $pid before taskkill: '$result'\n";
+
+                    $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result =~ s/\r//g;
+                    print "Task child processes for $pid before taskkill:\n";
+                    print "$result\n";
+
+                    if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
+                        # https://ss64.com/nt/taskkill.html
+                        my $cmd;
+                        if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
+                            $cmd = "taskkill -f    -pid $pid >$dev_null 2>&1";
+                        }
+                        else {
+                            $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        }
+                        print "Executing: '$cmd'\n";
+                        system($cmd);
+                    }
                 }
                 return;
             }
@@ -279,7 +317,7 @@ sub processexists {
 
 #######################################################################
 # killpid attempts to gracefully stop processes in the given pid list
-# with a SIGTERM signal and SIGKILLs those which haven't died on time.
+# with a SIGTERM signal and SIGKILLs those which have not died on time.
 #
 sub killpid {
     my ($verbose, $pidlist) = @_;
@@ -430,7 +468,6 @@ sub killallsockfilters {
     }
 }
 
-
 sub set_advisor_read_lock {
     my ($filename) = @_;
 
@@ -441,7 +478,6 @@ sub set_advisor_read_lock {
     printf "Error creating lock file $filename error: $!\n";
 }
 
-
 sub clear_advisor_read_lock {
     my ($filename) = @_;
 
@@ -449,6 +485,5 @@ sub clear_advisor_read_lock {
         unlink($filename);
     }
 }
-
 
 1;

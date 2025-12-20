@@ -28,30 +28,27 @@
 #ifndef __OS400_SYS_
 #define __OS400_SYS_
 
-
 /* Per-thread item identifiers. */
 
 typedef enum {
-        LK_GSK_ERROR,
-        LK_LDAP_ERROR,
-        LK_CURL_VERSION,
-        LK_VERSION_INFO,
-        LK_VERSION_INFO_DATA,
-        LK_EASY_STRERROR,
-        LK_SHARE_STRERROR,
-        LK_MULTI_STRERROR,
-        LK_URL_STRERROR,
-        LK_ZLIB_VERSION,
-        LK_ZLIB_MSG,
-        LK_LAST
-}               localkey_t;
+  LK_GSK_ERROR,
+  LK_LDAP_ERROR,
+  LK_CURL_VERSION,
+  LK_VERSION_INFO,
+  LK_VERSION_INFO_DATA,
+  LK_EASY_STRERROR,
+  LK_SHARE_STRERROR,
+  LK_MULTI_STRERROR,
+  LK_URL_STRERROR,
+  LK_ZLIB_VERSION,
+  LK_ZLIB_MSG,
+  LK_LAST
+} localkey_t;
 
-
-extern char *   (* Curl_thread_buffer)(localkey_t key, long size);
-
+extern char *(*Curl_thread_buffer)(localkey_t key, long size);
 
 /* Maximum string expansion factor due to character code conversion. */
 
-#define MAX_CONV_EXPANSION      4       /* Can deal with UTF-8. */
+#define MAX_CONV_EXPANSION 4       /* Can deal with UTF-8. */
 
 #endif

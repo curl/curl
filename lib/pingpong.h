@@ -53,8 +53,6 @@ struct pingpong {
   size_t sendsize; /* total size of the sendthis buffer */
   struct curltime response; /* set to Curl_now() when a command has been sent
                                off, used to time-out response reading */
-  timediff_t response_time; /* When no timeout is given, this is the amount of
-                               milliseconds we await for a server response. */
   struct dynbuf sendbuf;
   struct dynbuf recvbuf;
   size_t overflow; /* number of bytes left after a final response line */
@@ -73,11 +71,10 @@ struct pingpong {
                          read */
 };
 
-#define PINGPONG_SETUP(pp,s,e)                   \
-  do {                                           \
-    (pp)->response_time = RESP_TIMEOUT;          \
-    (pp)->statemachine = s;                      \
-    (pp)->endofresp = e;                         \
+#define PINGPONG_SETUP(pp, s, e) \
+  do {                           \
+    (pp)->statemachine = s;      \
+    (pp)->endofresp = e;         \
   } while(0)
 
 /*
@@ -90,13 +87,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data, struct pingpong *pp,
                            bool block, bool disconnecting);
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct pingpong *pp);
+void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow);
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting);
-
 
 /***********************************************************************
  *
@@ -150,7 +146,6 @@ CURLcode Curl_pp_disconnect(struct pingpong *pp);
 CURLcode Curl_pp_pollset(struct Curl_easy *data,
                          struct pingpong *pp,
                          struct easy_pollset *ps);
-
 
 /***********************************************************************
  *

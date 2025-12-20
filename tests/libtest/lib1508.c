@@ -23,27 +23,25 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1508(const char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURLM *m = NULL;
+  CURLcode result = CURLE_OK;
+  CURLM *multi = NULL;
 
   (void)URL;
 
   global_init(CURL_GLOBAL_ALL);
 
-  multi_init(m);
+  multi_init(multi);
 
 test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   curl_mprintf("We are done\n");
 
-  return res;
+  return result;
 }

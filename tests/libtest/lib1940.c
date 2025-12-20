@@ -23,17 +23,15 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t t1940_write_cb(char *data, size_t n, size_t l, void *userp)
 {
   /* take care of the data here, ignored in this example */
   (void)data;
   (void)userp;
-  return n*l;
+  return n * l;
 }
 
-static void t1940_showem(CURL *easy, int header_request, unsigned int type)
+static void t1940_showem(CURL *curl, int header_request, unsigned int type)
 {
   static const char *testdata[] = {
     "daTE",
@@ -46,13 +44,14 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
     "fold",
     "blank",
     "Blank2",
+    "Test",
     NULL
   };
 
   int i;
   struct curl_header *header;
   for(i = 0; testdata[i]; i++) {
-    if(CURLHE_OK == curl_easy_header(easy, testdata[i], 0,
+    if(CURLHE_OK == curl_easy_header(curl, testdata[i], 0,
                                      type, header_request, &header)) {
       if(header->amount > 1) {
         /* more than one, iterate over them */
@@ -64,7 +63,7 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
 
           if(++index == amount)
             break;
-          if(CURLHE_OK != curl_easy_header(easy, testdata[i], index,
+          if(CURLHE_OK != curl_easy_header(curl, testdata[i], index,
                                            type, header_request, &header))
             break;
         } while(1);
@@ -79,8 +78,8 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
 
 static CURLcode test_lib1940(const char *URL)
 {
-  CURL *easy = NULL;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
 
   int header_request;
   if(testnum == 1946) {
@@ -91,32 +90,32 @@ static CURLcode test_lib1940(const char *URL)
   }
 
   global_init(CURL_GLOBAL_DEFAULT);
-  easy_init(easy);
-  easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-  easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
+  easy_init(curl);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   /* ignores any content */
-  easy_setopt(easy, CURLOPT_WRITEFUNCTION, t1940_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1940_write_cb);
 
-  /* if there's a proxy set, use it */
+  /* if there is a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
-    easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
-    easy_setopt(easy, CURLOPT_HTTPPROXYTUNNEL, 1L);
+    easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
+    easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
   }
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  t1940_showem(easy, header_request, CURLH_HEADER);
+  t1940_showem(curl, header_request, CURLH_HEADER);
   if(libtest_arg2 && *libtest_arg2) {
     /* now show connect headers only */
-    t1940_showem(easy, header_request, CURLH_CONNECT);
+    t1940_showem(curl, header_request, CURLH_CONNECT);
   }
-  t1940_showem(easy, header_request, CURLH_1XX);
-  t1940_showem(easy, header_request, CURLH_TRAILER);
+  t1940_showem(curl, header_request, CURLH_1XX);
+  t1940_showem(curl, header_request, CURLH_TRAILER);
 
 test_cleanup:
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

@@ -33,24 +33,18 @@
 #include "curlx/nonblock.h" /* for curlx_nonblock */
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
+#include "bufref.h"
 #include "curlx/warnless.h"
-#include <curl/curl.h>
+
 #include <librtmp/rtmp.h>
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-#if defined(_WIN32) && !defined(USE_LWIPSOCK)
-#define setsockopt(a,b,c,d,e) (setsockopt)(a,b,c,(const char *)d,(int)e)
-#define SET_RCVTIMEO(tv,s)   int tv = s*1000
-#elif defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)
-#define SET_RCVTIMEO(tv,s)   int tv = s*1000
+#if defined(USE_WINSOCK) || defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)
+#define SET_RCVTIMEO(tv, s)  int tv = s * 1000
 #else
-#define SET_RCVTIMEO(tv,s)   struct timeval tv = {s,0}
+#define SET_RCVTIMEO(tv, s)  struct timeval tv = { s, 0 }
 #endif
 
-#define DEF_BUFTIME    (2*60*60*1000)    /* 2 hours */
+#define DEF_BUFTIME    (2 * 60 * 60 * 1000)    /* 2 hours */
 
 /* meta key for storing RTMP* at connection */
 #define CURL_META_RTMP_CONN   "meta:proto:rtmp:conn"
@@ -68,7 +62,7 @@ static Curl_recv rtmp_recv;
 static Curl_send rtmp_send;
 
 /*
- * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu
+ * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu/
  */
 
 const struct Curl_handler Curl_handler_rtmp = {
@@ -240,10 +234,9 @@ static CURLcode rtmp_setup_connection(struct Curl_easy *data,
 
   RTMP_Init(r);
   RTMP_SetBufferMS(r, DEF_BUFTIME);
-  if(!RTMP_SetupURL(r, data->state.url)) {
-    RTMP_Free(r);
+  if(!RTMP_SetupURL(r, CURL_UNCONST(Curl_bufref_ptr(&data->state.url))))
+    /* rtmp_conn_dtor() performs the cleanup */
     return CURLE_URL_MALFORMAT;
-  }
   return CURLE_OK;
 }
 
@@ -255,6 +248,11 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
 
   if(!r)
     return CURLE_FAILED_INIT;
+
+  if(conn->sock[FIRSTSOCKET] > INT_MAX) {
+    /* The socket value is invalid for rtmp. */
+    return CURLE_FAILED_INIT;
+  }
 
   r->m_sb.sb_socket = (int)conn->sock[FIRSTSOCKET];
 
@@ -331,15 +329,15 @@ static CURLcode rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
   struct connectdata *conn = data->conn;
   RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t rv;
 
   (void)sockindex;
   *pnread = 0;
   if(!r)
     return CURLE_FAILED_INIT;
 
-  nread = RTMP_Read(r, buf, curlx_uztosi(len));
-  if(nread < 0) {
+  rv = RTMP_Read(r, buf, curlx_uztosi(len));
+  if(!curlx_sztouz(rv, pnread)) {
     if(r->m_read.status == RTMP_READ_COMPLETE ||
        r->m_read.status == RTMP_READ_EOF) {
       data->req.size = data->req.bytecount;
@@ -347,19 +345,17 @@ static CURLcode rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
     else
       result = CURLE_RECV_ERROR;
   }
-  else
-    *pnread = (size_t)nread;
 
   return result;
 }
 
 static CURLcode rtmp_send(struct Curl_easy *data, int sockindex,
-                          const void *buf, size_t len, bool eos,
+                          const uint8_t *buf, size_t len, bool eos,
                           size_t *pnwritten)
 {
   struct connectdata *conn = data->conn;
   RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
-  ssize_t nwritten;
+  ssize_t rv;
 
   (void)sockindex;
   (void)eos;
@@ -367,11 +363,10 @@ static CURLcode rtmp_send(struct Curl_easy *data, int sockindex,
   if(!r)
     return CURLE_FAILED_INIT;
 
-  nwritten = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
-  if(nwritten < 0)
+  rv = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
+  if(!curlx_sztouz(rv, pnwritten))
     return CURLE_SEND_ERROR;
 
-  *pnwritten = (size_t)nwritten;
   return CURLE_OK;
 }
 

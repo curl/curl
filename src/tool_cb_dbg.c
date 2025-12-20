@@ -27,8 +27,7 @@
 #include "tool_msgs.h"
 #include "tool_cb_dbg.h"
 #include "tool_util.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include "toolx/tool_time.h"
 
 static void dump(const char *timebuf, const char *idsbuf, const char *text,
                  FILE *stream, const unsigned char *ptr, size_t size,
@@ -36,7 +35,6 @@ static void dump(const char *timebuf, const char *idsbuf, const char *text,
 
 /*
  * Return the formatted HH:MM:SS for the tv_sec given.
- * NOT thread safe.
  */
 static const char *hms_for_sec(time_t tv_sec)
 {
@@ -44,10 +42,12 @@ static const char *hms_for_sec(time_t tv_sec)
   static char hms_buf[12];
 
   if(tv_sec != cached_tv_sec) {
-    /* !checksrc! disable BANNEDFUNC 1 */
-    struct tm *now = localtime(&tv_sec);  /* not thread safe either */
+    struct tm now;
+    CURLcode result = toolx_localtime(tv_sec, &now);
+    if(result)
+      memset(&now, 0, sizeof(now));
     curl_msnprintf(hms_buf, sizeof(hms_buf), "%02d:%02d:%02d",
-                   now->tm_hour, now->tm_min, now->tm_sec);
+                   now.tm_hour, now.tm_min, now.tm_sec);
     cached_tv_sec = tv_sec;
   }
   return hms_buf;
@@ -105,7 +105,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   if(handle && global->traceids &&
      !curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
-        conn_id >= 0) {
+       conn_id >= 0) {
       curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
                      xfer_id, conn_id);
     }
@@ -226,7 +226,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     break;
   }
 
-  dump(timebuf, idsbuf, text, output, (unsigned char *) data, size,
+  dump(timebuf, idsbuf, text, output, (unsigned char *)data, size,
        global->tracetype, type);
   return 0;
 }

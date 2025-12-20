@@ -34,7 +34,7 @@ from testenv.env import EnvConfig
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
-from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd
+from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd, Sshd
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +130,17 @@ def nghttpx_fwd(env, httpd) -> Generator[Union[Nghttpx,bool], None, None]:
         assert nghttpx.initial_start()
         yield nghttpx
         nghttpx.stop()
+    else:
+        yield False
+
+
+@pytest.fixture(scope='session')
+def sshd(env: Env) -> Generator[Union[Sshd,bool], None, None]:
+    if env.has_sshd():
+        sshd = Sshd(env=env)
+        assert sshd.initial_start(), f'{sshd.dump_log()}'
+        yield sshd
+        sshd.stop()
     else:
         yield False
 

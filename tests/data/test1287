@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,10 +9,9 @@ proxytunnel
 verbose logs
 </keywords>
 </info>
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -24,14 +24,14 @@ contents
 
 # The purpose of this test is to make sure curl ignores headers
 # Content-Length and Transfer-Encoding in a successful CONNECT 2xx reply.
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Content-Length: 123
 Transfer-Encoding: chunked
 
 </connect>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Content-Length: 123
 Transfer-Encoding: chunked
@@ -47,7 +47,6 @@ contents
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -66,17 +65,16 @@ verbose-strings
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION

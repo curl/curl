@@ -39,6 +39,7 @@ void curlx_now_init(void);
 #endif
 
 struct curltime curlx_now(void);
+void curlx_pnow(struct curltime *pnow);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -46,7 +47,9 @@ struct curltime curlx_now(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-timediff_t curlx_timediff(struct curltime newer, struct curltime older);
+timediff_t curlx_timediff_ms(struct curltime newer, struct curltime older);
+timediff_t curlx_ptimediff_ms(const struct curltime *newer,
+                              const struct curltime *older);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -54,7 +57,8 @@ timediff_t curlx_timediff(struct curltime newer, struct curltime older);
  *
  * Returns: the time difference in number of milliseconds, rounded up.
  */
-timediff_t curlx_timediff_ceil(struct curltime newer, struct curltime older);
+timediff_t curlx_timediff_ceil_ms(struct curltime newer,
+                                  struct curltime older);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -63,5 +67,9 @@ timediff_t curlx_timediff_ceil(struct curltime newer, struct curltime older);
  * Returns: the time difference in number of microseconds.
  */
 timediff_t curlx_timediff_us(struct curltime newer, struct curltime older);
+timediff_t curlx_ptimediff_us(const struct curltime *newer,
+                              const struct curltime *older);
+
+CURLcode curlx_gmtime(time_t intime, struct tm *store);
 
 #endif /* HEADER_CURL_TIMEVAL_H */
