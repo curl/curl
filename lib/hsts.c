@@ -36,7 +36,6 @@
 #include "sendf.h"
 #include "parsedate.h"
 #include "curl_share.h"
-#include "strdup.h"
 #include "curlx/strparse.h"
 #include "curlx/timeval.h"
 
