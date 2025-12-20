@@ -28,7 +28,6 @@
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) || \
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
-#include "curlx/warnless.h"
 #include "curl_sha256.h"
 
 #ifdef USE_MBEDTLS

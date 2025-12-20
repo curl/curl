@@ -74,7 +74,6 @@
 #include "strcase.h"
 #include "content_encoding.h"
 #include "http_proxy.h"
-#include "curlx/warnless.h"
 #include "http2.h"
 #include "cfilters.h"
 #include "connect.h"

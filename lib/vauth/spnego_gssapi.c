@@ -31,7 +31,6 @@
 #include "vauth.h"
 #include "../curlx/base64.h"
 #include "../curl_gssapi.h"
-#include "../curlx/warnless.h"
 #include "../sendf.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)

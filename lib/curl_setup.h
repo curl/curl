@@ -780,6 +780,18 @@
 #endif
 
 /*
+ * Macros and functions to safely suppress warnings
+ */
+#include "curlx/warnless.h"
+
+#ifdef _WIN32
+#  undef  read
+#  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
+#  undef  write
+#  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
+#endif
+
+/*
  * Definition of our NOP statement Object-like macro
  */
 #ifndef Curl_nop_stmt

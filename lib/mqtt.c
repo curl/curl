@@ -35,7 +35,6 @@
 #include "select.h"
 #include "url.h"
 #include "escape.h"
-#include "curlx/warnless.h"
 #include "rand.h"
 
 /* first byte is command.

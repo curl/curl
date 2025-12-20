@@ -64,7 +64,6 @@
 #include "mime.h"
 #include "amigaos.h"
 #include "macos.h"
-#include "curlx/warnless.h"
 #include "curlx/wait.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"

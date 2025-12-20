@@ -69,8 +69,6 @@
 #include "../vtls/vtls_scache.h"
 #include "curl_ngtcp2.h"
 
-#include "../curlx/warnless.h"
-
 
 #define QUIC_MAX_STREAMS       (256 * 1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)

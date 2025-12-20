@@ -31,7 +31,6 @@
 #include "urldata.h"
 #include "idn.h"
 #include "sendf.h"
-#include "curlx/warnless.h"
 
 #ifdef USE_LIBIDN2
 #include <idn2.h>

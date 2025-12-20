@@ -30,7 +30,6 @@
 
 #include "vauth.h"
 #include "../curlx/base64.h"
-#include "../curlx/warnless.h"
 #include "../sendf.h"
 #include "../strerror.h"
 

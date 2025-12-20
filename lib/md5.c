@@ -29,7 +29,6 @@
 
 #include "curl_md5.h"
 #include "curl_hmac.h"
-#include "curlx/warnless.h"
 
 #ifdef USE_OPENSSL
   #include <openssl/opensslconf.h>

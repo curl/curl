@@ -74,7 +74,6 @@
 #include "setopt.h"
 #include "headers.h"
 #include "bufref.h"
-#include "curlx/warnless.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_IMAP)

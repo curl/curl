@@ -119,8 +119,6 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
 
-#include "../curlx/warnless.h"
-
 #if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
 #endif

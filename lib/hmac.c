@@ -31,7 +31,6 @@
   defined(USE_SSL)
 
 #include "curl_hmac.h"
-#include "curlx/warnless.h"
 
 /*
  * Generic HMAC algorithm.

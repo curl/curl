@@ -39,7 +39,6 @@
 #include "transfer.h"
 #include "select.h"
 #include "curlx/strparse.h"
-#include "curlx/warnless.h"
 
 /***
     RFC 6455 Section 5.2

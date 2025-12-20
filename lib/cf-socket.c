@@ -66,7 +66,6 @@
 #include "multiif.h"
 #include "curlx/inet_pton.h"
 #include "progress.h"
-#include "curlx/warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
 #include "rand.h"

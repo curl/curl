@@ -32,7 +32,6 @@
 #include "sendf.h"
 #include "progress.h"
 #include "select.h"
-#include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
 static void cf_cntrl_update_info(struct Curl_easy *data,

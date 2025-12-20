@@ -64,7 +64,6 @@
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
 #include "progress.h"
-#include "curlx/warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
 #include "http_proxy.h"

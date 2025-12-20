@@ -72,7 +72,6 @@
 #include "url.h"
 #include "bufref.h"
 #include "curl_sasl.h"
-#include "curlx/warnless.h"
 
 
 /* meta key for storing protocol meta at easy handle */
