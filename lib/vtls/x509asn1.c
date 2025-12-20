@@ -38,7 +38,6 @@
 #endif
 
 #include "../urldata.h"
-#include "../curl_ctype.h"
 #include "hostcheck.h"
 #include "vtls.h"
 #include "vtls_int.h"
