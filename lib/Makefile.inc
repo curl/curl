@@ -237,7 +237,6 @@ LIB_CFILES =         \
   psl.c              \
   rand.c             \
   ratelimit.c        \
-  rename.c           \
   request.c          \
   rtsp.c             \
   select.c           \
@@ -366,7 +365,6 @@ LIB_HFILES =         \
   psl.h              \
   rand.h             \
   ratelimit.h        \
-  rename.h           \
   request.h          \
   rtsp.h             \
   select.h           \

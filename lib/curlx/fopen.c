@@ -44,6 +44,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 #include <share.h>  /* for _SH_DENYNO */
 
 #include "multibyte.h"
+#include "timeval.h"
 
 #ifdef CURLDEBUG
 /*
@@ -435,6 +436,36 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   CURLX_FREE(fixed);
   return result;
 }
+
+#if (!defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES)) || \
+  !defined(CURL_DISABLE_ALTSVC)
+/* rename() on Windows does not overwrite, so we cannot use it here.
+   MoveFileEx() will overwrite and is usually atomic, however it fails
+   when there are open handles to the file. */
+int curlx_win32_rename(const char *oldpath, const char *newpath)
+{
+  const int max_wait_ms = 1000;
+  struct curltime start = curlx_now();
+  TCHAR *tchar_oldpath = curlx_convert_UTF8_to_tchar(oldpath);
+  TCHAR *tchar_newpath = curlx_convert_UTF8_to_tchar(newpath);
+  for(;;) {
+    timediff_t diff;
+    if(MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING)) {
+      curlx_free(tchar_oldpath);
+      curlx_free(tchar_newpath);
+      break;
+    }
+    diff = curlx_timediff_ms(curlx_now(), start);
+    if(diff < 0 || diff > max_wait_ms) {
+      curlx_free(tchar_oldpath);
+      curlx_free(tchar_newpath);
+      return -1;
+    }
+    Sleep(1);
+  }
+  return 0;
+}
+#endif
 
 #undef CURLX_MALLOC
 #undef CURLX_FREE
