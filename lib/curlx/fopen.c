@@ -437,7 +437,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
-#if (!defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES)) || \
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES) || \
   !defined(CURL_DISABLE_ALTSVC)
 /* rename() on Windows does not overwrite, so we cannot use it here.
    MoveFileEx() will overwrite and is usually atomic, however it fails
