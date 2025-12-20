@@ -260,8 +260,6 @@ HANDLE curlx_CreateFile(const char *filename,
                         HANDLE hTemplateFile)
 {
   HANDLE handle = INVALID_HANDLE_VALUE;
-  TCHAR *fixed = NULL;
-  const TCHAR *target = NULL;
 
 #ifdef _UNICODE
   TCHAR *filename_t = curlx_convert_UTF8_to_wchar(filename);
@@ -270,6 +268,9 @@ HANDLE curlx_CreateFile(const char *filename,
 #endif
 
   if(filename_t) {
+    TCHAR *fixed = NULL;
+    const TCHAR *target = NULL;
+
     if(fix_excessive_path(filename_t, &fixed))
       target = fixed;
     else
