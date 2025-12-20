@@ -750,7 +750,7 @@ const struct helptxt helptext[] = {
     CURLHELP_PROXY },
   { "    --sync",
     "Download only if local file is older",
-    CURLHELP_HTTP},
+    CURLHELP_HTTP },
   { "    --tcp-fastopen",
     "Use TCP Fast Open",
     CURLHELP_CONNECTION },
