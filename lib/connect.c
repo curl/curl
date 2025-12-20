@@ -56,6 +56,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "cf-haproxy.h"
+#include "cf-https-connect.h"
 #include "cf-ip-happy.h"
 #include "cf-socket.h"
 #include "multiif.h"
