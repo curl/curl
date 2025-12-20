@@ -36,13 +36,13 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf, si
 The `type` argument specifies what the bytes in `buf` actually are.
 The following bits are defined:
 ```
-#define CLIENTWRITE_BODY    (1<<0) /* non-meta information, BODY */
-#define CLIENTWRITE_INFO    (1<<1) /* meta information, not a HEADER */
-#define CLIENTWRITE_HEADER  (1<<2) /* meta information, HEADER */
-#define CLIENTWRITE_STATUS  (1<<3) /* a special status HEADER */
-#define CLIENTWRITE_CONNECT (1<<4) /* a CONNECT related HEADER */
-#define CLIENTWRITE_1XX     (1<<5) /* a 1xx response related HEADER */
-#define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
+#define CLIENTWRITE_BODY    (1 << 0) /* non-meta information, BODY */
+#define CLIENTWRITE_INFO    (1 << 1) /* meta information, not a HEADER */
+#define CLIENTWRITE_HEADER  (1 << 2) /* meta information, HEADER */
+#define CLIENTWRITE_STATUS  (1 << 3) /* a special status HEADER */
+#define CLIENTWRITE_CONNECT (1 << 4) /* a CONNECT related HEADER */
+#define CLIENTWRITE_1XX     (1 << 5) /* a 1xx response related HEADER */
+#define CLIENTWRITE_TRAILER (1 << 6) /* a trailer HEADER */
 ```
 
 The main types here are `CLIENTWRITE_BODY` and `CLIENTWRITE_HEADER`. They are

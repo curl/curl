@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)

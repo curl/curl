@@ -81,28 +81,28 @@ typedef enum {
   CURLUPART_ZONEID /* added in 7.65.0 */
 } CURLUPart;
 
-#define CURLU_DEFAULT_PORT (1<<0)       /* return default port number */
-#define CURLU_NO_DEFAULT_PORT (1<<1)    /* act as if no port number was set,
-                                           if the port number matches the
-                                           default for the scheme */
-#define CURLU_DEFAULT_SCHEME (1<<2)     /* return default scheme if
-                                           missing */
-#define CURLU_NON_SUPPORT_SCHEME (1<<3) /* allow non-supported scheme */
-#define CURLU_PATH_AS_IS (1<<4)         /* leave dot sequences */
-#define CURLU_DISALLOW_USER (1<<5)      /* no user+password allowed */
-#define CURLU_URLDECODE (1<<6)          /* URL decode on get */
-#define CURLU_URLENCODE (1<<7)          /* URL encode on set */
-#define CURLU_APPENDQUERY (1<<8)        /* append a form style part */
-#define CURLU_GUESS_SCHEME (1<<9)       /* legacy curl-style guessing */
-#define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
-                                           scheme is unknown. */
-#define CURLU_ALLOW_SPACE (1<<11)       /* Allow spaces in the URL */
-#define CURLU_PUNYCODE (1<<12)          /* get the hostname in punycode */
-#define CURLU_PUNY2IDN (1<<13)          /* punycode => IDN conversion */
-#define CURLU_GET_EMPTY (1<<14)         /* allow empty queries and fragments
-                                           when extracting the URL or the
-                                           components */
-#define CURLU_NO_GUESS_SCHEME (1<<15)   /* for get, do not accept a guess */
+#define CURLU_DEFAULT_PORT (1 << 0)       /* return default port number */
+#define CURLU_NO_DEFAULT_PORT (1 << 1)    /* act as if no port number was set,
+                                             if the port number matches the
+                                             default for the scheme */
+#define CURLU_DEFAULT_SCHEME (1 << 2)     /* return default scheme if
+                                             missing */
+#define CURLU_NON_SUPPORT_SCHEME (1 << 3) /* allow non-supported scheme */
+#define CURLU_PATH_AS_IS (1 << 4)         /* leave dot sequences */
+#define CURLU_DISALLOW_USER (1 << 5)      /* no user+password allowed */
+#define CURLU_URLDECODE (1 << 6)          /* URL decode on get */
+#define CURLU_URLENCODE (1 << 7)          /* URL encode on set */
+#define CURLU_APPENDQUERY (1 << 8)        /* append a form style part */
+#define CURLU_GUESS_SCHEME (1 << 9)       /* legacy curl-style guessing */
+#define CURLU_NO_AUTHORITY (1 << 10)      /* Allow empty authority when the
+                                             scheme is unknown. */
+#define CURLU_ALLOW_SPACE (1 << 11)       /* Allow spaces in the URL */
+#define CURLU_PUNYCODE (1 << 12)          /* get the hostname in punycode */
+#define CURLU_PUNY2IDN (1 << 13)          /* punycode => IDN conversion */
+#define CURLU_GET_EMPTY (1 << 14)         /* allow empty queries and fragments
+                                             when extracting the URL or the
+                                             components */
+#define CURLU_NO_GUESS_SCHEME (1 << 15)   /* for get, do not accept a guess */
 
 typedef struct Curl_URL CURLU;
 

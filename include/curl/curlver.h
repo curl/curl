@@ -71,8 +71,8 @@
  */
 #define LIBCURL_TIMESTAMP "[unreleased]"
 
-#define CURL_VERSION_BITS(x,y,z) ((x)<<16|(y)<<8|(z))
-#define CURL_AT_LEAST_VERSION(x,y,z) \
+#define CURL_VERSION_BITS(x, y, z) ((x) << 16 | (y) << 8 | (z))
+#define CURL_AT_LEAST_VERSION(x, y, z) \
   (LIBCURL_VERSION_NUM >= CURL_VERSION_BITS(x, y, z))
 
 #endif /* CURLINC_CURLVER_H */

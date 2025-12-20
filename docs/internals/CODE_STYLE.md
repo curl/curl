@@ -393,6 +393,7 @@ This is the full list of functions generally banned.
     sscanf
     stat
     strcat
+    strcpy
     strdup
     strerror
     strncat

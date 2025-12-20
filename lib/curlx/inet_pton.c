@@ -17,7 +17,6 @@
  *
  * SPDX-License-Identifier: ISC
  */
-
 #include "../curl_setup.h"
 
 #include "strparse.h"

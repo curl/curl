@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "strparse.h"
 
 void curlx_str_init(struct Curl_str *out)

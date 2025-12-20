@@ -21,12 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-/* #define CURL_LIBSSH2_DEBUG */
-
 #include "../curl_setup.h"
 
 #ifdef USE_LIBSSH2
+
+/* #define CURL_LIBSSH2_DEBUG */
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -167,7 +166,7 @@ static void kbd_callback(const char *name, int name_len,
   (void)name_len;
   (void)instruction;
   (void)instruction_len;
-#endif  /* CURL_LIBSSH2_DEBUG */
+#endif /* CURL_LIBSSH2_DEBUG */
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
     responses[0].text = curlx_strdup(conn->passwd);

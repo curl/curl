@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "llist.h"
 #include "hash.h"
 #include "conncache.h"

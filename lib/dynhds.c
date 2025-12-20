@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "dynhds.h"
@@ -32,10 +31,9 @@
 #include <nghttp2/nghttp2.h>
 #endif /* USE_NGHTTP2 */
 
-
-static struct dynhds_entry *
-entry_new(const char *name, size_t namelen,
-          const char *value, size_t valuelen, int opts)
+static struct dynhds_entry *entry_new(const char *name, size_t namelen,
+                                      const char *value, size_t valuelen,
+                                      int opts)
 {
   struct dynhds_entry *e;
   char *p;
@@ -45,7 +43,7 @@ entry_new(const char *name, size_t namelen,
   e = curlx_calloc(1, sizeof(*e) + namelen + valuelen + 2);
   if(!e)
     return NULL;
-  e->name = p = ((char *)e) + sizeof(*e);
+  e->name = p = (char *)e + sizeof(*e);
   memcpy(p, name, namelen);
   e->namelen = namelen;
   e->value = p += namelen + 1; /* leave a \0 at the end of name */

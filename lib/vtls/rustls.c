@@ -5,8 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Jacob Hoffman-Andrews,
- * <github@hoffman-andrews.com>
+ * Copyright (C) Jacob Hoffman-Andrews, <github@hoffman-andrews.com>
  * Copyright (C) kpcyrd, <kpcyrd@archlinux.org>
  * Copyright (C) Daniel McCarney, <daniel@binaryparadox.net>
  *

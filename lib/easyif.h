@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Prototypes for library-wide functions provided by easy.c
  */

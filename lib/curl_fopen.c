@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
@@ -156,4 +155,4 @@ fail:
   return result;
 }
 
-#endif /* ! disabled */
+#endif /* !disabled */

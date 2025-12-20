@@ -23,7 +23,6 @@
  * RFC6749 OAuth 2.0 Authorization Framework
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \

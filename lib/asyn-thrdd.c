@@ -21,14 +21,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-#include "socketpair.h"
 
 /***********************************************************************
  * Only for threaded name resolves builds
  **********************************************************************/
 #ifdef CURLRES_THREADED
+
+#include "socketpair.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

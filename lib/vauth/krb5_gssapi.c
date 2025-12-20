@@ -24,7 +24,6 @@
  * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && defined(USE_KERBEROS5)

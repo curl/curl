@@ -22,7 +22,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
@@ -1112,9 +1111,9 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = Curl_read16_le(((const unsigned char *)msg) +
+    len = Curl_read16_le((const unsigned char *)msg +
                          sizeof(struct smb_header) + 11);
-    off = Curl_read16_le(((const unsigned char *)msg) +
+    off = Curl_read16_le((const unsigned char *)msg +
                          sizeof(struct smb_header) + 13);
     if(len > 0) {
       if(off + sizeof(unsigned int) + len > smbc->got) {
@@ -1141,7 +1140,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = Curl_read16_le(((const unsigned char *)msg) +
+    len = Curl_read16_le((const unsigned char *)msg +
                          sizeof(struct smb_header) + 5);
     data->req.bytecount += len;
     data->req.offset += len;

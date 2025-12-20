@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "tool_setup.h"
+
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
 #include "var.h"

@@ -21,8 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "tool_setup.h"
+
 #include "tool_stderr.h"
 #include "tool_msgs.h"
 

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
@@ -1260,5 +1259,5 @@ done:
 
 #endif /* WANT_EXTRACT_CERTINFO */
 
-#endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_MBEDTLS or
+#endif /* USE_GNUTLS || USE_WOLFSSL || USE_SCHANNEL || USE_MBEDTLS ||
           USE_RUSTLS */
