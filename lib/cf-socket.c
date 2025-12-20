@@ -64,7 +64,6 @@
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_pton.h"
 #include "progress.h"
 #include "curlx/warnless.h"

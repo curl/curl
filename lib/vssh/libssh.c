@@ -55,7 +55,6 @@
 #include "../cfilters.h"
 #include "../connect.h"
 #include "../parsedate.h"          /* for the week day and month names */
-#include "../sockaddr.h"           /* required for Curl_sockaddr_storage */
 #include "../curlx/strparse.h"
 #include "../multiif.h"
 #include "../select.h"

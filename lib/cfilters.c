@@ -30,7 +30,6 @@
 #include "connect.h"
 #include "url.h"
 #include "sendf.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "progress.h"
 #include "select.h"
 #include "curlx/warnless.h"
