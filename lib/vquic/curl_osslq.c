@@ -35,7 +35,6 @@
 #include "../urldata.h"
 #include "../hash.h"
 #include "../sendf.h"
-#include "../rand.h"
 #include "../multiif.h"
 #include "../cfilters.h"
 #include "../cf-socket.h"

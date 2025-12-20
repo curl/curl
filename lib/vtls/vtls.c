@@ -72,7 +72,6 @@
 #include "../connect.h"
 #include "../select.h"
 #include "../setopt.h"
-#include "../rand.h"
 #include "../strdup.h"
 
 #ifdef USE_APPLE_SECTRUST
