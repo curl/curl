@@ -66,7 +66,6 @@
 #include "url.h"
 #include "curlx/warnless.h"
 #include "http_proxy.h"
-#include "socks.h"
 #include "strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"

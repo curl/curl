@@ -61,7 +61,6 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
 #include "imap.h"
 #include "mime.h"
 #include "curlx/strparse.h"

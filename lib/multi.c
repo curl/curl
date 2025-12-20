@@ -48,7 +48,6 @@
 #include "http_proxy.h"
 #include "http2.h"
 #include "socketpair.h"
-#include "socks.h"
 #include "urlapi-int.h"
 #include "bufref.h"
 
