@@ -221,14 +221,14 @@ int Curl_socketpair(int domain, int type, int protocol,
           goto error;
         if(
 #ifdef USE_WINSOCK
-          /* This is how Windows does it */
-          (SOCKEWOULDBLOCK == sockerr)
+           /* This is how Windows does it */
+           (SOCKEWOULDBLOCK == sockerr)
 #else
-          /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
-             returned due to its inability to send off data without
-             blocking. We therefore treat both error codes the same here */
-          (SOCKEWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
-          (SOCKEINTR == sockerr) || (SOCKEINPROGRESS == sockerr)
+           /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
+              returned due to its inability to send off data without
+              blocking. We therefore treat both error codes the same here */
+           (SOCKEWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
+           (SOCKEINTR == sockerr) || (SOCKEINPROGRESS == sockerr)
 #endif
           ) {
           continue;
