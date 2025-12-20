@@ -77,7 +77,6 @@
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
 #include <openssl/bio.h>
-#include <openssl/buffer.h>
 #include <openssl/pkcs12.h>
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
