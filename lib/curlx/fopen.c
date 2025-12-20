@@ -446,7 +446,7 @@ int curlx_win32_rename(const char *oldpath, const char *newpath)
 {
   int res = -1; /* fail */
 
-#ifdef _UNICODE
+#ifdef UNICODE
   TCHAR *tchar_oldpath = curlx_convert_UTF8_to_wchar(oldpath);
   TCHAR *tchar_newpath = curlx_convert_UTF8_to_wchar(newpath);
 #else
@@ -494,7 +494,7 @@ int curlx_win32_rename(const char *oldpath, const char *newpath)
     CURLX_FREE(newpath_fixed);
   }
 
-#ifdef _UNICODE
+#ifdef UNICODE
   curlx_free(tchar_oldpath);
   curlx_free(tchar_newpath);
 #endif
