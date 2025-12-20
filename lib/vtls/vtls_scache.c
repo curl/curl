@@ -43,6 +43,7 @@
 #include "../llist.h"
 #include "../curl_share.h"
 #include "../curl_trc.h"
+#include "../curl_hmac.h"
 #include "../curl_sha256.h"
 #include "../rand.h"
 #include "../curlx/warnless.h"
