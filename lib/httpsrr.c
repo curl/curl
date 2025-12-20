@@ -27,7 +27,6 @@
 #ifdef USE_HTTPSRR
 
 #include "urldata.h"
-#include "curl_addrinfo.h"
 #include "httpsrr.h"
 #include "connect.h"
 #include "sendf.h"
