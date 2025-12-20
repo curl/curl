@@ -37,6 +37,7 @@
 #include "ws.h"
 #include "easyif.h"
 #include "transfer.h"
+#include "select.h"
 #include "curlx/nonblock.h"
 #include "curlx/strparse.h"
 #include "curlx/warnless.h"
