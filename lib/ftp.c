@@ -42,6 +42,7 @@
 
 #include "urldata.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "if2ip.h"
 #include "hostip.h"
 #include "progress.h"

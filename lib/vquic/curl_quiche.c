@@ -33,7 +33,7 @@
 #include "../urldata.h"
 #include "../cfilters.h"
 #include "../cf-socket.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../connect.h"

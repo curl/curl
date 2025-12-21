@@ -35,6 +35,7 @@
 #include "multiif.h"
 #include "multi_ev.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "curlx/timeval.h"
 #include "http.h"
 #include "select.h"

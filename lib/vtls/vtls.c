@@ -59,7 +59,7 @@
 #include "rustls.h"         /* Rustls versions */
 
 #include "../slist.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strcase.h"
 #include "../url.h"
 #include "../progress.h"

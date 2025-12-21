@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#include "sendf.h"
+struct Curl_easy;
 
 /**
  * The client writer type "cw-pause" that buffers writes for

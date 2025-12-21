@@ -62,6 +62,7 @@
 #include "cw-out.h"
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "progress.h"
 #include "http.h"
 #include "url.h"

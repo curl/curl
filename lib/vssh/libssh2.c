@@ -44,6 +44,7 @@
 
 #include "../urldata.h"
 #include "../sendf.h"
+#include "../curl_trc.h"
 #include "../hostip.h"
 #include "../progress.h"
 #include "../transfer.h"

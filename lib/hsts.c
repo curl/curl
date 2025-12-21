@@ -33,7 +33,6 @@
 #include "hsts.h"
 #include "curl_fopen.h"
 #include "curl_get_line.h"
-#include "sendf.h"
 #include "parsedate.h"
 #include "curl_share.h"
 #include "curlx/strparse.h"

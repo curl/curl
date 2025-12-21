@@ -28,7 +28,7 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"

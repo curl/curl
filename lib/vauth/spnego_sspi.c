@@ -30,7 +30,7 @@
 
 #include "vauth.h"
 #include "../curlx/base64.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strerror.h"
 
 /*

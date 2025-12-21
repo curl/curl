@@ -29,7 +29,7 @@
 #include "urldata.h"
 #include "httpsrr.h"
 #include "connect.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "strdup.h"
 
 static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,

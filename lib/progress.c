@@ -25,7 +25,7 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
 #include "transfer.h"

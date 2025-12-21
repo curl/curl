@@ -74,7 +74,7 @@
 #include "vtls/vtls.h"
 #include "hostip.h"
 #include "transfer.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "progress.h"
 #include "cookie.h"
 #include "strcase.h"

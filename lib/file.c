@@ -57,6 +57,7 @@
 #include "urldata.h"
 #include "progress.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "escape.h"
 #include "file.h"
 #include "multiif.h"

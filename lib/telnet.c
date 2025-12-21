@@ -50,6 +50,7 @@
 #include "url.h"
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "telnet.h"
 #include "connect.h"
 #include "progress.h"

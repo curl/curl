@@ -29,7 +29,7 @@
 #include "urldata.h"
 #include "cookie.h"
 #include "psl.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "slist.h"
 #include "curl_share.h"
 #include "strcase.h"

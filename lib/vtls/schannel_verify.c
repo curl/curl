@@ -43,7 +43,7 @@
 #include "../curlx/inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strerror.h"
 #include "../curlx/winapi.h"
 #include "../curlx/multibyte.h"
