@@ -40,8 +40,7 @@
 
 #ifdef USE_ARES
 #include <ares.h>
-#include <ares_version.h> /* really old c-ares did not include this by
-                             itself */
+#include <ares_version.h> /* really old c-ares did not include it by itself */
 #endif
 
 #include "urldata.h"
