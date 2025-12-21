@@ -274,7 +274,7 @@ static LIBSSH2_FREE_FUNC(my_libssh2_free)
     Curl_cfree(ptr);
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char *myssh_statename(sshstate state)
 {
   static const char * const names[] = {
@@ -357,7 +357,7 @@ static void myssh_set_state(struct Curl_easy *data,
                             struct ssh_conn *sshc,
                             sshstate nowstate)
 {
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(sshc->state != nowstate) {
     CURL_TRC_SSH(data, "[%s] -> [%s]",
                  myssh_statename(sshc->state),
