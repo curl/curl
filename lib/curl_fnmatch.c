@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_FTP
 
 #include "curl_fnmatch.h"
@@ -356,7 +357,9 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   return loop((const unsigned char *)pattern,
               (const unsigned char *)string, 2);
 }
-#else
+
+#else /* HAVE_FNMATCH */
+
 #include <fnmatch.h>
 /*
  * @unittest: 1307
@@ -380,6 +383,6 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   /* not reached */
 }
 
-#endif
+#endif /* !HAVE_FNMATCH */
 
-#endif /* if FTP is disabled */
+#endif /* !CURL_DISABLE_FTP */
