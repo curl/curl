@@ -119,7 +119,7 @@ void Curl_trc_ssls(struct Curl_easy *data,
 #ifdef USE_SSH
 extern struct curl_trc_feat Curl_trc_feat_ssh;
 void Curl_trc_ssh(struct Curl_easy *data,
-                   const char *fmt, ...) CURL_PRINTF(2, 3);
+                  const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 extern struct curl_trc_feat Curl_trc_feat_ws;
@@ -221,15 +221,15 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
 extern struct curl_trc_feat Curl_trc_feat_timer;
 
 #define Curl_trc_is_verbose(data) \
-            ((data) && (data)->set.verbose && \
-            (!(data)->state.feat || \
-             ((data)->state.feat->log_level >= CURL_LOG_LVL_INFO)))
+  ((data) && (data)->set.verbose && \
+   (!(data)->state.feat || \
+    ((data)->state.feat->log_level >= CURL_LOG_LVL_INFO)))
 #define Curl_trc_cf_is_verbose(cf, data) \
-            (Curl_trc_is_verbose(data) && \
-             (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
+  (Curl_trc_is_verbose(data) && \
+   (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
 #define Curl_trc_ft_is_verbose(data, ft) \
-            (Curl_trc_is_verbose(data) && \
-             (ft)->log_level >= CURL_LOG_LVL_INFO)
+  (Curl_trc_is_verbose(data) && \
+   (ft)->log_level >= CURL_LOG_LVL_INFO)
 #define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
 #define CURL_TRC_EASY_TIMERS(data) \
   do { if(CURL_TRC_TIMER_is_verbose(data)) \
