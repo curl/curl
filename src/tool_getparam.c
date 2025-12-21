@@ -1494,7 +1494,7 @@ static ParameterError parse_verbose(bool toggle)
     return err;
   }
   else if(!verbose_nopts) {
-    /* fist `-v` in an argument resets to base verbosity */
+    /* first `-v` in an argument resets to base verbosity */
     global->verbosity = 0;
     if(!global->trace_set && set_trace_config("-all"))
       return PARAM_NO_MEM;

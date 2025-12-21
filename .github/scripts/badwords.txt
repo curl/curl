@@ -73,6 +73,7 @@ host name\b:hostname
 host names\b:hostnames
 [^;<]file name\b:filename
 file names\b:filenames
+\bfist\b:first
 \buser name\b:username
 \buser names\b:usernames
 \bpass phrase:passphrase
