@@ -142,49 +142,6 @@ struct tftp_conn {
   BIT(remote_pinned);
 };
 
-/* Forward declarations */
-static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event);
-static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event);
-static CURLcode tftp_connect(struct Curl_easy *data, bool *done);
-static CURLcode tftp_do(struct Curl_easy *data, bool *done);
-static CURLcode tftp_done(struct Curl_easy *data,
-                          CURLcode, bool premature);
-static CURLcode tftp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done);
-static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done);
-static CURLcode tftp_pollset(struct Curl_easy *data,
-                             struct easy_pollset *ps);
-static CURLcode tftp_translate_code(tftp_error_t error);
-
-/*
- * TFTP protocol handler.
- */
-const struct Curl_handler Curl_handler_tftp = {
-  "tftp",                               /* scheme */
-  tftp_setup_connection,                /* setup_connection */
-  tftp_do,                              /* do_it */
-  tftp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  tftp_connect,                         /* connect_it */
-  tftp_multi_statemach,                 /* connecting */
-  tftp_doing,                           /* doing */
-  tftp_pollset,                         /* proto_pollset */
-  tftp_pollset,                         /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_TFTP,                            /* defport */
-  CURLPROTO_TFTP,                       /* protocol */
-  CURLPROTO_TFTP,                       /* family */
-  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY /* flags */
-};
-
 /**********************************************************
  *
  * tftp_set_timeouts -
@@ -1377,4 +1334,33 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
+/*
+ * TFTP protocol handler.
+ */
+const struct Curl_handler Curl_handler_tftp = {
+  "tftp",                               /* scheme */
+  tftp_setup_connection,                /* setup_connection */
+  tftp_do,                              /* do_it */
+  tftp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  tftp_connect,                         /* connect_it */
+  tftp_multi_statemach,                 /* connecting */
+  tftp_doing,                           /* doing */
+  tftp_pollset,                         /* proto_pollset */
+  tftp_pollset,                         /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_TFTP,                            /* defport */
+  CURLPROTO_TFTP,                       /* protocol */
+  CURLPROTO_TFTP,                       /* family */
+  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY /* flags */
+};
+
 #endif
