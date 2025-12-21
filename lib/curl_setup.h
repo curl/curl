@@ -464,18 +464,12 @@
 
 #include <limits.h>
 
-#include "curlx/warnless.h"
-
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
 #  include <io.h>
 #  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  undef  read
-#  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
-#  undef  write
-#  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
    /* Large file (>2Gb) support using Win32 functions. */
 #  undef  lseek
 #  define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
@@ -783,6 +777,18 @@
  */
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
+#endif
+
+/*
+ * Macros and functions to safely suppress warnings
+ */
+#include "curlx/warnless.h"
+
+#ifdef _WIN32
+#  undef  read
+#  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
+#  undef  write
+#  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
 #endif
 
 /*
