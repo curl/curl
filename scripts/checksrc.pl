@@ -659,7 +659,7 @@ sub scanfile {
                       $line, length($1), $file, $l, "\/\/ comment");
         }
 
-        if($l =~ /^\s*#\s*if\s+!?defined\([a-zA-Z0-9_]+\)$/) {
+        if($l =~ /^\s*#\s*if\s+!?\s*defined\([a-zA-Z0-9_]+\)$/) {
             checkwarn("IFDEFSINGLE",
                       $line, length($1), $file, $l, "use ifdef/ifndef for single macro checks");
         }

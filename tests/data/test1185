@@ -80,7 +80,7 @@ void startfunc(int a, int b) {
  *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
 
 # if defined(SINGLE_MACRO)
- #if  !defined(__macro_10)
+ #if  ! defined(__macro_10)
 #elif !defined(TESTMACRO)
 #endif
 #endif
@@ -216,7 +216,7 @@ void startfunc(int a, int b) {
  # if defined(SINGLE_MACRO)
  ^
 ./%LOGDIR/code1185.c:65:1: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
-  #if  !defined(__macro_10)
+  #if  ! defined(__macro_10)
  ^
 ./%LOGDIR/code1185.c:71:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
