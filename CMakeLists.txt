@@ -263,6 +263,8 @@ if(ENABLE_CURLDEBUG)
   list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
+set(CMAKE_UNITY_BUILD OFF)  # TEST TEST TEST
+
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
