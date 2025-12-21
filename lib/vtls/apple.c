@@ -225,7 +225,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #endif
 
 #ifdef SUPPORTS_SecTrustEvaluateWithError
-#if defined(HAVE_BUILTIN_AVAILABLE)
+#ifdef HAVE_BUILTIN_AVAILABLE
   if(__builtin_available(macOS 10.14, iOS 12, tvOS 12, watchOS 5, *)) {
 #else
   if(1) {
