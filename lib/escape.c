@@ -125,8 +125,8 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     if(('%' == in) && (alloc > 2) &&
        ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
       /* this is two hexadecimal digits following a '%' */
-      in = (unsigned char)((Curl_hexval(string[1]) << 4) |
-                           Curl_hexval(string[2]));
+      in = (unsigned char)((curlx_hexval(string[1]) << 4) |
+                           curlx_hexval(string[2]));
       string += 3;
       alloc -= 3;
     }

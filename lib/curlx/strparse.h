@@ -106,7 +106,7 @@ void curlx_str_passblanks(const char **linep);
    returns 10. THIS ONLY WORKS ON VALID HEXADECIMAL LETTER INPUT. Verify
    before calling this!
 */
-extern const unsigned char Curl_hexasciitable[];
-#define Curl_hexval(x) (unsigned char)(Curl_hexasciitable[(x) - '0'] & 0x0f)
+extern const unsigned char curlx_hexasciitable[];
+#define curlx_hexval(x) (unsigned char)(curlx_hexasciitable[(x) - '0'] & 0x0f)
 
 #endif /* HEADER_CURL_STRPARSE_H */
