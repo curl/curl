@@ -285,77 +285,6 @@ struct smb_tree_disconnect {
 #  pragma pack(pop)
 #endif
 
-/* Local API functions */
-static CURLcode smb_setup_connection(struct Curl_easy *data,
-                                     struct connectdata *conn);
-static CURLcode smb_connect(struct Curl_easy *data, bool *done);
-static CURLcode smb_connection_state(struct Curl_easy *data, bool *done);
-static CURLcode smb_do(struct Curl_easy *data, bool *done);
-static CURLcode smb_request_state(struct Curl_easy *data, bool *done);
-static CURLcode smb_pollset(struct Curl_easy *data,
-                            struct easy_pollset *ps);
-static CURLcode smb_parse_url_path(struct Curl_easy *data,
-                                   struct smb_conn *smbc,
-                                   struct smb_request *req);
-
-/*
- * SMB handler interface
- */
-const struct Curl_handler Curl_handler_smb = {
-  "smb",                                /* scheme */
-  smb_setup_connection,                 /* setup_connection */
-  smb_do,                               /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  smb_connect,                          /* connect_it */
-  smb_connection_state,                 /* connecting */
-  smb_request_state,                    /* doing */
-  smb_pollset,                          /* proto_pollset */
-  smb_pollset,                          /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_SMB,                             /* defport */
-  CURLPROTO_SMB,                        /* protocol */
-  CURLPROTO_SMB,                        /* family */
-  PROTOPT_CONN_REUSE                    /* flags */
-};
-
-#ifdef USE_SSL
-/*
- * SMBS handler interface
- */
-const struct Curl_handler Curl_handler_smbs = {
-  "smbs",                               /* scheme */
-  smb_setup_connection,                 /* setup_connection */
-  smb_do,                               /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  smb_connect,                          /* connect_it */
-  smb_connection_state,                 /* connecting */
-  smb_request_state,                    /* doing */
-  smb_pollset,                          /* proto_pollset */
-  smb_pollset,                          /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_SMBS,                            /* defport */
-  CURLPROTO_SMBS,                       /* protocol */
-  CURLPROTO_SMB,                        /* family */
-  PROTOPT_SSL | PROTOPT_CONN_REUSE      /* flags */
-};
-#endif
-
 #define MAX_PAYLOAD_SIZE  0x8000
 #define MAX_MESSAGE_SIZE  (MAX_PAYLOAD_SIZE + 0x1000)
 #define CLIENTNAME        "curl"
@@ -458,6 +387,49 @@ static void smb_conn_dtor(void *key, size_t klen, void *entry)
   Curl_safefree(smbc->recv_buf);
   Curl_safefree(smbc->send_buf);
   curlx_free(smbc);
+}
+
+static CURLcode smb_parse_url_path(struct Curl_easy *data,
+                                   struct smb_conn *smbc,
+                                   struct smb_request *req)
+{
+  char *path;
+  char *slash;
+  CURLcode result;
+
+  /* URL decode the path */
+  result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
+  if(result)
+    return result;
+
+  /* Parse the path for the share */
+  smbc->share = curlx_strdup((*path == '/' || *path == '\\')
+                             ? path + 1 : path);
+  curlx_free(path);
+  if(!smbc->share)
+    return CURLE_OUT_OF_MEMORY;
+
+  slash = strchr(smbc->share, '/');
+  if(!slash)
+    slash = strchr(smbc->share, '\\');
+
+  /* The share must be present */
+  if(!slash) {
+    Curl_safefree(smbc->share);
+    failf(data, "missing share in URL path for SMB");
+    return CURLE_URL_MALFORMAT;
+  }
+
+  /* Parse the path for the file path converting any forward slashes into
+     backslashes */
+  *slash++ = 0;
+  req->path = slash;
+
+  for(; *slash; slash++) {
+    if(*slash == '/')
+      *slash = '\\';
+  }
+  return CURLE_OK;
 }
 
 /* this should setup things in the connection, not in the easy
@@ -1226,47 +1198,62 @@ static CURLcode smb_do(struct Curl_easy *data, bool *done)
   return CURLE_URL_MALFORMAT;
 }
 
-static CURLcode smb_parse_url_path(struct Curl_easy *data,
-                                   struct smb_conn *smbc,
-                                   struct smb_request *req)
-{
-  char *path;
-  char *slash;
-  CURLcode result;
+/*
+ * SMB handler interface
+ */
+const struct Curl_handler Curl_handler_smb = {
+  "smb",                                /* scheme */
+  smb_setup_connection,                 /* setup_connection */
+  smb_do,                               /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  smb_connect,                          /* connect_it */
+  smb_connection_state,                 /* connecting */
+  smb_request_state,                    /* doing */
+  smb_pollset,                          /* proto_pollset */
+  smb_pollset,                          /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_SMB,                             /* defport */
+  CURLPROTO_SMB,                        /* protocol */
+  CURLPROTO_SMB,                        /* family */
+  PROTOPT_CONN_REUSE                    /* flags */
+};
 
-  /* URL decode the path */
-  result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
-  if(result)
-    return result;
-
-  /* Parse the path for the share */
-  smbc->share = curlx_strdup((*path == '/' || *path == '\\')
-                             ? path + 1 : path);
-  curlx_free(path);
-  if(!smbc->share)
-    return CURLE_OUT_OF_MEMORY;
-
-  slash = strchr(smbc->share, '/');
-  if(!slash)
-    slash = strchr(smbc->share, '\\');
-
-  /* The share must be present */
-  if(!slash) {
-    Curl_safefree(smbc->share);
-    failf(data, "missing share in URL path for SMB");
-    return CURLE_URL_MALFORMAT;
-  }
-
-  /* Parse the path for the file path converting any forward slashes into
-     backslashes */
-  *slash++ = 0;
-  req->path = slash;
-
-  for(; *slash; slash++) {
-    if(*slash == '/')
-      *slash = '\\';
-  }
-  return CURLE_OK;
-}
+#ifdef USE_SSL
+/*
+ * SMBS handler interface
+ */
+const struct Curl_handler Curl_handler_smbs = {
+  "smbs",                               /* scheme */
+  smb_setup_connection,                 /* setup_connection */
+  smb_do,                               /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  smb_connect,                          /* connect_it */
+  smb_connection_state,                 /* connecting */
+  smb_request_state,                    /* doing */
+  smb_pollset,                          /* proto_pollset */
+  smb_pollset,                          /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_SMBS,                            /* defport */
+  CURLPROTO_SMBS,                       /* protocol */
+  CURLPROTO_SMB,                        /* family */
+  PROTOPT_SSL | PROTOPT_CONN_REUSE      /* flags */
+};
+#endif
 
 #endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */
