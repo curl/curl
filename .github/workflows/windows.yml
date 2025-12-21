@@ -769,7 +769,6 @@ jobs:
               -DNGTCP2_INCLUDE_DIR=/ucrt64/include
               -DNGTCP2_LIBRARY=/ucrt64/lib/libngtcp2.dll.a
               -DNGTCP2_CRYPTO_OSSL_LIBRARY=/ucrt64/lib/libngtcp2_crypto_ossl.dll.a
-              -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
