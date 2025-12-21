@@ -32,7 +32,6 @@
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
 #include "vauth.h"
-#include "../curl_trc.h"
 
 /*
  * Curl_auth_create_plain_message()

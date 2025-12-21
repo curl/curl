@@ -46,7 +46,6 @@
 
 #include "urldata.h"
 #include "asyn.h"
-#include "curl_trc.h"
 #include "hostip.h"
 #include "multiif.h"
 #include "select.h"
