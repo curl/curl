@@ -384,4 +384,4 @@ void Curl_rtmp_version(char *version, size_t len)
                  suff);
 }
 
-#endif  /* USE_LIBRTMP */
+#endif /* USE_LIBRTMP */

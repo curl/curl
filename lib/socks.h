@@ -54,4 +54,4 @@ extern struct Curl_cftype Curl_cft_socks_proxy;
 
 #endif /* !CURL_DISABLE_PROXY */
 
-#endif  /* HEADER_CURL_SOCKS_H */
+#endif /* HEADER_CURL_SOCKS_H */

@@ -167,7 +167,7 @@ static void kbd_callback(const char *name, int name_len,
   (void)name_len;
   (void)instruction;
   (void)instruction_len;
-#endif  /* CURL_LIBSSH2_DEBUG */
+#endif /* CURL_LIBSSH2_DEBUG */
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
     responses[0].text = curlx_strdup(conn->passwd);

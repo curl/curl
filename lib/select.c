@@ -329,7 +329,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       r++;
   }
 
-#endif  /* HAVE_POLL */
+#endif /* HAVE_POLL */
 
   return r;
 }
