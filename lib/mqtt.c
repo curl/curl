@@ -89,48 +89,6 @@ struct MQTT {
   BIT(pingsent); /* 1 while we wait for ping response */
 };
 
-/*
- * Forward declarations.
- */
-
-static CURLcode mqtt_do(struct Curl_easy *data, bool *done);
-static CURLcode mqtt_done(struct Curl_easy *data,
-                          CURLcode status, bool premature);
-static CURLcode mqtt_doing(struct Curl_easy *data, bool *done);
-static CURLcode mqtt_pollset(struct Curl_easy *data,
-                             struct easy_pollset *ps);
-static CURLcode mqtt_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn);
-
-/*
- * MQTT protocol handler.
- */
-
-const struct Curl_handler Curl_handler_mqtt = {
-  "mqtt",                             /* scheme */
-  mqtt_setup_conn,                    /* setup_connection */
-  mqtt_do,                            /* do_it */
-  mqtt_done,                          /* done */
-  ZERO_NULL,                          /* do_more */
-  ZERO_NULL,                          /* connect_it */
-  ZERO_NULL,                          /* connecting */
-  mqtt_doing,                         /* doing */
-  ZERO_NULL,                          /* proto_pollset */
-  mqtt_pollset,                       /* doing_pollset */
-  ZERO_NULL,                          /* domore_pollset */
-  ZERO_NULL,                          /* perform_pollset */
-  ZERO_NULL,                          /* disconnect */
-  ZERO_NULL,                          /* write_resp */
-  ZERO_NULL,                          /* write_resp_hd */
-  ZERO_NULL,                          /* connection_check */
-  ZERO_NULL,                          /* attach connection */
-  ZERO_NULL,                          /* follow */
-  PORT_MQTT,                          /* defport */
-  CURLPROTO_MQTT,                     /* protocol */
-  CURLPROTO_MQTT,                     /* family */
-  PROTOPT_NONE                        /* flags */
-};
-
 static void mqtt_easy_dtor(void *key, size_t klen, void *entry)
 {
   struct MQTT *mq = entry;
@@ -975,5 +933,34 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     result = CURLE_OK;
   return result;
 }
+
+/*
+ * MQTT protocol handler.
+ */
+
+const struct Curl_handler Curl_handler_mqtt = {
+  "mqtt",                             /* scheme */
+  mqtt_setup_conn,                    /* setup_connection */
+  mqtt_do,                            /* do_it */
+  mqtt_done,                          /* done */
+  ZERO_NULL,                          /* do_more */
+  ZERO_NULL,                          /* connect_it */
+  ZERO_NULL,                          /* connecting */
+  mqtt_doing,                         /* doing */
+  ZERO_NULL,                          /* proto_pollset */
+  mqtt_pollset,                       /* doing_pollset */
+  ZERO_NULL,                          /* domore_pollset */
+  ZERO_NULL,                          /* perform_pollset */
+  ZERO_NULL,                          /* disconnect */
+  ZERO_NULL,                          /* write_resp */
+  ZERO_NULL,                          /* write_resp_hd */
+  ZERO_NULL,                          /* connection_check */
+  ZERO_NULL,                          /* attach connection */
+  ZERO_NULL,                          /* follow */
+  PORT_MQTT,                          /* defport */
+  CURLPROTO_MQTT,                     /* protocol */
+  CURLPROTO_MQTT,                     /* family */
+  PROTOPT_NONE                        /* flags */
+};
 
 #endif /* CURL_DISABLE_MQTT */
