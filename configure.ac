@@ -707,8 +707,6 @@ AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
   esac ],
     AC_MSG_RESULT([no])
 )
-dnl TEST TEST TEST
-want_unity='no'
 if test -z "$PERL" && test "$want_unity" = "yes"; then
   AC_MSG_WARN([perl was not found. Will not enable unity.])
   want_unity='no'
