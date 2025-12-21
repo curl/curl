@@ -26,6 +26,8 @@
 
 #include "curl_setup.h"
 
+#include "curl_trc.h"
+
 /**
  * Type of data that is being written to the client (application)
  * - data written can be either BODY or META data
