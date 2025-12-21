@@ -24,7 +24,7 @@
 #include "unitcheck.h"
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 
 /*
  * This test hardcodes the knowledge of the buffer size which is internal to
