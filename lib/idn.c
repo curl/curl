@@ -41,7 +41,7 @@
 #define IDN2_LOOKUP(name, host, flags)                          \
   idn2_lookup_ul((const char *)name, (char **)host, flags)
 #endif
-#endif  /* USE_LIBIDN2 */
+#endif /* USE_LIBIDN2 */
 
 /* for macOS and iOS targets */
 #ifdef USE_APPLE_IDN
