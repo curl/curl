@@ -172,7 +172,7 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms)
   return nfds;
 }
 
-#endif
+#endif /* USE_ARES */
 
 #endif /* CURLRES_ASYNCH */
 
