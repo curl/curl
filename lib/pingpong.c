@@ -31,6 +31,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "select.h"
 #include "progress.h"
 #include "pingpong.h"

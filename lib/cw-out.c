@@ -28,6 +28,7 @@
 #include "cfilters.h"
 #include "multiif.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "transfer.h"
 #include "cw-out.h"
 #include "cw-pause.h"

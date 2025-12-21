@@ -59,6 +59,7 @@
 #include "select.h"
 #include "cfilters.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
 #include "mime.h"

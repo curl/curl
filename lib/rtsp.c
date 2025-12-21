@@ -29,6 +29,7 @@
 #include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "multiif.h"
 #include "http.h"
 #include "url.h"

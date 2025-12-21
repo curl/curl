@@ -50,6 +50,7 @@
 #include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "formdata.h"
 #include "mime.h"
 #include "progress.h"

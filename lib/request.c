@@ -31,6 +31,7 @@
 #include "progress.h"
 #include "request.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "transfer.h"
 #include "url.h"
 #include "curlx/strparse.h"

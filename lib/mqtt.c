@@ -30,6 +30,7 @@
 #include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "progress.h"
 #include "mqtt.h"
 #include "select.h"

@@ -31,6 +31,7 @@
 #include "urldata.h"
 #include "url.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "progress.h"

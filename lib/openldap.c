@@ -43,6 +43,7 @@
 #include "urldata.h"
 #include "url.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "curl_ldap.h"

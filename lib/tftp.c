@@ -51,6 +51,7 @@
 #include "cf-socket.h"
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "tftp.h"
 #include "progress.h"
 #include "connect.h"
