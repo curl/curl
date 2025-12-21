@@ -33,7 +33,6 @@
 #include "connect.h"
 #include "gopher.h"
 #include "select.h"
-#include "vtls/vtls.h"
 #include "url.h"
 #include "escape.h"
 #include "curlx/warnless.h"

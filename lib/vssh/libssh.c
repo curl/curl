@@ -51,7 +51,6 @@
 #include "../http.h"               /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
 #include "../url.h"
-#include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"
 #include "../parsedate.h"          /* for the week day and month names */

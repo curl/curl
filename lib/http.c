@@ -56,7 +56,6 @@
 #include "curlx/base64.h"
 #include "cookie.h"
 #include "vauth/vauth.h"
-#include "vtls/vtls.h"
 #include "vquic/vquic.h"
 #include "http_digest.h"
 #include "http_ntlm.h"

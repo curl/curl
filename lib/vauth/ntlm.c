@@ -40,7 +40,6 @@
 #include "../curl_ntlm_core.h"
 #include "../curlx/warnless.h"
 #include "../rand.h"
-#include "../vtls/vtls.h"
 #include "../strdup.h"
 #include "../curl_endian.h"
 
