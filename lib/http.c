@@ -85,94 +85,6 @@
 #include "bufref.h"
 #include "curlx/strparse.h"
 
-/*
- * Forward declarations.
- */
-
-static bool http_should_fail(struct Curl_easy *data, int httpcode);
-static bool http_exp100_is_waiting(struct Curl_easy *data);
-static CURLcode http_exp100_add_reader(struct Curl_easy *data);
-static void http_exp100_send_anyway(struct Curl_easy *data);
-static bool http_exp100_is_selected(struct Curl_easy *data);
-static void http_exp100_got100(struct Curl_easy *data);
-static CURLcode http_firstwrite(struct Curl_easy *data);
-static CURLcode http_header(struct Curl_easy *data,
-                            const char *hd, size_t hdlen);
-static CURLcode http_range(struct Curl_easy *data,
-                           Curl_HttpReq httpreq);
-static CURLcode http_req_set_TE(struct Curl_easy *data,
-                                struct dynbuf *req,
-                                int httpversion);
-static CURLcode http_size(struct Curl_easy *data);
-static CURLcode http_statusline(struct Curl_easy *data,
-                                struct connectdata *conn);
-static CURLcode http_target(struct Curl_easy *data, struct dynbuf *req);
-static CURLcode http_useragent(struct Curl_easy *data);
-static CURLcode http_write_header(struct Curl_easy *data,
-                                  const char *hd, size_t hdlen);
-
-/*
- * HTTP handler interface.
- */
-const struct Curl_handler Curl_handler_http = {
-  "http",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  Curl_http_doing_pollset,              /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  Curl_http_perform_pollset,            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
-  Curl_http_write_resp_hd,              /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_HTTP,                            /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_CREDSPERREQUEST |             /* flags */
-    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
-
-};
-
-#ifdef USE_SSL
-/*
- * HTTPS handler interface.
- */
-const struct Curl_handler Curl_handler_https = {
-  "https",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  NULL,                                 /* connecting */
-  ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_pollset */
-  Curl_http_doing_pollset,              /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  Curl_http_perform_pollset,            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
-  Curl_http_write_resp_hd,              /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_HTTPS,                           /* defport */
-  CURLPROTO_HTTPS,                      /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
-    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
-};
-
-#endif
-
 void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg)
 {
   memset(neg, 0, sizeof(*neg));
@@ -5069,5 +4981,66 @@ static bool http_exp100_is_selected(struct Curl_easy *data)
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
   return !!r;
 }
+
+/*
+ * HTTP handler interface.
+ */
+const struct Curl_handler Curl_handler_http = {
+  "http",                               /* scheme */
+  Curl_http_setup_conn,                 /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  Curl_http_doing_pollset,              /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  Curl_http_follow,                     /* follow */
+  PORT_HTTP,                            /* defport */
+  CURLPROTO_HTTP,                       /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_CREDSPERREQUEST |             /* flags */
+    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
+
+};
+
+#ifdef USE_SSL
+/*
+ * HTTPS handler interface.
+ */
+const struct Curl_handler Curl_handler_https = {
+  "https",                              /* scheme */
+  Curl_http_setup_conn,                 /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  NULL,                                 /* connecting */
+  ZERO_NULL,                            /* doing */
+  NULL,                                 /* proto_pollset */
+  Curl_http_doing_pollset,              /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  Curl_http_follow,                     /* follow */
+  PORT_HTTPS,                           /* defport */
+  CURLPROTO_HTTPS,                      /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
+    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
+};
+#endif
 
 #endif /* CURL_DISABLE_HTTP */
