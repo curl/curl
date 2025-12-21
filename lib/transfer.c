@@ -66,7 +66,6 @@
 #include "http.h"
 #include "url.h"
 #include "getinfo.h"
-#include "vtls/vtls.h"
 #include "vquic/vquic.h"
 #include "multiif.h"
 #include "connect.h"

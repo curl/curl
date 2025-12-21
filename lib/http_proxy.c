@@ -35,7 +35,6 @@
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
 #include "connect.h"
-#include "vtls/vtls.h"
 #include "transfer.h"
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"

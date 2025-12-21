@@ -40,7 +40,6 @@
 #include "connect.h"
 #include "curl_trc.h"
 #include "strcase.h"
-#include "vtls/vtls.h"
 #include "transfer.h"
 #include "curlx/strparse.h"
 
