@@ -136,12 +136,12 @@ int curlx_str_singlespace(const char **linep)
 
 /* given an ASCII character and max ascii, return TRUE if valid */
 #define valid_digit(x, m) \
-  (((x) >= '0') && ((x) <= m) && Curl_hexasciitable[(x) - '0'])
+  (((x) >= '0') && ((x) <= m) && curlx_hexasciitable[(x) - '0'])
 
 /* We use 16 for the zero index (and the necessary bitwise AND in the loop)
    to be able to have a non-zero value there to make valid_digit() able to
    use the info */
-const unsigned char Curl_hexasciitable[] = {
+const unsigned char curlx_hexasciitable[] = {
   16, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 0x30: 0 - 9 */
   0, 0, 0, 0, 0, 0, 0,
   10, 11, 12, 13, 14, 15,        /* 0x41: A - F */
