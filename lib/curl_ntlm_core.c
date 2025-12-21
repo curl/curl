@@ -116,6 +116,7 @@
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 #include "curl_md4.h"
+#include "vauth/vauth.h"
 
 #ifdef USE_CURL_DES_SET_ODD_PARITY
 /*
