@@ -167,7 +167,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
   if(max < base) {
     /* special-case low max scenario because check needs to be different */
     do {
-      int n = Curl_hexval(*p++);
+      int n = curlx_hexval(*p++);
       num = num * base + n;
       if(num > max)
         return STRE_OVERFLOW;
@@ -175,7 +175,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
   }
   else {
     do {
-      int n = Curl_hexval(*p++);
+      int n = curlx_hexval(*p++);
       if(num > ((max - n) / base))
         return STRE_OVERFLOW;
       num = num * base + n;
