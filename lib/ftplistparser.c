@@ -1089,4 +1089,4 @@ fail:
   return retsize;
 }
 
-#endif /* CURL_DISABLE_FTP */
+#endif /* !CURL_DISABLE_FTP */
