@@ -30,6 +30,7 @@
 #ifdef _WIN32
 #include "winapi.h"
 #include "snprintf.h"
+#include "strcopy.h"
 
 /* This is a helper function for curlx_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
@@ -93,8 +94,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #else
   {
     const char *txt = (err == ERROR_SUCCESS) ? "No error" : "Error";
-    if(strlen(txt) < buflen)
-      strcpy(buf, txt);
+    curlx_strcopy(buf, buflen, txt, strlen(txt));
   }
 #endif
 

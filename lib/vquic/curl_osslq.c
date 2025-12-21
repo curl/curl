@@ -53,6 +53,7 @@
 #include "../url.h"
 #include "../bufref.h"
 #include "../curlx/strerr.h"
+#include "../curlx/strcopy.h"
 
 /* A stream window is the maximum amount we need to buffer for
  * each active transfer. We use HTTP/3 flow control and only ACK
@@ -141,7 +142,7 @@ static char *osslq_strerror(unsigned long error, char *buf, size_t size)
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
     if(strlen(msg) < size)
-      strcpy(buf, msg);
+      curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;

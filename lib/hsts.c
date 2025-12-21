@@ -37,6 +37,7 @@
 #include "curl_share.h"
 #include "curlx/strparse.h"
 #include "curlx/timeval.h"
+#include "curlx/strcopy.h"
 
 #define MAX_HSTS_LINE    4095
 #define MAX_HSTS_HOSTLEN 2048
@@ -294,7 +295,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
                    stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
   }
   else
-    strcpy(e.expire, UNLIMITED);
+    curlx_strcopy(e.expire, sizeof(e.expire), UNLIMITED, strlen(UNLIMITED));
 
   sc = data->set.hsts_write(data, &e, i, data->set.hsts_write_userp);
   *stop = (sc != CURLSTS_OK);

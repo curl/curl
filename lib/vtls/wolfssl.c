@@ -62,6 +62,7 @@
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
 #include "../strdup.h"
+#include "../curlx/strcopy.h"
 #include "x509asn1.h"
 
 #include <wolfssl/ssl.h>
@@ -1542,8 +1543,7 @@ static char *wssl_strerror(unsigned long error, char *buf, unsigned long size)
 
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
-    /* the string fits because the assert above assures this */
-    strcpy(buf, msg);
+    curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;

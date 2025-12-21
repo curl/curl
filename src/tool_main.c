@@ -108,9 +108,7 @@ static void memory_tracking_init(void)
   if(env) {
     /* use the value as filename */
     char fname[512];
-    if(strlen(env) >= sizeof(fname))
-      env[sizeof(fname) - 1] = '\0';
-    strcpy(fname, env);
+    curlx_strcopy(fname, sizeof(fname), env, strlen(env));
     curl_free(env);
     curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called before

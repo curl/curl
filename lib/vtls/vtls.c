@@ -72,6 +72,7 @@
 #include "../select.h"
 #include "../setopt.h"
 #include "../strdup.h"
+#include "../curlx/strcopy.h"
 
 #ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
@@ -1082,10 +1083,7 @@ static size_t multissl_version(char *buffer, size_t size)
   }
 
   if(size) {
-    if(backends_len < size)
-      strcpy(buffer, backends);
-    else
-      *buffer = 0; /* did not fit */
+    curlx_strcopy(buffer, size, backends, backends_len);
   }
   return 0;
 }

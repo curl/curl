@@ -60,6 +60,7 @@
 #include "select.h"
 #include "strcase.h"
 #include "easy_lock.h"
+#include "curlx/strcopy.h"
 #include "curlx/strparse.h"
 
 #if defined(CURLRES_SYNCH) &&                   \
@@ -622,7 +623,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
   memcpy(ca->ai_addr, &sa6, ss_size);
   ca->ai_canonname = (char *)ca->ai_addr + ss_size;
-  strcpy(ca->ai_canonname, name);
+  curlx_strcopy(ca->ai_canonname, hostlen + 1, name, hostlen);
   return ca;
 }
 #else
@@ -659,7 +660,7 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
   ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
   memcpy(ca->ai_addr, &sa, ss_size);
   ca->ai_canonname = (char *)ca->ai_addr + ss_size;
-  strcpy(ca->ai_canonname, name);
+  curlx_strcopy(ca->ai_canonname, hostlen + 1, name, hostlen);
 
   ca6 = get_localhost6(port, name);
   if(!ca6)
