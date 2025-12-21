@@ -85,94 +85,6 @@
 #include "bufref.h"
 #include "curlx/strparse.h"
 
-/*
- * Forward declarations.
- */
-
-static bool http_should_fail(struct Curl_easy *data, int httpcode);
-static bool http_exp100_is_waiting(struct Curl_easy *data);
-static CURLcode http_exp100_add_reader(struct Curl_easy *data);
-static void http_exp100_send_anyway(struct Curl_easy *data);
-static bool http_exp100_is_selected(struct Curl_easy *data);
-static void http_exp100_got100(struct Curl_easy *data);
-static CURLcode http_firstwrite(struct Curl_easy *data);
-static CURLcode http_header(struct Curl_easy *data,
-                            const char *hd, size_t hdlen);
-static CURLcode http_range(struct Curl_easy *data,
-                           Curl_HttpReq httpreq);
-static CURLcode http_req_set_TE(struct Curl_easy *data,
-                                struct dynbuf *req,
-                                int httpversion);
-static CURLcode http_size(struct Curl_easy *data);
-static CURLcode http_statusline(struct Curl_easy *data,
-                                struct connectdata *conn);
-static CURLcode http_target(struct Curl_easy *data, struct dynbuf *req);
-static CURLcode http_useragent(struct Curl_easy *data);
-static CURLcode http_write_header(struct Curl_easy *data,
-                                  const char *hd, size_t hdlen);
-
-/*
- * HTTP handler interface.
- */
-const struct Curl_handler Curl_handler_http = {
-  "http",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  Curl_http_doing_pollset,              /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  Curl_http_perform_pollset,            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
-  Curl_http_write_resp_hd,              /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_HTTP,                            /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_CREDSPERREQUEST |             /* flags */
-    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
-
-};
-
-#ifdef USE_SSL
-/*
- * HTTPS handler interface.
- */
-const struct Curl_handler Curl_handler_https = {
-  "https",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  NULL,                                 /* connecting */
-  ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_pollset */
-  Curl_http_doing_pollset,              /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  Curl_http_perform_pollset,            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
-  Curl_http_write_resp_hd,              /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_HTTPS,                           /* defport */
-  CURLPROTO_HTTPS,                      /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
-    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
-};
-
-#endif
-
 void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg)
 {
   memset(neg, 0, sizeof(*neg));
@@ -547,13 +459,83 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+/**
+ * http_should_fail() determines whether an HTTP response code has gotten us
+ * into an error state or not.
+ *
+ * @retval FALSE communications should continue
+ *
+ * @retval TRUE communications should not continue
+ */
+static bool http_should_fail(struct Curl_easy *data, int httpcode)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+
+  /*
+  ** If we have not been asked to fail on error,
+  ** do not fail.
+  */
+  if(!data->set.http_fail_on_error)
+    return FALSE;
+
+  /*
+  ** Any code < 400 is never terminal.
+  */
+  if(httpcode < 400)
+    return FALSE;
+
+  /*
+  ** A 416 response to a resume request is presumably because the file is
+  ** already completely downloaded and thus not actually a fail.
+  */
+  if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
+     httpcode == 416)
+    return FALSE;
+
+  /*
+  ** Any code >= 400 that is not 401 or 407 is always
+  ** a terminal error
+  */
+  if((httpcode != 401) && (httpcode != 407))
+    return TRUE;
+
+  /*
+  ** All we have left to deal with is 401 and 407
+  */
+  DEBUGASSERT((httpcode == 401) || (httpcode == 407));
+
+  /*
+  ** Examine the current authentication state to see if this is an error. The
+  ** idea is for this function to get called after processing all the headers
+  ** in a response message. So, if we have been to asked to authenticate a
+  ** particular stage, and we have done it, we are OK. If we are already
+  ** completely authenticated, it is not OK to get another 401 or 407.
+  **
+  ** It is possible for authentication to go stale such that the client needs
+  ** to reauthenticate. Once that info is available, use it here.
+  */
+
+  /*
+  ** Either we are not authenticating, or we are supposed to be authenticating
+  ** something else. This is an error.
+  */
+  if((httpcode == 401) && !data->state.aptr.user)
+    return TRUE;
+#ifndef CURL_DISABLE_PROXY
+  if((httpcode == 407) && !data->conn->bits.proxy_user_passwd)
+    return TRUE;
+#endif
+
+  return data->state.authproblem;
+}
+
 /*
  * Curl_http_auth_act() gets called when all HTTP headers have been received
  * and it checks what authentication methods that are available and decides
  * which one (if any) to use. It will set 'newurl' if an auth method was
  * picked.
  */
-
 CURLcode Curl_http_auth_act(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
@@ -1116,77 +1098,6 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 #endif
 }
 
-/**
- * http_should_fail() determines whether an HTTP response code has gotten us
- * into an error state or not.
- *
- * @retval FALSE communications should continue
- *
- * @retval TRUE communications should not continue
- */
-static bool http_should_fail(struct Curl_easy *data, int httpcode)
-{
-  DEBUGASSERT(data);
-  DEBUGASSERT(data->conn);
-
-  /*
-  ** If we have not been asked to fail on error,
-  ** do not fail.
-  */
-  if(!data->set.http_fail_on_error)
-    return FALSE;
-
-  /*
-  ** Any code < 400 is never terminal.
-  */
-  if(httpcode < 400)
-    return FALSE;
-
-  /*
-  ** A 416 response to a resume request is presumably because the file is
-  ** already completely downloaded and thus not actually a fail.
-  */
-  if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
-     httpcode == 416)
-    return FALSE;
-
-  /*
-  ** Any code >= 400 that is not 401 or 407 is always
-  ** a terminal error
-  */
-  if((httpcode != 401) && (httpcode != 407))
-    return TRUE;
-
-  /*
-  ** All we have left to deal with is 401 and 407
-  */
-  DEBUGASSERT((httpcode == 401) || (httpcode == 407));
-
-  /*
-  ** Examine the current authentication state to see if this is an error. The
-  ** idea is for this function to get called after processing all the headers
-  ** in a response message. So, if we have been to asked to authenticate a
-  ** particular stage, and we have done it, we are OK. If we are already
-  ** completely authenticated, it is not OK to get another 401 or 407.
-  **
-  ** It is possible for authentication to go stale such that the client needs
-  ** to reauthenticate. Once that info is available, use it here.
-  */
-
-  /*
-  ** Either we are not authenticating, or we are supposed to be authenticating
-  ** something else. This is an error.
-  */
-  if((httpcode == 401) && !data->state.aptr.user)
-    return TRUE;
-#ifndef CURL_DISABLE_PROXY
-  if((httpcode == 407) && !data->conn->bits.proxy_user_passwd)
-    return TRUE;
-#endif
-
-  return data->state.authproblem;
-}
-
 static void http_switch_to_get(struct Curl_easy *data, int code)
 {
   const char *req = data->set.str[STRING_CUSTOMREQUEST];
@@ -1532,6 +1443,145 @@ bool Curl_compareheader(const char *headerline, /* line to check */
   return FALSE; /* no match */
 }
 
+struct cr_exp100_ctx {
+  struct Curl_creader super;
+  struct curltime start; /* time started waiting */
+  enum expect100 state;
+};
+
+/* Expect: 100-continue client reader, blocking uploads */
+
+static void http_exp100_continue(struct Curl_easy *data,
+                                 struct Curl_creader *reader)
+{
+  struct cr_exp100_ctx *ctx = reader->ctx;
+  if(ctx->state > EXP100_SEND_DATA) {
+    ctx->state = EXP100_SEND_DATA;
+    Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+  }
+}
+
+static CURLcode cr_exp100_read(struct Curl_easy *data,
+                               struct Curl_creader *reader,
+                               char *buf, size_t blen,
+                               size_t *nread, bool *eos)
+{
+  struct cr_exp100_ctx *ctx = reader->ctx;
+  timediff_t ms;
+
+  switch(ctx->state) {
+  case EXP100_SENDING_REQUEST:
+    if(!Curl_req_sendbuf_empty(data)) {
+      /* The initial request data has not been fully sent yet. Do
+       * not start the timer yet. */
+      DEBUGF(infof(data, "cr_exp100_read, request not full sent yet"));
+      *nread = 0;
+      *eos = FALSE;
+      return CURLE_OK;
+    }
+    /* We are now waiting for a reply from the server or
+     * a timeout on our side IFF the request has been fully sent. */
+    DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE, "
+           "timeout %dms", data->set.expect_100_timeout));
+    ctx->state = EXP100_AWAITING_CONTINUE;
+    ctx->start = *Curl_pgrs_now(data);
+    Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
+    *nread = 0;
+    *eos = FALSE;
+    return CURLE_OK;
+  case EXP100_FAILED:
+    DEBUGF(infof(data, "cr_exp100_read, expectation failed, error"));
+    *nread = 0;
+    *eos = FALSE;
+    return CURLE_READ_ERROR;
+  case EXP100_AWAITING_CONTINUE:
+    ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->start);
+    if(ms < data->set.expect_100_timeout) {
+      DEBUGF(infof(data, "cr_exp100_read, AWAITING_CONTINUE, not expired"));
+      *nread = 0;
+      *eos = FALSE;
+      return CURLE_OK;
+    }
+    /* we have waited long enough, continue anyway */
+    http_exp100_continue(data, reader);
+    infof(data, "Done waiting for 100-continue");
+    FALLTHROUGH();
+  default:
+    DEBUGF(infof(data, "cr_exp100_read, pass through"));
+    return Curl_creader_read(data, reader->next, buf, blen, nread, eos);
+  }
+}
+
+static void cr_exp100_done(struct Curl_easy *data,
+                           struct Curl_creader *reader, int premature)
+{
+  struct cr_exp100_ctx *ctx = reader->ctx;
+  ctx->state = premature ? EXP100_FAILED : EXP100_SEND_DATA;
+  Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+}
+
+static const struct Curl_crtype cr_exp100 = {
+  "cr-exp100",
+  Curl_creader_def_init,
+  cr_exp100_read,
+  Curl_creader_def_close,
+  Curl_creader_def_needs_rewind,
+  Curl_creader_def_total_length,
+  Curl_creader_def_resume_from,
+  Curl_creader_def_cntrl,
+  Curl_creader_def_is_paused,
+  cr_exp100_done,
+  sizeof(struct cr_exp100_ctx)
+};
+
+static CURLcode http_exp100_add_reader(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = NULL;
+  CURLcode result;
+
+  result = Curl_creader_create(&reader, data, &cr_exp100, CURL_CR_PROTOCOL);
+  if(!result)
+    result = Curl_creader_add(data, reader);
+  if(!result) {
+    struct cr_exp100_ctx *ctx = reader->ctx;
+    ctx->state = EXP100_SENDING_REQUEST;
+  }
+
+  if(result && reader)
+    Curl_creader_free(data, reader);
+  return result;
+}
+
+static void http_exp100_got100(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  if(r)
+    http_exp100_continue(data, r);
+}
+
+static bool http_exp100_is_waiting(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  if(r) {
+    struct cr_exp100_ctx *ctx = r->ctx;
+    return ctx->state == EXP100_AWAITING_CONTINUE;
+  }
+  return FALSE;
+}
+
+static void http_exp100_send_anyway(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  if(r)
+    http_exp100_continue(data, r);
+}
+
+static bool http_exp100_is_selected(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  return !!r;
+}
+
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
@@ -1556,6 +1606,33 @@ CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
   if(!result && Curl_req_want_send(data) && !http_exp100_is_waiting(data)) {
     result = Curl_pollset_add_out(data, ps, conn->sock[FIRSTSOCKET]);
   }
+  return result;
+}
+
+static CURLcode http_write_header(struct Curl_easy *data,
+                                  const char *hd, size_t hdlen)
+{
+  CURLcode result;
+  int writetype;
+
+  /* now, only output this if the header AND body are requested:
+   */
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
+
+  writetype = CLIENTWRITE_HEADER |
+    ((data->req.httpcode / 100 == 1) ? CLIENTWRITE_1XX : 0);
+
+  result = Curl_client_write(data, writetype, hd, hdlen);
+  if(result)
+    return result;
+
+  result = Curl_bump_headersize(data, hdlen, FALSE);
+  if(result)
+    return result;
+
+  data->req.deductheadercount = (100 <= data->req.httpcode &&
+                                 199 >= data->req.httpcode) ?
+    data->req.headerbytecount : 0;
   return result;
 }
 
@@ -3800,33 +3877,6 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode http_write_header(struct Curl_easy *data,
-                                  const char *hd, size_t hdlen)
-{
-  CURLcode result;
-  int writetype;
-
-  /* now, only output this if the header AND body are requested:
-   */
-  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
-
-  writetype = CLIENTWRITE_HEADER |
-    ((data->req.httpcode / 100 == 1) ? CLIENTWRITE_1XX : 0);
-
-  result = Curl_client_write(data, writetype, hd, hdlen);
-  if(result)
-    return result;
-
-  result = Curl_bump_headersize(data, hdlen, FALSE);
-  if(result)
-    return result;
-
-  data->req.deductheadercount = (100 <= data->req.httpcode &&
-                                 199 >= data->req.httpcode) ?
-    data->req.headerbytecount : 0;
-  return result;
-}
-
 static CURLcode http_on_response(struct Curl_easy *data,
                                  const char *last_hd, size_t last_hd_len,
                                  const char *buf, size_t blen,
@@ -4931,143 +4981,65 @@ void Curl_http_resp_free(struct http_resp *resp)
   }
 }
 
-struct cr_exp100_ctx {
-  struct Curl_creader super;
-  struct curltime start; /* time started waiting */
-  enum expect100 state;
+/*
+ * HTTP handler interface.
+ */
+const struct Curl_handler Curl_handler_http = {
+  "http",                               /* scheme */
+  Curl_http_setup_conn,                 /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  Curl_http_doing_pollset,              /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  Curl_http_follow,                     /* follow */
+  PORT_HTTP,                            /* defport */
+  CURLPROTO_HTTP,                       /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_CREDSPERREQUEST |             /* flags */
+    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
+
 };
 
-/* Expect: 100-continue client reader, blocking uploads */
-
-static void http_exp100_continue(struct Curl_easy *data,
-                                 struct Curl_creader *reader)
-{
-  struct cr_exp100_ctx *ctx = reader->ctx;
-  if(ctx->state > EXP100_SEND_DATA) {
-    ctx->state = EXP100_SEND_DATA;
-    Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-  }
-}
-
-static CURLcode cr_exp100_read(struct Curl_easy *data,
-                               struct Curl_creader *reader,
-                               char *buf, size_t blen,
-                               size_t *nread, bool *eos)
-{
-  struct cr_exp100_ctx *ctx = reader->ctx;
-  timediff_t ms;
-
-  switch(ctx->state) {
-  case EXP100_SENDING_REQUEST:
-    if(!Curl_req_sendbuf_empty(data)) {
-      /* The initial request data has not been fully sent yet. Do
-       * not start the timer yet. */
-      DEBUGF(infof(data, "cr_exp100_read, request not full sent yet"));
-      *nread = 0;
-      *eos = FALSE;
-      return CURLE_OK;
-    }
-    /* We are now waiting for a reply from the server or
-     * a timeout on our side IFF the request has been fully sent. */
-    DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE, "
-           "timeout %dms", data->set.expect_100_timeout));
-    ctx->state = EXP100_AWAITING_CONTINUE;
-    ctx->start = *Curl_pgrs_now(data);
-    Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
-    *nread = 0;
-    *eos = FALSE;
-    return CURLE_OK;
-  case EXP100_FAILED:
-    DEBUGF(infof(data, "cr_exp100_read, expectation failed, error"));
-    *nread = 0;
-    *eos = FALSE;
-    return CURLE_READ_ERROR;
-  case EXP100_AWAITING_CONTINUE:
-    ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->start);
-    if(ms < data->set.expect_100_timeout) {
-      DEBUGF(infof(data, "cr_exp100_read, AWAITING_CONTINUE, not expired"));
-      *nread = 0;
-      *eos = FALSE;
-      return CURLE_OK;
-    }
-    /* we have waited long enough, continue anyway */
-    http_exp100_continue(data, reader);
-    infof(data, "Done waiting for 100-continue");
-    FALLTHROUGH();
-  default:
-    DEBUGF(infof(data, "cr_exp100_read, pass through"));
-    return Curl_creader_read(data, reader->next, buf, blen, nread, eos);
-  }
-}
-
-static void cr_exp100_done(struct Curl_easy *data,
-                           struct Curl_creader *reader, int premature)
-{
-  struct cr_exp100_ctx *ctx = reader->ctx;
-  ctx->state = premature ? EXP100_FAILED : EXP100_SEND_DATA;
-  Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-}
-
-static const struct Curl_crtype cr_exp100 = {
-  "cr-exp100",
-  Curl_creader_def_init,
-  cr_exp100_read,
-  Curl_creader_def_close,
-  Curl_creader_def_needs_rewind,
-  Curl_creader_def_total_length,
-  Curl_creader_def_resume_from,
-  Curl_creader_def_cntrl,
-  Curl_creader_def_is_paused,
-  cr_exp100_done,
-  sizeof(struct cr_exp100_ctx)
+#ifdef USE_SSL
+/*
+ * HTTPS handler interface.
+ */
+const struct Curl_handler Curl_handler_https = {
+  "https",                              /* scheme */
+  Curl_http_setup_conn,                 /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  NULL,                                 /* connecting */
+  ZERO_NULL,                            /* doing */
+  NULL,                                 /* proto_pollset */
+  Curl_http_doing_pollset,              /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  Curl_http_follow,                     /* follow */
+  PORT_HTTPS,                           /* defport */
+  CURLPROTO_HTTPS,                      /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
+    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
 };
-
-static CURLcode http_exp100_add_reader(struct Curl_easy *data)
-{
-  struct Curl_creader *reader = NULL;
-  CURLcode result;
-
-  result = Curl_creader_create(&reader, data, &cr_exp100, CURL_CR_PROTOCOL);
-  if(!result)
-    result = Curl_creader_add(data, reader);
-  if(!result) {
-    struct cr_exp100_ctx *ctx = reader->ctx;
-    ctx->state = EXP100_SENDING_REQUEST;
-  }
-
-  if(result && reader)
-    Curl_creader_free(data, reader);
-  return result;
-}
-
-static void http_exp100_got100(struct Curl_easy *data)
-{
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
-  if(r)
-    http_exp100_continue(data, r);
-}
-
-static bool http_exp100_is_waiting(struct Curl_easy *data)
-{
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
-  if(r) {
-    struct cr_exp100_ctx *ctx = r->ctx;
-    return ctx->state == EXP100_AWAITING_CONTINUE;
-  }
-  return FALSE;
-}
-
-static void http_exp100_send_anyway(struct Curl_easy *data)
-{
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
-  if(r)
-    http_exp100_continue(data, r);
-}
-
-static bool http_exp100_is_selected(struct Curl_easy *data)
-{
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
-  return !!r;
-}
+#endif
 
 #endif /* CURL_DISABLE_HTTP */

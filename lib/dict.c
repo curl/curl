@@ -65,41 +65,6 @@
 #define DICT_DEFINE3 "/LOOKUP:"
 
 
-/*
- * Forward declarations.
- */
-
-static CURLcode dict_do(struct Curl_easy *data, bool *done);
-
-/*
- * DICT protocol handler.
- */
-
-const struct Curl_handler Curl_handler_dict = {
-  "dict",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  dict_do,                              /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_DICT,                            /* defport */
-  CURLPROTO_DICT,                       /* protocol */
-  CURLPROTO_DICT,                       /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
-};
-
 #define DYN_DICT_WORD 10000
 static char *unescape_word(const char *input)
 {
@@ -306,4 +271,33 @@ error:
   curlx_free(path);
   return result;
 }
+
+/*
+ * DICT protocol handler.
+ */
+const struct Curl_handler Curl_handler_dict = {
+  "dict",                               /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  dict_do,                              /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_DICT,                            /* defport */
+  CURLPROTO_DICT,                       /* protocol */
+  CURLPROTO_DICT,                       /* family */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
+};
+
 #endif /* CURL_DISABLE_DICT */
