@@ -53,6 +53,7 @@
 /* Forward declarations */
 struct Curl_creader;
 struct Curl_cwriter;
+struct Curl_easy;
 
 /**
  * Write `len` bytes at `prt` to the client. `type` indicates what
