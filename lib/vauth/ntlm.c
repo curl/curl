@@ -36,7 +36,7 @@
 #define DEBUG_ME 0
 
 #include "vauth.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../curl_ntlm_core.h"
 #include "../rand.h"
 #include "../strdup.h"

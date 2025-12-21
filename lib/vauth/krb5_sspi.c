@@ -29,7 +29,7 @@
 #if defined(USE_WINDOWS_SSPI) && defined(USE_KERBEROS5)
 
 #include "vauth.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 
 /*
  * Curl_auth_is_gssapi_supported()
