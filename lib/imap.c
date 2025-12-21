@@ -174,69 +174,6 @@ static CURLcode imap_cancel_authenticate(struct Curl_easy *data,
 static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out);
 static void imap_easy_reset(struct IMAP *imap);
 
-/*
- * IMAP protocol handler.
- */
-
-const struct Curl_handler Curl_handler_imap = {
-  "imap",                           /* scheme */
-  imap_setup_connection,            /* setup_connection */
-  imap_do,                          /* do_it */
-  imap_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  imap_connect,                     /* connect_it */
-  imap_multi_statemach,             /* connecting */
-  imap_doing,                       /* doing */
-  imap_pollset,                     /* proto_pollset */
-  imap_pollset,                     /* doing_pollset */
-  ZERO_NULL,                        /* domore_pollset */
-  ZERO_NULL,                        /* perform_pollset */
-  imap_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_IMAP,                        /* defport */
-  CURLPROTO_IMAP,                   /* protocol */
-  CURLPROTO_IMAP,                   /* family */
-  PROTOPT_CLOSEACTION |             /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
-  PROTOPT_CONN_REUSE
-};
-
-#ifdef USE_SSL
-/*
- * IMAPS protocol handler.
- */
-
-const struct Curl_handler Curl_handler_imaps = {
-  "imaps",                          /* scheme */
-  imap_setup_connection,            /* setup_connection */
-  imap_do,                          /* do_it */
-  imap_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  imap_connect,                     /* connect_it */
-  imap_multi_statemach,             /* connecting */
-  imap_doing,                       /* doing */
-  imap_pollset,                     /* proto_pollset */
-  imap_pollset,                     /* doing_pollset */
-  ZERO_NULL,                        /* domore_pollset */
-  ZERO_NULL,                        /* perform_pollset */
-  imap_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_IMAPS,                       /* defport */
-  CURLPROTO_IMAPS,                  /* protocol */
-  CURLPROTO_IMAP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
-};
-#endif
-
 #define IMAP_RESP_OK       1
 #define IMAP_RESP_NOT_OK   2
 #define IMAP_RESP_PREAUTH  3
@@ -2359,5 +2296,66 @@ static CURLcode imap_parse_custom_request(struct Curl_easy *data,
 
   return result;
 }
+
+/*
+ * IMAP protocol handler.
+ */
+const struct Curl_handler Curl_handler_imap = {
+  "imap",                           /* scheme */
+  imap_setup_connection,            /* setup_connection */
+  imap_do,                          /* do_it */
+  imap_done,                        /* done */
+  ZERO_NULL,                        /* do_more */
+  imap_connect,                     /* connect_it */
+  imap_multi_statemach,             /* connecting */
+  imap_doing,                       /* doing */
+  imap_pollset,                     /* proto_pollset */
+  imap_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
+  imap_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
+  ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
+  ZERO_NULL,                        /* follow */
+  PORT_IMAP,                        /* defport */
+  CURLPROTO_IMAP,                   /* protocol */
+  CURLPROTO_IMAP,                   /* family */
+  PROTOPT_CLOSEACTION |             /* flags */
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE
+};
+
+#ifdef USE_SSL
+/*
+ * IMAPS protocol handler.
+ */
+const struct Curl_handler Curl_handler_imaps = {
+  "imaps",                          /* scheme */
+  imap_setup_connection,            /* setup_connection */
+  imap_do,                          /* do_it */
+  imap_done,                        /* done */
+  ZERO_NULL,                        /* do_more */
+  imap_connect,                     /* connect_it */
+  imap_multi_statemach,             /* connecting */
+  imap_doing,                       /* doing */
+  imap_pollset,                     /* proto_pollset */
+  imap_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
+  imap_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
+  ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
+  ZERO_NULL,                        /* follow */
+  PORT_IMAPS,                       /* defport */
+  CURLPROTO_IMAPS,                  /* protocol */
+  CURLPROTO_IMAP,                   /* family */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
+  PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
+};
+#endif
 
 #endif /* CURL_DISABLE_IMAP */
