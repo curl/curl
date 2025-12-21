@@ -41,7 +41,6 @@
 #include "connect.h"
 #include "cw-out.h"
 #include "cw-pause.h"
-#include "vssh/ssh.h"
 #include "multiif.h"
 #include "strerror.h"
 #include "http2.h"
