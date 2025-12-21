@@ -49,7 +49,7 @@
 #include "../urldata.h"
 #include "../url.h"
 #include "../uint-hash.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../cfilters.h"

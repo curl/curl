@@ -51,7 +51,7 @@
 #endif
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"

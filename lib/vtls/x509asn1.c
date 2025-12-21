@@ -39,7 +39,7 @@
 
 #include "../urldata.h"
 #include "vtls.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../curlx/base64.h"
 #include "x509asn1.h"
 #include "../curlx/dynbuf.h"

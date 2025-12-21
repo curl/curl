@@ -30,7 +30,7 @@
 #include "cfilters.h"
 #include "progress.h"
 #include "multiif.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "cshutdn.h"
 #include "conncache.h"
 #include "curl_share.h"

@@ -32,7 +32,7 @@
 #include "http_aws_sigv4.h"
 #include "curl_sha256.h"
 #include "transfer.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "escape.h"
 #include "curlx/strparse.h"
 #include "curlx/timeval.h"

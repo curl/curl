@@ -33,7 +33,7 @@
 #include <nghttp3/nghttp3.h>
 
 #include "../urldata.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../multiif.h"
 #include "../cfilters.h"
 #include "../cf-socket.h"

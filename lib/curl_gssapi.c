@@ -27,7 +27,7 @@
 #ifdef HAVE_GSSAPI
 
 #include "curl_gssapi.h"
-#include "sendf.h"
+#include "curl_trc.h"
 
 #ifdef DEBUGBUILD
 #if defined(HAVE_GSSGNU) || !defined(_WIN32)

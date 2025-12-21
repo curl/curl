@@ -41,7 +41,7 @@
 #include "strcase.h"
 #include "curl_share.h"
 #include "vtls/vtls.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "hostip.h"
 #include "http2.h"
 #include "setopt.h"

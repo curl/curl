@@ -45,7 +45,7 @@
 #include <signal.h>
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "connect.h"
 #include "hostip.h"
 #include "hash.h"

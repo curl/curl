@@ -30,7 +30,6 @@
 
 #include "urldata.h"
 #include "idn.h"
-#include "sendf.h"
 
 #ifdef USE_LIBIDN2
 #include <idn2.h>

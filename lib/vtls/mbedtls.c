@@ -60,7 +60,7 @@
 #endif
 #include "cipher_suite.h"
 #include "../urldata.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "mbedtls.h"
 #include "vtls.h"
 #include "vtls_int.h"

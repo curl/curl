@@ -41,7 +41,7 @@
 #include <nettle/sha2.h>
 
 #include "../urldata.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "keylog.h"
 #include "gtls.h"
 #include "vtls.h"
