@@ -43,6 +43,7 @@
 #include "curlx/strparse.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
+#include "curlx/strcopy.h"
 
 static void trc_write(struct Curl_easy *data, curl_infotype type,
                       const char *ptr, size_t size)
@@ -184,7 +185,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     len = curl_mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
-      strcpy(data->set.errorbuffer, error);
+      curlx_strcopy(data->set.errorbuffer, CURL_ERROR_SIZE, error, len);
       data->state.errorbuf = TRUE; /* wrote error string */
     }
     error[len++] = '\n';

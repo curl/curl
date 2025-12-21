@@ -40,7 +40,7 @@
 #include "curl_ntlm_core.h"
 #include "escape.h"
 #include "curl_endian.h"
-
+#include "curlx/strcopy.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_SMB_EASY   "meta:proto:smb:easy"
@@ -790,7 +790,7 @@ static CURLcode smb_send_open(struct Curl_easy *data,
     msg.create_disposition = smb_swap32(SMB_FILE_OPEN);
   }
   msg.byte_count = smb_swap16((unsigned short)byte_count);
-  strcpy(msg.bytes, req->path);
+  curlx_strcopy(msg.bytes, sizeof(msg.bytes), req->path, byte_count - 1);
 
   return smb_send_message(data, smbc, req, SMB_COM_NT_CREATE_ANDX, &msg,
                           sizeof(msg) - sizeof(msg.bytes) + byte_count);

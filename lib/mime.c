@@ -32,6 +32,7 @@ struct Curl_easy;
 #include "curl_trc.h"
 #include "transfer.h"
 #include "strdup.h"
+#include "curlx/strcopy.h"
 #include "curlx/fopen.h"
 #include "curlx/base64.h"
 
@@ -602,7 +603,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
         }
       }
       if(softlinebreak) {
-        strcpy(buf, "\x3D\x0D\x0A");    /* "=\r\n" */
+        curlx_strcopy(buf, sizeof(buf), "\x3D\x0D\x0A", 3);    /* "=\r\n" */
         len = 3;
         consumed = 0;
       }

@@ -28,6 +28,7 @@
 
 #include "curl_gssapi.h"
 #include "curl_trc.h"
+#include "curlx/strcopy.h"
 
 #ifdef DEBUGBUILD
 #if defined(HAVE_GSSGNU) || !defined(_WIN32)
@@ -224,7 +225,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    strcpy(ctx->creds, creds);
+    curlx_strcopy(ctx->creds, sizeof(ctx->creds), creds, strlen(creds));
     ctx->flags = req_flags;
   }
 
