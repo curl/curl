@@ -270,7 +270,12 @@ typedef unsigned int bit;
  */
 #undef DEBUGASSERT
 #ifdef DEBUGBUILD
+#ifdef CURL_DEBUGASSERT
+/* External assertion handler for custom integrations */
+#define DEBUGASSERT(x) CURL_DEBUGASSERT(x)
+#else
 #define DEBUGASSERT(x) assert(x)
+#endif
 #else
 #define DEBUGASSERT(x) do {} while(0)
 #endif
