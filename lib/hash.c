@@ -333,7 +333,7 @@ size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
 
   while(key_str < end) {
     size_t j = (size_t)*key_str++;
-    h += h << 5;
+    h = (size_t)(h + (h << 5));
     h ^= j;
   }
 
