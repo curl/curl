@@ -610,12 +610,11 @@ static const struct Curl_cwtype * const transfer_unencoders[] = {
 
 /* Return the list of comma-separated names of supported encodings.
  */
-CURLcode Curl_get_content_encodings(char **str)
+char *Curl_get_content_encodings(void)
 {
   struct dynbuf enc;
   const struct Curl_cwtype * const *cep;
   CURLcode result = CURLE_OK;
-
   curlx_dyn_init(&enc, 255);
 
   for(cep = general_unencoders; *cep && !result; cep++) {
@@ -626,8 +625,8 @@ CURLcode Curl_get_content_encodings(char **str)
       result = curlx_dyn_add(&enc, ce->name);
   }
   if(!result)
-    *str = curlx_dyn_ptr(&enc);
-  return result;
+    return curlx_dyn_ptr(&enc);
+  return NULL;
 }
 
 /* Deferred error dummy writer. */

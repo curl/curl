@@ -1726,9 +1726,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      *
      */
     if(ptr && !*ptr) {
-      result = Curl_get_content_encodings(&ptr);
-      if(!result)
-        s->str[STRING_ENCODING] = ptr;
+      ptr = Curl_get_content_encodings();
+      if(!ptr)
+        result = CURLE_OUT_OF_MEMORY;
       return result;
     }
     return Curl_setstropt(&s->str[STRING_ENCODING], ptr);
