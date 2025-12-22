@@ -64,7 +64,7 @@ char *curl_easy_escape(CURL *data, const char *string, int inlength)
 
   curlx_dyn_init(&d, length * 3 + 1);
 
-  while(length--) {
+  while(length) {
     /* treat the characters unsigned */
     unsigned char in = (unsigned char)*string++;
 
@@ -80,6 +80,7 @@ char *curl_easy_escape(CURL *data, const char *string, int inlength)
       if(curlx_dyn_addn(&d, out, 3))
         return NULL;
     }
+    length--;
   }
 
   return curlx_dyn_ptr(&d);
