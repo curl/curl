@@ -53,11 +53,9 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "escape.h"
-#include "progress.h"
 #include "dict.h"
 
 #define DICT_MATCH   "/MATCH:"

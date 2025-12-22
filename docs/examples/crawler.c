@@ -183,11 +183,11 @@ int main(void)
   int pending;
   int complete;
   int still_running;
-  CURLcode res;
+  CURLcode result;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   signal(SIGINT, sighandler);
   LIBXML_TEST_VERSION

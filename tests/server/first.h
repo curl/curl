@@ -98,8 +98,6 @@ enum {
   DOCNUMBER_404        = -1
 };
 
-#include <curl/curl.h> /* for curl_socket_t */
-
 #ifdef USE_UNIX_SOCKETS
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */

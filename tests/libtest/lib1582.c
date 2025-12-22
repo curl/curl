@@ -25,7 +25,7 @@
 
 static CURLcode test_lib1582(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -48,11 +48,11 @@ static CURLcode test_lib1582(const char *URL)
   test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   test_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

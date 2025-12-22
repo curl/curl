@@ -38,6 +38,7 @@ permissions: {}
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
+  CURL_TEST_MIN: 1600
   # handled in renovate.json
   OPENSSL_VERSION: 3.6.0
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
@@ -354,6 +355,7 @@ jobs:
         build:
           - name: 'openssl'
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            tflags: '--min=1640'
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --with-openssl=/home/runner/openssl/build --with-ngtcp2 --enable-ssls-export
@@ -376,6 +378,7 @@ jobs:
 
           - name: 'libressl'
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON
 
@@ -388,6 +391,7 @@ jobs:
 
           - name: 'awslc'
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON
@@ -401,6 +405,7 @@ jobs:
 
           - name: 'boringssl'
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON
@@ -417,6 +422,7 @@ jobs:
             install_packages: libp11-kit-dev libssh-dev
             PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
+            tflags: '--min=1840'
             generate: >-
               -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH=ON
               -DCMAKE_UNITY_BUILD=ON
@@ -433,6 +439,7 @@ jobs:
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            tflags: '--min=1840'
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON
@@ -440,6 +447,7 @@ jobs:
           - name: 'openssl-quic'
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            tflags: '--min=1640'
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
@@ -463,6 +471,7 @@ jobs:
 
           - name: 'quiche'
             PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig:/home/runner/quiche/target/release
+            tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/quiche/deps/boringssl/src
               -DUSE_QUICHE=ON
@@ -630,7 +639,7 @@ jobs:
           # lib dir
           # /home/runner/quiche/quiche/deps/boringssl/src/lib
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -702,8 +711,10 @@ jobs:
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
+        env:
+          TFLAGS: '${{ matrix.build.tflags }}'
         run: |
-          export TFLAGS='-n'
+          TFLAGS+=' -n'
           source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
@@ -714,7 +725,7 @@ jobs:
       - name: 'run tests (valgrind)'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
-          export TFLAGS='-j6 HTTP/3'
+          export TFLAGS='-j6 --min=4 HTTP/3'
           source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci

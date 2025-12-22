@@ -45,8 +45,6 @@ extern FILE *tool_stderr;
  * curl tool certainly uses libcurl's external interface.
  */
 
-#include <curl/curl.h> /* external interface */
-
 #include <curlx/curlx.h>
 
 /*
@@ -73,7 +71,7 @@ extern FILE *tool_stderr;
 #endif
 
 #ifndef tool_nop_stmt
-#define tool_nop_stmt do { } while(0)
+#define tool_nop_stmt do {} while(0)
 #endif
 
 #ifdef _WIN32

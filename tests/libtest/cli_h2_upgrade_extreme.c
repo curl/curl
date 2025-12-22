@@ -37,12 +37,12 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
 {
   CURLM *multi = NULL;
   CURL *curl;
-  CURLMcode mc;
+  CURLMcode mresult;
   int running_handles = 0, start_count, numfds;
   CURLMsg *msg;
   int msgs_in_queue;
   char range[128];
-  CURLcode res = (CURLcode)1;
+  CURLcode result = (CURLcode)1;
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
@@ -85,28 +85,28 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
                      (curl_off_t)16384);
       curl_easy_setopt(curl, CURLOPT_RANGE, range);
 
-      mc = curl_multi_add_handle(multi, curl);
-      if(mc != CURLM_OK) {
+      mresult = curl_multi_add_handle(multi, curl);
+      if(mresult != CURLM_OK) {
         curl_mfprintf(stderr, "curl_multi_add_handle: %s\n",
-                      curl_multi_strerror(mc));
+                      curl_multi_strerror(mresult));
         curl_easy_cleanup(curl);
         goto cleanup;
       }
       --start_count;
     }
 
-    mc = curl_multi_perform(multi, &running_handles);
-    if(mc != CURLM_OK) {
+    mresult = curl_multi_perform(multi, &running_handles);
+    if(mresult != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_perform: %s\n",
-                    curl_multi_strerror(mc));
+                    curl_multi_strerror(mresult));
       goto cleanup;
     }
 
     if(running_handles) {
-      mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
-      if(mc != CURLM_OK) {
+      mresult = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
+      if(mresult != CURLM_OK) {
         curl_mfprintf(stderr, "curl_multi_poll: %s\n",
-                      curl_multi_strerror(mc));
+                      curl_multi_strerror(mresult));
         goto cleanup;
       }
     }
@@ -148,7 +148,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   } while(running_handles > 0 || start_count);
 
   curl_mfprintf(stderr, "exiting\n");
-  res = CURLE_OK;
+  result = CURLE_OK;
 
 cleanup:
 
@@ -167,5 +167,5 @@ cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

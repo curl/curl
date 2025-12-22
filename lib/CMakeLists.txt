@@ -26,7 +26,7 @@ set(LIBCURL_OUTPUT_NAME "${LIB_NAME}" CACHE STRING "Basename of the curl library
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${CURL_DEBUG_MACROS} "BUILDING_LIBCURL")
 
-configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
+configure_file("curl_config-cmake.h.in" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # Get CSOURCES, HHEADERS, LIB_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
@@ -344,5 +344,14 @@ if(CURL_ENABLE_EXPORT_TARGET)
   export(TARGETS ${libcurl_export}
     FILE "${PROJECT_BINARY_DIR}/libcurl-target.cmake"
     NAMESPACE ${PROJECT_NAME}::
+  )
+endif()
+
+if(PERL_EXECUTABLE)
+  add_custom_target(curl-optiontable
+    COMMENT "Generating lib/easyoptions.c" VERBATIM USES_TERMINAL
+    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/optiontable.pl" < "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
+      > "${PROJECT_SOURCE_DIR}/lib/easyoptions.c"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/optiontable.pl" "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
   )
 endif()

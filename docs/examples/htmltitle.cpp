@@ -86,7 +86,7 @@ static size_t writer(char *data, size_t size, size_t nmemb,
 //
 static bool init(CURL *&curl, const char *url)
 {
-  CURLcode res;
+  CURLcode result;
 
   curl = curl_easy_init();
 
@@ -95,32 +95,32 @@ static bool init(CURL *&curl, const char *url)
     return false;
   }
 
-  res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
-  if(res != CURLE_OK) {
-    fprintf(stderr, "Failed to set error buffer [%d]\n", res);
+  result = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
+  if(result != CURLE_OK) {
+    fprintf(stderr, "Failed to set error buffer [%d]\n", result);
     return false;
   }
 
-  res = curl_easy_setopt(curl, CURLOPT_URL, url);
-  if(res != CURLE_OK) {
+  result = curl_easy_setopt(curl, CURLOPT_URL, url);
+  if(result != CURLE_OK) {
     fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
     return false;
   }
 
-  res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  if(res != CURLE_OK) {
+  result = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if(result != CURLE_OK) {
     fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);
     return false;
   }
 
-  res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
-  if(res != CURLE_OK) {
+  result = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
+  if(result != CURLE_OK) {
     fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
     return false;
   }
 
-  res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
-  if(res != CURLE_OK) {
+  result = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+  if(result != CURLE_OK) {
     fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
     return false;
   }
@@ -253,7 +253,7 @@ static void parseHtml(const std::string &html,
 int main(int argc, char *argv[])
 {
   CURL *curl = NULL;
-  CURLcode res;
+  CURLcode result;
   std::string title;
 
   // Ensure one argument is given
@@ -263,9 +263,9 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   // Initialize CURL handle
 
@@ -277,10 +277,10 @@ int main(int argc, char *argv[])
 
   // Retrieve content for the URL
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 
-  if(res != CURLE_OK) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);
     return EXIT_FAILURE;
   }
@@ -291,5 +291,5 @@ int main(int argc, char *argv[])
   // Display the extracted title
   printf("Title: %s\n", title.c_str());
 
-  return (int)res;
+  return (int)result;
 }

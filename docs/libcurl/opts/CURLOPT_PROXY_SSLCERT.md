@@ -62,13 +62,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT, "client.pem");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
     curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

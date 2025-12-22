@@ -146,8 +146,6 @@ typedef unsigned int curl_prot_t;
 
 #include "curlx/timeval.h"
 
-#include <curl/curl.h>
-
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
@@ -179,7 +177,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #include "smtp.h"
 #include "ftp.h"
 #include "file.h"
-#include "vssh/ssh.h"
 #include "http.h"
 #include "rtsp.h"
 #include "smb.h"
@@ -741,14 +738,14 @@ struct connectdata {
 
 #ifndef CURL_DISABLE_PROXY
 #define CURL_CONN_HOST_DISPNAME(c) \
-          ((c)->bits.socksproxy ? (c)->socks_proxy.host.dispname : \
-            (c)->bits.httpproxy ? (c)->http_proxy.host.dispname : \
-              (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
-                (c)->host.dispname)
+  ((c)->bits.socksproxy ? (c)->socks_proxy.host.dispname : \
+    (c)->bits.httpproxy ? (c)->http_proxy.host.dispname : \
+      (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
+        (c)->host.dispname)
 #else
 #define CURL_CONN_HOST_DISPNAME(c) \
-          (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
-            (c)->host.dispname
+  (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
+    (c)->host.dispname
 #endif
 
 /* The end of connectdata. */
@@ -802,6 +799,7 @@ struct pgrs_dir {
 };
 
 struct Progress {
+  struct curltime now; /* current time of processing */
   time_t lastshow; /* time() of the last displayed progress meter or NULL to
                       force redraw at next call */
   struct pgrs_dir ul;
@@ -1133,6 +1131,8 @@ struct UrlState {
   BIT(http_hd_te); /* Added HTTP header TE: */
   BIT(http_hd_upgrade); /* Added HTTP header Upgrade: */
   BIT(http_hd_h2_settings); /* Added HTTP header H2Settings: */
+  BIT(maybe_folded);
+  BIT(leading_unfold); /* unfold started, this is the leading bytes */
 #endif
 };
 
@@ -1159,7 +1159,7 @@ enum dupstring {
   STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
   STRING_SSL_CIPHER13_LIST, /* list of TLS 1.3 ciphers to use */
   STRING_SSL_CRLFILE,     /* CRL file to check certificate */
-  STRING_SSL_ISSUERCERT, /* issuer cert file to check certificate */
+  STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
   STRING_SERVICE_NAME,    /* Service name */
 #ifndef CURL_DISABLE_PROXY
   STRING_CERT_PROXY,      /* client certificate filename */

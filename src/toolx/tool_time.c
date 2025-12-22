@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_MBEDTLS_THREADLOCK_H
-#define HEADER_CURL_MBEDTLS_THREADLOCK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,7 +6,6 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,26 +21,41 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "tool_time.h"
 
-#ifdef USE_MBEDTLS
-
-#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || defined(_WIN32)
-
-int Curl_mbedtlsthreadlock_thread_setup(void);
-int Curl_mbedtlsthreadlock_thread_cleanup(void);
-int Curl_mbedtlsthreadlock_lock_function(size_t n);
-int Curl_mbedtlsthreadlock_unlock_function(size_t n);
-
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 3)
+#include <sec_api/time_s.h>  /* for _localtime32_s(), _localtime64_s() */
+#ifdef _USE_32BIT_TIME_T
+#define localtime_s _localtime32_s
 #else
+#define localtime_s _localtime64_s
+#endif
+#endif
 
-#define Curl_mbedtlsthreadlock_thread_setup() 1
-#define Curl_mbedtlsthreadlock_thread_cleanup() 1
-#define Curl_mbedtlsthreadlock_lock_function(x) 1
-#define Curl_mbedtlsthreadlock_unlock_function(x) 1
+/*
+ * toolx_localtime() is a localtime() replacement for portability. Do not use
+ * the localtime_s(), localtime_r() or localtime() functions anywhere else but
+ * here.
+ */
+CURLcode toolx_localtime(time_t intime, struct tm *store)
+{
+#ifdef _WIN32
+  if(localtime_s(store, &intime)) /* thread-safe */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#elif defined(HAVE_LOCALTIME_R)
+  const struct tm *tm;
+  tm = localtime_r(&intime, store); /* thread-safe */
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#else
+  const struct tm *tm;
+  /* !checksrc! disable BANNEDFUNC 1 */
+  tm = localtime(&intime); /* not thread-safe */
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
+  else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#endif
 
-#endif /* (USE_THREADS_POSIX && HAVE_PTHREAD_H) || _WIN32 */
-
-#endif /* USE_MBEDTLS */
-
-#endif /* HEADER_CURL_MBEDTLS_THREADLOCK_H */
+  return CURLE_OK;
+}

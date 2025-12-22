@@ -389,7 +389,7 @@ Details via CMake
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
 - `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
-- `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
+- `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
 
 ## Dependency options (tools)
 
@@ -544,6 +544,9 @@ Note: These variables are internal and subject to change.
 - `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
 - `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
 - `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
+- `curl-listcats`:          Generate help category constants for `src/tool_help.h` from documentation.
+- `curl-listhelp`:          Generate `src/tool_listhelp.c` from documentation.
+- `curl-optiontable`:       Generate `lib/easyoptions.c` from documentation.
 
 # Migrating from Visual Studio IDE Project Files
 

@@ -27,7 +27,7 @@ option(CURL_COMPLETION_ZSH "Install zsh completions" OFF)
 
 if(CURL_COMPLETION_FISH OR
    CURL_COMPLETION_ZSH)
-  if(PERL_FOUND)
+  if(Perl_FOUND)
     if(CURL_COMPLETION_FISH)
       set(_completion_fish "${CMAKE_CURRENT_BINARY_DIR}/curl.fish")
       add_custom_command(OUTPUT "${_completion_fish}"

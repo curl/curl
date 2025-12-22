@@ -48,7 +48,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "formdata.h"
@@ -57,7 +56,6 @@
 #include "curlx/base64.h"
 #include "cookie.h"
 #include "vauth/vauth.h"
-#include "vtls/vtls.h"
 #include "vquic/vquic.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
@@ -76,7 +74,6 @@
 #include "strcase.h"
 #include "content_encoding.h"
 #include "http_proxy.h"
-#include "curlx/warnless.h"
 #include "http2.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -85,8 +82,8 @@
 #include "hsts.h"
 #include "ws.h"
 #include "bufref.h"
-#include "curl_ctype.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 
 /*
  * Forward declarations.
@@ -111,6 +108,8 @@ static CURLcode http_statusline(struct Curl_easy *data,
                                 struct connectdata *conn);
 static CURLcode http_target(struct Curl_easy *data, struct dynbuf *req);
 static CURLcode http_useragent(struct Curl_easy *data);
+static CURLcode http_write_header(struct Curl_easy *data,
+                                  const char *hd, size_t hdlen);
 
 /*
  * HTTP handler interface.
@@ -1575,6 +1574,10 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   data->state.authhost.multipass = FALSE;
   data->state.authproxy.multipass = FALSE;
 
+  if(curlx_dyn_len(&data->state.headerb)) {
+    (void)http_write_header(data, curlx_dyn_ptr(&data->state.headerb),
+                            curlx_dyn_len(&data->state.headerb));
+  }
   curlx_dyn_reset(&data->state.headerb);
 
   if(status)
@@ -1780,7 +1783,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
     /* no condition was asked for */
     return CURLE_OK;
 
-  result = Curl_gmtime(data->set.timevalue, &keeptime);
+  result = curlx_gmtime(data->set.timevalue, &keeptime);
   if(result) {
     failf(data, "Invalid TIMEVALUE");
     return result;
@@ -2947,6 +2950,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* make sure the header buffer is reset - if there are leftovers from a
      previous transfer */
   curlx_dyn_reset(&data->state.headerb);
+  data->state.maybe_folded = FALSE;
 
   if(!data->conn->bits.reuse) {
     result = http_check_new_conn(data);
@@ -4283,6 +4287,21 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+/* cut off the newline characters */
+static void unfold_header(struct Curl_easy *data)
+{
+  size_t len = curlx_dyn_len(&data->state.headerb);
+  char *hd = curlx_dyn_ptr(&data->state.headerb);
+  if(len && (hd[len - 1] == '\n'))
+    len--;
+  if(len && (hd[len - 1] == '\r'))
+    len--;
+  while(len && (ISBLANK(hd[len - 1]))) /* strip off trailing whitespace */
+    len--;
+  curlx_dyn_setlen(&data->state.headerb, len);
+  data->state.leading_unfold = TRUE;
+}
+
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
@@ -4296,10 +4315,49 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
   char *end_ptr;
   bool leftover_body = FALSE;
 
+  /* we have bytes for the next header, make sure it is not a folded header
+     before passing it on */
+  if(data->state.maybe_folded && blen) {
+    if(ISBLANK(buf[0])) {
+      /* folded, remove the trailing newlines and append the next header */
+      unfold_header(data);
+    }
+    else {
+      /* the header data we hold is a complete header, pass it on */
+      size_t ignore_this;
+      result = http_rw_hd(data, curlx_dyn_ptr(&data->state.headerb),
+                          curlx_dyn_len(&data->state.headerb),
+                          NULL, 0, &ignore_this);
+      curlx_dyn_reset(&data->state.headerb);
+      if(result)
+        return result;
+    }
+    data->state.maybe_folded = FALSE;
+  }
+
   /* header line within buffer loop */
   *pconsumed = 0;
   while(blen && k->header) {
     size_t consumed;
+    size_t hlen;
+    char *hd;
+    size_t unfold_len = 0;
+
+    if(data->state.leading_unfold) {
+      /* immediately after an unfold, keep only a single whitespace */
+      while(blen && ISBLANK(buf[0])) {
+        buf++;
+        blen--;
+        unfold_len++;
+      }
+      if(blen) {
+        /* insert a single space */
+        result = curlx_dyn_addn(&data->state.headerb, " ", 1);
+        if(result)
+          return result;
+        data->state.leading_unfold = FALSE; /* done now */
+      }
+    }
 
     end_ptr = memchr(buf, '\n', blen);
     if(!end_ptr) {
@@ -4308,7 +4366,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       result = curlx_dyn_addn(&data->state.headerb, buf, blen);
       if(result)
         return result;
-      *pconsumed += blen;
+      *pconsumed += blen + unfold_len;
 
       if(!k->headerline) {
         /* check if this looks like a protocol header */
@@ -4337,24 +4395,26 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       goto out; /* read more and try again */
     }
 
-    /* decrease the size of the remaining (supposed) header line */
+    /* the size of the remaining header line */
     consumed = (end_ptr - buf) + 1;
+
     result = curlx_dyn_addn(&data->state.headerb, buf, consumed);
     if(result)
       return result;
     blen -= consumed;
     buf += consumed;
-    *pconsumed += consumed;
+    *pconsumed += consumed + unfold_len;
 
     /****
      * We now have a FULL header line in 'headerb'.
      *****/
 
+    hlen = curlx_dyn_len(&data->state.headerb);
+    hd = curlx_dyn_ptr(&data->state.headerb);
+
     if(!k->headerline) {
-      /* the first read header */
-      statusline st = checkprotoprefix(data, conn,
-                                       curlx_dyn_ptr(&data->state.headerb),
-                                       curlx_dyn_len(&data->state.headerb));
+      /* the first read "header", the status line */
+      statusline st = checkprotoprefix(data, conn, hd, hlen);
       if(st == STATUS_BAD) {
         streamclose(conn, "bad HTTP: No end-of-message indicator");
         /* this is not the beginning of a protocol first header line.
@@ -4372,10 +4432,25 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
         goto out;
       }
     }
+    else {
+      if(hlen && !ISNEWLINE(hd[0])) {
+        /* this is NOT the header separator */
 
-    result = http_rw_hd(data, curlx_dyn_ptr(&data->state.headerb),
-                        curlx_dyn_len(&data->state.headerb),
-                        buf, blen, &consumed);
+        /* if we have bytes for the next header, check for folding */
+        if(blen && ISBLANK(buf[0])) {
+          /* remove the trailing CRLF and append the next header */
+          unfold_header(data);
+          continue;
+        }
+        else if(!blen) {
+          /* this might be a folded header so deal with it in next invoke */
+          data->state.maybe_folded = TRUE;
+          break;
+        }
+      }
+    }
+
+    result = http_rw_hd(data, hd, hlen, buf, blen, &consumed);
     /* We are done with this line. We reset because response
      * processing might switch to HTTP/2 and that might call us
      * directly again. */
@@ -4892,7 +4967,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE, "
            "timeout %dms", data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
-    ctx->start = curlx_now();
+    ctx->start = *Curl_pgrs_now(data);
     Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
     *nread = 0;
     *eos = FALSE;
@@ -4903,7 +4978,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     *eos = FALSE;
     return CURLE_READ_ERROR;
   case EXP100_AWAITING_CONTINUE:
-    ms = curlx_timediff_ms(curlx_now(), ctx->start);
+    ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->start);
     if(ms < data->set.expect_100_timeout) {
       DEBUGF(infof(data, "cr_exp100_read, AWAITING_CONTINUE, not expired"));
       *nread = 0;

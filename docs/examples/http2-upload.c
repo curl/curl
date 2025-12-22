@@ -161,7 +161,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     known_offset = 1;
   }
   secs = epoch_offset + tv.tv_sec;
-  now = localtime(&secs);  /* not thread safe but we do not care */
+  now = localtime(&secs);  /* not thread-safe but we do not care */
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
            now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
 
@@ -287,7 +287,7 @@ static int setup(struct input *t, int num, const char *upload)
  */
 int main(int argc, char **argv)
 {
-  CURLcode res;
+  CURLcode result;
   struct input *trans;
   CURLM *multi = NULL;
   int i;
@@ -308,9 +308,9 @@ int main(int argc, char **argv)
   else
     num_transfers = 3;  /* a suitable low default */
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   trans = calloc(num_transfers, sizeof(*trans));
   if(!trans) {
@@ -338,13 +338,13 @@ int main(int argc, char **argv)
   curl_multi_setopt(multi, CURLMOPT_MAX_HOST_CONNECTIONS, 1L);
 
   do {
-    CURLMcode mc = curl_multi_perform(multi, &still_running);
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if(mresult)
       break;
 
   } while(still_running);

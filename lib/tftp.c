@@ -47,7 +47,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "transfer.h"
@@ -56,7 +55,6 @@
 #include "progress.h"
 #include "connect.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "multiif.h"
 #include "url.h"
 #include "strcase.h"
 #include "select.h"
@@ -143,7 +141,6 @@ struct tftp_conn {
   BIT(remote_pinned);
 };
 
-
 /* Forward declarations */
 static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event);
 static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event);
@@ -162,7 +159,6 @@ static CURLcode tftp_translate_code(tftp_error_t error);
 /*
  * TFTP protocol handler.
  */
-
 const struct Curl_handler Curl_handler_tftp = {
   "tftp",                               /* scheme */
   tftp_setup_connection,                /* setup_connection */
@@ -205,7 +201,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
   bool start = (state->state == TFTP_STATE_START);
 
   /* Compute drop-dead time */
-  timeout_ms = Curl_timeleft_ms(state->data, NULL, start);
+  timeout_ms = Curl_timeleft_ms(state->data, start);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */
@@ -793,7 +789,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
     }
     /* Update the progress meter */
     k->writebytecount += state->sbytes;
-    Curl_pgrsSetUploadCounter(data, k->writebytecount);
+    Curl_pgrs_upload_inc(data, state->sbytes);
     break;
 
   case TFTP_EVENT_TIMEOUT:
@@ -1192,7 +1188,7 @@ static timediff_t tftp_state_timeout(struct tftp_conn *state,
   if(event)
     *event = TFTP_EVENT_NONE;
 
-  timeout_ms = Curl_timeleft_ms(state->data, NULL,
+  timeout_ms = Curl_timeleft_ms(state->data,
                                 (state->state == TFTP_STATE_START));
   if(timeout_ms < 0) {
     state->error = TFTP_ERR_TIMEOUT;

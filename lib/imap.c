@@ -36,7 +36,6 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#include "curlx/dynbuf.h"
 
 #ifndef CURL_DISABLE_IMAP
 
@@ -54,7 +53,7 @@
 #include <inet.h>
 #endif
 
-#include <curl/curl.h>
+#include "curlx/dynbuf.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -62,7 +61,6 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
 #include "imap.h"
 #include "mime.h"
 #include "curlx/strparse.h"
@@ -71,12 +69,9 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "select.h"
-#include "multiif.h"
 #include "url.h"
 #include "bufref.h"
 #include "curl_sasl.h"
-#include "curlx/warnless.h"
-#include "curl_ctype.h"
 
 
 /* meta key for storing protocol meta at easy handle */
@@ -141,7 +136,6 @@ struct IMAP {
   unsigned int uidvalidity; /* UIDVALIDITY to check in select */
   BIT(uidvalidity_set);
 };
-
 
 /* Local API functions */
 static CURLcode imap_regular_transfer(struct Curl_easy *data,
@@ -1995,7 +1989,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
   curlx_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
-  Curl_pp_init(pp);
+  Curl_pp_init(pp, Curl_pgrs_now(data));
 
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))
     return CURLE_OUT_OF_MEMORY;

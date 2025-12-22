@@ -42,18 +42,18 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
     curl_easy_setopt(curl, CURLOPT_USERNAME, "shrek");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "swamp");
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       long auth;
-      res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &auth);
-      if(!res) {
+      result = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &auth);
+      if(!result) {
         if(!auth)
           printf("No auth used\n");
         else {

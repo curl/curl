@@ -130,7 +130,7 @@ static void *t586_test_fire(void *ptr)
 /* test function */
 static CURLcode test_lib586(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLSHcode scode = CURLSHE_OK;
   struct t586_Tdata tdata;
   CURL *curl;
@@ -208,7 +208,7 @@ static CURLcode test_lib586(const char *URL)
   test_setopt(curl, CURLOPT_SHARE, share);
 
   curl_mprintf("PERFORM\n");
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
   /* try to free share, expect to fail because share is in use */
   curl_mprintf("try SHARE_CLEANUP...\n");
@@ -236,5 +236,5 @@ test_cleanup:
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

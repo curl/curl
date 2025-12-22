@@ -51,7 +51,7 @@
 int main(void)
 {
   CURL *curl = NULL;
-  CURLcode res;
+  CURLcode result;
   FILE *headerfile;
   const char *pPassphrase = NULL;
 
@@ -70,9 +70,9 @@ int main(void)
   pKeyType = "PEM";
 #endif
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result) {
+    return (int)result;
   }
 
   headerfile = fopen(pHeaderFile, "wb");
@@ -128,12 +128,12 @@ int main(void)
   /* disconnect if we cannot validate server's cert */
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 
-  /* Perform the request, res gets the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result gets the return code */
+  result = curl_easy_perform(curl);
   /* Check for errors */
-  if(res != CURLE_OK)
+  if(result != CURLE_OK)
     fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+            curl_easy_strerror(result));
 
 error:
 
@@ -146,5 +146,5 @@ error:
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

@@ -1265,7 +1265,7 @@ dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_getaddrinfo, then
 dnl HAVE_GETADDRINFO will be defined. Additionally when
 dnl HAVE_GETADDRINFO gets defined this will also attempt
-dnl to find out if getaddrinfo happens to be threadsafe,
+dnl to find out if getaddrinfo happens to be thread-safe,
 dnl defining HAVE_GETADDRINFO_THREADSAFE when true.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
@@ -1414,7 +1414,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
-    AC_MSG_CHECKING([if getaddrinfo is threadsafe])
+    AC_MSG_CHECKING([if getaddrinfo is thread-safe])
     if test "$curl_cv_apple" = "yes"; then
       dnl Darwin 6.0 and macOS 10.2.X and newer
       tst_tsafe_getaddrinfo="yes"
@@ -1479,7 +1479,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     AC_MSG_RESULT([$tst_tsafe_getaddrinfo])
     if test "$tst_tsafe_getaddrinfo" = "yes"; then
       AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_THREADSAFE, 1,
-        [Define to 1 if the getaddrinfo function is threadsafe.])
+        [Define to 1 if the getaddrinfo function is thread-safe.])
       curl_cv_func_getaddrinfo_threadsafe="yes"
     else
       curl_cv_func_getaddrinfo_threadsafe="no"
@@ -2134,7 +2134,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
       ]],[[
         time_t tm = 1170352587;
         struct tm result;
-        if(gmtime_r(&tm, &result) != 0)
+        if(gmtime_r(&tm, &result) == 0)
           return 1;
         (void)result;
       ]])
@@ -2200,6 +2200,126 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   else
     AC_MSG_RESULT([no])
     curl_cv_func_gmtime_r="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_LOCALTIME_R
+dnl -------------------------------------------------
+dnl Verify if localtime_r is available, prototyped, can
+dnl be compiled and seems to work. If all of these are
+dnl true, and usage has not been previously disallowed
+dnl with shell variable curl_disallow_localtime_r, then
+dnl HAVE_LOCALTIME_R will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
+  AC_REQUIRE([CURL_INCLUDES_TIME])dnl
+  #
+  tst_links_localtime_r="unknown"
+  tst_proto_localtime_r="unknown"
+  tst_compi_localtime_r="unknown"
+  tst_works_localtime_r="unknown"
+  tst_allow_localtime_r="unknown"
+  #
+  AC_MSG_CHECKING([if localtime_r can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([localtime_r])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_localtime_r="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_localtime_r="no"
+  ])
+  #
+  if test "$tst_links_localtime_r" = "yes"; then
+    AC_MSG_CHECKING([if localtime_r is prototyped])
+    AC_EGREP_CPP([localtime_r],[
+      $curl_includes_time
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_localtime_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_localtime_r="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_localtime_r" = "yes"; then
+    AC_MSG_CHECKING([if localtime_r is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_time
+      ]],[[
+        time_t clock = 1170352587;
+        struct tm result;
+        if(localtime_r(&clock, &result) != 0)
+          return 1;
+        (void)result;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_localtime_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_localtime_r="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "$cross_compiling" != "yes" &&
+    test "$tst_compi_localtime_r" = "yes"; then
+    AC_MSG_CHECKING([if localtime_r seems to work])
+    CURL_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
+        $curl_includes_time
+      ]],[[
+        time_t clock = 1170352587;
+        struct tm *tmp = 0;
+        struct tm result;
+        tmp = localtime_r(&clock, &result);
+        (void)result;
+        if(tmp)
+          return 0;
+        else
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_localtime_r="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_localtime_r="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_localtime_r" = "yes" &&
+    test "$tst_works_localtime_r" != "no"; then
+    AC_MSG_CHECKING([if localtime_r usage allowed])
+    if test "x$curl_disallow_localtime_r" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_localtime_r="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_localtime_r="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if localtime_r might be used])
+  if test "$tst_links_localtime_r" = "yes" &&
+     test "$tst_proto_localtime_r" = "yes" &&
+     test "$tst_compi_localtime_r" = "yes" &&
+     test "$tst_allow_localtime_r" = "yes" &&
+     test "$tst_works_localtime_r" != "no"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_LOCALTIME_R, 1,
+      [Define to 1 if you have a working localtime_r function.])
+    curl_cv_func_localtime_r="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_localtime_r="no"
   fi
 ])
 

@@ -30,12 +30,11 @@
 #include "curl_rtmp.h"
 #include "urldata.h"
 #include "url.h"
-#include "curlx/nonblock.h" /* for curlx_nonblock */
+#include "curlx/nonblock.h"
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
 #include "bufref.h"
-#include "curlx/warnless.h"
-#include <curl/curl.h>
+
 #include <librtmp/rtmp.h>
 
 #if defined(USE_WINSOCK) || defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)

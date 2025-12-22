@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
+#include "curl_setup.h"
 
 char Curl_raw_toupper(char in);
 char Curl_raw_tolower(char in);

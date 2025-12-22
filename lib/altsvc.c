@@ -28,18 +28,15 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
-#include <curl/curl.h>
 #include "urldata.h"
 #include "altsvc.h"
 #include "curl_fopen.h"
 #include "curl_get_line.h"
 #include "parsedate.h"
 #include "sendf.h"
-#include "curlx/warnless.h"
-#include "rename.h"
-#include "strdup.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 #include "connect.h"
 
 #define MAX_ALTSVC_LINE    4095
@@ -241,7 +238,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
   const char *dst6_post = "";
   const char *src6_pre = "";
   const char *src6_post = "";
-  CURLcode result = Curl_gmtime(as->expires, &stamp);
+  CURLcode result = curlx_gmtime(as->expires, &stamp);
   if(result)
     return result;
 #ifdef USE_IPV6
@@ -379,7 +376,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
         break;
     }
     curlx_fclose(out);
-    if(!result && tempstore && Curl_rename(tempstore, file))
+    if(!result && tempstore && curlx_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 
     if(result && tempstore)

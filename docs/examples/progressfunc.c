@@ -77,9 +77,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -95,14 +95,14 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &prog);
 
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(res != CURLE_OK)
-      fprintf(stderr, "%s\n", curl_easy_strerror(res));
+    if(result != CURLE_OK)
+      fprintf(stderr, "%s\n", curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

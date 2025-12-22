@@ -372,14 +372,14 @@ static CURLcode test_lib1521(const char *URL)
   struct curl_certinfo *certinfo;
   struct curl_tlssessioninfo *tlssession;
   struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0};
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   (void)URL;
   global_init(CURL_GLOBAL_ALL);
   easy_init(dep);
   easy_init(curl);
   share = curl_share_init();
   if(!share) {
-    res = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
 
@@ -447,7 +447,8 @@ while(<STDIN>) {
         # the first check for an option
         my $fpref = "${exists}${w2}CURLcode first =\n${w3}curl_easy_setopt(curl, $name,";
         my $ifpresent = "${w2}if(present(first)) {\n";
-        my $pref = "${w3}res = curl_easy_setopt(curl, $name,";
+        my $pref = "${w3}result =\n".
+                   "${w3}  curl_easy_setopt(curl, $name,";
         my $i = ' ' x (length($w) + 25);
         my $fcheck = <<MOO
     if(first && present(first)) /* first setopt check only */
@@ -460,8 +461,8 @@ MOO
 MOO
             ;
         my $check = <<MOO
-      if(res)
-        err("$name", res, __LINE__);
+      if(result)
+        err("$name", result, __LINE__);
 MOO
             ;
         my $flongcheckzero = <<MOO
@@ -472,20 +473,20 @@ MOO
             ;
 
         my $longcheck = <<MOO
-      if(res && !bad_long(res, $name))
-        errlong("$name", res, __LINE__);
+      if(result && !bad_long(result, $name))
+        errlong("$name", result, __LINE__);
 MOO
             ;
 
         my $negcheck = <<MOO
-      if(res && bad_neg($name))
-        errneg("$name", res, __LINE__);
+      if(result && bad_neg($name))
+        errneg("$name", result, __LINE__);
 MOO
             ;
 
         my $nullcheck = <<MOO
-      if(res)
-        errnull(\"$name\", res, __LINE__);
+      if(result)
+        errnull(\"$name\", result, __LINE__);
 MOO
             ;
 
@@ -586,8 +587,8 @@ MOO
     elsif($infomode &&
           ($_ =~ /^CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
        my ($info, $type)=($1, $2);
-       my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
-       my $check = "  if(res)\n    t1521_geterr(\"$info\", res, __LINE__);\n";
+       my $c = "  result = curl_easy_getinfo(curl, CURLINFO_$info,";
+       my $check = "  if(result)\n    t1521_geterr(\"$info\", result, __LINE__);\n";
        if($type eq "STRING") {
          print $fh "$c &charp);\n$check";
        }
@@ -629,16 +630,16 @@ print $fh <<FOOTER
 
   /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
   curl_easy_setopt(curl, (CURLoption)1, 0L);
-  res = CURLE_OK;
+  result = CURLE_OK;
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dep);
   curl_share_cleanup(share);
   curl_global_cleanup();
 
-  if(!res)
+  if(!result)
     puts("ok");
-  return res;
+  return result;
 }
 FOOTER
     ;

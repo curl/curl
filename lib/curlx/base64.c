@@ -26,8 +26,6 @@
 
 #include "../curl_setup.h"
 
-#include <curl/curl.h>
-#include "warnless.h"
 #include "base64.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */

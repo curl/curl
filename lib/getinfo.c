@@ -24,14 +24,11 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "getinfo.h"
 #include "cfilters.h"
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
-#include "progress.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
 

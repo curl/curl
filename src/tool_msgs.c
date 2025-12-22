@@ -32,13 +32,10 @@
 #define NOTE_PREFIX  "Note: "
 #define ERROR_PREFIX "curl: "
 
-static void voutf(const char *prefix,
-                  const char *fmt,
-                  va_list ap) CURL_PRINTF(2, 0);
+static void voutf(const char *prefix, const char *fmt, va_list ap)
+  CURL_PRINTF(2, 0);
 
-static void voutf(const char *prefix,
-                  const char *fmt,
-                  va_list ap)
+static void voutf(const char *prefix, const char *fmt, va_list ap)
 {
   size_t len;
   char *ptr;

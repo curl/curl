@@ -45,15 +45,13 @@ cd "$(dirname "$0")"/..
 
 {
   if [ -n "${1:-}" ]; then
-    for A in "$@"; do printf "%s\n" "$A"; done
+    for A in "$@"; do printf '%s\n' "$A"; done
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    git ls-files
+    git ls-files '**CMakeLists.txt' '*.cmake'
   else
-    # strip off the leading ./ to make the grep regexes work properly
-    find . -type f | sed 's@^\./@@'
+    find . -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \)
   fi
-} | grep -E '(^CMake|/CMake|\.cmake$|\.cmake\.in$)' | grep -v -E '(\.h\.cmake|\.c)$' \
-  | xargs \
+} | sort | xargs \
   cmake-lint \
     --suppress-decorations \
     --disable \

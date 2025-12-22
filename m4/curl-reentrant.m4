@@ -184,6 +184,7 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRERROR_R], [
   fi
 ])
 
+
 dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition

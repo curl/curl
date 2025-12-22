@@ -31,8 +31,8 @@ static CURLcode test_lib751(const char *URL)
 {
   CURL *curls[1000];
   CURLM *multi;
-  CURLcode res = CURLE_FAILED_INIT;
-  CURLMcode mres;
+  CURLcode result = CURLE_FAILED_INIT;
+  CURLMcode mresult;
   int i;
 
   (void)URL;
@@ -41,36 +41,36 @@ static CURLcode test_lib751(const char *URL)
   curl_global_init(CURL_GLOBAL_DEFAULT);
   multi = curl_multi_init();
   if(!multi) {
-    res = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
 
   for(i = 0; i < 1000; i++) {
     CURL *curl = curl_easy_init();
     if(!curl) {
-      res = CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
       goto test_cleanup;
     }
     curls[i] = curl;
 
-    res = curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
-    if(!res)
-      res = curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    if(res)
+    result = curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
+    if(!result)
+      result = curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if(result)
       goto test_cleanup;
 
-    mres = curl_multi_add_handle(multi, curl);
-    if(mres != CURLM_OK) {
-      curl_mfprintf(stderr, "MULTI ERROR: %s\n", curl_multi_strerror(mres));
-      res = CURLE_FAILED_INIT;
+    mresult = curl_multi_add_handle(multi, curl);
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "MULTI ERROR: %s\n", curl_multi_strerror(mresult));
+      result = CURLE_FAILED_INIT;
       goto test_cleanup;
     }
   }
 
 test_cleanup:
 
-  if(res)
-    curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(res));
+  if(result)
+    curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(result));
 
   for(i = 0; i < 1000; i++) {
     if(curls[i]) {
@@ -82,5 +82,5 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

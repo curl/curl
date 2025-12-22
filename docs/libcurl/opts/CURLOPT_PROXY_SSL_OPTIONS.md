@@ -104,13 +104,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example");
     /* weaken TLS only for use with silly proxies */
     curl_easy_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
                      CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

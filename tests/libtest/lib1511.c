@@ -27,7 +27,7 @@ static CURLcode test_lib1511(const char *URL)
 {
   long unmet;
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -40,30 +40,30 @@ static CURLcode test_lib1511(const char *URL)
   /* TIMEVALUE in the future */
   easy_setopt(curl, CURLOPT_TIMEVALUE, 1566210680L);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
   if(unmet != 1L) {
-    res = TEST_ERR_FAILURE; /* not correct */
+    result = TEST_ERR_FAILURE; /* not correct */
     goto test_cleanup;
   }
 
   /* TIMEVALUE in the past */
   easy_setopt(curl, CURLOPT_TIMEVALUE, 1L);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
   if(unmet) {
-    res = TEST_ERR_FAILURE; /* not correct */
+    result = TEST_ERR_FAILURE; /* not correct */
     goto test_cleanup;
   }
 
-  res = TEST_ERR_SUCCESS; /* this is where we should be */
+  result = TEST_ERR_SUCCESS; /* this is where we should be */
 
 test_cleanup:
 
@@ -71,5 +71,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -1162,7 +1162,7 @@ sub singletest_postcheck {
         }
     }
 
-    if($checktests && checktest("${TESTDIR}/test${testnum}")) {
+    if(checktest("${TESTDIR}/test${testnum}")) {
         logmsg " $testnum: postcheck FAILED: issue(s) found in test data\n";
         return -1;
     }

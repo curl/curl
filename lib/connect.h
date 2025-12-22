@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/nonblock.h" /* for curlx_nonblock() */
-#include "sockaddr.h"
 #include "curlx/timeval.h"
 
 struct Curl_dns_entry;
@@ -39,25 +37,28 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *str);
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
 timediff_t Curl_timeleft_ms(struct Curl_easy *data,
-                            struct curltime *nowp,
                             bool duringconnect);
+timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
+                                const struct curltime *pnow,
+                                bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 
 #define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
-                         int timeout_ms, struct curltime *nowp);
+                         int timeout_ms);
 
 /* return how much time there is left to shutdown the connection at
  * sockindex. Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
-                                  struct curltime *nowp);
+timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex);
 
 /* return how much time there is left to shutdown the connection.
  * Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
-                                       struct curltime *nowp);
+timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
+                                       struct connectdata *conn);
 
 void Curl_shutdown_clear(struct Curl_easy *data, int sockindex);
 

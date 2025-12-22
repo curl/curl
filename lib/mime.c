@@ -24,12 +24,9 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 struct Curl_easy;
 
 #include "mime.h"
-#include "curlx/warnless.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "transfer.h"
@@ -262,7 +259,6 @@ static char *Curl_basename(char *path)
 #define basename(x)  Curl_basename(x)
 #endif
 
-
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
                          enum mimestate tok, void *ptr)
@@ -271,7 +267,6 @@ static void mimesetstate(struct mime_state *state,
   state->ptr = ptr;
   state->offset = 0;
 }
-
 
 /* Escape header string into allocated memory. */
 static char *escape_string(struct Curl_easy *data,

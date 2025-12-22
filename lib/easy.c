@@ -45,7 +45,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
@@ -53,11 +52,10 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
-#include "curl_share.h"
 #include "strdup.h"
-#include "progress.h"
 #include "easyif.h"
 #include "multiif.h"
+#include "multi_ev.h"
 #include "select.h"
 #include "cfilters.h"
 #include "sendf.h" /* for failf function prototype */
@@ -66,7 +64,6 @@
 #include "mime.h"
 #include "amigaos.h"
 #include "macos.h"
-#include "curlx/warnless.h"
 #include "curlx/wait.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
@@ -601,16 +598,16 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
                                  struct pollfd *fds,
                                  unsigned int numfds,
                                  int pollrc,
-                                 struct curltime *before,
+                                 struct curltime *start,
                                  struct events *ev)
 {
-  CURLMcode mcode = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
 
   if(!pollrc) {
     /* timeout! */
     ev->ms = 0;
     /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
-    mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
+    mresult = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
                                      &ev->running_handles);
   }
   else {
@@ -625,7 +622,7 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
         /* sending infof "randomly" to the first easy handle */
         infof(multi->admin, "call curl_multi_socket_action(socket "
               "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
-        mcode = curl_multi_socket_action(multi, fds[i].fd, act,
+        mresult = curl_multi_socket_action(multi, fds[i].fd, act,
                                          &ev->running_handles);
       }
     }
@@ -634,7 +631,7 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
       /* If nothing updated the timeout, we decrease it by the spent time.
        * If it was updated, it has the new timeout time stored already.
        */
-      timediff_t spent_ms = curlx_timediff_ms(curlx_now(), *before);
+      timediff_t spent_ms = curlx_timediff_ms(curlx_now(), *start);
       if(spent_ms > 0) {
 #if DEBUG_EV_POLL
         curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
@@ -647,7 +644,7 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
       }
     }
   }
-  return mcode;
+  return mresult;
 }
 
 /* wait_or_timeout()
@@ -657,18 +654,18 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
 static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
   bool done = FALSE;
-  CURLMcode mcode = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
 
   while(!done) {
     CURLMsg *msg;
     struct pollfd fds[4];
     int pollrc;
-    struct curltime before;
+    struct curltime start;
     const unsigned int numfds = populate_fds(fds, ev);
 
     /* get the time stamp to use to figure out how long poll takes */
-    before = curlx_now();
+    curlx_pnow(&start);
 
     result = poll_fds(ev, fds, numfds, &pollrc);
     if(result)
@@ -676,9 +673,9 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
     ev->msbump = FALSE; /* reset here */
 
-    mcode = monitor_sockets(multi, fds, numfds, pollrc, &before, ev);
+    mresult = monitor_sockets(multi, fds, numfds, pollrc, &start, ev);
 
-    if(mcode)
+    if(mresult)
       return CURLE_URL_MALFORMAT;
 
     /* we do not really care about the "msgs_in_queue" value returned in the
@@ -716,19 +713,19 @@ static CURLcode easy_events(struct Curl_multi *multi)
 static CURLcode easy_transfer(struct Curl_multi *multi)
 {
   bool done = FALSE;
-  CURLMcode mcode = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
 
-  while(!done && !mcode) {
+  while(!done && !mresult) {
     int still_running = 0;
 
-    mcode = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+    mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(!mcode)
-      mcode = curl_multi_perform(multi, &still_running);
+    if(!mresult)
+      mresult = curl_multi_perform(multi, &still_running);
 
     /* only read 'still_running' if curl_multi_perform() return OK */
-    if(!mcode && !still_running) {
+    if(!mresult && !still_running) {
       int rc;
       CURLMsg *msg = curl_multi_info_read(multi, &rc);
       if(msg) {
@@ -739,8 +736,8 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
   }
 
   /* Make sure to return some kind of error if there was a multi problem */
-  if(mcode) {
-    result = (mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
+  if(mresult) {
+    result = (mresult == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
       /* The other multi errors should never happen, so return
          something suitably generic */
       CURLE_BAD_FUNCTION_ARGUMENT;
@@ -769,7 +766,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 static CURLcode easy_perform(struct Curl_easy *data, bool events)
 {
   struct Curl_multi *multi;
-  CURLMcode mcode;
+  CURLMcode mresult;
   CURLcode result = CURLE_OK;
   SIGPIPE_VARIABLE(pipe_st);
 
@@ -817,10 +814,10 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
 
   data->multi_easy = NULL; /* pretend it does not exist */
-  mcode = curl_multi_add_handle(multi, data);
-  if(mcode) {
+  mresult = curl_multi_add_handle(multi, data);
+  if(mresult) {
     curl_multi_cleanup(multi);
-    if(mcode == CURLM_OUT_OF_MEMORY)
+    if(mresult == CURLM_OUT_OF_MEMORY)
       return CURLE_OUT_OF_MEMORY;
     return CURLE_FAILED_INIT;
   }

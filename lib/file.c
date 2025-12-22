@@ -55,7 +55,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "progress.h"
 #include "sendf.h"
 #include "escape.h"
@@ -65,7 +64,7 @@
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "curlx/fopen.h"
-#include "curlx/warnless.h"
+#include "curlx/timeval.h"
 #include "curl_range.h"
 
 #if defined(_WIN32) || defined(MSDOS)
@@ -315,7 +314,6 @@ static CURLcode file_upload(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   char *xfer_ulbuf;
   size_t xfer_ulblen;
-  curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *sendbuf;
   bool eos = FALSE;
@@ -405,9 +403,7 @@ static CURLcode file_upload(struct Curl_easy *data,
       result = CURLE_SEND_ERROR;
       break;
     }
-    bytecount += nwritten;
-
-    Curl_pgrsSetUploadCounter(data, bytecount);
+    Curl_pgrs_upload_inc(data, nwritten);
 
     result = Curl_pgrsCheck(data);
   }
@@ -493,7 +489,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     }
 
     filetime = (time_t)statbuf.st_mtime;
-    result = Curl_gmtime(filetime, &buffer);
+    result = curlx_gmtime(filetime, &buffer);
     if(result)
       return result;
 

@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "uint-table.h"
 
 #ifdef DEBUGBUILD

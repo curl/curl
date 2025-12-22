@@ -40,7 +40,6 @@
 #include <inet.h>
 #endif
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "if2ip.h"
@@ -65,12 +64,11 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "url.h"
-#include "curlx/warnless.h"
 #include "http_proxy.h"
-#include "socks.h"
 #include "strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -445,8 +443,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
     /* there is pending control data still in the buffer to read */
     response = TRUE;
   else {
-    int socketstate = Curl_socket_check(ctrl_sock, CURL_SOCKET_BAD,
-                                        CURL_SOCKET_BAD, 0);
+    int socketstate = SOCKET_READABLE(ctrl_sock, 0);
     /* see if the connection request is already here */
     switch(socketstate) {
     case -1: /* error */
@@ -2110,7 +2107,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       struct tm buffer;
       const struct tm *tm = &buffer;
 
-      result = Curl_gmtime(filetime, &buffer);
+      result = curlx_gmtime(filetime, &buffer);
       if(result)
         return result;
 
@@ -3178,7 +3175,7 @@ static CURLcode ftp_connect(struct Curl_easy *data,
     conn->bits.ftp_use_control_ssl = TRUE;
   }
 
-  Curl_pp_init(pp); /* once per transfer */
+  Curl_pp_init(pp, Curl_pgrs_now(data)); /* once per transfer */
 
   /* When we connect, we start in the state where we await the 220
      response */
@@ -3314,7 +3311,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
      * data has been transferred. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
-    pp->response = curlx_now(); /* timeout relative now */
+    pp->response = *Curl_pgrs_now(data); /* timeout relative now */
     result = getftpresponse(data, &nread, &ftpcode);
 
     if(!nread && (CURLE_OPERATION_TIMEDOUT == result)) {
@@ -3434,7 +3431,7 @@ static CURLcode ftp_sendquote(struct Curl_easy *data,
 
       result = Curl_pp_sendf(data, &ftpc->pp, "%s", cmd);
       if(!result) {
-        pp->response = curlx_now(); /* timeout relative now */
+        pp->response = *Curl_pgrs_now(data); /* timeout relative now */
         result = getftpresponse(data, &nread, &ftpcode);
       }
       if(result)
@@ -3683,7 +3680,6 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 
   return result;
 }
-
 
 /***********************************************************************
  *

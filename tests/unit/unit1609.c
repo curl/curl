@@ -25,13 +25,12 @@
 
 #include "urldata.h"
 #include "connect.h"
-#include "curl_share.h"
 
 static CURLcode t1609_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
 /* CURLOPT_RESOLVE address parsing test - to test the following defect fix:

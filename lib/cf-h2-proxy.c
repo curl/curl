@@ -28,6 +28,7 @@
   defined(USE_NGHTTP2)
 
 #include <nghttp2/nghttp2.h>
+
 #include "urldata.h"
 #include "url.h"
 #include "cfilters.h"
@@ -42,7 +43,6 @@
 #include "multiif.h"
 #include "sendf.h"
 #include "select.h"
-#include "curlx/warnless.h"
 #include "cf-h2-proxy.h"
 
 #define PROXY_H2_CHUNK_SIZE  (16 * 1024)
@@ -1088,7 +1088,7 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
   }
   DEBUGASSERT(ts->authority);
 
-  if(Curl_timeleft_ms(data, NULL, TRUE) < 0) {
+  if(Curl_timeleft_ms(data, TRUE) < 0) {
     failf(data, "Proxy CONNECT aborted due to timeout");
     result = CURLE_OPERATION_TIMEDOUT;
     goto out;

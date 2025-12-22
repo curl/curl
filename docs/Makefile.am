@@ -68,6 +68,7 @@ INTERNALDOCS =                                  \
  internals/SCORECARD.md                         \
  internals/SPLAY.md                             \
  internals/STRPARSE.md                          \
+ internals/TIME-KEEPING.md                      \
  internals/TLS-SESSIONS.md                      \
  internals/UINT_SETS.md                         \
  internals/WEBSOCKET.md

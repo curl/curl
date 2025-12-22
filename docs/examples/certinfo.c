@@ -39,11 +39,11 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -57,14 +57,14 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       struct curl_certinfo *certinfo;
 
-      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &certinfo);
+      result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &certinfo);
 
-      if(!res && certinfo) {
+      if(!result && certinfo) {
         int i;
 
         printf("%d certs!\n", certinfo->num_of_certs);
@@ -83,5 +83,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

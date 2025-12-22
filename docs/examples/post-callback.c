@@ -68,7 +68,7 @@ static size_t read_cb(char *dest, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   struct WriteThis wt;
 
@@ -76,12 +76,12 @@ int main(void)
   wt.sizeleft = strlen(data);
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_DEFAULT);
+  result = curl_global_init(CURL_GLOBAL_DEFAULT);
   /* Check for errors */
-  if(res != CURLE_OK) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed: %s\n",
-            curl_easy_strerror(res));
-    return (int)res;
+            curl_easy_strerror(result));
+    return (int)result;
   }
 
   /* get a curl handle */
@@ -114,7 +114,7 @@ int main(void)
       struct curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Transfer-Encoding: chunked");
-      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+      result = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
       /* use curl_slist_free_all() after the *perform() call to free this
          list again */
     }
@@ -137,18 +137,18 @@ int main(void)
       struct curl_slist *chunk = NULL;
 
       chunk = curl_slist_append(chunk, "Expect:");
-      res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+      result = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
       /* use curl_slist_free_all() after the *perform() call to free this
          list again */
     }
 #endif
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);

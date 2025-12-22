@@ -24,11 +24,9 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "connect.h"
 #include "curl_share.h"
-#include "psl.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
 #include "hsts.h"

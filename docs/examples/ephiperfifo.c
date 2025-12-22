@@ -186,10 +186,10 @@ static void check_multi_info(struct GlobalInfo *g)
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
       CURL *curl = msg->easy_handle;
-      CURLcode res = msg->data.result;
+      CURLcode result = msg->data.result;
       curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
-      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, res, conn->error);
+      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, result, conn->error);
       curl_multi_remove_handle(g->multi, curl);
       free(conn->url);
       curl_easy_cleanup(curl);
@@ -201,14 +201,14 @@ static void check_multi_info(struct GlobalInfo *g)
 /* Called by libevent when we get action on a multi socket filedescriptor */
 static void event_cb(struct GlobalInfo *g, int fd, int revents)
 {
-  CURLMcode rc;
+  CURLMcode mresult;
   struct itimerspec its;
 
   int action = ((revents & EPOLLIN) ? CURL_CSELECT_IN : 0) |
-               ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
+    ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
 
-  rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
-  mcode_or_die("event_cb: curl_multi_socket_action", rc);
+  mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
+  mcode_or_die("event_cb: curl_multi_socket_action", mresult);
 
   check_multi_info(g);
   if(g->still_running <= 0) {
@@ -221,7 +221,7 @@ static void event_cb(struct GlobalInfo *g, int fd, int revents)
 /* Called by main loop when our timeout expires */
 static void timer_cb(struct GlobalInfo *g, int revents)
 {
-  CURLMcode rc;
+  CURLMcode mresult;
   uint64_t count = 0;
   ssize_t err = 0;
 
@@ -242,9 +242,9 @@ static void timer_cb(struct GlobalInfo *g, int revents)
     perror("read(tfd)");
   }
 
-  rc = curl_multi_socket_action(g->multi,
+  mresult = curl_multi_socket_action(g->multi,
                                 CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", rc);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
 }
 
@@ -347,7 +347,7 @@ static int prog_cb(void *p, double dltotal, double dlnow, double ult,
 static void new_conn(const char *url, struct GlobalInfo *g)
 {
   struct ConnInfo *conn;
-  CURLMcode rc;
+  CURLMcode mresult;
 
   conn = (struct ConnInfo *)calloc(1, sizeof(*conn));
   conn->error[0] = '\0';
@@ -373,8 +373,8 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_LIMIT, 10L);
   fprintf(MSG_OUT, "Adding easy %p to multi %p (%s)\n",
           conn->curl, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->curl);
-  mcode_or_die("new_conn: curl_multi_add_handle", rc);
+  mresult = curl_multi_add_handle(g->multi, conn->curl);
+  mcode_or_die("new_conn: curl_multi_add_handle", mresult);
 
   /* note that the add_handle() sets a timeout to trigger soon so that the
    * necessary socket_action() call gets called by this app */
@@ -451,19 +451,17 @@ void sigint_handler(int signo)
   g_should_exit_ = 1;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
-  CURLcode res;
+  CURLcode result;
   struct GlobalInfo g;
   struct itimerspec its;
   struct epoll_event ev;
   struct epoll_event events[10];
-  (void)argc;
-  (void)argv;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   g_should_exit_ = 0;
   signal(SIGINT, sigint_handler);

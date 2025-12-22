@@ -35,8 +35,6 @@
 
 #endif /* __INTEL_COMPILER && __unix__ */
 
-#include <limits.h>
-
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
 
 #define CURL_MASK_USHORT  ((unsigned short)~0)

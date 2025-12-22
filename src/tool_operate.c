@@ -377,21 +377,21 @@ static CURLcode retrycheck(struct OperationConfig *config,
     RETRY_FTP,
     RETRY_LAST /* not used */
   } retry = RETRY_NO;
-  if((CURLE_OPERATION_TIMEDOUT == result) ||
-     (CURLE_COULDNT_RESOLVE_HOST == result) ||
-     (CURLE_COULDNT_RESOLVE_PROXY == result) ||
-     (CURLE_FTP_ACCEPT_TIMEOUT == result))
+  if((result == CURLE_OPERATION_TIMEDOUT) ||
+     (result == CURLE_COULDNT_RESOLVE_HOST) ||
+     (result == CURLE_COULDNT_RESOLVE_PROXY) ||
+     (result == CURLE_FTP_ACCEPT_TIMEOUT))
     /* retry timeout always */
     retry = RETRY_TIMEOUT;
   else if(config->retry_connrefused &&
-          (CURLE_COULDNT_CONNECT == result)) {
+          (result == CURLE_COULDNT_CONNECT)) {
     long oserrno = 0;
     curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &oserrno);
     if(SOCKECONNREFUSED == oserrno)
       retry = RETRY_CONNREFUSED;
   }
-  else if((CURLE_OK == result) ||
-          (config->fail && (CURLE_HTTP_RETURNED_ERROR == result))) {
+  else if((result == CURLE_OK) ||
+          (config->fail && (result == CURLE_HTTP_RETURNED_ERROR))) {
     /* If it returned OK. _or_ failonerror was enabled and it
        returned due to such an error, check for HTTP transient
        errors to retry on. */

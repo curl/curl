@@ -28,7 +28,6 @@
 #include "cfilters.h"
 #include "curlx/dynbuf.h"
 #include "doh.h"
-#include "multiif.h"
 #include "progress.h"
 #include "request.h"
 #include "sendf.h"
@@ -90,7 +89,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
 CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
-  req->start = curlx_now();
+  req->start = *Curl_pgrs_now(data);
   return Curl_req_soft_reset(req, data);
 }
 
@@ -219,7 +218,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
         size_t body_len = *pnwritten - hds_len;
         Curl_debug(data, CURLINFO_DATA_OUT, buf + hds_len, body_len);
         data->req.writebytecount += body_len;
-        Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
+        Curl_pgrs_upload_inc(data, body_len);
       }
     }
   }

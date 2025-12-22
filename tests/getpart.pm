@@ -244,12 +244,6 @@ sub loadtest {
             print STDERR "file $file is empty!\n";
             return 1;
         }
-        my $prolog = $xml[0];
-        chomp $prolog;
-        if($prolog ne '<?xml version="1.0" encoding="US-ASCII"?>') {
-            print STDERR "file $file missing the XML prolog!\n";
-            return 1;
-        }
     }
     else {
         # failure
@@ -296,6 +290,11 @@ sub checktest {
         binmode $xmlh; # we want the raw data to check original newlines
         my $content = do { local $/; <$xmlh> };
         close($xmlh);
+
+        if(index($content, '<?xml version="1.0" encoding="US-ASCII"?>') != 0) {
+            print STDERR "*** getpart.pm: $xmlfile is missing the XML prolog.\n";
+            return 1;
+        }
 
         my $eol = eol_detect($content);
         if($eol eq '') {

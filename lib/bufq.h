@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 /**
  * A chunk of bytes for reading and writing.
  * The size is fixed a creation with read and write offset

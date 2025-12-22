@@ -1100,11 +1100,6 @@ static int test_rtspd(int argc, char *argv[])
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/rtsp-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
   install_signal_handlers(false);
 
 #ifdef USE_IPV6

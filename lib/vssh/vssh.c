@@ -27,7 +27,6 @@
 #ifdef USE_SSH
 
 #include "vssh.h"
-#include <curl/curl.h>
 #include "../curlx/strparse.h"
 #include "../curl_trc.h"
 #include "../escape.h"

@@ -47,8 +47,6 @@
 #include "../transfer.h"
 #include "../url.h"
 #include "../bufref.h"
-#include "../curlx/inet_pton.h"
-#include "../curlx/warnless.h"
 #include "../vtls/openssl.h"
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
@@ -865,7 +863,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   *pnread = 0;
   (void)buf;
   (void)blen;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   if(!stream)
     return CURLE_RECV_ERROR;
@@ -1075,7 +1073,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result;
 
   *pnwritten = 0;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   result = cf_process_ingress(cf, data);
   if(result)
@@ -1233,7 +1231,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx->q.sockfd != CURL_SOCKET_BAD);
   DEBUGASSERT(ctx->initialized);
 
-  result = vquic_ctx_init(&ctx->q);
+  result = vquic_ctx_init(data, &ctx->q);
   if(result)
     return result;
 
@@ -1352,7 +1350,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   if(!ctx->qconn) {
     result = cf_quiche_ctx_open(cf, data);
@@ -1375,7 +1373,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   if(quiche_conn_is_established(ctx->qconn)) {
     ctx->handshake_at = ctx->q.last_op;
     CURL_TRC_CF(data, cf, "handshake complete after %" FMT_TIMEDIFF_T "ms",
-                curlx_timediff_ms(ctx->handshake_at, ctx->started_at));
+                curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at));
     result = cf_quiche_verify_peer(cf, data);
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
@@ -1434,7 +1432,7 @@ static CURLcode cf_quiche_shutdown(struct Curl_cfilter *cf,
     int err;
 
     ctx->shutdown_started = TRUE;
-    vquic_ctx_update_time(&ctx->q);
+    vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
     err = quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
     if(err) {
       CURL_TRC_CF(data, cf, "error %d adding shutdown packet, "
@@ -1505,7 +1503,8 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
-      timediff_t ms = curlx_timediff_ms(ctx->q.first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_ptimediff_ms(&ctx->q.first_byte_at,
+                                         &ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else

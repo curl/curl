@@ -885,6 +885,9 @@ sub checksystemfeatures {
     if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") != 0) {
         logmsg "* diff: missing\n";
     }
+    if($mintotal) {
+        logmsg "* Min tests: $mintotal\n";
+    }
 }
 
 #######################################################################
@@ -1179,7 +1182,7 @@ sub singletest_shouldrun {
         }
     }
 
-    if($why && $checktests && checktest("${TESTDIR}/test${testnum}")) {
+    if($why && checktest("${TESTDIR}/test${testnum}")) {
         logmsg "Warning: issue(s) found in test data: ${TESTDIR}/test${testnum}\n";
     }
 
@@ -1760,6 +1763,7 @@ sub singletest_check {
             if($leak) {
                 logmsg "\n** MEMORY FAILURE\n";
                 logmsg @memdata;
+                logmsg " $testnum: memory FAILED\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
@@ -1798,6 +1802,7 @@ sub singletest_check {
             if($allocs > $lim_allocs) {
                 logmsg "\n** TOO MANY ALLOCS\n";
                 logmsg "$lim_allocs allocations allowed, did $allocs\n";
+                logmsg " $testnum: allocs FAILED\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
@@ -1805,6 +1810,7 @@ sub singletest_check {
             if($max > $lim_max) {
                 logmsg "\n** TOO MUCH TOTAL ALLOCATION\n";
                 logmsg "$lim_max maximum allocation allowed, did $max\n";
+                logmsg " $testnum: allocsize FAILED\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
@@ -1823,7 +1829,7 @@ sub singletest_check {
             my $fname = shift @notexists;
             chomp $fname;
             if(-e $fname) {
-                logmsg "Found '$fname' when not supposed to exist.\n";
+                logmsg "ERROR: Found '$fname' when not supposed to exist.\n";
                 $err++;
             }
             elsif($verbose) {
@@ -2419,10 +2425,6 @@ while(@ARGV) {
         # execute in scrambled order
         $scrambleorder=1;
     }
-    elsif($ARGV[0] eq "-w") {
-        # verify test data
-        $checktests=1;
-    }
     elsif($ARGV[0] =~ /^-t(.*)/) {
         # torture
         $torture=1;
@@ -2568,7 +2570,6 @@ Usage: runtests.pl [options] [test selection(s)]
   -u       error instead of warning on server unexpectedly alive
   -v       verbose output
   -vc path use this curl only to verify the existing servers
-  -w       check test data
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
   [~num]   like "~5 ~6 ~9" to ignore the result of those tests
@@ -2714,6 +2715,10 @@ get_disttests();
 if(!$jobs) {
     # Disable buffered logging with only one test job
     setlogfunc(\&logmsg);
+}
+
+if(!$mintotal && $ENV{"CURL_TEST_MIN"}) {
+    $mintotal = $ENV{"CURL_TEST_MIN"};
 }
 
 #######################################################################
@@ -3337,12 +3342,9 @@ else {
     }
 }
 
-if(!$mintotal && $ENV{"CURL_TEST_MIN"}) {
-    $mintotal = $ENV{"CURL_TEST_MIN"};
-}
 if($mintotal) {
     if($total < $mintotal) {
-        logmsg "TESTFAIL: number of tests run was below the minimum of: $mintotal\n";
+        logmsg "TESTFAIL: number of tests run ($total) was below the minimum of: $mintotal\n";
         exit 1;
     }
     else {

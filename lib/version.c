@@ -28,7 +28,6 @@
 #include <nghttp2/nghttp2.h>
 #endif
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "http2.h"
@@ -551,9 +550,7 @@ static const struct feat features_table[] = {
   {NULL,                 NULL,                0}
 };
 
-static const char *feature_names[sizeof(features_table) /
-                                 sizeof(features_table[0])] = {NULL};
-
+static const char *feature_names[CURL_ARRAYSIZE(features_table)] = { NULL };
 
 static curl_version_info_data version_info = {
   CURLVERSION_NOW,

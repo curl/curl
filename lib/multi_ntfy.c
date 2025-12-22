@@ -24,8 +24,6 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "curl_trc.h"
 #include "multihandle.h"
@@ -176,6 +174,7 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
       mntfy_chunk_append(tail, data, (uint32_t)type);
     else
       multi->ntfy.failure = CURLM_OUT_OF_MEMORY;
+    multi->ntfy.has_entries = TRUE;
   }
 }
 
@@ -199,9 +198,11 @@ CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi)
   multi->in_ntfy_callback = FALSE;
 
   if(multi->ntfy.failure) {
-    CURLMcode result = multi->ntfy.failure;
+    CURLMcode mresult = multi->ntfy.failure;
     multi->ntfy.failure = CURLM_OK; /* reset, once delivered */
-    return result;
+    return mresult;
   }
+  else
+    multi->ntfy.has_entries = FALSE;
   return CURLM_OK;
 }

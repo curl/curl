@@ -489,7 +489,7 @@ bool glob_inuse(struct URLGlob *glob)
   return glob->palloc ? TRUE : FALSE;
 }
 
-CURLcode glob_url(struct URLGlob *glob, char *url, curl_off_t *urlnum,
+CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
                   FILE *error)
 {
   /*

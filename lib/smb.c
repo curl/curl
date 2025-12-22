@@ -31,13 +31,11 @@
 #include "urldata.h"
 #include "url.h"
 #include "sendf.h"
-#include "multiif.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "progress.h"
 #include "transfer.h"
 #include "select.h"
-#include "vtls/vtls.h"
 #include "curl_ntlm_core.h"
 #include "escape.h"
 #include "curl_endian.h"
@@ -1146,7 +1144,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
                          sizeof(struct smb_header) + 5);
     data->req.bytecount += len;
     data->req.offset += len;
-    Curl_pgrsSetUploadCounter(data, data->req.bytecount);
+    Curl_pgrs_upload_inc(data, len);
     if(data->req.bytecount >= data->req.size)
       next_state = SMB_CLOSE;
     else

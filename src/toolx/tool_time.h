@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_RENAME_H
-#define HEADER_CURL_RENAME_H
+#ifndef HEADER_TOOLX_TOOL_TIME_H
+#define HEADER_TOOLX_TOOL_TIME_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,7 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
-int Curl_rename(const char *oldpath, const char *newpath);
+CURLcode toolx_localtime(time_t intime, struct tm *store);
 
-#endif /* HEADER_CURL_RENAME_H */
+#endif /* HEADER_TOOLX_TOOL_TIME_H */

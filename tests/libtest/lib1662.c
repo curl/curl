@@ -48,7 +48,7 @@ static size_t t1662_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode test_lib1662(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl;
   curl_mime *mime1;
   curl_mimepart *part1;
@@ -77,12 +77,12 @@ static CURLcode test_lib1662(const char *URL)
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
       curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
       curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-      res = curl_easy_perform(curl);
+      result = curl_easy_perform(curl);
     }
   }
 
   curl_easy_cleanup(curl);
   curl_mime_free(mime1);
   curl_global_cleanup();
-  return res;
+  return result;
 }

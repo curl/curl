@@ -28,8 +28,6 @@
 
 #ifdef USE_CURL_NTLM_CORE
 
-#include "vauth/vauth.h"
-
 struct ntlmdata;
 
 /* Helpers to generate function byte arguments in little endian order */

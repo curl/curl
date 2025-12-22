@@ -272,7 +272,7 @@ all the details needed to get the file moved from one machine to another.
 
 # Multi-threading Issues
 
-libcurl is thread safe but there are a few exceptions. Refer to
+libcurl is thread-safe but there are a few exceptions. Refer to
 libcurl-thread(3) for more information.
 
 # When It does not Work

@@ -37,7 +37,6 @@
 #include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "parsedate.h"
-#include "rename.h"
 #include "strdup.h"
 #include "llist.h"
 #include "bufref.h"
@@ -1013,6 +1012,7 @@ Curl_cookie_add(struct Curl_easy *data,
   co = Curl_memdup(&comem, sizeof(comem));
   if(!co) {
     co = &comem;
+    result = CURLE_OUT_OF_MEMORY;
     goto fail; /* bail out if we are this low on memory */
   }
 
@@ -1533,7 +1533,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
   if(!use_stdout) {
     curlx_fclose(out);
     out = NULL;
-    if(tempstore && Curl_rename(tempstore, filename)) {
+    if(tempstore && curlx_rename(tempstore, filename)) {
       error = CURLE_WRITE_ERROR;
       goto error;
     }

@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include <toolx/tool_time.h>
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -83,8 +85,9 @@ void logmsg(const char *msg, ...)
   char buffer[2048 + 1];
   FILE *logfp;
   struct curltime tv;
+  CURLcode result;
   time_t sec;
-  struct tm *now;
+  struct tm now;
   char timebuf[50];
   static time_t epoch_offset;
   static int    known_offset;
@@ -100,12 +103,12 @@ void logmsg(const char *msg, ...)
     known_offset = 1;
   }
   sec = epoch_offset + tv.tv_sec;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  now = localtime(&sec); /* not thread safe but we do not care */
+  result = toolx_localtime(sec, &now);
+  if(result)
+    memset(&now, 0, sizeof(now));
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-           (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
-           (long)tv.tv_usec);
+           now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
 
   va_start(ap, msg);
 #ifdef __clang__
@@ -404,7 +407,7 @@ static void exit_signal_handler(int signum)
  * SIGINT is not supported for any Win32 application. When a CTRL+C
  * interrupt occurs, Win32 operating systems generate a new thread
  * to specifically handle that interrupt. This can cause a single-thread
- * application, such as one in UNIX, to become multithreaded and cause
+ * application, such as one in UNIX, to become multi-threaded and cause
  * unexpected behavior.
  * [...]
  * The SIGKILL and SIGTERM signals are not generated under Windows.

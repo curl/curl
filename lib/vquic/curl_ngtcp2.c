@@ -59,7 +59,6 @@
 #include "../curlx/dynbuf.h"
 #include "../http1.h"
 #include "../select.h"
-#include "../curlx/inet_pton.h"
 #include "../transfer.h"
 #include "../bufref.h"
 #include "vquic.h"
@@ -70,8 +69,6 @@
 #include "../vtls/vtls_scache.h"
 #include "curl_ngtcp2.h"
 
-#include "../curlx/warnless.h"
-
 
 #define QUIC_MAX_STREAMS       (256 * 1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)
@@ -79,8 +76,11 @@
 /* A stream window is the maximum amount we need to buffer for
  * each active transfer.
  * Chunk size is large enough to take a full DATA frame */
-#define H3_STREAM_WINDOW_SIZE (64 * 1024)
-#define H3_STREAM_CHUNK_SIZE  (16 * 1024)
+#define H3_STREAM_WINDOW_SIZE_INITIAL (32 * 1024)
+#define H3_STREAM_WINDOW_SIZE_MAX     (10 * 1024 * 1024)
+#define H3_CONN_WINDOW_SIZE_MAX       (100 * H3_STREAM_WINDOW_SIZE_MAX)
+
+#define H3_STREAM_CHUNK_SIZE  (64 * 1024)
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #endif
@@ -90,12 +90,11 @@
  * The benefit of the pool is that stream buffer to not keep
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
-#define H3_STREAM_POOL_SPARES \
-  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE) / 2
+#define H3_STREAM_POOL_SPARES      2
 /* Receive and Send max number of chunks just follows from the
  * chunk size and window size */
 #define H3_STREAM_SEND_CHUNKS \
-  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_WINDOW_SIZE_MAX / H3_STREAM_CHUNK_SIZE)
 
 /*
  * Store ngtcp2 version info in this buffer.
@@ -132,7 +131,6 @@ struct cf_ngtcp2_ctx {
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct dynbuf scratch;             /* temp buffer for header construction */
   struct uint_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
-  size_t max_stream_window;          /* max flow window for one stream */
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   size_t earlydata_max;              /* max amount of early data supported by
@@ -159,7 +157,6 @@ static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
   DEBUGASSERT(!ctx->initialized);
   ctx->qlogfd = -1;
   ctx->version = NGTCP2_PROTO_VER_MAX;
-  ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
@@ -236,6 +233,7 @@ struct h3_stream_ctx {
   uint64_t error3;              /* HTTP/3 stream error code */
   curl_off_t upload_left;       /* number of request bytes left to upload */
   uint64_t download_unacked;    /* bytes not acknowledged yet */
+  uint64_t window_size_max;     /* max flow control window set for stream */
   int status_code;              /* HTTP status code */
   CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
   BIT(resp_hds_complete);       /* we have a complete, final response */
@@ -280,6 +278,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   Curl_bufq_initp(&stream->sendbuf, &ctx->stream_bufcp,
                   H3_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);
   stream->sendbuf_len_in_flight = 0;
+  stream->window_size_max = H3_STREAM_WINDOW_SIZE_INITIAL;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
   if(!Curl_uint32_hash_set(&ctx->streams, data->mid, stream)) {
@@ -384,24 +383,31 @@ struct pkt_io_ctx {
   ngtcp2_path_storage ps;
 };
 
-static void pktx_update_time(struct pkt_io_ctx *pktx,
+static void pktx_update_time(struct Curl_easy *data,
+                             struct pkt_io_ctx *pktx,
                              struct Curl_cfilter *cf)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  const struct curltime *pnow = Curl_pgrs_now(data);
 
-  vquic_ctx_update_time(&ctx->q);
-  pktx->ts = (ngtcp2_tstamp)ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
-             (ngtcp2_tstamp)ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
+  vquic_ctx_update_time(&ctx->q, pnow);
+  pktx->ts = (ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS +
+             (ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static void pktx_init(struct pkt_io_ctx *pktx,
                       struct Curl_cfilter *cf,
                       struct Curl_easy *data)
 {
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  const struct curltime *pnow = Curl_pgrs_now(data);
+
   pktx->cf = cf;
   pktx->data = data;
   ngtcp2_path_storage_zero(&pktx->ps);
-  pktx_update_time(pktx, cf);
+  vquic_ctx_set_time(&ctx->q, pnow);
+  pktx->ts = (ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS +
+             (ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
@@ -464,18 +470,18 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->initial_ts = pktx->ts;
   s->handshake_timeout = (data->set.connecttimeout > 0) ?
     data->set.connecttimeout * NGTCP2_MILLISECONDS : QUIC_HANDSHAKE_TIMEOUT;
-  s->max_window = 100 * ctx->max_stream_window;
-  s->max_stream_window = ctx->max_stream_window;
+  s->max_window = H3_CONN_WINDOW_SIZE_MAX;
+  s->max_stream_window = 0; /* disable ngtcp2 auto-tuning of window */
   s->no_pmtud = FALSE;
 #ifdef NGTCP2_SETTINGS_V3
   /* try ten times the ngtcp2 defaults here for problems with Caddy */
   s->glitch_ratelim_burst = 1000 * 10;
   s->glitch_ratelim_rate = 33 * 10;
 #endif
-  t->initial_max_data = 10 * ctx->max_stream_window;
-  t->initial_max_stream_data_bidi_local = ctx->max_stream_window;
-  t->initial_max_stream_data_bidi_remote = ctx->max_stream_window;
-  t->initial_max_stream_data_uni = ctx->max_stream_window;
+  t->initial_max_data = s->max_window;
+  t->initial_max_stream_data_bidi_local = H3_STREAM_WINDOW_SIZE_INITIAL;
+  t->initial_max_stream_data_bidi_remote = H3_STREAM_WINDOW_SIZE_INITIAL;
+  t->initial_max_stream_data_uni = t->initial_max_data;
   t->initial_max_streams_bidi = QUIC_MAX_STREAMS;
   t->initial_max_streams_uni = QUIC_MAX_STREAMS;
   t->max_idle_timeout = 0; /* no idle timeout from our side */
@@ -500,7 +506,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   if(!ctx || !data)
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
-  ctx->handshake_at = curlx_now();
+  ctx->handshake_at = *Curl_pgrs_now(data);
   ctx->tls_handshake_complete = TRUE;
   Curl_vquic_report_handshake(&ctx->tls, cf, data);
 
@@ -514,7 +520,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
                 "ms, remote transport[max_udp_payload=%" PRIu64
                 ", initial_max_data=%" PRIu64
                 "]",
-               curlx_timediff_ms(ctx->handshake_at, ctx->started_at),
+               curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at),
                rp->max_udp_payload_size, rp->initial_max_data);
   }
 #endif
@@ -900,7 +906,7 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx_update_time(pktx, cf);
+    pktx_update_time(data, pktx, cf);
   }
 
   expiry = ngtcp2_conn_get_expiry(ctx->qconn);
@@ -1041,19 +1047,41 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
   }
 }
 
+static void cf_ngtcp2_stream_update_window(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct h3_stream_ctx *stream)
+{
+  /* stream receive max window size for flow control. We can only
+   * grow it from the initial window size */
+  uint64_t swin_max = data->progress.dl.rlimit.rate_per_step ?
+    data->progress.dl.rlimit.rate_per_step : H3_STREAM_WINDOW_SIZE_MAX;
+  if(swin_max > stream->window_size_max) {
+    struct cf_ngtcp2_ctx *ctx = cf->ctx;
+    int rc = ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id,
+      swin_max - stream->window_size_max);
+    if(rc) {
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] extend_max_stream_offset to %"
+                  PRIu64 " -> %s (%d)",
+                  stream->id, swin_max, ngtcp2_strerror(rc), rc);
+      DEBUGASSERT(0);
+    }
+    stream->window_size_max = swin_max;
+  }
+}
+
 static void cf_ngtcp2_ack_stream(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct h3_stream_ctx *stream)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct curltime now = curlx_now();
   curl_off_t avail;
   uint64_t ack_len = 0;
 
   /* How many byte to ack on the stream? */
 
   /* how much does rate limiting allow us to acknowledge? */
-  avail = Curl_rlimit_avail(&data->progress.dl.rlimit, now);
+  avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
+                            Curl_pgrs_now(data));
   if(avail == CURL_OFF_T_MAX) { /* no rate limit, ack all */
     ack_len = stream->download_unacked;
   }
@@ -1068,6 +1096,8 @@ static void cf_ngtcp2_ack_stream(struct Curl_cfilter *cf,
     ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, ack_len);
     stream->download_unacked -= ack_len;
   }
+
+  cf_ngtcp2_stream_update_window(cf, data, stream);
 }
 
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
@@ -1629,6 +1659,8 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
+  cf_ngtcp2_stream_update_window(cf, data, stream);
+
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRId64 "] OPENED stream for %s",
           stream->id, Curl_bufref_ptr(&data->state.url));
@@ -1740,18 +1772,29 @@ denied:
   return result;
 }
 
+struct cf_ngtcp2_recv_ctx {
+  struct pkt_io_ctx *pktx;
+  size_t pkt_count;
+};
+
 static CURLcode cf_ngtcp2_recv_pkts(const unsigned char *buf, size_t buflen,
                                     size_t gso_size,
                                     struct sockaddr_storage *remote_addr,
                                     socklen_t remote_addrlen, int ecn,
                                     void *userp)
 {
-  struct pkt_io_ctx *pktx = userp;
+  struct cf_ngtcp2_recv_ctx *rctx = userp;
+  struct pkt_io_ctx *pktx = rctx->pktx;
   struct cf_ngtcp2_ctx *ctx = pktx->cf->ctx;
   ngtcp2_pkt_info pi;
   ngtcp2_path path;
   size_t offset, pktlen;
   int rv;
+
+  if(!rctx->pkt_count) {
+    pktx_update_time(pktx->data, pktx, pktx->cf);
+    ngtcp2_path_storage_zero(&pktx->ps);
+  }
 
   if(ecn)
     CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, gso=%zu, ecn=%x)",
@@ -1763,6 +1806,7 @@ static CURLcode cf_ngtcp2_recv_pkts(const unsigned char *buf, size_t buflen,
   pi.ecn = (uint8_t)ecn;
 
   for(offset = 0; offset < buflen; offset += gso_size) {
+    rctx->pkt_count++;
     pktlen = ((offset + gso_size) <= buflen) ? gso_size : (buflen - offset);
     rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi,
                               buf + offset, pktlen, pktx->ts);
@@ -1787,23 +1831,22 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct pkt_io_ctx local_pktx;
+  struct cf_ngtcp2_recv_ctx rctx;
   CURLcode result = CURLE_OK;
 
   if(!pktx) {
     pktx_init(&local_pktx, cf, data);
     pktx = &local_pktx;
   }
-  else {
-    pktx_update_time(pktx, cf);
-    ngtcp2_path_storage_zero(&pktx->ps);
-  }
 
   result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
   if(result)
     return result;
 
+  rctx.pktx = pktx;
+  rctx.pkt_count = 0;
   return vquic_recv_packets(cf, data, &ctx->q, 1000,
-                            cf_ngtcp2_recv_pkts, pktx);
+                            cf_ngtcp2_recv_pkts, &rctx);
 }
 
 /**
@@ -1929,7 +1972,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx_update_time(pktx, cf);
+    pktx_update_time(data, pktx, cf);
     ngtcp2_path_storage_zero(&pktx->ps);
   }
 
@@ -2016,7 +2059,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
       }
       return curlcode;
     }
-    pktx_update_time(pktx, cf);
+    pktx_update_time(data, pktx, cf);
     ngtcp2_conn_update_pkt_tx_time(ctx->qconn, pktx->ts);
   }
   return CURLE_OK;
@@ -2529,7 +2572,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ctx->qlogfd = qfd; /* -1 if failure above */
   quic_settings(ctx, data, pktx);
 
-  result = vquic_ctx_init(&ctx->q);
+  result = vquic_ctx_init(data, &ctx->q);
   if(result)
     return result;
 
@@ -2598,7 +2641,6 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   struct cf_call_data save;
-  struct curltime now;
   struct pkt_io_ctx pktx;
 
   if(cf->connected) {
@@ -2614,13 +2656,12 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  now = curlx_now();
   pktx_init(&pktx, cf, data);
 
   CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->qconn) {
-    ctx->started_at = now;
+    ctx->started_at = *Curl_pgrs_now(data);
     result = cf_connect_start(cf, data, &pktx);
     if(result)
       goto out;
@@ -2733,7 +2774,8 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
-      timediff_t ms = curlx_timediff_ms(ctx->q.first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_ptimediff_ms(&ctx->q.first_byte_at,
+                                         &ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -2794,7 +2836,8 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
    * it will close the connection when it expires. */
   rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
   if(rp && rp->max_idle_timeout) {
-    timediff_t idletime_ms = curlx_timediff_ms(curlx_now(), ctx->q.last_io);
+    timediff_t idletime_ms =
+      curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->q.last_io);
     if(idletime_ms > 0) {
       uint64_t max_idle_ms =
         (uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS);

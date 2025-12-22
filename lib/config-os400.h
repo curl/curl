@@ -38,9 +38,9 @@
 /* OS400 supports a 3-argument ASCII version of gethostbyaddr_r(), but its
  *  prototype is incompatible with the "standard" one (1st argument is not
  *  const). However, getaddrinfo() is supported (ASCII version defined as
- *  a local wrapper in setup-os400.h) in a threadsafe way: we can then
+ *  a local wrapper in setup-os400.h) in a thread-safe way: we can then
  *  configure getaddrinfo() as such and get rid of gethostbyname_r() without
- *  loss of threadsafeness. */
+ *  loss of thread-safeness. */
 #undef HAVE_GETHOSTBYNAME_R
 #undef HAVE_GETHOSTBYNAME_R_3
 #undef HAVE_GETHOSTBYNAME_R_5
@@ -107,6 +107,9 @@
 
 /* Define if you have the GNU gssapi libraries */
 #undef HAVE_GSSGNU
+
+/* Define if you have the `localtime_r' function. */
+#define HAVE_LOCALTIME_R
 
 /* Define if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H

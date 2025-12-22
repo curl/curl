@@ -40,7 +40,7 @@ static size_t count_chars(void *userp, const char *buf, size_t len)
 static CURLcode test_lib650(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   CURLFORMcode formrc;
   struct curl_slist *headers, *headers2 = NULL;
   struct curl_httppost *formpost = NULL;
@@ -189,8 +189,8 @@ static CURLcode test_lib650(const char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -203,5 +203,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

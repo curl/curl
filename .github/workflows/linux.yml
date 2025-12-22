@@ -58,8 +58,8 @@ env:
   OPENLDAP_VERSION: 2.6.10
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.68.0
-  # renovate: datasource=github-tags depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
-  FIL_C_VERSION: 0.676
+  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
+  FIL_C_VERSION: 0.677
 
 jobs:
   linux:
@@ -667,7 +667,7 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           printenv >> "$GITHUB_ENV"
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 

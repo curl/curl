@@ -66,11 +66,8 @@
 #include <iphlpapi.h>
 #endif
 
-#include <limits.h>
-
 #include "doh.h"
 #include "urldata.h"
-#include "netrc.h"
 #include "formdata.h"
 #include "mime.h"
 #include "bufref.h"
@@ -83,13 +80,8 @@
 #include "strcase.h"
 #include "escape.h"
 #include "curl_share.h"
-#include "content_encoding.h"
 #include "http_digest.h"
-#include "http_negotiate.h"
-#include "select.h"
 #include "multiif.h"
-#include "easyif.h"
-#include "curlx/warnless.h"
 #include "getinfo.h"
 #include "pop3.h"
 #include "urlapi-int.h"
@@ -98,6 +90,16 @@
 #include "noproxy.h"
 #include "cfilters.h"
 #include "idn.h"
+#include "http_proxy.h"
+#include "conncache.h"
+#include "multihandle.h"
+#include "strdup.h"
+#include "setopt.h"
+#include "altsvc.h"
+#include "curlx/dynbuf.h"
+#include "headers.h"
+#include "curlx/strerr.h"
+#include "curlx/strparse.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -112,20 +114,10 @@
 #include "imap.h"
 #include "url.h"
 #include "connect.h"
-#include "http_ntlm.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
 #include "mqtt.h"
-#include "http_proxy.h"
-#include "conncache.h"
-#include "multihandle.h"
-#include "strdup.h"
-#include "setopt.h"
-#include "altsvc.h"
-#include "curlx/dynbuf.h"
-#include "headers.h"
-#include "curlx/strerr.h"
-#include "curlx/strparse.h"
+#include "ws.h"
 
 #ifdef USE_NGHTTP2
 static void data_priority_cleanup(struct Curl_easy *data);
@@ -637,7 +629,7 @@ static bool conn_maxage(struct Curl_easy *data,
   timediff_t age_ms;
 
   if(data->set.conn_max_idle_ms) {
-    age_ms = curlx_timediff_ms(now, conn->lastused);
+    age_ms = curlx_ptimediff_ms(&now, &conn->lastused);
     if(age_ms > data->set.conn_max_idle_ms) {
       infof(data, "Too old connection (%" FMT_TIMEDIFF_T
             " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
@@ -647,7 +639,7 @@ static bool conn_maxage(struct Curl_easy *data,
   }
 
   if(data->set.conn_max_age_ms) {
-    age_ms = curlx_timediff_ms(now, conn->created);
+    age_ms = curlx_ptimediff_ms(&now, &conn->created);
     if(age_ms > data->set.conn_max_age_ms) {
       infof(data,
             "Too old connection (created %" FMT_TIMEDIFF_T
@@ -664,21 +656,15 @@ static bool conn_maxage(struct Curl_easy *data,
  * Return TRUE iff the given connection is considered dead.
  */
 bool Curl_conn_seems_dead(struct connectdata *conn,
-                          struct Curl_easy *data,
-                          struct curltime *pnow)
+                          struct Curl_easy *data)
 {
   DEBUGASSERT(!data->conn);
   if(!CONN_INUSE(conn)) {
     /* The check for a dead socket makes sense only if the connection is not in
        use */
     bool dead;
-    struct curltime now;
-    if(!pnow) {
-      now = curlx_now();
-      pnow = &now;
-    }
 
-    if(conn_maxage(data, conn, *pnow)) {
+    if(conn_maxage(data, conn, *Curl_pgrs_now(data))) {
       /* avoid check if already too old */
       dead = TRUE;
     }
@@ -727,11 +713,11 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
 }
 
 CURLcode Curl_conn_upkeep(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          struct curltime *now)
+                          struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  if(curlx_timediff_ms(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
+  if(curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->keepalive) <=
+     data->set.upkeep_interval_ms)
     return result;
 
   /* briefly attach for action */
@@ -749,7 +735,7 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
   }
   Curl_detach_connection(data);
 
-  conn->keepalive = *now;
+  conn->keepalive = *Curl_pgrs_now(data);
   return result;
 }
 
@@ -1241,7 +1227,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
 
-  if(!CONN_INUSE(conn) && Curl_conn_seems_dead(conn, m->data, NULL)) {
+  if(!CONN_INUSE(conn) && Curl_conn_seems_dead(conn, m->data)) {
     /* remove and disconnect. */
     Curl_conn_terminate(m->data, conn, FALSE);
     return FALSE;
@@ -1346,7 +1332,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->remote_port = -1; /* unknown at this point */
 
   /* Store creation time to help future close decision making */
-  conn->created = curlx_now();
+  conn->created = *Curl_pgrs_now(data);
 
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = conn->created;
@@ -3208,7 +3194,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 {
   struct hostname *ehost;
   int eport;
-  timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, TRUE);
+  timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
   const char *peertype = "host";
   CURLcode result;
 
@@ -3266,7 +3252,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
   else if(result == CURLE_OPERATION_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
-          curlx_timediff_ms(curlx_now(), data->progress.t_startsingle));
+          curlx_ptimediff_ms(Curl_pgrs_now(data),
+                             &data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
   else if(result) {

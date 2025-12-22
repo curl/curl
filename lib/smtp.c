@@ -57,7 +57,6 @@
 #include <inet.h>
 #endif
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -66,18 +65,15 @@
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
 #include "mime.h"
-#include "socks.h"
 #include "smtp.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "select.h"
-#include "multiif.h"
 #include "url.h"
 #include "curl_gethostname.h"
 #include "bufref.h"
 #include "curl_sasl.h"
-#include "curlx/warnless.h"
 #include "idn.h"
 #include "curlx/strparse.h"
 
@@ -1441,7 +1437,7 @@ static CURLcode smtp_connect(struct Curl_easy *data, bool *done)
   Curl_sasl_init(&smtpc->sasl, data, &saslsmtp);
 
   /* Initialise the pingpong layer */
-  Curl_pp_init(&smtpc->pp);
+  Curl_pp_init(&smtpc->pp, Curl_pgrs_now(data));
 
   /* Parse the URL options */
   result = smtp_parse_url_options(data->conn, smtpc);
@@ -1702,7 +1698,6 @@ static CURLcode smtp_regular_transfer(struct Curl_easy *data,
                 result, *dophase_done);
   return result;
 }
-
 
 static void smtp_easy_dtor(void *key, size_t klen, void *entry)
 {

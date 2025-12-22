@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+
 #include "curlx/timeval.h"
 
 /* only use function calls to access this struct */
@@ -36,14 +37,14 @@ struct Curl_tree {
   void *ptr;                 /* data the splay code does not care about */
 };
 
-struct Curl_tree *Curl_splay(struct curltime i,
+struct Curl_tree *Curl_splay(const struct curltime *pkey,
                              struct Curl_tree *t);
 
-struct Curl_tree *Curl_splayinsert(struct curltime key,
+struct Curl_tree *Curl_splayinsert(const struct curltime *pkey,
                                    struct Curl_tree *t,
                                    struct Curl_tree *newnode);
 
-struct Curl_tree *Curl_splaygetbest(struct curltime key,
+struct Curl_tree *Curl_splaygetbest(const struct curltime *pkey,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed);
 

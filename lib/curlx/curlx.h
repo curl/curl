@@ -37,14 +37,6 @@
 #include "nonblock.h"
 /* "nonblock.h" provides curlx_nonblock() */
 
-#include "warnless.h"
-/* "warnless.h" provides functions:
-
-  curlx_ultous()
-  curlx_ultouc()
-  curlx_uztosi()
-*/
-
 #include "multibyte.h"
 /* "multibyte.h" provides these functions and macros:
 

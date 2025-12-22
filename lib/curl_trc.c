@@ -24,17 +24,13 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "curl_trc.h"
 #include "urldata.h"
-#include "easyif.h"
 #include "cfilters.h"
 #include "multiif.h"
 
 #include "cf-socket.h"
 #include "connect.h"
-#include "doh.h"
 #include "http2.h"
 #include "http_proxy.h"
 #include "cf-h1-proxy.h"
@@ -42,6 +38,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h"
@@ -314,12 +311,12 @@ void Curl_trc_easy_timers(struct Curl_easy *data)
   if(CURL_TRC_TIMER_is_verbose(data)) {
     struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
     if(e) {
-      struct curltime now = curlx_now();
+      const struct curltime *pnow = Curl_pgrs_now(data);
       while(e) {
         struct time_node *n = Curl_node_elem(e);
         e = Curl_node_next(e);
         CURL_TRC_TIMER(data, n->eid, "expires in %" FMT_TIMEDIFF_T "ns",
-                       curlx_timediff_us(n->time, now));
+                       curlx_ptimediff_us(&n->time, pnow));
       }
     }
   }
@@ -508,8 +505,6 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_timer,     TRC_CT_NETWORK },
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
-#endif
-#ifndef CURL_DISABLE_DOH
 #endif
 #ifndef CURL_DISABLE_SMTP
   { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },

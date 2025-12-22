@@ -520,7 +520,7 @@ option(BUILD_LIBCURL_DOCS "Build libcurl man pages" ON)
 option(BUILD_MISC_DOCS "Build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
 option(ENABLE_CURL_MANUAL "Build the man page for curl and enable its -M/--manual option" ON)
 
-if((ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS) AND NOT PERL_FOUND)
+if((ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS) AND NOT Perl_FOUND)
   message(WARNING "Perl not found. Will not build manuals.")
 endif()
 
@@ -1570,6 +1570,7 @@ check_function_exists("getpwuid_r"    HAVE_GETPWUID_R)
 check_function_exists("geteuid"       HAVE_GETEUID)
 check_function_exists("utime"         HAVE_UTIME)
 check_symbol_exists("gmtime_r"        "stdlib.h;time.h" HAVE_GMTIME_R)
+check_symbol_exists("localtime_r"     "stdlib.h;time.h" HAVE_LOCALTIME_R)
 
 check_symbol_exists("gethostbyname_r" "netdb.h" HAVE_GETHOSTBYNAME_R)
 check_symbol_exists("gethostname"     "${CURL_INCLUDES}" HAVE_GETHOSTNAME)  # winsock2.h unistd.h proto/bsdsocket.h
@@ -1863,13 +1864,13 @@ set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
 set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
 option(BUILD_TESTING "Build tests" ON)
-if(BUILD_TESTING AND PERL_FOUND)
+if(BUILD_TESTING AND Perl_FOUND)
   set(CURL_BUILD_TESTING ON)
 else()
   set(CURL_BUILD_TESTING OFF)
 endif()
 
-if(PERL_FOUND)
+if(Perl_FOUND)
   set(CURL_MANPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.1")
   set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
   add_subdirectory(docs)
@@ -2338,7 +2339,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_RUSTLS
   #   USE_WIN32_LDAP CURL_DISABLE_LDAP
   #   USE_WOLFSSL
-  configure_package_config_file("CMake/curl-config.cmake.in"
+  configure_package_config_file("CMake/curl-config.in.cmake"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
@@ -2379,7 +2380,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   if(NOT TARGET curl_uninstall)
     configure_file(
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
       "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
       @ONLY)
 

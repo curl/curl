@@ -25,8 +25,6 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include <curl/curl.h>
-#include <stddef.h>
 
 #ifdef HAVE_LIBZ
 #include <zlib.h>
@@ -287,8 +285,10 @@ static const struct Curl_cwtype deflate_encoding = {
   sizeof(struct zlib_writer)
 };
 
+/*
+ * Gzip handler.
+ */
 
-/* Gzip handler. */
 static CURLcode gzip_do_init(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {

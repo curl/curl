@@ -27,7 +27,6 @@
 #if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
 #include "curl_sha512_256.h"
-#include "curlx/warnless.h"
 
 /* The recommended order of the TLS backends:
  * 1. OpenSSL
@@ -65,7 +64,6 @@
             (__NetBSD_Version__ >= 1099000000 &&  \
              __NetBSD_Version__ <  1099001100)
 #          define NEED_NETBSD_SHA512_256_WORKAROUND 1
-#          include <string.h>
 #        endif
 #      endif
 #    endif

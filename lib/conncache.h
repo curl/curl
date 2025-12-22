@@ -25,7 +25,6 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
 #include "curlx/timeval.h"
 
 struct connectdata;
@@ -139,7 +138,7 @@ void Curl_cpool_prune_dead(struct Curl_easy *data);
 /**
  * Perform upkeep actions on connections in the transfer's pool.
  */
-CURLcode Curl_cpool_upkeep(void *data);
+CURLcode Curl_cpool_upkeep(struct Curl_easy *data);
 
 typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
                                    struct Curl_easy *data,

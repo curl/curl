@@ -34,7 +34,7 @@ struct pair {
 static CURLcode test_lib1597(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   curl_version_info_data *curlinfo;
   const char * const *proto;
   int n;
@@ -74,7 +74,7 @@ static CURLcode test_lib1597(const char *URL)
   curlinfo = curl_version_info(CURLVERSION_NOW);
   if(!curlinfo) {
     fputs("curl_version_info failed\n", stderr);
-    res = TEST_ERR_FAILURE;
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
@@ -82,7 +82,7 @@ static CURLcode test_lib1597(const char *URL)
   for(proto = curlinfo->protocols; *proto; proto++) {
     if((size_t)n >= sizeof(protolist)) {
       puts("protolist buffer too small\n");
-      res = TEST_ERR_FAILURE;
+      result = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
     n += curl_msnprintf(protolist + n, sizeof(protolist) - n, ",%s", *proto);
@@ -94,9 +94,9 @@ static CURLcode test_lib1597(const char *URL)
 
   /* Run the tests. */
   for(i = 0; prots[i].in; i++) {
-    res = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
-    if(res != *prots[i].exp) {
-      curl_mprintf("unexpectedly '%s' returned %d\n", prots[i].in, res);
+    result = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
+    if(result != *prots[i].exp) {
+      curl_mprintf("unexpectedly '%s' returned %d\n", prots[i].in, result);
       break;
     }
   }
@@ -106,5 +106,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

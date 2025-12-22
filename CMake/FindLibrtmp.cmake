@@ -90,7 +90,7 @@ else()
 
   # Necessary when linking a static librtmp
   find_package(OpenSSL)
-  if(OPENSSL_FOUND)
+  if(OpenSSL_FOUND)
     list(APPEND _librtmp_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
   endif()
 endif()

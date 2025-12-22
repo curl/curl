@@ -229,16 +229,16 @@ static int cb_socket(CURL *curl, curl_socket_t s, int action,
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
+  CURLcode result;
   struct datauv uv = { 0 };
   int running_handles;
 
   if(argc <= 1)
     return 0;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   uv.loop = uv_default_loop();
   uv_timer_init(uv.loop, &uv.timeout);

@@ -55,7 +55,6 @@
 #include <inet.h>
 #endif
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -63,19 +62,16 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
 #include "pingpong.h"
 #include "pop3.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "select.h"
-#include "multiif.h"
 #include "url.h"
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "curl_md5.h"
-#include "curlx/warnless.h"
 #include "strdup.h"
 
 /* Authentication type flags */
@@ -1297,7 +1293,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   Curl_sasl_init(&pop3c->sasl, data, &saslpop3);
 
   /* Initialise the pingpong layer */
-  Curl_pp_init(pp);
+  Curl_pp_init(pp, Curl_pgrs_now(data));
 
   /* Parse the URL options */
   result = pop3_parse_url_options(conn);

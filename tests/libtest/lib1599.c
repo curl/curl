@@ -26,7 +26,7 @@
 static CURLcode test_lib1599(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
@@ -36,9 +36,9 @@ static CURLcode test_lib1599(const char *URL)
     curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
     curl_easy_setopt(curl, CURLOPT_NETRC_FILE, libtest_arg2);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return res;
+  return result;
 }

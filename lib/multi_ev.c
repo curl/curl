@@ -24,8 +24,6 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "url.h"
 #include "cfilters.h"
@@ -36,10 +34,7 @@
 #include "select.h"
 #include "uint-bset.h"
 #include "uint-spbset.h"
-#include "uint-table.h"
-#include "curlx/warnless.h"
 #include "multihandle.h"
-#include "socks.h"
 
 
 static void mev_in_callback(struct Curl_multi *multi, bool value)
@@ -480,11 +475,12 @@ static struct easy_pollset *mev_get_last_pollset(struct Curl_easy *data,
   return NULL;
 }
 
-static CURLMcode mev_assess(struct Curl_multi *multi, struct Curl_easy *data,
+static CURLMcode mev_assess(struct Curl_multi *multi,
+                            struct Curl_easy *data,
                             struct connectdata *conn)
 {
   struct easy_pollset ps, *last_ps;
-  CURLMcode res = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
 
   if(!multi || !multi->socket_cb)
     return CURLM_OK;
@@ -493,8 +489,8 @@ static CURLMcode mev_assess(struct Curl_multi *multi, struct Curl_easy *data,
   if(conn) {
     CURLcode r = Curl_conn_adjust_pollset(data, conn, &ps);
     if(r) {
-      res = (r == CURLE_OUT_OF_MEMORY) ?
-            CURLM_OUT_OF_MEMORY : CURLM_INTERNAL_ERROR;
+      mresult = (r == CURLE_OUT_OF_MEMORY) ?
+        CURLM_OUT_OF_MEMORY : CURLM_INTERNAL_ERROR;
       goto out;
     }
   }
@@ -508,18 +504,18 @@ static CURLMcode mev_assess(struct Curl_multi *multi, struct Curl_easy *data,
     else
       last_ps = mev_add_new_xfer_pollset(data);
     if(!last_ps) {
-      res = CURLM_OUT_OF_MEMORY;
+      mresult = CURLM_OUT_OF_MEMORY;
       goto out;
     }
   }
 
   if(last_ps)
-    res = mev_pollset_diff(multi, data, conn, &ps, last_ps);
+    mresult = mev_pollset_diff(multi, data, conn, &ps, last_ps);
   else
     DEBUGASSERT(!ps.n);
 out:
   Curl_pollset_cleanup(&ps);
-  return res;
+  return mresult;
 }
 
 CURLMcode Curl_multi_ev_assess_xfer(struct Curl_multi *multi,
@@ -539,16 +535,17 @@ CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
                                          struct uint32_bset *set)
 {
   uint32_t mid;
-  CURLMcode result = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
 
   if(multi && multi->socket_cb && Curl_uint32_bset_first(set, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
-      if(data)
-        result = Curl_multi_ev_assess_xfer(multi, data);
-    } while(!result && Curl_uint32_bset_next(set, mid, &mid));
+      if(data) {
+        mresult = Curl_multi_ev_assess_xfer(multi, data);
+      }
+    } while(!mresult && Curl_uint32_bset_next(set, mid, &mid));
   }
-  return result;
+  return mresult;
 }
 
 CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,

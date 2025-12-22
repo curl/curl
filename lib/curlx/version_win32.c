@@ -26,9 +26,7 @@
 
 #ifdef _WIN32
 
-#include <curl/curl.h>
 #include "version_win32.h"
-#include "warnless.h"
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
    and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */

@@ -41,7 +41,6 @@
 #include "connect.h"
 #include "curlx/timeval.h"
 #include "socks.h"
-#include "multiif.h" /* for getsock macros */
 #include "curlx/inet_pton.h"
 #include "url.h"
 
@@ -133,7 +132,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
 
   *pnread = 0;
   for(;;) {
-    timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, TRUE);
+    timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
     if(timeout_ms < 0) {
       /* we already got the timeout */
       return CURLE_OPERATION_TIMEDOUT;

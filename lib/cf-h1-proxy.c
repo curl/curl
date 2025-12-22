@@ -26,7 +26,6 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "curlx/dynbuf.h"
 #include "sendf.h"
@@ -41,9 +40,7 @@
 #include "connect.h"
 #include "curl_trc.h"
 #include "strcase.h"
-#include "vtls/vtls.h"
 #include "transfer.h"
-#include "multiif.h"
 #include "curlx/strparse.h"
 
 
@@ -528,7 +525,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
 
   do {
 
-    if(Curl_timeleft_ms(data, NULL, TRUE) < 0) {
+    if(Curl_timeleft_ms(data, TRUE) < 0) {
       failf(data, "Proxy CONNECT aborted due to timeout");
       result = CURLE_OPERATION_TIMEDOUT;
       goto out;

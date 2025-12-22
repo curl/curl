@@ -24,10 +24,7 @@
 
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "hash.h"
-#include "llist.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD

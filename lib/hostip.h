@@ -25,6 +25,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "hash.h"
 #include "curl_addrinfo.h"
 #include "curlx/timeval.h" /* for timediff_t */
@@ -131,7 +132,7 @@ void Curl_dnscache_prune(struct Curl_easy *data);
 /* clear the DNS cache */
 void Curl_dnscache_clear(struct Curl_easy *data);
 
-/* IPv4 threadsafe resolve function used for synch and asynch builds */
+/* IPv4 thread-safe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
 CURLcode Curl_once_resolved(struct Curl_easy *data,

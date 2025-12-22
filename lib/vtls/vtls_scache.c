@@ -45,7 +45,6 @@
 #include "../curl_trc.h"
 #include "../curl_sha256.h"
 #include "../rand.h"
-#include "../curlx/warnless.h"
 
 
 static bool cf_ssl_peer_key_is_global(const char *peer_key);

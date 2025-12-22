@@ -391,6 +391,9 @@
 /* Define to 1 if you have the <locale.h> header file. */
 #cmakedefine HAVE_LOCALE_H 1
 
+/* Define to 1 if you have a working localtime_r function. */
+#cmakedefine HAVE_LOCALTIME_R 1
+
 /* Define to 1 if the compiler supports the 'long long' data type. */
 #cmakedefine HAVE_LONGLONG 1
 

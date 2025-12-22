@@ -26,7 +26,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # Get CSOURCES, HHEADERS, LIB_RCFILES variables
 include Makefile.inc
 
-CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
+CMAKE_DIST = CMakeLists.txt curl_config-cmake.h.in
 
 EXTRA_DIST = config-mac.h config-os400.h config-plan9.h config-riscos.h \
   config-win32.h curl_config.h.in $(LIB_RCFILES) libcurl.def            \
@@ -165,7 +165,7 @@ UNITV_ = $(UNITV_0)
 
 # UNITPROTOS depends on every C file in the lib/ dir
 $(UNITPROTOS): $(CSOURCES)
-	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES) > $(top_builddir)/lib/$(UNITPROTOS))
+	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
 
 # disable the tests that are mostly causing false positives
 TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.ArrayBound,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet

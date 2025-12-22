@@ -27,7 +27,6 @@
 #ifndef CURL_DISABLE_RTSP
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "multiif.h"
@@ -42,7 +41,6 @@
 #include "strdup.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
-
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"
@@ -71,7 +69,6 @@ struct RTSP {
   long CSeq_sent; /* CSeq of this request */
   long CSeq_recv; /* CSeq received */
 };
-
 
 #define RTP_PKT_LENGTH(p) ((((unsigned int)((unsigned char)((p)[2]))) << 8) | \
                             ((unsigned int)((unsigned char)((p)[3]))))

@@ -28,7 +28,7 @@ static CURLcode test_lib651(const char *URL)
   static char testbuf[17000]; /* more than 16K */
 
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLFORMcode formrc;
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
@@ -75,8 +75,8 @@ static CURLcode test_lib651(const char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -88,5 +88,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

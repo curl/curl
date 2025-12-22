@@ -163,7 +163,7 @@ static void *t506_test_fire(void *ptr)
 /* test function */
 static CURLcode test_lib506(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURLSHcode scode = CURLSHE_OK;
   CURLcode code = CURLE_OK;
   char *url = NULL;
@@ -315,18 +315,18 @@ static CURLcode test_lib506(const char *URL)
   curl_mprintf("CURLOPT_COOKIELIST RELOAD\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
 
-  res = CURLE_OK;
+  result = CURLE_OK;
 
   code = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
   if(code != CURLE_OK) {
     curl_mfprintf(stderr, "curl_easy_getinfo() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   curl_mprintf("loaded cookies:\n");
   if(!cookies) {
     curl_mfprintf(stderr, "  reloading cookies from '%s' failed\n", jar);
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   curl_mprintf("-----------------\n");
@@ -366,5 +366,5 @@ test_cleanup:
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -36,7 +36,6 @@
 #include <wolfssl/options.h>
 #include <wolfssl/version.h>
 
-
 #if LIBWOLFSSL_VERSION_HEX < 0x03004006 /* wolfSSL 3.4.6 (2015) */
 #error "wolfSSL version should be at least 3.4.6"
 #endif
@@ -54,22 +53,16 @@
 #endif
 #endif
 
-#include <limits.h>
-
 #include "../urldata.h"
 #include "../sendf.h"
-#include "../curlx/inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
 #include "keylog.h"
-#include "../parsedate.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
-#include "../select.h"
 #include "../strdup.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
@@ -426,7 +419,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   struct Curl_ssl_session *sc_session = NULL;
-  unsigned char *sdata = NULL, *qtp_clone = NULL;
+  unsigned char *sdata = NULL, *sdata_ptr, *qtp_clone = NULL;
   unsigned int sdata_len;
   unsigned int earlydata_max = 0;
 
@@ -439,13 +432,15 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
     result = CURLE_FAILED_INIT;
     goto out;
   }
-  sdata = curlx_calloc(1, sdata_len);
+  sdata = sdata_ptr = curlx_calloc(1, sdata_len);
   if(!sdata) {
     failf(data, "unable to allocate session buffer of %u bytes", sdata_len);
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  sdata_len = wolfSSL_i2d_SSL_SESSION(session, &sdata);
+  /* wolfSSL right now does not change the last parameter here, but it
+   * might one day decide to do so for OpenSSL compatibility. */
+  sdata_len = wolfSSL_i2d_SSL_SESSION(session, &sdata_ptr);
   if(sdata_len <= 0) {
     CURL_TRC_CF(data, cf, "fail to serialize session: %u", sdata_len);
     result = CURLE_FAILED_INIT;
@@ -723,12 +718,11 @@ static void wssl_x509_share_free(void *key, size_t key_len, void *p)
   curlx_free(share);
 }
 
-static bool wssl_cached_x509_store_expired(const struct Curl_easy *data,
+static bool wssl_cached_x509_store_expired(struct Curl_easy *data,
                                            const struct wssl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  struct curltime now = curlx_now();
-  timediff_t elapsed_ms = curlx_timediff_ms(now, mb->time);
+  timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &mb->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
@@ -748,7 +742,7 @@ static bool wssl_cached_x509_store_different(struct Curl_cfilter *cf,
 }
 
 static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
-                                                  const struct Curl_easy *data)
+                                                      struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct wssl_x509_share *share;
@@ -768,7 +762,7 @@ static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
 }
 
 static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
-                                       const struct Curl_easy *data,
+                                       struct Curl_easy *data,
                                        WOLFSSL_X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -811,7 +805,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
       curlx_free(share->CAfile);
     }
 
-    share->time = curlx_now();
+    share->time = *Curl_pgrs_now(data);
     share->store = store;
     share->CAfile = CAfile;
   }

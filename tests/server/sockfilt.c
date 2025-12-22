@@ -1313,11 +1313,6 @@ static int test_sockfilt(int argc, char *argv[])
     }
   }
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
   CURLX_SET_BINMODE(stdin);
   CURLX_SET_BINMODE(stdout);
   CURLX_SET_BINMODE(stderr);

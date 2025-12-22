@@ -298,10 +298,6 @@ Enable verbose output. Speaks more than by default. If used in conjunction
 with parallel testing, it is difficult to associate the logs with the specific
 test being run.
 
-## `-w`
-
-Verify test data.
-
 ## `-vc \<curl\>`
 
 Provide a path to a custom curl binary to run when verifying that the servers

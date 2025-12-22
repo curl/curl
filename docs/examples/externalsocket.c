@@ -99,13 +99,13 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct sockaddr_in servaddr;  /*  socket address structure  */
   curl_socket_t sockfd;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -157,14 +157,14 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
 
     close(sockfd);
 
-    if(res) {
-      printf("libcurl error: %d\n", res);
+    if(result) {
+      printf("libcurl error: %d\n", result);
       return 4;
     }
   }

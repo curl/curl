@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "testtrace.h"
 
+#include <toolx/tool_time.h>
+
 struct libtest_trace_cfg debug_config;
 
 static time_t epoch_offset; /* for test time tracing */
@@ -93,7 +95,8 @@ int libtest_debug_cb(CURL *curl, curl_infotype type,
   timestr = &timebuf[0];
 
   if(trace_cfg->tracetime) {
-    struct tm *now;
+    CURLcode result;
+    struct tm now;
     struct curltime tv;
     time_t secs;
     tv = curlx_now();
@@ -102,10 +105,11 @@ int libtest_debug_cb(CURL *curl, curl_infotype type,
       known_offset = 1;
     }
     secs = epoch_offset + tv.tv_sec;
-    /* !checksrc! disable BANNEDFUNC 1 */
-    now = localtime(&secs);  /* not thread safe but we do not care */
+    result = toolx_localtime(secs, &now);
+    if(result)
+      memset(&now, 0, sizeof(now));
     curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
-                   now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+                   now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
   }
 
   switch(type) {

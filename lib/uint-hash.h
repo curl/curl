@@ -26,10 +26,6 @@
 
 #include "curl_setup.h"
 
-#include <stddef.h>
-
-#include "llist.h"
-
 /* A version with uint32_t as key */
 typedef void Curl_uint32_hash_dtor(uint32_t id, void *value);
 struct uint_hash_entry;

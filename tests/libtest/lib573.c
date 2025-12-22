@@ -33,7 +33,7 @@ static CURLcode test_lib573(const char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int running = 1;
   double connect_time = 0.0;
   double dbl_epsilon;
@@ -94,7 +94,7 @@ static CURLcode test_lib573(const char *URL)
   if(connect_time < dbl_epsilon) {
     curl_mfprintf(stderr, "connect time %e is < epsilon %e\n",
                   connect_time, dbl_epsilon);
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
   }
 
 test_cleanup:
@@ -106,5 +106,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

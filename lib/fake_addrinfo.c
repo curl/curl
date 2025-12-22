@@ -23,12 +23,11 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "fake_addrinfo.h"
 
 #ifdef USE_FAKE_GETADDRINFO
 
-#include <string.h>
-#include <stdlib.h>
 #include <ares.h>
 
 void r_freeaddrinfo(struct addrinfo *cahead)

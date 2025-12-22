@@ -93,17 +93,17 @@ static CURLcode perform_and_check_connections(CURL *curl,
                                               const char *description,
                                               long expected_connections)
 {
-  CURLcode res;
+  CURLcode result;
   long connections = 0;
 
-  res = curl_easy_perform(curl);
-  if(res != CURLE_OK) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed with %d\n", res);
+  result = curl_easy_perform(curl);
+  if(result != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_easy_perform() failed with %d\n", result);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connections);
-  if(res != CURLE_OK) {
+  result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connections);
+  if(result != CURLE_OK) {
     curl_mfprintf(stderr, "curl_easy_getinfo() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -123,8 +123,7 @@ static CURLcode test_lib1533(const char *URL)
 {
   struct cb_data data;
   CURL *curl = NULL;
-  CURLcode res = TEST_ERR_FAILURE;
-  CURLcode result;
+  CURLcode result = TEST_ERR_FAILURE;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -150,10 +149,11 @@ static CURLcode test_lib1533(const char *URL)
   test_setopt(curl, CURLOPT_WRITEFUNCTION, t1533_write_cb);
   test_setopt(curl, CURLOPT_WRITEDATA, &data);
 
-  result = perform_and_check_connections(curl,
-    "First request without CURLOPT_KEEP_SENDING_ON_ERROR", 1);
+  result =
+    perform_and_check_connections(curl,
+                                  "First request without "
+                                  "CURLOPT_KEEP_SENDING_ON_ERROR", 1);
   if(result != TEST_ERR_SUCCESS) {
-    res = result;
     goto test_cleanup;
   }
 
@@ -162,7 +162,6 @@ static CURLcode test_lib1533(const char *URL)
   result = perform_and_check_connections(curl,
     "Second request without CURLOPT_KEEP_SENDING_ON_ERROR", 1);
   if(result != TEST_ERR_SUCCESS) {
-    res = result;
     goto test_cleanup;
   }
 
@@ -173,7 +172,6 @@ static CURLcode test_lib1533(const char *URL)
   result = perform_and_check_connections(curl,
     "First request with CURLOPT_KEEP_SENDING_ON_ERROR", 1);
   if(result != TEST_ERR_SUCCESS) {
-    res = result;
     goto test_cleanup;
   }
 
@@ -182,17 +180,14 @@ static CURLcode test_lib1533(const char *URL)
   result = perform_and_check_connections(curl,
     "Second request with CURLOPT_KEEP_SENDING_ON_ERROR", 0);
   if(result != TEST_ERR_SUCCESS) {
-    res = result;
     goto test_cleanup;
   }
 
-  res = TEST_ERR_SUCCESS;
+  result = TEST_ERR_SUCCESS;
 
 test_cleanup:
-
   curl_easy_cleanup(curl);
-
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

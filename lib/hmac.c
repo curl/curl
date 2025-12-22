@@ -30,10 +30,7 @@
   !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) ||   \
   defined(USE_SSL)
 
-#include <curl/curl.h>
-
 #include "curl_hmac.h"
-#include "curlx/warnless.h"
 
 /*
  * Generic HMAC algorithm.

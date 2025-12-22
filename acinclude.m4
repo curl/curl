@@ -1168,7 +1168,7 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     dnl --with-ca-path given
     capath="$want_capath"
     ca="no"
-  elif test "x$ca_native" != "xno"; then
+  elif test "$ca_native" != "no"; then
     # native ca configured, do not look further
     ca="no"
     capath="no"
