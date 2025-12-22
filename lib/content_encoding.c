@@ -815,10 +815,9 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-CURLcode Curl_get_content_encodings(char **str)
+char *Curl_get_content_encodings(void)
 {
-  *str = curlx_strdup(CONTENT_ENCODING_DEFAULT);
-  return *str ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+  return curlx_strdup(CONTENT_ENCODING_DEFAULT);
 }
 
 #endif /* CURL_DISABLE_HTTP */
