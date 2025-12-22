@@ -619,10 +619,12 @@ char *Curl_get_content_encodings(void)
 
   for(cep = general_unencoders; *cep && !result; cep++) {
     const struct Curl_cwtype *ce = *cep;
-    if(curlx_dyn_len(&enc))
-      result = curlx_dyn_addn(&enc, ", ", 2);
-    if(!result)
-      result = curlx_dyn_add(&enc, ce->name);
+    if(!curl_strequal(ce->name, CONTENT_ENCODING_DEFAULT)) {
+      if(curlx_dyn_len(&enc))
+        result = curlx_dyn_addn(&enc, ", ", 2);
+      if(!result)
+        result = curlx_dyn_add(&enc, ce->name);
+    }
   }
   if(!result)
     return curlx_dyn_ptr(&enc);
