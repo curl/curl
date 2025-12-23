@@ -845,15 +845,15 @@ typedef enum {
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
 #define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE))
 
-#define CURLSSH_AUTH_ANY       ~0L     /* all types supported by the server */
-#define CURLSSH_AUTH_NONE      0L      /* none allowed, silly but complete */
-#define CURLSSH_AUTH_PUBLICKEY (1L<<0) /* public/private key files */
-#define CURLSSH_AUTH_PASSWORD  (1L<<1) /* password */
-#define CURLSSH_AUTH_HOST      (1L<<2) /* host key files */
-#define CURLSSH_AUTH_KEYBOARD  (1L<<3) /* keyboard interactive */
-#define CURLSSH_AUTH_AGENT     (1L<<4) /* agent (ssh-agent, pageant...) */
-#define CURLSSH_AUTH_GSSAPI    (1L<<5) /* gssapi (kerberos, ...) */
-#define CURLSSH_AUTH_DEFAULT CURLSSH_AUTH_ANY
+#define CURLSSH_AUTH_ANY       ~0L       /* all types supported by server */
+#define CURLSSH_AUTH_NONE      0L        /* none allowed, silly but complete */
+#define CURLSSH_AUTH_PUBLICKEY (1L << 0) /* public/private key files */
+#define CURLSSH_AUTH_PASSWORD  (1L << 1) /* password */
+#define CURLSSH_AUTH_HOST      (1L << 2) /* host key files */
+#define CURLSSH_AUTH_KEYBOARD  (1L << 3) /* keyboard interactive */
+#define CURLSSH_AUTH_AGENT     (1L << 4) /* agent (ssh-agent, pageant...) */
+#define CURLSSH_AUTH_GSSAPI    (1L << 5) /* gssapi (kerberos, ...) */
+#define CURLSSH_AUTH_DEFAULT   CURLSSH_AUTH_ANY
 
 #define CURLGSSAPI_DELEGATION_NONE        0L      /* no delegation (default) */
 #define CURLGSSAPI_DELEGATION_POLICY_FLAG (1L<<0) /* if permitted by policy */
