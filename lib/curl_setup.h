@@ -94,7 +94,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), strcpy(), tests: sscanf() */
+#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
 #endif
 #endif /* _MSC_VER */
 
