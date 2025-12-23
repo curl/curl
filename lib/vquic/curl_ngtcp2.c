@@ -1291,11 +1291,14 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL, /* end_stream */
   cb_h3_reset_stream,
   NULL, /* shutdown */
-  NULL, /* recv_settings */
+  NULL, /* recv_settings (deprecated) */
 #ifdef NGHTTP3_CALLBACKS_V2
   NULL, /* recv_origin */
   NULL, /* end_origin */
   NULL, /* rand */
+#endif
+#ifdef NGHTTP3_CALLBACKS_V3
+  NULL, /* recv_settings2 */
 #endif
 };
 
