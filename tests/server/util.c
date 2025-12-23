@@ -694,7 +694,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     logmsg("Too long unix socket domain path (%zd)", len);
     return -1;
   }
-  strcpy(sau->sun_path, unix_socket);
+  curlx_strcopy(sau->sun_path, sizeof(sau->sun_path), unix_socket, len);
   rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
   if(rc && SOCKERRNO == SOCKEADDRINUSE) {
     struct_stat statbuf;
