@@ -44,7 +44,7 @@ static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 
   if(size * nmemb >= T547_DATALEN) {
     curl_mfprintf(stderr, "READ!\n");
-    curlx_strcopy(ptr, size * nmemb, t547_uploadthis, T547_DATALEN);
+    memcpy(ptr, t547_uploadthis, T547_DATALEN);
     return T547_DATALEN;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");
