@@ -877,7 +877,7 @@ static ngtcp2_callbacks ng_callbacks = {
   cb_recv_rx_key,
   NULL, /* recv_tx_key */
   NULL, /* early_data_rejected */
-#ifdef NGTCP2_CALLBACKS_V2
+#ifdef NGTCP2_CALLBACKS_V2  /* ngtcp2 v1.14.0+ */
   NULL, /* begin_path_validation */
 #endif
 };
@@ -1292,12 +1292,12 @@ static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_reset_stream,
   NULL, /* shutdown */
   NULL, /* recv_settings (deprecated) */
-#ifdef NGHTTP3_CALLBACKS_V2
+#ifdef NGHTTP3_CALLBACKS_V2  /* nghttp3 v1.11.0+ */
   NULL, /* recv_origin */
   NULL, /* end_origin */
   NULL, /* rand */
 #endif
-#ifdef NGHTTP3_CALLBACKS_V3
+#ifdef NGHTTP3_CALLBACKS_V3  /* nghttp3 v1.14.0+ */
   NULL, /* recv_settings2 */
 #endif
 };
