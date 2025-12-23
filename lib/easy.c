@@ -608,7 +608,7 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
     ev->ms = 0;
     /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
     mresult = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
-                                     &ev->running_handles);
+                                       &ev->running_handles);
   }
   else {
     /* here pollrc is > 0 */
@@ -623,7 +623,7 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
         infof(multi->admin, "call curl_multi_socket_action(socket "
               "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
         mresult = curl_multi_socket_action(multi, fds[i].fd, act,
-                                         &ev->running_handles);
+                                           &ev->running_handles);
       }
     }
 
