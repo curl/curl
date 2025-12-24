@@ -110,6 +110,7 @@ my %banfunc = (
     "sscanf" => 1,
     "stat" => 1,
     "strcat" => 1,
+    "strcpy" => 1,
     "strdup" => 1,
     "strerror" => 1,
     "strncat" => 1,
