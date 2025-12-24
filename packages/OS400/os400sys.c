@@ -711,8 +711,7 @@ char *Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
      overwrite the EBCDIC buffer with ASCII to return it. */
 
-  /* !checksrc! disable BANNEDFUNC 1 */
-  strcpy(cp, cp2);
+  memcpy(cp, cp2, i);
   free(cp2);
   return cp;
 }
@@ -742,8 +741,7 @@ char *Curl_ldap_first_attribute_a(void *ld, LDAPMessage *entry,
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
      overwrite the EBCDIC buffer with ASCII to return it. */
 
-  /* !checksrc! disable BANNEDFUNC 1 */
-  strcpy(cp, cp2);
+  memcpy(cp, cp2, i);
   free(cp2);
   return cp;
 }
@@ -773,8 +771,7 @@ char *Curl_ldap_next_attribute_a(void *ld, LDAPMessage *entry,
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
      overwrite the EBCDIC buffer with ASCII to return it. */
 
-  /* !checksrc! disable BANNEDFUNC 1 */
-  strcpy(cp, cp2);
+  memcpy(cp, cp2, i);
   free(cp2);
   return cp;
 }
