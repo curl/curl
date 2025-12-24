@@ -107,7 +107,6 @@
 #include "telnet.h"
 #include "tftp.h"
 #include "http.h"
-#include "http2.h"
 #include "file.h"
 #include "curl_ldap.h"
 #include "vssh/ssh.h"

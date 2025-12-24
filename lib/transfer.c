@@ -69,7 +69,6 @@
 #include "getinfo.h"
 #include "multiif.h"
 #include "connect.h"
-#include "http2.h"
 #include "mime.h"
 #include "hsts.h"
 #include "setopt.h"

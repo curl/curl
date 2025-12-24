@@ -43,7 +43,6 @@
 #include "vtls/vtls.h"
 #include "curl_trc.h"
 #include "hostip.h"
-#include "http2.h"
 #include "setopt.h"
 #include "altsvc.h"
 #include "hsts.h"
