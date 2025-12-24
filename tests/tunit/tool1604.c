@@ -178,9 +178,6 @@ static CURLcode test_tool1604(const char *arg)
     { "COM56", 0,
       "COM56", SANITIZE_ERR_OK
     },
-    /* At the moment we expect a maximum path length of 259. I assume MS-DOS
-       has variable max path lengths depending on compiler that are shorter
-       so currently these "good" truncate tests will not run on MS-DOS */
     { "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
       "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
