@@ -62,7 +62,7 @@ char *curl_easy_escape(CURL *data, const char *string, int inlength)
   if(!length)
     return curlx_strdup("");
 
-  if(length > SIZE_MAX/16)
+  if(length > SIZE_MAX / 16)
     return NULL;
 
   curlx_dyn_init(&d, length * 3 + 1);
