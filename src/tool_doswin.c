@@ -446,7 +446,7 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
 
   *sanitized = NULL;
 
-  /* Ignore "\\" prefixed paths, they're allowed to use reserved names. */
+  /* Ignore "\\" prefixed paths, they are allowed to use reserved names. */
 #ifndef MSDOS
   if((flags & SANITIZE_ALLOW_PATH) &&
      file_name[0] == '\\' && file_name[1] == '\\') {
