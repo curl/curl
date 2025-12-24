@@ -71,7 +71,6 @@
 #include "setopt.h"
 #include "http_digest.h"
 #include "system_win32.h"
-#include "http2.h"
 #include "curlx/dynbuf.h"
 #include "bufref.h"
 #include "altsvc.h"
