@@ -161,7 +161,12 @@ timediff_t Curl_rlimit_wait_ms(struct Curl_rlimit *r,
 {
   timediff_t wait_us, elapsed_us;
 
-  if(r->blocked || !r->rate_per_step)
+  if(r->blocked) {
+    /* When blocked (paused), return 1 second wait to avoid tight loop
+     * while still allowing periodic progress callback updates */
+    return 1000;
+  }
+  if(!r->rate_per_step)
     return 0;
   ratelimit_update(r, pts);
   if(r->tokens > 0)
