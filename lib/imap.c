@@ -56,6 +56,7 @@
 #include "curlx/dynbuf.h"
 #include "urldata.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "hostip.h"
 #include "progress.h"
 #include "transfer.h"
@@ -72,7 +73,7 @@
 #include "url.h"
 #include "bufref.h"
 #include "curl_sasl.h"
-
+#include "curlx/strcopy.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_IMAP_EASY   "meta:proto:imap:easy"
@@ -1678,7 +1679,7 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done)
   imap_state(data, imapc, IMAP_SERVERGREET);
 
   /* Start off with an response id of '*' */
-  strcpy(imapc->resptag, "*");
+  curlx_strcopy(imapc->resptag, sizeof(imapc->resptag), "*", 1);
 
   result = imap_multi_statemach(data, done);
 

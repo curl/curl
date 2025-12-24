@@ -25,11 +25,12 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
 #include "transfer.h"
 #include "curlx/timeval.h"
+#include "curlx/strcopy.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000
@@ -37,18 +38,18 @@
 #ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
    byte) */
-static void time2str(char *r, curl_off_t seconds)
+static void time2str(char *r, size_t rsize, curl_off_t seconds)
 {
   curl_off_t h;
   if(seconds <= 0) {
-    strcpy(r, "--:--:--");
+    curlx_strcopy(r, rsize, "--:--:--", 8);
     return;
   }
   h = seconds / 3600;
   if(h <= 99) {
     curl_off_t m = (seconds - (h * 3600)) / 60;
     curl_off_t s = (seconds - (h * 3600)) - (m * 60);
-    curl_msnprintf(r, 9, "%2" FMT_OFF_T ":%02" FMT_OFF_T ":%02" FMT_OFF_T,
+    curl_msnprintf(r, rsize, "%2" FMT_OFF_T ":%02" FMT_OFF_T ":%02" FMT_OFF_T,
                    h, m, s);
   }
   else {
@@ -57,21 +58,21 @@ static void time2str(char *r, curl_off_t seconds)
     curl_off_t d = seconds / 86400;
     h = (seconds - (d * 86400)) / 3600;
     if(d <= 999)
-      curl_msnprintf(r, 9, "%3" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
+      curl_msnprintf(r, rsize, "%3" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
     else
-      curl_msnprintf(r, 9, "%7" FMT_OFF_T "d", d);
+      curl_msnprintf(r, rsize, "%7" FMT_OFF_T "d", d);
   }
 }
 
 /* The point of this function would be to return a string of the input data,
    but never longer than 6 columns (+ one zero byte).
    Add suffix k, M, G when suitable... */
-static char *max6data(curl_off_t bytes, char *max6)
+static char *max6out(curl_off_t bytes, char *max6, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum, shown as
      8.0E (exabytes)*/
   if(bytes < 100000)
-    curl_msnprintf(max6, 7, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
+    curl_msnprintf(max6, mlen, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
   else {
     const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
     int k = 0;
@@ -85,7 +86,7 @@ static char *max6data(curl_off_t bytes, char *max6)
       DEBUGASSERT(unit[k]);
     } while(unit[k]);
     /* xxx.yU */
-    curl_msnprintf(max6, 7, "%3" CURL_FORMAT_CURL_OFF_T
+    curl_msnprintf(max6, mlen, "%3" CURL_FORMAT_CURL_OFF_T
                    ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
                    (bytes % 1024) / (1024 / 10), unit[k]);
   }
@@ -528,9 +529,10 @@ static void progress_meter(struct Curl_easy *data)
   /* Since both happen at the same time, total expected duration is max. */
   total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
   /* create the three time strings */
-  time2str(time_left, total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
-  time2str(time_total, total_estm.secs);
-  time2str(time_spent, cur_secs);
+  time2str(time_left, sizeof(time_left),
+           total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
+  time2str(time_total, sizeof(time_total), total_estm.secs);
+  time2str(time_spent, sizeof(time_spent), cur_secs);
 
   /* Get the total amount of data expected to get transferred */
   total_expected_size = p->ul_size_known ? p->ul.total_size : p->ul.cur_size;
@@ -554,18 +556,24 @@ static void progress_meter(struct Curl_easy *data)
                 "%3" FMT_OFF_T " %s "
                 "%3" FMT_OFF_T " %s "
                 "%3" FMT_OFF_T " %s %s %s  %s %s %s %s",
-                total_estm.percent, /* 3 letters */         /* total % */
-                max6data(total_expected_size, max6[2]),     /* total size */
-                dl_estm.percent, /* 3 letters */            /* rcvd % */
-                max6data(p->dl.cur_size, max6[0]),          /* rcvd size */
-                ul_estm.percent, /* 3 letters */            /* xfer % */
-                max6data(p->ul.cur_size, max6[1]),          /* xfer size */
-                max6data(p->dl.speed, max6[3]),             /* avrg dl speed */
-                max6data(p->ul.speed, max6[4]),             /* avrg ul speed */
-                time_total,    /* 8 letters */              /* total time */
-                time_spent,    /* 8 letters */              /* time spent */
-                time_left,     /* 8 letters */              /* time left */
-                max6data(p->current_speed, max6[5])
+                total_estm.percent, /* 3 letters */    /* total % */
+                max6out(total_expected_size, max6[2],
+                        sizeof(max6[2])),              /* total size */
+                dl_estm.percent, /* 3 letters */       /* rcvd % */
+                max6out(p->dl.cur_size, max6[0],
+                        sizeof(max6[0])),              /* rcvd size */
+                ul_estm.percent, /* 3 letters */       /* xfer % */
+                max6out(p->ul.cur_size, max6[1],
+                        sizeof(max6[1])),              /* xfer size */
+                max6out(p->dl.speed, max6[3],
+                        sizeof(max6[3])),              /* avrg dl speed */
+                max6out(p->ul.speed, max6[4],
+                        sizeof(max6[4])),              /* avrg ul speed */
+                time_total,    /* 8 letters */         /* total time */
+                time_spent,    /* 8 letters */         /* time spent */
+                time_left,     /* 8 letters */         /* time left */
+                max6out(p->current_speed, max6[5],
+                        sizeof(max6[5]))               /* current speed */
     );
 
   /* we flush the output stream to make it appear as soon as possible */

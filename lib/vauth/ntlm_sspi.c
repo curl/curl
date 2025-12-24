@@ -28,7 +28,7 @@
 
 #include "vauth.h"
 #include "../curl_ntlm_core.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strdup.h"
 
 /*

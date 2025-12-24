@@ -41,7 +41,7 @@
 #include "strcase.h"
 #include "curl_share.h"
 #include "vtls/vtls.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "hostip.h"
 #include "http2.h"
 #include "setopt.h"
@@ -521,7 +521,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
   case CURLOPT_HTTP09_ALLOWED:
     s->http09_allowed = enabled;
     break;
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
   case CURLOPT_COOKIESESSION:
     /*
      * Set this option to TRUE to start a new "cookie session". It will
@@ -1726,9 +1726,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      *
      */
     if(ptr && !*ptr) {
-      char all[256];
-      Curl_all_content_encodings(all, sizeof(all));
-      return Curl_setstropt(&s->str[STRING_ENCODING], all);
+      ptr = Curl_get_content_encodings();
+      if(ptr)
+        s->str[STRING_ENCODING] = ptr;
+      else
+        result = CURLE_OUT_OF_MEMORY;
+      return result;
     }
     return Curl_setstropt(&s->str[STRING_ENCODING], ptr);
 

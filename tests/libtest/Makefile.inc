@@ -37,6 +37,7 @@ CURLX_C = \
   ../../lib/curl_threads.c \
   ../../lib/curlx/fopen.c \
   ../../lib/curlx/multibyte.c \
+  ../../lib/curlx/strcopy.c \
   ../../lib/curlx/strerr.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \

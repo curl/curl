@@ -32,7 +32,7 @@
 #include "vauth.h"
 #include "digest.h"
 #include "../curlx/multibyte.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strdup.h"
 #include "../strcase.h"
 #include "../strerror.h"

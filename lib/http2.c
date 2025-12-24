@@ -35,6 +35,7 @@
 #include "http2.h"
 #include "http.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "select.h"
 #include "curlx/base64.h"
 #include "multiif.h"

@@ -162,6 +162,7 @@ my %warnings = (
     'EXCLAMATIONSPACE'      => 'Whitespace after exclamation mark in expression',
     'FIXME'                 => 'FIXME or TODO comment',
     'FOPENMODE'             => 'fopen needs a macro for the mode string',
+    'IFDEFSINGLE',          => 'use ifdef/ifndef for single macro checks',
     'INCLUDEDUP',           => 'same file is included again',
     'INDENTATION'           => 'wrong start column for code',
     'LONGLINE'              => "Line longer than $max_column",
@@ -656,6 +657,11 @@ sub scanfile {
         if($l =~ /^(([^"\*]*)[^:"]|)\/\//) {
             checkwarn("CPPCOMMENTS",
                       $line, length($1), $file, $l, "\/\/ comment");
+        }
+
+        if($l =~ /^\s*#\s*if\s+!?\s*defined\([a-zA-Z0-9_]+\)$/) {
+            checkwarn("IFDEFSINGLE",
+                      $line, length($1), $file, $l, "use ifdef/ifndef for single macro checks");
         }
 
         if($l =~ /^(\#\s*include\s+)([\">].*[>}"])/) {

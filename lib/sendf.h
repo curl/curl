@@ -26,8 +26,6 @@
 
 #include "curl_setup.h"
 
-#include "curl_trc.h"
-
 /**
  * Type of data that is being written to the client (application)
  * - data written can be either BODY or META data
@@ -55,6 +53,7 @@
 /* Forward declarations */
 struct Curl_creader;
 struct Curl_cwriter;
+struct Curl_easy;
 
 /**
  * Write `len` bytes at `prt` to the client. `type` indicates what

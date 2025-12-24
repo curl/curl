@@ -29,7 +29,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "url.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "progress.h"
 #include "select.h"
 #include "curlx/strparse.h"

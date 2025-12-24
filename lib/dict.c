@@ -54,7 +54,7 @@
 
 #include "urldata.h"
 #include "transfer.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "escape.h"
 #include "dict.h"
 

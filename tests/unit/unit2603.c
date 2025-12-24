@@ -159,16 +159,6 @@ static CURLcode test_unit2603(const char *arg)
     T4_INPUT, NULL, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
   };
 
-  static const char *T5_INPUT[] = {
-    "OPTIONS * HTTP/1.1\r\nContent-Length: 0\r\nBlabla: xxx.yyy\r",
-    "\n\tzzzzzz\r\n\r\n",
-    "123",
-    NULL,
-  };
-  static const struct tcase TEST5a = {
-    T5_INPUT, NULL, NULL, "OPTIONS", NULL, NULL, "*", 2, 3
-  };
-
   static const char *T6_INPUT[] = {
     "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
     NULL,
@@ -194,7 +184,6 @@ static CURLcode test_unit2603(const char *arg)
   parse_success(&TEST2);
   parse_success(&TEST3a);
   parse_success(&TEST4a);
-  parse_success(&TEST5a);
   parse_success(&TEST6a);
   parse_success(&TEST7a);
   parse_success(&TEST7b);

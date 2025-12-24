@@ -35,7 +35,7 @@
 
 #include "urldata.h"
 #include "bufq.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "select.h"
 #include "cfilters.h"
 #include "connect.h"

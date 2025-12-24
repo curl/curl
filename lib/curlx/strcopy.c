@@ -21,38 +21,29 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
-
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h> /* IPPROTO_TCP */
-#endif
-
-#include "tool_cb_soc.h"
+#include "../curl_setup.h"
+#include "strcopy.h"
 
 /*
-** callback for CURLOPT_OPENSOCKETFUNCTION
-**
-** Notice that only Linux is supported for the moment.
-*/
-
-curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
-                                        curlsocktype purpose,
-                                        struct curl_sockaddr *addr)
+ * curlx_strcopy() is a replacement for strcpy().
+ *
+ * Provide the target buffer @dest and size of the target buffer @dsize, If
+ * the source string @src with its *string length* @slen fits in the target
+ * buffer it will be copied there - including storing a null terminator.
+ *
+ * If the target buffer is too small, the copy is not performed but if the
+ * target buffer has a non-zero size it will get a null terminator stored.
+ */
+void curlx_strcopy(char *dest,      /* destination buffer */
+                   size_t dsize,    /* size of target buffer */
+                   const char *src, /* source string */
+                   size_t slen)     /* length of source string to copy */
 {
-  int protocol = addr->protocol;
-
-  (void)clientp;
-  (void)purpose;
-
-  if(protocol == IPPROTO_TCP)
-#ifdef __linux__
-#  ifndef IPPROTO_MPTCP
-#  define IPPROTO_MPTCP 262
-#  endif
-    protocol = IPPROTO_MPTCP;
-#else
-    return CURL_SOCKET_BAD;
-#endif
-
-  return CURL_SOCKET(addr->family, addr->socktype, protocol);
+  DEBUGASSERT(slen < dsize);
+  if(slen < dsize) {
+    memcpy(dest, src, slen);
+    dest[slen] = 0;
+  }
+  else if(dsize)
+    dest[0] = 0;
 }

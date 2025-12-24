@@ -1,3 +1,5 @@
+#ifndef HEADER_CURLX_STRCOPY_H
+#define HEADER_CURLX_STRCOPY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,38 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h> /* IPPROTO_TCP */
-#endif
+void curlx_strcopy(char *dest,
+                   size_t dsize, /* size of target buffer */
+                   const char *src,
+                   size_t slen); /* length of string to copy */
 
-#include "tool_cb_soc.h"
-
-/*
-** callback for CURLOPT_OPENSOCKETFUNCTION
-**
-** Notice that only Linux is supported for the moment.
-*/
-
-curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
-                                        curlsocktype purpose,
-                                        struct curl_sockaddr *addr)
-{
-  int protocol = addr->protocol;
-
-  (void)clientp;
-  (void)purpose;
-
-  if(protocol == IPPROTO_TCP)
-#ifdef __linux__
-#  ifndef IPPROTO_MPTCP
-#  define IPPROTO_MPTCP 262
-#  endif
-    protocol = IPPROTO_MPTCP;
-#else
-    return CURL_SOCKET_BAD;
-#endif
-
-  return CURL_SOCKET(addr->family, addr->socktype, protocol);
-}
+#endif /* HEADER_CURLX_STRCOPY_H */

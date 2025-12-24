@@ -44,7 +44,7 @@
 #include "vauth/vauth.h"
 #include "cfilters.h"
 #include "curl_sasl.h"
-#include "sendf.h"
+#include "curl_trc.h"
 
 /* Supported mechanisms */
 static const struct {

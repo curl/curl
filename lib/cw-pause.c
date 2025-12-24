@@ -28,6 +28,7 @@
 #include "bufq.h"
 #include "cfilters.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "cw-pause.h"
 
 

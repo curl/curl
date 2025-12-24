@@ -33,7 +33,7 @@
 #include "../curlx/fopen.h"
 #include "../curlx/strerr.h"
 #include "../urldata.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"

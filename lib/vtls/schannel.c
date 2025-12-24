@@ -42,7 +42,7 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../strdup.h"
 #include "../strerror.h"

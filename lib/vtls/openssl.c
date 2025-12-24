@@ -44,7 +44,7 @@
 #endif
 
 #include "../urldata.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../formdata.h" /* for the boundary function */
 #include "../url.h" /* for the ssl config check function */
 #include "../curlx/inet_pton.h"
@@ -61,6 +61,7 @@
 #include "../multiif.h"
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
+#include "../curlx/strcopy.h"
 #include "../strdup.h"
 #include "apple.h"
 
@@ -773,8 +774,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
-    if(strlen(msg) < size)
-      strcpy(buf, msg);
+    curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;

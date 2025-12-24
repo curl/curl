@@ -74,7 +74,7 @@
 #include "vtls/vtls.h"
 #include "hostip.h"
 #include "transfer.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "progress.h"
 #include "cookie.h"
 #include "strcase.h"
@@ -1527,7 +1527,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-#if defined(USE_SSH)
+#ifdef USE_SSH
     &Curl_handler_scp,
 #else
     NULL,

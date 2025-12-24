@@ -46,7 +46,6 @@
 
 #include "urldata.h"
 #include "asyn.h"
-#include "sendf.h"
 #include "hostip.h"
 #include "multiif.h"
 #include "select.h"
