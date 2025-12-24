@@ -710,9 +710,8 @@ char *Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
      overwrite the EBCDIC buffer with ASCII to return it.
 
-     'i' stores the length without the null-terminator, destination 'cp' has
-     its original terminating null, and `memcpy()` copies back the number of
-     characters without a null-terminator, leaving the one already there. */
+     The destination buffer already has a null-terminator at the correct
+     position. Keep it outouched and copy the buffer without a terminator. */
   memcpy(cp, cp2, i);
   free(cp2);
   return cp;
@@ -742,9 +741,8 @@ char *Curl_ldap_first_attribute_a(void *ld, LDAPMessage *entry,
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
      overwrite the EBCDIC buffer with ASCII to return it.
 
-     'i' stores the length without the null-terminator, destination 'cp' has
-     its original terminating null, and `memcpy()` copies back the number of
-     characters without a null-terminator, leaving the one already there. */
+     The destination buffer already has a null-terminator at the correct
+     position. Keep it outouched and copy the buffer without a terminator. */
   memcpy(cp, cp2, i);
   free(cp2);
   return cp;
@@ -774,9 +772,8 @@ char *Curl_ldap_next_attribute_a(void *ld, LDAPMessage *entry,
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
      overwrite the EBCDIC buffer with ASCII to return it.
 
-     'i' stores the length without the null-terminator, destination 'cp' has
-     its original terminating null, and `memcpy()` copies back the number of
-     characters without a null-terminator, leaving the one already there. */
+     The destination buffer already has a null-terminator at the correct
+     position. Keep it outouched and copy the buffer without a terminator. */
   memcpy(cp, cp2, i);
   free(cp2);
   return cp;
