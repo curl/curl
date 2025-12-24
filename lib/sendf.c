@@ -44,7 +44,6 @@
 #include "cw-pause.h"
 #include "multiif.h"
 #include "strerror.h"
-#include "http2.h"
 #include "progress.h"
 
 

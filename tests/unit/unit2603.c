@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #include "urldata.h"
-#include "http.h"
 #include "http1.h"
 #include "curl_trc.h"
 

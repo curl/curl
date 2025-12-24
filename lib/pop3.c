@@ -62,7 +62,6 @@
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
 #include "pingpong.h"
 #include "pop3.h"
 #include "vtls/vtls.h"

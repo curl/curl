@@ -61,7 +61,7 @@
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
+#include "pingpong.h"
 #include "imap.h"
 #include "mime.h"
 #include "curlx/strparse.h"

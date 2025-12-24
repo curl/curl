@@ -107,7 +107,6 @@
 #include "telnet.h"
 #include "tftp.h"
 #include "http.h"
-#include "http2.h"
 #include "file.h"
 #include "curl_ldap.h"
 #include "vssh/ssh.h"
@@ -117,6 +116,8 @@
 #include "curl_rtmp.h"
 #include "gopher.h"
 #include "mqtt.h"
+#include "rtsp.h"
+#include "smtp.h"
 #include "ws.h"
 
 #ifdef USE_NGHTTP2

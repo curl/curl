@@ -48,7 +48,6 @@
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
 #include "ftp.h"
 #include "fileinfo.h"
 #include "ftplistparser.h"

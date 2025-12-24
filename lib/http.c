@@ -81,6 +81,7 @@
 #include "strdup.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "rtsp.h"
 #include "ws.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
