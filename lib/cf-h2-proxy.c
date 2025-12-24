@@ -37,7 +37,6 @@
 #include "bufq.h"
 #include "curlx/dynbuf.h"
 #include "dynhds.h"
-#include "http1.h"
 #include "http2.h"
 #include "http_proxy.h"
 #include "multiif.h"
