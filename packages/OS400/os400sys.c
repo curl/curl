@@ -708,8 +708,11 @@ char *Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
-     overwrite the EBCDIC buffer with ASCII to return it. */
+     overwrite the EBCDIC buffer with ASCII to return it.
 
+     'i' stores the length without the null-terminator, destination 'cp' has
+     its original terminating null, and `memcpy()` copies back the number of
+     characters without a null-terminator, leaving the one already there. */
   memcpy(cp, cp2, i);
   free(cp2);
   return cp;
@@ -737,8 +740,11 @@ char *Curl_ldap_first_attribute_a(void *ld, LDAPMessage *entry,
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
-     overwrite the EBCDIC buffer with ASCII to return it. */
+     overwrite the EBCDIC buffer with ASCII to return it.
 
+     'i' stores the length without the null-terminator, destination 'cp' has
+     its original terminating null, and `memcpy()` copies back the number of
+     characters without a null-terminator, leaving the one already there. */
   memcpy(cp, cp2, i);
   free(cp2);
   return cp;
@@ -766,8 +772,11 @@ char *Curl_ldap_next_attribute_a(void *ld, LDAPMessage *entry,
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
-     overwrite the EBCDIC buffer with ASCII to return it. */
+     overwrite the EBCDIC buffer with ASCII to return it.
 
+     'i' stores the length without the null-terminator, destination 'cp' has
+     its original terminating null, and `memcpy()` copies back the number of
+     characters without a null-terminator, leaving the one already there. */
   memcpy(cp, cp2, i);
   free(cp2);
   return cp;
