@@ -115,7 +115,12 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
     return SANITIZE_ERR_BAD_ARGUMENT;
 
   if(flags & SANITIZE_ALLOW_PATH)
+#ifdef MSDOS
+    max_sanitized_len = PATH_MAX - 1;
+#else
+    /* Windows extended-length path max */
     max_sanitized_len = 32767 - 1;
+#endif
   else
     /* The maximum length of a filename. FILENAME_MAX is often the same as
        PATH_MAX, in other words it is 260 and does not discount the path
