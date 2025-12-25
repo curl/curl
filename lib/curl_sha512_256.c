@@ -717,12 +717,12 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
      part of number of bits as big-endian values.
      See FIPS PUB 180-4 section 5.1.2. */
   /* Note: the target location is predefined and buffer is always aligned */
-  CURL_PUT_64BIT_BE((unsigned char *)ctx_buf +                                \
-                    CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD,  \
+  CURL_PUT_64BIT_BE((unsigned char *)ctx_buf +
+                    CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD,
                     ctx->count_bits_hi);
-  CURL_PUT_64BIT_BE((unsigned char *)ctx_buf +                                \
-                    CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD + \
-                    SHA512_256_BYTES_IN_WORD,                                 \
+  CURL_PUT_64BIT_BE((unsigned char *)ctx_buf +
+                    CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD +
+                    SHA512_256_BYTES_IN_WORD,
                     num_bits);
   /* Process the full final block. */
   Curl_sha512_256_transform(ctx->H, ctx->buffer);
