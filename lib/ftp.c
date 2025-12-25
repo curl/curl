@@ -1941,7 +1941,8 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
   if(result) {
-    if(ftpc->count1 == 0 && ftpcode == 229) {
+    if((result != CURLE_OUT_OF_MEMORY) &&
+       (ftpc->count1 == 0) && (ftpcode == 229)) {
       curlx_free(newhost);
       return ftp_epsv_disable(data, ftpc, conn);
     }
@@ -3552,6 +3553,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   if(conn->cfilter[SECONDARYSOCKET]) {
     bool is_eptr = Curl_conn_is_tcp_listen(data, SECONDARYSOCKET);
     result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
+    if(result == CURLE_OUT_OF_MEMORY)
+      return result;
     if(result || (!connected && !is_eptr &&
                   !Curl_conn_is_ip_connected(data, SECONDARYSOCKET))) {
       if(result && !is_eptr && (ftpc->count1 == 0)) {
