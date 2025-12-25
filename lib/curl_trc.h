@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 struct Curl_easy;
 struct Curl_cfilter;
 

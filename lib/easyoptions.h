@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* should probably go into the public header */
 
 /* generated table with all easy options */
