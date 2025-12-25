@@ -239,4 +239,4 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#endif /* if SSH is used */
+#endif /* USE_SSH */
