@@ -173,7 +173,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
                              size_t *pnread);          /* how much received */
 
 #include "mime.h"
-#include "imap.h"
 #include "ftp.h"
 #include "http.h"
 #include "smb.h"
