@@ -31,7 +31,6 @@
 #define ITERINIT 0x5FEDCBA9
 #endif
 
-
 #if 0 /* useful function for debugging hashes and their contents */
 void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 {
