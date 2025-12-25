@@ -24,9 +24,6 @@
  *
  ***************************************************************************/
 
-#include "pingpong.h"
-#include "curl_sasl.h"
-
 extern const struct Curl_handler Curl_handler_smtp;
 extern const struct Curl_handler Curl_handler_smtps;
 

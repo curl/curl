@@ -64,6 +64,7 @@
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
+#include "pingpong.h"
 #include "mime.h"
 #include "smtp.h"
 #include "vtls/vtls.h"
