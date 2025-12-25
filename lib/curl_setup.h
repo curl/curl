@@ -1033,8 +1033,6 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define CURL_ACCEPT4(sock, addr, len, flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
-#define CURL_SEND send
-#define CURL_RECV recv
 
 #else /* !CURLDEBUG */
 
@@ -1051,8 +1049,6 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #ifdef HAVE_ACCEPT4
 #define CURL_ACCEPT4 accept4
 #endif
-#define CURL_SEND send
-#define CURL_RECV recv
 
 #endif /* CURLDEBUG */
 

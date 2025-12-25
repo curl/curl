@@ -781,7 +781,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if(n == 0)
       break;
-    nwritten = CURL_SEND(socket_w, buffer, n, 0);
+    nwritten = send(socket_w, buffer, n, 0);
     if(nwritten == SOCKET_ERROR)
       break;
     if((DWORD)nwritten != n)
