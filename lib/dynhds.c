@@ -31,10 +31,9 @@
 #include <nghttp2/nghttp2.h>
 #endif /* USE_NGHTTP2 */
 
-
-static struct dynhds_entry *
-entry_new(const char *name, size_t namelen,
-          const char *value, size_t valuelen, int opts)
+static struct dynhds_entry *entry_new(const char *name, size_t namelen,
+                                      const char *value, size_t valuelen,
+                                      int opts)
 {
   struct dynhds_entry *e;
   char *p;
