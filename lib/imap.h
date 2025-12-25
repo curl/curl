@@ -24,9 +24,6 @@
  *
  ***************************************************************************/
 
-#include "pingpong.h"
-#include "curl_sasl.h"
-
 extern const struct Curl_handler Curl_handler_imap;
 extern const struct Curl_handler Curl_handler_imaps;
 
