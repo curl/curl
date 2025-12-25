@@ -43,7 +43,7 @@ static struct dynhds_entry *entry_new(const char *name, size_t namelen,
   e = curlx_calloc(1, sizeof(*e) + namelen + valuelen + 2);
   if(!e)
     return NULL;
-  e->name = p = ((char *)e) + sizeof(*e);
+  e->name = p = (char *)e + sizeof(*e);
   memcpy(p, name, namelen);
   e->namelen = namelen;
   e->value = p += namelen + 1; /* leave a \0 at the end of name */
