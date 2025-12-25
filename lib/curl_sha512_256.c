@@ -284,7 +284,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
    ((uint64_t)(((const uint8_t *)(ptr))[3]) << 32) | \
    ((uint64_t)(((const uint8_t *)(ptr))[4]) << 24) | \
    ((uint64_t)(((const uint8_t *)(ptr))[5]) << 16) | \
-   ((uint64_t)(((const uint8_t *)(ptr))[6]) <<  8) | \
+   ((uint64_t)(((const uint8_t *)(ptr))[6]) << 8)  | \
     (uint64_t)(((const uint8_t *)(ptr))[7]))
 
 #define CURL_PUT_64BIT_BE(ptr, val)                             \
