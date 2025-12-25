@@ -174,7 +174,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 
 #include "mime.h"
 #include "imap.h"
-#include "smtp.h"
 #include "ftp.h"
 #include "http.h"
 #include "smb.h"
