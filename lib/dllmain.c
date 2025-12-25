@@ -60,6 +60,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   }
   return TRUE;
 }
-#endif /* OpenSSL (non-fork) */
+#endif /* USE_OPENSSL (non-fork) */
 
 #endif /* _WIN32 && !CURL_STATICLIB */
