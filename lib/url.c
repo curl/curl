@@ -116,6 +116,7 @@
 #include "curl_rtmp.h"
 #include "gopher.h"
 #include "mqtt.h"
+#include "rtsp.h"
 #include "ws.h"
 
 #ifdef USE_NGHTTP2
