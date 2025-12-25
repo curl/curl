@@ -124,4 +124,4 @@ bool Curl_cert_hostcheck(const char *match, size_t matchlen,
   return FALSE;
 }
 
-#endif /* OPENSSL or SCHANNEL */
+#endif /* USE_OPENSSL || USE_SCHANNEL */

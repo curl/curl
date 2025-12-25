@@ -516,7 +516,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
   return result;
 }
 
-#endif /* quiche or OpenSSL */
+#endif /* USE_QUICHE || USE_OPENSSL */
 
 #ifdef USE_OPENSSL
 

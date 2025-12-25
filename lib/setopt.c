@@ -1405,8 +1405,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     Curl_safefree(data->state.formp);
     data->state.mimepost = NULL;
     break;
-#endif /* ! CURL_DISABLE_FORM_API */
-#endif /* ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_FORM_API */
+#endif /* !CURL_DISABLE_HTTP */
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_IMAP)
 # ifndef CURL_DISABLE_MIME
@@ -1427,8 +1427,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 #endif
     }
     break;
-#endif /* ! CURL_DISABLE_MIME */
-#endif /* ! disabled HTTP, SMTP or IMAP */
+#endif /* !CURL_DISABLE_MIME */
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
   case CURLOPT_STDERR:
     /*
      * Set to a FILE * that should receive all error writes. This
