@@ -730,10 +730,10 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   /* Put in BE mode the leftmost part of the hash as the final digest.
      See FIPS PUB 180-4 section 6.7. */
 
-  CURL_PUT_64BIT_BE((digest + 0 * SHA512_256_BYTES_IN_WORD), ctx->H[0]);
-  CURL_PUT_64BIT_BE((digest + 1 * SHA512_256_BYTES_IN_WORD), ctx->H[1]);
-  CURL_PUT_64BIT_BE((digest + 2 * SHA512_256_BYTES_IN_WORD), ctx->H[2]);
-  CURL_PUT_64BIT_BE((digest + 3 * SHA512_256_BYTES_IN_WORD), ctx->H[3]);
+  CURL_PUT_64BIT_BE(digest + 0 * SHA512_256_BYTES_IN_WORD, ctx->H[0]);
+  CURL_PUT_64BIT_BE(digest + 1 * SHA512_256_BYTES_IN_WORD, ctx->H[1]);
+  CURL_PUT_64BIT_BE(digest + 2 * SHA512_256_BYTES_IN_WORD, ctx->H[2]);
+  CURL_PUT_64BIT_BE(digest + 3 * SHA512_256_BYTES_IN_WORD, ctx->H[3]);
 
   /* Erase potentially sensitive data. */
   memset(ctx, 0, sizeof(struct Curl_sha512_256ctx));
