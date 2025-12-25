@@ -51,12 +51,8 @@
 #endif
 
 #include "tool_cfgable.h"
-#include "tool_cb_dbg.h"
 #include "tool_cb_hdr.h"
 #include "tool_cb_prg.h"
-#include "tool_cb_rea.h"
-#include "tool_cb_see.h"
-#include "tool_cb_soc.h"
 #include "tool_cb_wrt.h"
 #include "tool_dirhie.h"
 #include "tool_doswin.h"
@@ -64,7 +60,6 @@
 #include "tool_filetime.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
-#include "tool_findfile.h"
 #include "tool_libinfo.h"
 #include "tool_main.h"
 #include "tool_msgs.h"
@@ -84,6 +79,7 @@
 #include "tool_progress.h"
 #include "tool_ipfs.h"
 #include "config2setopts.h"
+#include "var.h"
 
 #ifdef DEBUGBUILD
 /* libcurl's debug-only curl_easy_perform_ev() */

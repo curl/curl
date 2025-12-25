@@ -24,7 +24,6 @@
 #include "tool_setup.h"
 #include "tool_operate.h"
 #include "tool_progress.h"
-#include "tool_util.h"
 
 /* The point of this function would be to return a string of the input data,
    but never longer than 5 columns (+ one zero byte).

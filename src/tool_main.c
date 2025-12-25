@@ -39,7 +39,6 @@
 #include "tool_operate.h"
 #include "tool_vms.h"
 #include "tool_main.h"
-#include "tool_libinfo.h"
 #include "tool_stderr.h"
 
 #ifdef __VMS

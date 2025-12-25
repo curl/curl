@@ -25,7 +25,6 @@
 
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
-#include "tool_util.h"
 #include "tool_operate.h"
 #include "terminal.h"
 
