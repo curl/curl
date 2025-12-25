@@ -26,6 +26,7 @@
 #include "tool_cfgable.h"
 #include "tool_setopt.h"
 #include "tool_findfile.h"
+#include "tool_formparse.h"
 #include "tool_msgs.h"
 #include "tool_libinfo.h"
 #include "tool_cb_soc.h"
