@@ -168,9 +168,9 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   if(ret == CURLE_OK)
     memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
   explicit_memset(tmp_digest, 0, sizeof(tmp_digest));
-#else  /* ! NEED_NETBSD_SHA512_256_WORKAROUND */
+#else /* !NEED_NETBSD_SHA512_256_WORKAROUND */
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
-#endif /* ! NEED_NETBSD_SHA512_256_WORKAROUND */
+#endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
 
   EVP_MD_CTX_destroy(*ctx);
   *ctx = NULL;

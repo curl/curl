@@ -92,7 +92,7 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         if(!share->cookies)
           res = CURLSHE_NOMEM;
       }
-#else   /* CURL_DISABLE_HTTP */
+#else /* CURL_DISABLE_HTTP || CURL_DISABLE_COOKIES */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;
@@ -104,7 +104,7 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         if(!share->hsts)
           res = CURLSHE_NOMEM;
       }
-#else   /* CURL_DISABLE_HSTS */
+#else /* CURL_DISABLE_HSTS */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;
@@ -159,7 +159,7 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         Curl_cookie_cleanup(share->cookies);
         share->cookies = NULL;
       }
-#else   /* CURL_DISABLE_HTTP */
+#else /* CURL_DISABLE_HTTP || CURL_DISABLE_COOKIES */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;
@@ -169,7 +169,7 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
       if(share->hsts) {
         Curl_hsts_cleanup(&share->hsts);
       }
-#else   /* CURL_DISABLE_HSTS */
+#else /* CURL_DISABLE_HSTS */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;

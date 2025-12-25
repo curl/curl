@@ -262,7 +262,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       ufds[i].revents |= POLLIN | POLLOUT;
   }
 
-#else  /* HAVE_POLL */
+#else /* !HAVE_POLL */
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
