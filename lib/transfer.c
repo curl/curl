@@ -64,6 +64,7 @@
 #include "sendf.h"
 #include "curl_trc.h"
 #include "progress.h"
+#include "http.h"
 #include "url.h"
 #include "getinfo.h"
 #include "multiif.h"

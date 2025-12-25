@@ -33,6 +33,7 @@
 #include "uint-hash.h"
 #include "http1.h"
 #include "http2.h"
+#include "http.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "select.h"

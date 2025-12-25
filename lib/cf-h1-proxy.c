@@ -29,6 +29,7 @@
 #include "urldata.h"
 #include "curlx/dynbuf.h"
 #include "sendf.h"
+#include "http.h"
 #include "http1.h"
 #include "http_proxy.h"
 #include "url.h"

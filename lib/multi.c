@@ -37,6 +37,7 @@
 #include "sendf.h"
 #include "curl_trc.h"
 #include "curlx/timeval.h"
+#include "http.h"
 #include "select.h"
 #include "curlx/wait.h"
 #include "conncache.h"
