@@ -42,4 +42,4 @@ void Curl_fileinfo_cleanup(struct fileinfo *finfo)
   curlx_free(finfo);
 }
 
-#endif
+#endif /* !CURL_DISABLE_FTP */
