@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_RUSTLS_H
+#define HEADER_CURL_RUSTLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,9 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef HEADER_CURL_RUSTLS_H
-#define HEADER_CURL_RUSTLS_H
-
 #include "../curl_setup.h"
 
 #ifdef USE_RUSTLS
