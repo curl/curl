@@ -436,4 +436,4 @@ out:
   return result;
 }
 
-#endif /* ! CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */

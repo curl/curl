@@ -787,4 +787,4 @@ CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY && ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */

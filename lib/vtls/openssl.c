@@ -4654,7 +4654,7 @@ out:
   curlx_dyn_free(&dname);
   return result;
 }
-#endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #ifdef USE_APPLE_SECTRUST
 struct ossl_certs_ctx {

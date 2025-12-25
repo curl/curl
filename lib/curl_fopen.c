@@ -155,4 +155,4 @@ fail:
   return result;
 }
 
-#endif /* ! disabled */
+#endif /* !disabled */
