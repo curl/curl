@@ -356,7 +356,6 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   return loop((const unsigned char *)pattern,
               (const unsigned char *)string, 2);
 }
-
 #else /* HAVE_FNMATCH */
 
 #include <fnmatch.h>
@@ -381,7 +380,6 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   }
   /* not reached */
 }
-
 #endif /* !HAVE_FNMATCH */
 
 #endif /* !CURL_DISABLE_FTP */
