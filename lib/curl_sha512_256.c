@@ -284,18 +284,19 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
    ((uint64_t)(((const uint8_t *)(ptr))[3]) << 32) | \
    ((uint64_t)(((const uint8_t *)(ptr))[4]) << 24) | \
    ((uint64_t)(((const uint8_t *)(ptr))[5]) << 16) | \
-   ((uint64_t)(((const uint8_t *)(ptr))[6]) << 8)  | \
+   ((uint64_t)(((const uint8_t *)(ptr))[6]) <<  8) | \
     (uint64_t)(((const uint8_t *)(ptr))[7]))
 
-#define CURL_PUT_64BIT_BE(ptr,val) do {                        \
-    ((uint8_t*)(ptr))[7] = (uint8_t) ((uint64_t)(val));        \
-    ((uint8_t*)(ptr))[6] = (uint8_t)(((uint64_t)(val)) >> 8);  \
-    ((uint8_t*)(ptr))[5] = (uint8_t)(((uint64_t)(val)) >> 16); \
-    ((uint8_t*)(ptr))[4] = (uint8_t)(((uint64_t)(val)) >> 24); \
-    ((uint8_t*)(ptr))[3] = (uint8_t)(((uint64_t)(val)) >> 32); \
-    ((uint8_t*)(ptr))[2] = (uint8_t)(((uint64_t)(val)) >> 40); \
-    ((uint8_t*)(ptr))[1] = (uint8_t)(((uint64_t)(val)) >> 48); \
-    ((uint8_t*)(ptr))[0] = (uint8_t)(((uint64_t)(val)) >> 56); \
+#define CURL_PUT_64BIT_BE(ptr, val)                             \
+  do {                                                          \
+    ((uint8_t *)(ptr))[7] = (uint8_t)((uint64_t)(val));         \
+    ((uint8_t *)(ptr))[6] = (uint8_t)(((uint64_t)(val)) >> 8);  \
+    ((uint8_t *)(ptr))[5] = (uint8_t)(((uint64_t)(val)) >> 16); \
+    ((uint8_t *)(ptr))[4] = (uint8_t)(((uint64_t)(val)) >> 24); \
+    ((uint8_t *)(ptr))[3] = (uint8_t)(((uint64_t)(val)) >> 32); \
+    ((uint8_t *)(ptr))[2] = (uint8_t)(((uint64_t)(val)) >> 40); \
+    ((uint8_t *)(ptr))[1] = (uint8_t)(((uint64_t)(val)) >> 48); \
+    ((uint8_t *)(ptr))[0] = (uint8_t)(((uint64_t)(val)) >> 56); \
   } while(0)
 
 /* Defined as a function. The macro version may duplicate the binary code
@@ -600,7 +601,7 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        const unsigned char *data,
                                        size_t length)
 {
-  unsigned int bytes_have; /**< Number of bytes in the context buffer */
+  unsigned int bytes_have; /* Number of bytes in the context buffer */
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;
@@ -671,8 +672,8 @@ static CURLcode Curl_sha512_256_update(void *context,
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
-  uint64_t num_bits;   /**< Number of processed bits */
-  unsigned int bytes_have; /**< Number of bytes in the context buffer */
+  uint64_t num_bits;   /* Number of processed bits */
+  unsigned int bytes_have; /* Number of bytes in the context buffer */
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;
 
@@ -719,12 +720,12 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   CURL_PUT_64BIT_BE(((unsigned char *)ctx_buf)        \
                       + CURL_SHA512_256_BLOCK_SIZE    \
                       - SHA512_256_SIZE_OF_LEN_ADD,   \
-                      ctx->count_bits_hi);
-  CURL_PUT_64BIT_BE(((unsigned char *)ctx_buf)        \
-                      + CURL_SHA512_256_BLOCK_SIZE    \
-                      - SHA512_256_SIZE_OF_LEN_ADD    \
-                      + SHA512_256_BYTES_IN_WORD,     \
-                      num_bits);
+                    ctx->count_bits_hi);
+  CURL_PUT_64BIT_BE(((unsigned char *)ctx_buf)      \
+                      + CURL_SHA512_256_BLOCK_SIZE  \
+                      - SHA512_256_SIZE_OF_LEN_ADD  \
+                      + SHA512_256_BYTES_IN_WORD,   \
+                    num_bits);
   /* Process the full final block. */
   Curl_sha512_256_transform(ctx->H, ctx->buffer);
 
