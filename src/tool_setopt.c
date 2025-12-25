@@ -25,6 +25,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
+#include "tool_formparse.h"
 #include "tool_setopt.h"
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION

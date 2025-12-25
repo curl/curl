@@ -35,7 +35,6 @@
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
 #include "tool_operate.h"
-#include "tool_util.h"
 #include "tool_msgs.h"
 
 #ifndef _WIN32

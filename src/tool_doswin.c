@@ -33,7 +33,6 @@
 #  include <stdlib.h>
 #  include <tlhelp32.h>
 #  include "tool_cfgable.h"
-#  include "tool_libinfo.h"
 #endif
 
 #include "tool_bname.h"
