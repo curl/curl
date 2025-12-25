@@ -20,7 +20,7 @@
  *
  * SPDX-License-Identifier: curl
  *
- */
+ ***************************************************************************/
 #include "curl_setup.h"
 
 #include "curlx/dynbuf.h"
