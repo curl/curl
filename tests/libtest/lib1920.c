@@ -39,11 +39,13 @@ static CURLcode test_lib1920(const char *URL)
 
     result = curl_easy_perform(curl);
 
-    /* doing a reset here should not change the cookie jar content */
-    curl_easy_reset(curl);
-    /* set the cookie jar name so that curl knows where to store the
-       cookies after reset */
-    easy_setopt(curl, CURLOPT_COOKIEJAR,  libtest_arg2);
+    if(!result) {
+      /* doing a reset here should not change the cookie jar content */
+      curl_easy_reset(curl);
+      /* set the cookie jar name so that curl knows where to store the
+         cookies after reset */
+      easy_setopt(curl, CURLOPT_COOKIEJAR,  libtest_arg2);
+    }
   }
 
 test_cleanup:
