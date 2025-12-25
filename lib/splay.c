@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "curlx/timeval.h"

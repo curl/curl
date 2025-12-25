@@ -21,11 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * IDN conversions
  */
-
 #include "curl_setup.h"
 
 #include "urldata.h"

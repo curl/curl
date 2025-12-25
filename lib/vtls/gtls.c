@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all GnuTLS-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
@@ -29,7 +28,6 @@
  * Note: do not use the GnuTLS' *_t variable type names in this source code,
  * since they were not present in 1.0.X.
  */
-
 #include "../curl_setup.h"
 
 #ifdef USE_GNUTLS

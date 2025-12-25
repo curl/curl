@@ -24,7 +24,6 @@
  * RFC7616 DIGEST-SHA256, DIGEST-SHA512-256 authentication
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifndef CURL_DISABLE_DIGEST_AUTH

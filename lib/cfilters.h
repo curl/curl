@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curlx/timediff.h"
 
 struct bufq;

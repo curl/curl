@@ -21,12 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all OpenSSL-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  */
-
 #include "../curl_setup.h"
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)

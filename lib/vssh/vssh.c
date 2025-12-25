@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl AND ISC
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifdef USE_SSH

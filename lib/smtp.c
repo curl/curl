@@ -38,7 +38,6 @@
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_SMTP

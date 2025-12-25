@@ -21,8 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #include "curl_gethostname.h"
 #include "curlx/strcopy.h"
 

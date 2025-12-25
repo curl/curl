@@ -21,12 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-/* #define CURL_LIBSSH2_DEBUG */
-
 #include "../curl_setup.h"
 
 #ifdef USE_LIBSSH2
+
+/* #define CURL_LIBSSH2_DEBUG */
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

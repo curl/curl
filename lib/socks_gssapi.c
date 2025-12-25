@@ -22,7 +22,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_PROXY)

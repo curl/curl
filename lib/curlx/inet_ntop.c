@@ -16,7 +16,6 @@
  *
  * SPDX-License-Identifier: ISC
  */
-
 #include "../curl_setup.h"
 
 #ifndef HAVE_INET_NTOP

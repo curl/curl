@@ -23,9 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* This file is for lib internal stuff */
-
 #include "curl_setup.h"
 
 #include "bufq.h"
