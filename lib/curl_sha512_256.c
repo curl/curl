@@ -459,9 +459,9 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
   (Curl_rotr64((x), 28) ^ Curl_rotr64((x), 34) ^ Curl_rotr64((x), 39))
 #define SIG1(x)                                                         \
   (Curl_rotr64((x), 14) ^ Curl_rotr64((x), 18) ^ Curl_rotr64((x), 41))
-#define sig0(x)                                                 \
-  (Curl_rotr64((x), 1) ^ Curl_rotr64((x), 8) ^ ((x) >> 7))
-#define sig1(x)                                                 \
+#define sig0(x)                                               \
+  (Curl_rotr64((x),  1) ^ Curl_rotr64((x),  8) ^ ((x) >> 7))
+#define sig1(x)                                               \
   (Curl_rotr64((x), 19) ^ Curl_rotr64((x), 61) ^ ((x) >> 6))
 
   if(1) {
