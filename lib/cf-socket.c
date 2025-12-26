@@ -346,6 +346,8 @@ static CURLcode socket_open(struct Curl_easy *data,
   else {
     /* opensocket callback not set, so simply create the socket now */
     *sockfd = CURL_SOCKET(addr->family, addr->socktype, addr->protocol);
+    if((*sockfd == CURL_SOCKET_BAD) && (SOCKERRNO == SOCKENOMEM))
+      return CURLE_OUT_OF_MEMORY;
   }
 
   if(*sockfd == CURL_SOCKET_BAD) {
