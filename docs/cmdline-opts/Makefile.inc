@@ -281,6 +281,7 @@ DPAGES = \
   stderr.md \
   styled-output.md \
   suppress-connect-headers.md \
+  sync.md \
   tcp-fastopen.md \
   tcp-nodelay.md \
   telnet-option.md \

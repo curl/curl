@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+<reply>
+<data crlf="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 02 Jan 2025 00:00:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 31 Dec 2024 23:59:00 GMT
+Accept-Ranges: bytes
+Content-Length: 10
+Connection: close
+Content-Type: text/plain
+
+new file
+</data>
+</reply>
+<client>
+<server>
+http
+</server>
+<name>
+sync HTTP GET
+</name>
+<precheck>
+%PERL -e 'use Date::Parse; open(my $fh, ">", "%LOGDIR/curl%TESTNUMBER.out") or die "$!\n"; print $fh "old file\r\n"; close($fh); my $t = str2time("2025-01-01T00:00:00Z"); utime $t, $t, "%LOGDIR/curl%TESTNUMBER.out";'
+</precheck>
+<command>
+--sync http://%HOSTIP:%HTTPPORT/testfile.txt
+</command>
+</client>
+<verify>
+<file name="%LOGDIR/curl%TESTNUMBER.out" crlf="yes">
+old file
+</file>
+</verify>
+</testcase>
