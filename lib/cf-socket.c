@@ -352,7 +352,8 @@ static CURLcode socket_open(struct Curl_easy *data,
     /* no socket, no connection */
     failf(data, "failed to open socket: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
-    return CURLE_COULDNT_CONNECT;
+    return SOCKERRNO == SOCKENOMEM ? CURLE_OUT_OF_MEMORY :
+      CURLE_COULDNT_CONNECT;
   }
 
 #ifdef HAVE_FCNTL
