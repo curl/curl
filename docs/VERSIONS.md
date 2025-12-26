@@ -69,6 +69,7 @@ dates. The tool was called `httpget` before 2.0, `urlget` before 4.0 then
 `curl` since 4.0. `libcurl` and `curl` are always released in sync, using the
 same version numbers.
 
+- 8.19.0: pending
 - 8.18.0: pending
 - 8.17.0: November 5, 2025
 - 8.16.0: September 10, 2025
