@@ -25,14 +25,15 @@
 #
 # Input variables:
 #
-# - `NGHTTP2_INCLUDE_DIR`:  Absolute path to nghttp2 include directory.
-# - `NGHTTP2_LIBRARY`:      Absolute path to `nghttp2` library.
+# - `NGHTTP2_INCLUDE_DIR`:      Absolute path to nghttp2 include directory.
+# - `NGHTTP2_LIBRARY`:          Absolute path to `nghttp2` library.
+# - `NGHTTP2_USE_STATIC_LIBS`:  Configure for static nghttp2 libraries.
 #
 # Defines:
 #
-# - `NGHTTP2_FOUND`:        System has nghttp2.
-# - `NGHTTP2_VERSION`:      Version of nghttp2.
-# - `CURL::nghttp2`:        nghttp2 library target.
+# - `NGHTTP2_FOUND`:            System has nghttp2.
+# - `NGHTTP2_VERSION`:          Version of nghttp2.
+# - `CURL::nghttp2`:            nghttp2 library target.
 
 set(_nghttp2_pc_requires "libnghttp2")
 
@@ -46,10 +47,21 @@ endif()
 if(_nghttp2_FOUND)
   set(NGHTTP2_FOUND TRUE)
   set(NGHTTP2_VERSION ${_nghttp2_VERSION})
+  if(NGHTTP2_USE_STATIC_LIBS)
+    set(_nghttp2_CFLAGS       "${_nghttp2_STATIC_CFLAGS}")
+    set(_nghttp2_INCLUDE_DIRS "${_nghttp2_STATIC_INCLUDE_DIRS}")
+    set(_nghttp2_LIBRARY_DIRS "${_nghttp2_STATIC_LIBRARY_DIRS}")
+    set(_nghttp2_LIBRARIES    "${_nghttp2_STATIC_LIBRARIES}")
+  endif()
   message(STATUS "Found NGHTTP2 (via pkg-config): ${_nghttp2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
 else()
   find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h")
-  find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
+  if(NGHTTP2_USE_STATIC_LIBS)
+    set(_nghttp2_CFLAGS "-DNGHTTP2_STATICLIB")
+    find_library(NGHTTP2_LIBRARY NAMES "nghttp2_static" "nghttp2")
+  else()
+    find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
+  endif()
 
   unset(NGHTTP2_VERSION CACHE)
   if(NGHTTP2_INCLUDE_DIR AND EXISTS "${NGHTTP2_INCLUDE_DIR}/nghttp2/nghttp2ver.h")
