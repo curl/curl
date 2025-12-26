@@ -1026,8 +1026,11 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* step 2, create a socket for the requested address */
   error = 0;
   for(ai = res; ai; ai = ai->ai_next) {
-    if(Curl_socket_open(data, ai, NULL,
-                        Curl_conn_get_transport(data, conn), &portsock)) {
+    result = Curl_socket_open(data, ai, NULL,
+                              Curl_conn_get_transport(data, conn), &portsock);
+    if(result) {
+      if(result == CURLE_OUT_OF_MEMORY)
+        goto out;
       error = SOCKERRNO;
       continue;
     }
