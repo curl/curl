@@ -21,7 +21,7 @@ The curl project produces two products:
 ### libcurl
 
 A client-side URL transfer library, supporting DICT, FILE, FTP, FTPS, GOPHER,
-GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP,
+GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3, POP3S, RTMP,
 RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
 
 libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,

@@ -51,6 +51,7 @@ static const struct detail scheme[] = {
              "  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \\\n"
              "   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))" },
   { "mqtt", "#ifndef CURL_DISABLE_MQTT" },
+  { "mqtts", "#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)" },
   { "pop3", "#ifndef CURL_DISABLE_POP3" },
   { "pop3s", "#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)" },
   { "rtmp", "#ifdef USE_LIBRTMP" },

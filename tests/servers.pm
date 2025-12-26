@@ -237,8 +237,8 @@ sub init_serverpidfile_hash {
         }
     }
     for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                    'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls',
-                    'dns')) {
+                    'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'mqtts',
+                    'https-mtls', 'dns')) {
         for my $ipvnum ((4, 6)) {
             for my $idnum ((1, 2)) {
                 my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -1030,6 +1030,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'pop3s' => \&verifyftp,
                  'imaps' => \&verifyftp,
                  'mqtt' => \&verifypid,
+                 'mqtts' => \&verifypid,
                  'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
@@ -1328,6 +1329,9 @@ sub runhttpsserver {
     }
     if($proto eq "gophers") {
         $flags .= "--connect " . protoport("gopher");
+    }
+    elsif($proto eq "mqtts") {
+        $flags .= "--connect " . protoport("mqtt");
     }
     elsif(!$proxy) {
         $flags .= "--connect " . protoport("http");
@@ -2955,6 +2959,36 @@ sub startservers {
                 $run{'mqtt'}="$pid $pid2";
             }
         }
+        elsif($what eq "mqtts" ) {
+            if(!$stunnel) {
+                # we cannot run mqtts tests without stunnel
+                return ("no stunnel", 4);
+            }
+            if($run{'mqtt'} &&
+               !responsive_mqtt_server("mqtt", "", $verbose)) {
+                if(stopserver('mqtt')) {
+                    return ("failed stopping unresponsive MQTT server", 3);
+                }
+            }
+            if(!$run{'mqtt'}) {
+                ($serr, $pid, $pid2, $PORT{"mqtt"}) = runmqttserver("", $verbose);
+                if($pid <= 0) {
+                    return ("failed starting mqtt server", $serr);
+                }
+                logmsg sprintf("* pid mqtt => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'mqtt'}="$pid $pid2";
+            }
+            if(!$run{$what}) {
+                ($serr, $pid, $pid2, $PORT{$what}) =
+                    runhttpsserver($verbose, $what, "", $certfile);
+                if($pid <= 0) {
+                    return ("failed starting MQTTS server (stunnel)", $serr);
+                }
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{$what}="$pid $pid2";
+            }
+        }
         elsif($what eq "http-unix") {
             if($run{'http-unix'} &&
                !responsive_http_server("http", $verbose, "unix", $HTTPUNIXPATH)) {
@@ -3094,7 +3128,7 @@ sub subvariables {
                        'HTTP2', 'HTTP2TLS',
                        'HTTP3',
                        'IMAP', 'IMAP6', 'IMAPS',
-                       'MQTT',
+                       'MQTT', 'MQTTS',
                        'NOLISTEN',
                        'POP3', 'POP36', 'POP3S',
                        'RTSP', 'RTSP6',
