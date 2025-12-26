@@ -1151,6 +1151,8 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
 
   if test "$APPLE_SECTRUST_ENABLED" = "1"; then
     ca_native="Apple SecTrust"
+  elif test "$ca_native_opt" = "1"; then
+    ca_native="yes"
   else
     ca_native="no"
   fi

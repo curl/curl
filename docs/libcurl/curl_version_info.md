@@ -286,6 +286,13 @@ supports HTTP deflate using libz
 libcurl was built with multiple SSL backends. For details, see
 curl_global_sslset(3).
 
+## `NativeCA`
+
+*features* mask bit: non-existent
+
+libcurl was built to enable native CA store, to verify server certificates
+(Added in 8.19.0).
+
 ## `NTLM`
 
 *features* mask bit: CURL_VERSION_NTLM

@@ -34,6 +34,9 @@
 /* Default SSL backend */
 #cmakedefine CURL_DEFAULT_SSL_BACKEND "${CURL_DEFAULT_SSL_BACKEND}"
 
+/* Use native CA store */
+#cmakedefine CURL_CA_NATIVE 1
+
 /* disables alt-svc */
 #cmakedefine CURL_DISABLE_ALTSVC 1
 
