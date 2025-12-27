@@ -373,7 +373,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
   struct Curl_easy *data = x->data;
   struct h3_stream_ctx *stream = x->stream;
   struct cf_quiche_ctx *ctx = cf->ctx;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   if(!stream || stream->xfer_result)
     return 1; /* abort iteration */
