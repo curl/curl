@@ -396,7 +396,8 @@ static int cb_each_header(uint8_t *name, size_t name_len,
                 stream->id, curlx_dyn_ptr(&ctx->h1hdr));
   }
   else {
-    if(is_valid_h3_header(value, value_len) && is_valid_h3_header(name, name_len)) {
+    if(is_valid_h3_header(value, value_len) &&
+       is_valid_h3_header(name, name_len)) {
       /* store as an HTTP1-style header */
       CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s",
                   stream->id, (int)name_len, name,
