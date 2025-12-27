@@ -1031,6 +1031,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(result) {
       if(result == CURLE_OUT_OF_MEMORY)
         goto out;
+      result = CURLE_FTP_PORT_FAILED;
       error = SOCKERRNO;
       continue;
     }
