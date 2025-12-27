@@ -2042,7 +2042,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
     return CURLE_HTTP2;
   }
 
-  /* Process network input buffer fist */
+  /* Process network input buffer first */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
     CURL_TRC_CF(data, cf, "Process %zu bytes in connection buffer",
                 Curl_bufq_len(&ctx->inbufq));
