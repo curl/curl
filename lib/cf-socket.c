@@ -346,14 +346,15 @@ static CURLcode socket_open(struct Curl_easy *data,
   else {
     /* opensocket callback not set, so simply create the socket now */
     *sockfd = CURL_SOCKET(addr->family, addr->socktype, addr->protocol);
+    if((*sockfd == CURL_SOCKET_BAD) && (SOCKERRNO == SOCKENOMEM))
+      return CURLE_OUT_OF_MEMORY;
   }
 
   if(*sockfd == CURL_SOCKET_BAD) {
     /* no socket, no connection */
     failf(data, "failed to open socket: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
-    return SOCKERRNO == SOCKENOMEM ? CURLE_OUT_OF_MEMORY :
-      CURLE_COULDNT_CONNECT;
+    return CURLE_COULDNT_CONNECT;
   }
 
 #ifdef HAVE_FCNTL
