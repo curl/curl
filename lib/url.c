@@ -2695,8 +2695,10 @@ static CURLcode override_login(struct Curl_easy *data,
       NETRCcode ret = Curl_parsenetrc(&data->state.netrc, conn->host.name,
                                       userp, passwdp,
                                       data->set.str[STRING_NETRC_FILE]);
-      if(ret && ((ret == NETRC_NO_MATCH) ||
-                 (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
+      if(ret == NETRC_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+      else if(ret && ((ret == NETRC_NO_MATCH) ||
+                      (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
         infof(data, "Could not find host %s in the %s file; using defaults",
               conn->host.name,
               (data->set.str[STRING_NETRC_FILE] ?
