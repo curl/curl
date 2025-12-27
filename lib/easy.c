@@ -589,6 +589,63 @@ static CURLcode poll_fds(struct events *ev,
   return CURLE_OK;
 }
 
+/* monitor_sockets()
+ *
+ * monitor sockets
+ */
+static CURLMcode monitor_sockets(struct Curl_multi *multi,
+                                 struct pollfd *fds,
+                                 unsigned int numfds,
+                                 int pollrc,
+                                 struct curltime *start,
+                                 struct events *ev)
+{
+  CURLMcode mresult = CURLM_OK;
+
+  if(!pollrc) {
+    /* timeout! */
+    ev->ms = 0;
+    /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
+    mresult = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
+                                       &ev->running_handles);
+  }
+  else {
+    /* here pollrc is > 0 */
+    /* loop over the monitored sockets to see which ones had activity */
+    unsigned int i;
+    for(i = 0; i < numfds; i++) {
+      if(fds[i].revents) {
+        /* socket activity, tell libcurl */
+        int act = poll2cselect(fds[i].revents); /* convert */
+
+        /* sending infof "randomly" to the first easy handle */
+        infof(multi->admin, "call curl_multi_socket_action(socket "
+              "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
+        mresult = curl_multi_socket_action(multi, fds[i].fd, act,
+                                           &ev->running_handles);
+      }
+    }
+
+    if(!ev->msbump && ev->ms >= 0) {
+      /* If nothing updated the timeout, we decrease it by the spent time.
+       * If it was updated, it has the new timeout time stored already.
+       */
+      timediff_t spent_ms = curlx_timediff_ms(curlx_now(), *start);
+      if(spent_ms > 0) {
+#if DEBUG_EV_POLL
+        curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
+                      "time spent %ldms\n", ev->ms, (long)spent_ms);
+#endif
+        if(spent_ms > ev->ms)
+          ev->ms = 0;
+        else
+          ev->ms -= (long)spent_ms;
+      }
+    }
+  }
+  return mresult;
+}
+
 /* wait_or_timeout()
  *
  * waits for activity on any of the given sockets, or the timeout to trigger.
@@ -615,47 +672,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
     ev->msbump = FALSE; /* reset here */
 
-    if(!pollrc) {
-      /* timeout! */
-      ev->ms = 0;
-      /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
-      mresult = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
-                                         &ev->running_handles);
-    }
-    else {
-      /* here pollrc is > 0 */
-      /* loop over the monitored sockets to see which ones had activity */
-      unsigned int i;
-      for(i = 0; i < numfds; i++) {
-        if(fds[i].revents) {
-          /* socket activity, tell libcurl */
-          int act = poll2cselect(fds[i].revents); /* convert */
-
-          /* sending infof "randomly" to the first easy handle */
-          infof(multi->admin, "call curl_multi_socket_action(socket "
-                "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
-          mresult = curl_multi_socket_action(multi, fds[i].fd, act,
-                                             &ev->running_handles);
-        }
-      }
-
-      if(!ev->msbump && ev->ms >= 0) {
-        /* If nothing updated the timeout, we decrease it by the spent time.
-         * If it was updated, it has the new timeout time stored already.
-         */
-        timediff_t spent_ms = curlx_timediff_ms(curlx_now(), start);
-        if(spent_ms > 0) {
-#if DEBUG_EV_POLL
-        curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
-                      "time spent %ldms\n", ev->ms, (long)spent_ms);
-#endif
-          if(spent_ms > ev->ms)
-            ev->ms = 0;
-          else
-            ev->ms -= (long)spent_ms;
-        }
-      }
-    }
+    mresult = monitor_sockets(multi, fds, numfds, pollrc, &start, ev);
 
     if(mresult)
       return CURLE_URL_MALFORMAT;
