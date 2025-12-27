@@ -351,7 +351,7 @@ struct cb_ctx {
   struct h3_stream_ctx *stream;
 };
 
-static bool fineh3header(const uint8_t *hdr, size_t hlen)
+static bool is_valid_h3_header(const uint8_t *hdr, size_t hlen)
 {
   while(hlen--) {
     switch(*hdr++) {
@@ -378,7 +378,8 @@ static int cb_each_header(uint8_t *name, size_t name_len,
   if(!stream || stream->xfer_result)
     return 1; /* abort iteration */
 
-  if((name_len == 7) && !strncmp(HTTP_PSEUDO_STATUS, (char *)name, 7)) {
+  if((name_len == 7) && !strncmp(HTTP_PSEUDO_STATUS, (char *)name, 7) &&
+     is_valid_h3_header(value, value_len)) {
     curlx_dyn_reset(&ctx->h1hdr);
     result = Curl_http_decode_status(&stream->status_code,
                                      (const char *)value, value_len);
@@ -395,8 +396,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
                 stream->id, curlx_dyn_ptr(&ctx->h1hdr));
   }
   else {
-    bool ok = fineh3header(value, value_len);
-    if(ok) {
+    if(is_valid_h3_header(value, value_len) && is_valid_h3_header(name, name_len)) {
       /* store as an HTTP1-style header */
       CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s",
                   stream->id, (int)name_len, name,
@@ -415,7 +415,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
     }
     else
       CURL_TRC_CF(x->data, x->cf, "[%" PRIu64 "] ignore %zu bytes bad header",
-                  stream->id, value_len);
+                  stream->id, value_len + name_len);
   }
 
   if(result) {
