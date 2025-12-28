@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef CURLRES_ARES
@@ -872,7 +871,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   }
-#else /* too old c-ares version! */
+#else /* c-ares version too old! */
   (void)data;
   (void)(ares_result);
 #endif

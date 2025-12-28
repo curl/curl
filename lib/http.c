@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
@@ -81,6 +80,7 @@
 #include "strdup.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "rtsp.h"
 #include "ws.h"
 #include "bufref.h"
 #include "curlx/strparse.h"

@@ -35,7 +35,6 @@
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
 #include "tool_operate.h"
-#include "tool_util.h"
 #include "tool_msgs.h"
 
 #ifndef _WIN32
@@ -121,7 +120,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    execute */
   if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-    rc = CURL_RECV(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
+    rc = recv(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {
         errno = 0;

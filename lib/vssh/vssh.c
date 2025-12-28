@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl AND ISC
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifdef USE_SSH
@@ -239,4 +238,4 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#endif /* if SSH is used */
+#endif /* USE_SSH */

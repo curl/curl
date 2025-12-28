@@ -24,7 +24,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifdef USE_LIBSSH
@@ -49,7 +48,6 @@
 #include "../hostip.h"
 #include "../progress.h"
 #include "../transfer.h"
-#include "../http.h"               /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
 #include "../url.h"
 #include "../cfilters.h"
@@ -2629,6 +2627,11 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     infof(data, "Known hosts: %s", data->set.str[STRING_SSH_KNOWNHOSTS]);
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_KNOWNHOSTS,
                          data->set.str[STRING_SSH_KNOWNHOSTS]);
+    if(rc == SSH_OK)
+      /* libssh has two separate options for this. Set both to the same file
+         to avoid surprises */
+      rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_GLOBAL_KNOWNHOSTS,
+                           data->set.str[STRING_SSH_KNOWNHOSTS]);
     if(rc != SSH_OK) {
       failf(data, "Could not set known hosts file path");
       return CURLE_FAILED_INIT;

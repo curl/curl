@@ -22,10 +22,11 @@
  *
  ***************************************************************************/
 #include "../curl_setup.h"
+
 #include "strcopy.h"
 
 /*
- * curlx_strcopy() is a replacement for strcpy().
+ * curlx_strcopy() is a replacement for strcpy.
  *
  * Provide the target buffer @dest and size of the target buffer @dsize, If
  * the source string @src with its *string length* @slen fits in the target

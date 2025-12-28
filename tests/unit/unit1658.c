@@ -541,7 +541,7 @@ static CURLcode test_unit1658(const char *arg)
   UNITTEST_END(curl_global_cleanup())
 }
 
-#else /* CURL_DISABLE_DOH or not HTTPSRR enabled */
+#else /* CURL_DISABLE_DOH || !USE_HTTPSRR */
 
 static CURLcode test_unit1658(const char *arg)
 {

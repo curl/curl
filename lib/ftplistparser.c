@@ -21,6 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
+
+#ifndef CURL_DISABLE_FTP
 
 /**
  * Now implemented:
@@ -36,10 +39,6 @@
  * 5) DOS style
  * 01-29-97 11:32PM <DIR> prog
  */
-
-#include "curl_setup.h"
-
-#ifndef CURL_DISABLE_FTP
 
 #include "urldata.h"
 #include "fileinfo.h"
@@ -1089,4 +1088,4 @@ fail:
   return retsize;
 }
 
-#endif /* CURL_DISABLE_FTP */
+#endif /* !CURL_DISABLE_FTP */

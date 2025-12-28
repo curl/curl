@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 extern const char * const Curl_wkday[7];
 extern const char * const Curl_month[12];
 

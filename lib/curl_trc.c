@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "curl_trc.h"
@@ -86,8 +85,8 @@ static struct curl_trc_feat Curl_trc_feat_ids = {
   CURL_LOG_LVL_NONE,
 };
 #define CURL_TRC_IDS(data) \
-             (Curl_trc_is_verbose(data) && \
-             Curl_trc_feat_ids.log_level >= CURL_LOG_LVL_INFO)
+  (Curl_trc_is_verbose(data) && \
+  Curl_trc_feat_ids.log_level >= CURL_LOG_LVL_INFO)
 
 static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 {

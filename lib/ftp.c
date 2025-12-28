@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
@@ -48,7 +47,6 @@
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
 #include "ftp.h"
 #include "fileinfo.h"
 #include "ftplistparser.h"
@@ -1028,8 +1026,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* step 2, create a socket for the requested address */
   error = 0;
   for(ai = res; ai; ai = ai->ai_next) {
-    if(Curl_socket_open(data, ai, NULL,
-                        Curl_conn_get_transport(data, conn), &portsock)) {
+    result = Curl_socket_open(data, ai, NULL,
+                              Curl_conn_get_transport(data, conn), &portsock);
+    if(result) {
+      if(result == CURLE_OUT_OF_MEMORY)
+        goto out;
+      result = CURLE_FTP_PORT_FAILED;
       error = SOCKERRNO;
       continue;
     }
@@ -1942,7 +1944,8 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
   if(result) {
-    if(ftpc->count1 == 0 && ftpcode == 229) {
+    if((result != CURLE_OUT_OF_MEMORY) &&
+       (ftpc->count1 == 0) && (ftpcode == 229)) {
       curlx_free(newhost);
       return ftp_epsv_disable(data, ftpc, conn);
     }
@@ -3553,6 +3556,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   if(conn->cfilter[SECONDARYSOCKET]) {
     bool is_eptr = Curl_conn_is_tcp_listen(data, SECONDARYSOCKET);
     result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
+    if(result == CURLE_OUT_OF_MEMORY)
+      return result;
     if(result || (!connected && !is_eptr &&
                   !Curl_conn_is_ip_connected(data, SECONDARYSOCKET))) {
       if(result && !is_eptr && (ftpc->count1 == 0)) {

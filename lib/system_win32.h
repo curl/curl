@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef _WIN32
@@ -41,8 +40,8 @@ typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 /* This is used instead of if_nametoindex if available on Windows */
 extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
 #endif
-#else  /* _WIN32 */
+#else /* !_WIN32 */
 #define Curl_win32_init(x) CURLE_OK
-#endif /* !_WIN32 */
+#endif /* _WIN32 */
 
 #endif /* HEADER_CURL_SYSTEM_WIN32_H */

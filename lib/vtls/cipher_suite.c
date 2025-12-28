@@ -24,6 +24,7 @@
 #include "../curl_setup.h"
 
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+
 #include "cipher_suite.h"
 
 /*
@@ -130,24 +131,24 @@ enum {
   CS_TXT_LEN,
 };
 
-#define CS_ZIP_IDX(a, b, c, d, e, f, g, h)             \
-{                                                      \
-  (uint8_t) ((((a) << 2) & 0xFF) | ((b) & 0x3F) >> 4), \
-  (uint8_t) ((((b) << 4) & 0xFF) | ((c) & 0x3F) >> 2), \
-  (uint8_t) ((((c) << 6) & 0xFF) | ((d) & 0x3F)),      \
-  (uint8_t) ((((e) << 2) & 0xFF) | ((f) & 0x3F) >> 4), \
-  (uint8_t) ((((f) << 4) & 0xFF) | ((g) & 0x3F) >> 2), \
-  (uint8_t) ((((g) << 6) & 0xFF) | ((h) & 0x3F))       \
+#define CS_ZIP_IDX(a, b, c, d, e, f, g, h)            \
+{                                                     \
+  (uint8_t)((((a) << 2) & 0xFF) | ((b) & 0x3F) >> 4), \
+  (uint8_t)((((b) << 4) & 0xFF) | ((c) & 0x3F) >> 2), \
+  (uint8_t)((((c) << 6) & 0xFF) | ((d) & 0x3F)),      \
+  (uint8_t)((((e) << 2) & 0xFF) | ((f) & 0x3F) >> 4), \
+  (uint8_t)((((f) << 4) & 0xFF) | ((g) & 0x3F) >> 2), \
+  (uint8_t)((((g) << 6) & 0xFF) | ((h) & 0x3F))       \
 }
-#define CS_ENTRY(id, a, b, c, d, e, f, g, h)           \
-{                                                      \
-  id,                                                  \
-  CS_ZIP_IDX(                                          \
-    CS_TXT_IDX_ ## a, CS_TXT_IDX_ ## b,                \
-    CS_TXT_IDX_ ## c, CS_TXT_IDX_ ## d,                \
-    CS_TXT_IDX_ ## e, CS_TXT_IDX_ ## f,                \
-    CS_TXT_IDX_ ## g, CS_TXT_IDX_ ## h                 \
-  )                                                    \
+#define CS_ENTRY(id, a, b, c, d, e, f, g, h) \
+{                                            \
+  id,                                        \
+  CS_ZIP_IDX(                                \
+    CS_TXT_IDX_ ## a, CS_TXT_IDX_ ## b,      \
+    CS_TXT_IDX_ ## c, CS_TXT_IDX_ ## d,      \
+    CS_TXT_IDX_ ## e, CS_TXT_IDX_ ## f,      \
+    CS_TXT_IDX_ ## g, CS_TXT_IDX_ ## h       \
+  )                                          \
 }
 
 struct cs_entry {

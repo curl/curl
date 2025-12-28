@@ -24,7 +24,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
@@ -87,9 +86,9 @@ CURLcode Curl_x509_GTime2str(struct dynbuf *store,
 /* used by unit1657.c */
 CURLcode Curl_x509_getASN1Element(struct Curl_asn1Element *elem,
                                   const char *beg, const char *end);
-#endif
-#endif
+#endif /* USE_GNUTLS || USE_SCHANNEL || USE_MBEDTLS || RUSTLS */
+#endif /* UNITTESTS */
 
-#endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_MBEDTLS or
+#endif /* USE_GNUTLS || USE_WOLFSSL || USE_SCHANNEL || USE_MBEDTLS ||
           USE_RUSTLS */
 #endif /* HEADER_CURL_X509ASN1_H */

@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
 #include "tool_writeout.h"
 
 int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase);

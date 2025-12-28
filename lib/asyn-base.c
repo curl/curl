@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -40,8 +39,7 @@
 
 #ifdef USE_ARES
 #include <ares.h>
-#include <ares_version.h> /* really old c-ares did not include this by
-                             itself */
+#include <ares_version.h> /* really old c-ares did not include it by itself */
 #endif
 
 #include "urldata.h"
@@ -173,7 +171,7 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms)
   return nfds;
 }
 
-#endif
+#endif /* USE_ARES */
 
 #endif /* CURLRES_ASYNCH */
 

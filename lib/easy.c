@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -71,7 +70,6 @@
 #include "setopt.h"
 #include "http_digest.h"
 #include "system_win32.h"
-#include "http2.h"
 #include "curlx/dynbuf.h"
 #include "bufref.h"
 #include "altsvc.h"

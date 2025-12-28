@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -44,7 +43,6 @@
 #include "cw-pause.h"
 #include "multiif.h"
 #include "strerror.h"
-#include "http2.h"
 #include "progress.h"
 
 

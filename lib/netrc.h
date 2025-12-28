@@ -23,10 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_NETRC
+
 #include "curlx/dynbuf.h"
 
 struct store_netrc {

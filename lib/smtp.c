@@ -38,7 +38,6 @@
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_SMTP
@@ -64,7 +63,7 @@
 #include "progress.h"
 #include "transfer.h"
 #include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
+#include "pingpong.h"
 #include "mime.h"
 #include "smtp.h"
 #include "vtls/vtls.h"

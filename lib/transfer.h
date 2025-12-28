@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #define Curl_headersep(x) ((((x) == ':') || ((x) == ';')))
 
 char *Curl_checkheaders(const struct Curl_easy *data,

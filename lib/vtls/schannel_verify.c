@@ -23,12 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for Schannel-specific certificate verification. This code should
  * only be invoked by code in schannel.c.
  */
-
 #include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL

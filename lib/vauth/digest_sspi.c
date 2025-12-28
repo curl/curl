@@ -24,7 +24,6 @@
  * RFC2831 DIGEST-MD5 authentication
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_DIGEST_AUTH)

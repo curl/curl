@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_MD4_H
-#define HEADER_CURL_MD4_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,15 +21,35 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "first.h"
 
-#ifdef USE_CURL_NTLM_CORE
+static CURLcode test_lib1920(const char *URL)
+{
+  CURLcode result = CURLE_OK;
+  CURL *curl = NULL;
 
-#define MD4_DIGEST_LENGTH 16
+  curl_global_init(CURL_GLOBAL_ALL);
 
-CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
-                    const size_t len);
+  curl = curl_easy_init();
+  if(curl) {
+    easy_setopt(curl, CURLOPT_COOKIEFILE, libtest_arg2);
+    easy_setopt(curl, CURLOPT_COOKIEJAR,  libtest_arg2);
+    easy_setopt(curl, CURLOPT_URL,        URL);
+    easy_setopt(curl, CURLOPT_VERBOSE,    1L);
 
-#endif /* USE_CURL_NTLM_CORE */
+    result = curl_easy_perform(curl);
 
-#endif /* HEADER_CURL_MD4_H */
+    if(!result) {
+      /* doing a reset here should not change the cookie jar content */
+      curl_easy_reset(curl);
+      /* set the cookie jar name so that curl knows where to store the
+         cookies after reset */
+      easy_setopt(curl, CURLOPT_COOKIEJAR,  libtest_arg2);
+    }
+  }
+
+test_cleanup:
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+  return result;
+}

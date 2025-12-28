@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
@@ -49,7 +48,6 @@
 
 #include "sendf.h"
 #include "curl_trc.h"
-#include "http.h"
 #include "content_encoding.h"
 
 #define CONTENT_ENCODING_DEFAULT  "identity"
