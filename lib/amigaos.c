@@ -26,6 +26,7 @@
 #ifdef __AMIGA__
 
 #include "hostip.h"
+#include "curl_addrinfo.h"
 #include "amigaos.h"
 
 #ifdef HAVE_PROTO_BSDSOCKET_H
