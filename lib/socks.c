@@ -34,6 +34,7 @@
 
 #include "urldata.h"
 #include "bufq.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "select.h"
 #include "cfilters.h"
