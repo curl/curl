@@ -73,6 +73,7 @@
 #include "vtls/vtls.h"
 #include "hostip.h"
 #include "transfer.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "progress.h"
 #include "cookie.h"
