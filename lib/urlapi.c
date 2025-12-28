@@ -368,8 +368,9 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
                                    (h && (h->flags & PROTOPT_URLOPTIONS)) ?
                                    &optionsp : NULL);
   if(ccode) {
-    result = (ccode == CURLE_OUT_OF_MEMORY) ? CURLUE_OUT_OF_MEMORY :
-      CURLUE_BAD_LOGIN;
+    /* the only possible error from Curl_parse_login_details is out of
+       memory: */
+    result = CURLUE_OUT_OF_MEMORY;
     goto out;
   }
 
