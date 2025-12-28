@@ -43,6 +43,7 @@
 
 #include "../urldata.h"
 #include "../curl_trc.h"
+#include "../httpsrr.h"
 #include "../formdata.h" /* for the boundary function */
 #include "../url.h" /* for the ssl config check function */
 #include "../curlx/inet_pton.h"

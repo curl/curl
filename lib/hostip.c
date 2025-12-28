@@ -49,6 +49,7 @@
 #include "connect.h"
 #include "hostip.h"
 #include "hash.h"
+#include "httpsrr.h"
 #include "rand.h"
 #include "curl_share.h"
 #include "url.h"

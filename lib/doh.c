@@ -28,8 +28,8 @@
 #include "urldata.h"
 #include "curl_addrinfo.h"
 #include "doh.h"
-
 #include "curl_trc.h"
+#include "httpsrr.h"
 #include "multiif.h"
 #include "url.h"
 #include "connect.h"

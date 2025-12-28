@@ -27,7 +27,6 @@
 
 #include "hash.h"
 #include "curlx/timeval.h" /* for curltime, timediff_t */
-#include "httpsrr.h"
 
 #ifdef USE_HTTPSRR
 # include <stdint.h>
@@ -48,6 +47,7 @@ struct hostent;
 struct Curl_easy;
 struct connectdata;
 struct easy_pollset;
+struct Curl_https_rrinfo;
 
 enum alpnid {
   ALPN_none = 0,

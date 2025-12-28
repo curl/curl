@@ -59,6 +59,7 @@
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "hostip.h"
+#include "httpsrr.h"
 #include "url.h"
 #include "multiif.h"
 #include "curl_threads.h"

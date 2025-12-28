@@ -30,13 +30,12 @@ struct Curl_dns_entry;
 
 #ifdef CURLRES_ASYNCH
 
-#include "httpsrr.h"
-
 struct addrinfo;
 struct Curl_addrinfo;
 struct hostent;
 struct connectdata;
 struct easy_pollset;
+struct Curl_https_rrinfo;
 
 #if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
 #error cannot have both CURLRES_ARES and CURLRES_THREADED defined

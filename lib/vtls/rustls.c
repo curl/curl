@@ -33,6 +33,7 @@
 #include "../curlx/strerr.h"
 #include "../urldata.h"
 #include "../curl_trc.h"
+#include "../httpsrr.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
