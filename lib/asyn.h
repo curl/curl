@@ -25,13 +25,15 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#include "curlx/timeval.h"
+
 struct Curl_easy;
 struct Curl_dns_entry;
 
 #ifdef CURLRES_ASYNCH
 
-struct addrinfo;
-struct Curl_addrinfo;
+#include "curl_addrinfo.h"
+
 struct hostent;
 struct connectdata;
 struct easy_pollset;
