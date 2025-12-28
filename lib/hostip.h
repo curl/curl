@@ -26,9 +26,7 @@
 #include "curl_setup.h"
 
 #include "hash.h"
-#include "curl_addrinfo.h"
 #include "curlx/timeval.h" /* for curltime, timediff_t */
-#include "asyn.h"
 #include "httpsrr.h"
 
 #ifdef USE_HTTPSRR

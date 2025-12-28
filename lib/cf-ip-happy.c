@@ -50,6 +50,7 @@
 #include "connect.h"
 #include "cfilters.h"
 #include "cf-ip-happy.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
