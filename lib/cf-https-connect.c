@@ -30,6 +30,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "hostip.h"
+#include "httpsrr.h"
 #include "multiif.h"
 #include "cf-https-connect.h"
 #include "http2.h"

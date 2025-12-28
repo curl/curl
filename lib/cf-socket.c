@@ -61,6 +61,7 @@
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
+#include "curl_addrinfo.h"
 #include "select.h"
 #include "multiif.h"
 #include "curlx/inet_pton.h"

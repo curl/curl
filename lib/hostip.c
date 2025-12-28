@@ -44,10 +44,12 @@
 #include <signal.h>
 
 #include "urldata.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "connect.h"
 #include "hostip.h"
 #include "hash.h"
+#include "httpsrr.h"
 #include "rand.h"
 #include "curl_share.h"
 #include "url.h"
