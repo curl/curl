@@ -192,6 +192,9 @@ static bool auth_digest_get_key_value(const char *chlg, const char *key,
   do {
     struct Curl_str data;
     struct Curl_str name;
+
+    curlx_str_passblanks(&chlg);
+
     if(!curlx_str_until(&chlg, &name, 64, '=') &&
        !curlx_str_single(&chlg, '=')) {
       /* this is the key, get the value, possibly quoted */
@@ -204,11 +207,22 @@ static bool auth_digest_get_key_value(const char *chlg, const char *key,
 
       if(curlx_str_cmp(&name, key)) {
         /* if this is our key, return the value */
-        if(curlx_strlen(&data) >= buflen)
+        size_t len = curlx_strlen(&data);
+        const char *src = curlx_str(&data);
+        size_t i;
+        size_t outlen = 0;
+
+        if(len >= buflen)
           /* does not fit */
           return FALSE;
-        memcpy(buf, curlx_str(&data), curlx_strlen(&data));
-        buf[curlx_strlen(&data)] = 0;
+
+        for(i = 0; i < len; i++) {
+          if(src[i] == '\\' && i + 1 < len) {
+            i++; /* skip backslash */
+          }
+          buf[outlen++] = src[i];
+        }
+        buf[outlen] = 0;
         return TRUE;
       }
       if(curlx_str_single(&chlg, ','))

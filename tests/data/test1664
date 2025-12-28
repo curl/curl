@@ -49,7 +49,7 @@ curlx_str_quotedword
 5: (" "word"") 3, "" [0], line 0
 6: (""perfect"") 0, "perfect" [7], line 9
 7: (""p r e t"") 0, "p r e t" [7], line 9
-8: (""perfec\"") 0, "perfec\" [7], line 9
+8: (""perfec\"") 1, "" [0], line 0
 9: ("""") 0, "" [0], line 2
 10: ("") 3, "" [0], line 0
 11: (""longerth"") 1, "" [0], line 0
