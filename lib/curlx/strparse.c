@@ -103,6 +103,11 @@ int curlx_str_quotedword(const char **linep, struct Curl_str *out,
     return STRE_BEGQUOTE;
   s++;
   while(*s && (*s != '\"')) {
+    if(*s == '\\' && s[1]) {
+      s++;
+      if(++len > max)
+        return STRE_BIG;
+    }
     s++;
     if(++len > max)
       return STRE_BIG;
