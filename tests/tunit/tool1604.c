@@ -23,10 +23,11 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#if defined(_WIN32) || defined(MSDOS)
+
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 
-#if defined(_WIN32) || defined(MSDOS)
 static char *getflagstr(int flags)
 {
   char *buf = curlx_malloc(256);
