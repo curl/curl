@@ -193,10 +193,12 @@ bool Curl_req_done_sending(struct Curl_easy *data);
  */
 CURLcode Curl_req_send_more(struct Curl_easy *data);
 
-/**
- * TRUE iff the request wants to send, e.g. has buffered bytes.
- */
+/* TRUE if the request wants to send, e.g. is not done sending
+ * and is not blocked. */
 bool Curl_req_want_send(struct Curl_easy *data);
+
+/* TRUE if the request wants to receive and is not blocked. */
+bool Curl_req_want_recv(struct Curl_easy *data);
 
 /**
  * TRUE iff the request has no buffered bytes yet to send.
