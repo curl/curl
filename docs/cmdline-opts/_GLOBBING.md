@@ -4,9 +4,9 @@
 You can specify multiple URLs or parts of URLs by writing lists within braces
 or ranges within brackets. We call this "globbing".
 
-> **Note:** curl can interpret URLs that contain glob metacharacters
+> **Note:** curl can interpret URLs that contain glob characters
 > as glob patterns even when globbing is not intended.
-> This can happen with long output file names.
+> This can happen with long output filenames.
 > To disable URL globbing entirely, use `--globoff`.
 
 Provide a list with three different names like this:
