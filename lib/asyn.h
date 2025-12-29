@@ -27,6 +27,10 @@
 
 #include "curlx/timeval.h"
 
+#if defined(USE_HTTPSRR) && defined(USE_ARES)
+#include "httpsrr.h"
+#endif
+
 struct Curl_easy;
 struct Curl_dns_entry;
 
@@ -37,7 +41,6 @@ struct Curl_dns_entry;
 struct hostent;
 struct connectdata;
 struct easy_pollset;
-struct Curl_https_rrinfo;
 
 #if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
 #error cannot have both CURLRES_ARES and CURLRES_THREADED defined
