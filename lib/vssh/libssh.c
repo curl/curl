@@ -924,8 +924,8 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
   /* For public key auth we need either the private key or
      CURLSSH_AUTH_AGENT. */
   if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&
-    (data->set.str[STRING_SSH_PRIVATE_KEY] ||
-     (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
+     (data->set.str[STRING_SSH_PRIVATE_KEY] ||
+      (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
     myssh_to(data, sshc, SSH_AUTH_PKEY_INIT);
     infof(data, "Authentication using SSH public key file");
   }
