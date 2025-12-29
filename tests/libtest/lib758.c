@@ -30,8 +30,6 @@
 
 #include "first.h"
 
-#include "testtrace.h"
-
 #ifdef USE_OPENSSL
 
 #include <openssl/ssl.h>
@@ -42,6 +40,8 @@
 #endif
 
 #ifdef T578_ENABLED
+
+#include "testtrace.h"
 
 static struct t758_ctx {
   int socket_calls;

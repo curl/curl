@@ -23,11 +23,12 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#ifndef CURL_DISABLE_HTTP
+
 #include "urldata.h"
 #include "http1.h"
 #include "curl_trc.h"
 
-#ifndef CURL_DISABLE_HTTP
 static void check_eq(const char *s, const char *exp_s, const char *name)
 {
   if(s && exp_s) {

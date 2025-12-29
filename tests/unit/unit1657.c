@@ -23,9 +23,9 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "vtls/x509asn1.h"
-
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS)
+
+#include "vtls/x509asn1.h"
 
 struct test1657_spec {
   CURLcode (*setbuf)(const struct test1657_spec *spec, struct dynbuf *buf);
