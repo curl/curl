@@ -23,9 +23,9 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "hostip.h"
-
 #ifndef CURL_DISABLE_SHUFFLE_DNS
+
+#include "curl_addrinfo.h"
 
 CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                            struct Curl_addrinfo **addr);
