@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include <curl/curl.h>
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -49,6 +50,7 @@
 #include "strdup.h"
 #include "escape.h"
 #include "bufref.h"
+#include "curlx/strparse.h"
 
 static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
@@ -1614,6 +1616,109 @@ static CURLcode cookiefile(struct Curl_easy *data, const char *ptr)
 }
 #endif
 
+#ifndef CURL_DISABLE_HTTP
+/* Parse HTTP status code ranges from a string like "404,500-599" */
+static CURLcode parse_failon_status(const char *ptr,
+                                     struct http_code_range **ranges_out,
+                                     size_t *count_out)
+{
+  struct http_code_range *ranges = NULL;
+  size_t count = 0;
+  size_t capacity = 0;
+  const char *p = ptr;
+  const char *tmp;
+
+  if(!ptr || !*ptr)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  /* first pass to determine how many ranges we need to allocate */
+  tmp = ptr;
+  capacity = 1;
+  while(*tmp) {
+    if(*tmp == ',')
+      capacity++;
+    tmp++;
+  }
+
+  ranges = curlx_malloc(capacity * sizeof(struct http_code_range));
+  if(!ranges)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* second pass to parse and populate allocated ranges */
+  while(*p) {
+    curl_off_t start_num, end_num;
+    int start, end;
+
+    while(*p == ' ' || *p == '\t')
+      p++;
+
+    if(!*p)
+      break;
+
+    if(!ISDIGIT(*p)) {
+      curlx_free(ranges);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+
+    if(curlx_str_number(&p, &start_num, 999)) {
+      curlx_free(ranges);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    start = (int)start_num;
+
+    if(*p == '-') {
+      /* we have a range, rather than a single number */
+      p++;
+
+      if(!ISDIGIT(*p)) {
+        curlx_free(ranges);
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+
+      if(curlx_str_number(&p, &end_num, 999)) {
+        curlx_free(ranges);
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      end = (int)end_num;
+    }
+    else {
+      /* just one number, so make it both ends of the range */
+      end = start;
+    }
+
+    if(start > end) {
+      curlx_free(ranges);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+
+    ranges[count].start = start;
+    ranges[count].end = end;
+    count++;
+
+    while(*p == ' ' || *p == '\t')
+      p++;
+
+    if(*p == ',') {
+      p++;
+    }
+    else if(*p != '\0') {
+      curlx_free(ranges);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+  }
+
+  if(count == 0) {
+    curlx_free(ranges);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+  *ranges_out = ranges;
+  *count_out = count;
+
+  return CURLE_OK;
+}
+#endif
+
 static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             char *ptr)
 {
@@ -2565,6 +2670,23 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
       if(result)
         return result;
     }
+    break;
+  }
+#endif
+#ifndef CURL_DISABLE_HTTP
+  case CURLOPT_FAILON_STATUS: {
+    struct http_code_range *new_ranges = NULL;
+    size_t new_count = 0;
+
+    if(ptr) {
+      result = parse_failon_status(ptr, &new_ranges, &new_count);
+      if(result)
+        return result;
+    }
+
+    Curl_safefree(s->failon_status_codes);
+    s->failon_status_codes = new_ranges;
+    s->failon_status_count = new_count;
     break;
   }
 #endif

@@ -2253,6 +2253,9 @@ typedef enum {
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
 
+  /* HTTP status codes to fail on */
+  CURLOPT(CURLOPT_FAILON_STATUS, CURLOPTTYPE_STRINGPOINT, 329),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -1029,5 +1029,6 @@ CURLcode config2setopts(struct OperationConfig *config,
 #endif
   }
   my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
+  result = my_setopt_str(curl, CURLOPT_FAILON_STATUS, config->failon_status);
   return result;
 }

@@ -77,6 +77,7 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->iface);
 
   tool_safefree(config->range);
+  tool_safefree(config->failon_status);
 
   tool_safefree(config->userpwd);
   tool_safefree(config->tls_username);

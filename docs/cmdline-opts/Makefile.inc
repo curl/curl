@@ -98,6 +98,7 @@ DPAGES = \
   etag-save.md \
   expect100-timeout.md \
   fail-early.md \
+  fail-on-status.md \
   fail-with-body.md \
   fail.md \
   false-start.md \

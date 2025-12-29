@@ -645,6 +645,7 @@ CURLOPT_ENCODING                7.10          7.21.6
 CURLOPT_ERRORBUFFER             7.1
 CURLOPT_EXPECT_100_TIMEOUT_MS   7.36.0
 CURLOPT_FAILONERROR             7.1
+CURLOPT_FAILON_STATUS           8.18.0
 CURLOPT_FILE                    7.1           7.9.7
 CURLOPT_FILETIME                7.5
 CURLOPT_FNMATCH_DATA            7.21.0

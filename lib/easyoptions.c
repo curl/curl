@@ -93,6 +93,7 @@ const struct curl_easyoption Curl_easyopts[] = {
   { "ERRORBUFFER", CURLOPT_ERRORBUFFER, CURLOT_OBJECT, 0 },
   { "EXPECT_100_TIMEOUT_MS", CURLOPT_EXPECT_100_TIMEOUT_MS, CURLOT_LONG, 0 },
   { "FAILONERROR", CURLOPT_FAILONERROR, CURLOT_LONG, 0 },
+  { "FAILON_STATUS", CURLOPT_FAILON_STATUS, CURLOT_STRING, 0 },
   { "FILE", CURLOPT_WRITEDATA, CURLOT_CBPTR, CURLOT_FLAG_ALIAS },
   { "FILETIME", CURLOPT_FILETIME, CURLOT_LONG, 0 },
   { "FNMATCH_DATA", CURLOPT_FNMATCH_DATA, CURLOT_CBPTR, 0 },
@@ -385,6 +386,6 @@ const struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY % 10000) != (328 + 1);
+  return (CURLOPT_LASTENTRY % 10000) != (329 + 1);
 }
 #endif

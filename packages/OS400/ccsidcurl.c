@@ -1056,6 +1056,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_DOH_URL:
   case CURLOPT_ECH:
   case CURLOPT_EGDSOCKET:
+  case CURLOPT_FAILON_STATUS:
   case CURLOPT_FTPPORT:
   case CURLOPT_FTP_ACCOUNT:
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:

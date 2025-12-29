@@ -1290,6 +1290,12 @@ enum dupblob {
   BLOB_LAST
 };
 
+/* HTTP status code range for CURLOPT_FAILON_STATUS */
+struct http_code_range {
+  int start;  /* range start, inclusive */
+  int end;    /* range end, inclusive */
+};
+
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
   void *debugdata;   /* the data that will be passed to fdebug */
@@ -1484,6 +1490,8 @@ struct UserDefined {
   unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
                           file 0 - whatever, 1 - v2, 2 - v6 */
   unsigned char upload_flags; /* flags set by CURLOPT_UPLOAD_FLAGS */
+  struct http_code_range *failon_status_codes; /* fail on these codes */
+  size_t failon_status_count; /* number of ranges */
 #ifdef HAVE_GSSAPI
   /* GSS-API credential delegation, see the documentation of
      CURLOPT_GSSAPI_DELEGATION */
