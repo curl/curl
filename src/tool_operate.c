@@ -997,7 +997,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     tool_safefree(storefile);
     if(result) {
       /* bad globbing */
-      warnf("bad output glob");
+      warnf("bad output filename");
       return result;
     }
     if(!*per->outfile) {
