@@ -37,7 +37,7 @@ and 599.
 When combined with --fail or --fail-with-body, the last option specified wins.
 For example, using --fail followed by --fail-on-status deselects --fail in
 favor of the more specific status code matching. Similarly, specifying
---fail-on-status followed by --fail-with-body will deselect --fail-on-status.
+--fail-on-status followed by --fail-with-body deselects --fail-on-status.
 
 Note: The override pattern means only one failure mode is active at a time.
 Cooperative behavior (e.g., failing on specific status codes AND saving the

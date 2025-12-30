@@ -894,7 +894,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   Curl_mime_initpart(&dst->set.mimepost);
 
 #ifndef CURL_DISABLE_HTTP
-  /* don't share failon_status array pointers */
+  /* do not share failon_status array pointers */
   dst->set.failon_status_codes = NULL;
   dst->set.failon_status_count = 0;
 #endif
