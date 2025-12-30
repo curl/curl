@@ -98,6 +98,7 @@ struct getout {
   BIT(noglob);    /* disable globbing for this URL */
   BIT(out_null);  /* discard output for this URL */
 };
+
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.
  */
@@ -121,6 +122,14 @@ typedef enum {
   TOOL_HTTPREQ_SIMPLEPOST,
   TOOL_HTTPREQ_PUT
 } HttpReq;
+
+/* CURLTcode errors specific to tool */
+typedef enum {
+  CURLTE_OK,                  /* 0 */
+  CURLTE_ERROR,               /* 1 */
+  CURLTE_BAD_FILENAME = 900,
+  CURLTE_LAST                 /* never use! */
+} CURLTcode;
 
 /*
  * Complete struct declarations which have OperationConfig struct members,

@@ -121,6 +121,22 @@ static bool is_fatal_error(CURLcode code)
   return FALSE;
 }
 
+static const char *tool_strerror(CURLTcode error)
+{
+  switch(error) {
+  case CURLTE_OK:
+    return "No error (tool)";
+
+  case CURLTE_BAD_FILENAME:
+    return "Filename failed sanitization";
+
+  default:
+    break;
+  }
+
+  return "Unknown error (tool)";
+}
+
 /*
  * Check if a given string is a PKCS#11 URI
  */
@@ -638,8 +654,14 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     if(!config->synthetic_error && result &&
        (!global->silent || global->showerror)) {
       const char *msg = per->errorbuffer;
-      curl_mfprintf(tool_stderr, "curl: (%d) %s\n", result,
-                    msg[0] ? msg : curl_easy_strerror(result));
+      if(config->tresult) {
+        curl_mfprintf(tool_stderr, "curl: (%d) %s\n", config->tresult,
+                      msg[0] ? msg : tool_strerror(config->tresult));
+        config->tresult = CURLTE_OK;
+      }
+      else
+        curl_mfprintf(tool_stderr, "curl: (%d) %s\n", result,
+                      msg[0] ? msg : curl_easy_strerror(result));
       if(result == CURLE_PEER_FAILED_VERIFICATION)
         fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
     }
@@ -981,9 +1003,17 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   struct State *state = &global->state;
 
   if(!per->outfile) {
+    CURLTcode sanitize;
     /* extract the filename from the URL */
-    CURLcode result = get_url_file_name(&per->outfile, per->url);
-    if(result) {
+    CURLcode result = get_url_file_name(&per->outfile, per->url, &sanitize);
+    if(sanitize) {
+      if(sanitize == CURLTE_BAD_FILENAME) {
+        config->tresult = sanitize;
+        errorf("bad output filename");
+      }
+      return result;
+    }
+    else if(result) {
       errorf("Failed to extract a filename"
              " from the URL to use for storage");
       return result;
@@ -992,10 +1022,18 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   else if(glob_inuse(&state->urlglob)) {
     /* fill '#1' ... '#9' terms from URL pattern */
     char *storefile = per->outfile;
-    CURLcode result =
-      glob_match_url(&per->outfile, storefile, &state->urlglob);
+    CURLTcode sanitize;
+    CURLcode result = glob_match_url(&per->outfile, storefile,
+                                     &state->urlglob, &sanitize);
     tool_safefree(storefile);
-    if(result) {
+    if(sanitize) {
+      if(sanitize == CURLTE_BAD_FILENAME) {
+        config->tresult = sanitize;
+        warnf("bad output filename");
+      }
+      return result;
+    }
+    else if(result) {
       /* bad globbing */
       warnf("bad output glob");
       return result;

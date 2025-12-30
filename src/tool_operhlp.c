@@ -172,11 +172,14 @@ fail:
  * Returns a pointer to a heap-allocated string or NULL if
  * no name part, at location indicated by first argument.
  */
-CURLcode get_url_file_name(char **filename, const char *url)
+CURLcode get_url_file_name(char **filename, const char *url,
+                           CURLTcode *sanitize)
 {
   CURLU *uh = curl_url();
   char *path = NULL;
   CURLUcode uerr;
+
+  *sanitize = CURLTE_OK;
 
   if(!uh)
     return CURLE_OUT_OF_MEMORY;
@@ -223,9 +226,12 @@ CURLcode get_url_file_name(char **filename, const char *url)
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
         tool_safefree(*filename);
         if(sc) {
-          if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+          if(sc == SANITIZE_ERR_OUT_OF_MEMORY) {
+            *sanitize = CURLTE_ERROR;
             return CURLE_OUT_OF_MEMORY;
-          return CURLE_URL_MALFORMAT;
+          }
+          *sanitize = CURLTE_BAD_FILENAME;
+          return CURLE_BAD_FUNCTION_ARGUMENT;
         }
         *filename = sanitized;
       }

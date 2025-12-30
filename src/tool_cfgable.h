@@ -218,6 +218,7 @@ struct OperationConfig {
     CLOBBER_NEVER, /* If the file exists, always fail */
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;
+  CURLTcode tresult;
   unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
   unsigned char ssl_version;     /* 0 - 4, 0 being default */
