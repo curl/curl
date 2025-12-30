@@ -62,7 +62,7 @@ int curlx_str_until(const char **linep, struct Curl_str *out, const size_t max,
 int curlx_str_untilnl(const char **linep, struct Curl_str *out,
                       const size_t max);
 
-/* Get a "quoted" word. No escaping possible.
+/* Get a "quoted" word. Escaped quotes are supported.
    return non-zero on error */
 int curlx_str_quotedword(const char **linep, struct Curl_str *out,
                          const size_t max);
