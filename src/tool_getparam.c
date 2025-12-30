@@ -982,31 +982,23 @@ static ParameterError set_rate(const char *nextarg)
      /d == per day (24 hours)
   */
   ParameterError err = PARAM_OK;
-  const char *div = strchr(nextarg, '/');
-  char number[26];
-  long denominator;
+  const char *p = nextarg;
+  curl_off_t denominator;
   long numerator = 60 * 60 * 1000; /* default per hour */
-  size_t numlen = div ? (size_t)(div - nextarg) : strlen(nextarg);
-  if(numlen > sizeof(number) - 1)
-    return PARAM_NUMBER_TOO_LARGE;
 
-  memcpy(number, nextarg, numlen);
-  number[numlen] = 0;
-  err = str2unum(&denominator, number);
-  if(err)
-    return err;
+  if(curlx_str_number(&p, &denominator, CURL_OFF_T_MAX))
+    return PARAM_BAD_NUMERIC;
 
   if(denominator < 1)
     return PARAM_BAD_USE;
 
-  if(div) {
+  if(!curlx_str_single(&p, '/')) {
     curl_off_t numunits;
-    div++;
 
-    if(curlx_str_number(&div, &numunits, CURL_OFF_T_MAX))
+    if(curlx_str_number(&p, &numunits, CURL_OFF_T_MAX))
       numunits = 1;
 
-    switch(*div) {
+    switch(*p) {
     case 's': /* per second */
       numerator = 1000;
       break;
