@@ -981,9 +981,17 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   struct State *state = &global->state;
 
   if(!per->outfile) {
+    SANITIZEcode sc;
     /* extract the filename from the URL */
-    CURLcode result = get_url_file_name(&per->outfile, per->url);
-    if(result) {
+    CURLcode result = get_url_file_name(&per->outfile, per->url, &sc);
+    if(sc) {
+      if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+      if(sc == SANITIZE_ERR_INVALID_PATH)
+        errorf("bad output filename");
+      return result;
+    }
+    else if(result) {
       errorf("Failed to extract a filename"
              " from the URL to use for storage");
       return result;
@@ -992,10 +1000,19 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   else if(glob_inuse(&state->urlglob)) {
     /* fill '#1' ... '#9' terms from URL pattern */
     char *storefile = per->outfile;
+    SANITIZEcode sc;
     CURLcode result =
-      glob_match_url(&per->outfile, storefile, &state->urlglob);
+      glob_match_url(&per->outfile, storefile, &state->urlglob, &sc);
+
     tool_safefree(storefile);
-    if(result) {
+    if(sc) {
+      if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+      if(sc == SANITIZE_ERR_INVALID_PATH)
+        warnf("bad output filename");
+      return result;
+    }
+    else if(result) {
       /* bad globbing */
       warnf("bad output glob");
       return result;
