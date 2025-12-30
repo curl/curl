@@ -45,7 +45,7 @@ This release includes the following bugfixes:
  o cf-socket: drop feature check for `IPV6_V6ONLY` on Windows [210]
  o cf-socket: enable Win10 `TCP_KEEP*` options with old SDKs [323]
  o cf-socket: limit use of `TCP_KEEP*` to Windows 10.0.16299+ at runtime [157]
- o cf-socket: return OOM error if socket() failes due to OOM [341]
+ o cf-socket: return OOM error if socket() fails due to OOM [341]
  o cf-socket: trace ignored errors [97]
  o cfilters: make conn_forget_socket a private libssh function [109]
  o checksrc.pl: detect assign followed by more than one space [26]
