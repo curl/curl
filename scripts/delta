@@ -82,8 +82,8 @@ my $bsetopts = setopts("git show $start:include/curl/curl.h|");
 my $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
-my $aoptions=`grep -c '{"....--' src/tool_listhelp.c`;
-my $boptions=`git show $start:src/tool_listhelp.c 2>/dev/null | grep -c '{"....--'`;
+my $aoptions=`grep -c '{ *"....--' src/tool_listhelp.c`;
+my $boptions=`git show $start:src/tool_listhelp.c 2>/dev/null | grep -c '{ *"....--'`;
 my $noptions=$aoptions - $boptions;
 
 # current local branch

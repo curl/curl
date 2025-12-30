@@ -4,7 +4,7 @@ curl and libcurl 8.18.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3563
+ Contributors:                 3565
 
 This release includes the following changes:
 
@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o cf-socket: drop feature check for `IPV6_V6ONLY` on Windows [210]
  o cf-socket: enable Win10 `TCP_KEEP*` options with old SDKs [323]
  o cf-socket: limit use of `TCP_KEEP*` to Windows 10.0.16299+ at runtime [157]
+ o cf-socket: return OOM error if socket() fails due to OOM [341]
  o cf-socket: trace ignored errors [97]
  o cfilters: make conn_forget_socket a private libssh function [109]
  o checksrc.pl: detect assign followed by more than one space [26]
@@ -82,11 +83,13 @@ This release includes the following bugfixes:
  o curl_fopen: do not pass invalid mode flags to `open()` on Windows [84]
  o curl_gssapi: make sure Curl_gss_log_error() has an initialized buffer [257]
  o curl_ntlm_core: fix DES_* symbols for some wolfSSL builds [281]
+ o curl_quiche: refuse headers with CR, LF or null bytes [333]
  o curl_sasl: if redirected, require permission to use bearer [250]
  o curl_sasl: make Curl_sasl_decode_mech compare case insensitively [160]
  o curl_setup.h: document more funcs flagged by `_CRT_SECURE_NO_WARNINGS` [124]
  o curl_setup.h: drop stray `#undef stat` (Windows) [103]
  o curl_setup.h: drop superfluous parenthesis from `Curl_safefree` macro [242]
+ o curl_threads: don't do another malloc if the first fails [345]
  o curl_trc: delete unused DoH remains [272]
  o CURLINFO: remove 'get' and 'get the' from each short desc [50]
  o CURLINFO_SCHEME/PROTOCOL: they return the "scheme" for a "transfer" [48]
@@ -143,6 +146,8 @@ This release includes the following bugfixes:
  o ftp: make EPRT connections non-blocking [268]
  o ftp: refactor a piece of code by merging the repeated part [40]
  o ftp: remove #ifdef for define that is always defined [76]
+ o ftp: return better on OOM in two places [343]
+ o ftp: return from ftp_state_use_port immediately on OOM [338]
  o getenv: drop internal 1-to-1 wrapper [334]
  o getinfo: improve perf in debug mode [99]
  o gnutls: add PROFILE_MEDIUM as default [233]
@@ -201,6 +206,7 @@ This release includes the following bugfixes:
  o libssh2: replace atoi() in ssh_force_knownhost_key_type [63]
  o libssh: fix state machine loop to progress as it should
  o libssh: properly free sftp_attributes [153]
+ o libssh: require private key or user-agent for public key auth [293]
  o libssh: set both knownhosts options to the same file [271]
  o libtests: replace `atoi()` with `curlx_str_number()` [120]
  o limit-rate: add example using --limit-rate and --max-time together [89]
@@ -252,6 +258,7 @@ This release includes the following bugfixes:
  o pytest: quiche flakiness [280]
  o pytest: skip H2 tests if feature missing from curl [46]
  o quiche: use client writer [255]
+ o ratelimit blocking: fix busy loop [290]
  o ratelimit: redesign [209]
  o rtmp: fix double-free on URL parse errors [27]
  o rtmp: precaution for a potential integer truncation [54]
@@ -288,6 +295,7 @@ This release includes the following bugfixes:
  o sspi: fix memory leaks on error paths in `Curl_create_sspi_identity()` [237]
  o sws: fix binding to unix socket on Windows [214]
  o synctime: tidy up, make it work on all platforms [269]
+ o telnet: abort on bad suboption sequence [300]
  o telnet: replace atoi for BINARY handling with curlx_str_number [66]
  o TEST-SUITE.md: correct the man page's path [136]
  o test07_22: fix flakiness [95]
@@ -323,6 +331,7 @@ This release includes the following bugfixes:
  o tool: log when loading .curlrc in verbose mode [191]
  o tool_cfgable: free ssl-sessions at exit [123]
  o tool_doswin: clear pointer when thread takes ownership [198]
+ o tool_doswin: increase allowable length of path sanitizer [289]
  o tool_getparam: verify that a file exists for some options [134]
  o tool_help: add checks to avoid unsigned wrap around [14]
  o tool_ipfs: check return codes better [20]
@@ -342,8 +351,10 @@ This release includes the following bugfixes:
  o url: fix return code for OOM in parse_proxy() [193]
  o url: if curl_url_get() fails due to OOM, error out properly [205]
  o url: if OOM in parse_proxy() return error [132]
+ o url: return error at once when OOM in netrc handling [332]
  o urlapi: fix mem-leaks in curl_url_get error paths [22]
  o urlapi: handle OOM properly when setting URL [180]
+ o urlapi: return OOM correctly from parse_hostname_login() [337]
  o verify-release: update to avoid shellcheck warning SC2034 [88]
  o vquic-tls/gnutls: call Curl_gtls_verifyserver unconditionally [96]
  o vquic: do not pass invalid mode flags to `open()` (Windows) [58]
@@ -391,17 +402,17 @@ advice from friends like these:
   Christian Schmitz, Dan Fandrich, Daniel McCarney, Daniel Pouzzner,
   Daniel Santos, Daniel Stenberg, Denis Goleshchikhin, Deniz Parlak,
   dependabot[bot], Fabian Keil, Fd929c2CE5fA on github, ffath-vo on github,
-  Gabriel Marin, Georg Schulz-Allgaier, Gisle Vanem, Greg Hudson,
-  Harry Sintonen, Jeff King, Jiyong Yang, John Haugabook, Juliusz Sosinowicz,
-  Kai Pastor, koujaz on github, Leonardo Taccari, letshack9707 on hackerone,
-  Marc Aldorasi, Marcel Raad, Mathesh V, Max Faxälv, nait-furry,
-  ncaklovic on github, Nick Korepanov, Omdahake on github, Patrick Monnerat,
-  pelioro on hackerone, Ray Satiro, renovate[bot], Robert W. Van Kirk,
-  Samuel Henrique, Sergey Katsubo, st751228051 on github, Stanislav Fort,
-  Stefan Eissing, Sunny, Theo Buehler, Thomas Klausner, Viktor Szakats,
-  Wesley Moore, Wyatt O'Day, Xiaoke Wang, Yedaya Katsman, Yuhao Jiang,
-  yushicheng7788 on github
-  (62 contributors)
+  Fizn-Ahmd on github, Gabriel Marin, Georg Schulz-Allgaier, Gisle Vanem,
+  Greg Hudson, Harry Sintonen, Huseyin Tintas, Jeff King, Jiyong Yang,
+  John Haugabook, Juliusz Sosinowicz, Kai Pastor, koujaz on github,
+  Leonardo Taccari, letshack9707 on hackerone, Marc Aldorasi, Marcel Raad,
+  Mathesh V, Max Faxälv, nait-furry, ncaklovic on github, Nick Korepanov,
+  Omdahake on github, Patrick Monnerat, pelioro on hackerone, Ray Satiro,
+  renovate[bot], Robert W. Van Kirk, Samuel Henrique, Sergey Katsubo,
+  st751228051 on github, Stanislav Fort, Stefan Eissing, Sunny, Theo Buehler,
+  Thomas Klausner, Viktor Szakats, Wesley Moore, Wyatt O'Day, Xiaoke Wang,
+  Yedaya Katsman, Yuhao Jiang, yushicheng7788 on github
+  (64 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -692,14 +703,18 @@ References to bug reports and discussions on issues:
  [285] = https://curl.se/bug/?i=19911
  [286] = https://curl.se/bug/?i=19900
  [288] = https://curl.se/bug/?i=19907
+ [289] = https://curl.se/bug/?i=20044
+ [290] = https://curl.se/bug/?i=20091
  [291] = https://curl.se/bug/?i=19902
  [292] = https://curl.se/bug/?i=19888
+ [293] = https://curl.se/bug/?i=20110
  [294] = https://curl.se/bug/?i=19901
  [295] = https://curl.se/bug/?i=19899
  [296] = https://curl.se/bug/?i=20080
  [297] = https://curl.se/bug/?i=19894
  [298] = https://curl.se/bug/?i=19740
  [299] = https://curl.se/bug/?i=19945
+ [300] = https://curl.se/bug/?i=20108
  [301] = https://curl.se/bug/?i=19896
  [302] = https://curl.se/bug/?i=19942
  [303] = https://curl.se/bug/?i=19934
@@ -730,11 +745,18 @@ References to bug reports and discussions on issues:
  [329] = https://curl.se/bug/?i=19996
  [330] = https://curl.se/bug/?i=19992
  [331] = https://curl.se/bug/?i=20072
+ [332] = https://curl.se/bug/?i=20103
+ [333] = https://curl.se/bug/?i=20101
  [334] = https://curl.se/bug/?i=19984
  [335] = https://curl.se/bug/?i=19986
  [336] = https://curl.se/bug/?i=19978
+ [337] = https://curl.se/bug/?i=20100
+ [338] = https://curl.se/bug/?i=20100
  [339] = https://curl.se/bug/?i=20064
  [340] = https://curl.se/bug/?i=20063
+ [341] = https://curl.se/bug/?i=20100
+ [343] = https://curl.se/bug/?i=20099
+ [345] = https://curl.se/bug/?i=20095
  [350] = https://curl.se/bug/?i=20052
  [351] = https://curl.se/bug/?i=19983
  [354] = https://curl.se/bug/?i=20042
