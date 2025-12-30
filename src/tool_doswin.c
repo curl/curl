@@ -32,9 +32,9 @@
 #ifdef _WIN32
 #  include <stdlib.h>
 #  include <tlhelp32.h>
-#  include "tool_cfgable.h"
 #endif
 
+#include "tool_cfgable.h"
 #include "tool_bname.h"
 #include "tool_doswin.h"
 #include "tool_msgs.h"
