@@ -396,20 +396,22 @@ static void protoset_clear(const char **protoset, const char *proto)
  * data.
  */
 
-#define MAX_PROTOSTRING (64 * 11)  /* Room for 64 10-chars proto names. */
+#define MAX_PROTOS 34
+#define MAX_PROTOSTRING (MAX_PROTOS * 11)  /* Room for MAX_PROTOS number of
+                                              10-chars proto names. */
 
 ParameterError proto2num(const char * const *val, char **ostr, const char *str)
 {
-  const char **protoset;
   struct dynbuf obuf;
   size_t proto;
   CURLcode result = CURLE_OK;
+  const char *protoset[MAX_PROTOS + 1];
+
+  DEBUGASSERT(proto_count <= MAX_PROTOS);
+  if(proto_count > MAX_PROTOS) /* if case of surprises */
+    return PARAM_NO_MEM;
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
-
-  protoset = curlx_malloc((proto_count + 1) * sizeof(*protoset));
-  if(!protoset)
-    return PARAM_NO_MEM;
 
   /* Preset protocol set with default values. */
   protoset[0] = NULL;
@@ -505,7 +507,6 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   for(proto = 0; protoset[proto] && !result; proto++)
     result = curlx_dyn_addf(&obuf, "%s%s", curlx_dyn_len(&obuf) ? "," : "",
                             protoset[proto]);
-  curlx_free((char *)protoset);
   if(result)
     return PARAM_NO_MEM;
   if(!curlx_dyn_len(&obuf)) {
