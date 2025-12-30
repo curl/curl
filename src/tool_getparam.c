@@ -984,7 +984,7 @@ static ParameterError set_rate(const char *nextarg)
   ParameterError err = PARAM_OK;
   const char *p = nextarg;
   curl_off_t denominator;
-  long numerator = 60 * 60 * 1000; /* default per hour */
+  curl_off_t numerator = 60 * 60 * 1000; /* default per hour */
 
   if(curlx_str_number(&p, &denominator, CURL_OFF_T_MAX))
     return PARAM_BAD_NUMERIC;
@@ -1016,14 +1016,14 @@ static ParameterError set_rate(const char *nextarg)
       break;
     }
 
-    if((LONG_MAX / numerator) < numunits) {
+    if((CURL_OFF_T_MAX / numerator) < numunits) {
       /* overflow, too large number */
       errorf("too large --rate unit");
       err = PARAM_NUMBER_TOO_LARGE;
     }
     else
       /* this typecast is okay based on the check above */
-      numerator *= (long)numunits;
+      numerator *= numunits;
   }
 
   if(err)
