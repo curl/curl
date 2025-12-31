@@ -61,7 +61,7 @@
 #include <sys/filio.h>  /* FIONREAD on Solaris 7 */
 #endif
 
-#include <setjmp.h>
+#include <setjmp.h>  /* for sigjmp_buf, sigsetjmp() */
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
