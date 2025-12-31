@@ -40,12 +40,10 @@
 #  include <openssl/opensslv.h>
 #  if !defined(LIBRESSL_VERSION_NUMBER) || \
   (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x3080000fL)
-#    include <openssl/opensslconf.h>
-#    if !defined(OPENSSL_NO_SHA) && !defined(OPENSSL_NO_SHA512)
-#      include <openssl/evp.h>
-#      define USE_OPENSSL_SHA512_256          1
-#      define HAS_SHA512_256_IMPLEMENTATION   1
-#      ifdef __NetBSD__
+#    include <openssl/evp.h>
+#    define USE_OPENSSL_SHA512_256          1
+#    define HAS_SHA512_256_IMPLEMENTATION   1
+#    ifdef __NetBSD__
 /* Some NetBSD versions has a bug in SHA-512/256.
  * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
  * The problematic versions:
@@ -56,14 +54,13 @@
  * NetBSD 10.99.11 development.
  * It is safe to apply the workaround even if the bug is not present, as
  * the workaround just reduces performance slightly. */
-#        include <sys/param.h>
-#        if  __NetBSD_Version__ <   904000000 ||  \
-            (__NetBSD_Version__ >=  999000000 &&  \
-             __NetBSD_Version__ <  1000000000) || \
-            (__NetBSD_Version__ >= 1099000000 &&  \
-             __NetBSD_Version__ <  1099001100)
-#          define NEED_NETBSD_SHA512_256_WORKAROUND 1
-#        endif
+#      include <sys/param.h>
+#      if  __NetBSD_Version__ <   904000000 ||  \
+          (__NetBSD_Version__ >=  999000000 &&  \
+           __NetBSD_Version__ <  1000000000) || \
+          (__NetBSD_Version__ >= 1099000000 &&  \
+           __NetBSD_Version__ <  1099001100)
+#        define NEED_NETBSD_SHA512_256_WORKAROUND 1
 #      endif
 #    endif
 #  endif
