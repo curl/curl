@@ -40,7 +40,7 @@
 #include <inet.h>
 #endif
 
-#include <setjmp.h>
+#include <setjmp.h>  /* for sigjmp_buf, sigsetjmp() */
 #include <signal.h>
 
 #include "urldata.h"
