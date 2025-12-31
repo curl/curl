@@ -50,9 +50,14 @@ curlx_str_quotedword
 6: (""perfect"") 0, "perfect" [7], line 9
 7: (""p r e t"") 0, "p r e t" [7], line 9
 8: (""perfec\"") 1, "" [0], line 0
-9: ("""") 0, "" [0], line 2
-10: ("") 3, "" [0], line 0
-11: (""longerth"") 1, "" [0], line 0
+9: (""trail\""") 0, "trail\"" [7], line 9
+10: (""trail2\""") 1, "" [0], line 0
+11: (""trail33\""") 1, "" [0], line 0
+12: (""0\\\\\\"") 0, "0\\\\\\" [7], line 9
+13: (""1\\\\\\\"") 1, "" [0], line 0
+14: ("""") 0, "" [0], line 2
+15: ("") 3, "" [0], line 0
+16: (""longerth"") 1, "" [0], line 0
 curlx_str_single
 0: ("a") 0, line 1
 1: ("aa") 0, line 1
