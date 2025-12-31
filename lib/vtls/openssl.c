@@ -301,11 +301,11 @@ static CURLcode get_pkey_rsa(struct Curl_easy *data,
   return result;
 }
 
+#ifndef OPENSSL_NO_DSA
 static CURLcode get_pkey_dsa(struct Curl_easy *data,
                              EVP_PKEY *pubkey, BIO *mem, int i)
 {
   CURLcode result = CURLE_OK;
-#ifndef OPENSSL_NO_DSA
 #ifndef HAVE_EVP_PKEY_GET_PARAMS
   DSA *dsa = EVP_PKEY_get0_DSA(pubkey);
 #endif /* !HAVE_EVP_PKEY_GET_PARAMS */
@@ -333,9 +333,9 @@ static CURLcode get_pkey_dsa(struct Curl_easy *data,
   FREE_PKEY_PARAM_BIGNUM(q);
   FREE_PKEY_PARAM_BIGNUM(g);
   FREE_PKEY_PARAM_BIGNUM(pub_key);
-#endif /* !OPENSSL_NO_DSA */
   return result;
 }
+#endif /* !OPENSSL_NO_DSA */
 
 static CURLcode get_pkey_dh(struct Curl_easy *data,
                             EVP_PKEY *pubkey, BIO *mem, int i)
@@ -483,9 +483,11 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
         result = get_pkey_rsa(data, pubkey, mem, i);
         break;
 
+#ifndef OPENSSL_NO_DSA
       case EVP_PKEY_DSA:
         result = get_pkey_dsa(data, pubkey, mem, i);
         break;
+#endif
 
       case EVP_PKEY_DH:
         result = get_pkey_dh(data, pubkey, mem, i);
