@@ -182,9 +182,14 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
 
 #ifdef MSDOS
   sc = msdosify(&p, target, flags);
-  curlx_free(target);
-  if(sc)
+  if(sc) {
+    if(sc == SANITIZE_ERR_INVALID_PATH)
+      warnf("sanitized filename or path invalid: \"%s\"", target);
+    curlx_free(target);
     return sc;
+  }
+
+  curlx_free(target);
   target = p;
   len = strlen(target);
 
@@ -197,9 +202,14 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
 
   if(!(flags & SANITIZE_ALLOW_RESERVED)) {
     sc = rename_if_reserved_dos(&p, target, flags);
-    curlx_free(target);
-    if(sc)
+    if(sc) {
+      if(sc == SANITIZE_ERR_INVALID_PATH)
+        warnf("sanitized filename or path invalid: \"%s\"", target);
+      curlx_free(target);
       return sc;
+    }
+
+    curlx_free(target);
     target = p;
     len = strlen(target);
 
