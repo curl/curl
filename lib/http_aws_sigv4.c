@@ -34,7 +34,6 @@
 #include "curl_trc.h"
 #include "escape.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 #include "slist.h"
 
 #include <time.h>

@@ -84,7 +84,6 @@
 #include "ws.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 
 /*
  * Forward declarations.

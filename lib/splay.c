@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/timeval.h"
 #include "splay.h"
 
 /*

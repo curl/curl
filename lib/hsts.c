@@ -36,7 +36,6 @@
 #include "parsedate.h"
 #include "curl_share.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 #include "curlx/strcopy.h"
 
 #define MAX_HSTS_LINE    4095

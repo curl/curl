@@ -36,7 +36,6 @@
 #include "curl_trc.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 #include "connect.h"
 
 #define MAX_ALTSVC_LINE    4095

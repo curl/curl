@@ -52,7 +52,6 @@
 #include "../progress.h"
 #include "../strdup.h"
 #include "../curlx/fopen.h"
-#include "../curlx/timeval.h"
 #include "x509asn1.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
