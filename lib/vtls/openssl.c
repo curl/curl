@@ -4746,7 +4746,8 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   long ossl_verify;
   X509 *server_cert;
   bool verified = FALSE;
-#ifdef USE_APPLE_SECTRUST
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP) && \
+  defined(USE_APPLE_SECTRUST)
   bool sectrust_verified = FALSE;
 #endif
 
@@ -4801,7 +4802,9 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
       ssl_config->certverifyresult = X509_V_OK;
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
       sectrust_verified = TRUE;
+#endif
     }
   }
 #endif
