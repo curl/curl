@@ -23,9 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/timeval.h"
 #include "ratelimit.h"
-
 
 #define CURL_US_PER_SEC       1000000
 #define CURL_RLIMIT_MIN_CHUNK (16 * 1024)
