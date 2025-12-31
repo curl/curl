@@ -32,7 +32,6 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "curlx/nonblock.h"
-#include "curlx/timeval.h"
 #include "socks.h"
 #include "strdup.h"
 

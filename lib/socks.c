@@ -38,7 +38,6 @@
 #include "select.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "curlx/timeval.h"
 #include "socks.h"
 #include "curlx/inet_pton.h"
 #include "url.h"
