@@ -127,8 +127,10 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
     max_sanitized_len = (PATH_MAX - 1 > 255) ? 255 : PATH_MAX - 1;
 
   len = strlen(file_name);
-  if(len > max_sanitized_len)
+  if(len > max_sanitized_len) {
+    warnf("filename or path too long: \"%s\"", file_name);
     return SANITIZE_ERR_INVALID_PATH;
+  }
 
   target = curlx_strdup(file_name);
   if(!target)
@@ -187,6 +189,7 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
   len = strlen(target);
 
   if(len > max_sanitized_len) {
+    warnf("sanitized filename or path too long: \"%s\"", target);
     curlx_free(target);
     return SANITIZE_ERR_INVALID_PATH;
   }
@@ -201,6 +204,7 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
     len = strlen(target);
 
     if(len > max_sanitized_len) {
+      warnf("sanitized filename or path too long: \"%s\"", target);
       curlx_free(target);
       return SANITIZE_ERR_INVALID_PATH;
     }
