@@ -131,11 +131,6 @@ typedef unsigned int curl_prot_t;
    input easier and better. */
 #define CURL_MAX_INPUT_LENGTH 8000000
 
-#include "asyn.h"
-#include "cookie.h"
-#include "psl.h"
-#include "formdata.h"
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -145,6 +140,10 @@ typedef unsigned int curl_prot_t;
 
 #include "curlx/timeval.h"
 
+#include "asyn.h"
+#include "cookie.h"
+#include "psl.h"
+#include "formdata.h"
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"

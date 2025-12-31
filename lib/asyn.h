@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/timeval.h"
-
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
 #include "httpsrr.h"
 #endif
