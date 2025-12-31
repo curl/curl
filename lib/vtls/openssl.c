@@ -5364,7 +5364,6 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-#ifndef OPENSSL_NO_SHA256
 static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
                                size_t tmplen,
                                unsigned char *sha256sum /* output */,
@@ -5386,7 +5385,6 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
   EVP_MD_CTX_destroy(mdctx);
   return CURLE_OK;
 }
-#endif
 
 static bool ossl_cert_status_request(void)
 {
@@ -5445,11 +5443,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_set_engine,          /* set_engine or provider */
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
-#ifndef OPENSSL_NO_SHA256
   ossl_sha256sum,           /* sha256sum */
-#else
-  NULL,                     /* sha256sum */
-#endif
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
   ossl_get_channel_binding  /* get_channel_binding */
