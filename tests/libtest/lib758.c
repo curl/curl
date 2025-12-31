@@ -30,9 +30,9 @@
 
 #include "first.h"
 
-#include "testtrace.h"
-
 #ifdef USE_OPENSSL
+
+#include "testtrace.h"
 
 #include <openssl/ssl.h>
 
