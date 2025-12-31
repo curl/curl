@@ -222,19 +222,11 @@ CURLcode get_url_file_name(char **filename, const char *url)
         char *sanitized;
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
         if(sc) {
-          CURLcode res = CURLE_URL_MALFORMAT;
-
-          if(sc == SANITIZE_ERR_INVALID_PATH) {
+          if(sc == SANITIZE_ERR_INVALID_PATH)
             warnf("filename or path invalid (too long?): \"%s\"", *filename);
-            res = CURLE_BAD_FUNCTION_ARGUMENT;
-          }
-          else if(sc == SANITIZE_ERR_BAD_ARGUMENT)
-            res = CURLE_BAD_FUNCTION_ARGUMENT;
-          else if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
-            res = CURLE_OUT_OF_MEMORY;
-
           tool_safefree(*filename);
-          return res;
+          return (sc == SANITIZE_ERR_OUT_OF_MEMORY) ?
+            CURLE_OUT_OF_MEMORY : CURLE_BAD_FUNCTION_ARGUMENT;
         }
         tool_safefree(*filename);
         *filename = sanitized;

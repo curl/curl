@@ -705,20 +705,13 @@ CURLcode glob_match_url(char **output, const char *filename,
                                          (SANITIZE_ALLOW_PATH |
                                           SANITIZE_ALLOW_RESERVED));
     if(sc) {
-      CURLcode res = CURLE_URL_MALFORMAT;
-
       if(sc == SANITIZE_ERR_INVALID_PATH) {
         warnf("filename or path invalid (too long?): \"%s\"",
               curlx_dyn_ptr(&dyn));
-        res = CURLE_BAD_FUNCTION_ARGUMENT;
       }
-      else if(sc == SANITIZE_ERR_BAD_ARGUMENT)
-        res = CURLE_BAD_FUNCTION_ARGUMENT;
-      else if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
-        res = CURLE_OUT_OF_MEMORY;
-
       curlx_dyn_free(&dyn);
-      return res;
+      return (sc == SANITIZE_ERR_OUT_OF_MEMORY) ?
+        CURLE_OUT_OF_MEMORY : CURLE_BAD_FUNCTION_ARGUMENT;
     }
     curlx_dyn_free(&dyn);
     *output = sanitized;
