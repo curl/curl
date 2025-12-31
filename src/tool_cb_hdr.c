@@ -377,9 +377,13 @@ static char *parse_filename(const char *ptr, size_t len)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
-    tool_safefree(copy);
-    if(sc)
+    if(sc) {
+      if(sc == SANITIZE_ERR_INVALID_PATH)
+        warnf("filename or path invalid (too long?): \"%s\"", copy);
+      tool_safefree(copy);
       return NULL;
+    }
+    tool_safefree(copy);
     copy = sanitized;
   }
 #endif /* _WIN32 || MSDOS */
