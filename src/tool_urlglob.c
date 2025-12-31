@@ -25,6 +25,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
+#include "tool_msgs.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
 #include "tool_strdup.h"
@@ -703,16 +704,23 @@ CURLcode glob_match_url(char **output, const char *filename,
     SANITIZEcode sc = sanitize_file_name(&sanitized, curlx_dyn_ptr(&dyn),
                                          (SANITIZE_ALLOW_PATH |
                                           SANITIZE_ALLOW_RESERVED));
-    curlx_dyn_free(&dyn);
     if(sc) {
-      if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
-        return CURLE_OUT_OF_MEMORY;
-      else if(sc == SANITIZE_ERR_INVALID_PATH ||
-              sc == SANITIZE_ERR_BAD_ARGUMENT)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-      else
-        return CURLE_URL_MALFORMAT;
+      CURLcode res = CURLE_URL_MALFORMAT;
+
+      if(sc == SANITIZE_ERR_INVALID_PATH) {
+        warnf("filename or path invalid (too long?): \"%s\"",
+              curlx_dyn_ptr(&dyn));
+        res = CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      else if(sc == SANITIZE_ERR_BAD_ARGUMENT)
+        res = CURLE_BAD_FUNCTION_ARGUMENT;
+      else if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+        res = CURLE_OUT_OF_MEMORY;
+
+      curlx_dyn_free(&dyn);
+      return res;
     }
+    curlx_dyn_free(&dyn);
     *output = sanitized;
     return CURLE_OK;
   }

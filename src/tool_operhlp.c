@@ -221,16 +221,22 @@ CURLcode get_url_file_name(char **filename, const char *url)
       {
         char *sanitized;
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
-        tool_safefree(*filename);
         if(sc) {
-          if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
-            return CURLE_OUT_OF_MEMORY;
-          else if(sc == SANITIZE_ERR_INVALID_PATH ||
-                  sc == SANITIZE_ERR_BAD_ARGUMENT)
-            return CURLE_BAD_FUNCTION_ARGUMENT;
-          else
-            return CURLE_URL_MALFORMAT;
+          CURLcode res = CURLE_URL_MALFORMAT;
+
+          if(sc == SANITIZE_ERR_INVALID_PATH) {
+            warnf("filename or path invalid (too long?): \"%s\"", *filename);
+            res = CURLE_BAD_FUNCTION_ARGUMENT;
+          }
+          else if(sc == SANITIZE_ERR_BAD_ARGUMENT)
+            res = CURLE_BAD_FUNCTION_ARGUMENT;
+          else if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+            res = CURLE_OUT_OF_MEMORY;
+
+          tool_safefree(*filename);
+          return res;
         }
+        tool_safefree(*filename);
         *filename = sanitized;
       }
 #endif /* _WIN32 || MSDOS */
