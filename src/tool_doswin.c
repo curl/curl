@@ -207,10 +207,10 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
   }
 
 #ifdef DEBUGBUILD
-  if(getenv("CURL_FN_SANITIZE_OOM"))
-    return SANITIZE_ERR_OUT_OF_MEMORY;
   if(getenv("CURL_FN_SANITIZE_BAD"))
     return SANITIZE_ERR_INVALID_PATH;
+  if(getenv("CURL_FN_SANITIZE_OOM"))
+    return SANITIZE_ERR_OUT_OF_MEMORY;
 #endif
 
   *sanitized = target;
