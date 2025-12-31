@@ -28,7 +28,6 @@
 #include "multiif.h"
 #include "progress.h"
 #include "transfer.h"
-#include "curlx/timeval.h"
 #include "curlx/strcopy.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
