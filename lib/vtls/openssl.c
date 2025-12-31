@@ -2591,9 +2591,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   (void)ssl;
 }
 
-/* Check for ALPN support. */
-#define HAS_ALPN_OPENSSL
-
 static CURLcode
 ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
                              unsigned int ssl_version_min)
@@ -3422,7 +3419,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
     Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   }
 
-#ifdef HAS_ALPN_OPENSSL
   if(alpns.count) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
@@ -3436,7 +3432,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#endif
 
   return CURLE_OK;
 }
@@ -4072,14 +4067,13 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   SSL_set_bio(octx->ssl, bio, bio);
 #endif
 
-#ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn && (connssl->state != ssl_connection_deferred)) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
-#endif
+
   connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
 }
@@ -4362,7 +4356,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
 #endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST && !HAVE_BORINGSSL_LIKE */
 
-#ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
      * negotiated
      */
@@ -4373,7 +4366,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
       return Curl_alpn_set_negotiated(cf, data, connssl, neg_protocol, len);
     }
-#endif
 
     return CURLE_OK;
   }
