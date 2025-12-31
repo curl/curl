@@ -2231,7 +2231,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   return result;
 }
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
 static CURLcode verifystatus(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ossl_ctx *octx)
@@ -2592,9 +2592,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 }
 
 /* Check for ALPN support. */
-#ifndef OPENSSL_NO_TLSEXT
-#  define HAS_ALPN_OPENSSL
-#endif
+#define HAS_ALPN_OPENSSL
 
 static CURLcode
 ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
@@ -3593,7 +3591,7 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
 
   SSL_set_app_data(octx->ssl, ssl_user_data);
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   if(Curl_ssl_cf_get_primary_config(cf)->verifystatus)
     SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
 #endif
@@ -4746,8 +4744,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   long ossl_verify;
   X509 *server_cert;
   bool verified = FALSE;
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP) && \
-  defined(USE_APPLE_SECTRUST)
+#if !defined(OPENSSL_NO_OCSP) && defined(USE_APPLE_SECTRUST)
   bool sectrust_verified = FALSE;
 #endif
 
@@ -4802,7 +4799,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
       ssl_config->certverifyresult = X509_V_OK;
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
       sectrust_verified = TRUE;
 #endif
     }
@@ -4820,7 +4817,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     infof(data, " SSL certificate verification failed, continuing anyway!");
   }
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   if(conn_config->verifystatus &&
 #ifdef USE_APPLE_SECTRUST
      !sectrust_verified && /* already verified via apple sectrust, cannot
@@ -5401,7 +5398,7 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
 
 static bool ossl_cert_status_request(void)
 {
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   return TRUE;
 #else
   return FALSE;
