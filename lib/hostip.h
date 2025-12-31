@@ -31,8 +31,6 @@
 #include "asyn.h"
 #include "httpsrr.h"
 
-#include <setjmp.h>
-
 #ifdef USE_HTTPSRR
 # include <stdint.h>
 #endif
