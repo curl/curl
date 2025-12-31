@@ -30,7 +30,6 @@
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "curl_trc.h"
-#include "curlx/timeval.h"
 #include "rand.h"
 #include "escape.h"
 

@@ -64,7 +64,6 @@
 #include "../url.h"
 #include "../progress.h"
 #include "../curlx/fopen.h"
-#include "../curlx/timeval.h"
 #include "../curl_sha256.h"
 #include "../curlx/base64.h"
 #include "../curlx/inet_pton.h"

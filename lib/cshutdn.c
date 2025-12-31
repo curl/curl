@@ -36,7 +36,6 @@
 #include "connect.h"
 #include "select.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 
 
 static void cshutdn_run_conn_handler(struct Curl_easy *data,

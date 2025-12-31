@@ -64,7 +64,6 @@
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "curlx/fopen.h"
-#include "curlx/timeval.h"
 #include "curl_range.h"
 
 #if defined(_WIN32) || defined(MSDOS)

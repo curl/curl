@@ -67,7 +67,6 @@
 #include "strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025

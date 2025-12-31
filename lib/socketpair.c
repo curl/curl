@@ -123,7 +123,6 @@ int Curl_socketpair(int domain, int type, int protocol,
 #define INADDR_LOOPBACK 0x7f000001
 #endif
 
-#include "curlx/timeval.h"  /* needed before select.h */
 #include "select.h"   /* for Curl_poll */
 
 int Curl_socketpair(int domain, int type, int protocol,
