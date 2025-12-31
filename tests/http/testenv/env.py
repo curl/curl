@@ -164,6 +164,7 @@ class EnvConfig:
         if p.returncode != 0:
             raise RuntimeError(f'{self.curlinfo} failed with exit code: {p.returncode}')
         self.curl_is_verbose = 'verbose-strings: ON' in p.stdout
+        self.curl_can_cert_status = 'cert-status: ON' in p.stdout
 
         self.ports = {}
 
@@ -505,6 +506,10 @@ class Env:
     @staticmethod
     def curl_is_verbose() -> bool:
         return Env.CONFIG.curl_is_verbose
+
+    @staticmethod
+    def curl_can_cert_status() -> bool:
+        return Env.CONFIG.curl_can_cert_status
 
     @staticmethod
     def curl_can_early_data() -> bool:

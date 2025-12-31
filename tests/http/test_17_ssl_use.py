@@ -292,10 +292,7 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_08_cert_status(self, env: Env, proto, httpd, nghttpx):
-        if not env.curl_uses_lib('openssl') and \
-           not env.curl_uses_lib('quictls') and \
-           not env.curl_uses_lib('libressl') and \
-           not env.curl_uses_lib('gnutls'):
+        if not env.curl_can_cert_status():
             pytest.skip("TLS library does not support --cert-status")
         curl = CurlClient(env=env)
         domain = 'localhost'
