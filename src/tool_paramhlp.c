@@ -206,9 +206,10 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
 ParameterError str2num(long *val, const char *str)
 {
   curl_off_t num;
-  bool is_neg = (*str == '-');
-  if(is_neg)
-    str++;
+  bool is_neg = FALSE;
+  DEBUGASSERT(str);
+  if(!curlx_str_single(&str, '-'))
+    is_neg = TRUE;
   if(curlx_str_number(&str, &num, LONG_MAX) ||
      curlx_str_single(&str, '\0'))
     return PARAM_BAD_NUMERIC; /* badness */
@@ -223,6 +224,7 @@ ParameterError oct2nummax(long *val, const char *str, long max)
 {
   curl_off_t num;
   int rc;
+  DEBUGASSERT(str);
   rc = curlx_str_octal(&str, &num, max);
   if(rc) {
     if(STRE_OVERFLOW == rc)
