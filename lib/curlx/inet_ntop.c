@@ -181,10 +181,9 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
    */
   if(best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
     *tp++ = ':';
-  *tp++ = '\0';
 
   /* Check for overflow, copy, and we are done. */
-  if((size_t)(tp - tmp) > size) {
+  if((size_t)(tp - tmp) >= size) {
 #ifdef USE_WINSOCK
     errno = WSAEINVAL;
 #else
@@ -193,7 +192,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
     return NULL;
   }
 
-  curlx_strcopy(dst, size, tmp, strlen(tmp));
+  curlx_strcopy(dst, size, tmp, tp - tmp);
   return dst;
 }
 
