@@ -832,8 +832,8 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
 
   if(enc->payload_remain > 0) {
     /* trying to write a new frame before the previous one is finished */
-    failf(data, "[WS] starting new frame with %zd bytes from last one "
-                "remaining to be sent", (ssize_t)enc->payload_remain);
+    failf(data, "[WS] starting new frame with %" FMT_OFF_T " bytes "
+                "from last one remaining to be sent", enc->payload_remain);
     return CURLE_SEND_ERROR;
   }
 
