@@ -458,7 +458,7 @@ bool Curl_cw_out_is_paused(struct Curl_easy *data)
     return FALSE;
 
   ctx = (struct cw_out_ctx *)cw_out;
-  return ctx->paused;
+  return (bool)ctx->paused;
 }
 
 static CURLcode cw_out_flush(struct Curl_easy *data,

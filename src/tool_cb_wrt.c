@@ -244,7 +244,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
-  bool is_tty = global->isatty;
+  bool is_tty = (bool)global->isatty;
 #ifdef _WIN32
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;

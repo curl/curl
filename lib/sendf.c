@@ -117,7 +117,7 @@ CURLcode Curl_client_start(struct Curl_easy *data)
 
 bool Curl_creader_will_rewind(struct Curl_easy *data)
 {
-  return data->req.rewind_read;
+  return (bool)data->req.rewind_read;
 }
 
 void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
@@ -727,7 +727,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     if(ctx->total_len >= 0)
       ctx->seen_eos = (ctx->read_len >= ctx->total_len);
     *pnread = nread;
-    *peos = ctx->seen_eos;
+    *peos = (bool)ctx->seen_eos;
     break;
   }
   CURL_TRC_READ(data, "cr_in_read(len=%zu, total=%"FMT_OFF_T
@@ -742,7 +742,7 @@ static bool cr_in_needs_rewind(struct Curl_easy *data,
 {
   struct cr_in_ctx *ctx = reader->ctx;
   (void)data;
-  return ctx->has_used_cb;
+  return (bool)ctx->has_used_cb;
 }
 
 static curl_off_t cr_in_total_length(struct Curl_easy *data,
@@ -903,7 +903,7 @@ static bool cr_in_is_paused(struct Curl_easy *data,
 {
   struct cr_in_ctx *ctx = reader->ctx;
   (void)data;
-  return ctx->is_paused;
+  return (bool)ctx->is_paused;
 }
 
 static const struct Curl_crtype cr_in = {
@@ -1013,7 +1013,7 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
       if(ctx->read_eos)
         ctx->eos = TRUE;
       *pnread = nread;
-      *peos = ctx->eos;
+      *peos = (bool)ctx->eos;
       goto out;
     }
 

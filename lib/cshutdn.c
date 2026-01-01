@@ -59,7 +59,7 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
                    conn->connection_id, conn->bits.aborted));
       /* There are protocol handlers that block on retrieving
        * server responses here (FTP). Set a short timeout. */
-      conn->handler->disconnect(data, conn, conn->bits.aborted);
+      conn->handler->disconnect(data, conn, (bool)conn->bits.aborted);
     }
 
     conn->bits.shutdown_handler = TRUE;

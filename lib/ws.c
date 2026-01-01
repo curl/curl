@@ -836,14 +836,15 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
     return CURLE_SEND_ERROR;
   }
 
-  result = ws_frame_flags2firstbyte(data, flags, enc->contfragment, &firstb);
+  result = ws_frame_flags2firstbyte(data, flags, (bool)enc->contfragment,
+                                    &firstb);
   if(result)
     return result;
 
   /* fragmentation only applies to data frames (text/binary);
    * control frames (close/ping/pong) do not affect the CONT status */
   if(flags & (CURLWS_TEXT | CURLWS_BINARY)) {
-    enc->contfragment = (flags & CURLWS_CONT) ? (bit)TRUE : (bit)FALSE;
+    enc->contfragment = (curl_bit)((flags & CURLWS_CONT) ? TRUE : FALSE);
   }
 
   if(flags & CURLWS_PING && payload_len > WS_MAX_CNTRL_LEN) {
@@ -1177,7 +1178,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
       if(ctx->read_eos)
         ctx->eos = TRUE;
       *pnread = nread;
-      *peos = ctx->eos;
+      *peos = (bool)ctx->eos;
       goto out;
     }
 

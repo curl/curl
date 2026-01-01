@@ -1169,7 +1169,7 @@ CURLcode Curl_cookie_loadfiles(struct Curl_easy *data)
       data->state.cookie_engine = TRUE;
       while(list) {
         result = cookie_load(data, list->data, data->cookies,
-                             data->set.cookiesession);
+                             (bool)data->set.cookiesession);
         if(result)
           break;
         list = list->next;

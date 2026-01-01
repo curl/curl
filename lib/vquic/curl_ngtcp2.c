@@ -1158,7 +1158,8 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
   if(!stream)
     return 0;
   /* add a CRLF only if we have received some headers */
-  h3_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"), stream->closed);
+  h3_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"),
+                        (bool)stream->closed);
 
   CURL_TRC_CF(data, cf, "[%" PRId64 "] end_headers, status=%d",
               stream_id, stream->status_code);

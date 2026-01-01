@@ -317,7 +317,7 @@ void Curl_conncontrol(struct connectdata *conn,
             ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
   if((ctrl == CONNCTRL_STREAM) && is_multiplex)
     ;  /* stream signal on multiplex conn never affects close state */
-  else if((bit)closeit != conn->bits.close) {
+  else if((curl_bit)closeit != conn->bits.close) {
     conn->bits.close = closeit; /* the only place in the source code that
                                    should assign this bit */
   }

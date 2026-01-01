@@ -233,13 +233,8 @@ struct timeval {
 #endif
 
 /* the type we use for storing a single boolean bit */
-#ifdef _MSC_VER
-typedef bool bit;
-#define BIT(x) bool x
-#else
-typedef unsigned int bit;
-#define BIT(x) bit x:1
-#endif
+typedef unsigned int curl_bit;
+#define BIT(x) curl_bit x:1
 
 /*
  * Redefine TRUE and FALSE too, to catch current use. With this

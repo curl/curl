@@ -1309,8 +1309,8 @@ static bool ConnectionExists(struct Curl_easy *data,
   /* wait_pipe is TRUE if we encounter a bundle that is undecided. There
    * is no matching connection then, yet. */
   *usethis = match.found;
-  *force_reuse = match.force_reuse;
-  *waitpipe = match.wait_pipe;
+  *force_reuse = (bool)match.force_reuse;
+  *waitpipe = (bool)match.wait_pipe;
   return result;
 }
 
@@ -1367,7 +1367,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
 #endif
   conn->ip_version = data->set.ipver;
-  conn->connect_only = data->set.connect_only;
+  conn->connect_only = (bool)data->set.connect_only;
   conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
@@ -3157,7 +3157,7 @@ static CURLcode resolve_unix(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   hostaddr->addr = Curl_unix2addr(unix_path, &longpath,
-                                  conn->bits.abstract_unix_socket);
+                                  (bool)conn->bits.abstract_unix_socket);
   if(!hostaddr->addr) {
     if(longpath)
       /* Long paths are not supported for now */

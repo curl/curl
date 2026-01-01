@@ -623,7 +623,7 @@ static void multi_done_locked(struct connectdata *conn,
   Curl_resolv_unlink(data, &data->state.dns[1]);
   Curl_dnscache_prune(data);
 
-  if(multi_conn_should_close(conn, data, mdctx->premature)) {
+  if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
     CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s:%d, "
                "forbid=%d, close=%d, premature=%d, conn_multiplex=%d",
@@ -632,7 +632,7 @@ static void multi_done_locked(struct connectdata *conn,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
 #endif
     connclose(conn, "disconnecting");
-    Curl_conn_terminate(data, conn, mdctx->premature);
+    Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -640,7 +640,7 @@ static void multi_done_locked(struct connectdata *conn,
                " by server, not reusing", conn->connection_id, host, port);
 #endif
     connclose(conn, "server shutdown");
-    Curl_conn_terminate(data, conn, mdctx->premature);
+    Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
   else {
     /* the connection is no longer in use by any transfer */
@@ -1629,7 +1629,7 @@ CURLMcode curl_multi_wakeup(CURLM *m)
  */
 static bool multi_ischanged(struct Curl_multi *multi, bool clear)
 {
-  bool retval = multi->recheckstate;
+  bool retval = (bool)multi->recheckstate;
   if(clear)
     multi->recheckstate = FALSE;
   return retval;

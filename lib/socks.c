@@ -1308,7 +1308,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   cf->connected = TRUE;
 
 out:
-  *done = cf->connected;
+  *done = (bool)cf->connected;
   return result;
 }
 

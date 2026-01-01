@@ -332,8 +332,8 @@ static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
         Curl_auth_create_gssapi_user_message(data, sctx->conn->user,
                                              sctx->conn->passwd,
                                              service, sctx->conn->host.name,
-                                             sctx->sasl->mutual_auth, NULL,
-                                             krb5, &sctx->resp);
+                                             (bool)sctx->sasl->mutual_auth,
+                                             NULL, krb5, &sctx->resp);
     }
     return TRUE;
   }
@@ -712,7 +712,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     result = !krb5 ? CURLE_OUT_OF_MEMORY :
       Curl_auth_create_gssapi_user_message(data, conn->user, conn->passwd,
                                            service, conn->host.name,
-                                           sasl->mutual_auth, NULL,
+                                           (bool)sasl->mutual_auth, NULL,
                                            krb5, &resp);
     newstate = SASL_GSSAPI_TOKEN;
     break;
@@ -728,7 +728,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
            message */
         result = Curl_auth_create_gssapi_user_message(data, NULL, NULL,
                                                       NULL, NULL,
-                                                      sasl->mutual_auth,
+                                                      (bool)sasl->mutual_auth,
                                                       &serverdata,
                                                       krb5, &resp);
         newstate = SASL_GSSAPI_NO_DATA;
@@ -801,7 +801,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     sasl->curmech = NULL;
 
     /* Start an alternative SASL authentication */
-    return Curl_sasl_start(sasl, data, sasl->force_ir, progress);
+    return Curl_sasl_start(sasl, data, (bool)sasl->force_ir, progress);
   default:
     failf(data, "Unsupported SASL authentication mechanism");
     result = CURLE_UNSUPPORTED_PROTOCOL;  /* Should not happen */

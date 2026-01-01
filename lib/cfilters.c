@@ -513,7 +513,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
   }
 
-  *done = cf->connected;
+  *done = (bool)cf->connected;
   if(*done)
     return CURLE_OK;
 
@@ -610,7 +610,7 @@ bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
     return FALSE;
   cf = conn->cfilter[sockindex];
   if(cf)
-    return cf->connected;
+    return (bool)cf->connected;
   else if(conn->handler->flags & PROTOPT_NONETWORK)
     return TRUE;
   return FALSE;

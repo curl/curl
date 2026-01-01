@@ -1716,7 +1716,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        data->state.http_neg.preferred,
-                                       conn->bits.tls_enable_alpn));
+                                       (bool)conn->bits.tls_enable_alpn));
 #endif
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1767,7 +1767,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct ssl_connect_data *ctx;
   CURLcode result;
   /* ALPN is default, but if user explicitly disables it, obey */
-  bool use_alpn = data->set.ssl_enable_alpn;
+  bool use_alpn = (bool)data->set.ssl_enable_alpn;
   http_majors wanted = CURL_HTTP_V1x;
 
   (void)conn;
