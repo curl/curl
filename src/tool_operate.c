@@ -1696,8 +1696,8 @@ static CURLcode parallel_event(struct parastate *s)
       CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  /* We need to cleanup the multi here, since the uv context lives on the *
-     stack and will be gone. multi_cleanup can trigger events! */
+  /* We need to cleanup the multi here, since the uv context lives on the
+   * stack and will be gone. multi_cleanup can trigger events! */
   curl_multi_cleanup(s->multi);
 
 #if DEBUG_UV
