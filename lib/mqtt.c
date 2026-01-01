@@ -634,8 +634,8 @@ fail:
   return result;
 }
 
-static size_t mqtt_decode_len(unsigned char *buf,
-                              size_t buflen, size_t *lenbytes)
+/* return 0 on success, non-zero on error */
+static int mqtt_decode_len(size_t *lenp, unsigned char *buf, size_t buflen)
 {
   size_t len = 0;
   size_t mult = 1;
@@ -643,15 +643,15 @@ static size_t mqtt_decode_len(unsigned char *buf,
   unsigned char encoded = 128;
 
   for(i = 0; (i < buflen) && (encoded & 128); i++) {
+    if(i == 4)
+      return 1; /* bad size */
     encoded = buf[i];
     len += (encoded & 127) * mult;
     mult *= 128;
   }
 
-  if(lenbytes)
-    *lenbytes = i;
-
-  return len;
+  *lenp = len;
+  return 0;
 }
 
 #ifdef DEBUGBUILD
@@ -915,7 +915,10 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = CURLE_WEIRD_SERVER_REPLY;
     if(result)
       break;
-    mq->remaining_length = mqtt_decode_len(mq->pkt_hd, mq->npacket, NULL);
+    if(mqtt_decode_len(&mq->remaining_length, mq->pkt_hd, mq->npacket)) {
+      result = CURLE_WEIRD_SERVER_REPLY;
+      break;
+    }
     mq->npacket = 0;
     if(mq->remaining_length) {
       mqstate(data, mqtt->nextstate, MQTT_NOSTATE);
