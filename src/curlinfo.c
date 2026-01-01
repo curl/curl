@@ -39,6 +39,10 @@
 
 #include <stdio.h>
 
+#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP */
+#endif
+
 static const char *disabled[] = {
   "bindlocal: "
 #ifdef CURL_DISABLE_BINDLOCAL
