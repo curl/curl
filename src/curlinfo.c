@@ -243,6 +243,14 @@ static const char *disabled[] = {
 #else
   "OFF"
 #endif
+  ,
+  "cert-status: "
+#if defined(USE_GNUTLS) || \
+  ((defined(USE_QUICHE) || defined(USE_OPENSSL)) && !defined(OPENSSL_NO_OCSP))
+  "ON"
+#else
+  "OFF"
+#endif
 };
 
 int main(int argc, char **argv)
