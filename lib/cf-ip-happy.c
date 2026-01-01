@@ -515,10 +515,10 @@ out:
       expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
       next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
       if(next_expire_ms <= 0) {
-        CURL_TRC_CF(data, cf, "HAPPY_EYBALLS timeout due, re-evaluate");
+        CURL_TRC_CF(data, cf, "HAPPY_EYEBALLS timeout due, re-evaluate");
         goto evaluate;
       }
-      CURL_TRC_CF(data, cf, "next HAPPY_EYBALLS timeout in %" FMT_TIMEDIFF_T
+      CURL_TRC_CF(data, cf, "next HAPPY_EYEBALLS timeout in %" FMT_TIMEDIFF_T
                   "ms", next_expire_ms);
       Curl_expire(data, next_expire_ms, EXPIRE_HAPPY_EYEBALLS);
     }

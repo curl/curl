@@ -30,7 +30,7 @@
 #include "tool_ssls.h"
 #include "tool_parsecfg.h"
 
-/* The maximum line length for an ecoded session ticket */
+/* The maximum line length for an encoded session ticket */
 #define MAX_SSLS_LINE (64 * 1024)
 
 static CURLcode tool_ssls_easy(struct OperationConfig *config,
