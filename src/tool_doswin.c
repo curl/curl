@@ -103,7 +103,6 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
   char *p, *target;
   size_t len;
   SANITIZEcode sc;
-  size_t max_sanitized_len;
 
   if(!sanitized)
     return SANITIZE_ERR_BAD_ARGUMENT;
@@ -113,22 +112,7 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
   if(!file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-  if(flags & SANITIZE_ALLOW_PATH)
-#ifdef MSDOS
-    max_sanitized_len = PATH_MAX - 1;
-#else
-    /* Windows extended-length path max */
-    max_sanitized_len = 32767 - 1;
-#endif
-  else
-    /* The maximum length of a filename. FILENAME_MAX is often the same as
-       PATH_MAX, in other words it is 260 and does not discount the path
-       information therefore we should not use it. */
-    max_sanitized_len = (PATH_MAX - 1 > 255) ? 255 : PATH_MAX - 1;
-
   len = strlen(file_name);
-  if(len > max_sanitized_len)
-    return SANITIZE_ERR_INVALID_PATH;
 
   target = curlx_strdup(file_name);
   if(!target)
@@ -184,12 +168,6 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
   if(sc)
     return sc;
   target = p;
-  len = strlen(target);
-
-  if(len > max_sanitized_len) {
-    curlx_free(target);
-    return SANITIZE_ERR_INVALID_PATH;
-  }
 #endif
 
   if(!(flags & SANITIZE_ALLOW_RESERVED)) {
@@ -198,12 +176,6 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
     if(sc)
       return sc;
     target = p;
-    len = strlen(target);
-
-    if(len > max_sanitized_len) {
-      curlx_free(target);
-      return SANITIZE_ERR_INVALID_PATH;
-    }
   }
 
 #ifdef DEBUGBUILD
@@ -523,10 +495,6 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
     p_len = strlen(p);
 
     /* Prepend a '_' */
-    if(len == bufsize - 1) {
-      curlx_free(buffer);
-      return SANITIZE_ERR_INVALID_PATH;
-    }
     memmove(p + 1, p, p_len + 1);
     p[0] = '_';
     ++p_len;
