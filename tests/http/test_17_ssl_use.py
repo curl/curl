@@ -295,6 +295,8 @@ class TestSSLUse:
         if not env.curl_uses_lib('openssl') and \
            not env.curl_uses_lib('quictls') and \
            not env.curl_uses_lib('libressl') and \
+           not env.curl_uses_lib('boringssl') and \
+           not env.curl_uses_lib('aws-lc') and \
            not env.curl_uses_lib('quiche') and \
            not env.curl_uses_lib('gnutls'):
             pytest.skip("TLS library does not support --cert-status")
