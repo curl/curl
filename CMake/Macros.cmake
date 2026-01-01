@@ -74,6 +74,10 @@ macro(curl_dependency_option _option_name _find_name _desc_name)
     find_package(${_find_name})
   elseif(${_option_name})
     find_package(${_find_name} REQUIRED)
+  else()
+    string(TOUPPER "${_find_name}" _find_name_upper)
+    set(${_find_name}_FOUND OFF)  # cmake-lint: disable=C0103
+    set(${_find_name_upper}_FOUND OFF)  # cmake-lint: disable=C0103
   endif()
 endmacro()
 
