@@ -66,7 +66,7 @@ CURLcode Curl_pgrsCheck(struct Curl_easy *data);
 void Curl_pgrsRecvPause(struct Curl_easy *data, bool enable);
 void Curl_pgrsSendPause(struct Curl_easy *data, bool enable);
 
-/* Reset sizes and couners for up- and download. */
+/* Reset sizes and counters for up- and download. */
 void Curl_pgrsReset(struct Curl_easy *data);
 /* Reset sizes for up- and download. */
 void Curl_pgrsResetTransferSizes(struct Curl_easy *data);

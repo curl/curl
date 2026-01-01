@@ -1059,7 +1059,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 static CURLcode rtsp_parse_transport(struct Curl_easy *data,
                                      const char *transport)
 {
-  /* If we receive multiple Transport response-headers, the linterleaved
+  /* If we receive multiple Transport response-headers, the interleaved
      channels of each response header is recorded and used together for
      subsequent data validity checks.*/
   /* e.g.: ' RTP/AVP/TCP;unicast;interleaved=5-6' */
