@@ -72,9 +72,9 @@
 #define QUIC_MAX_STREAMS       (256 * 1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)
 
-/* A stream window is the maximum amount we need to buffer for
- * each active transfer.
- * Chunk size is large enough to take a full DATA frame */
+/* We announce a small window size in transport param to the server,
+ * and grow that immediately to max when no rate limit is in place.
+ * We need to start small as we are not able to decrease it. */
 #define H3_STREAM_WINDOW_SIZE_INITIAL (32 * 1024)
 #define H3_STREAM_WINDOW_SIZE_MAX     (10 * 1024 * 1024)
 #define H3_CONN_WINDOW_SIZE_MAX       (100 * H3_STREAM_WINDOW_SIZE_MAX)
@@ -90,10 +90,10 @@
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES      2
-/* Receive and Send max number of chunks just follows from the
- * chunk size and window size */
+/* The max amount of un-acked upload data we keep around per stream */
+#define H3_STREAM_SEND_BUFER_MAX      (10 * 1024 * 1024)
 #define H3_STREAM_SEND_CHUNKS \
-  (H3_STREAM_WINDOW_SIZE_MAX / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_SEND_BUFER_MAX / H3_STREAM_CHUNK_SIZE)
 
 /*
  * Store ngtcp2 version info in this buffer.
