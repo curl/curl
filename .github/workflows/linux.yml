@@ -235,7 +235,7 @@ jobs:
 
           - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=20 --min=900 951 to 9999'
+            tflags: '-t --shallow=25 --min=900 951 to 9999'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
