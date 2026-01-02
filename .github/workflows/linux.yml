@@ -172,10 +172,17 @@ jobs:
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
             image: 'ubuntu-24.04-arm'
 
-          - name: 'openssl -O3 libssh valgrind'
+          - name: 'openssl -O3 libssh valgrind #1'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
+            tflags: '1 to 950 --min=920'
+
+          - name: 'openssl -O3 libssh valgrind #2'
+            install_packages: libssh-dev valgrind
+            CFLAGS: -O3
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
+            tflags: '951 to 9999 --min=910'
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
