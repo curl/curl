@@ -367,7 +367,7 @@ to curl.
 
 For example, a user might pass in a username that looks like
 `Mr[CR][LF]Smith`. It may cause some minor havoc in the protocol handling,
-depending on what protocol that is used.
+depending on what protocol is used.
 
 # curl major incident response
 
