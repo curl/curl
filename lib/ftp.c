@@ -2420,7 +2420,7 @@ static CURLcode client_write_header(struct Curl_easy *data,
    * headers from CONNECT should not automatically be part of the
    * output. */
   CURLcode result;
-  bit save = data->set.include_header;
+  bool save = (bool)data->set.include_header;
   data->set.include_header = TRUE;
   result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, blen);
   data->set.include_header = save;
