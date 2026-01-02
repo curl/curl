@@ -155,12 +155,12 @@ jobs:
           - name: 'openssl libssh2 sync-resolver valgrind #1'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
-            tflags: '1 to 1000 --min=1150'
+            tflags: '1 to 900 --min=970'
 
           - name: 'openssl libssh2 sync-resolver valgrind #2'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
-            tflags: '1001 to 9999 --min=1150'
+            tflags: '901 to 9999 --min=860'
 
           - name: 'openssl'
             install_packages: libssh-dev
