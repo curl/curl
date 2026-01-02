@@ -259,7 +259,7 @@ jobs:
               --enable-debug
               --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
               --disable-ldap --disable-pop3 --without-librtmp --disable-rtsp
-              --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
+              --enable-static --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
               --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp
               --without-libssh2 --without-libssh
               --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
@@ -447,7 +447,7 @@ jobs:
             fi
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
-            mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libpsl=/opt/homebrew/opt/libpsl \
               ${MATRIX_CONFIGURE} ${options}
@@ -667,7 +667,7 @@ jobs:
             fi
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --disable-docs --disable-manual \
               --with-openssl="$(brew --prefix openssl)" \

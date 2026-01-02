@@ -99,7 +99,7 @@ jobs:
               -DCURL_WERROR=ON \
               ${MATRIX_CONFIG}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
@@ -203,8 +203,8 @@ jobs:
           - { build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'openssl-devel libssh2-devel', name: 'default' }
           - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '--with-openssl', install: 'openssl-devel libssh2-devel', name: 'default R' }
           # MinGW
-          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib CPPFLAGS=-D_WIN32_WINNT=0x0501', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default XP' }
-          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: ''          , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic --enable-shared=no', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3 mingw-w64-x86_64-libssh2', name: 'c-ares U' }
+          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static --without-zlib CPPFLAGS=-D_WIN32_WINNT=0x0501', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default XP' }
+          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: ''          , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic --enable-static --disable-shared', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3 mingw-w64-x86_64-libssh2', name: 'c-ares U' }
           - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '--min=1650', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U' }
           # MinGW torture
           - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=13 --min=700 1 to 950'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel U torture 1' }
@@ -217,7 +217,7 @@ jobs:
           - { build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun'   , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', install: 'mingw-w64-clang-aarch64-libssh2', type: 'Release', name: 'schannel R TrackMemory', image: 'windows-11-arm' }
           - { build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON', install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh2', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
           - { build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON', install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
-          # { build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   , config: '--without-debug --with-schannel --enable-shared', install: 'mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
+          # { build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   , config: '--without-debug --with-schannel --disable-static', install: 'mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
           - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug', image: 'windows-2025' }
           - { build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: 'mingw-w64-i686-libssh2', type: 'Release', name: 'schannel R' }
       fail-fast: false
@@ -302,7 +302,7 @@ jobs:
             fi
           else
             export CFLAGS CPPFLAGS
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
@@ -648,7 +648,7 @@ jobs:
               -D_CURL_SKIP_BUILD_CERTS=ON \
               ${options}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
               --host="${TRIPLET}" \
               --with-schannel --with-winidn \
               --without-libpsl \

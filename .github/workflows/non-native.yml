@@ -190,7 +190,7 @@ jobs:
                 options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
               fi
               mkdir bld && cd bld
-              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
+              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
                 --prefix="$HOME"/curl-install \
                 --with-openssl \
                 --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
@@ -286,7 +286,7 @@ jobs:
               ${MATRIX_OPTIONS}
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror --disable-shared \
               CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
