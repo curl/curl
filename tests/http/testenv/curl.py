@@ -29,7 +29,7 @@ import logging
 import os
 import sys
 import time
-# from functools import cmp_to_key
+from functools import cmp_to_key
 from threading import Thread
 
 import psutil
@@ -570,15 +570,13 @@ class ExecResult:
                 self.check_stat_zero(s, key)
         # calculate the timeline that did happen
 
-        seen_tl = sorted(ref_tl, key=lambda ts: s[ts])
-        # is 'cmp_to_key' posing problems on win CI?
-        # def cmp_ts(t1, t2):
-        #    n = s[t1] - s[t2]
-        #    if not n:  # same timestamp, order to expected occurrence
-        #        return ref_tl.index(t1) - ref_tl.index(t2)
-        #    return n
-        #
-        # seen_tl = sorted(ref_tl, key=cmp_to_key(cmp_ts))
+        def cmp_ts(t1, t2):
+            n = s[t1] - s[t2]
+            if not n:  # same timestamp, order to expected occurrence
+                return ref_tl.index(t1) - ref_tl.index(t2)
+            return n
+
+        seen_tl = sorted(ref_tl, key=cmp_to_key(cmp_ts))
         assert seen_tl == ref_tl, f'timeline {idx}: {[f"{ts}: {s[ts]}" for ts in seen_tl]}\n{self.dump_logs()}'
         for key in somewhere_keys:
             self.check_stat_positive(s, idx, key)
