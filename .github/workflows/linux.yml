@@ -245,12 +245,19 @@ jobs:
               --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
 
           - name: 'scan-build cmake'
-            install_packages: clang-tools clang libssh2-1-dev libkrb5-dev
-            install_steps: skipall
+            install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
+            install_steps: skipall mbedtls rustls wolfssl-opensslextra
+            install_steps_brew: gsasl
             CC: clang
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
-            generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/runner/mbedtls/lib -Wl,-rpath,/home/runner/rustls/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
+            PKG_CONFIG_PATH: /home/runner/wolfssl-opensslextra/lib/pkgconfig:/home/runner/mbedtls/lib/pkgconfig:/home/runner/rustls/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
+              -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
+              -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+              -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
 
           - name: 'scan-build'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
