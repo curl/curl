@@ -82,7 +82,7 @@ static bool cr_data_pending(struct Curl_cfilter *cf,
   (void)data;
   DEBUGASSERT(ctx && ctx->backend);
   backend = (struct rustls_ssl_backend_data *)ctx->backend;
-  return (bool)backend->data_in_pending;
+  return backend->data_in_pending;
 }
 
 struct io_ctx {
