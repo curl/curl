@@ -118,25 +118,17 @@ jobs:
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
             tflags: '--min=830 1 to 950'
-            generate: >-
-              -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
-              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
-              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
-              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
-              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
-              -DCURL_USE_GSSAPI=ON
+            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
+            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls gss valgrind 2'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
             tflags: '--min=800 951 to 9999'
-            generate: >-
-              -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
-              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
-              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
-              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
-              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
-              -DCURL_USE_GSSAPI=ON
+            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
+            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
@@ -277,8 +269,8 @@ jobs:
             install_steps: skipall mbedtls rustls wolfssl-opensslextra
             install_steps_brew: gsasl
             make-custom-target: tidy
-            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
+            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
             configure: >-
               --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
               --with-librtmp --with-libssh2 --with-libidn2
