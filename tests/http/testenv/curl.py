@@ -29,6 +29,7 @@ import logging
 import os
 import sys
 import time
+from functools import cmp_to_key
 from threading import Thread
 
 import psutil
@@ -525,12 +526,12 @@ class ExecResult:
         }
         # stat keys where we expect a positive value
         ref_tl = []
-        somewhere_keys = []
+        # time_queue has it's own start timestamp. Other timers start *after*
+        # queueing is done. queue duration might therefore be anywhere.
+        somewhere_keys = ['time_queue']
         exact_match = True
-        # redirects mess up the queue time, only count without
-        if s['time_redirect'] == 0:
-            ref_tl += ['time_queue']
-        else:
+        # redirects mess up the times, some are accumulative
+        if s['time_redirect']:
             exact_match = False
         # connect events?
         if url.startswith('ftp'):
@@ -549,7 +550,7 @@ class ExecResult:
             ref_tl += dl_tl
             # the first byte of the response may arrive before we
             # track the other times when the client is slow (CI).
-            somewhere_keys = ['time_starttransfer']
+            somewhere_keys.extend(['time_starttransfer'])
         elif s['size_upload'] > 0 and s['size_download'] == 0:
             # this is an upload
             ul_tl = ['time_pretransfer', 'time_posttransfer']
@@ -567,9 +568,16 @@ class ExecResult:
             # assert all events not in reference timeline are 0
             for key in [key for key in all_keys if key not in ref_tl and key not in somewhere_keys]:
                 self.check_stat_zero(s, key)
+
         # calculate the timeline that did happen
-        seen_tl = sorted(ref_tl, key=lambda ts: s[ts])
-        assert seen_tl == ref_tl, f'{[f"{ts}: {s[ts]}" for ts in seen_tl]}'
+        def cmp_ts(t1, t2):
+            n = s[t1] - s[t2]
+            if not n:  # same timestamp, order to expected occurrence
+                return ref_tl.index(t1) - ref_tl.index(t2)
+            return n
+
+        seen_tl = sorted(ref_tl, key=cmp_to_key(cmp_ts))
+        assert seen_tl == ref_tl, f'timeline {idx}: {[f"{ts}: {s[ts]}" for ts in seen_tl]}\n{self.dump_logs()}'
         for key in somewhere_keys:
             self.check_stat_positive(s, idx, key)
             assert s[key] <= s['time_total']
