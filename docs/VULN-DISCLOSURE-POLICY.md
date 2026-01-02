@@ -357,13 +357,17 @@ options/protocols.
 ## CRLF in data
 
 curl makes barely any claims of *cleaning* input or rejecting invalid data. A
-user that uses a curl feature can send in *creative* sequences that if they
-include carriage-return (CR) or line-feed (LF).
+user that uses a curl feature can send in *creative* sequences that include
+carriage-return (CR) or line-feed (LF).
 
 Therefore, we reject the idea of *CRLF injection* as a security problem. It is
 a *feature* that users can send create byte sequences. If users do not want to
 send such octets, they are in control and should avoid sending such bytes to
 curl.
+
+For example, a user might pass in a username that looks like
+`Mr[CR][LF]Smith`. It may cause some minor havoc in the protocol handling,
+depending on what protocol that is used.
 
 # curl major incident response
 
