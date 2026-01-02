@@ -133,7 +133,7 @@ jobs:
   freebsd:
     name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     strategy:
       matrix:
         include:
@@ -242,7 +242,7 @@ jobs:
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 25
+    timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
