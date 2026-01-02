@@ -4,7 +4,7 @@ curl and libcurl 8.18.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3565
+ Contributors:                 3569
 
 This release includes the following changes:
 
@@ -18,6 +18,7 @@ This release includes the following bugfixes:
 
  o _PROGRESS.md: add the E unit, mention kibibyte [24]
  o alt-svc: more flexibility on same destination [298]
+ o altsvc: accept ma/persist per alternative entry [287]
  o altsvc: make it one malloc instead of three per entry [266]
  o AmigaOS: increase minimum stack size for tool_main [137]
  o apple sectrust: fix ancient evaluation [327]
@@ -31,6 +32,7 @@ This release includes the following bugfixes:
  o autotools: drop autoconf <2.59 compatibility code (zz60-xc-ovr) [70]
  o autotools: fix LargeFile feature display on Windows (after prev patch) [276]
  o autotools: tidy-up `if` expressions [275]
+ o badwords: add fist -> first, fix fallouts [388]
  o badwords: catch and fix threading-related words [320]
  o badwords: fix issues found in scripts and other files [142]
  o badwords: fix issues found in tests [156]
@@ -58,6 +60,7 @@ This release includes the following bugfixes:
  o cmake: replace deprecated `OPENSSL_FOUND` with `OpenSSL_FOUND` [310]
  o cmake: replace deprecated `PERL_FOUND` with `Perl_FOUND` [312]
  o cmake: save and restore `CMAKE_MODULE_PATH` in `curl-config.cmake` [222]
+ o cmake: set found status to OFF when not found (for compression deps) [359]
  o code: minor indent fixes before closing braces [107]
  o CODE_STYLE.md: sync banned function list with checksrc.pl [243]
  o compressed.md: might generate a huge amount of bytes [227]
@@ -111,6 +114,7 @@ This release includes the following bugfixes:
  o curlx: use curl alloc in `curlx_win32_stat()` (Windows) [360]
  o curlx: use curlx allocators in non-memdebug builds (Windows) [155]
  o DEPRECATE: add CMake <3.18 deprecation for April 2026 [291]
+ o digest: fix OWS and escaped quote handling [391]
  o digest_sspi: fix a memory leak on error path [149]
  o digest_sspi: properly free sspi identity [12]
  o DISTROS.md: add OpenBSD [126]
@@ -158,6 +162,7 @@ This release includes the following bugfixes:
  o h2/h3: handle methods with spaces [146]
  o headers: add length argument to Curl_headers_push() [309]
  o hostcheck: fail wildcard match if host starts with a dot [235]
+ o hostip.h: drop redundant `setjmp.h` include [380]
  o hostip: don't store negative lookup on OOM [61]
  o hostip: make more functions return CURLcode [202]
  o hostip: only store negative response for CURLE_COULDNT_RESOLVE_HOST [183]
@@ -178,6 +183,7 @@ This release includes the following bugfixes:
  o idn: use curlx allocators on Windows [165]
  o imap: check buffer length before accessing it [308]
  o imap: make sure Curl_pgrsSetDownloadSize() does not overflow [200]
+ o inet_ntop: avoid the strlen() [371]
  o INSTALL-CMAKE.md: document static option defaults more [37]
  o krb5: fix detecting channel binding feature [187]
  o krb5_sspi: unify a part of error handling [80]
@@ -188,6 +194,7 @@ This release includes the following bugfixes:
  o lib/sendf.h: forward declare two structs [221]
  o lib: cleanup for some typos about spaces and code style [3]
  o lib: create unitprotos.h in the builddir, not srcdir [322]
+ o lib: drop unused or duplicate `curlx/timeval.h` includes [384]
  o lib: drop unused protocol headers [270]
  o lib: eliminate size_t casts [112]
  o lib: error for OOM when extracting URL query [127]
@@ -225,6 +232,7 @@ This release includes the following bugfixes:
  o mk-ca-bundle.pl: default to SHA256 fingerprints with `-t` option [73]
  o mk-ca-bundle.pl: use `open()` with argument list to replace backticks [71]
  o mqtt: reject overly big messages [39]
+ o mqtt: return error when a too large packet is decoded [366]
  o multi: make max_total_* members size_t [158]
  o multi: remove MSTATE_TUNNELING [297]
  o multi: simplify admin handle processing [189]
@@ -238,21 +246,27 @@ This release includes the following bugfixes:
  o openssl: exit properly on OOM when getting certchain [133]
  o openssl: fix a potential memory leak of bio_out [150]
  o openssl: fix a potential memory leak of params.cert [151]
+ o openssl: fix building against no-dsa openssl [386]
+ o openssl: fix building against no-ocsp openssl with Apple SecTrust [385]
  o openssl: no verify failf message unless strict [166]
  o openssl: release ssl_session if sess_reuse_cb fails [43]
  o openssl: remove code handling default version [28]
  o openssl: simplify `HAVE_KEYLOG_CALLBACK` guard [212]
+ o openssl: stop checking for `OPENSSL_NO_SHA*` macros [382]
+ o openssl: stop checking for `OPENSSL_NO_TLSEXT` macro [383]
  o openssl: toggling CURLSSLOPT_NO_PARTIALCHAIN makes a different CA cache [313]
  o OS400/ccsidcurl: fix curl_easy_setopt_ccsid for non-converted blobs [94]
  o OS400/makefile.sh: fix shellcheck warning SC2038 [86]
  o os400sys: replace `strcpy()` with `memcpy()` [273]
  o osslq: code readability [5]
+ o progress: make it one column narrower [352]
  o progress: show fewer digits [78]
  o projects/README.md: Markdown fixes [148]
  o pytest fixes and improvements [159]
  o pytest: add tests using sshd [303]
  o pytest: disable two H3 earlydata tests for all platforms (was: macOS) [116]
  o pytest: do not ignore server issues [329]
+ o pytest: enable OCSP test 17_08 for LibreSSL [364]
  o pytest: fix and improve reliability [251]
  o pytest: improve stragglers [252]
  o pytest: quiche flakiness [280]
@@ -288,8 +302,10 @@ This release includes the following bugfixes:
  o smb: fix a size check to be overflow safe [161]
  o socketpair: drop redundant `_WIN32` branch and include [367]
  o socks_sspi: use free() not FreeContextBuffer() [93]
+ o source: misc typos [372]
  o speedcheck: do not trigger low speed cancel on transfers with CURL_READFUNC_PAUSE [113]
  o speedlimit: also reset on send unpausing [197]
+ o src: drop redundant definition of `BIT()` [357]
  o src: fix formatting nits [246]
  o ssh: tracing and better pollset handling [230]
  o sspi: fix memory leaks on error paths in `Curl_create_sspi_identity()` [237]
@@ -318,6 +334,7 @@ This release includes the following bugfixes:
  o tests: add `%AMP` macro, use it in two tests [245]
  o tests: add a standard log line for alloc failures [319]
  o tests: allow 2500-2503 to use ~2MB malloc [31]
+ o tests: drop redundant parenthesis from two macro expressions [376]
  o tests: fix formatting nits [225]
  o tests: rename CURLMcode variables to mresult
  o tftp: release filename if conn_get_remote_addr fails [42]
@@ -332,6 +349,8 @@ This release includes the following bugfixes:
  o tool_cfgable: free ssl-sessions at exit [123]
  o tool_doswin: clear pointer when thread takes ownership [198]
  o tool_doswin: increase allowable length of path sanitizer [289]
+ o tool_getparam: simplify the --rate parser [373]
+ o tool_getparam: use memdup0() instead of malloc + copy [390]
  o tool_getparam: verify that a file exists for some options [134]
  o tool_help: add checks to avoid unsigned wrap around [14]
  o tool_ipfs: check return codes better [20]
@@ -343,6 +362,8 @@ This release includes the following bugfixes:
  o tool_operate: return error for OOM in append2query [217]
  o tool_operate: use curlx_str_number instead of atoi [68]
  o tool_paramhlp: refuse --proto remove all protocols [10]
+ o tool_paramhlp: remove a malloc+free from proto2num() [378]
+ o tool_paramhlp: simplify number parsing [375]
  o tool_urlglob: acknowledge OOM in peek_ipv6 [175]
  o tool_urlglob: clean up used memory on errors better [44]
  o tool_urlglob: constify an argument [361]
@@ -361,9 +382,11 @@ This release includes the following bugfixes:
  o vquic: do_sendmsg full init [171]
  o vquic: ignore 0-length UDP packets [336]
  o vquic: initialize new callback in nghttp3 1.14.0+ [317]
+ o vtls: drop unused `use_alpn` from `ssl_connect_data` struct [355]
  o vtls: fix CURLOPT_CAPATH use [51]
  o vtls: handle possible malicious certs_num from peer [53]
  o vtls: pinned key check [98]
+ o VULN-DISCLOSURE-POLICY.md: CRLF in data [349]
  o wcurl: import v2025.11.09 [29]
  o windows: assume `USE_WIN32_LARGE_FILES` [292]
  o windows: fix `CreateFile()` calls to support long filenames [356]
@@ -375,6 +398,7 @@ This release includes the following bugfixes:
  o wolfssl: fix possible assert with `!HAVE_NO_EX` wolfSSL builds [261]
  o wolfssl: proof use of wolfSSL_i2d_SSL_SESSION [314]
  o wolfssl: simplify wssl_send_earlydata [111]
+ o ws: replace a cast by matching the format string [358]
  o x509asn1: drop unused `hostcheck.h`, `vtls_int.h` includes [340]
 
 This release includes the following known bugs:
@@ -403,16 +427,17 @@ advice from friends like these:
   Daniel Santos, Daniel Stenberg, Denis Goleshchikhin, Deniz Parlak,
   dependabot[bot], Fabian Keil, Fd929c2CE5fA on github, ffath-vo on github,
   Fizn-Ahmd on github, Gabriel Marin, Georg Schulz-Allgaier, Gisle Vanem,
-  Greg Hudson, Harry Sintonen, Huseyin Tintas, Jeff King, Jiyong Yang,
-  John Haugabook, Juliusz Sosinowicz, Kai Pastor, koujaz on github,
-  Leonardo Taccari, letshack9707 on hackerone, Marc Aldorasi, Marcel Raad,
-  Mathesh V, Max Faxälv, nait-furry, ncaklovic on github, Nick Korepanov,
-  Omdahake on github, Patrick Monnerat, pelioro on hackerone, Ray Satiro,
-  renovate[bot], Robert W. Van Kirk, Samuel Henrique, Sergey Katsubo,
-  st751228051 on github, Stanislav Fort, Stefan Eissing, Sunny, Theo Buehler,
-  Thomas Klausner, Viktor Szakats, Wesley Moore, Wyatt O'Day, Xiaoke Wang,
-  Yedaya Katsman, Yuhao Jiang, yushicheng7788 on github
-  (64 contributors)
+  Greg Hudson, Harry Sintonen, herdiyanitdev on hackerone, Hunt Darlener,
+  Huseyin Tintas, Jeff King, Jiyong Yang, John Haugabook, Joshua Vandaële,
+  Juliusz Sosinowicz, Kai Pastor, koujaz on github, Leonardo Taccari,
+  letshack9707 on hackerone, Marc Aldorasi, Marcel Raad, Mathesh V, Max Faxälv,
+  nait-furry, ncaklovic on github, Nick Korepanov, Omdahake on github,
+  Patrick Monnerat, pelioro on hackerone, Ray Satiro, renovate[bot],
+  Robert W. Van Kirk, Samuel Henrique, Sergey Katsubo, st751228051 on github,
+  Stanislav Fort, Stefan Eissing, Stuart Henderson, Sunny, Theo Buehler,
+  Thomas Klausner, trxvorr, Viktor Szakats, Wesley Moore, Wyatt O'Day,
+  Xiaoke Wang, Yedaya Katsman, Yuhao Jiang, yushicheng7788 on github
+  (69 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -702,6 +727,7 @@ References to bug reports and discussions on issues:
  [284] = https://curl.se/bug/?i=20086
  [285] = https://curl.se/bug/?i=19911
  [286] = https://curl.se/bug/?i=19900
+ [287] = https://curl.se/bug/?i=20160
  [288] = https://curl.se/bug/?i=19907
  [289] = https://curl.se/bug/?i=20044
  [290] = https://curl.se/bug/?i=20091
@@ -757,12 +783,35 @@ References to bug reports and discussions on issues:
  [341] = https://curl.se/bug/?i=20100
  [343] = https://curl.se/bug/?i=20099
  [345] = https://curl.se/bug/?i=20095
+ [349] = https://curl.se/bug/?i=20157
  [350] = https://curl.se/bug/?i=20052
  [351] = https://curl.se/bug/?i=19983
+ [352] = https://curl.se/bug/?i=20122
  [354] = https://curl.se/bug/?i=20042
+ [355] = https://curl.se/bug/?i=20154
  [356] = https://curl.se/bug/?i=19286
+ [357] = https://curl.se/bug/?i=20152
+ [358] = https://curl.se/bug/?i=20151
+ [359] = https://curl.se/bug/?i=20147
  [360] = https://curl.se/bug/?i=20043
  [361] = https://curl.se/bug/?i=20045
  [363] = https://curl.se/bug/?i=20038
+ [364] = https://curl.se/bug/?i=20149
  [365] = https://curl.se/bug/?i=20030
+ [366] = https://curl.se/bug/?i=20148
  [367] = https://curl.se/bug/?i=20032
+ [371] = https://curl.se/bug/?i=20139
+ [372] = https://curl.se/bug/?i=20138
+ [373] = https://curl.se/bug/?i=20119
+ [375] = https://curl.se/bug/?i=20134
+ [376] = https://curl.se/bug/?i=20136
+ [378] = https://curl.se/bug/?i=20120
+ [380] = https://curl.se/bug/?i=20132
+ [382] = https://curl.se/bug/?i=20130
+ [383] = https://curl.se/bug/?i=20129
+ [384] = https://curl.se/bug/?i=20126
+ [385] = https://curl.se/bug/?i=20128
+ [386] = https://curl.se/bug/?i=20127
+ [388] = https://curl.se/bug/?i=20066
+ [390] = https://curl.se/bug/?i=20118
+ [391] = https://curl.se/bug/?i=20102
