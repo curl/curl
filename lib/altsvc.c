@@ -554,8 +554,10 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                 persist = TRUE;
             }
             p = vp; /* point to the byte ending the value */
+            curlx_str_passblanks(&p);
             if(quoted && curlx_str_single(&p, '\"'))
               break;
+            curlx_str_passblanks(&p);
             if(curlx_str_single(&p, ';'))
               break;
           }
