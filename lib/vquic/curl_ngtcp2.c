@@ -91,9 +91,9 @@
  * have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES      2
 /* The max amount of un-acked upload data we keep around per stream */
-#define H3_STREAM_SEND_BUFER_MAX      (10 * 1024 * 1024)
+#define H3_STREAM_SEND_BUFFER_MAX      (10 * 1024 * 1024)
 #define H3_STREAM_SEND_CHUNKS \
-  (H3_STREAM_SEND_BUFER_MAX / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_SEND_BUFFER_MAX / H3_STREAM_CHUNK_SIZE)
 
 /*
  * Store ngtcp2 version info in this buffer.
