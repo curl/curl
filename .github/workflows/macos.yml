@@ -336,18 +336,18 @@ jobs:
             install: rustls-ffi
             generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
             tflags: '--min=1650'
-          - name: 'OpenSSL torture !FTP'
+          - name: 'OpenSSL torture 1'
             compiler: clang
             install: libnghttp3
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: '-t --shallow=25 !FTP --min=1450'
-          - name: 'OpenSSL torture FTP'
+            tflags: '-t --shallow=25 --min=920 1 to 950'
+          - name: 'OpenSSL torture 2'
             compiler: clang
             install: libnghttp3
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: '-t --shallow=20 FTP --min=260'
+            tflags: '-t --shallow=20 --min=910 951 to 9999'
         exclude:
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@18, build: { compiler: 'clang' } }
