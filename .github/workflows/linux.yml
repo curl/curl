@@ -81,9 +81,16 @@ jobs:
             install_steps: libressl pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
-          - name: 'libressl krb5 valgrind'
+          - name: 'libressl krb5 valgrind 1'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl
+            tflags: '1 to 950 --min=920'
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
+
+          - name: 'libressl krb5 valgrind 2'
+            install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
+            install_steps: libressl
+            tflags: '951 to 9999 --min=910'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
@@ -95,14 +102,34 @@ jobs:
             install_steps: wolfssl-all
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
-          - name: 'wolfssl-opensslextra valgrind'
+          - name: 'wolfssl-opensslextra valgrind 1'
             install_packages: valgrind
             install_steps: wolfssl-opensslextra
+            tflags: '1 to 950 --min=920'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
-          - name: 'mbedtls gss valgrind'
+          - name: 'wolfssl-opensslextra valgrind 2'
+            install_packages: valgrind
+            install_steps: wolfssl-opensslextra
+            tflags: '1 to 950 --min=920'
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+
+          - name: 'mbedtls gss valgrind 1'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
+            tflags: '1 to 950 --min=920'
+            generate: >-
+              -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
+              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
+              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
+              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
+              -DCURL_USE_GSSAPI=ON
+
+          - name: 'mbedtls gss valgrind 2'
+            install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
+            install_steps: mbedtls
+            tflags: '1 to 950 --min=920'
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
               -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
@@ -152,15 +179,15 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
-          - name: 'openssl libssh2 sync-resolver valgrind #1'
+          - name: 'openssl libssh2 sync-resolver valgrind 1'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
             tflags: '1 to 950 --min=920'
-
-          - name: 'openssl libssh2 sync-resolver valgrind #2'
-            install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
+
+          - name: 'openssl libssh2 sync-resolver valgrind 2'
+            install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             tflags: '951 to 9999 --min=910'
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
           - name: 'openssl'
             install_packages: libssh-dev
@@ -172,17 +199,17 @@ jobs:
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
             image: 'ubuntu-24.04-arm'
 
-          - name: 'openssl -O3 libssh valgrind #1'
+          - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
             tflags: '1 to 950 --min=920'
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
-          - name: 'openssl -O3 libssh valgrind #2'
+          - name: 'openssl -O3 libssh valgrind 2'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
             tflags: '951 to 9999 --min=910'
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
@@ -208,17 +235,17 @@ jobs:
               --without-libssh2 --without-libssh
               --disable-tftp --disable-ftp --disable-file --disable-smb
 
-          - name: 'openssl torture !FTP'
+          - name: 'openssl torture 1'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-            tflags: '-t --shallow=25 !FTP --min=1450'
+            tflags: '-t --shallow=25 1 to 950 --min=920'
             torture: true
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
-          - name: 'openssl torture FTP'
+          - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-            tflags: '-t --shallow=20 FTP --min=260'
+            tflags: '-t --shallow=20 951 to 9999 --min=910'
             torture: true
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
           - name: 'openssl i686'
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
@@ -332,9 +359,16 @@ jobs:
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'
 
-          - name: 'rustls valgrind'
+          - name: 'rustls valgrind 1'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
+            tflags: '1 to 950 --min=920'
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
+
+          - name: 'rustls valgrind 2'
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: rust rustls
+            tflags: '951 to 9999 --min=910'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
