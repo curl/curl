@@ -206,7 +206,7 @@ jobs:
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
             install_packages: libidn2-dev libkrb5-dev clang libssl-dev
-            configure: CC=clang --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
+            configure: CC=clang --enable-static --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
             install_packages: libssh2-1-dev libkrb5-dev clang
@@ -343,12 +343,12 @@ jobs:
 
           - name: 'event-based'
             install_packages: libssh-dev
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-event --min=1350'
 
           - name: 'duphandle'
             install_packages: libssh-dev
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'
 
           - name: 'rustls valgrind 1'
@@ -376,7 +376,7 @@ jobs:
           - name: 'Slackware !ssl gssapi gcc'
             # Flags used to build the curl Slackware package, except OpenSSL 1.1.0:
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
-            configure: --enable-debug --without-ssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
+            configure: --enable-debug --without-ssl --with-libssh2 --with-gssapi --enable-ares --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
@@ -737,7 +737,7 @@ jobs:
           else
             mkdir bld && cd bld && \
             ${MATRIX_CONFIGURE_PREFIX} \
-            ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror \
+            ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIGURE}
           fi
