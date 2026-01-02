@@ -132,8 +132,8 @@ static CURLcode test_unit1654(const char *arg)
   fail_if(res, "Curl_altsvc_parse(11) failed!");
 
   res = Curl_altsvc_parse(curl, asi,
-                          "h2=\"test2.se:443\"; ma=180, h2=\"test3.se:443\"; "
-                          "ma = 120;\r\n",
+                          "h2=\"test2.se:443\"; ma=\"180\"; unknown=2, "
+                          "h2=\"test3.se:443\"; ma = 120;\r\n",
                           ALPN_h2, "test.se", 443);
   fail_if(res, "Curl_altsvc_parse(12) failed!");
 
