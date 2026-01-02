@@ -553,6 +553,8 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
               else if(curlx_str_casecompare(&name, "persist") && (num == 1))
                 persist = TRUE;
             }
+            else
+              break;
             p = vp; /* point to the byte ending the value */
             curlx_str_passblanks(&p);
             if(quoted && curlx_str_single(&p, '\"'))
