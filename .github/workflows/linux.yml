@@ -244,6 +244,14 @@ jobs:
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
 
+          - name: 'scan-build cmake'
+            install_packages: clang-tools clang libssh2-1-dev libkrb5-dev
+            install_steps: skipall
+            CC: clang
+            configure-prefix: scan-build
+            make-prefix: scan-build --status-bugs
+            generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF
+
           - name: 'scan-build'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls rustls wolfssl-opensslextra
@@ -689,6 +697,7 @@ jobs:
           [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            ${MATRIX_CONFIGURE_PREFIX} \
             cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
