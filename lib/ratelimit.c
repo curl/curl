@@ -189,7 +189,7 @@ bool Curl_rlimit_active(struct Curl_rlimit *r)
 
 bool Curl_rlimit_is_blocked(struct Curl_rlimit *r)
 {
-  return r->blocked;
+  return (bool)r->blocked;
 }
 
 int64_t Curl_rlimit_avail(struct Curl_rlimit *r,

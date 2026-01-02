@@ -1521,7 +1521,7 @@ static CURLcode ftp_state_type(struct Curl_easy *data,
      information. Which in FTP cannot be much more than the file size and
      date. */
   if(data->req.no_body && ftpc->file &&
-     ftp_need_type(ftpc, data->state.prefer_ascii)) {
+     ftp_need_type(ftpc, (bool)data->state.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefore many servers
        may not support it! It is however the only way we have to get a file's
        size! */
@@ -1531,7 +1531,8 @@ static CURLcode ftp_state_type(struct Curl_easy *data,
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii, FTP_TYPE);
+    result = ftp_nb_type(data, ftpc, ftp, (bool)data->state.prefer_ascii,
+                         FTP_TYPE);
     if(result)
       return result;
   }
@@ -1572,7 +1573,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
                                    bool sizechecked)
 {
   CURLcode result = CURLE_OK;
-  bool append = data->set.remote_append;
+  bit append = data->set.remote_append;
 
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
@@ -2241,7 +2242,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       }
     }
     else if(data->state.upload) {
-      result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
+      result = ftp_nb_type(data, ftpc, ftp, (bool)data->state.prefer_ascii,
                            FTP_STOR_TYPE);
       if(result)
         return result;
@@ -2286,7 +2287,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
                                FTP_RETR_LIST_TYPE);
         }
         else {
-          result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
+          result = ftp_nb_type(data, ftpc, ftp, (bool)data->state.prefer_ascii,
                                FTP_RETR_TYPE);
         }
         if(result)
@@ -2419,7 +2420,7 @@ static CURLcode client_write_header(struct Curl_easy *data,
    * headers from CONNECT should not automatically be part of the
    * output. */
   CURLcode result;
-  bool save = data->set.include_header;
+  bit save = data->set.include_header;
   data->set.include_header = TRUE;
   result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, blen);
   data->set.include_header = save;

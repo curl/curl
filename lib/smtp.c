@@ -431,7 +431,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
     CURL_TRC_SMTP(data, "mail body complete, returning EOS");
     ctx->eos = TRUE;
   }
-  *peos = ctx->eos;
+  *peos = (bool)ctx->eos;
   DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
          blen, result, *pnread, *peos));
   return result;

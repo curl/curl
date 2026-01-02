@@ -836,7 +836,8 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
     return CURLE_SEND_ERROR;
   }
 
-  result = ws_frame_flags2firstbyte(data, flags, enc->contfragment, &firstb);
+  result = ws_frame_flags2firstbyte(data, flags, (bool)enc->contfragment,
+                                    &firstb);
   if(result)
     return result;
 
@@ -1177,7 +1178,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
       if(ctx->read_eos)
         ctx->eos = TRUE;
       *pnread = nread;
-      *peos = ctx->eos;
+      *peos = (bool)ctx->eos;
       goto out;
     }
 

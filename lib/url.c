@@ -1308,8 +1308,8 @@ static bool ConnectionExists(struct Curl_easy *data,
   /* wait_pipe is TRUE if we encounter a bundle that is undecided. There
    * is no matching connection then, yet. */
   *usethis = match.found;
-  *force_reuse = match.force_reuse;
-  *waitpipe = match.wait_pipe;
+  *force_reuse = (bool)match.force_reuse;
+  *waitpipe = (bool)match.wait_pipe;
   return result;
 }
 
@@ -3165,7 +3165,7 @@ static CURLcode resolve_unix(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   hostaddr->addr = Curl_unix2addr(unix_path, &longpath,
-                                  conn->bits.abstract_unix_socket);
+                                  (bool)conn->bits.abstract_unix_socket);
   if(!hostaddr->addr) {
     if(longpath)
       /* Long paths are not supported for now */

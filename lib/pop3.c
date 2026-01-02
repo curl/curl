@@ -271,9 +271,9 @@ static bool pop3_is_multiline(const char *cmdline)
   for(i = 0; i < CURL_ARRAYSIZE(pop3cmds); ++i) {
     if(curl_strnequal(pop3cmds[i].name, cmdline, pop3cmds[i].nlen)) {
       if(!cmdline[pop3cmds[i].nlen])
-        return pop3cmds[i].multiline;
+        return (bool)pop3cmds[i].multiline;
       else if(cmdline[pop3cmds[i].nlen] == ' ')
-        return pop3cmds[i].multiline_with_args;
+        return (bool)pop3cmds[i].multiline_with_args;
     }
   }
   /* Unknown command, assume multi-line for backward compatibility with

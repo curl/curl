@@ -710,7 +710,8 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
   }
 
   /* Calculate the SASL login details */
-  result = Curl_sasl_start(&imapc->sasl, data, imapc->ir_supported, &progress);
+  result = Curl_sasl_start(&imapc->sasl, data, (bool)imapc->ir_supported,
+                           &progress);
 
   if(!result) {
     if(progress == SASL_INPROGRESS)
