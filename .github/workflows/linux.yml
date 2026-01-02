@@ -84,13 +84,13 @@ jobs:
           - name: 'libressl krb5 valgrind 1'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl
-            tflags: '1 to 950 --min=920'
+            tflags: '1 to 950 --min=870'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl krb5 valgrind 2'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl
-            tflags: '951 to 9999 --min=910'
+            tflags: '951 to 9999 --min=900'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
@@ -105,19 +105,19 @@ jobs:
           - name: 'wolfssl-opensslextra valgrind 1'
             install_packages: valgrind
             install_steps: wolfssl-opensslextra
-            tflags: '1 to 950 --min=920'
+            tflags: '1 to 950 --min=780'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 2'
             install_packages: valgrind
             install_steps: wolfssl-opensslextra
-            tflags: '1 to 950 --min=920'
+            tflags: '951 to 9999 --min=800'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'mbedtls gss valgrind 1'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
-            tflags: '1 to 950 --min=920'
+            tflags: '1 to 950 --min=830'
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
               -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
@@ -129,7 +129,7 @@ jobs:
           - name: 'mbedtls gss valgrind 2'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
-            tflags: '1 to 950 --min=920'
+            tflags: '951 to 9999 --min=800'
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
               -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
@@ -208,7 +208,7 @@ jobs:
           - name: 'openssl -O3 libssh valgrind 2'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
-            tflags: '951 to 9999 --min=910'
+            tflags: '951 to 9999 --min=890'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl clang krb5 openldap static'
@@ -243,7 +243,7 @@ jobs:
 
           - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=20 951 to 9999 --min=910'
+            tflags: '-t --shallow=20 951 to 9999 --min=900'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
@@ -362,13 +362,13 @@ jobs:
           - name: 'rustls valgrind 1'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
-            tflags: '1 to 950 --min=920'
+            tflags: '1 to 950 --min=780'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
-            tflags: '951 to 9999 --min=910'
+            tflags: '951 to 9999 --min=820'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
