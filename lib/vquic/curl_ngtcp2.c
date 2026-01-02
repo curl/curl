@@ -2694,7 +2694,8 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
 out:
-  if(result == CURLE_RECV_ERROR && ctx->qconn &&
+  if(ctx->qconn &&
+     ((result == CURLE_RECV_ERROR) || (result == CURLE_SEND_ERROR)) &&
      ngtcp2_conn_in_draining_period(ctx->qconn)) {
     const ngtcp2_ccerr *cerr = ngtcp2_conn_get_ccerr(ctx->qconn);
 
