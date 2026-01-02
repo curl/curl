@@ -225,7 +225,7 @@ class TestUpload:
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}'\
-            f'/curltest/tweak?status=400&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
+            f'/curltest/tweak?status=200&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
         # depending on timing and protocol, we might get CURLE_PARTIAL_FILE or
