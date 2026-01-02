@@ -986,7 +986,8 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     else
       stream->status_code = -1;
 
-    h2_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"), stream->closed);
+    h2_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"),
+                          (bool)stream->closed);
 
     if(stream->status_code / 100 != 1) {
       stream->resp_hds_complete = TRUE;
