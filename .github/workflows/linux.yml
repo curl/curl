@@ -259,6 +259,21 @@ jobs:
               -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
               -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
 
+          - name: 'scan-build cmake H3 c-ares'
+            install_packages: clang-tools clang libidn2-dev libssh-dev libnghttp2-dev
+            install_steps: skipall
+            install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
+            CC: clang
+            configure-prefix: scan-build
+            make-prefix: scan-build --status-bugs
+            LDFLAGS: -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
+            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON
+              -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
+              -DCURL_DISABLE_VERBOSE_STRINGS=ON
+
           - name: 'scan-build'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls rustls wolfssl-opensslextra
