@@ -316,7 +316,8 @@ int curlx_win32_open(const char *filename, int oflag, ...)
       target = fixed;
     else
       target = filename_w;
-    errno = _wsopen_s(&result, target, oflag, _SH_DENYNO, pmode);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    result = _wopen(target, oflag, pmode);
     CURLX_FREE(filename_w);
   }
   else
@@ -327,7 +328,8 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  result = _open(target, oflag, pmode);
 #endif
 
   CURLX_FREE(fixed);
@@ -348,7 +350,8 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
       target = fixed;
     else
       target = filename_w;
-    errno = _wfopen_s(&result, target, mode_w);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    result = _wfopen(target, mode_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -360,7 +363,8 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     target = fixed;
   else
     target = filename;
-  errno = fopen_s(&result, target, mode);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  result = fopen(target, mode);
 #endif
 
   CURLX_FREE(fixed);
@@ -386,7 +390,8 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
       target = fixed;
     else
       target = filename_w;
-    errno = _wfreopen_s(&result, target, mode_w, fp);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    result = _wfreopen(target, mode_w, fp);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -398,7 +403,8 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
     target = fixed;
   else
     target = filename;
-  errno = freopen_s(&result, target, mode, fp);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  result = freopen(target, mode, fp);
 #endif
 
   CURLX_FREE(fixed);
