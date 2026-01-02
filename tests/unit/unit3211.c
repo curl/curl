@@ -63,8 +63,7 @@ static void check_set(const char *name, uint32_t capacity,
   for(i = 1; i < slen; ++i) {
     fail_unless(Curl_uint32_bset_next(&bset, n, &n), "next failed");
     if(n != s[i]) {
-      curl_mfprintf(stderr, "expected next to be %u"
-                    ", not %u\n", s[i], n);
+      curl_mfprintf(stderr, "expected next to be %u, not %u\n", s[i], n);
       fail_unless(n == s[i], "next not correct number");
     }
   }

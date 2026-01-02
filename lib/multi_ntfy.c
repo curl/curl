@@ -110,8 +110,7 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
       /* only when notification has not been disabled in the meantime */
       if(data && Curl_uint32_bset_contains(&multi->ntfy.enabled, e->type)) {
         /* this may cause new notifications to be added! */
-        CURL_TRC_M(multi->admin,
-                   "[NTFY] dispatch %u to xfer %u",
+        CURL_TRC_M(multi->admin, "[NTFY] dispatch %u to xfer %u",
                    e->type, e->mid);
         multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
       }

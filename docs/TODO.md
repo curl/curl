@@ -427,7 +427,7 @@ context information ourselves.
 `CURLOPT_SSL_CTX_FUNCTION` works perfectly for HTTPS and email protocols, but
 it has no effect for LDAPS connections.
 
- [curl issue 4108](https://github.com/curl/curl/issues/4108)
+[curl issue 4108](https://github.com/curl/curl/issues/4108)
 
 ## Paged searches on LDAP server
 

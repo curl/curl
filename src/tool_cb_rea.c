@@ -130,7 +130,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
   else
-#endif
+#endif /* _WIN32 */
   {
     rc = read(per->infd, buffer, sz * nmemb);
     if(rc < 0) {

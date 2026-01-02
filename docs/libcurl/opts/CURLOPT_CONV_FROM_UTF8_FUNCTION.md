@@ -53,7 +53,7 @@ CURLE_CONV_REQD error code.
 If HAVE_ICONV is defined, CURL_ICONV_CODESET_OF_HOST must also be defined.
 For example:
 ~~~c
- #define CURL_ICONV_CODESET_OF_HOST "IBM-1047"
+#define CURL_ICONV_CODESET_OF_HOST "IBM-1047"
 ~~~
 
 The iconv code in libcurl defaults the network and UTF8 codeset names as

@@ -11,9 +11,9 @@ SPDX-License-Identifier: curl
 The official "URL syntax" is primarily defined in these two different
 specifications:
 
- - [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) (although URL is called
-   "URI" in there)
- - [The WHATWG URL Specification](https://url.spec.whatwg.org/)
+- [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) (although URL is called
+  "URI" in there)
+- [The WHATWG URL Specification](https://url.spec.whatwg.org/)
 
 RFC 3986 is the earlier one, and curl has always tried to adhere to that one
 (since it shipped in January 2005).
@@ -100,13 +100,13 @@ supported by browsers early on and has been mimicked by curl.
 
 Based on what the hostname starts with, curl "guesses" what protocol to use:
 
- - `ftp.` means FTP
- - `dict.` means DICT
- - `ldap.` means LDAP
- - `imap.` means IMAP
- - `smtp.` means SMTP
- - `pop3.` means POP3
- - all other means HTTP
+- `ftp.` means FTP
+- `dict.` means DICT
+- `ldap.` means LDAP
+- `imap.` means IMAP
+- `smtp.` means SMTP
+- `pop3.` means POP3
+- all other means HTTP
 
 ### Globbing letters
 

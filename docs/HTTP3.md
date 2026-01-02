@@ -33,8 +33,8 @@ master branch using pull-requests, just like ordinary changes.
 
 To fix before we remove the experimental label:
 
- - the used QUIC library needs to consider itself non-beta
- - it is fine to "leave" individual backends as experimental if necessary
+- the used QUIC library needs to consider itself non-beta
+- it is fine to "leave" individual backends as experimental if necessary
 
 # ngtcp2 version
 

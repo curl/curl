@@ -28,7 +28,6 @@
 /*
 ** callback for CURLOPT_SEEKFUNCTION
 */
-
 int tool_seek_cb(void *userdata, curl_off_t offset, int whence);
 
 #endif /* HEADER_CURL_TOOL_CB_SEE_H */

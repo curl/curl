@@ -31,7 +31,6 @@
 #include "../curl_hmac.h"
 #include "../curl_md5.h"
 
-
 /*
  * Curl_auth_create_cram_md5_message()
  *

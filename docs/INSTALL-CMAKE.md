@@ -30,15 +30,15 @@ from the `projects/Windows` Visual Studio solution files, see
 You can configure for in source tree builds or for a build tree
 that is apart from the source tree.
 
- - Build in the source tree.
+- Build in the source tree.
 
-       $ cmake -B .
+      $ cmake -B .
 
- - Build in a separate directory (parallel to the curl source tree in this
-   example). The build directory is created for you. This is recommended over
-   building in the source tree to separate source and build artifacts.
+- Build in a separate directory (parallel to the curl source tree in this
+  example). The build directory is created for you. This is recommended over
+  building in the source tree to separate source and build artifacts.
 
-       $ cmake -B ../curl-build
+      $ cmake -B ../curl-build
 
 For the full list of CMake build configuration variables see
 [the corresponding section](#cmake-build-options).

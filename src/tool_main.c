@@ -207,4 +207,4 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-#endif /* ndef UNITTESTS */
+#endif /* !UNITTESTS */

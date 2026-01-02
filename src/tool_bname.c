@@ -23,9 +23,9 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "tool_bname.h"
-
 #ifndef HAVE_BASENAME
+
+#include "tool_bname.h"
 
 char *tool_basename(char *path)
 {

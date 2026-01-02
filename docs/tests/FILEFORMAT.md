@@ -302,14 +302,14 @@ test file to load the list content.
 
 Send back this contents instead of the `<data>` one. The `NUM` is set by:
 
- - The test number in the request line is >10000 and this is the remainder
-   of [test case number]%10000.
- - The request was HTTP and included digest details, which adds 1000 to `NUM`
- - If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
- - If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
- - If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
- - If an HTTP request is Negotiate, `NUM` gets incremented by one for each
-   request with Negotiate authorization header on the same test case.
+- The test number in the request line is >10000 and this is the remainder of
+  [test case number]%10000.
+- The request was HTTP and included digest details, which adds 1000 to `NUM`
+- If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
+- If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
+- If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
+- If an HTTP request is Negotiate, `NUM` gets incremented by one for each
+  request with Negotiate authorization header on the same test case.
 
 Dynamically changing `NUM` in this way allows the test harness to be used to
 test authentication negotiation where several different requests must be sent

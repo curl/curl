@@ -34,8 +34,8 @@ accepts a void pointer as second argument named *userp* which is passed as the
 first argument to the curl_formget_callback function.
 
 ~~~c
- typedef size_t (*curl_formget_callback)(void *userp, const char *buf,
-                                         size_t len);"
+typedef size_t (*curl_formget_callback)(void *userp, const char *buf,
+                                        size_t len);
 ~~~
 
 The *curl_formget_callback* is invoked for each part of the HTTP POST chain.

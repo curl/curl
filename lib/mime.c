@@ -35,10 +35,9 @@ struct Curl_easy;
 #include "curlx/fopen.h"
 #include "curlx/base64.h"
 
-#if !defined(CURL_DISABLE_MIME) && \
-  (!defined(CURL_DISABLE_HTTP) || \
-   !defined(CURL_DISABLE_SMTP) || \
-   !defined(CURL_DISABLE_IMAP))
+#if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
+                                    !defined(CURL_DISABLE_SMTP) ||      \
+                                    !defined(CURL_DISABLE_IMAP))
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
@@ -95,7 +94,7 @@ static const char aschex[] =
   "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x41\x42\x43\x44\x45\x46";
 
 #ifndef __VMS
-#define filesize(name, stat_data) (stat_data.st_size)
+#define filesize(name, stat_data) stat_data.st_size
 #define fopen_read                curlx_fopen
 
 #else
@@ -181,7 +180,7 @@ static FILE *vmsfopenread(const char *file, const char *mode)
 }
 
 #define fopen_read vmsfopenread
-#endif
+#endif /* !__VMS */
 
 #ifndef HAVE_BASENAME
 /*
@@ -230,7 +229,7 @@ static char *Curl_basename(char *path)
 }
 
 #define basename(x)  Curl_basename(x)
-#endif
+#endif /* !HAVE_BASENAME */
 
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
@@ -2175,7 +2174,8 @@ CURLcode Curl_creader_set_mime(struct Curl_easy *data, curl_mimepart *part)
 }
 
 #else /* !CURL_DISABLE_MIME && (!CURL_DISABLE_HTTP ||
-                                !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP) */
+                                !CURL_DISABLE_SMTP ||
+                                !CURL_DISABLE_IMAP) */
 
 /* Mime not compiled in: define stubs for externally-referenced functions. */
 curl_mime *curl_mime_init(CURL *easy)

@@ -25,12 +25,12 @@
  * Get a webpage, extract the title with libxml.
  * </DESC>
 
- Written by Lars Nilsson
+  Written by Lars Nilsson
 
- GNU C++ compile command line suggestion (edit paths accordingly):
+  GNU C++ compile command line suggestion (edit paths accordingly):
 
- g++ -Wall -I/opt/curl/include -I/opt/libxml/include/libxml2 htmltitle.cpp \
- -o htmltitle -L/opt/curl/lib -L/opt/libxml/lib -lcurl -lxml2
+  g++ -Wall -I/opt/curl/include -I/opt/libxml/include/libxml2 htmltitle.cpp \
+    -o htmltitle -L/opt/curl/lib -L/opt/libxml/lib -lcurl -lxml2
 */
 #include <stdio.h>
 #include <string.h>
@@ -42,7 +42,7 @@
 #include <libxml/HTMLparser.h>
 
 //
-//  Case-insensitive string comparison
+// Case-insensitive string comparison
 //
 
 #ifdef _WIN32
@@ -52,7 +52,7 @@
 #endif
 
 //
-//  libxml callback context structure
+// libxml callback context structure
 //
 struct Context {
   Context() : addTitle(false) {}
@@ -62,13 +62,13 @@ struct Context {
 };
 
 //
-//  libcurl variables for error strings and returned data
+// libcurl variables for error strings and returned data
 
 static char errorBuffer[CURL_ERROR_SIZE];
 static std::string buffer;
 
 //
-//  libcurl write callback function
+// libcurl write callback function
 //
 static size_t writer(char *data, size_t size, size_t nmemb,
                      std::string *writerData)
@@ -82,7 +82,7 @@ static size_t writer(char *data, size_t size, size_t nmemb,
 }
 
 //
-//  libcurl connection initialization
+// libcurl connection initialization
 //
 static bool init(CURL *&curl, const char *url)
 {
@@ -129,7 +129,7 @@ static bool init(CURL *&curl, const char *url)
 }
 
 //
-//  libxml start element callback function
+// libxml start element callback function
 //
 static void StartElement(void *voidContext,
                          const xmlChar *name,
@@ -145,7 +145,7 @@ static void StartElement(void *voidContext,
 }
 
 //
-//  libxml end element callback function
+// libxml end element callback function
 //
 static void EndElement(void *voidContext,
                        const xmlChar *name)
@@ -157,7 +157,7 @@ static void EndElement(void *voidContext,
 }
 
 //
-//  Text handling helper function
+// Text handling helper function
 //
 static void handleCharacters(Context *context,
                              const xmlChar *chars,
@@ -169,7 +169,7 @@ static void handleCharacters(Context *context,
 }
 
 //
-//  libxml PCDATA callback function
+// libxml PCDATA callback function
 //
 static void Characters(void *voidContext,
                        const xmlChar *chars,
@@ -181,7 +181,7 @@ static void Characters(void *voidContext,
 }
 
 //
-//  libxml CDATA callback function
+// libxml CDATA callback function
 //
 static void cdata(void *voidContext,
                   const xmlChar *chars,
@@ -193,7 +193,7 @@ static void cdata(void *voidContext,
 }
 
 //
-//  libxml SAX callback structure
+// libxml SAX callback structure
 //
 static htmlSAXHandler saxHandler = {
   NULL,
@@ -231,7 +231,7 @@ static htmlSAXHandler saxHandler = {
 };
 
 //
-//  Parse given (assumed to be) HTML text and return the title
+// Parse given (assumed to be) HTML text and return the title
 //
 static void parseHtml(const std::string &html,
                       std::string &title)

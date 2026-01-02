@@ -72,7 +72,9 @@
 /*****************************************************************************
  *  This is a rewrite/clone of the arpa/tftp.h file for systems without it.  *
  *****************************************************************************/
+
 #define SEGSIZE 512 /* data segment size */
+#define PKTSIZE (SEGSIZE + 4)  /* SEGSIZE defined in arpa/tftp.h */
 
 #if defined(__GNUC__) && ((__GNUC__ >= 3) || \
   ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
@@ -107,8 +109,6 @@ struct tftphdr {
 /*****************************************************************************
  *                      STRUCT DECLARATIONS AND DEFINES                      *
  *****************************************************************************/
-
-#define PKTSIZE (SEGSIZE + 4)  /* SEGSIZE defined in arpa/tftp.h */
 
 struct testcase {
   char *buffer;   /* holds the file data to send to the client */

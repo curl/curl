@@ -61,7 +61,6 @@
  * 'utf8seq' member holds an incomplete UTF-8 sequence destined for the console
  * until it can be completed (1-4 bytes) + NUL.
  */
-
 struct OutStruct {
   char *filename;
   FILE *stream;
@@ -82,7 +81,6 @@ struct OutStruct {
  * as well as information relative to where URL contents should
  * be stored or which file should be uploaded.
  */
-
 struct getout {
   struct getout *next;      /* next one */
   char          *url;       /* the URL we deal with */
@@ -98,10 +96,10 @@ struct getout {
   BIT(noglob);    /* disable globbing for this URL */
   BIT(out_null);  /* discard output for this URL */
 };
+
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.
  */
-
 typedef enum {
   TRACE_NONE,  /* no trace/verbose output at all */
   TRACE_BIN,   /* tcpdump inspired look */
@@ -112,7 +110,6 @@ typedef enum {
 /*
  * 'HttpReq' enumeration represents HTTP request types.
  */
-
 typedef enum {
   TOOL_HTTPREQ_UNSPEC,  /* first in list */
   TOOL_HTTPREQ_GET,
@@ -134,7 +131,6 @@ typedef enum {
  * Complete struct declarations which have OperationConfig struct members,
  * just in case this header is directly included in some source file.
  */
-
 #include "tool_cfgable.h"
 
 #endif /* HEADER_CURL_TOOL_SDECLS_H */

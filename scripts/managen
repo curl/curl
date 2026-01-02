@@ -1338,7 +1338,8 @@ my $dir = ".";
 my $include = "../../include";
 my $cmd = shift @ARGV || '';
 
- check:
+check:
+
 if($cmd eq "-d") {
     # specifies source directory
     $dir = shift @ARGV;

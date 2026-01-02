@@ -46,7 +46,7 @@ const char *proto_tftp = NULL;
 #ifndef CURL_DISABLE_IPFS
 const char *proto_ipfs = "ipfs";
 const char *proto_ipns = "ipns";
-#endif /* !CURL_DISABLE_IPFS */
+#endif
 
 static struct proto_name_tokenp {
   const char   *proto_name;
