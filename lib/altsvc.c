@@ -525,8 +525,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         if(curlx_str_single(&p, '\"'))
           break;
 
-        /* Handle the optional 'ma' and 'persist' flags once first, as they
-           need to be known for each alternative service. Unknown flags are
+        /* Handle the optional 'ma' and 'persist' flags. Unknown flags are
            skipped. */
         curlx_str_passblanks(&p);
         if(!curlx_str_single(&p, ';')) {
