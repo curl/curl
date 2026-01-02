@@ -572,7 +572,7 @@ class ExecResult:
 
         def cmp_ts(t1, t2):
             n = s[t1] - s[t2]
-            if not n:  # same timestamp, order to exected occurrence
+            if not n:  # same timestamp, order to expected occurrence
                 return ref_tl.index(t1) - ref_tl.index(t2)
             return n
 
