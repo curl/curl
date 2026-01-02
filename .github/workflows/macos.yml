@@ -341,13 +341,13 @@ jobs:
             install: libnghttp3
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: '-t --shallow=25 --min=900 1 to 920'
+            tflags: '-t --shallow=25 --min=890 1 to 910'
           - name: 'OpenSSL torture 2'
             compiler: clang
             install: libnghttp3
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: '-t --shallow=20 --min=930 921 to 9999'
+            tflags: '-t --shallow=20 --min=950 911 to 9999'
         exclude:
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@18, build: { compiler: 'clang' } }
