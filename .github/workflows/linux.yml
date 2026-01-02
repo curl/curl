@@ -244,7 +244,7 @@ jobs:
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
 
-          - name: 'scan-build'
+          - name: 'scan-build !examples'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls rustls wolfssl-opensslextra
             install_steps_brew: gsasl
@@ -819,7 +819,7 @@ jobs:
           ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
-        if: ${{ !contains(matrix.build.install_packages, 'valgrind') && matrix.build.make-custom-target != 'tidy' }}
+        if: ${{ !contains(matrix.build.install_packages, 'valgrind') && matrix.build.make-custom-target != 'tidy' && !contains(matrix.build.name, '!examples') }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target curl-examples-build
