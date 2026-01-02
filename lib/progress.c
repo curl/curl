@@ -513,10 +513,10 @@ static void progress_meter(struct Curl_easy *data)
                     data->state.resume_from);
     }
     curl_mfprintf(data->set.err,
-                  "  %% Total    %% Received %% Xferd  Average Speed   "
-                  "Time    Time     Time  Current\n"
-                  "                                 Dload  Upload   "
-                  "Total   Spent    Left  Speed\n");
+                  "  %% Total    %% Received %% Xferd  Average Speed  "
+                  "Time     Time     Time   Current\n"
+                  "                                 Dload  Upload  "
+                  "Total    Spent    Left   Speed\n");
     p->headers_out = TRUE; /* headers are shown */
   }
 
@@ -553,7 +553,7 @@ static void progress_meter(struct Curl_easy *data)
                 "\r"
                 "%3" FMT_OFF_T " %s "
                 "%3" FMT_OFF_T " %s "
-                "%3" FMT_OFF_T " %s %s %s  %s %s %s %s",
+                "%3" FMT_OFF_T " %s %s %s %s %s %s %s",
                 total_estm.percent, /* 3 letters */    /* total % */
                 max6out(total_expected_size, max6[2],
                         sizeof(max6[2])),              /* total size */
