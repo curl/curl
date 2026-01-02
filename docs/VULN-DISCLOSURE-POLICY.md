@@ -354,6 +354,17 @@ using the protocols or options that require the use of those algorithms.
 When servers upgrade to use secure alternatives, curl users should use those
 options/protocols.
 
+## CRLF in data
+
+curl makes barely any claims of *cleaning* input or rejecting invalid data. A
+user that uses a curl feature can send in *creative* sequences that if they
+include carriage-return (CR) or line-feed (LF).
+
+Therefore, we reject the idea of *CRLF injection* as a security problem. It is
+a *feature* that users can send create byte sequences. If users don't want to
+send such octets, they are in control and should avoid sending such bytes to
+curl.
+
 # curl major incident response
 
 Vulnerability disclosure manages the full life cycle of a vulnerability
