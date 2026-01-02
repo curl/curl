@@ -3332,7 +3332,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 
     result = ossl_populate_x509_store(cf, data, octx, store);
     if(result == CURLE_OK && cache_criteria_met) {
-      ossl_set_cached_x509_store(cf, data, store, octx->store_is_empty);
+      ossl_set_cached_x509_store(cf, data, store, (bool)octx->store_is_empty);
     }
   }
 
@@ -5016,7 +5016,7 @@ static bool ossl_data_pending(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   (void)data;
-  return connssl->input_pending;
+  return (bool)connssl->input_pending;
 }
 
 static CURLcode ossl_send(struct Curl_cfilter *cf,
