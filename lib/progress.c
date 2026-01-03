@@ -533,9 +533,9 @@ static void progress_meter(struct Curl_easy *data)
   curl_off_t total_cur_size;
   curl_off_t total_expected_size;
   curl_off_t dl_size;
-  char time_left[10];
-  char time_total[10];
-  char time_spent[10];
+  char time_left[8];
+  char time_total[8];
+  char time_spent[8];
   curl_off_t cur_secs = (curl_off_t)p->timespent / 1000000; /* seconds */
 
   if(!p->headers_out) {
