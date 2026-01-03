@@ -522,7 +522,10 @@ if(PERL_EXECUTABLE)
     COMMENT "Running lint checks" VERBATIM USES_TERMINAL
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl"
-    DEPENDS "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
+    DEPENDS
+      "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
+      "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
   )
 endif()
 
