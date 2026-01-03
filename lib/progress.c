@@ -47,7 +47,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
     return;
   }
   h = seconds / 3600;
-  if(h <= 23) {
+  if(h <= 99) {
     curl_off_t m = (seconds - (h * 3600)) / 60;
     if(h <= 9) {
       curl_off_t s = (seconds - (h * 3600)) - (m * 60);
