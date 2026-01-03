@@ -68,4 +68,4 @@ override curl's internal binary output in terminal prevention:
     curl https://example.com/jpeg -o -
 
 Note that the binary output may be caused by the response being compressed, in
-which case you may want to use the --compressed option instead.
+which case you may want to use the --compressed option.
