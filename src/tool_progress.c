@@ -86,8 +86,7 @@ int xferinfo_cb(void *clientp,
   return 0;
 }
 
-/* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
-   byte) */
+/* Provide a time string that is 8 letters long (plus the zero byte) */
 UNITTEST void time2str(char *r, size_t rlen, curl_off_t seconds)
 {
   curl_off_t h;
@@ -171,9 +170,9 @@ bool progress_meter(CURLM *multi, struct curltime *start, bool final)
           tool_stderr);
   }
   if(final || (diff > 500)) {
-    char time_left[10];
-    char time_total[10];
-    char time_spent[10];
+    char time_left[9];
+    char time_total[9];
+    char time_spent[9];
     char buffer[3][6];
     curl_off_t spent = curlx_timediff_ms(now, *start) / 1000;
     char dlpercen[4] = "--";
