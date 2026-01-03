@@ -29,7 +29,7 @@
 /* The point of this function would be to return a string of the input data,
    but never longer than 5 columns (+ one zero byte).
    Add suffix k, M, G when suitable... */
-static char *max5data(curl_off_t bytes, char *max5, size_t mlen)
+UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum */
   const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
@@ -43,9 +43,9 @@ static char *max5data(curl_off_t bytes, char *max5, size_t mlen)
     curl_off_t nbytes = bytes / 1024;
     if(nbytes < 100) {
       /* display with a decimal */
-      curl_msnprintf(max5, mlen, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
+      curl_msnprintf(max5, mlen, "%2" CURL_FORMAT_CURL_OFF_T ".%"
                      CURL_FORMAT_CURL_OFF_T "%c", bytes / 1024,
-                     (bytes % 1024) / (1024 / 10), unit[k]);
+                     (bytes % 1024) * 10 / 1024, unit[k]);
       break;
     }
     else if(nbytes < 10000) {
@@ -85,33 +85,39 @@ int xferinfo_cb(void *clientp,
   return 0;
 }
 
-/* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
-   byte) */
-static void time2str(char *r, size_t rlen, curl_off_t seconds)
+/* Provide a time string that is 8 letters long (plus the zero byte) */
+UNITTEST void time2str(char *r, size_t rlen, curl_off_t seconds)
 {
   curl_off_t h;
   if(seconds <= 0) {
-    curlx_strcopy(r, rlen, "--:--:--", 8);
+    curlx_strcopy(r, rlen, "        ", 8);
     return;
   }
   h = seconds / 3600;
   if(h <= 99) {
     curl_off_t m = (seconds - (h * 3600)) / 60;
     curl_off_t s = (seconds - (h * 3600)) - (m * 60);
-    curl_msnprintf(r, rlen, "%2" CURL_FORMAT_CURL_OFF_T
-                   ":%02" CURL_FORMAT_CURL_OFF_T
-                   ":%02" CURL_FORMAT_CURL_OFF_T, h, m, s);
+    curl_msnprintf(r, rlen, "%02" FMT_OFF_T ":%02" FMT_OFF_T ":"
+                   "%02" FMT_OFF_T, h, m, s);
   }
   else {
-    /* this equals to more than 99 hours, switch to a more suitable output
-       format to fit within the limits. */
     curl_off_t d = seconds / 86400;
     h = (seconds - (d * 86400)) / 3600;
     if(d <= 999)
-      curl_msnprintf(r, rlen, "%3" CURL_FORMAT_CURL_OFF_T
-                     "d %02" CURL_FORMAT_CURL_OFF_T "h", d, h);
-    else
-      curl_msnprintf(r, rlen, "%7" CURL_FORMAT_CURL_OFF_T "d", d);
+      curl_msnprintf(r, rlen, "%3" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
+    else { /* more than 999 days */
+      curl_off_t m = d / 30;
+      if(m <= 999) {
+        curl_msnprintf(r, rlen, "%3" FMT_OFF_T "m %02" FMT_OFF_T "d", m, d%30);
+      }
+      else { /* more than 999 months */
+        curl_off_t y = d / 365;
+        if(y <= 99999)
+          curl_msnprintf(r, rlen, "%7" FMT_OFF_T "y", y);
+        else
+          curlx_strcopy(r, rlen, " >99999y", 8);
+      }
+    }
   }
 }
 
@@ -163,9 +169,9 @@ bool progress_meter(CURLM *multi, struct curltime *start, bool final)
           tool_stderr);
   }
   if(final || (diff > 500)) {
-    char time_left[10];
-    char time_total[10];
-    char time_spent[10];
+    char time_left[9];
+    char time_total[9];
+    char time_spent[9];
     char buffer[3][6];
     curl_off_t spent = curlx_timediff_ms(now, *start) / 1000;
     char dlpercen[4] = "--";
