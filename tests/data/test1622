@@ -13,7 +13,7 @@ tool-progress
 unittest
 </features>
 <name>
-time and size output
+tool time and size progress output
 </name>
 <tool>
 tool%TESTNUMBER
