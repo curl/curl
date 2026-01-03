@@ -200,6 +200,9 @@ checksrc:
 	(cd docs/examples && $(MAKE) checksrc)
 	(cd packages && $(MAKE) checksrc)
 
+lint: checksrc
+	@PERL@ $(top_srcdir)/scripts/spacecheck.pl
+
 tidy:
 	(cd src && $(MAKE) tidy)
 	(cd lib && $(MAKE) tidy)

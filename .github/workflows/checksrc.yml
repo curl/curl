@@ -173,7 +173,7 @@ jobs:
           .github/scripts/shellcheck.sh
 
       - name: 'spacecheck'
-        run: .github/scripts/spacecheck.pl
+        run: scripts/spacecheck.pl
 
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
