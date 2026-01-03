@@ -528,6 +528,7 @@ Note: These variables are internal and subject to change.
 
 ## Useful build targets
 
+- `checksrc`:               Run lint check `checksrc`.
 - `testdeps`:               Build test dependencies (servers, tools, test certificates).
                             Individual targets: `curlinfo`, `libtests`, `servers`, `tunits`, `units`
                             Test certificates: `build-certs`, `clean-certs`
