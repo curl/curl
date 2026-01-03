@@ -40,7 +40,6 @@ void progress_finalize(struct per_transfer *per);
 #ifdef UNITTESTS
 UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen);
 UNITTEST void time2str(char *r, size_t rlen, curl_off_t seconds);
-
 #endif
 
 #endif /* HEADER_CURL_TOOL_PROGRESS_H */
