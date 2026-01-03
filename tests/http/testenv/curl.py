@@ -568,8 +568,8 @@ class ExecResult:
             # assert all events not in reference timeline are 0
             for key in [key for key in all_keys if key not in ref_tl and key not in somewhere_keys]:
                 self.check_stat_zero(s, key)
-        # calculate the timeline that did happen
 
+        # calculate the timeline that did happen
         def cmp_ts(t1, t2):
             n = s[t1] - s[t2]
             if not n:  # same timestamp, order to expected occurrence
