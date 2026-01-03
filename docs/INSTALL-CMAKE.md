@@ -544,6 +544,7 @@ Note: These variables are internal and subject to change.
 - `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
 - `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
 - `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
+- `curl-lint`:              Run lint checks.
 - `curl-listcats`:          Generate help category constants for `src/tool_help.h` from documentation.
 - `curl-listhelp`:          Generate `src/tool_listhelp.c` from documentation.
 - `curl-optiontable`:       Generate `lib/easyoptions.c` from documentation.
