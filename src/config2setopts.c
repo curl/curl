@@ -533,16 +533,17 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl)
   return result;
 }
 
-static CURLcode add_cookie_with_spaces(struct dynbuf *buf, const char *cookie, bool prepend_separator) {
+static CURLcode add_cookie_with_spaces(struct dynbuf *buf,
+                                       const char *cookie,
+                                       bool prepend_separator)
+{
   CURLcode result;
   const char *p = cookie;
-  
   if(prepend_separator) {
     result = curlx_dyn_addn(buf, "; ", 2);
     if(result)
       return result;
   }
-  
   while(*p) {
     const char *semicolon = strchr(p, ';');
     if(semicolon) {
@@ -550,7 +551,6 @@ static CURLcode add_cookie_with_spaces(struct dynbuf *buf, const char *cookie, b
       result = curlx_dyn_addn(buf, p, semicolon - p + 1);
       if(result)
         return result;
-      
       /* Add space after semicolon if not already there */
       if(semicolon[1] != ' ' && semicolon[1] != '\0') {
         result = curlx_dyn_addn(buf, " ", 1);
@@ -581,12 +581,13 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
 
   curlx_dyn_init(&cookies, MAX_COOKIE_LINE);
   for(cl = config->cookies; cl; cl = cl->next) {
-  result = add_cookie_with_spaces(&cookies, cl->data, cl != config->cookies);
-  if(result) {
-    warnf("skipped provided cookie, the cookie header would go over %u bytes", MAX_COOKIE_LINE);
+    result = add_cookie_with_spaces(&cookies, cl->data, cl != config->cookies);
+    if(result) {
+      warnf("skipped provided cookie, the cookie header " 
+          "would go over %u bytes", MAX_COOKIE_LINE);
     return result;
+    }
   }
-}
 
   result = my_setopt_str(curl, CURLOPT_COOKIE, curlx_dyn_ptr(&cookies));
   curlx_dyn_free(&cookies);
