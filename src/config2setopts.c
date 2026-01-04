@@ -547,7 +547,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
       if(cl == config->cookies)
         result = curlx_dyn_add(&cookies, cl->data);
       else
-        result = curlx_dyn_addf(&cookies, ";%s", cl->data);
+        result = curlx_dyn_addf(&cookies, "; %s", cl->data);
 
       if(result) {
         warnf("skipped provided cookie, the cookie header "
