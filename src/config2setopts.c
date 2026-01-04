@@ -537,7 +537,7 @@ static CURLcode add_cookie_with_spaces(struct dynbuf *buf,
                                        const char *cookie,
                                        bool prepend_separator)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   const char *p = cookie;
   if(prepend_separator) {
     result = curlx_dyn_addn(buf, "; ", 2);
