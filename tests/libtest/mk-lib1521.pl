@@ -449,6 +449,8 @@ while(<STDIN>) {
         my $ifpresent = "${w2}if(present(first)) {\n";
         my $pref = "${w3}result =\n".
                    "${w3}  curl_easy_setopt(curl, $name,";
+        my $ignoreset = "${w3}/* set string again to check for leaks */\n".
+            "${w3}(void)curl_easy_setopt(curl, $name,";
         my $i = ' ' x (length($w) + 25);
         my $fcheck = <<MOO
     if(first && present(first)) /* first setopt check only */
@@ -494,6 +496,7 @@ MOO
         if($type eq "CURLOPTTYPE_STRINGPOINT") {
             print $fh "${fpref} \"string\");\n$fstringcheck";
             print $fh "$ifpresent";
+            print $fh "${ignoreset} \"\");\n";
             print $fh "${pref} NULL);\n$nullcheck";
         }
         elsif(($type eq "CURLOPTTYPE_LONG") ||
