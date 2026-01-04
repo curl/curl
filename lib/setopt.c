@@ -1725,8 +1725,10 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     if(ptr && !*ptr) {
       ptr = Curl_get_content_encodings();
-      if(ptr)
+      if(ptr) {
+        curlx_free(s->str[STRING_ENCODING]);
         s->str[STRING_ENCODING] = ptr;
+      }
       else
         result = CURLE_OUT_OF_MEMORY;
       return result;
