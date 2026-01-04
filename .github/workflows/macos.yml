@@ -605,13 +605,15 @@ jobs:
           # Reduce build combinations, by dropping less interesting ones
           - { image: macos-26, compiler: 'gcc-13' }
           - { compiler: 'gcc-14' , build: cmake }
+          # Reduce autotools to just one job that is also build with cmake
           - { compiler: 'gcc-13' , build: autotools }
           - { compiler: 'gcc-14' , build: autotools }
-          - { compiler: 'gcc-26' , build: autotools }
+          - { compiler: 'gcc-15' , build: autotools }
           - { compiler: 'llvm@15', build: autotools }
           - { compiler: 'llvm@18', build: autotools }
           - { compiler: 'llvm@20', build: autotools }
-          - { compiler: 'clang'  , build: autotools }
+          - { image: macos-14,     build: autotools }
+          - { image: macos-15,     build: autotools }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
