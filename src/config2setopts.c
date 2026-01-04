@@ -583,9 +583,9 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
   for(cl = config->cookies; cl; cl = cl->next) {
     result = add_cookie_with_spaces(&cookies, cl->data, cl != config->cookies);
     if(result) {
-      warnf("skipped provided cookie, the cookie header " 
-          "would go over %u bytes", MAX_COOKIE_LINE);
-    return result;
+      warnf("skipped provided cookie, the cookie header "
+           "would go over %u bytes", MAX_COOKIE_LINE);
+      return result;
     }
   }
 
