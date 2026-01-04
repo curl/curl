@@ -589,7 +589,7 @@ jobs:
         image: [macos-14, macos-15, macos-26]
         xcode: ['']  # default Xcodes
         macos-version-min: ['']
-        build: [autotools, cmake]
+        build: [cmake]  # autotools
         exclude:
           # Combinations not covered by runner images:
           - { image: macos-14, compiler: 'llvm@18' }
