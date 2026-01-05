@@ -547,14 +547,14 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
       if(cl == config->cookies)
         result = curlx_dyn_add(&cookies, cl->data);
       else
-        result = curlx_dyn_addf(&cookies, ";%s%s",
-                                ISBLANK(cl->data[0]) ? "" : " ", cl->data);
-    if(result) {
-      warnf("skipped provided cookie, the cookie header "
-            "would go over %u bytes", MAX_COOKIE_LINE);
-      return result;
+          result = curlx_dyn_addf(&cookies, ";%s%s",
+                                  ISBLANK(cl->data[0]) ? "" : " ", cl->data);
+      if(result) {
+        warnf("skipped provided cookie, the cookie header "
+              "would go over %u bytes", MAX_COOKIE_LINE);
+        return result;
+      }
     }
-  }
 
     result = my_setopt_str(curl, CURLOPT_COOKIE, curlx_dyn_ptr(&cookies));
     curlx_dyn_free(&cookies);
