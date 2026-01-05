@@ -207,7 +207,7 @@ jobs:
   macos:
     name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.compiler }} ${{ matrix.build.name }}"
     runs-on: 'macos-15'
-    timeout-minutes: 25
+    timeout-minutes: 15
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: '${{ matrix.build.compiler }}'
