@@ -1022,7 +1022,11 @@ void Curl_ldap_version(char *buf, size_t bufsz)
   LDAPAPIInfo api;
   api.ldapai_info_version = LDAP_API_INFO_VERSION;
 
+#if defined(__OS400__)
+  if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_SUCCESS) {
+#else
   if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
+#endif
     unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
     unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
     unsigned int minor =
@@ -1030,8 +1034,13 @@ void Curl_ldap_version(char *buf, size_t bufsz)
        - patch) / 100;
     curl_msnprintf(buf, bufsz, "%s/%u.%u.%u%s",
                    api.ldapai_vendor_name, major, minor, patch, flavor);
+
+#if defined(__OS400__)
+    ldap_value_free(api.ldapai_extensions);
+#else
     ldap_memfree(api.ldapai_vendor_name);
     ber_memvfree((void **)api.ldapai_extensions);
+#endif
   }
   else
     curl_msnprintf(buf, bufsz, "LDAP/1");
