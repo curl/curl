@@ -225,7 +225,7 @@ static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
   Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 
-struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
+struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t ev_hashsize,  /* event hash */
                                      size_t chashsize, /* connection hash */
                                      size_t dnssize,   /* dns hash */

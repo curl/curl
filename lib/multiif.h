@@ -45,7 +45,7 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
-struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
+struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t hashsize,
                                      size_t chashsize,
                                      size_t dnssize,
