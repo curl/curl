@@ -555,7 +555,8 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
       return result;
     }
   }
-  result = my_setopt_str(curl, CURLOPT_COOKIE, curlx_dyn_ptr(&cookies));
+
+    result = my_setopt_str(curl, CURLOPT_COOKIE, curlx_dyn_ptr(&cookies));
   curlx_dyn_free(&cookies);
   if(result)
     return result;
