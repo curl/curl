@@ -673,6 +673,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
               -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
+              -DUSE_APPLE_IDN=ON -DUSE_APPLE_SECTRUST=ON \
               ${options}
           else
             export CFLAGS
@@ -691,6 +692,7 @@ jobs:
               --with-openssl="$(brew --prefix openssl)" \
               --without-nghttp2 --without-libidn2 \
               --without-libpsl \
+              --with-apple-idn --with-apple-sectrust \
               ${options}
           fi
 
