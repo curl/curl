@@ -345,7 +345,7 @@ jobs:
     needs:
       - build-cache
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 45
+    timeout-minutes: 10
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
