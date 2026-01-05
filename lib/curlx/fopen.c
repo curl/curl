@@ -40,7 +40,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #ifdef _WIN32
 
-#include <share.h>  /* for _SH_DENYNO */
+#include <share.h>  /* for _SH_SECURE */
 
 #include "multibyte.h"
 #include "timeval.h"
@@ -316,7 +316,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
       target = fixed;
     else
       target = filename_w;
-    errno = _wsopen_s(&result, target, oflag, _SH_DENYNO, pmode);
+    errno = _wsopen_s(&result, target, oflag, _SH_SECURE, pmode);
     CURLX_FREE(filename_w);
   }
   else
@@ -327,7 +327,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
+  errno = _sopen_s(&result, target, oflag, _SH_SECURE, pmode);
 #endif
 
   CURLX_FREE(fixed);
@@ -348,7 +348,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
       target = fixed;
     else
       target = filename_w;
-    result = _wfsopen(target, mode_w, _SH_DENYNO);
+    result = _wfsopen(target, mode_w, _SH_SECURE);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -360,7 +360,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     target = fixed;
   else
     target = filename;
-  result = _fsopen(target, mode, _SH_DENYNO);
+  result = _fsopen(target, mode, _SH_SECURE);
 #endif
 
   CURLX_FREE(fixed);
