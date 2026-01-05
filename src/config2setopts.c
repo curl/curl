@@ -548,7 +548,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
       result = curlx_dyn_add(&cookies, cl->data);
       else
         result = curlx_dyn_addf(&cookies, ";%s%s",
-          ISBLANK(cl->data[0]) ? "" : " ", cl->data);
+                                ISBLANK(cl->data[0]) ? "" : " ", cl->data);
     if(result) {
       warnf("skipped provided cookie, the cookie header "
             "would go over %u bytes", MAX_COOKIE_LINE);
