@@ -1220,7 +1220,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
   int this_max_fd = -1;
   struct Curl_multi *multi = m;
   struct easy_pollset ps;
-  unsigned int i, mid;
+  unsigned int i;
+  uint32_t mid;
   (void)exc_fd_set;
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -1279,7 +1280,8 @@ CURLMcode curl_multi_waitfds(CURLM *m,
   CURLMcode mresult = CURLM_OK;
   struct Curl_multi *multi = m;
   struct easy_pollset ps;
-  unsigned int need = 0, mid;
+  unsigned int need = 0;
+  uint32_t mid;
 
   if(!ufds && (size || !fd_count))
     return CURLM_BAD_FUNCTION_ARGUMENT;
@@ -3758,7 +3760,8 @@ CURL **curl_multi_get_handles(CURLM *m)
   unsigned int count = Curl_uint32_tbl_count(&multi->xfers);
   CURL **a = curlx_malloc(sizeof(struct Curl_easy *) * (count + 1));
   if(a) {
-    unsigned int i = 0, mid;
+    unsigned int i = 0;
+    uint32_t mid;
 
     if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
       do {
