@@ -1022,7 +1022,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
   LDAPAPIInfo api;
   api.ldapai_info_version = LDAP_API_INFO_VERSION;
 
-#if defined(__OS400__)
+#ifdef __OS400__
   if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_SUCCESS) {
 #else
   if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
@@ -1035,7 +1035,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
     curl_msnprintf(buf, bufsz, "%s/%u.%u.%u%s",
                    api.ldapai_vendor_name, major, minor, patch, flavor);
 
-#if defined(__OS400__)
+#ifdef __OS400__
     ldap_value_free(api.ldapai_extensions);
 #else
     ldap_memfree(api.ldapai_vendor_name);
