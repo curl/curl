@@ -461,6 +461,7 @@
 #if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
 #endif
+#include <inttypes.h>
 
 #include <limits.h>
 
@@ -478,7 +479,6 @@
 #  define struct_stat                  struct _stati64
 #  define LSEEK_ERROR                  (__int64)-1
 #elif defined(__DJGPP__)
-#  include <inttypes.h>
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
 #  undef  lseek
