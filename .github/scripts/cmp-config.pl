@@ -48,7 +48,6 @@ my %remove = (
     '#define HAVE_GSSAPI_GSSAPI_GENERIC_H 1' => 1,
     '#define HAVE_GSSAPI_GSSAPI_H 1' => 1,
     '#define HAVE_GSSAPI_GSSAPI_KRB5_H 1' => 1,
-    '#define HAVE_INTTYPES_H 1' => 1,
     '#define HAVE_LDAP_H 1' => 1,
     '#define HAVE_LDAP_SSL 1' => 1,
     '#define HAVE_LIBBROTLIDEC 1' => 1,

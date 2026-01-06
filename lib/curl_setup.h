@@ -464,6 +464,13 @@
 
 #include <limits.h>
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#define PRIu32 "u"
+#define PRIx32 "x"
+#endif
+
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
 #  include <io.h>
