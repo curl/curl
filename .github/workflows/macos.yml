@@ -233,7 +233,7 @@ jobs:
             tflags: '--min=950'
           - name: '!ssl'
             compiler: clang
-            configure: --enable-debug --without-ssl
+            generate: -DENABLE_DEBUG=ON -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBSSH2=OFF
             tflags: '--min=1500'
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
@@ -246,7 +246,7 @@ jobs:
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh libnghttp3
-            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --with-openssl-quic
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
           - name: '!ssl c-ares'
             compiler: clang
             configure: --enable-debug --enable-ares --without-ssl
@@ -254,21 +254,23 @@ jobs:
           - name: '!ssl HTTP-only'
             compiler: clang
             tflags: '--min=950'
-            configure: >-
-              --enable-debug
-              --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
-              --disable-ldap --disable-pop3 --without-librtmp --disable-rtsp
-              --enable-static --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
-              --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp
-              --without-libssh2 --without-libssh
-              --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
+            generate: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_DISABLE_ALTSVC=ON -DCURL_DISABLE_DICT=ON -DCURL_DISABLE_FILE=ON -DCURL_DISABLE_FTP=ON -DCURL_DISABLE_GOPHER=ON -DCURL_DISABLE_IMAP=ON
+              -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_POP3=ON -DCURL_DISABLE_RTSP=ON
+              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCURL_DISABLE_SMB=ON -DCURL_DISABLE_SMTP=ON -DCURL_DISABLE_TELNET=ON -DCURL_DISABLE_TFTP=ON -DENABLE_UNIX_SOCKETS=OFF
+              -DCURL_DISABLE_MQTT=ON -DCURL_DISABLE_WEBSOCKETS=ON
+              -DCURL_USE_GSSAPI=OFF -DUSE_LIBIDN2=OFF -DCURL_USE_LIBPSL=OFF -DUSE_LIBRTMP=OFF
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF
+              -DUSE_NGHTTP2=OFF -DCURL_DISABLE_NTLM=ON -DCURL_ENABLE_SSL=OFF
+              -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF
 
             macos-version-min: '10.15'  # Catalina (2019)
           - name: 'LibreSSL !ldap +examples'
             compiler: clang
             install: libressl
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl --disable-ldap
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON
           - name: 'OpenSSL 10.15'
             compiler: clang
             install: libnghttp3 libngtcp2
@@ -282,7 +284,7 @@ jobs:
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust
           - name: 'OpenSSL event-based'
             compiler: clang
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: '--test-event --min=1300'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
