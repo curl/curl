@@ -269,7 +269,7 @@ jobs:
             compiler: clang
             install: libressl
             install_steps: pytest
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
           - name: 'OpenSSL 10.15'
             compiler: clang
             install: libnghttp3 libngtcp2
