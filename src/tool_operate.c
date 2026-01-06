@@ -1003,7 +1003,6 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     SANITIZEcode sc;
     CURLcode result =
       glob_match_url(&per->outfile, storefile, &state->urlglob, &sc);
-
     tool_safefree(storefile);
     if(sc) {
       if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
