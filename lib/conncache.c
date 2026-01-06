@@ -610,7 +610,7 @@ static void cpool_discard_conn(struct cpool *cpool,
    */
   if(CONN_INUSE(conn) && !aborted) {
     CURL_TRC_M(data, "[CPOOL] not discarding #%" FMT_OFF_T
-               " still in use by %u transfers", conn->connection_id,
+               " still in use by %" PRIu32 " transfers", conn->connection_id,
                conn->attached_xfers);
     return;
   }

@@ -391,7 +391,7 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
      * to downsize the already resized ones. The sets continue
      * to work properly when larger than the table, but not
      * the other way around. */
-    CURL_TRC_M(data, "increasing xfer table size to %u", new_size);
+    CURL_TRC_M(data, "increasing xfer table size to %" PRIu32, new_size);
     if(Curl_uint32_bset_resize(&multi->process, new_size) ||
        Curl_uint32_bset_resize(&multi->dirty, new_size) ||
        Curl_uint32_bset_resize(&multi->pending, new_size) ||
@@ -517,8 +517,8 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
     data->set.server_response_timeout;
   multi->admin->set.no_signal = data->set.no_signal;
 
-  CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
-             data->mid, Curl_multi_xfers_running(multi),
+  CURL_TRC_M(data, "added to multi, mid=%" PRIu32 ", running=%u"
+             ", total=%" PRIu32, data->mid, Curl_multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
@@ -608,10 +608,11 @@ static void multi_done_locked(struct connectdata *conn,
 
   Curl_detach_connection(data);
 
-  CURL_TRC_M(data, "multi_done_locked, in use=%u", conn->attached_xfers);
+  CURL_TRC_M(data, "multi_done_locked, in use=%" PRIu32, conn->attached_xfers);
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
-    CURL_TRC_M(data, "Connection still in use %u, no more multi_done now!",
+    CURL_TRC_M(data,
+               "Connection still in use %" PRIu32 ", no more multi_done now!",
                conn->attached_xfers);
     return;
   }
@@ -884,8 +885,8 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
       return mresult;
   }
 
-  CURL_TRC_M(data, "removed from multi, mid=%u, running=%u, total=%u",
-             mid, Curl_multi_xfers_running(multi),
+  CURL_TRC_M(data, "removed from multi, mid=%" PRIu32 ", running=%u"
+             ", total=%" PRIu32, mid, Curl_multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
