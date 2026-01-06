@@ -970,23 +970,20 @@ void Curl_ldap_version(char *buf, size_t bufsz)
     unsigned int minor =
       (((unsigned int)api.ldapai_vendor_version - major * 10000)
        - patch) / 100;
-
 #ifdef __OS400__
-    curl_msnprintf(buf, bufsz, "IBMLDAP/%u.%u.%u",
-                   major, minor, patch);
-
+    curl_msnprintf(buf, bufsz, "IBMLDAP/%u.%u.%u", major, minor, patch);
     ldap_value_free(api.ldapai_extensions);
+    (void)flavor;
 #else
     curl_msnprintf(buf, bufsz, "%s/%u.%u.%u%s",
                    api.ldapai_vendor_name, major, minor, patch, flavor);
-
     ldap_memfree(api.ldapai_vendor_name);
     ber_memvfree((void **)api.ldapai_extensions);
 #endif
   }
   else
     curl_msnprintf(buf, bufsz, "LDAP/1");
-#endif
+#endif /* USE_WIN32_LDAP */
 }
 
 /*
