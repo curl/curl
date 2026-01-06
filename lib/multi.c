@@ -2716,17 +2716,19 @@ statemachine_end:
         /* A sub transfer, not for msgsent to application */
         struct Curl_easy *mdata;
 
-        CURL_TRC_M(data, "sub xfer done for master %u", data->master_mid);
+        CURL_TRC_M(data, "sub xfer done for master %" PRIu32,
+                   data->master_mid);
         mdata = Curl_multi_get_easy(multi, data->master_mid);
         if(mdata) {
           if(mdata->sub_xfer_done)
             mdata->sub_xfer_done(mdata, data, result);
           else
-            CURL_TRC_M(data, "master easy %u without sub_xfer_done callback.",
-                       data->master_mid);
+            CURL_TRC_M(data, "master easy %" PRIu32
+                       " without sub_xfer_done callback.", data->master_mid);
         }
         else {
-          CURL_TRC_M(data, "master easy %u already gone.", data->master_mid);
+          CURL_TRC_M(data, "master easy %" PRIu32 " already gone.",
+                     data->master_mid);
         }
       }
       else {
@@ -3123,7 +3125,8 @@ static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
         }
       }
       else {
-        CURL_TRC_M(multi->admin, "multi_run_dirty, %u no longer found", mid);
+        CURL_TRC_M(multi->admin,
+                   "multi_run_dirty, %" PRIu32 " no longer found", mid);
         Curl_uint32_bset_remove(&multi->dirty, mid);
       }
     } while(Curl_uint32_bset_next(&multi->dirty, mid, &mid));
@@ -3345,7 +3348,8 @@ static bool multi_has_dirties(struct Curl_multi *multi)
         Curl_uint32_bset_remove(&multi->dirty, mid);
       }
       else {
-        CURL_TRC_M(multi->admin, "dirty transfer %u no longer found", mid);
+        CURL_TRC_M(multi->admin, "dirty transfer %" PRIu32 " no longer found",
+                   mid);
         Curl_uint32_bset_remove(&multi->dirty, mid);
       }
     } while(Curl_uint32_bset_next(&multi->dirty, mid, &mid));
@@ -3988,8 +3992,8 @@ struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
   struct Curl_easy *data = Curl_uint32_tbl_get(&multi->xfers, mid);
   if(data && GOOD_EASY_HANDLE(data))
     return data;
-  CURL_TRC_M(multi->admin, "invalid easy handle in xfer table for mid=%u",
-             mid);
+  CURL_TRC_M(multi->admin,
+             "invalid easy handle in xfer table for mid=%" PRIu32, mid);
   Curl_uint32_tbl_remove(&multi->xfers, mid);
   return NULL;
 }
