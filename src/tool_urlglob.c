@@ -704,8 +704,11 @@ CURLcode glob_match_url(char **output, const char *filename,
                                          (SANITIZE_ALLOW_PATH |
                                           SANITIZE_ALLOW_RESERVED));
     curlx_dyn_free(&dyn);
-    if(sc)
+    if(sc) {
+      if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
       return CURLE_URL_MALFORMAT;
+    }
     *output = sanitized;
     return CURLE_OK;
   }
