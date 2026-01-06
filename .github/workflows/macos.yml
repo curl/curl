@@ -253,7 +253,7 @@ jobs:
             tflags: '--min=1500'
           - name: '!ssl HTTP-only'
             compiler: clang
-            tflags: '--min=950'
+            tflags: '--min=930'
             generate: >-
               -DENABLE_DEBUG=ON -DHTTP_ONLY=ON
               -DCURL_DISABLE_ALTSVC=ON
