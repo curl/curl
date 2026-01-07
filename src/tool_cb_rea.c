@@ -113,13 +113,14 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
 
+#ifdef _WIN32
   /* If we are on Windows, and using `-T .`, then per->infd points to a socket
    connected to stdin via a reader thread, and needs to be read with recv()
    Make sure we are in non-blocking mode and infd is not regular stdin
    On Linux per->infd should be stdin (0) and the block below should not
    execute */
   if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#ifndef CURL_WINDOWS_UWP
     rc = recv(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {
@@ -131,11 +132,13 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
 #else
-    warnf("per->infd != 0: FD == %d. This behavior"
-          " is only supported on desktop Windows", per->infd);
+    warnf("per->infd != 0: FD == %d. "
+          "This behavior is only supported on desktop Windows", per->infd);
 #endif
   }
-  else {
+  else
+#endif
+  {
     rc = read(per->infd, buffer, sz * nmemb);
     if(rc < 0) {
       if(errno == EAGAIN) {
@@ -147,6 +150,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
   }
+
   if((per->uploadfilesize != -1) &&
      (per->uploadedsofar + rc > per->uploadfilesize)) {
     /* do not allow uploading more than originally set out to do */
