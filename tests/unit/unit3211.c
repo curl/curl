@@ -34,7 +34,7 @@ static void check_set(const char *name, uint32_t capacity,
   size_t i, j;
   uint32_t n, c;
 
-  curl_mfprintf(stderr, "test %s, capacity=%" PRIu32 ", %zu numbers\n",
+  curl_mfprintf(stderr, "test %s, capacity=%u, %zu numbers\n",
                 name, capacity, slen);
   Curl_uint32_bset_init(&bset);
   fail_unless(!Curl_uint32_bset_resize(&bset, capacity), "bset resize failed");
@@ -63,8 +63,8 @@ static void check_set(const char *name, uint32_t capacity,
   for(i = 1; i < slen; ++i) {
     fail_unless(Curl_uint32_bset_next(&bset, n, &n), "next failed");
     if(n != s[i]) {
-      curl_mfprintf(stderr, "expected next to be %" PRIu32
-                    ", not %" PRIu32 "\n", s[i], n);
+      curl_mfprintf(stderr, "expected next to be %u"
+                    ", not %u\n", s[i], n);
       fail_unless(n == s[i], "next not correct number");
     }
   }
