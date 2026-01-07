@@ -804,7 +804,9 @@
 #  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
 #  undef  write
 #  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
+#endif
 
+#ifdef _MSC_VER
 /* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about portable functions */
 #  undef close
 #  define close(fd) _close(fd)
