@@ -461,13 +461,16 @@
 #if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
 #endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#else
-#define PRIu32 "u"
-#endif
 
 #include <limits.h>
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+#ifndef PRIu32
+#define PRIu32 "u"
+#endif
 
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
