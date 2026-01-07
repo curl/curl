@@ -389,15 +389,14 @@ jobs:
               -DWATT_ROOT="$HOME/djgpp/net/watt"
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --disable-shared \
               CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
               AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
               RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \
               WATT_ROOT="$HOME/djgpp/net/watt" \
               --host=i586-pc-msdosdjgpp \
               --without-ssl --without-libpsl \
-              --with-zlib="$HOME/djgpp" \
-              --disable-shared
+              --with-zlib="$HOME/djgpp"
           fi
 
       - name: 'configure log'
