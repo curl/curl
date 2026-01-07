@@ -961,18 +961,14 @@ static CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
            chars, and the delimiting slash character must be appended to the
            hostname */
         path = strpbrk(ptr, "/\\:*?\"<>|");
-        if(!path || *path != '/') {
-          result = CURLUE_BAD_FILE_URL;
-          goto fail;
-        }
+        if(!path || *path != '/')
+          return CURLUE_BAD_FILE_URL;
 
         len = path - ptr;
         if(len) {
           CURLcode code = curlx_dyn_addn(host, ptr, len);
-          if(code) {
-            result = cc2cu(code);
-            goto fail;
-          }
+          if(code)
+            return cc2cu(code);
           uncpath = TRUE;
         }
 
