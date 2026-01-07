@@ -52,12 +52,14 @@ int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define CURLX_FREOPEN_LOW(fname, mode, fh) curlx_win32_freopen(fname, mode, fh)
 #define curlx_stat(fname, stp)             curlx_win32_stat(fname, stp)
 #define curlx_open                         curlx_win32_open
+#define curlx_close                        _close
 #define curlx_rename                       curlx_win32_rename
 #else
 #define CURLX_FOPEN_LOW                    fopen
 #define CURLX_FREOPEN_LOW                  freopen
 #define curlx_stat(fname, stp)             stat(fname, stp)
 #define curlx_open                         open
+#define curlx_close                        close
 #define curlx_rename                       rename
 #endif
 

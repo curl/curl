@@ -147,7 +147,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
 
 fail:
   if(fd != -1) {
-    close(fd);
+    curlx_close(fd);
     unlink(tempstore);
   }
 
