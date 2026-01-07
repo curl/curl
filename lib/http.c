@@ -898,7 +898,7 @@ static CURLcode auth_spnego(struct Curl_easy *data,
                             bool proxy,
                             const char *auth,
                             struct auth *authp,
-                            unsigned long *availp)
+                            uint32_t *availp)
 {
   if((authp->avail & CURLAUTH_NEGOTIATE) || Curl_auth_is_spnego_supported()) {
     *availp |= CURLAUTH_NEGOTIATE;
@@ -931,7 +931,7 @@ static CURLcode auth_ntlm(struct Curl_easy *data,
                           bool proxy,
                           const char *auth,
                           struct auth *authp,
-                          unsigned long *availp)
+                          uint32_t *availp)
 {
   /* NTLM support requires the SSL crypto libs */
   if((authp->avail & CURLAUTH_NTLM) || Curl_auth_is_ntlm_supported()) {
@@ -960,7 +960,7 @@ static CURLcode auth_digest(struct Curl_easy *data,
                             bool proxy,
                             const char *auth,
                             struct auth *authp,
-                            unsigned long *availp)
+                            uint32_t *availp)
 {
   if(authp->avail & CURLAUTH_DIGEST)
     infof(data, "Ignoring duplicate digest auth header.");
@@ -989,7 +989,7 @@ static CURLcode auth_digest(struct Curl_easy *data,
 #ifndef CURL_DISABLE_BASIC_AUTH
 static CURLcode auth_basic(struct Curl_easy *data,
                            struct auth *authp,
-                           unsigned long *availp)
+                           uint32_t *availp)
 {
   *availp |= CURLAUTH_BASIC;
   authp->avail |= CURLAUTH_BASIC;
@@ -1008,7 +1008,7 @@ static CURLcode auth_basic(struct Curl_easy *data,
 #ifndef CURL_DISABLE_BEARER_AUTH
 static CURLcode auth_bearer(struct Curl_easy *data,
                             struct auth *authp,
-                            unsigned long *availp)
+                            uint32_t *availp)
 {
   *availp |= CURLAUTH_BEARER;
   authp->avail |= CURLAUTH_BEARER;
@@ -1042,7 +1042,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   !defined(CURL_DISABLE_BASIC_AUTH) ||          \
   !defined(CURL_DISABLE_BEARER_AUTH)
 
-  unsigned long *availp;
+  uint32_t *availp;
   struct auth *authp;
   CURLcode result = CURLE_OK;
   DEBUGASSERT(auth);
