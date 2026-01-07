@@ -1208,9 +1208,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
                                             CURLU_DEFAULT_SCHEME));
 
   /* handle the file: scheme */
-  if(schemelen && !strcmp(schemebuf, "file")) {
+  if(schemelen && !strcmp(schemebuf, "file"))
     result = parse_file(url, urllen, u, &host, &path, &pathlen);
-  }
   else {
     const char *hostp = NULL;
     size_t hostlen;
@@ -1218,7 +1217,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       goto fail;
 
-    schemelen = u->scheme ? strlen(u->scheme) : 0;
     /* find the end of the hostname + port number */
     hostlen = strcspn(hostp, "/?#");
     path = &hostp[hostlen];
@@ -1226,8 +1224,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     /* this pathlen also contains the query and the fragment */
     pathlen = urllen - (path - url);
     if(hostlen) {
-      result = parse_authority(u, hostp, hostlen, flags, &host, schemelen);
-      if(!result && (flags & CURLU_GUESS_SCHEME) && !schemelen)
+      result = parse_authority(u, hostp, hostlen, flags, &host, !!u->scheme);
+      if(!result && (flags & CURLU_GUESS_SCHEME) && !u->scheme)
         result = guess_scheme(u, &host);
     }
     else if(flags & CURLU_NO_AUTHORITY) {
