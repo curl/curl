@@ -138,6 +138,7 @@ static const struct LongShort aliases[]= {
   {"expect100-timeout",          ARG_STRG, ' ', C_EXPECT100_TIMEOUT},
   {"fail",                       ARG_BOOL, 'f', C_FAIL},
   {"fail-early",                 ARG_BOOL, ' ', C_FAIL_EARLY},
+  {"fail-on-status",             ARG_STRG, ' ', C_FAIL_ON_STATUS},
   {"fail-with-body",             ARG_BOOL, ' ', C_FAIL_WITH_BODY},
   {"false-start",                ARG_BOOL, ' ', C_FALSE_START},
   {"follow",                     ARG_BOOL, ' ', C_FOLLOW},
@@ -2050,11 +2051,19 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_FAIL: /* --fail without body */
     if(toggle && (config->fail == FAIL_WITH_BODY))
       warnf("--fail deselects --fail-with-body here");
+    if(toggle && config->failon_status) {
+      warnf("--fail deselects --fail-on-status here");
+      tool_safefree(config->failon_status);
+    }
     config->fail = toggle ? FAIL_WO_BODY : FAIL_NONE;
     break;
   case C_FAIL_WITH_BODY: /* --fail-with-body */
     if(toggle && (config->fail == FAIL_WO_BODY))
       warnf("--fail-with-body deselects --fail here");
+    if(toggle && config->failon_status) {
+      warnf("--fail-with-body deselects --fail-on-status here");
+      tool_safefree(config->failon_status);
+    }
     config->fail = toggle ? FAIL_WITH_BODY : FAIL_NONE;
     break;
   case C_GLOBOFF: /* --globoff */
@@ -2724,6 +2733,14 @@ static ParameterError opt_string(struct OperationConfig *config,
     break;
   case C_SIGNATURE_ALGORITHMS: /* --sigalgs */
     err = getstr(&config->ssl_signature_algorithms, nextarg, DENY_BLANK);
+    break;
+  case C_FAIL_ON_STATUS: /* --fail-on-status */
+    if(config->fail == FAIL_WO_BODY)
+      warnf("--fail-on-status deselects --fail here");
+    else if(config->fail == FAIL_WITH_BODY)
+      warnf("--fail-on-status deselects --fail-with-body here");
+    config->fail = FAIL_NONE;
+    err = getstr(&config->failon_status, nextarg, DENY_BLANK);
     break;
   case C_FORM: /* --form */
   case C_FORM_STRING: /* --form-string */

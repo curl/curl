@@ -1130,6 +1130,20 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
   DEBUGASSERT(data->conn);
 
   /*
+  ** If CURLOPT_FAILON_STATUS is set, only check against those specific codes
+  */
+  if(data->set.failon_status_codes) {
+    size_t i;
+    for(i = 0; i < data->set.failon_status_count; i++) {
+      if(httpcode >= data->set.failon_status_codes[i].start &&
+         httpcode <= data->set.failon_status_codes[i].end) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /*
   ** If we have not been asked to fail on error,
   ** do not fail.
   */

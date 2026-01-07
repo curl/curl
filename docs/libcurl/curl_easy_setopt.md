@@ -315,6 +315,10 @@ Error message buffer. See CURLOPT_ERRORBUFFER(3)
 
 Fail on HTTP 4xx errors. CURLOPT_FAILONERROR(3)
 
+## CURLOPT_FAILON_STATUS
+
+Fail on specific HTTP status codes. See CURLOPT_FAILON_STATUS(3)
+
 ## CURLOPT_FILETIME
 
 Request file modification date and time. See CURLOPT_FILETIME(3)

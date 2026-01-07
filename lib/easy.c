@@ -893,6 +893,12 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   dst->set = src->set;
   Curl_mime_initpart(&dst->set.mimepost);
 
+#ifndef CURL_DISABLE_HTTP
+  /* do not share failon_status array pointers */
+  dst->set.failon_status_codes = NULL;
+  dst->set.failon_status_count = 0;
+#endif
+
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
@@ -932,6 +938,19 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 
   if(src->set.resolve)
     dst->state.resolve = dst->set.resolve;
+
+#ifndef CURL_DISABLE_HTTP
+  /* duplicate fail status codes array */
+  if(src->set.failon_status_codes && src->set.failon_status_count) {
+    size_t array_size = src->set.failon_status_count *
+                        sizeof(struct http_code_range);
+    dst->set.failon_status_codes = Curl_memdup(src->set.failon_status_codes,
+                                                array_size);
+    if(!dst->set.failon_status_codes)
+      return CURLE_OUT_OF_MEMORY;
+    dst->set.failon_status_count = src->set.failon_status_count;
+  }
+#endif
 
   return result;
 }

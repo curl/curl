@@ -181,6 +181,10 @@ void Curl_freeset(struct Curl_easy *data)
   curl_slist_free_all(data->state.cookielist);
   data->state.cookielist = NULL;
 #endif
+#ifndef CURL_DISABLE_HTTP
+  Curl_safefree(data->set.failon_status_codes);
+  data->set.failon_status_count = 0;
+#endif
 }
 
 /* free the URL pieces */

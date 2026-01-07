@@ -280,7 +280,7 @@ test3100 test3101 test3102 test3103 test3104 test3105 \
 \
 test3200 test3201 test3202 test3203 test3204 test3205 test3206 test3207 test3208 \
 test3209 test3210 test3211 test3212 test3213 test3214 test3215 test3216 \
-test4000 test4001
+test4000 test4001 test4002 test4003 test4004 test4005
 
 EXTRA_DIST = $(TESTCASES) DISABLED data-xml1 data320.html \
 data1461.txt data1463.txt  \

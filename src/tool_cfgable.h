@@ -223,6 +223,7 @@ struct OperationConfig {
   unsigned char ssl_version;     /* 0 - 4, 0 being default */
   unsigned char ssl_version_max; /* 0 - 4, 0 being default */
   unsigned char fail;            /* NONE, with body, without body */
+  char *failon_status;           /* --fail-on-status string */
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */

@@ -183,6 +183,7 @@ man_MANS =                                      \
   CURLOPT_ERRORBUFFER.3                         \
   CURLOPT_EXPECT_100_TIMEOUT_MS.3               \
   CURLOPT_FAILONERROR.3                         \
+  CURLOPT_FAILON_STATUS.3                       \
   CURLOPT_FILETIME.3                            \
   CURLOPT_FNMATCH_DATA.3                        \
   CURLOPT_FNMATCH_FUNCTION.3                    \
