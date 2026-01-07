@@ -336,6 +336,9 @@
 /* Define to 1 if symbol `sa_family_t' exists */
 #cmakedefine HAVE_SA_FAMILY_T 1
 
+/* Define to 1 if you have the <inttypes.h> header file. */
+#cmakedefine HAVE_INTTYPES_H 1
+
 /* Define to 1 if you have the ioctlsocket function. */
 #cmakedefine HAVE_IOCTLSOCKET 1
 
