@@ -449,7 +449,7 @@ static void qlog_callback(void *user_data, uint32_t flags,
     ssize_t rc = write(ctx->qlogfd, data, datalen);
     if(rc == -1) {
       /* on write error, stop further write attempts */
-      close(ctx->qlogfd);
+      curlx_close(ctx->qlogfd);
       ctx->qlogfd = -1;
     }
   }
@@ -2140,7 +2140,7 @@ static void cf_ngtcp2_ctx_close(struct cf_ngtcp2_ctx *ctx)
   if(!ctx->initialized)
     return;
   if(ctx->qlogfd != -1) {
-    close(ctx->qlogfd);
+    curlx_close(ctx->qlogfd);
   }
   ctx->qlogfd = -1;
   Curl_vquic_tls_cleanup(&ctx->tls);
