@@ -813,7 +813,7 @@
 #  undef fileno
 #  define fileno(fh) _fileno(fh)
 #  undef unlink
-#  define _unlink(fn) _unlink(fn)
+#  define unlink(fn) _unlink(fn)
 #endif
 
 /*
