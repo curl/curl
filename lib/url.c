@@ -881,12 +881,12 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
     if(conn->attached_xfers >=
             Curl_multi_max_concurrent_streams(m->data->multi)) {
       infof(m->data, "client side MAX_CONCURRENT_STREAMS reached"
-            ", skip (%" PRIu32 ")", conn->attached_xfers);
+            ", skip (%u)", conn->attached_xfers);
       return FALSE;
     }
     if(conn->attached_xfers >=
        Curl_conn_get_max_concurrent(m->data, conn, FIRSTSOCKET)) {
-      infof(m->data, "MAX_CONCURRENT_STREAMS reached, skip (%" PRIu32 ")",
+      infof(m->data, "MAX_CONCURRENT_STREAMS reached, skip (%u)",
             conn->attached_xfers);
       return FALSE;
     }
