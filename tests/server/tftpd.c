@@ -849,7 +849,7 @@ send_ack:
   write_behind(test, pf->f_convert);
   /* close the output file as early as possible after upload completion */
   if(test->ofile > 0) {
-    close(test->ofile);
+    curlx_close(test->ofile);
     test->ofile = 0;
   }
 
@@ -875,7 +875,7 @@ send_ack:
 abort:
   /* make sure the output file is closed in case of abort */
   if(test->ofile > 0) {
-    close(test->ofile);
+    curlx_close(test->ofile);
     test->ofile = 0;
   }
   return;
@@ -1305,7 +1305,7 @@ static int test_tftpd(int argc, char **argv)
 tftpd_cleanup:
 
   if(test.ofile > 0)
-    close(test.ofile);
+    curlx_close(test.ofile);
 
   if((peer != sock) && (peer != CURL_SOCKET_BAD))
     sclose(peer);
