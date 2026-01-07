@@ -341,7 +341,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
           return CURLM_OUT_OF_MEMORY;
       }
       CURL_TRC_M(data, "ev entry fd=%" FMT_SOCKET_T ", added %s #%" FMT_OFF_T
-                 ", total=%" PRIu32 "/%d (xfer/conn)", s,
+                 ", total=%u/%d (xfer/conn)", s,
                  conn ? "connection" : "transfer",
                  conn ? conn->connection_id : data->mid,
                  Curl_uint32_spbset_count(&entry->xfers),
@@ -411,7 +411,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
       if(mresult)
         return mresult;
       CURL_TRC_M(data, "ev entry fd=%" FMT_SOCKET_T ", removed transfer, "
-                 "total=%" PRIu32 "/%d (xfer/conn)", s,
+                 "total=%u/%d (xfer/conn)", s,
                  Curl_uint32_spbset_count(&entry->xfers),
                  entry->conn ? 1 : 0);
     }
@@ -582,7 +582,7 @@ void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
         }
         else {
           CURL_TRC_M(multi->admin,
-                     "socket transfer %" PRIu32 " no longer found", mid);
+                     "socket transfer %u no longer found", mid);
           Curl_uint32_spbset_remove(&entry->xfers, mid);
         }
       } while(Curl_uint32_spbset_next(&entry->xfers, mid, &mid));

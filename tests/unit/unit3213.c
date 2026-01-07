@@ -60,8 +60,8 @@ static void check_spbset(const char *name, const uint32_t *s, size_t slen)
   for(i = 1; i < slen; ++i) {
     fail_unless(Curl_uint32_spbset_next(&bset, n, &n), "next failed");
     if(n != s[i]) {
-      curl_mfprintf(stderr, "expected next to be %" PRIu32
-                    ", not %" PRIu32 "\n", s[i], n);
+      curl_mfprintf(stderr, "expected next to be %u"
+                    ", not %u\n", s[i], n);
       fail_unless(n == s[i], "next not correct number");
     }
   }

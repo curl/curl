@@ -462,13 +462,17 @@
 #include <stdint.h>
 #endif
 
+#ifdef __DJGPP__
+/* By default, DJGPP provides this type as a version of 'unsigned long' which
+   forces us to use a define use it in printf() format strings without
+   warnings. long and int are both 32 bits for this platform. */
+#define uint32_t unsigned int
+#endif
+
 #include <limits.h>
 
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#else
-#define PRIu32 "u"
-#define PRIx32 "x"
 #endif
 
 #ifdef _WIN32
