@@ -1224,7 +1224,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     /* this pathlen also contains the query and the fragment */
     pathlen = urllen - (path - url);
     if(hostlen) {
-      result = parse_authority(u, hostp, hostlen, flags, &host, !!u->scheme);
+      result = parse_authority(u, hostp, hostlen, flags, &host,
+                               u->scheme != NULL);
       if(!result && (flags & CURLU_GUESS_SCHEME) && !u->scheme)
         result = guess_scheme(u, &host);
     }
