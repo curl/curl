@@ -51,8 +51,8 @@ eval "require LWP::UserAgent";
 
 my %urls = (
     'autoland' => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt',
-    'beta'    => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/beta/security/nss/lib/ckfw/builtins/certdata.txt',
-    'release' => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/release/security/nss/lib/ckfw/builtins/certdata.txt',
+    'beta'     => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/beta/security/nss/lib/ckfw/builtins/certdata.txt',
+    'release'  => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/release/security/nss/lib/ckfw/builtins/certdata.txt',
 );
 
 $opt_d = 'release';
