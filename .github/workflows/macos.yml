@@ -220,24 +220,14 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          # autotools
           - name: '!ssl !debug brotli zstd'
-            compiler: clang
-            install: brotli zstd
-            configure: --without-ssl --with-brotli --with-zstd
+            compiler: gcc-13
+            configure: --without-ssl --with-brotli --with-zstd --with-apple-idn
             tflags: '--min=1450'
             xcode: ''  # default Xcode. Set it once to silence actionlint.
-          - name: '!ssl !debug'
-            compiler: gcc-13
-            configure: --without-ssl
-            tflags: '--min=950'
-          - name: '!ssl'
-            compiler: clang
-            generate: -DENABLE_DEBUG=ON -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
-            tflags: '--min=1500'
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
-            configure: --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2 --without-ssl --with-apple-idn
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
             tflags: '--min=1550'
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
@@ -284,14 +274,13 @@ jobs:
             compiler: clang
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
             tflags: '--test-event --min=1300'
-          # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
             compiler: clang
             install: libnghttp3 libngtcp2 gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
-            install: llvm brotli zstd gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
+            install: llvm gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
             install_steps: clang-tidy skiprun
             chkprefill: _chkprefill
             generate: >-
@@ -299,17 +288,19 @@ jobs:
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'HTTP/3 clang-tidy'
             compiler: clang
-            install: llvm brotli zstd libnghttp3 libngtcp2 openldap krb5
+            install: llvm libnghttp3 libngtcp2 openldap krb5
             install_steps: clang-tidy skipall
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
               -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
 
           - name: 'LibreSSL openldap krb5 c-ares +examples'
