@@ -588,6 +588,10 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
       drain_tunnel(cf, data, &ctx->tunnel);
     }
     break;
+  case NGHTTP2_RST_STREAM:
+    if(frame->rst_stream.error_code)
+      ctx->tunnel.reset = TRUE;
+    break;
   default:
     break;
   }
@@ -747,6 +751,8 @@ static int proxy_h2_on_stream_close(nghttp2_session *session,
               stream_id, nghttp2_http2_strerror(error_code), error_code);
   ctx->tunnel.closed = TRUE;
   ctx->tunnel.error = error_code;
+  if(error_code)
+    ctx->tunnel.reset = TRUE;
 
   return 0;
 }
@@ -1223,20 +1229,11 @@ static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
 
   *pnread = 0;
-  if(ctx->tunnel.error == NGHTTP2_REFUSED_STREAM) {
-    CURL_TRC_CF(data, cf, "[%d] REFUSED_STREAM, try again on a new "
-                "connection", ctx->tunnel.stream_id);
-    failf(data, "proxy server refused HTTP/2 stream");
-    return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
-  }
-  else if(ctx->tunnel.error != NGHTTP2_NO_ERROR) {
-    failf(data, "HTTP/2 stream %u was not closed cleanly: %s (err %u)",
-          ctx->tunnel.stream_id, nghttp2_http2_strerror(ctx->tunnel.error),
-          ctx->tunnel.error);
-    return CURLE_HTTP2_STREAM;
-  }
-  else if(ctx->tunnel.reset) {
-    failf(data, "HTTP/2 stream %u was reset", ctx->tunnel.stream_id);
+  if(ctx->tunnel.error) {
+    failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
+          " %s)", ctx->tunnel.stream_id,
+           ctx->tunnel.reset ? "server" : "curl",
+           ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
     return CURLE_RECV_ERROR;
   }
 
