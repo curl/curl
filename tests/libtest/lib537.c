@@ -60,7 +60,7 @@ static void t537_close_file_descriptors(void)
       t537_num_open.rlim_cur < t537_num_open.rlim_max;
       t537_num_open.rlim_cur++)
     if(t537_testfd[t537_num_open.rlim_cur] > 0)
-      close(t537_testfd[t537_num_open.rlim_cur]);
+      curlx_close(t537_testfd[t537_num_open.rlim_cur]);
   curlx_free(t537_testfd);
   t537_testfd = NULL;
 }
@@ -334,7 +334,7 @@ static int t537_test_rlimit(int keep_open)
       for(t537_num_open.rlim_cur = t537_num_open.rlim_max;
           t537_testfd[t537_num_open.rlim_cur] >= 0;
           t537_num_open.rlim_cur++) {
-        close(t537_testfd[t537_num_open.rlim_cur]);
+        curlx_close(t537_testfd[t537_num_open.rlim_cur]);
         t537_testfd[t537_num_open.rlim_cur] = -1;
       }
 
