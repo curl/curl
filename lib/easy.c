@@ -361,7 +361,7 @@ CURL *curl_easy_init(void)
   }
   global_init_unlock();
 
-  /* We use curl_open() with undefined URL so far */
+  /* We use Curl_open() with undefined URL so far */
   result = Curl_open(&data);
   if(result) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_open failed\n"));
