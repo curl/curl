@@ -263,7 +263,7 @@ jobs:
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
             macos-version-min: '10.15'
           - name: 'OpenSSL SecTrust'
             compiler: clang
