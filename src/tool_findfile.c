@@ -74,7 +74,7 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
       int fd = curlx_open(c, O_RDONLY);
       if(fd >= 0) {
         char *path = curlx_strdup(c);
-        close(fd);
+        curlx_close(fd);
         curl_free(c);
         return path;
       }
