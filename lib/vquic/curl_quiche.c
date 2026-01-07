@@ -855,6 +855,20 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
   DEBUGASSERT(stream);
   *pnread = 0;
   if(stream->reset) {
+    if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
+      infof(data, "HTTP/3 stream %" PRIu64 " refused by server, try again "
+            "on a new connection", stream->id);
+      connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
+      data->state.refused_stream = TRUE;
+      return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
+    }
+    else if(stream->resp_hds_complete && data->req.no_body) {
+        CURL_TRC_CF(data, cf, "[%" PRIu64 "] error after response headers, "
+                    "but we did not want a body anyway, ignore error 0x%"
+                    PRIx64 " %s", stream->id, stream->error3,
+                    vquic_h3_err_str(stream->error3));
+        return CURLE_OK;
+    }
     failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
           " %s)", stream->id, stream->error3,
           vquic_h3_err_str(stream->error3));

@@ -146,6 +146,7 @@ struct h2_stream_ctx {
   BIT(resp_hds_complete); /* we have a complete, final response */
   BIT(closed); /* TRUE on stream close */
   BIT(reset);  /* TRUE on stream reset */
+  BIT(reset_by_server);  /* TRUE on stream reset by server */
   BIT(close_handled); /* TRUE if stream closure is handled by libcurl */
   BIT(bodystarted);
   BIT(body_eos);    /* the complete body has been added to `sendbuf` and
@@ -1011,10 +1012,8 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     break;
   case NGHTTP2_RST_STREAM:
-    stream->closed = TRUE;
-    if(frame->rst_stream.error_code) {
-      stream->reset = TRUE;
-    }
+    if(frame->rst_stream.error_code)
+      stream->reset_by_server = TRUE;
     Curl_multi_mark_dirty(data);
     break;
   case NGHTTP2_WINDOW_UPDATE:
@@ -1332,9 +1331,8 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 
   stream->closed = TRUE;
   stream->error = error_code;
-  if(stream->error) {
+  if(stream->error)
     stream->reset = TRUE;
-  }
 
   if(stream->error)
     CURL_TRC_CF(data_s, cf, "[%d] RESET: %s (err %d)",
@@ -1686,36 +1684,31 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
   CURLcode result;
 
   *pnlen = 0;
-  if(stream->error == NGHTTP2_REFUSED_STREAM) {
-    CURL_TRC_CF(data, cf, "[%d] REFUSED_STREAM, try again on a new "
-                "connection", stream->id);
-    connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
-    data->state.refused_stream = TRUE;
-    return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
-  }
-  else if(stream->error != NGHTTP2_NO_ERROR) {
-    if(stream->resp_hds_complete && data->req.no_body) {
-      CURL_TRC_CF(data, cf, "[%d] error after response headers, but we did "
-                  "not want a body anyway, ignore: %s (err %u)",
-                  stream->id, nghttp2_http2_strerror(stream->error),
-                  stream->error);
-      stream->close_handled = TRUE;
-      return CURLE_OK;
+  if(stream->reset) {
+    if(stream->error == NGHTTP2_REFUSED_STREAM) {
+      infof(data, "HTTP/2 stream %d refused by server, try again on a new "
+                  "connection", stream->id);
+      connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
+      data->state.refused_stream = TRUE;
+      return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
-    failf(data, "HTTP/2 stream %u was not closed cleanly: %s (err %u)",
-          stream->id, nghttp2_http2_strerror(stream->error),
-          stream->error);
-    return CURLE_HTTP2_STREAM;
+    else if(stream->resp_hds_complete && data->req.no_body) {
+        CURL_TRC_CF(data, cf, "[%d] error after response headers, but we did "
+                    "not want a body anyway, ignore: %s (err %u)",
+                    stream->id, nghttp2_http2_strerror(stream->error),
+                    stream->error);
+        stream->close_handled = TRUE;
+        return CURLE_OK;
+    }
+    failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
+          " %s)", stream->id, stream->reset_by_server ? "server" : "curl",
+           stream->error, nghttp2_http2_strerror(stream->error));
+    return stream->error ? CURLE_HTTP2_STREAM :
+           (data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP2);
   }
-  else if(stream->reset) {
-    failf(data, "HTTP/2 stream %u was reset", stream->id);
-    return data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP2;
-  }
-
-  if(!stream->bodystarted) {
-    failf(data, "HTTP/2 stream %u was closed cleanly, but before getting "
-          " all response header fields, treated as error",
-          stream->id);
+  else if(!stream->bodystarted) {
+    failf(data, "HTTP/2 stream %d was closed cleanly, but before getting "
+          " all response header fields, treated as error", stream->id);
     return CURLE_HTTP2_STREAM;
   }
 
