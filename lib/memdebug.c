@@ -497,8 +497,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
-  /* !checksrc! disable BANNEDFUNC 1 */
-  FILE *res = fdopen(filedes, mode);
+  FILE *res = CURLX_FDOPEN_LOW(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
