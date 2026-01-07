@@ -461,7 +461,9 @@
 #if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
 #endif
+#if !defined(_MSC_VER) || (_MSC_VER >= 1800)
 #include <inttypes.h>
+#endif
 
 #include <limits.h>
 
