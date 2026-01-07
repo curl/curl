@@ -471,6 +471,9 @@
 #ifndef PRIu32
 #define PRIu32 "u"
 #endif
+#ifndef PRIx32
+#define PRIx32 "x"
+#endif
 
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
