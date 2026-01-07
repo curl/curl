@@ -89,10 +89,6 @@
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
-/* Avoid VS2005 and upper complaining about portable C functions. */
-#ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
-#endif
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
 #endif
@@ -808,6 +804,13 @@
 #  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
 #  undef  write
 #  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
+/* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about non-portable funcs */
+#  undef fileno
+#  define fileno(fh) _fileno(fh)
+#  undef unlink
+#  define unlink(fn) _unlink(fn)
+#  undef isatty
+#  define isatty(fd) _isatty(fd)
 #endif
 
 /*

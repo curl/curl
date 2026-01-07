@@ -23,14 +23,13 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef _WIN32
-#include <direct.h>
-#endif
-
 #include "tool_dirhie.h"
 #include "tool_msgs.h"
 
-#if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
+#ifdef _WIN32
+#  include <direct.h>
+#  define mkdir(x, y) _mkdir(x)
+#elif defined(MSDOS) && !defined(__DJGPP__)
 #  define mkdir(x, y) (mkdir)(x)
 #endif
 

@@ -349,7 +349,7 @@ static CURLcode socket_open(struct Curl_easy *data,
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
     failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
-    close(*sockfd);
+    sclose(*sockfd);
     *sockfd = CURL_SOCKET_BAD;
     return CURLE_COULDNT_CONNECT;
   }

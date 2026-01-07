@@ -379,7 +379,7 @@ static void exit_signal_handler(int signum)
 #endif
       static const char msg[] = "exit_signal_handler: called\n";
       (void)!write(fd, msg, sizeof(msg) - 1);
-      close(fd);
+      curlx_close(fd);
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";

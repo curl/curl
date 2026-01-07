@@ -70,6 +70,7 @@ my %banfunc = (
     "atoi" => 1,
     "atol" => 1,
     "calloc" => 1,
+    "close" => 1,
     "CreateFile" => 1,
     "CreateFileA" => 1,
     "CreateFileW" => 1,

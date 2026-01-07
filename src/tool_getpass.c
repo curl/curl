@@ -187,7 +187,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
   }
 
   if(STDIN_FILENO != fd)
-    close(fd);
+    curlx_close(fd);
 
   return password; /* return pointer to buffer */
 }
