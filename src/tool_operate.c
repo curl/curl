@@ -607,22 +607,21 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   if(!curl || !config)
     return result;
 
+#ifdef _WIN32
   if(per->uploadfile) {
     if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#ifndef CURL_WINDOWS_UWP
       sclose(per->infd);
 #else
-      warnf("Closing per->infd != 0: FD == "
-            "%d. This behavior is only supported on desktop "
-            " Windows", per->infd);
+      warnf("Closing per->infd != 0: FD == %d. "
+            "This behavior is only supported on desktop Windows", per->infd);
 #endif
     }
   }
-  else {
-    if(per->infdopen) {
+  else
+#endif
+    if(per->infdopen)
       close(per->infd);
-    }
-  }
 
   if(per->skip)
     goto skip;
