@@ -898,17 +898,301 @@ end:
   return result ? 1 : 0; /* success */
 }
 
+static CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
+                            struct dynbuf *host, const char **pathp,
+                            size_t *pathlenp)
+{
+  const char *path;
+  size_t pathlen;
+  bool uncpath = FALSE;
+  if(urllen <= 6)
+    /* file:/ is not enough to actually be a complete file: URL */
+    return CURLUE_BAD_FILE_URL;
+
+  /* path has been allocated large enough to hold this */
+  path = &url[5];
+  pathlen = urllen - 5;
+
+  u->scheme = curlx_strdup("file");
+  if(!u->scheme)
+    return CURLUE_OUT_OF_MEMORY;
+
+  /* Extra handling URLs with an authority component (i.e. that start with
+   * "file://")
+   *
+   * We allow omitted hostname (e.g. file:/<path>) -- valid according to
+   * RFC 8089, but not the (current) WHAT-WG URL spec.
+   */
+  if(path[0] == '/' && path[1] == '/') {
+    /* swallow the two slashes */
+    const char *ptr = &path[2];
+
+    /*
+     * According to RFC 8089, a file: URL can be reliably dereferenced if:
+     *
+     *  o it has no/blank hostname, or
+     *
+     *  o the hostname matches "localhost" (case-insensitively), or
+     *
+     *  o the hostname is a FQDN that resolves to this machine, or
+     *
+     *  o it is an UNC String transformed to an URI (Windows only, RFC 8089
+     *    Appendix E.3).
+     *
+     * For brevity, we only consider URLs with empty, "localhost", or
+     * "127.0.0.1" hostnames as local, otherwise as an UNC String.
+     *
+     * Additionally, there is an exception for URLs with a Windows drive
+     * letter in the authority (which was accidentally omitted from RFC 8089
+     * Appendix E, but believe me, it was meant to be there. --MK)
+     */
+    if(ptr[0] != '/' && !STARTS_WITH_URL_DRIVE_PREFIX(ptr)) {
+      /* the URL includes a hostname, it must match "localhost" or
+         "127.0.0.1" to be valid */
+      if(checkprefix("localhost/", ptr) ||
+         checkprefix("127.0.0.1/", ptr)) {
+        ptr += 9; /* now points to the slash after the host */
+      }
+      else {
+#ifdef _WIN32
+        size_t len;
+
+        /* the hostname, NetBIOS computer name, can not contain disallowed
+           chars, and the delimiting slash character must be appended to the
+           hostname */
+        path = strpbrk(ptr, "/\\:*?\"<>|");
+        if(!path || *path != '/')
+          return CURLUE_BAD_FILE_URL;
+
+        len = path - ptr;
+        if(len) {
+          CURLcode code = curlx_dyn_addn(host, ptr, len);
+          if(code)
+            return cc2cu(code);
+          uncpath = TRUE;
+        }
+
+        ptr -= 2; /* now points to the // before the host in UNC */
+#else
+        /* Invalid file://hostname/, expected localhost or 127.0.0.1 or
+           none */
+        return CURLUE_BAD_FILE_URL;
+#endif
+      }
+    }
+
+    path = ptr;
+    pathlen = urllen - (ptr - url);
+  }
+
+  if(!uncpath)
+    /* no host for file: URLs by default */
+    curlx_dyn_reset(host);
+
+#if !defined(_WIN32) && !defined(MSDOS) && !defined(__CYGWIN__)
+  /* Do not allow Windows drive letters when not in Windows.
+   * This catches both "file:/c:" and "file:c:" */
+  if(('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) ||
+     STARTS_WITH_URL_DRIVE_PREFIX(path)) {
+    /* File drive letters are only accepted in MS-DOS/Windows */
+    return CURLUE_BAD_FILE_URL;
+  }
+#else
+  /* If the path starts with a slash and a drive letter, ditch the slash */
+  if('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) {
+    /* This cannot be done with strcpy, as the memory chunks overlap! */
+    path++;
+    pathlen--;
+  }
+#endif
+  *pathp = path;
+  *pathlenp = pathlen;
+  return CURLUE_OK;
+}
+
+static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
+                              size_t schemelen, unsigned int flags,
+                              const char **hostpp)
+{
+  /* clear path */
+  const char *schemep = NULL;
+
+  if(schemelen) {
+    int i = 0;
+    const char *p = &url[schemelen + 1];
+    while((*p == '/') && (i < 4)) {
+      p++;
+      i++;
+    }
+
+    schemep = schemebuf;
+    if(!Curl_get_scheme_handler(schemep) &&
+       !(flags & CURLU_NON_SUPPORT_SCHEME))
+      return CURLUE_UNSUPPORTED_SCHEME;
+
+    if((i < 1) || (i > 3))
+      /* less than one or more than three slashes */
+      return CURLUE_BAD_SLASHES;
+
+    *hostpp = p; /* hostname starts here */
+  }
+  else {
+    /* no scheme! */
+
+    if(!(flags & (CURLU_DEFAULT_SCHEME | CURLU_GUESS_SCHEME)))
+      return CURLUE_BAD_SCHEME;
+
+    if(flags & CURLU_DEFAULT_SCHEME)
+      schemep = DEFAULT_SCHEME;
+
+    /*
+     * The URL was badly formatted, let's try without scheme specified.
+     */
+    *hostpp = url;
+  }
+
+  if(schemep) {
+    u->scheme = curlx_strdup(schemep);
+    if(!u->scheme)
+      return CURLUE_OUT_OF_MEMORY;
+  }
+  return CURLUE_OK;
+}
+
+static CURLUcode guess_scheme(CURLU *u, struct dynbuf *host)
+{
+  const char *hostname = curlx_dyn_ptr(host);
+  const char *schemep = NULL;
+  /* legacy curl-style guess based on hostname */
+  if(checkprefix("ftp.", hostname))
+    schemep = "ftp";
+  else if(checkprefix("dict.", hostname))
+    schemep = "dict";
+  else if(checkprefix("ldap.", hostname))
+    schemep = "ldap";
+  else if(checkprefix("imap.", hostname))
+    schemep = "imap";
+  else if(checkprefix("smtp.", hostname))
+    schemep = "smtp";
+  else if(checkprefix("pop3.", hostname))
+    schemep = "pop3";
+  else
+    schemep = "http";
+
+  u->scheme = curlx_strdup(schemep);
+  if(!u->scheme)
+    return CURLUE_OUT_OF_MEMORY;
+
+  u->guessed_scheme = TRUE;
+  return CURLUE_OK;
+}
+
+static CURLUcode handle_fragment(CURLU *u, const char *fragment,
+                                 size_t fraglen, unsigned int flags)
+{
+  CURLUcode result;
+  u->fragment_present = TRUE;
+  if(fraglen > 1) {
+    /* skip the leading '#' in the copy but include the terminating null */
+    if(flags & CURLU_URLENCODE) {
+      struct dynbuf enc;
+      curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+      result = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE);
+      if(result)
+        return result;
+      u->fragment = curlx_dyn_ptr(&enc);
+    }
+    else {
+      u->fragment = Curl_memdup0(fragment + 1, fraglen - 1);
+      if(!u->fragment)
+        return CURLUE_OUT_OF_MEMORY;
+    }
+  }
+  return CURLUE_OK;
+}
+
+static CURLUcode handle_query(CURLU *u, const char *query,
+                              size_t qlen, unsigned int flags)
+{
+  u->query_present = TRUE;
+  if(qlen > 1) {
+    if(flags & CURLU_URLENCODE) {
+      struct dynbuf enc;
+      CURLUcode result;
+      curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+      /* skip the leading question mark */
+      result = urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE);
+      if(result)
+        return result;
+      u->query = curlx_dyn_ptr(&enc);
+    }
+    else {
+      u->query = Curl_memdup0(query + 1, qlen - 1);
+      if(!u->query)
+        return CURLUE_OUT_OF_MEMORY;
+    }
+  }
+  else {
+    /* single byte query */
+    u->query = curlx_strdup("");
+    if(!u->query)
+      return CURLUE_OUT_OF_MEMORY;
+  }
+  return CURLUE_OK;
+}
+
+static CURLUcode handle_path(CURLU *u, const char *path,
+                             size_t pathlen, unsigned int flags)
+{
+  CURLUcode result;
+  if(pathlen && (flags & CURLU_URLENCODE)) {
+    struct dynbuf enc;
+    curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+    result = urlencode_str(&enc, path, pathlen, TRUE, FALSE);
+    if(result)
+      return result;
+    pathlen = curlx_dyn_len(&enc);
+    path = u->path = curlx_dyn_ptr(&enc);
+  }
+
+  if(pathlen <= 1) {
+    /* there is no path left or just the slash, unset */
+    path = NULL;
+  }
+  else {
+    if(!u->path) {
+      u->path = Curl_memdup0(path, pathlen);
+      if(!u->path)
+        return CURLUE_OUT_OF_MEMORY;
+      path = u->path;
+    }
+    else if(flags & CURLU_URLENCODE)
+      /* it might have encoded more than just the path so cut it */
+      u->path[pathlen] = 0;
+
+    if(!(flags & CURLU_PATH_AS_IS)) {
+      /* remove ../ and ./ sequences according to RFC3986 */
+      char *dedot;
+      int err = dedotdotify(path, pathlen, &dedot);
+      if(err)
+        return CURLUE_OUT_OF_MEMORY;
+      if(dedot) {
+        curlx_free(u->path);
+        u->path = dedot;
+      }
+    }
+  }
+  return CURLUE_OK;
+}
+
 static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 {
   const char *path;
   size_t pathlen;
-  char *query = NULL;
-  char *fragment = NULL;
   char schemebuf[MAX_SCHEME_LEN + 1];
   size_t schemelen = 0;
   size_t urllen;
   CURLUcode result = CURLUE_OK;
-  size_t fraglen = 0;
   struct dynbuf host;
 
   DEBUGASSERT(url);
@@ -924,170 +1208,14 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
                                             CURLU_DEFAULT_SCHEME));
 
   /* handle the file: scheme */
-  if(schemelen && !strcmp(schemebuf, "file")) {
-    bool uncpath = FALSE;
-    if(urllen <= 6) {
-      /* file:/ is not enough to actually be a complete file: URL */
-      result = CURLUE_BAD_FILE_URL;
-      goto fail;
-    }
-
-    /* path has been allocated large enough to hold this */
-    path = &url[5];
-    pathlen = urllen - 5;
-
-    u->scheme = curlx_strdup("file");
-    if(!u->scheme) {
-      result = CURLUE_OUT_OF_MEMORY;
-      goto fail;
-    }
-
-    /* Extra handling URLs with an authority component (i.e. that start with
-     * "file://")
-     *
-     * We allow omitted hostname (e.g. file:/<path>) -- valid according to
-     * RFC 8089, but not the (current) WHAT-WG URL spec.
-     */
-    if(path[0] == '/' && path[1] == '/') {
-      /* swallow the two slashes */
-      const char *ptr = &path[2];
-
-      /*
-       * According to RFC 8089, a file: URL can be reliably dereferenced if:
-       *
-       *  o it has no/blank hostname, or
-       *
-       *  o the hostname matches "localhost" (case-insensitively), or
-       *
-       *  o the hostname is a FQDN that resolves to this machine, or
-       *
-       *  o it is an UNC String transformed to an URI (Windows only, RFC 8089
-       *    Appendix E.3).
-       *
-       * For brevity, we only consider URLs with empty, "localhost", or
-       * "127.0.0.1" hostnames as local, otherwise as an UNC String.
-       *
-       * Additionally, there is an exception for URLs with a Windows drive
-       * letter in the authority (which was accidentally omitted from RFC 8089
-       * Appendix E, but believe me, it was meant to be there. --MK)
-       */
-      if(ptr[0] != '/' && !STARTS_WITH_URL_DRIVE_PREFIX(ptr)) {
-        /* the URL includes a hostname, it must match "localhost" or
-           "127.0.0.1" to be valid */
-        if(checkprefix("localhost/", ptr) ||
-           checkprefix("127.0.0.1/", ptr)) {
-          ptr += 9; /* now points to the slash after the host */
-        }
-        else {
-#ifdef _WIN32
-          size_t len;
-
-          /* the hostname, NetBIOS computer name, can not contain disallowed
-             chars, and the delimiting slash character must be appended to the
-             hostname */
-          path = strpbrk(ptr, "/\\:*?\"<>|");
-          if(!path || *path != '/') {
-            result = CURLUE_BAD_FILE_URL;
-            goto fail;
-          }
-
-          len = path - ptr;
-          if(len) {
-            CURLcode code = curlx_dyn_addn(&host, ptr, len);
-            if(code) {
-              result = cc2cu(code);
-              goto fail;
-            }
-            uncpath = TRUE;
-          }
-
-          ptr -= 2; /* now points to the // before the host in UNC */
-#else
-          /* Invalid file://hostname/, expected localhost or 127.0.0.1 or
-             none */
-          result = CURLUE_BAD_FILE_URL;
-          goto fail;
-#endif
-        }
-      }
-
-      path = ptr;
-      pathlen = urllen - (ptr - url);
-    }
-
-    if(!uncpath)
-      /* no host for file: URLs by default */
-      curlx_dyn_reset(&host);
-
-#if !defined(_WIN32) && !defined(MSDOS) && !defined(__CYGWIN__)
-    /* Do not allow Windows drive letters when not in Windows.
-     * This catches both "file:/c:" and "file:c:" */
-    if(('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) ||
-       STARTS_WITH_URL_DRIVE_PREFIX(path)) {
-      /* File drive letters are only accepted in MS-DOS/Windows */
-      result = CURLUE_BAD_FILE_URL;
-      goto fail;
-    }
-#else
-    /* If the path starts with a slash and a drive letter, ditch the slash */
-    if('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) {
-      /* This cannot be done with strcpy, as the memory chunks overlap! */
-      path++;
-      pathlen--;
-    }
-#endif
-  }
+  if(schemelen && !strcmp(schemebuf, "file"))
+    result = parse_file(url, urllen, u, &host, &path, &pathlen);
   else {
-    /* clear path */
-    const char *schemep = NULL;
-    const char *hostp;
+    const char *hostp = NULL;
     size_t hostlen;
-
-    if(schemelen) {
-      int i = 0;
-      const char *p = &url[schemelen + 1];
-      while((*p == '/') && (i < 4)) {
-        p++;
-        i++;
-      }
-
-      schemep = schemebuf;
-      if(!Curl_get_scheme_handler(schemep) &&
-         !(flags & CURLU_NON_SUPPORT_SCHEME)) {
-        result = CURLUE_UNSUPPORTED_SCHEME;
-        goto fail;
-      }
-
-      if((i < 1) || (i > 3)) {
-        /* less than one or more than three slashes */
-        result = CURLUE_BAD_SLASHES;
-        goto fail;
-      }
-      hostp = p; /* hostname starts here */
-    }
-    else {
-      /* no scheme! */
-
-      if(!(flags & (CURLU_DEFAULT_SCHEME | CURLU_GUESS_SCHEME))) {
-        result = CURLUE_BAD_SCHEME;
-        goto fail;
-      }
-      if(flags & CURLU_DEFAULT_SCHEME)
-        schemep = DEFAULT_SCHEME;
-
-      /*
-       * The URL was badly formatted, let's try without scheme specified.
-       */
-      hostp = url;
-    }
-
-    if(schemep) {
-      u->scheme = curlx_strdup(schemep);
-      if(!u->scheme) {
-        result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
-      }
-    }
+    result = parse_scheme(url, u, schemebuf, schemelen, flags, &hostp);
+    if(result)
+      goto fail;
 
     /* find the end of the hostname + port number */
     hostlen = strcspn(hostp, "/?#");
@@ -1096,155 +1224,45 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     /* this pathlen also contains the query and the fragment */
     pathlen = urllen - (path - url);
     if(hostlen) {
-
-      result = parse_authority(u, hostp, hostlen, flags, &host, schemelen);
-      if(result)
-        goto fail;
-
-      if((flags & CURLU_GUESS_SCHEME) && !schemep) {
-        const char *hostname = curlx_dyn_ptr(&host);
-        /* legacy curl-style guess based on hostname */
-        if(checkprefix("ftp.", hostname))
-          schemep = "ftp";
-        else if(checkprefix("dict.", hostname))
-          schemep = "dict";
-        else if(checkprefix("ldap.", hostname))
-          schemep = "ldap";
-        else if(checkprefix("imap.", hostname))
-          schemep = "imap";
-        else if(checkprefix("smtp.", hostname))
-          schemep = "smtp";
-        else if(checkprefix("pop3.", hostname))
-          schemep = "pop3";
-        else
-          schemep = "http";
-
-        u->scheme = curlx_strdup(schemep);
-        if(!u->scheme) {
-          result = CURLUE_OUT_OF_MEMORY;
-          goto fail;
-        }
-        u->guessed_scheme = TRUE;
-      }
+      result = parse_authority(u, hostp, hostlen, flags, &host,
+                               u->scheme != NULL);
+      if(!result && (flags & CURLU_GUESS_SCHEME) && !u->scheme)
+        result = guess_scheme(u, &host);
     }
     else if(flags & CURLU_NO_AUTHORITY) {
       /* allowed to be empty. */
-      if(curlx_dyn_add(&host, "")) {
+      if(curlx_dyn_add(&host, ""))
         result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
-      }
     }
-    else {
+    else
       result = CURLUE_NO_HOST;
-      goto fail;
+  }
+  if(!result) {
+    /* The path might at this point contain a fragment and/or a query to
+       handle */
+    const char *fragment = strchr(path, '#');
+    if(fragment) {
+      size_t fraglen = pathlen - (fragment - path);
+      result = handle_fragment(u, fragment, fraglen, flags);
+      /* after this, pathlen still contains the query */
+      pathlen -= fraglen;
     }
   }
-
-  fragment = strchr(path, '#');
-  if(fragment) {
-    fraglen = pathlen - (fragment - path);
-    u->fragment_present = TRUE;
-    if(fraglen > 1) {
-      /* skip the leading '#' in the copy but include the terminating null */
-      if(flags & CURLU_URLENCODE) {
-        struct dynbuf enc;
-        curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-        result = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE);
-        if(result)
-          goto fail;
-        u->fragment = curlx_dyn_ptr(&enc);
-      }
-      else {
-        u->fragment = Curl_memdup0(fragment + 1, fraglen - 1);
-        if(!u->fragment) {
-          result = CURLUE_OUT_OF_MEMORY;
-          goto fail;
-        }
-      }
-    }
-    /* after this, pathlen still contains the query */
-    pathlen -= fraglen;
-  }
-
-  query = memchr(path, '?', pathlen);
-  if(query) {
-    size_t qlen = fragment ? (size_t)(fragment - query) :
-      pathlen - (query - path);
-    pathlen -= qlen;
-    u->query_present = TRUE;
-    if(qlen > 1) {
-      if(flags & CURLU_URLENCODE) {
-        struct dynbuf enc;
-        curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-        /* skip the leading question mark */
-        result = urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE);
-        if(result)
-          goto fail;
-        u->query = curlx_dyn_ptr(&enc);
-      }
-      else {
-        u->query = Curl_memdup0(query + 1, qlen - 1);
-        if(!u->query) {
-          result = CURLUE_OUT_OF_MEMORY;
-          goto fail;
-        }
-      }
-    }
-    else {
-      /* single byte query */
-      u->query = curlx_strdup("");
-      if(!u->query) {
-        result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
-      }
+  if(!result) {
+    const char *query = memchr(path, '?', pathlen);
+    if(query) {
+      size_t qlen = pathlen - (query - path);
+      result = handle_query(u, query, qlen, flags);
+      pathlen -= qlen;
     }
   }
-
-  if(pathlen && (flags & CURLU_URLENCODE)) {
-    struct dynbuf enc;
-    curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    result = urlencode_str(&enc, path, pathlen, TRUE, FALSE);
-    if(result)
-      goto fail;
-    pathlen = curlx_dyn_len(&enc);
-    path = u->path = curlx_dyn_ptr(&enc);
+  if(!result)
+    /* the fragment and query parts are trimmed off from the path */
+    result = handle_path(u, path, pathlen, flags);
+  if(!result) {
+    u->host = curlx_dyn_ptr(&host);
+    return CURLUE_OK;
   }
-
-  if(pathlen <= 1) {
-    /* there is no path left or just the slash, unset */
-    path = NULL;
-  }
-  else {
-    if(!u->path) {
-      u->path = Curl_memdup0(path, pathlen);
-      if(!u->path) {
-        result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
-      }
-      path = u->path;
-    }
-    else if(flags & CURLU_URLENCODE)
-      /* it might have encoded more than just the path so cut it */
-      u->path[pathlen] = 0;
-
-    if(!(flags & CURLU_PATH_AS_IS)) {
-      /* remove ../ and ./ sequences according to RFC3986 */
-      char *dedot;
-      int err = dedotdotify(path, pathlen, &dedot);
-      if(err) {
-        result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
-      }
-      if(dedot) {
-        curlx_free(u->path);
-        u->path = dedot;
-      }
-    }
-  }
-
-  u->host = curlx_dyn_ptr(&host);
-
-  return result;
 fail:
   curlx_dyn_free(&host);
   free_urlhandle(u);
