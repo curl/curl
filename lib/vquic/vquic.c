@@ -742,6 +742,56 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+const char *vquic_h3_err_str(uint64_t error_code)
+{
+  if(error_code <= UINT_MAX) {
+    switch((unsigned int)error_code) {
+    case CURL_H3_ERR_NO_ERROR:
+      return "NO_ERROR";
+    case CURL_H3_ERR_GENERAL_PROTOCOL_ERROR:
+      return "GENERAL_PROTOCOL_ERROR";
+    case CURL_H3_ERR_INTERNAL_ERROR:
+      return "INTERNAL_ERROR";
+    case CURL_H3_ERR_STREAM_CREATION_ERROR:
+      return "STREAM_CREATION_ERROR";
+    case CURL_H3_ERR_CLOSED_CRITICAL_STREAM:
+      return "CLOSED_CRITICAL_STREAM";
+    case CURL_H3_ERR_FRAME_UNEXPECTED:
+      return "FRAME_UNEXPECTED";
+    case CURL_H3_ERR_FRAME_ERROR:
+      return "FRAME_ERROR";
+    case CURL_H3_ERR_EXCESSIVE_LOAD:
+      return "EXCESSIVE_LOAD";
+    case CURL_H3_ERR_ID_ERROR:
+      return "ID_ERROR";
+    case CURL_H3_ERR_SETTINGS_ERROR:
+      return "SETTINGS_ERROR";
+    case CURL_H3_ERR_MISSING_SETTINGS:
+      return "MISSING_SETTINGS";
+    case CURL_H3_ERR_REQUEST_REJECTED:
+      return "REQUEST_REJECTED";
+    case CURL_H3_ERR_REQUEST_CANCELLED:
+      return "REQUEST_CANCELLED";
+    case CURL_H3_ERR_REQUEST_INCOMPLETE:
+      return "REQUEST_INCOMPLETE";
+    case CURL_H3_ERR_MESSAGE_ERROR:
+      return "MESSAGE_ERROR";
+    case CURL_H3_ERR_CONNECT_ERROR:
+      return "CONNECT_ERROR";
+    case CURL_H3_ERR_VERSION_FALLBACK:
+      return "VERSION_FALLBACK";
+    default:
+      break;
+    }
+  }
+  /* RFC 9114 ch. 8.1 + 9, reserved future error codes that are NO_ERROR */
+  if((error_code >= 0x21) && !((error_code - 0x21) % 0x1f))
+    return "NO_ERROR";
+  return "unknown";
+}
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+
 #if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
 
 static void *vquic_ngtcp2_malloc(size_t size, void *user_data)

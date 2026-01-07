@@ -855,7 +855,9 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
   DEBUGASSERT(stream);
   *pnread = 0;
   if(stream->reset) {
-    failf(data, "HTTP/3 stream %" PRIu64 " reset by server", stream->id);
+    failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
+          " %s)", stream->id, stream->error3,
+          vquic_h3_err_str(stream->error3));
     result = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_recv, was reset -> %d",
                 stream->id, result);
