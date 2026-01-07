@@ -902,8 +902,8 @@ static CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
                             struct dynbuf *host, const char **pathp,
                             size_t *pathlenp)
 {
-  const char *path = *pathp;
-  size_t pathlen = *pathlenp;
+  const char *path;
+  size_t pathlen;
   bool uncpath = FALSE;
   if(urllen <= 6)
     /* file:/ is not enough to actually be a complete file: URL */
