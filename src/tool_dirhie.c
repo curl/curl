@@ -32,9 +32,6 @@
 
 #if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
 #  define mkdir(x, y) (mkdir)(x)
-#  ifndef F_OK
-#  define F_OK 0
-#  endif
 #endif
 
 static void show_dir_errno(const char *name)
