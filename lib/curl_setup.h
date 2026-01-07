@@ -89,10 +89,6 @@
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
-/* Avoid VS2005 and upper complaining about portable C functions. */
-#ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
-#endif
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
 #endif
@@ -808,6 +804,14 @@
 #  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
 #  undef  write
 #  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
+
+/* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about portable functions */
+#  undef close
+#  define close(fd) _close(fd)
+#  undef fileno
+#  define fileno(fh) _fileno(fh)
+#  undef unlink
+#  define _unlink(fn) _unlink(fn)
 #endif
 
 /*
@@ -853,13 +857,13 @@
 
 /* For MSVC (all versions as of VS2022) */
 #ifndef STDIN_FILENO
-#define STDIN_FILENO  fileno(stdin)
+#define STDIN_FILENO  _fileno(stdin)
 #endif
 #ifndef STDOUT_FILENO
-#define STDOUT_FILENO  fileno(stdout)
+#define STDOUT_FILENO  _fileno(stdout)
 #endif
 #ifndef STDERR_FILENO
-#define STDERR_FILENO  fileno(stderr)
+#define STDERR_FILENO  _fileno(stderr)
 #endif
 
 /* Since O_BINARY is used in bitmasks, setting it to zero makes it usable in
