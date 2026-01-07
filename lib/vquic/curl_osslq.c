@@ -2077,7 +2077,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
   *pnread = 0;
   if(stream->reset) {
     failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
-          " %s)", stream->id, stream->error3,
+          " %s)", stream->s.id, stream->error3,
           vquic_h3_err_str(stream->error3));
     return data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
   }
