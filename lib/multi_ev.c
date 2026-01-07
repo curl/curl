@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
@@ -29,7 +28,6 @@
 #include "cfilters.h"
 #include "curl_trc.h"
 #include "multiif.h"
-#include "curlx/timeval.h"
 #include "multi_ev.h"
 #include "select.h"
 #include "uint-bset.h"

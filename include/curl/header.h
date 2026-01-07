@@ -38,11 +38,11 @@ struct curl_header {
 };
 
 /* 'origin' bits */
-#define CURLH_HEADER    (1<<0) /* plain server header */
-#define CURLH_TRAILER   (1<<1) /* trailers */
-#define CURLH_CONNECT   (1<<2) /* CONNECT headers */
-#define CURLH_1XX       (1<<3) /* 1xx headers */
-#define CURLH_PSEUDO    (1<<4) /* pseudo headers */
+#define CURLH_HEADER    (1 << 0) /* plain server header */
+#define CURLH_TRAILER   (1 << 1) /* trailers */
+#define CURLH_CONNECT   (1 << 2) /* CONNECT headers */
+#define CURLH_1XX       (1 << 3) /* 1xx headers */
+#define CURLH_PSEUDO    (1 << 4) /* pseudo headers */
 
 typedef enum {
   CURLHE_OK,

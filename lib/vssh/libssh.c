@@ -24,7 +24,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifdef USE_LIBSSH
@@ -49,7 +48,6 @@
 #include "../hostip.h"
 #include "../progress.h"
 #include "../transfer.h"
-#include "../http.h"               /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
 #include "../url.h"
 #include "../cfilters.h"
@@ -923,7 +921,11 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
           "keyboard-interactive, " : "",
           sshc->auth_methods & SSH_AUTH_METHOD_PASSWORD ?
           "password": "");
-  if(sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) {
+  /* For public key auth we need either the private key or
+     CURLSSH_AUTH_AGENT. */
+  if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&
+     (data->set.str[STRING_SSH_PRIVATE_KEY] ||
+      (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
     myssh_to(data, sshc, SSH_AUTH_PKEY_INIT);
     infof(data, "Authentication using SSH public key file");
   }
@@ -2629,6 +2631,11 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     infof(data, "Known hosts: %s", data->set.str[STRING_SSH_KNOWNHOSTS]);
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_KNOWNHOSTS,
                          data->set.str[STRING_SSH_KNOWNHOSTS]);
+    if(rc == SSH_OK)
+      /* libssh has two separate options for this. Set both to the same file
+         to avoid surprises */
+      rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_GLOBAL_KNOWNHOSTS,
+                           data->set.str[STRING_SSH_KNOWNHOSTS]);
     if(rc != SSH_OK) {
       failf(data, "Could not set known hosts file path");
       return CURLE_FAILED_INIT;

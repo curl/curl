@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
@@ -29,53 +28,78 @@
 #include "multiif.h"
 #include "progress.h"
 #include "transfer.h"
-#include "curlx/timeval.h"
+#include "curlx/strcopy.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000
 
 #ifndef CURL_DISABLE_PROGRESS_METER
-/* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
-   byte) */
-static void time2str(char *r, curl_off_t seconds)
+/* Provide a string that is 7 letters long (plus the zero byte).
+
+   Unit test 1636.
+*/
+UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds);
+UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
 {
   curl_off_t h;
   if(seconds <= 0) {
-    strcpy(r, "--:--:--");
+    curlx_strcopy(r, rsize, "       ", 7);
     return;
   }
   h = seconds / 3600;
   if(h <= 99) {
     curl_off_t m = (seconds - (h * 3600)) / 60;
-    curl_off_t s = (seconds - (h * 3600)) - (m * 60);
-    curl_msnprintf(r, 9, "%2" FMT_OFF_T ":%02" FMT_OFF_T ":%02" FMT_OFF_T,
-                   h, m, s);
+    if(h <= 9) {
+      curl_off_t s = (seconds - (h * 3600)) - (m * 60);
+      if(h)
+        curl_msnprintf(r, rsize, "%" FMT_OFF_T ":%02" FMT_OFF_T ":"
+                       "%02" FMT_OFF_T, h, m, s);
+      else
+        curl_msnprintf(r, rsize, "  %02" FMT_OFF_T ":%02" FMT_OFF_T, m, s);
+    }
+    else
+      curl_msnprintf(r, rsize, "%" FMT_OFF_T "h %02" FMT_OFF_T "m", h, m);
   }
   else {
-    /* this equals to more than 99 hours, switch to a more suitable output
-       format to fit within the limits. */
     curl_off_t d = seconds / 86400;
     h = (seconds - (d * 86400)) / 3600;
-    if(d <= 999)
-      curl_msnprintf(r, 9, "%3" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
-    else
-      curl_msnprintf(r, 9, "%7" FMT_OFF_T "d", d);
+    if(d <= 99)
+      curl_msnprintf(r, rsize, "%2" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
+    else if(d <= 999)
+      curl_msnprintf(r, rsize, "%6" FMT_OFF_T "d", d);
+    else { /* more than 999 days */
+      curl_off_t m = d / 30;
+      if(m <= 999)
+        curl_msnprintf(r, rsize, "%6" FMT_OFF_T "m", m);
+      else { /* more than 999 months */
+        curl_off_t y = d / 365;
+        if(y <= 99999)
+          curl_msnprintf(r, rsize, "%6" FMT_OFF_T "y", y);
+        else
+          curlx_strcopy(r, rsize, ">99999y", 7);
+      }
+    }
   }
 }
 
 /* The point of this function would be to return a string of the input data,
    but never longer than 6 columns (+ one zero byte).
-   Add suffix k, M, G when suitable... */
-static char *max6data(curl_off_t bytes, char *max6)
+   Add suffix k, M, G when suitable...
+
+   Unit test 1636
+*/
+UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen);
+UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum, shown as
      8.0E (exabytes)*/
   if(bytes < 100000)
-    curl_msnprintf(max6, 7, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
+    curl_msnprintf(max6, mlen, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
   else {
     const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
     int k = 0;
     curl_off_t nbytes;
+    curl_off_t rest;
     do {
       nbytes = bytes / 1024;
       if(nbytes < 1000)
@@ -84,10 +108,17 @@ static char *max6data(curl_off_t bytes, char *max6)
       k++;
       DEBUGASSERT(unit[k]);
     } while(unit[k]);
-    /* xxx.yU */
-    curl_msnprintf(max6, 7, "%3" CURL_FORMAT_CURL_OFF_T
-                   ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
-                   (bytes % 1024) / (1024 / 10), unit[k]);
+    rest = bytes % 1024;
+    if(nbytes <= 99)
+      /* xx.yyU */
+      curl_msnprintf(max6, mlen, "%2" CURL_FORMAT_CURL_OFF_T
+                     ".%02" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
+                     rest * 100 / 1024, unit[k]);
+    else
+      /* xxx.yU */
+      curl_msnprintf(max6, mlen, "%3" CURL_FORMAT_CURL_OFF_T
+                     ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
+                     rest * 10 / 1024, unit[k]);
   }
   return max6;
 }
@@ -502,9 +533,9 @@ static void progress_meter(struct Curl_easy *data)
   curl_off_t total_cur_size;
   curl_off_t total_expected_size;
   curl_off_t dl_size;
-  char time_left[10];
-  char time_total[10];
-  char time_spent[10];
+  char time_left[8];
+  char time_total[8];
+  char time_spent[8];
   curl_off_t cur_secs = (curl_off_t)p->timespent / 1000000; /* seconds */
 
   if(!p->headers_out) {
@@ -514,10 +545,10 @@ static void progress_meter(struct Curl_easy *data)
                     data->state.resume_from);
     }
     curl_mfprintf(data->set.err,
-                  "  %% Total    %% Received %% Xferd  Average Speed   "
-                  "Time    Time     Time  Current\n"
-                  "                                 Dload  Upload   "
-                  "Total   Spent    Left  Speed\n");
+                  "  %% Total    %% Received %% Xferd  Average Speed  "
+                  "Time    Time    Time   Current\n"
+                  "                                 Dload  Upload  "
+                  "Total   Spent   Left   Speed\n");
     p->headers_out = TRUE; /* headers are shown */
   }
 
@@ -528,9 +559,10 @@ static void progress_meter(struct Curl_easy *data)
   /* Since both happen at the same time, total expected duration is max. */
   total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
   /* create the three time strings */
-  time2str(time_left, total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
-  time2str(time_total, total_estm.secs);
-  time2str(time_spent, cur_secs);
+  time2str(time_left, sizeof(time_left),
+           total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
+  time2str(time_total, sizeof(time_total), total_estm.secs);
+  time2str(time_spent, sizeof(time_spent), cur_secs);
 
   /* Get the total amount of data expected to get transferred */
   total_expected_size = p->ul_size_known ? p->ul.total_size : p->ul.cur_size;
@@ -553,19 +585,25 @@ static void progress_meter(struct Curl_easy *data)
                 "\r"
                 "%3" FMT_OFF_T " %s "
                 "%3" FMT_OFF_T " %s "
-                "%3" FMT_OFF_T " %s %s %s  %s %s %s %s",
-                total_estm.percent, /* 3 letters */         /* total % */
-                max6data(total_expected_size, max6[2]),     /* total size */
-                dl_estm.percent, /* 3 letters */            /* rcvd % */
-                max6data(p->dl.cur_size, max6[0]),          /* rcvd size */
-                ul_estm.percent, /* 3 letters */            /* xfer % */
-                max6data(p->ul.cur_size, max6[1]),          /* xfer size */
-                max6data(p->dl.speed, max6[3]),             /* avrg dl speed */
-                max6data(p->ul.speed, max6[4]),             /* avrg ul speed */
-                time_total,    /* 8 letters */              /* total time */
-                time_spent,    /* 8 letters */              /* time spent */
-                time_left,     /* 8 letters */              /* time left */
-                max6data(p->current_speed, max6[5])
+                "%3" FMT_OFF_T " %s %s %s %s %s %s %s",
+                total_estm.percent, /* 3 letters */    /* total % */
+                max6out(total_expected_size, max6[2],
+                        sizeof(max6[2])),              /* total size */
+                dl_estm.percent, /* 3 letters */       /* rcvd % */
+                max6out(p->dl.cur_size, max6[0],
+                        sizeof(max6[0])),              /* rcvd size */
+                ul_estm.percent, /* 3 letters */       /* xfer % */
+                max6out(p->ul.cur_size, max6[1],
+                        sizeof(max6[1])),              /* xfer size */
+                max6out(p->dl.speed, max6[3],
+                        sizeof(max6[3])),              /* avrg dl speed */
+                max6out(p->ul.speed, max6[4],
+                        sizeof(max6[4])),              /* avrg ul speed */
+                time_total,    /* 7 letters */         /* total time */
+                time_spent,    /* 7 letters */         /* time spent */
+                time_left,     /* 7 letters */         /* time left */
+                max6out(p->current_speed, max6[5],
+                        sizeof(max6[5]))               /* current speed */
     );
 
   /* we flush the output stream to make it appear as soon as possible */

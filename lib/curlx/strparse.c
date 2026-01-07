@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "strparse.h"
 
 void curlx_str_init(struct Curl_str *out)
@@ -90,7 +89,7 @@ int curlx_str_untilnl(const char **linep, struct Curl_str *out,
   return STRE_OK;
 }
 
-/* Get a "quoted" word. No escaping possible.
+/* Get a "quoted" word. Escaped quotes are supported.
    return non-zero on error */
 int curlx_str_quotedword(const char **linep, struct Curl_str *out,
                          const size_t max)
@@ -104,6 +103,11 @@ int curlx_str_quotedword(const char **linep, struct Curl_str *out,
     return STRE_BEGQUOTE;
   s++;
   while(*s && (*s != '\"')) {
+    if(*s == '\\' && s[1]) {
+      s++;
+      if(++len > max)
+        return STRE_BIG;
+    }
     s++;
     if(++len > max)
       return STRE_BIG;

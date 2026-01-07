@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_CURL_NTLM_CORE
@@ -76,6 +75,7 @@
 #else
 #  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
+#  include <wolfssl/version.h>
 #  ifdef OPENSSL_COEXIST
 #    define DES_key_schedule      WOLFSSL_DES_key_schedule
 #    define DES_cblock            WOLFSSL_DES_cblock
@@ -84,6 +84,13 @@
 #    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
 #    define DES_ecb_encrypt       wolfSSL_DES_ecb_encrypt
 #    define DESKEY(x)             ((WOLFSSL_DES_key_schedule *)(x))
+
+#    if defined(LIBWOLFSSL_VERSION_HEX) &&      \
+       (LIBWOLFSSL_VERSION_HEX >= 0x05007006)
+#      define DES_ENCRYPT WC_DES_ENCRYPT
+#      define DES_DECRYPT WC_DES_DECRYPT
+#    endif
+
 #  else
 #    define DESKEY(x) &x
 #  endif

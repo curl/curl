@@ -40,6 +40,7 @@
 #include "transfer.h"
 #include "select.h"
 #include "curlx/strparse.h"
+#include "curlx/strcopy.h"
 
 /***
     RFC 6455 Section 5.2
@@ -831,8 +832,8 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
 
   if(enc->payload_remain > 0) {
     /* trying to write a new frame before the previous one is finished */
-    failf(data, "[WS] starting new frame with %zd bytes from last one "
-                "remaining to be sent", (ssize_t)enc->payload_remain);
+    failf(data, "[WS] starting new frame with %" FMT_OFF_T " bytes "
+                "from last one remaining to be sent", enc->payload_remain);
     return CURLE_SEND_ERROR;
   }
 
@@ -1274,7 +1275,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
     curlx_free(randstr);
     return CURLE_FAILED_INIT;
   }
-  strcpy(keyval, randstr);
+  curlx_strcopy(keyval, sizeof(keyval), randstr, randlen);
   curlx_free(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {

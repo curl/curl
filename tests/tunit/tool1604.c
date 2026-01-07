@@ -23,10 +23,11 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#if defined(_WIN32) || defined(MSDOS)
+
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 
-#if defined(_WIN32) || defined(MSDOS)
 static char *getflagstr(int flags)
 {
   char *buf = curlx_malloc(256);
@@ -177,18 +178,6 @@ static CURLcode test_tool1604(const char *arg)
     },
     { "COM56", 0,
       "COM56", SANITIZE_ERR_OK
-    },
-    /* At the moment we expect a maximum path length of 259. I assume MS-DOS
-       has variable max path lengths depending on compiler that are shorter
-       so currently these "good" truncate tests will not run on MS-DOS */
-    { "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-      "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-      "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-      "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
-      "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
-      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-        0,
-      NULL, SANITIZE_ERR_INVALID_PATH
     },
     { NULL, 0,
       NULL, SANITIZE_ERR_BAD_ARGUMENT

@@ -94,7 +94,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), strcpy(), tests: sscanf() */
+#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
 #endif
 #endif /* _MSC_VER */
 
@@ -1003,18 +1003,6 @@ CURL_EXTERN int curl_dbg_socketpair(int domain, int type, int protocol,
                                     int line, const char *source);
 #endif
 
-/* send/receive sockets */
-CURL_EXTERN SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
-                                         SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
-                                         SEND_TYPE_ARG3 len,
-                                         SEND_TYPE_ARG4 flags, int line,
-                                         const char *source);
-CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
-                                         RECV_TYPE_ARG2 buf,
-                                         RECV_TYPE_ARG3 len,
-                                         RECV_TYPE_ARG4 flags, int line,
-                                         const char *source);
-
 /* FILE functions */
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
@@ -1045,8 +1033,6 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define CURL_ACCEPT4(sock, addr, len, flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
-#define CURL_SEND(a, b, c, d) curl_dbg_send(a, b, c, d, __LINE__, __FILE__)
-#define CURL_RECV(a, b, c, d) curl_dbg_recv(a, b, c, d, __LINE__, __FILE__)
 
 #else /* !CURLDEBUG */
 
@@ -1063,8 +1049,6 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #ifdef HAVE_ACCEPT4
 #define CURL_ACCEPT4 accept4
 #endif
-#define CURL_SEND send
-#define CURL_RECV recv
 
 #endif /* CURLDEBUG */
 

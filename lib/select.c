@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(HAVE_SELECT) && !defined(HAVE_POLL)
@@ -263,7 +262,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       ufds[i].revents |= POLLIN | POLLOUT;
   }
 
-#else  /* HAVE_POLL */
+#else /* !HAVE_POLL */
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
@@ -329,7 +328,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       r++;
   }
 
-#endif  /* HAVE_POLL */
+#endif /* HAVE_POLL */
 
   return r;
 }

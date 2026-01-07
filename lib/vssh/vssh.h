@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #include "../urldata.h"
@@ -37,4 +36,5 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
 CURLcode Curl_ssh_range(struct Curl_easy *data,
                         const char *range, curl_off_t filesize,
                         curl_off_t *startp, curl_off_t *sizep);
+
 #endif /* HEADER_CURL_PATH_H */

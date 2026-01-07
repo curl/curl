@@ -21,6 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
+
+#include "parsedate.h"
+#include "curlx/strparse.h"
+
 /*
   A brief summary of the date string formats this parser groks:
 
@@ -74,11 +79,6 @@
   20040911 +0200
 
 */
-
-#include "curl_setup.h"
-
-#include "parsedate.h"
-#include "curlx/strparse.h"
 
 /*
  * parsedate()

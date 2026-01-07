@@ -24,7 +24,6 @@
  *   IMAP, POP3, SMTP and whatever more that likes them.
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"

@@ -21,13 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all wolfSSL specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  *
  */
-
 #include "../curl_setup.h"
 
 #ifdef USE_WOLFSSL
@@ -62,6 +60,7 @@
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
 #include "../strdup.h"
+#include "../curlx/strcopy.h"
 #include "x509asn1.h"
 
 #include <wolfssl/ssl.h>
@@ -1542,8 +1541,7 @@ static char *wssl_strerror(unsigned long error, char *buf, unsigned long size)
 
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
-    /* the string fits because the assert above assures this */
-    strcpy(buf, msg);
+    curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;
@@ -1712,7 +1710,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
       wolfSSL_FreeArrays(wssl->ssl);
     }
   }
-#endif  /* OPENSSL_EXTRA */
+#endif /* OPENSSL_EXTRA */
 
   detail = wolfSSL_get_error(wssl->ssl, ret);
   CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);

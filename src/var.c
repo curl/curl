@@ -25,10 +25,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
-#include "tool_helpers.h"
-#include "tool_findfile.h"
 #include "tool_msgs.h"
-#include "tool_parsecfg.h"
 #include "tool_paramhlp.h"
 #include "tool_writeout_json.h"
 #include "tool_strdup.h"

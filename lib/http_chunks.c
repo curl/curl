@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
@@ -30,7 +29,6 @@
 #include "curl_trc.h"
 #include "sendf.h"   /* for the client write stuff */
 #include "curlx/dynbuf.h"
-#include "http.h"
 #include "multiif.h"
 #include "curlx/strparse.h"
 

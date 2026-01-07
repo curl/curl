@@ -36,7 +36,6 @@
 #include "curl_trc.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 #include "connect.h"
 
 #define MAX_ALTSVC_LINE    4095
@@ -460,9 +459,6 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   unsigned short dstport = srcport; /* the same by default */
   size_t entries = 0;
   struct Curl_str alpn;
-  const char *sp;
-  time_t maxage = 24 * 3600; /* default is 24 hours */
-  bool persist = FALSE;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
@@ -487,44 +483,10 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
 
   curlx_str_trimblanks(&alpn);
 
-  /* Handle the optional 'ma' and 'persist' flags once first, as they need to
-     be known for each alternative service. Unknown flags are skipped. */
-  sp = strchr(p, ';');
-  if(sp) {
-    sp++; /* pass the semicolon */
-    for(;;) {
-      struct Curl_str name;
-      struct Curl_str val;
-      const char *vp;
-      curl_off_t num;
-      bool quoted;
-      /* allow some extra whitespaces around name and value */
-      if(curlx_str_until(&sp, &name, 20, '=') ||
-         curlx_str_single(&sp, '=') ||
-         curlx_str_until(&sp, &val, 80, ';'))
-        break;
-      curlx_str_trimblanks(&name);
-      curlx_str_trimblanks(&val);
-      /* the value might be quoted */
-      vp = curlx_str(&val);
-      quoted = (*vp == '\"');
-      if(quoted)
-        vp++;
-      if(!curlx_str_number(&vp, &num, TIME_T_MAX)) {
-        if(curlx_str_casecompare(&name, "ma"))
-          maxage = (time_t)num;
-        else if(curlx_str_casecompare(&name, "persist") && (num == 1))
-          persist = TRUE;
-      }
-      if(quoted && curlx_str_single(&sp, '\"'))
-        break;
-      if(curlx_str_single(&sp, ';'))
-        break;
-    }
-  }
-
   do {
     if(!curlx_str_single(&p, '=')) {
+      time_t maxage = 24 * 3600; /* default is 24 hours */
+      bool persist = FALSE;
       /* [protocol]="[host][:port], [protocol]="[host][:port]" */
       enum alpnid dstalpnid = Curl_str2alpnid(&alpn);
       if(!curlx_str_single(&p, '\"')) {
@@ -563,6 +525,45 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         if(curlx_str_single(&p, '\"'))
           break;
 
+        /* Handle the optional 'ma' and 'persist' flags. Unknown flags are
+           skipped. */
+        curlx_str_passblanks(&p);
+        if(!curlx_str_single(&p, ';')) {
+          for(;;) {
+            struct Curl_str name;
+            struct Curl_str val;
+            const char *vp;
+            curl_off_t num;
+            bool quoted;
+            /* allow some extra whitespaces around name and value */
+            if(curlx_str_until(&p, &name, 20, '=') ||
+               curlx_str_single(&p, '=') ||
+               curlx_str_cspn(&p, &val, ",;"))
+              break;
+            curlx_str_trimblanks(&name);
+            curlx_str_trimblanks(&val);
+            /* the value might be quoted */
+            vp = curlx_str(&val);
+            quoted = (*vp == '\"');
+            if(quoted)
+              vp++;
+            if(!curlx_str_number(&vp, &num, TIME_T_MAX)) {
+              if(curlx_str_casecompare(&name, "ma"))
+                maxage = (time_t)num;
+              else if(curlx_str_casecompare(&name, "persist") && (num == 1))
+                persist = TRUE;
+            }
+            else
+              break;
+            p = vp; /* point to the byte ending the value */
+            curlx_str_passblanks(&p);
+            if(quoted && curlx_str_single(&p, '\"'))
+              break;
+            curlx_str_passblanks(&p);
+            if(curlx_str_single(&p, ';'))
+              break;
+          }
+        }
         if(dstalpnid) {
           if(!entries++)
             /* Flush cached alternatives for this source origin, if any - when

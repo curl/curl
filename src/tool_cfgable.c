@@ -25,6 +25,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_formparse.h"
+#include "tool_libinfo.h"
 #include "tool_paramhlp.h"
 #include "tool_main.h"
 #include "tool_msgs.h"

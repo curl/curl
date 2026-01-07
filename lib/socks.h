@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_PROXY
@@ -54,4 +53,4 @@ extern struct Curl_cftype Curl_cft_socks_proxy;
 
 #endif /* !CURL_DISABLE_PROXY */
 
-#endif  /* HEADER_CURL_SOCKS_H */
+#endif /* HEADER_CURL_SOCKS_H */

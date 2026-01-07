@@ -23,20 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "tool_setup.h"
+
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
 #include "var.h"
-
-/* the type we use for storing a single boolean bit */
-#ifndef BIT
-#ifdef _MSC_VER
-#define BIT(x) bool x
-#else
-#define BIT(x) unsigned int x:1
-#endif
-#endif
 
 #define MAX_CONFIG_LINE_LENGTH (10 * 1024 * 1024)
 

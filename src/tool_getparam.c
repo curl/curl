@@ -36,6 +36,7 @@
 #include "tool_main.h"
 #include "tool_stderr.h"
 #include "tool_help.h"
+#include "tool_strdup.h"
 #include "var.h"
 
 #define ALLOW_BLANK TRUE
@@ -69,12 +70,9 @@ static ParameterError getstrn(char **str, const char *val,
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
 
-  *str = curlx_malloc(len + 1);
+  *str = memdup0(val, len);
   if(!*str)
     return PARAM_NO_MEM;
-
-  memcpy(*str, val, len);
-  (*str)[len] = 0; /* null-terminate */
 
   return PARAM_OK;
 }
@@ -379,10 +377,11 @@ static const struct LongShort aliases[]= {
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
  * We allow ':' and '\' to be escaped by '\' so that we can use certificate
  * nicknames containing ':'. See <https://sourceforge.net/p/curl/bugs/1196/>
- * for details. */
-#ifndef UNITTESTS
-static
-#endif
+ * for details.
+ *
+ * Unit test 1394
+ */
+UNITTEST
 ParameterError parse_cert_parameter(const char *cert_parameter,
                                     char **certname,
                                     char **passphrase)
@@ -982,31 +981,23 @@ static ParameterError set_rate(const char *nextarg)
      /d == per day (24 hours)
   */
   ParameterError err = PARAM_OK;
-  const char *div = strchr(nextarg, '/');
-  char number[26];
-  long denominator;
-  long numerator = 60 * 60 * 1000; /* default per hour */
-  size_t numlen = div ? (size_t)(div - nextarg) : strlen(nextarg);
-  if(numlen > sizeof(number) - 1)
-    return PARAM_NUMBER_TOO_LARGE;
+  const char *p = nextarg;
+  curl_off_t denominator;
+  curl_off_t numerator = 60 * 60 * 1000; /* default per hour */
 
-  memcpy(number, nextarg, numlen);
-  number[numlen] = 0;
-  err = str2unum(&denominator, number);
-  if(err)
-    return err;
+  if(curlx_str_number(&p, &denominator, CURL_OFF_T_MAX))
+    return PARAM_BAD_NUMERIC;
 
   if(denominator < 1)
     return PARAM_BAD_USE;
 
-  if(div) {
+  if(!curlx_str_single(&p, '/')) {
     curl_off_t numunits;
-    div++;
 
-    if(curlx_str_number(&div, &numunits, CURL_OFF_T_MAX))
+    if(curlx_str_number(&p, &numunits, CURL_OFF_T_MAX))
       numunits = 1;
 
-    switch(*div) {
+    switch(*p) {
     case 's': /* per second */
       numerator = 1000;
       break;
@@ -1024,14 +1015,14 @@ static ParameterError set_rate(const char *nextarg)
       break;
     }
 
-    if((LONG_MAX / numerator) < numunits) {
+    if((CURL_OFF_T_MAX / numerator) < numunits) {
       /* overflow, too large number */
       errorf("too large --rate unit");
       err = PARAM_NUMBER_TOO_LARGE;
     }
     else
       /* this typecast is okay based on the check above */
-      numerator *= (long)numunits;
+      numerator *= numunits;
   }
 
   if(err)
@@ -1496,7 +1487,7 @@ static ParameterError parse_verbose(bool toggle)
     return err;
   }
   else if(!verbose_nopts) {
-    /* fist `-v` in an argument resets to base verbosity */
+    /* first `-v` in an argument resets to base verbosity */
     global->verbosity = 0;
     if(!global->trace_set && set_trace_config("-all"))
       return PARAM_NO_MEM;

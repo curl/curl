@@ -22,7 +22,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_PROXY)
@@ -33,7 +32,6 @@
 #include "connect.h"
 #include "strerror.h"
 #include "curlx/nonblock.h"
-#include "curlx/timeval.h"
 #include "socks.h"
 #include "curl_sspi.h"
 #include "curlx/multibyte.h"

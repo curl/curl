@@ -40,6 +40,10 @@ previous ones. Set it to NULL to disable its use again.
 The application does not have to keep the string around after setting this
 option.
 
+Note that if you want to send a *different* HAProxy client IP in a subsequent
+request, you need to make sure that it is done over a fresh connection as
+libcurl does not send it again while reusing connections.
+
 # DEFAULT
 
 NULL, no HAProxy header is sent

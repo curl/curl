@@ -37,7 +37,7 @@ env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   CURL_TEST_MIN: 1600
-  CURL_CLANG_TIDYFLAGS: '-checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.ArrayBound,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-clang-analyzer-valist.Uninitialized'
+  CURL_CLANG_TIDYFLAGS: '-checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.ArrayBound,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-clang-analyzer-valist.Uninitialized'
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
@@ -66,7 +66,7 @@ jobs:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     runs-on: ${{ matrix.build.image || 'ubuntu-latest' }}
     container: ${{ matrix.build.container }}
-    timeout-minutes: 25
+    timeout-minutes: 15
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
@@ -81,9 +81,16 @@ jobs:
             install_steps: libressl pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
-          - name: 'libressl krb5 valgrind'
+          - name: 'libressl krb5 valgrind 1'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl
+            tflags: '--min=870 1 to 950'
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
+
+          - name: 'libressl krb5 valgrind 2'
+            install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
+            install_steps: libressl
+            tflags: '--min=900 951 to 9999'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
@@ -95,21 +102,33 @@ jobs:
             install_steps: wolfssl-all
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
-          - name: 'wolfssl-opensslextra valgrind'
+          - name: 'wolfssl-opensslextra valgrind 1'
             install_packages: valgrind
             install_steps: wolfssl-opensslextra
+            tflags: '--min=780 1 to 950'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
-          - name: 'mbedtls gss valgrind'
+          - name: 'wolfssl-opensslextra valgrind 2'
+            install_packages: valgrind
+            install_steps: wolfssl-opensslextra
+            tflags: '--min=800 951 to 9999'
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+
+          - name: 'mbedtls gss valgrind 1'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
-            generate: >-
-              -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
-              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
-              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
-              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
-              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
-              -DCURL_USE_GSSAPI=ON
+            tflags: '--min=830 1 to 950'
+            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
+            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
+
+          - name: 'mbedtls gss valgrind 2'
+            install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
+            install_steps: mbedtls
+            tflags: '--min=800 951 to 9999'
+            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
+            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
@@ -152,8 +171,14 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
-          - name: 'openssl libssh2 sync-resolver valgrind'
+          - name: 'openssl libssh2 sync-resolver valgrind 1'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
+            tflags: '--min=920 1 to 950'
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
+
+          - name: 'openssl libssh2 sync-resolver valgrind 2'
+            install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
+            tflags: '--min=910 951 to 9999'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
           - name: 'openssl'
@@ -166,15 +191,22 @@ jobs:
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
             image: 'ubuntu-24.04-arm'
 
-          - name: 'openssl -O3 libssh valgrind'
+          - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
+            tflags: '--min=920 1 to 950'
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
+
+          - name: 'openssl -O3 libssh valgrind 2'
+            install_packages: libssh-dev valgrind
+            CFLAGS: -O3
+            tflags: '--min=890 951 to 9999'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
             install_packages: libidn2-dev libkrb5-dev clang libssl-dev
-            configure: CC=clang --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
+            configure: CC=clang --enable-static --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
             install_packages: libssh2-1-dev libkrb5-dev clang
@@ -195,17 +227,17 @@ jobs:
               --without-libssh2 --without-libssh
               --disable-tftp --disable-ftp --disable-file --disable-smb
 
-          - name: 'openssl torture !FTP'
+          - name: 'openssl torture 1'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-            tflags: '-t --shallow=25 !FTP --min=1450'
+            tflags: '-t --shallow=25 --min=920 1 to 950'
             torture: true
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
-          - name: 'openssl torture FTP'
+          - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-            tflags: '-t --shallow=20 FTP --min=260'
+            tflags: '-t --shallow=25 --min=900 951 to 9999'
             torture: true
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
           - name: 'openssl i686'
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
@@ -237,8 +269,8 @@ jobs:
             install_steps: skipall mbedtls rustls wolfssl-opensslextra
             install_steps_brew: gsasl
             make-custom-target: tidy
-            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
+            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
             configure: >-
               --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
               --with-librtmp --with-libssh2 --with-libidn2
@@ -251,15 +283,15 @@ jobs:
             CC: clang
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
-            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
-            configure: >-
-              --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
-              --with-librtmp --with-libssh2 --with-libidn2
-              --enable-ech --with-gssapi --enable-ssls-export
-              --disable-debug --disable-unity --disable-typecheck
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/runner/mbedtls/lib -Wl,-rpath,/home/runner/rustls/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
+            PKG_CONFIG_PATH: /home/runner/wolfssl-opensslextra/lib/pkgconfig:/home/runner/mbedtls/lib/pkgconfig:/home/runner/rustls/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
+              -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
+              -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+              -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
 
-          - name: 'scan-build H3 c-ares'
+          - name: 'scan-build H3 c-ares !examples'
             install_packages: clang-tools clang libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skipall
             install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
@@ -268,11 +300,11 @@ jobs:
             make-prefix: scan-build --status-bugs
             LDFLAGS: -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
-            configure: >-
-              --with-openssl=/home/linuxbrew/.linuxbrew/opt/openssl --with-ngtcp2 --with-nghttp3=
-              --with-libidn2 --with-libssh --enable-httpsrr --enable-ares
-              --disable-debug --disable-unity --disable-typecheck
-              --disable-verbose
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON
+              -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
+              -DCURL_DISABLE_VERBOSE_STRINGS=ON
 
           - name: 'address-sanitizer'
             install_packages: clang libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
@@ -311,17 +343,24 @@ jobs:
 
           - name: 'event-based'
             install_packages: libssh-dev
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-event --min=1350'
 
           - name: 'duphandle'
             install_packages: libssh-dev
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'
 
-          - name: 'rustls valgrind'
+          - name: 'rustls valgrind 1'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
+            tflags: '--min=780 1 to 950'
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
+
+          - name: 'rustls valgrind 2'
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: rust rustls
+            tflags: '--min=820 951 to 9999'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
@@ -337,7 +376,7 @@ jobs:
           - name: 'Slackware !ssl gssapi gcc'
             # Flags used to build the curl Slackware package, except OpenSSL 1.1.0:
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
-            configure: --enable-debug --without-ssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
+            configure: --enable-debug --without-ssl --with-libssh2 --with-gssapi --enable-ares --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
@@ -689,6 +728,7 @@ jobs:
           [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            ${MATRIX_CONFIGURE_PREFIX} \
             cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
@@ -697,7 +737,7 @@ jobs:
           else
             mkdir bld && cd bld && \
             ${MATRIX_CONFIGURE_PREFIX} \
-            ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror \
+            ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIGURE}
           fi
@@ -818,7 +858,7 @@ jobs:
           ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
-        if: ${{ !contains(matrix.build.install_packages, 'valgrind') && matrix.build.make-custom-target != 'tidy' }}
+        if: ${{ !contains(matrix.build.install_packages, 'valgrind') && matrix.build.make-custom-target != 'tidy' && !contains(matrix.build.name, '!examples') }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target curl-examples-build

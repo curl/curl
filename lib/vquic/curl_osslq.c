@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_OPENSSL_QUIC) && \
@@ -53,6 +52,7 @@
 #include "../url.h"
 #include "../bufref.h"
 #include "../curlx/strerr.h"
+#include "../curlx/strcopy.h"
 
 /* A stream window is the maximum amount we need to buffer for
  * each active transfer. We use HTTP/3 flow control and only ACK
@@ -141,7 +141,7 @@ static char *osslq_strerror(unsigned long error, char *buf, size_t size)
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
     if(strlen(msg) < size)
-      strcpy(buf, msg);
+      curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;
@@ -1073,11 +1073,14 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL, /* end_stream */
   cb_h3_reset_stream,
   NULL, /* shutdown */
-  NULL, /* recv_settings */
-#ifdef NGHTTP3_CALLBACKS_V2
+  NULL, /* recv_settings (deprecated) */
+#ifdef NGHTTP3_CALLBACKS_V2  /* nghttp3 v1.11.0+ */
   NULL, /* recv_origin */
   NULL, /* end_origin */
   NULL, /* rand */
+#endif
+#ifdef NGHTTP3_CALLBACKS_V3  /* nghttp3 v1.14.0+ */
+  NULL, /* recv_settings2 */
 #endif
 };
 

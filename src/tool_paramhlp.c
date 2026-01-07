@@ -203,47 +203,39 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
-static ParameterError getnum(long *val, const char *str, int base)
-{
-  DEBUGASSERT((base == 8) || (base == 10));
-  if(str) {
-    curl_off_t num;
-    bool is_neg = FALSE;
-    if(base == 10) {
-      is_neg = (*str == '-');
-      if(is_neg)
-        str++;
-      if(curlx_str_number(&str, &num, LONG_MAX))
-        return PARAM_BAD_NUMERIC;
-    }
-    else { /* base == 8 */
-      if(curlx_str_octal(&str, &num, LONG_MAX))
-        return PARAM_BAD_NUMERIC;
-    }
-    if(!curlx_str_single(&str, '\0')) {
-      *val = (long)num;
-      if(is_neg)
-        *val = -*val;
-      return PARAM_OK; /* Ok */
-    }
-  }
-  return PARAM_BAD_NUMERIC; /* badness */
-}
-
 ParameterError str2num(long *val, const char *str)
 {
-  return getnum(val, str, 10);
+  curl_off_t num;
+  bool is_neg = FALSE;
+  DEBUGASSERT(str);
+  if(!curlx_str_single(&str, '-'))
+    is_neg = TRUE;
+  if(curlx_str_number(&str, &num, LONG_MAX) ||
+     curlx_str_single(&str, '\0'))
+    return PARAM_BAD_NUMERIC; /* badness */
+
+  *val = (long)num;
+  if(is_neg)
+    *val = -*val;
+  return PARAM_OK; /* Ok */
 }
 
 ParameterError oct2nummax(long *val, const char *str, long max)
 {
-  ParameterError result = getnum(val, str, 8);
-  if(result != PARAM_OK)
-    return result;
-  else if(*val > max)
-    return PARAM_NUMBER_TOO_LARGE;
-  else if(*val < 0)
+  curl_off_t num;
+  int rc;
+  DEBUGASSERT(str);
+  rc = curlx_str_octal(&str, &num, max);
+  if(rc) {
+    if(STRE_OVERFLOW == rc)
+      return PARAM_NUMBER_TOO_LARGE;
+    return PARAM_BAD_NUMERIC;
+  }
+  if(curlx_str_single(&str, '\0'))
+    return PARAM_BAD_NUMERIC;
+  if(num < 0)
     return PARAM_NEGATIVE_NUMERIC;
+  *val = (long)num;
 
   return PARAM_OK;
 }
@@ -259,7 +251,7 @@ ParameterError oct2nummax(long *val, const char *str, long max)
 
 ParameterError str2unum(long *val, const char *str)
 {
-  ParameterError result = getnum(val, str, 10);
+  ParameterError result = str2num(val, str);
   if(result != PARAM_OK)
     return result;
   if(*val < 0)
@@ -396,20 +388,22 @@ static void protoset_clear(const char **protoset, const char *proto)
  * data.
  */
 
-#define MAX_PROTOSTRING (64 * 11)  /* Room for 64 10-chars proto names. */
+#define MAX_PROTOS 34
+#define MAX_PROTOSTRING (MAX_PROTOS * 11)  /* Room for MAX_PROTOS number of
+                                              10-chars proto names. */
 
 ParameterError proto2num(const char * const *val, char **ostr, const char *str)
 {
-  const char **protoset;
   struct dynbuf obuf;
   size_t proto;
   CURLcode result = CURLE_OK;
+  const char *protoset[MAX_PROTOS + 1];
+
+  DEBUGASSERT(proto_count <= MAX_PROTOS);
+  if(proto_count > MAX_PROTOS) /* if case of surprises */
+    return PARAM_NO_MEM;
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
-
-  protoset = curlx_malloc((proto_count + 1) * sizeof(*protoset));
-  if(!protoset)
-    return PARAM_NO_MEM;
 
   /* Preset protocol set with default values. */
   protoset[0] = NULL;
@@ -505,7 +499,6 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   for(proto = 0; protoset[proto] && !result; proto++)
     result = curlx_dyn_addf(&obuf, "%s%s", curlx_dyn_len(&obuf) ? "," : "",
                             protoset[proto]);
-  curlx_free((char *)protoset);
   if(result)
     return PARAM_NO_MEM;
   if(!curlx_dyn_len(&obuf)) {

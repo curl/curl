@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -107,7 +106,6 @@
 #include "telnet.h"
 #include "tftp.h"
 #include "http.h"
-#include "http2.h"
 #include "file.h"
 #include "curl_ldap.h"
 #include "vssh/ssh.h"
@@ -117,6 +115,8 @@
 #include "curl_rtmp.h"
 #include "gopher.h"
 #include "mqtt.h"
+#include "rtsp.h"
+#include "smtp.h"
 #include "ws.h"
 
 #ifdef USE_NGHTTP2
@@ -2695,8 +2695,10 @@ static CURLcode override_login(struct Curl_easy *data,
       NETRCcode ret = Curl_parsenetrc(&data->state.netrc, conn->host.name,
                                       userp, passwdp,
                                       data->set.str[STRING_NETRC_FILE]);
-      if(ret && ((ret == NETRC_NO_MATCH) ||
-                 (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
+      if(ret == NETRC_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+      else if(ret && ((ret == NETRC_NO_MATCH) ||
+                      (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
         infof(data, "Could not find host %s in the %s file; using defaults",
               conn->host.name,
               (data->set.str[STRING_NETRC_FILE] ?

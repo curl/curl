@@ -50,13 +50,13 @@ jobs:
           persist-credentials: false
 
       - name: 'initialize'
-        uses: github/codeql-action/init@1b168cd39490f61582a9beae412bb7057a6b2c4e # v4.31.8
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9
         with:
           languages: actions, python
           queries: security-extended
 
       - name: 'perform analysis'
-        uses: github/codeql-action/analyze@1b168cd39490f61582a9beae412bb7057a6b2c4e # v4.31.8
+        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9
 
   c:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
@@ -87,7 +87,7 @@ jobs:
           persist-credentials: false
 
       - name: 'initialize'
-        uses: github/codeql-action/init@1b168cd39490f61582a9beae412bb7057a6b2c4e # v4.31.8
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9
         with:
           languages: cpp
           build-mode: manual
@@ -131,4 +131,4 @@ jobs:
           fi
 
       - name: 'perform analysis'
-        uses: github/codeql-action/analyze@1b168cd39490f61582a9beae412bb7057a6b2c4e # v4.31.8
+        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9

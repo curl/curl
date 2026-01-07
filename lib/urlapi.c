@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
@@ -369,7 +368,9 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
                                    (h && (h->flags & PROTOPT_URLOPTIONS)) ?
                                    &optionsp : NULL);
   if(ccode) {
-    result = CURLUE_BAD_LOGIN;
+    /* the only possible error from Curl_parse_login_details is out of
+       memory: */
+    result = CURLUE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -509,7 +510,7 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     hostname[hlen] = 0; /* end the address there */
     if(curlx_inet_pton(AF_INET6, hostname, dest) != 1)
       return CURLUE_BAD_IPV6;
-    if(curlx_inet_ntop(AF_INET6, dest, hostname, hlen)) {
+    if(curlx_inet_ntop(AF_INET6, dest, hostname, hlen + 1)) {
       hlen = strlen(hostname); /* might be shorter now */
       hostname[hlen + 1] = 0;
     }

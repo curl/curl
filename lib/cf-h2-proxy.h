@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if defined(USE_NGHTTP2) && !defined(CURL_DISABLE_PROXY)

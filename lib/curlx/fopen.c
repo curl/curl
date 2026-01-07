@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #include "fopen.h"
@@ -349,7 +348,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
       target = fixed;
     else
       target = filename_w;
-    errno = _wfopen_s(&result, target, mode_w);
+    result = _wfsopen(target, mode_w, _SH_DENYNO);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -361,7 +360,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     target = fixed;
   else
     target = filename;
-  errno = fopen_s(&result, target, mode);
+  result = _fsopen(target, mode, _SH_DENYNO);
 #endif
 
   CURLX_FREE(fixed);

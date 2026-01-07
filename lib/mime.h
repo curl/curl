@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #define MIME_BOUNDARY_DASHES            24  /* leading boundary dashes */

@@ -225,7 +225,7 @@ class TestUpload:
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}'\
-            f'/curltest/tweak?status=400&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
+            f'/curltest/tweak?status=200&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
         # depending on timing and protocol, we might get CURLE_PARTIAL_FILE or
@@ -639,21 +639,18 @@ class TestUpload:
         ])
         r.check_exit_code(0)
 
-    # nghttpx is the only server we have that supports TLS early data and
-    # has a limit of 16k it announces
+    # nghttpx is the only server we have that supports TLS early data
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
-    @pytest.mark.parametrize("proto,upload_size,exp_early", [
-        pytest.param('http/1.1', 100, 203, id='h1-small-body'),
-        pytest.param('http/1.1', 10*1024, 10345, id='h1-medium-body'),
-        pytest.param('http/1.1', 32*1024, 16384, id='h1-limited-body'),
-        pytest.param('h2', 10*1024, 10378, id='h2-medium-body'),
-        pytest.param('h2', 32*1024, 16384, id='h2-limited-body'),
-        pytest.param('h3', 1024, 1126, id='h3-small-body'),
-        pytest.param('h3', 1024 * 1024, 131177, id='h3-limited-body'),
-        # h3: limited+body (long app data). The 0RTT size is limited by
-        # our sendbuf size of 128K.
+    @pytest.mark.parametrize("proto,upload_size", [
+        pytest.param('http/1.1', 100, id='h1-small-body'),
+        pytest.param('http/1.1', 10*1024, id='h1-medium-body'),
+        pytest.param('http/1.1', 32*1024, id='h1-limited-body'),
+        pytest.param('h2', 10*1024, id='h2-medium-body'),
+        pytest.param('h2', 32*1024, id='h2-limited-body'),
+        pytest.param('h3', 1024, id='h3-small-body'),
+        pytest.param('h3', 1024 * 1024, id='h3-limited-body'),
     ])
-    def test_07_70_put_earlydata(self, env: Env, httpd, nghttpx, proto, upload_size, exp_early):
+    def test_07_70_put_earlydata(self, env: Env, httpd, nghttpx, proto, upload_size):
         if not env.curl_can_early_data():
             pytest.skip('TLS earlydata not implemented')
         if proto == 'h2' and not env.have_h2_curl():
@@ -693,10 +690,12 @@ class TestUpload:
             m = re.match(r'^\[t-(\d+)] EarlyData: (-?\d+)', line)
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
+        # 1st transfer did not use early data
         assert earlydata[0] == 0, f'{earlydata}\n{r.dump_logs()}'
-        # depending on cpu load, curl might not upload as much before
-        # the handshake starts and early data stops.
-        assert 0 < earlydata[1] <= exp_early, f'{earlydata}\n{r.dump_logs()}'
+        # depending on cpu load, the amount of early data might differ.
+        # when the server is slow, we might send more. when curl is slow,
+        # we might send less before the server handshakes.
+        assert 0 < earlydata[1] <= (upload_size + 1024), f'{earlydata}\n{r.dump_logs()}'
 
     def check_downloads(self, client, r, source: List[str], count: int,
                         complete: bool = True):

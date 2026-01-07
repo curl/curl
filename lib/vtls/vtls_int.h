@@ -125,7 +125,6 @@ struct ssl_connect_data {
   ssl_connect_state connecting_state;
   ssl_earlydata_state earlydata_state;
   int io_need;                      /* TLS signals special SEND/RECV needs */
-  BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
   BIT(prefs_checked);               /* SSL preferences have been checked */
   BIT(input_pending);               /* data for SSL_read() may be available */

@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "tool_setup.h"
+
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 /* linked-list structure with last node cache for easysrc */

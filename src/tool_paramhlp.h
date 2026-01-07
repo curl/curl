@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#include "tool_libinfo.h"
 
 struct getout *new_getout(struct OperationConfig *config);
 

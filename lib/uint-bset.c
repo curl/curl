@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "uint-bset.h"
@@ -186,7 +185,7 @@ uint32_t Curl_popcount64(uint64_t x)
   x -= (x >> 1) & m1;             /* replace every 2 bits with bits present */
   x = (x & m2) + ((x >> 2) & m2); /* replace every nibble with bits present */
   x = (x + (x >> 4)) & m4;        /* replace every byte with bits present */
-  /* top 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ... which makes the
+  /* top 8 bits of x + (x << 8) + (x << 16) + (x << 24) + ... which makes the
    * top byte the sum of all individual 8 bytes, throw away the rest */
   return (uint32_t)((x * h01) >> 56);
 }

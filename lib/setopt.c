@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -43,7 +42,6 @@
 #include "vtls/vtls.h"
 #include "curl_trc.h"
 #include "hostip.h"
-#include "http2.h"
 #include "setopt.h"
 #include "altsvc.h"
 #include "hsts.h"
@@ -315,7 +313,7 @@ static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
   data->set.httpwant = (unsigned char)arg;
   return CURLE_OK;
 }
-#endif /* ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_HTTP */
 
 #ifdef USE_SSL
 CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
@@ -352,7 +350,7 @@ CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
   }
   return CURLE_OK;
 }
-#endif /* ! USE_SSL */
+#endif /* !USE_SSL */
 
 #ifndef CURL_DISABLE_RTSP
 static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
@@ -413,7 +411,7 @@ static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
   data->set.rtspreq = rtspreq;
   return CURLE_OK;
 }
-#endif /* ! CURL_DISABLE_RTSP */
+#endif /* !CURL_DISABLE_RTSP */
 
 #ifdef USE_SSL
 static void set_ssl_options(struct ssl_config_data *ssl,
@@ -584,7 +582,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
     else
       s->method = HTTPREQ_GET;
     break;
-#endif /* ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_HTTP */
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_HTTPPROXYTUNNEL:
     /*
@@ -622,7 +620,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
      */
     s->proxy_transfer_mode = enabled;
     break;
-#endif /* ! CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_PROXY */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_NEC:
     /*
@@ -685,7 +683,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
      */
     s->tftp_no_options = enabled;
     break;
-#endif /* ! CURL_DISABLE_TFTP */
+#endif /* !CURL_DISABLE_TFTP */
   case CURLOPT_TRANSFERTEXT:
     /*
      * This option was previously named 'FTPASCII'. Renamed to work with
@@ -728,7 +726,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
     s->doh_verifystatus = enabled;
     ok = 2;
     break;
-#endif /* ! CURL_DISABLE_DOH */
+#endif /* !CURL_DISABLE_DOH */
   case CURLOPT_SSL_VERIFYHOST:
     /*
      * Enable verification of the hostname in the peer certificate
@@ -791,7 +789,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSH_COMPRESSION:
     s->ssh_compression = enabled;
     break;
-#endif /* ! USE_SSH */
+#endif /* !USE_SSH */
 #ifndef CURL_DISABLE_SMTP
   case CURLOPT_MAIL_RCPT_ALLOWFAILS:
     /* allow RCPT TO command to fail for some recipients */
@@ -984,7 +982,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     s->expect_100_timeout = (unsigned short)arg;
     break;
 
-#endif /* ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_HTTP */
 
 #ifndef CURL_DISABLE_MIME
   case CURLOPT_MIME_OPTIONS:
@@ -1012,7 +1010,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       return CURLE_NOT_BUILT_IN;
     s->socks5auth = (unsigned char)uarg;
     break;
-#endif /* ! CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_PROXY */
 
 #ifndef CURL_DISABLE_FTP
   case CURLOPT_FTP_FILEMETHOD:
@@ -1033,14 +1031,14 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_ACCEPTTIMEOUT_MS:
     return setopt_set_timeout_ms(&s->accepttimeout, arg);
-#endif /* ! CURL_DISABLE_FTP */
+#endif /* !CURL_DISABLE_FTP */
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_FTP_CREATE_MISSING_DIRS:
     if((arg < CURLFTP_CREATE_DIR_NONE) || (arg > CURLFTP_CREATE_DIR_RETRY))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->ftp_create_missing_dirs = (unsigned char)arg;
     break;
-#endif /* ! CURL_DISABLE_FTP || USE_SSH */
+#endif /* !CURL_DISABLE_FTP || USE_SSH */
   case CURLOPT_INFILESIZE:
     if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1199,7 +1197,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->state.rtsp_next_server_CSeq = arg;
     break;
 
-#endif /* ! CURL_DISABLE_RTSP */
+#endif /* !CURL_DISABLE_RTSP */
 
   case CURLOPT_TCP_KEEPIDLE:
     result = value_range(&arg, 0, 0, INT_MAX);
@@ -1255,7 +1253,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     else
       Curl_hsts_cleanup(&data->hsts);
     break;
-#endif /* ! CURL_DISABLE_HSTS */
+#endif /* !CURL_DISABLE_HSTS */
 #ifndef CURL_DISABLE_ALTSVC
   case CURLOPT_ALTSVC_CTRL:
     if(!arg) {
@@ -1268,7 +1266,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
         return CURLE_OUT_OF_MEMORY;
     }
     return Curl_altsvc_ctrl(data->asi, arg);
-#endif /* ! CURL_DISABLE_ALTSVC */
+#endif /* !CURL_DISABLE_ALTSVC */
 #ifndef CURL_DISABLE_WEBSOCKETS
   case CURLOPT_WS_OPTIONS:
     s->ws_raw_mode = (bool)(arg & CURLWS_RAW_MODE);
@@ -1407,8 +1405,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     Curl_safefree(data->state.formp);
     data->state.mimepost = NULL;
     break;
-#endif /* ! CURL_DISABLE_FORM_API */
-#endif /* ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_FORM_API */
+#endif /* !CURL_DISABLE_HTTP */
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_IMAP)
 # ifndef CURL_DISABLE_MIME
@@ -1429,8 +1427,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 #endif
     }
     break;
-#endif /* ! CURL_DISABLE_MIME */
-#endif /* ! disabled HTTP, SMTP or IMAP */
+#endif /* !CURL_DISABLE_MIME */
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
   case CURLOPT_STDERR:
     /*
      * Set to a FILE * that should receive all error writes. This
@@ -1712,7 +1710,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     Curl_safefree(s->str[STRING_COPYPOSTFIELDS]);
     s->method = HTTPREQ_POST;
     break;
-#endif /* ! CURL_DISABLE_HTTP || ! CURL_DISABLE_MQTT */
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_MQTT */
 
 #ifndef CURL_DISABLE_HTTP
   case CURLOPT_ACCEPT_ENCODING:
@@ -1726,9 +1724,14 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      *
      */
     if(ptr && !*ptr) {
-      char all[256];
-      Curl_all_content_encodings(all, sizeof(all));
-      return Curl_setstropt(&s->str[STRING_ENCODING], all);
+      ptr = Curl_get_content_encodings();
+      if(ptr) {
+        curlx_free(s->str[STRING_ENCODING]);
+        s->str[STRING_ENCODING] = ptr;
+      }
+      else
+        result = CURLE_OUT_OF_MEMORY;
+      return result;
     }
     return Curl_setstropt(&s->str[STRING_ENCODING], ptr);
 
@@ -1793,7 +1796,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     return cookielist(data, ptr);
 #endif /* !CURL_DISABLE_COOKIES */
 
-#endif /* ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_HTTP */
 
   case CURLOPT_CUSTOMREQUEST:
     /*
@@ -2040,7 +2043,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * proxy exception list
      */
     return Curl_setstropt(&s->str[STRING_NOPROXY], ptr);
-#endif /* ! CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_PROXY */
 
   case CURLOPT_RANGE:
     /*
@@ -2398,7 +2401,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
   case CURLOPT_INTERLEAVEDATA:
     s->rtp_out = ptr;
     break;
-#endif /* ! CURL_DISABLE_RTSP */
+#endif /* !CURL_DISABLE_RTSP */
 #ifndef CURL_DISABLE_FTP
   case CURLOPT_CHUNK_DATA:
     s->wildcardptr = ptr;
@@ -2516,7 +2519,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     break;
   }
-#endif /* ! CURL_DISABLE_HSTS */
+#endif /* !CURL_DISABLE_HSTS */
 #ifndef CURL_DISABLE_ALTSVC
   case CURLOPT_ALTSVC:
     if(!data->asi) {
@@ -2530,7 +2533,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     if(ptr)
       return Curl_altsvc_load(data->asi, ptr);
     break;
-#endif /* ! CURL_DISABLE_ALTSVC */
+#endif /* !CURL_DISABLE_ALTSVC */
 #ifdef USE_ECH
   case CURLOPT_ECH: {
     size_t plen = 0;

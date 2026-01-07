@@ -22,7 +22,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_PROXY)
@@ -33,7 +32,6 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "curlx/nonblock.h"
-#include "curlx/timeval.h"
 #include "socks.h"
 #include "strdup.h"
 

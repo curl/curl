@@ -111,18 +111,6 @@ static CURLcode test_unit2602(const char *arg)
   }
 
   Curl_dynhds_free(&hds);
-  Curl_dynhds_init(&hds, 128, 4 * 1024);
-  /* continuation without previous header fails */
-  res = Curl_dynhds_h1_cadd_line(&hds, " indented value");
-  fail_unless(res, "add should have failed");
-
-  /* continuation with previous header must succeed */
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti1: val1"), "add");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, " val2"), "add indent");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti2: val1"), "add");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "\tval2"), "add indent");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti3: val1"), "add");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "     val2"), "add indent");
 
   curlx_dyn_init(&dbuf, 32 * 1024);
   fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");

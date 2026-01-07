@@ -48,7 +48,7 @@ static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 
   if(size * nmemb >= T555_DATALEN) {
     curl_mfprintf(stderr, "READ!\n");
-    strcpy(ptr, t555_uploadthis);
+    memcpy(ptr, t555_uploadthis, T555_DATALEN);
     return T555_DATALEN;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");

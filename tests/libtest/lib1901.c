@@ -33,12 +33,10 @@ static size_t t1901_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
     NULL
   };
   static int ix = 0;
-  (void)size;
-  (void)nmemb;
   (void)stream;
   if(chunks[ix]) {
     size_t len = strlen(chunks[ix]);
-    strcpy(ptr, chunks[ix]);
+    curlx_strcopy(ptr, size * nmemb, chunks[ix], len);
     ix++;
     return len;
   }

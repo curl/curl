@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS)
@@ -35,7 +34,6 @@
 #include "curl_trc.h"
 #include "escape.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 #include "slist.h"
 
 #include <time.h>

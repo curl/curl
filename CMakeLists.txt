@@ -269,7 +269,6 @@ if(CURL_CLANG_TIDY)
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.bzero")  # for FD_ZERO() (seen on macOS)
-  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
   list(APPEND _tidy_checks "-clang-analyzer-security.ArrayBound")  # false positives with clang-tidy v21.1.0
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")

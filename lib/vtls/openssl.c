@@ -21,12 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all OpenSSL-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  */
-
 #include "../curl_setup.h"
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
@@ -61,6 +59,7 @@
 #include "../multiif.h"
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
+#include "../curlx/strcopy.h"
 #include "../strdup.h"
 #include "apple.h"
 
@@ -302,11 +301,11 @@ static CURLcode get_pkey_rsa(struct Curl_easy *data,
   return result;
 }
 
+#ifndef OPENSSL_NO_DSA
 static CURLcode get_pkey_dsa(struct Curl_easy *data,
                              EVP_PKEY *pubkey, BIO *mem, int i)
 {
   CURLcode result = CURLE_OK;
-#ifndef OPENSSL_NO_DSA
 #ifndef HAVE_EVP_PKEY_GET_PARAMS
   DSA *dsa = EVP_PKEY_get0_DSA(pubkey);
 #endif /* !HAVE_EVP_PKEY_GET_PARAMS */
@@ -334,9 +333,9 @@ static CURLcode get_pkey_dsa(struct Curl_easy *data,
   FREE_PKEY_PARAM_BIGNUM(q);
   FREE_PKEY_PARAM_BIGNUM(g);
   FREE_PKEY_PARAM_BIGNUM(pub_key);
-#endif /* !OPENSSL_NO_DSA */
   return result;
 }
+#endif /* !OPENSSL_NO_DSA */
 
 static CURLcode get_pkey_dh(struct Curl_easy *data,
                             EVP_PKEY *pubkey, BIO *mem, int i)
@@ -484,9 +483,11 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
         result = get_pkey_rsa(data, pubkey, mem, i);
         break;
 
+#ifndef OPENSSL_NO_DSA
       case EVP_PKEY_DSA:
         result = get_pkey_dsa(data, pubkey, mem, i);
         break;
+#endif
 
       case EVP_PKEY_DH:
         result = get_pkey_dh(data, pubkey, mem, i);
@@ -517,7 +518,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
   return result;
 }
 
-#endif /* quiche or OpenSSL */
+#endif /* USE_QUICHE || USE_OPENSSL */
 
 #ifdef USE_OPENSSL
 
@@ -773,8 +774,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
-    if(strlen(msg) < size)
-      strcpy(buf, msg);
+    curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;
@@ -2231,7 +2231,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   return result;
 }
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
 static CURLcode verifystatus(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ossl_ctx *octx)
@@ -2590,11 +2590,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
              CURLINFO_SSL_DATA_IN, (const char *)buf, len);
   (void)ssl;
 }
-
-/* Check for ALPN support. */
-#ifndef OPENSSL_NO_TLSEXT
-#  define HAS_ALPN_OPENSSL
-#endif
 
 static CURLcode
 ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
@@ -3424,7 +3419,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
     Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   }
 
-#ifdef HAS_ALPN_OPENSSL
   if(alpns.count) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
@@ -3438,7 +3432,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#endif
 
   return CURLE_OK;
 }
@@ -3593,7 +3586,7 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
 
   SSL_set_app_data(octx->ssl, ssl_user_data);
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   if(Curl_ssl_cf_get_primary_config(cf)->verifystatus)
     SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
 #endif
@@ -4074,14 +4067,13 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   SSL_set_bio(octx->ssl, bio, bio);
 #endif
 
-#ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn && (connssl->state != ssl_connection_deferred)) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
-#endif
+
   connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
 }
@@ -4364,7 +4356,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
 #endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST && !HAVE_BORINGSSL_LIKE */
 
-#ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
      * negotiated
      */
@@ -4375,7 +4366,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
       return Curl_alpn_set_negotiated(cf, data, connssl, neg_protocol, len);
     }
-#endif
 
     return CURLE_OK;
   }
@@ -4656,7 +4646,7 @@ out:
   curlx_dyn_free(&dname);
   return result;
 }
-#endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #ifdef USE_APPLE_SECTRUST
 struct ossl_certs_ctx {
@@ -4746,7 +4736,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   long ossl_verify;
   X509 *server_cert;
   bool verified = FALSE;
-#ifdef USE_APPLE_SECTRUST
+#if !defined(OPENSSL_NO_OCSP) && defined(USE_APPLE_SECTRUST)
   bool sectrust_verified = FALSE;
 #endif
 
@@ -4801,7 +4791,9 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
       ssl_config->certverifyresult = X509_V_OK;
+#ifndef OPENSSL_NO_OCSP
       sectrust_verified = TRUE;
+#endif
     }
   }
 #endif
@@ -4817,7 +4809,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     infof(data, " SSL certificate verification failed, continuing anyway!");
   }
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   if(conn_config->verifystatus &&
 #ifdef USE_APPLE_SECTRUST
      !sectrust_verified && /* already verified via apple sectrust, cannot
@@ -5372,7 +5364,6 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-#ifndef OPENSSL_NO_SHA256
 static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
                                size_t tmplen,
                                unsigned char *sha256sum /* output */,
@@ -5394,11 +5385,10 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
   EVP_MD_CTX_destroy(mdctx);
   return CURLE_OK;
 }
-#endif
 
 static bool ossl_cert_status_request(void)
 {
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   return TRUE;
 #else
   return FALSE;
@@ -5453,11 +5443,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_set_engine,          /* set_engine or provider */
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
-#ifndef OPENSSL_NO_SHA256
   ossl_sha256sum,           /* sha256sum */
-#else
-  NULL,                     /* sha256sum */
-#endif
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
   ossl_get_channel_binding  /* get_channel_binding */

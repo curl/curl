@@ -52,7 +52,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
+        uses: cross-platform-actions/action@492b0c80085400348c599edace11141a4ee73524 # v0.32.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -97,7 +97,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
+        uses: cross-platform-actions/action@492b0c80085400348c599edace11141a4ee73524 # v0.32.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -133,13 +133,13 @@ jobs:
   freebsd:
     name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     strategy:
       matrix:
         include:
           - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
-          - { build: 'autotools', arch: 'arm64' , compiler: 'clang' }
+          - { build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
           - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
       fail-fast: false
     steps:
@@ -147,7 +147,7 @@ jobs:
         with:
           persist-credentials: false
       - name: '${{ matrix.build }}'
-        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
+        uses: cross-platform-actions/action@492b0c80085400348c599edace11141a4ee73524 # v0.32.0
         env:
           CC: '${{ matrix.compiler }}'
           CURL_TEST_MIN: 1800
@@ -190,7 +190,7 @@ jobs:
                 options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
               fi
               mkdir bld && cd bld
-              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
+              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
                 --prefix="$HOME"/curl-install \
                 --with-openssl \
                 --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
@@ -242,7 +242,7 @@ jobs:
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 25
+    timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
@@ -286,7 +286,7 @@ jobs:
               ${MATRIX_OPTIONS}
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror --disable-shared \
               CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \

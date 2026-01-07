@@ -705,13 +705,14 @@ char *Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
-  cp2[i] = '\0';
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
-     overwrite the EBCDIC buffer with ASCII to return it. */
+     overwrite the EBCDIC buffer with ASCII to return it.
 
-  strcpy(cp, cp2);
+     The destination buffer already has a null-terminator at the correct
+     position. Keep it outouched and copy the buffer without a terminator. */
+  memcpy(cp, cp2, i);
   free(cp2);
   return cp;
 }
@@ -735,13 +736,14 @@ char *Curl_ldap_first_attribute_a(void *ld, LDAPMessage *entry,
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
-  cp2[i] = '\0';
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
-     overwrite the EBCDIC buffer with ASCII to return it. */
+     overwrite the EBCDIC buffer with ASCII to return it.
 
-  strcpy(cp, cp2);
+     The destination buffer already has a null-terminator at the correct
+     position. Keep it outouched and copy the buffer without a terminator. */
+  memcpy(cp, cp2, i);
   free(cp2);
   return cp;
 }
@@ -765,13 +767,14 @@ char *Curl_ldap_next_attribute_a(void *ld, LDAPMessage *entry,
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
-  cp2[i] = '\0';
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
-     overwrite the EBCDIC buffer with ASCII to return it. */
+     overwrite the EBCDIC buffer with ASCII to return it.
 
-  strcpy(cp, cp2);
+     The destination buffer already has a null-terminator at the correct
+     position. Keep it outouched and copy the buffer without a terminator. */
+  memcpy(cp, cp2, i);
   free(cp2);
   return cp;
 }

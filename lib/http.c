@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
@@ -81,10 +80,10 @@
 #include "strdup.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "rtsp.h"
 #include "ws.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
-#include "curlx/timeval.h"
 
 /*
  * Forward declarations.
@@ -4288,18 +4287,23 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/* cut off the newline characters */
-static void unfold_header(struct Curl_easy *data)
+/* remove trailing CRLF then all trailing whitespace */
+void Curl_http_to_fold(struct dynbuf *bf)
 {
-  size_t len = curlx_dyn_len(&data->state.headerb);
-  char *hd = curlx_dyn_ptr(&data->state.headerb);
+  size_t len = curlx_dyn_len(bf);
+  char *hd = curlx_dyn_ptr(bf);
   if(len && (hd[len - 1] == '\n'))
     len--;
   if(len && (hd[len - 1] == '\r'))
     len--;
   while(len && (ISBLANK(hd[len - 1]))) /* strip off trailing whitespace */
     len--;
-  curlx_dyn_setlen(&data->state.headerb, len);
+  curlx_dyn_setlen(bf, len);
+}
+
+static void unfold_header(struct Curl_easy *data)
+{
+  Curl_http_to_fold(&data->state.headerb);
   data->state.leading_unfold = TRUE;
 }
 

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY) && \
@@ -37,7 +36,6 @@
 #include "bufq.h"
 #include "curlx/dynbuf.h"
 #include "dynhds.h"
-#include "http1.h"
 #include "http2.h"
 #include "http_proxy.h"
 #include "multiif.h"
@@ -447,7 +445,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   size_t nread;
 
-  /* Process network input buffer fist */
+  /* Process network input buffer first */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
     CURL_TRC_CF(data, cf, "[0] process %zu bytes in connection buffer",
                 Curl_bufq_len(&ctx->inbufq));

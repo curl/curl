@@ -23,12 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all Schannel-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  */
-
 #include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL

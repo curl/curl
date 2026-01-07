@@ -24,8 +24,6 @@
  *
  ***************************************************************************/
 
-#include "../curl_setup.h"
-
 #define CURLX_FUNCTION_CAST(target_type, func) \
   (target_type)(void (*)(void))(func)
 

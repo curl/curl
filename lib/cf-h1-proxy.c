@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
@@ -69,6 +68,8 @@ struct h1_tunnel_state {
   h1_tunnel_state tunnel_state;
   BIT(chunked_encoding);
   BIT(close_connection);
+  BIT(maybe_folded);
+  BIT(leading_unfold);
 };
 
 static bool tunnel_is_established(struct h1_tunnel_state *ts)
@@ -94,6 +95,8 @@ static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
   ts->keepon = KEEPON_CONNECT;
   ts->cl = 0;
   ts->close_connection = FALSE;
+  ts->maybe_folded = FALSE;
+  ts->leading_unfold = FALSE;
   return CURLE_OK;
 }
 
@@ -345,16 +348,82 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
   return result;
 }
 
+static CURLcode single_header(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct h1_tunnel_state *ts)
+{
+  CURLcode result = CURLE_OK;
+  char *linep = curlx_dyn_ptr(&ts->rcvbuf);
+  size_t line_len = curlx_dyn_len(&ts->rcvbuf); /* bytes in this line */
+  struct SingleRequest *k = &data->req;
+  int writetype;
+  ts->headerlines++;
+
+  /* output debug if that is requested */
+  Curl_debug(data, CURLINFO_HEADER_IN, linep, line_len);
+
+  /* send the header to the callback */
+  writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
+    (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
+  result = Curl_client_write(data, writetype, linep, line_len);
+  if(result)
+    return result;
+
+  result = Curl_bump_headersize(data, line_len, TRUE);
+  if(result)
+    return result;
+
+  /* Newlines are CRLF, so the CR is ignored as the line is not
+     really terminated until the LF comes. Treat a following CR
+     as end-of-headers as well.*/
+
+  if(ISNEWLINE(linep[0])) {
+    /* end of response-headers from the proxy */
+
+    if((407 == k->httpcode) && !data->state.authproblem) {
+      /* If we get a 407 response code with content length
+         when we have no auth problem, we must ignore the
+         whole response-body */
+      ts->keepon = KEEPON_IGNORE;
+
+      if(ts->cl) {
+        infof(data, "Ignore %" FMT_OFF_T " bytes of response-body", ts->cl);
+      }
+      else if(ts->chunked_encoding) {
+        infof(data, "Ignore chunked response-body");
+      }
+      else {
+        /* without content-length or chunked encoding, we
+           cannot keep the connection alive since the close is
+           the end signal so we bail out at once instead */
+        CURL_TRC_CF(data, cf, "CONNECT: no content-length or chunked");
+        ts->keepon = KEEPON_DONE;
+      }
+    }
+    else {
+      ts->keepon = KEEPON_DONE;
+    }
+
+    DEBUGASSERT(ts->keepon == KEEPON_IGNORE ||
+                ts->keepon == KEEPON_DONE);
+    return result;
+  }
+
+  result = on_resp_header(cf, data, ts, linep);
+  if(result)
+    return result;
+
+  curlx_dyn_reset(&ts->rcvbuf);
+  return result;
+}
+
 static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct h1_tunnel_state *ts,
                                   bool *done)
 {
   CURLcode result = CURLE_OK;
-  struct SingleRequest *k = &data->req;
-  char *linep;
-  size_t line_len;
-  int error, writetype;
+  int error;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -428,6 +497,31 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       continue;
     }
 
+    if(ts->maybe_folded) {
+      if(ISBLANK(byte)) {
+        Curl_http_to_fold(&ts->rcvbuf);
+        ts->leading_unfold = TRUE;
+      }
+      else {
+        result = single_header(cf, data, ts);
+        if(result)
+          return result;
+        /* now handle the new byte */
+      }
+      ts->maybe_folded = FALSE;
+    }
+
+    if(ts->leading_unfold) {
+      if(ISBLANK(byte))
+        /* skip a bit brother */
+        continue;
+      /* non-blank, insert a space then continue the unfolding */
+      if(curlx_dyn_addn(&ts->rcvbuf, " ", 1)) {
+        failf(data, "CONNECT response too large");
+        return CURLE_RECV_ERROR;
+      }
+      ts->leading_unfold = FALSE;
+    }
     if(curlx_dyn_addn(&ts->rcvbuf, &byte, 1)) {
       failf(data, "CONNECT response too large");
       return CURLE_RECV_ERROR;
@@ -436,67 +530,19 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     /* if this is not the end of a header line then continue */
     if(byte != 0x0a)
       continue;
-
-    ts->headerlines++;
-    linep = curlx_dyn_ptr(&ts->rcvbuf);
-    line_len = curlx_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
-
-    /* output debug if that is requested */
-    Curl_debug(data, CURLINFO_HEADER_IN, linep, line_len);
-
-    /* send the header to the callback */
-    writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
-      (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
-    result = Curl_client_write(data, writetype, linep, line_len);
-    if(result)
-      return result;
-
-    result = Curl_bump_headersize(data, line_len, TRUE);
-    if(result)
-      return result;
-
-    /* Newlines are CRLF, so the CR is ignored as the line is not
-       really terminated until the LF comes. Treat a following CR
-       as end-of-headers as well.*/
-
-    if(('\r' == linep[0]) ||
-       ('\n' == linep[0])) {
-      /* end of response-headers from the proxy */
-
-      if((407 == k->httpcode) && !data->state.authproblem) {
-        /* If we get a 407 response code with content length
-           when we have no auth problem, we must ignore the
-           whole response-body */
-        ts->keepon = KEEPON_IGNORE;
-
-        if(ts->cl) {
-          infof(data, "Ignore %" FMT_OFF_T " bytes of response-body", ts->cl);
-        }
-        else if(ts->chunked_encoding) {
-          infof(data, "Ignore chunked response-body");
-        }
-        else {
-          /* without content-length or chunked encoding, we
-             cannot keep the connection alive since the close is
-             the end signal so we bail out at once instead */
-          CURL_TRC_CF(data, cf, "CONNECT: no content-length or chunked");
-          ts->keepon = KEEPON_DONE;
-        }
+    else {
+      char *linep = curlx_dyn_ptr(&ts->rcvbuf);
+      size_t hlen = curlx_dyn_len(&ts->rcvbuf);
+      if(hlen && ISNEWLINE(linep[0])) {
+        /* end of headers */
+        result = single_header(cf, data, ts);
+        if(result)
+          return result;
       }
-      else {
-        ts->keepon = KEEPON_DONE;
-      }
-
-      DEBUGASSERT(ts->keepon == KEEPON_IGNORE ||
-                  ts->keepon == KEEPON_DONE);
-      continue;
+      else
+        ts->maybe_folded = TRUE;
     }
 
-    result = on_resp_header(cf, data, ts, linep);
-    if(result)
-      return result;
-
-    curlx_dyn_reset(&ts->rcvbuf);
   } /* while there is buffer left and loop is requested */
 
   if(error)
@@ -741,4 +787,4 @@ CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY && ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */

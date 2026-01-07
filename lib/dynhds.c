@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "dynhds.h"
@@ -32,10 +31,9 @@
 #include <nghttp2/nghttp2.h>
 #endif /* USE_NGHTTP2 */
 
-
-static struct dynhds_entry *
-entry_new(const char *name, size_t namelen,
-          const char *value, size_t valuelen, int opts)
+static struct dynhds_entry *entry_new(const char *name, size_t namelen,
+                                      const char *value, size_t valuelen,
+                                      int opts)
 {
   struct dynhds_entry *e;
   char *p;
@@ -45,7 +43,7 @@ entry_new(const char *name, size_t namelen,
   e = curlx_calloc(1, sizeof(*e) + namelen + valuelen + 2);
   if(!e)
     return NULL;
-  e->name = p = ((char *)e) + sizeof(*e);
+  e->name = p = (char *)e + sizeof(*e);
   memcpy(p, name, namelen);
   e->namelen = namelen;
   e->value = p += namelen + 1; /* leave a \0 at the end of name */
@@ -54,29 +52,6 @@ entry_new(const char *name, size_t namelen,
   if(opts & DYNHDS_OPT_LOWERCASE)
     Curl_strntolower(e->name, e->name, e->namelen);
   return e;
-}
-
-static struct dynhds_entry *entry_append(struct dynhds_entry *e,
-                                         const char *value, size_t valuelen)
-{
-  struct dynhds_entry *e2;
-  size_t valuelen2 = e->valuelen + 1 + valuelen;
-  char *p;
-
-  DEBUGASSERT(value);
-  e2 = curlx_calloc(1, sizeof(*e) + e->namelen + valuelen2 + 2);
-  if(!e2)
-    return NULL;
-  e2->name = p = ((char *)e2) + sizeof(*e2);
-  memcpy(p, e->name, e->namelen);
-  e2->namelen = e->namelen;
-  e2->value = p += e->namelen + 1; /* leave a \0 at the end of name */
-  memcpy(p, e->value, e->valuelen);
-  p += e->valuelen;
-  p[0] = ' ';
-  memcpy(p + 1, value, valuelen);
-  e2->valuelen = valuelen2;
-  return e2;
 }
 
 static void entry_free(struct dynhds_entry *e)
@@ -222,48 +197,26 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
   if(!line || !line_len)
     return CURLE_OK;
 
-  if((line[0] == ' ') || (line[0] == '\t')) {
-    struct dynhds_entry *e, *e2;
-    /* header continuation, yikes! */
-    if(!dynhds->hds_len)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-
-    while(line_len && ISBLANK(line[0])) {
-      ++line;
-      --line_len;
-    }
-    if(!line_len)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    e = dynhds->hds[dynhds->hds_len - 1];
-    e2 = entry_append(e, line, line_len);
-    if(!e2)
-      return CURLE_OUT_OF_MEMORY;
-    dynhds->hds[dynhds->hds_len - 1] = e2;
-    entry_free(e);
-    return CURLE_OK;
+  p = memchr(line, ':', line_len);
+  if(!p)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  name = line;
+  namelen = p - line;
+  p++; /* move past the colon */
+  for(i = namelen + 1; i < line_len; ++i, ++p) {
+    if(!ISBLANK(*p))
+      break;
   }
-  else {
-    p = memchr(line, ':', line_len);
-    if(!p)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    name = line;
-    namelen = p - line;
-    p++; /* move past the colon */
-    for(i = namelen + 1; i < line_len; ++i, ++p) {
-      if(!ISBLANK(*p))
-        break;
-    }
-    value = p;
-    valuelen = line_len - i;
+  value = p;
+  valuelen = line_len - i;
 
-    p = memchr(value, '\r', valuelen);
-    if(!p)
-      p = memchr(value, '\n', valuelen);
-    if(p)
-      valuelen = (size_t)(p - value);
+  p = memchr(value, '\r', valuelen);
+  if(!p)
+    p = memchr(value, '\n', valuelen);
+  if(p)
+    valuelen = (size_t)(p - value);
 
-    return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
-  }
+  return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
 }
 
 CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line)

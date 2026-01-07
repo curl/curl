@@ -23,16 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "hash.h"
 #include "curl_addrinfo.h"
-#include "curlx/timeval.h" /* for timediff_t */
+#include "curlx/timeval.h" /* for curltime, timediff_t */
 #include "asyn.h"
 #include "httpsrr.h"
-
-#include <setjmp.h>
 
 #ifdef USE_HTTPSRR
 # include <stdint.h>

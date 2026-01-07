@@ -48,6 +48,8 @@ h1 3.example.org 8080 h2 example.com 8080 "20190125 22:34:21" 0 0
 h1 3.example.org 8080 h3 yesyes.com 8080 "20190125 22:34:21" 0 0
 h2 example.org 80 h2 example.com 443 "20190124 22:36:21" 0 0
 h2 example.net 80 h2 example.net 443 "20190124 22:37:21" 0 0
+h2 test.se 443 h2 test2.se 443 "20190124 22:37:21" 0 0
+h2 test.se 443 h2 test3.se 443 "20190124 22:36:21" 0 0
 </file>
 </verify>
 </testcase>

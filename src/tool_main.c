@@ -39,7 +39,6 @@
 #include "tool_operate.h"
 #include "tool_vms.h"
 #include "tool_main.h"
-#include "tool_libinfo.h"
 #include "tool_stderr.h"
 
 #ifdef __VMS
@@ -108,9 +107,7 @@ static void memory_tracking_init(void)
   if(env) {
     /* use the value as filename */
     char fname[512];
-    if(strlen(env) >= sizeof(fname))
-      env[sizeof(fname) - 1] = '\0';
-    strcpy(fname, env);
+    curlx_strcopy(fname, sizeof(fname), env, strlen(env));
     curl_free(env);
     curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called before

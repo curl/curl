@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_ARPA_INET_H
@@ -31,7 +30,6 @@
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "curl_trc.h"
-#include "curlx/timeval.h"
 #include "rand.h"
 #include "escape.h"
 

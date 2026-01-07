@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
@@ -36,7 +35,6 @@
 #include "multi_ev.h"
 #include "sendf.h"
 #include "curl_trc.h"
-#include "curlx/timeval.h"
 #include "http.h"
 #include "select.h"
 #include "curlx/wait.h"
@@ -1081,10 +1079,9 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
     result = conn->handler->perform_pollset(data, ps);
   else {
     /* Default is to obey the data->req.keepon flags for send/recv */
-    if(CURL_WANT_RECV(data) && CONN_SOCK_IDX_VALID(conn->recv_idx)) {
+    if(Curl_req_want_recv(data) && CONN_SOCK_IDX_VALID(conn->recv_idx)) {
       result = Curl_pollset_add_in(data, ps, conn->sock[conn->recv_idx]);
     }
-
     if(!result && Curl_req_want_send(data) &&
        CONN_SOCK_IDX_VALID(conn->send_idx)) {
       result = Curl_pollset_add_out(data, ps, conn->sock[conn->send_idx]);
@@ -1223,7 +1220,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
   int this_max_fd = -1;
   struct Curl_multi *multi = m;
   struct easy_pollset ps;
-  unsigned int i, mid;
+  unsigned int i;
+  uint32_t mid;
   (void)exc_fd_set;
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -1282,7 +1280,8 @@ CURLMcode curl_multi_waitfds(CURLM *m,
   CURLMcode mresult = CURLM_OK;
   struct Curl_multi *multi = m;
   struct easy_pollset ps;
-  unsigned int need = 0, mid;
+  unsigned int need = 0;
+  uint32_t mid;
 
   if(!ufds && (size || !fd_count))
     return CURLM_BAD_FUNCTION_ARGUMENT;
@@ -1332,7 +1331,7 @@ static void reset_socket_fdwrite(curl_socket_t s)
   int t;
   int l = (int)sizeof(t);
   if(!getsockopt(s, SOL_SOCKET, SO_TYPE, (char *)&t, &l) && t == SOCK_STREAM)
-    CURL_SEND(s, NULL, 0, 0);
+    send(s, NULL, 0, 0);
 }
 #endif
 
@@ -3761,7 +3760,8 @@ CURL **curl_multi_get_handles(CURLM *m)
   unsigned int count = Curl_uint32_tbl_count(&multi->xfers);
   CURL **a = curlx_malloc(sizeof(struct Curl_easy *) * (count + 1));
   if(a) {
-    unsigned int i = 0, mid;
+    unsigned int i = 0;
+    uint32_t mid;
 
     if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
       do {

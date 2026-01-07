@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "curl_trc.h"
@@ -43,6 +42,7 @@
 #include "curlx/strparse.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
+#include "curlx/strcopy.h"
 
 static void trc_write(struct Curl_easy *data, curl_infotype type,
                       const char *ptr, size_t size)
@@ -85,8 +85,8 @@ static struct curl_trc_feat Curl_trc_feat_ids = {
   CURL_LOG_LVL_NONE,
 };
 #define CURL_TRC_IDS(data) \
-             (Curl_trc_is_verbose(data) && \
-             Curl_trc_feat_ids.log_level >= CURL_LOG_LVL_INFO)
+  (Curl_trc_is_verbose(data) && \
+  Curl_trc_feat_ids.log_level >= CURL_LOG_LVL_INFO)
 
 static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 {
@@ -184,7 +184,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     len = curl_mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
-      strcpy(data->set.errorbuffer, error);
+      curlx_strcopy(data->set.errorbuffer, CURL_ERROR_SIZE, error, len);
       data->state.errorbuf = TRUE; /* wrote error string */
     }
     error[len++] = '\n';
