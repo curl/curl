@@ -485,7 +485,6 @@
 #  define struct_stat                  struct _stati64
 #  define LSEEK_ERROR                  (__int64)-1
 #elif defined(__DJGPP__)
-#  include <inttypes.h>
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
 #  undef  lseek
