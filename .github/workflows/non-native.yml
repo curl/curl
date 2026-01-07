@@ -337,6 +337,7 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
+      # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced registryUrl=https://github.com
       TOOLCHAIN_VERSION: '3.4'
     strategy:
       matrix:
