@@ -224,10 +224,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
 #endif
 
-/* SSL backend-specific data; declared differently by each SSL backend */
-struct ssl_backend_data;
-struct Curl_ssl_scache_entry;
-
 struct ssl_primary_config {
   char *CApath;          /* certificate directory (does not work on Windows) */
   char *CAfile;          /* certificate to verify peer against */
