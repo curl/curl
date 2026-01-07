@@ -857,13 +857,13 @@
 
 /* For MSVC (all versions as of VS2022) */
 #ifndef STDIN_FILENO
-#define STDIN_FILENO  _fileno(stdin)
+#define STDIN_FILENO  fileno(stdin)
 #endif
 #ifndef STDOUT_FILENO
-#define STDOUT_FILENO  _fileno(stdout)
+#define STDOUT_FILENO  fileno(stdout)
 #endif
 #ifndef STDERR_FILENO
-#define STDERR_FILENO  _fileno(stderr)
+#define STDERR_FILENO  fileno(stderr)
 #endif
 
 /* Since O_BINARY is used in bitmasks, setting it to zero makes it usable in
