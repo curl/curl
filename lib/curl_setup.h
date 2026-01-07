@@ -466,12 +466,8 @@
 
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
-
-#ifndef PRIu32
+#else
 #define PRIu32 "u"
-#endif
-#ifndef PRIx32
 #define PRIx32 "x"
 #endif
 
