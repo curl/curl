@@ -808,8 +808,6 @@
 
 #ifdef _MSC_VER
 /* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about non-portable funcs */
-#  undef close
-#  define close(fd) _close(fd)
 #  undef fileno
 #  define fileno(fh) _fileno(fh)
 #  undef unlink
