@@ -289,7 +289,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
     {
       helpf("cannot open '%s'", per->uploadfile);
       if(per->infd != -1) {
-        close(per->infd);
+        curlx_close(per->infd);
         per->infd = STDIN_FILENO;
       }
       return CURLE_READ_ERROR;
@@ -621,7 +621,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   else
 #endif
     if(per->infdopen)
-      close(per->infd);
+      curlx_close(per->infd);
 
   if(per->skip)
     goto skip;

@@ -89,7 +89,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     if(fd != -1) {
       file = curlx_fdopen(fd, "wb");
       if(!file)
-        close(fd);
+        curlx_close(fd);
     }
   }
 
