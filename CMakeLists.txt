@@ -515,20 +515,17 @@ if(PERL_EXECUTABLE)
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
   )
-  add_custom_target(checksrc "${_lint_all}"
-    COMMENT "Running checksrc" VERBATIM USES_TERMINAL
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl"
-    DEPENDS "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
-  )
   if(CURL_LINT)
     set(_lint_all ALL)
   endif()
   add_custom_target(curl-lint "${_lint_all}"
     COMMENT "Running lint checks" VERBATIM USES_TERMINAL
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl"
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
-    DEPENDS checksrc "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
+    DEPENDS
+      "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
+      "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
   )
 endif()
 
