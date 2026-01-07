@@ -269,9 +269,9 @@ static CURLcode httpauth(struct Curl_easy *data, bool proxy,
       return CURLE_NOT_BUILT_IN; /* no supported types left! */
   }
   if(proxy)
-    data->set.proxyauth = auth;
+    data->set.proxyauth = (uint32_t)auth;
   else
-    data->set.httpauth = auth;
+    data->set.httpauth = (uint32_t)auth;
   return CURLE_OK;
 }
 #endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
