@@ -4,7 +4,7 @@ curl and libcurl 8.18.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3569
+ Contributors:                 3571
 
 This release includes the following changes:
 
@@ -66,6 +66,7 @@ This release includes the following bugfixes:
  o compressed.md: might generate a huge amount of bytes [227]
  o config-win32.h: delete obsolete, non-Windows comments [295]
  o config-win32.h: drop unused/obsolete `CURL_HAS_OPENLDAP_LDAPSDK` [278]
+ o config2setopts: add space in cookie header with multiple -b [344]
  o config2setopts: bail out if curl_url_get() returns OOM [102]
  o config2setopts: exit if curl_url_set() fails on OOM [105]
  o configure: delete unused variable [294]
@@ -123,6 +124,7 @@ This release includes the following bugfixes:
  o doc: some returned in-memory data may not be altered [196]
  o Dockerfile: update debian:bookworm-slim digest to e899040 [305]
  o docs/libcurl: fix C formatting nits [207]
+ o docs: add a note about --compressed to note about binary output [381]
  o docs: clarify how to do unix domain sockets with SOCKS proxy [240]
  o docs: fix checksrc `EQUALSPACE` warnings [21]
  o docs: fix time_posttransfer output unit as seconds [335]
@@ -260,6 +262,7 @@ This release includes the following bugfixes:
  o os400sys: replace `strcpy()` with `memcpy()` [273]
  o osslq: code readability [5]
  o progress: make it one column narrower [352]
+ o progress: narrower time display, multiple fixes [369]
  o progress: show fewer digits [78]
  o projects/README.md: Markdown fixes [148]
  o pytest fixes and improvements [159]
@@ -349,6 +352,7 @@ This release includes the following bugfixes:
  o tool_cfgable: free ssl-sessions at exit [123]
  o tool_doswin: clear pointer when thread takes ownership [198]
  o tool_doswin: increase allowable length of path sanitizer [289]
+ o tool_doswin: remove the max length check [374]
  o tool_getparam: simplify the --rate parser [373]
  o tool_getparam: use memdup0() instead of malloc + copy [390]
  o tool_getparam: verify that a file exists for some options [134]
@@ -364,9 +368,11 @@ This release includes the following bugfixes:
  o tool_paramhlp: refuse --proto remove all protocols [10]
  o tool_paramhlp: remove a malloc+free from proto2num() [378]
  o tool_paramhlp: simplify number parsing [375]
+ o tool_progress: fix large time outputs and decimal size display [379]
  o tool_urlglob: acknowledge OOM in peek_ipv6 [175]
  o tool_urlglob: clean up used memory on errors better [44]
  o tool_urlglob: constify an argument [361]
+ o tool_urlglob: fix propagating OOM error from `sanitize_file_name()` [342]
  o tool_urlglob: support globs as long as config line lengths [282]
  o tool_writeout: bail out proper on OOM [104]
  o url: fix return code for OOM in parse_proxy() [193]
@@ -388,6 +394,7 @@ This release includes the following bugfixes:
  o vtls: pinned key check [98]
  o VULN-DISCLOSURE-POLICY.md: CRLF in data [349]
  o wcurl: import v2025.11.09 [29]
+ o wcurl: import v2026.01.05 [315]
  o windows: assume `USE_WIN32_LARGE_FILES` [292]
  o windows: fix `CreateFile()` calls to support long filenames [356]
  o windows: use `_strdup()` instead of `strdup()` where missing [145]
@@ -423,21 +430,22 @@ advice from friends like these:
 
   Aleksandr Sergeev, Aleksei Bavshin, Alexander Batischev, Andrew Kirillov,
   anonymous237 on hackerone, BANADDA, boingball, Brad King, bttrfl on github,
-  Christian Schmitz, Dan Fandrich, Daniel McCarney, Daniel Pouzzner,
-  Daniel Santos, Daniel Stenberg, Denis Goleshchikhin, Deniz Parlak,
-  dependabot[bot], Fabian Keil, Fd929c2CE5fA on github, ffath-vo on github,
-  Fizn-Ahmd on github, Gabriel Marin, Georg Schulz-Allgaier, Gisle Vanem,
-  Greg Hudson, Harry Sintonen, herdiyanitdev on hackerone, Hunt Darlener,
-  Huseyin Tintas, Jeff King, Jiyong Yang, John Haugabook, Joshua Vandaële,
-  Juliusz Sosinowicz, Kai Pastor, koujaz on github, Leonardo Taccari,
-  letshack9707 on hackerone, Marc Aldorasi, Marcel Raad, Mathesh V, Max Faxälv,
-  nait-furry, ncaklovic on github, Nick Korepanov, Omdahake on github,
-  Patrick Monnerat, pelioro on hackerone, Ray Satiro, renovate[bot],
-  Robert W. Van Kirk, Samuel Henrique, Sergey Katsubo, st751228051 on github,
-  Stanislav Fort, Stefan Eissing, Stuart Henderson, Sunny, Theo Buehler,
-  Thomas Klausner, trxvorr, Viktor Szakats, Wesley Moore, Wyatt O'Day,
-  Xiaoke Wang, Yedaya Katsman, Yuhao Jiang, yushicheng7788 on github
-  (69 contributors)
+  Christian Schmitz, correctmost on github, Dan Fandrich, Daniel McCarney,
+  Daniel Pouzzner, Daniel Santos, Daniel Stenberg, Denis Goleshchikhin,
+  Deniz Parlak, dependabot[bot], Fabian Keil, Fd929c2CE5fA on github,
+  ffath-vo on github, Fizn-Ahmd on github, Gabriel Marin,
+  Georg Schulz-Allgaier, Gisle Vanem, Greg Hudson, Harry Sintonen,
+  herdiyanitdev on hackerone, Hunt Darlener, Huseyin Tintas, Jeff King,
+  Jiyong Yang, John Haugabook, Joshua Vandaële, Juliusz Sosinowicz, Kai Pastor,
+  koujaz on github, Leonardo Taccari, letshack9707 on hackerone, Marc Aldorasi,
+  Marcel Raad, Mathesh V, Max Faxälv, nait-furry, ncaklovic on github,
+  Nick Korepanov, Omdahake on github, Patrick Monnerat, pelioro on hackerone,
+  pojomi, Ray Satiro, renovate[bot], Robert W. Van Kirk, Samuel Henrique,
+  Sergey Katsubo, st751228051 on github, Stanislav Fort, Stefan Eissing,
+  Stuart Henderson, Sunny, Theo Buehler, Thomas Klausner, Tobias Zimmermann,
+  trxvorr, Viktor Szakats, Wesley Moore, Wyatt O'Day, Xiaoke Wang,
+  Yedaya Katsman, Yuhao Jiang, yushicheng7788 on github
+  (72 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -755,6 +763,7 @@ References to bug reports and discussions on issues:
  [312] = https://curl.se/bug/?i=20011
  [313] = https://curl.se/bug/?i=20009
  [314] = https://curl.se/bug/?i=20008
+ [315] = https://curl.se/bug/?i=20194
  [316] = https://curl.se/bug/?i=19997
  [317] = https://curl.se/bug/?i=20077
  [318] = https://curl.se/bug/?i=20002
@@ -781,7 +790,9 @@ References to bug reports and discussions on issues:
  [339] = https://curl.se/bug/?i=20064
  [340] = https://curl.se/bug/?i=20063
  [341] = https://curl.se/bug/?i=20100
+ [342] = https://curl.se/bug/?i=20198
  [343] = https://curl.se/bug/?i=20099
+ [344] = https://curl.se/bug/?i=20184
  [345] = https://curl.se/bug/?i=20095
  [349] = https://curl.se/bug/?i=20157
  [350] = https://curl.se/bug/?i=20052
@@ -800,13 +811,17 @@ References to bug reports and discussions on issues:
  [365] = https://curl.se/bug/?i=20030
  [366] = https://curl.se/bug/?i=20148
  [367] = https://curl.se/bug/?i=20032
+ [369] = https://curl.se/bug/?i=20122
  [371] = https://curl.se/bug/?i=20139
  [372] = https://curl.se/bug/?i=20138
  [373] = https://curl.se/bug/?i=20119
+ [374] = https://curl.se/bug/?i=20143
  [375] = https://curl.se/bug/?i=20134
  [376] = https://curl.se/bug/?i=20136
  [378] = https://curl.se/bug/?i=20120
+ [379] = https://curl.se/bug/?i=20177
  [380] = https://curl.se/bug/?i=20132
+ [381] = https://curl.se/bug/?i=20168
  [382] = https://curl.se/bug/?i=20130
  [383] = https://curl.se/bug/?i=20129
  [384] = https://curl.se/bug/?i=20126
