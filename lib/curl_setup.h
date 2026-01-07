@@ -812,6 +812,10 @@
 #  define fileno(fh) _fileno(fh)
 #  undef unlink
 #  define unlink(fn) _unlink(fn)
+#  undef isatty
+#  define isatty(fd) _isatty(fd)
+#  undef mkdir
+#  define mkdir(dir) _mkdir(dir)
 #endif
 
 /*
