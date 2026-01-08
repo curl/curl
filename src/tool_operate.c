@@ -633,28 +633,27 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     if(global->silent && !global->showerror)
       vms_show = VMSSTS_HIDE;
   }
-  else
 #endif
-    if(!config->synthetic_error && result &&
-       (!global->silent || global->showerror)) {
-      const char *msg = per->errorbuffer;
-      curl_mfprintf(tool_stderr, "curl: (%d) %s\n", result,
-                    msg[0] ? msg : curl_easy_strerror(result));
-      if(result == CURLE_PEER_FAILED_VERIFICATION)
-        fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
+  if(!config->synthetic_error && result &&
+     (!global->silent || global->showerror)) {
+    const char *msg = per->errorbuffer;
+    curl_mfprintf(tool_stderr, "curl: (%d) %s\n", result,
+                  msg[0] ? msg : curl_easy_strerror(result));
+    if(result == CURLE_PEER_FAILED_VERIFICATION)
+      fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
+  }
+  else if(config->fail == FAIL_WITH_BODY) {
+    /* if HTTP response >= 400, return error */
+    long code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+    if(code >= 400) {
+      if(!global->silent || global->showerror)
+        curl_mfprintf(tool_stderr,
+                      "curl: (%d) The requested URL returned error: %ld\n",
+                      CURLE_HTTP_RETURNED_ERROR, code);
+      result = CURLE_HTTP_RETURNED_ERROR;
     }
-    else if(config->fail == FAIL_WITH_BODY) {
-      /* if HTTP response >= 400, return error */
-      long code = 0;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-      if(code >= 400) {
-        if(!global->silent || global->showerror)
-          curl_mfprintf(tool_stderr,
-                        "curl: (%d) The requested URL returned error: %ld\n",
-                        CURLE_HTTP_RETURNED_ERROR, code);
-        result = CURLE_HTTP_RETURNED_ERROR;
-      }
-    }
+  }
   /* Set file extended attributes */
   if(!result && config->xattr && outs->fopened && outs->stream) {
     rc = fwrite_xattr(curl, per->url, fileno(outs->stream));
