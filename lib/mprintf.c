@@ -712,7 +712,8 @@ static bool out_double(void *userp,
   work[BUFFSIZE - 1] = 0;
 #endif
 #else
-  (sprintf)(work, formatbuf, dnum);
+  /* float and double outputs do not work without snprintf support */
+  work[0] = 0;
 #endif
 #ifdef __clang__
 #pragma clang diagnostic pop
