@@ -328,6 +328,7 @@ static const struct LongShort aliases[]= {
   {"stderr",                     ARG_FILE, ' ', C_STDERR},
   {"styled-output",              ARG_BOOL, ' ', C_STYLED_OUTPUT},
   {"suppress-connect-headers",   ARG_BOOL, ' ', C_SUPPRESS_CONNECT_HEADERS},
+  {"sync",                       ARG_BOOL, ' ', C_SYNC},
   {"tcp-fastopen",               ARG_BOOL, ' ', C_TCP_FASTOPEN},
   {"tcp-nodelay",                ARG_BOOL, ' ', C_TCP_NODELAY},
   {"telnet-option",              ARG_STRG, 't', C_TELNET_OPTION},
@@ -2066,6 +2067,9 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_INCLUDE: /* --include */
   case C_SHOW_HEADERS: /* --show-headers */
     config->show_headers = toggle;
+    break;
+  case C_SYNC:
+    config->sync = toggle;
     break;
   case C_JUNK_SESSION_COOKIES: /* --junk-session-cookies */
     config->cookiesession = toggle;
