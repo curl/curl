@@ -152,11 +152,9 @@ UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
 
         if(howlong >= data->set.low_speed_time * 1000) {
           /* too long */
-          failf(data,
-                "Operation too slow. "
-                "Less than %ld bytes/sec transferred the last %ld seconds",
-                data->set.low_speed_limit,
-                data->set.low_speed_time);
+          failf(data, "Operation too slow. Less than %" FMT_OFF_T
+                " bytes/sec transferred the last %u seconds",
+                data->set.low_speed_limit, data->set.low_speed_time);
           return CURLE_OPERATION_TIMEDOUT;
         }
       }

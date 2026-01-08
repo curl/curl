@@ -1050,9 +1050,10 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     s->low_speed_limit = arg;
     break;
   case CURLOPT_LOW_SPEED_TIME:
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->low_speed_time = arg;
+    result = value_range(&arg, 0, 0, USHRT_MAX);
+    if(result)
+      return result;
+    s->low_speed_time = (uint16_t)arg;
     break;
   case CURLOPT_PORT:
     if((arg < 0) || (arg > 65535))
@@ -1190,11 +1191,17 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_RTSP_REQUEST:
     return setopt_RTSP_REQUEST(data, arg);
   case CURLOPT_RTSP_CLIENT_CSEQ:
-    data->state.rtsp_next_client_CSeq = arg;
+    result = value_range(&arg, 0, 0, INT_MAX);
+    if(result)
+      return result;
+    data->state.rtsp_next_client_CSeq = (uint32_t)arg;
     break;
 
   case CURLOPT_RTSP_SERVER_CSEQ:
-    data->state.rtsp_next_server_CSeq = arg;
+    result = value_range(&arg, 0, 0, INT_MAX);
+    if(result)
+      return result;
+    data->state.rtsp_next_server_CSeq = (uint32_t)arg;
     break;
 
 #endif /* !CURL_DISABLE_RTSP */
@@ -1231,9 +1238,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     return setopt_set_timeout_ms(&s->happy_eyeballs_timeout, arg);
 
   case CURLOPT_UPKEEP_INTERVAL_MS:
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->upkeep_interval_ms = arg;
+    return setopt_set_timeout_ms(&s->upkeep_interval_ms, arg);
     break;
   case CURLOPT_MAXAGE_CONN:
     return setopt_set_timeout_sec(&s->conn_max_idle_ms, arg);
