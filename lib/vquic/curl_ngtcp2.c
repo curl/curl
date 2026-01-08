@@ -1396,6 +1396,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_call_data save;
   struct pkt_io_ctx pktx;
   CURLcode result = CURLE_OK;
+  int i;
 
   (void)ctx;
   (void)buf;
@@ -1422,21 +1423,29 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   cf_ngtcp2_ack_stream(cf, data, stream);
 
-  if(cf_progress_ingress(cf, data, &pktx)) {
-    result = CURLE_RECV_ERROR;
-    goto out;
+  /* first check for results/closed already known without touching
+   * the connection. For an already failed/closed stream, errors on
+   * the connection do not count.
+   * Then handle incoming data and check for failed/closed again.
+   */
+  for(i = 0; i < 2; ++i) {
+    if(stream->xfer_result) {
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);
+      cf_ngtcp2_stream_close(cf, data, stream);
+      result = stream->xfer_result;
+      goto out;
+    }
+    else if(stream->closed) {
+      result = recv_closed_stream(cf, data, stream, pnread);
+      goto out;
+    }
+
+    if(!i && cf_progress_ingress(cf, data, &pktx)) {
+      result = CURLE_RECV_ERROR;
+      goto out;
+    }
   }
 
-  if(stream->xfer_result) {
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);
-    cf_ngtcp2_stream_close(cf, data, stream);
-    result = stream->xfer_result;
-    goto out;
-  }
-  else if(stream->closed) {
-    result = recv_closed_stream(cf, data, stream, pnread);
-    goto out;
-  }
   result = CURLE_AGAIN;
 
 out:
