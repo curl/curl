@@ -581,8 +581,7 @@ void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
           Curl_multi_mark_dirty(data);
         }
         else {
-          CURL_TRC_M(multi->admin,
-                     "socket transfer %u no longer found", mid);
+          CURL_TRC_M(multi->admin, "socket transfer %u no longer found", mid);
           Curl_uint32_spbset_remove(&entry->xfers, mid);
         }
       } while(Curl_uint32_spbset_next(&entry->xfers, mid, &mid));
