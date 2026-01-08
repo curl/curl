@@ -224,7 +224,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
               outs->filename = filename;
 
             outs->is_cd_filename = TRUE;
-            outs->s_isreg = TRUE;
+            outs->regular_file = TRUE;
             outs->fopened = FALSE;
             outs->alloc_filename = TRUE;
             hdrcbdata->honor_cd_filename = FALSE; /* done now! */

@@ -99,7 +99,7 @@ bool tool_create_output_file(struct OutStruct *outs,
           curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return FALSE;
   }
-  outs->s_isreg = TRUE;
+  outs->regular_file = TRUE;
   outs->fopened = TRUE;
   outs->stream = file;
   outs->bytes = 0;
@@ -282,7 +282,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       /* regular file */
       if(!*outs->filename)
         check_fails = TRUE;
-      if(!outs->s_isreg)
+      if(!outs->regular_file)
         check_fails = TRUE;
       if(outs->fopened && !outs->stream)
         check_fails = TRUE;
@@ -293,7 +293,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
     else {
       /* standard stream */
-      if(!outs->stream || outs->s_isreg || outs->fopened)
+      if(!outs->stream || outs->regular_file || outs->fopened)
         check_fails = TRUE;
       if(outs->alloc_filename || outs->is_cd_filename || outs->init)
         check_fails = TRUE;

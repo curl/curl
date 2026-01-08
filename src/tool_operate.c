@@ -346,14 +346,14 @@ static bool is_outfile_auto_resumable(struct OperationConfig *config,
 {
   struct OutStruct *outs = &per->outs;
   return config->use_resume && config->resume_from_current &&
-         config->resume_from >= 0 && outs->init == config->resume_from &&
-         outs->bytes > 0 && outs->filename && outs->s_isreg && outs->fopened &&
-         outs->stream && !ferror(outs->stream) &&
-         !config->customrequest && !per->uploadfile &&
-         (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
-          config->httpreq == TOOL_HTTPREQ_GET) &&
-         /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
-         result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR;
+    config->resume_from >= 0 && outs->init == config->resume_from &&
+    outs->bytes > 0 && outs->filename && outs->regular_file && outs->fopened &&
+    outs->stream && !ferror(outs->stream) &&
+    !config->customrequest && !per->uploadfile &&
+    (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
+     config->httpreq == TOOL_HTTPREQ_GET) &&
+    /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
+    result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR;
 }
 
 static CURLcode retrycheck(struct OperationConfig *config,
@@ -677,7 +677,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
       result = CURLE_WRITE_ERROR;
   }
 
-  if(!outs->s_isreg && outs->stream) {
+  if(!outs->regular_file && outs->stream) {
     /* Dump standard stream buffered data */
     rc = fflush(outs->stream);
     if(!result && rc) {
@@ -732,7 +732,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   }
 
   /* File time can only be set _after_ the file has been closed */
-  if(!result && config->remote_time && outs->s_isreg && outs->filename) {
+  if(!result && config->remote_time && outs->regular_file && outs->filename) {
     /* Ask libcurl if we got a remote file time */
     curl_off_t filetime = -1;
     curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
@@ -904,7 +904,7 @@ static CURLcode etag_store(struct OperationConfig *config,
     }
     else {
       etag_save->filename = config->etag_save_file;
-      etag_save->s_isreg = TRUE;
+      etag_save->regular_file = TRUE;
       etag_save->fopened = TRUE;
       etag_save->stream = newfile;
     }
@@ -957,7 +957,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
     }
     else {
       heads->filename = config->headerfile;
-      heads->s_isreg = TRUE;
+      heads->regular_file = TRUE;
       heads->fopened = TRUE;
       heads->stream = newfile;
     }
@@ -1069,7 +1069,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     outs->stream = NULL; /* open when needed */
   }
   outs->filename = per->outfile;
-  outs->s_isreg = TRUE;
+  outs->regular_file = TRUE;
   return CURLE_OK;
 }
 

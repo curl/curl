@@ -38,10 +38,10 @@
  * 'is_cd_filename' member is TRUE when string pointed by 'filename' has been
  * set using a server-specified Content-Disposition filename, otherwise FALSE.
  *
- * 's_isreg' member is TRUE when output goes to a regular file, this also
+ * 'regular_file' member is TRUE when output goes to a regular file, this also
  * implies that output is 'seekable' and 'appendable' and also that member
  * 'filename' points to filename's string. For any standard stream member
- * 's_isreg' will be FALSE.
+ * 'regular_file' will be FALSE.
  *
  * 'fopened' member is TRUE when output goes to a regular file and it
  * has been fopen'ed, requiring it to be closed later on. In any other
@@ -72,7 +72,7 @@ struct OutStruct {
 #endif
   BIT(alloc_filename);
   BIT(is_cd_filename);
-  BIT(s_isreg);
+  BIT(regular_file);
   BIT(fopened);
   BIT(out_null);
 };
