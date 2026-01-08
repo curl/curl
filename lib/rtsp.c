@@ -66,8 +66,8 @@ struct rtsp_conn {
 
 /* RTSP transfer data */
 struct RTSP {
-  long CSeq_sent; /* CSeq of this request */
-  long CSeq_recv; /* CSeq received */
+  uint32_t CSeq_sent; /* CSeq of this request */
+  uint32_t CSeq_recv; /* CSeq received */
 };
 
 #define RTP_PKT_LENGTH(p) ((((unsigned int)((unsigned char)((p)[2]))) << 8) | \
@@ -245,16 +245,16 @@ static CURLcode rtsp_done(struct Curl_easy *data,
 
   if(!status && !httpStatus) {
     /* Check the sequence numbers */
-    long CSeq_sent = rtsp->CSeq_sent;
-    long CSeq_recv = rtsp->CSeq_recv;
+    uint32_t CSeq_sent = rtsp->CSeq_sent;
+    uint32_t CSeq_recv = rtsp->CSeq_recv;
     if((data->set.rtspreq != RTSPREQ_RECEIVE) && (CSeq_sent != CSeq_recv)) {
       failf(data,
-            "The CSeq of this request %ld did not match the response %ld",
+            "The CSeq of this request %u did not match the response %u",
             CSeq_sent, CSeq_recv);
       return CURLE_RTSP_CSEQ_ERROR;
     }
     if(data->set.rtspreq == RTSPREQ_RECEIVE && (rtspc->rtp_channel == -1)) {
-      infof(data, "Got an RTP Receive with a CSeq of %ld", CSeq_recv);
+      infof(data, "Got an RTP Receive with a CSeq of %u", CSeq_recv);
     }
     if(data->set.rtspreq == RTSPREQ_RECEIVE &&
        data->req.eos_written) {
@@ -346,11 +346,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  Curl_RtspReq rtspreq = data->set.rtspreq;
+  const Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
   struct dynbuf req_buffer;
-  unsigned char httpversion = 11; /* RTSP is close to HTTP/1.1, sort of... */
-
+  const unsigned char httpversion = 11; /* RTSP is close to HTTP/1.1, sort
+                                           of... */
   const char *p_request = NULL;
   const char *p_session_id = NULL;
   const char *p_accept = NULL;
@@ -573,7 +573,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   result =
     curlx_dyn_addf(&req_buffer,
                    "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
-                   "CSeq: %ld\r\n", /* CSeq */
+                   "CSeq: %u\r\n", /* CSeq */
                    p_request, p_stream_uri, rtsp->CSeq_sent);
   if(result)
     goto out;
@@ -995,12 +995,11 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
     if(!rtsp)
       return CURLE_FAILED_INIT;
     curlx_str_passblanks(&p);
-    if(curlx_str_number(&p, &CSeq, LONG_MAX)) {
+    if(curlx_str_number(&p, &CSeq, UINT_MAX)) {
       failf(data, "Unable to read the CSeq header: [%s]", header);
       return CURLE_RTSP_CSEQ_ERROR;
     }
-    rtsp->CSeq_recv = (long)CSeq; /* mark the request */
-    data->state.rtsp_CSeq_recv = (long)CSeq; /* update the handle */
+    data->state.rtsp_CSeq_recv = rtsp->CSeq_recv = (uint32_t)CSeq;
   }
   else if(checkprefix("Session:", header)) {
     const char *start, *end;

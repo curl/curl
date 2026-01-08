@@ -753,11 +753,11 @@ struct PureInfo {
   time_t filetime; /* If requested, this is might get set. Set to -1 if the
                       time was unretrievable. */
   curl_off_t request_size; /* the amount of bytes sent in the request(s) */
+  curl_off_t numconnects; /* how many new connections libcurl created */
   uint32_t proxyauthavail; /* what proxy auth types were announced */
   uint32_t httpauthavail;  /* what host auth types were announced */
   uint32_t proxyauthpicked; /* selected proxy auth type */
   uint32_t httpauthpicked;  /* selected host auth type */
-  long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would have been redirected to if asked to */
   curl_off_t retry_after; /* info from Retry-After: header */
@@ -998,10 +998,9 @@ struct UrlState {
 
 #ifndef CURL_DISABLE_RTSP
   /* This RTSP state information survives requests and connections */
-  long rtsp_next_client_CSeq; /* the session's next client CSeq */
-  long rtsp_next_server_CSeq; /* the session's next server CSeq */
-  long rtsp_CSeq_recv; /* most recent CSeq received */
-
+  uint32_t rtsp_next_client_CSeq; /* the session's next client CSeq */
+  uint32_t rtsp_next_server_CSeq; /* the session's next server CSeq */
+  uint32_t rtsp_CSeq_recv; /* most recent CSeq received */
   uint8_t rtp_channel_mask[32]; /* for the correctness checking of the
                                          interleaved data */
 #endif
@@ -1334,8 +1333,7 @@ struct UserDefined {
   timediff_t conn_max_age_ms; /* max time since creation to allow a
                                  connection that is to be reused */
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
-  long low_speed_limit; /* bytes/second */
-  long low_speed_time;  /* number of seconds */
+  curl_off_t low_speed_limit; /* bytes/second */
   curl_off_t max_send_speed; /* high speed limit in bytes/second for upload */
   curl_off_t max_recv_speed; /* high speed limit in bytes/second for
                                 download */
@@ -1433,7 +1431,8 @@ struct UserDefined {
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
-  long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
+  timediff_t upkeep_interval_ms; /* Time between calls for connection
+                                    upkeep. */
   CURLU *uh; /* URL handle for the current parsed URL */
 #ifndef CURL_DISABLE_HTTP
   void *trailer_data; /* pointer to pass to trailer data callback */
@@ -1450,6 +1449,7 @@ struct UserDefined {
                          set to -1 for infinity */
   uint16_t expect_100_timeout; /* in milliseconds */
   uint16_t use_port; /* which port to use (when not using default) */
+  uint16_t low_speed_time;  /* number of seconds */
 #ifndef CURL_DISABLE_BINDLOCAL
   uint16_t localport; /* local port number to bind to */
   uint16_t localportrange; /* number of additional port numbers to test

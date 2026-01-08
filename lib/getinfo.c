@@ -281,7 +281,12 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     *param_longp = data->state.os_errno;
     break;
   case CURLINFO_NUM_CONNECTS:
-    *param_longp = data->info.numconnects;
+#if SIZEOF_LONG < SIZEOF_CURL_OFF_T
+    if(data->info.numconnects > LONG_MAX)
+      *param_longp = LONG_MAX;
+    else
+#endif
+      *param_longp = (long)data->info.numconnects;
     break;
   case CURLINFO_LASTSOCKET:
     sockfd = Curl_getconnectinfo(data, NULL);
