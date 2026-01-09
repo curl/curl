@@ -246,38 +246,20 @@ static void my_sha256_final(unsigned char *digest, void *in)
     (a)[3] = (unsigned char) (((unsigned long)(val)) & 0xff);        \
   } while(0)
 
-#ifdef HAVE_LONGLONG
 #define WPA_PUT_BE64(a, val)                                      \
   do {                                                            \
-    (a)[0] = (unsigned char)(((unsigned long long)(val)) >> 56);  \
-    (a)[1] = (unsigned char)(((unsigned long long)(val)) >> 48);  \
-    (a)[2] = (unsigned char)(((unsigned long long)(val)) >> 40);  \
-    (a)[3] = (unsigned char)(((unsigned long long)(val)) >> 32);  \
-    (a)[4] = (unsigned char)(((unsigned long long)(val)) >> 24);  \
-    (a)[5] = (unsigned char)(((unsigned long long)(val)) >> 16);  \
-    (a)[6] = (unsigned char)(((unsigned long long)(val)) >>  8);  \
-    (a)[7] = (unsigned char)(((unsigned long long)(val)) & 0xff); \
+    (a)[0] = (unsigned char)(((uint64_t)(val)) >> 56);  \
+    (a)[1] = (unsigned char)(((uint64_t)(val)) >> 48);  \
+    (a)[2] = (unsigned char)(((uint64_t)(val)) >> 40);  \
+    (a)[3] = (unsigned char)(((uint64_t)(val)) >> 32);  \
+    (a)[4] = (unsigned char)(((uint64_t)(val)) >> 24);  \
+    (a)[5] = (unsigned char)(((uint64_t)(val)) >> 16);  \
+    (a)[6] = (unsigned char)(((uint64_t)(val)) >>  8);  \
+    (a)[7] = (unsigned char)(((uint64_t)(val)) & 0xff); \
   } while(0)
-#else
-#define WPA_PUT_BE64(a, val)                                    \
-  do {                                                          \
-    (a)[0] = (unsigned char)(((unsigned __int64)(val)) >> 56);  \
-    (a)[1] = (unsigned char)(((unsigned __int64)(val)) >> 48);  \
-    (a)[2] = (unsigned char)(((unsigned __int64)(val)) >> 40);  \
-    (a)[3] = (unsigned char)(((unsigned __int64)(val)) >> 32);  \
-    (a)[4] = (unsigned char)(((unsigned __int64)(val)) >> 24);  \
-    (a)[5] = (unsigned char)(((unsigned __int64)(val)) >> 16);  \
-    (a)[6] = (unsigned char)(((unsigned __int64)(val)) >>  8);  \
-    (a)[7] = (unsigned char)(((unsigned __int64)(val)) & 0xff); \
-  } while(0)
-#endif
 
 struct sha256_state {
-#ifdef HAVE_LONGLONG
-  unsigned long long length;
-#else
-  unsigned __int64 length;
-#endif
+  uint64_t length;
   unsigned long state[8], curlen;
   unsigned char buf[64];
 };

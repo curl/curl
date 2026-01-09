@@ -1504,7 +1504,6 @@ endforeach()
 
 check_type_size("size_t"      SIZEOF_SIZE_T)
 check_type_size("ssize_t"     SIZEOF_SSIZE_T)
-check_type_size("long long"   SIZEOF_LONG_LONG)
 check_type_size("long"        SIZEOF_LONG)
 check_type_size("int"         SIZEOF_INT)
 check_type_size("__int64"     SIZEOF___INT64)
@@ -1520,9 +1519,6 @@ if(NOT HAVE_SIZEOF_SSIZE_T)
 endif()
 # off_t is sized later, after the HAVE_FILE_OFFSET_BITS test
 
-if(SIZEOF_LONG_LONG)
-  set(HAVE_LONGLONG 1)
-endif()
 if(SIZEOF_SUSECONDS_T)
   set(HAVE_SUSECONDS_T 1)
 endif()

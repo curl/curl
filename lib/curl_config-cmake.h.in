@@ -394,9 +394,6 @@
 /* Define to 1 if you have a working localtime_r function. */
 #cmakedefine HAVE_LOCALTIME_R 1
 
-/* Define to 1 if the compiler supports the 'long long' data type. */
-#cmakedefine HAVE_LONGLONG 1
-
 /* Define to 1 if you have the 'suseconds_t' data type. */
 #cmakedefine HAVE_SUSECONDS_T 1
 
@@ -639,9 +636,6 @@ ${SIZEOF_INT_CODE}
 
 /* The size of `long', as computed by sizeof. */
 ${SIZEOF_LONG_CODE}
-
-/* The size of `long long', as computed by sizeof. */
-${SIZEOF_LONG_LONG_CODE}
 
 /* The size of `off_t', as computed by sizeof. */
 ${SIZEOF_OFF_T_CODE}

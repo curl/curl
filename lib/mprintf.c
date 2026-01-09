@@ -27,29 +27,6 @@
 #include "curl_printf.h"
 #include "curlx/strparse.h"
 
-#ifdef HAVE_LONGLONG
-#  define LONG_LONG_TYPE long long
-#  define HAVE_LONG_LONG_TYPE
-#elif defined(_MSC_VER)
-#  define LONG_LONG_TYPE __int64
-#  define HAVE_LONG_LONG_TYPE
-#else
-#  undef LONG_LONG_TYPE
-#  undef HAVE_LONG_LONG_TYPE
-#endif
-
-/*
- * Max integer data types that mprintf.c is capable
- */
-
-#ifdef HAVE_LONG_LONG_TYPE
-#  define mp_intmax_t LONG_LONG_TYPE
-#  define mp_uintmax_t unsigned LONG_LONG_TYPE
-#else
-#  define mp_intmax_t long
-#  define mp_uintmax_t unsigned long
-#endif
-
 #define BUFFSIZE 326 /* buffer for long-to-str and float-to-str calcs, should
                         fit negative DBL_MAX (317 letters) */
 #define MAX_PARAMETERS 128 /* number of input arguments */
@@ -128,8 +105,8 @@ struct va_input {
   union {
     const char *str;
     void *ptr;
-    mp_intmax_t nums; /* signed */
-    mp_uintmax_t numu; /* unsigned */
+    int64_t nums; /* signed */
+    uint64_t numu; /* unsigned */
     double dnum;
   } val;
 };
@@ -582,29 +559,29 @@ static int parsefmt(const char *format,
       break;
 
     case FORMAT_LONGLONGU:
-      iptr->val.numu = (mp_uintmax_t)va_arg(arglist, mp_uintmax_t);
+      iptr->val.numu = va_arg(arglist, uint64_t);
       break;
 
     case FORMAT_LONGLONG:
-      iptr->val.nums = (mp_intmax_t)va_arg(arglist, mp_intmax_t);
+      iptr->val.nums = va_arg(arglist, int64_t);
       break;
 
     case FORMAT_LONGU:
-      iptr->val.numu = (mp_uintmax_t)va_arg(arglist, unsigned long);
+      iptr->val.numu = va_arg(arglist, unsigned long);
       break;
 
     case FORMAT_LONG:
-      iptr->val.nums = (mp_intmax_t)va_arg(arglist, long);
+      iptr->val.nums = va_arg(arglist, long);
       break;
 
     case FORMAT_INTU:
-      iptr->val.numu = (mp_uintmax_t)va_arg(arglist, unsigned int);
+      iptr->val.numu = va_arg(arglist, unsigned int);
       break;
 
     case FORMAT_INT:
     case FORMAT_WIDTH:
     case FORMAT_PRECISION:
-      iptr->val.nums = (mp_intmax_t)va_arg(arglist, int);
+      iptr->val.nums = va_arg(arglist, int);
       break;
 
     case FORMAT_DOUBLE:
@@ -730,8 +707,8 @@ static bool out_double(void *userp,
 static bool out_number(void *userp,
                        int (*stream)(unsigned char, void *),
                        struct mproperty *p,
-                       mp_uintmax_t num,
-                       mp_intmax_t nums,
+                       uint64_t num,
+                       int64_t nums,
                        char *work, int *donep)
 {
   const unsigned char *digits = Curl_ldigits;
@@ -777,11 +754,11 @@ static bool out_number(void *userp,
     is_neg = (nums < 0);
     if(is_neg) {
       /* signed_num might fail to hold absolute negative minimum by 1 */
-      mp_intmax_t signed_num; /* Used to convert negative in positive.  */
-      signed_num = nums + (mp_intmax_t)1;
+      int64_t signed_num; /* Used to convert negative in positive.  */
+      signed_num = nums + (int64_t)1;
       signed_num = -signed_num;
-      num = (mp_uintmax_t)signed_num;
-      num += (mp_uintmax_t)1;
+      num = (uint64_t)signed_num;
+      num += (uint64_t)1;
     }
   }
 
@@ -1070,11 +1047,9 @@ static int formatf(void *userp, /* untouched by format(), just sent to the
 
     case FORMAT_INTPTR:
       /* Answer the count of characters written.  */
-#ifdef HAVE_LONG_LONG_TYPE
       if(p.flags & FLAGS_LONGLONG)
-        *(LONG_LONG_TYPE *)iptr->val.ptr = (LONG_LONG_TYPE)done;
+        *(int64_t *)iptr->val.ptr = (int64_t)done;
       else
-#endif
         if(p.flags & FLAGS_LONG)
           *(long *)iptr->val.ptr = (long)done;
       else if(!(p.flags & FLAGS_SHORT))
