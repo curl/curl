@@ -349,6 +349,18 @@ then immediately deletes the negotiated SSPI security context and frees the
 credentials before returning. The negotiated context is not stored on the
 connection and is therefore never used to protect later SOCKS5 traffic.
 
+## cannot use absolute Unix domain filename for SOCKS on Windows
+
+curl supports using a unix domain socket path for speaking SOCKS to a proxy,
+by providing a file name in the URL used for `-x` (`CURLOPT_PROXY`), but that
+path cannot be a proper absolute Windows path with a drive letter etc.
+
+A solution for this probably requires that we add and provide a
+`--unix-socket` (`CURLOPT_UNIX_SOCKET_PATH`) option alternative for proxy
+communication.
+
+See [curl issue 19825](https://github.com/curl/curl/issues/19825)
+
 # Internals
 
 ## GSSAPI library name + version is missing in `curl_version_info()`
