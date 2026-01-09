@@ -171,15 +171,8 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
-          - name: 'openssl libssh2 sync-resolver valgrind 1'
+          - name: 'openssl libssh2 sync-resolver valgrind'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
-            tflags: '--min=920 1 to 950'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
-            image: 'ubuntu-24.04-arm'
-
-          - name: 'openssl libssh2 sync-resolver valgrind 2'
-            install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
-            tflags: '--min=910 951 to 9999'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
             image: 'ubuntu-24.04-arm'
 
