@@ -174,7 +174,7 @@ jobs:
           - name: 'openssl libssh2 sync-resolver valgrind'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
-            image: 'ubuntu-24.04-arm'
+            image: ubuntu-24.04-arm
 
           - name: 'openssl'
             install_packages: libssh-dev
@@ -184,7 +184,7 @@ jobs:
           - name: 'openssl arm'
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
-            image: 'ubuntu-24.04-arm'
+            image: ubuntu-24.04-arm
 
           - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind
@@ -214,14 +214,14 @@ jobs:
             install_steps: skiprun pytest
             CC: clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
-            image: 'ubuntu-24.04-arm'
+            image: ubuntu-24.04-arm
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
-            image: 'ubuntu-24.04-arm'
+            image: ubuntu-24.04-arm
 
           - name: 'openssl https-only'
-            image: 'ubuntu-24.04-arm'
+            image: ubuntu-24.04-arm
             tflags: '--min=1150'
             configure: >-
               --with-openssl --enable-debug --disable-unity
@@ -256,7 +256,7 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             tflags: '--min=475'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
-            image: 'ubuntu-24.04-arm'
+            image: ubuntu-24.04-arm
 
           - name: 'libressl Fil-C'
             install_steps: filc libressl-filc nghttp2-filc pytest
@@ -355,7 +355,7 @@ jobs:
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'
-            image: 'ubuntu-24.04-arm'
+            image: ubuntu-24.04-arm
 
           - name: 'rustls valgrind 1'
             install_packages: libnghttp2-dev libldap-dev valgrind
