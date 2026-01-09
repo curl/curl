@@ -299,7 +299,7 @@ jobs:
           - name: 'scan-build H3 c-ares !examples'
             install_packages: clang-tools clang libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skipall
-            install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
+            install_steps_brew: openssl libngtcp2 libnghttp3 c-ares fastbuild
             CC: clang
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
@@ -731,6 +731,7 @@ jobs:
           CFLAGS: '${{ matrix.build.CFLAGS }}'
           LDFLAGS: '${{ matrix.build.LDFLAGS }}'
           LIBS: '${{ matrix.build.LIBS }}'
+          INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_CONFIGURE_PREFIX: '${{ matrix.build.configure-prefix }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
@@ -739,8 +740,10 @@ jobs:
           [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            _gen='Ninja'
+            [[ "${INSTALL_PACKAGES_BREW}" = *'fastbuild'* ]] && _gen='FASTBuild'
             ${MATRIX_CONFIGURE_PREFIX} \
-            cmake -B bld -G Ninja \
+            cmake -B bld -G "${_gen}" \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
