@@ -101,6 +101,7 @@ jobs:
           - name: 'wolfssl-all'
             install_steps: wolfssl-all
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
+            image: 'ubuntu-24.04-arm'
 
           - name: 'wolfssl-opensslextra valgrind 1'
             install_packages: valgrind
@@ -121,6 +122,7 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
+            image: 'ubuntu-24.04-arm'
 
           - name: 'mbedtls gss valgrind 2'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
@@ -129,6 +131,7 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
+            image: 'ubuntu-24.04-arm'
 
           - name: 'mbedtls clang'
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
@@ -162,6 +165,7 @@ jobs:
             install_packages: libidn2-dev
             install_steps: awslc
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
+            image: 'ubuntu-24.04-arm'
 
           - name: 'boringssl'
             install_steps: boringssl pytest
@@ -216,6 +220,7 @@ jobs:
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
+            image: 'ubuntu-24.04-arm'
 
           - name: 'openssl https-only'
             tflags: '--min=1150'
@@ -252,6 +257,7 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             tflags: '--min=475'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
+            image: 'ubuntu-24.04-arm'
 
           - name: 'libressl Fil-C'
             install_steps: filc libressl-filc nghttp2-filc pytest
@@ -350,6 +356,7 @@ jobs:
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'
+            image: 'ubuntu-24.04-arm'
 
           - name: 'rustls valgrind 1'
             install_packages: libnghttp2-dev libldap-dev valgrind
