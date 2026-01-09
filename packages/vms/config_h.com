@@ -1172,17 +1172,6 @@ $                   write tf "#endif"
 $                   goto cfgh_in_loop1
 $               endif
 $!
-$               if keysym .eqs. "LONGLONG"
-$               then
-$                   write tf "#ifndef __VAX"
-$                   write tf "#pragma message disable longlongtype"
-$                   write tf "#ifndef HAVE_LONGLONG"
-$                   write tf "#define HAVE_LONGLONG 1"
-$                   write tf "#endif"
-$                   write tf "#endif"
-$                   goto cfgh_in_loop1
-$               endif
-$!
 $!              May need to test compiler version
 $!-----------------------------------------------
 $               if keysym .eqs. "LONG_LONG"
@@ -1470,12 +1459,6 @@ $               if key2c .eqs. ""
 $               then
 $                   write tf "#ifndef SIZEOF_LONG"
 $                   write tf "#define SIZEOF_LONG 4"
-$                   write tf "#endif"
-$               else
-$                   write tf "#ifndef SIZEOF_LONG_LONG"
-$                   write tf "#ifndef __VAX"
-$                   write tf "#define SIZEOF_LONG_LONG 8"
-$                   write tf "#endif"
 $                   write tf "#endif"
 $               endif
 $               goto cfgh_in_loop1
