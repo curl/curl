@@ -134,7 +134,6 @@ jobs:
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
             install_steps: mbedtls pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
-            image: 'ubuntu-24.04-arm'
 
           - name: 'mbedtls-prev'
             install_packages: libssh2-1-dev libnghttp2-dev libuv1-dev
