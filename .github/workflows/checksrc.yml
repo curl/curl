@@ -99,7 +99,7 @@ jobs:
 
   complexity:
     name: 'complexity'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
       - name: 'install pmccabe'
@@ -119,7 +119,7 @@ jobs:
 
   xmllint:
     name: 'xmllint'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
       - name: 'install prereqs'
