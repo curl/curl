@@ -415,12 +415,12 @@ jobs:
           if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
             HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
           fi
-          # Workaround for ubuntu-24.04-arm images having 0777 here, which breaks
-          # the test sshd server used in pytest.
-          [[ "$(uname -m)" = *'aarch64'* ]] && chmod 0755 /home/runner
-          echo '--------------'
-          ls -l /home
-          echo '--------------'
+          # Workaround for ubuntu-24.04-arm images having 0777 for /home/runner,
+          # which breaks the test sshd server used in pytest.
+          if [[ "$(uname -m)" = *'aarch64'* ]]; then
+            ls -l /home
+            chmod 0755 /home/runner
+          fi
 
       - name: 'install prereqs (i686)'
         if: ${{ contains(matrix.build.name, 'i686') }}
