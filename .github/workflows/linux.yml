@@ -415,7 +415,9 @@ jobs:
           if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
             HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
           fi
-          chmod 0755 /home/runner
+          # Workaround for ubuntu-24.04-arm images having 0777 here, which breaks
+          # the test sshd server used in pytest.
+          [[ "$(uname -m)" = *'aarch64'* ]] && chmod 0755 /home/runner
           echo '--------------'
           uname -m
           echo '--------------'
