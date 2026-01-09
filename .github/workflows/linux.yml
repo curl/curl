@@ -418,6 +418,8 @@ jobs:
             HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
           fi
           echo '--------------'
+          ls -l /home
+          echo '--------------'
           ls -l /home/runner
           echo '--------------'
 
