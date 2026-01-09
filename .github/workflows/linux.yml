@@ -419,11 +419,7 @@ jobs:
           # the test sshd server used in pytest.
           [[ "$(uname -m)" = *'aarch64'* ]] && chmod 0755 /home/runner
           echo '--------------'
-          uname -m
-          echo '--------------'
           ls -l /home
-          echo '--------------'
-          ls -l /home/runner
           echo '--------------'
 
       - name: 'install prereqs (i686)'
