@@ -90,14 +90,14 @@ static CURLcode my_sha256_init(void *in)
 }
 
 static void my_sha256_update(void *in,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const uint8_t *data,
+                             uint32_t length)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   EVP_DigestUpdate(ctx->openssl_ctx, data, length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
@@ -115,13 +115,13 @@ static CURLcode my_sha256_init(void *ctx)
 }
 
 static void my_sha256_update(void *ctx,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const uint8_t *data,
+                             uint32_t length)
 {
   sha256_update(ctx, length, data);
 }
 
-static void my_sha256_final(unsigned char *digest, void *ctx)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 }
@@ -139,13 +139,13 @@ static CURLcode my_sha256_init(void *ctx)
 }
 
 static void my_sha256_update(void *ctx,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const uint8_t *data,
+                             uint32_t length)
 {
   (void)psa_hash_update(ctx, data, length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *ctx)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
   size_t actual_length;
   (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
@@ -162,13 +162,13 @@ static CURLcode my_sha256_init(void *ctx)
 }
 
 static void my_sha256_update(void *ctx,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const uint8_t *data,
+                             uint32_t length)
 {
   (void)CC_SHA256_Update(ctx, data, length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *ctx)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
   (void)CC_SHA256_Final(digest, ctx);
 }
@@ -203,17 +203,17 @@ static CURLcode my_sha256_init(void *in)
 }
 
 static void my_sha256_update(void *in,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const uint8_t *data,
+                             uint32_t length)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   CryptHashData(ctx->hHash, (const BYTE *)data, length, 0);
 }
 
-static void my_sha256_final(unsigned char *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  unsigned long length = 0;
+  uint32_t length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == CURL_SHA256_DIGEST_LENGTH)
@@ -233,58 +233,40 @@ static void my_sha256_final(unsigned char *digest, void *in)
 /* This is based on the SHA256 implementation in LibTomCrypt that was released
  * into public domain. */
 
-#define WPA_GET_BE32(a)              \
-  ((((unsigned long)(a)[0]) << 24) | \
-   (((unsigned long)(a)[1]) << 16) | \
-   (((unsigned long)(a)[2]) <<  8) | \
-    ((unsigned long)(a)[3]))
+#define WPA_GET_BE32(a)         \
+  ((((uint32_t)(a)[0]) << 24) | \
+   (((uint32_t)(a)[1]) << 16) | \
+   (((uint32_t)(a)[2]) <<  8) | \
+   ((uint32_t)(a)[3]))
 #define WPA_PUT_BE32(a, val)                                         \
   do {                                                               \
-    (a)[0] = (unsigned char)((((unsigned long)(val)) >> 24) & 0xff); \
-    (a)[1] = (unsigned char)((((unsigned long)(val)) >> 16) & 0xff); \
-    (a)[2] = (unsigned char)((((unsigned long)(val)) >>  8) & 0xff); \
-    (a)[3] = (unsigned char) (((unsigned long)(val)) & 0xff);        \
+    (a)[0] = (uint8_t)((((uint32_t)(val)) >> 24) & 0xff);            \
+    (a)[1] = (uint8_t)((((uint32_t)(val)) >> 16) & 0xff);            \
+    (a)[2] = (uint8_t)((((uint32_t)(val)) >>  8) & 0xff);            \
+    (a)[3] = (uint8_t) (((uint32_t)(val)) & 0xff);                   \
   } while(0)
 
-#ifdef HAVE_LONGLONG
 #define WPA_PUT_BE64(a, val)                                      \
   do {                                                            \
-    (a)[0] = (unsigned char)(((unsigned long long)(val)) >> 56);  \
-    (a)[1] = (unsigned char)(((unsigned long long)(val)) >> 48);  \
-    (a)[2] = (unsigned char)(((unsigned long long)(val)) >> 40);  \
-    (a)[3] = (unsigned char)(((unsigned long long)(val)) >> 32);  \
-    (a)[4] = (unsigned char)(((unsigned long long)(val)) >> 24);  \
-    (a)[5] = (unsigned char)(((unsigned long long)(val)) >> 16);  \
-    (a)[6] = (unsigned char)(((unsigned long long)(val)) >>  8);  \
-    (a)[7] = (unsigned char)(((unsigned long long)(val)) & 0xff); \
+    (a)[0] = (uint8_t)(((uint64_t)(val)) >> 56);                  \
+    (a)[1] = (uint8_t)(((uint64_t)(val)) >> 48);                  \
+    (a)[2] = (uint8_t)(((uint64_t)(val)) >> 40);                  \
+    (a)[3] = (uint8_t)(((uint64_t)(val)) >> 32);                  \
+    (a)[4] = (uint8_t)(((uint64_t)(val)) >> 24);                  \
+    (a)[5] = (uint8_t)(((uint64_t)(val)) >> 16);                  \
+    (a)[6] = (uint8_t)(((uint64_t)(val)) >>  8);                  \
+    (a)[7] = (uint8_t)(((uint64_t)(val)) & 0xff);                 \
   } while(0)
-#else
-#define WPA_PUT_BE64(a, val)                                    \
-  do {                                                          \
-    (a)[0] = (unsigned char)(((unsigned __int64)(val)) >> 56);  \
-    (a)[1] = (unsigned char)(((unsigned __int64)(val)) >> 48);  \
-    (a)[2] = (unsigned char)(((unsigned __int64)(val)) >> 40);  \
-    (a)[3] = (unsigned char)(((unsigned __int64)(val)) >> 32);  \
-    (a)[4] = (unsigned char)(((unsigned __int64)(val)) >> 24);  \
-    (a)[5] = (unsigned char)(((unsigned __int64)(val)) >> 16);  \
-    (a)[6] = (unsigned char)(((unsigned __int64)(val)) >>  8);  \
-    (a)[7] = (unsigned char)(((unsigned __int64)(val)) & 0xff); \
-  } while(0)
-#endif
 
 struct sha256_state {
-#ifdef HAVE_LONGLONG
-  unsigned long long length;
-#else
-  unsigned __int64 length;
-#endif
-  unsigned long state[8], curlen;
-  unsigned char buf[64];
+  uint64_t length;
+  uint32_t state[8], curlen;
+  uint8_t buf[64];
 };
 typedef struct sha256_state my_sha256_ctx;
 
 /* The K array */
-static const unsigned long K[64] = {
+static const uint32_t K[64] = {
   0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL, 0x3956c25bUL,
   0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL, 0xd807aa98UL, 0x12835b01UL,
   0x243185beUL, 0x550c7dc3UL, 0x72be5d74UL, 0x80deb1feUL, 0x9bdc06a7UL,
@@ -301,9 +283,9 @@ static const unsigned long K[64] = {
 };
 
 /* Various logical functions */
-#define RORc(x, y) \
-  (((((unsigned long)(x) & 0xFFFFFFFFUL) >> (unsigned long)((y) & 31)) | \
-     ((unsigned long)(x) << (unsigned long)(32 - ((y) & 31)))) & 0xFFFFFFFFUL)
+#define RORc(x, y)                                                      \
+  (((((uint32_t)(x) & 0xFFFFFFFFUL) >> (uint32_t)((y) & 31)) |          \
+    ((uint32_t)(x) << (uint32_t)(32 - ((y) & 31)))) & 0xFFFFFFFFUL)
 
 #define Sha256_Ch(x, y, z)  (z ^ (x & (y ^ z)))
 #define Sha256_Maj(x, y, z) (((x | y) & z) | (x & y))
@@ -316,9 +298,9 @@ static const unsigned long K[64] = {
 #define Gamma1(x)         (Sha256_S(x, 17) ^ Sha256_S(x, 19) ^ Sha256_R(x, 10))
 
 /* Compress 512-bits */
-static int sha256_compress(struct sha256_state *md, const unsigned char *buf)
+static int sha256_compress(struct sha256_state *md, const uint8_t *buf)
 {
-  unsigned long S[8], W[64];
+  uint32_t S[8], W[64];
   int i;
 
   /* Copy state into S */
@@ -336,14 +318,14 @@ static int sha256_compress(struct sha256_state *md, const unsigned char *buf)
   /* Compress */
 #define RND(a, b, c, d, e, f, g, h, i)                                   \
   do {                                                                   \
-    unsigned long t0 = h + Sigma1(e) + Sha256_Ch(e, f, g) + K[i] + W[i]; \
-    unsigned long t1 = Sigma0(a) + Sha256_Maj(a, b, c);                  \
+    uint32_t t0 = h + Sigma1(e) + Sha256_Ch(e, f, g) + K[i] + W[i]; \
+    uint32_t t1 = Sigma0(a) + Sha256_Maj(a, b, c);                  \
     d += t0;                                                             \
     h = t0 + t1;                                                         \
   } while(0)
 
   for(i = 0; i < 64; ++i) {
-    unsigned long t;
+    uint32_t t;
     RND(S[0], S[1], S[2], S[3], S[4], S[5], S[6], S[7], i);
     t = S[7];
     S[7] = S[6];
@@ -389,11 +371,11 @@ static CURLcode my_sha256_init(void *in)
    @param inlen  The length of the data (octets)
 */
 static void my_sha256_update(void *ctx,
-                             const unsigned char *in,
-                             unsigned int len)
+                             const uint8_t *in,
+                             uint32_t len)
 {
-  unsigned long inlen = len;
-  unsigned long n;
+  uint32_t inlen = len;
+  uint32_t n;
   struct sha256_state *md = (struct sha256_state *)ctx;
 #define CURL_SHA256_BLOCK_SIZE 64
   if(md->curlen > sizeof(md->buf))
@@ -428,7 +410,7 @@ static void my_sha256_update(void *ctx,
    @param out [out] The destination of the hash (32 bytes)
    @return 0 if successful
 */
-static void my_sha256_final(unsigned char *out, void *ctx)
+static void my_sha256_final(uint8_t *out, void *ctx)
 {
   struct sha256_state *md = ctx;
   int i;
@@ -440,7 +422,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
   md->length += md->curlen * 8;
 
   /* Append the '1' bit */
-  md->buf[md->curlen++] = (unsigned char)0x80;
+  md->buf[md->curlen++] = (uint8_t)0x80;
 
   /* If the length is currently above 56 bytes we append zeros
    * then compress. Then we can fall back to padding zeros and length
@@ -448,7 +430,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
    */
   if(md->curlen > 56) {
     while(md->curlen < 64) {
-      md->buf[md->curlen++] = (unsigned char)0;
+      md->buf[md->curlen++] = (uint8_t)0;
     }
     sha256_compress(md, md->buf);
     md->curlen = 0;
@@ -456,7 +438,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
 
   /* Pad up to 56 bytes of zeroes */
   while(md->curlen < 56) {
-    md->buf[md->curlen++] = (unsigned char)0;
+    md->buf[md->curlen++] = (uint8_t)0;
   }
 
   /* Store length */
@@ -483,7 +465,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
+CURLcode Curl_sha256it(uint8_t *output, const uint8_t *input,
                        const size_t length)
 {
   CURLcode result;
