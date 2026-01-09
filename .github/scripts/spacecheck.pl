@@ -40,6 +40,7 @@ my @need_crlf = (
 );
 
 my @double_empty_lines = (
+    "RELEASE-NOTES",
     "^lib/.+\\.(c|h)\$",
     "^packages/",
     "^tests/data/test",
