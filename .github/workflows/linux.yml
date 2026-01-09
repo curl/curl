@@ -204,12 +204,6 @@ jobs:
             configure: CC=clang --enable-static --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
-            install_packages: libssh2-1-dev libkrb5-dev clang
-            install_steps: skiprun pytest
-            CC: clang
-            generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
-
-          - name: 'openssl clang krb5 LTO arm'
             image: ubuntu-24.04-arm
             install_packages: libssh2-1-dev libkrb5-dev clang
             install_steps: skiprun pytest
