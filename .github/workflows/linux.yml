@@ -172,24 +172,26 @@ jobs:
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: 'openssl libssh2 sync-resolver valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             tflags: '--min=920 1 to 950'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
           - name: 'openssl libssh2 sync-resolver valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             tflags: '--min=910 951 to 9999'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
-          - name: 'openssl'
+          - name: 'openssl intel'
             install_packages: libssh-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
           - name: 'openssl arm'
+            image: ubuntu-24.04-arm
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
-            image: 'ubuntu-24.04-arm'
 
           - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind
@@ -209,15 +211,18 @@ jobs:
             configure: CC=clang --enable-static --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
+            image: ubuntu-24.04-arm
             install_packages: libssh2-1-dev libkrb5-dev clang
             install_steps: skiprun pytest
             CC: clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
+            image: ubuntu-24.04-arm
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
 
           - name: 'openssl https-only'
+            image: ubuntu-24.04-arm
             tflags: '--min=1150'
             configure: >-
               --with-openssl --enable-debug --disable-unity
@@ -250,6 +255,7 @@ jobs:
               --with-openssl --with-librtmp --with-libssh2 --with-libidn2 --enable-ares --enable-debug
 
           - name: '!ssl !http !smtp !imap'
+            image: ubuntu-24.04-arm
             tflags: '--min=475'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
@@ -347,6 +353,7 @@ jobs:
             tflags: '-n --test-event --min=1350'
 
           - name: 'duphandle'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'
@@ -408,6 +415,12 @@ jobs:
             ${MATRIX_INSTALL_PACKAGES}
           if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
             HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
+          fi
+          # Workaround for ubuntu-24.04-arm images having 0777 for /home/runner,
+          # which breaks the test sshd server used in pytest.
+          if [[ "$(uname -m)" = *'aarch64'* ]]; then
+            ls -l /home
+            chmod 0755 /home/runner
           fi
 
       - name: 'install prereqs (i686)'
