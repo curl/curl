@@ -194,12 +194,14 @@ jobs:
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
 
           - name: 'openssl -O3 libssh valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--min=920 1 to 950'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl -O3 libssh valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--min=890 951 to 9999'
