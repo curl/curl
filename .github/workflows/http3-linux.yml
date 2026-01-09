@@ -339,7 +339,7 @@ jobs:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs:
       - build-cache
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}

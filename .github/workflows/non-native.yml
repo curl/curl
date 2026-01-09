@@ -237,7 +237,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
@@ -328,7 +328,7 @@ jobs:
 
   msdos:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
