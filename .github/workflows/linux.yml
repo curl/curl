@@ -119,7 +119,7 @@ jobs:
 
           - name: 'mbedtls gss valgrind 1'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls
+            install_steps: mbedtls-latest-intel
             tflags: '--min=830 1 to 950'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
@@ -127,7 +127,7 @@ jobs:
 
           - name: 'mbedtls gss valgrind 2'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls
+            install_steps: mbedtls-latest-intel
             tflags: '--min=800 951 to 9999'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
@@ -136,7 +136,7 @@ jobs:
           - name: 'mbedtls clang'
             image: ubuntu-24.04-arm
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
-            install_steps: mbedtls-arm pytest
+            install_steps: mbedtls-latest-arm pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
@@ -147,7 +147,7 @@ jobs:
 
           - name: 'mbedtls-pkg MultiSSL !pc'
             install_packages: libnghttp2-dev libmbedtls-dev
-            install_steps: mbedtls skipall
+            install_steps: mbedtls-latest-intel skipall
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls
               -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
@@ -276,7 +276,7 @@ jobs:
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
-            install_steps: skipall mbedtls rustls wolfssl-opensslextra
+            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra
             install_steps_brew: gsasl
             make-custom-target: tidy
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
@@ -288,7 +288,7 @@ jobs:
 
           - name: 'scan-build'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
-            install_steps: skipall mbedtls rustls wolfssl-opensslextra
+            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra
             install_steps_brew: gsasl
             CC: clang
             configure-prefix: scan-build
@@ -563,18 +563,18 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples --prefix=/home/runner/wolfssl-opensslextra
           make install
 
-      - name: 'cache mbedtls'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
+      - name: 'cache mbedtls (latest-intel)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-mbedtls-threadsafe
+        id: cache-mbedtls-latest-intel
         env:
-          cache-name: cache-mbedtls-threadsafe
+          cache-name: cache-mbedtls-latest-intel
         with:
           path: ~/mbedtls
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
-      - name: 'build mbedtls'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls-threadsafe.outputs.cache-hit != 'true' }}
+      - name: 'build mbedtls (latest-intel)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') && steps.cache-mbedtls-latest-intel.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
@@ -586,18 +586,18 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache mbedtls (arm)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-arm') }}
+      - name: 'cache mbedtls (latest-arm)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-mbedtls-threadsafe-arm
+        id: cache-mbedtls-latest-arm
         env:
-          cache-name: cache-mbedtls-threadsafe-arm
+          cache-name: cache-mbedtls-latest-arm
         with:
           path: ~/mbedtls
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
-      - name: 'build mbedtls (arm)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-arm') && steps.cache-mbedtls-threadsafe-arm.outputs.cache-hit != 'true' }}
+      - name: 'build mbedtls (latest-arm)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && steps.cache-mbedtls-latest-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
@@ -612,15 +612,15 @@ jobs:
       - name: 'cache mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-mbedtls-threadsafe-prev
+        id: cache-mbedtls-prev
         env:
-          cache-name: cache-mbedtls-threadsafe-prev
+          cache-name: cache-mbedtls-prev
         with:
           path: ~/mbedtls-prev
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls (prev)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-threadsafe-prev.outputs.cache-hit != 'true' }}
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-prev.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION_PREV}/mbedtls-${MBEDTLS_VERSION_PREV}.tar.bz2" | tar -xj
