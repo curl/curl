@@ -134,8 +134,9 @@ jobs:
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
-            install_steps: mbedtls pytest
+            install_steps: mbedtls-arm pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
@@ -574,6 +575,29 @@ jobs:
 
       - name: 'build mbedtls'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls-threadsafe.outputs.cache-hit != 'true' }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
+          cd "mbedtls-${MBEDTLS_VERSION}"
+          ./scripts/config.py set MBEDTLS_THREADING_C
+          ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/mbedtls \
+            -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
+          cmake --build .
+          cmake --install .
+
+      - name: 'cache mbedtls (arm)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-arm') }}
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-mbedtls-threadsafe-arm
+        env:
+          cache-name: cache-mbedtls-threadsafe-arm
+        with:
+          path: ~/mbedtls
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
+
+      - name: 'build mbedtls (arm)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-arm') && steps.cache-mbedtls-threadsafe-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
