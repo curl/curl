@@ -101,7 +101,8 @@ jobs:
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
 
           - name: 'wolfssl-all'
-            install_steps: wolfssl-all
+            image: ubuntu-24.04-arm
+            install_steps: wolfssl-all-arm
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 1'
@@ -519,18 +520,18 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache wolfssl (all)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') }}
+      - name: 'cache wolfssl (all-arm)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-wolfssl-all
+        id: cache-wolfssl-all-arm
         env:
-          cache-name: cache-wolfssl-all
+          cache-name: cache-wolfssl-all-arm
         with:
           path: ~/wolfssl-all
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
-      - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true' }}
+      - name: 'build wolfssl (all-arm)'  # does not support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') && steps.cache-wolfssl-all-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
