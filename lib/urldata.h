@@ -1080,8 +1080,8 @@ struct UrlState {
                                CONN_MAX_RETRIES */
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
-  uint32_t creds_from:2; /* where is the server credentials originating from,
-                            see the CREDS_* defines above */
+  unsigned int creds_from:2; /* where is the server credentials originating
+                                from, see the CREDS_* defines above */
 
   /* when curl_easy_perform() is called, the multi handle is "owned" by
      the easy handle so curl_easy_cleanup() on such an easy handle will
