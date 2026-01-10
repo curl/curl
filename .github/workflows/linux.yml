@@ -78,24 +78,24 @@ jobs:
         build:
           - name: 'libressl krb5'
             install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
-            install_steps: libressl pytest codeset-test
+            install_steps: libressl-c pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl krb5 valgrind 1'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
-            install_steps: libressl
+            install_steps: libressl-c
             tflags: '--min=870 1 to 950'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl krb5 valgrind 2'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
-            install_steps: libressl
+            install_steps: libressl-c
             tflags: '--min=900 951 to 9999'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
             install_packages: clang
-            install_steps: libressl
+            install_steps: libressl-c
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
 
           - name: 'wolfssl-all'
@@ -454,18 +454,18 @@ jobs:
           cd filc
           ./setup.sh
 
-      - name: 'cache libressl'
-        if: ${{ contains(matrix.build.install_steps, 'libressl') }}
+      - name: 'cache libressl (c)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-c') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-libressl
+        id: cache-libressl-c
         env:
-          cache-name: cache-libressl
+          cache-name: cache-libressl-c
         with:
           path: ~/libressl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
-      - name: 'build libressl'
-        if: ${{ contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true' }}
+      - name: 'build libressl (c)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-c') && steps.cache-libressl-c.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
