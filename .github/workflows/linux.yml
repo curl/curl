@@ -566,15 +566,15 @@ jobs:
       - name: 'cache mbedtls (latest)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-mbedtls-threadsafe-latest
+        id: cache-mbedtls-latest
         env:
-          cache-name: cache-mbedtls-threadsafe-latest
+          cache-name: cache-mbedtls-latest
         with:
           path: ~/mbedtls
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls (latest)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest') && steps.cache-mbedtls-threadsafe-latest.outputs.cache-hit != 'true' }}
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest') && steps.cache-mbedtls-latest.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
@@ -589,15 +589,15 @@ jobs:
       - name: 'cache mbedtls (latest-arm)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-mbedtls-threadsafe-latest-arm
+        id: cache-mbedtls-latest-arm
         env:
-          cache-name: cache-mbedtls-threadsafe-latest-arm
+          cache-name: cache-mbedtls-latest-arm
         with:
           path: ~/mbedtls
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls (latest-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && steps.cache-mbedtls-threadsafe-latest-arm.outputs.cache-hit != 'true' }}
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && steps.cache-mbedtls-latest-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
@@ -612,15 +612,15 @@ jobs:
       - name: 'cache mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-mbedtls-threadsafe-prev
+        id: cache-mbedtls-prev
         env:
-          cache-name: cache-mbedtls-threadsafe-prev
+          cache-name: cache-mbedtls-prev
         with:
           path: ~/mbedtls-prev
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls (prev)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-threadsafe-prev.outputs.cache-hit != 'true' }}
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-prev.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION_PREV}/mbedtls-${MBEDTLS_VERSION_PREV}.tar.bz2" | tar -xj
