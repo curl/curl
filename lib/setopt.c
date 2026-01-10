@@ -1261,16 +1261,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #endif /* !CURL_DISABLE_HSTS */
 #ifndef CURL_DISABLE_ALTSVC
   case CURLOPT_ALTSVC_CTRL:
-    if(!arg) {
-      DEBUGF(infof(data, "bad CURLOPT_ALTSVC_CTRL input"));
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    if(!data->asi) {
-      data->asi = Curl_altsvc_init();
-      if(!data->asi)
-        return CURLE_OUT_OF_MEMORY;
-    }
-    return Curl_altsvc_ctrl(data->asi, arg);
+    return Curl_altsvc_ctrl(data, arg);
 #endif /* !CURL_DISABLE_ALTSVC */
 #ifndef CURL_DISABLE_WEBSOCKETS
   case CURLOPT_WS_OPTIONS:

@@ -310,10 +310,18 @@ CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 /*
  * Curl_altsvc_ctrl() passes on the external bitmask.
  */
-CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
+CURLcode Curl_altsvc_ctrl(struct Curl_easy *data, const long ctrl)
 {
-  DEBUGASSERT(asi);
-  asi->flags = ctrl;
+  DEBUGASSERT(data);
+  if(!ctrl)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(!data->asi) {
+    data->asi = Curl_altsvc_init();
+    if(!data->asi)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  data->asi->flags = ctrl;
   return CURLE_OK;
 }
 
