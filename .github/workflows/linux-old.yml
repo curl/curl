@@ -29,7 +29,6 @@ name: 'Linux Old'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -40,7 +39,6 @@ name: 'Linux Old'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:

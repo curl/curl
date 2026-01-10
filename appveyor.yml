@@ -184,7 +184,6 @@ skip_commits:
     - '.github/**/*'
     - 'Dockerfile'
     - 'packages/**/*'
-    - 'plan9/**/*'
 
 #artifacts:
 #  - path: '**/curl.exe'

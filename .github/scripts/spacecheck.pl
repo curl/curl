@@ -29,7 +29,6 @@ use warnings;
 my @tabs = (
     "^m4/zz40-xc-ovr.m4",
     "Makefile\\.(am|example)\$",
-    "/mkfile",
     "\\.sln\$",
     "^tests/data/data1706-stdout.txt",
     "^tests/data/test",
