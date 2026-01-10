@@ -351,8 +351,8 @@ connection and is therefore never used to protect later SOCKS5 traffic.
 
 ## cannot use absolute Unix domain filename for SOCKS on Windows
 
-curl supports using a unix domain socket path for speaking SOCKS to a proxy,
-by providing a file name in the URL used for `-x` (`CURLOPT_PROXY`), but that
+curl supports using a Unix domain socket path for speaking SOCKS to a proxy,
+by providing a file ame in the URL used for `-x` (`CURLOPT_PROXY`), but that
 path cannot be a proper absolute Windows path with a drive letter etc.
 
 A solution for this probably requires that we add and provide a
