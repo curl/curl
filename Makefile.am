@@ -66,18 +66,8 @@ CMAKE_DIST =                                    \
 
 VC_DIST = projects/README.md projects/generate.bat
 
-PLAN9_DIST = plan9/include/mkfile \
- plan9/include/mkfile             \
- plan9/mkfile.proto               \
- plan9/mkfile                     \
- plan9/README                     \
- plan9/lib/mkfile.inc             \
- plan9/lib/mkfile                 \
- plan9/src/mkfile.inc             \
- plan9/src/mkfile
-
 EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig \
- $(CMAKE_DIST) $(VC_DIST) $(PLAN9_DIST)
+ $(CMAKE_DIST) $(VC_DIST)
 
 DISTCLEANFILES = buildinfo.txt
 

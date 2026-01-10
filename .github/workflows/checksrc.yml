@@ -15,7 +15,6 @@ name: 'Source'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'plan9/**'
   pull_request:
     branches:
       - master
@@ -23,7 +22,6 @@ name: 'Source'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'plan9/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}

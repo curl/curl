@@ -15,7 +15,6 @@ name: 'non-native'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -26,7 +25,6 @@ name: 'non-native'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
