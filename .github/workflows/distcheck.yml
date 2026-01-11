@@ -34,9 +34,7 @@ jobs:
           persist-credentials: false
 
       - name: 'remove preinstalled curl libcurl4{-doc}'
-        run: |
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
+        run: sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
       - name: 'autoreconf'
         run: autoreconf -fi
@@ -236,9 +234,7 @@ jobs:
           persist-credentials: false
 
       - name: 'remove preinstalled curl libcurl4{-doc}'
-        run: |
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
+        run: sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
       - name: 'generate release tarballs'
         run: ./scripts/dmaketgz 9.10.11
@@ -290,7 +286,6 @@ jobs:
             rm -f bin.zip
             printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-win64-x64/bin/cmake.exe > ~/old-cmake-path.txt
           elif [[ "${MATRIX_IMAGE}" = *'ubuntu'* ]]; then
-            sudo rm -f /var/lib/man-db/auto-update
             sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
             cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
