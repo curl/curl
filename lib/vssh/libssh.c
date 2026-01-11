@@ -1967,7 +1967,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
                                     bool *block)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
   int rc = SSH_NO_ERROR, err;
 
   *block = FALSE;                   /* we are not blocking by default */
@@ -2341,7 +2340,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       /* the code we are about to return */
       result = sshc->actualcode;
       memset(sshc, 0, sizeof(struct ssh_conn));
-      connclose(conn, "SSH session free");
+      connclose(data->conn, "SSH session free");
       sshc->state = SSH_SESSION_FREE;   /* current */
       sshc->nextstate = SSH_NO_STATE;
       myssh_to(data, sshc, SSH_STOP);
