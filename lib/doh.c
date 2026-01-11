@@ -113,7 +113,7 @@ UNITTEST DOHcode doh_req_encode(const char *host,
   if(len < expected_len)
     return DOH_TOO_SMALL_BUFFER;
 
-  *dnsp++ = 0; /* 16 bit id */
+  *dnsp++ = 0; /* 16-bit id */
   *dnsp++ = 0;
   *dnsp++ = 0x01; /* |QR|   Opcode  |AA|TC|RD| Set the RD bit */
   *dnsp++ = '\0'; /* |RA|   Z    |   RCODE   |                */
@@ -152,10 +152,10 @@ UNITTEST DOHcode doh_req_encode(const char *host,
   *dnsp++ = 0; /* append zero-length label for root */
 
   /* There are assigned TYPE codes beyond 255: use range [1..65535] */
-  *dnsp++ = (unsigned char)(255 & (dnstype >> 8)); /* upper 8 bit TYPE */
-  *dnsp++ = (unsigned char)(255 & dnstype);        /* lower 8 bit TYPE */
+  *dnsp++ = (unsigned char)(255 & (dnstype >> 8)); /* upper 8-bit TYPE */
+  *dnsp++ = (unsigned char)(255 & dnstype);        /* lower 8-bit TYPE */
 
-  *dnsp++ = '\0'; /* upper 8 bit CLASS */
+  *dnsp++ = '\0'; /* upper 8-bit CLASS */
   *dnsp++ = DNS_CLASS_IN; /* IN - "the Internet" */
 
   *olen = dnsp - orig;

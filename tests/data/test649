@@ -20,7 +20,7 @@ Mime
 smtp
 </server>
 <name>
-SMTP multipart with 7bit encoder error
+SMTP multipart with 7-bit encoder error
 </name>
 <stdin crlf="yes">
 From: different

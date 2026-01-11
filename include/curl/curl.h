@@ -2704,7 +2704,7 @@ CURL_EXTERN char *curl_escape(const char *string,
  *
  * DESCRIPTION
  *
- * Unescapes URL encoding in strings (converts all %XX codes to their 8bit
+ * Unescapes URL encoding in strings (converts all %XX codes to their 8-bit
  * versions). This function returns a new allocated string or NULL if an error
  * occurred.
  * Conversion Note: On non-ASCII platforms the ASCII %XX codes are
