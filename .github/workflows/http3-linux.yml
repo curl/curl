@@ -184,7 +184,7 @@ jobs:
       - name: 'install build prereqs'
         if: ${{ steps.settings.outputs.needs-build == 'true' }}
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
@@ -483,7 +483,7 @@ jobs:
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server libev-dev' || '' }}
 
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
