@@ -466,7 +466,7 @@ jobs:
           cache-name: cache-libressl-c-arm
         with:
           path: ~/libressl
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'build libressl (c-arm)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') && steps.cache-libressl-c-arm.outputs.cache-hit != 'true' }}
@@ -486,7 +486,7 @@ jobs:
           cache-name: cache-libressl-filc
         with:
           path: ~/libressl
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ env.FIL_C_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ env.FIL_C_VERSION }}
 
       - name: 'build libressl (filc)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && steps.cache-libressl-filc.outputs.cache-hit != 'true' }}
@@ -507,7 +507,7 @@ jobs:
           cache-name: cache-nghttp2-filc
         with:
           path: ~/nghttp2
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.FIL_C_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.FIL_C_VERSION }}
 
       - name: 'build nghttp2 (filc)'
         if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') && steps.cache-nghttp2-filc.outputs.cache-hit != 'true' }}
@@ -529,7 +529,7 @@ jobs:
           cache-name: cache-wolfssl-all-arm
         with:
           path: ~/wolfssl-all
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssl (all-arm)'  # does not support `OPENSSL_COEXIST`
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') && steps.cache-wolfssl-all-arm.outputs.cache-hit != 'true' }}
@@ -550,7 +550,7 @@ jobs:
           cache-name: cache-wolfssl-opensslextra
         with:
           path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssl (opensslextra)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true' }}
@@ -571,7 +571,7 @@ jobs:
           cache-name: cache-mbedtls-latest-intel
         with:
           path: ~/mbedtls
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls (latest-intel)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') && steps.cache-mbedtls-latest-intel.outputs.cache-hit != 'true' }}
@@ -594,7 +594,7 @@ jobs:
           cache-name: cache-mbedtls-latest-arm
         with:
           path: ~/mbedtls
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls (latest-arm)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && steps.cache-mbedtls-latest-arm.outputs.cache-hit != 'true' }}
@@ -617,7 +617,7 @@ jobs:
           cache-name: cache-mbedtls-prev
         with:
           path: ~/mbedtls-prev
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-prev.outputs.cache-hit != 'true' }}
@@ -640,7 +640,7 @@ jobs:
           cache-name: cache-openldap-static
         with:
           path: ~/openldap-static
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.OPENLDAP_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENLDAP_VERSION }}
 
       - name: 'build openldap (static)'
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') && steps.cache-openldap-static.outputs.cache-hit != 'true' }}
@@ -659,7 +659,7 @@ jobs:
           cache-name: cache-openssl-tsan
         with:
           path: ~/openssl
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'build openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true' }}
@@ -678,7 +678,7 @@ jobs:
           cache-name: cache-awslc
         with:
           path: ~/awslc
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'build awslc'
         if: ${{ contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true' }}
@@ -698,7 +698,7 @@ jobs:
           cache-name: cache-boringssl
         with:
           path: ~/boringssl
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
 
       - name: 'build boringssl'
         if: ${{ contains(matrix.build.install_steps, 'boringssl') && steps.cache-boringssl.outputs.cache-hit != 'true' }}
@@ -719,7 +719,7 @@ jobs:
           cache-name: cache-rustls
         with:
           path: ~/rustls
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
 
       - name: 'fetch rustls deb'
         if: ${{ contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true' }}

@@ -73,7 +73,7 @@ jobs:
           cache-name: cache-openssl-http3-no-deprecated
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'cache libressl'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -82,7 +82,7 @@ jobs:
           cache-name: cache-libressl
         with:
           path: ~/libressl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'cache awslc'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -91,7 +91,7 @@ jobs:
           cache-name: cache-awslc
         with:
           path: ~/awslc/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'cache boringssl'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -100,7 +100,7 @@ jobs:
           cache-name: cache-boringssl
         with:
           path: ~/boringssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
 
       - name: 'cache nettle'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -109,7 +109,7 @@ jobs:
           cache-name: cache-nettle
         with:
           path: ~/nettle/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
 
       - name: 'cache gnutls'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -118,7 +118,7 @@ jobs:
           cache-name: cache-gnutls
         with:
           path: ~/gnutls/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
 
       - name: 'cache wolfssl'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -127,7 +127,7 @@ jobs:
           cache-name: cache-wolfssl
         with:
           path: ~/wolfssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp3'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -136,7 +136,7 @@ jobs:
           cache-name: cache-nghttp3
         with:
           path: ~/nghttp3/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
 
       - name: 'cache ngtcp2'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -145,7 +145,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache ngtcp2 boringssl'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -154,7 +154,7 @@ jobs:
           cache-name: cache-ngtcp2-boringssl
         with:
           path: ~/ngtcp2-boringssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
 
       - name: 'cache nghttp2'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -163,7 +163,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
       - id: settings
         if: >-
@@ -501,7 +501,7 @@ jobs:
           cache-name: cache-openssl-http3-no-deprecated
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache libressl'
@@ -511,7 +511,7 @@ jobs:
           cache-name: cache-libressl
         with:
           path: ~/libressl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache awslc'
@@ -521,7 +521,7 @@ jobs:
           cache-name: cache-awslc
         with:
           path: ~/awslc/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache boringssl'
@@ -531,7 +531,7 @@ jobs:
           cache-name: cache-boringssl
         with:
           path: ~/boringssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache nettle'
@@ -542,7 +542,7 @@ jobs:
           cache-name: cache-nettle
         with:
           path: ~/nettle/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
@@ -553,7 +553,7 @@ jobs:
           cache-name: cache-gnutls
         with:
           path: ~/gnutls/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache wolfssl'
@@ -564,7 +564,7 @@ jobs:
           cache-name: cache-wolfssl
         with:
           path: ~/wolfssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache nghttp3'
@@ -574,7 +574,7 @@ jobs:
           cache-name: cache-nghttp3
         with:
           path: ~/nghttp3/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2'
@@ -584,7 +584,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2 boringssl'
@@ -594,7 +594,7 @@ jobs:
           cache-name: cache-ngtcp2-boringssl
         with:
           path: ~/ngtcp2-boringssl/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache nghttp2'
@@ -604,7 +604,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache quiche'
@@ -615,7 +615,7 @@ jobs:
           cache-name: cache-quiche
         with:
           path: ~/quiche
-          key: ${{ runner.os }}-${{ runner.arch }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
         if: ${{ matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true' }}
