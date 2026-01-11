@@ -188,7 +188,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       socksreq[0] = 1; /* GSS-API subnegotiation version */
       socksreq[1] = 1; /* authentication message type */
       if(sspi_send_token.cbBuffer > 0xffff) {
-        /* needs to fit in an unsigned 16 bit field */
+        /* needs to fit in an unsigned 16-bit field */
         result = CURLE_COULDNT_CONNECT;
         goto error;
       }
@@ -399,7 +399,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     etbuf_size = sspi_w_token[0].cbBuffer + sspi_w_token[1].cbBuffer +
                  sspi_w_token[2].cbBuffer;
     if(etbuf_size > 0xffff) {
-      /* needs to fit in an unsigned 16 bit field */
+      /* needs to fit in an unsigned 16-bit field */
       result = CURLE_COULDNT_CONNECT;
       goto error;
     }
