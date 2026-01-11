@@ -1773,7 +1773,9 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
     sftp_attributes_free(sshc->quote_attrs);
   sshc->quote_attrs = sftp_stat(sshc->sftp_session, sshc->quote_path2);
   if(!sshc->quote_attrs) {
-    myssh_quote_error(data, sshc, "stat");
+    failf(data, "Attempt to get SFTP stats failed: %d",
+          sftp_get_error(sshc->sftp_session));
+    myssh_quote_error(data, sshc, NULL);
     return SSH_NO_ERROR;
   }
 
@@ -2102,7 +2104,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       if(rc == SSH_AGAIN)
         break;
       if(rc && !sshc->acceptfail) {
-        myssh_quote_error(data, sshc, "unlink");
+        myssh_quote_error(data, sshc, "rm");
         break;
       }
       myssh_to(data, sshc, SSH_SFTP_NEXT_QUOTE);
