@@ -343,9 +343,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        run: |
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
+        run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
