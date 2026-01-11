@@ -275,9 +275,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     else if(ptr[0] == '\r' || ptr[0] == '\n')
       per->was_last_header_empty = TRUE;
   }
-  if(hdrcbdata->config->show_headers &&
-    (scheme == proto_http || scheme == proto_https ||
-     scheme == proto_rtsp || scheme == proto_file)) {
+  if(hdrcbdata->config->show_headers && !outs->out_null &&
+     (scheme == proto_http || scheme == proto_https ||
+      scheme == proto_rtsp || scheme == proto_file)) {
     /* bold headers only for selected protocols */
     char *value = NULL;
 
