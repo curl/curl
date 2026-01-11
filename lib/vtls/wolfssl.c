@@ -401,7 +401,7 @@ static void wssl_bio_cf_free_methods(void)
 
 #else /* USE_BIO_CHAIN */
 
-#define wssl_bio_cf_init_methods() Curl_nop_stmt
+#define wssl_bio_cf_init_methods() WOLFSSL_SUCCESS
 #define wssl_bio_cf_free_methods() Curl_nop_stmt
 
 #endif /* !USE_BIO_CHAIN */
