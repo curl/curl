@@ -21,7 +21,7 @@ gitonly=".git*
 ^docs/examples/adddocsref.pl
 ^docs/tests/CI.md
 ^docs/THANKS-filter
-^projects/Windows/*
+^projects/*
 ^scripts/ciconfig.pl
 ^scripts/cijobs.pl
 ^scripts/contributors.sh

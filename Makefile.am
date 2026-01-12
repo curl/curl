@@ -64,10 +64,7 @@ CMAKE_DIST =                                    \
  tests/cmake/test.c                             \
  tests/cmake/test.sh
 
-VC_DIST = projects/README.md projects/generate.bat
-
-EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig \
- $(CMAKE_DIST) $(VC_DIST)
+EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig $(CMAKE_DIST)
 
 DISTCLEANFILES = buildinfo.txt
 
