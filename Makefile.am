@@ -158,14 +158,6 @@ rpms:
 	$(MAKE) RPMDIST=curl rpm
 	$(MAKE) RPMDIST=curl-ssl rpm
 
-rpm:
-	RPM_TOPDIR=`rpm --showrc | @PERL@ -n -e 'print if(s/.*_topdir\s+(.*)/$$1/)'` ; \
-	cp $(srcdir)/packages/Linux/RPM/$(RPMDIST).spec $$RPM_TOPDIR/SPECS ; \
-	cp $(PACKAGE)-$(VERSION).tar.gz $$RPM_TOPDIR/SOURCES ; \
-	rpm -ba --clean --rmsource $$RPM_TOPDIR/SPECS/$(RPMDIST).spec ; \
-	mv $$RPM_TOPDIR/RPMS/i386/$(RPMDIST)-*.rpm . ; \
-	mv $$RPM_TOPDIR/SRPMS/$(RPMDIST)-*.src.rpm .
-
 # We extend the standard install with a custom hook:
 if BUILD_DOCS
 install-data-hook:
