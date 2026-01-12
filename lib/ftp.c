@@ -87,7 +87,26 @@
 #define ftp_pasv_verbose(a, b, c, d)  Curl_nop_stmt
 #define FTP_CSTATE(c)  ((void)(c), "")
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
-  /* for tracing purposes */
+/***************************************************************************
+ *
+ * ftp_pasv_verbose()
+ *
+ * This function only outputs some informationals about this second connection
+ * when we have issued a PASV command before and thus we have connected to a
+ * possibly new IP address.
+ *
+ */
+static void ftp_pasv_verbose(struct Curl_easy *data,
+                             struct Curl_addrinfo *ai,
+                             char *newhost, /* ASCII version */
+                             int port)
+{
+  char buf[256];
+  Curl_printable_address(ai, buf, sizeof(buf));
+  infof(data, "Connecting to %s (%s) port %d", newhost, buf, port);
+}
+
+/* for tracing purposes */
 static const char * const ftp_state_names[] = {
   "STOP",
   "WAIT220",
@@ -166,7 +185,6 @@ static void ftp_state_low(struct Curl_easy *data,
 #define ftp_state(x, y, z) ftp_state_low(x, y, z, __LINE__)
 #endif /* DEBUGBUILD */
 
-static CURLcode ftp_quit(struct Curl_easy *data, struct ftp_conn *ftpc);
 static CURLcode ftp_parse_url_path(struct Curl_easy *data,
                                    struct ftp_conn *ftpc,
                                    struct FTP *ftp);
@@ -174,12 +192,6 @@ static CURLcode ftp_regular_transfer(struct Curl_easy *data,
                                      struct ftp_conn *ftpc,
                                      struct FTP *ftp,
                                      bool *done);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void ftp_pasv_verbose(struct Curl_easy *data,
-                             struct Curl_addrinfo *ai,
-                             char *newhost, /* ASCII version */
-                             int port);
-#endif
 static CURLcode ftp_state_mdtm(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp);
@@ -3397,28 +3409,6 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
   }
   return result;
 }
-
-/***************************************************************************
- *
- * ftp_pasv_verbose()
- *
- * This function only outputs some informationals about this second connection
- * when we have issued a PASV command before and thus we have connected to a
- * possibly new IP address.
- *
- */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void
-ftp_pasv_verbose(struct Curl_easy *data,
-                 struct Curl_addrinfo *ai,
-                 char *newhost, /* ASCII version */
-                 int port)
-{
-  char buf[256];
-  Curl_printable_address(ai, buf, sizeof(buf));
-  infof(data, "Connecting to %s (%s) port %d", newhost, buf, port);
-}
-#endif
 
 /*
  * ftp_do_more()
