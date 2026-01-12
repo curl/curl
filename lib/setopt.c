@@ -963,7 +963,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       /* no return error on too high numbers since the bitmask could be
          extended in a future */
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->keep_post = arg & CURL_REDIR_POST_ALL;
+    s->post301 = !!(arg & CURL_REDIR_POST_301);
+    s->post302 = !!(arg & CURL_REDIR_POST_302);
+    s->post303 = !!(arg & CURL_REDIR_POST_303);
     break;
 
   case CURLOPT_HEADEROPT:
