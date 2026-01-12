@@ -39,7 +39,7 @@
 #include "connect.h"
 
 #define MAX_ALTSVC_LINE    4095
-#define MAX_ALTSVC_DATELEN 256
+#define MAX_ALTSVC_DATELEN 17
 #define MAX_ALTSVC_HOSTLEN 2048
 #define MAX_ALTSVC_ALPNLEN 10
 
