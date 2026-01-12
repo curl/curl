@@ -196,12 +196,6 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
                             bool ascii, ftpstate newstate);
 static int ftp_need_type(struct ftp_conn *ftpc, bool ascii);
 static CURLcode ftp_multi_statemach(struct Curl_easy *data, bool *done);
-static CURLcode ftp_pollset(struct Curl_easy *data,
-                            struct easy_pollset *ps);
-static CURLcode ftp_domore_pollset(struct Curl_easy *data,
-                                   struct easy_pollset *ps);
-static CURLcode ftp_doing(struct Curl_easy *data,
-                          bool *dophase_done);
 static CURLcode init_wc_data(struct Curl_easy *data,
                              struct ftp_conn *ftpc,
                              struct FTP *ftp);
