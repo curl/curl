@@ -1810,6 +1810,55 @@ out:
   return result;
 }
 
+/* Call this when the DO phase has completed */
+static CURLcode smtp_dophase_done(struct Curl_easy *data,
+                                  struct SMTP *smtp,
+                                  bool connected)
+{
+  (void)connected;
+
+  if(smtp->transfer != PPTRANSFER_BODY)
+    /* no data to transfer */
+    Curl_xfer_setup_nop(data);
+
+  return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * smtp_regular_transfer()
+ *
+ * The input argument is already checked for validity.
+ *
+ * Performs all commands done before a regular transfer between a local and a
+ * remote host.
+ */
+static CURLcode smtp_regular_transfer(struct Curl_easy *data,
+                                      struct smtp_conn *smtpc,
+                                      struct SMTP *smtp,
+                                      bool *dophase_done)
+{
+  CURLcode result = CURLE_OK;
+  bool connected = FALSE;
+
+  /* Make sure size is unknown at this point */
+  data->req.size = -1;
+
+  /* Set the progress data */
+  Curl_pgrsReset(data);
+
+  /* Carry out the perform */
+  result = smtp_perform(data, smtpc, smtp, &connected, dophase_done);
+
+  /* Perform post DO phase operations if necessary */
+  if(!result && *dophase_done)
+    result = smtp_dophase_done(data, smtp, connected);
+
+  CURL_TRC_SMTP(data, "smtp_regular_transfer() -> %d, done=%d",
+                result, *dophase_done);
+  return result;
+}
+
 /***********************************************************************
  *
  * smtp_do()
@@ -1873,20 +1922,6 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/* Call this when the DO phase has completed */
-static CURLcode smtp_dophase_done(struct Curl_easy *data,
-                                  struct SMTP *smtp,
-                                  bool connected)
-{
-  (void)connected;
-
-  if(smtp->transfer != PPTRANSFER_BODY)
-    /* no data to transfer */
-    Curl_xfer_setup_nop(data);
-
-  return CURLE_OK;
-}
-
 /* Called from multi.c while DOing */
 static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
 {
@@ -1905,41 +1940,6 @@ static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
   }
 
   CURL_TRC_SMTP(data, "smtp_doing() -> %d, done=%d", result, *dophase_done);
-  return result;
-}
-
-/***********************************************************************
- *
- * smtp_regular_transfer()
- *
- * The input argument is already checked for validity.
- *
- * Performs all commands done before a regular transfer between a local and a
- * remote host.
- */
-static CURLcode smtp_regular_transfer(struct Curl_easy *data,
-                                      struct smtp_conn *smtpc,
-                                      struct SMTP *smtp,
-                                      bool *dophase_done)
-{
-  CURLcode result = CURLE_OK;
-  bool connected = FALSE;
-
-  /* Make sure size is unknown at this point */
-  data->req.size = -1;
-
-  /* Set the progress data */
-  Curl_pgrsReset(data);
-
-  /* Carry out the perform */
-  result = smtp_perform(data, smtpc, smtp, &connected, dophase_done);
-
-  /* Perform post DO phase operations if necessary */
-  if(!result && *dophase_done)
-    result = smtp_dophase_done(data, smtp, connected);
-
-  CURL_TRC_SMTP(data, "smtp_regular_transfer() -> %d, done=%d",
-                result, *dophase_done);
   return result;
 }
 
