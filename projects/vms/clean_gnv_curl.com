@@ -103,34 +103,34 @@ $!
 $ file = "lcl_root:[...]*.lai"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl-*_original_src.bck"
+$ file = "lcl_root:[.projects.vms]curl-*_original_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl_d-*_original_src.bck"
+$ file = "lcl_root:[.projects.vms]curl_d-*_original_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl-*_vms_src.bck"
+$ file = "lcl_root:[.projects.vms]curl-*_vms_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl_d-*_vms_src.bck"
+$ file = "lcl_root:[.projects.vms]curl_d-*_vms_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl-*.release_notes"
+$ file = "lcl_root:[.projects.vms]curl-*.release_notes"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl_d-*.release_notes"
+$ file = "lcl_root:[.projects.vms]curl_d-*.release_notes"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl-*.pcsi$desc"
+$ file = "lcl_root:[.projects.vms]*-curl-*.pcsi$desc"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl_d-*.pcsi$desc"
+$ file = "lcl_root:[.projects.vms]*-curl_d-*.pcsi$desc"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl-*.pcsi$text"
+$ file = "lcl_root:[.projects.vms]*-curl-*.pcsi$text"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl_d-*.pcsi$text"
+$ file = "lcl_root:[.projects.vms]*-curl_d-*.pcsi$text"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $!======================================================================
@@ -218,13 +218,13 @@ $!
 $ file = "lcl_root:[...]gnv*.opt"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]macro32_exactcase.exe"
+$ file = "lcl_root:[.projects.vms]macro32_exactcase.exe"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]report_openssl_version.exe"
+$ file = "lcl_root:[.projects.vms]report_openssl_version.exe"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]hp_ssl_release_info.txt"
+$ file = "lcl_root:[.projects.vms]hp_ssl_release_info.txt"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[.src]curl.exe"

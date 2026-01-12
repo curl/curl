@@ -66,7 +66,7 @@ $ arch_name = f$edit(f$getsyi("arch_name"),"UPCASE")
 $ if f$search("[--.src]curl.exe") .eqs. ""
 $ then
 $   build_it = 1
-$   libfile = "[.packages.vms.''arch_name']curllib.olb"
+$   libfile = "[.projects.vms.''arch_name']curllib.olb"
 $   if f$search(libfile) .nes. ""
 $   then
 $       build_it = 0

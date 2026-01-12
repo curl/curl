@@ -70,20 +70,20 @@ $!
 $!
 $! Build the Message file.
 $!--------------------------
-$ if f$search("[.packages.vms]curlmsg.obj") .eqs. ""
+$ if f$search("[.projects.vms]curlmsg.obj") .eqs. ""
 $ then
-$   message [.packages.vms]curlmsg.msg/object=[.packages.vms]
+$   message [.projects.vms]curlmsg.msg/object=[.projects.vms]
 $ endif
 $ if f$search("gnv$curlmsg.exe") .eqs. ""
 $ then
-$   link/share=gnv$curlmsg.exe [.packages.vms]curlmsg.obj
+$   link/share=gnv$curlmsg.exe [.projects.vms]curlmsg.obj
 $ endif
 $!
 $!
 $! Need to build the common init module.
 $!-------------------------------------------
 $ cflags = "/list/show=(expan,includ)"
-$ init_obj = "[.packages.vms]curl_crtl_init.obj"
+$ init_obj = "[.projects.vms]curl_crtl_init.obj"
 $ if f$search(init_obj) .eqs. ""
 $ then
 $   cc'cflags' 'default_dir'curl_crtl_init.c/obj='init_obj'
@@ -96,7 +96,7 @@ $! Need to build the module to test the HP OpenSSL version
 $!--------------------------------------------------------
 $ if arch_name .nes. "VAX"
 $ then
-$   rpt_obj = "[.packages.vms]report_openssl_version.obj
+$   rpt_obj = "[.projects.vms]report_openssl_version.obj
 $   if f$search(rpt_obj) .eqs. ""
 $   then
 $       cc'cflags' 'default_dir'report_openssl_version.c/obj='rpt_obj'
@@ -109,12 +109,12 @@ $   report_openssl_version := $'default_dir'report_openssl_version.exe
 $ endif
 $!
 $!
-$ base_link_opt_file = "[.packages.vms.''arch_name']gnv_libcurl_linker.opt"
-$ share_link_opt_file = "[.packages.vms.''arch_name']gnv_ssl_libcurl_linker.opt"
+$ base_link_opt_file = "[.projects.vms.''arch_name']gnv_libcurl_linker.opt"
+$ share_link_opt_file = "[.projects.vms.''arch_name']gnv_ssl_libcurl_linker.opt"
 $ if f$search(base_link_opt_file) .eqs. ""
 $ then
-$   base_link_opt_file = "[.packages.vms]gnv_libcurl_linker.opt"
-$   share_link_opt_file = "[.packages.vms]gnv_ssl_libcurl_linker.opt"
+$   base_link_opt_file = "[.projects.vms]gnv_libcurl_linker.opt"
+$   share_link_opt_file = "[.projects.vms]gnv_ssl_libcurl_linker.opt"
 $   if f$search(base_link_opt_file) .eqs. ""
 $   then
 $       write sys$output "Can not find base library option file!"
@@ -343,7 +343,7 @@ $ endif
 $!
 $! DCL build puts curllib in architecture directory
 $! GNV build uses the makefile.
-$ libfile = "[.packages.vms.''arch_name']curllib.olb"
+$ libfile = "[.projects.vms.''arch_name']curllib.olb"
 $ if f$search(libfile) .nes. ""
 $ then
 $   olb_file = libfile
@@ -424,9 +424,9 @@ $   endif
 $ else
 $   curl_exe = "[.src]curl.exe"
 $   curl_dsf = "[.src]curl.dsf"
-$   curl_main = "[.packages.vms.''arch_name']tool_main.obj"
-$   curl_src = "[.packages.vms.''arch_name']curlsrc.olb"
-$   curl_lib = "[.packages.vms.''arch_name']curllib.olb"
+$   curl_main = "[.projects.vms.''arch_name']tool_main.obj"
+$   curl_src = "[.projects.vms.''arch_name']curlsrc.olb"
+$   curl_lib = "[.projects.vms.''arch_name']curllib.olb"
 $   strcase = "strcase"
 $   nonblock = "nonblock"
 $   warnless = "warnless"
