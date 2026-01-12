@@ -156,7 +156,7 @@ jobs:
         with:
           environment_variables: CC CURL_CI CURL_TEST_MIN MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
-          version: '14.3'
+          version: '15.0'
           architecture: ${{ matrix.arch }}
           run: |
             export CURL_CI=github
