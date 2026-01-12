@@ -25,7 +25,11 @@ Funny-head: yesyes
 <client>
 <features>
 alt-svc
+Debug
 </features>
+<setenv>
+CURL_ALTSVC_HTTP=1
+</setenv>
 <server>
 http
 </server>
@@ -36,7 +40,7 @@ Alt-Svc from file with too long date
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --alt-svc "%LOGDIR/altsvc-%TESTNUMBER"
 </command>
 <file name="%LOGDIR/altsvc-%TESTNUMBER">
-h1 example.com 80 h1 %HOSTIP %HTTPPORT "20290222 22:19:028" 0 0
+h1 %HOSTIP %HTTPPORT h1 example.com 80 "20290222 22:19:028" 0 0
 </file>
 </client>
 
