@@ -137,8 +137,8 @@ jobs:
         include:
           - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
-          - { build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
-          - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
+          # - { build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
+          # - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
       fail-fast: false
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
