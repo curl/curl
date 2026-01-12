@@ -1341,7 +1341,7 @@ struct UserDefined {
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_httppost *httppost;  /* linked list of old POST data */
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
-  curl_mimepart mimepost;  /* MIME/POST data. */
+  curl_mimepart *mimepostp;  /* MIME/POST data. */
 #endif
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
@@ -1591,7 +1591,8 @@ struct UserDefined {
 };
 
 #ifndef CURL_DISABLE_MIME
-#define IS_MIME_POST(a) ((a)->set.mimepost.kind != MIMEKIND_NONE)
+#define IS_MIME_POST(a)                                                 \
+  ((a)->set.mimepostp && ((a)->set.mimepostp->kind != MIMEKIND_NONE))
 #else
 #define IS_MIME_POST(a) FALSE
 #endif

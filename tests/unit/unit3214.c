@@ -41,7 +41,7 @@ static void checksize(const char *name, size_t size, size_t allowed)
 }
 
 /* the maximum sizes we allow specific structs to grow to */
-#define MAX_CURL_EASY           5850
+#define MAX_CURL_EASY           5370
 #define MAX_CONNECTDATA         1300
 #define MAX_CURL_MULTI          850
 #define MAX_CURL_HTTPPOST       112

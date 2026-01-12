@@ -175,7 +175,8 @@ void Curl_freeset(struct Curl_easy *data)
   Curl_bufref_free(&data->state.referer);
   Curl_bufref_free(&data->state.url);
 
-  Curl_mime_cleanpart(&data->set.mimepost);
+  Curl_mime_cleanpart(data->set.mimepostp);
+  Curl_safefree(data->set.mimepostp);
 
 #ifndef CURL_DISABLE_COOKIES
   curl_slist_free_all(data->state.cookielist);
@@ -384,8 +385,6 @@ void Curl_init_userdefined(struct Curl_easy *data)
   /* SOCKS5 proxy auth defaults to username/password + GSS-API */
   set->socks5auth = CURLAUTH_BASIC | CURLAUTH_GSSAPI;
 #endif
-
-  Curl_mime_initpart(&set->mimepost);
 
   Curl_ssl_easy_config_init(data);
 #ifndef CURL_DISABLE_DOH
