@@ -195,24 +195,10 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
                             struct FTP *ftp,
                             bool ascii, ftpstate newstate);
 static int ftp_need_type(struct ftp_conn *ftpc, bool ascii);
-static CURLcode ftp_multi_statemach(struct Curl_easy *data, bool *done);
-static CURLcode init_wc_data(struct Curl_easy *data,
-                             struct ftp_conn *ftpc,
-                             struct FTP *ftp);
-static CURLcode wc_statemach(struct Curl_easy *data,
-                             struct ftp_conn *ftpc,
-                             struct FTP *ftp);
-static void wc_data_dtor(void *ptr);
 static CURLcode ftp_state_retr(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp,
                                curl_off_t filesize);
-static CURLcode ftp_readresp(struct Curl_easy *data,
-                             struct ftp_conn *ftpc,
-                             int sockindex,
-                             struct pingpong *pp,
-                             int *ftpcode,
-                             size_t *size);
 static CURLcode ftp_dophase_done(struct Curl_easy *data,
                                  struct ftp_conn *ftpc,
                                  struct FTP *ftp,
