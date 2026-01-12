@@ -2068,6 +2068,52 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   return result;
 }
 
+/* Call this when the DO phase has completed */
+static CURLcode imap_dophase_done(struct Curl_easy *data,
+                                  struct IMAP *imap,
+                                  bool connected)
+{
+  (void)connected;
+
+  if(imap->transfer != PPTRANSFER_BODY)
+    /* no data to transfer */
+    Curl_xfer_setup_nop(data);
+
+  return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * imap_regular_transfer()
+ *
+ * The input argument is already checked for validity.
+ *
+ * Performs all commands done before a regular transfer between a local and a
+ * remote host.
+ */
+static CURLcode imap_regular_transfer(struct Curl_easy *data,
+                                      struct IMAP *imap,
+                                      bool *dophase_done)
+{
+  CURLcode result = CURLE_OK;
+  bool connected = FALSE;
+
+  /* Make sure size is unknown at this point */
+  data->req.size = -1;
+
+  /* Set the progress data */
+  Curl_pgrsReset(data);
+
+  /* Carry out the perform */
+  result = imap_perform(data, &connected, dophase_done);
+
+  /* Perform post DO phase operations if necessary */
+  if(!result && *dophase_done)
+    result = imap_dophase_done(data, imap, connected);
+
+  return result;
+}
+
 /***********************************************************************
  *
  * imap_do()
@@ -2127,20 +2173,6 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/* Call this when the DO phase has completed */
-static CURLcode imap_dophase_done(struct Curl_easy *data,
-                                  struct IMAP *imap,
-                                  bool connected)
-{
-  (void)connected;
-
-  if(imap->transfer != PPTRANSFER_BODY)
-    /* no data to transfer */
-    Curl_xfer_setup_nop(data);
-
-  return CURLE_OK;
-}
-
 /* Called from multi.c while DOing */
 static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done)
 {
@@ -2158,38 +2190,6 @@ static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done)
 
     DEBUGF(infof(data, "DO phase is complete"));
   }
-
-  return result;
-}
-
-/***********************************************************************
- *
- * imap_regular_transfer()
- *
- * The input argument is already checked for validity.
- *
- * Performs all commands done before a regular transfer between a local and a
- * remote host.
- */
-static CURLcode imap_regular_transfer(struct Curl_easy *data,
-                                      struct IMAP *imap,
-                                      bool *dophase_done)
-{
-  CURLcode result = CURLE_OK;
-  bool connected = FALSE;
-
-  /* Make sure size is unknown at this point */
-  data->req.size = -1;
-
-  /* Set the progress data */
-  Curl_pgrsReset(data);
-
-  /* Carry out the perform */
-  result = imap_perform(data, &connected, dophase_done);
-
-  /* Perform post DO phase operations if necessary */
-  if(!result && *dophase_done)
-    result = imap_dophase_done(data, imap, connected);
 
   return result;
 }
