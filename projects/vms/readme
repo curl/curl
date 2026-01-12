@@ -161,7 +161,7 @@ and you must make sure that none of the build files are present before
 running a different type of build.  Use the "REALCLEAN" option for
 BUILD_VMS.COM and the "REALCLEAN" option for clean_gnv_curl.com.
 
-The (brute-force) DCL based builder is [.packages.vms]build_vms.com.
+The (brute-force) DCL based builder is [.projects.vms]build_vms.com.
 Comments in this procedure describe various optional parameters which
 enable or disable optional program features, or which control the build
 in other ways.  Product files (.EXE, .H, .LIS, .MAP, .OBJ, .OLB, ...)
@@ -183,9 +183,9 @@ is installed from a PCSI kit and default to using it.
 
    Example build commands:
 
-      @ [.packages.vms]build_vms.com CLEAN
-      @ [.packages.vms]build_vms.com LARGE LDAP
-      submit /noprint [.packages.vms]build_vms.com /param = (LARGE, LDAP)
+      @ [.projects.vms]build_vms.com CLEAN
+      @ [.projects.vms]build_vms.com LARGE LDAP
+      submit /noprint [.projects.vms]build_vms.com /param = (LARGE, LDAP)
 
 The build_vms.com procedure does not build the shared image file or the PCSI
 kit.  If you have built a curl with ZLIB and HPSSL support as well as if

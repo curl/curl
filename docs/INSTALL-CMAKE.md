@@ -581,9 +581,9 @@ Configuration element             | Equivalent CMake options
 
 For example these commands:
 
-    > cd projects
+    > cd projects/Windows
     > ./generate.bat VC12
-    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/curl-all.sln
+    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" VC12/curl-all.sln
 
 translate to:
 

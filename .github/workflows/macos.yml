@@ -14,7 +14,6 @@ name: 'macOS'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -24,7 +23,6 @@ name: 'macOS'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
       - 'projects/**'
 
 concurrency:

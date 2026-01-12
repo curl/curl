@@ -117,7 +117,7 @@ u unimplemented switch - ignored
 
 
 With these search lists set up and the properly, curl can be built by
-setting your default to PRJ_ROOT:[curl.packages.vms] and then issuing
+setting your default to PRJ_ROOT:[curl.projects.vms] and then issuing
 either the command:
 
   $ @pcsi_product_gnv_curl.com

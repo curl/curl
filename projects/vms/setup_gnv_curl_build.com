@@ -73,7 +73,7 @@ $!
 $! A logical name to make it easier to find some of the hacks.
 $ define/job gnv_hacks 'base_dir'
 $!
-$! A logical name to find the [.packages.vms] directory where we started.
+$! A logical name to find the [.projects.vms] directory where we started.
 $ define/job gnv_packages_vms 'default_dir'
 $!
 $! Kerberos headers:
@@ -96,7 +96,7 @@ $ endif
 $!
 $! C compiler include path.
 $ define/job decc$system_include prj_root:[.include.curl],-
-    [-.packages.vms],-
+    [-.projects.vms],-
     ssl$include:,gnv$gnu:[usr.include],-
     gnv$gnu:[usr.include.libz],gnv$gnu:[include],-
     gnv$zlib_include:,-
@@ -256,20 +256,20 @@ $!
 $!
 $! Build the Message file.
 $!--------------------------
-$ if f$search("[.packages.vms]curlmsg.obj") .eqs. ""
+$ if f$search("[.projects.vms]curlmsg.obj") .eqs. ""
 $ then
-$   message [.packages.vms]curlmsg.msg/object=[.packages.vms]
+$   message [.projects.vms]curlmsg.msg/object=[.projects.vms]
 $ endif
 $ if f$search("gnv$curlmsg.exe") .eqs. ""
 $ then
-$   link/share=gnv$curlmsg.exe [.packages.vms]curlmsg.obj
+$   link/share=gnv$curlmsg.exe [.projects.vms]curlmsg.obj
 $ endif
 $!
 $!
 $!
 $! Need to build the common init module.
 $!-------------------------------------------
-$ init_obj = "[.packages.vms]curl_crtl_init.obj"
+$ init_obj = "[.projects.vms]curl_crtl_init.obj"
 $ if f$search(init_obj) .eqs. ""
 $ then
 $   cc'cflags' 'default_dir'curl_crtl_init.c/obj='init_obj'

@@ -28,7 +28,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -38,7 +37,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
       - 'projects/**'
 
 concurrency:
