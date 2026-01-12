@@ -2117,7 +2117,7 @@ static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
   switch(httpreq) {
 #ifndef CURL_DISABLE_MIME
   case HTTPREQ_POST_MIME:
-    data->state.mimepost = &data->set.mimepost;
+    data->state.mimepost = data->set.mimepostp;
     break;
 #endif
 #ifndef CURL_DISABLE_FORM_API

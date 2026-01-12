@@ -891,7 +891,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* Copy src->set into dst->set first, then deal with the strings
      afterwards */
   dst->set = src->set;
-  Curl_mime_initpart(&dst->set.mimepost);
+  dst->set.mimepostp = NULL;
 
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
@@ -927,8 +927,17 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     dst->set.postfields = dst->set.str[i];
   }
 
-  /* Duplicate mime data. */
-  result = Curl_mime_duppart(dst, &dst->set.mimepost, &src->set.mimepost);
+  if(src->set.mimepostp) {
+    /* Duplicate mime data. Get a mimepost struct for the clone as well */
+    dst->set.mimepostp = curlx_malloc(sizeof(*dst->set.mimepostp));
+    if(!dst->set.mimepostp)
+      return CURLE_OUT_OF_MEMORY;
+
+    Curl_mime_initpart(dst->set.mimepostp);
+    result = Curl_mime_duppart(dst, dst->set.mimepostp, src->set.mimepostp);
+    if(result)
+      return result;
+  }
 
   if(src->set.resolve)
     dst->state.resolve = dst->set.resolve;
