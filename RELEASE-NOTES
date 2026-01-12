@@ -4,23 +4,38 @@ curl and libcurl 8.18.1
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3571
+ Contributors:                 3573
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o altsvc: only accept 17 byte dates from files [22]
  o build: detect and include `inttypes.h` again [13]
+ o cmake: reference OpenSSL and ZLIB imported targets only when enabled [41]
+ o cmake: silence useless compiler warnings triggered by the FASTBuild generator [43]
  o config-plan9: set `HAVE_STDINT_H` again [17]
+ o curl: limit Windows-specific code to Windows builds, other tidy-ups [48]
  o docs: explicitly call out Slowloris as not a security flaw [6]
  o http/3: add description for known server error codes [15]
+ o KNOWN_BUGS.md: absolute Unix domain filename for SOCKS on Windows [37]
+ o lib: use (u)int64_t instead of long long [39]
+ o Makefile.am: delete RPM targets referencing non-existent files [9]
+ o Makefile.am: drop stray VC project files from dist [5]
+ o mimepost: allocate main struct on-demand [20]
  o mprintf: drop old sprintf fallback [7]
  o ngtcp2: stabilize recv [18]
+ o plan9: drop special build and orphaned references [33]
+ o tool: improve error/warning messages when output filename sanitization fails [36]
+ o tool_cb_hdr: suppress header output when --out-null [10]
  o tool_dirhie: drop superfluous `F_OK` fallback (Windows) [8]
  o tool_operate: remove 'else' for VMS [3]
  o urldata.h: remove two forward-declared structs not used [4]
+ o urldata: change 'keep_post' into three distinct bitfields [21]
+ o urldata: convert 'long' fields to fixed variable types [47]
  o urldata: switch to uint* types [1]
+ o wolfssl: fix build without USE_BIO_CHAIN [27]
 
 This release includes the following known bugs:
 
@@ -42,18 +57,35 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, James Fuller, Stefan Eissing, Viktor Szakats
-  (4 contributors)
+  Andrew Kvalheim, Daniel Stenberg, James Fuller, Joshua Vandaële,
+  Megamouse on github, Patrick Monnerat, Ray Satiro, renovate[bot],
+  Stefan Eissing, Viktor Szakats
+  (10 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=20209
  [3] = https://curl.se/bug/?i=20221
  [4] = https://curl.se/bug/?i=20206
+ [5] = https://curl.se/bug/?i=20272
  [6] = https://curl.se/bug/?i=20219
  [7] = https://curl.se/bug/?i=20218
  [8] = https://curl.se/bug/?i=20214
+ [9] = https://curl.se/bug/?i=20270
+ [10] = https://curl.se/bug/?i=20235
  [13] = https://curl.se/bug/?i=20208
  [15] = https://curl.se/bug/?i=20202
  [17] = https://curl.se/bug/?i=20201
  [18] = https://curl.se/bug/?i=20220
+ [20] = https://curl.se/bug/?i=20260
+ [21] = https://curl.se/bug/?i=20262
+ [22] = https://curl.se/bug/?i=20259
+ [27] = https://curl.se/bug/?i=20250
+ [33] = https://curl.se/bug/?i=20243
+ [36] = https://curl.se/bug/?i=20044
+ [37] = https://curl.se/bug/?i=20236
+ [39] = https://curl.se/bug/?i=20233
+ [41] = https://curl.se/bug/?i=20217
+ [43] = https://curl.se/bug/?i=20230
+ [47] = https://curl.se/bug/?i=20227
+ [48] = https://curl.se/bug/?i=20213
