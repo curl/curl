@@ -136,102 +136,6 @@ struct SMTP {
   BIT(trailing_crlf);      /* Specifies if the trailing CRLF is present */
 };
 
-/* Local API functions */
-static CURLcode smtp_regular_transfer(struct Curl_easy *data,
-                                      struct smtp_conn *smtpc,
-                                      struct SMTP *smtp,
-                                      bool *done);
-static CURLcode smtp_do(struct Curl_easy *data, bool *done);
-static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
-                          bool premature);
-static CURLcode smtp_connect(struct Curl_easy *data, bool *done);
-static CURLcode smtp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead);
-static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done);
-static CURLcode smtp_pollset(struct Curl_easy *data,
-                             struct easy_pollset *ps);
-static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done);
-static CURLcode smtp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-static CURLcode smtp_parse_url_options(struct connectdata *conn,
-                                       struct smtp_conn *smtpc);
-static CURLcode smtp_parse_url_path(struct Curl_easy *data,
-                                    struct smtp_conn *smtpc);
-static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
-                                          struct SMTP *smtp);
-static CURLcode smtp_parse_address(const char *fqma,
-                                   char **address, struct hostname *host,
-                                   const char **suffix);
-static CURLcode smtp_perform_auth(struct Curl_easy *data, const char *mech,
-                                  const struct bufref *initresp);
-static CURLcode smtp_continue_auth(struct Curl_easy *data, const char *mech,
-                                   const struct bufref *resp);
-static CURLcode smtp_cancel_auth(struct Curl_easy *data, const char *mech);
-static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out);
-static CURLcode cr_eob_add(struct Curl_easy *data);
-
-/*
- * SMTP protocol handler.
- */
-
-const struct Curl_handler Curl_handler_smtp = {
-  "smtp",                           /* scheme */
-  smtp_setup_connection,            /* setup_connection */
-  smtp_do,                          /* do_it */
-  smtp_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  smtp_connect,                     /* connect_it */
-  smtp_multi_statemach,             /* connecting */
-  smtp_doing,                       /* doing */
-  smtp_pollset,                     /* proto_pollset */
-  smtp_pollset,                     /* doing_pollset */
-  ZERO_NULL,                        /* domore_pollset */
-  ZERO_NULL,                        /* perform_pollset */
-  smtp_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_SMTP,                        /* defport */
-  CURLPROTO_SMTP,                   /* protocol */
-  CURLPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-    PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE
-};
-
-#ifdef USE_SSL
-/*
- * SMTPS protocol handler.
- */
-
-const struct Curl_handler Curl_handler_smtps = {
-  "smtps",                          /* scheme */
-  smtp_setup_connection,            /* setup_connection */
-  smtp_do,                          /* do_it */
-  smtp_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  smtp_connect,                     /* connect_it */
-  smtp_multi_statemach,             /* connecting */
-  smtp_doing,                       /* doing */
-  smtp_pollset,                     /* proto_pollset */
-  smtp_pollset,                     /* doing_pollset */
-  ZERO_NULL,                        /* domore_pollset */
-  ZERO_NULL,                        /* perform_pollset */
-  smtp_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_SMTPS,                       /* defport */
-  CURLPROTO_SMTPS,                  /* protocol */
-  CURLPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-    PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
-};
-#endif
-
 /* SASL parameters for the smtp protocol */
 static const struct SASLproto saslsmtp = {
   "smtp",               /* The service name */
@@ -2080,5 +1984,65 @@ static CURLcode cr_eob_add(struct Curl_easy *data)
     Curl_creader_free(data, reader);
   return result;
 }
+
+/*
+ * SMTP protocol handler.
+ */
+const struct Curl_handler Curl_handler_smtp = {
+  "smtp",                           /* scheme */
+  smtp_setup_connection,            /* setup_connection */
+  smtp_do,                          /* do_it */
+  smtp_done,                        /* done */
+  ZERO_NULL,                        /* do_more */
+  smtp_connect,                     /* connect_it */
+  smtp_multi_statemach,             /* connecting */
+  smtp_doing,                       /* doing */
+  smtp_pollset,                     /* proto_pollset */
+  smtp_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
+  smtp_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
+  ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
+  ZERO_NULL,                        /* follow */
+  PORT_SMTP,                        /* defport */
+  CURLPROTO_SMTP,                   /* protocol */
+  CURLPROTO_SMTP,                   /* family */
+  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
+    PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE
+};
+
+#ifdef USE_SSL
+/*
+ * SMTPS protocol handler.
+ */
+const struct Curl_handler Curl_handler_smtps = {
+  "smtps",                          /* scheme */
+  smtp_setup_connection,            /* setup_connection */
+  smtp_do,                          /* do_it */
+  smtp_done,                        /* done */
+  ZERO_NULL,                        /* do_more */
+  smtp_connect,                     /* connect_it */
+  smtp_multi_statemach,             /* connecting */
+  smtp_doing,                       /* doing */
+  smtp_pollset,                     /* proto_pollset */
+  smtp_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
+  smtp_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
+  ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
+  ZERO_NULL,                        /* follow */
+  PORT_SMTPS,                       /* defport */
+  CURLPROTO_SMTPS,                  /* protocol */
+  CURLPROTO_SMTP,                   /* family */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
+    PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
+};
+#endif
 
 #endif /* CURL_DISABLE_SMTP */
