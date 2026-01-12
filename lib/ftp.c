@@ -233,71 +233,6 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data,
                                  struct FTP *ftp,
                                  bool connected);
 
-/*
- * FTP protocol handler.
- */
-
-const struct Curl_handler Curl_handler_ftp = {
-  "ftp",                           /* scheme */
-  ftp_setup_connection,            /* setup_connection */
-  ftp_do,                          /* do_it */
-  ftp_done,                        /* done */
-  ftp_do_more,                     /* do_more */
-  ftp_connect,                     /* connect_it */
-  ftp_multi_statemach,             /* connecting */
-  ftp_doing,                       /* doing */
-  ftp_pollset,                     /* proto_pollset */
-  ftp_pollset,                     /* doing_pollset */
-  ftp_domore_pollset,              /* domore_pollset */
-  ZERO_NULL,                       /* perform_pollset */
-  ftp_disconnect,                  /* disconnect */
-  ZERO_NULL,                       /* write_resp */
-  ZERO_NULL,                       /* write_resp_hd */
-  ZERO_NULL,                       /* connection_check */
-  ZERO_NULL,                       /* attach connection */
-  ZERO_NULL,                       /* follow */
-  PORT_FTP,                        /* defport */
-  CURLPROTO_FTP,                   /* protocol */
-  CURLPROTO_FTP,                   /* family */
-  PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
-  PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP |
-  PROTOPT_WILDCARD | PROTOPT_SSL_REUSE |
-  PROTOPT_CONN_REUSE /* flags */
-};
-
-#ifdef USE_SSL
-/*
- * FTPS protocol handler.
- */
-
-const struct Curl_handler Curl_handler_ftps = {
-  "ftps",                          /* scheme */
-  ftp_setup_connection,            /* setup_connection */
-  ftp_do,                          /* do_it */
-  ftp_done,                        /* done */
-  ftp_do_more,                     /* do_more */
-  ftp_connect,                     /* connect_it */
-  ftp_multi_statemach,             /* connecting */
-  ftp_doing,                       /* doing */
-  ftp_pollset,                     /* proto_pollset */
-  ftp_pollset,                     /* doing_pollset */
-  ftp_domore_pollset,              /* domore_pollset */
-  ZERO_NULL,                       /* perform_pollset */
-  ftp_disconnect,                  /* disconnect */
-  ZERO_NULL,                       /* write_resp */
-  ZERO_NULL,                       /* write_resp_hd */
-  ZERO_NULL,                       /* connection_check */
-  ZERO_NULL,                       /* attach connection */
-  ZERO_NULL,                       /* follow */
-  PORT_FTPS,                       /* defport */
-  CURLPROTO_FTPS,                  /* protocol */
-  CURLPROTO_FTP,                   /* family */
-  PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
-  PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY | PROTOPT_WILDCARD |
-  PROTOPT_CONN_REUSE /* flags */
-};
-#endif
-
 static void close_secondarysocket(struct Curl_easy *data,
                                   struct ftp_conn *ftpc)
 {
@@ -4463,5 +4398,68 @@ bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
     return FALSE;
   return TRUE;
 }
+
+/*
+ * FTP protocol handler.
+ */
+const struct Curl_handler Curl_handler_ftp = {
+  "ftp",                           /* scheme */
+  ftp_setup_connection,            /* setup_connection */
+  ftp_do,                          /* do_it */
+  ftp_done,                        /* done */
+  ftp_do_more,                     /* do_more */
+  ftp_connect,                     /* connect_it */
+  ftp_multi_statemach,             /* connecting */
+  ftp_doing,                       /* doing */
+  ftp_pollset,                     /* proto_pollset */
+  ftp_pollset,                     /* doing_pollset */
+  ftp_domore_pollset,              /* domore_pollset */
+  ZERO_NULL,                       /* perform_pollset */
+  ftp_disconnect,                  /* disconnect */
+  ZERO_NULL,                       /* write_resp */
+  ZERO_NULL,                       /* write_resp_hd */
+  ZERO_NULL,                       /* connection_check */
+  ZERO_NULL,                       /* attach connection */
+  ZERO_NULL,                       /* follow */
+  PORT_FTP,                        /* defport */
+  CURLPROTO_FTP,                   /* protocol */
+  CURLPROTO_FTP,                   /* family */
+  PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
+  PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP |
+  PROTOPT_WILDCARD | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE /* flags */
+};
+
+#ifdef USE_SSL
+/*
+ * FTPS protocol handler.
+ */
+const struct Curl_handler Curl_handler_ftps = {
+  "ftps",                          /* scheme */
+  ftp_setup_connection,            /* setup_connection */
+  ftp_do,                          /* do_it */
+  ftp_done,                        /* done */
+  ftp_do_more,                     /* do_more */
+  ftp_connect,                     /* connect_it */
+  ftp_multi_statemach,             /* connecting */
+  ftp_doing,                       /* doing */
+  ftp_pollset,                     /* proto_pollset */
+  ftp_pollset,                     /* doing_pollset */
+  ftp_domore_pollset,              /* domore_pollset */
+  ZERO_NULL,                       /* perform_pollset */
+  ftp_disconnect,                  /* disconnect */
+  ZERO_NULL,                       /* write_resp */
+  ZERO_NULL,                       /* write_resp_hd */
+  ZERO_NULL,                       /* connection_check */
+  ZERO_NULL,                       /* attach connection */
+  ZERO_NULL,                       /* follow */
+  PORT_FTPS,                       /* defport */
+  CURLPROTO_FTPS,                  /* protocol */
+  CURLPROTO_FTP,                   /* family */
+  PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
+  PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY | PROTOPT_WILDCARD |
+  PROTOPT_CONN_REUSE /* flags */
+};
+#endif
 
 #endif /* CURL_DISABLE_FTP */
