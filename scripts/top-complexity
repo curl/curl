@@ -81,8 +81,8 @@ my %whitelist = (
 # functions with complexity above this level causes the function to return error
 my $cutoff = 70;
 
-# functions above this complexity level are shown
-my $show = 57;
+# show this many from the top
+my $top = $ARGV[0] ? $ARGV[0] : 25;
 
 my $error = 0;
 my %where;
@@ -96,18 +96,17 @@ for my $l (@output) {
     if($l =~/^(\d+)\t\d+\t\d+\t\d+\t(\d+)\t([^\(]+).*: ([^ ]*)/) {
         my ($score, $len, $path, $func)=($1, $2, $3, $4);
 
-        if($score > $show) {
-            my $allow = 0;
-            if($whitelist{$func} &&
-               ($score <= $whitelist{$func})) {
-                $allow = 1;
-            }
-            $where{"$path:$func"}=$score;
-            $perm{"$path:$func"}=$allow;
-            if(($score > $cutoff) && !$allow) {
-                $error++;
-            }
+        my $allow = 0;
+        if($whitelist{$func} &&
+           ($score <= $whitelist{$func})) {
+            $allow = 1;
         }
+        $where{"$path:$func"}=$score;
+        $perm{"$path:$func"}=$allow;
+        if(($score > $cutoff) && !$allow) {
+            $error++;
+        }
+
         $alllines += $len;
         $allscore += ($len * $score);
     }
@@ -123,6 +122,9 @@ for my $e (sort {$where{$b} <=> $where{$a}} keys %where) {
     }
     printf "%-5d %s%s\n", $where{$e}, $e,
         $perm{$e} ? " [ALLOWED]": "";
+    if(!--$top) {
+        last;
+    }
 }
 
 printf "\nAverage complexity: %.2f\n", $allscore / $alllines;
