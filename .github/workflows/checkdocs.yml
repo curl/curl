@@ -12,17 +12,21 @@ name: 'Docs'
     branches:
       - master
       - '*/ci'
-    paths-ignore:
-      - '.circleci/**'
-      - 'appveyor.*'
-      - 'Dockerfile'
+    paths:
+      - '.github/workflows/checkdocs.yml'
+      - '.github/scripts/**'
+      - 'scripts/**'
+      - '**.md'
+      - 'docs/*'
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '.circleci/**'
-      - 'appveyor.*'
-      - 'Dockerfile'
+    paths:
+      - '.github/workflows/checkdocs.yml'
+      - '.github/scripts/**'
+      - 'scripts/**'
+      - '**.md'
+      - 'docs/*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
