@@ -61,8 +61,8 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
 #ifdef HAVE_FCNTL
   if(fcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
      fcntl(socks[1], F_SETFD, FD_CLOEXEC)) {
-    close(socks[0]);
-    close(socks[1]);
+    sclose(socks[0]);
+    sclose(socks[1]);
     socks[0] = socks[1] = CURL_SOCKET_BAD;
     return -1;
   }
@@ -70,8 +70,8 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
   if(nonblocking) {
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0) {
-      close(socks[0]);
-      close(socks[1]);
+      sclose(socks[0]);
+      sclose(socks[1]);
       socks[0] = socks[1] = CURL_SOCKET_BAD;
       return -1;
     }
@@ -98,8 +98,8 @@ int Curl_socketpair(int domain, int type, int protocol,
   if(nonblocking) {
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0) {
-      close(socks[0]);
-      close(socks[1]);
+      sclose(socks[0]);
+      sclose(socks[1]);
       return -1;
     }
   }
