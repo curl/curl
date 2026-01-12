@@ -1413,7 +1413,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST ||
         data->state.httpreq == HTTPREQ_POST_FORM ||
         data->state.httpreq == HTTPREQ_POST_MIME) &&
-       !(data->set.keep_post & CURL_REDIR_POST_301)) {
+       !data->set.post301) {
       http_switch_to_get(data, 301);
       switch_to_get = TRUE;
     }
@@ -1438,7 +1438,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST ||
         data->state.httpreq == HTTPREQ_POST_FORM ||
         data->state.httpreq == HTTPREQ_POST_MIME) &&
-       !(data->set.keep_post & CURL_REDIR_POST_302)) {
+       !data->set.post302) {
       http_switch_to_get(data, 302);
       switch_to_get = TRUE;
     }
@@ -1454,7 +1454,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
        ((data->state.httpreq != HTTPREQ_POST &&
          data->state.httpreq != HTTPREQ_POST_FORM &&
          data->state.httpreq != HTTPREQ_POST_MIME) ||
-        !(data->set.keep_post & CURL_REDIR_POST_303))) {
+        !data->set.post303)) {
       http_switch_to_get(data, 303);
       switch_to_get = TRUE;
     }
