@@ -1166,8 +1166,8 @@ static CURLcode create_single(struct OperationConfig *config,
                               CURLSH *share, struct State *state,
                               bool *added, bool *skipped)
 {
-  const bool orig_isatty = global->isatty;
-  const bool orig_noprogress = global->noprogress;
+  const bool orig_isatty = (bool)global->isatty;
+  const bool orig_noprogress = (bool)global->noprogress;
   CURLcode result = CURLE_OK;
   while(state->urlnode) {
     struct per_transfer *per = NULL;
@@ -2174,8 +2174,8 @@ static CURLcode run_all_transfers(CURLSH *share,
                                   CURLcode result)
 {
   /* Save the values of noprogress and isatty to restore them later on */
-  bool orig_noprogress = global->noprogress;
-  bool orig_isatty = global->isatty;
+  bool orig_noprogress = (bool)global->noprogress;
+  bool orig_isatty = (bool)global->isatty;
   struct per_transfer *per;
 
   /* Time to actually do the transfers */
