@@ -164,10 +164,10 @@ jobs:
             # https://ports.freebsd.org/
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               time sudo pkg install -y cmake-core ninja perl5 \
-                pkgconf brotli krb5-devel libidn2 libnghttp2 stunnel
+                pkgconf brotli libidn2 libnghttp2
             else
               time sudo pkg install -y autoconf automake libtool \
-                pkgconf brotli krb5-devel libidn2 libnghttp2 stunnel
+                pkgconf brotli libidn2 libnghttp2
               export MAKEFLAGS=-j3
             fi
 
