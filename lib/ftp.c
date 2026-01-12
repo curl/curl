@@ -166,9 +166,6 @@ static void ftp_state_low(struct Curl_easy *data,
 #define ftp_state(x, y, z) ftp_state_low(x, y, z, __LINE__)
 #endif /* DEBUGBUILD */
 
-static CURLcode ftp_sendquote(struct Curl_easy *data,
-                              struct ftp_conn *ftpc,
-                              struct curl_slist *quote);
 static CURLcode ftp_quit(struct Curl_easy *data, struct ftp_conn *ftpc);
 static CURLcode ftp_parse_url_path(struct Curl_easy *data,
                                    struct ftp_conn *ftpc,
@@ -3097,6 +3094,61 @@ static CURLcode ftp_connect(struct Curl_easy *data,
 
 /***********************************************************************
  *
+ * ftp_sendquote()
+ *
+ * Where a 'quote' means a list of custom commands to send to the server.
+ * The quote list is passed as an argument.
+ *
+ * BLOCKING
+ */
+static CURLcode ftp_sendquote(struct Curl_easy *data,
+                              struct ftp_conn *ftpc,
+                              struct curl_slist *quote)
+{
+  struct curl_slist *item;
+  struct pingpong *pp = &ftpc->pp;
+
+  item = quote;
+  while(item) {
+    if(item->data) {
+      size_t nread;
+      char *cmd = item->data;
+      bool acceptfail = FALSE;
+      CURLcode result;
+      int ftpcode = 0;
+
+      /* if a command starts with an asterisk, which a legal FTP command never
+         can, the command will be allowed to fail without it causing any
+         aborts or cancels etc. It will cause libcurl to act as if the command
+         is successful, whatever the server responds. */
+
+      if(cmd[0] == '*') {
+        cmd++;
+        acceptfail = TRUE;
+      }
+
+      result = Curl_pp_sendf(data, &ftpc->pp, "%s", cmd);
+      if(!result) {
+        pp->response = *Curl_pgrs_now(data); /* timeout relative now */
+        result = getftpresponse(data, &nread, &ftpcode);
+      }
+      if(result)
+        return result;
+
+      if(!acceptfail && (ftpcode >= 400)) {
+        failf(data, "QUOT string not accepted: %s", cmd);
+        return CURLE_QUOTE_ERROR;
+      }
+    }
+
+    item = item->next;
+  }
+
+  return CURLE_OK;
+}
+
+/***********************************************************************
+ *
  * ftp_done()
  *
  * The DONE function. This does what needs to be done after a single DO has
@@ -3301,61 +3353,6 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     result = ftp_sendquote(data, ftpc, data->set.postquote);
   CURL_TRC_FTP(data, "[%s] done, result=%d", FTP_CSTATE(ftpc), result);
   return result;
-}
-
-/***********************************************************************
- *
- * ftp_sendquote()
- *
- * Where a 'quote' means a list of custom commands to send to the server.
- * The quote list is passed as an argument.
- *
- * BLOCKING
- */
-static CURLcode ftp_sendquote(struct Curl_easy *data,
-                              struct ftp_conn *ftpc,
-                              struct curl_slist *quote)
-{
-  struct curl_slist *item;
-  struct pingpong *pp = &ftpc->pp;
-
-  item = quote;
-  while(item) {
-    if(item->data) {
-      size_t nread;
-      char *cmd = item->data;
-      bool acceptfail = FALSE;
-      CURLcode result;
-      int ftpcode = 0;
-
-      /* if a command starts with an asterisk, which a legal FTP command never
-         can, the command will be allowed to fail without it causing any
-         aborts or cancels etc. It will cause libcurl to act as if the command
-         is successful, whatever the server responds. */
-
-      if(cmd[0] == '*') {
-        cmd++;
-        acceptfail = TRUE;
-      }
-
-      result = Curl_pp_sendf(data, &ftpc->pp, "%s", cmd);
-      if(!result) {
-        pp->response = *Curl_pgrs_now(data); /* timeout relative now */
-        result = getftpresponse(data, &nread, &ftpcode);
-      }
-      if(result)
-        return result;
-
-      if(!acceptfail && (ftpcode >= 400)) {
-        failf(data, "QUOT string not accepted: %s", cmd);
-        return CURLE_QUOTE_ERROR;
-      }
-    }
-
-    item = item->next;
-  }
-
-  return CURLE_OK;
 }
 
 /***********************************************************************
