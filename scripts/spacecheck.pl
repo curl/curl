@@ -147,11 +147,6 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has multiple EOL at EOF";
     }
 
-    if($content =~ /\n\n\n\n/ ||
-       $content =~ /\r\n\r\n\r\n\r\n/) {
-        push @err, "content: has 3 or more consecutive empty lines";
-    }
-
     if(!fn_match($filename, @double_empty_lines)) {
         if($content =~ /\n\n\n/ ||
            $content =~ /\r\n\r\n\r\n/) {
