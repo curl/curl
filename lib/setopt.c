@@ -2933,7 +2933,7 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
 
 /*
  * Do not make Curl_vsetopt() static: it is called from
- * packages/OS400/ccsidcurl.c.
+ * projects/OS400/ccsidcurl.c.
  */
 CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 {

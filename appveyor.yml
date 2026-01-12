@@ -183,7 +183,8 @@ skip_commits:
     - '.circleci/*'
     - '.github/**/*'
     - 'Dockerfile'
-    - 'packages/**/*'
+    - 'projects/OS400/*'
+    - 'projects/vms/*'
 
 #artifacts:
 #  - path: '**/curl.exe'

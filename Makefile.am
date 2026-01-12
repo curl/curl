@@ -71,7 +71,7 @@ DISTCLEANFILES = buildinfo.txt
 bin_SCRIPTS = curl-config
 
 SUBDIRS = lib docs src scripts
-DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
+DIST_SUBDIRS = $(SUBDIRS) tests projects include docs
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
@@ -169,7 +169,7 @@ checksrc:
 	(cd tests && $(MAKE) checksrc)
 	(cd include/curl && $(MAKE) checksrc)
 	(cd docs/examples && $(MAKE) checksrc)
-	(cd packages && $(MAKE) checksrc)
+	(cd projects && $(MAKE) checksrc)
 
 lint: checksrc
 	@PERL@ $(top_srcdir)/scripts/spacecheck.pl

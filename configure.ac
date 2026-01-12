@@ -5550,8 +5550,8 @@ AC_CONFIG_FILES([\
   tests/tunit/Makefile \
   tests/http/config.ini \
   tests/http/Makefile \
-  packages/Makefile \
-  packages/vms/Makefile \
+  projects/Makefile \
+  projects/vms/Makefile \
   libcurl.pc
 ])
 AC_CONFIG_FILES([curl-config], [chmod +x curl-config])

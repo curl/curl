@@ -50,7 +50,7 @@ do      case "${SCRIPTDIR}" in
         esac
 done
 
-#  The script directory is supposed to be in $TOPDIR/packages/os400.
+#  The script directory is supposed to be in $TOPDIR/projects/os400.
 
 TOPDIR=$(dirname "${SCRIPTDIR}")
 TOPDIR=$(dirname "${TOPDIR}")
@@ -197,7 +197,7 @@ make_module()
         CMD="${CMD} LOCALETYPE(*LOCALE) FLAG(10)"
         CMD="${CMD} INCDIR('${QADRTDIR}/include'"
         CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}'"
-        CMD="${CMD} '${TOPDIR}/packages/OS400'"
+        CMD="${CMD} '${TOPDIR}/projects/OS400'"
 
         if [ "${WITH_ZLIB}" != "0" ]
         then    CMD="${CMD} '${ZLIB_INCLUDE}'"

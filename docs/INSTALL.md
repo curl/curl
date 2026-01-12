@@ -487,7 +487,7 @@ For IBM i (formerly OS/400), you can use curl in two different ways:
 
 - Natively, running in the **ILE**. The obvious use is being able to call curl
   from ILE C or RPG applications.
-- You need to build this from source. See `packages/OS400/README` for the ILE
+- You need to build this from source. See `projects/OS400/README` for the ILE
   specific build instructions.
 - In the **PASE** environment, which runs AIX programs. curl is built as it
   would be on AIX.

@@ -72,7 +72,6 @@ build:
               configure.ac,\
               m4/**,\
               Makefile.*,\
-              packages/**,\
               projects/**,\
               lib/libcurl.def,\
               tests/cmake/**\
