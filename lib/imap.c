@@ -137,65 +137,101 @@ struct IMAP {
   BIT(uidvalidity_set);
 };
 
-/* Local API functions */
-static CURLcode imap_regular_transfer(struct Curl_easy *data,
-                                      struct IMAP *imap,
-                                      bool *done);
-static CURLcode imap_do(struct Curl_easy *data, bool *done);
-static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
-                          bool premature);
-static CURLcode imap_connect(struct Curl_easy *data, bool *done);
-static CURLcode imap_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead);
-static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done);
-static CURLcode imap_pollset(struct Curl_easy *data,
-                             struct easy_pollset *ps);
-static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done);
-static CURLcode imap_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-static char *imap_atom(const char *str, bool escape_only);
-static CURLcode imap_sendf(struct Curl_easy *data,
-                           struct imap_conn *imapc,
-                           const char *fmt, ...) CURL_PRINTF(3, 4);
-static CURLcode imap_parse_url_options(struct connectdata *conn,
-                                       struct imap_conn *imapc);
-static CURLcode imap_parse_url_path(struct Curl_easy *data,
-                                    struct IMAP *imap);
-static CURLcode imap_parse_custom_request(struct Curl_easy *data,
-                                          struct IMAP *imap);
-static CURLcode imap_perform_authenticate(struct Curl_easy *data,
-                                          const char *mech,
-                                          const struct bufref *initresp);
-static CURLcode imap_continue_authenticate(struct Curl_easy *data,
-                                           const char *mech,
-                                           const struct bufref *resp);
-static CURLcode imap_cancel_authenticate(struct Curl_easy *data,
-                                         const char *mech);
-static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out);
-static void imap_easy_reset(struct IMAP *imap);
-
 #define IMAP_RESP_OK       1
 #define IMAP_RESP_NOT_OK   2
 #define IMAP_RESP_PREAUTH  3
-
-/* SASL parameters for the imap protocol */
-static const struct SASLproto saslimap = {
-  "imap",                     /* The service name */
-  imap_perform_authenticate,  /* Send authentication command */
-  imap_continue_authenticate, /* Send authentication continuation */
-  imap_cancel_authenticate,   /* Send authentication cancellation */
-  imap_get_message,           /* Get SASL response message */
-  0,                          /* No maximum initial response length */
-  '+',                        /* Code received when continuation is expected */
-  IMAP_RESP_OK,               /* Code to receive upon authentication success */
-  SASL_AUTH_DEFAULT,          /* Default mechanisms */
-  SASL_FLAG_BASE64            /* Configuration flags */
-};
 
 struct ulbits {
   int bit;
   const char *flag;
 };
+
+/***********************************************************************
+ *
+ * imap_sendf()
+ *
+ * Sends the formatted string as an IMAP command to the server.
+ *
+ * Designed to never block.
+ */
+static CURLcode imap_sendf(struct Curl_easy *data,
+                           struct imap_conn *imapc,
+                           const char *fmt, ...)
+{
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(fmt);
+
+  /* Calculate the tag based on the connection ID and command ID */
+  curl_msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
+                 'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
+                 ++imapc->cmdid);
+
+  /* start with a blank buffer */
+  curlx_dyn_reset(&imapc->dyn);
+
+  /* append tag + space + fmt */
+  result = curlx_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
+  if(!result) {
+    va_list ap;
+    va_start(ap, fmt);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+    result = Curl_pp_vsendf(data, &imapc->pp, curlx_dyn_ptr(&imapc->dyn), ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+    va_end(ap);
+  }
+  return result;
+}
+
+/***********************************************************************
+ *
+ * imap_atom()
+ *
+ * Checks the input string for characters that need escaping and returns an
+ * atom ready for sending to the server.
+ *
+ * The returned string needs to be freed.
+ *
+ */
+static char *imap_atom(const char *str, bool escape_only)
+{
+  struct dynbuf line;
+  size_t nclean;
+  size_t len;
+
+  if(!str)
+    return NULL;
+
+  len = strlen(str);
+  nclean = strcspn(str, "() {%*]\\\"");
+  if(len == nclean)
+    /* nothing to escape, return a strdup */
+    return curlx_strdup(str);
+
+  curlx_dyn_init(&line, 2000);
+
+  if(!escape_only && curlx_dyn_addn(&line, "\"", 1))
+    return NULL;
+
+  while(*str) {
+    if((*str == '\\' || *str == '"') &&
+       curlx_dyn_addn(&line, "\\", 1))
+      return NULL;
+    if(curlx_dyn_addn(&line, str, 1))
+      return NULL;
+    str++;
+  }
+
+  if(!escape_only && curlx_dyn_addn(&line, "\"", 1))
+    return NULL;
+
+  return curlx_dyn_ptr(&line);
+}
 
 /***********************************************************************
  *
@@ -1587,6 +1623,290 @@ static CURLcode imap_pollset(struct Curl_easy *data,
   return imapc ? Curl_pp_pollset(data, &imapc->pp, ps) : CURLE_OK;
 }
 
+static void imap_easy_reset(struct IMAP *imap)
+{
+  Curl_safefree(imap->mailbox);
+  Curl_safefree(imap->uid);
+  Curl_safefree(imap->mindex);
+  Curl_safefree(imap->section);
+  Curl_safefree(imap->partial);
+  Curl_safefree(imap->query);
+  Curl_safefree(imap->custom);
+  Curl_safefree(imap->custom_params);
+  /* Clear the transfer mode for the next request */
+  imap->transfer = PPTRANSFER_BODY;
+}
+
+/***********************************************************************
+ *
+ * imap_is_bchar()
+ *
+ * Portable test of whether the specified char is a "bchar" as defined in the
+ * grammar of RFC-5092.
+ */
+static bool imap_is_bchar(char ch)
+{
+  /* Performing the alnum check with this macro is faster because of ASCII
+     arithmetic */
+  if(ISALNUM(ch))
+    return TRUE;
+
+  switch(ch) {
+  /* bchar */
+  case ':':
+  case '@':
+  case '/':
+  /* bchar -> achar */
+  case '&':
+  case '=':
+  /* bchar -> achar -> uchar -> unreserved (without alphanumeric) */
+  case '-':
+  case '.':
+  case '_':
+  case '~':
+  /* bchar -> achar -> uchar -> sub-delims-sh */
+  case '!':
+  case '$':
+  case '\'':
+  case '(':
+  case ')':
+  case '*':
+  case '+':
+  case ',':
+  /* bchar -> achar -> uchar -> pct-encoded */
+  case '%': /* HEXDIG chars are already included above */
+    return TRUE;
+
+  default:
+    return FALSE;
+  }
+}
+
+/***********************************************************************
+ *
+ * imap_parse_url_options()
+ *
+ * Parse the URL login options.
+ */
+static CURLcode imap_parse_url_options(struct connectdata *conn,
+                                       struct imap_conn *imapc)
+{
+  CURLcode result = CURLE_OK;
+  const char *ptr = conn->options;
+  bool prefer_login = FALSE;
+
+  while(!result && ptr && *ptr) {
+    const char *key = ptr;
+    const char *value;
+
+    while(*ptr && *ptr != '=')
+      ptr++;
+
+    value = ptr + 1;
+
+    while(*ptr && *ptr != ';')
+      ptr++;
+
+    if(curl_strnequal(key, "AUTH=+LOGIN", 11)) {
+      /* User prefers plaintext LOGIN over any SASL, including SASL LOGIN */
+      prefer_login = TRUE;
+      imapc->sasl.prefmech = SASL_AUTH_NONE;
+    }
+    else if(curl_strnequal(key, "AUTH=", 5)) {
+      prefer_login = FALSE;
+      result = Curl_sasl_parse_url_auth_option(&imapc->sasl,
+                                               value, ptr - value);
+    }
+    else {
+      prefer_login = FALSE;
+      result = CURLE_URL_MALFORMAT;
+    }
+
+    if(*ptr == ';')
+      ptr++;
+  }
+
+  if(prefer_login)
+    imapc->preftype = IMAP_TYPE_CLEARTEXT;
+  else {
+    switch(imapc->sasl.prefmech) {
+    case SASL_AUTH_NONE:
+      imapc->preftype = IMAP_TYPE_NONE;
+      break;
+    case SASL_AUTH_DEFAULT:
+      imapc->preftype = IMAP_TYPE_ANY;
+      break;
+    default:
+      imapc->preftype = IMAP_TYPE_SASL;
+      break;
+    }
+  }
+
+  return result;
+}
+
+/***********************************************************************
+ *
+ * imap_parse_url_path()
+ *
+ * Parse the URL path into separate path components.
+ *
+ */
+static CURLcode imap_parse_url_path(struct Curl_easy *data,
+                                    struct IMAP *imap)
+{
+  /* The imap struct is already initialised in imap_connect() */
+  CURLcode result = CURLE_OK;
+  const char *begin = &data->state.up.path[1]; /* skip leading slash */
+  const char *ptr = begin;
+
+  /* See how much of the URL is a valid path and decode it */
+  while(imap_is_bchar(*ptr))
+    ptr++;
+
+  if(ptr != begin) {
+    /* Remove the trailing slash if present */
+    const char *end = ptr;
+    if(end > begin && end[-1] == '/')
+      end--;
+
+    result = Curl_urldecode(begin, end - begin, &imap->mailbox, NULL,
+                            REJECT_CTRL);
+    if(result)
+      return result;
+  }
+  else
+    imap->mailbox = NULL;
+
+  /* There can be any number of parameters in the form ";NAME=VALUE" */
+  while(*ptr == ';') {
+    char *name;
+    char *value;
+    size_t valuelen;
+
+    /* Find the length of the name parameter */
+    begin = ++ptr;
+    while(*ptr && *ptr != '=')
+      ptr++;
+
+    if(!*ptr)
+      return CURLE_URL_MALFORMAT;
+
+    /* Decode the name parameter */
+    result = Curl_urldecode(begin, ptr - begin, &name, NULL,
+                            REJECT_CTRL);
+    if(result)
+      return result;
+
+    /* Find the length of the value parameter */
+    begin = ++ptr;
+    while(imap_is_bchar(*ptr))
+      ptr++;
+
+    /* Decode the value parameter */
+    result = Curl_urldecode(begin, ptr - begin, &value, &valuelen,
+                            REJECT_CTRL);
+    if(result) {
+      curlx_free(name);
+      return result;
+    }
+
+    DEBUGF(infof(data, "IMAP URL parameter '%s' = '%s'", name, value));
+
+    /* Process the known hierarchical parameters (UIDVALIDITY, UID, SECTION
+       and PARTIAL) stripping of the trailing slash character if it is
+       present.
+
+       Note: Unknown parameters trigger a URL_MALFORMAT error. */
+    if(valuelen > 0 && value[valuelen - 1] == '/')
+      value[valuelen - 1] = '\0';
+    if(valuelen) {
+      if(curl_strequal(name, "UIDVALIDITY") && !imap->uidvalidity_set) {
+        curl_off_t num;
+        const char *p = (const char *)value;
+        if(!curlx_str_number(&p, &num, UINT_MAX)) {
+          imap->uidvalidity = (unsigned int)num;
+          imap->uidvalidity_set = TRUE;
+        }
+        curlx_free(value);
+      }
+      else if(curl_strequal(name, "UID") && !imap->uid) {
+        imap->uid = value;
+      }
+      else if(curl_strequal(name, "MAILINDEX") && !imap->mindex) {
+        imap->mindex = value;
+      }
+      else if(curl_strequal(name, "SECTION") && !imap->section) {
+        imap->section = value;
+      }
+      else if(curl_strequal(name, "PARTIAL") && !imap->partial) {
+        imap->partial = value;
+      }
+      else {
+        curlx_free(name);
+        curlx_free(value);
+        return CURLE_URL_MALFORMAT;
+      }
+    }
+    else
+      /* blank? */
+      curlx_free(value);
+    curlx_free(name);
+  }
+
+  /* Does the URL contain a query parameter? Only valid when we have a mailbox
+     and no UID as per RFC-5092 */
+  if(imap->mailbox && !imap->uid && !imap->mindex) {
+    /* Get the query parameter, URL decoded */
+    CURLUcode uc = curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
+                                CURLU_URLDECODE);
+    if(uc == CURLUE_OUT_OF_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Any extra stuff at the end of the URL is an error */
+  if(*ptr)
+    return CURLE_URL_MALFORMAT;
+
+  return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * imap_parse_custom_request()
+ *
+ * Parse the custom request.
+ */
+static CURLcode imap_parse_custom_request(struct Curl_easy *data,
+                                          struct IMAP *imap)
+{
+  CURLcode result = CURLE_OK;
+  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+
+  if(custom) {
+    /* URL decode the custom request */
+    result = Curl_urldecode(custom, 0, &imap->custom, NULL, REJECT_CTRL);
+
+    /* Extract the parameters if specified */
+    if(!result) {
+      const char *params = imap->custom;
+
+      while(*params && *params != ' ')
+        params++;
+
+      if(*params) {
+        imap->custom_params = curlx_strdup(params);
+        imap->custom[params - imap->custom] = '\0';
+
+        if(!imap->custom_params)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+    }
+  }
+
+  return result;
+}
+
 /***********************************************************************
  *
  * imap_connect()
@@ -1874,20 +2194,6 @@ static CURLcode imap_regular_transfer(struct Curl_easy *data,
   return result;
 }
 
-static void imap_easy_reset(struct IMAP *imap)
-{
-  Curl_safefree(imap->mailbox);
-  Curl_safefree(imap->uid);
-  Curl_safefree(imap->mindex);
-  Curl_safefree(imap->section);
-  Curl_safefree(imap->partial);
-  Curl_safefree(imap->query);
-  Curl_safefree(imap->custom);
-  Curl_safefree(imap->custom_params);
-  /* Clear the transfer mode for the next request */
-  imap->transfer = PPTRANSFER_BODY;
-}
-
 static void imap_easy_dtor(void *key, size_t klen, void *entry)
 {
   struct IMAP *imap = entry;
@@ -1907,6 +2213,20 @@ static void imap_conn_dtor(void *key, size_t klen, void *entry)
   Curl_safefree(imapc->mailbox);
   curlx_free(imapc);
 }
+
+/* SASL parameters for the imap protocol */
+static const struct SASLproto saslimap = {
+  "imap",                     /* The service name */
+  imap_perform_authenticate,  /* Send authentication command */
+  imap_continue_authenticate, /* Send authentication continuation */
+  imap_cancel_authenticate,   /* Send authentication cancellation */
+  imap_get_message,           /* Get SASL response message */
+  0,                          /* No maximum initial response length */
+  '+',                        /* Code received when continuation is expected */
+  IMAP_RESP_OK,               /* Code to receive upon authentication success */
+  SASL_AUTH_DEFAULT,          /* Default mechanisms */
+  SASL_FLAG_BASE64            /* Configuration flags */
+};
 
 static CURLcode imap_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
@@ -1938,363 +2258,6 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
-}
-
-/***********************************************************************
- *
- * imap_sendf()
- *
- * Sends the formatted string as an IMAP command to the server.
- *
- * Designed to never block.
- */
-static CURLcode imap_sendf(struct Curl_easy *data,
-                           struct imap_conn *imapc,
-                           const char *fmt, ...)
-{
-  CURLcode result = CURLE_OK;
-
-  DEBUGASSERT(fmt);
-
-  /* Calculate the tag based on the connection ID and command ID */
-  curl_msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-                 'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
-                 ++imapc->cmdid);
-
-  /* start with a blank buffer */
-  curlx_dyn_reset(&imapc->dyn);
-
-  /* append tag + space + fmt */
-  result = curlx_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
-  if(!result) {
-    va_list ap;
-    va_start(ap, fmt);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-    result = Curl_pp_vsendf(data, &imapc->pp, curlx_dyn_ptr(&imapc->dyn), ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-    va_end(ap);
-  }
-  return result;
-}
-
-/***********************************************************************
- *
- * imap_atom()
- *
- * Checks the input string for characters that need escaping and returns an
- * atom ready for sending to the server.
- *
- * The returned string needs to be freed.
- *
- */
-static char *imap_atom(const char *str, bool escape_only)
-{
-  struct dynbuf line;
-  size_t nclean;
-  size_t len;
-
-  if(!str)
-    return NULL;
-
-  len = strlen(str);
-  nclean = strcspn(str, "() {%*]\\\"");
-  if(len == nclean)
-    /* nothing to escape, return a strdup */
-    return curlx_strdup(str);
-
-  curlx_dyn_init(&line, 2000);
-
-  if(!escape_only && curlx_dyn_addn(&line, "\"", 1))
-    return NULL;
-
-  while(*str) {
-    if((*str == '\\' || *str == '"') &&
-       curlx_dyn_addn(&line, "\\", 1))
-      return NULL;
-    if(curlx_dyn_addn(&line, str, 1))
-      return NULL;
-    str++;
-  }
-
-  if(!escape_only && curlx_dyn_addn(&line, "\"", 1))
-    return NULL;
-
-  return curlx_dyn_ptr(&line);
-}
-
-/***********************************************************************
- *
- * imap_is_bchar()
- *
- * Portable test of whether the specified char is a "bchar" as defined in the
- * grammar of RFC-5092.
- */
-static bool imap_is_bchar(char ch)
-{
-  /* Performing the alnum check with this macro is faster because of ASCII
-     arithmetic */
-  if(ISALNUM(ch))
-    return TRUE;
-
-  switch(ch) {
-  /* bchar */
-  case ':':
-  case '@':
-  case '/':
-  /* bchar -> achar */
-  case '&':
-  case '=':
-  /* bchar -> achar -> uchar -> unreserved (without alphanumeric) */
-  case '-':
-  case '.':
-  case '_':
-  case '~':
-  /* bchar -> achar -> uchar -> sub-delims-sh */
-  case '!':
-  case '$':
-  case '\'':
-  case '(':
-  case ')':
-  case '*':
-  case '+':
-  case ',':
-  /* bchar -> achar -> uchar -> pct-encoded */
-  case '%': /* HEXDIG chars are already included above */
-    return TRUE;
-
-  default:
-    return FALSE;
-  }
-}
-
-/***********************************************************************
- *
- * imap_parse_url_options()
- *
- * Parse the URL login options.
- */
-static CURLcode imap_parse_url_options(struct connectdata *conn,
-                                       struct imap_conn *imapc)
-{
-  CURLcode result = CURLE_OK;
-  const char *ptr = conn->options;
-  bool prefer_login = FALSE;
-
-  while(!result && ptr && *ptr) {
-    const char *key = ptr;
-    const char *value;
-
-    while(*ptr && *ptr != '=')
-      ptr++;
-
-    value = ptr + 1;
-
-    while(*ptr && *ptr != ';')
-      ptr++;
-
-    if(curl_strnequal(key, "AUTH=+LOGIN", 11)) {
-      /* User prefers plaintext LOGIN over any SASL, including SASL LOGIN */
-      prefer_login = TRUE;
-      imapc->sasl.prefmech = SASL_AUTH_NONE;
-    }
-    else if(curl_strnequal(key, "AUTH=", 5)) {
-      prefer_login = FALSE;
-      result = Curl_sasl_parse_url_auth_option(&imapc->sasl,
-                                               value, ptr - value);
-    }
-    else {
-      prefer_login = FALSE;
-      result = CURLE_URL_MALFORMAT;
-    }
-
-    if(*ptr == ';')
-      ptr++;
-  }
-
-  if(prefer_login)
-    imapc->preftype = IMAP_TYPE_CLEARTEXT;
-  else {
-    switch(imapc->sasl.prefmech) {
-    case SASL_AUTH_NONE:
-      imapc->preftype = IMAP_TYPE_NONE;
-      break;
-    case SASL_AUTH_DEFAULT:
-      imapc->preftype = IMAP_TYPE_ANY;
-      break;
-    default:
-      imapc->preftype = IMAP_TYPE_SASL;
-      break;
-    }
-  }
-
-  return result;
-}
-
-/***********************************************************************
- *
- * imap_parse_url_path()
- *
- * Parse the URL path into separate path components.
- *
- */
-static CURLcode imap_parse_url_path(struct Curl_easy *data,
-                                    struct IMAP *imap)
-{
-  /* The imap struct is already initialised in imap_connect() */
-  CURLcode result = CURLE_OK;
-  const char *begin = &data->state.up.path[1]; /* skip leading slash */
-  const char *ptr = begin;
-
-  /* See how much of the URL is a valid path and decode it */
-  while(imap_is_bchar(*ptr))
-    ptr++;
-
-  if(ptr != begin) {
-    /* Remove the trailing slash if present */
-    const char *end = ptr;
-    if(end > begin && end[-1] == '/')
-      end--;
-
-    result = Curl_urldecode(begin, end - begin, &imap->mailbox, NULL,
-                            REJECT_CTRL);
-    if(result)
-      return result;
-  }
-  else
-    imap->mailbox = NULL;
-
-  /* There can be any number of parameters in the form ";NAME=VALUE" */
-  while(*ptr == ';') {
-    char *name;
-    char *value;
-    size_t valuelen;
-
-    /* Find the length of the name parameter */
-    begin = ++ptr;
-    while(*ptr && *ptr != '=')
-      ptr++;
-
-    if(!*ptr)
-      return CURLE_URL_MALFORMAT;
-
-    /* Decode the name parameter */
-    result = Curl_urldecode(begin, ptr - begin, &name, NULL,
-                            REJECT_CTRL);
-    if(result)
-      return result;
-
-    /* Find the length of the value parameter */
-    begin = ++ptr;
-    while(imap_is_bchar(*ptr))
-      ptr++;
-
-    /* Decode the value parameter */
-    result = Curl_urldecode(begin, ptr - begin, &value, &valuelen,
-                            REJECT_CTRL);
-    if(result) {
-      curlx_free(name);
-      return result;
-    }
-
-    DEBUGF(infof(data, "IMAP URL parameter '%s' = '%s'", name, value));
-
-    /* Process the known hierarchical parameters (UIDVALIDITY, UID, SECTION
-       and PARTIAL) stripping of the trailing slash character if it is
-       present.
-
-       Note: Unknown parameters trigger a URL_MALFORMAT error. */
-    if(valuelen > 0 && value[valuelen - 1] == '/')
-      value[valuelen - 1] = '\0';
-    if(valuelen) {
-      if(curl_strequal(name, "UIDVALIDITY") && !imap->uidvalidity_set) {
-        curl_off_t num;
-        const char *p = (const char *)value;
-        if(!curlx_str_number(&p, &num, UINT_MAX)) {
-          imap->uidvalidity = (unsigned int)num;
-          imap->uidvalidity_set = TRUE;
-        }
-        curlx_free(value);
-      }
-      else if(curl_strequal(name, "UID") && !imap->uid) {
-        imap->uid = value;
-      }
-      else if(curl_strequal(name, "MAILINDEX") && !imap->mindex) {
-        imap->mindex = value;
-      }
-      else if(curl_strequal(name, "SECTION") && !imap->section) {
-        imap->section = value;
-      }
-      else if(curl_strequal(name, "PARTIAL") && !imap->partial) {
-        imap->partial = value;
-      }
-      else {
-        curlx_free(name);
-        curlx_free(value);
-        return CURLE_URL_MALFORMAT;
-      }
-    }
-    else
-      /* blank? */
-      curlx_free(value);
-    curlx_free(name);
-  }
-
-  /* Does the URL contain a query parameter? Only valid when we have a mailbox
-     and no UID as per RFC-5092 */
-  if(imap->mailbox && !imap->uid && !imap->mindex) {
-    /* Get the query parameter, URL decoded */
-    CURLUcode uc = curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
-                                CURLU_URLDECODE);
-    if(uc == CURLUE_OUT_OF_MEMORY)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
-  /* Any extra stuff at the end of the URL is an error */
-  if(*ptr)
-    return CURLE_URL_MALFORMAT;
-
-  return CURLE_OK;
-}
-
-/***********************************************************************
- *
- * imap_parse_custom_request()
- *
- * Parse the custom request.
- */
-static CURLcode imap_parse_custom_request(struct Curl_easy *data,
-                                          struct IMAP *imap)
-{
-  CURLcode result = CURLE_OK;
-  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
-
-  if(custom) {
-    /* URL decode the custom request */
-    result = Curl_urldecode(custom, 0, &imap->custom, NULL, REJECT_CTRL);
-
-    /* Extract the parameters if specified */
-    if(!result) {
-      const char *params = imap->custom;
-
-      while(*params && *params != ' ')
-        params++;
-
-      if(*params) {
-        imap->custom_params = curlx_strdup(params);
-        imap->custom[params - imap->custom] = '\0';
-
-        if(!imap->custom_params)
-          result = CURLE_OUT_OF_MEMORY;
-      }
-    }
-  }
-
-  return result;
 }
 
 /*
