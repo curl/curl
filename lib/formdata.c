@@ -840,8 +840,7 @@ CURLcode Curl_getformdata(CURL *data,
   return result;
 }
 
-#else
-/* if disabled */
+#else /* if disabled */
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                           struct curl_httppost **last_post, ...)
 {
