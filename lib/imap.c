@@ -156,6 +156,9 @@ struct ulbits {
  */
 static CURLcode imap_sendf(struct Curl_easy *data,
                            struct imap_conn *imapc,
+                           const char *fmt, ...) CURL_PRINTF(3, 0);
+static CURLcode imap_sendf(struct Curl_easy *data,
+                           struct imap_conn *imapc,
                            const char *fmt, ...)
 {
   CURLcode result = CURLE_OK;
@@ -175,14 +178,7 @@ static CURLcode imap_sendf(struct Curl_easy *data,
   if(!result) {
     va_list ap;
     va_start(ap, fmt);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
     result = Curl_pp_vsendf(data, &imapc->pp, curlx_dyn_ptr(&imapc->dyn), ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
     va_end(ap);
   }
   return result;
