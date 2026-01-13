@@ -598,6 +598,15 @@ if test "$compiler_id" = "INTEL_UNIX_C"; then
   #
 fi
 
+case $host in
+  *msdosdjgpp)
+    if test "$compiler_num" -ge "1000"; then
+      dnl Avoid warnings in DJGPP's built-in FD_SET() macro
+      CFLAGS="$CFLAGS -Wno-arith-conversion"
+    fi
+    ;;
+esac
+
 CURL_CFLAG_EXTRAS=""
 if test "$want_werror" = "yes"; then
   CURL_CFLAG_EXTRAS="-Werror"
