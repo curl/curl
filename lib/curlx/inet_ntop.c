@@ -166,7 +166,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
       static const unsigned char ldigits[] = "0123456789abcdef";
 
       unsigned int w = words[i];
-      /* output lowercase 16bit hex number but ignore leading zeroes */
+      /* output lowercase 16-bit hex number but ignore leading zeroes */
       if(w & 0xf000)
         *tp++ = ldigits[(w & 0xf000) >> 12];
       if(w & 0xff00)

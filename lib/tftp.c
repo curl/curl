@@ -340,7 +340,7 @@ static CURLcode tftp_option_add(struct tftp_conn *state, size_t *csize,
   return CURLE_OK;
 }
 
-/* the next blocknum is x + 1 but it needs to wrap at an unsigned 16bit
+/* the next blocknum is x + 1 but it needs to wrap at an unsigned 16-bit
    boundary */
 #define NEXT_BLOCKNUM(x) (((x) + 1) & 0xffff)
 

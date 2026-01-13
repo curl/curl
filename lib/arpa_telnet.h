@@ -27,7 +27,7 @@
 /*
  * Telnet option defines. Add more here if in need.
  */
-#define CURL_TELOPT_BINARY   0  /* binary 8bit data */
+#define CURL_TELOPT_BINARY   0  /* binary 8-bit data */
 #define CURL_TELOPT_ECHO     1  /* just echo! */
 #define CURL_TELOPT_SGA      3  /* Suppress Go Ahead */
 #define CURL_TELOPT_EXOPL  255  /* EXtended OPtions List */
