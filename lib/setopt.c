@@ -1781,34 +1781,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
       return Curl_setstropt(&s->str[STRING_SSL_PINNEDPUBLICKEY_PROXY], ptr);
 #endif
     return CURLE_NOT_BUILT_IN;
-#endif
-  case CURLOPT_CAINFO:
-    /*
-     * Set CA info for SSL connection. Specify filename of the CA certificate
-     */
-    s->ssl.custom_cafile = TRUE;
-    return Curl_setstropt(&s->str[STRING_SSL_CAFILE], ptr);
-  case CURLOPT_CAPATH:
-    /*
-     * Set CA path info for SSL connection. Specify directory name of the CA
-     * certificates which have been prepared using openssl c_rehash utility.
-     */
-#ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
-      /* This does not work on Windows. */
-      s->ssl.custom_capath = TRUE;
-      return Curl_setstropt(&s->str[STRING_SSL_CAPATH], ptr);
-    }
-#endif
-    return CURLE_NOT_BUILT_IN;
-  case CURLOPT_CRLFILE:
-    /*
-     * Set CRL file info for SSL connection. Specify filename of the CRL
-     * to check certificates revocation
-     */
-    return Curl_setstropt(&s->str[STRING_SSL_CRLFILE], ptr);
 
-#ifndef CURL_DISABLE_PROXY
   case CURLOPT_HAPROXY_CLIENT_IP:
     /*
      * Set the client IP to send through HAProxy PROXY protocol
@@ -1870,6 +1843,31 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
   result = CURLE_OK;
 
   switch(option) {
+  case CURLOPT_CAINFO:
+    /*
+     * Set CA info for SSL connection. Specify filename of the CA certificate
+     */
+    s->ssl.custom_cafile = TRUE;
+    return Curl_setstropt(&s->str[STRING_SSL_CAFILE], ptr);
+  case CURLOPT_CAPATH:
+    /*
+     * Set CA path info for SSL connection. Specify directory name of the CA
+     * certificates which have been prepared using openssl c_rehash utility.
+     */
+#ifdef USE_SSL
+    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
+      /* This does not work on Windows. */
+      s->ssl.custom_capath = TRUE;
+      return Curl_setstropt(&s->str[STRING_SSL_CAPATH], ptr);
+    }
+#endif
+    return CURLE_NOT_BUILT_IN;
+  case CURLOPT_CRLFILE:
+    /*
+     * Set CRL file info for SSL connection. Specify filename of the CRL
+     * to check certificates revocation
+     */
+    return Curl_setstropt(&s->str[STRING_SSL_CRLFILE], ptr);
   case CURLOPT_SSL_CIPHER_LIST:
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
       /* set a list of cipher we want to use in the SSL connection */
