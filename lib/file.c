@@ -204,7 +204,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     return CURLE_URL_MALFORMAT;
   }
 
-  #ifdef AMIGA_FILESYSTEM
+#ifdef AMIGA_FILESYSTEM
   /*
    * A leading slash in an AmigaDOS path denotes the parent
    * directory, and hence we block this as it is relative.
@@ -227,10 +227,10 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       fd = curlx_open(real_path, O_RDONLY);
     }
   }
-  #else
+#else
   fd = curlx_open(real_path, O_RDONLY);
   file->path = real_path;
-  #endif
+#endif
 #endif
   curlx_free(file->freepath);
   file->freepath = real_path; /* free this when done */

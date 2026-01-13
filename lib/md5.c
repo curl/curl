@@ -30,28 +30,28 @@
 #include "curl_hmac.h"
 
 #ifdef USE_OPENSSL
-  #include <openssl/opensslconf.h>
-  #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-    #define USE_OPENSSL_MD5
-  #endif
+#include <openssl/opensslconf.h>
+#if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
+#define USE_OPENSSL_MD5
+#endif
 #endif
 
 #ifdef USE_WOLFSSL
-  #include <wolfssl/options.h>
-  #ifndef NO_MD5
-    #define USE_WOLFSSL_MD5
-  #endif
+#include <wolfssl/options.h>
+#ifndef NO_MD5
+#define USE_WOLFSSL_MD5
+#endif
 #endif
 
 #ifdef USE_MBEDTLS
-  #include <mbedtls/version.h>
-  #if MBEDTLS_VERSION_NUMBER < 0x03020000
-    #error "mbedTLS 3.2.0 or later required"
-  #endif
-  #include <psa/crypto_config.h>
-  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
-    #define USE_MBEDTLS_MD5
-  #endif
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+#error "mbedTLS 3.2.0 or later required"
+#endif
+#include <psa/crypto_config.h>
+#if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+#define USE_MBEDTLS_MD5
+#endif
 #endif
 
 #ifdef USE_GNUTLS
