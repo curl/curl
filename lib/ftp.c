@@ -199,11 +199,22 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
                             struct ftp_conn *ftpc,
                             struct FTP *ftp,
                             bool ascii, ftpstate newstate);
-static int ftp_need_type(struct ftp_conn *ftpc, bool ascii);
 static CURLcode ftp_state_retr(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp,
                                curl_off_t filesize);
+
+/***********************************************************************
+ *
+ * ftp_need_type()
+ *
+ * Returns TRUE if we in the current situation should send TYPE
+ */
+static int ftp_need_type(struct ftp_conn *ftpc,
+                         bool ascii_wanted)
+{
+  return ftpc->transfertype != (ascii_wanted ? 'A' : 'I');
+}
 
 static void close_secondarysocket(struct Curl_easy *data,
                                   struct ftp_conn *ftpc)
@@ -3554,18 +3565,6 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     result = ftp_sendquote(data, ftpc, data->set.postquote);
   CURL_TRC_FTP(data, "[%s] done, result=%d", FTP_CSTATE(ftpc), result);
   return result;
-}
-
-/***********************************************************************
- *
- * ftp_need_type()
- *
- * Returns TRUE if we in the current situation should send TYPE
- */
-static int ftp_need_type(struct ftp_conn *ftpc,
-                         bool ascii_wanted)
-{
-  return ftpc->transfertype != (ascii_wanted ? 'A' : 'I');
 }
 
 /***********************************************************************
