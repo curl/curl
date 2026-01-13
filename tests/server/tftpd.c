@@ -208,12 +208,6 @@ static sigjmp_buf timeoutbuf;
 #endif
 
 /*****************************************************************************
- *                            FUNCTION PROTOTYPES                            *
- *****************************************************************************/
-
-static ssize_t write_behind(struct testcase *test, int convert);
-
-/*****************************************************************************
  *                          FUNCTION IMPLEMENTATIONS                         *
  *****************************************************************************/
 
@@ -403,21 +397,6 @@ static int readit(struct testcase *test, struct tftphdr * volatile *dpp,
   return b->counter;
 }
 
-/* Update count associated with the buffer, get new buffer from the queue.
-   Calls write_behind only if next buffer not available.
- */
-static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
-                   int ct, int convert)
-{
-  bfs[current].counter = ct;      /* set size of data to write */
-  current = !current;             /* switch to other buffer */
-  if(bfs[current].counter != BF_FREE)     /* if not free */
-    write_behind(test, convert);          /* flush it */
-  bfs[current].counter = BF_ALLOC;        /* mark as allocated */
-  *dpp = &bfs[current].buf.hdr;
-  return ct;                      /* this is a lie of course */
-}
-
 /*
  * Output a buffer to a file, converting from netascii if requested.
  * CR, NUL -> CR  and CR, LF => LF.
@@ -490,6 +469,21 @@ skipit:
     prevchar = c;
   }
   return count;
+}
+
+/* Update count associated with the buffer, get new buffer from the queue.
+   Calls write_behind only if next buffer not available.
+ */
+static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
+                   int ct, int convert)
+{
+  bfs[current].counter = ct;      /* set size of data to write */
+  current = !current;             /* switch to other buffer */
+  if(bfs[current].counter != BF_FREE)     /* if not free */
+    write_behind(test, convert);          /* flush it */
+  bfs[current].counter = BF_ALLOC;        /* mark as allocated */
+  *dpp = &bfs[current].buf.hdr;
+  return ct;                      /* this is a lie of course */
 }
 
 /* When an error has occurred, it is possible that the two sides are out of
