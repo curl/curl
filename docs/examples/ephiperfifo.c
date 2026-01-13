@@ -171,6 +171,8 @@ static void timer_cb(struct GlobalInfo *g, int revents)
   uint64_t count = 0;
   ssize_t err = 0;
 
+  (void)revents;
+
   err = read(g->tfd, &count, sizeof(uint64_t));
   if(err == -1) {
     /* Note that we may call the timer callback even if the timerfd is not
@@ -200,6 +202,8 @@ static void timer_cb(struct GlobalInfo *g, int revents)
 static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
 {
   struct itimerspec its;
+
+  (void)multi;
 
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
@@ -385,6 +389,8 @@ static void fifo_cb(struct GlobalInfo *g, int revents)
   char s[1024];
   long int rv = 0;
   int n = 0;
+
+  (void)revents;
 
   do {
     s[0] = '\0';
