@@ -406,14 +406,86 @@ static CURLcode oldap_perform_sasl(struct Curl_easy *data)
 }
 
 #ifdef USE_SSL
-static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg);
-static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod);
-static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg);
+static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg)
+{
+  sbiod->sbiod_pvt = arg;
+  return 0;
+}
+
+static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
+{
+  sbiod->sbiod_pvt = NULL;
+  return 0;
+}
+
+/* We do not need to do anything because libcurl does it already */
+static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
+{
+  (void)sbiod;
+  return 0;
+}
+
+static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
+{
+  (void)arg;
+  if(opt == LBER_SB_OPT_DATA_READY) {
+    struct Curl_easy *data = sbiod->sbiod_pvt;
+    return Curl_conn_data_pending(data, FIRSTSOCKET);
+  }
+  return 0;
+}
+
 static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
-                                  ber_len_t len);
+                                  ber_len_t len)
+{
+  struct Curl_easy *data = sbiod->sbiod_pvt;
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
+      CURLcode err = CURLE_RECV_ERROR;
+      size_t nread;
+
+      if(!li) {
+        SET_SOCKERRNO(SOCKEINVAL);
+        return -1;
+      }
+      err = (li->recv)(data, FIRSTSOCKET, buf, len, &nread);
+      if(err == CURLE_AGAIN) {
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
+      }
+      ret = err ? -1 : (ber_slen_t)nread;
+    }
+  }
+  return ret;
+}
+
 static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
-                                   ber_len_t len);
-static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod);
+                                   ber_len_t len)
+{
+  struct Curl_easy *data = sbiod->sbiod_pvt;
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
+      CURLcode err = CURLE_SEND_ERROR;
+      size_t nwritten;
+
+      if(!li) {
+        SET_SOCKERRNO(SOCKEINVAL);
+        return -1;
+      }
+      err = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
+      if(err == CURLE_AGAIN) {
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
+      }
+      ret = err ? -1 : (ber_slen_t)nwritten;
+    }
+  }
+  return ret;
+}
 
 static Sockbuf_IO ldapsb_tls = {
   ldapsb_tls_setup,
@@ -1165,88 +1237,6 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   ldap_msgfree(msg);
   return result;
 }
-
-#ifdef USE_SSL
-static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg)
-{
-  sbiod->sbiod_pvt = arg;
-  return 0;
-}
-
-static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
-{
-  sbiod->sbiod_pvt = NULL;
-  return 0;
-}
-
-/* We do not need to do anything because libcurl does it already */
-static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
-{
-  (void)sbiod;
-  return 0;
-}
-
-static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
-{
-  (void)arg;
-  if(opt == LBER_SB_OPT_DATA_READY) {
-    struct Curl_easy *data = sbiod->sbiod_pvt;
-    return Curl_conn_data_pending(data, FIRSTSOCKET);
-  }
-  return 0;
-}
-
-static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
-                                  ber_len_t len)
-{
-  struct Curl_easy *data = sbiod->sbiod_pvt;
-  ber_slen_t ret = 0;
-  if(data) {
-    struct connectdata *conn = data->conn;
-    if(conn) {
-      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-      CURLcode err = CURLE_RECV_ERROR;
-      size_t nread;
-
-      if(!li) {
-        SET_SOCKERRNO(SOCKEINVAL);
-        return -1;
-      }
-      err = (li->recv)(data, FIRSTSOCKET, buf, len, &nread);
-      if(err == CURLE_AGAIN) {
-        SET_SOCKERRNO(SOCKEWOULDBLOCK);
-      }
-      ret = err ? -1 : (ber_slen_t)nread;
-    }
-  }
-  return ret;
-}
-static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
-                                   ber_len_t len)
-{
-  struct Curl_easy *data = sbiod->sbiod_pvt;
-  ber_slen_t ret = 0;
-  if(data) {
-    struct connectdata *conn = data->conn;
-    if(conn) {
-      struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-      CURLcode err = CURLE_SEND_ERROR;
-      size_t nwritten;
-
-      if(!li) {
-        SET_SOCKERRNO(SOCKEINVAL);
-        return -1;
-      }
-      err = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
-      if(err == CURLE_AGAIN) {
-        SET_SOCKERRNO(SOCKEWOULDBLOCK);
-      }
-      ret = err ? -1 : (ber_slen_t)nwritten;
-    }
-  }
-  return ret;
-}
-#endif /* USE_SSL */
 
 void Curl_ldap_version(char *buf, size_t bufsz)
 {
