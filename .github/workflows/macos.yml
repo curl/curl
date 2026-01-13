@@ -303,9 +303,9 @@ jobs:
             compiler: clang
             install: libressl krb5 openldap
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
-          - name: 'wolfSSL !ldap brotli zstd'
+          - name: 'wolfSSL brotli zstd'
             compiler: clang
-            install: brotli wolfssl zstd
+            install: brotli wolfssl zstd openldap
             install_steps: pytest
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
           - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
