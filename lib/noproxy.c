@@ -57,6 +57,9 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
   if(curlx_inet_pton(AF_INET, network, &check) != 1)
     return FALSE;
 
+  if(!bits)
+    return TRUE; /* /0 means all addresses match */
+
   if(bits && (bits != 32)) {
     unsigned int mask = 0xffffffff << (32 - bits);
     unsigned int haddr = htonl(address);
