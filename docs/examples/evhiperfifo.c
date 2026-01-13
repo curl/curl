@@ -144,6 +144,30 @@ static void mcode_or_die(const char *where, CURLMcode code)
   }
 }
 
+/* Check for completed transfers, and remove their easy handles */
+static void check_multi_info(struct GlobalInfo *g)
+{
+  char *eff_url;
+  CURLMsg *msg;
+  int msgs_left;
+  struct ConnInfo *conn;
+
+  fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
+  while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
+    if(msg->msg == CURLMSG_DONE) {
+      CURL *curl = msg->easy_handle;
+      CURLcode result = msg->data.result;
+      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
+      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, result, conn->error);
+      curl_multi_remove_handle(g->multi, curl);
+      free(conn->url);
+      curl_easy_cleanup(curl);
+      free(conn);
+    }
+  }
+}
+
 /* Called by libevent when our timeout expires */
 static void timer_cb(EV_P_ struct ev_timer *w, int revents)
 {
@@ -173,30 +197,6 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
     ev_timer_start(g->loop, &g->timer_event);
   }
   return 0;
-}
-
-/* Check for completed transfers, and remove their easy handles */
-static void check_multi_info(struct GlobalInfo *g)
-{
-  char *eff_url;
-  CURLMsg *msg;
-  int msgs_left;
-  struct ConnInfo *conn;
-
-  fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
-  while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
-    if(msg->msg == CURLMSG_DONE) {
-      CURL *curl = msg->easy_handle;
-      CURLcode result = msg->data.result;
-      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
-      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
-      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, result, conn->error);
-      curl_multi_remove_handle(g->multi, curl);
-      free(conn->url);
-      curl_easy_cleanup(curl);
-      free(conn);
-    }
-  }
 }
 
 /* Called by libevent when we get action on a multi socket */
