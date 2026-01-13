@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket API usage with epoll and timerfd
+ * multi socket interface together with epoll and timerfd
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
@@ -188,8 +188,8 @@ static void timer_cb(struct GlobalInfo *g, int revents)
     perror("read(tfd)");
   }
 
-  mresult = curl_multi_socket_action(g->multi,
-                                CURL_SOCKET_TIMEOUT, 0, &g->still_running);
+  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
+                                     &g->still_running);
   mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
 }
@@ -233,7 +233,7 @@ static void event_cb(struct GlobalInfo *g, int fd, int revents)
   struct itimerspec its;
 
   int action = ((revents & EPOLLIN) ? CURL_CSELECT_IN : 0) |
-    ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
+               ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
 
   mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", mresult);
@@ -399,10 +399,10 @@ static void fifo_cb(struct GlobalInfo *g, int revents)
 }
 
 /* Create a named pipe and tell libevent to monitor it */
-static const char *fifo = "hiper.fifo";
 static int init_fifo(struct GlobalInfo *g)
 {
   struct stat st;
+  static const char *fifo = "hiper.fifo";
   curl_socket_t sockfd;
   struct epoll_event epev;
 
