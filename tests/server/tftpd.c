@@ -211,7 +211,6 @@ static sigjmp_buf timeoutbuf;
  *                            FUNCTION PROTOTYPES                            *
  *****************************************************************************/
 
-static void read_ahead(struct testcase *test, int convert);
 static ssize_t write_behind(struct testcase *test, int convert);
 
 /*****************************************************************************
@@ -324,25 +323,6 @@ static struct tftphdr *r_init(void)
   return rw_init(1); /* read-ahead */
 }
 
-/* Have emptied current buffer by sending to net and getting ack.
-   Free it and return next buffer filled with data.
- */
-static int readit(struct testcase *test, struct tftphdr * volatile *dpp,
-                  int convert /* if true, convert to ASCII */)
-{
-  struct bf *b;
-
-  bfs[current].counter = BF_FREE; /* free old one */
-  current = !current;             /* "incr" current */
-
-  b = &bfs[current];              /* look at new buffer */
-  if(b->counter == BF_FREE)       /* if empty */
-    read_ahead(test, convert);    /* fill it */
-
-  *dpp = &b->buf.hdr;             /* set caller's ptr */
-  return b->counter;
-}
-
 /*
  * fill the input buffer, doing ASCII conversions if requested
  * conversions are  lf -> cr, lf  and cr -> cr, nul
@@ -402,6 +382,25 @@ static void read_ahead(struct testcase *test,
     *p++ = (char)c;
   }
   b->counter = (int)(p - dp->th_data);
+}
+
+/* Have emptied current buffer by sending to net and getting ack.
+   Free it and return next buffer filled with data.
+ */
+static int readit(struct testcase *test, struct tftphdr * volatile *dpp,
+                  int convert /* if true, convert to ASCII */)
+{
+  struct bf *b;
+
+  bfs[current].counter = BF_FREE; /* free old one */
+  current = !current;             /* "incr" current */
+
+  b = &bfs[current];              /* look at new buffer */
+  if(b->counter == BF_FREE)       /* if empty */
+    read_ahead(test, convert);    /* fill it */
+
+  *dpp = &b->buf.hdr;             /* set caller's ptr */
+  return b->counter;
 }
 
 /* Update count associated with the buffer, get new buffer from the queue.
