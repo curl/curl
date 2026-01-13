@@ -111,14 +111,7 @@ void logmsg(const char *msg, ...)
            now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
 
   va_start(ap, msg);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
   vsnprintf(buffer, sizeof(buffer), msg, ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
   va_end(ap);
 
   do {
