@@ -36,8 +36,6 @@
 #include "tool_libinfo.h"
 #include "tool_strdup.h"
 
-static char *parse_filename(const char *ptr, size_t len);
-
 #ifdef _WIN32
 #define BOLD    "\x1b[1m"
 #define BOLDOFF "\x1b[22m"
@@ -57,6 +55,82 @@ static char *parse_filename(const char *ptr, size_t len);
 static void write_linked_location(CURL *curl, const char *location,
                                   size_t loclen, FILE *stream);
 #endif
+
+/*
+ * Copies a filename part and returns an ALLOCATED data buffer.
+ */
+static char *parse_filename(const char *ptr, size_t len)
+{
+  char *copy;
+  char *p;
+  char *q;
+  char stop = '\0';
+
+  copy = memdup0(ptr, len);
+  if(!copy)
+    return NULL;
+
+  p = copy;
+  if(*p == '\'' || *p == '"') {
+    /* store the starting quote */
+    stop = *p;
+    p++;
+  }
+  else
+    stop = ';';
+
+  /* scan for the end letter and stop there */
+  q = strchr(p, stop);
+  if(q)
+    *q = '\0';
+
+  /* if the filename contains a path, only use filename portion */
+  q = strrchr(p, '/');
+  if(q) {
+    p = q + 1;
+    if(!*p) {
+      tool_safefree(copy);
+      return NULL;
+    }
+  }
+
+  /* If the filename contains a backslash, only use filename portion. The idea
+     is that even systems that do not handle backslashes as path separators
+     probably want the path removed for convenience. */
+  q = strrchr(p, '\\');
+  if(q) {
+    p = q + 1;
+    if(!*p) {
+      tool_safefree(copy);
+      return NULL;
+    }
+  }
+
+  /* make sure the filename does not end in \r or \n */
+  q = strchr(p, '\r');
+  if(q)
+    *q = '\0';
+
+  q = strchr(p, '\n');
+  if(q)
+    *q = '\0';
+
+  if(copy != p)
+    memmove(copy, p, strlen(p) + 1);
+
+#if defined(_WIN32) || defined(MSDOS)
+  {
+    char *sanitized;
+    SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
+    tool_safefree(copy);
+    if(sc)
+      return NULL;
+    copy = sanitized;
+  }
+#endif /* _WIN32 || MSDOS */
+
+  return copy;
+}
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
 {
@@ -309,82 +383,6 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       fwrite(ptr, cb, 1, outs->stream);
   }
   return cb;
-}
-
-/*
- * Copies a filename part and returns an ALLOCATED data buffer.
- */
-static char *parse_filename(const char *ptr, size_t len)
-{
-  char *copy;
-  char *p;
-  char *q;
-  char stop = '\0';
-
-  copy = memdup0(ptr, len);
-  if(!copy)
-    return NULL;
-
-  p = copy;
-  if(*p == '\'' || *p == '"') {
-    /* store the starting quote */
-    stop = *p;
-    p++;
-  }
-  else
-    stop = ';';
-
-  /* scan for the end letter and stop there */
-  q = strchr(p, stop);
-  if(q)
-    *q = '\0';
-
-  /* if the filename contains a path, only use filename portion */
-  q = strrchr(p, '/');
-  if(q) {
-    p = q + 1;
-    if(!*p) {
-      tool_safefree(copy);
-      return NULL;
-    }
-  }
-
-  /* If the filename contains a backslash, only use filename portion. The idea
-     is that even systems that do not handle backslashes as path separators
-     probably want the path removed for convenience. */
-  q = strrchr(p, '\\');
-  if(q) {
-    p = q + 1;
-    if(!*p) {
-      tool_safefree(copy);
-      return NULL;
-    }
-  }
-
-  /* make sure the filename does not end in \r or \n */
-  q = strchr(p, '\r');
-  if(q)
-    *q = '\0';
-
-  q = strchr(p, '\n');
-  if(q)
-    *q = '\0';
-
-  if(copy != p)
-    memmove(copy, p, strlen(p) + 1);
-
-#if defined(_WIN32) || defined(MSDOS)
-  {
-    char *sanitized;
-    SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
-    tool_safefree(copy);
-    if(sc)
-      return NULL;
-    copy = sanitized;
-  }
-#endif /* _WIN32 || MSDOS */
-
-  return copy;
 }
 
 #ifdef LINK
