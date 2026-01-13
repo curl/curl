@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket API usage together with glib2
+ * multi socket API usage with glib2
  * </DESC>
  */
 /* Example application source code using the multi socket interface to

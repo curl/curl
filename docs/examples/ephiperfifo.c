@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket interface together with epoll and timerfd
+ * multi socket interface with epoll and timerfd
  * </DESC>
  */
 /* Example application source code using the multi socket interface to

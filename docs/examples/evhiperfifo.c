@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket interface together with libev
+ * multi socket interface with libev
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
