@@ -30,7 +30,6 @@
 #endif
 
 #ifdef _WIN32
-#  include <stdlib.h>
 #  include <tlhelp32.h>
 #endif
 
