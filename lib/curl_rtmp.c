@@ -47,171 +47,8 @@
 /* meta key for storing RTMP* at connection */
 #define CURL_META_RTMP_CONN   "meta:proto:rtmp:conn"
 
-
-static CURLcode rtmp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-static CURLcode rtmp_do(struct Curl_easy *data, bool *done);
-static CURLcode rtmp_done(struct Curl_easy *data, CURLcode, bool premature);
-static CURLcode rtmp_connect(struct Curl_easy *data, bool *done);
-static CURLcode rtmp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead);
-
 static Curl_recv rtmp_recv;
 static Curl_send rtmp_send;
-
-/*
- * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu/
- */
-
-const struct Curl_handler Curl_handler_rtmp = {
-  "rtmp",                               /* scheme */
-  rtmp_setup_connection,                /* setup_connection */
-  rtmp_do,                              /* do_it */
-  rtmp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtmp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  rtmp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_RTMP,                            /* defport */
-  CURLPROTO_RTMP,                       /* protocol */
-  CURLPROTO_RTMP,                       /* family */
-  PROTOPT_NONE                          /* flags */
-};
-
-const struct Curl_handler Curl_handler_rtmpt = {
-  "rtmpt",                              /* scheme */
-  rtmp_setup_connection,                /* setup_connection */
-  rtmp_do,                              /* do_it */
-  rtmp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtmp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  rtmp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_RTMPT,                           /* defport */
-  CURLPROTO_RTMPT,                      /* protocol */
-  CURLPROTO_RTMPT,                      /* family */
-  PROTOPT_NONE                          /* flags */
-};
-
-const struct Curl_handler Curl_handler_rtmpe = {
-  "rtmpe",                              /* scheme */
-  rtmp_setup_connection,                /* setup_connection */
-  rtmp_do,                              /* do_it */
-  rtmp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtmp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  rtmp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_RTMP,                            /* defport */
-  CURLPROTO_RTMPE,                      /* protocol */
-  CURLPROTO_RTMPE,                      /* family */
-  PROTOPT_NONE                          /* flags */
-};
-
-const struct Curl_handler Curl_handler_rtmpte = {
-  "rtmpte",                             /* scheme */
-  rtmp_setup_connection,                /* setup_connection */
-  rtmp_do,                              /* do_it */
-  rtmp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtmp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  rtmp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_RTMPT,                           /* defport */
-  CURLPROTO_RTMPTE,                     /* protocol */
-  CURLPROTO_RTMPTE,                     /* family */
-  PROTOPT_NONE                          /* flags */
-};
-
-const struct Curl_handler Curl_handler_rtmps = {
-  "rtmps",                              /* scheme */
-  rtmp_setup_connection,                /* setup_connection */
-  rtmp_do,                              /* do_it */
-  rtmp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtmp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  rtmp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_RTMPS,                           /* defport */
-  CURLPROTO_RTMPS,                      /* protocol */
-  CURLPROTO_RTMP,                       /* family */
-  PROTOPT_NONE                          /* flags */
-};
-
-const struct Curl_handler Curl_handler_rtmpts = {
-  "rtmpts",                             /* scheme */
-  rtmp_setup_connection,                /* setup_connection */
-  rtmp_do,                              /* do_it */
-  rtmp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtmp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  rtmp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_RTMPS,                           /* defport */
-  CURLPROTO_RTMPTS,                     /* protocol */
-  CURLPROTO_RTMPT,                      /* family */
-  PROTOPT_NONE                          /* flags */
-};
 
 static void rtmp_conn_dtor(void *key, size_t klen, void *entry)
 {
@@ -382,5 +219,159 @@ void Curl_rtmp_version(char *version, size_t len)
                  RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
                  suff);
 }
+
+/*
+ * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu/
+ */
+
+const struct Curl_handler Curl_handler_rtmp = {
+  "rtmp",                               /* scheme */
+  rtmp_setup_connection,                /* setup_connection */
+  rtmp_do,                              /* do_it */
+  rtmp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  rtmp_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_RTMP,                            /* defport */
+  CURLPROTO_RTMP,                       /* protocol */
+  CURLPROTO_RTMP,                       /* family */
+  PROTOPT_NONE                          /* flags */
+};
+
+const struct Curl_handler Curl_handler_rtmpt = {
+  "rtmpt",                              /* scheme */
+  rtmp_setup_connection,                /* setup_connection */
+  rtmp_do,                              /* do_it */
+  rtmp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  rtmp_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_RTMPT,                           /* defport */
+  CURLPROTO_RTMPT,                      /* protocol */
+  CURLPROTO_RTMPT,                      /* family */
+  PROTOPT_NONE                          /* flags */
+};
+
+const struct Curl_handler Curl_handler_rtmpe = {
+  "rtmpe",                              /* scheme */
+  rtmp_setup_connection,                /* setup_connection */
+  rtmp_do,                              /* do_it */
+  rtmp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  rtmp_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_RTMP,                            /* defport */
+  CURLPROTO_RTMPE,                      /* protocol */
+  CURLPROTO_RTMPE,                      /* family */
+  PROTOPT_NONE                          /* flags */
+};
+
+const struct Curl_handler Curl_handler_rtmpte = {
+  "rtmpte",                             /* scheme */
+  rtmp_setup_connection,                /* setup_connection */
+  rtmp_do,                              /* do_it */
+  rtmp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  rtmp_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_RTMPT,                           /* defport */
+  CURLPROTO_RTMPTE,                     /* protocol */
+  CURLPROTO_RTMPTE,                     /* family */
+  PROTOPT_NONE                          /* flags */
+};
+
+const struct Curl_handler Curl_handler_rtmps = {
+  "rtmps",                              /* scheme */
+  rtmp_setup_connection,                /* setup_connection */
+  rtmp_do,                              /* do_it */
+  rtmp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  rtmp_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_RTMPS,                           /* defport */
+  CURLPROTO_RTMPS,                      /* protocol */
+  CURLPROTO_RTMP,                       /* family */
+  PROTOPT_NONE                          /* flags */
+};
+
+const struct Curl_handler Curl_handler_rtmpts = {
+  "rtmpts",                             /* scheme */
+  rtmp_setup_connection,                /* setup_connection */
+  rtmp_do,                              /* do_it */
+  rtmp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  rtmp_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_RTMPS,                           /* defport */
+  CURLPROTO_RTMPTS,                     /* protocol */
+  CURLPROTO_RTMPT,                      /* family */
+  PROTOPT_NONE                          /* flags */
+};
 
 #endif /* USE_LIBRTMP */

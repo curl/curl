@@ -73,13 +73,6 @@ struct RTSP {
 #define RTP_PKT_LENGTH(p) ((((unsigned int)((unsigned char)((p)[2]))) << 8) | \
                             ((unsigned int)((unsigned char)((p)[3]))))
 
-/* protocol-specific functions set up to be called by the main engine */
-static CURLcode rtsp_do(struct Curl_easy *data, bool *done);
-static CURLcode rtsp_done(struct Curl_easy *data, CURLcode, bool premature);
-static CURLcode rtsp_connect(struct Curl_easy *data, bool *done);
-static CURLcode rtsp_do_pollset(struct Curl_easy *data,
-                                struct easy_pollset *ps);
-
 /*
  * Parse and write out an RTSP response.
  * @param data     the transfer
@@ -119,34 +112,6 @@ static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
                                  size_t len);
 static CURLcode rtsp_parse_transport(struct Curl_easy *data,
                                      const char *transport);
-
-/*
- * RTSP handler interface.
- */
-const struct Curl_handler Curl_handler_rtsp = {
-  "rtsp",                               /* scheme */
-  rtsp_setup_connection,                /* setup_connection */
-  rtsp_do,                              /* do_it */
-  rtsp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtsp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  rtsp_do_pollset,                      /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  Curl_http_perform_pollset,            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  rtsp_rtp_write_resp,                  /* write_resp */
-  rtsp_rtp_write_resp_hd,               /* write_resp_hd */
-  rtsp_conncheck,                       /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_RTSP,                            /* defport */
-  CURLPROTO_RTSP,                       /* protocol */
-  CURLPROTO_RTSP,                       /* family */
-  PROTOPT_CONN_REUSE                    /* flags */
-};
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
 
@@ -1097,5 +1062,33 @@ static CURLcode rtsp_parse_transport(struct Curl_easy *data,
   }
   return CURLE_OK;
 }
+
+/*
+ * RTSP handler interface.
+ */
+const struct Curl_handler Curl_handler_rtsp = {
+  "rtsp",                               /* scheme */
+  rtsp_setup_connection,                /* setup_connection */
+  rtsp_do,                              /* do_it */
+  rtsp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  rtsp_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  rtsp_do_pollset,                      /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  rtsp_rtp_write_resp,                  /* write_resp */
+  rtsp_rtp_write_resp_hd,               /* write_resp_hd */
+  rtsp_conncheck,                       /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  Curl_http_follow,                     /* follow */
+  PORT_RTSP,                            /* defport */
+  CURLPROTO_RTSP,                       /* protocol */
+  CURLPROTO_RTSP,                       /* family */
+  PROTOPT_CONN_REUSE                    /* flags */
+};
 
 #endif /* CURL_DISABLE_RTSP */
