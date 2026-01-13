@@ -117,7 +117,7 @@ static const char aschex[] =
   "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x41\x42\x43\x44\x45\x46";
 
 #ifndef __VMS
-#define filesize(name, stat_data) (stat_data.st_size)
+#define filesize(name, stat_data) stat_data.st_size
 #define fopen_read                curlx_fopen
 
 #else
