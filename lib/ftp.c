@@ -196,6 +196,8 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
                             struct ftp_conn *ftpc,
                             struct FTP *ftp,
                             bool ascii, ftpstate newstate);
+static CURLcode getftpresponse(struct Curl_easy *data, size_t *nread,
+                               int *ftpcode);
 
 static void freedirs(struct ftp_conn *ftpc)
 {
@@ -475,9 +477,6 @@ static const struct Curl_cwtype ftp_cw_lc = {
 };
 
 #endif /* CURL_PREFER_LF_LINEENDS */
-
-static CURLcode getftpresponse(struct Curl_easy *data, size_t *nread,
-                               int *ftpcode);
 
 /***********************************************************************
  *
