@@ -84,40 +84,6 @@
 #define SSH_S_IFLNK  0120000
 #endif
 
-/* Local functions: */
-static CURLcode myssh_connect(struct Curl_easy *data, bool *done);
-static CURLcode myssh_multi_statemach(struct Curl_easy *data,
-                                      bool *done);
-static CURLcode myssh_do_it(struct Curl_easy *data, bool *done);
-
-static CURLcode scp_done(struct Curl_easy *data,
-                         CURLcode, bool premature);
-static CURLcode scp_doing(struct Curl_easy *data, bool *dophase_done);
-static CURLcode scp_disconnect(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               bool dead_connection);
-
-static CURLcode sftp_done(struct Curl_easy *data,
-                          CURLcode, bool premature);
-static CURLcode sftp_doing(struct Curl_easy *data,
-                           bool *dophase_done);
-static CURLcode sftp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn,
-                                bool dead);
-static CURLcode sftp_perform(struct Curl_easy *data,
-                             bool *connected,
-                             bool *dophase_done);
-
-static CURLcode myssh_pollset(struct Curl_easy *data,
-                              struct easy_pollset *ps);
-static void myssh_block2waitfor(struct connectdata *conn,
-                                struct ssh_conn *sshc,
-                                bool block);
-
-static CURLcode myssh_setup_connection(struct Curl_easy *data,
-                                       struct connectdata *conn);
-static void sshc_cleanup(struct ssh_conn *sshc);
-
 static CURLcode sftp_error_to_CURLE(int err)
 {
   switch(err) {
@@ -814,6 +780,22 @@ static void myssh_state_init(struct Curl_easy *data,
   ssh_set_blocking(sshc->ssh_session, 0);
 
   myssh_to(data, sshc, SSH_S_STARTUP);
+}
+
+static void myssh_block2waitfor(struct connectdata *conn,
+                                struct ssh_conn *sshc,
+                                bool block)
+{
+  (void)conn;
+  if(block) {
+    int dir = ssh_get_poll_flags(sshc->ssh_session);
+    /* translate the libssh define bits into our own bit defines */
+    sshc->waitfor =
+      ((dir & SSH_READ_PENDING) ? KEEP_RECV : 0) |
+      ((dir & SSH_WRITE_PENDING) ? KEEP_SEND : 0);
+  }
+  else
+    sshc->waitfor = 0;
 }
 
 static int myssh_in_S_STARTUP(struct Curl_easy *data,
@@ -1897,6 +1879,62 @@ static int myssh_in_TRANS_INIT(struct Curl_easy *data, struct ssh_conn *sshc,
   return rc;
 }
 
+static void sshc_cleanup(struct ssh_conn *sshc)
+{
+  if(sshc->initialised) {
+    if(sshc->sftp_file) {
+      sftp_close(sshc->sftp_file);
+      sshc->sftp_file = NULL;
+    }
+    if(sshc->sftp_session) {
+      sftp_free(sshc->sftp_session);
+      sshc->sftp_session = NULL;
+    }
+    if(sshc->ssh_session) {
+      ssh_free(sshc->ssh_session);
+      sshc->ssh_session = NULL;
+    }
+
+    /* worst-case scenario cleanup */
+    DEBUGASSERT(sshc->ssh_session == NULL);
+    DEBUGASSERT(sshc->scp_session == NULL);
+
+    if(sshc->readdir_tmp) {
+      ssh_string_free_char(sshc->readdir_tmp);
+      sshc->readdir_tmp = NULL;
+    }
+    if(sshc->quote_attrs) {
+      sftp_attributes_free(sshc->quote_attrs);
+      sshc->quote_attrs = NULL;
+    }
+    if(sshc->readdir_attrs) {
+      sftp_attributes_free(sshc->readdir_attrs);
+      sshc->readdir_attrs = NULL;
+    }
+    if(sshc->readdir_link_attrs) {
+      sftp_attributes_free(sshc->readdir_link_attrs);
+      sshc->readdir_link_attrs = NULL;
+    }
+    if(sshc->privkey) {
+      ssh_key_free(sshc->privkey);
+      sshc->privkey = NULL;
+    }
+    if(sshc->pubkey) {
+      ssh_key_free(sshc->pubkey);
+      sshc->pubkey = NULL;
+    }
+
+    Curl_safefree(sshc->rsa_pub);
+    Curl_safefree(sshc->rsa);
+    Curl_safefree(sshc->quote_path1);
+    Curl_safefree(sshc->quote_path2);
+    curlx_dyn_free(&sshc->readdir_buf);
+    Curl_safefree(sshc->readdir_linkPath);
+    SSH_STRING_FREE_CHAR(sshc->homedir);
+    sshc->initialised = FALSE;
+  }
+}
+
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
@@ -2341,22 +2379,6 @@ static CURLcode myssh_pollset(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static void myssh_block2waitfor(struct connectdata *conn,
-                                struct ssh_conn *sshc,
-                                bool block)
-{
-  (void)conn;
-  if(block) {
-    int dir = ssh_get_poll_flags(sshc->ssh_session);
-    /* translate the libssh define bits into our own bit defines */
-    sshc->waitfor =
-      ((dir & SSH_READ_PENDING) ? KEEP_RECV : 0) |
-      ((dir & SSH_WRITE_PENDING) ? KEEP_SEND : 0);
-  }
-  else
-    sshc->waitfor = 0;
-}
-
 /* called repeatedly until done from multi.c */
 static CURLcode myssh_multi_statemach(struct Curl_easy *data,
                                       bool *done)
@@ -2630,89 +2652,6 @@ static CURLcode scp_perform(struct Curl_easy *data,
   }
 
   return result;
-}
-
-static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
-{
-  CURLcode result;
-  bool connected = FALSE;
-  struct connectdata *conn = data->conn;
-  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-
-  *done = FALSE;                /* default to false */
-  if(!sshc)
-    return CURLE_FAILED_INIT;
-
-  data->req.size = -1;          /* make sure this is unknown at this point */
-
-  sshc->actualcode = CURLE_OK;  /* reset error code */
-  sshc->secondCreateDirs = 0;   /* reset the create directory attempt state
-                                   variable */
-
-  Curl_pgrsReset(data);
-
-  if(conn->handler->protocol & CURLPROTO_SCP)
-    result = scp_perform(data, &connected, done);
-  else
-    result = sftp_perform(data, &connected, done);
-
-  return result;
-}
-
-static void sshc_cleanup(struct ssh_conn *sshc)
-{
-  if(sshc->initialised) {
-    if(sshc->sftp_file) {
-      sftp_close(sshc->sftp_file);
-      sshc->sftp_file = NULL;
-    }
-    if(sshc->sftp_session) {
-      sftp_free(sshc->sftp_session);
-      sshc->sftp_session = NULL;
-    }
-    if(sshc->ssh_session) {
-      ssh_free(sshc->ssh_session);
-      sshc->ssh_session = NULL;
-    }
-
-    /* worst-case scenario cleanup */
-    DEBUGASSERT(sshc->ssh_session == NULL);
-    DEBUGASSERT(sshc->scp_session == NULL);
-
-    if(sshc->readdir_tmp) {
-      ssh_string_free_char(sshc->readdir_tmp);
-      sshc->readdir_tmp = NULL;
-    }
-    if(sshc->quote_attrs) {
-      sftp_attributes_free(sshc->quote_attrs);
-      sshc->quote_attrs = NULL;
-    }
-    if(sshc->readdir_attrs) {
-      sftp_attributes_free(sshc->readdir_attrs);
-      sshc->readdir_attrs = NULL;
-    }
-    if(sshc->readdir_link_attrs) {
-      sftp_attributes_free(sshc->readdir_link_attrs);
-      sshc->readdir_link_attrs = NULL;
-    }
-    if(sshc->privkey) {
-      ssh_key_free(sshc->privkey);
-      sshc->privkey = NULL;
-    }
-    if(sshc->pubkey) {
-      ssh_key_free(sshc->pubkey);
-      sshc->pubkey = NULL;
-    }
-
-    Curl_safefree(sshc->rsa_pub);
-    Curl_safefree(sshc->rsa);
-    Curl_safefree(sshc->quote_path1);
-    Curl_safefree(sshc->quote_path2);
-    curlx_dyn_free(&sshc->readdir_buf);
-    Curl_safefree(sshc->readdir_linkPath);
-    SSH_STRING_FREE_CHAR(sshc->homedir);
-    sshc->initialised = FALSE;
-  }
 }
 
 /* BLOCKING, but the function is using the state machine so the only reason
@@ -3074,6 +3013,33 @@ static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
     /* we never reach here */
     return CURLE_RECV_ERROR;
   }
+}
+
+static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
+{
+  CURLcode result;
+  bool connected = FALSE;
+  struct connectdata *conn = data->conn;
+  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+
+  *done = FALSE;                /* default to false */
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
+  data->req.size = -1;          /* make sure this is unknown at this point */
+
+  sshc->actualcode = CURLE_OK;  /* reset error code */
+  sshc->secondCreateDirs = 0;   /* reset the create directory attempt state
+                                   variable */
+
+  Curl_pgrsReset(data);
+
+  if(conn->handler->protocol & CURLPROTO_SCP)
+    result = scp_perform(data, &connected, done);
+  else
+    result = sftp_perform(data, &connected, done);
+
+  return result;
 }
 
 CURLcode Curl_ssh_init(void)
