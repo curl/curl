@@ -58,13 +58,13 @@ Get a full listing of all available configure options by invoking it like:
 If you want to install curl in a different file hierarchy than `/usr/local`,
 specify that when running configure:
 
-    ./configure --with-openssl --prefix=/path/to/curl/tree
+    ./configure --prefix=/path/to/curl/tree
 
 If you have write permission in that directory, you can do 'make install'
 without being root. An example of this would be to make a local install in
 your own home directory:
 
-    ./configure --with-openssl --prefix=$HOME
+    ./configure --prefix=$HOME
     make
     make install
 
@@ -106,7 +106,7 @@ provide this option to gcc to set a hard-coded path to the runtime linker:
 To force a static library compile, disable the shared library creation by
 running configure like:
 
-    ./configure --with-openssl --disable-shared
+    ./configure --disable-shared
 
 The configure script is primarily done to work with shared/dynamic third party
 dependencies. When linking with shared libraries, the dependency "chain" is

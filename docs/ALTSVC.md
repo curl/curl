@@ -10,7 +10,7 @@ curl features support for the Alt-Svc: HTTP header.
 
 ## Enable Alt-Svc in build
 
-`./configure --with-openssl --enable-alt-svc`
+`./configure --enable-alt-svc`
 
 (enabled by default since 7.73.0)
 
