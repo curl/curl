@@ -80,19 +80,6 @@
 
 */
 
-/*
- * parsedate()
- *
- * Returns:
- *
- * PARSEDATE_OK     - a fine conversion
- * PARSEDATE_FAIL   - failed to convert
- * PARSEDATE_LATER  - time overflow at the far end of time_t
- * PARSEDATE_SOONER - time underflow at the low end of time_t
- */
-
-static int parsedate(const char *date, time_t *output);
-
 #define PARSEDATE_OK     0
 #define PARSEDATE_FAIL   -1
 #define PARSEDATE_LATER  1

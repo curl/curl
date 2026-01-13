@@ -112,14 +112,24 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-static void dnscache_entry_free(struct Curl_dns_entry *dns);
-
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void show_resolve_info(struct Curl_easy *data,
                               struct Curl_dns_entry *dns);
 #else
 #define show_resolve_info(x, y) Curl_nop_stmt
 #endif
+
+static void dnscache_entry_free(struct Curl_dns_entry *dns)
+{
+  Curl_freeaddrinfo(dns->addr);
+#ifdef USE_HTTPSRR
+  if(dns->hinfo) {
+    Curl_httpsrr_cleanup(dns->hinfo);
+    curlx_free(dns->hinfo);
+  }
+#endif
+  curlx_free(dns);
+}
 
 /*
  * Curl_printable_address() stores a printable version of the 1st address
@@ -1158,18 +1168,6 @@ clean_up:
 #endif /* USE_ALARM_TIMEOUT */
 
   return result;
-}
-
-static void dnscache_entry_free(struct Curl_dns_entry *dns)
-{
-  Curl_freeaddrinfo(dns->addr);
-#ifdef USE_HTTPSRR
-  if(dns->hinfo) {
-    Curl_httpsrr_cleanup(dns->hinfo);
-    curlx_free(dns->hinfo);
-  }
-#endif
-  curlx_free(dns);
 }
 
 /*
