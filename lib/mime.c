@@ -203,7 +203,7 @@ static FILE *vmsfopenread(const char *file, const char *mode)
 }
 
 #define fopen_read vmsfopenread
-#endif
+#endif /* !__VMS */
 
 #ifndef HAVE_BASENAME
 /*
@@ -252,7 +252,7 @@ static char *Curl_basename(char *path)
 }
 
 #define basename(x)  Curl_basename(x)
-#endif
+#endif /* !HAVE_BASENAME */
 
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
