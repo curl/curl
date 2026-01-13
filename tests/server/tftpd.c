@@ -215,23 +215,13 @@ static const unsigned int rexmtval = TIMEOUT;
  *                            FUNCTION PROTOTYPES                            *
  *****************************************************************************/
 
-static struct tftphdr *rw_init(int);
-static struct tftphdr *w_init(void);
-static struct tftphdr *r_init(void);
 static void read_ahead(struct testcase *test, int convert);
 static ssize_t write_behind(struct testcase *test, int convert);
-static int synchnet(curl_socket_t);
 static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
 static int validate_access(struct testcase *test,
                            const char *filename, unsigned short mode);
 static void sendtftp(struct testcase *test, const struct formats *pf);
 static void recvtftp(struct testcase *test, const struct formats *pf);
-static void nak(int error);
-#if defined(HAVE_ALARM) && defined(SIGALRM)
-static void mysignal(int sig, void (*handler)(int));
-static void timer(int signum);
-static void justtimeout(int signum);
-#endif /* HAVE_ALARM && SIGALRM */
 
 /*****************************************************************************
  *                          FUNCTION IMPLEMENTATIONS                         *
@@ -286,6 +276,36 @@ static void justtimeout(int signum)
 }
 
 #endif /* HAVE_ALARM && SIGALRM */
+
+/*
+ * Send a nak packet (error message).  Error code passed in is one of the
+ * standard TFTP codes, or a Unix errno offset by 100.
+ */
+static void nak(int error)
+{
+  struct tftphdr *tp;
+  int length;
+  struct errmsg *pe;
+
+  tp = &trsbuf.hdr;
+  tp->th_opcode = htons(opcode_ERROR);
+  tp->th_code = htons((unsigned short)error);
+  for(pe = errmsgs; pe->e_code >= 0; pe++)
+    if(pe->e_code == error)
+      break;
+  if(pe->e_code < 0) {
+    curlx_strerror(error - 100, pe->e_msg, sizeof(pe->e_msg));
+    tp->th_code = TFTP_EUNDEF;   /* set 'undef' errorcode */
+  }
+  length = (int)strlen(pe->e_msg);
+
+  /* we use memcpy() instead of strcpy() in order to avoid buffer overflow
+   * report from glibc with FORTIFY_SOURCE */
+  memcpy(tp->th_msg, pe->e_msg, length + 1);
+  length += 5;
+  if(swrite(peer, &trsbuf.storage[0], length) != length)
+    logmsg("nak: fail\n");
+}
 
 /*
  * init for either read-ahead or write-behind.
@@ -1338,34 +1358,4 @@ abort:
     test->ofile = 0;
   }
   return;
-}
-
-/*
- * Send a nak packet (error message).  Error code passed in is one of the
- * standard TFTP codes, or a Unix errno offset by 100.
- */
-static void nak(int error)
-{
-  struct tftphdr *tp;
-  int length;
-  struct errmsg *pe;
-
-  tp = &trsbuf.hdr;
-  tp->th_opcode = htons(opcode_ERROR);
-  tp->th_code = htons((unsigned short)error);
-  for(pe = errmsgs; pe->e_code >= 0; pe++)
-    if(pe->e_code == error)
-      break;
-  if(pe->e_code < 0) {
-    curlx_strerror(error - 100, pe->e_msg, sizeof(pe->e_msg));
-    tp->th_code = TFTP_EUNDEF;   /* set 'undef' errorcode */
-  }
-  length = (int)strlen(pe->e_msg);
-
-  /* we use memcpy() instead of strcpy() in order to avoid buffer overflow
-   * report from glibc with FORTIFY_SOURCE */
-  memcpy(tp->th_msg, pe->e_msg, length + 1);
-  length += 5;
-  if(swrite(peer, &trsbuf.storage[0], length) != length)
-    logmsg("nak: fail\n");
 }
