@@ -165,35 +165,6 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
                                  struct TELNET *tn,
                                  char *buffer, ssize_t nread);
 
-/*
- * TELNET protocol handler.
- */
-
-const struct Curl_handler Curl_handler_telnet = {
-  "telnet",                             /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  telnet_do,                            /* do_it */
-  telnet_done,                          /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_TELNET,                          /* defport */
-  CURLPROTO_TELNET,                     /* protocol */
-  CURLPROTO_TELNET,                     /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
-};
-
 static void telnet_easy_dtor(void *key, size_t klen, void *entry)
 {
   struct TELNET *tn = entry;
@@ -1630,4 +1601,33 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
   return result;
 }
-#endif
+
+/*
+ * TELNET protocol handler.
+ */
+const struct Curl_handler Curl_handler_telnet = {
+  "telnet",                             /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  telnet_do,                            /* do_it */
+  telnet_done,                          /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_TELNET,                          /* defport */
+  CURLPROTO_TELNET,                     /* protocol */
+  CURLPROTO_TELNET,                     /* family */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
+};
+
+#endif /* !CURL_DISABLE_TELNET */
