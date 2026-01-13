@@ -52,8 +52,97 @@
 #endif
 
 #ifdef LINK
+/*
+ * Treat the Location: header specially, by writing a special escape
+ * sequence that adds a hyperlink to the displayed text. This makes
+ * the absolute URL of the redirect clickable in supported terminals,
+ * which could not happen otherwise for relative URLs. The Location:
+ * header is supposed to always be absolute so this theoretically
+ * should not be needed but the real world returns plenty of relative
+ * URLs here.
+ */
 static void write_linked_location(CURL *curl, const char *location,
-                                  size_t loclen, FILE *stream);
+                                  size_t loclen, FILE *stream)
+{
+  /* This would so simple if CURLINFO_REDIRECT_URL were available here */
+  CURLU *u = NULL;
+  char *copyloc = NULL, *locurl = NULL, *scheme = NULL, *finalurl = NULL;
+  const char *loc = location;
+  size_t llen = loclen;
+  int space_skipped = 0;
+  const char *vver = getenv("VTE_VERSION");
+
+  if(vver) {
+    curl_off_t num;
+    if(curlx_str_number(&vver, &num, CURL_OFF_T_MAX) ||
+       /* Skip formatting for old versions of VTE <= 0.48.1 (Mar 2017) since
+          some of those versions have formatting bugs. (#10428) */
+       (num <= 4801))
+      goto locout;
+  }
+
+  /* Strip leading whitespace of the redirect URL */
+  while(llen && (*loc == ' ' || *loc == '\t')) {
+    ++loc;
+    --llen;
+    ++space_skipped;
+  }
+
+  /* Strip the trailing end-of-line characters, normally "\r\n" */
+  while(llen && (loc[llen - 1] == '\n' || loc[llen - 1] == '\r'))
+    --llen;
+
+  /* CURLU makes it easy to handle the relative URL case */
+  u = curl_url();
+  if(!u)
+    goto locout;
+
+  /* Create a null-terminated and whitespace-stripped copy of Location: */
+  copyloc = memdup0(loc, llen);
+  if(!copyloc)
+    goto locout;
+
+  /* The original URL to use as a base for a relative redirect URL */
+  if(curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &locurl))
+    goto locout;
+  if(curl_url_set(u, CURLUPART_URL, locurl, 0))
+    goto locout;
+
+  /* Redirected location. This can be either absolute or relative. */
+  if(curl_url_set(u, CURLUPART_URL, copyloc, 0))
+    goto locout;
+
+  if(curl_url_get(u, CURLUPART_URL, &finalurl, CURLU_NO_DEFAULT_PORT))
+    goto locout;
+
+  if(curl_url_get(u, CURLUPART_SCHEME, &scheme, 0))
+    goto locout;
+
+  if(!strcmp("http", scheme) ||
+     !strcmp("https", scheme) ||
+     !strcmp("ftp", scheme) ||
+     !strcmp("ftps", scheme)) {
+    curl_mfprintf(stream, "%.*s" LINK "%s" LINKST "%.*s" LINKOFF,
+                  space_skipped, location,
+                  finalurl,
+                  (int)loclen - space_skipped, loc);
+    goto locdone;
+  }
+
+  /* Not a "safe" URL: do not linkify it */
+
+locout:
+  /* Write the normal output in case of error or unsafe */
+  fwrite(location, loclen, 1, stream);
+
+locdone:
+  if(u) {
+    curl_free(finalurl);
+    curl_free(scheme);
+    curl_url_cleanup(u);
+    curlx_free(copyloc);
+  }
+}
 #endif
 
 /*
@@ -384,97 +473,3 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   }
   return cb;
 }
-
-#ifdef LINK
-/*
- * Treat the Location: header specially, by writing a special escape
- * sequence that adds a hyperlink to the displayed text. This makes
- * the absolute URL of the redirect clickable in supported terminals,
- * which could not happen otherwise for relative URLs. The Location:
- * header is supposed to always be absolute so this theoretically
- * should not be needed but the real world returns plenty of relative
- * URLs here.
- */
-static void write_linked_location(CURL *curl, const char *location,
-                                  size_t loclen, FILE *stream)
-{
-  /* This would so simple if CURLINFO_REDIRECT_URL were available here */
-  CURLU *u = NULL;
-  char *copyloc = NULL, *locurl = NULL, *scheme = NULL, *finalurl = NULL;
-  const char *loc = location;
-  size_t llen = loclen;
-  int space_skipped = 0;
-  const char *vver = getenv("VTE_VERSION");
-
-  if(vver) {
-    curl_off_t num;
-    if(curlx_str_number(&vver, &num, CURL_OFF_T_MAX) ||
-       /* Skip formatting for old versions of VTE <= 0.48.1 (Mar 2017) since
-          some of those versions have formatting bugs. (#10428) */
-       (num <= 4801))
-      goto locout;
-  }
-
-  /* Strip leading whitespace of the redirect URL */
-  while(llen && (*loc == ' ' || *loc == '\t')) {
-    ++loc;
-    --llen;
-    ++space_skipped;
-  }
-
-  /* Strip the trailing end-of-line characters, normally "\r\n" */
-  while(llen && (loc[llen - 1] == '\n' || loc[llen - 1] == '\r'))
-    --llen;
-
-  /* CURLU makes it easy to handle the relative URL case */
-  u = curl_url();
-  if(!u)
-    goto locout;
-
-  /* Create a null-terminated and whitespace-stripped copy of Location: */
-  copyloc = memdup0(loc, llen);
-  if(!copyloc)
-    goto locout;
-
-  /* The original URL to use as a base for a relative redirect URL */
-  if(curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &locurl))
-    goto locout;
-  if(curl_url_set(u, CURLUPART_URL, locurl, 0))
-    goto locout;
-
-  /* Redirected location. This can be either absolute or relative. */
-  if(curl_url_set(u, CURLUPART_URL, copyloc, 0))
-    goto locout;
-
-  if(curl_url_get(u, CURLUPART_URL, &finalurl, CURLU_NO_DEFAULT_PORT))
-    goto locout;
-
-  if(curl_url_get(u, CURLUPART_SCHEME, &scheme, 0))
-    goto locout;
-
-  if(!strcmp("http", scheme) ||
-     !strcmp("https", scheme) ||
-     !strcmp("ftp", scheme) ||
-     !strcmp("ftps", scheme)) {
-    curl_mfprintf(stream, "%.*s" LINK "%s" LINKST "%.*s" LINKOFF,
-                  space_skipped, location,
-                  finalurl,
-                  (int)loclen - space_skipped, loc);
-    goto locdone;
-  }
-
-  /* Not a "safe" URL: do not linkify it */
-
-locout:
-  /* Write the normal output in case of error or unsafe */
-  fwrite(location, loclen, 1, stream);
-
-locdone:
-  if(u) {
-    curl_free(finalurl);
-    curl_free(scheme);
-    curl_url_cleanup(u);
-    curlx_free(copyloc);
-  }
-}
-#endif
