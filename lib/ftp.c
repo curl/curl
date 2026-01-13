@@ -204,10 +204,6 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp,
                                curl_off_t filesize);
-static CURLcode ftp_dophase_done(struct Curl_easy *data,
-                                 struct ftp_conn *ftpc,
-                                 struct FTP *ftp,
-                                 bool connected);
 
 static void close_secondarysocket(struct Curl_easy *data,
                                   struct ftp_conn *ftpc)
@@ -1889,6 +1885,218 @@ error:
   return result;
 }
 
+/* called repeatedly until done from multi.c */
+static CURLcode ftp_statemach(struct Curl_easy *data,
+                              struct ftp_conn *ftpc,
+                              bool *done)
+{
+  CURLcode result = Curl_pp_statemach(data, &ftpc->pp, FALSE, FALSE);
+
+  /* Check for the state outside of the Curl_socket_check() return code checks
+     since at times we are in fact already in this state when this function
+     gets called. */
+  *done = (ftpc->state == FTP_STOP);
+
+  return result;
+}
+
+/*
+ * ftp_do_more()
+ *
+ * This function shall be called when the second FTP (data) connection is
+ * connected.
+ *
+ * 'complete' can return 0 for incomplete, 1 for done and -1 for go back
+ * (which basically is only for when PASV is being sent to retry a failed
+ * EPSV).
+ */
+static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
+{
+  struct connectdata *conn = data->conn;
+  struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
+  struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
+  CURLcode result = CURLE_OK;
+  bool connected = FALSE;
+  bool complete = FALSE;
+  /* the ftp struct is inited in ftp_connect(). If we are connecting to an HTTP
+   * proxy then the state will not be valid until after that connection is
+   * complete */
+
+  if(!ftpc || !ftp)
+    return CURLE_FAILED_INIT;
+
+  *completep = 0; /* default to stay in the state */
+
+  /* if the second connection has been set up, try to connect it fully
+   * to the remote host. This may not complete at this time, for several
+   * reasons:
+   * - we do EPTR and the server will not connect to our listen socket
+   *   until we send more FTP commands
+   * - an SSL filter is in place and the server will not start the TLS
+   *   handshake until we send more FTP commands
+   */
+  if(conn->cfilter[SECONDARYSOCKET]) {
+    bool is_eptr = Curl_conn_is_tcp_listen(data, SECONDARYSOCKET);
+    result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
+    if(result == CURLE_OUT_OF_MEMORY)
+      return result;
+    if(result || (!connected && !is_eptr &&
+                  !Curl_conn_is_ip_connected(data, SECONDARYSOCKET))) {
+      if(result && !is_eptr && (ftpc->count1 == 0)) {
+        *completep = -1; /* go back to DOING please */
+        /* this is a EPSV connect failing, try PASV instead */
+        return ftp_epsv_disable(data, ftpc, conn);
+      }
+      return result;
+    }
+  }
+
+  if(ftpc->state) {
+    /* already in a state so skip the initial commands.
+       They are only done to kickstart the do_more state */
+    result = ftp_statemach(data, ftpc, &complete);
+
+    *completep = (int)complete;
+
+    /* if we got an error or if we do not wait for a data connection return
+       immediately */
+    if(result || !ftpc->wait_data_conn)
+      return result;
+
+    /* if we reach the end of the FTP state machine here, *complete will be
+       TRUE but so is ftpc->wait_data_conn, which says we need to wait for the
+       data connection and therefore we are not actually complete */
+    *completep = 0;
+  }
+
+  if(ftp->transfer <= PPTRANSFER_INFO) {
+    /* a transfer is about to take place, or if not a filename was given so we
+       will do a SIZE on it later and then we need the right TYPE first */
+
+    if(ftpc->wait_data_conn) {
+      bool serv_conned;
+
+      result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &serv_conned);
+      if(result)
+        return result; /* Failed to accept data connection */
+
+      if(serv_conned) {
+        /* It looks data connection is established */
+        ftpc->wait_data_conn = FALSE;
+        result = ftp_initiate_transfer(data, ftpc);
+
+        if(result)
+          return result;
+
+        *completep = 1; /* this state is now complete when the server has
+                           connected back to us */
+      }
+      else {
+        result = ftp_check_ctrl_on_data_wait(data, ftpc);
+        if(result)
+          return result;
+      }
+    }
+    else if(data->state.upload) {
+      result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
+                           FTP_STOR_TYPE);
+      if(result)
+        return result;
+
+      result = ftp_statemach(data, ftpc, &complete);
+      /* ftp_nb_type() might have skipped sending `TYPE A|I` when not
+       * deemed necessary and directly sent `STORE name`. If this was
+       * then complete, but we are still waiting on the data connection,
+       * the transfer has not been initiated yet. */
+      *completep = (int)(ftpc->wait_data_conn ? 0 : complete);
+    }
+    else {
+      /* download */
+      ftp->downloadsize = -1; /* unknown as of yet */
+
+      result = Curl_range(data);
+
+      if(result == CURLE_OK && data->req.maxdownload >= 0) {
+        /* Do not check for successful transfer */
+        ftpc->dont_check = TRUE;
+      }
+
+      if(result)
+        ;
+      else if((data->state.list_only || !ftpc->file) &&
+              !(data->set.prequote)) {
+        /* The specified path ends with a slash, and therefore we think this
+           is a directory that is requested, use LIST. But before that we
+           need to set ASCII transfer mode. */
+
+        /* But only if a body transfer was requested. */
+        if(ftp->transfer == PPTRANSFER_BODY) {
+          result = ftp_nb_type(data, ftpc, ftp, TRUE, FTP_LIST_TYPE);
+          if(result)
+            return result;
+        }
+        /* otherwise just fall through */
+      }
+      else {
+        if(data->set.prequote && !ftpc->file) {
+          result = ftp_nb_type(data, ftpc, ftp, TRUE,
+                               FTP_RETR_LIST_TYPE);
+        }
+        else {
+          result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
+                               FTP_RETR_TYPE);
+        }
+        if(result)
+          return result;
+      }
+
+      result = ftp_statemach(data, ftpc, &complete);
+      *completep = (int)complete;
+    }
+    return result;
+  }
+
+  /* no data to transfer */
+  Curl_xfer_setup_nop(data);
+
+  if(!ftpc->wait_data_conn) {
+    /* no waiting for the data connection so this is now complete */
+    *completep = 1;
+    CURL_TRC_FTP(data, "[%s] DO-MORE phase ends with %d", FTP_CSTATE(ftpc),
+                 (int)result);
+  }
+
+  return result;
+}
+
+/* call this when the DO phase has completed */
+static CURLcode ftp_dophase_done(struct Curl_easy *data,
+                                 struct ftp_conn *ftpc,
+                                 struct FTP *ftp,
+                                 bool connected)
+{
+  if(connected) {
+    int completed;
+    CURLcode result = ftp_do_more(data, &completed);
+
+    if(result) {
+      close_secondarysocket(data, ftpc);
+      return result;
+    }
+  }
+
+  if(ftp->transfer != PPTRANSFER_BODY)
+    /* no data to transfer */
+    Curl_xfer_setup_nop(data);
+  else if(!connected)
+    /* since we did not connect now, we want do_more to get called */
+    data->conn->bits.do_more = TRUE;
+
+  ftpc->ctl_valid = TRUE; /* seems good */
+
+  return CURLE_OK;
+}
+
 static CURLcode ftp_state_port_resp(struct Curl_easy *data,
                                     struct ftp_conn *ftpc,
                                     struct FTP *ftp,
@@ -3020,21 +3228,6 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 }
 
 /* called repeatedly until done from multi.c */
-static CURLcode ftp_statemach(struct Curl_easy *data,
-                              struct ftp_conn *ftpc,
-                              bool *done)
-{
-  CURLcode result = Curl_pp_statemach(data, &ftpc->pp, FALSE, FALSE);
-
-  /* Check for the state outside of the Curl_socket_check() return code checks
-     since at times we are in fact already in this state when this function
-     gets called. */
-  *done = (ftpc->state == FTP_STOP);
-
-  return result;
-}
-
-/* called repeatedly until done from multi.c */
 static CURLcode ftp_multi_statemach(struct Curl_easy *data,
                                     bool *done)
 {
@@ -3403,175 +3596,6 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
     /* keep track of our current transfer type */
     ftpc->transfertype = want;
   }
-  return result;
-}
-
-/*
- * ftp_do_more()
- *
- * This function shall be called when the second FTP (data) connection is
- * connected.
- *
- * 'complete' can return 0 for incomplete, 1 for done and -1 for go back
- * (which basically is only for when PASV is being sent to retry a failed
- * EPSV).
- */
-static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
-{
-  struct connectdata *conn = data->conn;
-  struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
-  struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
-  CURLcode result = CURLE_OK;
-  bool connected = FALSE;
-  bool complete = FALSE;
-  /* the ftp struct is inited in ftp_connect(). If we are connecting to an HTTP
-   * proxy then the state will not be valid until after that connection is
-   * complete */
-
-  if(!ftpc || !ftp)
-    return CURLE_FAILED_INIT;
-
-  *completep = 0; /* default to stay in the state */
-
-  /* if the second connection has been set up, try to connect it fully
-   * to the remote host. This may not complete at this time, for several
-   * reasons:
-   * - we do EPTR and the server will not connect to our listen socket
-   *   until we send more FTP commands
-   * - an SSL filter is in place and the server will not start the TLS
-   *   handshake until we send more FTP commands
-   */
-  if(conn->cfilter[SECONDARYSOCKET]) {
-    bool is_eptr = Curl_conn_is_tcp_listen(data, SECONDARYSOCKET);
-    result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
-    if(result == CURLE_OUT_OF_MEMORY)
-      return result;
-    if(result || (!connected && !is_eptr &&
-                  !Curl_conn_is_ip_connected(data, SECONDARYSOCKET))) {
-      if(result && !is_eptr && (ftpc->count1 == 0)) {
-        *completep = -1; /* go back to DOING please */
-        /* this is a EPSV connect failing, try PASV instead */
-        return ftp_epsv_disable(data, ftpc, conn);
-      }
-      return result;
-    }
-  }
-
-  if(ftpc->state) {
-    /* already in a state so skip the initial commands.
-       They are only done to kickstart the do_more state */
-    result = ftp_statemach(data, ftpc, &complete);
-
-    *completep = (int)complete;
-
-    /* if we got an error or if we do not wait for a data connection return
-       immediately */
-    if(result || !ftpc->wait_data_conn)
-      return result;
-
-    /* if we reach the end of the FTP state machine here, *complete will be
-       TRUE but so is ftpc->wait_data_conn, which says we need to wait for the
-       data connection and therefore we are not actually complete */
-    *completep = 0;
-  }
-
-  if(ftp->transfer <= PPTRANSFER_INFO) {
-    /* a transfer is about to take place, or if not a filename was given so we
-       will do a SIZE on it later and then we need the right TYPE first */
-
-    if(ftpc->wait_data_conn) {
-      bool serv_conned;
-
-      result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &serv_conned);
-      if(result)
-        return result; /* Failed to accept data connection */
-
-      if(serv_conned) {
-        /* It looks data connection is established */
-        ftpc->wait_data_conn = FALSE;
-        result = ftp_initiate_transfer(data, ftpc);
-
-        if(result)
-          return result;
-
-        *completep = 1; /* this state is now complete when the server has
-                           connected back to us */
-      }
-      else {
-        result = ftp_check_ctrl_on_data_wait(data, ftpc);
-        if(result)
-          return result;
-      }
-    }
-    else if(data->state.upload) {
-      result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
-                           FTP_STOR_TYPE);
-      if(result)
-        return result;
-
-      result = ftp_statemach(data, ftpc, &complete);
-      /* ftp_nb_type() might have skipped sending `TYPE A|I` when not
-       * deemed necessary and directly sent `STORE name`. If this was
-       * then complete, but we are still waiting on the data connection,
-       * the transfer has not been initiated yet. */
-      *completep = (int)(ftpc->wait_data_conn ? 0 : complete);
-    }
-    else {
-      /* download */
-      ftp->downloadsize = -1; /* unknown as of yet */
-
-      result = Curl_range(data);
-
-      if(result == CURLE_OK && data->req.maxdownload >= 0) {
-        /* Do not check for successful transfer */
-        ftpc->dont_check = TRUE;
-      }
-
-      if(result)
-        ;
-      else if((data->state.list_only || !ftpc->file) &&
-              !(data->set.prequote)) {
-        /* The specified path ends with a slash, and therefore we think this
-           is a directory that is requested, use LIST. But before that we
-           need to set ASCII transfer mode. */
-
-        /* But only if a body transfer was requested. */
-        if(ftp->transfer == PPTRANSFER_BODY) {
-          result = ftp_nb_type(data, ftpc, ftp, TRUE, FTP_LIST_TYPE);
-          if(result)
-            return result;
-        }
-        /* otherwise just fall through */
-      }
-      else {
-        if(data->set.prequote && !ftpc->file) {
-          result = ftp_nb_type(data, ftpc, ftp, TRUE,
-                               FTP_RETR_LIST_TYPE);
-        }
-        else {
-          result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
-                               FTP_RETR_TYPE);
-        }
-        if(result)
-          return result;
-      }
-
-      result = ftp_statemach(data, ftpc, &complete);
-      *completep = (int)complete;
-    }
-    return result;
-  }
-
-  /* no data to transfer */
-  Curl_xfer_setup_nop(data);
-
-  if(!ftpc->wait_data_conn) {
-    /* no waiting for the data connection so this is now complete */
-    *completep = 1;
-    CURL_TRC_FTP(data, "[%s] DO-MORE phase ends with %d", FTP_CSTATE(ftpc),
-                 (int)result);
-  }
-
   return result;
 }
 
@@ -4181,34 +4205,6 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
       }
     }
   }
-
-  return CURLE_OK;
-}
-
-/* call this when the DO phase has completed */
-static CURLcode ftp_dophase_done(struct Curl_easy *data,
-                                 struct ftp_conn *ftpc,
-                                 struct FTP *ftp,
-                                 bool connected)
-{
-  if(connected) {
-    int completed;
-    CURLcode result = ftp_do_more(data, &completed);
-
-    if(result) {
-      close_secondarysocket(data, ftpc);
-      return result;
-    }
-  }
-
-  if(ftp->transfer != PPTRANSFER_BODY)
-    /* no data to transfer */
-    Curl_xfer_setup_nop(data);
-  else if(!connected)
-    /* since we did not connect now, we want do_more to get called */
-    data->conn->bits.do_more = TRUE;
-
-  ftpc->ctl_valid = TRUE; /* seems good */
 
   return CURLE_OK;
 }
