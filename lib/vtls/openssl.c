@@ -179,8 +179,6 @@ typedef unsigned long sslerr_t;
 #endif
 #define ossl_valsize_t numcert_t
 
-static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl);
-
 static CURLcode push_certinfo(struct Curl_easy *data,
                               BIO *mem, const char *label, int num)
   WARN_UNUSED_RESULT;
