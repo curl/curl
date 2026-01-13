@@ -65,14 +65,7 @@ static bool waitfd(int waitms, int fd)
   timeout.tv_usec = (int)((waitms % 1000) * 1000);
 
   FD_ZERO(&bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
   FD_SET(fd, &bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
   if(!select(fd + 1, &bits, NULL, NULL, &timeout))
     return TRUE; /* timeout */
   return FALSE;

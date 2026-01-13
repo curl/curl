@@ -480,17 +480,10 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
         curl_socket_t sock = ps.sockets[i];
         if(!FDSET_SOCK(sock))
           continue;
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
         if(ps.actions[i] & CURL_POLL_IN)
           FD_SET(sock, read_fd_set);
         if(ps.actions[i] & CURL_POLL_OUT)
           FD_SET(sock, write_fd_set);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
         if((ps.actions[i] & (CURL_POLL_OUT | CURL_POLL_IN)) &&
            ((int)sock > *maxfd))
           *maxfd = (int)sock;
