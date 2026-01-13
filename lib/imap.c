@@ -156,6 +156,9 @@ struct ulbits {
  */
 static CURLcode imap_sendf(struct Curl_easy *data,
                            struct imap_conn *imapc,
+                           const char *fmt, ...) CURL_PRINTF(3, 0);
+static CURLcode imap_sendf(struct Curl_easy *data,
+                           struct imap_conn *imapc,
                            const char *fmt, ...)
 {
   CURLcode result = CURLE_OK;
