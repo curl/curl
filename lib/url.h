@@ -81,7 +81,6 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 
 /**
  * Return TRUE iff the given connection is considered dead.
- * @param nowp      NULL or pointer to time being checked against.
  */
 bool Curl_conn_seems_dead(struct connectdata *conn,
                           struct Curl_easy *data);
