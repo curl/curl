@@ -63,7 +63,7 @@ want it to survive subsequent API calls or the life-time of the easy handle.
 
 The *prev* pointer is only valid until another transfer is done using the
 *easy* handle. Once a new transfer has started, a new *prev* must be retrieved
-by calling curl_easy_nextheader(3) again with a NULL as fourth argument.
+by calling curl_easy_nextheader(3) again with NULL as the fourth argument.
 
 # %PROTOCOLS%
 
