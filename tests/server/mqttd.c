@@ -675,14 +675,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_err);
 
     /* there is always a socket to wait for */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
     FD_SET(sockfd, &fds_read);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
 
     do {
       /* select() blocking behavior call on blocking descriptors please */
