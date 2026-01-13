@@ -41,7 +41,7 @@ and complexities and we might as well avoid them if no one seems to want them.
 
 ## build
 
-    ./configure --enable-httpsrr
+    ./configure --with-openssl --enable-httpsrr
 
 or
 
@@ -82,7 +82,7 @@ call.
 
 This is done by specifying both c-ares and threaded resolver to configure:
 
-    ./configure --enable-ares=... --enable-threaded-resolver
+    ./configure --with-openssl --enable-ares=... --enable-threaded-resolver
 
 or to cmake:
 

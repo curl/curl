@@ -24,7 +24,7 @@ everything from git, do this:
 
 Daniel uses a configure line similar to this for easier development:
 
-    ./configure --disable-shared --enable-debug --enable-maintainer-mode
+    ./configure --with-openssl --disable-shared --enable-debug --enable-maintainer-mode
 
 ## REQUIREMENTS
 

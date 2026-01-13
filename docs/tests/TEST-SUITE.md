@@ -12,7 +12,7 @@ SPDX-License-Identifier: curl
 
   In the root of the curl repository:
 
-    ./configure && make && make test
+    ./configure --with-openssl && make && make test
 
   To run a specific set of tests (e.g. 303 and 410):
 
