@@ -185,9 +185,6 @@ static void ftp_state_low(struct Curl_easy *data,
 #define ftp_state(x, y, z) ftp_state_low(x, y, z, __LINE__)
 #endif /* DEBUGBUILD */
 
-static CURLcode ftp_parse_url_path(struct Curl_easy *data,
-                                   struct ftp_conn *ftpc,
-                                   struct FTP *ftp);
 static CURLcode ftp_state_mdtm(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp);
@@ -203,6 +200,171 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp,
                                curl_off_t filesize);
+
+static void freedirs(struct ftp_conn *ftpc)
+{
+  Curl_safefree(ftpc->dirs);
+  ftpc->dirdepth = 0;
+  Curl_safefree(ftpc->rawpath);
+  ftpc->file = NULL;
+}
+
+static size_t numof_slashes(const char *str)
+{
+  const char *slashPos;
+  size_t num = 0;
+  do {
+    slashPos = strchr(str, '/');
+    if(slashPos) {
+      ++num;
+      str = slashPos + 1;
+    }
+  } while(slashPos);
+  return num;
+}
+
+#define FTP_MAX_DIR_DEPTH 1000
+
+/***********************************************************************
+ *
+ * ftp_parse_url_path()
+ *
+ * Parse the URL path into separate path components.
+ *
+ */
+static CURLcode ftp_parse_url_path(struct Curl_easy *data,
+                                   struct ftp_conn *ftpc,
+                                   struct FTP *ftp)
+{
+  const char *slashPos = NULL;
+  const char *fileName = NULL;
+  CURLcode result = CURLE_OK;
+  const char *rawPath = NULL; /* url-decoded "raw" path */
+  size_t pathLen = 0;
+
+  ftpc->ctl_valid = FALSE;
+  ftpc->cwdfail = FALSE;
+
+  if(ftpc->rawpath)
+    freedirs(ftpc);
+  /* url-decode ftp path before further evaluation */
+  result = Curl_urldecode(ftp->path, 0, &ftpc->rawpath, &pathLen, REJECT_CTRL);
+  if(result) {
+    failf(data, "path contains control characters");
+    return result;
+  }
+  rawPath = ftpc->rawpath;
+
+  switch(data->set.ftp_filemethod) {
+  case FTPFILE_NOCWD: /* fastest, but less standard-compliant */
+
+    if((pathLen > 0) && (rawPath[pathLen - 1] != '/'))
+      fileName = rawPath;  /* this is a full file path */
+    /*
+      else: ftpc->file is not used anywhere other than for operations on
+            a file. In other words, never for directory operations.
+            So we can safely leave filename as NULL here and use it as a
+            argument in dir/file decisions.
+    */
+    break;
+
+  case FTPFILE_SINGLECWD:
+    slashPos = strrchr(rawPath, '/');
+    if(slashPos) {
+      /* get path before last slash, except for / */
+      size_t dirlen = slashPos - rawPath;
+      if(dirlen == 0)
+        dirlen = 1;
+
+      ftpc->dirs = curlx_calloc(1, sizeof(ftpc->dirs[0]));
+      if(!ftpc->dirs)
+        return CURLE_OUT_OF_MEMORY;
+
+      ftpc->dirs[0].start = 0;
+      ftpc->dirs[0].len = (int)dirlen;
+      ftpc->dirdepth = 1; /* we consider it to be a single directory */
+      fileName = slashPos + 1; /* rest is filename */
+    }
+    else
+      fileName = rawPath; /* filename only (or empty) */
+    break;
+
+  default: /* allow pretty much anything */
+  case FTPFILE_MULTICWD: {
+    /* current position: begin of next path component */
+    const char *curPos = rawPath;
+
+    /* number of entries to allocate for the 'dirs' array */
+    size_t dirAlloc = numof_slashes(rawPath);
+
+    if(dirAlloc >= FTP_MAX_DIR_DEPTH)
+      /* suspiciously deep directory hierarchy */
+      return CURLE_URL_MALFORMAT;
+
+    if(dirAlloc) {
+      ftpc->dirs = curlx_calloc(dirAlloc, sizeof(ftpc->dirs[0]));
+      if(!ftpc->dirs)
+        return CURLE_OUT_OF_MEMORY;
+
+      /* parse the URL path into separate path components */
+      while(dirAlloc--) {
+        const char *spos = strchr(curPos, '/');
+        size_t clen = spos - curPos;
+
+        /* path starts with a slash: add that as a directory */
+        if(!clen && (ftpc->dirdepth == 0))
+          ++clen;
+
+        /* we skip empty path components, like "x//y" since the FTP command
+           CWD requires a parameter and a non-existent parameter a) does not
+           work on many servers and b) has no effect on the others. */
+        if(clen) {
+          ftpc->dirs[ftpc->dirdepth].start = (int)(curPos - rawPath);
+          ftpc->dirs[ftpc->dirdepth].len = (int)clen;
+          ftpc->dirdepth++;
+        }
+        curPos = spos + 1;
+      }
+    }
+    fileName = curPos; /* the rest is the filename (or empty) */
+  }
+    break;
+  } /* switch */
+
+  if(fileName && *fileName)
+    ftpc->file = fileName;
+  else
+    ftpc->file = NULL; /* instead of point to a zero byte,
+                            we make it a NULL pointer */
+
+  if(data->state.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
+    /* We need a filename when uploading. Return error! */
+    failf(data, "Uploading to a URL without a filename");
+    return CURLE_URL_MALFORMAT;
+  }
+
+  ftpc->cwddone = FALSE; /* default to not done */
+
+  if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (rawPath[0] == '/'))
+    ftpc->cwddone = TRUE; /* skip CWD for absolute paths */
+  else { /* newly created FTP connections are already in entry path */
+    const char *oldPath = data->conn->bits.reuse ? ftpc->prevpath : "";
+    if(oldPath) {
+      size_t n = pathLen;
+      if(data->set.ftp_filemethod == FTPFILE_NOCWD)
+        n = 0; /* CWD to entry for relative paths */
+      else
+        n -= ftpc->file ? strlen(ftpc->file) : 0;
+
+      if((strlen(oldPath) == n) && rawPath && !strncmp(rawPath, oldPath, n)) {
+        infof(data, "Request has same path as previous transfer");
+        ftpc->cwddone = TRUE;
+      }
+    }
+  }
+
+  return CURLE_OK;
+}
 
 /***********************************************************************
  *
@@ -223,14 +385,6 @@ static void close_secondarysocket(struct Curl_easy *data,
   CURL_TRC_FTP(data, "[%s] closing DATA connection", FTP_CSTATE(ftpc));
   Curl_conn_close(data, SECONDARYSOCKET);
   Curl_conn_cf_discard_all(data, data->conn, SECONDARYSOCKET);
-}
-
-static void freedirs(struct ftp_conn *ftpc)
-{
-  Curl_safefree(ftpc->dirs);
-  ftpc->dirdepth = 0;
-  Curl_safefree(ftpc->rawpath);
-  ftpc->file = NULL;
 }
 
 #ifdef CURL_PREFER_LF_LINEENDS
@@ -4048,163 +4202,6 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   (void)ftp_quit(data, ftpc); /* ignore errors on the QUIT */
-  return CURLE_OK;
-}
-
-static size_t numof_slashes(const char *str)
-{
-  const char *slashPos;
-  size_t num = 0;
-  do {
-    slashPos = strchr(str, '/');
-    if(slashPos) {
-      ++num;
-      str = slashPos + 1;
-    }
-  } while(slashPos);
-  return num;
-}
-
-#define FTP_MAX_DIR_DEPTH 1000
-
-/***********************************************************************
- *
- * ftp_parse_url_path()
- *
- * Parse the URL path into separate path components.
- *
- */
-static CURLcode ftp_parse_url_path(struct Curl_easy *data,
-                                   struct ftp_conn *ftpc,
-                                   struct FTP *ftp)
-{
-  const char *slashPos = NULL;
-  const char *fileName = NULL;
-  CURLcode result = CURLE_OK;
-  const char *rawPath = NULL; /* url-decoded "raw" path */
-  size_t pathLen = 0;
-
-  ftpc->ctl_valid = FALSE;
-  ftpc->cwdfail = FALSE;
-
-  if(ftpc->rawpath)
-    freedirs(ftpc);
-  /* url-decode ftp path before further evaluation */
-  result = Curl_urldecode(ftp->path, 0, &ftpc->rawpath, &pathLen, REJECT_CTRL);
-  if(result) {
-    failf(data, "path contains control characters");
-    return result;
-  }
-  rawPath = ftpc->rawpath;
-
-  switch(data->set.ftp_filemethod) {
-  case FTPFILE_NOCWD: /* fastest, but less standard-compliant */
-
-    if((pathLen > 0) && (rawPath[pathLen - 1] != '/'))
-      fileName = rawPath;  /* this is a full file path */
-    /*
-      else: ftpc->file is not used anywhere other than for operations on
-            a file. In other words, never for directory operations.
-            So we can safely leave filename as NULL here and use it as a
-            argument in dir/file decisions.
-    */
-    break;
-
-  case FTPFILE_SINGLECWD:
-    slashPos = strrchr(rawPath, '/');
-    if(slashPos) {
-      /* get path before last slash, except for / */
-      size_t dirlen = slashPos - rawPath;
-      if(dirlen == 0)
-        dirlen = 1;
-
-      ftpc->dirs = curlx_calloc(1, sizeof(ftpc->dirs[0]));
-      if(!ftpc->dirs)
-        return CURLE_OUT_OF_MEMORY;
-
-      ftpc->dirs[0].start = 0;
-      ftpc->dirs[0].len = (int)dirlen;
-      ftpc->dirdepth = 1; /* we consider it to be a single directory */
-      fileName = slashPos + 1; /* rest is filename */
-    }
-    else
-      fileName = rawPath; /* filename only (or empty) */
-    break;
-
-  default: /* allow pretty much anything */
-  case FTPFILE_MULTICWD: {
-    /* current position: begin of next path component */
-    const char *curPos = rawPath;
-
-    /* number of entries to allocate for the 'dirs' array */
-    size_t dirAlloc = numof_slashes(rawPath);
-
-    if(dirAlloc >= FTP_MAX_DIR_DEPTH)
-      /* suspiciously deep directory hierarchy */
-      return CURLE_URL_MALFORMAT;
-
-    if(dirAlloc) {
-      ftpc->dirs = curlx_calloc(dirAlloc, sizeof(ftpc->dirs[0]));
-      if(!ftpc->dirs)
-        return CURLE_OUT_OF_MEMORY;
-
-      /* parse the URL path into separate path components */
-      while(dirAlloc--) {
-        const char *spos = strchr(curPos, '/');
-        size_t clen = spos - curPos;
-
-        /* path starts with a slash: add that as a directory */
-        if(!clen && (ftpc->dirdepth == 0))
-          ++clen;
-
-        /* we skip empty path components, like "x//y" since the FTP command
-           CWD requires a parameter and a non-existent parameter a) does not
-           work on many servers and b) has no effect on the others. */
-        if(clen) {
-          ftpc->dirs[ftpc->dirdepth].start = (int)(curPos - rawPath);
-          ftpc->dirs[ftpc->dirdepth].len = (int)clen;
-          ftpc->dirdepth++;
-        }
-        curPos = spos + 1;
-      }
-    }
-    fileName = curPos; /* the rest is the filename (or empty) */
-  }
-    break;
-  } /* switch */
-
-  if(fileName && *fileName)
-    ftpc->file = fileName;
-  else
-    ftpc->file = NULL; /* instead of point to a zero byte,
-                            we make it a NULL pointer */
-
-  if(data->state.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
-    /* We need a filename when uploading. Return error! */
-    failf(data, "Uploading to a URL without a filename");
-    return CURLE_URL_MALFORMAT;
-  }
-
-  ftpc->cwddone = FALSE; /* default to not done */
-
-  if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (rawPath[0] == '/'))
-    ftpc->cwddone = TRUE; /* skip CWD for absolute paths */
-  else { /* newly created FTP connections are already in entry path */
-    const char *oldPath = data->conn->bits.reuse ? ftpc->prevpath : "";
-    if(oldPath) {
-      size_t n = pathLen;
-      if(data->set.ftp_filemethod == FTPFILE_NOCWD)
-        n = 0; /* CWD to entry for relative paths */
-      else
-        n -= ftpc->file ? strlen(ftpc->file) : 0;
-
-      if((strlen(oldPath) == n) && rawPath && !strncmp(rawPath, oldPath, n)) {
-        infof(data, "Request has same path as previous transfer");
-        ftpc->cwddone = TRUE;
-      }
-    }
-  }
-
   return CURLE_OK;
 }
 
