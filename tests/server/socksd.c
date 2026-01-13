@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <stdlib.h>
-
 /* Function
  *
  * Accepts a TCP connection on a custom port (IPv4 or IPv6). Connects to a

@@ -23,9 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 /* Function
  *
  * Accepts a TCP connection on a custom port (IPv4 or IPv6).  Speaks MQTT.
