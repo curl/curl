@@ -562,7 +562,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
 
   remaininglength = payloadlen + 2 + topiclen;
   encodelen = mqtt_encode_len(encodedbytes, remaininglength);
-  if(MAX_MQTT_MESSAGE_SIZE - remaininglength - 1 < encodelen) {
+  if(remaininglength > (MAX_MQTT_MESSAGE_SIZE - encodelen - 1)) {
     result = CURLE_TOO_LARGE;
     goto fail;
   }
