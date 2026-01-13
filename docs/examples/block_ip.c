@@ -110,7 +110,7 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
   struct ip *ip, *last;
   char *cidr;
 
-  ip = (struct ip *)calloc(1, sizeof(*ip));
+  ip = calloc(1, sizeof(*ip));
   if(!ip)
     return NULL;
 
@@ -296,7 +296,7 @@ int main(void)
   CURLcode result;
   struct connection_filter *filter;
 
-  filter = (struct connection_filter *)calloc(1, sizeof(*filter));
+  filter = calloc(1, sizeof(*filter));
   if(!filter)
     return 1;
 
