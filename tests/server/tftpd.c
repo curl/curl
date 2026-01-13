@@ -216,36 +216,21 @@ static const unsigned int rexmtval = TIMEOUT;
  *****************************************************************************/
 
 static struct tftphdr *rw_init(int);
-
 static struct tftphdr *w_init(void);
-
 static struct tftphdr *r_init(void);
-
 static void read_ahead(struct testcase *test, int convert);
-
 static ssize_t write_behind(struct testcase *test, int convert);
-
 static int synchnet(curl_socket_t);
-
 static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
-
 static int validate_access(struct testcase *test,
                            const char *filename, unsigned short mode);
-
 static void sendtftp(struct testcase *test, const struct formats *pf);
-
 static void recvtftp(struct testcase *test, const struct formats *pf);
-
 static void nak(int error);
-
 #if defined(HAVE_ALARM) && defined(SIGALRM)
-
 static void mysignal(int sig, void (*handler)(int));
-
 static void timer(int signum);
-
 static void justtimeout(int signum);
-
 #endif /* HAVE_ALARM && SIGALRM */
 
 /*****************************************************************************
