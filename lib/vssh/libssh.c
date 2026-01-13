@@ -118,66 +118,6 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn);
 static void sshc_cleanup(struct ssh_conn *sshc);
 
-/*
- * SCP protocol handler.
- */
-
-const struct Curl_handler Curl_handler_scp = {
-  "SCP",                        /* scheme */
-  myssh_setup_connection,       /* setup_connection */
-  myssh_do_it,                  /* do_it */
-  scp_done,                     /* done */
-  ZERO_NULL,                    /* do_more */
-  myssh_connect,                /* connect_it */
-  myssh_multi_statemach,        /* connecting */
-  scp_doing,                    /* doing */
-  myssh_pollset,                /* proto_pollset */
-  myssh_pollset,                /* doing_pollset */
-  ZERO_NULL,                    /* domore_pollset */
-  myssh_pollset,                /* perform_pollset */
-  scp_disconnect,               /* disconnect */
-  ZERO_NULL,                    /* write_resp */
-  ZERO_NULL,                    /* write_resp_hd */
-  ZERO_NULL,                    /* connection_check */
-  ZERO_NULL,                    /* attach connection */
-  ZERO_NULL,                    /* follow */
-  PORT_SSH,                     /* defport */
-  CURLPROTO_SCP,                /* protocol */
-  CURLPROTO_SCP,                /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
-};
-
-/*
- * SFTP protocol handler.
- */
-
-const struct Curl_handler Curl_handler_sftp = {
-  "SFTP",                               /* scheme */
-  myssh_setup_connection,               /* setup_connection */
-  myssh_do_it,                          /* do_it */
-  sftp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  myssh_connect,                        /* connect_it */
-  myssh_multi_statemach,                /* connecting */
-  sftp_doing,                           /* doing */
-  myssh_pollset,                        /* proto_pollset */
-  myssh_pollset,                        /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  myssh_pollset,                        /* perform_pollset */
-  sftp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_SSH,                             /* defport */
-  CURLPROTO_SFTP,                       /* protocol */
-  CURLPROTO_SFTP,                       /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
-};
-
 static CURLcode sftp_error_to_CURLE(int err)
 {
   switch(err) {
@@ -3154,5 +3094,63 @@ void Curl_ssh_version(char *buffer, size_t buflen)
 {
   (void)curl_msnprintf(buffer, buflen, "libssh/%s", ssh_version(0));
 }
+
+/*
+ * SCP protocol handler.
+ */
+const struct Curl_handler Curl_handler_scp = {
+  "SCP",                        /* scheme */
+  myssh_setup_connection,       /* setup_connection */
+  myssh_do_it,                  /* do_it */
+  scp_done,                     /* done */
+  ZERO_NULL,                    /* do_more */
+  myssh_connect,                /* connect_it */
+  myssh_multi_statemach,        /* connecting */
+  scp_doing,                    /* doing */
+  myssh_pollset,                /* proto_pollset */
+  myssh_pollset,                /* doing_pollset */
+  ZERO_NULL,                    /* domore_pollset */
+  myssh_pollset,                /* perform_pollset */
+  scp_disconnect,               /* disconnect */
+  ZERO_NULL,                    /* write_resp */
+  ZERO_NULL,                    /* write_resp_hd */
+  ZERO_NULL,                    /* connection_check */
+  ZERO_NULL,                    /* attach connection */
+  ZERO_NULL,                    /* follow */
+  PORT_SSH,                     /* defport */
+  CURLPROTO_SCP,                /* protocol */
+  CURLPROTO_SCP,                /* family */
+  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
+};
+
+/*
+ * SFTP protocol handler.
+ */
+const struct Curl_handler Curl_handler_sftp = {
+  "SFTP",                               /* scheme */
+  myssh_setup_connection,               /* setup_connection */
+  myssh_do_it,                          /* do_it */
+  sftp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  myssh_connect,                        /* connect_it */
+  myssh_multi_statemach,                /* connecting */
+  sftp_doing,                           /* doing */
+  myssh_pollset,                        /* proto_pollset */
+  myssh_pollset,                        /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  myssh_pollset,                        /* perform_pollset */
+  sftp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_SSH,                             /* defport */
+  CURLPROTO_SFTP,                       /* protocol */
+  CURLPROTO_SFTP,                       /* family */
+  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
+};
 
 #endif /* USE_LIBSSH */
