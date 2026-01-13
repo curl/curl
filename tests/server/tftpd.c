@@ -213,7 +213,6 @@ static sigjmp_buf timeoutbuf;
 
 static void read_ahead(struct testcase *test, int convert);
 static ssize_t write_behind(struct testcase *test, int convert);
-static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
 
 /*****************************************************************************
  *                          FUNCTION IMPLEMENTATIONS                         *
@@ -541,343 +540,67 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   return j;
 }
 
-static int test_tftpd(int argc, char **argv)
+/* Based on the testno, parse the correct server commands. */
+static int tftpd_parse_servercmd(struct testcase *req)
 {
-  srvr_sockaddr_union_t me;
-  struct tftphdr *tp;
-  ssize_t n = 0;
-  int arg = 1;
-  unsigned short port = 8999; /* UDP */
-  curl_socket_t sock = CURL_SOCKET_BAD;
-  int flag;
-  int rc;
+  FILE *stream;
   int error;
-  char errbuf[STRERROR_LEN];
-  struct testcase test;
-  int result = 0;
-  srvr_sockaddr_union_t from;
-  curl_socklen_t fromlen;
 
-  memset(&test, 0, sizeof(test));
-
-  pidname = ".tftpd.pid";
-  serverlogfile = "log/tftpd.log";
-  serverlogslocked = 0;
-
-  while(argc > arg) {
-    const char *opt;
-    curl_off_t num;
-    if(!strcmp("--version", argv[arg])) {
-      printf("tftpd IPv4%s\n",
-#ifdef USE_IPV6
-             "/IPv6"
-#else
-             ""
-#endif
-      );
-      return 0;
-    }
-    else if(!strcmp("--pidfile", argv[arg])) {
-      arg++;
-      if(argc > arg)
-        pidname = argv[arg++];
-    }
-    else if(!strcmp("--portfile", argv[arg])) {
-      arg++;
-      if(argc > arg)
-        portname = argv[arg++];
-    }
-    else if(!strcmp("--logfile", argv[arg])) {
-      arg++;
-      if(argc > arg)
-        serverlogfile = argv[arg++];
-    }
-    else if(!strcmp("--logdir", argv[arg])) {
-      arg++;
-      if(argc > arg)
-        logdir = argv[arg++];
-    }
-    else if(!strcmp("--ipv4", argv[arg])) {
-#ifdef USE_IPV6
-      ipv_inuse = "IPv4";
-      use_ipv6 = FALSE;
-#endif
-      arg++;
-    }
-    else if(!strcmp("--ipv6", argv[arg])) {
-#ifdef USE_IPV6
-      ipv_inuse = "IPv6";
-      use_ipv6 = TRUE;
-#endif
-      arg++;
-    }
-    else if(!strcmp("--port", argv[arg])) {
-      arg++;
-      if(argc > arg) {
-        opt = argv[arg];
-        if(!curlx_str_number(&opt, &num, 0xffff))
-          port = (unsigned short)num;
-        arg++;
-      }
-    }
-    else if(!strcmp("--srcdir", argv[arg])) {
-      arg++;
-      if(argc > arg) {
-        srcpath = argv[arg];
-        arg++;
-      }
-    }
-    else {
-      puts("Usage: tftpd [option]\n"
-           " --version\n"
-           " --logfile [file]\n"
-           " --logdir [directory]\n"
-           " --pidfile [file]\n"
-           " --portfile [file]\n"
-           " --ipv4\n"
-           " --ipv6\n"
-           " --port [port]\n"
-           " --srcdir [path]");
-      return 0;
-    }
-  }
-
-  snprintf(loglockfile, sizeof(loglockfile), "%s/%s/tftp-%s.lock",
-           logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
-
-  install_signal_handlers(true);
-
-#ifdef USE_IPV6
-  if(!use_ipv6)
-#endif
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-#ifdef USE_IPV6
-  else
-    sock = socket(AF_INET6, SOCK_DGRAM, 0);
-#endif
-
-  if(CURL_SOCKET_BAD == sock) {
-    error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s",
+  stream = test2fopen(req->testno, logdir);
+  if(!stream) {
+    char errbuf[STRERROR_LEN];
+    error = errno;
+    logmsg("fopen() failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    result = 1;
-    goto tftpd_cleanup;
-  }
-
-  flag = 1;
-  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
-    error = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    result = 1;
-    goto tftpd_cleanup;
-  }
-
-#ifdef USE_IPV6
-  if(!use_ipv6) {
-#endif
-    memset(&me.sa4, 0, sizeof(me.sa4));
-    me.sa4.sin_family = AF_INET;
-    me.sa4.sin_addr.s_addr = INADDR_ANY;
-    me.sa4.sin_port = htons(port);
-    rc = bind(sock, &me.sa, sizeof(me.sa4));
-#ifdef USE_IPV6
+    logmsg("  Could not open test file %ld", req->testno);
+    return 1; /* done */
   }
   else {
-    memset(&me.sa6, 0, sizeof(me.sa6));
-    me.sa6.sin6_family = AF_INET6;
-    me.sa6.sin6_addr = in6addr_any;
-    me.sa6.sin6_port = htons(port);
-    rc = bind(sock, &me.sa, sizeof(me.sa6));
-  }
-#endif /* USE_IPV6 */
-  if(rc) {
-    error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu (%d) %s", port,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    result = 1;
-    goto tftpd_cleanup;
-  }
+    char *orgcmd = NULL;
+    char *cmd = NULL;
+    size_t cmdsize = 0;
+    int num = 0;
 
-  if(!port) {
-    /* The system was supposed to choose a port number, figure out which
-       port we actually got and update the listener port value with it. */
-    curl_socklen_t la_size;
-    srvr_sockaddr_union_t localaddr;
-#ifdef USE_IPV6
-    if(!use_ipv6)
-#endif
-      la_size = sizeof(localaddr.sa4);
-#ifdef USE_IPV6
-    else
-      la_size = sizeof(localaddr.sa6);
-#endif
-    memset(&localaddr.sa, 0, (size_t)la_size);
-    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
-      error = SOCKERRNO;
-      logmsg("getsockname() failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      sclose(sock);
-      goto tftpd_cleanup;
-    }
-    switch(localaddr.sa.sa_family) {
-    case AF_INET:
-      port = ntohs(localaddr.sa4.sin_port);
-      break;
-#ifdef USE_IPV6
-    case AF_INET6:
-      port = ntohs(localaddr.sa6.sin6_port);
-      break;
-#endif
-    default:
-      break;
-    }
-    if(!port) {
-      /* Real failure, listener port shall not be zero beyond this point. */
-      logmsg("Apparently getsockname() succeeded, with listener port zero.");
-      logmsg("A valid reason for this failure is a binary built without");
-      logmsg("proper network library linkage. This might not be the only");
-      logmsg("reason, but double check it before anything else.");
-      result = 2;
-      goto tftpd_cleanup;
-    }
-  }
-
-  tftpd_wrotepidfile = write_pidfile(pidname);
-  if(!tftpd_wrotepidfile) {
-    result = 1;
-    goto tftpd_cleanup;
-  }
-
-  if(portname) {
-    tftpd_wroteportfile = write_portfile(portname, port);
-    if(!tftpd_wroteportfile) {
-      result = 1;
-      goto tftpd_cleanup;
-    }
-  }
-
-  logmsg("Running %s version on port UDP/%d", ipv_inuse, (int)port);
-
-  for(;;) {
-    fromlen = sizeof(from);
-#ifdef USE_IPV6
-    if(!use_ipv6)
-#endif
-      fromlen = sizeof(from.sa4);
-#ifdef USE_IPV6
-    else
-      fromlen = sizeof(from.sa6);
-#endif
-    n = (ssize_t)recvfrom(sock, &trsbuf.storage[0], sizeof(trsbuf.storage), 0,
-                          &from.sa, &fromlen);
-    if(got_exit_signal)
-      break;
-    if(n < 0) {
-      logmsg("recvfrom");
-      result = 3;
-      break;
+    /* get the custom server control "commands" */
+    error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
+    curlx_fclose(stream);
+    if(error) {
+      logmsg("getpart() failed with error (%d)", error);
+      return 1; /* done */
     }
 
-    set_advisor_read_lock(loglockfile);
-    serverlogslocked = 1;
-
-#ifdef USE_IPV6
-    if(!use_ipv6) {
-#endif
-      from.sa4.sin_family = AF_INET;
-      peer = socket(AF_INET, SOCK_DGRAM, 0);
-      if(CURL_SOCKET_BAD == peer) {
-        logmsg("socket");
-        result = 2;
-        break;
+    cmd = orgcmd;
+    while(cmd && cmdsize) {
+      char *check;
+      if(sscanf(cmd, "writedelay: %d", &num) == 1) {
+        logmsg("instructed to delay %d secs between packets", num);
+        req->writedelay = num;
       }
-      if(connect(peer, &from.sa, sizeof(from.sa4)) < 0) {
-        logmsg("connect: fail");
-        result = 1;
-        break;
+      else {
+        logmsg("Unknown <servercmd> instruction found: %s", cmd);
       }
-#ifdef USE_IPV6
-    }
-    else {
-      from.sa6.sin6_family = AF_INET6;
-      peer = socket(AF_INET6, SOCK_DGRAM, 0);
-      if(CURL_SOCKET_BAD == peer) {
-        logmsg("socket");
-        result = 2;
-        break;
+      /* try to deal with CRLF or just LF */
+      check = strchr(cmd, '\r');
+      if(!check)
+        check = strchr(cmd, '\n');
+
+      if(check) {
+        /* get to the letter following the newline */
+        while((*check == '\r') || (*check == '\n'))
+          check++;
+
+        if(!*check)
+          /* if we reached a zero, get out */
+          break;
+        cmd = check;
       }
-      if(connect(peer, &from.sa, sizeof(from.sa6)) < 0) {
-        logmsg("connect: fail");
-        result = 1;
+      else
         break;
-      }
     }
-#endif
-
-    maxtimeout = 5 * TIMEOUT;
-
-    tp = &trsbuf.hdr;
-    tp->th_opcode = ntohs(tp->th_opcode);
-    if(tp->th_opcode == opcode_RRQ || tp->th_opcode == opcode_WRQ) {
-      memset(&test, 0, sizeof(test));
-      if(do_tftp(&test, tp, n) < 0)
-        break;
-      free(test.buffer);
-    }
-    sclose(peer);
-    peer = CURL_SOCKET_BAD;
-
-    if(got_exit_signal)
-      break;
-
-    if(serverlogslocked) {
-      serverlogslocked = 0;
-      clear_advisor_read_lock(loglockfile);
-    }
-
-    logmsg("end of one transfer");
+    free(orgcmd);
   }
 
-tftpd_cleanup:
-
-  if(test.ofile > 0)
-    close(test.ofile);
-
-  if((peer != sock) && (peer != CURL_SOCKET_BAD))
-    sclose(peer);
-
-  if(sock != CURL_SOCKET_BAD)
-    sclose(sock);
-
-  if(got_exit_signal)
-    logmsg("signalled to die");
-
-  if(tftpd_wrotepidfile)
-    unlink(pidname);
-  if(tftpd_wroteportfile)
-    unlink(portname);
-
-  if(serverlogslocked) {
-    serverlogslocked = 0;
-    clear_advisor_read_lock(loglockfile);
-  }
-
-  restore_signal_handlers(true);
-
-  if(got_exit_signal) {
-    logmsg("========> %s tftpd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, (long)our_getpid(), exit_signal);
-    /*
-     * To properly set the return status of the process we
-     * must raise the same signal SIGINT or SIGTERM that we
-     * caught and let the old handler take care of it.
-     */
-    raise(exit_signal);
-  }
-
-  logmsg("========> tftpd quits");
-  return result;
+  return 0; /* OK! */
 }
 
 /*
@@ -1290,65 +1013,341 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   return 0;
 }
 
-/* Based on the testno, parse the correct server commands. */
-static int tftpd_parse_servercmd(struct testcase *req)
+static int test_tftpd(int argc, char **argv)
 {
-  FILE *stream;
+  srvr_sockaddr_union_t me;
+  struct tftphdr *tp;
+  ssize_t n = 0;
+  int arg = 1;
+  unsigned short port = 8999; /* UDP */
+  curl_socket_t sock = CURL_SOCKET_BAD;
+  int flag;
+  int rc;
   int error;
+  char errbuf[STRERROR_LEN];
+  struct testcase test;
+  int result = 0;
+  srvr_sockaddr_union_t from;
+  curl_socklen_t fromlen;
 
-  stream = test2fopen(req->testno, logdir);
-  if(!stream) {
-    char errbuf[STRERROR_LEN];
-    error = errno;
-    logmsg("fopen() failed with error (%d) %s",
+  memset(&test, 0, sizeof(test));
+
+  pidname = ".tftpd.pid";
+  serverlogfile = "log/tftpd.log";
+  serverlogslocked = 0;
+
+  while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
+    if(!strcmp("--version", argv[arg])) {
+      printf("tftpd IPv4%s\n",
+#ifdef USE_IPV6
+             "/IPv6"
+#else
+             ""
+#endif
+      );
+      return 0;
+    }
+    else if(!strcmp("--pidfile", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        pidname = argv[arg++];
+    }
+    else if(!strcmp("--portfile", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        portname = argv[arg++];
+    }
+    else if(!strcmp("--logfile", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        serverlogfile = argv[arg++];
+    }
+    else if(!strcmp("--logdir", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        logdir = argv[arg++];
+    }
+    else if(!strcmp("--ipv4", argv[arg])) {
+#ifdef USE_IPV6
+      ipv_inuse = "IPv4";
+      use_ipv6 = FALSE;
+#endif
+      arg++;
+    }
+    else if(!strcmp("--ipv6", argv[arg])) {
+#ifdef USE_IPV6
+      ipv_inuse = "IPv6";
+      use_ipv6 = TRUE;
+#endif
+      arg++;
+    }
+    else if(!strcmp("--port", argv[arg])) {
+      arg++;
+      if(argc > arg) {
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          port = (unsigned short)num;
+        arg++;
+      }
+    }
+    else if(!strcmp("--srcdir", argv[arg])) {
+      arg++;
+      if(argc > arg) {
+        srcpath = argv[arg];
+        arg++;
+      }
+    }
+    else {
+      puts("Usage: tftpd [option]\n"
+           " --version\n"
+           " --logfile [file]\n"
+           " --logdir [directory]\n"
+           " --pidfile [file]\n"
+           " --portfile [file]\n"
+           " --ipv4\n"
+           " --ipv6\n"
+           " --port [port]\n"
+           " --srcdir [path]");
+      return 0;
+    }
+  }
+
+  snprintf(loglockfile, sizeof(loglockfile), "%s/%s/tftp-%s.lock",
+           logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
+
+  install_signal_handlers(true);
+
+#ifdef USE_IPV6
+  if(!use_ipv6)
+#endif
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+#ifdef USE_IPV6
+  else
+    sock = socket(AF_INET6, SOCK_DGRAM, 0);
+#endif
+
+  if(CURL_SOCKET_BAD == sock) {
+    error = SOCKERRNO;
+    logmsg("Error creating socket (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("  Could not open test file %ld", req->testno);
-    return 1; /* done */
+    result = 1;
+    goto tftpd_cleanup;
+  }
+
+  flag = 1;
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
+    error = SOCKERRNO;
+    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+    result = 1;
+    goto tftpd_cleanup;
+  }
+
+#ifdef USE_IPV6
+  if(!use_ipv6) {
+#endif
+    memset(&me.sa4, 0, sizeof(me.sa4));
+    me.sa4.sin_family = AF_INET;
+    me.sa4.sin_addr.s_addr = INADDR_ANY;
+    me.sa4.sin_port = htons(port);
+    rc = bind(sock, &me.sa, sizeof(me.sa4));
+#ifdef USE_IPV6
   }
   else {
-    char *orgcmd = NULL;
-    char *cmd = NULL;
-    size_t cmdsize = 0;
-    int num = 0;
-
-    /* get the custom server control "commands" */
-    error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
-    curlx_fclose(stream);
-    if(error) {
-      logmsg("getpart() failed with error (%d)", error);
-      return 1; /* done */
-    }
-
-    cmd = orgcmd;
-    while(cmd && cmdsize) {
-      char *check;
-      if(sscanf(cmd, "writedelay: %d", &num) == 1) {
-        logmsg("instructed to delay %d secs between packets", num);
-        req->writedelay = num;
-      }
-      else {
-        logmsg("Unknown <servercmd> instruction found: %s", cmd);
-      }
-      /* try to deal with CRLF or just LF */
-      check = strchr(cmd, '\r');
-      if(!check)
-        check = strchr(cmd, '\n');
-
-      if(check) {
-        /* get to the letter following the newline */
-        while((*check == '\r') || (*check == '\n'))
-          check++;
-
-        if(!*check)
-          /* if we reached a zero, get out */
-          break;
-        cmd = check;
-      }
-      else
-        break;
-    }
-    free(orgcmd);
+    memset(&me.sa6, 0, sizeof(me.sa6));
+    me.sa6.sin6_family = AF_INET6;
+    me.sa6.sin6_addr = in6addr_any;
+    me.sa6.sin6_port = htons(port);
+    rc = bind(sock, &me.sa, sizeof(me.sa6));
+  }
+#endif /* USE_IPV6 */
+  if(rc) {
+    error = SOCKERRNO;
+    logmsg("Error binding socket on port %hu (%d) %s", port,
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+    result = 1;
+    goto tftpd_cleanup;
   }
 
-  return 0; /* OK! */
+  if(!port) {
+    /* The system was supposed to choose a port number, figure out which
+       port we actually got and update the listener port value with it. */
+    curl_socklen_t la_size;
+    srvr_sockaddr_union_t localaddr;
+#ifdef USE_IPV6
+    if(!use_ipv6)
+#endif
+      la_size = sizeof(localaddr.sa4);
+#ifdef USE_IPV6
+    else
+      la_size = sizeof(localaddr.sa6);
+#endif
+    memset(&localaddr.sa, 0, (size_t)la_size);
+    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
+      error = SOCKERRNO;
+      logmsg("getsockname() failed with error (%d) %s",
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+      sclose(sock);
+      goto tftpd_cleanup;
+    }
+    switch(localaddr.sa.sa_family) {
+    case AF_INET:
+      port = ntohs(localaddr.sa4.sin_port);
+      break;
+#ifdef USE_IPV6
+    case AF_INET6:
+      port = ntohs(localaddr.sa6.sin6_port);
+      break;
+#endif
+    default:
+      break;
+    }
+    if(!port) {
+      /* Real failure, listener port shall not be zero beyond this point. */
+      logmsg("Apparently getsockname() succeeded, with listener port zero.");
+      logmsg("A valid reason for this failure is a binary built without");
+      logmsg("proper network library linkage. This might not be the only");
+      logmsg("reason, but double check it before anything else.");
+      result = 2;
+      goto tftpd_cleanup;
+    }
+  }
+
+  tftpd_wrotepidfile = write_pidfile(pidname);
+  if(!tftpd_wrotepidfile) {
+    result = 1;
+    goto tftpd_cleanup;
+  }
+
+  if(portname) {
+    tftpd_wroteportfile = write_portfile(portname, port);
+    if(!tftpd_wroteportfile) {
+      result = 1;
+      goto tftpd_cleanup;
+    }
+  }
+
+  logmsg("Running %s version on port UDP/%d", ipv_inuse, (int)port);
+
+  for(;;) {
+    fromlen = sizeof(from);
+#ifdef USE_IPV6
+    if(!use_ipv6)
+#endif
+      fromlen = sizeof(from.sa4);
+#ifdef USE_IPV6
+    else
+      fromlen = sizeof(from.sa6);
+#endif
+    n = (ssize_t)recvfrom(sock, &trsbuf.storage[0], sizeof(trsbuf.storage), 0,
+                          &from.sa, &fromlen);
+    if(got_exit_signal)
+      break;
+    if(n < 0) {
+      logmsg("recvfrom");
+      result = 3;
+      break;
+    }
+
+    set_advisor_read_lock(loglockfile);
+    serverlogslocked = 1;
+
+#ifdef USE_IPV6
+    if(!use_ipv6) {
+#endif
+      from.sa4.sin_family = AF_INET;
+      peer = socket(AF_INET, SOCK_DGRAM, 0);
+      if(CURL_SOCKET_BAD == peer) {
+        logmsg("socket");
+        result = 2;
+        break;
+      }
+      if(connect(peer, &from.sa, sizeof(from.sa4)) < 0) {
+        logmsg("connect: fail");
+        result = 1;
+        break;
+      }
+#ifdef USE_IPV6
+    }
+    else {
+      from.sa6.sin6_family = AF_INET6;
+      peer = socket(AF_INET6, SOCK_DGRAM, 0);
+      if(CURL_SOCKET_BAD == peer) {
+        logmsg("socket");
+        result = 2;
+        break;
+      }
+      if(connect(peer, &from.sa, sizeof(from.sa6)) < 0) {
+        logmsg("connect: fail");
+        result = 1;
+        break;
+      }
+    }
+#endif
+
+    maxtimeout = 5 * TIMEOUT;
+
+    tp = &trsbuf.hdr;
+    tp->th_opcode = ntohs(tp->th_opcode);
+    if(tp->th_opcode == opcode_RRQ || tp->th_opcode == opcode_WRQ) {
+      memset(&test, 0, sizeof(test));
+      if(do_tftp(&test, tp, n) < 0)
+        break;
+      free(test.buffer);
+    }
+    sclose(peer);
+    peer = CURL_SOCKET_BAD;
+
+    if(got_exit_signal)
+      break;
+
+    if(serverlogslocked) {
+      serverlogslocked = 0;
+      clear_advisor_read_lock(loglockfile);
+    }
+
+    logmsg("end of one transfer");
+  }
+
+tftpd_cleanup:
+
+  if(test.ofile > 0)
+    close(test.ofile);
+
+  if((peer != sock) && (peer != CURL_SOCKET_BAD))
+    sclose(peer);
+
+  if(sock != CURL_SOCKET_BAD)
+    sclose(sock);
+
+  if(got_exit_signal)
+    logmsg("signalled to die");
+
+  if(tftpd_wrotepidfile)
+    unlink(pidname);
+  if(tftpd_wroteportfile)
+    unlink(portname);
+
+  if(serverlogslocked) {
+    serverlogslocked = 0;
+    clear_advisor_read_lock(loglockfile);
+  }
+
+  restore_signal_handlers(true);
+
+  if(got_exit_signal) {
+    logmsg("========> %s tftpd (port: %d pid: %ld) exits with signal (%d)",
+           ipv_inuse, (int)port, (long)our_getpid(), exit_signal);
+    /*
+     * To properly set the return status of the process we
+     * must raise the same signal SIGINT or SIGTERM that we
+     * caught and let the old handler take care of it.
+     */
+    raise(exit_signal);
+  }
+
+  logmsg("========> tftpd quits");
+  return result;
 }
