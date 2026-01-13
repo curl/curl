@@ -91,97 +91,7 @@ extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
                         LDAP **ld);
 #endif
 
-static CURLcode oldap_setup_connection(struct Curl_easy *data,
-                                       struct connectdata *conn);
-static CURLcode oldap_do(struct Curl_easy *data, bool *done);
-static CURLcode oldap_done(struct Curl_easy *data, CURLcode, bool);
-static CURLcode oldap_connect(struct Curl_easy *data, bool *done);
-static CURLcode oldap_connecting(struct Curl_easy *data, bool *done);
-static CURLcode oldap_disconnect(struct Curl_easy *data,
-                                 struct connectdata *conn, bool dead);
-
-static CURLcode oldap_perform_auth(struct Curl_easy *data, const char *mech,
-                                   const struct bufref *initresp);
-static CURLcode oldap_continue_auth(struct Curl_easy *data, const char *mech,
-                                    const struct bufref *resp);
-static CURLcode oldap_cancel_auth(struct Curl_easy *data, const char *mech);
-static CURLcode oldap_get_message(struct Curl_easy *data, struct bufref *out);
-
 static Curl_recv oldap_recv;
-
-/*
- * LDAP protocol handler.
- */
-const struct Curl_handler Curl_handler_ldap = {
-  "ldap",                               /* scheme */
-  oldap_setup_connection,               /* setup_connection */
-  oldap_do,                             /* do_it */
-  oldap_done,                           /* done */
-  ZERO_NULL,                            /* do_more */
-  oldap_connect,                        /* connect_it */
-  oldap_connecting,                     /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  oldap_disconnect,                     /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_LDAP,                            /* defport */
-  CURLPROTO_LDAP,                       /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL_REUSE |                   /* flags */
-    PROTOPT_CONN_REUSE
-};
-
-#ifdef USE_SSL
-/*
- * LDAPS protocol handler.
- */
-const struct Curl_handler Curl_handler_ldaps = {
-  "ldaps",                              /* scheme */
-  oldap_setup_connection,               /* setup_connection */
-  oldap_do,                             /* do_it */
-  oldap_done,                           /* done */
-  ZERO_NULL,                            /* do_more */
-  oldap_connect,                        /* connect_it */
-  oldap_connecting,                     /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  oldap_disconnect,                     /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_LDAPS,                           /* defport */
-  CURLPROTO_LDAPS,                      /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL |                         /* flags */
-    PROTOPT_CONN_REUSE
-};
-#endif
-
-/* SASL parameters for the ldap protocol */
-static const struct SASLproto saslldap = {
-  "ldap",                     /* The service name */
-  oldap_perform_auth,         /* Send authentication command */
-  oldap_continue_auth,        /* Send authentication continuation */
-  oldap_cancel_auth,          /* Send authentication cancellation */
-  oldap_get_message,          /* Get SASL response message */
-  0,                          /* Maximum initial response length (no max) */
-  LDAP_SASL_BIND_IN_PROGRESS, /* Code received when continuation is expected */
-  LDAP_SUCCESS,               /* Code to receive upon authentication success */
-  SASL_AUTH_NONE,             /* Default mechanisms */
-  0                           /* Configuration flags */
-};
 
 struct ldapconninfo {
   struct SASL sasl;          /* SASL-related parameters */
@@ -584,6 +494,20 @@ static void oldap_conn_dtor(void *key, size_t klen, void *entry)
   }
   curlx_free(li);
 }
+
+/* SASL parameters for the ldap protocol */
+static const struct SASLproto saslldap = {
+  "ldap",                     /* The service name */
+  oldap_perform_auth,         /* Send authentication command */
+  oldap_continue_auth,        /* Send authentication continuation */
+  oldap_cancel_auth,          /* Send authentication cancellation */
+  oldap_get_message,          /* Get SASL response message */
+  0,                          /* Maximum initial response length (no max) */
+  LDAP_SASL_BIND_IN_PROGRESS, /* Code received when continuation is expected */
+  LDAP_SUCCESS,               /* Code to receive upon authentication success */
+  SASL_AUTH_NONE,             /* Default mechanisms */
+  0                           /* Configuration flags */
+};
 
 static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 {
@@ -1343,5 +1267,65 @@ void Curl_ldap_version(char *buf, size_t bufsz)
   else
     curl_msnprintf(buf, bufsz, "OpenLDAP");
 }
+
+/*
+ * LDAP protocol handler.
+ */
+const struct Curl_handler Curl_handler_ldap = {
+  "ldap",                               /* scheme */
+  oldap_setup_connection,               /* setup_connection */
+  oldap_do,                             /* do_it */
+  oldap_done,                           /* done */
+  ZERO_NULL,                            /* do_more */
+  oldap_connect,                        /* connect_it */
+  oldap_connecting,                     /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  oldap_disconnect,                     /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_LDAP,                            /* defport */
+  CURLPROTO_LDAP,                       /* protocol */
+  CURLPROTO_LDAP,                       /* family */
+  PROTOPT_SSL_REUSE |                   /* flags */
+    PROTOPT_CONN_REUSE
+};
+
+#ifdef USE_SSL
+/*
+ * LDAPS protocol handler.
+ */
+const struct Curl_handler Curl_handler_ldaps = {
+  "ldaps",                              /* scheme */
+  oldap_setup_connection,               /* setup_connection */
+  oldap_do,                             /* do_it */
+  oldap_done,                           /* done */
+  ZERO_NULL,                            /* do_more */
+  oldap_connect,                        /* connect_it */
+  oldap_connecting,                     /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  oldap_disconnect,                     /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+  PORT_LDAPS,                           /* defport */
+  CURLPROTO_LDAPS,                      /* protocol */
+  CURLPROTO_LDAP,                       /* family */
+  PROTOPT_SSL |                         /* flags */
+    PROTOPT_CONN_REUSE
+};
+#endif
 
 #endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */
