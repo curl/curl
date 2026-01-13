@@ -287,11 +287,6 @@ struct md5_ctx {
 };
 typedef struct md5_ctx my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx);
-static void my_md5_update(void *ctx, const unsigned char *data,
-                          unsigned int size);
-static void my_md5_final(unsigned char *result, void *ctx);
-
 /*
  * The basic MD5 functions.
  *

@@ -201,10 +201,6 @@ struct md4_ctx {
 };
 typedef struct md4_ctx MD4_CTX;
 
-static int MD4_Init(MD4_CTX *ctx);
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size);
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
-
 /*
  * The basic MD4 functions.
  *
