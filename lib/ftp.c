@@ -185,6 +185,10 @@ static void ftp_state_low(struct Curl_easy *data,
 #define ftp_state(x, y, z) ftp_state_low(x, y, z, __LINE__)
 #endif /* DEBUGBUILD */
 
+static CURLcode ftp_state_retr(struct Curl_easy *data,
+                               struct ftp_conn *ftpc,
+                               struct FTP *ftp,
+                               curl_off_t filesize);
 static CURLcode ftp_state_mdtm(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp);
@@ -196,10 +200,6 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
                             struct ftp_conn *ftpc,
                             struct FTP *ftp,
                             bool ascii, ftpstate newstate);
-static CURLcode ftp_state_retr(struct Curl_easy *data,
-                               struct ftp_conn *ftpc,
-                               struct FTP *ftp,
-                               curl_off_t filesize);
 
 static void freedirs(struct ftp_conn *ftpc)
 {
