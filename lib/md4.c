@@ -70,10 +70,10 @@
 #if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 
 #ifdef OPENSSL_COEXIST
-  #define MD4_CTX    WOLFSSL_MD4_CTX
-  #define MD4_Init   wolfSSL_MD4_Init
-  #define MD4_Update wolfSSL_MD4_Update
-  #define MD4_Final  wolfSSL_MD4_Final
+#  define MD4_CTX    WOLFSSL_MD4_CTX
+#  define MD4_Init   wolfSSL_MD4_Init
+#  define MD4_Update wolfSSL_MD4_Update
+#  define MD4_Final  wolfSSL_MD4_Final
 #endif
 
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)

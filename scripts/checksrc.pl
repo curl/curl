@@ -152,6 +152,7 @@ my %warnings = (
     'COMMENTNOSPACESTART'   => 'no space following /*',
     'COPYRIGHT'             => 'file missing a copyright statement',
     'CPPCOMMENTS'           => '// comment detected',
+    "CPPSPACE"              => 'space before preprocessor hash',
     'DOBRACE'               => 'A single space between do and open brace',
     'EMPTYLINEBRACE'        => 'Empty line before the open brace',
     'EQUALSNOSPACE'         => 'equals sign without following space',
@@ -672,6 +673,11 @@ sub scanfile {
             $includes{$path} = $l;
         }
 
+        # detect leading space before the hash
+        if($l =~ /^([ \t]+)\#/) {
+            checkwarn("CPPSPACE",
+                      $line, 0, $file, $l, "space before preprocessor hash");
+        }
         # detect and strip preprocessor directives
         if($l =~ /^[ \t]*\#/) {
             # preprocessor line

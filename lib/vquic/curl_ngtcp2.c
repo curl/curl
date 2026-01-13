@@ -2639,7 +2639,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #elif defined(USE_WOLFSSL)
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.wssl.ssl);
 #else
-  #error "ngtcp2 TLS backend not defined"
+#error "ngtcp2 TLS backend not defined"
 #endif
 
   ngtcp2_ccerr_default(&ctx->last_error);
