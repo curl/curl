@@ -214,10 +214,6 @@ static sigjmp_buf timeoutbuf;
 static void read_ahead(struct testcase *test, int convert);
 static ssize_t write_behind(struct testcase *test, int convert);
 static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
-static int validate_access(struct testcase *test,
-                           const char *filename, unsigned short mode);
-static void sendtftp(struct testcase *test, const struct formats *pf);
-static void recvtftp(struct testcase *test, const struct formats *pf);
 
 /*****************************************************************************
  *                          FUNCTION IMPLEMENTATIONS                         *
@@ -885,192 +881,6 @@ tftpd_cleanup:
 }
 
 /*
- * Handle initial connection protocol.
- */
-static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
-{
-  char *cp;
-  int first = 1, ecode;
-  const struct formats *pf;
-  char *filename, *mode = NULL;
-#ifdef USE_WINSOCK
-  DWORD recvtimeout, recvtimeoutbak;
-#endif
-  const char *option = "mode"; /* mode is implicit */
-  int toggle = 1;
-  FILE *server;
-  char dumpfile[256];
-
-  snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
-
-  /* Open request dump file. */
-  server = curlx_fopen(dumpfile, "ab");
-  if(!server) {
-    char errbuf[STRERROR_LEN];
-    int error = errno;
-    logmsg("fopen() failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Error opening file '%s'", dumpfile);
-    return -1;
-  }
-
-  /* store input protocol */
-  fprintf(server, "opcode = %x\n", tp->th_opcode);
-
-  cp = (char *)&tp->th_stuff;
-  filename = cp;
-  do {
-    bool endofit = true;
-    while(cp < &trsbuf.storage[size]) {
-      if(*cp == '\0') {
-        endofit = false;
-        break;
-      }
-      cp++;
-    }
-    if(endofit)
-      /* no more options */
-      break;
-
-    /* before increasing pointer, make sure it is still within the legal
-       space */
-    if((cp + 1) < &trsbuf.storage[size]) {
-      ++cp;
-      if(first) {
-        /* store the mode since we need it later */
-        mode = cp;
-        first = 0;
-      }
-      if(toggle)
-        /* name/value pair: */
-        fprintf(server, "%s = %s\n", option, cp);
-      else {
-        /* store the name pointer */
-        option = cp;
-      }
-      toggle ^= 1;
-    }
-    else
-      /* No more options */
-      break;
-  } while(1);
-
-  if(*cp || !mode) {
-    nak(TFTP_EBADOP);
-    curlx_fclose(server);
-    return 3;
-  }
-
-  /* store input protocol */
-  fprintf(server, "filename = %s\n", filename);
-
-  for(cp = mode; cp && *cp; cp++)
-    if(ISUPPER(*cp))
-      *cp = (char)tolower((int)*cp);
-
-  /* store input protocol */
-  curlx_fclose(server);
-
-  for(pf = formata; pf->f_mode; pf++)
-    if(strcmp(pf->f_mode, mode) == 0)
-      break;
-  if(!pf->f_mode) {
-    nak(TFTP_EBADOP);
-    return 2;
-  }
-  ecode = validate_access(test, filename, tp->th_opcode);
-  if(ecode) {
-    nak(ecode);
-    return 1;
-  }
-
-#ifdef USE_WINSOCK
-  recvtimeout = sizeof(recvtimeoutbak);
-  getsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (char *)&recvtimeoutbak, (int *)&recvtimeout);
-  recvtimeout = TIMEOUT*1000;
-  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (const char *)&recvtimeout, sizeof(recvtimeout));
-#endif
-
-  if(tp->th_opcode == opcode_WRQ)
-    recvtftp(test, pf);
-  else
-    sendtftp(test, pf);
-
-#ifdef USE_WINSOCK
-  recvtimeout = recvtimeoutbak;
-  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (const char *)&recvtimeout, sizeof(recvtimeout));
-#endif
-
-  return 0;
-}
-
-/* Based on the testno, parse the correct server commands. */
-static int tftpd_parse_servercmd(struct testcase *req)
-{
-  FILE *stream;
-  int error;
-
-  stream = test2fopen(req->testno, logdir);
-  if(!stream) {
-    char errbuf[STRERROR_LEN];
-    error = errno;
-    logmsg("fopen() failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("  Could not open test file %ld", req->testno);
-    return 1; /* done */
-  }
-  else {
-    char *orgcmd = NULL;
-    char *cmd = NULL;
-    size_t cmdsize = 0;
-    int num = 0;
-
-    /* get the custom server control "commands" */
-    error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
-    curlx_fclose(stream);
-    if(error) {
-      logmsg("getpart() failed with error (%d)", error);
-      return 1; /* done */
-    }
-
-    cmd = orgcmd;
-    while(cmd && cmdsize) {
-      char *check;
-      if(sscanf(cmd, "writedelay: %d", &num) == 1) {
-        logmsg("instructed to delay %d secs between packets", num);
-        req->writedelay = num;
-      }
-      else {
-        logmsg("Unknown <servercmd> instruction found: %s", cmd);
-      }
-      /* try to deal with CRLF or just LF */
-      check = strchr(cmd, '\r');
-      if(!check)
-        check = strchr(cmd, '\n');
-
-      if(check) {
-        /* get to the letter following the newline */
-        while((*check == '\r') || (*check == '\n'))
-          check++;
-
-        if(!*check)
-          /* if we reached a zero, get out */
-          break;
-        cmd = check;
-      }
-      else
-        break;
-    }
-    free(orgcmd);
-  }
-
-  return 0; /* OK! */
-}
-
-/*
  * Validate file access.
  */
 static int validate_access(struct testcase *test,
@@ -1355,4 +1165,190 @@ abort:
     test->ofile = 0;
   }
   return;
+}
+
+/*
+ * Handle initial connection protocol.
+ */
+static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
+{
+  char *cp;
+  int first = 1, ecode;
+  const struct formats *pf;
+  char *filename, *mode = NULL;
+#ifdef USE_WINSOCK
+  DWORD recvtimeout, recvtimeoutbak;
+#endif
+  const char *option = "mode"; /* mode is implicit */
+  int toggle = 1;
+  FILE *server;
+  char dumpfile[256];
+
+  snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
+
+  /* Open request dump file. */
+  server = curlx_fopen(dumpfile, "ab");
+  if(!server) {
+    char errbuf[STRERROR_LEN];
+    int error = errno;
+    logmsg("fopen() failed with error (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+    logmsg("Error opening file '%s'", dumpfile);
+    return -1;
+  }
+
+  /* store input protocol */
+  fprintf(server, "opcode = %x\n", tp->th_opcode);
+
+  cp = (char *)&tp->th_stuff;
+  filename = cp;
+  do {
+    bool endofit = true;
+    while(cp < &trsbuf.storage[size]) {
+      if(*cp == '\0') {
+        endofit = false;
+        break;
+      }
+      cp++;
+    }
+    if(endofit)
+      /* no more options */
+      break;
+
+    /* before increasing pointer, make sure it is still within the legal
+       space */
+    if((cp + 1) < &trsbuf.storage[size]) {
+      ++cp;
+      if(first) {
+        /* store the mode since we need it later */
+        mode = cp;
+        first = 0;
+      }
+      if(toggle)
+        /* name/value pair: */
+        fprintf(server, "%s = %s\n", option, cp);
+      else {
+        /* store the name pointer */
+        option = cp;
+      }
+      toggle ^= 1;
+    }
+    else
+      /* No more options */
+      break;
+  } while(1);
+
+  if(*cp || !mode) {
+    nak(TFTP_EBADOP);
+    curlx_fclose(server);
+    return 3;
+  }
+
+  /* store input protocol */
+  fprintf(server, "filename = %s\n", filename);
+
+  for(cp = mode; cp && *cp; cp++)
+    if(ISUPPER(*cp))
+      *cp = (char)tolower((int)*cp);
+
+  /* store input protocol */
+  curlx_fclose(server);
+
+  for(pf = formata; pf->f_mode; pf++)
+    if(strcmp(pf->f_mode, mode) == 0)
+      break;
+  if(!pf->f_mode) {
+    nak(TFTP_EBADOP);
+    return 2;
+  }
+  ecode = validate_access(test, filename, tp->th_opcode);
+  if(ecode) {
+    nak(ecode);
+    return 1;
+  }
+
+#ifdef USE_WINSOCK
+  recvtimeout = sizeof(recvtimeoutbak);
+  getsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (char *)&recvtimeoutbak, (int *)&recvtimeout);
+  recvtimeout = TIMEOUT*1000;
+  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (const char *)&recvtimeout, sizeof(recvtimeout));
+#endif
+
+  if(tp->th_opcode == opcode_WRQ)
+    recvtftp(test, pf);
+  else
+    sendtftp(test, pf);
+
+#ifdef USE_WINSOCK
+  recvtimeout = recvtimeoutbak;
+  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (const char *)&recvtimeout, sizeof(recvtimeout));
+#endif
+
+  return 0;
+}
+
+/* Based on the testno, parse the correct server commands. */
+static int tftpd_parse_servercmd(struct testcase *req)
+{
+  FILE *stream;
+  int error;
+
+  stream = test2fopen(req->testno, logdir);
+  if(!stream) {
+    char errbuf[STRERROR_LEN];
+    error = errno;
+    logmsg("fopen() failed with error (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+    logmsg("  Could not open test file %ld", req->testno);
+    return 1; /* done */
+  }
+  else {
+    char *orgcmd = NULL;
+    char *cmd = NULL;
+    size_t cmdsize = 0;
+    int num = 0;
+
+    /* get the custom server control "commands" */
+    error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
+    curlx_fclose(stream);
+    if(error) {
+      logmsg("getpart() failed with error (%d)", error);
+      return 1; /* done */
+    }
+
+    cmd = orgcmd;
+    while(cmd && cmdsize) {
+      char *check;
+      if(sscanf(cmd, "writedelay: %d", &num) == 1) {
+        logmsg("instructed to delay %d secs between packets", num);
+        req->writedelay = num;
+      }
+      else {
+        logmsg("Unknown <servercmd> instruction found: %s", cmd);
+      }
+      /* try to deal with CRLF or just LF */
+      check = strchr(cmd, '\r');
+      if(!check)
+        check = strchr(cmd, '\n');
+
+      if(check) {
+        /* get to the letter following the newline */
+        while((*check == '\r') || (*check == '\n'))
+          check++;
+
+        if(!*check)
+          /* if we reached a zero, get out */
+          break;
+        cmd = check;
+      }
+      else
+        break;
+    }
+    free(orgcmd);
+  }
+
+  return 0; /* OK! */
 }
