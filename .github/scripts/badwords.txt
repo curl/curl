@@ -78,9 +78,9 @@ file names\b:filenames
 \buser names\b:usernames
 \bpass phrase:passphrase
 \bwill\b:rewrite to present tense
-\b(8|16|24|32|64|128)bit: Add dash NN-bit
-(8|16|24|32|64|128) bit\b: Add dash: NN-bit
-(8|16|24|32|64|128)-bits: Use NN bits or NN-bit
+\b(8|16|24|32|64|128|[0-9]+)bit: Add dash NN-bit
+(8|16|24|32|64|128|[0-9]+) bit\b: Add dash: NN-bit
+(8|16|24|32|64|128|[0-9]+)-bits: Use NN bits or NN-bit
 \bvery\b:rephrase using an alternative word
 \bCurl\b=curl
 \bcURL\b=curl
