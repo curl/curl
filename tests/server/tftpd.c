@@ -207,10 +207,6 @@ static int tftpd_wroteportfile = 0;
 static sigjmp_buf timeoutbuf;
 #endif
 
-#if defined(HAVE_ALARM) && defined(SIGALRM)
-static const unsigned int rexmtval = TIMEOUT;
-#endif
-
 /*****************************************************************************
  *                            FUNCTION PROTOTYPES                            *
  *****************************************************************************/
@@ -228,6 +224,7 @@ static void recvtftp(struct testcase *test, const struct formats *pf);
  *****************************************************************************/
 
 #if defined(HAVE_ALARM) && defined(SIGALRM)
+static const unsigned int rexmtval = TIMEOUT;
 
 /*
  * Like signal(), but with well-defined semantics.
