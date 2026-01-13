@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket API usage together with glib2
+ * multi socket API usage with glib2
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
@@ -194,9 +194,8 @@ static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
   CURLMcode mresult;
   int fd = g_io_channel_unix_get_fd(ch);
 
-  int action =
-    ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
-    ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
+  int action = ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
+               ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
 
   mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", mresult);
@@ -230,9 +229,8 @@ static void remsock(struct SockInfo *f)
 static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
                     struct GlobalInfo *g)
 {
-  GIOCondition kind =
-    ((act & CURL_POLL_IN) ? G_IO_IN : 0) |
-    ((act & CURL_POLL_OUT) ? G_IO_OUT : 0);
+  GIOCondition kind = ((act & CURL_POLL_IN) ? G_IO_IN : 0) |
+                      ((act & CURL_POLL_OUT) ? G_IO_OUT : 0);
 
   f->sockfd = s;
   f->action = act;

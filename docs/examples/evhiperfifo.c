@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket interface together with libev
+ * multi socket interface with libev
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
@@ -106,23 +106,6 @@ struct SockInfo {
   struct GlobalInfo *global;
 };
 
-static void timer_cb(EV_P_ struct ev_timer *w, int revents);
-
-/* Update the event timer after curl_multi library calls */
-static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
-{
-  (void)multi;
-  printf("%s %li\n", __PRETTY_FUNCTION__, timeout_ms);
-  ev_timer_stop(g->loop, &g->timer_event);
-  if(timeout_ms >= 0) {
-    /* -1 means delete, other values are timeout times in milliseconds */
-    double t = timeout_ms / 1000;
-    ev_timer_init(&g->timer_event, timer_cb, t, 0.);
-    ev_timer_start(g->loop, &g->timer_event);
-  }
-  return 0;
-}
-
 /* Die if we get a bad CURLMcode somewhere */
 static void mcode_or_die(const char *where, CURLMcode code)
 {
@@ -185,18 +168,49 @@ static void check_multi_info(struct GlobalInfo *g)
   }
 }
 
+/* Called by libevent when our timeout expires */
+static void timer_cb(EV_P_ struct ev_timer *w, int revents)
+{
+  CURLMcode mresult;
+  struct GlobalInfo *g;
+
+  printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
+
+  g = (struct GlobalInfo *)w->data;
+
+  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
+                                     &g->still_running);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
+  check_multi_info(g);
+}
+
+/* Update the event timer after curl_multi library calls */
+static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
+{
+  (void)multi;
+  printf("%s %li\n", __PRETTY_FUNCTION__, timeout_ms);
+  ev_timer_stop(g->loop, &g->timer_event);
+  if(timeout_ms >= 0) {
+    /* -1 means delete, other values are timeout times in milliseconds */
+    double t = timeout_ms / 1000;
+    ev_timer_init(&g->timer_event, timer_cb, t, 0.);
+    ev_timer_start(g->loop, &g->timer_event);
+  }
+  return 0;
+}
+
 /* Called by libevent when we get action on a multi socket */
 static void event_cb(EV_P_ struct ev_io *w, int revents)
 {
-  struct GlobalInfo *g;
   CURLMcode mresult;
-  int action;
+  struct GlobalInfo *g;
+
+  int action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
+               ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
 
   printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
   g = (struct GlobalInfo *)w->data;
 
-  action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
-           ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
   mresult = curl_multi_socket_action(g->multi, w->fd, action,
                                      &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", mresult);
@@ -205,22 +219,6 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
     ev_timer_stop(g->loop, &g->timer_event);
   }
-}
-
-/* Called by libevent when our timeout expires */
-static void timer_cb(EV_P_ struct ev_timer *w, int revents)
-{
-  struct GlobalInfo *g;
-  CURLMcode mresult;
-
-  printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
-
-  g = (struct GlobalInfo *)w->data;
-
-  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
-                                &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
-  check_multi_info(g);
 }
 
 /* Clean up the SockInfo structure */
@@ -370,7 +368,7 @@ static void fifo_cb(EV_P_ struct ev_io *w, int revents)
     rv = fscanf(g->input, "%1023s%n", s, &n);
     s[n] = '\0';
     if(n && s[0]) {
-      new_conn(s, g);  /* if we read a URL, go get it! */
+      new_conn(s, g); /* if we read a URL, go get it! */
     }
     else
       break;

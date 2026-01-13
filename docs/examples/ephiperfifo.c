@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket API usage with epoll and timerfd
+ * multi socket interface with epoll and timerfd
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
@@ -140,7 +140,61 @@ static void mcode_or_die(const char *where, CURLMcode code)
   }
 }
 
-static void timer_cb(struct GlobalInfo *g, int revents);
+/* Check for completed transfers, and remove their easy handles */
+static void check_multi_info(struct GlobalInfo *g)
+{
+  char *eff_url;
+  CURLMsg *msg;
+  int msgs_left;
+  struct ConnInfo *conn;
+
+  fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
+  while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
+    if(msg->msg == CURLMSG_DONE) {
+      CURL *curl = msg->easy_handle;
+      CURLcode result = msg->data.result;
+      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
+      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, result, conn->error);
+      curl_multi_remove_handle(g->multi, curl);
+      free(conn->url);
+      curl_easy_cleanup(curl);
+      free(conn);
+    }
+  }
+}
+
+/* Called by main loop when our timeout expires */
+static void timer_cb(struct GlobalInfo *g, int revents)
+{
+  CURLMcode mresult;
+  uint64_t count = 0;
+  ssize_t err = 0;
+
+  (void)revents;
+
+  err = read(g->tfd, &count, sizeof(uint64_t));
+  if(err == -1) {
+    /* Note that we may call the timer callback even if the timerfd is not
+     * readable. It is possible that there are multiple events stored in the
+     * epoll buffer (i.e. the timer may have fired multiple times). The event
+     * count is cleared after the first call so future events in the epoll
+     * buffer fails to read from the timer. */
+    if(errno == EAGAIN) {
+      fprintf(MSG_OUT, "EAGAIN on tfd %d\n", g->tfd);
+      return;
+    }
+  }
+  if(err != sizeof(uint64_t)) {
+    fprintf(stderr, "read(tfd) == %ld", err);
+    perror("read(tfd)");
+  }
+
+  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
+                                     &g->still_running);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
+  check_multi_info(g);
+}
 
 /* Update the timer after curl_multi library does its thing. curl informs the
  * application through this callback what it wants the new timeout to be,
@@ -148,6 +202,8 @@ static void timer_cb(struct GlobalInfo *g, int revents);
 static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
 {
   struct itimerspec its;
+
+  (void)multi;
 
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
@@ -174,30 +230,6 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
   return 0;
 }
 
-/* Check for completed transfers, and remove their easy handles */
-static void check_multi_info(struct GlobalInfo *g)
-{
-  char *eff_url;
-  CURLMsg *msg;
-  int msgs_left;
-  struct ConnInfo *conn;
-
-  fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
-  while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
-    if(msg->msg == CURLMSG_DONE) {
-      CURL *curl = msg->easy_handle;
-      CURLcode result = msg->data.result;
-      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
-      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
-      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, result, conn->error);
-      curl_multi_remove_handle(g->multi, curl);
-      free(conn->url);
-      curl_easy_cleanup(curl);
-      free(conn);
-    }
-  }
-}
-
 /* Called by libevent when we get action on a multi socket filedescriptor */
 static void event_cb(struct GlobalInfo *g, int fd, int revents)
 {
@@ -205,7 +237,7 @@ static void event_cb(struct GlobalInfo *g, int fd, int revents)
   struct itimerspec its;
 
   int action = ((revents & EPOLLIN) ? CURL_CSELECT_IN : 0) |
-    ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
+               ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
 
   mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", mresult);
@@ -216,36 +248,6 @@ static void event_cb(struct GlobalInfo *g, int fd, int revents)
     memset(&its, 0, sizeof(its));
     timerfd_settime(g->tfd, 0, &its, NULL);
   }
-}
-
-/* Called by main loop when our timeout expires */
-static void timer_cb(struct GlobalInfo *g, int revents)
-{
-  CURLMcode mresult;
-  uint64_t count = 0;
-  ssize_t err = 0;
-
-  err = read(g->tfd, &count, sizeof(uint64_t));
-  if(err == -1) {
-    /* Note that we may call the timer callback even if the timerfd is not
-     * readable. It is possible that there are multiple events stored in the
-     * epoll buffer (i.e. the timer may have fired multiple times). The event
-     * count is cleared after the first call so future events in the epoll
-     * buffer fails to read from the timer. */
-    if(errno == EAGAIN) {
-      fprintf(MSG_OUT, "EAGAIN on tfd %d\n", g->tfd);
-      return;
-    }
-  }
-  if(err != sizeof(uint64_t)) {
-    fprintf(stderr, "read(tfd) == %ld", err);
-    perror("read(tfd)");
-  }
-
-  mresult = curl_multi_socket_action(g->multi,
-                                CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
-  check_multi_info(g);
 }
 
 /* Clean up the SockInfo structure */
@@ -290,7 +292,7 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
 static void addsock(curl_socket_t s, CURL *curl, int action,
                     struct GlobalInfo *g)
 {
-  struct SockInfo *fdp = (struct SockInfo *)calloc(1, sizeof(struct SockInfo));
+  struct SockInfo *fdp = calloc(1, sizeof(struct SockInfo));
 
   fdp->global = g;
   setsock(fdp, s, curl, action, g);
@@ -349,7 +351,7 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   struct ConnInfo *conn;
   CURLMcode mresult;
 
-  conn = (struct ConnInfo *)calloc(1, sizeof(*conn));
+  conn = calloc(1, sizeof(*conn));
   conn->error[0] = '\0';
 
   conn->curl = curl_easy_init();
@@ -371,13 +373,14 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   curl_easy_setopt(conn->curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_TIME, 3L);
   curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_LIMIT, 10L);
+
   fprintf(MSG_OUT, "Adding easy %p to multi %p (%s)\n",
           conn->curl, g->multi, url);
   mresult = curl_multi_add_handle(g->multi, conn->curl);
   mcode_or_die("new_conn: curl_multi_add_handle", mresult);
 
-  /* note that the add_handle() sets a timeout to trigger soon so that the
-   * necessary socket_action() call gets called by this app */
+  /* note that add_handle() sets a timeout to trigger soon so that the
+     necessary socket_action() gets called */
 }
 
 /* This gets called whenever data is received from the fifo */
@@ -386,6 +389,8 @@ static void fifo_cb(struct GlobalInfo *g, int revents)
   char s[1024];
   long int rv = 0;
   int n = 0;
+
+  (void)revents;
 
   do {
     s[0] = '\0';
@@ -400,10 +405,10 @@ static void fifo_cb(struct GlobalInfo *g, int revents)
 }
 
 /* Create a named pipe and tell libevent to monitor it */
-static const char *fifo = "hiper.fifo";
 static int init_fifo(struct GlobalInfo *g)
 {
   struct stat st;
+  static const char *fifo = "hiper.fifo";
   curl_socket_t sockfd;
   struct epoll_event epev;
 
