@@ -107,8 +107,6 @@
 #include <openssl/store.h>
 /* this is used in the following conditions to make them easier to read */
 #define OPENSSL_HAS_PROVIDERS
-
-static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
 /* AWS-LC fixed a bug with large buffers in v1.61.0 which also introduced
