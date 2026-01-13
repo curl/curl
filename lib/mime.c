@@ -48,12 +48,6 @@ struct Curl_easy;
 #include "slist.h"
 #include "curlx/dynbuf.h"
 
-#ifdef _WIN32
-#  ifndef R_OK
-#  define R_OK 4
-#  endif
-#endif
-
 #define READ_ERROR   ((size_t)-1)
 #define STOP_FILLING ((size_t)-2)
 
