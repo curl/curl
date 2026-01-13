@@ -185,10 +185,6 @@ static void ftp_state_low(struct Curl_easy *data,
 #define ftp_state(x, y, z) ftp_state_low(x, y, z, __LINE__)
 #endif /* DEBUGBUILD */
 
-static CURLcode ftp_state_retr(struct Curl_easy *data,
-                               struct ftp_conn *ftpc,
-                               struct FTP *ftp,
-                               curl_off_t filesize);
 static CURLcode ftp_state_mdtm(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp);
@@ -1670,6 +1666,89 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
   return result;
 }
 
+static CURLcode ftp_state_retr(struct Curl_easy *data,
+                               struct ftp_conn *ftpc,
+                               struct FTP *ftp,
+                               curl_off_t filesize)
+{
+  CURLcode result = CURLE_OK;
+
+  CURL_TRC_FTP(data, "[%s] ftp_state_retr()", FTP_CSTATE(ftpc));
+  if(data->set.max_filesize && (filesize > data->set.max_filesize)) {
+    failf(data, "Maximum file size exceeded");
+    return CURLE_FILESIZE_EXCEEDED;
+  }
+  ftp->downloadsize = filesize;
+
+  if(data->state.resume_from) {
+    /* We always (attempt to) get the size of downloads, so it is done before
+       this even when not doing resumes. */
+    if(filesize == -1) {
+      infof(data, "ftp server does not support SIZE");
+      /* We could not get the size and therefore we cannot know if there really
+         is a part of the file left to get, although the server will just
+         close the connection when we start the connection so it will not cause
+         us any harm, just not make us exit as nicely. */
+    }
+    else {
+      /* We got a file size report, so we check that there actually is a
+         part of the file left to get, or else we go home.  */
+      if(data->state.resume_from < 0) {
+        /* We are supposed to download the last abs(from) bytes */
+        if(filesize < -data->state.resume_from) {
+          failf(data, "Offset (%" FMT_OFF_T
+                ") was beyond file size (%" FMT_OFF_T ")",
+                data->state.resume_from, filesize);
+          return CURLE_BAD_DOWNLOAD_RESUME;
+        }
+        /* convert to size to download */
+        ftp->downloadsize = -data->state.resume_from;
+        /* download from where? */
+        data->state.resume_from = filesize - ftp->downloadsize;
+      }
+      else {
+        if(filesize < data->state.resume_from) {
+          failf(data, "Offset (%" FMT_OFF_T
+                ") was beyond file size (%" FMT_OFF_T ")",
+                data->state.resume_from, filesize);
+          return CURLE_BAD_DOWNLOAD_RESUME;
+        }
+        /* Now store the number of bytes we are expected to download */
+        ftp->downloadsize = filesize - data->state.resume_from;
+      }
+    }
+
+    if(ftp->downloadsize == 0) {
+      /* no data to transfer */
+      Curl_xfer_setup_nop(data);
+      infof(data, "File already completely downloaded");
+
+      /* Set ->transfer so that we will not get any error in ftp_done()
+       * because we did not transfer the any file */
+      ftp->transfer = PPTRANSFER_NONE;
+      ftp_state(data, ftpc, FTP_STOP);
+      return CURLE_OK;
+    }
+
+    /* Set resume file transfer offset */
+    infof(data, "Instructs server to resume from offset %" FMT_OFF_T,
+          data->state.resume_from);
+
+    result = Curl_pp_sendf(data, &ftpc->pp, "REST %" FMT_OFF_T,
+                           data->state.resume_from);
+    if(!result)
+      ftp_state(data, ftpc, FTP_RETR_REST);
+  }
+  else {
+    /* no resume */
+    result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
+    if(!result)
+      ftp_state(data, ftpc, FTP_RETR);
+  }
+
+  return result;
+}
+
 static CURLcode ftp_state_quote(struct Curl_easy *data,
                                 struct ftp_conn *ftpc,
                                 struct FTP *ftp,
@@ -2491,89 +2570,6 @@ static CURLcode ftp_state_type_resp(struct Curl_easy *data,
     result = ftp_state_stor_prequote(data, ftpc, ftp);
   else if(instate == FTP_RETR_LIST_TYPE)
     result = ftp_state_list_prequote(data, ftpc, ftp);
-
-  return result;
-}
-
-static CURLcode ftp_state_retr(struct Curl_easy *data,
-                               struct ftp_conn *ftpc,
-                               struct FTP *ftp,
-                               curl_off_t filesize)
-{
-  CURLcode result = CURLE_OK;
-
-  CURL_TRC_FTP(data, "[%s] ftp_state_retr()", FTP_CSTATE(ftpc));
-  if(data->set.max_filesize && (filesize > data->set.max_filesize)) {
-    failf(data, "Maximum file size exceeded");
-    return CURLE_FILESIZE_EXCEEDED;
-  }
-  ftp->downloadsize = filesize;
-
-  if(data->state.resume_from) {
-    /* We always (attempt to) get the size of downloads, so it is done before
-       this even when not doing resumes. */
-    if(filesize == -1) {
-      infof(data, "ftp server does not support SIZE");
-      /* We could not get the size and therefore we cannot know if there really
-         is a part of the file left to get, although the server will just
-         close the connection when we start the connection so it will not cause
-         us any harm, just not make us exit as nicely. */
-    }
-    else {
-      /* We got a file size report, so we check that there actually is a
-         part of the file left to get, or else we go home.  */
-      if(data->state.resume_from < 0) {
-        /* We are supposed to download the last abs(from) bytes */
-        if(filesize < -data->state.resume_from) {
-          failf(data, "Offset (%" FMT_OFF_T
-                ") was beyond file size (%" FMT_OFF_T ")",
-                data->state.resume_from, filesize);
-          return CURLE_BAD_DOWNLOAD_RESUME;
-        }
-        /* convert to size to download */
-        ftp->downloadsize = -data->state.resume_from;
-        /* download from where? */
-        data->state.resume_from = filesize - ftp->downloadsize;
-      }
-      else {
-        if(filesize < data->state.resume_from) {
-          failf(data, "Offset (%" FMT_OFF_T
-                ") was beyond file size (%" FMT_OFF_T ")",
-                data->state.resume_from, filesize);
-          return CURLE_BAD_DOWNLOAD_RESUME;
-        }
-        /* Now store the number of bytes we are expected to download */
-        ftp->downloadsize = filesize - data->state.resume_from;
-      }
-    }
-
-    if(ftp->downloadsize == 0) {
-      /* no data to transfer */
-      Curl_xfer_setup_nop(data);
-      infof(data, "File already completely downloaded");
-
-      /* Set ->transfer so that we will not get any error in ftp_done()
-       * because we did not transfer the any file */
-      ftp->transfer = PPTRANSFER_NONE;
-      ftp_state(data, ftpc, FTP_STOP);
-      return CURLE_OK;
-    }
-
-    /* Set resume file transfer offset */
-    infof(data, "Instructs server to resume from offset %" FMT_OFF_T,
-          data->state.resume_from);
-
-    result = Curl_pp_sendf(data, &ftpc->pp, "REST %" FMT_OFF_T,
-                           data->state.resume_from);
-    if(!result)
-      ftp_state(data, ftpc, FTP_RETR_REST);
-  }
-  else {
-    /* no resume */
-    result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
-    if(!result)
-      ftp_state(data, ftpc, FTP_RETR);
-  }
 
   return result;
 }
