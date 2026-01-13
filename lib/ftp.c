@@ -188,10 +188,6 @@ static void ftp_state_low(struct Curl_easy *data,
 static CURLcode ftp_parse_url_path(struct Curl_easy *data,
                                    struct ftp_conn *ftpc,
                                    struct FTP *ftp);
-static CURLcode ftp_regular_transfer(struct Curl_easy *data,
-                                     struct ftp_conn *ftpc,
-                                     struct FTP *ftp,
-                                     bool *done);
 static CURLcode ftp_state_mdtm(struct Curl_easy *data,
                                struct ftp_conn *ftpc,
                                struct FTP *ftp);
@@ -3863,6 +3859,52 @@ static CURLcode wc_statemach(struct Curl_easy *data,
 
 /***********************************************************************
  *
+ * ftp_regular_transfer()
+ *
+ * The input argument is already checked for validity.
+ *
+ * Performs all commands done before a regular transfer between a local and a
+ * remote host.
+ *
+ * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
+ * ftp_done() function without finding any major problem.
+ */
+static CURLcode ftp_regular_transfer(struct Curl_easy *data,
+                                     struct ftp_conn *ftpc,
+                                     struct FTP *ftp,
+                                     bool *dophase_done)
+{
+  CURLcode result = CURLE_OK;
+  bool connected = FALSE;
+  data->req.size = -1; /* make sure this is unknown at this point */
+
+  Curl_pgrsReset(data);
+
+  ftpc->ctl_valid = TRUE; /* starts good */
+
+  result = ftp_perform(data, ftpc, ftp,
+                       &connected, /* have we connected after PASV/PORT */
+                       dophase_done); /* all commands in the DO-phase done? */
+
+  if(!result) {
+
+    if(!*dophase_done)
+      /* the DO phase has not completed yet */
+      return CURLE_OK;
+
+    result = ftp_dophase_done(data, ftpc, ftp, connected);
+
+    if(result)
+      return result;
+  }
+  else
+    freedirs(ftpc);
+
+  return result;
+}
+
+/***********************************************************************
+ *
  * ftp_do()
  *
  * This function is registered as 'curl_do' function. It decodes the path
@@ -4190,52 +4232,6 @@ static CURLcode ftp_doing(struct Curl_easy *data,
 
     CURL_TRC_FTP(data, "[%s] DO phase is complete2", FTP_CSTATE(ftpc));
   }
-  return result;
-}
-
-/***********************************************************************
- *
- * ftp_regular_transfer()
- *
- * The input argument is already checked for validity.
- *
- * Performs all commands done before a regular transfer between a local and a
- * remote host.
- *
- * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
- * ftp_done() function without finding any major problem.
- */
-static CURLcode ftp_regular_transfer(struct Curl_easy *data,
-                                     struct ftp_conn *ftpc,
-                                     struct FTP *ftp,
-                                     bool *dophase_done)
-{
-  CURLcode result = CURLE_OK;
-  bool connected = FALSE;
-  data->req.size = -1; /* make sure this is unknown at this point */
-
-  Curl_pgrsReset(data);
-
-  ftpc->ctl_valid = TRUE; /* starts good */
-
-  result = ftp_perform(data, ftpc, ftp,
-                       &connected, /* have we connected after PASV/PORT */
-                       dophase_done); /* all commands in the DO-phase done? */
-
-  if(!result) {
-
-    if(!*dophase_done)
-      /* the DO phase has not completed yet */
-      return CURLE_OK;
-
-    result = ftp_dophase_done(data, ftpc, ftp, connected);
-
-    if(result)
-      return result;
-  }
-  else
-    freedirs(ftpc);
-
   return result;
 }
 
