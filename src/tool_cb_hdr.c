@@ -240,6 +240,141 @@ fail:
 }
 
 /*
+ * Write etag to file when --etag-save option is given.
+ */
+static size_t save_etag(const char *etag_h, const char *endp,
+                        struct OutStruct *etag_save)
+{
+  const char *eot = endp - 1;
+  if(*eot == '\n') {
+    while(ISBLANK(*etag_h) && (etag_h < eot))
+      etag_h++;
+    while(ISSPACE(*eot))
+      eot--;
+
+    if(eot >= etag_h) {
+      size_t etag_length = eot - etag_h + 1;
+      /*
+       * Truncate the etag save stream, it can have an existing etag value.
+       */
+#ifdef HAVE_FTRUNCATE
+      if(ftruncate(fileno(etag_save->stream), 0)) {
+        return CURL_WRITEFUNC_ERROR;
+      }
+#else
+      if(fseek(etag_save->stream, 0, SEEK_SET)) {
+        return CURL_WRITEFUNC_ERROR;
+      }
+#endif
+
+      fwrite(etag_h, 1, etag_length, etag_save->stream);
+      /* terminate with newline */
+      fputc('\n', etag_save->stream);
+      (void)fflush(etag_save->stream);
+    }
+  }
+  return 0; /* ok */
+}
+
+/*
+ * This function sets the filename where output shall be written when curl
+ * options --remote-name (-O) and --remote-header-name (-J) have been
+ * simultaneously given and additionally server returns an HTTP
+ * Content-Disposition header specifying a filename property.
+ */
+static size_t content_disposition(const char *str, const char *end,
+                                  size_t cb, struct per_transfer *per)
+{
+  struct HdrCbData *hdrcbdata = &per->hdrcbdata;
+  struct OutStruct *outs = &per->outs;
+
+  if((cb > 20) && checkprefix("Content-disposition:", str)) {
+    const char *p = str + 20;
+    /* look for the 'filename=' parameter (encoded filenames (*=) are not
+       supported) */
+    for(;;) {
+      char *filename;
+      size_t len;
+
+      while((p < end) && *p && !ISALPHA(*p))
+        p++;
+      if(p > end - 9)
+        break;
+
+      if(memcmp(p, "filename=", 9)) {
+        /* no match, find next parameter */
+        while((p < end) && *p && (*p != ';'))
+          p++;
+        if((p < end) && *p)
+          continue;
+        else
+          break;
+      }
+      p += 9;
+
+      len = cb - (size_t)(p - str);
+      filename = parse_filename(p, len);
+      if(filename) {
+        if(outs->stream) {
+          /* indication of problem, get out! */
+          curlx_free(filename);
+          return CURL_WRITEFUNC_ERROR;
+        }
+
+        if(per->config->output_dir) {
+          outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
+                                         filename);
+          curlx_free(filename);
+          if(!outs->filename)
+            return CURL_WRITEFUNC_ERROR;
+        }
+        else
+          outs->filename = filename;
+
+        outs->is_cd_filename = TRUE;
+        outs->regular_file = TRUE;
+        outs->fopened = FALSE;
+        outs->alloc_filename = TRUE;
+        hdrcbdata->honor_cd_filename = FALSE; /* done now! */
+        if(!tool_create_output_file(outs, per->config))
+          return CURL_WRITEFUNC_ERROR;
+        if(tool_write_headers(&per->hdrcbdata, outs->stream))
+          return CURL_WRITEFUNC_ERROR;
+      }
+      break;
+    }
+    if(!outs->stream && !tool_create_output_file(outs, per->config))
+      return CURL_WRITEFUNC_ERROR;
+    if(tool_write_headers(&per->hdrcbdata, outs->stream))
+      return CURL_WRITEFUNC_ERROR;
+  } /* content-disposition handling */
+
+  if(hdrcbdata->honor_cd_filename &&
+     hdrcbdata->config->show_headers) {
+    /* still awaiting the Content-Disposition header, store the header in
+       memory. Since it is not null-terminated, we need an extra dance. */
+    char *clone = curl_maprintf("%.*s", (int)cb, str);
+    if(clone) {
+      struct curl_slist *old = hdrcbdata->headlist;
+      hdrcbdata->headlist = curl_slist_append(old, clone);
+      curlx_free(clone);
+      if(!hdrcbdata->headlist) {
+        curl_slist_free_all(old);
+        return CURL_WRITEFUNC_ERROR;
+      }
+    }
+    else {
+      curl_slist_free_all(hdrcbdata->headlist);
+      hdrcbdata->headlist = NULL;
+      return CURL_WRITEFUNC_ERROR;
+    }
+    return cb; /* done for now */
+  }
+
+  return 0; /* ok */
+}
+
+/*
 ** callback for CURLOPT_HEADERFUNCTION
 *
 * 'size' is always 1
@@ -297,134 +432,23 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       /* only care about etag and content-disposition headers in 2xx and 3xx
          responses */
       ;
-    /*
-     * Write etag to file when --etag-save option is given.
-     */
     else if(per->config->etag_save_file && etag_save->stream &&
             /* match only header that start with etag (case insensitive) */
             checkprefix("etag:", str)) {
-      const char *etag_h = &str[5];
-      const char *eot = end - 1;
-      if(*eot == '\n') {
-        while(ISBLANK(*etag_h) && (etag_h < eot))
-          etag_h++;
-        while(ISSPACE(*eot))
-          eot--;
-
-        if(eot >= etag_h) {
-          size_t etag_length = eot - etag_h + 1;
-          /*
-           * Truncate the etag save stream, it can have an existing etag value.
-           */
-#ifdef HAVE_FTRUNCATE
-          if(ftruncate(fileno(etag_save->stream), 0)) {
-            return CURL_WRITEFUNC_ERROR;
-          }
-#else
-          if(fseek(etag_save->stream, 0, SEEK_SET)) {
-            return CURL_WRITEFUNC_ERROR;
-          }
-#endif
-
-          fwrite(etag_h, 1, etag_length, etag_save->stream);
-          /* terminate with newline */
-          fputc('\n', etag_save->stream);
-          (void)fflush(etag_save->stream);
-        }
-      }
+      size_t rc = save_etag(&str[5], end, etag_save);
+      if(rc)
+        return rc;
     }
 
-    /*
-     * This callback sets the filename where output shall be written when
-     * curl options --remote-name (-O) and --remote-header-name (-J) have
-     * been simultaneously given and additionally server returns an HTTP
-     * Content-Disposition header specifying a filename property.
-     */
-
+    /* Parse the content-disposition header. When honor_cd_filename is true
+       other headers may be stored until the content-disposition header is
+       reached, at which point the saved headers can be written. That means
+       the content_disposition() may return an rc when it has saved a
+       different header for writing later. */
     else if(hdrcbdata->honor_cd_filename) {
-      if((cb > 20) && checkprefix("Content-disposition:", str)) {
-        const char *p = str + 20;
-
-        /* look for the 'filename=' parameter
-           (encoded filenames (*=) are not supported) */
-        for(;;) {
-          char *filename;
-          size_t len;
-
-          while((p < end) && *p && !ISALPHA(*p))
-            p++;
-          if(p > end - 9)
-            break;
-
-          if(memcmp(p, "filename=", 9)) {
-            /* no match, find next parameter */
-            while((p < end) && *p && (*p != ';'))
-              p++;
-            if((p < end) && *p)
-              continue;
-            else
-              break;
-          }
-          p += 9;
-
-          len = cb - (size_t)(p - str);
-          filename = parse_filename(p, len);
-          if(filename) {
-            if(outs->stream) {
-              /* indication of problem, get out! */
-              curlx_free(filename);
-              return CURL_WRITEFUNC_ERROR;
-            }
-
-            if(per->config->output_dir) {
-              outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
-                                             filename);
-              curlx_free(filename);
-              if(!outs->filename)
-                return CURL_WRITEFUNC_ERROR;
-            }
-            else
-              outs->filename = filename;
-
-            outs->is_cd_filename = TRUE;
-            outs->regular_file = TRUE;
-            outs->fopened = FALSE;
-            outs->alloc_filename = TRUE;
-            hdrcbdata->honor_cd_filename = FALSE; /* done now! */
-            if(!tool_create_output_file(outs, per->config))
-              return CURL_WRITEFUNC_ERROR;
-            if(tool_write_headers(&per->hdrcbdata, outs->stream))
-              return CURL_WRITEFUNC_ERROR;
-          }
-          break;
-        }
-        if(!outs->stream && !tool_create_output_file(outs, per->config))
-          return CURL_WRITEFUNC_ERROR;
-        if(tool_write_headers(&per->hdrcbdata, outs->stream))
-          return CURL_WRITEFUNC_ERROR;
-      } /* content-disposition handling */
-
-      if(hdrcbdata->honor_cd_filename &&
-         hdrcbdata->config->show_headers) {
-        /* still awaiting the Content-Disposition header, store the header in
-           memory. Since it is not null-terminated, we need an extra dance. */
-        char *clone = curl_maprintf("%.*s", (int)cb, str);
-        if(clone) {
-          struct curl_slist *old = hdrcbdata->headlist;
-          hdrcbdata->headlist = curl_slist_append(old, clone);
-          curlx_free(clone);
-          if(!hdrcbdata->headlist) {
-            curl_slist_free_all(old);
-            return CURL_WRITEFUNC_ERROR;
-          }
-        }
-        else {
-          curl_slist_free_all(hdrcbdata->headlist);
-          hdrcbdata->headlist = NULL;
-          return CURL_WRITEFUNC_ERROR;
-        }
-        return cb; /* done for now */
-      }
+      size_t rc = content_disposition(str, end, cb, per);
+      if(rc)
+        return rc;
     }
   }
   if(hdrcbdata->config->writeout) {
