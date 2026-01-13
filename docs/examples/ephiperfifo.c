@@ -140,8 +140,6 @@ static void mcode_or_die(const char *where, CURLMcode code)
   }
 }
 
-static void timer_cb(struct GlobalInfo *g, int revents);
-
 /* Update the timer after curl_multi library does its thing. curl informs the
  * application through this callback what it wants the new timeout to be,
  * after it does some work. */

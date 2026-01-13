@@ -106,23 +106,6 @@ struct SockInfo {
   struct GlobalInfo *global;
 };
 
-static void timer_cb(EV_P_ struct ev_timer *w, int revents);
-
-/* Update the event timer after curl_multi library calls */
-static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
-{
-  (void)multi;
-  printf("%s %li\n", __PRETTY_FUNCTION__, timeout_ms);
-  ev_timer_stop(g->loop, &g->timer_event);
-  if(timeout_ms >= 0) {
-    /* -1 means delete, other values are timeout times in milliseconds */
-    double t = timeout_ms / 1000;
-    ev_timer_init(&g->timer_event, timer_cb, t, 0.);
-    ev_timer_start(g->loop, &g->timer_event);
-  }
-  return 0;
-}
-
 /* Die if we get a bad CURLMcode somewhere */
 static void mcode_or_die(const char *where, CURLMcode code)
 {
@@ -159,6 +142,37 @@ static void mcode_or_die(const char *where, CURLMcode code)
     fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
     exit(code);
   }
+}
+
+/* Called by libevent when our timeout expires */
+static void timer_cb(EV_P_ struct ev_timer *w, int revents)
+{
+  struct GlobalInfo *g;
+  CURLMcode mresult;
+
+  printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
+
+  g = (struct GlobalInfo *)w->data;
+
+  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
+                                &g->still_running);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
+  check_multi_info(g);
+}
+
+/* Update the event timer after curl_multi library calls */
+static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
+{
+  (void)multi;
+  printf("%s %li\n", __PRETTY_FUNCTION__, timeout_ms);
+  ev_timer_stop(g->loop, &g->timer_event);
+  if(timeout_ms >= 0) {
+    /* -1 means delete, other values are timeout times in milliseconds */
+    double t = timeout_ms / 1000;
+    ev_timer_init(&g->timer_event, timer_cb, t, 0.);
+    ev_timer_start(g->loop, &g->timer_event);
+  }
+  return 0;
 }
 
 /* Check for completed transfers, and remove their easy handles */
@@ -205,22 +219,6 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
     ev_timer_stop(g->loop, &g->timer_event);
   }
-}
-
-/* Called by libevent when our timeout expires */
-static void timer_cb(EV_P_ struct ev_timer *w, int revents)
-{
-  struct GlobalInfo *g;
-  CURLMcode mresult;
-
-  printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
-
-  g = (struct GlobalInfo *)w->data;
-
-  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
-                                &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
-  check_multi_info(g);
 }
 
 /* Clean up the SockInfo structure */
