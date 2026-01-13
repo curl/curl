@@ -30,14 +30,14 @@
 #include "curl_sha256.h"
 
 #ifdef USE_MBEDTLS
-  #include <mbedtls/version.h>
-  #if MBEDTLS_VERSION_NUMBER < 0x03020000
-    #error "mbedTLS 3.2.0 or later required"
-  #endif
-  #include <psa/crypto_config.h>
-  #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
-    #define USE_MBEDTLS_SHA256
-  #endif
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+#error "mbedTLS 3.2.0 or later required"
+#endif
+#include <psa/crypto_config.h>
+#if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
+#define USE_MBEDTLS_SHA256
+#endif
 #endif
 
 #ifdef USE_OPENSSL

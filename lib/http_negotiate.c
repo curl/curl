@@ -233,19 +233,19 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
     }
 
     *state = GSS_AUTHSENT;
-  #ifdef HAVE_GSSAPI
+#ifdef HAVE_GSSAPI
     if(neg_ctx->status == GSS_S_COMPLETE ||
        neg_ctx->status == GSS_S_CONTINUE_NEEDED) {
       *state = GSS_AUTHDONE;
     }
-  #else
-  #ifdef USE_WINDOWS_SSPI
+#else
+#ifdef USE_WINDOWS_SSPI
     if(neg_ctx->status == SEC_E_OK ||
        neg_ctx->status == SEC_I_CONTINUE_NEEDED) {
       *state = GSS_AUTHDONE;
     }
-  #endif
-  #endif
+#endif
+#endif
   }
 
   if(*state == GSS_AUTHDONE || *state == GSS_AUTHSUCC) {
