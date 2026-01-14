@@ -88,13 +88,13 @@ work has not been started.
 
 Ideas:
 
- - Read stdin and send off as messages. Consider newline as end of fragment.
-   (default to text? offer option to set binary)
- - Respond to PINGs automatically
- - Issue PINGs at some default interval (option to switch off/change interval?)
- - Allow `-d` to specify (initial) data to send (should the format allow for
-   multiple separate frames?)
- - Exit after N messages received, where N can be zero.
+- Read stdin and send off as messages. Consider newline as end of fragment.
+  (default to text? offer option to set binary)
+- Respond to PINGs automatically
+- Issue PINGs at some default interval (option to switch off/change interval?)
+- Allow `-d` to specify (initial) data to send (should the format allow for
+  multiple separate frames?)
+- Exit after N messages received, where N can be zero.
 
 ## Future work
 
