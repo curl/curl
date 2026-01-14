@@ -58,9 +58,6 @@
 #  endif
 #endif
 
-/* only used by msdosify() */
-static SANITIZEcode truncate_dryrun(const char *path,
-                                    const size_t truncate_pos);
 static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
                              int flags);
 #endif /* MSDOS */
