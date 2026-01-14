@@ -238,36 +238,36 @@ Use the following ways to improve the message and provide pointers to related
 work.
 
 - `Follow-up to {shorthash}` - if this fixes or continues a previous commit;
-add a `Ref:` that commit's PR or issue if it is not a small, obvious fix;
-followed by an empty line
+  add a `Ref:` that commit's PR or issue if it is not a small, obvious fix;
+  followed by an empty line
 
 - `Bug: URL` to the source of the report or more related discussion; use
-`Fixes` for GitHub issues instead when that is appropriate.
+  `Fixes` for GitHub issues instead when that is appropriate.
 
 - `Approved-by: John Doe` - credit someone who approved the PR.
 
 - `Authored-by: John Doe` - credit the original author of the code; only use
-this if you cannot use `git commit --author=...`.
+  this if you cannot use `git commit --author=...`.
 
 - `Signed-off-by: John Doe` - we do not use this, but do not bother removing
   it.
 
 - `whatever-else-by:` credit all helpers, finders, doers; try to use one of
-the following keywords if at all possible, for consistency: `Acked-by:`,
-`Assisted-by:`, `Co-authored-by:`, `Found-by:`, `Reported-by:`,
-`Reviewed-by:`, `Suggested-by:`, `Tested-by:`.
+  the following keywords if at all possible, for consistency: `Acked-by:`,
+  `Assisted-by:`, `Co-authored-by:`, `Found-by:`, `Reported-by:`,
+  `Reviewed-by:`, `Suggested-by:`, `Tested-by:`.
 
 - `Ref: #1234` - if this is related to a GitHub issue or PR, possibly one that
-has already been closed.
+  has already been closed.
 
 - `Ref: URL` to more information about the commit; use `Bug:` instead for a
-reference to a bug on another bug tracker]
+  reference to a bug on another bug tracker]
 
 - `Fixes #1234` - if this fixes a GitHub issue; GitHub closes the issue once
-this commit is merged.
+  this commit is merged.
 
 - `Closes #1234` - if this merges a GitHub PR; GitHub closes the PR once this
-commit is merged.
+  commit is merged.
 
 Do not forget to use commit with `--author` if you commit someone else's work,
 and make sure that you have your own user and email setup correctly in git
