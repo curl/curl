@@ -64,9 +64,140 @@ static SANITIZEcode truncate_dryrun(const char *path,
 static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
                              int flags);
 #endif /* MSDOS */
+
+/*
+Rename file_name if it is a reserved dos device name.
+
+This is a supporting function for sanitize_file_name.
+
+Warning: This is an MS-DOS legacy function and was purposely written in a way
+that some path information may pass through. For example drive letter names
+(C:, D:, etc) are allowed to pass through. For sanitizing a filename use
+sanitize_file_name.
+
+Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
+Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
+*/
 static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
                                            const char *file_name,
-                                           int flags);
+                                           int flags)
+{
+  /* We could have a file whose name is a device on MS-DOS. Trying to
+   * retrieve such a file would fail at best and wedge us at worst. We need
+   * to rename such files. */
+  char *p, *base, *buffer;
+#ifdef MSDOS
+  struct_stat st_buf;
+#endif
+  size_t len, bufsize;
+
+  if(!sanitized || !file_name)
+    return SANITIZE_ERR_BAD_ARGUMENT;
+
+  *sanitized = NULL;
+
+  /* Ignore "\\" prefixed paths, they are allowed to use reserved names. */
+#ifndef MSDOS
+  if((flags & SANITIZE_ALLOW_PATH) &&
+     file_name[0] == '\\' && file_name[1] == '\\') {
+    *sanitized = curlx_strdup(file_name);
+    if(!*sanitized)
+      return SANITIZE_ERR_OUT_OF_MEMORY;
+    return SANITIZE_ERR_OK;
+  }
+#endif
+
+  /* The buffer contains two extra bytes to allow for path expansion that
+     occurs if reserved name(s) need an underscore prepended. */
+  len = strlen(file_name);
+  bufsize = len + 2 + 1;
+
+  buffer = curlx_malloc(bufsize);
+  if(!buffer)
+    return SANITIZE_ERR_OUT_OF_MEMORY;
+
+  memcpy(buffer, file_name, len + 1);
+
+  base = basename(buffer);
+
+  /* Rename reserved device names that are known to be accessible without \\.\
+     Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
+     https://web.archive.org/web/20160314141551/support.microsoft.com/en-us/kb/74496
+     https://learn.microsoft.com/windows/win32/fileio/naming-a-file
+     */
+  for(p = buffer; p; p = (p == buffer && buffer != base ? base : NULL)) {
+    size_t p_len;
+    int x = (curl_strnequal(p, "CON", 3) ||
+             curl_strnequal(p, "PRN", 3) ||
+             curl_strnequal(p, "AUX", 3) ||
+             curl_strnequal(p, "NUL", 3)) ? 3 :
+            (curl_strnequal(p, "CLOCK$", 6)) ? 6 :
+            (curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) ?
+              (('1' <= p[3] && p[3] <= '9') ? 4 : 3) : 0;
+
+    if(!x)
+      continue;
+
+    /* the devices may be accessible with an extension or ADS, for
+       example CON.AIR and 'CON . AIR' and CON:AIR access console */
+
+    for(; p[x] == ' '; ++x)
+      ;
+
+    if(p[x] == '.') {
+      p[x] = '_';
+      continue;
+    }
+    else if(p[x] == ':') {
+      if(!(flags & SANITIZE_ALLOW_PATH)) {
+        p[x] = '_';
+        continue;
+      }
+      ++x;
+    }
+    else if(p[x]) /* no match */
+      continue;
+
+    /* p points to 'CON' or 'CON ' or 'CON:', etc */
+    p_len = strlen(p);
+
+    /* Prepend a '_' */
+    memmove(p + 1, p, p_len + 1);
+    p[0] = '_';
+    ++p_len;
+    ++len;
+
+    /* the basename pointer must be updated since the path has expanded */
+    if(p == buffer)
+      base = basename(buffer);
+  }
+
+  /* This is the legacy portion from rename_if_dos_device_name that checks for
+     reserved device names. It only works on MS-DOS. On Windows XP the stat
+     check errors with EINVAL if the device name is reserved. On Windows
+     Vista/7/8 it sets mode S_IFREG (regular file or device). According to
+     MSDN stat doc the latter behavior is correct, but that does not help us
+     identify whether it is a reserved device name and not a regular
+     filename. */
+#ifdef MSDOS
+  if(base && (curlx_stat(base, &st_buf) == 0) && S_ISCHR(st_buf.st_mode)) {
+    /* Prepend a '_' */
+    size_t blen = strlen(base);
+    if(blen) {
+      if(len == bufsize - 1) {
+        curlx_free(buffer);
+        return SANITIZE_ERR_INVALID_PATH;
+      }
+      memmove(base + 1, base, blen + 1);
+      base[0] = '_';
+      ++len;
+    }
+  }
+#endif
+
+  *sanitized = buffer;
+  return SANITIZE_ERR_OK;
+}
 
 /*
 Sanitize a file or path name.
@@ -396,140 +527,6 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
   return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 #endif /* MSDOS */
-
-/*
-Rename file_name if it is a reserved dos device name.
-
-This is a supporting function for sanitize_file_name.
-
-Warning: This is an MS-DOS legacy function and was purposely written in a way
-that some path information may pass through. For example drive letter names
-(C:, D:, etc) are allowed to pass through. For sanitizing a filename use
-sanitize_file_name.
-
-Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
-Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
-*/
-static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
-                                           const char *file_name,
-                                           int flags)
-{
-  /* We could have a file whose name is a device on MS-DOS. Trying to
-   * retrieve such a file would fail at best and wedge us at worst. We need
-   * to rename such files. */
-  char *p, *base, *buffer;
-#ifdef MSDOS
-  struct_stat st_buf;
-#endif
-  size_t len, bufsize;
-
-  if(!sanitized || !file_name)
-    return SANITIZE_ERR_BAD_ARGUMENT;
-
-  *sanitized = NULL;
-
-  /* Ignore "\\" prefixed paths, they are allowed to use reserved names. */
-#ifndef MSDOS
-  if((flags & SANITIZE_ALLOW_PATH) &&
-     file_name[0] == '\\' && file_name[1] == '\\') {
-    *sanitized = curlx_strdup(file_name);
-    if(!*sanitized)
-      return SANITIZE_ERR_OUT_OF_MEMORY;
-    return SANITIZE_ERR_OK;
-  }
-#endif
-
-  /* The buffer contains two extra bytes to allow for path expansion that
-     occurs if reserved name(s) need an underscore prepended. */
-  len = strlen(file_name);
-  bufsize = len + 2 + 1;
-
-  buffer = curlx_malloc(bufsize);
-  if(!buffer)
-    return SANITIZE_ERR_OUT_OF_MEMORY;
-
-  memcpy(buffer, file_name, len + 1);
-
-  base = basename(buffer);
-
-  /* Rename reserved device names that are known to be accessible without \\.\
-     Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
-     https://web.archive.org/web/20160314141551/support.microsoft.com/en-us/kb/74496
-     https://learn.microsoft.com/windows/win32/fileio/naming-a-file
-     */
-  for(p = buffer; p; p = (p == buffer && buffer != base ? base : NULL)) {
-    size_t p_len;
-    int x = (curl_strnequal(p, "CON", 3) ||
-             curl_strnequal(p, "PRN", 3) ||
-             curl_strnequal(p, "AUX", 3) ||
-             curl_strnequal(p, "NUL", 3)) ? 3 :
-            (curl_strnequal(p, "CLOCK$", 6)) ? 6 :
-            (curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) ?
-              (('1' <= p[3] && p[3] <= '9') ? 4 : 3) : 0;
-
-    if(!x)
-      continue;
-
-    /* the devices may be accessible with an extension or ADS, for
-       example CON.AIR and 'CON . AIR' and CON:AIR access console */
-
-    for(; p[x] == ' '; ++x)
-      ;
-
-    if(p[x] == '.') {
-      p[x] = '_';
-      continue;
-    }
-    else if(p[x] == ':') {
-      if(!(flags & SANITIZE_ALLOW_PATH)) {
-        p[x] = '_';
-        continue;
-      }
-      ++x;
-    }
-    else if(p[x]) /* no match */
-      continue;
-
-    /* p points to 'CON' or 'CON ' or 'CON:', etc */
-    p_len = strlen(p);
-
-    /* Prepend a '_' */
-    memmove(p + 1, p, p_len + 1);
-    p[0] = '_';
-    ++p_len;
-    ++len;
-
-    /* the basename pointer must be updated since the path has expanded */
-    if(p == buffer)
-      base = basename(buffer);
-  }
-
-  /* This is the legacy portion from rename_if_dos_device_name that checks for
-     reserved device names. It only works on MS-DOS. On Windows XP the stat
-     check errors with EINVAL if the device name is reserved. On Windows
-     Vista/7/8 it sets mode S_IFREG (regular file or device). According to
-     MSDN stat doc the latter behavior is correct, but that does not help us
-     identify whether it is a reserved device name and not a regular
-     filename. */
-#ifdef MSDOS
-  if(base && (curlx_stat(base, &st_buf) == 0) && S_ISCHR(st_buf.st_mode)) {
-    /* Prepend a '_' */
-    size_t blen = strlen(base);
-    if(blen) {
-      if(len == bufsize - 1) {
-        curlx_free(buffer);
-        return SANITIZE_ERR_INVALID_PATH;
-      }
-      memmove(base + 1, base, blen + 1);
-      base[0] = '_';
-      ++len;
-    }
-  }
-#endif
-
-  *sanitized = buffer;
-  return SANITIZE_ERR_OK;
-}
 
 #ifdef __DJGPP__
 /*
