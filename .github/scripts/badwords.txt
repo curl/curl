@@ -79,7 +79,7 @@ file names\b:filenames
 \bpass phrase:passphrase
 \bwill\b:rewrite to present tense
 \b[0-9]+bit[^*"]: NN-bit
-\b[0-9]+ bit\b: NN-bit
+\b([02-9]|[1-9][0-9]+) bit\b: NN-bit
 [0-9]+-bits:NN bits or NN-bit
 \bvery\b:rephrase using an alternative word
 \bCurl\b=curl
