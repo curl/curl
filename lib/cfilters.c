@@ -33,9 +33,6 @@
 #include "select.h"
 #include "curlx/strparse.h"
 
-static void cf_cntrl_update_info(struct Curl_easy *data,
-                                 struct connectdata *conn);
-
 #ifdef UNITTESTS
 /* used by unit2600.c */
 void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -450,6 +447,29 @@ static CURLcode cf_verboseconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 #endif
+
+static CURLcode cf_cntrl_all(struct connectdata *conn,
+                             struct Curl_easy *data,
+                             bool ignore_result,
+                             int event, int arg1, void *arg2)
+{
+  CURLcode result = CURLE_OK;
+  size_t i;
+
+  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
+    result = Curl_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
+                                event, arg1, arg2);
+    if(!ignore_result && result)
+      break;
+  }
+  return result;
+}
+
+static void cf_cntrl_update_info(struct Curl_easy *data,
+                                 struct connectdata *conn)
+{
+  cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
+}
 
 CURLcode Curl_conn_connect(struct Curl_easy *data,
                            int sockindex,
@@ -922,23 +942,6 @@ Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
   return cf ? cf_get_remote_addr(cf, data) : NULL;
 }
 
-static CURLcode cf_cntrl_all(struct connectdata *conn,
-                             struct Curl_easy *data,
-                             bool ignore_result,
-                             int event, int arg1, void *arg2)
-{
-  CURLcode result = CURLE_OK;
-  size_t i;
-
-  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
-    result = Curl_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
-                                event, arg1, arg2);
-    if(!ignore_result && result)
-      break;
-  }
-  return result;
-}
-
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
 {
   return cf_cntrl_all(data->conn, data, FALSE, CF_CTRL_DATA_SETUP, 0, NULL);
@@ -974,12 +977,6 @@ CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause)
 {
   return cf_cntrl_all(data->conn, data, FALSE,
                       CF_CTRL_DATA_PAUSE, do_pause, NULL);
-}
-
-static void cf_cntrl_update_info(struct Curl_easy *data,
-                                 struct connectdata *conn)
-{
-  cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 }
 
 /**
