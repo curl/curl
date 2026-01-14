@@ -1133,7 +1133,6 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   int nwritten;
 
-  (void)data;
   DEBUGASSERT(backend);
   *pnwritten = 0;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
@@ -1305,7 +1304,6 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   int nread;
 
-  (void)data;
   DEBUGASSERT(backend);
   *pnread = 0;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;

@@ -2069,7 +2069,6 @@ static CURLcode gtls_send(struct Curl_cfilter *cf,
   ssize_t nwritten;
   size_t remain = blen;
 
-  (void)data;
   DEBUGASSERT(backend);
   *pnwritten = 0;
 
@@ -2186,7 +2185,6 @@ static void gtls_close(struct Curl_cfilter *cf,
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
 
-  (void)data;
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "close");
   if(backend->gtls.session) {
@@ -2215,7 +2213,6 @@ static CURLcode gtls_recv(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   ssize_t nread;
 
-  (void)data;
   DEBUGASSERT(backend);
 
   nread = gnutls_record_recv(backend->gtls.session, buf, blen);

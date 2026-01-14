@@ -161,7 +161,6 @@ static uint32_t rtsp_conncheck(struct Curl_easy *data,
                                uint32_t checks_to_perform)
 {
   unsigned int ret_val = CONNRESULT_NONE;
-  (void)data;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
     bool input_pending;

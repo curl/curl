@@ -486,7 +486,6 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   size_t remain = curlx_sotouz_range(dec->payload_len - dec->payload_offset,
                                      0, SIZE_MAX);
 
-  (void)data;
   while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if(inlen > remain)
       inlen = remain;

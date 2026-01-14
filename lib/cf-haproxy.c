@@ -156,7 +156,6 @@ out:
 static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   cf_haproxy_ctx_free(cf->ctx);
 }

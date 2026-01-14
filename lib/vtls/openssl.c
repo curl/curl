@@ -5036,7 +5036,6 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   int nwritten;
 
-  (void)data;
   DEBUGASSERT(octx);
   *pnwritten = 0;
   ERR_clear_error();
@@ -5129,7 +5128,6 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   int nread;
 
-  (void)data;
   DEBUGASSERT(octx);
 
   *pnread = 0;

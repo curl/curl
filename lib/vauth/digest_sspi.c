@@ -193,10 +193,6 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
      status == SEC_I_COMPLETE_AND_CONTINUE)
     Curl_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char buffer[STRERROR_LEN];
-#endif
-
     Curl_pSecFn->FreeCredentialsHandle(&credentials);
     Curl_sspi_free_identity(p_identity);
     curlx_free(spn);
@@ -206,8 +202,11 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-    infof(data, "schannel: InitializeSecurityContext failed: %s",
-          Curl_sspi_strerror(status, buffer, sizeof(buffer)));
+    {
+      char buffer[STRERROR_LEN];
+      infof(data, "schannel: InitializeSecurityContext failed: %s",
+            Curl_sspi_strerror(status, buffer, sizeof(buffer)));
+    }
 #endif
 
     return CURLE_AUTH_ERROR;
@@ -401,8 +400,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   SecBufferDesc chlg_desc;
   SECURITY_STATUS status;
 
-  (void)data;
-
   /* Query the security package for DigestSSP */
   status =
     Curl_pSecFn->QuerySecurityPackageInfo(
@@ -594,10 +591,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
        status == SEC_I_COMPLETE_AND_CONTINUE)
       Curl_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
     else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      char buffer[STRERROR_LEN];
-#endif
-
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
 
       Curl_sspi_free_identity(p_identity);
@@ -609,8 +602,11 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-      infof(data, "schannel: InitializeSecurityContext failed: %s",
-            Curl_sspi_strerror(status, buffer, sizeof(buffer)));
+      {
+        char buffer[STRERROR_LEN];
+        infof(data, "schannel: InitializeSecurityContext failed: %s",
+              Curl_sspi_strerror(status, buffer, sizeof(buffer)));
+      }
 #endif
 
       return CURLE_AUTH_ERROR;

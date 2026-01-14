@@ -259,10 +259,6 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   SecPkgContext_Sizes sizes;
   SECURITY_STATUS status;
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
-
   /* Ensure we have a valid challenge message */
   DEBUGASSERT(chlg);
   if(!Curl_bufref_len(chlg)) {

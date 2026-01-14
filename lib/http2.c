@@ -745,7 +745,6 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
   size_t nwritten;
   CURLcode result;
 
-  (void)data;
   if(Curl_bufq_is_empty(&ctx->outbufq))
     return CURLE_OK;
 

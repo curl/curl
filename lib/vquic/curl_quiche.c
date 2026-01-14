@@ -1629,8 +1629,6 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
-  (void)data;
-  (void)conn;
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
