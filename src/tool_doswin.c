@@ -60,6 +60,17 @@
  * algorithms originally from DJTAR.
  */
 
+#ifdef __DJGPP__
+/*
+ * Disable program default argument globbing. We do it on our own.
+ */
+char **__crt0_glob_function(char *arg)
+{
+  (void)arg;
+  return (char **)0;
+}
+#endif
+
 /*
 Test if truncating a path to a file will leave at least a single character in
 the filename. Filenames suffixed by an alternate data stream cannot be
@@ -893,17 +904,6 @@ curl_socket_t win32_stdin_read_thread(void)
 }
 
 #endif /* !CURL_WINDOWS_UWP */
-
-#ifdef __DJGPP__
-/*
- * Disable program default argument globbing. We do it on our own.
- */
-char **__crt0_glob_function(char *arg)
-{
-  (void)arg;
-  return (char **)0;
-}
-#endif
 
 CURLcode win32_init(void)
 {
