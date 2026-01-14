@@ -970,9 +970,11 @@ sub scanfile {
             my $bad = $2;
             my $prefix = $1;
             my $suff = $3;
-            checkwarn("BANNEDFUNC",
-                      $line, length($prefix), $file, $ol,
-                      "use of $bad is banned");
+            if($prefix !~ /(->|\.)$/) {
+                checkwarn("BANNEDFUNC",
+                          $line, length($prefix), $file, $ol,
+                          "use of $bad is banned");
+            }
             my $search = quotemeta($prefix . $bad . $suff);
             my $replace = $prefix . 'x' x (length($bad) + 1);
             $l =~ s/$search/$replace/;

@@ -88,6 +88,9 @@ void startfunc(int a, int b) {
 
  // CPP comment ?
 
+ int d = impl->magicbad(1); /* member function always allowed */
+ int e = impl.magicbad(); /* member function always allowed */
+
  /* comment does not end
 
 </file>
