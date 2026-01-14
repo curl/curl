@@ -35,8 +35,8 @@ Curl_easy *data         connectdata *conn        cf-ssl        cf-socket
 +----------------+      +-----------------+      +-------+     +--------+
 
 Curl_write(data, buffer)
- --> Curl_cfilter_write(data, data->conn, buffer)
-      ---> conn->filter->write(conn->filter, data, buffer)
+  --> Curl_cfilter_write(data, data->conn, buffer)
+        --> conn->filter->write(conn->filter, data, buffer)
 ```
 
 While connection filters all do different things, they look the same from the
