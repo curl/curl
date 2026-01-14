@@ -638,6 +638,7 @@ static struct TerminalSettings {
   LONG valid;
 } TerminalSettings;
 
+/* Offered by mingw-w64 v7+. MS SDK ~10.16299/~VS2017+. */
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
