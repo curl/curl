@@ -212,12 +212,6 @@ static CURLcode cf_h2_update_settings(struct cf_h2_ctx *ctx,
   return CURLE_OK;
 }
 
-static CURLcode nw_out_flush(struct Curl_cfilter *cf,
-                             struct Curl_easy *data);
-
-static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data);
-
 /**
  * All about the H2 internals of a stream
  */
@@ -404,6 +398,29 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
 
   *pstream = stream;
   return CURLE_OK;
+}
+
+static CURLcode nw_out_flush(struct Curl_cfilter *cf,
+                             struct Curl_easy *data)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  size_t nwritten;
+  CURLcode result;
+
+  if(Curl_bufq_is_empty(&ctx->outbufq))
+    return CURLE_OK;
+
+  result = Curl_cf_send_bufq(cf->next, data, &ctx->outbufq, NULL, 0,
+                             &nwritten);
+  if(result) {
+    if(result == CURLE_AGAIN) {
+      CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
+                  Curl_bufq_len(&ctx->outbufq));
+      ctx->nw_out_blocked = 1;
+    }
+    return result;
+  }
+  return Curl_bufq_is_empty(&ctx->outbufq) ? CURLE_OK : CURLE_AGAIN;
 }
 
 static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -736,29 +753,6 @@ void Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
   (void)curl_msnprintf(p, len, "nghttp2/%s", h2->version_str);
-}
-
-static CURLcode nw_out_flush(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
-{
-  struct cf_h2_ctx *ctx = cf->ctx;
-  size_t nwritten;
-  CURLcode result;
-
-  if(Curl_bufq_is_empty(&ctx->outbufq))
-    return CURLE_OK;
-
-  result = Curl_cf_send_bufq(cf->next, data, &ctx->outbufq, NULL, 0,
-                             &nwritten);
-  if(result) {
-    if(result == CURLE_AGAIN) {
-      CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
-                  Curl_bufq_len(&ctx->outbufq));
-      ctx->nw_out_blocked = 1;
-    }
-    return result;
-  }
-  return Curl_bufq_is_empty(&ctx->outbufq) ? CURLE_OK : CURLE_AGAIN;
 }
 
 /*
