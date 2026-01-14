@@ -33,16 +33,16 @@ The multi interface offers several abilities that the easy interface does not.
 They are mainly:
 
 1. Enable a "pull" interface. The application that uses libcurl decides where
-and when to ask libcurl to get/send data.
+   and when to ask libcurl to get/send data.
 
 2. Enable multiple simultaneous transfers in the same thread without making it
-complicated for the application.
+   complicated for the application.
 
 3. Enable the application to wait for action on its own file descriptors and
-curl's file descriptors simultaneously.
+   curl's file descriptors simultaneously.
 
 4. Enable event-based handling and scaling transfers up to and beyond
-thousands of parallel connections.
+   thousands of parallel connections.
 
 # ONE MULTI HANDLE MANY EASY HANDLES
 
@@ -177,7 +177,7 @@ multi interface. While we certainly want and intend for these to get fixed in
 the future, you should be aware of the following current restrictions:
 
 ~~~c
- - Name resolves unless the c-ares or threaded-resolver backends are used
- - file:// transfers
- - TELNET transfers
+- Name resolves unless the c-ares or threaded-resolver backends are used
+- file:// transfers
+- TELNET transfers
 ~~~
