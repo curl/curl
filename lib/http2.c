@@ -124,7 +124,59 @@ struct cf_h2_ctx {
 #undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf) ((struct cf_h2_ctx *)(cf)->ctx)->call_data
 
-static void h2_stream_hash_free(unsigned int id, void *stream);
+/**
+ * All about the H2 internals of a stream
+ */
+struct h2_stream_ctx {
+  struct bufq sendbuf; /* request buffer */
+  struct h1_req_parser h1; /* parsing the request */
+  struct dynhds resp_trailers; /* response trailer fields */
+  size_t resp_hds_len; /* amount of response header bytes in recvbuf */
+  curl_off_t nrcvd_data;  /* number of DATA bytes received */
+
+  char **push_headers;       /* allocated array */
+  size_t push_headers_used;  /* number of entries filled in */
+  size_t push_headers_alloc; /* number of entries allocated */
+
+  int status_code; /* HTTP response status code */
+  uint32_t error; /* stream error code */
+  CURLcode xfer_result; /* Result of writing out response */
+  int32_t local_window_size; /* the local recv window size */
+  int32_t id; /* HTTP/2 protocol identifier for stream */
+  BIT(resp_hds_complete); /* we have a complete, final response */
+  BIT(closed); /* TRUE on stream close */
+  BIT(reset);  /* TRUE on stream reset */
+  BIT(close_handled); /* TRUE if stream closure is handled by libcurl */
+  BIT(bodystarted);
+  BIT(body_eos);    /* the complete body has been added to `sendbuf` and
+                     * is being/has been processed from there. */
+  BIT(write_paused);  /* stream write is paused */
+};
+
+static void free_push_headers(struct h2_stream_ctx *stream)
+{
+  size_t i;
+  for(i = 0; i < stream->push_headers_used; i++)
+    curlx_free(stream->push_headers[i]);
+  Curl_safefree(stream->push_headers);
+  stream->push_headers_used = 0;
+}
+
+static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
+{
+  Curl_bufq_free(&stream->sendbuf);
+  Curl_h1_req_parse_free(&stream->h1);
+  Curl_dynhds_free(&stream->resp_trailers);
+  free_push_headers(stream);
+  curlx_free(stream);
+}
+
+static void h2_stream_hash_free(unsigned int id, void *stream)
+{
+  (void)id;
+  DEBUGASSERT(stream);
+  h2_stream_ctx_free((struct h2_stream_ctx *)stream);
+}
 
 static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
 {
@@ -212,35 +264,6 @@ static CURLcode cf_h2_update_settings(struct cf_h2_ctx *ctx,
   return CURLE_OK;
 }
 
-/**
- * All about the H2 internals of a stream
- */
-struct h2_stream_ctx {
-  struct bufq sendbuf; /* request buffer */
-  struct h1_req_parser h1; /* parsing the request */
-  struct dynhds resp_trailers; /* response trailer fields */
-  size_t resp_hds_len; /* amount of response header bytes in recvbuf */
-  curl_off_t nrcvd_data;  /* number of DATA bytes received */
-
-  char **push_headers;       /* allocated array */
-  size_t push_headers_used;  /* number of entries filled in */
-  size_t push_headers_alloc; /* number of entries allocated */
-
-  int status_code; /* HTTP response status code */
-  uint32_t error; /* stream error code */
-  CURLcode xfer_result; /* Result of writing out response */
-  int32_t local_window_size; /* the local recv window size */
-  int32_t id; /* HTTP/2 protocol identifier for stream */
-  BIT(resp_hds_complete); /* we have a complete, final response */
-  BIT(closed); /* TRUE on stream close */
-  BIT(reset);  /* TRUE on stream reset */
-  BIT(close_handled); /* TRUE if stream closure is handled by libcurl */
-  BIT(bodystarted);
-  BIT(body_eos);    /* the complete body has been added to `sendbuf` and
-                     * is being/has been processed from there. */
-  BIT(write_paused);  /* stream write is paused */
-};
-
 #define H2_STREAM_CTX(ctx, data)                                        \
   ((struct h2_stream_ctx *)(                                            \
     data? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL))
@@ -267,31 +290,6 @@ static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
   stream->local_window_size = H2_STREAM_WINDOW_SIZE_INITIAL;
   stream->nrcvd_data = 0;
   return stream;
-}
-
-static void free_push_headers(struct h2_stream_ctx *stream)
-{
-  size_t i;
-  for(i = 0; i < stream->push_headers_used; i++)
-    curlx_free(stream->push_headers[i]);
-  Curl_safefree(stream->push_headers);
-  stream->push_headers_used = 0;
-}
-
-static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
-{
-  Curl_bufq_free(&stream->sendbuf);
-  Curl_h1_req_parse_free(&stream->h1);
-  Curl_dynhds_free(&stream->resp_trailers);
-  free_push_headers(stream);
-  curlx_free(stream);
-}
-
-static void h2_stream_hash_free(unsigned int id, void *stream)
-{
-  (void)id;
-  DEBUGASSERT(stream);
-  h2_stream_ctx_free((struct h2_stream_ctx *)stream);
 }
 
 #ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
