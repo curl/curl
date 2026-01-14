@@ -73,31 +73,6 @@ struct RTSP {
 #define RTP_PKT_LENGTH(p) ((((unsigned int)((unsigned char)((p)[2]))) << 8) | \
                             ((unsigned int)((unsigned char)((p)[3]))))
 
-/*
- * Parse and write out an RTSP response.
- * @param data     the transfer
- * @param conn     the connection
- * @param buf      data read from connection
- * @param blen     amount of data in buf
- * @param is_eos   TRUE iff this is the last write
- * @param readmore out, TRUE iff complete buf was consumed and more data
- *                 is needed
- */
-static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
-                                    const char *buf,
-                                    size_t blen,
-                                    bool is_eos);
-static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
-                                       const char *buf,
-                                       size_t blen,
-                                       bool is_eos);
-
-static CURLcode rtsp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-static uint32_t rtsp_conncheck(struct Curl_easy *data,
-                               struct connectdata *check,
-                               uint32_t checks_to_perform);
-
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
@@ -812,6 +787,16 @@ out:
   return result;
 }
 
+/*
+ * Parse and write out an RTSP response.
+ * @param data     the transfer
+ * @param conn     the connection
+ * @param buf      data read from connection
+ * @param blen     amount of data in buf
+ * @param is_eos   TRUE iff this is the last write
+ * @param readmore out, TRUE iff complete buf was consumed and more data
+ *                 is needed
+ */
 static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                                     const char *buf,
                                     size_t blen,
