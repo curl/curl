@@ -783,7 +783,7 @@ static CURLcode auth_create_digest_http_message(
     goto oom;
   }
 
-  hashthis = curl_maprintf("%s:%s", request, uri_quoted);
+  hashthis = curl_maprintf("%s:%s", request, uripath);
   if(!hashthis) {
     result = CURLE_OUT_OF_MEMORY;
     goto oom;
@@ -908,8 +908,10 @@ static CURLcode auth_create_digest_http_message(
   if(digest->opaque) {
     /* Append the opaque */
     char *opaque_quoted = auth_digest_string_quoted(digest->opaque);
-    if(!opaque_quoted)
+    if(!opaque_quoted) {
+      result = CURLE_OUT_OF_MEMORY;
       goto oom;
+    }
     result = curlx_dyn_addf(&response, ", opaque=\"%s\"", opaque_quoted);
     curlx_free(opaque_quoted);
     if(result)
