@@ -54,8 +54,8 @@ struct helptxt {
 };
 
 /*
- * The bitmask output is generated with the following command
- ------------------------------------------------------------
+  The bitmask output is generated with the following command:
+  ------------------------------------------------------------
   make -C docs/cmdline-opts listcats
  */
 
