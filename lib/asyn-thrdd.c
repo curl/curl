@@ -116,7 +116,6 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
   struct async_thrdd_addr_ctx *addr_ctx = *paddr_ctx;
   bool destroy;
 
-  (void)data;
   if(!addr_ctx)
     return;
 

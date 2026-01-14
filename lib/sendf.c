@@ -625,7 +625,6 @@ struct cr_in_ctx {
 static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
 {
   struct cr_in_ctx *ctx = reader->ctx;
-  (void)data;
   ctx->read_cb = data->state.fread_func;
   ctx->cb_user_data = data->state.in;
   ctx->total_len = -1;
@@ -1294,7 +1293,6 @@ static CURLcode cr_buf_read(struct Curl_easy *data,
   struct cr_buf_ctx *ctx = reader->ctx;
   size_t nread = ctx->blen - ctx->index;
 
-  (void)data;
   if(!nread || !ctx->buf) {
     *pnread = 0;
     *peos = TRUE;

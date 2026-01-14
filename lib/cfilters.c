@@ -339,7 +339,6 @@ void Curl_conn_cf_add(struct Curl_easy *data,
                       int index,
                       struct Curl_cfilter *cf)
 {
-  (void)data;
   DEBUGASSERT(conn);
   DEBUGASSERT(!cf->conn);
   DEBUGASSERT(!cf->next);

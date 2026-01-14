@@ -1077,7 +1077,6 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   CURLcode result = CURLE_COULDNT_CONNECT;
   bool is_tcp;
 
-  (void)data;
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
   ctx->started_at = *Curl_pgrs_now(data);
 #ifdef SOCK_NONBLOCK
@@ -1277,7 +1276,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   CURLcode result = CURLE_COULDNT_CONNECT;
   int rc = 0;
 
-  (void)data;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -1627,7 +1625,7 @@ static bool cf_socket_conn_is_alive(struct Curl_cfilter *cf,
   int r;
 
   *input_pending = FALSE;
-  (void)data;
+
   if(!ctx || ctx->sock == CURL_SOCKET_BAD)
     return FALSE;
 

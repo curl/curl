@@ -379,7 +379,6 @@ static CURLcode proxy_h2_nw_out_flush(struct Curl_cfilter *cf,
   size_t nwritten;
   CURLcode result;
 
-  (void)data;
   if(Curl_bufq_is_empty(&ctx->outbufq))
     return CURLE_OK;
 
@@ -716,7 +715,6 @@ static int proxy_h2_on_header(nghttp2_session *session,
   CURLcode result;
 
   (void)flags;
-  (void)data;
   (void)session;
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
   if(stream_id != ctx->tunnel.stream_id) {
@@ -785,7 +783,6 @@ static ssize_t tunnel_send_callback(nghttp2_session *session,
   size_t nread;
 
   (void)source;
-  (void)data;
   (void)ctx;
 
   if(!stream_id)
@@ -849,7 +846,6 @@ static int proxy_h2_on_stream_close(nghttp2_session *session,
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
   (void)session;
-  (void)data;
 
   if(stream_id != ctx->tunnel.stream_id)
     return 0;

@@ -1494,7 +1494,6 @@ static CURLcode imap_pp_statemachine(struct Curl_easy *data,
   struct pingpong *pp;
   size_t nread = 0;
 
-  (void)data;
   if(!imapc || !imap)
     return CURLE_FAILED_INIT;
   pp = &imapc->pp;
@@ -2161,7 +2160,6 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
 {
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
 
-  (void)data;
   if(imapc) {
     /* We cannot send quit unconditionally. If this connection is stale or
        bad in any way (pingpong has pending data to send),

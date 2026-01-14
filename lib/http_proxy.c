@@ -380,7 +380,6 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
 
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   curlx_free(ctx);
 }

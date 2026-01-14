@@ -808,7 +808,7 @@ static int cpool_do_conn(struct Curl_easy *data,
                          struct connectdata *conn, void *param)
 {
   struct cpool_do_conn_ctx *dctx = param;
-  (void)data;
+
   if(conn->connection_id == dctx->id) {
     dctx->cb(conn, data, dctx->cbdata);
     return 1;
@@ -858,7 +858,6 @@ static int cpool_mark_stale(struct Curl_easy *data,
 static int cpool_reap_no_reuse(struct Curl_easy *data,
                                struct connectdata *conn, void *param)
 {
-  (void)data;
   (void)param;
   if(!CONN_INUSE(conn) && conn->bits.no_reuse) {
     Curl_conn_terminate(data, conn, FALSE);

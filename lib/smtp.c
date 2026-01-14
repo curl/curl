@@ -1904,7 +1904,6 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
 {
   struct smtp_conn *smtpc = Curl_conn_meta_get(conn, CURL_META_SMTP_CONN);
 
-  (void)data;
   if(!smtpc)
     return CURLE_FAILED_INIT;
 
