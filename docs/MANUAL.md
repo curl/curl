@@ -594,7 +594,7 @@ line parameter, like:
 Force curl to get and display a local help page in case it is invoked without
 URL by making a config file similar to:
 
-    # default url to get
+    # default URL to get
     url = "https://help.with.curl.example.com/curlhelp.html"
 
 You can specify another config file to be read by using the `-K`/`--config`

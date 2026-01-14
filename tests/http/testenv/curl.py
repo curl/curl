@@ -526,7 +526,7 @@ class ExecResult:
         }
         # stat keys where we expect a positive value
         ref_tl = []
-        # time_queue has it's own start timestamp. Other timers start *after*
+        # time_queue has its own start timestamp. Other timers start *after*
         # queueing is done. queue duration might therefore be anywhere.
         somewhere_keys = ['time_queue']
         exact_match = True
