@@ -36,9 +36,9 @@ Lines starting with `#` are ignored.
 
 For each hsts entry:
 
-    [host name] "YYYYMMDD HH:MM:SS"
+    [hostname] "YYYYMMDD HH:MM:SS"
 
-The `[host name]` is dot-prefixed if it includes subdomains.
+The `[hostname]` is dot-prefixed if it includes subdomains.
 
 The time stamp is when the entry expires.
 
