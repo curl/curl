@@ -467,9 +467,6 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   unsigned short dstport = srcport; /* the same by default */
   size_t entries = 0;
   struct Curl_str alpn;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   DEBUGASSERT(asi);
 
