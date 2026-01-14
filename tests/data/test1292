@@ -29,7 +29,7 @@ http
 Replaced internal headers with a blank one
 </name>
 <command>
- -H "Host;" -H "Accept;" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-H "Host;" -H "Accept;" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
