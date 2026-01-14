@@ -400,8 +400,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   SecBufferDesc chlg_desc;
   SECURITY_STATUS status;
 
-  (void)data;
-
   /* Query the security package for DigestSSP */
   status =
     Curl_pSecFn->QuerySecurityPackageInfo(
