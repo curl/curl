@@ -2053,9 +2053,6 @@ static char *detect_proxy(struct Curl_easy *data,
    */
   char proxy_env[20];
   const char *envp = proxy_env;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
                  conn->handler->scheme);
@@ -2831,10 +2828,6 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   char *portptr;
   int port = -1;
   CURLcode result = CURLE_OK;
-
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   *hostname_result = NULL;
   *port_result = -1;

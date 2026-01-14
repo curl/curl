@@ -438,7 +438,6 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
 
   infof(data, "%s%s", prefix, buf);
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
   (void)prefix;
 #endif
 }
