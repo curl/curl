@@ -45,42 +45,6 @@
 #include "strerror.h"
 #include "progress.h"
 
-
-static CURLcode do_init_writer_stack(struct Curl_easy *data);
-
-/* Curl_client_write() sends data to the write callback(s)
-
-   The bit pattern defines to what "streams" to write to. Body and/or header.
-   The defines are in sendf.h of course.
- */
-CURLcode Curl_client_write(struct Curl_easy *data,
-                           int type, const char *buf, size_t blen)
-{
-  CURLcode result;
-
-  /* it is one of those, at least */
-  DEBUGASSERT(type &
-              (CLIENTWRITE_BODY | CLIENTWRITE_HEADER | CLIENTWRITE_INFO));
-  /* BODY is only BODY (with optional EOS) */
-  DEBUGASSERT(!(type & CLIENTWRITE_BODY) ||
-              ((type & ~(CLIENTWRITE_BODY | CLIENTWRITE_EOS)) == 0));
-  /* INFO is only INFO (with optional EOS) */
-  DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
-              ((type & ~(CLIENTWRITE_INFO | CLIENTWRITE_EOS)) == 0));
-
-  if(!data->req.writer_stack) {
-    result = do_init_writer_stack(data);
-    if(result)
-      return result;
-    DEBUGASSERT(data->req.writer_stack);
-  }
-
-  result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
-  CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
-                 type, blen, result);
-  return result;
-}
-
 static void cl_reset_writer(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer = data->req.writer_stack;
@@ -206,6 +170,7 @@ struct cw_download_ctx {
   struct Curl_cwriter super;
   BIT(started_response);
 };
+
 /* Download client writer in phase CURL_CW_PROTOCOL that
  * sees the "real" download body data. */
 static CURLcode cw_download_write(struct Curl_easy *data,
@@ -351,6 +316,84 @@ static const struct Curl_cwtype cw_raw = {
   sizeof(struct Curl_cwriter)
 };
 
+static CURLcode do_init_writer_stack(struct Curl_easy *data)
+{
+  struct Curl_cwriter *writer;
+  CURLcode result;
+
+  DEBUGASSERT(!data->req.writer_stack);
+  result = Curl_cwriter_create(&data->req.writer_stack,
+                               data, &Curl_cwt_out, CURL_CW_CLIENT);
+  if(result)
+    return result;
+
+  /* This places the "pause" writer behind the "download" writer that
+   * is added below. Meaning the "download" can do checks on content length
+   * and other things *before* write outs are buffered for paused transfers. */
+  result = Curl_cwriter_create(&writer, data, &Curl_cwt_pause,
+                               CURL_CW_PROTOCOL);
+  if(!result) {
+    result = Curl_cwriter_add(data, writer);
+    if(result)
+      Curl_cwriter_free(data, writer);
+  }
+  if(result)
+    return result;
+
+  result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
+  if(!result) {
+    result = Curl_cwriter_add(data, writer);
+    if(result)
+      Curl_cwriter_free(data, writer);
+  }
+  if(result)
+    return result;
+
+  result = Curl_cwriter_create(&writer, data, &cw_raw, CURL_CW_RAW);
+  if(!result) {
+    result = Curl_cwriter_add(data, writer);
+    if(result)
+      Curl_cwriter_free(data, writer);
+  }
+  if(result)
+    return result;
+
+  return result;
+}
+
+/* Curl_client_write() sends data to the write callback(s)
+
+   The bit pattern defines to what "streams" to write to. Body and/or header.
+   The defines are in sendf.h of course.
+ */
+CURLcode Curl_client_write(struct Curl_easy *data,
+                           int type, const char *buf, size_t blen)
+{
+  CURLcode result;
+
+  /* it is one of those, at least */
+  DEBUGASSERT(type &
+              (CLIENTWRITE_BODY | CLIENTWRITE_HEADER | CLIENTWRITE_INFO));
+  /* BODY is only BODY (with optional EOS) */
+  DEBUGASSERT(!(type & CLIENTWRITE_BODY) ||
+              ((type & ~(CLIENTWRITE_BODY | CLIENTWRITE_EOS)) == 0));
+  /* INFO is only INFO (with optional EOS) */
+  DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
+              ((type & ~(CLIENTWRITE_INFO | CLIENTWRITE_EOS)) == 0));
+
+  if(!data->req.writer_stack) {
+    result = do_init_writer_stack(data);
+    if(result)
+      return result;
+    DEBUGASSERT(data->req.writer_stack);
+  }
+
+  result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
+  CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
+                 type, blen, result);
+  return result;
+}
+
 /* Create an unencoding writer stage using the given handler. */
 CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
                              struct Curl_easy *data,
@@ -398,51 +441,6 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
       ++n;
   }
   return n;
-}
-
-static CURLcode do_init_writer_stack(struct Curl_easy *data)
-{
-  struct Curl_cwriter *writer;
-  CURLcode result;
-
-  DEBUGASSERT(!data->req.writer_stack);
-  result = Curl_cwriter_create(&data->req.writer_stack,
-                               data, &Curl_cwt_out, CURL_CW_CLIENT);
-  if(result)
-    return result;
-
-  /* This places the "pause" writer behind the "download" writer that
-   * is added below. Meaning the "download" can do checks on content length
-   * and other things *before* write outs are buffered for paused transfers. */
-  result = Curl_cwriter_create(&writer, data, &Curl_cwt_pause,
-                               CURL_CW_PROTOCOL);
-  if(!result) {
-    result = Curl_cwriter_add(data, writer);
-    if(result)
-      Curl_cwriter_free(data, writer);
-  }
-  if(result)
-    return result;
-
-  result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
-  if(!result) {
-    result = Curl_cwriter_add(data, writer);
-    if(result)
-      Curl_cwriter_free(data, writer);
-  }
-  if(result)
-    return result;
-
-  result = Curl_cwriter_create(&writer, data, &cw_raw, CURL_CW_RAW);
-  if(!result) {
-    result = Curl_cwriter_add(data, writer);
-    if(result)
-      Curl_cwriter_free(data, writer);
-  }
-  if(result)
-    return result;
-
-  return result;
 }
 
 CURLcode Curl_cwriter_add(struct Curl_easy *data,
