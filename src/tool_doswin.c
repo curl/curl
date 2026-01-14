@@ -31,14 +31,6 @@
 
 #ifdef _WIN32
 #  include <tlhelp32.h>
-#endif
-
-#include "tool_cfgable.h"
-#include "tool_bname.h"
-#include "tool_doswin.h"
-#include "tool_msgs.h"
-
-#ifdef _WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
@@ -47,6 +39,11 @@
 #  include <fcntl.h>         /* for _use_lfn(f) prototype */
 #  define CURL_USE_LFN(f) _use_lfn(f)
 #endif
+
+#include "tool_cfgable.h"
+#include "tool_bname.h"
+#include "tool_doswin.h"
+#include "tool_msgs.h"
 
 #ifdef MSDOS
 
