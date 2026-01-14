@@ -808,7 +808,6 @@ static CURLcode auth_create_digest_http_message(
     }
   }
 
-
   result = hash(hashbuf, (unsigned char *)hashthis, strlen(hashthis));
   curlx_free(hashthis);
   if(result)
