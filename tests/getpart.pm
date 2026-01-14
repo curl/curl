@@ -96,10 +96,10 @@ sub getpartattr {
     my %hash;
     my $inside=0;
 
- #   print "Section: $section, part: $part\n";
+  # print "Section: $section, part: $part\n";
 
     for(@xml) {
- #       print "$inside: $_";
+      # print "$inside: $_";
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
@@ -214,6 +214,7 @@ sub partexists {
     }
     return 0; # does not exist
 }
+
 # The code currently never calls this more than once per part per file, so
 # caching a result that will never be used again just slows things down.
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
