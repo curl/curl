@@ -710,19 +710,7 @@ static void init_terminal(void)
     }
   }
 }
-#endif /* !CURL_WINDOWS_UWP */
 
-CURLcode win32_init(void)
-{
-  curlx_now_init();
-#ifndef CURL_WINDOWS_UWP
-  init_terminal();
-#endif
-
-  return CURLE_OK;
-}
-
-#ifndef CURL_WINDOWS_UWP
 /* The following STDIN non - blocking read techniques are heavily inspired
    by nmap and ncat (https://nmap.org/ncat/) */
 struct win_thread_data {
@@ -930,6 +918,16 @@ curl_socket_t win32_stdin_read_thread(void)
 }
 
 #endif /* !CURL_WINDOWS_UWP */
+
+CURLcode win32_init(void)
+{
+  curlx_now_init();
+#ifndef CURL_WINDOWS_UWP
+  init_terminal();
+#endif
+
+  return CURLE_OK;
+}
 
 #endif /* _WIN32 */
 
