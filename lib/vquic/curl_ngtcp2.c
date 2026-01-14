@@ -614,7 +614,6 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   struct Curl_easy *data = stream_user_data;
   (void)offset;
-  (void)data;
 
   nconsumed =
     nghttp3_conn_read_stream(ctx->h3conn, stream_id, buf, buflen, fin);
@@ -705,7 +704,6 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)tconn;
   (void)final_size;
   (void)app_error_code;
-  (void)data;
 
   rv = nghttp3_conn_shutdown_stream_read(ctx->h3conn, stream_id);
   CURL_TRC_CF(data, cf, "[%" PRId64 "] reset -> %d", stream_id, rv);
@@ -1263,7 +1261,6 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
   struct Curl_easy *data = stream_user_data;
   int rv;
   (void)conn;
-  (void)data;
 
   rv = ngtcp2_conn_shutdown_stream_write(ctx->qconn, 0, stream_id,
                                          app_error_code);
@@ -2907,7 +2904,6 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
-  (void)data;
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
