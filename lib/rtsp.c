@@ -83,11 +83,6 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
   return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
-static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
-                                 size_t len);
-static CURLcode rtsp_parse_transport(struct Curl_easy *data,
-                                     const char *transport);
-
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
 
 static void rtsp_easy_dtor(void *key, size_t klen, void *entry)
@@ -624,6 +619,48 @@ static CURLcode rtp_write_body_junk(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
+                                 size_t len)
+{
+  size_t wrote;
+  curl_write_callback writeit;
+  void *user_ptr;
+
+  if(len == 0) {
+    failf(data, "Cannot write a 0 size RTP packet.");
+    return CURLE_WRITE_ERROR;
+  }
+
+  /* If the user has configured CURLOPT_INTERLEAVEFUNCTION then use that
+     function and any configured CURLOPT_INTERLEAVEDATA to write out the RTP
+     data. Otherwise, use the CURLOPT_WRITEFUNCTION with the CURLOPT_WRITEDATA
+     pointer to write out the RTP data. */
+  if(data->set.fwrite_rtp) {
+    writeit = data->set.fwrite_rtp;
+    user_ptr = data->set.rtp_out;
+  }
+  else {
+    writeit = data->set.fwrite_func;
+    user_ptr = data->set.out;
+  }
+
+  Curl_set_in_callback(data, TRUE);
+  wrote = writeit((char *)CURL_UNCONST(ptr), 1, len, user_ptr);
+  Curl_set_in_callback(data, FALSE);
+
+  if(CURL_WRITEFUNC_PAUSE == wrote) {
+    failf(data, "Cannot pause RTP");
+    return CURLE_WRITE_ERROR;
+  }
+
+  if(wrote != len) {
+    failf(data, "Failed writing RTP data");
+    return CURLE_WRITE_ERROR;
+  }
+
+  return CURLE_OK;
+}
+
 static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
                                 struct rtsp_conn *rtspc,
                                 const char *buf,
@@ -893,45 +930,46 @@ static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
   return rtsp_rtp_write_resp(data, buf, blen, is_eos);
 }
 
-static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
-                                 size_t len)
+static CURLcode rtsp_parse_transport(struct Curl_easy *data,
+                                     const char *transport)
 {
-  size_t wrote;
-  curl_write_callback writeit;
-  void *user_ptr;
-
-  if(len == 0) {
-    failf(data, "Cannot write a 0 size RTP packet.");
-    return CURLE_WRITE_ERROR;
+  /* If we receive multiple Transport response-headers, the interleaved
+     channels of each response header is recorded and used together for
+     subsequent data validity checks.*/
+  /* e.g.: ' RTP/AVP/TCP;unicast;interleaved=5-6' */
+  const char *start, *end;
+  start = transport;
+  while(start && *start) {
+    curlx_str_passblanks(&start);
+    end = strchr(start, ';');
+    if(checkprefix("interleaved=", start)) {
+      curl_off_t chan1, chan2, chan;
+      const char *p = start + 12;
+      if(!curlx_str_number(&p, &chan1, 255)) {
+        unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
+        chan2 = chan1;
+        if(!curlx_str_single(&p, '-')) {
+          if(curlx_str_number(&p, &chan2, 255)) {
+            infof(data, "Unable to read the interleaved parameter from "
+                  "Transport header: [%s]", transport);
+            chan2 = chan1;
+          }
+        }
+        for(chan = chan1; chan <= chan2; chan++) {
+          int idx = (int)chan / 8;
+          int off = (int)chan % 8;
+          rtp_channel_mask[idx] |= (unsigned char)(1 << off);
+        }
+      }
+      else {
+        infof(data, "Unable to read the interleaved parameter from "
+              "Transport header: [%s]", transport);
+      }
+      break;
+    }
+    /* skip to next parameter */
+    start = (!end) ? end : (end + 1);
   }
-
-  /* If the user has configured CURLOPT_INTERLEAVEFUNCTION then use that
-     function and any configured CURLOPT_INTERLEAVEDATA to write out the RTP
-     data. Otherwise, use the CURLOPT_WRITEFUNCTION with the CURLOPT_WRITEDATA
-     pointer to write out the RTP data. */
-  if(data->set.fwrite_rtp) {
-    writeit = data->set.fwrite_rtp;
-    user_ptr = data->set.rtp_out;
-  }
-  else {
-    writeit = data->set.fwrite_func;
-    user_ptr = data->set.out;
-  }
-
-  Curl_set_in_callback(data, TRUE);
-  wrote = writeit((char *)CURL_UNCONST(ptr), 1, len, user_ptr);
-  Curl_set_in_callback(data, FALSE);
-
-  if(CURL_WRITEFUNC_PAUSE == wrote) {
-    failf(data, "Cannot pause RTP");
-    return CURLE_WRITE_ERROR;
-  }
-
-  if(wrote != len) {
-    failf(data, "Failed writing RTP data");
-    return CURLE_WRITE_ERROR;
-  }
-
   return CURLE_OK;
 }
 
@@ -1000,49 +1038,6 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
     result = rtsp_parse_transport(data, header + 10);
     if(result)
       return result;
-  }
-  return CURLE_OK;
-}
-
-static CURLcode rtsp_parse_transport(struct Curl_easy *data,
-                                     const char *transport)
-{
-  /* If we receive multiple Transport response-headers, the interleaved
-     channels of each response header is recorded and used together for
-     subsequent data validity checks.*/
-  /* e.g.: ' RTP/AVP/TCP;unicast;interleaved=5-6' */
-  const char *start, *end;
-  start = transport;
-  while(start && *start) {
-    curlx_str_passblanks(&start);
-    end = strchr(start, ';');
-    if(checkprefix("interleaved=", start)) {
-      curl_off_t chan1, chan2, chan;
-      const char *p = start + 12;
-      if(!curlx_str_number(&p, &chan1, 255)) {
-        unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
-        chan2 = chan1;
-        if(!curlx_str_single(&p, '-')) {
-          if(curlx_str_number(&p, &chan2, 255)) {
-            infof(data, "Unable to read the interleaved parameter from "
-                  "Transport header: [%s]", transport);
-            chan2 = chan1;
-          }
-        }
-        for(chan = chan1; chan <= chan2; chan++) {
-          int idx = (int)chan / 8;
-          int off = (int)chan % 8;
-          rtp_channel_mask[idx] |= (unsigned char)(1 << off);
-        }
-      }
-      else {
-        infof(data, "Unable to read the interleaved parameter from "
-              "Transport header: [%s]", transport);
-      }
-      break;
-    }
-    /* skip to next parameter */
-    start = (!end) ? end : (end + 1);
   }
   return CURLE_OK;
 }
