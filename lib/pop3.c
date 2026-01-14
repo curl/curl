@@ -1295,11 +1295,11 @@ upgrade_tls:
   if(pp->sendleft)
     return Curl_pp_flushsend(data, pp);
 
- do {
-    /* Read the response from the server */
-   result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &pop3code, &nread);
-   if(result)
-     return result;
+  do {
+     /* Read the response from the server */
+    result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &pop3code, &nread);
+    if(result)
+      return result;
 
     if(!pop3code)
       break;
