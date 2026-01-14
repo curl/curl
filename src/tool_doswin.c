@@ -710,7 +710,7 @@ static void init_terminal(void)
     }
   }
 }
-#endif
+#endif /* !CURL_WINDOWS_UWP */
 
 CURLcode win32_init(void)
 {
