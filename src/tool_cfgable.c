@@ -120,7 +120,7 @@ static void free_config_fields(struct OperationConfig *config)
 
 #ifndef CURL_DISABLE_IPFS
   tool_safefree(config->ipfs_gateway);
-#endif /* !CURL_DISABLE_IPFS */
+#endif
   tool_safefree(config->doh_url);
   tool_safefree(config->cipher_list);
   tool_safefree(config->proxy_cipher_list);
