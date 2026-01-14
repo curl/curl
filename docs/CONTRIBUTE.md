@@ -224,9 +224,9 @@ How to write git commit messages in the curl project.
 The first line is a succinct description of the change and should ideally work
 as a single line in the RELEASE NOTES.
 
- - use the imperative, present tense: **change** not "changed" nor "changes"
- - do not capitalize the first letter
- - no period (.) at the end
+- use the imperative, present tense: **change** not "changed" nor "changes"
+- do not capitalize the first letter
+- no period (.) at the end
 
 The `[area]` in the first line can be `http2`, `cookies`, `openssl` or
 similar. There is no fixed list to select from but using the same "area" as
