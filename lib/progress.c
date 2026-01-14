@@ -180,7 +180,6 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
 }
 
 /*
-
    New proposed interface, 9th of February 2000:
 
    pgrsStartNow() - sets start time
@@ -190,7 +189,6 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
    pgrsSetUploadCounter() - amount of data currently uploaded
    pgrsUpdate() - show progress
    pgrsDone() - transfer complete
-
 */
 
 int Curl_pgrsDone(struct Curl_easy *data)
@@ -243,7 +241,6 @@ void Curl_pgrsSendPause(struct Curl_easy *data, bool enable)
 }
 
 /*
- *
  * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
  */
 void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
@@ -321,7 +318,6 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 }
 
 /*
- *
  * Curl_pgrsTime(). Store the current time at the given label. This fetches a
  * fresh "now" and returns it.
  *
@@ -607,8 +603,7 @@ static void progress_meter(struct Curl_easy *data)
   /* we flush the output stream to make it appear as soon as possible */
   fflush(data->set.err);
 }
-#else
- /* progress bar disabled */
+#else /* CURL_DISABLE_PROGRESS_METER */
 #define progress_meter(x) Curl_nop_stmt
 #endif
 
