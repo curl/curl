@@ -854,6 +854,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn,
                              unsigned char transport)
 {
+  (void)data;
   (void)conn;
   (void)transport;
   DEBUGF(infof(data, "QUIC is not supported in this build"));
