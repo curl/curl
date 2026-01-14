@@ -102,6 +102,7 @@ static int inet_pton4(const char *src, unsigned char *dst)
   return 1;
 }
 
+#ifdef USE_IPV6
 /* int
  * inet_pton6(src, dst)
  *      convert presentation level address to network order binary form.
@@ -191,6 +192,7 @@ static int inet_pton6(const char *src, unsigned char *dst)
   memcpy(dst, tmp, IN6ADDRSZ);
   return 1;
 }
+#endif
 
 /* int
  * inet_pton(af, src, dst)
@@ -213,8 +215,10 @@ int curlx_inet_pton(int af, const char *src, void *dst)
   switch(af) {
   case AF_INET:
     return inet_pton4(src, (unsigned char *)dst);
+#ifdef USE_IPV6
   case AF_INET6:
     return inet_pton6(src, (unsigned char *)dst);
+#endif
   default:
     errno = SOCKEAFNOSUPPORT;
     return -1;

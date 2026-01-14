@@ -386,6 +386,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
   return CURLUE_OK;
 }
 
+#ifdef USE_IPV6
 /* this assumes 'hostname' now starts with [ */
 static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
                             size_t hlen) /* length of hostname */
@@ -440,12 +441,18 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
   }
   return CURLUE_OK;
 }
+#else
+#define ipv6_parse(a,b,c) CURLUE_BAD_HOSTNAME
+#endif
 
 static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
                                 size_t hlen) /* length of hostname */
 {
   size_t len;
   DEBUGASSERT(hostname);
+#ifndef USE_IPV6
+  (void)u;
+#endif
 
   if(!hlen)
     return CURLUE_NO_HOST;
