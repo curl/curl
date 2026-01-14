@@ -236,6 +236,34 @@ static char *imap_atom(const char *str, bool escape_only)
   return curlx_dyn_ptr(&line);
 }
 
+/*
+ * Finds the start of a literal '{size}' in line, skipping over quoted strings.
+ */
+static const char *imap_find_literal(const char *line, size_t len)
+{
+  const char *end = line + len;
+  bool in_quote = FALSE;
+
+  while(line < end) {
+    if(in_quote) {
+      if(*line == '\\' && (line + 1) < end) {
+        line += 2;
+        continue;
+      }
+      if(*line == '"')
+        in_quote = FALSE;
+    }
+    else {
+      if(*line == '"')
+        in_quote = TRUE;
+      else if(*line == '{')
+        return line;
+    }
+    line++;
+  }
+  return NULL;
+}
+
 /***********************************************************************
  *
  * imap_matchresp()
@@ -1168,7 +1196,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
        body data). Literal syntax is {size}\r\n */
     const char *cr = memchr(line, '\r', len);
     size_t line_len = cr ? (size_t)(cr - line) : len;
-    const char *ptr = memchr(line, '{', line_len);
+    const char *ptr = imap_find_literal(line, line_len);
     if(ptr) {
       curl_off_t size = 0;
       bool parsed = FALSE;
@@ -1347,7 +1375,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
 
   /* Something like this is received "* 1 FETCH (BODY[TEXT] {2021}\r" so parse
      the continuation data contained within the curly brackets */
-  ptr = memchr(ptr, '{', len);
+  ptr = imap_find_literal(ptr, len);
   if(ptr) {
     ptr++;
     if(!curlx_str_number(&ptr, &size, CURL_OFF_T_MAX) &&
