@@ -15,7 +15,7 @@ CUSTOMREQUEST
 %repeat[120 x Testing large IMAP literal with custom FETCH. XXXXXXXXXXXXX%0d]%
 </data>
 <datacheck>
-* 456 FETCH (BODY[TEXT] {7201}%CR
+* 456 FETCH (("fake {50}" BODY[TEXT]) {7201}%CR
 %repeat[120 x Testing large IMAP literal with custom FETCH. XXXXXXXXXXXXX%0d]%
 </datacheck>
 </reply>
@@ -28,8 +28,9 @@ imap
 <name>
 IMAP custom FETCH with larger literal response (~7KB)
 </name>
+# The quoted string contains {50} which must not be parsed as a literal
 <command>
- imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 456 BODY[TEXT]'
+ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 456 ("fake {50}" BODY[TEXT])'
 </command>
 </client>
 
@@ -39,7 +40,7 @@ IMAP custom FETCH with larger literal response (~7KB)
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER
-A004 FETCH 456 BODY[TEXT]
+A004 FETCH 456 ("fake {50}" BODY[TEXT])
 A005 LOGOUT
 </protocol>
 </verify>
