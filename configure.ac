@@ -4125,6 +4125,16 @@ AC_CHECK_TYPE([bool],[
 #endif
 ])
 
+# check for uintptr_t type
+AC_CHECK_TYPE([uintptr_t], [
+  AC_DEFINE(HAVE_UINTPTR_T, 1,
+    [Define to 1 if uintptr_t type is available.])
+],, [
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+])
+
 if test "$curl_cv_native_windows" != "yes"; then
   # check for sa_family_t
   AC_CHECK_TYPE(sa_family_t,

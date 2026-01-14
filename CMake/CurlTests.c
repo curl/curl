@@ -114,6 +114,16 @@ int main(void)
 }
 #endif
 
+#ifdef HAVE_UINTPTR_T
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+int main(void)
+{
+  return (int)sizeof(uintptr_t *);
+}
+#endif
+
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <stdarg.h>
