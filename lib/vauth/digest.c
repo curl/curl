@@ -152,6 +152,8 @@ static char *auth_digest_string_quoted(const char *s)
 {
   struct dynbuf out;
   curlx_dyn_init(&out, 2048);
+  if(!*s) /* for zero length input, make sure we return an empty string */
+    return curlx_strdup("");
   while(*s) {
     CURLcode result;
     if(*s == '"' || *s == '\\') {
