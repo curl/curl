@@ -83,9 +83,6 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
-static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
-                                      unsigned int flags);
-
 static void free_urlhandle(struct Curl_URL *u)
 {
   curlx_free(u->scheme);
@@ -220,81 +217,6 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
     return len;
   }
   return 0;
-}
-
-/*
- * Concatenate a relative URL onto a base URL making it absolute.
- */
-static CURLUcode redirect_url(const char *base, const char *relurl,
-                              CURLU *u, unsigned int flags)
-{
-  struct dynbuf urlbuf;
-  bool host_changed = FALSE;
-  const char *useurl = relurl;
-  const char *cutoff = NULL;
-  size_t prelen;
-  CURLUcode uc;
-
-  /* protsep points to the start of the hostname, after [scheme]:// */
-  const char *protsep = base + strlen(u->scheme) + 3;
-  DEBUGASSERT(base && relurl && u); /* all set here */
-  if(!base)
-    return CURLUE_MALFORMED_INPUT; /* should never happen */
-
-  /* handle different relative URL types */
-  switch(relurl[0]) {
-  case '/':
-    if(relurl[1] == '/') {
-      /* protocol-relative URL: //example.com/path */
-      cutoff = protsep;
-      useurl = &relurl[2];
-      host_changed = TRUE;
-    }
-    else
-      /* absolute /path */
-      cutoff = strchr(protsep, '/');
-    break;
-
-  case '#':
-    /* fragment-only change */
-    if(u->fragment)
-      cutoff = strchr(protsep, '#');
-    break;
-
-  default:
-    /* path or query-only change */
-    if(u->query && u->query[0])
-      /* remove existing query */
-      cutoff = strchr(protsep, '?');
-    else if(u->fragment && u->fragment[0])
-      /* Remove existing fragment */
-      cutoff = strchr(protsep, '#');
-
-    if(relurl[0] != '?') {
-      /* append a relative path after the last slash */
-      cutoff = memrchr(protsep, '/',
-                       cutoff ? (size_t)(cutoff - protsep) : strlen(protsep));
-      if(cutoff)
-        cutoff++; /* truncate after last slash */
-    }
-    break;
-  }
-
-  prelen = cutoff ? (size_t)(cutoff - base) : strlen(base);
-
-  /* build new URL */
-  curlx_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
-
-  if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
-     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
-    uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
-                              flags & ~CURLU_PATH_AS_IS);
-  }
-  else
-    uc = CURLUE_OUT_OF_MEMORY;
-
-  curlx_dyn_free(&urlbuf);
-  return uc;
 }
 
 /* scan for byte values <= 31, 127 and sometimes space */
@@ -1284,6 +1206,81 @@ static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
     *u = tmpurl;
   }
   return result;
+}
+
+/*
+ * Concatenate a relative URL onto a base URL making it absolute.
+ */
+static CURLUcode redirect_url(const char *base, const char *relurl,
+                              CURLU *u, unsigned int flags)
+{
+  struct dynbuf urlbuf;
+  bool host_changed = FALSE;
+  const char *useurl = relurl;
+  const char *cutoff = NULL;
+  size_t prelen;
+  CURLUcode uc;
+
+  /* protsep points to the start of the hostname, after [scheme]:// */
+  const char *protsep = base + strlen(u->scheme) + 3;
+  DEBUGASSERT(base && relurl && u); /* all set here */
+  if(!base)
+    return CURLUE_MALFORMED_INPUT; /* should never happen */
+
+  /* handle different relative URL types */
+  switch(relurl[0]) {
+  case '/':
+    if(relurl[1] == '/') {
+      /* protocol-relative URL: //example.com/path */
+      cutoff = protsep;
+      useurl = &relurl[2];
+      host_changed = TRUE;
+    }
+    else
+      /* absolute /path */
+      cutoff = strchr(protsep, '/');
+    break;
+
+  case '#':
+    /* fragment-only change */
+    if(u->fragment)
+      cutoff = strchr(protsep, '#');
+    break;
+
+  default:
+    /* path or query-only change */
+    if(u->query && u->query[0])
+      /* remove existing query */
+      cutoff = strchr(protsep, '?');
+    else if(u->fragment && u->fragment[0])
+      /* Remove existing fragment */
+      cutoff = strchr(protsep, '#');
+
+    if(relurl[0] != '?') {
+      /* append a relative path after the last slash */
+      cutoff = memrchr(protsep, '/',
+                       cutoff ? (size_t)(cutoff - protsep) : strlen(protsep));
+      if(cutoff)
+        cutoff++; /* truncate after last slash */
+    }
+    break;
+  }
+
+  prelen = cutoff ? (size_t)(cutoff - base) : strlen(base);
+
+  /* build new URL */
+  curlx_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
+
+  if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
+     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
+    uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
+                              flags & ~CURLU_PATH_AS_IS);
+  }
+  else
+    uc = CURLUE_OUT_OF_MEMORY;
+
+  curlx_dyn_free(&urlbuf);
+  return uc;
 }
 
 /*

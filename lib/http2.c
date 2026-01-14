@@ -124,7 +124,59 @@ struct cf_h2_ctx {
 #undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf) ((struct cf_h2_ctx *)(cf)->ctx)->call_data
 
-static void h2_stream_hash_free(unsigned int id, void *stream);
+/**
+ * All about the H2 internals of a stream
+ */
+struct h2_stream_ctx {
+  struct bufq sendbuf; /* request buffer */
+  struct h1_req_parser h1; /* parsing the request */
+  struct dynhds resp_trailers; /* response trailer fields */
+  size_t resp_hds_len; /* amount of response header bytes in recvbuf */
+  curl_off_t nrcvd_data;  /* number of DATA bytes received */
+
+  char **push_headers;       /* allocated array */
+  size_t push_headers_used;  /* number of entries filled in */
+  size_t push_headers_alloc; /* number of entries allocated */
+
+  int status_code; /* HTTP response status code */
+  uint32_t error; /* stream error code */
+  CURLcode xfer_result; /* Result of writing out response */
+  int32_t local_window_size; /* the local recv window size */
+  int32_t id; /* HTTP/2 protocol identifier for stream */
+  BIT(resp_hds_complete); /* we have a complete, final response */
+  BIT(closed); /* TRUE on stream close */
+  BIT(reset);  /* TRUE on stream reset */
+  BIT(close_handled); /* TRUE if stream closure is handled by libcurl */
+  BIT(bodystarted);
+  BIT(body_eos);    /* the complete body has been added to `sendbuf` and
+                     * is being/has been processed from there. */
+  BIT(write_paused);  /* stream write is paused */
+};
+
+static void free_push_headers(struct h2_stream_ctx *stream)
+{
+  size_t i;
+  for(i = 0; i < stream->push_headers_used; i++)
+    curlx_free(stream->push_headers[i]);
+  Curl_safefree(stream->push_headers);
+  stream->push_headers_used = 0;
+}
+
+static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
+{
+  Curl_bufq_free(&stream->sendbuf);
+  Curl_h1_req_parse_free(&stream->h1);
+  Curl_dynhds_free(&stream->resp_trailers);
+  free_push_headers(stream);
+  curlx_free(stream);
+}
+
+static void h2_stream_hash_free(unsigned int id, void *stream)
+{
+  (void)id;
+  DEBUGASSERT(stream);
+  h2_stream_ctx_free((struct h2_stream_ctx *)stream);
+}
 
 static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
 {
@@ -212,41 +264,6 @@ static CURLcode cf_h2_update_settings(struct cf_h2_ctx *ctx,
   return CURLE_OK;
 }
 
-static CURLcode nw_out_flush(struct Curl_cfilter *cf,
-                             struct Curl_easy *data);
-
-static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data);
-
-/**
- * All about the H2 internals of a stream
- */
-struct h2_stream_ctx {
-  struct bufq sendbuf; /* request buffer */
-  struct h1_req_parser h1; /* parsing the request */
-  struct dynhds resp_trailers; /* response trailer fields */
-  size_t resp_hds_len; /* amount of response header bytes in recvbuf */
-  curl_off_t nrcvd_data;  /* number of DATA bytes received */
-
-  char **push_headers;       /* allocated array */
-  size_t push_headers_used;  /* number of entries filled in */
-  size_t push_headers_alloc; /* number of entries allocated */
-
-  int status_code; /* HTTP response status code */
-  uint32_t error; /* stream error code */
-  CURLcode xfer_result; /* Result of writing out response */
-  int32_t local_window_size; /* the local recv window size */
-  int32_t id; /* HTTP/2 protocol identifier for stream */
-  BIT(resp_hds_complete); /* we have a complete, final response */
-  BIT(closed); /* TRUE on stream close */
-  BIT(reset);  /* TRUE on stream reset */
-  BIT(close_handled); /* TRUE if stream closure is handled by libcurl */
-  BIT(bodystarted);
-  BIT(body_eos);    /* the complete body has been added to `sendbuf` and
-                     * is being/has been processed from there. */
-  BIT(write_paused);  /* stream write is paused */
-};
-
 #define H2_STREAM_CTX(ctx, data)                                        \
   ((struct h2_stream_ctx *)(                                            \
     data? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL))
@@ -273,31 +290,6 @@ static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
   stream->local_window_size = H2_STREAM_WINDOW_SIZE_INITIAL;
   stream->nrcvd_data = 0;
   return stream;
-}
-
-static void free_push_headers(struct h2_stream_ctx *stream)
-{
-  size_t i;
-  for(i = 0; i < stream->push_headers_used; i++)
-    curlx_free(stream->push_headers[i]);
-  Curl_safefree(stream->push_headers);
-  stream->push_headers_used = 0;
-}
-
-static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
-{
-  Curl_bufq_free(&stream->sendbuf);
-  Curl_h1_req_parse_free(&stream->h1);
-  Curl_dynhds_free(&stream->resp_trailers);
-  free_push_headers(stream);
-  curlx_free(stream);
-}
-
-static void h2_stream_hash_free(unsigned int id, void *stream)
-{
-  (void)id;
-  DEBUGASSERT(stream);
-  h2_stream_ctx_free((struct h2_stream_ctx *)stream);
 }
 
 #ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
@@ -406,6 +398,29 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static CURLcode nw_out_flush(struct Curl_cfilter *cf,
+                             struct Curl_easy *data)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  size_t nwritten;
+  CURLcode result;
+
+  if(Curl_bufq_is_empty(&ctx->outbufq))
+    return CURLE_OK;
+
+  result = Curl_cf_send_bufq(cf->next, data, &ctx->outbufq, NULL, 0,
+                             &nwritten);
+  if(result) {
+    if(result == CURLE_AGAIN) {
+      CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
+                  Curl_bufq_len(&ctx->outbufq));
+      ctx->nw_out_blocked = 1;
+    }
+    return result;
+  }
+  return Curl_bufq_is_empty(&ctx->outbufq) ? CURLE_OK : CURLE_AGAIN;
+}
+
 static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
@@ -462,154 +477,6 @@ static int h2_client_new(struct Curl_cfilter *cf,
   rc = nghttp2_session_client_new3(&ctx->h2, cbs, cf, o, &mem);
   nghttp2_option_del(o);
   return rc;
-}
-
-static ssize_t send_callback(nghttp2_session *h2,
-                             const uint8_t *mem, size_t length, int flags,
-                             void *userp);
-static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
-                         void *userp);
-static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
-                                       const nghttp2_frame *frame,
-                                       int lib_error_code,
-                                       void *user_data);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
-                         void *userp);
-#endif
-static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
-                              int32_t stream_id,
-                              const uint8_t *mem, size_t len, void *userp);
-static int on_stream_close(nghttp2_session *session, int32_t stream_id,
-                           uint32_t error_code, void *userp);
-static int on_begin_headers(nghttp2_session *session,
-                            const nghttp2_frame *frame, void *userp);
-static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
-                     const uint8_t *name, size_t namelen,
-                     const uint8_t *value, size_t valuelen,
-                     uint8_t flags,
-                     void *userp);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static int error_callback(nghttp2_session *session, const char *msg,
-                          size_t len, void *userp);
-#endif
-static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
-{
-  struct cf_h2_ctx *ctx = cf->ctx;
-  struct h2_stream_ctx *stream;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-  int rc;
-  nghttp2_session_callbacks *cbs = NULL;
-
-  DEBUGASSERT(!ctx->h2);
-  DEBUGASSERT(ctx->initialized);
-
-  rc = nghttp2_session_callbacks_new(&cbs);
-  if(rc) {
-    failf(data, "Could not initialize nghttp2 callbacks");
-    goto out;
-  }
-
-  nghttp2_session_callbacks_set_send_callback(cbs, send_callback);
-  nghttp2_session_callbacks_set_on_frame_recv_callback(cbs, on_frame_recv);
-  nghttp2_session_callbacks_set_on_invalid_frame_recv_callback(cbs,
-    cf_h2_on_invalid_frame_recv);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  nghttp2_session_callbacks_set_on_frame_send_callback(cbs, on_frame_send);
-#endif
-  nghttp2_session_callbacks_set_on_data_chunk_recv_callback(
-    cbs, on_data_chunk_recv);
-  nghttp2_session_callbacks_set_on_stream_close_callback(cbs, on_stream_close);
-  nghttp2_session_callbacks_set_on_begin_headers_callback(
-    cbs, on_begin_headers);
-  nghttp2_session_callbacks_set_on_header_callback(cbs, on_header);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  nghttp2_session_callbacks_set_error_callback(cbs, error_callback);
-#endif
-
-  /* The nghttp2 session is not yet setup, do it */
-  rc = h2_client_new(cf, cbs);
-  if(rc) {
-    failf(data, "Could not initialize nghttp2");
-    goto out;
-  }
-  ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;
-
-  if(ctx->via_h1_upgrade) {
-    /* HTTP/1.1 Upgrade issued. H2 Settings have already been submitted
-     * in the H1 request and we upgrade from there. This stream
-     * is opened implicitly as #1. */
-    uint8_t binsettings[H2_BINSETTINGS_LEN];
-    ssize_t rclen;
-    size_t binlen; /* length of the binsettings data */
-
-    rclen = populate_binsettings(binsettings, data);
-
-    if(!curlx_sztouz(rclen, &binlen) || !binlen) {
-      failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
-      result = CURLE_FAILED_INIT;
-      goto out;
-    }
-
-    result = http2_data_setup(cf, data, &stream);
-    if(result)
-      goto out;
-    DEBUGASSERT(stream);
-    stream->id = 1;
-    /* queue SETTINGS frame (again) */
-    rc = nghttp2_session_upgrade2(ctx->h2, binsettings, binlen,
-                                  data->state.httpreq == HTTPREQ_HEAD,
-                                  NULL);
-    if(rc) {
-      failf(data, "nghttp2_session_upgrade2() failed: %s(%d)",
-            nghttp2_strerror(rc), rc);
-      result = CURLE_HTTP2;
-      goto out;
-    }
-
-    rc = nghttp2_session_set_stream_user_data(ctx->h2, stream->id,
-                                              data);
-    if(rc) {
-      infof(data, "http/2: failed to set user_data for stream %u",
-            stream->id);
-      DEBUGASSERT(0);
-    }
-    CURL_TRC_CF(data, cf, "created session via Upgrade");
-  }
-  else {
-    nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
-    size_t ivlen;
-
-    ivlen = populate_settings(iv, data, ctx);
-    rc = nghttp2_submit_settings(ctx->h2, NGHTTP2_FLAG_NONE,
-                                 iv, ivlen);
-    if(rc) {
-      failf(data, "nghttp2_submit_settings() failed: %s(%d)",
-            nghttp2_strerror(rc), rc);
-      result = CURLE_HTTP2;
-      goto out;
-    }
-  }
-
-  rc = nghttp2_session_set_local_window_size(ctx->h2, NGHTTP2_FLAG_NONE, 0,
-                                             HTTP2_HUGE_WINDOW_SIZE);
-  if(rc) {
-    failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
-          nghttp2_strerror(rc), rc);
-    result = CURLE_HTTP2;
-    goto out;
-  }
-
-  /* all set, traffic will be send on connect */
-  result = CURLE_OK;
-  CURL_TRC_CF(data, cf, "[0] created h2 session%s",
-              ctx->via_h1_upgrade ? " (via h1 upgrade)" : "");
-
-out:
-  if(cbs)
-    nghttp2_session_callbacks_del(cbs);
-  return result;
 }
 
 /*
@@ -736,29 +603,6 @@ void Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
   (void)curl_msnprintf(p, len, "nghttp2/%s", h2->version_str);
-}
-
-static CURLcode nw_out_flush(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
-{
-  struct cf_h2_ctx *ctx = cf->ctx;
-  size_t nwritten;
-  CURLcode result;
-
-  if(Curl_bufq_is_empty(&ctx->outbufq))
-    return CURLE_OK;
-
-  result = Curl_cf_send_bufq(cf->next, data, &ctx->outbufq, NULL, 0,
-                             &nwritten);
-  if(result) {
-    if(result == CURLE_AGAIN) {
-      CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
-                  Curl_bufq_len(&ctx->outbufq));
-      ctx->nw_out_blocked = 1;
-    }
-    return result;
-  }
-  return Curl_bufq_is_empty(&ctx->outbufq) ? CURLE_OK : CURLE_AGAIN;
 }
 
 /*
@@ -2530,6 +2374,125 @@ static CURLcode cf_h2_adjust_pollset(struct Curl_cfilter *cf,
     result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
+  return result;
+}
+
+static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  struct h2_stream_ctx *stream;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+  int rc;
+  nghttp2_session_callbacks *cbs = NULL;
+
+  DEBUGASSERT(!ctx->h2);
+  DEBUGASSERT(ctx->initialized);
+
+  rc = nghttp2_session_callbacks_new(&cbs);
+  if(rc) {
+    failf(data, "Could not initialize nghttp2 callbacks");
+    goto out;
+  }
+
+  nghttp2_session_callbacks_set_send_callback(cbs, send_callback);
+  nghttp2_session_callbacks_set_on_frame_recv_callback(cbs, on_frame_recv);
+  nghttp2_session_callbacks_set_on_invalid_frame_recv_callback(cbs,
+    cf_h2_on_invalid_frame_recv);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  nghttp2_session_callbacks_set_on_frame_send_callback(cbs, on_frame_send);
+#endif
+  nghttp2_session_callbacks_set_on_data_chunk_recv_callback(
+    cbs, on_data_chunk_recv);
+  nghttp2_session_callbacks_set_on_stream_close_callback(cbs, on_stream_close);
+  nghttp2_session_callbacks_set_on_begin_headers_callback(
+    cbs, on_begin_headers);
+  nghttp2_session_callbacks_set_on_header_callback(cbs, on_header);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  nghttp2_session_callbacks_set_error_callback(cbs, error_callback);
+#endif
+
+  /* The nghttp2 session is not yet setup, do it */
+  rc = h2_client_new(cf, cbs);
+  if(rc) {
+    failf(data, "Could not initialize nghttp2");
+    goto out;
+  }
+  ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;
+
+  if(ctx->via_h1_upgrade) {
+    /* HTTP/1.1 Upgrade issued. H2 Settings have already been submitted
+     * in the H1 request and we upgrade from there. This stream
+     * is opened implicitly as #1. */
+    uint8_t binsettings[H2_BINSETTINGS_LEN];
+    ssize_t rclen;
+    size_t binlen; /* length of the binsettings data */
+
+    rclen = populate_binsettings(binsettings, data);
+
+    if(!curlx_sztouz(rclen, &binlen) || !binlen) {
+      failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+
+    result = http2_data_setup(cf, data, &stream);
+    if(result)
+      goto out;
+    DEBUGASSERT(stream);
+    stream->id = 1;
+    /* queue SETTINGS frame (again) */
+    rc = nghttp2_session_upgrade2(ctx->h2, binsettings, binlen,
+                                  data->state.httpreq == HTTPREQ_HEAD,
+                                  NULL);
+    if(rc) {
+      failf(data, "nghttp2_session_upgrade2() failed: %s(%d)",
+            nghttp2_strerror(rc), rc);
+      result = CURLE_HTTP2;
+      goto out;
+    }
+
+    rc = nghttp2_session_set_stream_user_data(ctx->h2, stream->id,
+                                              data);
+    if(rc) {
+      infof(data, "http/2: failed to set user_data for stream %u",
+            stream->id);
+      DEBUGASSERT(0);
+    }
+    CURL_TRC_CF(data, cf, "created session via Upgrade");
+  }
+  else {
+    nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
+    size_t ivlen;
+
+    ivlen = populate_settings(iv, data, ctx);
+    rc = nghttp2_submit_settings(ctx->h2, NGHTTP2_FLAG_NONE,
+                                 iv, ivlen);
+    if(rc) {
+      failf(data, "nghttp2_submit_settings() failed: %s(%d)",
+            nghttp2_strerror(rc), rc);
+      result = CURLE_HTTP2;
+      goto out;
+    }
+  }
+
+  rc = nghttp2_session_set_local_window_size(ctx->h2, NGHTTP2_FLAG_NONE, 0,
+                                             HTTP2_HUGE_WINDOW_SIZE);
+  if(rc) {
+    failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
+          nghttp2_strerror(rc), rc);
+    result = CURLE_HTTP2;
+    goto out;
+  }
+
+  /* all set, traffic will be send on connect */
+  result = CURLE_OK;
+  CURL_TRC_CF(data, cf, "[0] created h2 session%s",
+              ctx->via_h1_upgrade ? " (via h1 upgrade)" : "");
+
+out:
+  if(cbs)
+    nghttp2_session_callbacks_del(cbs);
   return result;
 }
 

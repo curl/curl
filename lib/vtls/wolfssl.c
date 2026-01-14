@@ -100,10 +100,6 @@
 #undef USE_BIO_CHAIN
 #endif
 
-static CURLcode wssl_connect(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             bool *done);
-
 #ifdef OPENSSL_EXTRA
 /*
  * Availability note:
