@@ -181,9 +181,9 @@ libcurl are not equipped for that at the moment except when built with
 _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as a
 locale.
 
- https://curl.se/bug/?i=345
- https://curl.se/bug/?i=731
- https://curl.se/bug/?i=3747
+https://curl.se/bug/?i=345
+https://curl.se/bug/?i=731
+https://curl.se/bug/?i=3747
 
 NTLM authentication and Unicode
 
