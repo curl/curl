@@ -930,17 +930,21 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+#if defined(MBEDTLS_PK_WRITE_C) && defined(MBEDTLS_SSL_KEEP_PEER_CERTIFICATE)
+#define HAVE_PINNED_PUBKEY
+#endif
+
 static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
-#if defined(MBEDTLS_PK_WRITE_C) || defined(HAS_ALPN_MBEDTLS)
+#if defined(HAVE_PINNED_PUBKEY) || defined(HAS_ALPN_MBEDTLS)
   CURLcode result;
 #endif
   int ret;
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-#ifdef MBEDTLS_PK_WRITE_C
+#ifdef HAVE_PINNED_PUBKEY
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
@@ -986,7 +990,7 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
           mbedtls_ssl_get_version(&backend->ssl), cipher_str);
   }
 
-#ifdef MBEDTLS_PK_WRITE_C
+#ifdef HAVE_PINNED_PUBKEY
   if(pinnedpubkey) {
     int size;
     const mbedtls_x509_crt *peercert;
@@ -1514,7 +1518,9 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_CERTINFO |
+#ifdef HAVE_PINNED_PUBKEY
   SSLSUPP_PINNEDPUBKEY |
+#endif
   SSLSUPP_SSL_CTX |
 #ifdef MBEDTLS_SSL_PROTO_TLS1_3  /* requires mbedTLS 3.6.0+ */
   SSLSUPP_TLS13_CIPHERSUITES |
