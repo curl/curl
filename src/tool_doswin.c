@@ -58,8 +58,212 @@
 #  endif
 #endif
 
+/* The functions msdosify, rename_if_dos_device_name and __crt0_glob_function
+ * were taken with modification from the DJGPP port of tar 1.12. They use
+ * algorithms originally from DJTAR.
+ */
+
+/*
+Test if truncating a path to a file will leave at least a single character in
+the filename. Filenames suffixed by an alternate data stream cannot be
+truncated. This performs a dry run, nothing is modified.
+
+Good truncate_pos 9:    C:\foo\bar  =>  C:\foo\ba
+Good truncate_pos 6:    C:\foo      =>  C:\foo
+Good truncate_pos 5:    C:\foo      =>  C:\fo
+Bad* truncate_pos 5:    C:foo       =>  C:foo
+Bad truncate_pos 5:     C:\foo:ads  =>  C:\fo
+Bad truncate_pos 9:     C:\foo:ads  =>  C:\foo:ad
+Bad truncate_pos 5:     C:\foo\bar  =>  C:\fo
+Bad truncate_pos 5:     C:\foo\     =>  C:\fo
+Bad truncate_pos 7:     C:\foo\     =>  C:\foo\
+Error truncate_pos 7:   C:\foo      =>  (pos out of range)
+Bad truncate_pos 1:     C:\foo\     =>  C
+
+* C:foo is ambiguous, C could end up being a drive or file therefore something
+  like C:superlongfilename cannot be truncated.
+
+Returns
+SANITIZE_ERR_OK: Good -- 'path' can be truncated
+SANITIZE_ERR_INVALID_PATH: Bad -- 'path' cannot be truncated
+!= SANITIZE_ERR_OK && != SANITIZE_ERR_INVALID_PATH: Error
+*/
+static SANITIZEcode truncate_dryrun(const char *path,
+                                    const size_t truncate_pos)
+{
+  size_t len;
+
+  if(!path)
+    return SANITIZE_ERR_BAD_ARGUMENT;
+
+  len = strlen(path);
+
+  if(truncate_pos > len)
+    return SANITIZE_ERR_BAD_ARGUMENT;
+
+  if(!len || !truncate_pos)
+    return SANITIZE_ERR_INVALID_PATH;
+
+  if(strpbrk(&path[truncate_pos - 1], "\\/:"))
+    return SANITIZE_ERR_INVALID_PATH;
+
+  /* C:\foo can be truncated but C:\foo:ads cannot */
+  if(truncate_pos > 1) {
+    const char *p = &path[truncate_pos - 1];
+    do {
+      --p;
+      if(*p == ':')
+        return SANITIZE_ERR_INVALID_PATH;
+    } while(p != path && *p != '\\' && *p != '/');
+  }
+
+  return SANITIZE_ERR_OK;
+}
+
+/*
+Extra sanitization MS-DOS for file_name.
+
+This is a supporting function for sanitize_file_name.
+
+Warning: This is an MS-DOS legacy function and was purposely written in a way
+that some path information may pass through. For example drive letter names
+(C:, D:, etc) are allowed to pass through. For sanitizing a filename use
+sanitize_file_name.
+
+Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
+Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
+*/
 static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
-                             int flags);
+                             int flags)
+{
+  char dos_name[PATH_MAX];
+  static const char illegal_chars_dos[] =
+    ".+, ;=[]"     /* illegal in DOS */
+    "|<>/\\\":?*"; /* illegal in DOS & W95 */
+  static const char *illegal_chars_w95 = &illegal_chars_dos[8];
+  int idx, dot_idx;
+  const char *s = file_name;
+  char *d = dos_name;
+  const char * const dlimit = dos_name + sizeof(dos_name) - 1;
+  const char *illegal_aliens = illegal_chars_dos;
+  size_t len = sizeof(illegal_chars_dos) - 1;
+
+  if(!sanitized)
+    return SANITIZE_ERR_BAD_ARGUMENT;
+
+  *sanitized = NULL;
+
+  if(!file_name)
+    return SANITIZE_ERR_BAD_ARGUMENT;
+
+  if(strlen(file_name) > PATH_MAX - 1)
+    return SANITIZE_ERR_INVALID_PATH;
+
+  /* Support for Windows 9X VFAT systems, when available. */
+  if(CURL_USE_LFN(file_name)) {
+    illegal_aliens = illegal_chars_w95;
+    len -= (illegal_chars_w95 - illegal_chars_dos);
+  }
+
+  /* Get past the drive letter, if any. */
+  if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
+    *d++ = *s++;
+    *d = ((flags & SANITIZE_ALLOW_PATH)) ? ':' : '_';
+    ++d;
+    ++s;
+  }
+
+  for(idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
+    if(memchr(illegal_aliens, *s, len)) {
+
+      if((flags & SANITIZE_ALLOW_PATH) && *s == ':')
+        *d = ':';
+      else if((flags & SANITIZE_ALLOW_PATH) && (*s == '/' || *s == '\\'))
+        *d = *s;
+      /* Dots are special: DOS does not allow them as the leading character,
+         and a filename cannot have more than a single dot. We leave the
+         first non-leading dot alone, unless it comes too close to the
+         beginning of the name: we want sh.lex.c to become sh_lex.c, not
+         sh.lex-c.  */
+      else if(*s == '.') {
+        if((flags & SANITIZE_ALLOW_PATH) && idx == 0 &&
+           (s[1] == '/' || s[1] == '\\' ||
+            (s[1] == '.' && (s[2] == '/' || s[2] == '\\')))) {
+          /* Copy "./" and "../" verbatim.  */
+          *d++ = *s++;
+          if(d == dlimit)
+            break;
+          if(*s == '.') {
+            *d++ = *s++;
+            if(d == dlimit)
+              break;
+          }
+          *d = *s;
+        }
+        else if(idx == 0)
+          *d = '_';
+        else if(dot_idx >= 0) {
+          if(dot_idx < 5) { /* 5 is a heuristic ad-hoc'ery */
+            d[dot_idx - idx] = '_'; /* replace previous dot */
+            *d = '.';
+          }
+          else
+            *d = '-';
+        }
+        else
+          *d = '.';
+
+        if(*s == '.')
+          dot_idx = idx;
+      }
+      else if(*s == '+' && s[1] == '+') {
+        if(idx - 2 == dot_idx) { /* .c++, .h++ etc. */
+          *d++ = 'x';
+          if(d == dlimit)
+            break;
+          *d = 'x';
+        }
+        else {
+          /* libg++ etc.  */
+          if(dlimit - d < 4) {
+            *d++ = 'x';
+            if(d == dlimit)
+              break;
+            *d = 'x';
+          }
+          else {
+            memcpy(d, "plus", 4);
+            d += 3;
+          }
+        }
+        s++;
+        idx++;
+      }
+      else
+        *d = '_';
+    }
+    else
+      *d = *s;
+    if(*s == '/' || *s == '\\') {
+      idx = 0;
+      dot_idx = -1;
+    }
+    else
+      idx++;
+  }
+  *d = '\0';
+
+  if(*s) {
+    /* dos_name is truncated, check that truncation requirements are met,
+       specifically truncating a filename suffixed by an alternate data stream
+       or truncating the entire filename is not allowed. */
+    if(strpbrk(s, "\\/:") || truncate_dryrun(dos_name, d - dos_name))
+      return SANITIZE_ERR_INVALID_PATH;
+  }
+
+  *sanitized = curlx_strdup(dos_name);
+  return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
+}
 #endif /* MSDOS */
 
 /*
@@ -315,226 +519,6 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
   *sanitized = target;
   return SANITIZE_ERR_OK;
 }
-
-#ifdef MSDOS
-/*
-Test if truncating a path to a file will leave at least a single character in
-the filename. Filenames suffixed by an alternate data stream cannot be
-truncated. This performs a dry run, nothing is modified.
-
-Good truncate_pos 9:    C:\foo\bar  =>  C:\foo\ba
-Good truncate_pos 6:    C:\foo      =>  C:\foo
-Good truncate_pos 5:    C:\foo      =>  C:\fo
-Bad* truncate_pos 5:    C:foo       =>  C:foo
-Bad truncate_pos 5:     C:\foo:ads  =>  C:\fo
-Bad truncate_pos 9:     C:\foo:ads  =>  C:\foo:ad
-Bad truncate_pos 5:     C:\foo\bar  =>  C:\fo
-Bad truncate_pos 5:     C:\foo\     =>  C:\fo
-Bad truncate_pos 7:     C:\foo\     =>  C:\foo\
-Error truncate_pos 7:   C:\foo      =>  (pos out of range)
-Bad truncate_pos 1:     C:\foo\     =>  C
-
-* C:foo is ambiguous, C could end up being a drive or file therefore something
-  like C:superlongfilename cannot be truncated.
-
-Returns
-SANITIZE_ERR_OK: Good -- 'path' can be truncated
-SANITIZE_ERR_INVALID_PATH: Bad -- 'path' cannot be truncated
-!= SANITIZE_ERR_OK && != SANITIZE_ERR_INVALID_PATH: Error
-*/
-static SANITIZEcode truncate_dryrun(const char *path,
-                                    const size_t truncate_pos)
-{
-  size_t len;
-
-  if(!path)
-    return SANITIZE_ERR_BAD_ARGUMENT;
-
-  len = strlen(path);
-
-  if(truncate_pos > len)
-    return SANITIZE_ERR_BAD_ARGUMENT;
-
-  if(!len || !truncate_pos)
-    return SANITIZE_ERR_INVALID_PATH;
-
-  if(strpbrk(&path[truncate_pos - 1], "\\/:"))
-    return SANITIZE_ERR_INVALID_PATH;
-
-  /* C:\foo can be truncated but C:\foo:ads cannot */
-  if(truncate_pos > 1) {
-    const char *p = &path[truncate_pos - 1];
-    do {
-      --p;
-      if(*p == ':')
-        return SANITIZE_ERR_INVALID_PATH;
-    } while(p != path && *p != '\\' && *p != '/');
-  }
-
-  return SANITIZE_ERR_OK;
-}
-
-/* The functions msdosify, rename_if_dos_device_name and __crt0_glob_function
- * were taken with modification from the DJGPP port of tar 1.12. They use
- * algorithms originally from DJTAR.
- */
-
-/*
-Extra sanitization MS-DOS for file_name.
-
-This is a supporting function for sanitize_file_name.
-
-Warning: This is an MS-DOS legacy function and was purposely written in a way
-that some path information may pass through. For example drive letter names
-(C:, D:, etc) are allowed to pass through. For sanitizing a filename use
-sanitize_file_name.
-
-Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
-Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
-*/
-static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
-                             int flags)
-{
-  char dos_name[PATH_MAX];
-  static const char illegal_chars_dos[] =
-    ".+, ;=[]"     /* illegal in DOS */
-    "|<>/\\\":?*"; /* illegal in DOS & W95 */
-  static const char *illegal_chars_w95 = &illegal_chars_dos[8];
-  int idx, dot_idx;
-  const char *s = file_name;
-  char *d = dos_name;
-  const char * const dlimit = dos_name + sizeof(dos_name) - 1;
-  const char *illegal_aliens = illegal_chars_dos;
-  size_t len = sizeof(illegal_chars_dos) - 1;
-
-  if(!sanitized)
-    return SANITIZE_ERR_BAD_ARGUMENT;
-
-  *sanitized = NULL;
-
-  if(!file_name)
-    return SANITIZE_ERR_BAD_ARGUMENT;
-
-  if(strlen(file_name) > PATH_MAX - 1)
-    return SANITIZE_ERR_INVALID_PATH;
-
-  /* Support for Windows 9X VFAT systems, when available. */
-  if(CURL_USE_LFN(file_name)) {
-    illegal_aliens = illegal_chars_w95;
-    len -= (illegal_chars_w95 - illegal_chars_dos);
-  }
-
-  /* Get past the drive letter, if any. */
-  if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
-    *d++ = *s++;
-    *d = ((flags & SANITIZE_ALLOW_PATH)) ? ':' : '_';
-    ++d;
-    ++s;
-  }
-
-  for(idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
-    if(memchr(illegal_aliens, *s, len)) {
-
-      if((flags & SANITIZE_ALLOW_PATH) && *s == ':')
-        *d = ':';
-      else if((flags & SANITIZE_ALLOW_PATH) && (*s == '/' || *s == '\\'))
-        *d = *s;
-      /* Dots are special: DOS does not allow them as the leading character,
-         and a filename cannot have more than a single dot. We leave the
-         first non-leading dot alone, unless it comes too close to the
-         beginning of the name: we want sh.lex.c to become sh_lex.c, not
-         sh.lex-c.  */
-      else if(*s == '.') {
-        if((flags & SANITIZE_ALLOW_PATH) && idx == 0 &&
-           (s[1] == '/' || s[1] == '\\' ||
-            (s[1] == '.' && (s[2] == '/' || s[2] == '\\')))) {
-          /* Copy "./" and "../" verbatim.  */
-          *d++ = *s++;
-          if(d == dlimit)
-            break;
-          if(*s == '.') {
-            *d++ = *s++;
-            if(d == dlimit)
-              break;
-          }
-          *d = *s;
-        }
-        else if(idx == 0)
-          *d = '_';
-        else if(dot_idx >= 0) {
-          if(dot_idx < 5) { /* 5 is a heuristic ad-hoc'ery */
-            d[dot_idx - idx] = '_'; /* replace previous dot */
-            *d = '.';
-          }
-          else
-            *d = '-';
-        }
-        else
-          *d = '.';
-
-        if(*s == '.')
-          dot_idx = idx;
-      }
-      else if(*s == '+' && s[1] == '+') {
-        if(idx - 2 == dot_idx) { /* .c++, .h++ etc. */
-          *d++ = 'x';
-          if(d == dlimit)
-            break;
-          *d = 'x';
-        }
-        else {
-          /* libg++ etc.  */
-          if(dlimit - d < 4) {
-            *d++ = 'x';
-            if(d == dlimit)
-              break;
-            *d = 'x';
-          }
-          else {
-            memcpy(d, "plus", 4);
-            d += 3;
-          }
-        }
-        s++;
-        idx++;
-      }
-      else
-        *d = '_';
-    }
-    else
-      *d = *s;
-    if(*s == '/' || *s == '\\') {
-      idx = 0;
-      dot_idx = -1;
-    }
-    else
-      idx++;
-  }
-  *d = '\0';
-
-  if(*s) {
-    /* dos_name is truncated, check that truncation requirements are met,
-       specifically truncating a filename suffixed by an alternate data stream
-       or truncating the entire filename is not allowed. */
-    if(strpbrk(s, "\\/:") || truncate_dryrun(dos_name, d - dos_name))
-      return SANITIZE_ERR_INVALID_PATH;
-  }
-
-  *sanitized = curlx_strdup(dos_name);
-  return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
-}
-#endif /* MSDOS */
-
-#ifdef __DJGPP__
-/*
- * Disable program default argument globbing. We do it on our own.
- */
-char **__crt0_glob_function(char *arg)
-{
-  (void)arg;
-  return (char **)0;
-}
-#endif
 
 #ifdef _WIN32
 
@@ -912,6 +896,17 @@ curl_socket_t win32_stdin_read_thread(void)
 }
 
 #endif /* !CURL_WINDOWS_UWP */
+
+#ifdef __DJGPP__
+/*
+ * Disable program default argument globbing. We do it on our own.
+ */
+char **__crt0_glob_function(char *arg)
+{
+  (void)arg;
+  return (char **)0;
+}
+#endif
 
 CURLcode win32_init(void)
 {
