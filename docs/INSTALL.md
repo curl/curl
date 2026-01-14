@@ -137,13 +137,13 @@ alter it, you can select how to deal with each individual library.
 
 These options are provided to select the TLS backend to use.
 
- - AmiSSL: `--with-amissl`
- - GnuTLS: `--with-gnutls`.
- - mbedTLS: `--with-mbedtls`
- - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
- - Rustls: `--with-rustls`
- - Schannel: `--with-schannel`
- - wolfSSL: `--with-wolfssl`
+- AmiSSL: `--with-amissl`
+- GnuTLS: `--with-gnutls`.
+- mbedTLS: `--with-mbedtls`
+- OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
+- Rustls: `--with-rustls`
+- Schannel: `--with-schannel`
+- wolfSSL: `--with-wolfssl`
 
 You can build curl with *multiple* TLS backends at your choice, but some TLS
 backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
