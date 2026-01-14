@@ -53,29 +53,7 @@ struct Curl_easy;
 
 static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
                                  void *instream, bool *hasread);
-
-/* Encoders. */
-static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
-                               curl_mimepart *part);
-static curl_off_t encoder_nop_size(curl_mimepart *part);
-static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part);
-static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
-                                  curl_mimepart *part);
-static curl_off_t encoder_base64_size(curl_mimepart *part);
-static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
-                              curl_mimepart *part);
-static curl_off_t encoder_qp_size(curl_mimepart *part);
 static curl_off_t mime_size(curl_mimepart *part);
-
-static const struct mime_encoder encoders[] = {
-  { "binary", encoder_nop_read, encoder_nop_size },
-  { "8bit", encoder_nop_read, encoder_nop_size },
-  { "7bit", encoder_7bit_read, encoder_nop_size },
-  { "base64", encoder_base64_read, encoder_base64_size },
-  { "quoted-printable", encoder_qp_read, encoder_qp_size },
-  { ZERO_NULL, ZERO_NULL, ZERO_NULL }
-};
 
 /* Quoted-printable character class table.
  *
@@ -1434,6 +1412,15 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
 
   return CURLE_OK;
 }
+
+static const struct mime_encoder encoders[] = {
+  { "binary", encoder_nop_read, encoder_nop_size },
+  { "8bit", encoder_nop_read, encoder_nop_size },
+  { "7bit", encoder_7bit_read, encoder_nop_size },
+  { "base64", encoder_base64_read, encoder_base64_size },
+  { "quoted-printable", encoder_qp_read, encoder_qp_size },
+  { ZERO_NULL, ZERO_NULL, ZERO_NULL }
+};
 
 /* Set mime data transfer encoder. */
 CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
