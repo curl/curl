@@ -38,7 +38,7 @@ export GNV_CC_QUALIFIERS=/STANDARD=RELAXED
 cd ../..
 #
 #
-./configure  --prefix=/usr --exec-prefix=/usr --disable-dependency-tracking \
- --disable-libtool-lock --with-gssapi --disable-ntlm-wb \
- --with-ca-path=gnv\$curl_ca_path
+./configure --prefix=/usr --exec-prefix=/usr --disable-dependency-tracking \
+  --disable-libtool-lock --with-gssapi --disable-ntlm-wb \
+  --with-ca-path=gnv\$curl_ca_path
 #
