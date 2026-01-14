@@ -145,6 +145,6 @@ char *findfile(const char *fname, int dotscore)
         return checkhome(home, fname, FALSE);
     }
   }
-#endif /* PWD-stuff */
+#endif /* HAVE_GETPWUID && HAVE_GETEUID */
   return NULL;
 }
