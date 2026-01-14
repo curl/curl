@@ -282,13 +282,14 @@ Once all the packages have been installed, begin the process of installing curl 
 
  </details>
 
- 1. `sh configure <configure_options>`
- 2. `make`
+1. `sh configure <configure_options>`
+2. `make`
 
 If any error occurs during curl installation, try:
- - reinstalling the required `cygwin` packages from the list above
- - temporarily move `cygwin` to the top of your path
- - install all of the suggested `cygwin` packages
+
+- reinstalling the required `cygwin` packages from the list above
+- temporarily move `cygwin` to the top of your path
+- install all of the suggested `cygwin` packages
 
 ## MS-DOS
 
