@@ -143,7 +143,7 @@ locdone:
     curlx_free(copyloc);
   }
 }
-#endif
+#endif /* LINK */
 
 /*
  * Copies a filename part and returns an ALLOCATED data buffer.
