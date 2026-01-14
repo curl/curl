@@ -88,6 +88,8 @@ void startfunc(int a, int b) {
 
  // CPP comment ?
 
+ int d = impl->magicbad(buffer, "%d", 99); /* member function shall pass */
+
  /* comment does not end
 
 </file>
