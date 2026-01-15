@@ -5310,9 +5310,6 @@ fi
 if test "$want_debug" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
 fi
-if test "$want_debug" = "yes"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
-fi
 if test -n "$CURL_CA_EMBED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
   CURL_CA_EMBED_msg="$CURL_CA_EMBED"
