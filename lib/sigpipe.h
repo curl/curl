@@ -85,33 +85,14 @@ static void sigpipe_apply(struct Curl_easy *data,
 
 #else
 /* for systems without sigaction */
+#define sigpipe_ignore(x, y) do { (void)x; (void)y; } while(0)
+#define sigpipe_apply(x, y)  do { (void)x; (void)y; } while(0)
+#define sigpipe_init(x)      do { (void)x; } while(0)
+#define sigpipe_restore(x)   do { (void)x; } while(0)
+
 struct Curl_sigpipe_ctx {
   bool dummy;
 };
-
-static void sigpipe_init(struct Curl_sigpipe_ctx *ig)
-{
-  (void)ig;
-}
-
-static void sigpipe_ignore(struct Curl_easy *data,
-                           struct Curl_sigpipe_ctx *ig)
-{
-  (void)data;
-  (void)ig;
-}
-
-static void sigpipe_restore(struct Curl_sigpipe_ctx *ig)
-{
-  (void)ig;
-}
-
-static void sigpipe_apply(struct Curl_easy *data,
-                          struct Curl_sigpipe_ctx *ig)
-{
-  (void)data;
-  (void)ig;
-}
 
 #endif
 
