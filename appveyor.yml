@@ -53,14 +53,13 @@ environment:
       PRJ_CFG: Release
       OPENSSL: 'ON'
       SHARED: 'ON'
-    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, Build-tests'
+    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, no-DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A ARM64'
       PRJ_CFG: Release
       SCHANNEL: 'ON'
       DEBUG: 'OFF'
-      CURLDEBUG: 'ON'
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       PRJ_GEN: 'Visual Studio 10 2010'
@@ -127,7 +126,7 @@ environment:
       PRJ_CFG: Debug
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'ON'
-    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, DEBUGBUILD, no-CURLDEBUG, Build-tests'
+    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, no-DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
@@ -135,7 +134,7 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'ON'
       SHARED: 'ON'
-      CURLDEBUG: 'OFF'
+      DEBUG: 'OFF'
     - job_name: 'CM VS2022, Debug, x64, no SSL, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
