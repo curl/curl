@@ -287,8 +287,8 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_STARTTRANSFER:
     delta = &data->progress.t_starttransfer;
     /* prevent updating t_starttransfer unless:
-     *   1) this is the first time we are setting t_starttransfer
-     *   2) a redirect has occurred since the last time t_starttransfer was set
+     *   1. this is the first time we are setting t_starttransfer
+     *   2. a redirect has occurred since the last time t_starttransfer was set
      * This prevents repeated invocations of the function from incorrectly
      * changing the t_starttransfer time.
      */
