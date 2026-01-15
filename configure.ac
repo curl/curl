@@ -5453,11 +5453,6 @@ XC_CHECK_BUILD_FLAGS
 SSL_BACKENDS=${ssl_backends}
 AC_SUBST(SSL_BACKENDS)
 
-if test "$want_curldebug_assumed" = "yes" &&
-   test "$want_curldebug" = "yes" && test "$USE_ARES" = "1"; then
-  ac_configure_args="$ac_configure_args --enable-curldebug"
-fi
-
 CURL_PREPARE_CONFIGUREHELP_PM
 
 AC_CONFIG_FILES([\
