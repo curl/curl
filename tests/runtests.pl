@@ -656,7 +656,7 @@ sub checksystemfeatures {
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
 
-            # built with memory tracking support (--enable-curldebug); may be disabled later
+            # built with memory tracking support (--enable-debug); may be disabled later
             $feature{"TrackMemory"} = $feat =~ /TrackMemory/i;
             # curl was built with --enable-debug
             $feature{"Debug"} = $feat =~ /Debug/i;
@@ -846,7 +846,7 @@ sub checksystemfeatures {
 
     if($torture && !$feature{"TrackMemory"}) {
         die "cannot run torture tests since curl was built without ".
-            "TrackMemory feature (--enable-curldebug)";
+            "TrackMemory feature (--enable-debug)";
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
