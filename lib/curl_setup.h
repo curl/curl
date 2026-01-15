@@ -953,6 +953,10 @@ extern curl_calloc_callback Curl_ccalloc;
 
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
+#ifdef DEBUGBUILD
+#define CURLDEBUG
+#endif
+
 #ifdef CURLDEBUG
 #ifdef __clang__
 #  define ALLOC_FUNC         __attribute__((__malloc__))
