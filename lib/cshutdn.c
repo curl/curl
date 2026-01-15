@@ -176,13 +176,13 @@ static bool cshutdn_destroy_oldest(struct cshutdn *cshutdn,
   }
 
   if(e) {
-    SIGPIPE_VARIABLE(pipe_st);
+    struct Curl_sigpipe_ctx sigpipe_ctx;
     conn = Curl_node_elem(e);
     Curl_node_remove(e);
-    sigpipe_init(&pipe_st);
-    sigpipe_apply(data, &pipe_st);
+    sigpipe_init(&sigpipe_ctx);
+    sigpipe_apply(data, &sigpipe_ctx);
     Curl_cshutdn_terminate(data, conn, FALSE);
-    sigpipe_restore(&pipe_st);
+    sigpipe_restore(&sigpipe_ctx);
     return TRUE;
   }
   return FALSE;
@@ -222,7 +222,8 @@ out:
 }
 
 static void cshutdn_perform(struct cshutdn *cshutdn,
-                            struct Curl_easy *data)
+                            struct Curl_easy *data,
+                            struct Curl_sigpipe_ctx *sigpipe_ctx)
 {
   struct Curl_llist_node *e = Curl_llist_head(&cshutdn->list);
   struct Curl_llist_node *enext;
@@ -235,6 +236,7 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
 
   CURL_TRC_M(data, "[SHUTDOWN] perform on %zu connections",
              Curl_llist_count(&cshutdn->list));
+  sigpipe_apply(data, sigpipe_ctx);
   while(e) {
     enext = Curl_node_next(e);
     conn = Curl_node_elem(e);
@@ -263,20 +265,19 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
 {
   struct curltime started = *Curl_pgrs_now(data);
   struct Curl_llist_node *e;
-  SIGPIPE_VARIABLE(pipe_st);
+  struct Curl_sigpipe_ctx sigpipe_ctx;
 
   DEBUGASSERT(cshutdn);
   DEBUGASSERT(data);
 
   CURL_TRC_M(data, "[SHUTDOWN] shutdown all");
-  sigpipe_init(&pipe_st);
-  sigpipe_apply(data, &pipe_st);
+  sigpipe_init(&sigpipe_ctx);
 
   while(Curl_llist_head(&cshutdn->list)) {
     timediff_t spent_ms;
     int remain_ms;
 
-    cshutdn_perform(cshutdn, data);
+    cshutdn_perform(cshutdn, data, &sigpipe_ctx);
 
     if(!Curl_llist_head(&cshutdn->list)) {
       CURL_TRC_M(data, "[SHUTDOWN] shutdown finished cleanly");
@@ -308,7 +309,7 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
   }
   DEBUGASSERT(!Curl_llist_count(&cshutdn->list));
 
-  sigpipe_restore(&pipe_st);
+  sigpipe_restore(&sigpipe_ctx);
 }
 
 int Curl_cshutdn_init(struct cshutdn *cshutdn,
@@ -418,38 +419,11 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
              conn->connection_id, Curl_llist_count(&cshutdn->list));
 }
 
-static void cshutdn_multi_socket(struct cshutdn *cshutdn,
-                                 struct Curl_easy *data,
-                                 curl_socket_t s)
-{
-  struct Curl_llist_node *e;
-  struct connectdata *conn;
-  bool done;
-
-  DEBUGASSERT(cshutdn->multi->socket_cb);
-  e = Curl_llist_head(&cshutdn->list);
-  while(e) {
-    conn = Curl_node_elem(e);
-    if(s == conn->sock[FIRSTSOCKET] || s == conn->sock[SECONDARYSOCKET]) {
-      Curl_cshutdn_run_once(data, conn, &done);
-      if(done || cshutdn_update_ev(cshutdn, data, conn)) {
-        Curl_node_remove(e);
-        Curl_cshutdn_terminate(data, conn, FALSE);
-      }
-      break;
-    }
-    e = Curl_node_next(e);
-  }
-}
-
 void Curl_cshutdn_perform(struct cshutdn *cshutdn,
                           struct Curl_easy *data,
-                          curl_socket_t s)
+                          struct Curl_sigpipe_ctx *sigpipe_ctx)
 {
-  if((s == CURL_SOCKET_TIMEOUT) || (!cshutdn->multi->socket_cb))
-    cshutdn_perform(cshutdn, data);
-  else
-    cshutdn_multi_socket(cshutdn, data, s);
+  cshutdn_perform(cshutdn, data, sigpipe_ctx);
 }
 
 /* return fd_set info about the shutdown connections */

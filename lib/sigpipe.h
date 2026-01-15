@@ -29,15 +29,12 @@
   (defined(USE_OPENSSL) || defined(USE_MBEDTLS) || defined(USE_WOLFSSL))
 #include <signal.h>
 
-struct sigpipe_ignore {
+struct Curl_sigpipe_ctx {
   struct sigaction old_pipe_act;
   BIT(no_signal);
 };
 
-#define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x
-#define SIGPIPE_MEMBER(x)   struct sigpipe_ignore x
-
-static void sigpipe_init(struct sigpipe_ignore *ig)
+static void sigpipe_init(struct Curl_sigpipe_ctx *ig)
 {
   memset(ig, 0, sizeof(*ig));
   ig->no_signal = TRUE;
@@ -49,7 +46,7 @@ static void sigpipe_init(struct sigpipe_ignore *ig)
  * return from libcurl again.
  */
 static void sigpipe_ignore(struct Curl_easy *data,
-                           struct sigpipe_ignore *ig)
+                           struct Curl_sigpipe_ctx *ig)
 {
   /* get a local copy of no_signal because the Curl_easy might not be
      around when we restore */
@@ -70,7 +67,7 @@ static void sigpipe_ignore(struct Curl_easy *data,
  * and SIGPIPE handling. It MUST only be called after a corresponding
  * sigpipe_ignore() was used.
  */
-static void sigpipe_restore(struct sigpipe_ignore *ig)
+static void sigpipe_restore(struct Curl_sigpipe_ctx *ig)
 {
   if(!ig->no_signal)
     /* restore the outside state */
@@ -78,7 +75,7 @@ static void sigpipe_restore(struct sigpipe_ignore *ig)
 }
 
 static void sigpipe_apply(struct Curl_easy *data,
-                          struct sigpipe_ignore *ig)
+                          struct Curl_sigpipe_ctx *ig)
 {
   if(data->set.no_signal != ig->no_signal) {
     sigpipe_restore(ig);
@@ -88,12 +85,34 @@ static void sigpipe_apply(struct Curl_easy *data,
 
 #else
 /* for systems without sigaction */
-#define sigpipe_ignore(x, y) Curl_nop_stmt
-#define sigpipe_apply(x, y)  Curl_nop_stmt
-#define sigpipe_init(x)      Curl_nop_stmt
-#define sigpipe_restore(x)   Curl_nop_stmt
-#define SIGPIPE_VARIABLE(x)
-#define SIGPIPE_MEMBER(x)    bool x
+struct Curl_sigpipe_ctx {
+  bool dummy;
+};
+
+static void sigpipe_init(struct Curl_sigpipe_ctx *ig)
+{
+  (void)ig;
+}
+
+static void sigpipe_ignore(struct Curl_easy *data,
+                           struct Curl_sigpipe_ctx *ig)
+{
+  (void)data;
+  (void)ig;
+}
+
+static void sigpipe_restore(struct Curl_sigpipe_ctx *ig)
+{
+  (void)ig;
+}
+
+static void sigpipe_apply(struct Curl_easy *data,
+                          struct Curl_sigpipe_ctx *ig)
+{
+  (void)data;
+  (void)ig;
+}
+
 #endif
 
 #endif /* HEADER_CURL_SIGPIPE_H */
