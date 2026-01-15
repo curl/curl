@@ -45,7 +45,6 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 CURL_CHECK_OPTION_DEBUG
 AM_CONDITIONAL(DEBUGBUILD, test "$want_debug" = "yes")
-want_curldebug="$want_debug"
 CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 CURL_CHECK_OPTION_WERROR
@@ -5311,7 +5310,7 @@ fi
 if test "$want_debug" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
 fi
-if test "$want_curldebug" = "yes"; then
+if test "$want_debug" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
 fi
 if test -n "$CURL_CA_EMBED"; then
