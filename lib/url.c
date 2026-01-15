@@ -175,8 +175,10 @@ void Curl_freeset(struct Curl_easy *data)
   Curl_bufref_free(&data->state.referer);
   Curl_bufref_free(&data->state.url);
 
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   Curl_mime_cleanpart(data->set.mimepostp);
   Curl_safefree(data->set.mimepostp);
+#endif
 
 #ifndef CURL_DISABLE_COOKIES
   curl_slist_free_all(data->state.cookielist);
