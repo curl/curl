@@ -1256,7 +1256,7 @@ if(CURL_USE_GSSAPI)
 endif()
 
 # libbacktrace
-option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires build with TrackMemory and DWARF debug information." OFF)
+option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires debug-enabled build and DWARF debug information." OFF)
 if(CURL_USE_LIBBACKTRACE)
   if(NOT ENABLE_DEBUG)
     message(FATAL_ERROR "libbacktrace requires debug-enabled build for TrackMemory")
