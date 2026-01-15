@@ -357,7 +357,7 @@ Details via CMake
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
-- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires build with TrackMemory and DWARF debug information. Default: `OFF`
+- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires debug-enabled build and DWARF debug information. Default: `OFF`
 - `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
 - `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
 - `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
