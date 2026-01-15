@@ -209,7 +209,8 @@ project forward. Countries, companies and organizations have a single
 president or CEO for a reason; having a single leader that responsibly can
 take quick daily decisions is efficient. Without Daniel as BDFL, either
 someone else needs to step up and become president, or the project needs to
-adopt a council-driven process. Maybe both?
+adopt a council-driven process. Maybe both? Maybe vote a new project leader
+for one year or a few years at a time?
 
 Deciding the replacement person and governance is a subject for the curl core
 team to vote on. When that happens, this section of this document should also
