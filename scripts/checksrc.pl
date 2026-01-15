@@ -970,7 +970,7 @@ sub scanfile {
             my $bad = $2;
             my $prefix = $1;
             my $suff = $3;
-            if($prefix !~ /->$/) {
+            if($prefix !~ /(->|\.)$/) {
                 checkwarn("BANNEDFUNC",
                           $line, length($prefix), $file, $ol,
                           "use of $bad is banned");
