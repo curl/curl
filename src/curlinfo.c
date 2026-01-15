@@ -234,7 +234,7 @@ static const char *disabled[] = {
 #endif
   ,
   "override-dns: "
-#if defined(CURLDEBUG) &&                                       \
+#if defined(CURL_DEBUG_LEAK) &&                             \
   (defined(CURLRES_ARES) || defined(USE_FAKE_GETADDRINFO))
   "ON"
 #else
