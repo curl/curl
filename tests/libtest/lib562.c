@@ -27,7 +27,7 @@
   From "KNOWN_BUGS" April 2009:
 
   59. If the CURLOPT_PORT option is used on an FTP URL like
-  "ftp://example.com/file;type=A" the ";type=A" is stripped off.
+      "ftp://example.com/file;type=A" the ";type=A" is stripped off.
  */
 
 static CURLcode test_lib562(const char *URL)
