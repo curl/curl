@@ -687,6 +687,10 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
       feature_names[n++] = p->name;
     }
 
+#ifdef DEBUGBUILD
+  features |= CURL_VERSION_CURLDEBUG; /* for compatibility */
+#endif
+
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;
 
