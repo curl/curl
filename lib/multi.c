@@ -2325,7 +2325,8 @@ static CURLMcode state_connect(struct Curl_multi *multi,
 }
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
-                                 struct Curl_easy *data)
+                                 struct Curl_easy *data,
+                                 struct Curl_sigpipe_ctx *sigpipe_ctx)
 {
   struct Curl_message *msg = NULL;
   bool connected;
@@ -2354,10 +2355,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
-    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, CURL_SOCKET_TIMEOUT);
+    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, sigpipe_ctx);
     return CURLM_OK;
   }
 
+  sigpipe_apply(data, sigpipe_ctx);
   do {
     /* A "stream" here is a logical stream if the protocol can handle that
        (HTTP/2), or the full connection for older protocols */
@@ -2731,7 +2733,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   CURLMcode returncode = CURLM_OK;
   struct curltime start = *multi_now(multi);
   uint32_t mid;
-  SIGPIPE_VARIABLE(pipe_st);
+  struct Curl_sigpipe_ctx sigpipe_ctx;
 
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
@@ -2739,7 +2741,8 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   if(multi->in_ntfy_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  sigpipe_init(&pipe_st);
+  sigpipe_init(&sigpipe_ctx);
+
   if(Curl_uint32_bset_first(&multi->process, &mid)) {
     CURL_TRC_M(multi->admin, "multi_perform(running=%u)",
                Curl_multi_xfers_running(multi));
@@ -2752,13 +2755,12 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
         Curl_uint32_bset_remove(&multi->dirty, mid);
         continue;
       }
-      sigpipe_apply(data, &pipe_st);
-      mresult = multi_runsingle(multi, data);
+      mresult = multi_runsingle(multi, data, &sigpipe_ctx);
       if(mresult)
         returncode = mresult;
     } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
-  sigpipe_restore(&pipe_st);
+  sigpipe_restore(&sigpipe_ctx);
 
   if(multi_ischanged(multi, TRUE))
     process_pending_handles(multi);
@@ -3015,22 +3017,15 @@ static CURLMcode add_next_timeout(const struct curltime *pnow,
   return CURLM_OK;
 }
 
-struct multi_run_ctx {
-  struct Curl_multi *multi;
-  size_t run_xfers;
-  SIGPIPE_MEMBER(pipe_st);
-};
-
-static void multi_mark_expired_as_dirty(struct multi_run_ctx *mrc,
+static void multi_mark_expired_as_dirty(struct Curl_multi *multi,
                                         const struct curltime *ts)
 {
-  struct Curl_multi *multi = mrc->multi;
   struct Curl_easy *data = NULL;
   struct Curl_tree *t = NULL;
 
   /*
    * The loop following here will go on as long as there are expire-times left
-   * to process (compared to mrc->now) in the splay and 'data' will be
+   * to process (compared to `ts`) in the splay and 'data' will be
    * re-assigned for every expired handle we deal with.
    */
   while(1) {
@@ -3057,12 +3052,14 @@ static void multi_mark_expired_as_dirty(struct multi_run_ctx *mrc,
   }
 }
 
-static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
+static CURLMcode multi_run_dirty(struct Curl_multi *multi,
+                                 struct Curl_sigpipe_ctx *sigpipe_ctx,
+                                 uint32_t *pnum)
 {
-  struct Curl_multi *multi = mrc->multi;
   CURLMcode mresult = CURLM_OK;
   uint32_t mid;
 
+  *pnum = 0;
   if(Curl_uint32_bset_first(&multi->dirty, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
@@ -3075,10 +3072,9 @@ static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
           continue;
         }
 
-        mrc->run_xfers++;
-        sigpipe_apply(data, &mrc->pipe_st);
+        (*pnum)++;
         /* runsingle() clears the dirty mid */
-        mresult = multi_runsingle(multi, data);
+        mresult = multi_runsingle(multi, data, sigpipe_ctx);
 
         if(CURLM_OK >= mresult) {
           /* reassess event handling of data */
@@ -3105,12 +3101,11 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
                               int *running_handles)
 {
   CURLMcode mresult = CURLM_OK;
-  struct multi_run_ctx mrc;
+  struct Curl_sigpipe_ctx pipe_ctx;
+  uint32_t run_xfers;
 
   (void)ev_bitmask;
-  memset(&mrc, 0, sizeof(mrc));
-  mrc.multi = multi;
-  sigpipe_init(&mrc.pipe_st);
+  sigpipe_init(&pipe_ctx);
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
@@ -3136,23 +3131,23 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     memset(&multi->last_expire_ts, 0, sizeof(multi->last_expire_ts));
   }
 
-  multi_mark_expired_as_dirty(&mrc, multi_now(multi));
-  mresult = multi_run_dirty(&mrc);
+  multi_mark_expired_as_dirty(multi, multi_now(multi));
+  mresult = multi_run_dirty(multi, &pipe_ctx, &run_xfers);
   if(mresult)
     goto out;
 
-  if(mrc.run_xfers) {
+  if(run_xfers) {
     /* Running transfers takes time. With a new timestamp, we might catch
      * other expires which are due now. Instead of telling the application
      * to set a 0 timeout and call us again, we run them here.
      * Do that only once or it might be unfair to transfers on other
      * sockets. */
-    multi_mark_expired_as_dirty(&mrc, &multi->now);
-    mresult = multi_run_dirty(&mrc);
+    multi_mark_expired_as_dirty(multi, &multi->now);
+    mresult = multi_run_dirty(multi, &pipe_ctx, &run_xfers);
   }
 
 out:
-  sigpipe_restore(&mrc.pipe_st);
+  sigpipe_restore(&pipe_ctx);
 
   if(multi_ischanged(multi, TRUE))
     process_pending_handles(multi);
