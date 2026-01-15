@@ -34,7 +34,7 @@ struct Curl_sigpipe_ctx {
   BIT(no_signal);
 };
 
-static void sigpipe_init(struct Curl_sigpipe_ctx *ig)
+static CURL_INLINE void sigpipe_init(struct Curl_sigpipe_ctx *ig)
 {
   memset(ig, 0, sizeof(*ig));
   ig->no_signal = TRUE;
@@ -45,8 +45,8 @@ static void sigpipe_init(struct Curl_sigpipe_ctx *ig)
  * internals, and then sigpipe_restore() will restore the situation when we
  * return from libcurl again.
  */
-static void sigpipe_ignore(struct Curl_easy *data,
-                           struct Curl_sigpipe_ctx *ig)
+static CURL_INLINE void sigpipe_ignore(struct Curl_easy *data,
+                                       struct Curl_sigpipe_ctx *ig)
 {
   /* get a local copy of no_signal because the Curl_easy might not be
      around when we restore */
@@ -67,17 +67,17 @@ static void sigpipe_ignore(struct Curl_easy *data,
  * and SIGPIPE handling. It MUST only be called after a corresponding
  * sigpipe_ignore() was used.
  */
-static void sigpipe_restore(struct Curl_sigpipe_ctx *ig)
+static CURL_INLINE void sigpipe_restore(struct Curl_sigpipe_ctx *ig)
 {
   if(!ig->no_signal)
     /* restore the outside state */
     sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
 }
 
-static void sigpipe_apply(struct Curl_easy *data,
-                          struct Curl_sigpipe_ctx *ig)
+static CURL_INLINE void sigpipe_apply(struct Curl_easy *data,
+                                      struct Curl_sigpipe_ctx *ig)
 {
-  if(data->set.no_signal != ig->no_signal) {
+  if(data && (data->set.no_signal != ig->no_signal)) {
     sigpipe_restore(ig);
     sigpipe_ignore(data, ig);
   }
