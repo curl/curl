@@ -419,7 +419,7 @@ static bool progress_calc(struct Curl_easy *data,
 {
   struct Progress * const p = &data->progress;
   int i_next, i_oldest, i_latest;
-  timediff_t duration_ms;
+  timediff_t duration_us;
   curl_off_t amount;
 
   /* The time spent so far (from the start) in microseconds */
@@ -470,21 +470,19 @@ static bool progress_calc(struct Curl_easy *data,
   /* How much we transferred between oldest and current records */
   amount = p->speed_amount[i_latest] - p->speed_amount[i_oldest];
   /* How long this took */
-  duration_ms = curlx_ptimediff_ms(&p->speed_time[i_latest],
+  duration_us = curlx_ptimediff_us(&p->speed_time[i_latest],
                                    &p->speed_time[i_oldest]);
-  if(duration_ms <= 0)
-    duration_ms = 1;
+  if(duration_us <= 0)
+    duration_us = 1;
 
-  if(amount > (CURL_OFF_T_MAX / 1000)) {
+  if(amount > (CURL_OFF_T_MAX / 1000000)) {
     /* the 'amount' value is bigger than would fit in 64 bits if
-       multiplied with 1000, so we use the double math for this */
+       multiplied with 1000000, so we use the double math for this */
     p->current_speed =
-      (curl_off_t)(((double)amount * 1000.0) / (double)duration_ms);
+      (curl_off_t)(((double)amount * 1000000.0) / (double)duration_us);
   }
   else {
-    /* the 'amount' value is small enough to fit within 32 bits even
-       when multiplied with 1000 */
-    p->current_speed = amount * 1000 / duration_ms;
+    p->current_speed = amount * 1000000 / duration_us;
   }
 
   if((p->lastshow == pnow->tv_sec) && !data->req.done)
