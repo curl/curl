@@ -98,7 +98,7 @@ static int main_checkfds(void)
 #define main_checkfds() 0
 #endif
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 static void memory_tracking_init(void)
 {
   char *env;

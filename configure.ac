@@ -48,8 +48,6 @@ AM_CONDITIONAL(DEBUGBUILD, test "$want_debug" = "yes")
 CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 CURL_CHECK_OPTION_WERROR
-CURL_CHECK_OPTION_CURLDEBUG
-AM_CONDITIONAL(CURLDEBUG, test "$want_curldebug" = "yes")
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
 CURL_CHECK_OPTION_RT
@@ -5312,9 +5310,6 @@ fi
 if test "$want_debug" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
 fi
-if test "$want_curldebug" = "yes"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
-fi
 if test -n "$CURL_CA_EMBED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
   CURL_CA_EMBED_msg="$CURL_CA_EMBED"
@@ -5452,11 +5447,6 @@ XC_CHECK_BUILD_FLAGS
 
 SSL_BACKENDS=${ssl_backends}
 AC_SUBST(SSL_BACKENDS)
-
-if test "$want_curldebug_assumed" = "yes" &&
-   test "$want_curldebug" = "yes" && test "$USE_ARES" = "1"; then
-  ac_configure_args="$ac_configure_args --enable-curldebug"
-fi
 
 CURL_PREPARE_CONFIGUREHELP_PM
 
