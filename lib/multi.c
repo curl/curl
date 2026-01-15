@@ -2767,10 +2767,10 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   if(multi->in_ntfy_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  sigpipe_init(&pipe_st);
   if(Curl_uint32_bset_first(&multi->process, &mid)) {
     CURL_TRC_M(multi->admin, "multi_perform(running=%u)",
                Curl_multi_xfers_running(multi));
+    sigpipe_init(&pipe_st);
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       CURLMcode mresult;
@@ -2785,8 +2785,8 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
       if(mresult)
         returncode = mresult;
     } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
+    sigpipe_restore(&pipe_st);
   }
-  sigpipe_restore(&pipe_st);
 
   if(multi_ischanged(multi, TRUE))
     process_pending_handles(multi);
