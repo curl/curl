@@ -231,7 +231,8 @@ struct h3_stream_ctx {
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
   uint64_t error3;              /* HTTP/3 stream error code */
   curl_off_t upload_left;       /* number of request bytes left to upload */
-  uint64_t download_unacked;    /* bytes not acknowledged yet */
+  uint64_t rx_offset;           /* current receive offset */
+  uint64_t rx_offset_max;       /* allowed receive offset */
   uint64_t window_size_max;     /* max flow control window set for stream */
   int status_code;              /* HTTP status code */
   CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
@@ -273,6 +274,9 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
 
   stream->id = -1;
+  stream->rx_offset = 0;
+  stream->rx_offset_max = H3_STREAM_WINDOW_SIZE_INITIAL;
+
   /* on send, we control how much we put into the buffer */
   Curl_bufq_initp(&stream->sendbuf, &ctx->stream_bufcp,
                   H3_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);
@@ -610,20 +614,15 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  nghttp3_ssize nconsumed;
+  nghttp3_ssize rc;
+  uint64_t nconsumed;
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   struct Curl_easy *data = stream_user_data;
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)offset;
 
-  nconsumed =
-    nghttp3_conn_read_stream(ctx->h3conn, stream_id, buf, buflen, fin);
-  if(!data)
-    data = CF_DATA_CURRENT(cf);
-  if(data)
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] read_stream(len=%zu) -> %zd",
-                stream_id, buflen, nconsumed);
-  if(nconsumed < 0) {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  rc = nghttp3_conn_read_stream(ctx->h3conn, stream_id, buf, buflen, fin);
+  if(rc < 0) {
     if(data && stream) {
       CURL_TRC_CF(data, cf, "[%" PRId64 "] error on known stream, "
                   "reset=%d, closed=%d",
@@ -631,13 +630,18 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
     }
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
-
-  /* number of bytes inside buflen which consists of framing overhead
-   * including QPACK HEADERS. In other words, it does not consume payload of
-   * DATA frame. */
-  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, (uint64_t)nconsumed);
-  ngtcp2_conn_extend_max_offset(tconn, (uint64_t)nconsumed);
-
+  nconsumed = (uint64_t)rc;
+  if(nconsumed) {
+    /* number of bytes inside buflen which consists of framing overhead
+     * including QPACK HEADERS. In other words, it does not consume payload of
+     * DATA frame. */
+    ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, nconsumed);
+    ngtcp2_conn_extend_max_offset(tconn, nconsumed);
+    if(stream) {
+      stream->rx_offset += nconsumed;
+      stream->rx_offset_max += nconsumed;
+    }
+  }
   return 0;
 }
 
@@ -1044,57 +1048,50 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
   }
 }
 
-static void cf_ngtcp2_stream_update_window(struct Curl_cfilter *cf,
-                                           struct Curl_easy *data,
-                                           struct h3_stream_ctx *stream)
-{
-  /* stream receive max window size for flow control. We can only
-   * grow it from the initial window size */
-  uint64_t swin_max = data->progress.dl.rlimit.rate_per_step ?
-    data->progress.dl.rlimit.rate_per_step : H3_STREAM_WINDOW_SIZE_MAX;
-  if(swin_max > stream->window_size_max) {
-    struct cf_ngtcp2_ctx *ctx = cf->ctx;
-    int rc = ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id,
-      swin_max - stream->window_size_max);
-    if(rc) {
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] extend_max_stream_offset to %"
-                  PRIu64 " -> %s (%d)",
-                  stream->id, swin_max, ngtcp2_strerror(rc), rc);
-      DEBUGASSERT(0);
-    }
-    stream->window_size_max = swin_max;
-  }
-}
-
-static void cf_ngtcp2_ack_stream(struct Curl_cfilter *cf,
+static void cf_ngtcp2_upd_rx_win(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct h3_stream_ctx *stream)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  curl_off_t avail;
-  uint64_t ack_len = 0;
-
-  /* How many byte to ack on the stream? */
+  uint64_t cur_win, wanted_win = H3_STREAM_WINDOW_SIZE_MAX;
 
   /* how much does rate limiting allow us to acknowledge? */
-  avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
-                            Curl_pgrs_now(data));
-  if(avail == CURL_OFF_T_MAX) { /* no rate limit, ack all */
-    ack_len = stream->download_unacked;
-  }
-  else if(avail > 0) {
-    ack_len = CURLMIN(stream->download_unacked, (uint64_t)avail);
+  if(Curl_rlimit_active(&data->progress.dl.rlimit)) {
+    int64_t avail;
+
+    /* start rate limit updates only after first bytes arrived */
+    if(!stream->rx_offset)
+      return;
+
+    avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
+                              Curl_pgrs_now(data));
+    if(avail <= 0) {
+      /* nothing available, do not extend the rx offset */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] dl rate limit exhausted (%" PRId64
+                  " tokens)", stream->id, avail);
+      return;
+    }
+    wanted_win = CURLMIN((uint64_t)avail, H3_STREAM_WINDOW_SIZE_MAX);
   }
 
-  if(ack_len) {
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] ACK %" PRIu64
-                "/%" PRIu64 " bytes of DATA", stream->id,
-                ack_len, stream->download_unacked);
-    ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, ack_len);
-    stream->download_unacked -= ack_len;
+  if(stream->rx_offset_max < stream->rx_offset) {
+    DEBUGASSERT(0);
+    return;
   }
+  cur_win = stream->rx_offset_max - stream->rx_offset;
 
-  cf_ngtcp2_stream_update_window(cf, data, stream);
+  if(wanted_win > cur_win) {
+    uint64_t delta = wanted_win - cur_win;
+
+    if(UINT64_MAX - delta < stream->rx_offset_max)
+      delta = UINT64_MAX - stream->rx_offset_max;
+    if(delta) {
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] rx window, extend by %" PRIu64
+                  " bytes", stream->id, delta);
+      stream->rx_offset_max += delta;
+      ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, delta);
+    }
+  }
 }
 
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
@@ -1113,15 +1110,15 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
   h3_xfer_write_resp(cf, data, stream, (const char *)buf, blen, FALSE);
-  CURL_TRC_CF(data, cf, "[%" PRId64 "] DATA len=%zu", stream->id, blen);
 
   ngtcp2_conn_extend_max_offset(ctx->qconn, blen);
-  if(UINT64_MAX - blen < stream->download_unacked)
-    stream->download_unacked = UINT64_MAX; /* unlikely */
-  else
-    stream->download_unacked += blen;
+  stream->rx_offset += blen;
+  if(stream->rx_offset_max < stream->rx_offset)
+    stream->rx_offset_max = stream->rx_offset;
 
-  cf_ngtcp2_ack_stream(cf, data, stream);
+  CURL_TRC_CF(data, cf, "[%" PRId64 "] DATA len=%zu, rx win=%" PRId64,
+              stream->id, blen, stream->rx_offset_max - stream->rx_offset);
+  cf_ngtcp2_upd_rx_win(cf, data, stream);
   return 0;
 }
 
@@ -1131,13 +1128,18 @@ static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream3_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data = stream_user_data;
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)conn;
-  (void)stream_user_data;
 
   /* nghttp3 has consumed bytes on the QUIC stream and we need to
    * tell the QUIC connection to increase its flow control */
   ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream3_id, consumed);
   ngtcp2_conn_extend_max_offset(ctx->qconn, consumed);
+  if(stream) {
+    stream->rx_offset += consumed;
+    stream->rx_offset_max += consumed;
+  }
   return 0;
 }
 
@@ -1418,7 +1420,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  cf_ngtcp2_ack_stream(cf, data, stream);
+  cf_ngtcp2_upd_rx_win(cf, data, stream);
 
   /* first check for results/closed already known without touching
    * the connection. For an already failed/closed stream, errors on
@@ -1669,7 +1671,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  cf_ngtcp2_stream_update_window(cf, data, stream);
+  cf_ngtcp2_upd_rx_win(cf, data, stream);
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRId64 "] OPENED stream for %s",

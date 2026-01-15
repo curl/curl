@@ -1922,25 +1922,42 @@ static CURLcode multi_follow(struct Curl_easy *data,
 
 static CURLcode mspeed_check(struct Curl_easy *data)
 {
-  const struct curltime *pnow = Curl_pgrs_now(data);
-  timediff_t recv_wait_ms = 0;
-  timediff_t send_wait_ms = 0;
+  if(Curl_rlimit_active(&data->progress.dl.rlimit) ||
+     Curl_rlimit_active(&data->progress.ul.rlimit)) {
+    /* check if our send/recv limits require idle waits */
+    const struct curltime *pnow = Curl_pgrs_now(data);
+    timediff_t recv_ms, send_ms;
 
-  /* check if our send/recv limits require idle waits */
-  send_wait_ms = Curl_rlimit_wait_ms(&data->progress.ul.rlimit, pnow);
-  recv_wait_ms = Curl_rlimit_wait_ms(&data->progress.dl.rlimit, pnow);
+    send_ms = Curl_rlimit_wait_ms(&data->progress.ul.rlimit, pnow);
+    recv_ms = Curl_rlimit_wait_ms(&data->progress.dl.rlimit, pnow);
 
-  if(send_wait_ms || recv_wait_ms) {
-    if(data->mstate != MSTATE_RATELIMITING) {
-      multistate(data, MSTATE_RATELIMITING);
+    if(send_ms || recv_ms) {
+      if(data->mstate != MSTATE_RATELIMITING) {
+        multistate(data, MSTATE_RATELIMITING);
+      }
+      Curl_expire(data, CURLMAX(send_ms, recv_ms), EXPIRE_TOOFAST);
+      Curl_multi_clear_dirty(data);
+      CURL_TRC_M(data, "[RLIMIT] waiting %" FMT_TIMEDIFF_T "ms",
+                 CURLMAX(send_ms, recv_ms));
+      return CURLE_AGAIN;
     }
-    Curl_expire(data, CURLMAX(send_wait_ms, recv_wait_ms), EXPIRE_TOOFAST);
-    Curl_multi_clear_dirty(data);
-    CURL_TRC_M(data, "[RLIMIT] waiting %" FMT_TIMEDIFF_T "ms",
-               CURLMAX(send_wait_ms, recv_wait_ms));
-    return CURLE_AGAIN;
+    else {
+      /* when will the rate limits increase next? The transfer needs
+       * to run again at that time or it may stall. */
+      send_ms = Curl_rlimit_next_step_ms(&data->progress.ul.rlimit, pnow);
+      recv_ms = Curl_rlimit_next_step_ms(&data->progress.dl.rlimit, pnow);
+      if(send_ms || recv_ms) {
+        timediff_t next_ms = CURLMIN(send_ms, recv_ms);
+        if(!next_ms)
+          next_ms = CURLMAX(send_ms, recv_ms);
+        Curl_expire(data, next_ms, EXPIRE_TOOFAST);
+        CURL_TRC_M(data, "[RLIMIT] next token update in %" FMT_TIMEDIFF_T "ms",
+                   next_ms);
+      }
+    }
   }
-  else if(data->mstate != MSTATE_PERFORMING) {
+
+  if(data->mstate != MSTATE_PERFORMING) {
     CURL_TRC_M(data, "[RLIMIT] wait over, continue");
     multistate(data, MSTATE_PERFORMING);
   }
