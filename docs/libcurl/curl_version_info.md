@@ -388,7 +388,7 @@ callbacks. Always 0 since 7.82.0. Deprecated.
 
 libcurl was built with memory tracking debug capabilities. This is mainly of
 interest for libcurl hackers. Always the same as CURL_VERSION_DEBUG since
-8.19.0 Deprecated.
+8.19.0. Deprecated.
 
 ## no name
 
