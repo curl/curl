@@ -372,7 +372,7 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
     curlx_free(rrname);
     return CURLE_FAILED_INIT;
   }
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   if(getenv("CURL_DNS_SERVER")) {
     const char *servers = getenv("CURL_DNS_SERVER");
     status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
