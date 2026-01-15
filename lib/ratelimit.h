@@ -1,5 +1,5 @@
-#ifndef HEADER_Curl_rlimit_H
-#define HEADER_Curl_rlimit_H
+#ifndef HEADER_CURL_RLIMIT_H
+#define HEADER_CURL_RLIMIT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -90,4 +90,4 @@ void Curl_rlimit_block(struct Curl_rlimit *r,
                        bool activate,
                        const struct curltime *pts);
 
-#endif /* HEADER_Curl_rlimit_H */
+#endif /* HEADER_CURL_RLIMIT_H */
