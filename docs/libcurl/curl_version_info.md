@@ -356,13 +356,6 @@ curl initialization. (Added in 7.84.0) See libcurl-thread(3)
 libcurl was built with support for TLS-SRP (in one or more of the built-in TLS
 backends).
 
-## `TrackMemory`
-
-*features* mask bit: CURL_VERSION_CURLDEBUG
-
-libcurl was built with memory tracking debug capabilities. This is mainly of
-interest for libcurl hackers.
-
 ## `Unicode`
 
 *features* mask bit: CURL_VERSION_UNICODE
@@ -388,6 +381,14 @@ supports HTTP zstd content encoding using zstd library (Added in 7.72.0)
 
 libcurl was built with support for character conversions provided by
 callbacks. Always 0 since 7.82.0. Deprecated.
+
+## no name
+
+*features* mask bit: CURL_VERSION_CURLDEBUG
+
+libcurl was built with memory tracking debug capabilities. This is mainly of
+interest for libcurl hackers. Always the same as CURL_VERSION_DEBUG since
+8.19.0 Deprecated.
 
 ## no name
 

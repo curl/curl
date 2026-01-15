@@ -3184,7 +3184,8 @@ typedef struct curl_version_info_data curl_version_info_data;
                                              supported */
 #define CURL_VERSION_SSPI         (1<<11) /* Built against Windows SSPI */
 #define CURL_VERSION_CONV         (1<<12) /* Character conversions supported */
-#define CURL_VERSION_CURLDEBUG    (1<<13) /* Debug memory tracking supported */
+#define CURL_VERSION_CURLDEBUG    (1<<13) /* Debug memory tracking supported
+                                             (deprecated) */
 #define CURL_VERSION_TLSAUTH_SRP  (1<<14) /* TLS-SRP auth is supported */
 #define CURL_VERSION_NTLM_WB      (1<<15) /* NTLM delegation to winbind helper
                                              is supported */
