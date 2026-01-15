@@ -253,7 +253,6 @@ option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OF
 if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
-set(ENABLE_CURLDEBUG ${ENABLE_DEBUG})
 
 set(CURL_DEBUG_MACROS "")
 if(ENABLE_DEBUG)
