@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef CURL_DEBUG_LEAK
+#ifdef CURL_MEMDEBUG
 
 #include <stddef.h>  /* for offsetof() */
 
@@ -575,4 +575,4 @@ void curl_dbg_log(const char *format, ...)
   curl_dbg_unlock(was_locked);
 }
 
-#endif /* CURL_DEBUG_LEAK */
+#endif /* CURL_MEMDEBUG */

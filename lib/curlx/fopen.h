@@ -61,7 +61,7 @@ int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define curlx_rename                       rename
 #endif
 
-#ifdef CURL_DEBUG_LEAK
+#ifdef CURL_MEMDEBUG
 #define curlx_fopen(file, mode) curl_dbg_fopen(file, mode, __LINE__, __FILE__)
 #define curlx_freopen(file, mode, fh) \
   curl_dbg_freopen(file, mode, fh, __LINE__, __FILE__)

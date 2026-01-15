@@ -29,7 +29,7 @@
 #include <ares.h>
 #endif
 
-#if defined(CURL_DEBUG_LEAK) && defined(HAVE_GETADDRINFO) && \
+#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO) && \
   defined(USE_ARES) && (ARES_VERSION >= 0x011a00) /* >= 1.26.0 */
 #define USE_FAKE_GETADDRINFO 1
 #endif

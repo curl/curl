@@ -954,10 +954,10 @@ extern curl_calloc_callback Curl_ccalloc;
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
 #ifdef DEBUGBUILD
-#define CURL_DEBUG_LEAK
+#define CURL_MEMDEBUG
 #endif
 
-#ifdef CURL_DEBUG_LEAK
+#ifdef CURL_MEMDEBUG
 #ifdef __clang__
 #  define ALLOC_FUNC         __attribute__((__malloc__))
 #  if __clang_major__ >= 4
@@ -1053,7 +1053,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
 
-#else /* !CURL_DEBUG_LEAK */
+#else /* !CURL_MEMDEBUG */
 
 #define sclose(x) CURL_SCLOSE(x)
 #define fake_sclose(x) Curl_nop_stmt
@@ -1069,11 +1069,11 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define CURL_ACCEPT4 accept4
 #endif
 
-#endif /* CURL_DEBUG_LEAK */
+#endif /* CURL_MEMDEBUG */
 
 /* Allocator macros */
 
-#ifdef CURL_DEBUG_LEAK
+#ifdef CURL_MEMDEBUG
 
 #define curlx_strdup(ptr)          curl_dbg_strdup(ptr, __LINE__, __FILE__)
 #define curlx_malloc(size)         curl_dbg_malloc(size, __LINE__, __FILE__)
@@ -1091,7 +1091,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #endif
 #endif /* _WIN32 */
 
-#else /* !CURL_DEBUG_LEAK */
+#else /* !CURL_MEMDEBUG */
 
 #ifdef BUILDING_LIBCURL
 #define curlx_strdup(ptr)          Curl_cstrdup(ptr)
@@ -1119,7 +1119,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #endif
 #endif /* _WIN32 */
 
-#endif /* CURL_DEBUG_LEAK */
+#endif /* CURL_MEMDEBUG */
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
