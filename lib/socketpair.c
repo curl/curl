@@ -32,7 +32,7 @@
 
 #include <sys/eventfd.h>
 
-int Curl_eventfd(curl_socket_t socks[2], bool nonblocking)
+static int wakeup_eventfd(curl_socket_t socks[2], bool nonblocking)
 {
   int efd = eventfd(0, nonblocking ? EFD_CLOEXEC | EFD_NONBLOCK : EFD_CLOEXEC);
   if(efd == -1) {
@@ -49,7 +49,7 @@ int Curl_eventfd(curl_socket_t socks[2], bool nonblocking)
 #include <fcntl.h>
 #endif
 
-int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
+static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
 {
 #ifdef HAVE_PIPE2
   int flags = nonblocking ? O_NONBLOCK | O_CLOEXEC : O_CLOEXEC;
@@ -81,13 +81,32 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
   return 0;
 }
 
-#endif /* USE_EVENTFD */
+#else
+
+#if defined(USE_UNIX_SOCKETS) && defined(HAVE_SOCKETPAIR)
+#define SOCKETPAIR_FAMILY AF_UNIX
+#elif !defined(HAVE_SOCKETPAIR)
+#define SOCKETPAIR_FAMILY 0 /* not used */
+#else
+#error "unsupported Unix domain and socketpair build combo"
+#endif
+
+#ifdef SOCK_CLOEXEC
+#define SOCKETPAIR_TYPE (SOCK_STREAM | SOCK_CLOEXEC)
+#else
+#define SOCKETPAIR_TYPE SOCK_STREAM
+#endif
+
+#define USE_SOCKETPAIR
+
+#endif /* USE_EVENTFD or HAVE_PIPE2 */
 
 #ifndef CURL_DISABLE_SOCKETPAIR
+
 #ifdef HAVE_SOCKETPAIR
 #ifdef USE_SOCKETPAIR
-int Curl_socketpair(int domain, int type, int protocol,
-                    curl_socket_t socks[2], bool nonblocking)
+static int wakeup_socketpair(int domain, int type, int protocol,
+                             curl_socket_t socks[2], bool nonblocking)
 {
 #ifdef SOCK_NONBLOCK
   type = nonblocking ? type | SOCK_NONBLOCK : type;
@@ -125,8 +144,8 @@ int Curl_socketpair(int domain, int type, int protocol,
 
 #include "select.h"   /* for Curl_poll */
 
-int Curl_socketpair(int domain, int type, int protocol,
-                    curl_socket_t socks[2], bool nonblocking)
+static int wakeup_socketpair(int domain, int type, int protocol,
+                             curl_socket_t socks[2], bool nonblocking)
 {
   union {
     struct sockaddr_in inaddr;
@@ -257,5 +276,98 @@ error:
   sclose(socks[1]);
   return -1;
 }
+
+#endif /* !HAVE_SOCKETPAIR */
+
+int Curl_wakeup_init(curl_socket_t socks[2], bool nonblocking)
+{
+#ifdef USE_EVENTFD
+  return wakeup_eventfd(socks, nonblocking);
+#elif defined(HAVE_PIPE)
+  return wakeup_pipe(socks, nonblocking);
+#else
+  return wakeup_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0,
+                           socks, nonblocking);
 #endif
+}
+
+#if defined(USE_EVENTFD) || defined(HAVE_PIPE)
+
+#define wakeup_write        write
+#define wakeup_read         read
+#define wakeup_close        close
+
+#else /* !USE_EVENTFD && !HAVE_PIPE */
+
+#define wakeup_write        swrite
+#define wakeup_read         sread
+#define wakeup_close        sclose
+
+#endif
+
+int Curl_wakeup_signal(curl_socket_t socks[2])
+{
+  int err = 0;
+#ifdef USE_EVENTFD
+  const uint64_t buf[1] = { 1 };
+#else
+  const char buf[1] = { 1 };
+#endif
+
+  while(1) {
+    if(wakeup_write(socks[1], buf, sizeof(buf)) < 0) {
+      err = SOCKERRNO;
+#ifdef USE_WINSOCK
+      if(err == SOCKEWOULDBLOCK)
+        err = 0; /* wakeup is already ongoing */
+#else
+      if(SOCKEINTR == err)
+        continue;
+      if((err == SOCKEWOULDBLOCK) || (err == EAGAIN))
+        err = 0; /* wakeup is already ongoing */
+#endif
+    }
+    break;
+  }
+  return err;
+}
+
+CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
+{
+  char buf[64];
+  ssize_t rc;
+  CURLcode result = CURLE_OK;
+
+  do {
+    rc = wakeup_read(socks[0], buf, sizeof(buf));
+    if(!rc)
+      break;
+    else if(rc < 0) {
+#ifdef USE_WINSOCK
+      if(SOCKERRNO == SOCKEWOULDBLOCK)
+        break;
+#else
+      if(SOCKEINTR == SOCKERRNO)
+        continue;
+      if((SOCKERRNO == SOCKEWOULDBLOCK) || (SOCKERRNO == EAGAIN))
+        break;
+#endif
+      result = CURLE_READ_ERROR;
+      break;
+    }
+  } while(all);
+  return result;
+}
+
+void Curl_wakeup_destroy(curl_socket_t socks[2])
+{
+#ifndef USE_EVENTFD
+  if(socks[1] != CURL_SOCKET_BAD)
+    wakeup_close(socks[1]);
+#endif
+  if(socks[0] != CURL_SOCKET_BAD)
+    wakeup_close(socks[0]);
+  socks[0] = socks[1] = CURL_SOCKET_BAD;
+}
+
 #endif /* !CURL_DISABLE_SOCKETPAIR */

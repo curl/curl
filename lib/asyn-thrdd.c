@@ -134,10 +134,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
     if(addr_ctx->res)
       Curl_freeaddrinfo(addr_ctx->res);
 #ifndef CURL_DISABLE_SOCKETPAIR
-#ifndef USE_EVENTFD
-    wakeup_close(addr_ctx->sock_pair[1]);
-#endif
-    wakeup_close(addr_ctx->sock_pair[0]);
+  Curl_wakeup_destroy(addr_ctx->sock_pair);
 #endif
     curlx_free(addr_ctx);
   }
@@ -169,7 +166,7 @@ addr_ctx_create(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_SOCKETPAIR
   /* create socket pair or pipe */
-  if(wakeup_create(addr_ctx->sock_pair, FALSE) < 0) {
+  if(Curl_wakeup_init(addr_ctx->sock_pair, FALSE) < 0) {
     addr_ctx->sock_pair[0] = CURL_SOCKET_BAD;
     addr_ctx->sock_pair[1] = CURL_SOCKET_BAD;
     goto err_exit;
@@ -231,15 +228,11 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
     Curl_mutex_release(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(!do_abort) {
-#ifdef USE_EVENTFD
-      const uint64_t buf[1] = { 1 };
-#else
-      const char buf[1] = { 1 };
-#endif
       /* Thread is done, notify transfer */
-      if(wakeup_write(addr_ctx->sock_pair[1], buf, sizeof(buf)) < 0) {
+      int err = Curl_wakeup_signal(addr_ctx->sock_pair);
+      if(err) {
         /* update sock_error to errno */
-        addr_ctx->sock_error = SOCKERRNO;
+        addr_ctx->sock_error = err;
       }
     }
 #endif
@@ -276,15 +269,10 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
     Curl_mutex_release(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(!do_abort) {
-#ifdef USE_EVENTFD
-      const uint64_t buf[1] = { 1 };
-#else
-      const char buf[1] = { 1 };
-#endif
-      /* Thread is done, notify transfer */
-      if(wakeup_write(addr_ctx->sock_pair[1], buf, sizeof(buf)) < 0) {
+      int err = Curl_wakeup_signal(addr_ctx->sock_pair);
+      if(err) {
         /* update sock_error to errno */
-        addr_ctx->sock_error = SOCKERRNO;
+        addr_ctx->sock_error = err;
       }
     }
 #endif
