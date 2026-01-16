@@ -42,7 +42,7 @@ jobs:
     timeout-minutes: 10
     defaults:
       run:
-        shell: D:\cygwin\bin\bash.exe '{0}'
+        shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -184,7 +184,7 @@ jobs:
     timeout-minutes: ${{ contains(matrix.tflags, '-t') && 14 || 10 }}
     defaults:
       run:
-        shell: msys2 {0}
+        shell: msys2 {0}  # zizmor: ignore[misfeature]
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
@@ -412,7 +412,7 @@ jobs:
     timeout-minutes: 10
     defaults:
       run:
-        shell: msys2 {0}
+        shell: msys2 {0}  # zizmor: ignore[misfeature]
     env:
       CURL_TEST_MIN: 1550
       MAKEFLAGS: -j 5
@@ -696,7 +696,7 @@ jobs:
     timeout-minutes: ${{ matrix.arch == 'arm64' && 12 || 10 }}
     defaults:
       run:
-        shell: msys2 {0}
+        shell: msys2 {0}  # zizmor: ignore[misfeature]
     env:
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
