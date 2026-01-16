@@ -1444,7 +1444,7 @@ static int mbedtls_init(void)
                               NULL, 0);
 
   if(ret) {
-    failf(NULL, " failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
+    failf(NULL, "failed: mbedtls_ctr_drbg_seed returned -0x%x",
           (unsigned int)-ret);
     return 0;
   }
