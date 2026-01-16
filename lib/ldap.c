@@ -1040,7 +1040,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   PORT_LDAPS,                           /* defport */
   CURLPROTO_LDAPS,                      /* protocol */
   CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL                           /* flags */
+  PROTOPT_SSL | PROTOPT_SIGPIPE         /* flags */
 };
 #endif
 

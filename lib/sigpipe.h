@@ -43,6 +43,9 @@ static void sigpipe_init(struct sigpipe_ignore *ig)
   ig->no_signal = TRUE;
 }
 
+#define proto_sigunsafe(data)                                   \
+  (data->conn && data->conn->handler->flags & PROTOPT_SIGPIPE)
+
 /*
  * sigpipe_ignore() makes sure we ignore SIGPIPE while running libcurl
  * internals, and then sigpipe_restore() will restore the situation when we
@@ -51,17 +54,19 @@ static void sigpipe_init(struct sigpipe_ignore *ig)
 static void sigpipe_ignore(struct Curl_easy *data,
                            struct sigpipe_ignore *ig)
 {
-  /* get a local copy of no_signal because the Curl_easy might not be
-     around when we restore */
-  ig->no_signal = data->set.no_signal;
-  if(!data->set.no_signal) {
-    struct sigaction action;
-    /* first, extract the existing situation */
-    sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
-    action = ig->old_pipe_act;
-    /* ignore this signal */
-    action.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &action, NULL);
+  if(proto_sigunsafe(data)) {
+    /* get a local copy of no_signal because the Curl_easy might not be
+       around when we restore */
+    ig->no_signal = data->set.no_signal;
+    if(!data->set.no_signal) {
+      struct sigaction action;
+      /* first, extract the existing situation */
+      sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
+      action = ig->old_pipe_act;
+      /* ignore this signal */
+      action.sa_handler = SIG_IGN;
+      sigaction(SIGPIPE, &action, NULL);
+    }
   }
 }
 

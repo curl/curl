@@ -3087,7 +3087,8 @@ const struct Curl_handler Curl_handler_scp = {
   CURLPROTO_SCP,                /* protocol */
   CURLPROTO_SCP,                /* family */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE |
+  PROTOPT_SIGPIPE;
 };
 
 /*
@@ -3116,7 +3117,8 @@ const struct Curl_handler Curl_handler_sftp = {
   CURLPROTO_SFTP,                       /* protocol */
   CURLPROTO_SFTP,                       /* family */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE |
+  PROTOPT_SIGPIPE;
 };
 
 #endif /* USE_LIBSSH */
