@@ -656,12 +656,12 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
     else
       curl_msnprintf(buf, buflen, "%s (0x%08lx)", txt, err);
   }
-#else
+#else /* !CURL_DISABLE_VERBOSE_STRINGS */
+  (void)txt;
   if(err == SEC_E_OK)
-    txt = "No error";
+    curlx_strcopy(buf, buflen, STRCONST("No error"));
   else
-    txt = "Error";
-  curlx_strcopy(buf, buflen, txt, strlen(txt));
+    curlx_strcopy(buf, buflen, STRCONST("Error"));
 #endif
 
   if(errno != old_errno)

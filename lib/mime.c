@@ -573,7 +573,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
         }
       }
       if(softlinebreak) {
-        curlx_strcopy(buf, sizeof(buf), "\x3D\x0D\x0A", 3);    /* "=\r\n" */
+        curlx_strcopy(buf, sizeof(buf), STRCONST("\x3D\x0D\x0A")); /* =\r\n */
         len = 3;
         consumed = 0;
       }

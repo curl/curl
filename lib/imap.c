@@ -1966,7 +1966,7 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done)
   imap_state(data, imapc, IMAP_SERVERGREET);
 
   /* Start off with an response id of '*' */
-  curlx_strcopy(imapc->resptag, sizeof(imapc->resptag), "*", 1);
+  curlx_strcopy(imapc->resptag, sizeof(imapc->resptag), STRCONST("*"));
 
   result = imap_multi_statemach(data, done);
 
