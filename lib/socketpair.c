@@ -28,6 +28,9 @@
 #include "rand.h"
 #include "curlx/nonblock.h"
 
+#ifndef CURL_DISABLE_SOCKETPAIR
+
+/* choose implementation */
 #ifdef USE_EVENTFD
 
 #include <sys/eventfd.h>
@@ -81,37 +84,24 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
   return 0;
 }
 
-#else
+#elif defined(HAVE_SOCKETPAIR)  /* !USE_EVENTFD && !HAVE_PIPE */
 
-#if defined(USE_UNIX_SOCKETS) && defined(HAVE_SOCKETPAIR)
-#define SOCKETPAIR_FAMILY AF_UNIX
-#elif !defined(HAVE_SOCKETPAIR)
-#define SOCKETPAIR_FAMILY 0 /* not used */
-#else
+#ifndef USE_UNIX_SOCKETS
 #error "unsupported Unix domain and socketpair build combo"
 #endif
 
-#ifdef SOCK_CLOEXEC
-#define SOCKETPAIR_TYPE (SOCK_STREAM | SOCK_CLOEXEC)
-#else
-#define SOCKETPAIR_TYPE SOCK_STREAM
-#endif
-
-#define USE_SOCKETPAIR
-
-#endif /* USE_EVENTFD or HAVE_PIPE2 */
-
-#ifndef CURL_DISABLE_SOCKETPAIR
-
-#ifdef HAVE_SOCKETPAIR
-#ifdef USE_SOCKETPAIR
-static int wakeup_socketpair(int domain, int type, int protocol,
-                             curl_socket_t socks[2], bool nonblocking)
+static int wakeup_socketpair(curl_socket_t socks[2], bool nonblocking)
 {
-#ifdef SOCK_NONBLOCK
-  type = nonblocking ? type | SOCK_NONBLOCK : type;
+  int type = SOCK_STREAM;
+#ifdef SOCK_CLOEXEC
+  type |= SOCK_CLOEXEC;
 #endif
-  if(CURL_SOCKETPAIR(domain, type, protocol, socks))
+#ifdef SOCK_NONBLOCK
+  if(nonblocking)
+    type |= SOCK_NONBLOCK;
+#endif
+
+  if(CURL_SOCKETPAIR(AF_UNIX, type, 0, socks))
     return -1;
 #ifndef SOCK_NONBLOCK
   if(nonblocking) {
@@ -125,8 +115,8 @@ static int wakeup_socketpair(int domain, int type, int protocol,
 #endif
   return 0;
 }
-#endif /* USE_SOCKETPAIR */
-#else /* !HAVE_SOCKETPAIR */
+
+#else /* !USE_EVENTFD && !HAVE_PIPE && !HAVE_SOCKETPAIR */
 
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -144,8 +134,7 @@ static int wakeup_socketpair(int domain, int type, int protocol,
 
 #include "select.h"   /* for Curl_poll */
 
-static int wakeup_socketpair(int domain, int type, int protocol,
-                             curl_socket_t socks[2], bool nonblocking)
+static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
 {
   union {
     struct sockaddr_in inaddr;
@@ -155,9 +144,6 @@ static int wakeup_socketpair(int domain, int type, int protocol,
   curl_socklen_t addrlen = sizeof(a.inaddr);
   int reuse = 1;
   struct pollfd pfd[1];
-  (void)domain;
-  (void)type;
-  (void)protocol;
 
   listener = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if(listener == CURL_SOCKET_BAD)
@@ -277,7 +263,7 @@ error:
   return -1;
 }
 
-#endif /* !HAVE_SOCKETPAIR */
+#endif /* choose implementation */
 
 int Curl_wakeup_init(curl_socket_t socks[2], bool nonblocking)
 {
@@ -285,9 +271,10 @@ int Curl_wakeup_init(curl_socket_t socks[2], bool nonblocking)
   return wakeup_eventfd(socks, nonblocking);
 #elif defined(HAVE_PIPE)
   return wakeup_pipe(socks, nonblocking);
+#elif defined(HAVE_SOCKETPAIR)
+  return wakeup_socketpair(socks, nonblocking);
 #else
-  return wakeup_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0,
-                           socks, nonblocking);
+  return wakeup_inet(socks, nonblocking);
 #endif
 }
 
