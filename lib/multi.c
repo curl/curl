@@ -294,7 +294,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(multi->wsa_event == WSA_INVALID_EVENT)
     goto error;
 #elif defined(ENABLE_WAKEUP)
-  if(wakeup_create(multi->wakeup_pair, TRUE) < 0) {
+  if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0) {
     multi->wakeup_pair[0] = CURL_SOCKET_BAD;
     multi->wakeup_pair[1] = CURL_SOCKET_BAD;
   }
@@ -1533,20 +1533,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifdef ENABLE_WAKEUP
       if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
         if(cpfds.pfds[curl_nfds + extra_nfds].revents & POLLIN) {
-          char buf[64];
-          ssize_t nread;
-          while(1) {
-            /* the reading socket is non-blocking, try to read
-               data from it until it receives an error (except EINTR).
-               In normal cases it will get EAGAIN or EWOULDBLOCK
-               when there is no more data, breaking the loop. */
-            nread = wakeup_read(multi->wakeup_pair[0], buf, sizeof(buf));
-            if(nread <= 0) {
-              if(nread < 0 && SOCKEINTR == SOCKERRNO)
-                continue;
-              break;
-            }
-          }
+          (void)Curl_wakeup_consume(multi->wakeup_pair, TRUE);
           /* do not count the wakeup socket into the returned value */
           retcode--;
         }
@@ -1623,38 +1610,9 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      making it safe to access from another thread after the init part
      and before cleanup */
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
-    while(1) {
-#ifdef USE_EVENTFD
-      /* eventfd has a stringent rule of requiring the 8-byte buffer when
-         calling write(2) on it */
-      const uint64_t buf[1] = { 1 };
-#else
-      const char buf[1] = { 1 };
-#endif
-      /* swrite() is not thread-safe in general, because concurrent calls
-         can have their messages interleaved, but in this case the content
-         of the messages does not matter, which makes it ok to call.
-
-         The write socket is set to non-blocking, this way this function
-         cannot block, making it safe to call even from the same thread
-         that will call curl_multi_wait(). If swrite() returns that it
-         would block, it is considered successful because it means that
-         previous calls to this function will wake up the poll(). */
-      if(wakeup_write(multi->wakeup_pair[1], buf, sizeof(buf)) < 0) {
-        int err = SOCKERRNO;
-        int return_success;
-#ifdef USE_WINSOCK
-        return_success = SOCKEWOULDBLOCK == err;
-#else
-        if(SOCKEINTR == err)
-          continue;
-        return_success = SOCKEWOULDBLOCK == err || EAGAIN == err;
-#endif
-        if(!return_success)
-          return CURLM_WAKEUP_FAILURE;
-      }
-      return CURLM_OK;
-    }
+    if(Curl_wakeup_signal(multi->wakeup_pair))
+      return CURLM_WAKEUP_FAILURE;
+    return CURLM_OK;
   }
 #endif
 #endif
@@ -2929,10 +2887,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     WSACloseEvent(multi->wsa_event);
 #else
 #ifdef ENABLE_WAKEUP
-    wakeup_close(multi->wakeup_pair[0]);
-#ifndef USE_EVENTFD
-    wakeup_close(multi->wakeup_pair[1]);
-#endif
+  Curl_wakeup_destroy(multi->wakeup_pair);
 #endif
 #endif
 
