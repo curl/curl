@@ -26,6 +26,7 @@
 #include "tool_cfgable.h"
 #include "tool_setopt.h"
 #include "tool_findfile.h"
+#include "tool_formparse.h"
 #include "tool_msgs.h"
 #include "tool_libinfo.h"
 #include "tool_cb_soc.h"
@@ -54,7 +55,7 @@ static int get_address_family(curl_socket_t sockfd)
 #endif
 
 #ifndef SOL_IP
-#  define SOL_IP IPPROTO_IP
+#define SOL_IP IPPROTO_IP
 #endif
 
 #if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
@@ -546,8 +547,8 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
       if(cl == config->cookies)
         result = curlx_dyn_add(&cookies, cl->data);
       else
-        result = curlx_dyn_addf(&cookies, ";%s", cl->data);
-
+        result = curlx_dyn_addf(&cookies, ";%s%s",
+                                ISBLANK(cl->data[0]) ? "" : " ", cl->data);
       if(result) {
         warnf("skipped provided cookie, the cookie header "
               "would go over %u bytes", MAX_COOKIE_LINE);

@@ -282,11 +282,6 @@
 /*                        COMPILER SPECIFIC                         */
 /* ---------------------------------------------------------------- */
 
-/* Define if the compiler supports the 'long long' data type. */
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#define HAVE_LONGLONG 1
-#endif
-
 /* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #  ifndef _USE_32BIT_TIME_T

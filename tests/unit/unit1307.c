@@ -23,9 +23,9 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "curl_fnmatch.h"
-
 #ifndef CURL_DISABLE_FTP
+
+#include "curl_fnmatch.h"
 
 /*
    CURL_FNMATCH_MATCH    0

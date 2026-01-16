@@ -28,7 +28,7 @@ http
 HTTP PUT from a file but enforce chunked transfer-encoding
 </name>
 <command>
- -T %LOGDIR/file%TESTNUMBER -H "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-T %LOGDIR/file%TESTNUMBER -H "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <file name="%LOGDIR/file%TESTNUMBER">
 just some tiny teeny contents

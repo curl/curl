@@ -179,9 +179,9 @@ UNITTEST void de_init(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
-#else /* if DoH is disabled */
+#else /* CURL_DISABLE_DOH */
 #define Curl_doh(a, b, c, d, e)    NULL
 #define Curl_doh_is_resolved(x, y) CURLE_COULDNT_RESOLVE_HOST
-#endif
+#endif /* !CURL_DISABLE_DOH */
 
 #endif /* HEADER_CURL_DOH_H */

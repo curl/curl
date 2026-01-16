@@ -148,7 +148,7 @@ static CURLcode test_unit1303(const char *arg)
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
     easy->progress.now = now;
-    timeout = Curl_timeleft_ms(easy, run[i].connecting);
+    timeout = Curl_timeleft_now_ms(easy, &now, run[i].connecting);
     if(timeout != run[i].result)
       fail(run[i].comment);
   }

@@ -21,8 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #include "bufq.h"
 
 static bool chunk_is_empty(const struct buf_chunk *chunk)

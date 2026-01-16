@@ -30,11 +30,8 @@
 
 #include "first.h"
 
-#include "testtrace.h"
-
 #ifdef USE_OPENSSL
 
-#include <openssl/x509.h>
 #include <openssl/ssl.h>
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
@@ -43,6 +40,8 @@
 #endif
 
 #ifdef T578_ENABLED
+
+#include "testtrace.h"
 
 static struct t758_ctx {
   int socket_calls;
@@ -280,14 +279,7 @@ static void t758_updateFdSet(struct t758_Sockets *sockets, fd_set *fdset,
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
     FD_SET(sockets->sockets[i], fdset);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
     if(*maxFd < sockets->sockets[i] + 1) {
       *maxFd = sockets->sockets[i] + 1;
     }

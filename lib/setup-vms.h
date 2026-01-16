@@ -355,9 +355,6 @@ static int CONF_modules_load_file(const char *filename,
 #define sk_pop                          SK_POP
 #define sk_pop_free                     SK_POP_FREE
 #define sk_value                        SK_VALUE
-#ifdef __VAX
-#define OPENSSL_NO_SHA256
-#endif
 #define SHA256_Final  SHA256_FINAL
 #define SHA256_Init   SHA256_INIT
 #define SHA256_Update SHA256_UPDATE

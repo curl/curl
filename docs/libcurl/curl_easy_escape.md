@@ -34,8 +34,7 @@ A-Z, 0-9, '-', '.', '_' or '~' are converted to their "URL escaped" version
 constrained by its type, the returned string may not be altered.
 
 If *length* is set to 0 (zero), curl_easy_escape(3) uses strlen() on the input
-*string* to find out the size. This function does not accept input strings
-longer than **CURL_MAX_INPUT_LENGTH** (8 MB).
+*string* to find out the size.
 
 You must curl_free(3) the returned string when you are done with it.
 

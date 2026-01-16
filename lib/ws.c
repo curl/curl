@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-#include <curl/curl.h>
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
@@ -34,15 +33,14 @@
 #include "curlx/base64.h"
 #include "connect.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "multiif.h"
 #include "ws.h"
 #include "easyif.h"
 #include "transfer.h"
 #include "select.h"
-#include "curlx/nonblock.h"
 #include "curlx/strparse.h"
-#include "curlx/warnless.h"
-
+#include "curlx/strcopy.h"
 
 /***
     RFC 6455 Section 5.2
@@ -447,7 +445,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       break;
     case 10:
       if(dec->head[2] > 127) {
-        failf(data, "[WS] frame length longer than 63 bit not supported");
+        failf(data, "[WS] frame length longer than 63 bits not supported");
         return CURLE_RECV_ERROR;
       }
       dec->payload_len =
@@ -488,7 +486,6 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   size_t remain = curlx_sotouz_range(dec->payload_len - dec->payload_offset,
                                      0, SIZE_MAX);
 
-  (void)data;
   while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if(inlen > remain)
       inlen = remain;
@@ -770,7 +767,6 @@ static const struct Curl_cwtype ws_cw_decode = {
   sizeof(struct ws_cw_ctx)
 };
 
-
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
 {
@@ -835,8 +831,8 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
 
   if(enc->payload_remain > 0) {
     /* trying to write a new frame before the previous one is finished */
-    failf(data, "[WS] starting new frame with %zd bytes from last one "
-                "remaining to be sent", (ssize_t)enc->payload_remain);
+    failf(data, "[WS] starting new frame with %" FMT_OFF_T " bytes "
+                "from last one remaining to be sent", enc->payload_remain);
     return CURLE_SEND_ERROR;
   }
 
@@ -1278,7 +1274,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
     curlx_free(randstr);
     return CURLE_FAILED_INIT;
   }
-  strcpy(keyval, randstr);
+  curlx_strcopy(keyval, sizeof(keyval), randstr, randlen);
   curlx_free(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
@@ -1705,8 +1701,7 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
       /* POLLOUT socket */
       if(sock == CURL_SOCKET_BAD)
         return CURLE_SEND_ERROR;
-      ev = Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, sock,
-                             left_ms ? left_ms : 500);
+      ev = SOCKET_WRITABLE(sock, left_ms ? left_ms : 500);
       if(ev < 0) {
         failf(data, "[WS] Error while waiting for socket becoming writable");
         return CURLE_SEND_ERROR;

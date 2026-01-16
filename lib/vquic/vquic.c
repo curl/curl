@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifdef HAVE_NETINET_UDP_H
@@ -34,7 +33,6 @@
 #include "../bufq.h"
 #include "../curlx/dynbuf.h"
 #include "../curlx/fopen.h"
-#include "../curlx/warnless.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "curl_ngtcp2.h"
@@ -53,7 +51,6 @@
 
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    1
-
 
 int Curl_vquic_init(void)
 {
@@ -96,7 +93,7 @@ CURLcode vquic_ctx_init(struct Curl_easy *data,
     }
   }
 #endif
-  vquic_ctx_set_time(data, qctx);
+  vquic_ctx_set_time(qctx, Curl_pgrs_now(data));
 
   return CURLE_OK;
 }
@@ -106,17 +103,16 @@ void vquic_ctx_free(struct cf_quic_ctx *qctx)
   Curl_bufq_free(&qctx->sendbuf);
 }
 
-void vquic_ctx_set_time(struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx)
+void vquic_ctx_set_time(struct cf_quic_ctx *qctx,
+                        const struct curltime *pnow)
 {
-  qctx->last_op = data->progress.now;
+  qctx->last_op = *pnow;
 }
 
-void vquic_ctx_update_time(struct Curl_easy *data,
-                           struct cf_quic_ctx *qctx)
+void vquic_ctx_update_time(struct cf_quic_ctx *qctx,
+                           const struct curltime *pnow)
 {
-  Curl_pgrs_now_set(data);
-  qctx->last_op = data->progress.now;
+  qctx->last_op = *pnow;
 }
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
@@ -202,8 +198,8 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 
   *psent = 0;
 
-  while((rv = CURL_SEND(qctx->sockfd, (const char *)pkt,
-                        (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
+  while((rv = send(qctx->sockfd, (const char *)pkt,
+                   (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;
 
@@ -746,6 +742,56 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+const char *vquic_h3_err_str(uint64_t error_code)
+{
+  if(error_code <= UINT_MAX) {
+    switch((unsigned int)error_code) {
+    case CURL_H3_ERR_NO_ERROR:
+      return "NO_ERROR";
+    case CURL_H3_ERR_GENERAL_PROTOCOL_ERROR:
+      return "GENERAL_PROTOCOL_ERROR";
+    case CURL_H3_ERR_INTERNAL_ERROR:
+      return "INTERNAL_ERROR";
+    case CURL_H3_ERR_STREAM_CREATION_ERROR:
+      return "STREAM_CREATION_ERROR";
+    case CURL_H3_ERR_CLOSED_CRITICAL_STREAM:
+      return "CLOSED_CRITICAL_STREAM";
+    case CURL_H3_ERR_FRAME_UNEXPECTED:
+      return "FRAME_UNEXPECTED";
+    case CURL_H3_ERR_FRAME_ERROR:
+      return "FRAME_ERROR";
+    case CURL_H3_ERR_EXCESSIVE_LOAD:
+      return "EXCESSIVE_LOAD";
+    case CURL_H3_ERR_ID_ERROR:
+      return "ID_ERROR";
+    case CURL_H3_ERR_SETTINGS_ERROR:
+      return "SETTINGS_ERROR";
+    case CURL_H3_ERR_MISSING_SETTINGS:
+      return "MISSING_SETTINGS";
+    case CURL_H3_ERR_REQUEST_REJECTED:
+      return "REQUEST_REJECTED";
+    case CURL_H3_ERR_REQUEST_CANCELLED:
+      return "REQUEST_CANCELLED";
+    case CURL_H3_ERR_REQUEST_INCOMPLETE:
+      return "REQUEST_INCOMPLETE";
+    case CURL_H3_ERR_MESSAGE_ERROR:
+      return "MESSAGE_ERROR";
+    case CURL_H3_ERR_CONNECT_ERROR:
+      return "CONNECT_ERROR";
+    case CURL_H3_ERR_VERSION_FALLBACK:
+      return "VERSION_FALLBACK";
+    default:
+      break;
+    }
+  }
+  /* RFC 9114 ch. 8.1 + 9, reserved future error codes that are NO_ERROR */
+  if((error_code >= 0x21) && !((error_code - 0x21) % 0x1f))
+    return "NO_ERROR";
+  return "unknown";
+}
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+
 #if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
 
 static void *vquic_ngtcp2_malloc(size_t size, void *user_data)
@@ -808,8 +854,8 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn,
                              unsigned char transport)
 {
-  (void)conn;
   (void)data;
+  (void)conn;
   (void)transport;
   DEBUGF(infof(data, "QUIC is not supported in this build"));
   return CURLE_NOT_BUILT_IN;

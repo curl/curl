@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -45,7 +44,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
@@ -53,27 +51,25 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
-#include "curl_share.h"
 #include "strdup.h"
-#include "progress.h"
 #include "easyif.h"
 #include "multiif.h"
+#include "multi_ev.h"
 #include "select.h"
 #include "cfilters.h"
-#include "sendf.h" /* for failf function prototype */
+#include "sendf.h"
+#include "curl_trc.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
 #include "mime.h"
 #include "amigaos.h"
 #include "macos.h"
-#include "curlx/warnless.h"
 #include "curlx/wait.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
 #include "setopt.h"
 #include "http_digest.h"
 #include "system_win32.h"
-#include "http2.h"
 #include "curlx/dynbuf.h"
 #include "bufref.h"
 #include "altsvc.h"
@@ -365,7 +361,7 @@ CURL *curl_easy_init(void)
   }
   global_init_unlock();
 
-  /* We use curl_open() with undefined URL so far */
+  /* We use Curl_open() with undefined URL so far */
   result = Curl_open(&data);
   if(result) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_open failed\n"));
@@ -607,11 +603,11 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     CURLMsg *msg;
     struct pollfd fds[4];
     int pollrc;
-    struct curltime before;
+    struct curltime start;
     const unsigned int numfds = populate_fds(fds, ev);
 
     /* get the time stamp to use to figure out how long poll takes */
-    before = curlx_now();
+    curlx_pnow(&start);
 
     result = poll_fds(ev, fds, numfds, &pollrc);
     if(result)
@@ -643,12 +639,11 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         }
       }
 
-
       if(!ev->msbump && ev->ms >= 0) {
         /* If nothing updated the timeout, we decrease it by the spent time.
          * If it was updated, it has the new timeout time stored already.
          */
-        timediff_t spent_ms = curlx_timediff_ms(curlx_now(), before);
+        timediff_t spent_ms = curlx_timediff_ms(curlx_now(), start);
         if(spent_ms > 0) {
 #if DEBUG_EV_POLL
         curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
@@ -896,8 +891,9 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* Copy src->set into dst->set first, then deal with the strings
      afterwards */
   dst->set = src->set;
-  Curl_mime_initpart(&dst->set.mimepost);
-
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  dst->set.mimepostp = NULL;
+#endif
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
@@ -932,8 +928,19 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     dst->set.postfields = dst->set.str[i];
   }
 
-  /* Duplicate mime data. */
-  result = Curl_mime_duppart(dst, &dst->set.mimepost, &src->set.mimepost);
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  if(src->set.mimepostp) {
+    /* Duplicate mime data. Get a mimepost struct for the clone as well */
+    dst->set.mimepostp = curlx_malloc(sizeof(*dst->set.mimepostp));
+    if(!dst->set.mimepostp)
+      return CURLE_OUT_OF_MEMORY;
+
+    Curl_mime_initpart(dst->set.mimepostp);
+    result = Curl_mime_duppart(dst, dst->set.mimepostp, src->set.mimepostp);
+    if(result)
+      return result;
+  }
+#endif
 
   if(src->set.resolve)
     dst->state.resolve = dst->set.resolve;
@@ -996,7 +1003,6 @@ CURL *curl_easy_duphandle(CURL *d)
   if(dupset(outcurl, data))
     goto fail;
 
-  Curl_pgrs_now_set(outcurl); /* start of API call */
   outcurl->progress.hide     = data->progress.hide;
   outcurl->progress.callback = data->progress.callback;
 
@@ -1156,7 +1162,6 @@ CURLcode curl_easy_pause(CURL *d, int action)
   if(Curl_is_in_callback(data))
     recursive = TRUE;
 
-  Curl_pgrs_now_set(data); /* start of API call */
   recv_paused = Curl_xfer_recv_is_paused(data);
   recv_paused_new = (action & CURLPAUSE_RECV);
   send_paused = Curl_xfer_send_is_paused(data);
@@ -1181,7 +1186,7 @@ CURLcode curl_easy_pause(CURL *d, int action)
       Curl_multi_mark_dirty(data); /* make it run */
       /* On changes, tell application to update its timers. */
       if(changed) {
-        if(Curl_update_timer(data->multi, &data->progress.now) && !result)
+        if(Curl_update_timer(data->multi) && !result)
           result = CURLE_ABORTED_BY_CALLBACK;
       }
     }

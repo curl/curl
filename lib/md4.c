@@ -21,15 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_CURL_NTLM_CORE
 
-#include <string.h>
-
 #include "curl_md4.h"
-#include "curlx/warnless.h"
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslv.h>
@@ -74,10 +70,10 @@
 #if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 
 #ifdef OPENSSL_COEXIST
-  #define MD4_CTX    WOLFSSL_MD4_CTX
-  #define MD4_Init   wolfSSL_MD4_Init
-  #define MD4_Update wolfSSL_MD4_Update
-  #define MD4_Final  wolfSSL_MD4_Final
+#  define MD4_CTX    WOLFSSL_MD4_CTX
+#  define MD4_Init   wolfSSL_MD4_Init
+#  define MD4_Update wolfSSL_MD4_Update
+#  define MD4_Final  wolfSSL_MD4_Final
 #endif
 
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
@@ -204,10 +200,6 @@ struct md4_ctx {
   MD4_u32plus block[16];
 };
 typedef struct md4_ctx MD4_CTX;
-
-static int MD4_Init(MD4_CTX *ctx);
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size);
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
 
 /*
  * The basic MD4 functions.

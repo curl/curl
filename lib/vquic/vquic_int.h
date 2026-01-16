@@ -23,14 +23,41 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
+
 #include "../bufq.h"
 
 #ifdef USE_HTTP3
 
 #define MAX_PKT_BURST         10
 #define MAX_UDP_PAYLOAD_SIZE  1452
+
+/* definitions from RFC 9114, ch 8.1 */
+typedef enum {
+  CURL_H3_ERR_NO_ERROR = 0x0100,
+  CURL_H3_ERR_GENERAL_PROTOCOL_ERROR = 0x0101,
+  CURL_H3_ERR_INTERNAL_ERROR = 0x0102,
+  CURL_H3_ERR_STREAM_CREATION_ERROR = 0x0103,
+  CURL_H3_ERR_CLOSED_CRITICAL_STREAM = 0x0104,
+  CURL_H3_ERR_FRAME_UNEXPECTED = 0x0105,
+  CURL_H3_ERR_FRAME_ERROR = 0x0106,
+  CURL_H3_ERR_EXCESSIVE_LOAD = 0x0107,
+  CURL_H3_ERR_ID_ERROR = 0x0108,
+  CURL_H3_ERR_SETTINGS_ERROR = 0x0109,
+  CURL_H3_ERR_MISSING_SETTINGS = 0x010a,
+  CURL_H3_ERR_REQUEST_REJECTED = 0x010b,
+  CURL_H3_ERR_REQUEST_CANCELLED = 0x010c,
+  CURL_H3_ERR_REQUEST_INCOMPLETE = 0x010d,
+  CURL_H3_ERR_MESSAGE_ERROR = 0x010e,
+  CURL_H3_ERR_CONNECT_ERROR = 0x010f,
+  CURL_H3_ERR_VERSION_FALLBACK = 0x0110,
+} vquic_h3_error;
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+const char *vquic_h3_err_str(uint64_t error_code);
+#else
+#define vquic_h3_err_str(x)   ""
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
 
 struct cf_quic_ctx {
   curl_socket_t sockfd;               /* connected UDP socket */
@@ -58,11 +85,11 @@ CURLcode vquic_ctx_init(struct Curl_easy *data,
                         struct cf_quic_ctx *qctx);
 void vquic_ctx_free(struct cf_quic_ctx *qctx);
 
-void vquic_ctx_set_time(struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx);
+void vquic_ctx_set_time(struct cf_quic_ctx *qctx,
+                        const struct curltime *pnow);
 
-void vquic_ctx_update_time(struct Curl_easy *data,
-                           struct cf_quic_ctx *qctx);
+void vquic_ctx_update_time(struct cf_quic_ctx *qctx,
+                           const struct curltime *pnow);
 
 void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
                             struct cf_quic_ctx *qctx,

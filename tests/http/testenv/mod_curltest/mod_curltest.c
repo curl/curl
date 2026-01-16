@@ -35,65 +35,6 @@
 #include <http_request.h>
 #include <http_log.h>
 
-static void curltest_hooks(apr_pool_t *pool);
-static int curltest_echo_handler(request_rec *r);
-static int curltest_put_handler(request_rec *r);
-static int curltest_tweak_handler(request_rec *r);
-static int curltest_1_1_required(request_rec *r);
-static int curltest_sslinfo_handler(request_rec *r);
-
-AP_DECLARE_MODULE(curltest) =
-{
-  STANDARD20_MODULE_STUFF,
-  NULL, /* func to create per-directory config */
-  NULL,  /* func to merge per-directory config */
-  NULL, /* func to create per-server config */
-  NULL,  /* func to merge per-server config */
-  NULL,              /* command handlers */
-  curltest_hooks,
-#ifdef AP_MODULE_FLAG_NONE
-  AP_MODULE_FLAG_ALWAYS_MERGE
-#endif
-};
-
-static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
-                                apr_pool_t *ptemp, server_rec *s)
-{
-  void *data = NULL;
-  const char *key = "mod_curltest_init_counter";
-
-  (void)plog;
-  (void)ptemp;
-
-  apr_pool_userdata_get(&data, key, s->process->pool);
-  if(!data) {
-    /* dry run */
-    apr_pool_userdata_set((const void *)1, key,
-                          apr_pool_cleanup_null, s->process->pool);
-    return APR_SUCCESS;
-  }
-
-  /* mess with the overall server here */
-
-  return APR_SUCCESS;
-}
-
-static void curltest_hooks(apr_pool_t *pool)
-{
-  ap_log_perror(APLOG_MARK, APLOG_TRACE1, 0, pool, "installing hooks");
-
-  /* Run once after configuration is set, but before mpm children initialize.
-   */
-  ap_hook_post_config(curltest_post_config, NULL, NULL, APR_HOOK_MIDDLE);
-
-  /* curl test handlers */
-  ap_hook_handler(curltest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_1_1_required, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
-}
-
 #define SECS_PER_HOUR      (60 * 60)
 #define SECS_PER_DAY       (24 * SECS_PER_HOUR)
 
@@ -882,3 +823,56 @@ cleanup:
   }
   return DECLINED;
 }
+
+static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
+                                apr_pool_t *ptemp, server_rec *s)
+{
+  void *data = NULL;
+  const char *key = "mod_curltest_init_counter";
+
+  (void)p;
+  (void)plog;
+  (void)ptemp;
+
+  apr_pool_userdata_get(&data, key, s->process->pool);
+  if(!data) {
+    /* dry run */
+    apr_pool_userdata_set((const void *)1, key,
+                          apr_pool_cleanup_null, s->process->pool);
+    return APR_SUCCESS;
+  }
+
+  /* mess with the overall server here */
+
+  return APR_SUCCESS;
+}
+
+static void curltest_hooks(apr_pool_t *pool)
+{
+  ap_log_perror(APLOG_MARK, APLOG_TRACE1, 0, pool, "installing hooks");
+
+  /* Run once after configuration is set, but before mpm children initialize.
+   */
+  ap_hook_post_config(curltest_post_config, NULL, NULL, APR_HOOK_MIDDLE);
+
+  /* curl test handlers */
+  ap_hook_handler(curltest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_1_1_required, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
+}
+
+AP_DECLARE_MODULE(curltest) =
+{
+  STANDARD20_MODULE_STUFF,
+  NULL, /* func to create per-directory config */
+  NULL,  /* func to merge per-directory config */
+  NULL, /* func to create per-server config */
+  NULL,  /* func to merge per-server config */
+  NULL,              /* command handlers */
+  curltest_hooks,
+#ifdef AP_MODULE_FLAG_NONE
+  AP_MODULE_FLAG_ALWAYS_MERGE
+#endif
+};

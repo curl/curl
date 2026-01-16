@@ -23,16 +23,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
-#include "../bufq.h"
-#include "../vtls/vtls.h"
-#include "../vtls/vtls_int.h"
-#include "../vtls/openssl.h"
 
 #if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
+#include "../bufq.h"
+#include "../vtls/vtls.h"
+#include "../vtls/vtls_int.h"
+
+#include "../vtls/openssl.h"
 #include "../vtls/wolfssl.h"
 
 struct ssl_peer;

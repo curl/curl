@@ -16,6 +16,9 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT%CR
 Server: test-server/%CR
  fake%CR
  folded%CR
+Tabs: tab-instead/%TAB%CR
+%TABonly%CR
+%TAB mixed%CR
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT%CR
 ETag: "21025-dc7-39462498"%CR
 Content-Length: 6%CR
@@ -52,10 +55,11 @@ Accept: */*
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/ fake folded
+Tabs: tab-instead/ only mixed
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Content-Length: 6
-Connection:%repeat[46 x  ]%   close
+Connection: close
 
 </file>
 </verify>

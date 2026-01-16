@@ -21,16 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * IDN conversions
  */
-
 #include "curl_setup.h"
+
 #include "urldata.h"
 #include "idn.h"
-#include "sendf.h"
-#include "curlx/warnless.h"
 
 #ifdef USE_LIBIDN2
 #include <idn2.h>
@@ -42,7 +39,7 @@
 #define IDN2_LOOKUP(name, host, flags)                          \
   idn2_lookup_ul((const char *)name, (char **)host, flags)
 #endif
-#endif  /* USE_LIBIDN2 */
+#endif /* USE_LIBIDN2 */
 
 /* for macOS and iOS targets */
 #ifdef USE_APPLE_IDN

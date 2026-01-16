@@ -25,7 +25,6 @@
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
-#include "tool_getparam.h"
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
 #include "tool_parsecfg.h"
@@ -840,9 +839,9 @@ int formparse(const char *input,
         part->headers = headers;
         headers = NULL;
         if(res == CURLE_READ_ERROR) {
-            /* An error occurred while reading stdin: if read has started,
-               issue the error now. Else, delay it until processed by
-               libcurl. */
+          /* An error occurred while reading stdin: if read has started,
+             issue the error now. Else, delay it until processed by
+             libcurl. */
           if(part->size > 0) {
             warnf("error while reading standard input");
             goto fail;

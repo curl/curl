@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -51,8 +50,7 @@
 #endif
 
 #include "urldata.h"
-#include "sendf.h"
-#include "if2ip.h"
+#include "curl_trc.h"
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -60,19 +58,13 @@
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
 #include "cf-socket.h"
-#include "select.h"
-#include "url.h" /* for Curl_safefree() */
 #include "multiif.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_ntop.h"
-#include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
 #include "progress.h"
-#include "curlx/warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "curl_share.h"
 #include "http_proxy.h"
 #include "socks.h"
 
@@ -112,8 +104,9 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
  * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
-timediff_t Curl_timeleft_ms(struct Curl_easy *data,
-                            bool duringconnect)
+timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
+                                const struct curltime *pnow,
+                                bool duringconnect)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
@@ -129,7 +122,7 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
 
   if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
-      curlx_timediff_ms(data->progress.now, data->progress.t_startop);
+      curlx_ptimediff_ms(pnow, &data->progress.t_startop);
     if(!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   }
@@ -139,7 +132,7 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
   ctimeout_ms = (data->set.connecttimeout > 0) ?
     data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
   ctimeleft_ms = ctimeout_ms -
-    curlx_timediff_ms(data->progress.now, data->progress.t_startsingle);
+    curlx_ptimediff_ms(pnow, &data->progress.t_startsingle);
   if(!ctimeleft_ms)
     ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   if(!timeleft_ms)
@@ -149,13 +142,19 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
   return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
 }
 
+timediff_t Curl_timeleft_ms(struct Curl_easy *data,
+                            bool duringconnect)
+{
+  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data), duringconnect);
+}
+
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
                          int timeout_ms)
 {
   struct connectdata *conn = data->conn;
 
   DEBUGASSERT(conn);
-  conn->shutdown.start[sockindex] = data->progress.now;
+  conn->shutdown.start[sockindex] = *Curl_pgrs_now(data);
   conn->shutdown.timeout_ms = (timeout_ms > 0) ?
     (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
@@ -176,8 +175,8 @@ timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
     return 0; /* not started or no limits */
 
   left_ms = conn->shutdown.timeout_ms -
-            curlx_timediff_ms(data->progress.now,
-                              conn->shutdown.start[sockindex]);
+            curlx_ptimediff_ms(Curl_pgrs_now(data),
+                               &conn->shutdown.start[sockindex]);
   return left_ms ? left_ms : -1;
 }
 
@@ -466,7 +465,6 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
 
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   Curl_safefree(ctx);
 }

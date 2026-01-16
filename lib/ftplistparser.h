@@ -70,8 +70,8 @@ void Curl_wildcard_dtor(struct WildcardData **wcp);
 
 struct Curl_easy;
 
-#else
-/* FTP is disabled */
+#else /* CURL_DISABLE_FTP */
 #define Curl_wildcard_dtor(x)
-#endif /* CURL_DISABLE_FTP */
+#endif /* !CURL_DISABLE_FTP */
+
 #endif /* HEADER_CURL_FTPLISTPARSER_H */

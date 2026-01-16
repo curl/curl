@@ -58,10 +58,10 @@ static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
-  if(host && (strlen(host) < e->namelen)) {
-    strcpy(e->name, host);
+  if(host) {
+    curlx_strcopy(e->name, e->namelen, host, strlen(host));
     e->includeSubDomains = FALSE;
-    strcpy(e->expire, expire);
+    curlx_strcopy(e->expire, sizeof(e->expire), expire, strlen(expire));
     curl_mfprintf(stderr, "add '%s'\n", host);
   }
   else

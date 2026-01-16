@@ -391,19 +391,19 @@ int getpart(char **outbuf, size_t *outlen,
 
       if(STATE_OUTSIDE == state) {
         /* outermost element (<testcase>) */
-        strcpy(curouter, ptag);
+        curlx_strcopy(curouter, sizeof(curouter), ptag, strlen(ptag));
         state = STATE_OUTER;
         continue;
       }
       else if(STATE_OUTER == state) {
         /* start of a main section */
-        strcpy(curmain, ptag);
+        curlx_strcopy(curmain, sizeof(curmain), ptag, strlen(ptag));
         state = STATE_INMAIN;
         continue;
       }
       else if(STATE_INMAIN == state) {
         /* start of a sub section */
-        strcpy(cursub, ptag);
+        curlx_strcopy(cursub, sizeof(cursub), ptag, strlen(ptag));
         state = STATE_INSUB;
         if(!strcmp(curmain, main) && !strcmp(cursub, sub)) {
           /* start of wanted part */

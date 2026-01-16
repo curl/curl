@@ -21,13 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "vauth.h"
-#include "../strdup.h"
 #include "../curlx/multibyte.h"
 #include "../url.h"
 
@@ -136,7 +132,7 @@ bool Curl_auth_user_contains_domain(const char *user)
 }
 
 /*
- * Curl_auth_ollowed_to_host() tells if authentication, cookies or other
+ * Curl_auth_allowed_to_host() tells if authentication, cookies or other
  * "sensitive data" can (still) be sent to this host.
  */
 bool Curl_auth_allowed_to_host(struct Curl_easy *data)
@@ -151,7 +147,6 @@ bool Curl_auth_allowed_to_host(struct Curl_easy *data)
 }
 
 #ifdef USE_NTLM
-
 static void ntlm_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct ntlmdata *ntlm = entry;
@@ -179,11 +174,9 @@ void Curl_auth_ntlm_remove(struct connectdata *conn, bool proxy)
   Curl_conn_meta_remove(conn, proxy ? CURL_META_NTLM_PROXY_CONN
                                     : CURL_META_NTLM_CONN);
 }
-
 #endif /* USE_NTLM */
 
 #ifdef USE_KERBEROS5
-
 static void krb5_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct kerberos5data *krb5 = entry;
@@ -205,11 +198,9 @@ struct kerberos5data *Curl_auth_krb5_get(struct connectdata *conn)
   }
   return krb5;
 }
-
 #endif /* USE_KERBEROS5 */
 
 #ifdef USE_GSASL
-
 static void gsasl_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct gsasldata *gsasl = entry;
@@ -231,11 +222,9 @@ struct gsasldata *Curl_auth_gsasl_get(struct connectdata *conn)
   }
   return gsasl;
 }
-
 #endif /* USE_GSASL */
 
 #ifdef USE_SPNEGO
-
 static void nego_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct negotiatedata *nego = entry;
@@ -257,5 +246,4 @@ struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy)
   }
   return nego;
 }
-
 #endif /* USE_SPNEGO */

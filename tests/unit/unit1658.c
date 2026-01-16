@@ -342,7 +342,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x03" /* data size */
-      "\x12\x34\x00", /* 24 bit port number! */
+      "\x12\x34\x00", /* 24-bit port number */
       17,
       "r:43|"
     },
@@ -356,7 +356,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x01" /* data size */
-      "\x12", /* 8 bit port number! */
+      "\x12", /* 8-bit port number */
       15,
       "r:43|"
     },
@@ -541,7 +541,7 @@ static CURLcode test_unit1658(const char *arg)
   UNITTEST_END(curl_global_cleanup())
 }
 
-#else /* CURL_DISABLE_DOH or not HTTPSRR enabled */
+#else /* CURL_DISABLE_DOH || !USE_HTTPSRR */
 
 static CURLcode test_unit1658(const char *arg)
 {

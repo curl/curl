@@ -21,18 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred. */
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 struct Curl_easy;
 
 #include "urldata.h"
-#include "curlx/warnless.h"
 #include "escape.h"
 #include "curlx/strparse.h"
 #include "curl_printf.h"
@@ -64,6 +59,9 @@ char *curl_easy_escape(CURL *data, const char *string, int inlength)
   length = (inlength ? (size_t)inlength : strlen(string));
   if(!length)
     return curlx_strdup("");
+
+  if(length > SIZE_MAX / 16)
+    return NULL;
 
   curlx_dyn_init(&d, length * 3 + 1);
 
@@ -128,8 +126,8 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     if(('%' == in) && (alloc > 2) &&
        ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
       /* this is two hexadecimal digits following a '%' */
-      in = (unsigned char)((Curl_hexval(string[1]) << 4) |
-                           Curl_hexval(string[2]));
+      in = (unsigned char)((curlx_hexval(string[1]) << 4) |
+                           curlx_hexval(string[2]));
       string += 3;
       alloc -= 3;
     }

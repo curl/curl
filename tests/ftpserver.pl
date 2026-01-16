@@ -2652,7 +2652,7 @@ sub PORT_ftp {
             sendcontrol "500 silly you, go away\r\n";
             return;
         }
-        $port = ($5<<8)+$6;
+        $port = ($5 << 8) + $6;
         $addr = "$1.$2.$3.$4";
     }
     # EPRT |2|::1|49706|

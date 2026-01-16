@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
@@ -34,7 +33,7 @@
  */
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "strcase.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_core.h"

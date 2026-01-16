@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
 #include "tool_operate.h"
 
 typedef enum {

@@ -32,6 +32,7 @@ static CURLcode test_lib568(const char *URL)
 {
   CURLcode result;
   CURL *curl;
+  char errbuf[STRERROR_LEN];
   int sdp;
   FILE *sdpf = NULL;
   struct_stat file_info;
@@ -67,7 +68,9 @@ static CURLcode test_lib568(const char *URL)
 
   sdp = curlx_open(libtest_arg2, O_RDONLY);
   if(sdp == -1) {
-    curl_mfprintf(stderr, "cannot open %s\n", libtest_arg2);
+    curl_mfprintf(stderr, "open() failed with error (%d) %s\n",
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -76,7 +79,9 @@ static CURLcode test_lib568(const char *URL)
 
   sdpf = curlx_fopen(libtest_arg2, "rb");
   if(!sdpf) {
-    curl_mfprintf(stderr, "cannot fopen %s\n", libtest_arg2);
+    curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

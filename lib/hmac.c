@@ -23,17 +23,13 @@
  * RFC2104 Keyed-Hashing for Message Authentication
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||      \
   !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) ||   \
   defined(USE_SSL)
 
-#include <curl/curl.h>
-
 #include "curl_hmac.h"
-#include "curlx/warnless.h"
 
 /*
  * Generic HMAC algorithm.

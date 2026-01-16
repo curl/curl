@@ -23,12 +23,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_WINDOWS_SSPI
-
-#include <curl/curl.h>
 
 /*
  * When including the following three headers, it is mandatory to define either

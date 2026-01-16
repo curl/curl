@@ -98,7 +98,7 @@ int main(void)
     /* The list of cookies in cookies.txt are not be imported until right
        before a transfer is performed. Cookies in the list that have the same
        hostname, path and name as in my_cookie are skipped. That is because
-       libcurl has already imported my_cookie and it's considered a "live"
+       libcurl has already imported my_cookie and it is considered a "live"
        cookie. A live cookie is not replaced by one read from a file.
     */
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */

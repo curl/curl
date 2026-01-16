@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -41,11 +40,11 @@
 #include <inet.h>
 #endif
 
-#include <setjmp.h>
+#include <setjmp.h>  /* for sigjmp_buf, sigsetjmp() */
 #include <signal.h>
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "connect.h"
 #include "hostip.h"
 #include "hash.h"
@@ -56,10 +55,11 @@
 #include "curlx/inet_pton.h"
 #include "multiif.h"
 #include "doh.h"
-#include "curlx/warnless.h"
+#include "progress.h"
 #include "select.h"
 #include "strcase.h"
 #include "easy_lock.h"
+#include "curlx/strcopy.h"
 #include "curlx/strparse.h"
 
 #if defined(CURLRES_SYNCH) &&                   \
@@ -112,14 +112,24 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-static void dnscache_entry_free(struct Curl_dns_entry *dns);
-
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void show_resolve_info(struct Curl_easy *data,
                               struct Curl_dns_entry *dns);
 #else
 #define show_resolve_info(x, y) Curl_nop_stmt
 #endif
+
+static void dnscache_entry_free(struct Curl_dns_entry *dns)
+{
+  Curl_freeaddrinfo(dns->addr);
+#ifdef USE_HTTPSRR
+  if(dns->hinfo) {
+    Curl_httpsrr_cleanup(dns->hinfo);
+    curlx_free(dns->hinfo);
+  }
+#endif
+  curlx_free(dns);
+}
 
 /*
  * Curl_printable_address() stores a printable version of the 1st address
@@ -191,7 +201,7 @@ static int dnscache_entry_is_stale(void *datap, void *hc)
 
   if(dns->timestamp.tv_sec || dns->timestamp.tv_usec) {
     /* get age in milliseconds */
-    timediff_t age = curlx_timediff_ms(prune->now, dns->timestamp);
+    timediff_t age = curlx_ptimediff_ms(&prune->now, &dns->timestamp);
     if(!dns->addr)
       age *= 2; /* negative entries age twice as fast */
     if(age >= prune->max_age_ms)
@@ -265,7 +275,7 @@ void Curl_dnscache_prune(struct Curl_easy *data)
   do {
     /* Remove outdated and unused entries from the hostcache */
     timediff_t oldest_ms =
-      dnscache_prune(&dnscache->entries, timeout_ms, data->progress.now);
+      dnscache_prune(&dnscache->entries, timeout_ms, *Curl_pgrs_now(data));
 
     if(Curl_hash_count(&dnscache->entries) > MAX_DNS_CACHE_SIZE)
       /* prune the ones over half this age */
@@ -331,7 +341,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     /* See whether the returned entry is stale. Done before we release lock */
     struct dnscache_prune_data user;
 
-    user.now = data->progress.now;
+    user.now = *Curl_pgrs_now(data);
     user.max_age_ms = data->set.dns_cache_timeout_ms;
     user.oldest_ms = 0;
 
@@ -520,7 +530,7 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
     dns->timestamp.tv_usec = 0; /* an entry that never goes stale */
   }
   else {
-    dns->timestamp = data->progress.now;
+    dns->timestamp = *Curl_pgrs_now(data);
   }
   dns->hostport = port;
   if(hostlen)
@@ -622,7 +632,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
   memcpy(ca->ai_addr, &sa6, ss_size);
   ca->ai_canonname = (char *)ca->ai_addr + ss_size;
-  strcpy(ca->ai_canonname, name);
+  curlx_strcopy(ca->ai_canonname, hostlen + 1, name, hostlen);
   return ca;
 }
 #else
@@ -659,7 +669,7 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
   ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
   memcpy(ca->ai_addr, &sa, ss_size);
   ca->ai_canonname = (char *)ca->ai_addr + ss_size;
-  strcpy(ca->ai_canonname, name);
+  curlx_strcopy(ca->ai_canonname, hostlen + 1, name, hostlen);
 
   ca6 = get_localhost6(port, name);
   if(!ca6)
@@ -1136,8 +1146,8 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    timediff_t elapsed_secs = curlx_timediff_ms(data->progress.now,
-                                                data->conn->created) / 1000;
+    timediff_t elapsed_secs = curlx_ptimediff_ms(Curl_pgrs_now(data),
+                                                 &data->conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);
@@ -1158,18 +1168,6 @@ clean_up:
 #endif /* USE_ALARM_TIMEOUT */
 
   return result;
-}
-
-static void dnscache_entry_free(struct Curl_dns_entry *dns)
-{
-  Curl_freeaddrinfo(dns->addr);
-#ifdef USE_HTTPSRR
-  if(dns->hinfo) {
-    Curl_httpsrr_cleanup(dns->hinfo);
-    curlx_free(dns->hinfo);
-  }
-#endif
-  curlx_free(dns);
 }
 
 /*

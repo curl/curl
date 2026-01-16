@@ -36,7 +36,7 @@ writing that is `16` for "multi_easy" handles (used in `curl_easy_perform()`
 and `512` for multi handles created with `curl_multi_init()`.
 
 The first added easy handle gets `mid == 1` assigned. The second one receives `2`,
-even when the fist one has been removed already. Every added handle gets an
+even when the first one has been removed already. Every added handle gets an
 `mid` one larger than the previously assigned one. Until the capacity of
 the table is reached and it starts looking for a free id at `1` again (`0`
 is always in the table).

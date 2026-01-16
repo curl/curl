@@ -34,8 +34,7 @@
 
    Return 0 on success, non-zero on error.
 */
-int jsonquoted(const char *in, size_t len,
-               struct dynbuf *out, bool lowercase)
+int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
 {
   const unsigned char *i = (const unsigned char *)in;
   const unsigned char *in_end = &i[len];

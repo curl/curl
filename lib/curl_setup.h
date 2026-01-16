@@ -94,7 +94,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), strcpy(), tests: sscanf() */
+#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
 #endif
 #endif /* _MSC_VER */
 
@@ -154,15 +154,11 @@
 #  include "config-os400.h"
 #endif
 
-#ifdef __PLAN9__
-#  include "config-plan9.h"
-#endif
-
 #endif /* HAVE_CONFIG_H */
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
-/* behavior or generated code characteristics must be done here,   */
+/* behavior or generated code characteristics must be done here,    */
 /* as appropriate, before any system header file is included. It is */
 /* also possible to have them defined in the config file included   */
 /* before this point. As a result of all this we frown inclusion of */
@@ -449,7 +445,7 @@
 #include <assert.h>
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
-#  if ! defined __LP64
+#  ifndef __LP64
 #    include <floss.h> /* FLOSS is only used for 32-bit builds. */
 #  endif
 #endif
@@ -460,6 +456,13 @@
 
 #if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
+#endif
+
+#ifdef __DJGPP__
+/* By default, DJGPP provides this type as a version of 'unsigned long' which
+   forces us to use a define use it in printf() format strings without
+   warnings. long and int are both 32 bits for this platform. */
+#define uint32_t unsigned int
 #endif
 
 #include <limits.h>
@@ -780,10 +783,22 @@
 #endif
 
 /*
+ * Macros and functions to safely suppress warnings
+ */
+#include "curlx/warnless.h"
+
+#ifdef _WIN32
+#  undef  read
+#  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
+#  undef  write
+#  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
+#endif
+
+/*
  * Definition of our NOP statement Object-like macro
  */
 #ifndef Curl_nop_stmt
-#define Curl_nop_stmt do { } while(0)
+#define Curl_nop_stmt do {} while(0)
 #endif
 
 /*
@@ -843,8 +858,8 @@
 Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 */
 #if defined(_WIN32) || defined(MSDOS)
-#define FOPEN_READTEXT "rt"
-#define FOPEN_WRITETEXT "wt"
+#define FOPEN_READTEXT   "rt"
+#define FOPEN_WRITETEXT  "wt"
 #define FOPEN_APPENDTEXT "at"
 #elif defined(__CYGWIN__)
 /* Cygwin has specific behavior we need to address when _WIN32 is not defined.
@@ -853,12 +868,12 @@ For write we want our output to have line endings of LF and be compatible with
 other Cygwin utilities. For read we want to handle input that may have line
 endings either CRLF or LF so 't' is appropriate.
 */
-#define FOPEN_READTEXT "rt"
-#define FOPEN_WRITETEXT "w"
+#define FOPEN_READTEXT   "rt"
+#define FOPEN_WRITETEXT  "w"
 #define FOPEN_APPENDTEXT "a"
 #else
-#define FOPEN_READTEXT "r"
-#define FOPEN_WRITETEXT "w"
+#define FOPEN_READTEXT   "r"
+#define FOPEN_WRITETEXT  "w"
 #define FOPEN_APPENDTEXT "a"
 #endif
 
@@ -919,9 +934,12 @@ extern curl_calloc_callback Curl_ccalloc;
  * This macro also assigns NULL to given pointer when free'd.
  */
 #define Curl_safefree(ptr) \
-  do { curlx_free(ptr); (ptr) = NULL;} while(0)
+  do {                     \
+    curlx_free(ptr);       \
+    (ptr) = NULL;          \
+  } while(0)
 
-#include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
+#include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
 #ifdef CURLDEBUG
 #ifdef __clang__
@@ -988,29 +1006,15 @@ CURL_EXTERN int curl_dbg_socketpair(int domain, int type, int protocol,
                                     int line, const char *source);
 #endif
 
-/* send/receive sockets */
-CURL_EXTERN SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
-                                         SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
-                                         SEND_TYPE_ARG3 len,
-                                         SEND_TYPE_ARG4 flags, int line,
-                                         const char *source);
-CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
-                                         RECV_TYPE_ARG2 buf,
-                                         RECV_TYPE_ARG3 len,
-                                         RECV_TYPE_ARG4 flags, int line,
-                                         const char *source);
-
 /* FILE functions */
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_fopen(const char *file, const char *mode,
-                       int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
-                         int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                        int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
+                                            int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_freopen(const char *file,
+                                              const char *mode, FILE *fh,
+                                              int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                                             int line, const char *source);
 
 #define sclose(sockfd) curl_dbg_sclose(sockfd, __LINE__, __FILE__)
 #define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd, __LINE__, __FILE__)
@@ -1032,8 +1036,6 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_ACCEPT4(sock, addr, len, flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
-#define CURL_SEND(a, b, c, d) curl_dbg_send(a, b, c, d, __LINE__, __FILE__)
-#define CURL_RECV(a, b, c, d) curl_dbg_recv(a, b, c, d, __LINE__, __FILE__)
 
 #else /* !CURLDEBUG */
 
@@ -1050,8 +1052,6 @@ CURL_EXTERN ALLOC_FUNC
 #ifdef HAVE_ACCEPT4
 #define CURL_ACCEPT4 accept4
 #endif
-#define CURL_SEND send
-#define CURL_RECV recv
 
 #endif /* CURLDEBUG */
 
@@ -1059,47 +1059,47 @@ CURL_EXTERN ALLOC_FUNC
 
 #ifdef CURLDEBUG
 
-#define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
-#define curlx_calloc(nbelem,size) \
-                              curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
-#define curlx_realloc(ptr,size)   \
-                              curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
-#define curlx_free(ptr)           curl_dbg_free(ptr, __LINE__, __FILE__)
+#define curlx_strdup(ptr)          curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define curlx_malloc(size)         curl_dbg_malloc(size, __LINE__, __FILE__)
+#define curlx_calloc(nbelem, size) \
+  curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#define curlx_realloc(ptr, size) \
+  curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#define curlx_free(ptr)            curl_dbg_free(ptr, __LINE__, __FILE__)
 
 #ifdef _WIN32
 #ifdef UNICODE
-#define curlx_tcsdup(ptr)         curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#define curlx_tcsdup(ptr)          curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
 #else
-#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#define curlx_tcsdup(ptr)          curlx_strdup(ptr)
 #endif
 #endif /* _WIN32 */
 
 #else /* !CURLDEBUG */
 
 #ifdef BUILDING_LIBCURL
-#define curlx_strdup(ptr)         Curl_cstrdup(ptr)
-#define curlx_malloc(size)        Curl_cmalloc(size)
-#define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
-#define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
-#define curlx_free(ptr)           Curl_cfree(ptr)
+#define curlx_strdup(ptr)          Curl_cstrdup(ptr)
+#define curlx_malloc(size)         Curl_cmalloc(size)
+#define curlx_calloc(nbelem, size) Curl_ccalloc(nbelem, size)
+#define curlx_realloc(ptr, size)   Curl_crealloc(ptr, size)
+#define curlx_free(ptr)            Curl_cfree(ptr)
 #else /* !BUILDING_LIBCURL */
 #ifdef _WIN32
-#define curlx_strdup(ptr)         _strdup(ptr)
+#define curlx_strdup(ptr)          _strdup(ptr)
 #else
-#define curlx_strdup(ptr)         strdup(ptr)
+#define curlx_strdup(ptr)          strdup(ptr)
 #endif
-#define curlx_malloc(size)        malloc(size)
-#define curlx_calloc(nbelem,size) calloc(nbelem, size)
-#define curlx_realloc(ptr,size)   realloc(ptr, size)
-#define curlx_free(ptr)           free(ptr)
+#define curlx_malloc(size)         malloc(size)
+#define curlx_calloc(nbelem, size) calloc(nbelem, size)
+#define curlx_realloc(ptr, size)   realloc(ptr, size)
+#define curlx_free(ptr)            free(ptr)
 #endif /* BUILDING_LIBCURL */
 
 #ifdef _WIN32
 #ifdef UNICODE
-#define curlx_tcsdup(ptr)         Curl_wcsdup(ptr)
+#define curlx_tcsdup(ptr)          Curl_wcsdup(ptr)
 #else
-#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#define curlx_tcsdup(ptr)          curlx_strdup(ptr)
 #endif
 #endif /* _WIN32 */
 
@@ -1124,8 +1124,8 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
-    (defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)) || \
-    defined(USE_QUICHE)
+  (defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)) || \
+  defined(USE_QUICHE)
 
 #ifdef CURL_WITH_MULTI_SSL
 #error "MultiSSL combined with QUIC is not supported"

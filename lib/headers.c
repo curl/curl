@@ -21,14 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include "strdup.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "headers.h"
-#include "curlx/strparse.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 

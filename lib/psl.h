@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #ifdef USE_LIBPSL
+
 #include <libpsl.h>
 
 struct Curl_easy;

@@ -12,7 +12,8 @@ codespell \
   --skip '.github/scripts/pyspelling.words' \
   --skip '.github/scripts/typos.toml' \
   --skip 'docs/THANKS' \
-  --skip 'packages/*' \
+  --skip 'projects/OS400/*' \
+  --skip 'projects/vms/*' \
   --skip 'scripts/wcurl' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.words' \

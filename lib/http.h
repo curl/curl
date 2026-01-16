@@ -27,7 +27,6 @@
 
 #include "bufq.h"
 #include "dynhds.h"
-#include "ws.h"
 
 typedef enum {
   HTTPREQ_GET,
@@ -104,6 +103,8 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
                                  int httpversion, struct dynbuf *req);
 CURLcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
                                 struct dynhds *hds);
+
+void Curl_http_to_fold(struct dynbuf *bf);
 
 void Curl_http_method(struct Curl_easy *data,
                       const char **method, Curl_HttpReq *);

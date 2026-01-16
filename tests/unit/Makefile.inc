@@ -37,6 +37,7 @@ TESTS_C = \
   unit1600.c unit1601.c unit1602.c unit1603.c            unit1605.c unit1606.c \
   unit1607.c unit1608.c unit1609.c unit1610.c unit1611.c unit1612.c unit1614.c \
   unit1615.c unit1616.c                                  unit1620.c \
+  unit1636.c \
   unit1650.c unit1651.c unit1652.c unit1653.c unit1654.c unit1655.c unit1656.c \
   unit1657.c unit1658.c            unit1660.c unit1661.c unit1663.c unit1664.c \
   unit1979.c unit1980.c \

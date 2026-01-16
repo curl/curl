@@ -2633,7 +2633,7 @@ if(!$randseed) {
     close($curlvh) || die "could not get curl version!";
     # use the first line of output and get the md5 out of it
     my $str = md5($c[0]);
-    $randseed += unpack('S', $str);  # unsigned 16 bit value
+    $randseed += unpack('S', $str);  # unsigned 16-bit value
 }
 srand $randseed;
 
@@ -3344,7 +3344,7 @@ else {
 
 if($mintotal) {
     if($total < $mintotal) {
-        logmsg "TESTFAIL: number of tests run was below the minimum of: $mintotal\n";
+        logmsg "TESTFAIL: number of tests run ($total) was below the minimum of: $mintotal\n";
         exit 1;
     }
     else {

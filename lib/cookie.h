@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "llist.h"
 
 struct Cookie {

@@ -21,6 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "../curl_setup.h"
 
 #include "warnless.h"
 
@@ -34,8 +35,6 @@
 #endif
 
 #endif /* __INTEL_COMPILER && __unix__ */
-
-#include <limits.h>
 
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
 

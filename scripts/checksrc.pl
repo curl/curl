@@ -70,6 +70,9 @@ my %banfunc = (
     "atoi" => 1,
     "atol" => 1,
     "calloc" => 1,
+    "CreateFile" => 1,
+    "CreateFileA" => 1,
+    "CreateFileW" => 1,
     "fclose" => 1,
     "fdopen" => 1,
     "fopen" => 1,
@@ -89,13 +92,15 @@ my %banfunc = (
     "localtime" => 1,
     "malloc" => 1,
     "mbstowcs" => 1,
+    "MoveFileEx" => 1,
+    "MoveFileExA" => 1,
+    "MoveFileExW" => 1,
     "msnprintf" => 1,
     "mvsnprintf" => 1,
     "open" => 1,
     "printf" => 1,
     "realloc" => 1,
-    "recv" => 1,
-    "send" => 1,
+    "rename" => 1,
     "snprintf" => 1,
     "socket" => 1,
     "socketpair" => 1,
@@ -103,6 +108,7 @@ my %banfunc = (
     "sscanf" => 1,
     "stat" => 1,
     "strcat" => 1,
+    "strcpy" => 1,
     "strdup" => 1,
     "strerror" => 1,
     "strncat" => 1,
@@ -146,6 +152,7 @@ my %warnings = (
     'COMMENTNOSPACESTART'   => 'no space following /*',
     'COPYRIGHT'             => 'file missing a copyright statement',
     'CPPCOMMENTS'           => '// comment detected',
+    "CPPSPACE"              => 'space before preprocessor hash',
     'DOBRACE'               => 'A single space between do and open brace',
     'EMPTYLINEBRACE'        => 'Empty line before the open brace',
     'EQUALSNOSPACE'         => 'equals sign without following space',
@@ -155,6 +162,7 @@ my %warnings = (
     'EXCLAMATIONSPACE'      => 'Whitespace after exclamation mark in expression',
     'FIXME'                 => 'FIXME or TODO comment',
     'FOPENMODE'             => 'fopen needs a macro for the mode string',
+    'IFDEFSINGLE',          => 'use ifdef/ifndef for single macro checks',
     'INCLUDEDUP',           => 'same file is included again',
     'INDENTATION'           => 'wrong start column for code',
     'LONGLINE'              => "Line longer than $max_column",
@@ -651,6 +659,11 @@ sub scanfile {
                       $line, length($1), $file, $l, "\/\/ comment");
         }
 
+        if($l =~ /^\s*#\s*if\s+!?\s*defined\([a-zA-Z0-9_]+\)$/) {
+            checkwarn("IFDEFSINGLE",
+                      $line, length($1), $file, $l, "use ifdef/ifndef for single macro checks");
+        }
+
         if($l =~ /^(\#\s*include\s+)([\">].*[>}"])/) {
             my ($pre, $path) = ($1, $2);
             if($includes{$path}) {
@@ -660,6 +673,11 @@ sub scanfile {
             $includes{$path} = $l;
         }
 
+        # detect leading space before the hash
+        if($l =~ /^([ \t]+)\#/) {
+            checkwarn("CPPSPACE",
+                      $line, 0, $file, $l, "space before preprocessor hash");
+        }
         # detect and strip preprocessor directives
         if($l =~ /^[ \t]*\#/) {
             # preprocessor line
@@ -952,9 +970,11 @@ sub scanfile {
             my $bad = $2;
             my $prefix = $1;
             my $suff = $3;
-            checkwarn("BANNEDFUNC",
-                      $line, length($prefix), $file, $ol,
-                      "use of $bad is banned");
+            if($prefix !~ /(->|\.)$/) {
+                checkwarn("BANNEDFUNC",
+                          $line, length($prefix), $file, $ol,
+                          "use of $bad is banned");
+            }
             my $search = quotemeta($prefix . $bad . $suff);
             my $replace = $prefix . 'x' x (length($bad) + 1);
             $l =~ s/$search/$replace/;

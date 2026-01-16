@@ -1088,6 +1088,7 @@ sub listhelp {
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
 #include "tool_help.h"
 
 /*
@@ -1127,7 +1128,7 @@ HEAD
                 $bitmask .= ' | ';
             }
         }
-        $bitmask =~ s/(?=.{76}).{1,76}\|/$&\n  /g;
+        $bitmask =~ s/(?=.{76}).{1,76}\|/$&\n   /g;
         my $arg = $arglong{$long};
         if($arg) {
             $opt .= " $arg";
@@ -1135,7 +1136,7 @@ HEAD
         my $desc = $helplong{$f};
         $desc =~ s/\"/\\\"/g; # escape double quotes
 
-        my $line = sprintf "  {\"%s\",\n   \"%s\",\n  %s},\n", $opt, $desc, $bitmask;
+        my $line = sprintf "  { \"%s\",\n    \"%s\",\n   %s },\n", $opt, $desc, $bitmask;
 
         if(length($opt) > 78) {
             print STDERR "WARN: the --$long name is too long\n";
@@ -1337,7 +1338,8 @@ my $dir = ".";
 my $include = "../../include";
 my $cmd = shift @ARGV || '';
 
- check:
+check:
+
 if($cmd eq "-d") {
     # specifies source directory
     $dir = shift @ARGV;

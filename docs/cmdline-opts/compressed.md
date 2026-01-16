@@ -25,3 +25,6 @@ content is (still) compressed; while in fact it has already been decompressed.
 If this option is used and the server sends an unsupported encoding, curl
 reports an error. This is a request, not an order; the server may or may not
 deliver data compressed.
+
+**WARNING**: when decompressing data, even tiny transfers might be expanded
+and generate a huge amount of bytes.

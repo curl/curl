@@ -24,7 +24,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
   (SIZEOF_CURL_OFF_T > 4)
 

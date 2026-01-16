@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_FTP) || \
@@ -87,7 +86,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data, struct pingpong *pp,
                            bool block, bool disconnecting);
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct pingpong *pp, struct curltime *pnow);
+void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow);
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */

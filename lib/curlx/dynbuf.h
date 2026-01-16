@@ -24,8 +24,6 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
-
 struct dynbuf {
   char *bufr;    /* point to a null-terminated allocated buffer */
   size_t leng;   /* number of bytes *EXCLUDING* the null-terminator */

@@ -62,7 +62,7 @@ SPDX-License-Identifier: curl
   to use to allow the server to use a weak cipher for you.
 
   Note that these weak ciphers are identified as flawed. For example, this
-  includes symmetric ciphers with less than 128 bit keys and RC4.
+  includes symmetric ciphers with less than 128-bit keys and RC4.
 
   Schannel in Windows XP is not able to connect to servers that no longer
   support the legacy handshakes and algorithms used by those versions, so we

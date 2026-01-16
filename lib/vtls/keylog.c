@@ -31,7 +31,6 @@
   defined(USE_RUSTLS)
 
 #include "keylog.h"
-#include <curl/curl.h>
 #include "../escape.h"
 #include "../curlx/fopen.h"
 
@@ -145,4 +144,4 @@ bool Curl_tls_keylog_write(const char *label,
   return TRUE;
 }
 
-#endif  /* TLS or QUIC backend */
+#endif /* TLS or QUIC backend */

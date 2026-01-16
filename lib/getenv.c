@@ -21,10 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 char *curl_getenv(const char *variable)
 {

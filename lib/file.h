@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #ifndef CURL_DISABLE_FILE
 extern const struct Curl_handler Curl_handler_file;
 #endif

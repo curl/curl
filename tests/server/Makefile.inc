@@ -40,6 +40,7 @@ CURLX_C = \
   ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/nonblock.c \
+  ../../lib/curlx/strcopy.c \
   ../../lib/curlx/strerr.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \

@@ -31,6 +31,7 @@ LIB_CURLX_CFILES = \
   curlx/inet_pton.c \
   curlx/multibyte.c \
   curlx/nonblock.c \
+  curlx/strcopy.c  \
   curlx/strerr.c   \
   curlx/strparse.c \
   curlx/timediff.c \
@@ -51,6 +52,7 @@ LIB_CURLX_HFILES = \
   curlx/multibyte.h \
   curlx/nonblock.h \
   curlx/snprintf.h \
+  curlx/strcopy.h  \
   curlx/strerr.h   \
   curlx/strparse.h \
   curlx/timediff.h \
@@ -86,7 +88,6 @@ LIB_VTLS_CFILES =           \
   vtls/hostcheck.c          \
   vtls/keylog.c             \
   vtls/mbedtls.c            \
-  vtls/mbedtls_threadlock.c \
   vtls/openssl.c            \
   vtls/rustls.c             \
   vtls/schannel.c           \
@@ -104,7 +105,6 @@ LIB_VTLS_HFILES =           \
   vtls/hostcheck.h          \
   vtls/keylog.h             \
   vtls/mbedtls.h            \
-  vtls/mbedtls_threadlock.h \
   vtls/openssl.h            \
   vtls/rustls.h             \
   vtls/schannel.h           \
@@ -237,7 +237,6 @@ LIB_CFILES =         \
   psl.c              \
   rand.c             \
   ratelimit.c        \
-  rename.c           \
   request.c          \
   rtsp.c             \
   select.c           \
@@ -366,7 +365,6 @@ LIB_HFILES =         \
   psl.h              \
   rand.h             \
   ratelimit.h        \
-  rename.h           \
   request.h          \
   rtsp.h             \
   select.h           \

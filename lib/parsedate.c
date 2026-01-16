@@ -21,6 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
+
+#include "parsedate.h"
+#include "curlx/strparse.h"
+
 /*
   A brief summary of the date string formats this parser groks:
 
@@ -74,28 +79,6 @@
   20040911 +0200
 
 */
-
-#include "curl_setup.h"
-
-#include <limits.h>
-
-#include <curl/curl.h>
-#include "curlx/warnless.h"
-#include "parsedate.h"
-#include "curlx/strparse.h"
-
-/*
- * parsedate()
- *
- * Returns:
- *
- * PARSEDATE_OK     - a fine conversion
- * PARSEDATE_FAIL   - failed to convert
- * PARSEDATE_LATER  - time overflow at the far end of time_t
- * PARSEDATE_SOONER - time underflow at the low end of time_t
- */
-
-static int parsedate(const char *date, time_t *output);
 
 #define PARSEDATE_OK     0
 #define PARSEDATE_FAIL   -1

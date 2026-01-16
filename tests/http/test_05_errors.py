@@ -61,7 +61,7 @@ class TestErrors:
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip("openssl-quic is flaky in yielding proper error codes")
         if proto == 'h3' and env.curl_uses_lib('quiche') and \
-                not env.curl_lib_version_at_least('quiche', '0.24.7'):
+                not env.curl_lib_version_at_least('quiche', '0.24.8'):
             pytest.skip("quiche issue #2277 not fixed")
         count = 20
         curl = CurlClient(env=env)

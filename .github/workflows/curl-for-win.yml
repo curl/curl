@@ -14,8 +14,6 @@ name: 'curl-for-win'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -25,8 +23,6 @@ name: 'curl-for-win'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:

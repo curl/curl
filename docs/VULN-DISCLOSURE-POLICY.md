@@ -224,7 +224,8 @@ problem. There are already several benign and likely reasons for transfers to
 stall and never end, so applications that cannot deal with never-ending
 transfers already need to have counter-measures established.
 
-If the problem avoids the regular counter-measures when it causes a never-
+Well known attacks, like [Slowloris](https://en.wikipedia.org/wiki/Slowloris_(cyber_attack)), that send partial
+requests are usually not considered a flaw. If the problem avoids the regular counter-measures when it causes a never-
 ending transfer, it might be a security problem.
 
 ## Not practically possible
@@ -276,12 +277,12 @@ arguments, even though some that are not blanked might contain sensitive
 data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
- - not all systems allow the arguments to be blanked in the first place
- - since curl blanks the argument itself they are readable for a short moment
-   no matter what
- - virtually every argument can contain sensitive data, depending on use
- - blanking all arguments would make it impractical for users to differentiate
-   curl command lines in process listings
+- not all systems allow the arguments to be blanked in the first place
+- since curl blanks the argument itself they are readable for a short moment
+  no matter what
+- virtually every argument can contain sensitive data, depending on use
+- blanking all arguments would make it impractical for users to differentiate
+  curl command lines in process listings
 
 ## Busy-loops
 
@@ -353,6 +354,21 @@ using the protocols or options that require the use of those algorithms.
 
 When servers upgrade to use secure alternatives, curl users should use those
 options/protocols.
+
+## CRLF in data
+
+curl makes barely any claims of *cleaning* input or rejecting invalid data. A
+user that uses a curl feature can send in *creative* sequences that include
+carriage-return (CR) or line-feed (LF) characters.
+
+Therefore, we reject the idea of *CRLF injection* as a security problem. It is
+a *feature* that users can send creative byte sequences. If users do not want
+to send such octets, they are in control and should avoid sending such bytes
+to curl.
+
+For example, a user might pass in a username that looks like
+`Mr[CR][LF]Smith`. It may cause some minor havoc in the protocol handling,
+depending on what protocol is used.
 
 # curl major incident response
 

@@ -82,7 +82,7 @@ static CURLcode test_unit1654(const char *arg)
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   res = Curl_altsvc_parse(curl, asi,
-                          "h2=\":443\", h3=\":443\"; "
+                          "h2=\":443\"; ma=180, h3=\":443\"; "
                           "persist = \"1\"; ma = 120;\r\n",
                           ALPN_h1, "curl.se", 80);
   fail_if(res, "Curl_altsvc_parse(6) failed!");
@@ -130,6 +130,12 @@ static CURLcode test_unit1654(const char *arg)
                           "h2=\"example.net:70000\"; ma=\"180\";\r\n",
                           ALPN_h2, "8.example.net", 80);
   fail_if(res, "Curl_altsvc_parse(11) failed!");
+
+  res = Curl_altsvc_parse(curl, asi,
+                          "h2=\"test2.se:443\"; ma=\"180 \" ; unknown=2, "
+                          "h2=\"test3.se:443\"; ma = 120;\r\n",
+                          ALPN_h2, "test.se", 443);
+  fail_if(res, "Curl_altsvc_parse(12) failed!");
 
   Curl_altsvc_save(curl, asi, outname);
 

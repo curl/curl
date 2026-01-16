@@ -59,23 +59,19 @@
 #include "rustls.h"         /* Rustls versions */
 
 #include "../slist.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strcase.h"
 #include "../url.h"
 #include "../progress.h"
-#include "../curl_share.h"
-#include "../multiif.h"
 #include "../curlx/fopen.h"
-#include "../curlx/timeval.h"
 #include "../curl_sha256.h"
-#include "../curlx/warnless.h"
 #include "../curlx/base64.h"
 #include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
 #include "../setopt.h"
-#include "../rand.h"
 #include "../strdup.h"
+#include "../curlx/strcopy.h"
 
 #ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
@@ -756,9 +752,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
@@ -1086,10 +1079,7 @@ static size_t multissl_version(char *buffer, size_t size)
   }
 
   if(size) {
-    if(backends_len < size)
-      strcpy(buffer, backends);
-    else
-      *buffer = 0; /* did not fit */
+    curlx_strcopy(buffer, size, backends, backends_len);
   }
   return 0;
 }
@@ -1371,8 +1361,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!result && *done) {
     cf->connected = TRUE;
     if(connssl->state == ssl_connection_complete) {
-      Curl_pgrs_now_set(data);
-      connssl->handshake_done = data->progress.now;
+      connssl->handshake_done = *Curl_pgrs_now(data);
     }
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||

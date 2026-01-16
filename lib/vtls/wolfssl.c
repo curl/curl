@@ -21,13 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all wolfSSL specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  *
  */
-
 #include "../curl_setup.h"
 
 #ifdef USE_WOLFSSL
@@ -35,7 +33,6 @@
 #define WOLFSSL_OPTIONS_IGNORE_SYS
 #include <wolfssl/options.h>
 #include <wolfssl/version.h>
-
 
 #if LIBWOLFSSL_VERSION_HEX < 0x03004006 /* wolfSSL 3.4.6 (2015) */
 #error "wolfSSL version should be at least 3.4.6"
@@ -54,21 +51,17 @@
 #endif
 #endif
 
-#include <limits.h>
-
 #include "../urldata.h"
-#include "../sendf.h"
-#include "../curlx/inet_pton.h"
+#include "../curl_trc.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
 #include "keylog.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
-#include "../select.h"
 #include "../strdup.h"
+#include "../curlx/strcopy.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
@@ -106,10 +99,6 @@
 #else /* HAVE_WOLFSSL_BIO_NEW */
 #undef USE_BIO_CHAIN
 #endif
-
-static CURLcode wssl_connect(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             bool *done);
 
 #ifdef OPENSSL_EXTRA
 /*
@@ -408,7 +397,7 @@ static void wssl_bio_cf_free_methods(void)
 
 #else /* USE_BIO_CHAIN */
 
-#define wssl_bio_cf_init_methods() Curl_nop_stmt
+#define wssl_bio_cf_init_methods() TRUE
 #define wssl_bio_cf_free_methods() Curl_nop_stmt
 
 #endif /* !USE_BIO_CHAIN */
@@ -724,11 +713,11 @@ static void wssl_x509_share_free(void *key, size_t key_len, void *p)
   curlx_free(share);
 }
 
-static bool wssl_cached_x509_store_expired(const struct Curl_easy *data,
+static bool wssl_cached_x509_store_expired(struct Curl_easy *data,
                                            const struct wssl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  timediff_t elapsed_ms = curlx_timediff_ms(data->progress.now, mb->time);
+  timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &mb->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
@@ -748,7 +737,7 @@ static bool wssl_cached_x509_store_different(struct Curl_cfilter *cf,
 }
 
 static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
-                                                  const struct Curl_easy *data)
+                                                      struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct wssl_x509_share *share;
@@ -768,7 +757,7 @@ static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
 }
 
 static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
-                                       const struct Curl_easy *data,
+                                       struct Curl_easy *data,
                                        WOLFSSL_X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -811,7 +800,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
       curlx_free(share->CAfile);
     }
 
-    share->time = data->progress.now;
+    share->time = *Curl_pgrs_now(data);
     share->store = store;
     share->CAfile = CAfile;
   }
@@ -1548,8 +1537,7 @@ static char *wssl_strerror(unsigned long error, char *buf, unsigned long size)
 
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
-    /* the string fits because the assert above assures this */
-    strcpy(buf, msg);
+    curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;
@@ -1718,7 +1706,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
       wolfSSL_FreeArrays(wssl->ssl);
     }
   }
-#endif  /* OPENSSL_EXTRA */
+#endif /* OPENSSL_EXTRA */
 
   detail = wolfSSL_get_error(wssl->ssl, ret);
   CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);

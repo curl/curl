@@ -21,14 +21,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-#include "socketpair.h"
 
 /***********************************************************************
  * Only for threaded name resolves builds
  **********************************************************************/
 #ifdef CURLRES_THREADED
+
+#include "socketpair.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -56,13 +56,12 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "hostip.h"
-#include "hash.h"
-#include "curl_share.h"
 #include "url.h"
 #include "multiif.h"
 #include "curl_threads.h"
+#include "progress.h"
 #include "select.h"
 
 #ifdef USE_ARES
@@ -117,7 +116,6 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
   struct async_thrdd_addr_ctx *addr_ctx = *paddr_ctx;
   bool destroy;
 
-  (void)data;
   if(!addr_ctx)
     return;
 
@@ -374,7 +372,7 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
     curlx_free(rrname);
     return CURLE_FAILED_INIT;
   }
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   if(getenv("CURL_DNS_SERVER")) {
     const char *servers = getenv("CURL_DNS_SERVER");
     status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
@@ -442,7 +440,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
 
   /* passing addr_ctx to the thread adds a reference */
   addr_ctx->ref_count = 2;
-  addr_ctx->start = data->progress.now;
+  addr_ctx->start = *Curl_pgrs_now(data);
 
 #ifdef HAVE_GETADDRINFO
   addr_ctx->thread_hnd = Curl_thread_create(getaddrinfo_thread, addr_ctx);
@@ -655,8 +653,8 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
     /* should be fine even if this converts to 32-bit */
-    timediff_t elapsed = curlx_timediff_ms(data->progress.now,
-                                           data->progress.t_startsingle);
+    timediff_t elapsed = curlx_ptimediff_ms(Curl_pgrs_now(data),
+                                            &data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 
@@ -706,7 +704,8 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
     result = Curl_pollset_add_in(data, ps, thrdd->addr->sock_pair[0]);
 #else
     timediff_t milli;
-    timediff_t ms = curlx_timediff_ms(data->progress.now, thrdd->addr->start);
+    timediff_t ms =
+      curlx_ptimediff_ms(Curl_pgrs_now(data), &thrdd->addr->start);
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)

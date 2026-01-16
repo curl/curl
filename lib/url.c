@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -66,30 +65,22 @@
 #include <iphlpapi.h>
 #endif
 
-#include <limits.h>
-
 #include "doh.h"
 #include "urldata.h"
-#include "netrc.h"
 #include "formdata.h"
 #include "mime.h"
 #include "bufref.h"
 #include "vtls/vtls.h"
 #include "hostip.h"
 #include "transfer.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "progress.h"
 #include "cookie.h"
 #include "strcase.h"
 #include "escape.h"
 #include "curl_share.h"
-#include "content_encoding.h"
 #include "http_digest.h"
-#include "http_negotiate.h"
-#include "select.h"
 #include "multiif.h"
-#include "easyif.h"
-#include "curlx/warnless.h"
 #include "getinfo.h"
 #include "pop3.h"
 #include "urlapi-int.h"
@@ -98,24 +89,6 @@
 #include "noproxy.h"
 #include "cfilters.h"
 #include "idn.h"
-
-/* And now for the protocols */
-#include "ftp.h"
-#include "dict.h"
-#include "telnet.h"
-#include "tftp.h"
-#include "http.h"
-#include "http2.h"
-#include "file.h"
-#include "curl_ldap.h"
-#include "vssh/ssh.h"
-#include "imap.h"
-#include "url.h"
-#include "connect.h"
-#include "http_ntlm.h"
-#include "curl_rtmp.h"
-#include "gopher.h"
-#include "mqtt.h"
 #include "http_proxy.h"
 #include "conncache.h"
 #include "multihandle.h"
@@ -126,6 +99,25 @@
 #include "headers.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+
+/* And now for the protocols */
+#include "ftp.h"
+#include "dict.h"
+#include "telnet.h"
+#include "tftp.h"
+#include "http.h"
+#include "file.h"
+#include "curl_ldap.h"
+#include "vssh/ssh.h"
+#include "imap.h"
+#include "url.h"
+#include "connect.h"
+#include "curl_rtmp.h"
+#include "gopher.h"
+#include "mqtt.h"
+#include "rtsp.h"
+#include "smtp.h"
+#include "ws.h"
 
 #ifdef USE_NGHTTP2
 static void data_priority_cleanup(struct Curl_easy *data);
@@ -183,7 +175,10 @@ void Curl_freeset(struct Curl_easy *data)
   Curl_bufref_free(&data->state.referer);
   Curl_bufref_free(&data->state.url);
 
-  Curl_mime_cleanpart(&data->set.mimepost);
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  Curl_mime_cleanpart(data->set.mimepostp);
+  Curl_safefree(data->set.mimepostp);
+#endif
 
 #ifndef CURL_DISABLE_COOKIES
   curl_slist_free_all(data->state.cookielist);
@@ -393,8 +388,6 @@ void Curl_init_userdefined(struct Curl_easy *data)
   set->socks5auth = CURLAUTH_BASIC | CURLAUTH_GSSAPI;
 #endif
 
-  Curl_mime_initpart(&set->mimepost);
-
   Curl_ssl_easy_config_init(data);
 #ifndef CURL_DISABLE_DOH
   set->doh_verifyhost = TRUE;
@@ -515,7 +508,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 #endif
   Curl_netrc_init(&data->state.netrc);
   Curl_init_userdefined(data);
-  Curl_pgrs_now_set(data); /* on easy handle create */
 
   *curl = data;
   return CURLE_OK;
@@ -639,7 +631,7 @@ static bool conn_maxage(struct Curl_easy *data,
   timediff_t age_ms;
 
   if(data->set.conn_max_idle_ms) {
-    age_ms = curlx_timediff_ms(now, conn->lastused);
+    age_ms = curlx_ptimediff_ms(&now, &conn->lastused);
     if(age_ms > data->set.conn_max_idle_ms) {
       infof(data, "Too old connection (%" FMT_TIMEDIFF_T
             " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
@@ -649,7 +641,7 @@ static bool conn_maxage(struct Curl_easy *data,
   }
 
   if(data->set.conn_max_age_ms) {
-    age_ms = curlx_timediff_ms(now, conn->created);
+    age_ms = curlx_ptimediff_ms(&now, &conn->created);
     if(age_ms > data->set.conn_max_age_ms) {
       infof(data,
             "Too old connection (created %" FMT_TIMEDIFF_T
@@ -674,7 +666,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
        use */
     bool dead;
 
-    if(conn_maxage(data, conn, data->progress.now)) {
+    if(conn_maxage(data, conn, *Curl_pgrs_now(data))) {
       /* avoid check if already too old */
       dead = TRUE;
     }
@@ -723,11 +715,11 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
 }
 
 CURLcode Curl_conn_upkeep(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          struct curltime *now)
+                          struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  if(curlx_timediff_ms(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
+  if(curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->keepalive) <=
+     data->set.upkeep_interval_ms)
     return result;
 
   /* briefly attach for action */
@@ -745,7 +737,7 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
   }
   Curl_detach_connection(data);
 
-  conn->keepalive = *now;
+  conn->keepalive = *Curl_pgrs_now(data);
   return result;
 }
 
@@ -1371,7 +1363,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->remote_port = -1; /* unknown at this point */
 
   /* Store creation time to help future close decision making */
-  conn->created = data->progress.now;
+  conn->created = *Curl_pgrs_now(data);
 
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = conn->created;
@@ -1566,7 +1558,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-#if defined(USE_SSH)
+#ifdef USE_SSH
     &Curl_handler_scp,
 #else
     NULL,
@@ -2093,9 +2085,6 @@ static char *detect_proxy(struct Curl_easy *data,
    */
   char proxy_env[20];
   const char *envp = proxy_env;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
                  conn->handler->scheme);
@@ -2734,8 +2723,10 @@ static CURLcode override_login(struct Curl_easy *data,
       NETRCcode ret = Curl_parsenetrc(&data->state.netrc, conn->host.name,
                                       userp, passwdp,
                                       data->set.str[STRING_NETRC_FILE]);
-      if(ret && ((ret == NETRC_NO_MATCH) ||
-                 (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
+      if(ret == NETRC_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+      else if(ret && ((ret == NETRC_NO_MATCH) ||
+                      (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
         infof(data, "Could not find host %s in the %s file; using defaults",
               conn->host.name,
               (data->set.str[STRING_NETRC_FILE] ?
@@ -2869,10 +2860,6 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   char *portptr;
   int port = -1;
   CURLcode result = CURLE_OK;
-
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   *hostname_result = NULL;
   *port_result = -1;
@@ -3291,7 +3278,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
   else if(result == CURLE_OPERATION_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
-          curlx_timediff_ms(data->progress.now, data->progress.t_startsingle));
+          curlx_ptimediff_ms(Curl_pgrs_now(data),
+                             &data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
   else if(result) {

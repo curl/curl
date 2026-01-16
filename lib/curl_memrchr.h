@@ -23,12 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_MEMRCHR
 
-#include <string.h>
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif

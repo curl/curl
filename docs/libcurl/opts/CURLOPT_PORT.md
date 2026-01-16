@@ -37,7 +37,7 @@ protocol.
 Usually, you just let the URL decide which port to use but this allows the
 application to override that.
 
-While this option accepts a 'long', a port number is an unsigned 16 bit number
+While this option accepts a 'long', a port number is an unsigned 16-bit number
 and therefore using a port number lower than zero or over 65535 causes a
 **CURLE_BAD_FUNCTION_ARGUMENT** error.
 

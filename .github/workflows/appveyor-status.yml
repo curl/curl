@@ -16,7 +16,7 @@ permissions: {}
 jobs:
   split:
     name: 'split'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     if: ${{ github.event.sender.login == 'appveyor[bot]' }}
     permissions:
       statuses: write  # To update build statuses

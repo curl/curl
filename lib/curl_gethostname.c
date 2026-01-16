@@ -21,10 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "curl_gethostname.h"
+#include "curlx/strcopy.h"
 
 /*
  * Curl_gethostname() is a wrapper around gethostname() which allows
@@ -60,7 +60,7 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
   const char *force_hostname = getenv("CURL_GETHOSTNAME");
   if(force_hostname) {
     if(strlen(force_hostname) < (size_t)namelen)
-      strcpy(name, force_hostname);
+      curlx_strcopy(name, namelen, force_hostname, strlen(force_hostname));
     else
       return 1; /* cannot do it */
     err = 0;

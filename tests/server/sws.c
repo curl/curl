@@ -770,182 +770,6 @@ storerequest_cleanup:
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
 
-static void init_httprequest(struct sws_httprequest *req)
-{
-  req->checkindex = 0;
-  req->offset = 0;
-  req->testno = DOCNUMBER_NOTHING;
-  req->partno = 0;
-  req->connect_request = FALSE;
-  req->open = TRUE;
-  req->auth_req = FALSE;
-  req->auth = FALSE;
-  req->cl = 0;
-  req->digest = FALSE;
-  req->ntlm = FALSE;
-  req->skip = 0;
-  req->skipall = FALSE;
-  req->noexpect = FALSE;
-  req->delay = 0;
-  req->writedelay = 0;
-  req->rcmd = RCMD_NORMALREQ;
-  req->prot_version = 0;
-  req->callcount = 0;
-  req->connect_port = 0;
-  req->done_processing = 0;
-  req->upgrade = 0;
-  req->upgrade_request = 0;
-}
-
-static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req);
-
-/* returns 1 if the connection should be serviced again immediately, 0 if there
-   is no data waiting, or < 0 if it should be closed */
-static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
-{
-  int fail = 0;
-  char *reqbuf = req->reqbuf;
-  ssize_t got = 0;
-  int overflow = 0;
-
-  if(req->upgrade_request) {
-    /* upgraded connection, work it differently until end of connection */
-    logmsg("Upgraded connection, this is no longer HTTP/1");
-    sws_send_doc(sock, req);
-
-    /* dump the request received so far to the external file */
-    reqbuf[req->offset] = '\0';
-    sws_storerequest(reqbuf, req->offset);
-    req->offset = 0;
-
-    /* read websocket traffic */
-    if(req->open) {
-      logmsg("wait for websocket traffic");
-      do {
-        got = sread(sock, reqbuf + req->offset,
-                    sizeof(req->reqbuf) - req->offset);
-        if(got > 0) {
-          req->offset += got;
-          logmsg("Got %zu bytes from client", got);
-        }
-
-        if((got == -1) &&
-           ((SOCKERRNO == EAGAIN) || (SOCKERRNO == SOCKEWOULDBLOCK))) {
-          int rc;
-          fd_set input;
-          fd_set output;
-          struct timeval timeout = { 0 };
-          timeout.tv_sec = 1; /* 1000 ms */
-
-          logmsg("Got EAGAIN from sread");
-          FD_ZERO(&input);
-          FD_ZERO(&output);
-          got = 0;
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
-          FD_SET(sock, &input);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
-          do {
-            logmsg("Wait until readable");
-            rc = select((int)sock + 1, &input, &output, NULL, &timeout);
-          } while(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal);
-          logmsg("readable %d", rc);
-          if(rc)
-            got = 1;
-        }
-      } while(got > 0);
-    }
-    else {
-      logmsg("NO wait for websocket traffic");
-    }
-    if(req->offset) {
-      logmsg("log the websocket traffic");
-      /* dump the incoming websocket traffic to the external file */
-      reqbuf[req->offset] = '\0';
-      sws_storerequest(reqbuf, req->offset);
-      req->offset = 0;
-    }
-    init_httprequest(req);
-
-    return -1;
-  }
-
-  if(req->offset >= sizeof(req->reqbuf) - 1) {
-    /* buffer is already full; do nothing */
-    overflow = 1;
-  }
-  else {
-    if(req->skip)
-      /* we are instructed to not read the entire thing, so we make sure to
-         only read what we are supposed to and NOT read the entire thing the
-         client wants to send! */
-      got = sread(sock, reqbuf + req->offset, req->cl);
-    else
-      got = sread(sock, reqbuf + req->offset,
-                  sizeof(req->reqbuf) - 1 - req->offset);
-
-    if(got_exit_signal)
-      return -1;
-    if(got == 0) {
-      logmsg("Connection closed by client");
-      fail = 1;
-    }
-    else if(got < 0) {
-      char errbuf[STRERROR_LEN];
-      int error = SOCKERRNO;
-      if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
-        /* nothing to read at the moment */
-        return 0;
-      }
-      logmsg("recv() returned error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      fail = 1;
-    }
-    if(fail) {
-      /* dump the request received so far to the external file */
-      reqbuf[req->offset] = '\0';
-      sws_storerequest(reqbuf, req->offset);
-      return -1;
-    }
-
-    logmsg("Read %zd bytes", got);
-
-    req->offset += (size_t)got;
-    reqbuf[req->offset] = '\0';
-
-    req->done_processing = sws_ProcessRequest(req);
-    if(got_exit_signal)
-      return -1;
-  }
-
-  if(overflow || (req->offset == sizeof(req->reqbuf) - 1 && got > 0)) {
-    logmsg("Request would overflow buffer, closing connection");
-    /* dump request received so far to external file anyway */
-    reqbuf[sizeof(req->reqbuf) - 1] = '\0';
-    fail = 1;
-  }
-  else if(req->offset > sizeof(req->reqbuf) - 1) {
-    logmsg("Request buffer overflow, closing connection");
-    /* dump request received so far to external file anyway */
-    reqbuf[sizeof(req->reqbuf) - 1] = '\0';
-    fail = 1;
-  }
-  else
-    reqbuf[req->offset] = '\0';
-
-  /* at the end of a request dump it to an external file */
-  if(fail || req->done_processing)
-    sws_storerequest(reqbuf, req->offset);
-  if(got_exit_signal)
-    return -1;
-
-  return fail ? -1 : 1;
-}
-
 /* returns -1 on failure */
 static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 {
@@ -1225,6 +1049,173 @@ retry:
   return 0;
 }
 
+static void init_httprequest(struct sws_httprequest *req)
+{
+  req->checkindex = 0;
+  req->offset = 0;
+  req->testno = DOCNUMBER_NOTHING;
+  req->partno = 0;
+  req->connect_request = FALSE;
+  req->open = TRUE;
+  req->auth_req = FALSE;
+  req->auth = FALSE;
+  req->cl = 0;
+  req->digest = FALSE;
+  req->ntlm = FALSE;
+  req->skip = 0;
+  req->skipall = FALSE;
+  req->noexpect = FALSE;
+  req->delay = 0;
+  req->writedelay = 0;
+  req->rcmd = RCMD_NORMALREQ;
+  req->prot_version = 0;
+  req->callcount = 0;
+  req->connect_port = 0;
+  req->done_processing = 0;
+  req->upgrade = 0;
+  req->upgrade_request = 0;
+}
+
+/* returns 1 if the connection should be serviced again immediately, 0 if there
+   is no data waiting, or < 0 if it should be closed */
+static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
+{
+  int fail = 0;
+  char *reqbuf = req->reqbuf;
+  ssize_t got = 0;
+  int overflow = 0;
+
+  if(req->upgrade_request) {
+    /* upgraded connection, work it differently until end of connection */
+    logmsg("Upgraded connection, this is no longer HTTP/1");
+    sws_send_doc(sock, req);
+
+    /* dump the request received so far to the external file */
+    reqbuf[req->offset] = '\0';
+    sws_storerequest(reqbuf, req->offset);
+    req->offset = 0;
+
+    /* read websocket traffic */
+    if(req->open) {
+      logmsg("wait for websocket traffic");
+      do {
+        got = sread(sock, reqbuf + req->offset,
+                    sizeof(req->reqbuf) - req->offset);
+        if(got > 0) {
+          req->offset += got;
+          logmsg("Got %zu bytes from client", got);
+        }
+
+        if((got == -1) &&
+           ((SOCKERRNO == EAGAIN) || (SOCKERRNO == SOCKEWOULDBLOCK))) {
+          int rc;
+          fd_set input;
+          fd_set output;
+          struct timeval timeout = { 0 };
+          timeout.tv_sec = 1; /* 1000 ms */
+
+          logmsg("Got EAGAIN from sread");
+          FD_ZERO(&input);
+          FD_ZERO(&output);
+          got = 0;
+          FD_SET(sock, &input);
+          do {
+            logmsg("Wait until readable");
+            rc = select((int)sock + 1, &input, &output, NULL, &timeout);
+          } while(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal);
+          logmsg("readable %d", rc);
+          if(rc)
+            got = 1;
+        }
+      } while(got > 0);
+    }
+    else {
+      logmsg("NO wait for websocket traffic");
+    }
+    if(req->offset) {
+      logmsg("log the websocket traffic");
+      /* dump the incoming websocket traffic to the external file */
+      reqbuf[req->offset] = '\0';
+      sws_storerequest(reqbuf, req->offset);
+      req->offset = 0;
+    }
+    init_httprequest(req);
+
+    return -1;
+  }
+
+  if(req->offset >= sizeof(req->reqbuf) - 1) {
+    /* buffer is already full; do nothing */
+    overflow = 1;
+  }
+  else {
+    if(req->skip)
+      /* we are instructed to not read the entire thing, so we make sure to
+         only read what we are supposed to and NOT read the entire thing the
+         client wants to send! */
+      got = sread(sock, reqbuf + req->offset, req->cl);
+    else
+      got = sread(sock, reqbuf + req->offset,
+                  sizeof(req->reqbuf) - 1 - req->offset);
+
+    if(got_exit_signal)
+      return -1;
+    if(got == 0) {
+      logmsg("Connection closed by client");
+      fail = 1;
+    }
+    else if(got < 0) {
+      char errbuf[STRERROR_LEN];
+      int error = SOCKERRNO;
+      if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
+        /* nothing to read at the moment */
+        return 0;
+      }
+      logmsg("recv() returned error (%d) %s",
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+      fail = 1;
+    }
+    if(fail) {
+      /* dump the request received so far to the external file */
+      reqbuf[req->offset] = '\0';
+      sws_storerequest(reqbuf, req->offset);
+      return -1;
+    }
+
+    logmsg("Read %zd bytes", got);
+
+    req->offset += (size_t)got;
+    reqbuf[req->offset] = '\0';
+
+    req->done_processing = sws_ProcessRequest(req);
+    if(got_exit_signal)
+      return -1;
+  }
+
+  if(overflow || (req->offset == sizeof(req->reqbuf) - 1 && got > 0)) {
+    logmsg("Request would overflow buffer, closing connection");
+    /* dump request received so far to external file anyway */
+    reqbuf[sizeof(req->reqbuf) - 1] = '\0';
+    fail = 1;
+  }
+  else if(req->offset > sizeof(req->reqbuf) - 1) {
+    logmsg("Request buffer overflow, closing connection");
+    /* dump request received so far to external file anyway */
+    reqbuf[sizeof(req->reqbuf) - 1] = '\0';
+    fail = 1;
+  }
+  else
+    reqbuf[req->offset] = '\0';
+
+  /* at the end of a request dump it to an external file */
+  if(fail || req->done_processing)
+    sws_storerequest(reqbuf, req->offset);
+  if(got_exit_signal)
+    return -1;
+
+  return fail ? -1 : 1;
+}
+
 static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 {
   srvr_sockaddr_union_t serveraddr;
@@ -1323,14 +1314,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
       timeout.tv_sec = 1; /* 1000 ms */
 
       FD_ZERO(&output);
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
       FD_SET(serverfd, &output);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
       while(1) {
         rc = select((int)serverfd + 1, NULL, &output, NULL, &timeout);
         if(rc < 0 && SOCKERRNO != SOCKEINTR)
@@ -1455,14 +1439,7 @@ static void http_connect(curl_socket_t *infdp,
       /* listener socket is monitored to allow client to establish
          secondary tunnel only when this tunnel is not established
          and primary one is fully operational */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
       FD_SET(rootfd, &input);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
       maxfd = rootfd;
     }
 
@@ -1472,28 +1449,14 @@ static void http_connect(curl_socket_t *infdp,
       if(clientfd[i] != CURL_SOCKET_BAD) {
         if(poll_client_rd[i]) {
           /* unless told not to do so, monitor readability */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
           FD_SET(clientfd[i], &input);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
           if(clientfd[i] > maxfd)
             maxfd = clientfd[i];
         }
         if(poll_client_wr[i] && toc[i]) {
           /* unless told not to do so, monitor writability
              if there is data ready to be sent to client */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
           FD_SET(clientfd[i], &output);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
           if(clientfd[i] > maxfd)
             maxfd = clientfd[i];
         }
@@ -1502,28 +1465,14 @@ static void http_connect(curl_socket_t *infdp,
       if(serverfd[i] != CURL_SOCKET_BAD) {
         if(poll_server_rd[i]) {
           /* unless told not to do so, monitor readability */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
           FD_SET(serverfd[i], &input);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
           if(serverfd[i] > maxfd)
             maxfd = serverfd[i];
         }
         if(poll_server_wr[i] && tos[i]) {
           /* unless told not to do so, monitor writability
              if there is data ready to be sent to server */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
           FD_SET(serverfd[i], &output);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
           if(serverfd[i] > maxfd)
             maxfd = serverfd[i];
         }
@@ -2345,14 +2294,7 @@ static int test_sws(int argc, char *argv[])
 
     for(socket_idx = 0; socket_idx < num_sockets; ++socket_idx) {
       /* Listen on all sockets */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
       FD_SET(all_sockets[socket_idx], &input);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
       if(all_sockets[socket_idx] > maxfd)
         maxfd = all_sockets[socket_idx];
     }

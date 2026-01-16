@@ -52,7 +52,7 @@ open F, "<symbols-in-versions";
 sub str2num {
     my ($str)=@_;
     if($str && $str =~ /([0-9]*)\.([0-9]*)\.*([0-9]*)/) {
-        return sprintf("0x%06x", $1 <<16 | $2 << 8 | ($3 || '0'));
+        return sprintf("0x%06x", $1 << 16 | $2 << 8 | ($3 || '0'));
     }
 }
 

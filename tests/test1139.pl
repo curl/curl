@@ -264,7 +264,7 @@ my @toolhelp; # store all parsed parameters
 while(<$r>) {
     chomp;
     my $l= $_;
-    if(/^  \{\" *(.*)/) {
+    if(/^  \{ \" *(.*)/) {
         my $str=$1;
         my $combo;
         if($str =~ /^-(.), --([a-z0-9.-]*)/) {

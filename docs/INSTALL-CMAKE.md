@@ -30,15 +30,15 @@ from the `projects/Windows` Visual Studio solution files, see
 You can configure for in source tree builds or for a build tree
 that is apart from the source tree.
 
- - Build in the source tree.
+- Build in the source tree.
 
-       $ cmake -B .
+      $ cmake -B .
 
- - Build in a separate directory (parallel to the curl source tree in this
-   example). The build directory is created for you. This is recommended over
-   building in the source tree to separate source and build artifacts.
+- Build in a separate directory (parallel to the curl source tree in this
+  example). The build directory is created for you. This is recommended over
+  building in the source tree to separate source and build artifacts.
 
-       $ cmake -B ../curl-build
+      $ cmake -B ../curl-build
 
 For the full list of CMake build configuration variables see
 [the corresponding section](#cmake-build-options).
@@ -241,6 +241,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
 - `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
 - `CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX`:  Override default versioned symbol prefix. Default: `<TLS-BACKEND>_` or `MULTISSL_`
+- `CURL_LINT`:                              Run lint checks while building. Default: `OFF`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
@@ -389,7 +390,7 @@ Details via CMake
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
 - `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
-- `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
+- `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
 
 ## Dependency options (tools)
 
@@ -544,6 +545,10 @@ Note: These variables are internal and subject to change.
 - `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
 - `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
 - `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
+- `curl-lint`:              Run lint checks.
+- `curl-listcats`:          Generate help category constants for `src/tool_help.h` from documentation.
+- `curl-listhelp`:          Generate `src/tool_listhelp.c` from documentation.
+- `curl-optiontable`:       Generate `lib/easyoptions.c` from documentation.
 
 # Migrating from Visual Studio IDE Project Files
 
@@ -576,9 +581,9 @@ Configuration element             | Equivalent CMake options
 
 For example these commands:
 
-    > cd projects
+    > cd projects/Windows
     > ./generate.bat VC12
-    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/curl-all.sln
+    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" VC12/curl-all.sln
 
 translate to:
 

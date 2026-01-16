@@ -5,7 +5,7 @@ Title: runtests.pl
 Section: 1
 Source: runtests
 See-also:
- - runtests.pl
+  - runtests.pl
 Added-in: 7.5
 ---
 

@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifdef USE_LIBSSH2
@@ -35,8 +34,6 @@
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #endif
-
-#include "vssh.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_SSH_EASY   "meta:proto:ssh:easy"

@@ -23,12 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all Schannel-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  */
-
 #include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
@@ -42,17 +40,14 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../strdup.h"
 #include "../strerror.h"
 #include "../select.h" /* for the socket readiness */
 #include "../curlx/fopen.h"
-#include "../curlx/inet_pton.h" /* for IP addr SNI check */
 #include "../curlx/multibyte.h"
-#include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 #include "../system_win32.h"
 #include "../curlx/version_win32.h"
 #include "../rand.h"
@@ -70,8 +65,8 @@
 #define SCH_DEV_SHOWBOOL(x)                                   \
   infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE");
 #else
-#define SCH_DEV(x) do { } while(0)
-#define SCH_DEV_SHOWBOOL(x) do { } while(0)
+#define SCH_DEV(x) do {} while(0)
+#define SCH_DEV_SHOWBOOL(x) do {} while(0)
 #endif
 
 /* Offered by mingw-w64 v8+. MS SDK 7.0A+. */
@@ -138,10 +133,6 @@
 #define HAS_ALPN_SCHANNEL
 static bool s_win_has_alpn;
 #endif
-
-static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
-                                             const char *pinnedpubkey);
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
                           void *BufDataPtr, unsigned long BufByteSize)
@@ -1120,6 +1111,74 @@ static CURLcode schannel_error(struct Curl_easy *data,
   }
 }
 
+static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
+                                             struct Curl_easy *data,
+                                             const char *pinnedpubkey)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
+  CERT_CONTEXT *pCertContextServer = NULL;
+
+  /* Result is returned to caller */
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+  DEBUGASSERT(backend);
+
+  /* if a path was not specified, do not pin */
+  if(!pinnedpubkey)
+    return CURLE_OK;
+
+  do {
+    SECURITY_STATUS sspi_status;
+    const char *x509_der;
+    DWORD x509_der_len;
+    struct Curl_X509certificate x509_parsed;
+    struct Curl_asn1Element *pubkey;
+
+    sspi_status =
+      Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
+                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                       &pCertContextServer);
+
+    if((sspi_status != SEC_E_OK) || !pCertContextServer) {
+      char buffer[STRERROR_LEN];
+      failf(data, "schannel: Failed to read remote certificate context: %s",
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      break; /* failed */
+    }
+
+    if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+         (pCertContextServer->cbCertEncoded > 0)))
+      break;
+
+    x509_der = (const char *)pCertContextServer->pbCertEncoded;
+    x509_der_len = pCertContextServer->cbCertEncoded;
+    memset(&x509_parsed, 0, sizeof(x509_parsed));
+    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
+      break;
+
+    pubkey = &x509_parsed.subjectPublicKeyInfo;
+    if(!pubkey->header || pubkey->end <= pubkey->header) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
+      break;
+    }
+
+    result = Curl_pin_peer_pubkey(data,
+                                  pinnedpubkey,
+                                  (const unsigned char *)pubkey->header,
+                                  (size_t)(pubkey->end - pubkey->header));
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key");
+    }
+  } while(0);
+
+  if(pCertContextServer)
+    CertFreeCertificateContext(pCertContextServer);
+
+  return result;
+}
+
 static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
                                        struct Curl_easy *data)
 {
@@ -1336,13 +1395,13 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
                     inbuf[1].cbBuffer));
       /*
         There are two cases where we could be getting extra data here:
-        1) If we are renegotiating a connection and the handshake is already
-        complete (from the server perspective), it can encrypted app data
-        (not handshake data) in an extra buffer at this point.
-        2) (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
-        connection and this extra data is part of the handshake.
-        We should process the data immediately; waiting for the socket to
-        be ready may fail since the server is done sending handshake data.
+        1. If we are renegotiating a connection and the handshake is already
+           complete (from the server perspective), it can encrypted app data
+           (not handshake data) in an extra buffer at this point.
+        2. (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
+           connection and this extra data is part of the handshake.
+           We should process the data immediately; waiting for the socket to
+           be ready may fail since the server is done sending handshake data.
       */
       /* check if the remaining data is less than the total amount
          and therefore begins after the already processed data */
@@ -1722,7 +1781,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     connssl->connecting_state = ssl_connect_2;
     memset(rs, 0, sizeof(*rs));
     rs->io_need = CURL_SSL_IO_NEED_SEND;
-    rs->start_time = curlx_now();
+    rs->start_time = *Curl_pgrs_now(data);
     rs->started = TRUE;
   }
 
@@ -1731,7 +1790,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     curl_socket_t readfd, writefd;
     timediff_t elapsed;
 
-    elapsed = curlx_timediff_ms(curlx_now(), rs->start_time);
+    elapsed = curlx_ptimediff_ms(Curl_pgrs_now(data), &rs->start_time);
     if(elapsed >= MAX_RENEG_BLOCK_TIME) {
       failf(data, "schannel: renegotiation timeout");
       result = CURLE_SSL_CONNECT_ERROR;
@@ -1797,7 +1856,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(result)
         break;
 
-      elapsed = curlx_timediff_ms(curlx_now(), rs->start_time);
+      elapsed = curlx_ptimediff_ms(Curl_pgrs_now(data), &rs->start_time);
       if(elapsed >= MAX_RENEG_BLOCK_TIME) {
         failf(data, "schannel: renegotiation timeout");
         result = CURLE_SSL_CONNECT_ERROR;
@@ -2585,74 +2644,6 @@ static CURLcode schannel_random(struct Curl_easy *data,
   return Curl_win32_random(entropy, length);
 }
 
-static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
-                                             const char *pinnedpubkey)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct schannel_ssl_backend_data *backend =
-    (struct schannel_ssl_backend_data *)connssl->backend;
-  CERT_CONTEXT *pCertContextServer = NULL;
-
-  /* Result is returned to caller */
-  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-
-  DEBUGASSERT(backend);
-
-  /* if a path was not specified, do not pin */
-  if(!pinnedpubkey)
-    return CURLE_OK;
-
-  do {
-    SECURITY_STATUS sspi_status;
-    const char *x509_der;
-    DWORD x509_der_len;
-    struct Curl_X509certificate x509_parsed;
-    struct Curl_asn1Element *pubkey;
-
-    sspi_status =
-      Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
-                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                       &pCertContextServer);
-
-    if((sspi_status != SEC_E_OK) || !pCertContextServer) {
-      char buffer[STRERROR_LEN];
-      failf(data, "schannel: Failed to read remote certificate context: %s",
-            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-      break; /* failed */
-    }
-
-    if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-         (pCertContextServer->cbCertEncoded > 0)))
-      break;
-
-    x509_der = (const char *)pCertContextServer->pbCertEncoded;
-    x509_der_len = pCertContextServer->cbCertEncoded;
-    memset(&x509_parsed, 0, sizeof(x509_parsed));
-    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
-      break;
-
-    pubkey = &x509_parsed.subjectPublicKeyInfo;
-    if(!pubkey->header || pubkey->end <= pubkey->header) {
-      failf(data, "SSL: failed retrieving public key from server certificate");
-      break;
-    }
-
-    result = Curl_pin_peer_pubkey(data,
-                                  pinnedpubkey,
-                                  (const unsigned char *)pubkey->header,
-                                  (size_t)(pubkey->end - pubkey->header));
-    if(result) {
-      failf(data, "SSL: public key does not match pinned public key");
-    }
-  } while(0);
-
-  if(pCertContextServer)
-    CertFreeCertificateContext(pCertContextServer);
-
-  return result;
-}
-
 static void schannel_checksum(const unsigned char *input,
                               size_t inputlen,
                               unsigned char *checksum,
@@ -2723,7 +2714,7 @@ static void *schannel_get_internals(struct ssl_connect_data *connssl,
 }
 
 HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
-                                               const struct Curl_easy *data)
+                                               struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_multi *multi = data->multi;
@@ -2732,7 +2723,6 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   timediff_t timeout_ms;
   timediff_t elapsed_ms;
-  struct curltime now;
   unsigned char info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
 
   DEBUGASSERT(multi);
@@ -2758,8 +2748,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
      negative timeout means retain forever. */
   timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
-    now = curlx_now();
-    elapsed_ms = curlx_timediff_ms(now, share->time);
+    elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &share->time);
     if(elapsed_ms >= timeout_ms) {
       return NULL;
     }
@@ -2803,7 +2792,7 @@ static void schannel_cert_share_free(void *key, size_t key_len, void *p)
 }
 
 bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
-                                         const struct Curl_easy *data,
+                                         struct Curl_easy *data,
                                          HCERTSTORE cert_store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);

@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
 #include "tool_xattr.h"
 
 #ifdef USE_XATTR

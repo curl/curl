@@ -27,9 +27,8 @@
 
 #ifndef CURL_DISABLE_IPFS
 #define MAX_GATEWAY_URL_LEN 10000
-
 CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
                           struct OperationConfig *config);
+#endif
 
 #endif /* HEADER_CURL_TOOL_IPFS_H */
-#endif /* !CURL_DISABLE_IPFS */

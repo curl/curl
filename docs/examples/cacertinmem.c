@@ -28,7 +28,6 @@
 
 /* Requires: USE_OPENSSL */
 
-#include <openssl/err.h>
 #include <openssl/ssl.h>
 
 #include <stdio.h>

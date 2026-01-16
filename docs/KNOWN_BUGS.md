@@ -181,9 +181,9 @@ libcurl are not equipped for that at the moment except when built with
 _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as a
 locale.
 
- https://curl.se/bug/?i=345
- https://curl.se/bug/?i=731
- https://curl.se/bug/?i=3747
+https://curl.se/bug/?i=345
+https://curl.se/bug/?i=731
+https://curl.se/bug/?i=3747
 
 NTLM authentication and Unicode
 
@@ -348,6 +348,18 @@ authenticated username and reports the supported data-protection level, but
 then immediately deletes the negotiated SSPI security context and frees the
 credentials before returning. The negotiated context is not stored on the
 connection and is therefore never used to protect later SOCKS5 traffic.
+
+## cannot use absolute Unix domain filename for SOCKS on Windows
+
+curl supports using a Unix domain socket path for speaking SOCKS to a proxy,
+by providing a filename in the URL used for `-x` (`CURLOPT_PROXY`), but that
+path cannot be a proper absolute Windows path with a drive letter etc.
+
+A solution for this probably requires that we add and provide a
+`--unix-socket` (`CURLOPT_UNIX_SOCKET_PATH`) option alternative for proxy
+communication.
+
+See [curl issue 19825](https://github.com/curl/curl/issues/19825)
 
 # Internals
 

@@ -29,7 +29,7 @@
 # Stop on errors and on usage of unset variables.
 set -eu
 
-VERSION="2025.11.09"
+VERSION="2026.01.05"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
@@ -64,10 +64,10 @@ Options:
                            number appended to the end (curl >= 7.83.0). If this option is provided
                            multiple times, only the last value is considered.
 
-  --no-decode-filename: Don't percent-decode the output filename, even if the percent-encoding in
+  --no-decode-filename: Do not percent-decode the output filename, even if the percent-encoding in
                         the URL was done by wcurl, e.g.: The URL contained whitespace.
 
-  --dry-run: Don't actually execute curl, just print what would be invoked.
+  --dry-run: Do not actually execute curl, just print what would be invoked.
 
   -V, --version: Print version information.
 
@@ -118,7 +118,8 @@ readonly PER_URL_PARAMETERS="\
 # characters.
 # 2F = /
 # 5C = \
-readonly UNSAFE_PERCENT_ENCODE="%2F %5C"
+# 3A = :
+readonly UNSAFE_PERCENT_ENCODE="%2F %5C %3A"
 
 # Whether to invoke curl or not.
 DRY_RUN="false"
@@ -167,7 +168,7 @@ percent_decode()
         # If character is a "%", read the next character as decode_hex1.
         if [ "${decode_out}" = % ] && IFS= read -r decode_hex1; then
             decode_out="${decode_out}${decode_hex1}"
-            # If there's one more character, read it as decode_hex2.
+            # If there is one more character, read it as decode_hex2.
             if IFS= read -r decode_hex2; then
                 decode_out="${decode_out}${decode_hex2}"
                 # Skip decoding if this is a control character (00-1F).
@@ -190,10 +191,11 @@ get_url_filename()
 {
     # Remove protocol and query string if present.
     hostname_and_path="$(printf %s "${1}" | sed -e 's,^[^/]*//,,' -e 's,?.*$,,')"
-    # If what remains contains a slash, there's a path; return it percent-decoded.
+    # If what remains contains a slash, there is a path; return it percent-decoded.
     case "${hostname_and_path}" in
         # sed to remove everything preceding the last '/', e.g.: "example/something" becomes "something"
-        */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,')" ;;
+        # sed to also replace ':' with the percent_encoded %3A
+        */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,' -e 's,:,%3A,g')" ;;
     esac
     # No slash means there was just a hostname and no path; return empty string.
 }
@@ -210,37 +212,39 @@ exec_curl()
 
     CURL_NO_CLOBBER=""
     CURL_PARALLEL=""
-    # --no-clobber is only supported since 7.83.0.
-    # --parallel is only supported since 7.66.0.
-    # --parallel-max-host is only supported since 8.16.0.
+
     if [ "${curl_version_major}" -ge 8 ]; then
         CURL_NO_CLOBBER="--no-clobber"
-        CURL_PARALLEL="--parallel"
-        if [ "${curl_version_minor}" -ge 16 ]; then
-            CURL_PARALLEL="--parallel --parallel-max-host 5"
+        CURL_PARALLEL="--parallel --parallel-max-host 5"
+
+        # --parallel-max-host is only supported since 8.16.0.
+        if [ "${curl_version_major}" -eq 8 ] && [ "${curl_version_minor}" -lt 16 ]; then
+            CURL_PARALLEL="--parallel"
         fi
     elif [ "${curl_version_major}" -eq 7 ]; then
+        # --no-clobber is only supported since 7.83.0.
         if [ "${curl_version_minor}" -ge 83 ]; then
             CURL_NO_CLOBBER="--no-clobber"
         fi
+        # --parallel is only supported since 7.66.0.
         if [ "${curl_version_minor}" -ge 66 ]; then
             CURL_PARALLEL="--parallel"
         fi
     fi
 
-    # Detecting whether we need --parallel. It's easier to rely on
+    # Detecting whether we need --parallel. It is easier to rely on
     # the shell's argument parsing.
     # shellcheck disable=SC2086
     set -- $URLS
 
-    # If there are less than two URLs, don't set the parallel flag.
+    # If there are less than two URLs, do not set the parallel flag.
     if [ "$#" -lt 2 ]; then
         CURL_PARALLEL=""
     fi
 
     # Start assembling the command.
     #
-    # We use 'set --' here (again) because (a) we don't have arrays on
+    # We use 'set --' here (again) because (a) we do not have arrays on
     # POSIX shell, and (b) we need better control over the way we
     # split arguments.
     #

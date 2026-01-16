@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Bang on RTP by
-#   1) giving an evil payload (with $)
-#   2) Giving evil content (SDP starting with $)
-#   3) packing rtp after headers, after content, and at the start
+# 1. giving an evil payload (with $)
+# 2. Giving evil content (SDP starting with $)
+# 3. packing rtp after headers, after content, and at the start
 <info>
 <keywords>
 RTSP

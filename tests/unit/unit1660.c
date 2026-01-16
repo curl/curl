@@ -23,17 +23,10 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
+
 #include "urldata.h"
 #include "hsts.h"
-
-#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
-static CURLcode test_unit1660(const char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
-  puts("nothing to do when HTTP or HSTS are disabled");
-  UNITTEST_END_SIMPLE
-}
-#else
 
 static void showsts(struct stsentry *e, const char *chost)
 {
@@ -167,5 +160,12 @@ static CURLcode test_unit1660(const char *arg)
   curl_global_cleanup();
 
   UNITTEST_END(curl_global_cleanup())
+}
+#else
+static CURLcode test_unit1660(const char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  puts("nothing to do when HTTP or HSTS are disabled");
+  UNITTEST_END_SIMPLE
 }
 #endif

@@ -44,7 +44,7 @@ GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Cookie: name=contents;name2=content2;name3=content3
+Cookie: name=contents;name2=content2; name3=content3
 
 </protocol>
 </verify>

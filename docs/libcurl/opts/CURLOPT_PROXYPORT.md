@@ -38,7 +38,7 @@ Disabling this option, setting it to zero, makes it not specified which makes
 libcurl use the default proxy port number or the port number specified in the
 proxy URL string.
 
-While this accepts a 'long', the port number is 16 bit so it cannot be larger
+While this accepts a 'long', the port number is 16-bit so it cannot be larger
 than 65535.
 
 # DEFAULT

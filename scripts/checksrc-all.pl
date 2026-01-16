@@ -12,13 +12,13 @@ use Cwd 'abs_path';
 
 my @files;
 if(system('git rev-parse --is-inside-work-tree >/dev/null 2>&1') == 0) {
-  @files = `git ls-files '*.[ch]'`;
+    @files = `git ls-files '*.[ch]'`;
 }
 else {
-  find(sub { if(/\.[ch]$/) { push(@files, $File::Find::name) } }, ('.'));
+    find(sub { if(/\.[ch]$/) { push(@files, $File::Find::name) } }, ('.'));
 }
 if(@ARGV) {
-  find(sub { if(/\.[ch]$/) { push(@files, $File::Find::name) } }, @ARGV);
+    find(sub { if(/\.[ch]$/) { push(@files, $File::Find::name) } }, @ARGV);
 }
 
 @files = grep !/\/CMakeFiles\//, @files;

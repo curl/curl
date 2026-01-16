@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 /* Destructor for a single table entry */
 typedef void Curl_uint32_tbl_entry_dtor(uint32_t key, void *entry);
 

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <stdlib.h>
-
 /* Function
  *
  * Accepts a TCP connection on a custom port (IPv4 or IPv6). Connects to a
@@ -101,9 +99,12 @@ static void socksd_resetdefaults(void)
   s_config.reqcmd = CONFIG_REQCMD;
   s_config.connectrep = CONFIG_CONNECTREP;
   s_config.port = CONFIG_PORT;
-  strcpy(s_config.addr, CONFIG_ADDR);
-  strcpy(s_config.user, "user");
-  strcpy(s_config.password, "password");
+  curlx_strcopy(s_config.addr, sizeof(s_config.addr),
+                CONFIG_ADDR, strlen(CONFIG_ADDR));
+  curlx_strcopy(s_config.user, sizeof(s_config.user),
+                "user", strlen("user"));
+  curlx_strcopy(s_config.password, sizeof(s_config.password),
+                "password", strlen("password"));
 }
 
 static void socksd_getconfig(void)
@@ -141,7 +142,8 @@ static void socksd_getconfig(void)
           }
         }
         else if(!strcmp(key, "backend")) {
-          strcpy(s_config.addr, value);
+          curlx_strcopy(s_config.addr, sizeof(s_config.addr),
+                        value, strlen(value));
           logmsg("backend [%s] set", s_config.addr);
         }
         else if(!strcmp(key, "backendport")) {
@@ -152,11 +154,13 @@ static void socksd_getconfig(void)
           }
         }
         else if(!strcmp(key, "user")) {
-          strcpy(s_config.user, value);
+          curlx_strcopy(s_config.user, sizeof(s_config.user),
+                        value, strlen(value));
           logmsg("user [%s] set", s_config.user);
         }
         else if(!strcmp(key, "password")) {
-          strcpy(s_config.password, value);
+          curlx_strcopy(s_config.password, sizeof(s_config.password),
+                        value, strlen(value));
           logmsg("password [%s] set", s_config.password);
         }
         /* Methods:
@@ -643,37 +647,16 @@ static bool socksd_incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_err);
 
     /* there is always a socket to wait for */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
     FD_SET(sockfd, &fds_read);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
 
     for(i = 0; i < 2; i++) {
       if(c[i].used) {
         curl_socket_t fd = c[i].clientfd;
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
         FD_SET(fd, &fds_read);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
         if((int)fd > maxfd)
           maxfd = (int)fd;
         fd = c[i].remotefd;
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
         FD_SET(fd, &fds_read);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
         if((int)fd > maxfd)
           maxfd = (int)fd;
       }

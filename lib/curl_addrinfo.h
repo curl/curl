@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -39,7 +38,6 @@
 #ifdef __VMS
 #  include <in.h>
 #  include <inet.h>
-#  include <stdlib.h>
 #endif
 
 /*

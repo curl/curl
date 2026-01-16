@@ -38,9 +38,9 @@
 #endif
 
 #include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
+
 #include <curl/curl.h>
+
 #include <stdio.h>
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -189,7 +189,7 @@ int main(void)
     else
       printf("*** transfer failed ***\n");
 
-    /* second try: retrieve page using user certificate and key -> succeeds
+    /* second try: retrieve page using user certificate and key -> succeeds to
      * load the certificate and key by installing a function doing
      * the necessary "modifications" to the SSL CONTEXT just before link init
      */

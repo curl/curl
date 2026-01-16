@@ -21,12 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef CURLDEBUG
 
-#include <curl/curl.h>
+#include <stddef.h>  /* for offsetof() */
 
 #include "urldata.h"
 #include "curl_threads.h"
@@ -116,6 +115,7 @@ static void curl_dbg_cleanup(void)
   }
 #endif
 }
+
 #ifdef USE_BACKTRACE
 static void error_bt_callback(void *data, const char *message,
                               int error_number)
@@ -400,37 +400,6 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
                  source, line, sockfd);
 
   return sockfd;
-}
-
-SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
-                             SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
-                             SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags,
-                             int line, const char *source)
-{
-  SEND_TYPE_RETV rc;
-  if(countcheck("send", line, source))
-    return -1;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  rc = send(sockfd, buf, len, flags);
-  if(source)
-    curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
-                 source, line, (unsigned long)len, (long)rc);
-  return rc;
-}
-
-RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
-                             RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags,
-                             int line, const char *source)
-{
-  RECV_TYPE_RETV rc;
-  if(countcheck("recv", line, source))
-    return -1;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  rc = recv(sockfd, buf, len, flags);
-  if(source)
-    curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
-                 source, line, (unsigned long)len, (long)rc);
-  return rc;
 }
 
 #ifdef HAVE_SOCKETPAIR

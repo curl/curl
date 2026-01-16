@@ -62,7 +62,7 @@ tail -n +7 ./docs/THANKS | sed 's/ github/ github/i'  > $rand
       git -C "$CURLWWW" log --use-mailmap "$start..HEAD"
     fi
   } | \
-  grep -Eai '(^Author|^Commit|by):' | \
+  grep -Eai '(^Author|^Commit|^ +[a-z-]+-by):' | \
   cut -d: -f2- | \
   cut '-d(' -f1 | \
   cut '-d<' -f1 | \

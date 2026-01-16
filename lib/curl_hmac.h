@@ -28,8 +28,6 @@
   !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) ||   \
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
-#include <curl/curl.h>
-
 #define HMAC_MD5_LENGTH 16
 
 typedef CURLcode (*HMAC_hinit)(void *context);

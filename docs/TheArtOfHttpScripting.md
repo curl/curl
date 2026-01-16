@@ -385,7 +385,7 @@ SPDX-License-Identifier: curl
 
  To tell curl to use a user and password for authentication:
 
-    curl --user name:password https://www.example.com
+    curl --user myname:password https://www.example.com
 
 ## Other Authentication
 

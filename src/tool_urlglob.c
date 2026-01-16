@@ -489,7 +489,7 @@ bool glob_inuse(struct URLGlob *glob)
   return glob->palloc ? TRUE : FALSE;
 }
 
-CURLcode glob_url(struct URLGlob *glob, char *url, curl_off_t *urlnum,
+CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
                   FILE *error)
 {
   /*
@@ -637,10 +637,11 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
 #define MAX_OUTPUT_GLOB_LENGTH (1024 * 1024)
 
 CURLcode glob_match_url(char **output, const char *filename,
-                        struct URLGlob *glob)
+                        struct URLGlob *glob, SANITIZEcode *sc)
 {
   struct dynbuf dyn;
   *output = NULL;
+  *sc = SANITIZE_ERR_OK;
 
   curlx_dyn_init(&dyn, MAX_OUTPUT_GLOB_LENGTH);
 
@@ -700,12 +701,11 @@ CURLcode glob_match_url(char **output, const char *filename,
 #if defined(_WIN32) || defined(MSDOS)
   {
     char *sanitized;
-    SANITIZEcode sc = sanitize_file_name(&sanitized, curlx_dyn_ptr(&dyn),
-                                         (SANITIZE_ALLOW_PATH |
-                                          SANITIZE_ALLOW_RESERVED));
+    *sc = sanitize_file_name(&sanitized, curlx_dyn_ptr(&dyn),
+                             SANITIZE_ALLOW_PATH | SANITIZE_ALLOW_RESERVED);
     curlx_dyn_free(&dyn);
-    if(sc)
-      return CURLE_URL_MALFORMAT;
+    if(*sc)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     *output = sanitized;
     return CURLE_OK;
   }

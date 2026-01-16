@@ -211,8 +211,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
 
     if test "$ac_cv_lib_ssl_SSL_connect" = "yes"; then
       dnl Have the libraries--check for OpenSSL headers
-      AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
-                       openssl/pem.h openssl/ssl.h openssl/err.h,
+      AC_CHECK_HEADERS(openssl/rsa.h openssl/crypto.h openssl/pem.h openssl/ssl.h openssl/err.h,
         ssl_msg="OpenSSL"
         test "openssl" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         OPENSSL_ENABLED=1

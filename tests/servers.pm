@@ -2485,7 +2485,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for http)", $serr);
                 }
                 logmsg sprintf ("* pid http => %d %d\n", $pid, $pid2)
                     if($verbose);
@@ -2642,7 +2642,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for https/https-mtls)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
@@ -2683,7 +2683,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for http/2)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
@@ -2724,7 +2724,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for http/3)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";

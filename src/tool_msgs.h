@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
 #include "tool_cfgable.h"
 
 void warnf(const char *fmt, ...) CURL_PRINTF(1, 2);

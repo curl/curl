@@ -32,24 +32,18 @@
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_POP3) || \
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include <curl/curl.h>
 #include "urldata.h"
-
 #include "curlx/base64.h"
 #include "vauth/vauth.h"
 #include "cfilters.h"
-#include "vtls/vtls.h"
-#include "curl_hmac.h"
 #include "curl_sasl.h"
-#include "curlx/warnless.h"
-#include "sendf.h"
+#include "curl_trc.h"
 
 /* Supported mechanisms */
 static const struct {
@@ -717,9 +711,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     struct kerberos5data *krb5 = Curl_auth_krb5_get(conn);
     result = !krb5 ? CURLE_OUT_OF_MEMORY :
       Curl_auth_create_gssapi_user_message(data, conn->user, conn->passwd,
-                                                  service, conn->host.name,
-                                                  sasl->mutual_auth, NULL,
-                                                  krb5, &resp);
+                                           service, conn->host.name,
+                                           sasl->mutual_auth, NULL,
+                                           krb5, &resp);
     newstate = SASL_GSSAPI_TOKEN;
     break;
   }

@@ -42,8 +42,7 @@ struct ProgressData {
 
 struct OperationConfig;
 
-void progressbarinit(struct ProgressData *bar,
-                     struct OperationConfig *config);
+void progressbarinit(struct ProgressData *bar, struct OperationConfig *config);
 
 /*
 ** callback for CURLOPT_PROGRESSFUNCTION

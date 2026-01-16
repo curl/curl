@@ -27,7 +27,8 @@
 
 struct Curl_cwriter;
 
-void Curl_all_content_encodings(char *buf, size_t blen);
+/* returns an allocated string or NULL */
+char *Curl_get_content_encodings(void);
 
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer);

@@ -107,9 +107,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
-    cd projects
+    cd projects/Windows
     ./generate.bat "${VC_VERSION}"
-    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "-property:Platform=${PLAT}" "Windows/${VC_VERSION}/curl-all.sln"
+    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "-property:Platform=${PLAT}" "${VC_VERSION}/curl-all.sln"
   )
   [ "${PLAT}" = 'x64' ] && platdir='Win64' || platdir='Win32'
   [[ "${PRJ_CFG}" = *'Debug'* ]] && binsuffix='d' || binsuffix=''

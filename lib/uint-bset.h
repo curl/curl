@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 /* A bitset for unsigned int values.
  * It can hold the numbers from 0 - (nmax - 1),
  * rounded to the next 64 multiple.

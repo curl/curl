@@ -598,6 +598,15 @@ if test "$compiler_id" = "INTEL_UNIX_C"; then
   #
 fi
 
+case $host in
+  *msdosdjgpp)
+    if test "$compiler_num" -ge "1000"; then
+      dnl Avoid warnings in DJGPP's built-in FD_SET() macro
+      CFLAGS="$CFLAGS -Wno-arith-conversion"
+    fi
+    ;;
+esac
+
 CURL_CFLAG_EXTRAS=""
 if test "$want_werror" = "yes"; then
   CURL_CFLAG_EXTRAS="-Werror"
@@ -4104,11 +4113,6 @@ CURL_SIZEOF(curl_socket_t, [
 ])
 CPPFLAGS=$o
 
-AC_CHECK_TYPE(long long,
-  [AC_DEFINE(HAVE_LONGLONG, 1,
-    [Define to 1 if the compiler supports the 'long long' data type.])]
-)
-
 if test "$ac_cv_sizeof_curl_off_t" -lt 8; then
   AC_MSG_ERROR([64-bit curl_off_t is required])
 fi
@@ -5555,8 +5559,8 @@ AC_CONFIG_FILES([\
   tests/tunit/Makefile \
   tests/http/config.ini \
   tests/http/Makefile \
-  packages/Makefile \
-  packages/vms/Makefile \
+  projects/Makefile \
+  projects/vms/Makefile \
   libcurl.pc
 ])
 AC_CONFIG_FILES([curl-config], [chmod +x curl-config])

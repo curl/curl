@@ -21,17 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #include "urldata.h"
 #include "getinfo.h"
 #include "cfilters.h"
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
-#include "progress.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
 
@@ -285,7 +281,12 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     *param_longp = data->state.os_errno;
     break;
   case CURLINFO_NUM_CONNECTS:
-    *param_longp = data->info.numconnects;
+#if SIZEOF_LONG < SIZEOF_CURL_OFF_T
+    if(data->info.numconnects > LONG_MAX)
+      *param_longp = LONG_MAX;
+    else
+#endif
+      *param_longp = (long)data->info.numconnects;
     break;
   case CURLINFO_LASTSOCKET:
     sockfd = Curl_getconnectinfo(data, NULL);

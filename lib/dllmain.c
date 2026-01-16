@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_OPENSSL
@@ -60,6 +59,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   }
   return TRUE;
 }
-#endif /* OpenSSL */
+#endif /* USE_OPENSSL (non-fork) */
 
-#endif /* DLL build */
+#endif /* _WIN32 && !CURL_STATICLIB */

@@ -21,26 +21,18 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #include "urldata.h"
 #include "url.h"
 #include "cfilters.h"
 #include "curl_trc.h"
 #include "multiif.h"
-#include "curlx/timeval.h"
 #include "multi_ev.h"
-#include "progress.h"
 #include "select.h"
 #include "uint-bset.h"
 #include "uint-spbset.h"
-#include "uint-table.h"
-#include "curlx/warnless.h"
 #include "multihandle.h"
-#include "socks.h"
 
 
 static void mev_in_callback(struct Curl_multi *multi, bool value)
@@ -538,8 +530,7 @@ CURLMcode Curl_multi_ev_assess_conn(struct Curl_multi *multi,
 }
 
 CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
-                                         struct uint32_bset *set,
-                                         struct curltime *pnow)
+                                         struct uint32_bset *set)
 {
   uint32_t mid;
   CURLMcode mresult = CURLM_OK;
@@ -548,7 +539,6 @@ CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(data) {
-        Curl_pgrs_now_at_least(data, pnow);
         mresult = Curl_multi_ev_assess_xfer(multi, data);
       }
     } while(!mresult && Curl_uint32_bset_next(set, mid, &mid));

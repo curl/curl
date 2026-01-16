@@ -25,7 +25,6 @@
 
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
-#include "tool_util.h"
 #include "tool_operate.h"
 #include "terminal.h"
 
@@ -36,7 +35,7 @@
 
    my $pi = 3.1415;
    foreach my $i (1 .. 200) {
-     printf "%d, ", sin($i/200 * 2 * $pi) * 500000 + 500000;
+     printf "%d, ", sin($i / 200 * 2 * $pi) * 500000 + 500000;
    }
 */
 static const int sinus[] = {
@@ -229,8 +228,7 @@ int tool_progress_cb(void *clientp,
   return 0;
 }
 
-void progressbarinit(struct ProgressData *bar,
-                     struct OperationConfig *config)
+void progressbarinit(struct ProgressData *bar, struct OperationConfig *config)
 {
   memset(bar, 0, sizeof(struct ProgressData));
 

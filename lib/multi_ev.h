@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "hash.h"
 
 struct Curl_easy;
@@ -55,8 +54,7 @@ CURLMcode Curl_multi_ev_assess_xfer(struct Curl_multi *multi,
                                     struct Curl_easy *data);
 /* Assess all easy handles on the list */
 CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
-                                         struct uint32_bset *set,
-                                         struct curltime *pnow);
+                                         struct uint32_bset *set);
 /* Assess the connection by getting its current pollset */
 CURLMcode Curl_multi_ev_assess_conn(struct Curl_multi *multi,
                                     struct Curl_easy *data,

@@ -23,9 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-#include <stddef.h>
 
 typedef void (*Curl_llist_dtor)(void *user, void *elem);
 

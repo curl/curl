@@ -503,18 +503,18 @@ happening. The different fields in the output have the following meaning:
 
 From left-to-right:
 
- - `%`           - percentage completed of the whole transfer
- - `Total`       - total size of the whole expected transfer
- - `%`           - percentage completed of the download
- - `Received`    - currently downloaded amount of bytes
- - `%`           - percentage completed of the upload
- - `Xferd`       - currently uploaded amount of bytes
- - `Average Speed Dload` - the average transfer speed of the download
- - `Average Speed Upload` - the average transfer speed of the upload
- - `Time Total`  - expected time to complete the operation
- - `Time Current` - time passed since the invoke
- - `Time Left`   - expected time left to completion
- - `Curr.Speed`  - the average transfer speed the last 5 seconds (the first
+- `%`            - percentage completed of the whole transfer
+- `Total`        - total size of the whole expected transfer
+- `%`            - percentage completed of the download
+- `Received`     - currently downloaded amount of bytes
+- `%`            - percentage completed of the upload
+- `Xferd`        - currently uploaded amount of bytes
+- `Average Speed Dload` - the average transfer speed of the download
+- `Average Speed Upload` - the average transfer speed of the upload
+- `Time Total`   - expected time to complete the operation
+- `Time Current` - time passed since the invoke
+- `Time Left`    - expected time left to completion
+- `Curr.Speed`   - the average transfer speed the last 5 seconds (the first
                    5 seconds of a transfer is based on less time of course.)
 
 The `-#` option displays a totally different progress bar that does not need
@@ -594,7 +594,7 @@ line parameter, like:
 Force curl to get and display a local help page in case it is invoked without
 URL by making a config file similar to:
 
-    # default url to get
+    # default URL to get
     url = "https://help.with.curl.example.com/curlhelp.html"
 
 You can specify another config file to be read by using the `-K`/`--config`
@@ -907,8 +907,8 @@ tell the server we use a vt100 terminal, try something like:
 
 Other interesting options for it `-t` include:
 
- - `XDISPLOC=<X display>` Sets the X display location.
- - `NEW_ENV=<var,val>` Sets an environment variable.
+- `XDISPLOC=<X display>` Sets the X display location.
+- `NEW_ENV=<var,val>` Sets an environment variable.
 
 NOTE: The telnet protocol does not specify any way to login with a specified
 user and password so curl cannot do that automatically. To do that, you need to

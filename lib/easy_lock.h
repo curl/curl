@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #define GLOBAL_INIT_IS_THREADSAFE
@@ -59,7 +58,7 @@
 #endif
 #endif
 
-#endif
+#endif /* !__INTEL_COMPILER */
 
 static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
 {

@@ -21,16 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "headers.h"
 #include "multiif.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "transfer.h"
 #include "cw-out.h"
 #include "cw-pause.h"
@@ -102,22 +99,6 @@ struct cw_out_ctx {
   struct cw_out_buf *buf;
   BIT(paused);
   BIT(errored);
-};
-
-static CURLcode cw_out_write(struct Curl_easy *data,
-                             struct Curl_cwriter *writer, int type,
-                             const char *buf, size_t nbytes);
-static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer);
-static CURLcode cw_out_init(struct Curl_easy *data,
-                            struct Curl_cwriter *writer);
-
-const struct Curl_cwtype Curl_cwt_out = {
-  "cw-out",
-  NULL,
-  cw_out_init,
-  cw_out_write,
-  cw_out_close,
-  sizeof(struct cw_out_ctx)
 };
 
 static CURLcode cw_out_init(struct Curl_easy *data,
@@ -457,6 +438,15 @@ static CURLcode cw_out_write(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
+const struct Curl_cwtype Curl_cwt_out = {
+  "cw-out",
+  NULL,
+  cw_out_init,
+  cw_out_write,
+  cw_out_close,
+  sizeof(struct cw_out_ctx)
+};
 
 bool Curl_cw_out_is_paused(struct Curl_easy *data)
 {

@@ -45,7 +45,7 @@ curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
   (void)purpose;
 
   if(protocol == IPPROTO_TCP)
-#if defined(__linux__)
+#ifdef __linux__
 #  ifndef IPPROTO_MPTCP
 #  define IPPROTO_MPTCP 262
 #  endif

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -56,31 +55,24 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
-#include "netrc.h"
 
-#include "content_encoding.h"
 #include "hostip.h"
 #include "cfilters.h"
 #include "cw-out.h"
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "progress.h"
 #include "http.h"
 #include "url.h"
 #include "getinfo.h"
-#include "vtls/vtls.h"
-#include "vquic/vquic.h"
-#include "select.h"
 #include "multiif.h"
 #include "connect.h"
-#include "http2.h"
 #include "mime.h"
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"
 #include "bufref.h"
-#include "curlx/warnless.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_IMAP)
@@ -261,7 +253,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 
     if(bytestoread && Curl_rlimit_active(&data->progress.dl.rlimit)) {
       curl_off_t dl_avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
-                                              &data->progress.now);
+                                              Curl_pgrs_now(data));
       /* DEBUGF(infof(data, "dl_rlimit, available=%" FMT_OFF_T, dl_avail));
        */
       /* In case of rate limited downloads: if this loop already got
@@ -399,15 +391,15 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              curlx_timediff_ms(data->progress.now,
-                                data->progress.t_startsingle),
+              curlx_ptimediff_ms(Curl_pgrs_now(data),
+                                 &data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              curlx_timediff_ms(data->progress.now,
-                                data->progress.t_startsingle),
+              curlx_ptimediff_ms(Curl_pgrs_now(data),
+                                 &data->progress.t_startsingle),
               k->bytecount);
       }
       result = CURLE_OPERATION_TIMEDOUT;
@@ -903,7 +895,7 @@ bool Curl_xfer_recv_is_paused(struct Curl_easy *data)
 CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable)
 {
   CURLcode result = CURLE_OK;
-  Curl_rlimit_block(&data->progress.ul.rlimit, enable, &data->progress.now);
+  Curl_rlimit_block(&data->progress.ul.rlimit, enable, Curl_pgrs_now(data));
   if(!enable && Curl_creader_is_paused(data))
     result = Curl_creader_unpause(data);
   Curl_pgrsSendPause(data, enable);
@@ -913,7 +905,7 @@ CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable)
 CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
 {
   CURLcode result = CURLE_OK;
-  Curl_rlimit_block(&data->progress.dl.rlimit, enable, &data->progress.now);
+  Curl_rlimit_block(&data->progress.dl.rlimit, enable, Curl_pgrs_now(data));
   if(!enable && Curl_cwriter_is_paused(data))
     result = Curl_cwriter_unpause(data);
   Curl_conn_ev_data_pause(data, enable);

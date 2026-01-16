@@ -21,61 +21,85 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
 #include "transfer.h"
-#include "curlx/timeval.h"
+#include "curlx/strcopy.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000
 
 #ifndef CURL_DISABLE_PROGRESS_METER
-/* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
-   byte) */
-static void time2str(char *r, curl_off_t seconds)
+/* Provide a string that is 7 letters long (plus the zero byte).
+
+   Unit test 1636.
+*/
+UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds);
+UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
 {
   curl_off_t h;
   if(seconds <= 0) {
-    strcpy(r, "--:--:--");
+    curlx_strcopy(r, rsize, STRCONST("       "));
     return;
   }
   h = seconds / 3600;
   if(h <= 99) {
     curl_off_t m = (seconds - (h * 3600)) / 60;
-    curl_off_t s = (seconds - (h * 3600)) - (m * 60);
-    curl_msnprintf(r, 9, "%2" FMT_OFF_T ":%02" FMT_OFF_T ":%02" FMT_OFF_T,
-                   h, m, s);
+    if(h <= 9) {
+      curl_off_t s = (seconds - (h * 3600)) - (m * 60);
+      if(h)
+        curl_msnprintf(r, rsize, "%" FMT_OFF_T ":%02" FMT_OFF_T ":"
+                       "%02" FMT_OFF_T, h, m, s);
+      else
+        curl_msnprintf(r, rsize, "  %02" FMT_OFF_T ":%02" FMT_OFF_T, m, s);
+    }
+    else
+      curl_msnprintf(r, rsize, "%" FMT_OFF_T "h %02" FMT_OFF_T "m", h, m);
   }
   else {
-    /* this equals to more than 99 hours, switch to a more suitable output
-       format to fit within the limits. */
     curl_off_t d = seconds / 86400;
     h = (seconds - (d * 86400)) / 3600;
-    if(d <= 999)
-      curl_msnprintf(r, 9, "%3" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
-    else
-      curl_msnprintf(r, 9, "%7" FMT_OFF_T "d", d);
+    if(d <= 99)
+      curl_msnprintf(r, rsize, "%2" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
+    else if(d <= 999)
+      curl_msnprintf(r, rsize, "%6" FMT_OFF_T "d", d);
+    else { /* more than 999 days */
+      curl_off_t m = d / 30;
+      if(m <= 999)
+        curl_msnprintf(r, rsize, "%6" FMT_OFF_T "m", m);
+      else { /* more than 999 months */
+        curl_off_t y = d / 365;
+        if(y <= 99999)
+          curl_msnprintf(r, rsize, "%6" FMT_OFF_T "y", y);
+        else
+          curlx_strcopy(r, rsize, STRCONST(">99999y"));
+      }
+    }
   }
 }
 
 /* The point of this function would be to return a string of the input data,
    but never longer than 6 columns (+ one zero byte).
-   Add suffix k, M, G when suitable... */
-static char *max6data(curl_off_t bytes, char *max6)
+   Add suffix k, M, G when suitable...
+
+   Unit test 1636
+*/
+UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen);
+UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum, shown as
      8.0E (exabytes)*/
   if(bytes < 100000)
-    curl_msnprintf(max6, 7, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
+    curl_msnprintf(max6, mlen, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
   else {
     const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
     int k = 0;
     curl_off_t nbytes;
+    curl_off_t rest;
     do {
       nbytes = bytes / 1024;
       if(nbytes < 1000)
@@ -84,10 +108,17 @@ static char *max6data(curl_off_t bytes, char *max6)
       k++;
       DEBUGASSERT(unit[k]);
     } while(unit[k]);
-    /* xxx.yU */
-    curl_msnprintf(max6, 7, "%3" CURL_FORMAT_CURL_OFF_T
-                   ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
-                   (bytes % 1024) / (1024 / 10), unit[k]);
+    rest = bytes % 1024;
+    if(nbytes <= 99)
+      /* xx.yyU */
+      curl_msnprintf(max6, mlen, "%2" CURL_FORMAT_CURL_OFF_T
+                     ".%02" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
+                     rest * 100 / 1024, unit[k]);
+    else
+      /* xxx.yU */
+      curl_msnprintf(max6, mlen, "%3" CURL_FORMAT_CURL_OFF_T
+                     ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
+                     rest * 10 / 1024, unit[k]);
   }
   return max6;
 }
@@ -102,7 +133,7 @@ static void pgrs_speedinit(struct Curl_easy *data)
  * @unittest: 1606
  */
 UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
-                                  struct curltime *pnow)
+                                  const struct curltime *pnow)
 {
   if(!data->set.low_speed_time || !data->set.low_speed_limit ||
      Curl_xfer_recv_is_paused(data) || Curl_xfer_send_is_paused(data))
@@ -116,15 +147,14 @@ UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
         data->state.keeps_speed = *pnow;
       else {
         /* how long has it been under the limit */
-        timediff_t howlong = curlx_timediff_ms(*pnow, data->state.keeps_speed);
+        timediff_t howlong =
+          curlx_ptimediff_ms(pnow, &data->state.keeps_speed);
 
         if(howlong >= data->set.low_speed_time * 1000) {
           /* too long */
-          failf(data,
-                "Operation too slow. "
-                "Less than %ld bytes/sec transferred the last %ld seconds",
-                data->set.low_speed_limit,
-                data->set.low_speed_time);
+          failf(data, "Operation too slow. Less than %" FMT_OFF_T
+                " bytes/sec transferred the last %u seconds",
+                data->set.low_speed_limit, data->set.low_speed_time);
           return CURLE_OPERATION_TIMEDOUT;
         }
       }
@@ -141,27 +171,15 @@ UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-void Curl_pgrs_now_set(struct Curl_easy *data)
+const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
 {
-  data->progress.now = curlx_now();
-}
-
-void Curl_pgrs_now_at_least(struct Curl_easy *data, struct curltime *pts)
-{
-  if((pts->tv_sec > data->progress.now.tv_sec) ||
-     ((pts->tv_sec == data->progress.now.tv_sec) &&
-      (pts->tv_usec > data->progress.now.tv_usec))) {
-    data->progress.now = *pts;
-  }
-}
-
-void Curl_pgrs_now_update(struct Curl_easy *data, struct Curl_easy *other)
-{
-  Curl_pgrs_now_at_least(data, &other->progress.now);
+  struct curltime *pnow = data->multi ?
+                          &data->multi->now : &data->progress.now;
+  curlx_pnow(pnow);
+  return pnow;
 }
 
 /*
-
    New proposed interface, 9th of February 2000:
 
    pgrsStartNow() - sets start time
@@ -171,7 +189,6 @@ void Curl_pgrs_now_update(struct Curl_easy *data, struct Curl_easy *other)
    pgrsSetUploadCounter() - amount of data currently uploaded
    pgrsUpdate() - show progress
    pgrsDone() - transfer complete
-
 */
 
 int Curl_pgrsDone(struct Curl_easy *data)
@@ -224,7 +241,6 @@ void Curl_pgrsSendPause(struct Curl_easy *data, bool enable)
 }
 
 /*
- *
  * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
  */
 void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
@@ -251,7 +267,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_POSTQUEUE:
     /* Queue time is accumulative from all involved redirects */
     data->progress.t_postqueue +=
-      curlx_timediff_us(timestamp, data->progress.t_startqueue);
+      curlx_ptimediff_us(&timestamp, &data->progress.t_startqueue);
     break;
   case TIMER_STARTACCEPT:
     data->progress.t_acceptdata = timestamp;
@@ -271,8 +287,8 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_STARTTRANSFER:
     delta = &data->progress.t_starttransfer;
     /* prevent updating t_starttransfer unless:
-     *   1) this is the first time we are setting t_starttransfer
-     *   2) a redirect has occurred since the last time t_starttransfer was set
+     *   1. this is the first time we are setting t_starttransfer
+     *   2. a redirect has occurred since the last time t_starttransfer was set
      * This prevents repeated invocations of the function from incorrectly
      * changing the t_starttransfer time.
      */
@@ -287,13 +303,14 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
     delta = &data->progress.t_posttransfer;
     break;
   case TIMER_REDIRECT:
-    data->progress.t_redirect = curlx_timediff_us(timestamp,
-                                                 data->progress.start);
+    data->progress.t_redirect = curlx_ptimediff_us(&timestamp,
+                                                   &data->progress.start);
     data->progress.t_startqueue = timestamp;
     break;
   }
   if(delta) {
-    timediff_t us = curlx_timediff_us(timestamp, data->progress.t_startsingle);
+    timediff_t us = curlx_ptimediff_us(&timestamp,
+                                       &data->progress.t_startsingle);
     if(us < 1)
       us = 1; /* make sure at least one microsecond passed */
     *delta += us;
@@ -301,7 +318,6 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 }
 
 /*
- *
  * Curl_pgrsTime(). Store the current time at the given label. This fetches a
  * fresh "now" and returns it.
  *
@@ -309,15 +325,15 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
  */
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  Curl_pgrs_now_set(data); /* update on real progress */
-  Curl_pgrsTimeWas(data, timer, data->progress.now);
+  Curl_pgrsTimeWas(data, timer, *Curl_pgrs_now(data));
 }
 
 void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   struct Progress *p = &data->progress;
+
   p->speeder_c = 0; /* reset the progress meter display */
-  p->start = data->progress.now;
+  p->start = *Curl_pgrs_now(data);
   p->is_t_startransfer_set = FALSE;
   p->dl.cur_size = 0;
   p->ul.cur_size = 0;
@@ -330,7 +346,7 @@ void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta)
 {
   if(delta) {
     data->progress.dl.cur_size += delta;
-    Curl_rlimit_drain(&data->progress.dl.rlimit, delta, &data->progress.now);
+    Curl_rlimit_drain(&data->progress.dl.rlimit, delta, Curl_pgrs_now(data));
   }
 }
 
@@ -338,7 +354,7 @@ void Curl_pgrs_upload_inc(struct Curl_easy *data, size_t delta)
 {
   if(delta) {
     data->progress.ul.cur_size += delta;
-    Curl_rlimit_drain(&data->progress.ul.rlimit, delta, &data->progress.now);
+    Curl_rlimit_drain(&data->progress.ul.rlimit, delta, Curl_pgrs_now(data));
   }
 }
 
@@ -394,7 +410,8 @@ static curl_off_t trspeed(curl_off_t size, /* number of bytes */
 }
 
 /* returns TRUE if it is time to show the progress meter */
-static bool progress_calc(struct Curl_easy *data, struct curltime *pnow)
+static bool progress_calc(struct Curl_easy *data,
+                          const struct curltime *pnow)
 {
   struct Progress * const p = &data->progress;
   int i_next, i_oldest, i_latest;
@@ -402,7 +419,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime *pnow)
   curl_off_t amount;
 
   /* The time spent so far (from the start) in microseconds */
-  p->timespent = curlx_timediff_us(*pnow, p->start);
+  p->timespent = curlx_ptimediff_us(pnow, &p->start);
   p->dl.speed = trspeed(p->dl.cur_size, p->timespent);
   p->ul.speed = trspeed(p->ul.cur_size, p->timespent);
 
@@ -422,7 +439,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime *pnow)
 
   /* Make a new record only when some time has passed.
    * Too frequent calls otherwise ruin the history. */
-  if(curlx_timediff_ms(*pnow, p->speed_time[i_latest]) >= 1000) {
+  if(curlx_ptimediff_ms(pnow, &p->speed_time[i_latest]) >= 1000) {
     p->speeder_c++;
     i_latest = i_next;
     p->speed_amount[i_latest] = p->dl.cur_size + p->ul.cur_size;
@@ -449,8 +466,8 @@ static bool progress_calc(struct Curl_easy *data, struct curltime *pnow)
   /* How much we transferred between oldest and current records */
   amount = p->speed_amount[i_latest] - p->speed_amount[i_oldest];
   /* How long this took */
-  duration_ms = curlx_timediff_ms(p->speed_time[i_latest],
-                                  p->speed_time[i_oldest]);
+  duration_ms = curlx_ptimediff_ms(&p->speed_time[i_latest],
+                                   &p->speed_time[i_oldest]);
   if(duration_ms <= 0)
     duration_ms = 1;
 
@@ -510,9 +527,9 @@ static void progress_meter(struct Curl_easy *data)
   curl_off_t total_cur_size;
   curl_off_t total_expected_size;
   curl_off_t dl_size;
-  char time_left[10];
-  char time_total[10];
-  char time_spent[10];
+  char time_left[8];
+  char time_total[8];
+  char time_spent[8];
   curl_off_t cur_secs = (curl_off_t)p->timespent / 1000000; /* seconds */
 
   if(!p->headers_out) {
@@ -522,10 +539,10 @@ static void progress_meter(struct Curl_easy *data)
                     data->state.resume_from);
     }
     curl_mfprintf(data->set.err,
-                  "  %% Total    %% Received %% Xferd  Average Speed   "
-                  "Time    Time     Time  Current\n"
-                  "                                 Dload  Upload   "
-                  "Total   Spent    Left  Speed\n");
+                  "  %% Total    %% Received %% Xferd  Average Speed  "
+                  "Time    Time    Time   Current\n"
+                  "                                 Dload  Upload  "
+                  "Total   Spent   Left   Speed\n");
     p->headers_out = TRUE; /* headers are shown */
   }
 
@@ -536,9 +553,10 @@ static void progress_meter(struct Curl_easy *data)
   /* Since both happen at the same time, total expected duration is max. */
   total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
   /* create the three time strings */
-  time2str(time_left, total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
-  time2str(time_total, total_estm.secs);
-  time2str(time_spent, cur_secs);
+  time2str(time_left, sizeof(time_left),
+           total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
+  time2str(time_total, sizeof(time_total), total_estm.secs);
+  time2str(time_spent, sizeof(time_spent), cur_secs);
 
   /* Get the total amount of data expected to get transferred */
   total_expected_size = p->ul_size_known ? p->ul.total_size : p->ul.cur_size;
@@ -561,26 +579,31 @@ static void progress_meter(struct Curl_easy *data)
                 "\r"
                 "%3" FMT_OFF_T " %s "
                 "%3" FMT_OFF_T " %s "
-                "%3" FMT_OFF_T " %s %s %s  %s %s %s %s",
-                total_estm.percent, /* 3 letters */         /* total % */
-                max6data(total_expected_size, max6[2]),     /* total size */
-                dl_estm.percent, /* 3 letters */            /* rcvd % */
-                max6data(p->dl.cur_size, max6[0]),          /* rcvd size */
-                ul_estm.percent, /* 3 letters */            /* xfer % */
-                max6data(p->ul.cur_size, max6[1]),          /* xfer size */
-                max6data(p->dl.speed, max6[3]),             /* avrg dl speed */
-                max6data(p->ul.speed, max6[4]),             /* avrg ul speed */
-                time_total,    /* 8 letters */              /* total time */
-                time_spent,    /* 8 letters */              /* time spent */
-                time_left,     /* 8 letters */              /* time left */
-                max6data(p->current_speed, max6[5])
+                "%3" FMT_OFF_T " %s %s %s %s %s %s %s",
+                total_estm.percent, /* 3 letters */    /* total % */
+                max6out(total_expected_size, max6[2],
+                        sizeof(max6[2])),              /* total size */
+                dl_estm.percent, /* 3 letters */       /* rcvd % */
+                max6out(p->dl.cur_size, max6[0],
+                        sizeof(max6[0])),              /* rcvd size */
+                ul_estm.percent, /* 3 letters */       /* xfer % */
+                max6out(p->ul.cur_size, max6[1],
+                        sizeof(max6[1])),              /* xfer size */
+                max6out(p->dl.speed, max6[3],
+                        sizeof(max6[3])),              /* avrg dl speed */
+                max6out(p->ul.speed, max6[4],
+                        sizeof(max6[4])),              /* avrg ul speed */
+                time_total,    /* 7 letters */         /* total time */
+                time_spent,    /* 7 letters */         /* time spent */
+                time_left,     /* 7 letters */         /* time left */
+                max6out(p->current_speed, max6[5],
+                        sizeof(max6[5]))               /* current speed */
     );
 
   /* we flush the output stream to make it appear as soon as possible */
   fflush(data->set.err);
 }
-#else
- /* progress bar disabled */
+#else /* CURL_DISABLE_PROGRESS_METER */
 #define progress_meter(x) Curl_nop_stmt
 #endif
 
@@ -635,7 +658,8 @@ static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
   return CURLE_OK;
 }
 
-static CURLcode pgrs_update(struct Curl_easy *data, struct curltime *pnow)
+static CURLcode pgrs_update(struct Curl_easy *data,
+                            const struct curltime *pnow)
 {
   bool showprogress = progress_calc(data, pnow);
   return pgrsupdate(data, showprogress);
@@ -643,16 +667,16 @@ static CURLcode pgrs_update(struct Curl_easy *data, struct curltime *pnow)
 
 CURLcode Curl_pgrsUpdate(struct Curl_easy *data)
 {
-  return pgrs_update(data, &data->progress.now);
+  return pgrs_update(data, Curl_pgrs_now(data));
 }
 
 CURLcode Curl_pgrsCheck(struct Curl_easy *data)
 {
   CURLcode result;
 
-  result = pgrs_update(data, &data->progress.now);
+  result = pgrs_update(data, Curl_pgrs_now(data));
   if(!result && !data->req.done)
-    result = pgrs_speedcheck(data, &data->progress.now);
+    result = pgrs_speedcheck(data, Curl_pgrs_now(data));
   return result;
 }
 
@@ -661,5 +685,5 @@ CURLcode Curl_pgrsCheck(struct Curl_easy *data)
  */
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
 {
-  (void)progress_calc(data, &data->progress.now);
+  (void)progress_calc(data, Curl_pgrs_now(data));
 }

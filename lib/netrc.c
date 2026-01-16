@@ -21,8 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_NETRC
 
 #ifdef HAVE_PWD_H
@@ -35,7 +35,6 @@
 #endif
 #endif
 
-#include <curl/curl.h>
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"

@@ -177,7 +177,7 @@ multi interface. While we certainly want and intend for these to get fixed in
 the future, you should be aware of the following current restrictions:
 
 ~~~c
- - Name resolves unless the c-ares or threaded-resolver backends are used
- - file:// transfers
- - TELNET transfers
+- Name resolves unless the c-ares or threaded-resolver backends are used
+- file:// transfers
+- TELNET transfers
 ~~~

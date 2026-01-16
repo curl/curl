@@ -9,6 +9,8 @@ SPDX-License-Identifier: curl
 This is an incomplete list of known risks when running and using curl and
 libcurl.
 
+# Risks
+
 ## Insecure transfers
 
 When using curl to perform transfers with protocols that are insecure or the
@@ -88,12 +90,12 @@ The curl command blanks the contents of a number of command line arguments to
 prevent them from appearing in process listings. It does not blank all
 arguments, even though some that are not blanked might contain sensitive data.
 
- - not all systems allow the arguments to be blanked in the first place
- - since curl blanks the argument itself they are readable for a short moment
-   no matter what
- - virtually every argument can contain sensitive data, depending on use
- - blanking all arguments would make it impractical for users to differentiate
-   curl command lines in process listings
+- not all systems allow the arguments to be blanked in the first place
+- since curl blanks the argument itself they are readable for a short moment
+  no matter what
+- virtually every argument can contain sensitive data, depending on use
+- blanking all arguments would make it impractical for users to differentiate
+  curl command lines in process listings
 
 ## HTTP headers in redirects
 
@@ -136,3 +138,9 @@ authentication.
 
 curl users should consider switching to servers and options that use modern
 and secure algorithms.
+
+## Compression bombs
+
+When asking curl or libcurl to automatically decompress data on arrival, there
+is a risk that the size of the output from the decompression process ends up
+many times larger than the input data size.

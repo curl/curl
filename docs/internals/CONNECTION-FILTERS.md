@@ -34,9 +34,9 @@ Curl_easy *data         connectdata *conn        cf-ssl        cf-socket
 |https://curl.se/|----> | properties      |----> | keys  |---> | socket |--> OS --> network
 +----------------+      +-----------------+      +-------+     +--------+
 
- Curl_write(data, buffer)
+Curl_write(data, buffer)
   --> Curl_cfilter_write(data, data->conn, buffer)
-       ---> conn->filter->write(conn->filter, data, buffer)
+        --> conn->filter->write(conn->filter, data, buffer)
 ```
 
 While connection filters all do different things, they look the same from the
@@ -77,10 +77,9 @@ etc.
 Each filter does in principle the following:
 
 ```
-static CURLcode
-myfilter_cf_connect(struct Curl_cfilter *cf,
-                    struct Curl_easy *data,
-                    bool *done)
+static CURLcode myfilter_cf_connect(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    bool *done)
 {
   CURLcode result;
 
@@ -140,8 +139,8 @@ filter, once it is connected, just passes the calls through. Those filters
 implementations look like this:
 
 ```
-ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, CURLcode *err)
+ssize_t Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         const void *buf, size_t len, CURLcode *err)
 {
   return cf->next->cft->do_send(cf->next, data, buf, len, err);
 }

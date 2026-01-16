@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 /***********************************************************************
@@ -44,10 +43,8 @@
 #endif
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "hostip.h"
-#include "hash.h"
-#include "curl_share.h"
 #include "url.h"
 
 
@@ -77,9 +74,6 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
   struct Curl_addrinfo *ai = NULL;
 
   (void)ip_version;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   ai = Curl_ipv4_resolve_r(hostname, port);
   if(!ai)

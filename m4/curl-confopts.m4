@@ -291,7 +291,7 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
   AC_MSG_CHECKING([whether to disable dependency on -lrt])
   OPT_RT="default"
   AC_ARG_ENABLE(rt,
- AS_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
+AS_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
   OPT_RT=$enableval)
   case "$OPT_RT" in
     no)

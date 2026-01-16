@@ -36,7 +36,7 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
       get_property(_cache_var_type CACHE ${_cache_var} PROPERTY TYPE)
       get_property(_cache_var_value CACHE ${_cache_var} PROPERTY VALUE)
       if(_cache_var_type STREQUAL "UNINITIALIZED")
-        set(_cache_var_type)
+        set(_cache_var_type "")
       else()
         set(_cache_var_type ":${_cache_var_type}")
       endif()
@@ -269,7 +269,6 @@ if(CURL_CLANG_TIDY)
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.bzero")  # for FD_ZERO() (seen on macOS)
-  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
   list(APPEND _tidy_checks "-clang-analyzer-security.ArrayBound")  # false positives with clang-tidy v21.1.0
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")
@@ -501,6 +500,8 @@ if(WINDOWS_STORE)
   set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
 endif()
 
+option(CURL_LINT "Run lint checks while building" OFF)
+
 find_package(Perl)
 
 if(PERL_EXECUTABLE)
@@ -513,6 +514,18 @@ if(PERL_EXECUTABLE)
     COMMENT "Generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
+  )
+  if(CURL_LINT)
+    set(_lint_all ALL)
+  endif()
+  add_custom_target(curl-lint "${_lint_all}"
+    COMMENT "Running lint checks" VERBATIM USES_TERMINAL
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl"
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
+    DEPENDS
+      "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
+      "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
   )
 endif()
 
@@ -754,7 +767,6 @@ if(CURL_USE_OPENSSL)
   # Depend on OpenSSL via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  set_target_properties(OpenSSL::SSL PROPERTIES INTERFACE_LIBCURL_PC_MODULES "openssl")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
@@ -894,7 +906,6 @@ if(ZLIB_FOUND)
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS ZLIB::ZLIB)
-  set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_LIBCURL_PC_MODULES "zlib")
 endif()
 
 set(HAVE_BROTLI OFF)
@@ -1505,7 +1516,6 @@ endforeach()
 
 check_type_size("size_t"      SIZEOF_SIZE_T)
 check_type_size("ssize_t"     SIZEOF_SSIZE_T)
-check_type_size("long long"   SIZEOF_LONG_LONG)
 check_type_size("long"        SIZEOF_LONG)
 check_type_size("int"         SIZEOF_INT)
 check_type_size("__int64"     SIZEOF___INT64)
@@ -1521,9 +1531,6 @@ if(NOT HAVE_SIZEOF_SSIZE_T)
 endif()
 # off_t is sized later, after the HAVE_FILE_OFFSET_BITS test
 
-if(SIZEOF_LONG_LONG)
-  set(HAVE_LONGLONG 1)
-endif()
 if(SIZEOF_SUSECONDS_T)
   set(HAVE_SUSECONDS_T 1)
 endif()
@@ -1800,7 +1807,14 @@ endif()
 # before dependencies detected via curl's custom Find modules, and breaks
 # linkers sensitive to lib order. There must be a better solution to this.
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  foreach(_lib IN ITEMS OpenSSL::Crypto ZLIB::ZLIB)
+  set(_libs "")
+  if(USE_OPENSSL)
+    list(APPEND _libs OpenSSL::Crypto)
+  endif()
+  if(HAVE_LIBZ)
+    list(APPEND _libs ZLIB::ZLIB)
+  endif()
+  foreach(_lib IN LISTS _libs)
     if(TARGET "${_lib}")
       add_library(CURL::${_lib} INTERFACE IMPORTED)
       get_target_property(_libname "${_lib}" LOCATION)
@@ -2138,7 +2152,13 @@ if(NOT CURL_DISABLE_INSTALL)
       if(NOT _libname AND NOT _libs AND NOT _libdirs)
         message(WARNING "Bad lib in library list: ${_lib}")
       endif()
-      get_target_property(_modules "${_lib}" INTERFACE_LIBCURL_PC_MODULES)
+      if(_lib STREQUAL OpenSSL::SSL)
+        set(_modules "openssl")
+      elseif(_lib STREQUAL ZLIB::ZLIB)
+        set(_modules "zlib")
+      else()
+        get_target_property(_modules "${_lib}" INTERFACE_LIBCURL_PC_MODULES)
+      endif()
       if(_modules)
         list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "${_modules}")
       endif()
@@ -2339,7 +2359,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_RUSTLS
   #   USE_WIN32_LDAP CURL_DISABLE_LDAP
   #   USE_WOLFSSL
-  configure_package_config_file("CMake/curl-config.cmake.in"
+  configure_package_config_file("CMake/curl-config.in.cmake"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
@@ -2380,7 +2400,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   if(NOT TARGET curl_uninstall)
     configure_file(
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
       "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
       @ONLY)
 

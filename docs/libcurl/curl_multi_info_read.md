@@ -52,14 +52,14 @@ in that struct and can be used in subsequent regular
 curl_easy_getinfo(3) calls (or similar):
 
 ~~~c
- struct CURLMsg {
-   CURLMSG msg;       /* what this message means */
-   CURL *easy_handle; /* the handle it concerns */
-   union {
-     void *whatever;    /* message-specific data */
-     CURLcode result;   /* return code for transfer */
-   } data;
- };
+struct CURLMsg {
+  CURLMSG msg;       /* what this message means */
+  CURL *easy_handle; /* the handle it concerns */
+  union {
+    void *whatever;    /* message-specific data */
+    CURLcode result;   /* return code for transfer */
+  } data;
+};
 ~~~
 When **msg** is *CURLMSG_DONE*, the message identifies a transfer that
 is done, and then **result** contains the return code for the easy handle

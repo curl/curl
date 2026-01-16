@@ -21,14 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifndef HAVE_SELECT
 #error "We cannot compile without select() support."
 #endif
-
-#include <limits.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>

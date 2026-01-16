@@ -21,16 +21,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_HTTPSRR
 
 #include "urldata.h"
-#include "curl_addrinfo.h"
 #include "httpsrr.h"
 #include "connect.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "strdup.h"
 
 static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,

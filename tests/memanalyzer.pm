@@ -63,8 +63,6 @@ sub memanalyze {
     my $reallocs = 0;
     my $strdups = 0;
     my $wcsdups = 0;
-    my $sends = 0;
-    my $recvs = 0;
     my $sockets = 0;
 
     $memsum = 0; # the total number of memory allocated over the lifetime
@@ -346,14 +344,6 @@ sub memanalyze {
         elsif($_ =~ /^GETNAME ([^ ]*):(\d*) (.*)/) {
             # not much to do
         }
-        # SEND url.c:1901 send(83) = 83
-        elsif($_ =~ /^SEND ([^ ]*):(\d*) (.*)/) {
-            $sends++;
-        }
-        # RECV url.c:1901 recv(102400) = 256
-        elsif($_ =~ /^RECV ([^ ]*):(\d*) (.*)/) {
-            $recvs++;
-        }
 
         # ADDR url.c:1282 getaddrinfo() = 0x5ddd
         elsif($_ =~ /^ADDR ([^ ]*):(\d*) (.*)/) {
@@ -445,11 +435,9 @@ sub memanalyze {
             "Strdups: $strdups\n",
             "Wcsdups: $wcsdups\n",
             "Frees: $frees\n",
-            "Sends: $sends\n",
-            "Recvs: $recvs\n",
             "Sockets: $sockets\n",
             "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
-            "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sends + $recvs + $sockets)."\n",
+            "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sockets)."\n",
             "Maximum allocated: $maxmem\n",
             "Total allocated: $memsum\n";
     }

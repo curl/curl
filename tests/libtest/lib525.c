@@ -43,7 +43,7 @@ static CURLcode test_lib525(const char *URL)
 
   hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
+    curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_FOPEN;

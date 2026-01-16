@@ -21,13 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "curl_trc.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -35,6 +33,7 @@
 #include "multiif.h"
 #include "cf-https-connect.h"
 #include "http2.h"
+#include "progress.h"
 #include "select.h"
 #include "vquic/vquic.h"
 
@@ -149,7 +148,7 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   struct Curl_cfilter *save = cf->next;
 
   cf->next = NULL;
-  b->started = data->progress.now;
+  b->started = *Curl_pgrs_now(data);
   switch(b->alpn_id) {
   case ALPN_h3:
     transport = TRNSPRT_QUIC;
@@ -212,12 +211,12 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   if(reply_ms >= 0)
     CURL_TRC_CF(data, cf, "connect+handshake %s: %dms, 1st data: %dms",
                 winner->name,
-                (int)curlx_timediff_ms(data->progress.now,
-                                       winner->started), reply_ms);
+                (int)curlx_ptimediff_ms(Curl_pgrs_now(data),
+                                        &winner->started), reply_ms);
   else
     CURL_TRC_CF(data, cf, "deferred handshake %s: %dms",
-                winner->name, (int)curlx_timediff_ms(data->progress.now,
-                                                     winner->started));
+                winner->name, (int)curlx_ptimediff_ms(Curl_pgrs_now(data),
+                                                      &winner->started));
 
   /* install the winning filter below this one. */
   cf->next = winner->cf;
@@ -265,7 +264,7 @@ static bool time_to_start_next(struct Curl_cfilter *cf,
                 ctx->ballers[idx].name);
     return TRUE;
   }
-  elapsed_ms = curlx_timediff_ms(now, ctx->started);
+  elapsed_ms = curlx_ptimediff_ms(&now, &ctx->started);
   if(elapsed_ms >= ctx->hard_eyeballs_timeout_ms) {
     CURL_TRC_CF(data, cf, "hard timeout of %" FMT_TIMEDIFF_T "ms reached, "
                 "starting %s",
@@ -308,7 +307,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     for(i = 0; i < ctx->baller_count; i++)
       DEBUGASSERT(!ctx->ballers[i].cf);
     CURL_TRC_CF(data, cf, "connect, init");
-    ctx->started = data->progress.now;
+    ctx->started = *Curl_pgrs_now(data);
     cf_hc_baller_init(&ctx->ballers[0], cf, data, ctx->ballers[0].transport);
     if(ctx->baller_count > 1) {
       Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
@@ -327,7 +326,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       }
     }
 
-    if(time_to_start_next(cf, data, 1, data->progress.now)) {
+    if(time_to_start_next(cf, data, 1, *Curl_pgrs_now(data))) {
       cf_hc_baller_init(&ctx->ballers[1], cf, data, ctx->ballers[1].transport);
     }
 
@@ -468,7 +467,7 @@ static struct curltime cf_get_max_baller_time(struct Curl_cfilter *cf,
     struct Curl_cfilter *cfb = ctx->ballers[i].cf;
     memset(&t, 0, sizeof(t));
     if(cfb && !cfb->cft->query(cfb, data, query, NULL, &t)) {
-      if((t.tv_sec || t.tv_usec) && curlx_timediff_us(t, tmax) > 0)
+      if((t.tv_sec || t.tv_usec) && curlx_ptimediff_us(&t, &tmax) > 0)
         tmax = t;
     }
   }
@@ -547,7 +546,6 @@ static void cf_hc_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
 
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   cf_hc_reset(cf, data);
   Curl_safefree(ctx);

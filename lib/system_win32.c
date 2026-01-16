@@ -21,16 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef _WIN32
 
-#include <curl/curl.h>
 #include "system_win32.h"
 #include "curlx/version_win32.h"
 #include "curl_sspi.h"
-#include "curlx/warnless.h"
 
 #ifndef HAVE_IF_NAMETOINDEX
 /* Handle of iphlpapp.dll */

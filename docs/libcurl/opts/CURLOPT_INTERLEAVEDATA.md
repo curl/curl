@@ -60,7 +60,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INTERLEAVEDATA, &rtp_data);
 
     curl_easy_perform(curl);
- }
+  }
 }
 ~~~
 

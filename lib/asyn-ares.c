@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef CURLRES_ARES
@@ -32,7 +31,6 @@
  * as defined in asyn.h, nothing else belongs in this file!
  **********************************************************************/
 
-#include <limits.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -49,10 +47,8 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "hostip.h"
-#include "hash.h"
-#include "curl_share.h"
 #include "url.h"
 #include "multiif.h"
 #include "curlx/inet_pton.h"
@@ -311,7 +307,8 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
      /* This is only set to non-zero if the timer was started. */
      (ares->happy_eyeballs_dns_time.tv_sec ||
       ares->happy_eyeballs_dns_time.tv_usec) &&
-     (curlx_timediff_ms(data->progress.now, ares->happy_eyeballs_dns_time) >=
+     (curlx_ptimediff_ms(Curl_pgrs_now(data),
+                        &ares->happy_eyeballs_dns_time) >=
       HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
@@ -439,14 +436,13 @@ CURLcode Curl_async_await(struct Curl_easy *data,
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
       struct curltime now = curlx_now(); /* update in loop */
-      timediff_t elapsed_ms = curlx_timediff_ms(now, data->progress.now);
+      timediff_t elapsed_ms = curlx_ptimediff_ms(&now, Curl_pgrs_now(data));
       if(elapsed_ms <= 0)
         timeout_ms -= 1; /* always deduct at least 1 */
       else if(elapsed_ms > timeout_ms)
         timeout_ms = -1;
       else
         timeout_ms -= elapsed_ms;
-      Curl_pgrs_now_at_least(data, &now);
     }
     if(timeout_ms < 0)
       result = CURLE_OPERATION_TIMEDOUT;
@@ -582,7 +578,7 @@ static void async_ares_hostbyname_cb(void *user_data,
        timeout to prevent it. After all, we do not even know where in the
        c-ares retry cycle each request is.
     */
-    ares->happy_eyeballs_dns_time = data->progress.now;
+    ares->happy_eyeballs_dns_time = *Curl_pgrs_now(data);
     Curl_expire(data, HAPPY_EYEBALLS_DNS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS_DNS);
   }
 }
@@ -840,7 +836,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
   const char *servers = data->set.str[STRING_DNS_SERVERS];
   int ares_result = ARES_SUCCESS;
 
-#if defined(CURLDEBUG) && defined(HAVE_CARES_SERVERS_CSV)
+#if defined(DEBUGBUILD) && defined(HAVE_CARES_SERVERS_CSV)
   if(getenv("CURL_DNS_SERVER"))
     servers = getenv("CURL_DNS_SERVER");
 #endif
@@ -875,7 +871,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   }
-#else /* too old c-ares version! */
+#else /* c-ares version too old! */
   (void)data;
   (void)(ares_result);
 #endif

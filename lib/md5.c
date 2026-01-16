@@ -21,42 +21,37 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) || \
   !defined(CURL_DISABLE_DIGEST_AUTH)
 
-#include <string.h>
-#include <curl/curl.h>
-
 #include "curl_md5.h"
 #include "curl_hmac.h"
-#include "curlx/warnless.h"
 
 #ifdef USE_OPENSSL
-  #include <openssl/opensslconf.h>
-  #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-    #define USE_OPENSSL_MD5
-  #endif
+#include <openssl/opensslconf.h>
+#if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
+#define USE_OPENSSL_MD5
+#endif
 #endif
 
 #ifdef USE_WOLFSSL
-  #include <wolfssl/options.h>
-  #ifndef NO_MD5
-    #define USE_WOLFSSL_MD5
-  #endif
+#include <wolfssl/options.h>
+#ifndef NO_MD5
+#define USE_WOLFSSL_MD5
+#endif
 #endif
 
 #ifdef USE_MBEDTLS
-  #include <mbedtls/version.h>
-  #if MBEDTLS_VERSION_NUMBER < 0x03020000
-    #error "mbedTLS 3.2.0 or later required"
-  #endif
-  #include <psa/crypto_config.h>
-  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
-    #define USE_MBEDTLS_MD5
-  #endif
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+#error "mbedTLS 3.2.0 or later required"
+#endif
+#include <psa/crypto_config.h>
+#if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+#define USE_MBEDTLS_MD5
+#endif
 #endif
 
 #ifdef USE_GNUTLS
@@ -291,11 +286,6 @@ struct md5_ctx {
   MD5_u32plus block[16];
 };
 typedef struct md5_ctx my_md5_ctx;
-
-static CURLcode my_md5_init(void *ctx);
-static void my_md5_update(void *ctx, const unsigned char *data,
-                          unsigned int size);
-static void my_md5_final(unsigned char *result, void *ctx);
 
 /*
  * The basic MD5 functions.

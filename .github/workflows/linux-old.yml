@@ -28,8 +28,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -39,8 +37,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -58,7 +54,7 @@ env:
 jobs:
   cmake-autotools:
     name: 'autotools & cmake'
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     container: 'debian:stretch'
 
     env:
@@ -162,7 +158,7 @@ jobs:
         run: |
           mkdir bld-am
           cd bld-am
-          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --disable-shared \
             --without-ssl --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
 
