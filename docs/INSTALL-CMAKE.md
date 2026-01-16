@@ -79,18 +79,18 @@ generate the project. After the project is generated, you can run make.
 CMake also comes with a Qt based GUI called `cmake-gui`. To configure with
 `cmake-gui`, you run `cmake-gui` and follow these steps:
 
- 1. Fill in the "Where is the source code" combo box with the path to
-    the curl source tree.
- 2. Fill in the "Where to build the binaries" combo box with the path to
-    the directory for your build tree, ideally this should not be the same
-    as the source tree, but a parallel directory called curl-build or
-    something similar.
- 3. Once the source and binary directories are specified, press the
-    "Configure" button.
- 4. Select the native build tool that you want to use.
- 5. At this point you can change any of the options presented in the GUI.
-    Once you have selected all the options you want, click the "Generate"
-    button.
+1. Fill in the "Where is the source code" combo box with the path to
+   the curl source tree.
+2. Fill in the "Where to build the binaries" combo box with the path to
+   the directory for your build tree, ideally this should not be the same
+   as the source tree, but a parallel directory called curl-build or
+   something similar.
+3. Once the source and binary directories are specified, press the
+   "Configure" button.
+4. Select the native build tool that you want to use.
+5. At this point you can change any of the options presented in the GUI.
+   Once you have selected all the options you want, click the "Generate"
+   button.
 
 # Building
 
@@ -345,7 +345,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CMAKE_INSTALL_PREFIX`                    (see CMake)
 - `CMAKE_STATIC_LIBRARY_SUFFIX`             (see CMake)
 - `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Set the number of sources in a "unity" unit. Default: `0` (all)
-- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka jumbo) builds. Default: `OFF`
+- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka "jumbo") builds. Default: `OFF`
 
 Details via CMake
 [variables](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html) and

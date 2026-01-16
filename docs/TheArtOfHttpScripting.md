@@ -8,214 +8,214 @@ SPDX-License-Identifier: curl
 
 ## Background
 
- This document assumes that you are familiar with HTML and general networking.
+This document assumes that you are familiar with HTML and general networking.
 
- The increasing amount of applications moving to the web has made "HTTP
- Scripting" more frequently requested and wanted. To be able to automatically
- extract information from the web, to fake users, to post or upload data to
- web servers are all important tasks today.
+The increasing amount of applications moving to the web has made "HTTP
+Scripting" more frequently requested and wanted. To be able to automatically
+extract information from the web, to fake users, to post or upload data to
+web servers are all important tasks today.
 
- curl is a command line tool for doing all sorts of URL manipulations and
- transfers, but this particular document focuses on how to use it when doing
- HTTP requests for fun and profit. This documents assumes that you know how to
- invoke `curl --help` or `curl --manual` to get basic information about it.
+curl is a command line tool for doing all sorts of URL manipulations and
+transfers, but this particular document focuses on how to use it when doing
+HTTP requests for fun and profit. This documents assumes that you know how to
+invoke `curl --help` or `curl --manual` to get basic information about it.
 
- curl is not written to do everything for you. It makes the requests, it gets
- the data, it sends data and it retrieves the information. You probably need
- to glue everything together using some kind of script language or repeated
- manual invokes.
+curl is not written to do everything for you. It makes the requests, it gets
+the data, it sends data and it retrieves the information. You probably need
+to glue everything together using some kind of script language or repeated
+manual invokes.
 
 ## The HTTP Protocol
 
- HTTP is the protocol used to fetch data from web servers. It is a simple
- protocol that is built upon TCP/IP. The protocol also allows information to
- get sent to the server from the client using a few different methods, as is
- shown here.
+HTTP is the protocol used to fetch data from web servers. It is a simple
+protocol that is built upon TCP/IP. The protocol also allows information to
+get sent to the server from the client using a few different methods, as is
+shown here.
 
- HTTP is plain ASCII text lines being sent by the client to a server to
- request a particular action, and then the server replies a few text lines
- before the actual requested content is sent to the client.
+HTTP is plain ASCII text lines being sent by the client to a server to
+request a particular action, and then the server replies a few text lines
+before the actual requested content is sent to the client.
 
- The client, curl, sends an HTTP request. The request contains a method (like
- GET, POST, HEAD etc), a number of request headers and sometimes a request
- body. The HTTP server responds with a status line (indicating if things went
- well), response headers and most often also a response body. The "body" part
- is the plain data you requested, like the actual HTML or the image etc.
+The client, curl, sends an HTTP request. The request contains a method (like
+GET, POST, HEAD etc), a number of request headers and sometimes a request
+body. The HTTP server responds with a status line (indicating if things went
+well), response headers and most often also a response body. The "body" part
+is the plain data you requested, like the actual HTML or the image etc.
 
 ## See the Protocol
 
- Using curl's option [`--verbose`](https://curl.se/docs/manpage.html#-v) (`-v`
- as a short option) displays what kind of commands curl sends to the server,
- as well as a few other informational texts.
+Using curl's option [`--verbose`](https://curl.se/docs/manpage.html#-v) (`-v`
+as a short option) displays what kind of commands curl sends to the server,
+as well as a few other informational texts.
 
- `--verbose` is the single most useful option when it comes to debug or even
- understand the curl<->server interaction.
+`--verbose` is the single most useful option when it comes to debug or even
+understand the curl<->server interaction.
 
- Sometimes even `--verbose` is not enough. Then
- [`--trace`](https://curl.se/docs/manpage.html#-trace) and
- [`--trace-ascii`](https://curl.se/docs/manpage.html#--trace-ascii)
- offer even more details as they show **everything** curl sends and
- receives. Use it like this:
+Sometimes even `--verbose` is not enough. Then
+[`--trace`](https://curl.se/docs/manpage.html#-trace) and
+[`--trace-ascii`](https://curl.se/docs/manpage.html#--trace-ascii)
+offer even more details as they show **everything** curl sends and
+receives. Use it like this:
 
     curl --trace-ascii debugdump.txt https://www.example.com/
 
 ## See the Timing
 
- Many times you may wonder what exactly is taking all the time, or you just
- want to know the amount of milliseconds between two points in a transfer. For
- those, and other similar situations, the
- [`--trace-time`](https://curl.se/docs/manpage.html#--trace-time) option is
- what you need. It prepends the time to each trace output line:
+Many times you may wonder what exactly is taking all the time, or you just
+want to know the amount of milliseconds between two points in a transfer. For
+those, and other similar situations, the
+[`--trace-time`](https://curl.se/docs/manpage.html#--trace-time) option is
+what you need. It prepends the time to each trace output line:
 
     curl --trace-ascii d.txt --trace-time https://example.com/
 
 ## See which Transfer
 
- When doing parallel transfers, it is relevant to see which transfer is doing
- what. When response headers are received (and logged) you need to know which
- transfer these are for.
- [`--trace-ids`](https://curl.se/docs/manpage.html#--trace-ids) option is what
- you need. It prepends the transfer and connection identifier to each trace
- output line:
+When doing parallel transfers, it is relevant to see which transfer is doing
+what. When response headers are received (and logged) you need to know which
+transfer these are for.
+[`--trace-ids`](https://curl.se/docs/manpage.html#--trace-ids) option is what
+you need. It prepends the transfer and connection identifier to each trace
+output line:
 
     curl --trace-ascii d.txt --trace-ids https://example.com/
 
 ## See the Response
 
- By default curl sends the response to stdout. You need to redirect it
- somewhere to avoid that, most often that is done with `-o` or `-O`.
+By default curl sends the response to stdout. You need to redirect it
+somewhere to avoid that, most often that is done with `-o` or `-O`.
 
 # URL
 
 ## Spec
 
- The Uniform Resource Locator format is how you specify the address of a
- particular resource on the Internet. You know these, you have seen URLs like
- https://curl.se/ or https://example.com/ a million times. RFC 3986 is the
- canonical spec. The formal name is not URL, it is **URI**.
+The Uniform Resource Locator format is how you specify the address of a
+particular resource on the Internet. You know these, you have seen URLs like
+https://curl.se/ or https://example.com/ a million times. RFC 3986 is the
+canonical spec. The formal name is not URL, it is **URI**.
 
 ## Host
 
- The hostname is usually resolved using DNS or your /etc/hosts file to an IP
- address and that is what curl communicates with. Alternatively you specify
- the IP address directly in the URL instead of a name.
+The hostname is usually resolved using DNS or your /etc/hosts file to an IP
+address and that is what curl communicates with. Alternatively you specify
+the IP address directly in the URL instead of a name.
 
- For development and other trying out situations, you can point to a different
- IP address for a hostname than what would otherwise be used, by using curl's
- [`--resolve`](https://curl.se/docs/manpage.html#--resolve) option:
+For development and other trying out situations, you can point to a different
+IP address for a hostname than what would otherwise be used, by using curl's
+[`--resolve`](https://curl.se/docs/manpage.html#--resolve) option:
 
     curl --resolve www.example.org:80:127.0.0.1 https://www.example.org/
 
 ## Port number
 
- Each protocol curl supports operates on a default port number, be it over TCP
- or in some cases UDP. Normally you do not have to take that into
- consideration, but at times you run test servers on other ports or
- similar. Then you can specify the port number in the URL with a colon and a
- number immediately following the hostname. Like when doing HTTP to port
- 1234:
+Each protocol curl supports operates on a default port number, be it over TCP
+or in some cases UDP. Normally you do not have to take that into
+consideration, but at times you run test servers on other ports or
+similar. Then you can specify the port number in the URL with a colon and a
+number immediately following the hostname. Like when doing HTTP to port
+1234:
 
     curl https://www.example.org:1234/
 
- The port number you specify in the URL is the number that the server uses to
- offer its services. Sometimes you may use a proxy, and then you may
- need to specify that proxy's port number separately from what curl needs to
- connect to the server. Like when using an HTTP proxy on port 4321:
+The port number you specify in the URL is the number that the server uses to
+offer its services. Sometimes you may use a proxy, and then you may
+need to specify that proxy's port number separately from what curl needs to
+connect to the server. Like when using an HTTP proxy on port 4321:
 
     curl --proxy http://proxy.example.org:4321 https://remote.example.org/
 
 ## Username and password
 
- Some services are setup to require HTTP authentication and then you need to
- provide name and password which is then transferred to the remote site in
- various ways depending on the exact authentication protocol used.
+Some services are setup to require HTTP authentication and then you need to
+provide name and password which is then transferred to the remote site in
+various ways depending on the exact authentication protocol used.
 
- You can opt to either insert the user and password in the URL or you can
- provide them separately:
+You can opt to either insert the user and password in the URL or you can
+provide them separately:
 
     curl https://user:password@example.org/
 
- or
+or
 
     curl -u user:password https://example.org/
 
- You need to pay attention that this kind of HTTP authentication is not what
- is usually done and requested by user-oriented websites these days. They tend
- to use forms and cookies instead.
+You need to pay attention that this kind of HTTP authentication is not what
+is usually done and requested by user-oriented websites these days. They tend
+to use forms and cookies instead.
 
 ## Path part
 
- The path part is just sent off to the server to request that it sends back
- the associated response. The path is what is to the right side of the slash
- that follows the hostname and possibly port number.
+The path part is just sent off to the server to request that it sends back
+the associated response. The path is what is to the right side of the slash
+that follows the hostname and possibly port number.
 
 # Fetch a page
 
 ## GET
 
- The simplest and most common request/operation made using HTTP is to GET a
- URL. The URL could itself refer to a webpage, an image or a file. The client
- issues a GET request to the server and receives the document it asked for.
- If you issue the command line
+The simplest and most common request/operation made using HTTP is to GET a
+URL. The URL could itself refer to a webpage, an image or a file. The client
+issues a GET request to the server and receives the document it asked for.
+If you issue the command line
 
     curl https://curl.se/
 
- you get a webpage returned in your terminal window. The entire HTML document
- this URL identifies.
+you get a webpage returned in your terminal window. The entire HTML document
+this URL identifies.
 
- All HTTP replies contain a set of response headers that are normally hidden,
- use curl's [`--include`](https://curl.se/docs/manpage.html#-i) (`-i`)
- option to display them as well as the rest of the document.
+All HTTP replies contain a set of response headers that are normally hidden,
+use curl's [`--include`](https://curl.se/docs/manpage.html#-i) (`-i`)
+option to display them as well as the rest of the document.
 
 ## HEAD
 
- You can ask the remote server for ONLY the headers by using the
- [`--head`](https://curl.se/docs/manpage.html#-I) (`-I`) option which makes
- curl issue a HEAD request. In some special cases servers deny the HEAD method
- while others still work, which is a particular kind of annoyance.
+You can ask the remote server for ONLY the headers by using the
+[`--head`](https://curl.se/docs/manpage.html#-I) (`-I`) option which makes
+curl issue a HEAD request. In some special cases servers deny the HEAD method
+while others still work, which is a particular kind of annoyance.
 
- The HEAD method is defined and made so that the server returns the headers
- exactly the way it would do for a GET, but without a body. It means that you
- may see a `Content-Length:` in the response headers, but there must not be an
- actual body in the HEAD response.
+The HEAD method is defined and made so that the server returns the headers
+exactly the way it would do for a GET, but without a body. It means that you
+may see a `Content-Length:` in the response headers, but there must not be an
+actual body in the HEAD response.
 
 ## Multiple URLs in a single command line
 
- A single curl command line may involve one or many URLs. The most common case
- is probably to just use one, but you can specify any amount of URLs. Yes any.
- No limits. You then get requests repeated over and over for all the given
- URLs.
+A single curl command line may involve one or many URLs. The most common case
+is probably to just use one, but you can specify any amount of URLs. Yes any.
+No limits. You then get requests repeated over and over for all the given
+URLs.
 
- Example, send two GET requests:
+Example, send two GET requests:
 
     curl https://url1.example.com https://url2.example.com
 
- If you use [`--data`](https://curl.se/docs/manpage.html#-d) to POST to
- the URL, using multiple URLs means that you send that same POST to all the
- given URLs.
+If you use [`--data`](https://curl.se/docs/manpage.html#-d) to POST to
+the URL, using multiple URLs means that you send that same POST to all the
+given URLs.
 
- Example, send two POSTs:
+Example, send two POSTs:
 
     curl --data name=curl https://url1.example.com https://url2.example.com
 
 ## Multiple HTTP methods in a single command line
 
- Sometimes you need to operate on several URLs in a single command line and do
- different HTTP methods on each. For this, you might enjoy the
- [`--next`](https://curl.se/docs/manpage.html#-:) option. It is basically a
- separator that separates a bunch of options from the next. All the URLs
- before `--next` get the same method and get all the POST data merged into
- one.
+Sometimes you need to operate on several URLs in a single command line and do
+different HTTP methods on each. For this, you might enjoy the
+[`--next`](https://curl.se/docs/manpage.html#-:) option. It is basically a
+separator that separates a bunch of options from the next. All the URLs
+before `--next` get the same method and get all the POST data merged into
+one.
 
- When curl reaches the `--next` on the command line, it resets the method and
- the POST data and allow a new set.
+When curl reaches the `--next` on the command line, it resets the method and
+the POST data and allow a new set.
 
- Perhaps this is best shown with a few examples. To send first a HEAD and then
- a GET:
+Perhaps this is best shown with a few examples. To send first a HEAD and then
+a GET:
 
     curl -I https://example.com --next https://example.com
 
- To first send a POST and then a GET:
+To first send a POST and then a GET:
 
     curl -d score=10 https://example.com/post.cgi --next https://example.com/results.html
 
@@ -223,20 +223,20 @@ SPDX-License-Identifier: curl
 
 ## Forms explained
 
- Forms are the general way a website can present an HTML page with fields for
- the user to enter data in, and then press some kind of 'OK' or 'Submit'
- button to get that data sent to the server. The server then typically uses
- the posted data to decide how to act. Like using the entered words to search
- in a database, or to add the info in a bug tracking system, display the
- entered address on a map or using the info as a login-prompt verifying that
- the user is allowed to see what it is about to see.
+Forms are the general way a website can present an HTML page with fields for
+the user to enter data in, and then press some kind of 'OK' or 'Submit'
+button to get that data sent to the server. The server then typically uses
+the posted data to decide how to act. Like using the entered words to search
+in a database, or to add the info in a bug tracking system, display the
+entered address on a map or using the info as a login-prompt verifying that
+the user is allowed to see what it is about to see.
 
- Of course there has to be some kind of program on the server end to receive
- the data you send. You cannot just invent something out of the air.
+Of course there has to be some kind of program on the server end to receive
+the data you send. You cannot just invent something out of the air.
 
 ## GET
 
- A GET-form uses the method GET, as specified in HTML like:
+A GET-form uses the method GET, as specified in HTML like:
 
 ```html
 <form method="GET" action="junk.cgi">
@@ -245,36 +245,36 @@ SPDX-License-Identifier: curl
 </form>
 ```
 
- In your favorite browser, this form appears with a text box to fill in and a
- press-button labeled "OK". If you fill in '1905' and press the OK button,
- your browser then creates a new URL to get for you. The URL gets
- `junk.cgi?birthyear=1905&press=OK` appended to the path part of the previous
- URL.
+In your favorite browser, this form appears with a text box to fill in and a
+press-button labeled "OK". If you fill in '1905' and press the OK button,
+your browser then creates a new URL to get for you. The URL gets
+`junk.cgi?birthyear=1905&press=OK` appended to the path part of the previous
+URL.
 
- If the original form was seen on the page `www.example.com/when/birth.html`,
- the second page you get becomes
- `www.example.com/when/junk.cgi?birthyear=1905&press=OK`.
+If the original form was seen on the page `www.example.com/when/birth.html`,
+the second page you get becomes
+`www.example.com/when/junk.cgi?birthyear=1905&press=OK`.
 
- Most search engines work this way.
+Most search engines work this way.
 
- To make curl do the GET form post for you, just enter the expected created
- URL:
+To make curl do the GET form post for you, just enter the expected created
+URL:
 
     curl "https://www.example.com/when/junk.cgi?birthyear=1905&press=OK"
 
 ## POST
 
- The GET method makes all input field names get displayed in the URL field of
- your browser. That is generally a good thing when you want to be able to
- bookmark that page with your given data, but it is an obvious disadvantage if
- you entered secret information in one of the fields or if there are a large
- amount of fields creating a long and unreadable URL.
+The GET method makes all input field names get displayed in the URL field of
+your browser. That is generally a good thing when you want to be able to
+bookmark that page with your given data, but it is an obvious disadvantage if
+you entered secret information in one of the fields or if there are a large
+amount of fields creating a long and unreadable URL.
 
- The HTTP protocol then offers the POST method. This way the client sends the
- data separated from the URL and thus you do not see any of it in the URL
- address field.
+The HTTP protocol then offers the POST method. This way the client sends the
+data separated from the URL and thus you do not see any of it in the URL
+address field.
 
- The form would look similar to the previous one:
+The form would look similar to the previous one:
 
 ```html
 <form method="POST" action="junk.cgi">
@@ -283,56 +283,56 @@ SPDX-License-Identifier: curl
 </form>
 ```
 
- And to use curl to post this form with the same data filled in as before, we
- could do it like:
+To use curl to post this form with the same data filled in as before, we
+could do it like:
 
     curl --data "birthyear=1905&press=%20OK%20" https://www.example.com/when/junk.cgi
 
- This kind of POST uses the Content-Type `application/x-www-form-urlencoded`
- and is the most widely used POST kind.
+This kind of POST uses the Content-Type `application/x-www-form-urlencoded`
+and is the most widely used POST kind.
 
- The data you send to the server MUST already be properly encoded, curl does
- not do that for you. For example, if you want the data to contain a space,
- you need to replace that space with `%20`, etc. Failing to comply with this
- most likely causes your data to be received wrongly and messed up.
+The data you send to the server MUST already be properly encoded, curl does
+not do that for you. For example, if you want the data to contain a space,
+you need to replace that space with `%20`, etc. Failing to comply with this
+most likely causes your data to be received wrongly and messed up.
 
- Recent curl versions can in fact url-encode POST data for you, like this:
+Recent curl versions can in fact url-encode POST data for you, like this:
 
     curl --data-urlencode "name=I am Daniel" https://www.example.com
 
- If you repeat `--data` several times on the command line, curl concatenates
- all the given data pieces - and put a `&` symbol between each data segment.
+If you repeat `--data` several times on the command line, curl concatenates
+all the given data pieces - and put a `&` symbol between each data segment.
 
 ## File Upload POST
 
- Back in late 1995 they defined an additional way to post data over HTTP. It
- is documented in the RFC 1867, why this method sometimes is referred to as
- RFC 1867-posting.
+Back in late 1995 they defined an additional way to post data over HTTP. It
+is documented in the RFC 1867, why this method sometimes is referred to as
+RFC 1867-posting.
 
- This method is mainly designed to better support file uploads. A form that
- allows a user to upload a file could be written like this in HTML:
+This method is mainly designed to better support file uploads. A form that
+allows a user to upload a file could be written like this in HTML:
 
     <form method="POST" enctype='multipart/form-data' action="upload.cgi">
       <input name=upload type=file>
       <input type=submit name=press value="OK">
     </form>
 
- This clearly shows that the Content-Type about to be sent is
- `multipart/form-data`.
+This clearly shows that the Content-Type about to be sent is
+`multipart/form-data`.
 
- To post to a form like this with curl, you enter a command line like:
+To post to a form like this with curl, you enter a command line like:
 
     curl --form upload=@localfilename --form press=OK [URL]
 
 ## Hidden Fields
 
- A common way for HTML based applications to pass state information between
- pages is to add hidden fields to the forms. Hidden fields are already filled
- in, they are not displayed to the user and they get passed along just as all
- the other fields.
+A common way for HTML based applications to pass state information between
+pages is to add hidden fields to the forms. Hidden fields are already filled
+in, they are not displayed to the user and they get passed along just as all
+the other fields.
 
- A similar example form with one visible field, one hidden field and one
- submit button could look like:
+A similar example form with one visible field, one hidden field and one
+submit button could look like:
 
 ```html
 <form method="POST" action="foobar.cgi">
@@ -342,33 +342,33 @@ SPDX-License-Identifier: curl
 </form>
 ```
 
- To POST this with curl, you do not have to think about if the fields are
- hidden or not. To curl they are all the same:
+To POST this with curl, you do not have to think about if the fields are
+hidden or not. To curl they are all the same:
 
     curl --data "birthyear=1905&press=OK&person=daniel" [URL]
 
 ## Figure Out What A POST Looks Like
 
- When you are about to fill in a form and send it to a server by using curl
- instead of a browser, you are of course interested in sending a POST exactly
- the way your browser does.
+When you are about to fill in a form and send it to a server by using curl
+instead of a browser, you are of course interested in sending a POST exactly
+the way your browser does.
 
- An easy way to get to see this, is to save the HTML page with the form on
- your local disk, modify the 'method' to a GET, and press the submit button
- (you could also change the action URL if you want to).
+An easy way to get to see this, is to save the HTML page with the form on
+your local disk, modify the 'method' to a GET, and press the submit button
+(you could also change the action URL if you want to).
 
- You then clearly see the data get appended to the URL, separated with a
- `?`-letter as GET forms are supposed to.
+You then clearly see the data get appended to the URL, separated with a
+`?`-letter as GET forms are supposed to.
 
 # HTTP upload
 
 ## PUT
 
- Perhaps the best way to upload data to an HTTP server is to use PUT. Then
- again, this of course requires that someone put a program or script on the
- server end that knows how to receive an HTTP PUT stream.
+Perhaps the best way to upload data to an HTTP server is to use PUT. Then
+again, this of course requires that someone put a program or script on the
+server end that knows how to receive an HTTP PUT stream.
 
- Put a file to an HTTP server with curl:
+Put a file to an HTTP server with curl:
 
     curl --upload-file uploadfile https://www.example.com/receive.cgi
 
@@ -376,92 +376,92 @@ SPDX-License-Identifier: curl
 
 ## Basic Authentication
 
- HTTP Authentication is the ability to tell the server your username and
- password so that it can verify that you are allowed to do the request you are
- doing. The Basic authentication used in HTTP (which is the type curl uses by
- default) is **plain text** based, which means it sends username and password
- only slightly obfuscated, but still fully readable by anyone that sniffs on
- the network between you and the remote server.
+HTTP Authentication is the ability to tell the server your username and
+password so that it can verify that you are allowed to do the request you are
+doing. The Basic authentication used in HTTP (which is the type curl uses by
+default) is **plain text** based, which means it sends username and password
+only slightly obfuscated, but still fully readable by anyone that sniffs on
+the network between you and the remote server.
 
- To tell curl to use a user and password for authentication:
+To tell curl to use a user and password for authentication:
 
     curl --user myname:password https://www.example.com
 
 ## Other Authentication
 
- The site might require a different authentication method (check the headers
- returned by the server), and then
- [`--ntlm`](https://curl.se/docs/manpage.html#--ntlm),
- [`--digest`](https://curl.se/docs/manpage.html#--digest),
- [`--negotiate`](https://curl.se/docs/manpage.html#--negotiate) or even
- [`--anyauth`](https://curl.se/docs/manpage.html#--anyauth) might be
- options that suit you.
+The site might require a different authentication method (check the headers
+returned by the server), and then
+[`--ntlm`](https://curl.se/docs/manpage.html#--ntlm),
+[`--digest`](https://curl.se/docs/manpage.html#--digest),
+[`--negotiate`](https://curl.se/docs/manpage.html#--negotiate) or even
+[`--anyauth`](https://curl.se/docs/manpage.html#--anyauth) might be
+options that suit you.
 
 ## Proxy Authentication
 
- Sometimes your HTTP access is only available through the use of an HTTP
- proxy. This seems to be especially common at various companies. An HTTP proxy
- may require its own user and password to allow the client to get through to
- the Internet. To specify those with curl, run something like:
+Sometimes your HTTP access is only available through the use of an HTTP
+proxy. This seems to be especially common at various companies. An HTTP proxy
+may require its own user and password to allow the client to get through to
+the Internet. To specify those with curl, run something like:
 
     curl --proxy-user proxyuser:proxypassword curl.se
 
- If your proxy requires the authentication to be done using the NTLM method,
- use [`--proxy-ntlm`](https://curl.se/docs/manpage.html#--proxy-ntlm), if
- it requires Digest use
- [`--proxy-digest`](https://curl.se/docs/manpage.html#--proxy-digest).
+If your proxy requires the authentication to be done using the NTLM method,
+use [`--proxy-ntlm`](https://curl.se/docs/manpage.html#--proxy-ntlm), if
+it requires Digest use
+[`--proxy-digest`](https://curl.se/docs/manpage.html#--proxy-digest).
 
- If you use any one of these user+password options but leave out the password
- part, curl prompts for the password interactively.
+If you use any one of these user+password options but leave out the password
+part, curl prompts for the password interactively.
 
 ## Hiding credentials
 
- Do note that when a program is run, its parameters might be possible to see
- when listing the running processes of the system. Thus, other users may be
- able to watch your passwords if you pass them as plain command line
- options. There are ways to circumvent this.
+Do note that when a program is run, its parameters might be possible to see
+when listing the running processes of the system. Thus, other users may be
+able to watch your passwords if you pass them as plain command line
+options. There are ways to circumvent this.
 
- It is worth noting that while this is how HTTP Authentication works, many
- websites do not use this concept when they provide logins etc. See the Web
- Login chapter further below for more details on that.
+It is worth noting that while this is how HTTP Authentication works, many
+websites do not use this concept when they provide logins etc. See the Web
+Login chapter further below for more details on that.
 
 # More HTTP Headers
 
 ## Referer
 
- An HTTP request may include a 'referer' field (yes it is misspelled), which
- can be used to tell from which URL the client got to this particular
- resource. Some programs/scripts check the referer field of requests to verify
- that this was not arriving from an external site or an unknown page. While
- this is a stupid way to check something so easily forged, many scripts still
- do it. Using curl, you can put anything you want in the referer-field and
- thus more easily be able to fool the server into serving your request.
+An HTTP request may include a 'referer' field (yes it is misspelled), which
+can be used to tell from which URL the client got to this particular
+resource. Some programs/scripts check the referer field of requests to verify
+that this was not arriving from an external site or an unknown page. While
+this is a stupid way to check something so easily forged, many scripts still
+do it. Using curl, you can put anything you want in the referer-field and
+thus more easily be able to fool the server into serving your request.
 
- Use curl to set the referer field with:
+Use curl to set the referer field with:
 
     curl --referer https://www.example.come https://www.example.com
 
 ## User Agent
 
- Similar to the referer field, all HTTP requests may set the User-Agent
- field. It names what user agent (client) that is being used. Many
- applications use this information to decide how to display pages. Silly web
- programmers try to make different pages for users of different browsers to
- make them look the best possible for their particular browsers. They usually
- also do different kinds of JavaScript etc.
+Similar to the referer field, all HTTP requests may set the User-Agent
+field. It names what user agent (client) that is being used. Many
+applications use this information to decide how to display pages. Silly web
+programmers try to make different pages for users of different browsers to
+make them look the best possible for their particular browsers. They usually
+also do different kinds of JavaScript etc.
 
- At times, you may learn that getting a page with curl does not return the
- same page that you see when getting the page with your browser. Then you know
- it is time to set the User Agent field to fool the server into thinking you
- are one of those browsers.
+At times, you may learn that getting a page with curl does not return the
+same page that you see when getting the page with your browser. Then you know
+it is time to set the User Agent field to fool the server into thinking you
+are one of those browsers.
 
- By default, curl uses curl/VERSION, such as User-Agent: curl/8.11.0.
+By default, curl uses curl/VERSION, such as User-Agent: curl/8.11.0.
 
- To make curl look like Internet Explorer 5 on a Windows 2000 box:
+To make curl look like Internet Explorer 5 on a Windows 2000 box:
 
     curl --user-agent "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" [URL]
 
- Or why not look like you are using Netscape 4.73 on an old Linux box:
+Or why not look like you are using Netscape 4.73 on an old Linux box:
 
     curl --user-agent "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
 
@@ -469,91 +469,91 @@ SPDX-License-Identifier: curl
 
 ## Location header
 
- When a resource is requested from a server, the reply from the server may
- include a hint about where the browser should go next to find this page, or a
- new page keeping newly generated output. The header that tells the browser to
- redirect is `Location:`.
+When a resource is requested from a server, the reply from the server may
+include a hint about where the browser should go next to find this page, or a
+new page keeping newly generated output. The header that tells the browser to
+redirect is `Location:`.
 
- curl does not follow `Location:` headers by default, but simply displays such
- pages in the same manner it displays all HTTP replies. It does however
- feature an option that makes it attempt to follow the `Location:` pointers.
+curl does not follow `Location:` headers by default, but simply displays such
+pages in the same manner it displays all HTTP replies. It does however
+feature an option that makes it attempt to follow the `Location:` pointers.
 
- To tell curl to follow a Location:
+To tell curl to follow a Location:
 
     curl --location https://www.example.com
 
- If you use curl to POST to a site that immediately redirects you to another
- page, you can safely use [`--location`](https://curl.se/docs/manpage.html#-L)
- (`-L`) and `--data`/`--form` together. curl only uses POST in the first
- request, and then revert to GET in the following operations.
+If you use curl to POST to a site that immediately redirects you to another
+page, you can safely use [`--location`](https://curl.se/docs/manpage.html#-L)
+(`-L`) and `--data`/`--form` together. curl only uses POST in the first
+request, and then revert to GET in the following operations.
 
 ## Other redirects
 
- Browsers typically support at least two other ways of redirects that curl
- does not: first the html may contain a meta refresh tag that asks the browser
- to load a specific URL after a set number of seconds, or it may use
- JavaScript to do it.
+Browsers typically support at least two other ways of redirects that curl
+does not: first the html may contain a meta refresh tag that asks the browser
+to load a specific URL after a set number of seconds, or it may use
+JavaScript to do it.
 
 # Cookies
 
 ## Cookie Basics
 
- The way the web browsers do "client side state control" is by using
- cookies. Cookies are just names with associated contents. The cookies are
- sent to the client by the server. The server tells the client for what path
- and hostname it wants the cookie sent back, and it also sends an expiration
- date and a few more properties.
+The way the web browsers do "client side state control" is by using
+cookies. Cookies are just names with associated contents. The cookies are
+sent to the client by the server. The server tells the client for what path
+and hostname it wants the cookie sent back, and it also sends an expiration
+date and a few more properties.
 
- When a client communicates with a server with a name and path as previously
- specified in a received cookie, the client sends back the cookies and their
- contents to the server, unless of course they are expired.
+When a client communicates with a server with a name and path as previously
+specified in a received cookie, the client sends back the cookies and their
+contents to the server, unless of course they are expired.
 
- Many applications and servers use this method to connect a series of requests
- into a single logical session. To be able to use curl in such occasions, we
- must be able to record and send back cookies the way the web application
- expects them. The same way browsers deal with them.
+Many applications and servers use this method to connect a series of requests
+into a single logical session. To be able to use curl in such occasions, we
+must be able to record and send back cookies the way the web application
+expects them. The same way browsers deal with them.
 
 ## Cookie options
 
- The simplest way to send a few cookies to the server when getting a page with
- curl is to add them on the command line like:
+The simplest way to send a few cookies to the server when getting a page with
+curl is to add them on the command line like:
 
     curl --cookie "name=Daniel" https://www.example.com
 
- Cookies are sent as common HTTP headers. This is practical as it allows curl
- to record cookies simply by recording headers. Record cookies with curl by
- using the [`--dump-header`](https://curl.se/docs/manpage.html#-D) (`-D`)
- option like:
+Cookies are sent as common HTTP headers. This is practical as it allows curl
+to record cookies simply by recording headers. Record cookies with curl by
+using the [`--dump-header`](https://curl.se/docs/manpage.html#-D) (`-D`)
+option like:
 
     curl --dump-header headers_and_cookies https://www.example.com
 
- (Take note that the
- [`--cookie-jar`](https://curl.se/docs/manpage.html#-c) option described
- below is a better way to store cookies.)
+(Take note that the
+[`--cookie-jar`](https://curl.se/docs/manpage.html#-c) option described
+below is a better way to store cookies.)
 
- curl has a full blown cookie parsing engine built-in that comes in use if you
- want to reconnect to a server and use cookies that were stored from a
- previous connection (or hand-crafted manually to fool the server into
- believing you had a previous connection). To use previously stored cookies,
- you run curl like:
+curl has a full blown cookie parsing engine built-in that comes in use if you
+want to reconnect to a server and use cookies that were stored from a
+previous connection (or hand-crafted manually to fool the server into
+believing you had a previous connection). To use previously stored cookies,
+you run curl like:
 
     curl --cookie stored_cookies_in_file https://www.example.com
 
- curl's "cookie engine" gets enabled when you use the
- [`--cookie`](https://curl.se/docs/manpage.html#-b) option. If you only
- want curl to understand received cookies, use `--cookie` with a file that
- does not exist. Example, if you want to let curl understand cookies from a
- page and follow a location (and thus possibly send back cookies it received),
- you can invoke it like:
+curl's "cookie engine" gets enabled when you use the
+[`--cookie`](https://curl.se/docs/manpage.html#-b) option. If you only
+want curl to understand received cookies, use `--cookie` with a file that
+does not exist. Example, if you want to let curl understand cookies from a
+page and follow a location (and thus possibly send back cookies it received),
+you can invoke it like:
 
     curl --cookie nada --location https://www.example.com
 
- curl has the ability to read and write cookie files that use the same file
- format that Netscape and Mozilla once used. It is a convenient way to share
- cookies between scripts or invokes. The `--cookie` (`-b`) switch
- automatically detects if a given file is such a cookie file and parses it,
- and by using the `--cookie-jar` (`-c`) option you make curl write a new
- cookie file at the end of an operation:
+curl has the ability to read and write cookie files that use the same file
+format that Netscape and Mozilla once used. It is a convenient way to share
+cookies between scripts or invokes. The `--cookie` (`-b`) switch
+automatically detects if a given file is such a cookie file and parses it,
+and by using the `--cookie-jar` (`-c`) option you make curl write a new
+cookie file at the end of an operation:
 
     curl --cookie cookies.txt --cookie-jar newcookies.txt \
       https://www.example.com
@@ -562,43 +562,43 @@ SPDX-License-Identifier: curl
 
 ## HTTPS is HTTP secure
 
- There are a few ways to do secure HTTP transfers. By far the most common
- protocol for doing this is what is generally known as HTTPS, HTTP over
- SSL. SSL encrypts all the data that is sent and received over the network and
- thus makes it harder for attackers to spy on sensitive information.
+There are a few ways to do secure HTTP transfers. By far the most common
+protocol for doing this is what is generally known as HTTPS, HTTP over
+SSL. SSL encrypts all the data that is sent and received over the network and
+thus makes it harder for attackers to spy on sensitive information.
 
- SSL (or TLS as the current version of the standard is called) offers a set of
- advanced features to do secure transfers over HTTP.
+SSL (or TLS as the current version of the standard is called) offers a set of
+advanced features to do secure transfers over HTTP.
 
- curl supports encrypted fetches when built to use a TLS library and it can be
- built to use one out of a fairly large set of libraries - `curl -V` shows
- which one your curl was built to use (if any). To get a page from an HTTPS
- server, simply run curl like:
+curl supports encrypted fetches when built to use a TLS library and it can be
+built to use one out of a fairly large set of libraries - `curl -V` shows
+which one your curl was built to use (if any). To get a page from an HTTPS
+server, simply run curl like:
 
     curl https://secure.example.com
 
 ## Certificates
 
- In the HTTPS world, you use certificates to validate that you are the one you
- claim to be, as an addition to normal passwords. curl supports client- side
- certificates. All certificates are locked with a passphrase, which you need
- to enter before the certificate can be used by curl. The passphrase can be
- specified on the command line or if not, entered interactively when curl
- queries for it. Use a certificate with curl on an HTTPS server like:
+In the HTTPS world, you use certificates to validate that you are the one you
+claim to be, as an addition to normal passwords. curl supports client- side
+certificates. All certificates are locked with a passphrase, which you need
+to enter before the certificate can be used by curl. The passphrase can be
+specified on the command line or if not, entered interactively when curl
+queries for it. Use a certificate with curl on an HTTPS server like:
 
     curl --cert mycert.pem https://secure.example.com
 
- curl also tries to verify that the server is who it claims to be, by
- verifying the server's certificate against a locally stored CA cert bundle.
- Failing the verification causes curl to deny the connection. You must then
- use [`--insecure`](https://curl.se/docs/manpage.html#-k) (`-k`) in case you
- want to tell curl to ignore that the server cannot be verified.
+curl also tries to verify that the server is who it claims to be, by
+verifying the server's certificate against a locally stored CA cert bundle.
+Failing the verification causes curl to deny the connection. You must then
+use [`--insecure`](https://curl.se/docs/manpage.html#-k) (`-k`) in case you
+want to tell curl to ignore that the server cannot be verified.
 
- More about server certificate verification and ca cert bundles can be read in
- the [`SSLCERTS` document](https://curl.se/docs/sslcerts.html).
+More about server certificate verification and ca cert bundles can be read in
+the [`SSLCERTS` document](https://curl.se/docs/sslcerts.html).
 
- At times you may end up with your own CA cert store and then you can tell
- curl to use that to verify the server's certificate:
+At times you may end up with your own CA cert store and then you can tell
+curl to use that to verify the server's certificate:
 
     curl --cacert ca-bundle.pem https://example.com/
 
@@ -606,106 +606,106 @@ SPDX-License-Identifier: curl
 
 ## Modify method and headers
 
- Doing fancy stuff, you may need to add or change elements of a single curl
- request.
+Doing fancy stuff, you may need to add or change elements of a single curl
+request.
 
- For example, you can change the POST method to `PROPFIND` and send the data
- as `Content-Type: text/xml` (instead of the default `Content-Type`) like
- this:
+For example, you can change the POST method to `PROPFIND` and send the data
+as `Content-Type: text/xml` (instead of the default `Content-Type`) like
+this:
 
     curl --data "<xml>" --header "Content-Type: text/xml" \
       --request PROPFIND example.com
 
- You can delete a default header by providing one without content. Like you
- can ruin the request by chopping off the `Host:` header:
+You can delete a default header by providing one without content. Like you
+can ruin the request by chopping off the `Host:` header:
 
     curl --header "Host:" https://www.example.com
 
- You can add headers the same way. Your server may want a `Destination:`
- header, and you can add it:
+You can add headers the same way. Your server may want a `Destination:`
+header, and you can add it:
 
     curl --header "Destination: nowhere" https://example.com
 
 ## More on changed methods
 
- It should be noted that curl selects which methods to use on its own
- depending on what action to ask for. `-d` makes a POST, `-I` makes a HEAD and
- so on. If you use the [`--request`](https://curl.se/docs/manpage.html#-X) /
- `-X` option you can change the method keyword curl selects, but you do not
- modify curl's behavior. This means that if you for example use -d "data" to
- do a POST, you can modify the method to a `PROPFIND` with `-X` and curl still
- thinks it sends a POST. You can change the normal GET to a POST method by
- simply adding `-X POST` in a command line like:
+It should be noted that curl selects which methods to use on its own
+depending on what action to ask for. `-d` makes a POST, `-I` makes a HEAD and
+so on. If you use the [`--request`](https://curl.se/docs/manpage.html#-X) /
+`-X` option you can change the method keyword curl selects, but you do not
+modify curl's behavior. This means that if you for example use -d "data" to
+do a POST, you can modify the method to a `PROPFIND` with `-X` and curl still
+thinks it sends a POST. You can change the normal GET to a POST method by
+simply adding `-X POST` in a command line like:
 
     curl -X POST https://example.org/
 
- curl however still acts as if it sent a GET so it does not send any request
- body etc.
+curl however still acts as if it sent a GET so it does not send any request
+body etc.
 
 # Web Login
 
 ## Some login tricks
 
- While not strictly just HTTP related, it still causes a lot of people
- problems so here's the executive run-down of how the vast majority of all
- login forms work and how to login to them using curl.
+While not strictly just HTTP related, it still causes a lot of people
+problems so here's the executive run-down of how the vast majority of all
+login forms work and how to login to them using curl.
 
- It can also be noted that to do this properly in an automated fashion, you
- most certainly need to script things and do multiple curl invokes etc.
+It can also be noted that to do this properly in an automated fashion, you
+most certainly need to script things and do multiple curl invokes etc.
 
- First, servers mostly use cookies to track the logged-in status of the
- client, so you need to capture the cookies you receive in the responses.
- Then, many sites also set a special cookie on the login page (to make sure
- you got there through their login page) so you should make a habit of first
- getting the login-form page to capture the cookies set there.
+First, servers mostly use cookies to track the logged-in status of the
+client, so you need to capture the cookies you receive in the responses.
+Then, many sites also set a special cookie on the login page (to make sure
+you got there through their login page) so you should make a habit of first
+getting the login-form page to capture the cookies set there.
 
- Some web-based login systems feature various amounts of JavaScript, and
- sometimes they use such code to set or modify cookie contents. Possibly they
- do that to prevent programmed logins, like this manual describes how to...
- Anyway, if reading the code is not enough to let you repeat the behavior
- manually, capturing the HTTP requests done by your browsers and analyzing the
- sent cookies is usually a working method to work out how to shortcut the
- JavaScript need.
+Some web-based login systems feature various amounts of JavaScript, and
+sometimes they use such code to set or modify cookie contents. Possibly they
+do that to prevent programmed logins, like this manual describes how to...
+Anyway, if reading the code is not enough to let you repeat the behavior
+manually, capturing the HTTP requests done by your browsers and analyzing the
+sent cookies is usually a working method to work out how to shortcut the
+JavaScript need.
 
- In the actual `<form>` tag for the login, lots of sites fill-in
- random/session or otherwise secretly generated hidden tags and you may need
- to first capture the HTML code for the login form and extract all the hidden
- fields to be able to do a proper login POST. Remember that the contents need
- to be URL encoded when sent in a normal POST.
+In the actual `<form>` tag for the login, lots of sites fill-in
+random/session or otherwise secretly generated hidden tags and you may need
+to first capture the HTML code for the login form and extract all the hidden
+fields to be able to do a proper login POST. Remember that the contents need
+to be URL encoded when sent in a normal POST.
 
 # Debug
 
 ## Some debug tricks
 
- Many times when you run curl on a site, you notice that the site does not
- seem to respond the same way to your curl requests as it does to your
- browser's.
+Many times when you run curl on a site, you notice that the site does not
+seem to respond the same way to your curl requests as it does to your
+browser's.
 
- Then you need to start making your curl requests more similar to your
- browser's requests:
+Then you need to start making your curl requests more similar to your
+browser's requests:
 
- - Use the `--trace-ascii` option to store fully detailed logs of the requests
-   for easier analyzing and better understanding
+- Use the `--trace-ascii` option to store fully detailed logs of the requests
+  for easier analyzing and better understanding
 
- - Make sure you check for and use cookies when needed (both reading with
-   `--cookie` and writing with `--cookie-jar`)
+- Make sure you check for and use cookies when needed (both reading with
+  `--cookie` and writing with `--cookie-jar`)
 
- - Set user-agent (with [`-A`](https://curl.se/docs/manpage.html#-A)) to
-   one like a recent popular browser does
+- Set user-agent (with [`-A`](https://curl.se/docs/manpage.html#-A)) to
+  one like a recent popular browser does
 
- - Set referer (with [`-E`](https://curl.se/docs/manpage.html#-E)) like
-   it is set by the browser
+- Set referer (with [`-E`](https://curl.se/docs/manpage.html#-E)) like
+  it is set by the browser
 
- - If you use POST, make sure you send all the fields and in the same order as
-   the browser does it.
+- If you use POST, make sure you send all the fields and in the same order as
+  the browser does it.
 
 ## Check what the browsers do
 
- A good helper to make sure you do this right, is the web browsers' developers
- tools that let you view all headers you send and receive (even when using
- HTTPS).
+A good helper to make sure you do this right, is the web browsers' developers
+tools that let you view all headers you send and receive (even when using
+HTTPS).
 
- A more raw approach is to capture the HTTP traffic on the network with tools
- such as Wireshark or tcpdump and check what headers that were sent and
- received by the browser. (HTTPS forces you to use `SSLKEYLOGFILE` to do
- that.)
+A more raw approach is to capture the HTTP traffic on the network with tools
+such as Wireshark or tcpdump and check what headers that were sent and
+received by the browser. (HTTPS forces you to use `SSLKEYLOGFILE` to do
+that.)

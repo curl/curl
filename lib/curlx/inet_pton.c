@@ -53,8 +53,7 @@
  * sizeof(int) < 4. sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-/* int
- * inet_pton4(src, dst)
+/* int inet_pton4(src, dst)
  *      like inet_aton() but without all the hexadecimal and shorthand.
  * return:
  *      1 if `src' is a valid dotted quad, else 0.
@@ -102,8 +101,7 @@ static int inet_pton4(const char *src, unsigned char *dst)
   return 1;
 }
 
-/* int
- * inet_pton6(src, dst)
+/* int inet_pton6(src, dst)
  *      convert presentation level address to network order binary form.
  * return:
  *      1 if `src' is a valid [RFC1884 2.2] address, else 0.
@@ -192,8 +190,7 @@ static int inet_pton6(const char *src, unsigned char *dst)
   return 1;
 }
 
-/* int
- * inet_pton(af, src, dst)
+/* int inet_pton(af, src, dst)
  *      convert from presentation format (which usually means ASCII printable)
  *      to network format (which is usually some kind of binary format).
  * return:

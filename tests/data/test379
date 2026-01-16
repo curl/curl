@@ -36,7 +36,7 @@ http
 <name>
 --remove-on-error with --no-clobber and an added number
 </name>
- <command option="no-output">
+<command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save --remove-on-error --no-clobber
 </command>
 </client>

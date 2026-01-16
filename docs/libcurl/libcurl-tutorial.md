@@ -46,7 +46,7 @@ Your compiler needs to know where the libcurl headers are located. Therefore
 you must set your compiler's include path to point to the directory where you
 installed them. The 'curl-config'[3] tool can be used to get this information:
 ~~~c
-  $ curl-config --cflags
+    $ curl-config --cflags
 ~~~
 
 ## Linking the Program with libcurl
@@ -58,7 +58,7 @@ OpenSSL libraries, but even some standard OS libraries may be needed on the
 command line. To figure out which flags to use, once again the 'curl-config'
 tool comes to the rescue:
 ~~~c
-  $ curl-config --libs
+    $ curl-config --libs
 ~~~
 
 ## SSL or Not
@@ -71,7 +71,7 @@ installed libcurl has been built with SSL support enabled, use *curl-config*
 like this:
 
 ~~~c
-  $ curl-config --feature
+    $ curl-config --feature
 ~~~
 
 If SSL is supported, the keyword *SSL* is written to stdout, possibly together
@@ -102,7 +102,7 @@ The program must initialize some of the libcurl functionality globally. That
 means it should be done exactly once, no matter how many times you intend to
 use the library. Once for your program's entire life time. This is done using
 ~~~c
- curl_global_init()
+    curl_global_init()
 ~~~
 and it takes one parameter which is a bit pattern that tells libcurl what to
 initialize. Using *CURL_GLOBAL_ALL* makes it initialize all known internal
@@ -168,7 +168,7 @@ must never share the same handle in multiple threads.
 
 Get an easy handle with
 ~~~c
- handle = curl_easy_init();
+    handle = curl_easy_init();
 ~~~
 It returns an easy handle. Using that you proceed to the next step: setting
 up your preferred actions. A handle is just a logic entity for the upcoming
@@ -194,7 +194,7 @@ One of the most basic properties to set in the handle is the URL. You set your
 preferred URL to transfer with CURLOPT_URL(3) in a manner similar to:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(handle, CURLOPT_URL, "https://example.com/");
 ~~~
 
 Let's assume for a while that you want to receive data as the URL identifies a
@@ -203,17 +203,17 @@ that needs this transfer, I assume that you would like to get the data passed
 to you directly instead of simply getting it passed to stdout. So, you write
 your own function that matches this prototype:
 ~~~c
- size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
+    size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
 ~~~
 You tell libcurl to pass all data to this function by issuing a function
 similar to this:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
 ~~~
 You can control what data your callback function gets in the fourth argument
 by setting another property:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_WRITEDATA, &internal_struct);
+    curl_easy_setopt(handle, CURLOPT_WRITEDATA, &internal_struct);
 ~~~
 Using that property, you can easily pass local data between your application
 and the function that gets invoked by libcurl. libcurl itself does not touch
@@ -243,7 +243,7 @@ There are of course many more options you can set, and we get back to a few of
 them later. Let's instead continue to the actual transfer:
 
 ~~~c
- success = curl_easy_perform(handle);
+    success = curl_easy_perform(handle);
 ~~~
 
 curl_easy_perform(3) connects to the remote site, does the necessary commands
@@ -319,7 +319,7 @@ data by asking us for it. To make it do that, we set the read callback and the
 custom pointer libcurl passes to our read callback. The read callback should
 have a prototype similar to:
 ~~~c
- size_t function(char *bufptr, size_t size, size_t nitems, void *userp);
+    size_t function(char *bufptr, size_t size, size_t nitems, void *userp);
 ~~~
 Where *bufptr* is the pointer to a buffer we fill in with data to upload
 and *nitems* is the size of the buffer and therefore also the maximum
@@ -327,21 +327,21 @@ amount of data we can return to libcurl in this call. The *userp* pointer
 is the custom pointer we set to point to a struct of ours to pass private data
 between the application and the callback.
 ~~~c
- curl_easy_setopt(handle, CURLOPT_READFUNCTION, read_function);
+    curl_easy_setopt(handle, CURLOPT_READFUNCTION, read_function);
 
- curl_easy_setopt(handle, CURLOPT_READDATA, &filedata);
+    curl_easy_setopt(handle, CURLOPT_READDATA, &filedata);
 ~~~
 Tell libcurl that we want to upload:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(handle, CURLOPT_UPLOAD, 1L);
 ~~~
 A few protocols do not behave properly when uploads are done without any prior
 knowledge of the expected file size. So, set the upload file size using the
 CURLOPT_INFILESIZE_LARGE(3) for all known file sizes like this[1]:
 
 ~~~c
- /* in this example, file_size must be an curl_off_t variable */
- curl_easy_setopt(handle, CURLOPT_INFILESIZE_LARGE, file_size);
+    /* in this example, file_size must be an curl_off_t variable */
+    curl_easy_setopt(handle, CURLOPT_INFILESIZE_LARGE, file_size);
 ~~~
 
 When you call curl_easy_perform(3) this time, it performs all the
@@ -361,7 +361,7 @@ Most protocols support that you specify the name and password in the URL
 itself. libcurl detects this and use them accordingly. This is written like
 this:
 ~~~c
- protocol://user:password@example.com/path/
+    protocol://user:password@example.com/path/
 ~~~
 If you need any odd letters in your username or password, you should enter
 them URL encoded, as %XX where XX is a two-digit hexadecimal number.
@@ -372,7 +372,7 @@ CURLOPT_USERPWD(3) option. The argument passed to libcurl should be a
 char * to a string in the format "user:password". In a manner like this:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_USERPWD, "myname:thesecret");
+    curl_easy_setopt(handle, CURLOPT_USERPWD, "myname:thesecret");
 ~~~
 
 Another case where name and password might be needed at times, is for those
@@ -381,7 +381,7 @@ another option for this, the CURLOPT_PROXYUSERPWD(3). It is used quite similar
 to the CURLOPT_USERPWD(3) option like this:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
+    curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
 ~~~
 
 There is a long time Unix "standard" way of storing FTP usernames and
@@ -396,15 +396,15 @@ non-FTP protocols such as HTTP. To make curl use this file, use the
 CURLOPT_NETRC(3) option:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_NETRC, 1L);
+    curl_easy_setopt(handle, CURLOPT_NETRC, 1L);
 ~~~
 
 A basic example of how such a .netrc file may look like:
 
 ~~~c
- machine myhost.mydomain.com
- login userlogin
- password secretword
+    machine myhost.mydomain.com
+    login userlogin
+    password secretword
 ~~~
 
 All these examples have been cases where the password has been optional, or
@@ -414,7 +414,7 @@ you are using an SSL private key for secure transfers.
 
 To pass the known private key password to libcurl:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_KEYPASSWD, "keypassword");
+    curl_easy_setopt(handle, CURLOPT_KEYPASSWD, "keypassword");
 ~~~
 
 # HTTP Authentication
@@ -431,15 +431,14 @@ Negotiate (SPNEGO). You can tell libcurl which one to use with
 CURLOPT_HTTPAUTH(3) as in:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-
+    curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
 ~~~
 
 When you send authentication to a proxy, you can also set authentication type
 the same way but instead with CURLOPT_PROXYAUTH(3):
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+    curl_easy_setopt(handle, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
 ~~~
 
 Both these options allow you to set multiple types (by ORing them together),
@@ -448,7 +447,7 @@ claims to support. This method does however add a round-trip since libcurl
 must first ask the server what it supports:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST | CURLAUTH_BASIC);
+    curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST | CURLAUTH_BASIC);
 ~~~
 
 For convenience, you can use the *CURLAUTH_ANY* define (instead of a list with
@@ -487,21 +486,21 @@ done in a generic way, by building a list of our own headers and then passing
 that list to libcurl.
 
 ~~~c
- struct curl_slist *headers = NULL;
- headers = curl_slist_append(headers, "Content-Type: text/xml");
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, "Content-Type: text/xml");
 
- /* post binary data */
- curl_easy_setopt(handle, CURLOPT_POSTFIELDS, binaryptr);
+    /* post binary data */
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDS, binaryptr);
 
- /* set the size of the postfields data */
- curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, 23L);
+    /* set the size of the postfields data */
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, 23L);
 
- /* pass our list of custom made headers */
- curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
+    /* pass our list of custom made headers */
+    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
 
- curl_easy_perform(handle); /* post away! */
+    curl_easy_perform(handle); /* post away! */
 
- curl_slist_free_all(headers); /* free the header list */
+    curl_slist_free_all(headers); /* free the header list */
 ~~~
 
 While the simple examples above cover the majority of all cases where HTTP
@@ -531,24 +530,24 @@ The following example sets two simple text parts with plain textual contents,
 and then a file with binary contents and uploads the whole thing.
 
 ~~~c
- curl_mime *multipart = curl_mime_init(handle);
- curl_mimepart *part = curl_mime_addpart(multipart);
- curl_mime_name(part, "name");
- curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "project");
- curl_mime_data(part, "curl", CURL_ZERO_TERMINATED);
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "logotype-image");
- curl_mime_filedata(part, "curl.png");
+    curl_mime *multipart = curl_mime_init(handle);
+    curl_mimepart *part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "name");
+    curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "project");
+    curl_mime_data(part, "curl", CURL_ZERO_TERMINATED);
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "logotype-image");
+    curl_mime_filedata(part, "curl.png");
 
- /* Set the form info */
- curl_easy_setopt(handle, CURLOPT_MIMEPOST, multipart);
+    /* Set the form info */
+    curl_easy_setopt(handle, CURLOPT_MIMEPOST, multipart);
 
- curl_easy_perform(handle); /* post away! */
+    curl_easy_perform(handle); /* post away! */
 
- /* free the post data again */
- curl_mime_free(multipart);
+    /* free the post data again */
+    curl_mime_free(multipart);
 ~~~
 
 To post multiple files for a single form field, you must supply each file in
@@ -559,8 +558,8 @@ multiple files posting is deprecated by RFC 7578, chapter 4.3.
 To set the data source from an already opened FILE pointer, use:
 
 ~~~c
- curl_mime_data_cb(part, filesize, (curl_read_callback) fread,
-                   (curl_seek_callback) fseek, NULL, filepointer);
+    curl_mime_data_cb(part, filesize, (curl_read_callback)fread,
+                      (curl_seek_callback)fseek, NULL, filepointer);
 ~~~
 
 A deprecated curl_formadd(3) function is still supported in libcurl.
@@ -574,25 +573,25 @@ parts, you post the whole form.
 The MIME API example above is expressed as follows using this function:
 
 ~~~c
- struct curl_httppost *post = NULL;
- struct curl_httppost *last = NULL;
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "name",
-              CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "project",
-              CURLFORM_COPYCONTENTS, "curl", CURLFORM_END);
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "logotype-image",
-              CURLFORM_FILECONTENT, "curl.png", CURLFORM_END);
+    struct curl_httppost *post = NULL;
+    struct curl_httppost *last = NULL;
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "name",
+                 CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "project",
+                 CURLFORM_COPYCONTENTS, "curl", CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "logotype-image",
+                 CURLFORM_FILECONTENT, "curl.png", CURLFORM_END);
 
- /* Set the form info */
- curl_easy_setopt(handle, CURLOPT_HTTPPOST, post);
+    /* Set the form info */
+    curl_easy_setopt(handle, CURLOPT_HTTPPOST, post);
 
- curl_easy_perform(handle); /* post away! */
+    curl_easy_perform(handle); /* post away! */
 
- /* free the post data again */
- curl_formfree(post);
+    /* free the post data again */
+    curl_formfree(post);
 ~~~
 
 Multipart formposts are chains of parts using MIME-style separators and
@@ -605,19 +604,19 @@ shows how you set headers to one specific part when you add that to the post
 handle:
 
 ~~~c
- struct curl_slist *headers = NULL;
- headers = curl_slist_append(headers, "Content-Type: text/xml");
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, "Content-Type: text/xml");
 
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "logotype-image",
-              CURLFORM_FILECONTENT, "curl.xml",
-              CURLFORM_CONTENTHEADER, headers,
-              CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "logotype-image",
+                 CURLFORM_FILECONTENT, "curl.xml",
+                 CURLFORM_CONTENTHEADER, headers,
+                 CURLFORM_END);
 
- curl_easy_perform(handle); /* post away! */
+    curl_easy_perform(handle); /* post away! */
 
- curl_formfree(post); /* free post */
- curl_slist_free_all(headers); /* free custom header list */
+    curl_formfree(post); /* free post */
+    curl_slist_free_all(headers); /* free custom header list */
 ~~~
 
 Since all options on an easy handle are "sticky", they remain the same until
@@ -626,7 +625,7 @@ curl to go back to a plain GET request if you intend to do one as your next
 request. You force an easy handle to go back to GET by using the
 CURLOPT_HTTPGET(3) option:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
 ~~~
 Just setting CURLOPT_POSTFIELDS(3) to "" or NULL does *not* stop libcurl
 from doing a POST. It just makes it POST without any data to send!
@@ -647,18 +646,18 @@ CURLOPT_MIMEPOST(3) instead of CURLOPT_HTTPPOST(3).
 Here are some example of *curl_formadd* calls to MIME API sequences:
 
 ~~~c
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "id",
-              CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
-              CURLFORM_CONTENTHEADER, headers,
-              CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "id",
+                 CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
+                 CURLFORM_CONTENTHEADER, headers,
+                 CURLFORM_END);
 ~~~
 becomes:
 ~~~c
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "id");
- curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
- curl_mime_headers(part, headers, FALSE);
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "id");
+    curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
+    curl_mime_headers(part, headers, FALSE);
 ~~~
 
 Setting the last curl_mime_headers(3) argument to TRUE would have caused
@@ -666,16 +665,16 @@ the headers to be automatically released upon destroyed the multi-part, thus
 saving a clean-up call to curl_slist_free_all(3).
 
 ~~~c
- curl_formadd(&post, &last,
-              CURLFORM_PTRNAME, "logotype-image",
-              CURLFORM_FILECONTENT, "-",
-              CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_PTRNAME, "logotype-image",
+                 CURLFORM_FILECONTENT, "-",
+                 CURLFORM_END);
 ~~~
 becomes:
 ~~~c
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "logotype-image");
- curl_mime_data_cb(part, (curl_off_t)-1, fread, fseek, NULL, stdin);
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "logotype-image");
+    curl_mime_data_cb(part, (curl_off_t)-1, fread, fseek, NULL, stdin);
 ~~~
 
 curl_mime_name(3) always copies the field name. The special filename "-" is
@@ -684,79 +683,79 @@ source using fread(). The transfer is be chunk-encoded since the data size is
 unknown.
 
 ~~~c
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "datafile[]",
-              CURLFORM_FILE, "file1",
-              CURLFORM_FILE, "file2",
-              CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "datafile[]",
+                 CURLFORM_FILE, "file1",
+                 CURLFORM_FILE, "file2",
+                 CURLFORM_END);
 ~~~
 becomes:
 ~~~c
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "datafile[]");
- curl_mime_filedata(part, "file1");
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "datafile[]");
- curl_mime_filedata(part, "file2");
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "datafile[]");
+    curl_mime_filedata(part, "file1");
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "datafile[]");
+    curl_mime_filedata(part, "file2");
 ~~~
 
 The deprecated multipart/mixed implementation of multiple files field is
 translated to two distinct parts with the same name.
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_READFUNCTION, myreadfunc);
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "stream",
-              CURLFORM_STREAM, arg,
-              CURLFORM_CONTENTLEN, (curl_off_t) datasize,
-              CURLFORM_FILENAME, "archive.zip",
-              CURLFORM_CONTENTTYPE, "application/zip",
-              CURLFORM_END);
+    curl_easy_setopt(handle, CURLOPT_READFUNCTION, myreadfunc);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "stream",
+                 CURLFORM_STREAM, arg,
+                 CURLFORM_CONTENTLEN, (curl_off_t)datasize,
+                 CURLFORM_FILENAME, "archive.zip",
+                 CURLFORM_CONTENTTYPE, "application/zip",
+                 CURLFORM_END);
 ~~~
 becomes:
 ~~~c
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "stream");
- curl_mime_data_cb(part, (curl_off_t)datasize,
-                   myreadfunc, NULL, NULL, arg);
- curl_mime_filename(part, "archive.zip");
- curl_mime_type(part, "application/zip");
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "stream");
+    curl_mime_data_cb(part, (curl_off_t)datasize,
+                      myreadfunc, NULL, NULL, arg);
+    curl_mime_filename(part, "archive.zip");
+    curl_mime_type(part, "application/zip");
 ~~~
 
 CURLOPT_READFUNCTION(3) callback is not used: it is replace by directly
 setting the part source data from the callback read function.
 
 ~~~c
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "memfile",
-              CURLFORM_BUFFER, "memfile.bin",
-              CURLFORM_BUFFERPTR, databuffer,
-              CURLFORM_BUFFERLENGTH, (long) sizeof databuffer,
-              CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "memfile",
+                 CURLFORM_BUFFER, "memfile.bin",
+                 CURLFORM_BUFFERPTR, databuffer,
+                 CURLFORM_BUFFERLENGTH, (long)sizeof(databuffer),
+                 CURLFORM_END);
 ~~~
 becomes:
 ~~~c
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "memfile");
- curl_mime_data(part, databuffer, (curl_off_t)sizeof(databuffer));
- curl_mime_filename(part, "memfile.bin");
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "memfile");
+    curl_mime_data(part, databuffer, (curl_off_t)sizeof(databuffer));
+    curl_mime_filename(part, "memfile.bin");
 ~~~
 
 curl_mime_data(3) always copies the initial data: data buffer is thus
 free for immediate reuse.
 
 ~~~c
- curl_formadd(&post, &last,
-              CURLFORM_COPYNAME, "message",
-              CURLFORM_FILECONTENT, "msg.txt",
-              CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "message",
+                 CURLFORM_FILECONTENT, "msg.txt",
+                 CURLFORM_END);
 ~~~
 becomes:
 ~~~c
- part = curl_mime_addpart(multipart);
- curl_mime_name(part, "message");
- curl_mime_filedata(part, "msg.txt");
- curl_mime_filename(part, NULL);
+    part = curl_mime_addpart(multipart);
+    curl_mime_name(part, "message");
+    curl_mime_filedata(part, "msg.txt");
+    curl_mime_filename(part, NULL);
 ~~~
 
 Use of curl_mime_filedata(3) sets the remote filename as a side effect: it is
@@ -780,11 +779,11 @@ Set the progress callback by using CURLOPT_PROGRESSFUNCTION(3). Pass a pointer
 to a function that matches this prototype:
 
 ~~~c
- int progress_callback(void *clientp,
-                       double dltotal,
-                       double dlnow,
-                       double ultotal,
-                       double ulnow);
+    int progress_callback(void *clientp,
+                          double dltotal,
+                          double dlnow,
+                          double ultotal,
+                          double ulnow);
 ~~~
 
 If any of the input arguments is unknown, a 0 is provided. The first argument,
@@ -801,13 +800,13 @@ The callbacks CANNOT be non-static class member functions
 Example C++ code:
 
 ~~~c
-class AClass {
-  static size_t write_data(void *ptr, size_t size, size_t nmemb,
-                           void *ourpointer)
-  {
-    /* do what you want with the data */
-  }
-}
+    class AClass {
+      static size_t write_data(void *ptr, size_t size, size_t nmemb,
+                               void *ourpointer)
+      {
+        /* do what you want with the data */
+      }
+    }
 ~~~
 
 # Proxies
@@ -840,12 +839,12 @@ commands or even proper FTP directory listings.
 
 To tell libcurl to use a proxy at a given port number:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_PROXY, "proxy-host.com:8080");
+    curl_easy_setopt(handle, CURLOPT_PROXY, "proxy-host.com:8080");
 ~~~
 Some proxies require user authentication before allowing a request, and you
 pass that information similar to this:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "user:password");
+    curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "user:password");
 ~~~
 If you want to, you can specify the hostname only in the
 CURLOPT_PROXY(3) option, and set the port number separately with
@@ -854,7 +853,7 @@ CURLOPT_PROXYPORT(3).
 Tell libcurl what kind of proxy it is with CURLOPT_PROXYTYPE(3) (if not,
 it defaults to assuming an HTTP proxy):
 ~~~c
- curl_easy_setopt(handle, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+    curl_easy_setopt(handle, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
 ~~~
 
 ## Environment Variables
@@ -921,7 +920,7 @@ rarely allowed.
 
 Tell libcurl to use proxy tunneling like this:
 ~~~c
- curl_easy_setopt(handle, CURLOPT_HTTPPROXYTUNNEL, 1L);
+    curl_easy_setopt(handle, CURLOPT_HTTPPROXYTUNNEL, 1L);
 ~~~
 In fact, there might even be times when you want to do plain HTTP operations
 using a tunnel like this, as it then enables you to operate on the remote
@@ -1031,7 +1030,7 @@ GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST(3)
 is there for you. It is simple to use:
 
 ~~~c
-curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
+    curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
 ~~~
 
 When using the custom request, you change the request keyword of the actual
@@ -1046,17 +1045,17 @@ request, and you are free to pass any amount of extra headers that you
 think fit. Adding headers is this easy:
 
 ~~~c
-struct curl_slist *headers = NULL; /* init to NULL is important */
+    struct curl_slist *headers = NULL; /* init to NULL is important */
 
-headers = curl_slist_append(headers, "Hey-server-hey: how are you?");
-headers = curl_slist_append(headers, "X-silly-content: yes");
+    headers = curl_slist_append(headers, "Hey-server-hey: how are you?");
+    headers = curl_slist_append(headers, "X-silly-content: yes");
 
-/* pass our list of custom made headers */
-curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
+    /* pass our list of custom made headers */
+    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
 
-curl_easy_perform(handle); /* transfer http */
+    curl_easy_perform(handle); /* transfer http */
 
-curl_slist_free_all(headers); /* free the header list */
+    curl_slist_free_all(headers); /* free the header list */
 ~~~
 
 ... and if you think some of the internally generated headers, such as Accept:
@@ -1064,8 +1063,8 @@ or Host: do not contain the data you want them to contain, you can replace
 them by simply setting them too:
 
 ~~~c
-headers = curl_slist_append(headers, "Accept: Agent-007");
-headers = curl_slist_append(headers, "Host: munged.host.line");
+    headers = curl_slist_append(headers, "Accept: Agent-007");
+    headers = curl_slist_append(headers, "Host: munged.host.line");
 ~~~
 
 ## Delete Headers
@@ -1075,7 +1074,9 @@ header from being sent. For instance, if you want to completely prevent the
 "Accept:" header from being sent, you can disable it with code similar to
 this:
 
- headers = curl_slist_append(headers, "Accept:");
+~~~c
+    headers = curl_slist_append(headers, "Accept:");
+~~~
 
 Both replacing and canceling internal headers should be done with careful
 consideration and you should be aware that you may violate the HTTP protocol
@@ -1096,7 +1097,9 @@ we support. libcurl speaks HTTP 1.1 by default. Some old servers do not like
 getting 1.1-requests and when dealing with stubborn old things like that, you
 can tell libcurl to use 1.0 instead by doing something like this:
 
- curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+~~~c
+    curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+~~~
 
 ## FTP Custom Commands
 
@@ -1116,14 +1119,14 @@ correct remote directory.
 A little example that deletes a given file before an operation:
 
 ~~~c
- headers = curl_slist_append(headers, "DELE file-to-remove");
+    headers = curl_slist_append(headers, "DELE file-to-remove");
 
- /* pass the list of custom commands to the handle */
- curl_easy_setopt(handle, CURLOPT_QUOTE, headers);
+    /* pass the list of custom commands to the handle */
+    curl_easy_setopt(handle, CURLOPT_QUOTE, headers);
 
- curl_easy_perform(handle); /* transfer ftp data! */
+    curl_easy_perform(handle); /* transfer ftp data! */
 
- curl_slist_free_all(headers); /* free the header list */
+    curl_slist_free_all(headers); /* free the header list */
 ~~~
 
 If you would instead want this operation (or chain of operations) to happen
@@ -1171,7 +1174,7 @@ To just send whatever cookie you want to a server, you can use
 CURLOPT_COOKIE(3) to set a cookie string like this:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
+    curl_easy_setopt(handle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
 ~~~
 
 In many cases, that is not enough. You might want to dynamically save whatever
@@ -1271,43 +1274,43 @@ Here is an example building an email message with an inline plain/html text
 alternative and a file attachment encoded in base64:
 
 ~~~c
- curl_mime *message = curl_mime_init(handle);
+    curl_mime *message = curl_mime_init(handle);
 
- /* The inline part is an alternative proposing the html and the text
-    versions of the email. */
- curl_mime *alt = curl_mime_init(handle);
+    /* The inline part is an alternative proposing the html and the text
+       versions of the email. */
+    curl_mime *alt = curl_mime_init(handle);
 
- /* HTML message. */
- curl_mimepart *part = curl_mime_addpart(alt);
- curl_mime_data(part, "<html><body><p>This is HTML</p></body></html>",
-                      CURL_ZERO_TERMINATED);
- curl_mime_type(part, "text/html");
+    /* HTML message. */
+    curl_mimepart *part = curl_mime_addpart(alt);
+    curl_mime_data(part, "<html><body><p>This is HTML</p></body></html>",
+                         CURL_ZERO_TERMINATED);
+    curl_mime_type(part, "text/html");
 
- /* Text message. */
- part = curl_mime_addpart(alt);
- curl_mime_data(part, "This is plain text message",
-                      CURL_ZERO_TERMINATED);
+    /* Text message. */
+    part = curl_mime_addpart(alt);
+    curl_mime_data(part, "This is plain text message",
+                         CURL_ZERO_TERMINATED);
 
- /* Create the inline part. */
- part = curl_mime_addpart(message);
- curl_mime_subparts(part, alt);
- curl_mime_type(part, "multipart/alternative");
- struct curl_slist *headers = curl_slist_append(NULL,
-                   "Content-Disposition: inline");
- curl_mime_headers(part, headers, TRUE);
+    /* Create the inline part. */
+    part = curl_mime_addpart(message);
+    curl_mime_subparts(part, alt);
+    curl_mime_type(part, "multipart/alternative");
+    struct curl_slist *headers = curl_slist_append(NULL,
+                      "Content-Disposition: inline");
+    curl_mime_headers(part, headers, TRUE);
 
- /* Add the attachment. */
- part = curl_mime_addpart(message);
- curl_mime_filedata(part, "manual.pdf");
- curl_mime_encoder(part, "base64");
+    /* Add the attachment. */
+    part = curl_mime_addpart(message);
+    curl_mime_filedata(part, "manual.pdf");
+    curl_mime_encoder(part, "base64");
 
- /* Build the mail headers. */
- headers = curl_slist_append(NULL, "From: me@example.com");
- headers = curl_slist_append(headers, "To: you@example.com");
+    /* Build the mail headers. */
+    headers = curl_slist_append(NULL, "From: me@example.com");
+    headers = curl_slist_append(headers, "To: you@example.com");
 
- /* Set these into the easy handle. */
- curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
- curl_easy_setopt(handle, CURLOPT_MIMEPOST, mime);
+    /* Set these into the easy handle. */
+    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(handle, CURLOPT_MIMEPOST, mime);
 ~~~
 
 It should be noted that appending a message to an IMAP directory requires
@@ -1412,7 +1415,7 @@ to figure out success on each individual transfer.
 
 # SSL, Certificates and Other Tricks
 
- [ seeding, passwords, keys, certificates, ENGINE, ca certs ]
+[ seeding, passwords, keys, certificates, ENGINE, ca certs ]
 
 # Sharing Data Between Easy Handles
 

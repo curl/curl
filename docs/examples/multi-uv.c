@@ -26,12 +26,12 @@
  * </DESC>
  */
 /* Use the socket_action interface to download multiple files in parallel,
-   powered by libuv.
-
-   Requires libuv and (of course) libcurl.
-
-   See https://docs.libuv.org/en/v1.x/index.html libuv API documentation
-*/
+ * powered by libuv.
+ *
+ * Requires libuv and (of course) libcurl.
+ *
+ * See https://docs.libuv.org/en/v1.x/index.html libuv API documentation
+ */
 
 /* Requires: USE_LIBUV */
 

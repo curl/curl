@@ -32,31 +32,30 @@
  * but this uses epoll and timerfd instead of libevent.
  *
  * Written by Jeff Pohlmeyer, converted to use epoll by Josh Bialkowski
-
-Requires a Linux system with epoll
-
-When running, the program creates the named pipe "hiper.fifo"
-
-Whenever there is input into the fifo, the program reads the input as a list
-of URL's and creates some new easy handles to fetch each URL via the
-curl_multi "hiper" API.
-
-Thus, you can try a single URL:
-  % echo http://www.yahoo.com > hiper.fifo
-
-Or a whole bunch of them:
-  % cat my-url-list > hiper.fifo
-
-The fifo buffer is handled almost instantly, so you can even add more URL's
-while the previous requests are still being downloaded.
-
-Note:
-  For the sake of simplicity, URL length is limited to 1023 char's !
-
-This is purely a demo app, all retrieved data is simply discarded by the write
-callback.
-
-*/
+ *
+ * Requires a Linux system with epoll
+ *
+ * When running, the program creates the named pipe "hiper.fifo"
+ *
+ * Whenever there is input into the fifo, the program reads the input as a list
+ * of URL's and creates some new easy handles to fetch each URL via the
+ * curl_multi "hiper" API.
+ *
+ * Thus, you can try a single URL:
+ *   % echo http://www.yahoo.com > hiper.fifo
+ *
+ * Or a whole bunch of them:
+ *   % cat my-url-list > hiper.fifo
+ *
+ * The fifo buffer is handled almost instantly, so you can even add more URL's
+ * while the previous requests are still being downloaded.
+ *
+ * Note:
+ *   For the sake of simplicity, URL length is limited to 1023 chars.
+ *
+ * This is purely a demo app, all retrieved data is simply discarded by
+ * the write callback.
+ */
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
