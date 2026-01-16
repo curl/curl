@@ -3088,7 +3088,7 @@ const struct Curl_handler Curl_handler_scp = {
   CURLPROTO_SCP,                /* family */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
   PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE |
-  PROTOPT_SIGPIPE;
+  PROTOPT_SIGPIPE
 };
 
 /*
