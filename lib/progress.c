@@ -43,7 +43,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
 {
   curl_off_t h;
   if(seconds <= 0) {
-    curlx_strcopy(r, rsize, "       ", 7);
+    curlx_strcopy(r, rsize, STRCONST("       "));
     return;
   }
   h = seconds / 3600;
@@ -76,7 +76,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
         if(y <= 99999)
           curl_msnprintf(r, rsize, "%6" FMT_OFF_T "y", y);
         else
-          curlx_strcopy(r, rsize, ">99999y", 7);
+          curlx_strcopy(r, rsize, STRCONST(">99999y"));
       }
     }
   }

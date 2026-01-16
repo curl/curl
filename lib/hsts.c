@@ -294,7 +294,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
                    stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
   }
   else
-    curlx_strcopy(e.expire, sizeof(e.expire), UNLIMITED, strlen(UNLIMITED));
+    curlx_strcopy(e.expire, sizeof(e.expire), STRCONST(UNLIMITED));
 
   sc = data->set.hsts_write(data, &e, i, data->set.hsts_write_userp);
   *stop = (sc != CURLSTS_OK);
