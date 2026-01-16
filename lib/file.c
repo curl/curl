@@ -87,7 +87,7 @@ static void file_cleanup(struct FILEPROTO *file)
   Curl_safefree(file->freepath);
   file->path = NULL;
   if(file->fd != -1) {
-    close(file->fd);
+    curlx_close(file->fd);
     file->fd = -1;
   }
 }
@@ -312,7 +312,7 @@ static CURLcode file_upload(struct Curl_easy *data,
   /* treat the negative resume offset value as the case of "-" */
   if(data->state.resume_from < 0) {
     if(fstat(fd, &file_stat)) {
-      close(fd);
+      curlx_close(fd);
       failf(data, "cannot get the size of %s", file->path);
       return CURLE_WRITE_ERROR;
     }
@@ -367,7 +367,7 @@ static CURLcode file_upload(struct Curl_easy *data,
     result = Curl_pgrsUpdate(data);
 
 out:
-  close(fd);
+  curlx_close(fd);
   Curl_multi_xfer_ulbuf_release(data, xfer_ulbuf);
 
   return result;

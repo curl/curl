@@ -353,6 +353,7 @@ This is the full list of functions generally banned.
     atoi
     atol
     calloc
+    close
     CreateFile
     CreateFileA
     CreateFileW

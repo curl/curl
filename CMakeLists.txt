@@ -190,9 +190,6 @@ if(WIN32)
 
   # Apply to all feature checks
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")
-  if(MSVC)
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_CRT_NONSTDC_NO_DEPRECATE")  # for strdup() detection
-  endif()
 
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
@@ -1561,7 +1558,6 @@ check_symbol_exists("send"            "${CURL_INCLUDES}" HAVE_SEND)  # proto/bsd
 check_function_exists("sendmsg"       HAVE_SENDMSG)
 check_function_exists("sendmmsg"      HAVE_SENDMMSG)
 check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
-check_symbol_exists("strdup"          "string.h" HAVE_STRDUP)
 check_symbol_exists("memrchr"         "string.h" HAVE_MEMRCHR)
 check_symbol_exists("alarm"           "unistd.h" HAVE_ALARM)
 check_symbol_exists("fcntl"           "fcntl.h" HAVE_FCNTL)
@@ -1602,11 +1598,13 @@ check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 if(WIN32)
   # include wincrypt.h as a workaround for mingw-w64 __MINGW64_VERSION_MAJOR <= 5 header bug */
   check_symbol_exists("if_nametoindex"  "winsock2.h;wincrypt.h;iphlpapi.h" HAVE_IF_NAMETOINDEX)  # Windows Vista+ non-UWP */
+  set(HAVE_STRDUP 1)  # to not define local implementation. The codebase uses _strdup().
 else()
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
   check_symbol_exists("strcasecmp"        "string.h" HAVE_STRCASECMP)
+  check_symbol_exists("strdup"            "string.h" HAVE_STRDUP)
   check_symbol_exists("stricmp"           "string.h" HAVE_STRICMP)
   check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
 endif()
