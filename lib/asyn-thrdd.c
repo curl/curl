@@ -133,9 +133,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
     curlx_free(addr_ctx->hostname);
     if(addr_ctx->res)
       Curl_freeaddrinfo(addr_ctx->res);
-#ifndef CURL_DISABLE_SOCKETPAIR
-  Curl_wakeup_destroy(addr_ctx->sock_pair);
-#endif
+    Curl_wakeup_destroy(addr_ctx->sock_pair);
     curlx_free(addr_ctx);
   }
   *paddr_ctx = NULL;

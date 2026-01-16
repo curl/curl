@@ -36,7 +36,8 @@ int Curl_wakeup_signal(curl_socket_t socks[2]);
 
 CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all);
 
-
+#else
+#define Curl_wakeup_destroy(x)  Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_SOCKETPAIR_H */
