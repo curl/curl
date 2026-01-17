@@ -251,8 +251,8 @@ Build curl:
      % make
      % make install
 
- If `make install` results in `Permission denied` error, you need to prepend
- it with `sudo`.
+If `make install` results in `Permission denied` error, you need to prepend
+it with `sudo`.
 
 # `--http3`
 
