@@ -23,7 +23,7 @@ transfer does not start and curl returns with exit code 63.
 
 Setting the maximum value to zero disables the limit.
 
-A unit suffix letter ca be used. Appending 'k' or 'K' counts the number as
+A unit suffix letter can be used. Appending 'k' or 'K' counts the number as
 kilobytes, 'm' or 'M' makes it megabytes etc. The supported suffixes (k, M, G,
 T, P) are 1024-based. Examples: 200K, 3m and 1G. (Added in 7.58.0)
 
