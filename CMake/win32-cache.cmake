@@ -28,6 +28,7 @@ endif()
 if(MINGW)
   set(HAVE_BASENAME 1)
   set(HAVE_BOOL_T 1)  # = HAVE_STDBOOL_H
+  set(HAVE_UINTPTR_T 1)  # = HAVE_STDINT_H
   set(HAVE_DIRENT_H 1)
   set(HAVE_FTRUNCATE 1)
   set(HAVE_GETTIMEOFDAY 1)
@@ -60,6 +61,7 @@ else()
       set(HAVE_STDBOOL_H 0)
     endif()
     set(HAVE_BOOL_T "${HAVE_STDBOOL_H}")
+    set(HAVE_UINTPTR_T 1)  # = HAVE_STDINT_H
     if(MSVC_VERSION GREATER_EQUAL 1900)
       set(HAVE_SNPRINTF 1)
     else()
