@@ -105,10 +105,10 @@ static CURLcode test_tool1623(const char *arg)
       ParameterError err =
         GetSizeParameter(check[i].input, &output);
       if(err != check[i].err)
-        curl_mprintf("'%s' unexecpectedly returned %d \n",
+        curl_mprintf("'%s' unexpectedly returned %d \n",
                      check[i].input, err);
       else if(check[i].amount != output)
-        curl_mprintf("'%s' unexecpectedly gave %" FMT_OFF_T "\n",
+        curl_mprintf("'%s' unexpectedly gave %" FMT_OFF_T "\n",
                      check[i].input, output);
       else {
 #if 0 /* enable for debugging */
