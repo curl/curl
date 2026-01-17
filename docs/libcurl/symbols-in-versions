@@ -4,13 +4,13 @@
                             | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
- This document lists defines and other symbols present in libcurl, together
- with exact information about the first libcurl version that provides the
- symbol, the first version in which the symbol was marked as deprecated and
- for a few symbols the last version that featured it. The names appear in
- alphabetical order.
+This document lists defines and other symbols present in libcurl, together
+with exact information about the first libcurl version that provides the
+symbol, the first version in which the symbol was marked as deprecated and
+for a few symbols the last version that featured it. The names appear in
+alphabetical order.
 
- Name                           Introduced  Deprecated  Last
+Name                            Introduced  Deprecated  Last
 
 CURL_AT_LEAST_VERSION           7.43.0
 CURL_BLOB_COPY                  7.71.0
