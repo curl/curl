@@ -331,7 +331,7 @@ dnl we would like an httpd as test server
 dnl
 HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
-                         [where to find httpd/apache2 for testing])],
+                        [where to find httpd/apache2 for testing])],
   [request_httpd=$withval], [request_httpd=check])
 if test "x$request_httpd" = "xcheck" || test "x$request_httpd" = "xyes"; then
   if test -x "/usr/sbin/apache2"; then
@@ -411,7 +411,7 @@ dnl we would like a sshd as test server
 dnl
 SSHD_ENABLED="maybe"
 AC_ARG_WITH(test-sshd, [AS_HELP_STRING([--with-test-sshd=PATH],
-                         [where to find sshd for testing])],
+                       [where to find sshd for testing])],
   [request_sshd=$withval], [request_sshd=check])
 if test "x$request_sshd" = "xcheck" || test "x$request_sshd" = "xyes"; then
   if test -x "/usr/sbin/sshd"; then
