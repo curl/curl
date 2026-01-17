@@ -44,6 +44,9 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
+CURLcode Curl_findprotocol(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           const char *protostr);
 
 /* Attach/Clear/Get meta data for an easy handle. Needs to provide
  * a destructor, will be automatically called when the easy handle
