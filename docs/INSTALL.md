@@ -46,6 +46,9 @@ unpacked the source archive):
 
 (Adjust the configure line accordingly to use the TLS library you want.)
 
+By default curl builds with libpsl (Public Suffix List) support. If libpsl is
+not available on your system, install it or disable it with `--without-libpsl`.
+
 You probably need to be root when doing the last command.
 
 Get a full listing of all available configure options by invoking it like:
@@ -65,10 +68,9 @@ your own home directory:
     make
     make install
 
-The configure script always tries to find a working SSL library unless
-explicitly told not to. If you have OpenSSL installed in the default search
-path for your compiler/linker, you do not need to do anything special. If you
-have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
+The configure script requires you to select a TLS backend explicitly unless
+you disable TLS with `--without-ssl`. If you have OpenSSL installed in the
+default search path for your compiler/linker, you can run configure like:
 
     ./configure --with-openssl
 
@@ -91,7 +93,7 @@ header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
 environment variables prior to running configure. Something like this should
 work:
 
-    CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure
+    CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure --with-openssl
 
 If you have shared SSL libs installed in a directory where your runtime
 linker does not find them (which usually causes configure failures), you can
