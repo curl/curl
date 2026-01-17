@@ -275,7 +275,6 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
 - `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
-- `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export. Default: `OFF`
 
 ## Disabling features

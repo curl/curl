@@ -3652,11 +3652,7 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-#ifdef USE_OPENSSL_QUIC
-    *pmethod = OSSL_QUIC_client_method();
-#else
     *pmethod = TLS_method();
-#endif
     break;
   default:
     failf(data, "unsupported transport %d in SSL init", peer->transport);

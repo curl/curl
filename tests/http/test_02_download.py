@@ -314,8 +314,6 @@ class TestDownload:
     # download, several at a time, pause and abort paused
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_23a_lib_abort_paused(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
@@ -341,8 +339,6 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_23b_lib_abort_offset(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
@@ -368,8 +364,6 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_23c_lib_fail_offset(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10

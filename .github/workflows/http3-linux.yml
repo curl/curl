@@ -439,21 +439,6 @@ jobs:
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON
 
-          - name: 'openssl-quic'
-            install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            tflags: '--min=1640'
-            configure: >-
-              LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-openssl=/home/runner/openssl/build --with-openssl-quic
-
-          - name: 'openssl-quic'
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
-              -DCURL_DISABLE_LDAP=ON
-              -DCMAKE_UNITY_BUILD=ON
-
           - name: 'quiche'
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig

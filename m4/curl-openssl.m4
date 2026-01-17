@@ -394,24 +394,5 @@ AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading o
     fi
   ])
 
-  dnl ---
-  dnl We may use OpenSSL QUIC.
-  dnl ---
-  AC_MSG_CHECKING([for QUIC support and OpenSSL >= 3.3])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <openssl/ssl.h>
-    ]],[[
-      #if (OPENSSL_VERSION_NUMBER < 0x30300000L)
-      #error need at least version 3.3.0
-      #endif
-      OSSL_QUIC_client_method();
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    have_openssl_quic=1
-  ],[
-    AC_MSG_RESULT([no])
-  ])
 fi
 ])

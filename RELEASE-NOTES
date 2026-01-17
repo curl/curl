@@ -77,7 +77,6 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
- o OpenSSL-QUIC
  o RTMP support
  o Support for c-ares versions before 1.16.0
  o Support for Windows XP/2003

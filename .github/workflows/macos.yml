@@ -232,7 +232,7 @@ jobs:
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh libnghttp3
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
           - name: '!ssl c-ares'
             compiler: clang
             configure: --enable-debug --enable-ares --without-ssl
@@ -330,19 +330,19 @@ jobs:
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: '-t --shallow=25 --min=480 1 to 500'
           - name: 'OpenSSL torture 2'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: '-t --shallow=25 --min=730 501 to 1250'
           - name: 'OpenSSL torture 3'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: '-t --shallow=25 --min=628 1251 to 9999'
 
     steps:
