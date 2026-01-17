@@ -50,6 +50,7 @@
 #define PORT_RTMPS  PORT_HTTPS
 #define PORT_GOPHER 70
 #define PORT_MQTT   1883
+#define PORT_MQTTS  8883
 
 struct curl_trc_featt;
 

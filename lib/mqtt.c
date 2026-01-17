@@ -36,6 +36,8 @@
 #include "url.h"
 #include "escape.h"
 #include "rand.h"
+#include "cfilters.h"
+#include "connect.h"
 
 /* first byte is command.
    second byte is for flags. */
@@ -933,6 +935,50 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     result = CURLE_OK;
   return result;
 }
+
+#ifdef USE_SSL
+
+static CURLcode mqtts_connecting(struct Curl_easy *data, bool *done)
+{
+  struct connectdata *conn = data->conn;
+  CURLcode result;
+
+  result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
+  if(result)
+    connclose(conn, "Failed TLS connection");
+  return result;
+}
+
+/*
+ * MQTTS protocol handler.
+ */
+
+const struct Curl_handler Curl_handler_mqtts = {
+  "mqtts",                            /* scheme */
+  mqtt_setup_conn,                    /* setup_connection */
+  mqtt_do,                            /* do_it */
+  mqtt_done,                          /* done */
+  ZERO_NULL,                          /* do_more */
+  ZERO_NULL,                          /* connect_it */
+  mqtts_connecting,                   /* connecting */
+  mqtt_doing,                         /* doing */
+  ZERO_NULL,                          /* proto_pollset */
+  mqtt_pollset,                       /* doing_pollset */
+  ZERO_NULL,                          /* domore_pollset */
+  ZERO_NULL,                          /* perform_pollset */
+  ZERO_NULL,                          /* disconnect */
+  ZERO_NULL,                          /* write_resp */
+  ZERO_NULL,                          /* write_resp_hd */
+  ZERO_NULL,                          /* connection_check */
+  ZERO_NULL,                          /* attach connection */
+  ZERO_NULL,                          /* follow */
+  PORT_MQTTS,                         /* defport */
+  CURLPROTO_MQTTS,                    /* protocol */
+  CURLPROTO_MQTT,                     /* family */
+  PROTOPT_SSL                         /* flags */
+};
+
+#endif
 
 /*
  * MQTT protocol handler.

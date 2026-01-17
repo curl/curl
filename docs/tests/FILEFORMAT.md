@@ -184,6 +184,7 @@ Available substitute variables include:
 - `%IMAPPORT` - Port number of the IMAP server
 - `%LOGDIR` - Log directory relative to %PWD
 - `%MQTTPORT` - Port number of the MQTT server
+- `%MQTTSPORT` - Port number of the MQTTS server
 - `%NOLISTENPORT` - Port number where no service is listening
 - `%POP36PORT` - IPv6 port number of the POP3 server
 - `%POP3PORT` - Port number of the POP3 server

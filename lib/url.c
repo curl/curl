@@ -1423,7 +1423,12 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-    NULL, NULL,
+#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)
+    &Curl_handler_mqtts,
+#else
+    NULL,
+#endif
+    NULL,
 #if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
     &Curl_handler_gophers,
 #else

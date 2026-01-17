@@ -341,6 +341,9 @@ static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_MQTT
   "mqtt",
 #endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)
+  "mqtts",
+#endif
 #ifndef CURL_DISABLE_POP3
   "pop3",
 #endif
