@@ -535,7 +535,7 @@ static ParameterError GetFileAndPassword(const char *nextarg, char **file,
 }
 
 struct sizeunit {
-  char unit; /* single uppercase ASCII letter */
+  char unit; /* single lowercase ASCII letter */
   curl_off_t mul;
   size_t mlen; /* number of digits in 'mul', when written in decimal */
 };
