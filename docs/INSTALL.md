@@ -268,8 +268,8 @@ Download the latest version of the `cygwin` packages required (*and suggested*) 
 
 Once all the packages have been installed, begin the process of installing curl from the source code:
 
- <details>
-     <summary>configure_options</summary>
+<details>
+    <summary>configure_options</summary>
 
 ```
     --with-gnutls
@@ -280,7 +280,7 @@ Once all the packages have been installed, begin the process of installing curl 
     --without-ssl
 ```
 
- </details>
+</details>
 
 1. `sh configure <configure_options>`
 2. `make`
