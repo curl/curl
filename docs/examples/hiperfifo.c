@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket API usage with libevent 2
+ * multi socket interface with libevent 2
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
