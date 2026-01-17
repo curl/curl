@@ -4383,7 +4383,7 @@ if test "$curl_cv_winuwp" != "yes"; then
   AC_MSG_CHECKING([whether to enable SSPI support (Windows native builds only)])
   AC_ARG_ENABLE(sspi,
   AS_HELP_STRING([--enable-sspi],[Enable SSPI])
-  AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
+AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
   [ case "$enableval" in
     yes)
       if test "$curl_cv_native_windows" = "yes"; then
@@ -5027,7 +5027,7 @@ if test "$CURL_DISABLE_HTTP" != "1"; then
   AC_MSG_CHECKING([whether to support WebSockets])
   AC_ARG_ENABLE(websockets,
   AS_HELP_STRING([--enable-websockets],[Enable WebSockets support])
-  AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
+AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
   [ case "$enableval" in
     no)
       AC_MSG_RESULT(no)
