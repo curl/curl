@@ -256,7 +256,7 @@ static void my_md5_final(unsigned char *digest, void *in)
  * MD5 Message-Digest Algorithm (RFC 1321).
  *
  * Homepage:
- https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
+ * https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
  *
  * Author:
  * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>

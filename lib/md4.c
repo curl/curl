@@ -170,7 +170,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
  * MD4 Message-Digest Algorithm (RFC 1320).
  *
  * Homepage:
- https://openwall.info/wiki/people/solar/software/public-domain-source-code/md4
+ * https://openwall.info/wiki/people/solar/software/public-domain-source-code/md4
  *
  * Author:
  * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>
