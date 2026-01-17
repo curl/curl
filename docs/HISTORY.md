@@ -246,7 +246,7 @@ November:
     Known libcurl bindings:        37
     Contributors:                 683
 
- 145,000 unique visitors. >100 GB downloaded.
+145,000 unique visitors. >100 GB downloaded.
 
 2009
 ----
@@ -282,7 +282,7 @@ August:
     Known libcurl bindings:        39
     Contributors:                 808
 
- Gopher support added (re-added actually, see January 2006)
+Gopher support added (re-added actually, see January 2006)
 
 2011
 ----
