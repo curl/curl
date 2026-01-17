@@ -1,36 +1,66 @@
-curl and libcurl 8.18.1
+curl and libcurl 8.19.0
 
  Public curl releases:         273
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3573
+ Contributors:                 3577
 
 This release includes the following changes:
 
+ o windows: bump minimum to Vista (from XP) [12]
 
 This release includes the following bugfixes:
 
  o altsvc: only accept 17 byte dates from files [22]
  o build: detect and include `inttypes.h` again [13]
+ o build: drop duplicate C includes [54]
+ o build: globally suppress DJGPP warnings in `FD_SET()` [56]
+ o checksrc: do not apply `BANNEDFUNC` to struct member functions [35]
+ o checksrc: warn for leading spaces before the preprocessor hash [72]
  o cmake: reference OpenSSL and ZLIB imported targets only when enabled [41]
  o cmake: silence useless compiler warnings triggered by the FASTBuild generator [43]
  o config-plan9: set `HAVE_STDINT_H` again [17]
  o curl: limit Windows-specific code to Windows builds, other tidy-ups [48]
+ o curl_easy_nextheader.md: a new transfer invalidates 'prev' [69]
+ o digest: handle quotes in the path [50]
  o docs: explicitly call out Slowloris as not a security flaw [6]
+ o examples: omit forward declarations, apply misc fixes [60]
+ o GOVERNANCE.md: Post-Daniel BDFL [31]
+ o hostip6: remove debug-only code [24]
  o http/3: add description for known server error codes [15]
+ o imap: check `imap_sendf()` printf masks at compile-time [67]
+ o imap: skip literals inside quoted strings [30]
  o KNOWN_BUGS.md: absolute Unix domain filename for SOCKS on Windows [37]
+ o ldap: silence potential unused variable warning (OS400) [55]
+ o lib: reorder protocol functions to avoid forward declarations (email) [76]
+ o lib: reorder protocol functions to avoid forward declarations (ftp) [75]
+ o lib: reorder protocol functions to avoid forward declarations (misc cont.) [66]
+ o lib: reorder protocol functions to avoid forward declarations (misc) [77]
+ o lib: reorder protocol functions to avoid forward declarations (ssh) [65]
  o lib: use (u)int64_t instead of long long [39]
  o Makefile.am: delete RPM targets referencing non-existent files [9]
  o Makefile.am: drop stray VC project files from dist [5]
+ o mbedtls: no pinnedpubkey wo MBEDTLS_SSL_KEEP_PEER_CERTIFICATE [29]
+ o mbedtls: remove newline from failf() call [25]
+ o md4, md5: drop redundant forward declarations [64]
+ o mime: drop fallback for unused `R_OK` macro [58]
  o mimepost: allocate main struct on-demand [20]
+ o mod_curltest: silence unused argument compiler warning [63]
  o mprintf: drop old sprintf fallback [7]
+ o mqtt: better too-big-message-check [73]
+ o msvc: drop exception, make `BIT()` a bitfield with Visual Studio [2]
  o ngtcp2: stabilize recv [18]
+ o openldap: avoid forward declarations in ldaps code [62]
  o plan9: drop special build and orphaned references [33]
+ o ratelimit: download finetune [16]
+ o tftp: correct the filename length check [70]
  o tool: improve error/warning messages when output filename sanitization fails [36]
  o tool_cb_hdr: suppress header output when --out-null [10]
  o tool_dirhie: drop superfluous `F_OK` fallback (Windows) [8]
+ o tool_doswin: document `ENABLE_VIRTUAL_TERMINAL_PROCESSING` toolchain support [44]
  o tool_operate: remove 'else' for VMS [3]
+ o url.h: fix `-Wdocumentation` [61]
  o urldata.h: remove two forward-declared structs not used [4]
  o urldata: change 'keep_post' into three distinct bitfields [21]
  o urldata: convert 'long' fields to fixed variable types [47]
@@ -57,14 +87,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrew Kvalheim, Daniel Stenberg, James Fuller, Joshua Vandaële,
-  Megamouse on github, Patrick Monnerat, Ray Satiro, renovate[bot],
-  Stefan Eissing, Viktor Szakats
-  (10 contributors)
+  Andrew Kvalheim, calm329, Daniel Gustafsson, Daniel Stenberg,
+  dependabot[bot], gudyuu on hackerone, James Fuller, Joshua Vandaële,
+  Megamouse on github, Michał Antoniak, Patrick Monnerat, Ray Satiro,
+  renovate[bot], Stefan Eissing, Tomáš Malý, Viktor Szakats, z2_, Йоте
+  (18 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=20209
+ [2] = https://curl.se/bug/?i=20142
  [3] = https://curl.se/bug/?i=20221
  [4] = https://curl.se/bug/?i=20206
  [5] = https://curl.se/bug/?i=20272
@@ -73,19 +105,48 @@ References to bug reports and discussions on issues:
  [8] = https://curl.se/bug/?i=20214
  [9] = https://curl.se/bug/?i=20270
  [10] = https://curl.se/bug/?i=20235
+ [12] = https://curl.se/bug/?i=17985
  [13] = https://curl.se/bug/?i=20208
  [15] = https://curl.se/bug/?i=20202
+ [16] = https://curl.se/bug/?i=20228
  [17] = https://curl.se/bug/?i=20201
  [18] = https://curl.se/bug/?i=20220
  [20] = https://curl.se/bug/?i=20260
  [21] = https://curl.se/bug/?i=20262
  [22] = https://curl.se/bug/?i=20259
+ [24] = https://curl.se/bug/?i=20334
+ [25] = https://curl.se/bug/?i=20333
  [27] = https://curl.se/bug/?i=20250
+ [29] = https://curl.se/bug/?i=20319
+ [30] = https://curl.se/bug/?i=20320
+ [31] = https://curl.se/bug/?i=20325
  [33] = https://curl.se/bug/?i=20243
+ [35] = https://curl.se/bug/?i=20323
  [36] = https://curl.se/bug/?i=20044
  [37] = https://curl.se/bug/?i=20236
  [39] = https://curl.se/bug/?i=20233
  [41] = https://curl.se/bug/?i=20217
  [43] = https://curl.se/bug/?i=20230
+ [44] = https://curl.se/bug/?i=20315
  [47] = https://curl.se/bug/?i=20227
  [48] = https://curl.se/bug/?i=20213
+ [50] = https://curl.se/bug/?i=20295
+ [54] = https://curl.se/bug/?i=20303
+ [55] = https://curl.se/bug/?i=20302
+ [56] = https://curl.se/bug/?i=20299
+ [58] = https://curl.se/bug/?i=20298
+ [60] = https://curl.se/bug/?i=20296
+ [61] = https://curl.se/bug/?i=20294
+ [62] = https://curl.se/bug/?i=20293
+ [63] = https://curl.se/bug/?i=20292
+ [64] = https://curl.se/bug/?i=20291
+ [65] = https://curl.se/bug/?i=20290
+ [66] = https://curl.se/bug/?i=20289
+ [67] = https://curl.se/bug/?i=20287
+ [69] = https://curl.se/bug/?i=20285
+ [70] = https://hackerone.com/reports/3508321
+ [72] = https://curl.se/bug/?i=20282
+ [73] = https://hackerone.com/reports/3508500
+ [75] = https://curl.se/bug/?i=20276
+ [76] = https://curl.se/bug/?i=20275
+ [77] = https://curl.se/bug/?i=20274
