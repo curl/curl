@@ -12,6 +12,10 @@ A plain "GET" subscribes to the topic and prints all published messages.
 
 Doing a "POST" publishes the post data to the topic and exits.
 
+## TLS protection
+
+Use `mqtts://` to do MQTT over TLS: MQTTS.
+
 ### Subscribing
 
 Command usage:

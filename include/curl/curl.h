@@ -1100,6 +1100,7 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLPROTO_SMBS    (1L << 27)
 #define CURLPROTO_MQTT    (1L << 28)
 #define CURLPROTO_GOPHERS (1L << 29)
+#define CURLPROTO_MQTTS   (1L << 30)
 #define CURLPROTO_ALL     (~0L) /* enable everything */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
