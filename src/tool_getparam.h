@@ -375,6 +375,7 @@ ParameterError getparameter(const char *flag, const char *nextarg,
 ParameterError parse_cert_parameter(const char *cert_parameter,
                                     char **certname,
                                     char **passphrase);
+UNITTEST ParameterError GetSizeParameter(const char *arg, curl_off_t *out);
 #endif
 
 ParameterError parse_args(int argc, argv_item_t argv[]);

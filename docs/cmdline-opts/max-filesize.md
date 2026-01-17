@@ -12,6 +12,7 @@ See-also:
   - limit-rate
 Example:
   - --max-filesize 100K $URL
+  - --max-filesize 2.6M $URL
 ---
 
 # `--max-filesize`
@@ -22,9 +23,9 @@ transfer does not start and curl returns with exit code 63.
 
 Setting the maximum value to zero disables the limit.
 
-A size modifier may be used. For example, Appending 'k' or 'K' counts the
-number as kilobytes, 'm' or 'M' makes it megabytes, while 'g' or 'G' makes it
-gigabytes. Examples: 200K, 3m and 1G. (Added in 7.58.0)
+A unit suffix letter can be used. Appending 'k' or 'K' counts the number as
+kilobytes, 'm' or 'M' makes it megabytes etc. The supported suffixes (k, M, G,
+T, P) are 1024-based. Examples: 200K, 3m and 1G. (Added in 7.58.0)
 
 **NOTE**: before curl 8.4.0, when the file size is not known prior to
 download, for such files this option has no effect even if the file transfer
@@ -32,3 +33,7 @@ ends up being larger than this given limit.
 
 Starting with curl 8.4.0, this option aborts the transfer if it reaches the
 threshold during transfer.
+
+Starting in curl 8.19.0, the maximum size can be specified using a fraction as
+in `2.5M` for two and a half megabytes. It only works with a period (`.`)
+delimiter, independent of what your locale might prefer.
