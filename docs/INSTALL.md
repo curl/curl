@@ -8,7 +8,7 @@ SPDX-License-Identifier: curl
 
 ## Installing Binary Packages
 
-Lots of people download binary distributions of curl and libcurl. This
+Lots of people download binary distributions of curl and libcurl. These binary packages                                                 can usually be installed using your operating system's package manager. This
 document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
 libcurl from [source code](https://curl.se/download.html).
