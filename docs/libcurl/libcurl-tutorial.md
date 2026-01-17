@@ -1412,7 +1412,7 @@ to figure out success on each individual transfer.
 
 # SSL, Certificates and Other Tricks
 
- [ seeding, passwords, keys, certificates, ENGINE, ca certs ]
+[ seeding, passwords, keys, certificates, ENGINE, ca certs ]
 
 # Sharing Data Between Easy Handles
 
