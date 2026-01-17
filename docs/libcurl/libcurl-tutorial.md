@@ -1074,7 +1074,9 @@ header from being sent. For instance, if you want to completely prevent the
 "Accept:" header from being sent, you can disable it with code similar to
 this:
 
- headers = curl_slist_append(headers, "Accept:");
+~~~c
+    headers = curl_slist_append(headers, "Accept:");
+~~~
 
 Both replacing and canceling internal headers should be done with careful
 consideration and you should be aware that you may violate the HTTP protocol
@@ -1095,7 +1097,9 @@ we support. libcurl speaks HTTP 1.1 by default. Some old servers do not like
 getting 1.1-requests and when dealing with stubborn old things like that, you
 can tell libcurl to use 1.0 instead by doing something like this:
 
- curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+~~~c
+    curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+~~~
 
 ## FTP Custom Commands
 
