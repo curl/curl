@@ -26,9 +26,9 @@
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
-   download many files at once.
-
-Written by Jeff Pohlmeyer
+ * download many files at once.
+ *
+ * Written by Jeff Pohlmeyer
 
 Requires libevent version 2 and a (POSIX?) system that has mkfifo().
 
