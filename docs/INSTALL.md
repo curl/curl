@@ -563,7 +563,7 @@ may be relevant in some environments: `-march=X`, `-mthumb`, `-m32`,
 `-mdynamic-no-pic`, `-flto`, `-fdata-sections`, `-ffunction-sections`,
 `-fno-unwind-tables`, `-fno-asynchronous-unwind-tables`,
 `-fno-record-gcc-switches`, `-fsection-anchors`, `-fno-plt`,
-`-Wl,--gc-sections`, `-Wl,-Bsymbolic`, `-Wl,-s`,
+`-Wl,--gc-sections`, `-Wl,-dead_strip` (Apple), `-Wl,-Bsymbolic`, `-Wl,-s`
 
 For example, this is how to combine a few of these options:
 
