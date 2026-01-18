@@ -935,10 +935,12 @@ out:
     return CURLE_OK;
   }
   else if(respwait) {
+#ifdef USE_CURL_ASYNC
     if(!Curl_resolv_check(data, &dns)) {
       *entry = dns;
       return dns ? CURLE_OK : CURLE_AGAIN;
     }
+#endif
     result = CURLE_COULDNT_RESOLVE_HOST;
   }
 error:
