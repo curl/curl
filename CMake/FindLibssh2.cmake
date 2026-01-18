@@ -25,14 +25,15 @@
 #
 # Input variables:
 #
-# - `LIBSSH2_INCLUDE_DIR`:  Absolute path to libssh2 include directory.
-# - `LIBSSH2_LIBRARY`:      Absolute path to `libssh2` library.
+# - `LIBSSH2_INCLUDE_DIR`:      Absolute path to libssh2 include directory.
+# - `LIBSSH2_LIBRARY`:          Absolute path to `libssh2` library.
+# - `LIBSSH2_USE_STATIC_LIBS`:  Configure for static libssh2 libraries.
 #
 # Defines:
 #
-# - `LIBSSH2_FOUND`:        System has libssh2.
-# - `LIBSSH2_VERSION`:      Version of libssh2.
-# - `CURL::libssh2`:        libssh2 library target.
+# - `LIBSSH2_FOUND`:            System has libssh2.
+# - `LIBSSH2_VERSION`:          Version of libssh2.
+# - `CURL::libssh2`:            libssh2 library target.
 
 set(_libssh2_pc_requires "libssh2")
 
@@ -47,10 +48,20 @@ if(_libssh2_FOUND AND _libssh2_INCLUDE_DIRS)
   set(Libssh2_FOUND TRUE)
   set(LIBSSH2_FOUND TRUE)
   set(LIBSSH2_VERSION ${_libssh2_VERSION})
+  if(LIBSSH2_USE_STATIC_LIBS)
+    set(_libssh2_CFLAGS       "${_libssh2_STATIC_CFLAGS}")
+    set(_libssh2_INCLUDE_DIRS "${_libssh2_STATIC_INCLUDE_DIRS}")
+    set(_libssh2_LIBRARY_DIRS "${_libssh2_STATIC_LIBRARY_DIRS}")
+    set(_libssh2_LIBRARIES    "${_libssh2_STATIC_LIBRARIES}")
+  endif()
   message(STATUS "Found Libssh2 (via pkg-config): ${_libssh2_INCLUDE_DIRS} (found version \"${LIBSSH2_VERSION}\")")
 else()
   find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h")
-  find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
+  if(LIBSSH2_USE_STATIC_LIBS)
+    find_library(LIBSSH2_LIBRARY NAMES "ssh2_static" "libssh2_static" "ssh2" "libssh2")
+  else()
+    find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
+  endif()
 
   unset(LIBSSH2_VERSION CACHE)
   if(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")

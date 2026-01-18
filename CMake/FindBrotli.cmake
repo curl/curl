@@ -25,15 +25,16 @@
 #
 # Input variables:
 #
-# - `BROTLI_INCLUDE_DIR`:    Absolute path to brotli include directory.
-# - `BROTLICOMMON_LIBRARY`:  Absolute path to `brotlicommon` library.
-# - `BROTLIDEC_LIBRARY`:     Absolute path to `brotlidec` library.
+# - `BROTLI_INCLUDE_DIR`:      Absolute path to brotli include directory.
+# - `BROTLICOMMON_LIBRARY`:    Absolute path to `brotlicommon` library.
+# - `BROTLIDEC_LIBRARY`:       Absolute path to `brotlidec` library.
+# - `BROTLI_USE_STATIC_LIBS`:  Configure for static brotli libraries.
 #
 # Defines:
 #
-# - `BROTLI_FOUND`:          System has brotli.
-# - `BROTLI_VERSION`:        Version of brotli.
-# - `CURL::brotli`:          brotli library target.
+# - `BROTLI_FOUND`:            System has brotli.
+# - `BROTLI_VERSION`:          Version of brotli.
+# - `CURL::brotli`:            brotli library target.
 
 set(_brotli_pc_requires "libbrotlidec" "libbrotlicommon")  # order is significant: brotlidec then brotlicommon
 
@@ -49,11 +50,22 @@ if(_brotli_FOUND)
   set(Brotli_FOUND TRUE)
   set(BROTLI_FOUND TRUE)
   set(BROTLI_VERSION ${_brotli_libbrotlicommon_VERSION})
+  if(BROTLI_USE_STATIC_LIBS)
+    set(_brotli_CFLAGS       "${_brotli_STATIC_CFLAGS}")
+    set(_brotli_INCLUDE_DIRS "${_brotli_STATIC_INCLUDE_DIRS}")
+    set(_brotli_LIBRARY_DIRS "${_brotli_STATIC_LIBRARY_DIRS}")
+    set(_brotli_LIBRARIES    "${_brotli_STATIC_LIBRARIES}")
+  endif()
   message(STATUS "Found Brotli (via pkg-config): ${_brotli_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()
   find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")
-  find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
-  find_library(BROTLIDEC_LIBRARY NAMES "brotlidec")
+  if(BROTLI_USE_STATIC_LIBS)
+    find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon-static" "brotlicommon")
+    find_library(BROTLIDEC_LIBRARY NAMES "brotlidec-static" "brotlidec")
+  else()
+    find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
+    find_library(BROTLIDEC_LIBRARY NAMES "brotlidec")
+  endif()
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Brotli
