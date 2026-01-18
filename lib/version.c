@@ -541,9 +541,6 @@ static const struct feat features_table[] = {
 #ifdef USE_TLS_SRP
   FEATURE("TLS-SRP",     NULL,                CURL_VERSION_TLSAUTH_SRP),
 #endif
-#ifdef CURLDEBUG
-  FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
-#endif
 #if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
   FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
 #endif
@@ -689,6 +686,10 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
       features |= p->bitmask;
       feature_names[n++] = p->name;
     }
+
+#ifdef DEBUGBUILD
+  features |= CURL_VERSION_CURLDEBUG; /* for compatibility */
+#endif
 
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;

@@ -54,9 +54,6 @@ AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
 endif
-if CURLDEBUG
-AM_CPPFLAGS += -DCURLDEBUG
-endif
 
 if BUILD_UNITTESTS
 $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C)

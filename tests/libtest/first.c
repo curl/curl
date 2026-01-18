@@ -122,7 +122,7 @@ int cgetopt(int argc, const char * const argv[], const char *optstring)
   }
 }
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 static void memory_tracking_init(void)
 {
   const char *env;

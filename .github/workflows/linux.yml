@@ -338,7 +338,7 @@ jobs:
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
             CC: clang
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=OFF
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON
 
           - name: 'memory-sanitizer'
             install_packages: clang
