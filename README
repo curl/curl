@@ -33,18 +33,18 @@ WEBSITE
 
   Visit the curl website for the latest news and downloads:
 
-        https://curl.se/
+  https://curl.se/
 
 GIT
 
   To download the latest source code off the GIT server, do this:
 
-    git clone https://github.com/curl/curl
+  git clone https://github.com/curl/curl
 
   (you will get a directory named curl created, filled with the source code)
 
 SECURITY PROBLEMS
 
-  Report suspected security problems via our HackerOne page and not in public.
+  Report suspected security problems privately and not in public.
 
-    https://hackerone.com/curl
+  https://curl.se/dev/vuln-disclosure.html

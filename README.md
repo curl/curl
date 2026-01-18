@@ -54,8 +54,8 @@ Download the latest source from the Git server:
 
 ## Security problems
 
-Report suspected security problems via [our HackerOne
-page](https://hackerone.com/curl) and not in public.
+Report suspected security problems
+[privately](https://curl.se/dev/vuln-disclosure.html) and not in public.
 
 ## Backers
 

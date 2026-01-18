@@ -36,8 +36,7 @@ SPDX-License-Identifier: curl
  using our security development process.
 
  Security related bugs or bugs that are suspected to have a security impact,
- should be reported on the [curl security tracker at
- HackerOne](https://hackerone.com/curl).
+ should be reported [privately](https://curl.se/dev/vuln-disclosure.html).
 
  This ensures that the report reaches the curl security team so that they
  first can deal with the report away from the public to minimize the harm and
