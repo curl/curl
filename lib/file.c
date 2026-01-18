@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "file.h"
 
 #ifndef CURL_DISABLE_FILE
 
@@ -53,12 +55,10 @@
 #include <dirent.h>
 #endif
 
-#include "urldata.h"
 #include "progress.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "escape.h"
-#include "file.h"
 #include "multiif.h"
 #include "transfer.h"
 #include "url.h"
@@ -605,11 +605,7 @@ out:
   return result;
 }
 
-/*
- * FILE scheme handler.
- */
-const struct Curl_handler Curl_handler_file = {
-  "file",                               /* scheme */
+static const struct Curl_protocol Curl_protocol_file = {
   file_setup_connection,                /* setup_connection */
   file_do,                              /* do_it */
   file_done,                            /* done */
@@ -627,10 +623,22 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  0,                                    /* defport */
-  CURLPROTO_FILE,                       /* protocol */
-  CURLPROTO_FILE,                       /* family */
-  PROTOPT_NONETWORK | PROTOPT_NOURLQUERY /* flags */
 };
 
 #endif
+
+/*
+ * FILE scheme handler.
+ */
+const struct Curl_scheme Curl_scheme_file = {
+  "file",                               /* scheme */
+#ifdef CURL_DISABLE_FILE
+  ZERO_NULL,
+#else
+  &Curl_protocol_file,
+#endif
+  CURLPROTO_FILE,                       /* protocol */
+  CURLPROTO_FILE,                       /* family */
+  PROTOPT_NONETWORK | PROTOPT_NOURLQUERY, /* flags */
+  0                                     /* defport */
+};

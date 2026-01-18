@@ -104,13 +104,13 @@ static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
 {
   struct connectdata *conn = data->conn;
 
-  if(conn->handler->protocol & PROTO_FAMILY_FTP)
+  if(conn->scheme->protocol & PROTO_FAMILY_FTP)
     return Curl_conn_data_pending(data, SECONDARYSOCKET);
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return (!rcvd_eagain &&
-          conn->handler->protocol & (CURLPROTO_SCP | CURLPROTO_SFTP)) ||
+          conn->scheme->protocol & (CURLPROTO_SCP | CURLPROTO_SFTP)) ||
          Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
@@ -623,13 +623,13 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      protocol is HTTP as when uploading over HTTP we will still get a
      response */
   if(data->state.upload &&
-     !(conn->handler->protocol & (PROTO_FAMILY_HTTP | CURLPROTO_RTSP)))
+     !(conn->scheme->protocol & (PROTO_FAMILY_HTTP | CURLPROTO_RTSP)))
     return CURLE_OK;
 
   if(conn->bits.reuse &&
      (data->req.bytecount + data->req.headerbytecount == 0) &&
      ((!data->req.no_body && !data->req.done) ||
-      (conn->handler->protocol & PROTO_FAMILY_HTTP))
+      (conn->scheme->protocol & PROTO_FAMILY_HTTP))
 #ifndef CURL_DISABLE_RTSP
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
@@ -701,7 +701,7 @@ static void xfer_setup(
   /* without receiving, there should be not recv_size */
   DEBUGASSERT((conn->recv_idx >= 0) || (recv_size == -1));
   k->size = recv_size;
-  k->header = !!conn->handler->write_resp_hd;
+  k->header = !!conn->scheme->run->write_resp_hd;
   /* by default, we do not shutdown at the end of the transfer */
   k->shutdown = FALSE;
   k->shutdown_err_ignore = FALSE;
@@ -713,7 +713,7 @@ static void xfer_setup(
     Curl_pgrsSetDownloadSize(data, recv_size);
 
   /* we want header and/or body, if neither then do not do this! */
-  if(conn->handler->write_resp_hd || !data->req.no_body) {
+  if(conn->scheme->run->write_resp_hd || !data->req.no_body) {
 
     if(conn->recv_idx != -1)
       k->keepon |= KEEP_RECV;
@@ -768,10 +768,10 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  if(data->conn->handler->write_resp) {
+  if(data->conn->scheme->run->write_resp) {
     /* protocol handlers offering this function take full responsibility
      * for writing all received download data to the client. */
-    result = data->conn->handler->write_resp(data, buf, blen, is_eos);
+    result = data->conn->scheme->run->write_resp(data, buf, blen, is_eos);
   }
   else {
     /* No special handling by protocol handler, write all received data
@@ -802,11 +802,11 @@ bool Curl_xfer_write_is_paused(struct Curl_easy *data)
 CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos)
 {
-  if(data->conn->handler->write_resp_hd) {
+  if(data->conn->scheme->run->write_resp_hd) {
     DEBUGASSERT(!hd0[hdlen]); /* null terminated */
     /* protocol handlers offering this function take full responsibility
      * for writing all received download data to the client. */
-    return data->conn->handler->write_resp_hd(data, hd0, hdlen, is_eos);
+    return data->conn->scheme->run->write_resp_hd(data, hd0, hdlen, is_eos);
   }
   /* No special handling by protocol handler, write as response bytes */
   return Curl_xfer_write_resp(data, hd0, hdlen, is_eos);

@@ -1858,7 +1858,7 @@ static CURLcode ssh_state_auth_done(struct Curl_easy *data,
   data->conn->recv_idx = FIRSTSOCKET;
   conn->send_idx = -1;
 
-  if(conn->handler->protocol == CURLPROTO_SFTP) {
+  if(conn->scheme->protocol == CURLPROTO_SFTP) {
     myssh_state(data, sshc, SSH_SFTP_INIT);
     return CURLE_OK;
   }
@@ -3478,7 +3478,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   }
 
 #endif /* CURL_DISABLE_PROXY */
-  if(conn->handler->protocol & CURLPROTO_SCP) {
+  if(conn->scheme->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
   }
@@ -3867,7 +3867,7 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
 
   Curl_pgrsReset(data);
 
-  if(conn->handler->protocol & CURLPROTO_SCP)
+  if(conn->scheme->protocol & CURLPROTO_SCP)
     result = scp_perform(data, &connected, done);
   else
     result = sftp_perform(data, &connected, done);
@@ -3902,7 +3902,7 @@ static void ssh_attach(struct Curl_easy *data, struct connectdata *conn)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(conn);
-  if(conn->handler->protocol & PROTO_FAMILY_SSH) {
+  if(conn->scheme->protocol & PROTO_FAMILY_SSH) {
     struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
     if(sshc && sshc->ssh_session) {
       /* only re-attach if the session already exists */
@@ -3915,8 +3915,7 @@ static void ssh_attach(struct Curl_easy *data, struct connectdata *conn)
 /*
  * SCP protocol handler.
  */
-const struct Curl_handler Curl_handler_scp = {
-  "SCP",                                /* scheme */
+const struct Curl_protocol Curl_protocol_scp = {
   ssh_setup_connection,                 /* setup_connection */
   ssh_do,                               /* do_it */
   scp_done,                             /* done */
@@ -3934,18 +3933,12 @@ const struct Curl_handler Curl_handler_scp = {
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   ZERO_NULL,                            /* follow */
-  PORT_SSH,                             /* defport */
-  CURLPROTO_SCP,                        /* protocol */
-  CURLPROTO_SCP,                        /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
 };
 
 /*
  * SFTP protocol handler.
  */
-const struct Curl_handler Curl_handler_sftp = {
-  "SFTP",                               /* scheme */
+const struct Curl_protocol Curl_protocol_sftp = {
   ssh_setup_connection,                 /* setup_connection */
   ssh_do,                               /* do_it */
   sftp_done,                            /* done */
@@ -3963,11 +3956,6 @@ const struct Curl_handler Curl_handler_sftp = {
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   ZERO_NULL,                            /* follow */
-  PORT_SSH,                             /* defport */
-  CURLPROTO_SFTP,                       /* protocol */
-  CURLPROTO_SFTP,                       /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
 };
 
 #endif /* USE_LIBSSH2 */

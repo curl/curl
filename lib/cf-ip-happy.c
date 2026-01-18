@@ -793,7 +793,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
       cf_ip_happy_ctx_clear(cf, data);
       Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
 
-      if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
+      if(cf->conn->scheme->protocol & PROTO_FAMILY_SSH)
         Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(Curl_trc_cf_is_verbose(cf, data)) {

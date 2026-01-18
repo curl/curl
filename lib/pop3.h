@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-extern const struct Curl_handler Curl_handler_pop3;
-extern const struct Curl_handler Curl_handler_pop3s;
+extern const struct Curl_scheme Curl_scheme_pop3;
+extern const struct Curl_scheme Curl_scheme_pop3s;
 
 #endif /* HEADER_CURL_POP3_H */

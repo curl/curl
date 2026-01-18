@@ -495,7 +495,7 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
 #endif
 
 #ifdef USE_HTTPSRR
-  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+  if(conn->scheme->protocol & PROTO_FAMILY_HTTP) {
     /* Only use HTTPS RR for HTTP(S) transfers */
     char *qname = NULL;
     if(port != PORT_HTTPS) {

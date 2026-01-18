@@ -25,6 +25,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+extern const struct Curl_scheme Curl_scheme_ws;
+extern const struct Curl_scheme Curl_scheme_wss;
+
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
 /* meta key for storing protocol meta at connection */
@@ -32,11 +35,6 @@
 
 CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
 CURLcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
-
-extern const struct Curl_handler Curl_handler_ws;
-#ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_wss;
-#endif
 
 #else
 #define Curl_ws_request(x, y) CURLE_OK

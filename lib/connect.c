@@ -428,7 +428,7 @@ connect_sub_chain:
 #ifdef USE_SSL
     if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-         cf->conn->handler->flags & PROTOPT_SSL))       /* we want SSL */
+         cf->conn->scheme->flags & PROTOPT_SSL))       /* we want SSL */
        && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
       result = Curl_cf_ssl_insert_after(cf, data);
       if(result)
@@ -563,7 +563,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  DEBUGASSERT(conn->handler);
+  DEBUGASSERT(conn->scheme);
   DEBUGASSERT(dns);
 
   Curl_resolv_unlink(data, &data->state.dns[sockindex]);
@@ -571,7 +571,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
-     conn->handler->protocol == CURLPROTO_HTTPS) {
+     conn->scheme->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
     result = Curl_cf_https_setup(data, conn, sockindex);
     if(result)
