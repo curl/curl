@@ -438,7 +438,9 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
 {
   struct in_addr ia;
+#ifdef USE_IPV6
   struct in6_addr ia6;
+#endif
   bool result = FALSE;
 
   int res = curlx_inet_pton(AF_INET, hostname, &ia);
@@ -447,6 +449,7 @@ static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
     memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
     result = TRUE;
   }
+#ifdef USE_IPV6
   else {
     res = curlx_inet_pton(AF_INET6, hostname, &ia6);
     if(res) {
@@ -455,6 +458,7 @@ static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
       result = TRUE;
     }
   }
+#endif
   return result;
 }
 
