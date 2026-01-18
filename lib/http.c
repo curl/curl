@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
 
 #ifndef CURL_DISABLE_HTTP
 
@@ -46,7 +47,6 @@
 #include <sys/param.h>
 #endif
 
-#include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -1236,14 +1236,14 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
       }
       else {
         char *scheme;
-        const struct Curl_handler *p;
+        const struct Curl_scheme *p;
         uc = curl_url_get(data->state.uh, CURLUPART_SCHEME, &scheme, 0);
         if(uc) {
           curlx_free(follow_url);
           return Curl_uc_to_curlcode(uc);
         }
 
-        p = Curl_get_scheme_handler(scheme);
+        p = Curl_get_scheme(scheme);
         if(p && (p->protocol != data->info.conn_protocol)) {
           infof(data, "Clear auth, redirects scheme from %s to %s",
                 data->info.conn_scheme, scheme);
@@ -1930,11 +1930,11 @@ void Curl_http_method(struct Curl_easy *data,
   Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
   const char *request;
 #ifndef CURL_DISABLE_WEBSOCKETS
-  if(data->conn->handler->protocol & (CURLPROTO_WS | CURLPROTO_WSS))
+  if(data->conn->scheme->protocol & (CURLPROTO_WS | CURLPROTO_WSS))
     httpreq = HTTPREQ_GET;
   else
 #endif
-  if((data->conn->handler->protocol & (PROTO_FAMILY_HTTP | CURLPROTO_FTP)) &&
+  if((data->conn->scheme->protocol & (PROTO_FAMILY_HTTP | CURLPROTO_FTP)) &&
      data->state.upload)
     httpreq = HTTPREQ_PUT;
 
@@ -1999,7 +1999,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
 
     data->state.first_remote_port = conn->remote_port;
-    data->state.first_remote_protocol = conn->handler->protocol;
+    data->state.first_remote_protocol = conn->scheme->protocol;
   }
   Curl_safefree(aptr->host);
 
@@ -2971,7 +2971,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
       result = Curl_http2_request_upgrade(req, data);
     }
 #ifndef CURL_DISABLE_WEBSOCKETS
-    if(!result && conn->handler->protocol & (CURLPROTO_WS | CURLPROTO_WSS))
+    if(!result && conn->scheme->protocol & (CURLPROTO_WS | CURLPROTO_WSS))
       result = Curl_ws_request(data, req);
 #endif
     break;
@@ -3172,7 +3172,7 @@ static statusline checkprotoprefix(struct Curl_easy *data,
                                    const char *s, size_t len)
 {
 #ifndef CURL_DISABLE_RTSP
-  if(conn->handler->protocol & CURLPROTO_RTSP)
+  if(conn->scheme->protocol & CURLPROTO_RTSP)
     return checkrtspprefix(data, s, len);
 #else
   (void)conn;
@@ -3701,7 +3701,7 @@ static CURLcode http_header(struct Curl_easy *data,
 
   if(!result) {
     struct connectdata *conn = data->conn;
-    if(conn->handler->protocol & CURLPROTO_RTSP)
+    if(conn->scheme->protocol & CURLPROTO_RTSP)
       result = Curl_rtsp_parseheader(data, hd);
   }
   return result;
@@ -3993,7 +3993,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   if((k->size == -1) && !k->chunk && !conn->bits.close &&
      (k->httpversion == 11) &&
-     !(conn->handler->protocol & CURLPROTO_RTSP) &&
+     !(conn->scheme->protocol & CURLPROTO_RTSP) &&
      data->state.httpreq != HTTPREQ_HEAD) {
     /* On HTTP 1.1, when connection is not to get closed, but no
        Content-Length nor Transfer-Encoding chunked have been
@@ -4212,7 +4212,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     bool fine_statusline = FALSE;
 
     k->httpversion = 0; /* Do not know yet */
-    if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
+    if(data->conn->scheme->protocol & PROTO_FAMILY_HTTP) {
       /*
        * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
        *
@@ -4279,7 +4279,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
         }
       }
     }
-    else if(data->conn->handler->protocol & CURLPROTO_RTSP) {
+    else if(data->conn->scheme->protocol & CURLPROTO_RTSP) {
       const char *p = hd;
       struct Curl_str ver;
       curl_off_t status;
@@ -4984,8 +4984,7 @@ void Curl_http_resp_free(struct http_resp *resp)
 /*
  * HTTP handler interface.
  */
-const struct Curl_handler Curl_handler_http = {
-  "http",                               /* scheme */
+static const struct Curl_protocol Curl_protocol_http = {
   Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
@@ -5003,43 +5002,40 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   Curl_http_follow,                     /* follow */
-  PORT_HTTP,                            /* defport */
+};
+
+#endif /* CURL_DISABLE_HTTP */
+
+/*
+ * HTTP handler interface.
+ */
+const struct Curl_scheme Curl_scheme_http = {
+  "http",                               /* scheme */
+#ifdef CURL_DISABLE_HTTP
+  ZERO_NULL,
+#else
+  &Curl_protocol_http,
+#endif
   CURLPROTO_HTTP,                       /* protocol */
   CURLPROTO_HTTP,                       /* family */
   PROTOPT_CREDSPERREQUEST |             /* flags */
-    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
-
+  PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE,
+  PORT_HTTP,                            /* defport */
 };
 
-#ifdef USE_SSL
 /*
  * HTTPS handler interface.
  */
-const struct Curl_handler Curl_handler_https = {
+const struct Curl_scheme Curl_scheme_https = {
   "https",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  NULL,                                 /* connecting */
-  ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_pollset */
-  Curl_http_doing_pollset,              /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  Curl_http_perform_pollset,            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
-  Curl_http_write_resp_hd,              /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_HTTPS,                           /* defport */
+#if defined(CURL_DISABLE_HTTP) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_http,
+#endif
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
-    PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE
+  PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE,
+  PORT_HTTPS,                           /* defport */
 };
-#endif
-
-#endif /* CURL_DISABLE_HTTP */

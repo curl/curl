@@ -43,7 +43,7 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
 {
   if(!conn->bits.shutdown_handler) {
 
-    if(conn->handler && conn->handler->disconnect) {
+    if(conn->scheme && conn->scheme->run->disconnect) {
       /* Some disconnect handlers do a blocking wait on server responses.
        * FTP/IMAP/SMTP and SFTP are among them. When using the internal
        * handle, set an overall short timeout so we do not hang for the
@@ -59,7 +59,7 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
                    conn->connection_id, conn->bits.aborted));
       /* There are protocol handlers that block on retrieving
        * server responses here (FTP). Set a short timeout. */
-      conn->handler->disconnect(data, conn, (bool)conn->bits.aborted);
+      conn->scheme->run->disconnect(data, conn, (bool)conn->bits.aborted);
     }
 
     conn->bits.shutdown_handler = TRUE;

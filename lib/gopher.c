@@ -22,16 +22,16 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "gopher.h"
 
 #ifndef CURL_DISABLE_GOPHER
 
-#include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "gopher.h"
 #include "select.h"
 #include "url.h"
 #include "escape.h"
@@ -172,8 +172,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
  * connect-command-download protocols.
  */
 
-const struct Curl_handler Curl_handler_gopher = {
-  "gopher",                             /* scheme */
+static const struct Curl_protocol Curl_protocol_gopher = {
   ZERO_NULL,                            /* setup_connection */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
@@ -191,15 +190,10 @@ const struct Curl_handler Curl_handler_gopher = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  PORT_GOPHER,                          /* defport */
-  CURLPROTO_GOPHER,                     /* protocol */
-  CURLPROTO_GOPHER,                     /* family */
-  PROTOPT_NONE                          /* flags */
 };
 
 #ifdef USE_SSL
-const struct Curl_handler Curl_handler_gophers = {
-  "gophers",                            /* scheme */
+static const struct Curl_protocol Curl_protocol_gophers = {
   ZERO_NULL,                            /* setup_connection */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
@@ -217,11 +211,33 @@ const struct Curl_handler Curl_handler_gophers = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  PORT_GOPHER,                          /* defport */
-  CURLPROTO_GOPHERS,                    /* protocol */
-  CURLPROTO_GOPHER,                     /* family */
-  PROTOPT_SSL                           /* flags */
 };
 #endif
 
 #endif /* CURL_DISABLE_GOPHER */
+
+const struct Curl_scheme Curl_scheme_gopher = {
+  "gopher",                             /* scheme */
+#ifdef CURL_DISABLE_GOPHER
+  ZERO_NULL,
+#else
+  &Curl_protocol_gopher,
+#endif
+  CURLPROTO_GOPHER,                     /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
+  PROTOPT_NONE,                         /* flags */
+  PORT_GOPHER,                          /* defport */
+};
+
+const struct Curl_scheme Curl_scheme_gophers = {
+  "gophers",                            /* scheme */
+#if defined(CURL_DISABLE_GOPHER) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_gophers,
+#endif
+  CURLPROTO_GOPHERS,                    /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
+  PROTOPT_SSL,                          /* flags */
+  PORT_GOPHER,                          /* defport */
+};

@@ -569,8 +569,8 @@ static bool multi_conn_should_close(struct connectdata *conn,
 
   /* Unless this connection is for a "connect-only" transfer, it
    * needs to be closed if the protocol handler does not support reuse. */
-  if(!data->set.connect_only && conn->handler &&
-     !(conn->handler->flags & PROTOPT_CONN_REUSE))
+  if(!data->set.connect_only && conn->scheme &&
+     !(conn->scheme->flags & PROTOPT_CONN_REUSE))
     return TRUE;
 
   /* if premature is TRUE, it means this connection was said to be DONE before
@@ -699,8 +699,8 @@ static CURLcode multi_done(struct Curl_easy *data,
   }
 
   /* this calls the protocol-specific function pointer previously set */
-  if(conn->handler->done && (data->mstate >= MSTATE_PROTOCONNECT))
-    result = conn->handler->done(data, status, premature);
+  if(conn->scheme->run->done && (data->mstate >= MSTATE_PROTOCONNECT))
+    result = conn->scheme->run->done(data, status, premature);
   else
     result = status;
 
@@ -936,8 +936,8 @@ void Curl_attach_connection(struct Curl_easy *data,
     conn->attached_multi = data->multi;
   DEBUGASSERT(conn->attached_multi == data->multi);
 
-  if(conn->handler && conn->handler->attach)
-    conn->handler->attach(data, conn);
+  if(conn->scheme && conn->scheme->run->attach)
+    conn->scheme->run->attach(data, conn);
 }
 
 /* adjust pollset for rate limits/pauses */
@@ -1015,8 +1015,8 @@ static CURLcode mstate_protocol_pollset(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
-  if(conn->handler->proto_pollset)
-    result = conn->handler->proto_pollset(data, ps);
+  if(conn->scheme->run->proto_pollset)
+    result = conn->scheme->run->proto_pollset(data, ps);
   else {
     curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
     if(sockfd != CURL_SOCKET_BAD) {
@@ -1037,8 +1037,8 @@ static CURLcode mstate_do_pollset(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
-  if(conn->handler->doing_pollset)
-    result = conn->handler->doing_pollset(data, ps);
+  if(conn->scheme->run->doing_pollset)
+    result = conn->scheme->run->doing_pollset(data, ps);
   else if(CONN_SOCK_IDX_VALID(conn->send_idx)) {
     /* Default is that we want to send something to the server */
     result = Curl_pollset_add_out(data, ps, conn->sock[conn->send_idx]);
@@ -1056,8 +1056,8 @@ static CURLcode mstate_domore_pollset(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
-  if(conn->handler->domore_pollset)
-    result = conn->handler->domore_pollset(data, ps);
+  if(conn->scheme->run->domore_pollset)
+    result = conn->scheme->run->domore_pollset(data, ps);
   else if(CONN_SOCK_IDX_VALID(conn->send_idx)) {
     /* Default is that we want to send something to the server */
     result = Curl_pollset_add_out(data, ps, conn->sock[conn->send_idx]);
@@ -1075,8 +1075,8 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
-  if(conn->handler->perform_pollset)
-    result = conn->handler->perform_pollset(data, ps);
+  if(conn->scheme->run->perform_pollset)
+    result = conn->scheme->run->perform_pollset(data, ps);
   else {
     /* Default is to obey the data->req.keepon flags for send/recv */
     if(Curl_req_want_recv(data) && CONN_SOCK_IDX_VALID(conn->recv_idx)) {
@@ -1683,10 +1683,10 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
 
   DEBUGASSERT(conn);
-  DEBUGASSERT(conn->handler);
+  DEBUGASSERT(conn->scheme);
 
-  if(conn->handler->do_it)
-    result = conn->handler->do_it(data, done);
+  if(conn->scheme->run->do_it)
+    result = conn->scheme->run->do_it(data, done);
 
   return result;
 }
@@ -1707,8 +1707,8 @@ static CURLcode multi_do_more(struct Curl_easy *data, int *complete)
 
   *complete = 0;
 
-  if(conn->handler->do_more)
-    result = conn->handler->do_more(data, complete);
+  if(conn->scheme->run->do_more)
+    result = conn->scheme->run->do_more(data, complete);
 
   return result;
 }
@@ -1781,9 +1781,9 @@ static CURLcode protocol_connecting(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
 
-  if(conn && conn->handler->connecting) {
+  if(conn && conn->scheme->run->connecting) {
     *done = FALSE;
-    result = conn->handler->connecting(data, done);
+    result = conn->scheme->run->connecting(data, done);
   }
   else
     *done = TRUE;
@@ -1801,9 +1801,9 @@ static CURLcode protocol_doing(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
 
-  if(conn && conn->handler->doing) {
+  if(conn && conn->scheme->run->doing) {
     *done = FALSE;
-    result = conn->handler->doing(data, done);
+    result = conn->scheme->run->doing(data, done);
   }
   else
     *done = TRUE;
@@ -1827,9 +1827,9 @@ static CURLcode protocol_connect(struct Curl_easy *data, bool *protocol_done)
 
   *protocol_done = FALSE;
   if(!conn->bits.protoconnstart) {
-    if(conn->handler->connect_it) {
+    if(conn->scheme->run->connect_it) {
       /* Call the protocol-specific connect function */
-      result = conn->handler->connect_it(data, protocol_done);
+      result = conn->scheme->run->connect_it(data, protocol_done);
       if(result)
         return result;
     }
@@ -1838,7 +1838,7 @@ static CURLcode protocol_connect(struct Curl_easy *data, bool *protocol_done)
 
   /* Unless this protocol does not have any protocol-connect callback, as
      then we know we are done. */
-  if(!conn->handler->connecting)
+  if(!conn->scheme->run->connecting)
     *protocol_done = TRUE;
   return CURLE_OK;
 }
@@ -1869,12 +1869,12 @@ static void multi_posttransfer(struct Curl_easy *data)
  * This function DOES NOT FREE the given url.
  */
 static CURLcode multi_follow(struct Curl_easy *data,
-                             const struct Curl_handler *handler,
+                             const struct Curl_scheme *handler,
                              const char *newurl, /* the Location: string */
                              followtype type) /* see transfer.h */
 {
-  if(handler && handler->follow)
-    return handler->follow(data, newurl, type);
+  if(handler && handler->run->follow)
+    return handler->run->follow(data, newurl, type);
   return CURLE_TOO_MANY_REDIRECTS;
 }
 
@@ -1996,7 +1996,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
      * connection.
      */
 
-    if(!(data->conn->handler->flags & PROTOPT_DUAL) &&
+    if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
        result != CURLE_HTTP2_STREAM)
       streamclose(data->conn, "Transfer returned error");
 
@@ -2004,7 +2004,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
     multi_done(data, result, TRUE);
   }
   else if(data->req.done && !Curl_cwriter_is_paused(data)) {
-    const struct Curl_handler *handler = data->conn->handler;
+    const struct Curl_scheme *handler = data->conn->scheme;
 
     /* call this even if the readwrite function returned error */
     multi_posttransfer(data);
@@ -2143,7 +2143,7 @@ static CURLMcode state_do(struct Curl_easy *data,
        * unexpectedly died. If possible, send the connection back to the
        * CONNECT phase so we can try again.
        */
-      const struct Curl_handler *handler = data->conn->handler;
+      const struct Curl_scheme *handler = data->conn->scheme;
       char *newurl = NULL;
       followtype follow = FOLLOW_NONE;
       CURLcode drc;
@@ -2208,7 +2208,7 @@ static CURLMcode state_ratelimiting(struct Curl_easy *data,
   result = Curl_pgrsCheck(data);
 
   if(result) {
-    if(!(data->conn->handler->flags & PROTOPT_DUAL) &&
+    if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
        result != CURLE_HTTP2_STREAM)
       streamclose(data->conn, "Transfer returned error");
 
@@ -2556,7 +2556,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else {
 #ifndef CURL_DISABLE_FTP
         if(data->state.wildcardmatch &&
-           ((data->conn->handler->flags & PROTOPT_WILDCARD) == 0)) {
+           ((data->conn->scheme->flags & PROTOPT_WILDCARD) == 0)) {
           data->wildcard->state = CURLWC_DONE;
         }
 #endif

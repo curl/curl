@@ -143,7 +143,7 @@ bool Curl_auth_allowed_to_host(struct Curl_easy *data)
          (data->state.first_host &&
           curl_strequal(data->state.first_host, conn->host.name) &&
           (data->state.first_remote_port == conn->remote_port) &&
-          (data->state.first_remote_protocol == conn->handler->protocol));
+          (data->state.first_remote_protocol == conn->scheme->protocol));
 }
 
 #ifdef USE_NTLM

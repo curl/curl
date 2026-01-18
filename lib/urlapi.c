@@ -256,7 +256,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   char *userp = NULL;
   char *passwdp = NULL;
   char *optionsp = NULL;
-  const struct Curl_handler *h = NULL;
+  const struct Curl_scheme *h = NULL;
 
   /* At this point, we assume all the other special cases have been taken
    * care of, so the host is at most
@@ -281,7 +281,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* if this is a known scheme, get some details */
   if(u->scheme)
-    h = Curl_get_scheme_handler(u->scheme);
+    h = Curl_get_scheme(u->scheme);
 
   /* We could use the login information in the URL so extract it. Only parse
      options if the handler says we should. Note that 'h' might be NULL! */
@@ -948,7 +948,7 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
     }
 
     schemep = schemebuf;
-    if(!Curl_get_scheme_handler(schemep) &&
+    if(!Curl_get_scheme(schemep) &&
        !(flags & CURLU_NON_SUPPORT_SCHEME))
       return CURLUE_UNSUPPORTED_SCHEME;
 
@@ -1448,7 +1448,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
   else if(!u->host)
     return CURLUE_NO_HOST;
   else {
-    const struct Curl_handler *h = NULL;
+    const struct Curl_scheme *h = NULL;
     char schemebuf[MAX_SCHEME_LEN + 5];
     if(u->scheme)
       scheme = u->scheme;
@@ -1457,7 +1457,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
     else
       return CURLUE_NO_SCHEME;
 
-    h = Curl_get_scheme_handler(scheme);
+    h = Curl_get_scheme(scheme);
     if(!port && (flags & CURLU_DEFAULT_PORT)) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
@@ -1586,7 +1586,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     if(!ptr && (flags & CURLU_DEFAULT_PORT) && u->scheme) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
-      const struct Curl_handler *h = Curl_get_scheme_handler(u->scheme);
+      const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
       if(h) {
         curl_msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         ptr = portbuf;
@@ -1595,7 +1595,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     else if(ptr && u->scheme) {
       /* there is a stored port number, but ask to inhibit if
          it matches the default one for the scheme */
-      const struct Curl_handler *h = Curl_get_scheme_handler(u->scheme);
+      const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
       if(h && (h->defport == u->portnum) &&
          (flags & CURLU_NO_DEFAULT_PORT))
         ptr = NULL;
@@ -1637,16 +1637,16 @@ static CURLUcode set_url_scheme(CURLU *u, const char *scheme,
                                 unsigned int flags)
 {
   size_t plen = strlen(scheme);
-  const struct Curl_handler *h = NULL;
+  const struct Curl_scheme *h = NULL;
   if((plen > MAX_SCHEME_LEN) || (plen < 1))
     /* too long or too short */
     return CURLUE_BAD_SCHEME;
   /* verify that it is a fine scheme */
-  h = Curl_get_scheme_handler(scheme);
+  h = Curl_get_scheme(scheme);
+  if(!(flags & CURLU_NON_SUPPORT_SCHEME) && (!h || !h->run))
+    return CURLUE_UNSUPPORTED_SCHEME;
   if(!h) {
     const char *s = scheme;
-    if(!(flags & CURLU_NON_SUPPORT_SCHEME))
-      return CURLUE_UNSUPPORTED_SCHEME;
     if(ISALPHA(*s)) {
       /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
       while(--plen) {

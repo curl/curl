@@ -106,8 +106,8 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 {
   struct h1_tunnel_state *ts;
 
-  if(cf->conn->handler->flags & PROTOPT_NOTCPPROXY) {
-    failf(data, "%s cannot be done over CONNECT", cf->conn->handler->scheme);
+  if(cf->conn->scheme->flags & PROTOPT_NOTCPPROXY) {
+    failf(data, "%s cannot be done over CONNECT", cf->conn->scheme->name);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 

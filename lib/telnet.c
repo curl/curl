@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "telnet.h"
 
 #ifndef CURL_DISABLE_TELNET
 
@@ -45,12 +47,10 @@
 #include <sys/param.h>
 #endif
 
-#include "urldata.h"
 #include "url.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
-#include "telnet.h"
 #include "connect.h"
 #include "progress.h"
 #include "arpa_telnet.h"
@@ -1570,8 +1570,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 /*
  * TELNET protocol handler.
  */
-const struct Curl_handler Curl_handler_telnet = {
-  "telnet",                             /* scheme */
+static const struct Curl_protocol Curl_protocol_telnet = {
   ZERO_NULL,                            /* setup_connection */
   telnet_do,                            /* do_it */
   telnet_done,                          /* done */
@@ -1589,10 +1588,22 @@ const struct Curl_handler Curl_handler_telnet = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  PORT_TELNET,                          /* defport */
-  CURLPROTO_TELNET,                     /* protocol */
-  CURLPROTO_TELNET,                     /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
 #endif /* !CURL_DISABLE_TELNET */
+
+/*
+ * TELNET protocol handler.
+ */
+const struct Curl_scheme Curl_scheme_telnet = {
+  "telnet",                             /* scheme */
+#ifdef CURL_DISABLE_TELNET
+  ZERO_NULL,
+#else
+  &Curl_protocol_telnet,
+#endif
+  CURLPROTO_TELNET,                     /* protocol */
+  CURLPROTO_TELNET,                     /* family */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY,    /* flags */
+  PORT_TELNET,                          /* defport */
+};

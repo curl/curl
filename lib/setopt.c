@@ -214,9 +214,9 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     str = strchr(str, ',');
     tlen = str ? (size_t)(str - token) : strlen(token);
     if(tlen) {
-      const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
+      const struct Curl_scheme *h = Curl_getn_scheme(token, tlen);
 
-      if(!h)
+      if(!h || !h->run)
         return CURLE_UNSUPPORTED_PROTOCOL;
 
       *val |= h->protocol;

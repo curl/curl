@@ -611,7 +611,7 @@ bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
   cf = conn->cfilter[sockindex];
   if(cf)
     return (bool)cf->connected;
-  else if(conn->handler->flags & PROTOPT_NONETWORK)
+  else if(conn->scheme->flags & PROTOPT_NONETWORK)
     return TRUE;
   return FALSE;
 }

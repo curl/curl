@@ -1234,7 +1234,7 @@ static int cookie_sort_ct(const void *p1, const void *p2)
 
 bool Curl_secure_context(struct connectdata *conn, const char *host)
 {
-  return conn->handler->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS) ||
+  return conn->scheme->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS) ||
     curl_strequal("localhost", host) ||
     !strcmp(host, "127.0.0.1") ||
     !strcmp(host, "::1");

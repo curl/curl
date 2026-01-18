@@ -719,7 +719,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
     /* cannot do QUIC over a Unix domain socket */
     return CURLE_QUIC_CONNECT_ERROR;
   }
-  if(!(conn->handler->flags & PROTOPT_SSL)) {
+  if(!(conn->scheme->flags & PROTOPT_SSL)) {
     failf(data, "HTTP/3 requested for non-HTTPS URL");
     return CURLE_URL_MALFORMAT;
   }
