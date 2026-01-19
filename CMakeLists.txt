@@ -1572,7 +1572,7 @@ check_function_exists("setlocale"     HAVE_SETLOCALE)
 check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 
 if(WIN32)
-  set(HAVE_STRDUP 1)  # to not define local implementation. The codebase uses _strdup().
+  set(HAVE_STRDUP 1)  # to not define local implementation. curl uses _strdup() on Windows.
 else()
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
