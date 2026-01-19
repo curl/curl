@@ -1677,40 +1677,9 @@ static void imap_easy_reset(struct IMAP *imap)
  */
 static bool imap_is_bchar(char ch)
 {
-  /* Performing the alnum check with this macro is faster because of ASCII
+  /* Performing the alnum check first with macro is faster because of ASCII
      arithmetic */
-  if(ISALNUM(ch))
-    return TRUE;
-
-  switch(ch) {
-  /* bchar */
-  case ':':
-  case '@':
-  case '/':
-  /* bchar -> achar */
-  case '&':
-  case '=':
-  /* bchar -> achar -> uchar -> unreserved (without alphanumeric) */
-  case '-':
-  case '.':
-  case '_':
-  case '~':
-  /* bchar -> achar -> uchar -> sub-delims-sh */
-  case '!':
-  case '$':
-  case '\'':
-  case '(':
-  case ')':
-  case '*':
-  case '+':
-  case ',':
-  /* bchar -> achar -> uchar -> pct-encoded */
-  case '%': /* HEXDIG chars are already included above */
-    return TRUE;
-
-  default:
-    return FALSE;
-  }
+  return ch && (ISALNUM(ch) || strchr(":@/&=-._~!$\'()*+,%", ch));
 }
 
 /***********************************************************************
