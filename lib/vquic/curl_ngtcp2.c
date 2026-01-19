@@ -516,7 +516,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 
   ctx->tls_vrfy_result = Curl_vquic_tls_verify_peer(&ctx->tls, cf,
                                                     data, &ctx->peer);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     const ngtcp2_transport_params *rp;
     rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
@@ -1401,6 +1401,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)ctx;
   (void)buf;
+  NOVERBOSE((void)blen);
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
@@ -1730,7 +1731,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
       goto out;
     }
-    stream = H3_STREAM_CTX(ctx, data);
+    VERBOSE(stream = H3_STREAM_CTX(ctx, data));
   }
   else if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);
@@ -2735,7 +2736,7 @@ out:
     }
   }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(result) {
     struct ip_quadruple ip;
 

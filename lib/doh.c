@@ -40,7 +40,7 @@
 
 #define DNS_CLASS_IN 0x01
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static const char * const errors[] = {
   "",
   "Bad label",
@@ -65,7 +65,7 @@ static const char *doh_strerror(DOHcode code)
   return "bad error code";
 }
 
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 /* @unittest 1655
  */
@@ -324,9 +324,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
 
   /* pass in the struct pointer via a local variable to please coverity and
      the gcc typecheck helpers */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  doh->state.feat = &Curl_trc_feat_dns;
-#endif
+  VERBOSE(doh->state.feat = &Curl_trc_feat_dns);
   ERROR_CHECK_SETOPT(CURLOPT_URL, url);
   ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
   ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_probe_write_cb);
@@ -853,7 +851,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   return DOH_OK; /* ok */
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void doh_show(struct Curl_easy *data,
                      const struct dohentry *d)
 {
@@ -1009,7 +1007,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
   return result;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static const char *doh_type2name(DNStype dnstype)
 {
   switch(dnstype) {
@@ -1233,12 +1231,10 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       rc[slot] = doh_resp_decode(curlx_dyn_uptr(&p->body),
                                  curlx_dyn_len(&p->body),
                                  p->dnstype, &de);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(rc[slot]) {
         CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
                      doh_type2name(p->dnstype), dohp->host);
       }
-#endif
     } /* next slot */
 
     result = CURLE_COULDNT_RESOLVE_HOST; /* until we know better */

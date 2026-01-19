@@ -466,7 +466,7 @@ static void imap_state(struct Curl_easy *data,
                        struct imap_conn *imapc,
                        imapstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -490,8 +490,9 @@ static void imap_state(struct Curl_easy *data,
   if(imapc->state != newstate)
     infof(data, "IMAP %p state change from %s to %s",
           (void *)imapc, names[imapc->state], names[newstate]);
-#endif
+#else
   (void)data;
+#endif
   imapc->state = newstate;
 }
 

@@ -123,7 +123,7 @@ struct ldapreqinfo {
 static void oldap_state(struct Curl_easy *data, struct ldapconninfo *li,
                         ldapstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -140,8 +140,9 @@ static void oldap_state(struct Curl_easy *data, struct ldapconninfo *li,
   if(li->state != newstate)
     infof(data, "LDAP %p state change from %s to %s",
           (void *)li, names[li->state], names[newstate]);
-#endif
+#else
   (void)data;
+#endif
   li->state = newstate;
 }
 

@@ -497,11 +497,9 @@ static CURLcode tftp_connect_for_tx(struct tftp_conn *state,
                                     tftp_event_t event)
 {
   CURLcode result;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  struct Curl_easy *data = state->data;
 
-  infof(data, "%s", "Connected for transmit");
-#endif
+  infof(state->data, "%s", "Connected for transmit");
+
   state->state = TFTP_STATE_TX;
   result = tftp_set_timeouts(state);
   if(result)
@@ -635,11 +633,9 @@ static CURLcode tftp_connect_for_rx(struct tftp_conn *state,
                                     tftp_event_t event)
 {
   CURLcode result;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  struct Curl_easy *data = state->data;
 
-  infof(data, "%s", "Connected for receive");
-#endif
+  infof(state->data, "%s", "Connected for receive");
+
   state->state = TFTP_STATE_RX;
   result = tftp_set_timeouts(state);
   if(result)

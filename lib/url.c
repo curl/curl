@@ -1533,7 +1533,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 {
   char *zoneid;
   CURLUcode uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
-#if !defined(HAVE_IF_NAMETOINDEX) || defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if !defined(HAVE_IF_NAMETOINDEX) || !defined(CURLVERBOSE)
   (void)data;
 #endif
 
@@ -1549,7 +1549,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
       unsigned int scopeidx = 0;
       scopeidx = if_nametoindex(zoneid);
       if(!scopeidx) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
               curlx_strerror(errno, buffer, sizeof(buffer)));
@@ -1903,7 +1903,8 @@ static char *detect_proxy(struct Curl_easy *data,
    * checked if the lowercase versions do not exist.
    */
   char proxy_env[20];
-  const char *envp = proxy_env;
+  const char *envp;
+  VERBOSE(envp = proxy_env);
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
                  conn->scheme->name);
@@ -3457,8 +3458,8 @@ static CURLcode create_conn(struct Curl_easy *data,
      * `existing` and thus we need to cleanup the one we just
      * allocated before we can move along and use `existing`.
      */
-    bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
-                         Curl_conn_is_ssl(conn, FIRSTSOCKET));
+    VERBOSE(bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
+                                 Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
     reuse_conn(data, conn, existing);
     conn = existing;

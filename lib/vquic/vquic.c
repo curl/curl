@@ -235,8 +235,9 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
                                    size_t gsolen, size_t *psent)
 {
   const uint8_t *p, *end = pkt + pktlen;
-  size_t sent, len, calls = 0;
+  size_t sent, len;
   CURLcode result = CURLE_OK;
+  VERBOSE(size_t calls = 0);
 
   *psent = 0;
 
@@ -246,7 +247,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
     if(result)
       goto out;
     *psent += sent;
-    ++calls;
+    VERBOSE(++calls);
   }
 out:
   CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
@@ -737,7 +738,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 const char *vquic_h3_err_str(uint64_t error_code)
 {
   if(error_code <= UINT_MAX) {
@@ -785,7 +786,7 @@ const char *vquic_h3_err_str(uint64_t error_code)
     return "NO_ERROR";
   return "unknown";
 }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 #if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
 

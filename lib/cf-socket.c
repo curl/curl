@@ -84,7 +84,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 #if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   curl_socklen_t onoff = (curl_socklen_t)1;
   int level = IPPROTO_TCP;
-  char buffer[STRERROR_LEN];
+  VERBOSE(char buffer[STRERROR_LEN]);
 
   if(setsockopt(sockfd, level, TCP_NODELAY,
                 (void *)&onoff, sizeof(onoff)) < 0)
@@ -834,15 +834,12 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 
   default:
     /* unknown error, fallthrough and try another address! */
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-    (void)ipaddress;
-#else
     {
-      char buffer[STRERROR_LEN];
+      VERBOSE(char buffer[STRERROR_LEN]);
       infof(data, "Immediate connect fail for %s: %s", ipaddress,
             curlx_strerror(error, buffer, sizeof(buffer)));
+      NOVERBOSE((void)ipaddress);
     }
-#endif
     data->state.os_errno = error;
     /* connect failed */
     return CURLE_COULDNT_CONNECT;
@@ -982,14 +979,13 @@ static void set_local_ip(struct Curl_cfilter *cf,
   if((ctx->sock != CURL_SOCKET_BAD) &&
      !(data->conn->scheme->protocol & CURLPROTO_TFTP)) {
     /* TFTP does not connect, so it cannot get the IP like this */
-
-    char buffer[STRERROR_LEN];
     struct Curl_sockaddr_storage ssloc;
     curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
+    VERBOSE(char buffer[STRERROR_LEN]);
 
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr *)&ssloc, &slen)) {
-      int error = SOCKERRNO;
+      VERBOSE(int error = SOCKERRNO);
       infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
@@ -1292,18 +1288,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 out:
   if(result) {
     if(ctx->error) {
+      VERBOSE(char buffer[STRERROR_LEN]);
       set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      {
-        char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u from %s port %d failed: %s",
-              ctx->ip.remote_ip, ctx->ip.remote_port,
-              ctx->ip.local_ip, ctx->ip.local_port,
-              curlx_strerror(ctx->error, buffer, sizeof(buffer)));
-      }
-#endif
+      infof(data, "connect to %s port %u from %s port %d failed: %s",
+            ctx->ip.remote_ip, ctx->ip.remote_port,
+            ctx->ip.local_ip, ctx->ip.local_port,
+            curlx_strerror(ctx->error, buffer, sizeof(buffer)));
     }
     if(ctx->sock != CURL_SOCKET_BAD) {
       socket_close(data, cf->conn, TRUE, ctx->sock);
@@ -1380,8 +1372,8 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
   ssize_t rv;
-  size_t orig_len = len;
   CURLcode result = CURLE_OK;
+  VERBOSE(size_t orig_len = len);
 
   (void)eos;
   *pnwritten = 0;
@@ -1476,10 +1468,9 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
-    size_t orig_len = len;
-    len = ctx->recv_max;
     CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE max read of %zu bytes",
-                orig_len, len);
+                len, ctx->recv_max);
+    len = ctx->recv_max;
   }
 #endif
 

@@ -84,10 +84,10 @@
 /* macro to check for the last line in an FTP server response */
 #define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef CURLVERBOSE
 #define ftp_pasv_verbose(a, b, c, d)  Curl_nop_stmt
 #define FTP_CSTATE(c)  ((void)(c), "")
-#else /* CURL_DISABLE_VERBOSE_STRINGS */
+#else /* !CURLVERBOSE */
 /***************************************************************************
  *
  * ftp_pasv_verbose()
@@ -149,7 +149,7 @@ static const char * const ftp_state_names[] = {
 };
 #define FTP_CSTATE(ftpc)   ((ftpc) ? ftp_state_names[(ftpc)->state] : "???")
 
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 /* This is the ONLY way to change FTP state! */
 static void ftp_state_low(struct Curl_easy *data,
@@ -160,22 +160,16 @@ static void ftp_state_low(struct Curl_easy *data,
 #endif
   )
 {
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
+  if(ftpc->state != newstate) {
 #ifdef DEBUGBUILD
-  (void)lineno;
-#endif
-#else /* CURL_DISABLE_VERBOSE_STRINGS */
-  if(ftpc->state != newstate)
-#ifdef DEBUGBUILD
+    NOVERBOSE((void)lineno);
     CURL_TRC_FTP(data, "[%s] -> [%s] (line %d)", FTP_CSTATE(ftpc),
                  ftp_state_names[newstate], lineno);
 #else
     CURL_TRC_FTP(data, "[%s] -> [%s]", FTP_CSTATE(ftpc),
                  ftp_state_names[newstate]);
 #endif
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
-
+  }
   ftpc->state = newstate;
 }
 

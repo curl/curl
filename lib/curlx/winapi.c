@@ -75,7 +75,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(!curlx_get_winapi_error(err, buf, buflen)) {
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic push

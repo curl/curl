@@ -93,16 +93,16 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 
 void Curl_conncontrol(struct connectdata *conn,
                       int closeit
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
                       , const char *reason
 #endif
   );
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 #define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
 #define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
 #define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
-#else /* if !DEBUGBUILD || CURL_DISABLE_VERBOSE_STRINGS */
+#else /* !DEBUGBUILD || !CURLVERBOSE */
 #define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM)
 #define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
 #define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP)

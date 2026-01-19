@@ -119,12 +119,8 @@ struct cf_test_ctx {
 static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_test_ctx *ctx = cf->ctx;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
   infof(data, "%04dms: cf[%s] destroyed",
         (int)curlx_timediff_ms(curlx_now(), current_tr->started), ctx->id);
-#else
-  (void)data;
-#endif
   curlx_free(ctx);
   cf->ctx = NULL;
 }

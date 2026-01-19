@@ -297,7 +297,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
  */
 void Curl_conncontrol(struct connectdata *conn,
                       int ctrl /* see defines in header */
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
                       , const char *reason
 #endif
   )
@@ -307,7 +307,7 @@ void Curl_conncontrol(struct connectdata *conn,
      associated with a transfer. */
   bool closeit, is_multiplex;
   DEBUGASSERT(conn);
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   (void)reason; /* useful for debugging */
 #endif
   is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);

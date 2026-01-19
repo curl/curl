@@ -420,7 +420,7 @@ CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return CURLE_RECV_ERROR;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static CURLcode cf_verboseconnect(struct Curl_easy *data,
                                   struct Curl_cfilter *cf)
 {
@@ -535,9 +535,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(cf, data);
       data->conn->keepalive = *Curl_pgrs_now(data);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      result = cf_verboseconnect(data, cf);
-#endif
+      VERBOSE(result = cf_verboseconnect(data, cf));
       goto out;
     }
     else if(result) {

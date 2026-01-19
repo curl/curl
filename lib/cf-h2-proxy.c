@@ -426,7 +426,7 @@ static ssize_t on_session_send(nghttp2_session *h2,
     NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nwritten;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static int proxy_h2_fr_print(const nghttp2_frame *frame,
                              char *buffer, size_t blen)
 {
@@ -516,7 +516,7 @@ static int proxy_h2_on_frame_send(nghttp2_session *session,
   }
   return 0;
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 static int proxy_h2_on_frame_recv(nghttp2_session *session,
                                   const nghttp2_frame *frame,
@@ -529,7 +529,7 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
 
   (void)session;
   DEBUGASSERT(data);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
@@ -537,7 +537,7 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] <- %s", frame->hd.stream_id, buffer);
   }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
   if(!stream_id) {
     /* stream ID zero is for connection-oriented stuff */
@@ -973,7 +973,7 @@ static CURLcode cf_h2_proxy_ctx_init(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_send_callback(cbs, on_session_send);
   nghttp2_session_callbacks_set_on_frame_recv_callback(
     cbs, proxy_h2_on_frame_recv);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   nghttp2_session_callbacks_set_on_frame_send_callback(cbs,
                                                        proxy_h2_on_frame_send);
 #endif

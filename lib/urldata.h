@@ -1039,7 +1039,7 @@ struct UrlState {
                                     curl_easy_setopt(COOKIEFILE) calls */
 #endif
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   struct curl_trc_feat *feat; /* opt. trace feature transfer is part of */
 #endif
 

@@ -192,8 +192,9 @@ jobs:
 
           - name: 'openssl arm C89'
             image: ubuntu-24.04-arm
+            install_packages: libssh2-1-dev
             install_steps: pytest
-            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
+            configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh2 --enable-debug --disable-verbose
 
           - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind

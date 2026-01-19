@@ -340,7 +340,7 @@ CURLM *curl_multi_init(void)
                            CURL_TLS_SESSION_SIZE);
 }
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 {
   if(!multi->warned) {
@@ -597,7 +597,7 @@ static void multi_done_locked(struct connectdata *conn,
                               void *userdata)
 {
   struct multi_done_ctx *mdctx = userdata;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   const char *host =
 #ifndef CURL_DISABLE_PROXY
         conn->bits.socksproxy ?
@@ -612,7 +612,7 @@ static void multi_done_locked(struct connectdata *conn,
 #endif
         conn->bits.conn_to_port ? conn->conn_to_port :
         conn->remote_port;
-#endif
+#endif /* CURLVERBOSE */
 
   Curl_detach_connection(data);
 
@@ -632,21 +632,17 @@ static void multi_done_locked(struct connectdata *conn,
   Curl_dnscache_prune(data);
 
   if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
     CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s:%d, "
                "forbid=%d, close=%d, premature=%d, conn_multiplex=%d",
                conn->connection_id, host, port, data->set.reuse_forbid,
                conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
-#endif
     connclose(conn, "disconnecting");
     Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
     CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s:%d was shutdown"
                " by server, not reusing", conn->connection_id, host, port);
-#endif
     connclose(conn, "server shutdown");
     Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
@@ -655,10 +651,8 @@ static void multi_done_locked(struct connectdata *conn,
     if(Curl_cpool_conn_now_idle(data, conn)) {
       /* connection kept in the cpool */
       data->state.lastconnect_id = conn->connection_id;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Connection #%" FMT_OFF_T " to host %s:%d left intact",
             conn->connection_id, host, port);
-#endif
     }
     else {
       /* connection was removed from the cpool and destroyed. */
@@ -1178,7 +1172,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
     goto out;
   }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(CURL_TRC_M_is_verbose(data)) {
     size_t timeout_count = Curl_llist_count(&data->state.timeoutlist);
     switch(ps->n) {
@@ -3045,7 +3039,7 @@ static void multi_mark_expired_as_dirty(struct Curl_multi *multi,
     data = Curl_splayget(t); /* assign this for next loop */
     if(!data)
       continue;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
     if(CURL_TRC_TIMER_is_verbose(data)) {
       struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
       if(e) {
@@ -3325,9 +3319,7 @@ static void multi_timeout(struct Curl_multi *multi,
                           long *timeout_ms)
 {
   static const struct curltime tv_zero = { 0, 0 };
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  struct Curl_easy *data = NULL;
-#endif
+  VERBOSE(struct Curl_easy *data = NULL);
 
   if(multi->dead) {
     *timeout_ms = 0;
@@ -3354,19 +3346,14 @@ static void multi_timeout(struct Curl_multi *multi,
       /* some time left before expiration */
       timediff_t diff_ms =
         curlx_timediff_ceil_ms(multi->timetree->key, *pnow);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      data = Curl_splayget(multi->timetree);
-#endif
+      VERBOSE(data = Curl_splayget(multi->timetree));
       /* this should be safe even on 32-bit archs, as we do not use that
          overly long timeouts */
       *timeout_ms = (long)diff_ms;
     }
     else {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      if(multi->timetree) {
-        data = Curl_splayget(multi->timetree);
-      }
-#endif
+      if(multi->timetree)
+        VERBOSE(data = Curl_splayget(multi->timetree));
       /* 0 means immediately */
       *timeout_ms = 0;
     }
@@ -3376,7 +3363,7 @@ static void multi_timeout(struct Curl_multi *multi,
     *timeout_ms = -1;
   }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(data && CURL_TRC_TIMER_is_verbose(data)) {
     struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
     if(e) {

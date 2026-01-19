@@ -319,7 +319,7 @@ static curl_off_t smb_swap64(curl_off_t x)
 static void conn_state(struct Curl_easy *data, struct smb_conn *smbc,
                        enum smb_conn_state newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* For debug purposes */
   static const char * const names[] = {
     "SMB_NOT_CONNECTED",
@@ -333,8 +333,9 @@ static void conn_state(struct Curl_easy *data, struct smb_conn *smbc,
   if(smbc->state != newstate)
     infof(data, "SMB conn %p state change from %s to %s",
           (void *)smbc, names[smbc->state], names[newstate]);
-#endif
+#else
   (void)data;
+#endif
   smbc->state = newstate;
 }
 
@@ -343,7 +344,7 @@ static void request_state(struct Curl_easy *data,
 {
   struct smb_request *req = Curl_meta_get(data, CURL_META_SMB_EASY);
   if(req) {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
     /* For debug purposes */
     static const char * const names[] = {
       "SMB_REQUESTING",

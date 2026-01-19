@@ -1596,7 +1596,7 @@ static CURLcode client_cert(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 /* returns non-zero on failure */
 static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
 {
@@ -1845,7 +1845,6 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   char buf[1024];
   int nread = -1, err;
-  unsigned long sslerr;
   size_t i;
 
   DEBUGASSERT(octx);
@@ -1938,12 +1937,14 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   default:
     /* Server seems to have closed the connection without sending us
      * a close notify. */
-    sslerr = ERR_get_error();
-    CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
-                (sslerr ?
-                 ossl_strerror(sslerr, buf, sizeof(buf)) :
-                 SSL_ERROR_to_str(err)),
-                SOCKERRNO);
+    {
+      VERBOSE(unsigned long sslerr = ERR_get_error());
+      CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
+                  (sslerr ?
+                   ossl_strerror(sslerr, buf, sizeof(buf)) :
+                   SSL_ERROR_to_str(err)),
+                  SOCKERRNO);
+    }
     *done = TRUE;
     result = CURLE_OK;
     break;
@@ -2842,7 +2843,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
       if(!pContext)
         break;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
       else {
         char cert_name[256];
         if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
@@ -2931,7 +2932,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
          such as duplicate certificate, which is allowed by MS but not
          OpenSSL. */
       if(X509_STORE_add_cert(store, x509) == 1) {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef DEBUGBUILD
         infof(data, "SSL: Imported cert");
 #endif
         *padded = TRUE;
@@ -3345,7 +3346,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_cfg = Curl_ssl_cf_get_primary_config(cf);
   struct alpn_spec alpns;
-  char error_buffer[256];
   CURLcode result;
 
   Curl_alpn_copy(&alpns, alpns_requested);
@@ -3366,6 +3366,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                                     (long)der_sessionid_size);
       if(ssl_session) {
         if(!SSL_set_session(octx->ssl, ssl_session)) {
+          VERBOSE(char error_buffer[256]);
           infof(data, "SSL: SSL_set_session not accepted, "
                 "continuing without: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
@@ -3985,7 +3986,7 @@ static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
 
 void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     int psigtype_nid = NID_undef;
     const char *negotiated_group_name = NULL;
@@ -4010,7 +4011,7 @@ void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx)
 #else
   (void)data;
   (void)octx;
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 }
 
 static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
@@ -4413,7 +4414,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509 *cert,
 
 #if !(defined(LIBRESSL_VERSION_NUMBER) && \
   LIBRESSL_VERSION_NUMBER < 0x3060000fL) && \
-  !defined(HAVE_BORINGSSL_LIKE) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  !defined(HAVE_BORINGSSL_LIKE) && defined(CURLVERBOSE)
 static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 {
   STACK_OF(X509) *certstack;
@@ -4580,7 +4581,7 @@ static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
   return result;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 #define MAX_CERT_NAME_LENGTH 2048
 static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
@@ -4631,7 +4632,7 @@ out:
   curlx_dyn_free(&dname);
   return result;
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 #ifdef USE_APPLE_SECTRUST
 struct ossl_certs_ctx {
@@ -4744,7 +4745,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     goto out;
   }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   result = ossl_infof_cert(cf, data, server_cert);
   if(result)
     goto out;

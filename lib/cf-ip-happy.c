@@ -351,7 +351,8 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
   struct cf_ip_attempt *a = NULL, **panchor;
   bool do_more;
   timediff_t next_expire_ms;
-  int i, inconclusive, ongoing;
+  int inconclusive, ongoing;
+  VERBOSE(int i);
 
   if(bs->winner)
     return CURLE_OK;
@@ -360,9 +361,9 @@ evaluate:
   ongoing = inconclusive = 0;
 
   /* check if a running baller connects now */
-  i = -1;
+  VERBOSE(i = -1);
   for(panchor = &bs->running; *panchor; panchor = &((*panchor)->next)) {
-    ++i;
+    VERBOSE(++i);
     a = *panchor;
     a->result = cf_ip_attempt_connect(a, data, connected);
     if(!a->result) {
@@ -455,9 +456,9 @@ evaluate:
       timediff_t delay_ms = bs->attempt_delay_ms - since_ms;
       if(delay_ms <= 0) {
         CURL_TRC_CF(data, cf, "all attempts inconclusive, restarting one");
-        i = -1;
+        VERBOSE(i = -1);
         for(a = bs->running; a; a = a->next) {
-          ++i;
+          VERBOSE(++i);
           if(!a->inconclusive)
             continue;
           result = cf_ip_attempt_restart(a, cf, data);
@@ -482,7 +483,7 @@ evaluate:
       /* no more addresses, no inconclusive attempts */
       CURL_TRC_CF(data, cf, "no more attempts to try");
       result = CURLE_COULDNT_CONNECT;
-      i = 0;
+      VERBOSE(i = 0);
       for(a = bs->running; a; a = a->next) {
         CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
         if(a->result)
@@ -795,7 +796,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
 
       if(cf->conn->scheme->protocol & PROTO_FAMILY_SSH)
         Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
       if(Curl_trc_cf_is_verbose(cf, data)) {
         struct ip_quadruple ipquad;
         bool is_ipv6;

@@ -114,7 +114,7 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void show_resolve_info(struct Curl_easy *data,
                               struct Curl_dns_entry *dns)
 {
@@ -1325,12 +1325,10 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       struct Curl_addrinfo *head = NULL, *tail = NULL;
       size_t entry_len;
       char address[64];
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      const char *addresses = NULL;
-#endif
       curl_off_t port = 0;
       bool permanent = TRUE;
       bool error = TRUE;
+      VERBOSE(const char *addresses = NULL);
 
       if(*host == '+') {
         host++;
@@ -1350,9 +1348,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
          curlx_str_single(&host, ':'))
         goto err;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      addresses = host;
-#endif
+      VERBOSE(addresses = host);
 
       /* start the address section */
       while(*host) {
@@ -1460,11 +1456,9 @@ err:
       if(!dns)
         return CURLE_OUT_OF_MEMORY;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
             (int)curlx_strlen(&source), curlx_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
-#endif
 
       /* Wildcard hostname */
       if(curlx_str_casecompare(&source, "*")) {

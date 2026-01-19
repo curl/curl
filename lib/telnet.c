@@ -128,7 +128,7 @@ struct TELNET {
   unsigned char *subpointer, *subend;      /* buffer for sub-options */
 };
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef CURLVERBOSE
 #define printoption(a, b, c, d) Curl_nop_stmt
 #else
 static void printoption(struct Curl_easy *data,
@@ -165,7 +165,7 @@ static void printoption(struct Curl_easy *data,
     }
   }
 }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* !CURLVERBOSE */
 
 static void telnet_easy_dtor(void *key, size_t klen, void *entry)
 {
