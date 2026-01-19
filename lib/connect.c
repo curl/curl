@@ -100,25 +100,27 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
  * transfer/connection. If the value is 0, there is no timeout (ie there is
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
- * @param data the transfer to check on
- * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
 timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
-                                const struct curltime *pnow,
-                                bool duringconnect)
+                                const struct curltime *pnow)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
-  timediff_t ctimeout_ms;
 
-  /* The duration of a connect and the total transfer are calculated from two
-     different time-stamps. It can end up with the total timeout being reached
-     before the connect timeout expires and we must acknowledge whichever
-     timeout that is reached first. The total timeout is set per entire
-     operation, while the connect timeout is set per connect. */
-  if((!data->set.timeout || data->set.connect_only) && !duringconnect)
+  if(Curl_shutdown_started(data, FIRSTSOCKET))
+    return Curl_shutdown_timeleft(data, data->conn, FIRSTSOCKET);
+  else if(Curl_is_connecting(data)) {
+    timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
+      data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+    ctimeleft_ms = ctimeout_ms -
+      curlx_ptimediff_ms(pnow, &data->progress.t_startsingle);
+    if(!ctimeleft_ms)
+      ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
+  }
+  else if(!data->set.timeout || data->set.connect_only) {
     return 0; /* no timeout in place or checked, return "no limit" */
+  }
 
   if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
@@ -127,25 +129,16 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   }
 
-  if(!duringconnect)
-    return timeleft_ms; /* no connect check, this is it */
-  ctimeout_ms = (data->set.connecttimeout > 0) ?
-    data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
-  ctimeleft_ms = ctimeout_ms -
-    curlx_ptimediff_ms(pnow, &data->progress.t_startsingle);
   if(!ctimeleft_ms)
-    ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
-  if(!timeleft_ms)
-    return ctimeleft_ms; /* no general timeout, this is it */
-
-  /* return minimal time left or max amount already expired */
-  return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
+    return timeleft_ms;
+  else if(!timeleft_ms)
+    return ctimeleft_ms;
+  return CURLMIN(ctimeleft_ms, timeleft_ms);
 }
 
-timediff_t Curl_timeleft_ms(struct Curl_easy *data,
-                            bool duringconnect)
+timediff_t Curl_timeleft_ms(struct Curl_easy *data)
 {
-  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data), duringconnect);
+  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
@@ -162,6 +155,8 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
   /* Set a timer, unless we operate on the admin handle */
   if(data->mid)
     Curl_expire_ex(data, conn->shutdown.timeout_ms, EXPIRE_SHUTDOWN);
+  CURL_TRC_M(data, "shutdown start on%s connection",
+             sockindex ? " secondary" : "");
 }
 
 timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
@@ -204,8 +199,11 @@ void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
 
 bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
 {
-  struct curltime *pt = &data->conn->shutdown.start[sockindex];
-  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
+  if(data->conn) {
+    struct curltime *pt = &data->conn->shutdown.start[sockindex];
+    return (pt->tv_sec > 0) || (pt->tv_usec > 0);
+  }
+  return FALSE;
 }
 
 /* retrieves ip address and port from a sockaddr structure. note it calls

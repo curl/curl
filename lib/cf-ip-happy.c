@@ -496,8 +496,8 @@ out:
     bool more_possible;
 
     /* when do we need to be called again? */
-    next_expire_ms = Curl_timeleft_ms(data, TRUE);
-    if(next_expire_ms <= 0) {
+    next_expire_ms = Curl_timeleft_ms(data);
+    if(next_expire_ms < 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
         curlx_ptimediff_ms(Curl_pgrs_now(data),
                            &data->progress.t_startsingle));
@@ -699,7 +699,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   if(!dns)
     return CURLE_FAILED_INIT;
 
-  if(Curl_timeleft_ms(data, TRUE) < 0) {
+  if(Curl_timeleft_ms(data) < 0) {
     /* a precaution, no need to continue if time already is up */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;

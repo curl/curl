@@ -177,8 +177,6 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
 
   *done = FALSE;
   if(!Curl_shutdown_started(data, sockindex)) {
-    CURL_TRC_M(data, "shutdown start on%s connection",
-               sockindex ? " secondary" : "");
     Curl_shutdown_start(data, sockindex, 0);
   }
   else {
@@ -552,7 +550,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     else {
       /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
+      const timediff_t timeout_ms = Curl_timeleft_ms(data);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
 

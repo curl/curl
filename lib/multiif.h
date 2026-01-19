@@ -40,6 +40,7 @@ bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *data);
 CURLcode Curl_preconnect(struct Curl_easy *data);
+bool Curl_is_connecting(struct Curl_easy *data);
 
 void Curl_multi_connchanged(struct Curl_multi *multi);
 
