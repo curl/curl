@@ -231,7 +231,7 @@ test1680 test1681 test1682 test1683 \
 test1700 test1701 test1702 test1703 test1704 test1705 test1706 test1707 \
 test1708 test1709 test1710 test1711 \
 \
-test1800 test1801 test1802 \
+test1800 test1801 test1802 test1847 test1848 \
 \
 test1900 test1901 test1902 test1903 test1904 test1905 test1906 test1907 \
 test1908 test1909 test1910 test1911 test1912 test1913 test1914 test1915 \
