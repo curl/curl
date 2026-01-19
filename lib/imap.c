@@ -1679,7 +1679,7 @@ static bool imap_is_bchar(char ch)
 {
   /* Performing the alnum check first with macro is faster because of ASCII
      arithmetic */
-  return ch && (ISALNUM(ch) || !!strchr(":@/&=-._~!$\'()*+,%", ch));
+  return ch && (ISALNUM(ch) || strchr(":@/&=-._~!$\'()*+,%", ch));
 }
 
 /***********************************************************************
