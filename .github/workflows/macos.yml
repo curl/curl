@@ -182,7 +182,9 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file -- '{}' \;
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
 
       - name: 'build tests'
         run: |
@@ -464,6 +466,11 @@ jobs:
       - name: 'curl -V'
         run: bld/src/curl --disable --version
 
+      - name: 'curl info'
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+
       - name: 'curl install'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -697,3 +704,8 @@ jobs:
 
       - name: 'curl -V'
         run: bld/src/curl --disable --version
+
+      - name: 'curl info'
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
