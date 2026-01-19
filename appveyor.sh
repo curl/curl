@@ -87,6 +87,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     time cmake -G "${CMAKE_GENERATOR}" \
       -DENABLE_DEBUG=ON -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
+      -DCURL_DROP_UNUSED=ON \
       -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
       ${CMAKE_GENERATE:-} \
       ${options} \
