@@ -394,7 +394,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
    * amount remains. This may be overridden by authentications further
    * below! */
   bool abort_upload = (!data->req.upload_done && !little_upload_remains);
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
   const char *ongoing_auth = NULL;
 #endif
 
@@ -418,7 +418,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 #ifdef USE_NTLM
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
       ongoing_auth = "NTLM";
 #endif
       if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
@@ -433,7 +433,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
       ongoing_auth = "NEGOTIATE";
 #endif
       if((conn->http_negotiate_state != GSS_AUTHNONE) ||

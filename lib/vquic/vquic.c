@@ -237,7 +237,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
   const uint8_t *p, *end = pkt + pktlen;
   size_t sent, len;
   CURLcode result = CURLE_OK;
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
   size_t calls = 0;
 #endif
 
@@ -249,7 +249,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
     if(result)
       goto out;
     *psent += sent;
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
     ++calls;
 #endif
   }

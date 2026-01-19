@@ -1845,7 +1845,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   char buf[1024];
   int nread = -1, err;
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
   unsigned long sslerr;
 #endif
   size_t i;
@@ -1940,7 +1940,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   default:
     /* Server seems to have closed the connection without sending us
      * a close notify. */
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
     sslerr = ERR_get_error();
 #endif
     CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
@@ -3369,7 +3369,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                                     (long)der_sessionid_size);
       if(ssl_session) {
         if(!SSL_set_session(octx->ssl, ssl_session)) {
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
           char error_buffer[256];
 #endif
           infof(data, "SSL: SSL_set_session not accepted, "

@@ -129,7 +129,7 @@ struct websocket {
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
 
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
 static const char *ws_frame_name_of_op(uint8_t firstbyte)
 {
   switch(firstbyte & WSBIT_OPCODE_MASK) {

@@ -1905,7 +1905,7 @@ static char *detect_proxy(struct Curl_easy *data,
   char proxy_env[20];
   const char *envp;
 
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
   envp = proxy_env;
 #endif
 
@@ -3461,7 +3461,7 @@ static CURLcode create_conn(struct Curl_easy *data,
      * `existing` and thus we need to cleanup the one we just
      * allocated before we can move along and use `existing`.
      */
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
     bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
                          Curl_conn_is_ssl(conn, FIRSTSOCKET));
 #endif

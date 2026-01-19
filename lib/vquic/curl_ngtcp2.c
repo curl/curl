@@ -1733,7 +1733,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
       goto out;
     }
-#ifndef CURL_NO_VERBOSE_VAR
+#ifdef CURLVERBOSE
     stream = H3_STREAM_CTX(ctx, data);
 #endif
   }
