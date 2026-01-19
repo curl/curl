@@ -1481,7 +1481,7 @@ static CURLcode findprotocol(struct Curl_easy *data,
 {
   const struct Curl_scheme *p = Curl_get_scheme(protostr);
 
-  if(p && p->run && /* Protocol found spported. Check if allowed */
+  if(p && p->run && /* Protocol found supported. Check if allowed */
      (data->set.allowed_protocols & p->protocol)) {
 
     /* it is allowed for "normal" request, now do an extra check if this is
