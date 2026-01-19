@@ -121,7 +121,8 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
   else if(!data->set.timeout || data->set.connect_only) {
     return 0; /* no timeout in place or checked, return "no limit" */
   }
-  else if(data->set.timeout) {
+
+  if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
       curlx_ptimediff_ms(pnow, &data->progress.t_startop);
     if(!timeleft_ms)
@@ -132,8 +133,7 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
     return timeleft_ms;
   else if(!timeleft_ms)
     return ctimeleft_ms;
-  /* return minimal time left or max amount already expired */
-  return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
+  return CURLMIN(ctimeleft_ms, timeleft_ms);
 }
 
 timediff_t Curl_timeleft_ms(struct Curl_easy *data)
