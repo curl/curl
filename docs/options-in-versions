@@ -4,11 +4,11 @@
                             | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
-This document lists all command line options present in curl, together with
-exact information about the first curl version that supports it. The options
-are sorted alphabetically on the long name.
+ This document lists all command line options present in curl, together with
+ exact information about the first curl version that supports it. The options
+ are sorted alphabetically on the long name.
 
-Long (short)                         Introduced
+ Long (short)                        Introduced
 
 --abstract-unix-socket               7.53.0
 --alt-svc                            7.64.1
