@@ -942,7 +942,7 @@ support this. If you get yourself in a position where you face this nasty
 invention, the following advice have been mentioned and used in the past:
 
 - Depending on the JavaScript complexity, write up a script that translates it
-  to another language and execute that.
+to another language and execute that.
 
 - Read the JavaScript code and rewrite the same logic in another language.
 
