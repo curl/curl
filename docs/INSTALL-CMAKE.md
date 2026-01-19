@@ -477,6 +477,14 @@ Examples:
   which directory (typically) contains `include` and `lib` subdirectories.
   No ending slash or backslash is necessary.
 
+## Dependency options (Apple frameworks)
+
+- `COREFOUNDATION_FRAMEWORK`:               Absolute path to `CoreFoundation` framework. (for IPv6 non-c-ares, SecTrust, wolfSSL)
+- `CORESERVICES_FRAMEWORK`:                 Absolute path to `CoreServices` framework. (for IPv6 non-c-ares, SecTrust)
+- `FOUNDATION_FRAMEWORK`:                   Absolute path to `Foundation` framework. (for Rustls)
+- `SECURITY_FRAMEWORK`:                     Absolute path to `Security` framework. (for Rustls, SecTrust, wolfSSL)
+- `SYSTEMCONFIGURATION_FRAMEWORK`:          Absolute path to `SystemConfiguration` framework. (for IPv6 non-c-ares)
+
 ## Test tools
 
 - `APXS`:                                   Default: `apxs`
