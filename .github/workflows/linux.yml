@@ -188,7 +188,7 @@ jobs:
           - name: 'openssl intel'
             install_packages: libssh-dev
             install_steps: pytest
-            generate: -DCMAKE_C_FLAGS=-std=gnu89 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON
+            configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
           - name: 'openssl arm'
             image: ubuntu-24.04-arm
