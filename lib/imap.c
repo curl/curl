@@ -1193,9 +1193,8 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
 
   (void)instate;
 
-  if (imap->custom && imapcode == '*')
-  {
-    // custom not handled here
+  if(imap->custom && imapcode == '*') {
+    /* custom not handled here */
   }
   else if(imapcode == '*') {
     /* Check if this response contains a literal (e.g. FETCH responses with
