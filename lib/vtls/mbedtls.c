@@ -1526,7 +1526,11 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
   SSLSUPP_HTTPS_PROXY |
-  SSLSUPP_CIPHER_LIST,
+  SSLSUPP_CIPHER_LIST |
+#ifdef MBEDTLS_X509_CRL_PARSE_C
+  SSLSUPP_CRLFILE |
+#endif
+  0,
 
   sizeof(struct mbed_ssl_backend_data),
 

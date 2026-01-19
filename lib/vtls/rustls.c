@@ -1399,7 +1399,8 @@ const struct Curl_ssl Curl_ssl_rustls = {
   SSLSUPP_CIPHER_LIST |
   SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_CERTINFO |
-  SSLSUPP_ECH,
+  SSLSUPP_ECH |
+  SSLSUPP_CRLFILE,
   sizeof(struct rustls_ssl_backend_data),
 
   NULL,                            /* init */

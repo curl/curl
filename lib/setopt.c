@@ -1867,7 +1867,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set CRL file info for SSL connection. Specify filename of the CRL
      * to check certificates revocation
      */
-    return Curl_setstropt(&s->str[STRING_SSL_CRLFILE], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_CRLFILE))
+      return Curl_setstropt(&s->str[STRING_SSL_CRLFILE], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_SSL_CIPHER_LIST:
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
       /* set a list of cipher we want to use in the SSL connection */
@@ -2265,7 +2267,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set Issuer certificate file
      * to check certificates issuer
      */
-    return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT))
+      return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_PRIVATE:
     /*
      * Set private data pointer.
@@ -2278,7 +2282,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set accepted curves in SSL connection setup.
      * Specify colon-delimited list of curve algorithm names.
      */
-    return Curl_setstropt(&s->str[STRING_SSL_EC_CURVES], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_SSL_EC_CURVES))
+      return Curl_setstropt(&s->str[STRING_SSL_EC_CURVES], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_SSL_SIGNATURE_ALGORITHMS:
     /*
      * Set accepted signature algorithms.
@@ -2885,7 +2891,9 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT], blob);
+    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT))
+      return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT], blob);
+    return CURLE_NOT_BUILT_IN;
 
   default:
     return CURLE_UNKNOWN_OPTION;
