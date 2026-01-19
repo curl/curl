@@ -133,7 +133,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_TIMER_is_verbose(data) \
   Curl_trc_ft_is_verbose(data, &Curl_trc_feat_timer)
 
-#undef CURL_NO_VERBOSE_VAR
+#define CURLVERBOSE
 
 #if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define infof(data, ...)             \
@@ -210,7 +210,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #elif defined(CURL_HAVE_C99) && defined(CURL_DISABLE_VERBOSE_STRINGS)
 
-#define CURL_NO_VERBOSE_VAR
+#undef CURLVERBOSE
 
 #define infof(data, ...) \
   do {                   \
@@ -300,6 +300,12 @@ void Curl_trc_ws(struct Curl_easy *data,
 #endif
 
 #endif /* !CURL_HAVE_C99 */
+
+#ifdef CURLVERBOSE
+#define VERBOSE(x) x
+#else
+#define VERBOSE(x) Curl_nop_stmt
+#endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 /* informational messages enabled */
