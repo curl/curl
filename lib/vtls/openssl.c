@@ -1022,8 +1022,8 @@ static int enginecheck(struct Curl_easy *data,
                        SSL_CTX* ctx,
                        const char *key_file,
                        const char *key_passwd)
-#ifdef USE_OPENSSL_ENGINE
 {
+#ifdef USE_OPENSSL_ENGINE
   EVP_PKEY *priv_key = NULL;
 
   /* Implicitly use pkcs11 engine if none was provided and the
@@ -1066,22 +1066,20 @@ static int enginecheck(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)key_file;
   (void)key_passwd;
   failf(data, "SSL_FILETYPE_ENGINE not supported for private key");
   return 0;
-}
 #endif
+}
 
 static int providercheck(struct Curl_easy *data,
                          SSL_CTX* ctx,
                          const char *key_file)
-#ifdef OPENSSL_HAS_PROVIDERS
 {
+#ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * key_file is a PKCS#11 URI */
@@ -1155,22 +1153,20 @@ static int providercheck(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)key_file;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for private key");
   return 0;
-}
 #endif
+}
 
 static int engineload(struct Curl_easy *data,
                       SSL_CTX* ctx,
                       const char *cert_file)
+{
 /* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <=3.8.3 */
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
-{
   char error_buffer[256];
   /* Implicitly use pkcs11 engine if none was provided and the
    * cert_file is a PKCS#11 URI */
@@ -1228,21 +1224,19 @@ static int engineload(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)cert_file;
   failf(data, "SSL_FILETYPE_ENGINE not supported for certificate");
   return 0;
-}
 #endif
+}
 
 static int providerload(struct Curl_easy *data,
                         SSL_CTX* ctx,
                         const char *cert_file)
-#ifdef OPENSSL_HAS_PROVIDERS
 {
+#ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * cert_file is a PKCS#11 URI */
@@ -1306,15 +1300,13 @@ static int providerload(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)cert_file;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for certificate");
   return 0;
-}
 #endif
+}
 
 static int pkcs12load(struct Curl_easy *data,
                       SSL_CTX* ctx,
