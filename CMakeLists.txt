@@ -719,7 +719,7 @@ if(CURL_WINDOWS_SSPI AND NOT WINDOWS_STORE)
 endif()
 
 if(APPLE)
-  option(USE_APPLE_SECTRUST "Use Apple OS-native certificate verification (SecTrust)" OFF)
+  option(USE_APPLE_SECTRUST "Use Apple OS-native certificate verification" OFF)
   if(USE_APPLE_SECTRUST)
     if(NOT CURL_USE_OPENSSL AND NOT CURL_USE_GNUTLS)
       message(FATAL_ERROR "Apple SecTrust is only supported with Openssl/GnuTLS")

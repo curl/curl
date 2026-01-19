@@ -373,7 +373,7 @@ Details via CMake
 - `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
 - `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
-- `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification (SecTrust). Default: `OFF`
+- `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification. Default: `OFF`
 - `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
 - `USE_LIBRTMP`:                            Enable librtmp from rtmpdump. Default: `OFF`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
