@@ -257,11 +257,11 @@ jobs:
             install: libressl
             install_steps: pytest
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-          - name: 'OpenSSL 10.15'
+          - name: 'OpenSSL 10.15 C89'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCMAKE_C_STANDARD=90
             macos-version-min: '10.15'
           - name: 'OpenSSL SecTrust'
             compiler: clang

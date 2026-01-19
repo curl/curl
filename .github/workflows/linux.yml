@@ -185,12 +185,12 @@ jobs:
             tflags: '--min=910 951 to 9999'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
-          - name: 'openssl intel'
+          - name: 'openssl intel C89'
             install_packages: libssh-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
-          - name: 'openssl arm'
+          - name: 'openssl arm C89'
             image: ubuntu-24.04-arm
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
