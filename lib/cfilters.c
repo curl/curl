@@ -177,8 +177,6 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
 
   *done = FALSE;
   if(!Curl_shutdown_started(data, sockindex)) {
-    CURL_TRC_M(data, "shutdown start on%s connection",
-               sockindex ? " secondary" : "");
     Curl_shutdown_start(data, sockindex, 0);
   }
   else {
