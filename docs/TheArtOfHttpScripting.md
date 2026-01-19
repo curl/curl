@@ -283,7 +283,7 @@ The form would look similar to the previous one:
 </form>
 ```
 
-And to use curl to post this form with the same data filled in as before, we
+To use curl to post this form with the same data filled in as before, we
 could do it like:
 
     curl --data "birthyear=1905&press=%20OK%20" https://www.example.com/when/junk.cgi
