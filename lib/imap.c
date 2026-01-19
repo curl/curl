@@ -1189,10 +1189,15 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
   size_t len = imapc->pp.nfinal;
+  struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
 
   (void)instate;
 
-  if(imapcode == '*') {
+  if (imap->custom && imapcode == '*')
+  {
+    // custom not handled here
+  }
+  else if(imapcode == '*') {
     /* Check if this response contains a literal (e.g. FETCH responses with
        body data). Literal syntax is {size}\r\n */
     const char *cr = memchr(line, '\r', len);
