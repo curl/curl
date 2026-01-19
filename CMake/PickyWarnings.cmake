@@ -181,11 +181,6 @@ if(PICKY_COMPILER)
           -Wno-documentation-unknown-command # clang  3.3            appleclang  5.0
           -Wsometimes-uninitialized        # clang  3.2            appleclang  4.2
         )
-        if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_STANDARD STREQUAL 90)
-          list(APPEND _picky_enable
-            -Wno-c99-extensions            # clang  3.2            appleclang  4.2
-          )
-        endif()
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.6) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.1))
