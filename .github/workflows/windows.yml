@@ -129,7 +129,8 @@ jobs:
         timeout-minutes: 1
         run: |
           PATH=/usr/bin
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
@@ -335,7 +336,8 @@ jobs:
             # avoid libtool's curl.exe wrapper for shared builds
             mv bld/src/.libs/curl.exe bld/src/curl.exe || true
           fi
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
@@ -550,7 +552,8 @@ jobs:
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -667,7 +670,9 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
+        run: |
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
@@ -909,7 +914,8 @@ jobs:
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file -- '{}' \;
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 file --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
