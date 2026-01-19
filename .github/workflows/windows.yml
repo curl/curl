@@ -44,6 +44,7 @@ jobs:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
       MATRIX_BUILD: '${{ matrix.build }}'
@@ -187,6 +188,7 @@ jobs:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
     env:
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
       MATRIX_SYS: '${{ matrix.sys }}'
@@ -417,6 +419,7 @@ jobs:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
     env:
       CURL_TEST_MIN: 1550
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_DIR: '${{ matrix.dir }}'
     strategy:
@@ -601,6 +604,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       TRIPLET: 'x86_64-w64-mingw32'
       MATRIX_BUILD: '${{ matrix.build }}'
