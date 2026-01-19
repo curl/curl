@@ -101,13 +101,12 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  * @param data the transfer to check on
- * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
 timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
-                                const struct curltime *pnow,
-                                bool duringconnect)
+                                const struct curltime *pnow)
 {
+  bool duringconnect = Curl_is_connecting(data);
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
   timediff_t ctimeout_ms;
@@ -142,10 +141,9 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
   return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
 }
 
-timediff_t Curl_timeleft_ms(struct Curl_easy *data,
-                            bool duringconnect)
+timediff_t Curl_timeleft_ms(struct Curl_easy *data)
 {
-  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data), duringconnect);
+  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,

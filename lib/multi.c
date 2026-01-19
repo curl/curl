@@ -351,6 +351,11 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 #define multi_warn_debug(x, y) Curl_nop_stmt
 #endif
 
+bool Curl_is_connecting(struct Curl_easy *data)
+{
+  return data->mstate < MSTATE_DO;
+}
+
 static CURLMcode multi_xfers_add(struct Curl_multi *multi,
                                  struct Curl_easy *data)
 {
@@ -1720,14 +1725,13 @@ static bool multi_handle_timeout(struct Curl_easy *data,
                                  bool *stream_error,
                                  CURLcode *result)
 {
-  bool connect_timeout = data->mstate < MSTATE_DO;
   timediff_t timeout_ms;
 
-  timeout_ms = Curl_timeleft_ms(data, connect_timeout);
+  timeout_ms = Curl_timeleft_ms(data);
   if(timeout_ms < 0) {
     /* Handle timed out */
     struct curltime since;
-    if(connect_timeout)
+    if(Curl_is_connecting(data))
       since = data->progress.t_startsingle;
     else
       since = data->progress.t_startop;

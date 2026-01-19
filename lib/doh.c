@@ -304,8 +304,8 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     goto error;
   }
 
-  timeout_ms = Curl_timeleft_ms(data, TRUE);
-  if(timeout_ms <= 0) {
+  timeout_ms = Curl_timeleft_ms(data);
+  if(timeout_ms < 0) {
     result = CURLE_OPERATION_TIMEDOUT;
     goto error;
   }

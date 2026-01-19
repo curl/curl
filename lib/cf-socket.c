@@ -1970,7 +1970,7 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
 #endif
 
   /* check if the generic timeout possibly is set shorter */
-  other_ms = Curl_timeleft_ms(data, FALSE);
+  other_ms = Curl_timeleft_ms(data);
   if(other_ms && (other_ms < timeout_ms))
     /* note that this also works fine for when other_ms happens to be negative
        due to it already having elapsed */

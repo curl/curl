@@ -392,7 +392,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
   DEBUGASSERT(entry);
   *entry = NULL; /* clear on entry */
 
-  timeout_ms = Curl_timeleft_ms(data, TRUE);
+  timeout_ms = Curl_timeleft_ms(data);
   if(timeout_ms < 0) {
     /* already expired! */
     connclose(data->conn, "Timed out before name resolve started");

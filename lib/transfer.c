@@ -386,7 +386,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
     goto out;
 
   if(k->keepon) {
-    if(Curl_timeleft_ms(data, FALSE) < 0) {
+    if(Curl_timeleft_ms(data) < 0) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"

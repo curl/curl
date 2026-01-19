@@ -552,7 +552,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     else {
       /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
+      const timediff_t timeout_ms = Curl_timeleft_ms(data);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
 
