@@ -394,7 +394,9 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
    * amount remains. This may be overridden by authentications further
    * below! */
   bool abort_upload = (!data->req.upload_done && !little_upload_remains);
+#ifndef CURL_NO_VERBOSE_VAR
   const char *ongoing_auth = NULL;
+#endif
 
   /* We need a rewind before uploading client read data again. The
    * checks below just influence of the upload is to be continued
@@ -416,7 +418,9 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 #ifdef USE_NTLM
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
+#ifndef CURL_NO_VERBOSE_VAR
       ongoing_auth = "NTLM";
+#endif
       if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
          (conn->proxy_ntlm_state != NTLMSTATE_NONE)) {
         /* The NTLM-negotiation has started, keep on sending.
@@ -429,7 +433,9 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
+#ifndef CURL_NO_VERBOSE_VAR
       ongoing_auth = "NEGOTIATE";
+#endif
       if((conn->http_negotiate_state != GSS_AUTHNONE) ||
          (conn->proxy_negotiate_state != GSS_AUTHNONE)) {
         /* The NEGOTIATE-negotiation has started, keep on sending.
@@ -1101,6 +1107,11 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 static void http_switch_to_get(struct Curl_easy *data, int code)
 {
   const char *req = data->set.str[STRING_CUSTOMREQUEST];
+
+#ifdef CURL_NO_VERBOSE_VAR
+  (void)code;
+#endif
+
   if((req || data->state.httpreq != HTTPREQ_GET) &&
      (data->set.http_follow_mode == CURLFOLLOW_OBEYCODE)) {
     infof(data, "Switch to GET because of %d response", code);

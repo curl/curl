@@ -1903,7 +1903,11 @@ static char *detect_proxy(struct Curl_easy *data,
    * checked if the lowercase versions do not exist.
    */
   char proxy_env[20];
-  const char *envp = proxy_env;
+  const char *envp;
+
+#ifndef CURL_NO_VERBOSE_VAR
+  envp = proxy_env;
+#endif
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
                  conn->scheme->name);
@@ -3457,8 +3461,10 @@ static CURLcode create_conn(struct Curl_easy *data,
      * `existing` and thus we need to cleanup the one we just
      * allocated before we can move along and use `existing`.
      */
+#ifndef CURL_NO_VERBOSE_VAR
     bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
                          Curl_conn_is_ssl(conn, FIRSTSOCKET));
+#endif
 
     reuse_conn(data, conn, existing);
     conn = existing;

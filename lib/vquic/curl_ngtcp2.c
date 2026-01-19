@@ -1401,6 +1401,9 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)ctx;
   (void)buf;
+#ifdef CURL_NO_VERBOSE_VAR
+  (void)blen;
+#endif
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
@@ -1730,7 +1733,9 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
       goto out;
     }
+#ifndef CURL_NO_VERBOSE_VAR
     stream = H3_STREAM_CTX(ctx, data);
+#endif
   }
   else if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);

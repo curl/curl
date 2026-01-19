@@ -129,6 +129,7 @@ struct websocket {
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
 
+#ifndef CURL_NO_VERBOSE_VAR
 static const char *ws_frame_name_of_op(uint8_t firstbyte)
 {
   switch(firstbyte & WSBIT_OPCODE_MASK) {
@@ -148,6 +149,7 @@ static const char *ws_frame_name_of_op(uint8_t firstbyte)
     return "???";
   }
 }
+#endif
 
 static int ws_frame_firstbyte2flags(struct Curl_easy *data,
                                     uint8_t firstbyte, int cont_flags)
@@ -294,6 +296,10 @@ static CURLcode ws_frame_flags2firstbyte(struct Curl_easy *data,
 static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
                         const char *msg)
 {
+#ifdef CURL_NO_VERBOSE_VAR
+  (void)msg;
+#endif
+
   switch(dec->head_len) {
   case 0:
     break;
@@ -776,6 +782,10 @@ static const struct Curl_cwtype ws_cw_decode = {
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
 {
+#ifdef CURL_NO_VERBOSE_VAR
+  (void)enc;
+  (void)msg;
+#endif
   CURL_TRC_WS(data, "WS-ENC: %s [%s%s payload=%"
               FMT_OFF_T "/%" FMT_OFF_T "]",
               msg, ws_frame_name_of_op(enc->firstbyte),
