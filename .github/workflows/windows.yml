@@ -129,8 +129,8 @@ jobs:
         timeout-minutes: 1
         run: |
           PATH=/usr/bin
-          find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
@@ -336,8 +336,8 @@ jobs:
             # avoid libtool's curl.exe wrapper for shared builds
             mv bld/src/.libs/curl.exe bld/src/curl.exe || true
           fi
-          find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
           if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
@@ -552,8 +552,8 @@ jobs:
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
-          /usr/bin/find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -671,8 +671,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | xargs -0 ls -l --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
@@ -914,8 +914,8 @@ jobs:
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 file --
-          /usr/bin/find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 ls -l --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 file --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 ls -l --
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version

@@ -415,8 +415,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . -type f \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 ls -l --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time

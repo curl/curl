@@ -115,8 +115,8 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   curl="build/${platdir}/${VC_VERSION}/${PRJ_CFG}/curl${binsuffix}.exe"
 fi
 
-find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 file --
-find . -type f \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 ls -l --
+find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 file --
+find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | xargs -0 ls -l --
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
