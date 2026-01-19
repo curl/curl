@@ -345,7 +345,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CMAKE_INSTALL_PREFIX`                    (see CMake)
 - `CMAKE_STATIC_LIBRARY_SUFFIX`             (see CMake)
 - `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Set the number of sources in a "unity" unit. Default: `0` (all)
-- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka jumbo) builds. Default: `OFF`
+- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka "jumbo") builds. Default: `OFF`
 
 Details via CMake
 [variables](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html) and
