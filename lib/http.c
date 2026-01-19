@@ -1108,7 +1108,7 @@ static void http_switch_to_get(struct Curl_easy *data, int code)
 {
   const char *req = data->set.str[STRING_CUSTOMREQUEST];
 
-#ifdef CURL_NO_VERBOSE_VAR
+#ifndef CURLVERBOSE
   (void)code;
 #endif
 

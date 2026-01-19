@@ -1401,7 +1401,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)ctx;
   (void)buf;
-#ifdef CURL_NO_VERBOSE_VAR
+#ifndef CURLVERBOSE
   (void)blen;
 #endif
 

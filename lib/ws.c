@@ -296,7 +296,7 @@ static CURLcode ws_frame_flags2firstbyte(struct Curl_easy *data,
 static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
                         const char *msg)
 {
-#ifdef CURL_NO_VERBOSE_VAR
+#ifndef CURLVERBOSE
   (void)msg;
 #endif
 
@@ -782,7 +782,7 @@ static const struct Curl_cwtype ws_cw_decode = {
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
 {
-#ifdef CURL_NO_VERBOSE_VAR
+#ifndef CURLVERBOSE
   (void)enc;
   (void)msg;
 #endif

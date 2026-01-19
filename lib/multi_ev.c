@@ -190,7 +190,7 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
   struct mev_sh_entry *entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
   int rc = 0;
 
-#ifdef CURL_NO_VERBOSE_VAR
+#ifndef CURLVERBOSE
   (void)cause;
 #endif
 
