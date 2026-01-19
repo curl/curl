@@ -211,13 +211,6 @@
 #  endif
 #endif
 
-/* To avoid `stdbool.h` and C99 extension warning for _Bool in C89 mode */
-#if defined(__APPLE__) && defined(__clang__) && \
-  defined(__STDC_VERSION__) && __STDC_VERSION__ < 199901L
-#  undef HAVE_STDBOOL_H
-#  undef HAVE_BOOL_T
-#endif
-
 /* ================================================================ */
 /*  If you need to include a system header file for your platform,  */
 /*  please, do it beyond the point further indicated in this file.  */

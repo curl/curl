@@ -112,6 +112,10 @@ if(PICKY_COMPILER)
       -Wwrite-strings                      # clang  1.0  gcc  1.4
     )
 
+    if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_STANDARD STREQUAL 90)
+      list(APPEND _picky_enable "-Wno-c99-extensions")
+    endif()
+
     # Always enable with clang, version dependent with gcc
     set(_picky_common_old
       -Waddress                            # clang  2.7  gcc  4.3
