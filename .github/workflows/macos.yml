@@ -463,13 +463,13 @@ jobs:
             make -C bld V=1
           fi
 
-      - name: 'curl -V'
-        run: bld/src/curl --disable --version
-
       - name: 'curl info'
         run: |
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+
+      - name: 'curl -V'
+        run: bld/src/curl --disable --version
 
       - name: 'curl install'
         run: |
@@ -702,10 +702,10 @@ jobs:
             make -C bld V=1
           fi
 
-      - name: 'curl -V'
-        run: bld/src/curl --disable --version
-
       - name: 'curl info'
         run: |
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+
+      - name: 'curl -V'
+        run: bld/src/curl --disable --version

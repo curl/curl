@@ -811,14 +811,14 @@ jobs:
           fi
           ./scripts/singleuse.pl --unit "${libcurla}"
 
-      - name: 'curl -V'
-        if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: bld/src/curl --disable -V
-
       - name: 'curl info'
         run: |
           find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 file --
           find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+
+      - name: 'curl -V'
+        if: ${{ matrix.build.make-custom-target != 'tidy' }}
+        run: bld/src/curl --disable -V
 
       - name: 'curl install'
         run: |
