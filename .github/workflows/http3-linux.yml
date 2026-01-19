@@ -671,7 +671,10 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: bld/src/curl --disable -V
+        run: |
+          find . -type f \( -name curl -o -name '*.so*' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so*' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          bld/src/curl --disable -V
 
       - name: 'build tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
