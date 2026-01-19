@@ -184,7 +184,9 @@ jobs:
       - name: 'curl info'
         run: |
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          echo '---------'
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 gstat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         run: |
@@ -466,7 +468,7 @@ jobs:
       - name: 'curl -V'
         run: |
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version
 
       - name: 'curl install'
@@ -703,5 +705,5 @@ jobs:
       - name: 'curl -V'
         run: |
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 ls -l --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version
