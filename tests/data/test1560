@@ -13,6 +13,17 @@ url
 <setenv>
 LC_ALL=C.UTF-8
 </setenv>
+<features>
+file
+https
+http
+pop3
+smtp
+imap
+ldap
+dict
+ftp
+</features>
 <name>
 URL API
 </name>
