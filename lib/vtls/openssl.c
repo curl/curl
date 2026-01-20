@@ -1196,8 +1196,7 @@ static int engineload(struct Curl_easy *data,
     }
 
     /* Load the certificate from the engine */
-    if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name,
-                        0, &params, NULL, 1)) {
+    if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name, 0, &params, NULL, 1)) {
       failf(data, "ssl engine cannot load client cert with id '%s' [%s]",
             cert_file,
             ossl_strerror(ERR_get_error(), error_buffer,
@@ -1326,7 +1325,7 @@ static int pkcs12load(struct Curl_easy *data,
     if(!cert_bio) {
       failf(data, "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
-                          sizeof(error_buffer)) );
+                          sizeof(error_buffer)));
       return 0;
     }
   }
@@ -1335,7 +1334,7 @@ static int pkcs12load(struct Curl_easy *data,
     if(!cert_bio) {
       failf(data, "BIO_new return NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
-                          sizeof(error_buffer)) );
+                          sizeof(error_buffer)));
       return 0;
     }
 
@@ -2581,9 +2580,9 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   (void)ssl;
 }
 
-static CURLcode
-ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
-                             unsigned int ssl_version_min)
+static CURLcode ossl_set_ssl_version_min_max(struct Curl_cfilter *cf,
+                                             SSL_CTX *ctx,
+                                             unsigned int ssl_version_min)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   /* first, TLS min version... */
@@ -2714,7 +2713,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     result = Curl_ssl_session_create2(der_session_buf, der_session_size,
                                       ietf_tls_id, alpn,
                                       (curl_off_t)time(NULL) +
-                                      SSL_SESSION_get_timeout(session),
+                                        SSL_SESSION_get_timeout(session),
                                       earlydata_max, qtp_clone, quic_tp_len,
                                       &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
@@ -2739,8 +2738,7 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     struct ssl_connect_data *connssl = cf->ctx;
     Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), connssl->negotiated.alpn,
-                          NULL, 0);
+                          SSL_version(ssl), connssl->negotiated.alpn, NULL, 0);
   }
   return 0;
 }
@@ -3131,7 +3129,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
      * revocation */
     lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
     if(!lookup ||
-       (!X509_load_crl_file(lookup, ssl_crlfile, X509_FILETYPE_PEM)) ) {
+       (!X509_load_crl_file(lookup, ssl_crlfile, X509_FILETYPE_PEM))) {
       failf(data, "error loading CRL file: %s", ssl_crlfile);
       return CURLE_SSL_CRL_BADFILE;
     }
@@ -3977,8 +3975,8 @@ static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
     connssl->earlydata_state = ssl_earlydata_await;
     connssl->state = ssl_connection_deferred;
     result = Curl_alpn_set_negotiated(cf, data, connssl,
-                    (const unsigned char *)scs->alpn,
-                    scs->alpn ? strlen(scs->alpn) : 0);
+                                      (const unsigned char *)scs->alpn,
+                                      scs->alpn ? strlen(scs->alpn) : 0);
     *do_early_data = !result;
   }
   return result;
@@ -4331,8 +4329,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         /* trace retry_configs if we got some */
         ossl_trace_ech_retry_configs(data, octx->ssl, 0);
       }
-      if(rv != SSL_ECH_STATUS_SUCCESS
-         && data->set.tls_ech & CURLECH_HARD) {
+      if(rv != SSL_ECH_STATUS_SUCCESS && (data->set.tls_ech & CURLECH_HARD)) {
         infof(data, "ECH: ech-hard failed");
         return CURLE_SSL_CONNECT_ERROR;
       }

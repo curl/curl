@@ -4,8 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-Building via IDE Project Files
-==============================
+# Building via IDE Project Files
 
 This document describes how to compile, build and install curl and libcurl
 from sources using legacy versions of Visual Studio 2010 - 2013.

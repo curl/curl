@@ -64,7 +64,7 @@ static const char * const srchard[] = {
   "",
   NULL
 };
-static const char *const srcend[]={
+static const char *const srcend[] = {
   "",
   "  return (int)ret;",
   "}",

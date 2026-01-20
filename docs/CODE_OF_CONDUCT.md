@@ -4,8 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-Contributor Code of Conduct
-===========================
+# Contributor Code of Conduct
 
 As contributors and maintainers of this project, we pledge to respect all
 people who contribute through reporting issues, posting feature requests,
@@ -33,6 +32,7 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported by opening an issue or contacting one or more of the project
 maintainers.
 
-This Code of Conduct is adapted from the [Contributor
-Covenant](https://contributor-covenant.org/), version 1.1.0, available at
+This Code of Conduct is adapted from the
+[Contributor Covenant](https://contributor-covenant.org/), version 1.1.0,
+available at
 [https://contributor-covenant.org/version/1/1/0/](https://contributor-covenant.org/version/1/1/0/)

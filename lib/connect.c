@@ -426,8 +426,8 @@ connect_sub_chain:
 #ifdef USE_SSL
     if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-         cf->conn->scheme->flags & PROTOPT_SSL))       /* we want SSL */
-       && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
+         cf->conn->scheme->flags & PROTOPT_SSL)) &&  /* we want SSL */
+       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
       result = Curl_cf_ssl_insert_after(cf, data);
       if(result)
         return result;

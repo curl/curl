@@ -33,8 +33,7 @@ my %typecheck; # from the include file
 my %enum; # from libcurl-errors.3
 
 sub gettypecheck {
-    open(my $f, "<", "$root/include/curl/typecheck-gcc.h")
-        || die "no typecheck file";
+    open(my $f, "<", "$root/include/curl/typecheck-gcc.h") || die "no typecheck file";
     while(<$f>) {
         chomp;
         if($_ =~ /\(option\) == (CURL[^ \)]*)/) {
@@ -46,8 +45,7 @@ sub gettypecheck {
 
 sub getinclude {
     my $f;
-    open($f, "<", "$root/include/curl/curl.h")
-        || die "no curl.h";
+    open($f, "<", "$root/include/curl/curl.h") || die "no curl.h";
     while(<$f>) {
         if($_ =~ /\((CURLOPT[^,]*), (CURLOPTTYPE_[^,]*)/) {
             my ($opt, $type) = ($1, $2);
@@ -62,8 +60,7 @@ sub getinclude {
     $enum{"CURLOPT_CONV_TO_NETWORK_FUNCTION"}++;
     close($f);
 
-    open($f, "<", "$root/include/curl/multi.h")
-        || die "no curl.h";
+    open($f, "<", "$root/include/curl/multi.h") || die "no curl.h";
     while(<$f>) {
         if($_ =~ /\((CURLMOPT[^,]*), (CURLOPTTYPE_[^,]*)/) {
             my ($opt, $type) = ($1, $2);

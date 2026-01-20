@@ -960,8 +960,7 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
 #ifdef USE_SSL
     if(ssl_installed(conn)) {
       Sockbuf *sb;
-      if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
-         ||
+      if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS ||
          ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
         return CURLE_FAILED_INIT;
     }

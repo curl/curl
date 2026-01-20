@@ -4,8 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-Version Numbers and Releases
-============================
+# Version Numbers and Releases
 
 The command line tool curl and the library libcurl are individually
 versioned, but they usually follow each other closely.
