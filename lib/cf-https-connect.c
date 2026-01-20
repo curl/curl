@@ -657,6 +657,9 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   memset(&cf_fake, 0, sizeof(cf_fake));
   cf_fake.cft = &Curl_cft_http_connect;
   cf = &cf_fake;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)cf;
+#endif
 
   if(conn->bits.tls_enable_alpn) {
 #ifdef USE_HTTPSRR

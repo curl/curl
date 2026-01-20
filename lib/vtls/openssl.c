@@ -1947,11 +1947,15 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
     /* Server seems to have closed the connection without sending us
      * a close notify. */
     sslerr = ERR_get_error();
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+    (void)sslerr;
+#else
     CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
                 (sslerr ?
                  ossl_strerror(sslerr, buf, sizeof(buf)) :
                  SSL_ERROR_to_str(err)),
                 SOCKERRNO);
+#endif
     *done = TRUE;
     result = CURLE_OK;
     break;

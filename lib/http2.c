@@ -1300,17 +1300,17 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 {
   struct Curl_cfilter *cf = userp;
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct Curl_easy *data_s, *call_data = CF_DATA_CURRENT(cf);
+  struct Curl_easy *data_s;
   struct h2_stream_ctx *stream;
   int rv;
   (void)session;
 
-  DEBUGASSERT(call_data);
+  DEBUGASSERT(CF_DATA_CURRENT(cf));
   /* stream id 0 is the connection, do not look there for streams. */
   data_s = stream_id ?
     nghttp2_session_get_stream_user_data(session, stream_id) : NULL;
   if(!data_s) {
-    CURL_TRC_CF(call_data, cf,
+    CURL_TRC_CF(CF_DATA_CURRENT(cf), cf,
                 "[%d] on_stream_close, no easy set on stream", stream_id);
     return 0;
   }
@@ -1318,7 +1318,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     /* nghttp2 still has an easy registered for the stream which has
      * been freed be libcurl. This points to a code path that does not
      * trigger DONE or DETACH events as it must. */
-    CURL_TRC_CF(call_data, cf,
+    CURL_TRC_CF(CF_DATA_CURRENT(cf), cf,
                 "[%d] on_stream_close, not a GOOD easy on stream", stream_id);
     (void)nghttp2_session_set_stream_user_data(session, stream_id, 0);
     return NGHTTP2_ERR_CALLBACK_FAILURE;

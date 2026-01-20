@@ -416,7 +416,9 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 #ifdef USE_NTLM
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       ongoing_auth = "NTLM";
+#endif
       if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
          (conn->proxy_ntlm_state != NTLMSTATE_NONE)) {
         /* The NTLM-negotiation has started, keep on sending.
@@ -429,7 +431,9 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       ongoing_auth = "NEGOTIATE";
+#endif
       if((conn->http_negotiate_state != GSS_AUTHNONE) ||
          (conn->proxy_negotiate_state != GSS_AUTHNONE)) {
         /* The NEGOTIATE-negotiation has started, keep on sending.

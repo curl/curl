@@ -1903,7 +1903,9 @@ static char *detect_proxy(struct Curl_easy *data,
    * checked if the lowercase versions do not exist.
    */
   char proxy_env[20];
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   const char *envp = proxy_env;
+#endif
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
                  conn->scheme->name);
@@ -1942,18 +1944,26 @@ static char *detect_proxy(struct Curl_easy *data,
     }
     if(!proxy) {
 #endif
-      envp = "all_proxy";
-      proxy = curl_getenv(envp); /* default proxy to use */
+      proxy = curl_getenv("all_proxy"); /* default proxy to use */
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+      if(proxy)
+        envp = "all_proxy";
+#endif
       if(!proxy) {
-        envp = "ALL_PROXY";
-        proxy = curl_getenv(envp);
+        proxy = curl_getenv("ALL_PROXY");
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+        if(proxy)
+          envp = "ALL_PROXY";
+#endif
       }
 #ifndef CURL_DISABLE_WEBSOCKETS
     }
 #endif
   }
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(proxy)
     infof(data, "Uses proxy env variable %s == '%s'", envp, proxy);
+#endif
 
   return proxy;
 }

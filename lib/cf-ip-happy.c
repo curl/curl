@@ -483,6 +483,9 @@ evaluate:
       CURL_TRC_CF(data, cf, "no more attempts to try");
       result = CURLE_COULDNT_CONNECT;
       i = 0;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+      (void)i;
+#endif
       for(a = bs->running; a; a = a->next) {
         CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
         if(a->result)

@@ -1003,8 +1003,12 @@ static void set_local_ip(struct Curl_cfilter *cf,
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr *)&ssloc, &slen)) {
       int error = SOCKERRNO;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+      (void)error;
+#else
       infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
+#endif
     }
     else if(!Curl_addr2string((struct sockaddr *)&ssloc, slen,
                               ctx->ip.local_ip, &ctx->ip.local_port)) {

@@ -603,7 +603,6 @@ static int proxy_h2_on_header(nghttp2_session *session,
 {
   struct Curl_cfilter *cf = userp;
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   int32_t stream_id = frame->hd.stream_id;
   CURLcode result;
 
@@ -611,7 +610,7 @@ static int proxy_h2_on_header(nghttp2_session *session,
   (void)session;
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
   if(stream_id != ctx->tunnel.stream_id) {
-    CURL_TRC_CF(data, cf, "[%d] header for non-tunnel stream: "
+    CURL_TRC_CF(CF_DATA_CURRENT(cf), cf, "[%d] header for non-tunnel stream: "
                 "%.*s: %.*s", stream_id,
                 (int)namelen, name, (int)valuelen, value);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -641,7 +640,7 @@ static int proxy_h2_on_header(nghttp2_session *session,
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     resp->prev = ctx->tunnel.resp;
     ctx->tunnel.resp = resp;
-    CURL_TRC_CF(data, cf, "[%d] status: HTTP/2 %03d",
+    CURL_TRC_CF(CF_DATA_CURRENT(cf), cf, "[%d] status: HTTP/2 %03d",
                 stream_id, ctx->tunnel.resp->status);
     return 0;
   }
@@ -655,7 +654,7 @@ static int proxy_h2_on_header(nghttp2_session *session,
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  CURL_TRC_CF(data, cf, "[%d] header: %.*s: %.*s",
+  CURL_TRC_CF(CF_DATA_CURRENT(cf), cf, "[%d] header: %.*s: %.*s",
               stream_id, (int)namelen, name, (int)valuelen, value);
 
   return 0; /* 0 is successful */
@@ -670,7 +669,6 @@ static ssize_t tunnel_send_callback(nghttp2_session *session,
 {
   struct Curl_cfilter *cf = userp;
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   struct tunnel_stream *ts;
   CURLcode result;
   size_t nread;
@@ -695,7 +693,7 @@ static ssize_t tunnel_send_callback(nghttp2_session *session,
   if(ts->closed && Curl_bufq_is_empty(&ts->sendbuf))
     *data_flags = NGHTTP2_DATA_FLAG_EOF;
 
-  CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback -> %zd",
+  CURL_TRC_CF(CF_DATA_CURRENT(cf), cf, "[%d] tunnel_send_callback -> %zd",
               ts->stream_id, nread);
   return (nread  > SSIZE_MAX) ?
     NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nread;
@@ -736,14 +734,14 @@ static int proxy_h2_on_stream_close(nghttp2_session *session,
 {
   struct Curl_cfilter *cf = userp;
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
   (void)session;
 
   if(stream_id != ctx->tunnel.stream_id)
     return 0;
 
-  CURL_TRC_CF(data, cf, "[%d] proxy_h2_on_stream_close, %s (err %d)",
+  CURL_TRC_CF(CF_DATA_CURRENT(cf), cf,
+              "[%d] proxy_h2_on_stream_close, %s (err %d)",
               stream_id, nghttp2_http2_strerror(error_code), error_code);
   ctx->tunnel.closed = TRUE;
   ctx->tunnel.error = error_code;
