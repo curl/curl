@@ -442,8 +442,7 @@ if(CMAKE_C_STANDARD STREQUAL 90 AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1)
     list(APPEND _picky "-Wno-comma")  # Just silly
   endif()
-  list(REMOVE_ITEM _picky "-Wno-format-nonliteral")
-  list(APPEND _picky "-Wno-format-nonliteral")  # Avoid hitting this with vsnprintf in tests/servers
+  list(APPEND _picky "-Wno-format-nonliteral")  # Avoid hitting it with system vsnprintf in tests/servers
 endif()
 
 if(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
@@ -451,6 +450,11 @@ if(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSI
 endif()
 
 if(_picky_nocheck OR _picky)
+  # Keep the last entry from duplicates
+  list(REVERSE _picky)
+  list(REMOVE_DUPLICATES _picky)
+  list(REVERSE _picky)
+
   set(_picky_tmp "${_picky_nocheck}" "${_picky}")
   string(REPLACE ";" " " _picky_tmp "${_picky_tmp}")
   string(STRIP "${_picky_tmp}" _picky_tmp)
