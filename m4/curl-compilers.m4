@@ -1027,11 +1027,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [undef])
           fi
           #
-          dnl Only gcc 2.97 or later
-          if test "$compiler_num" -ge "297"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
-          fi
-          #
           dnl Only gcc 3.0 or later
           if test "$compiler_num" -ge "300"; then
             dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
