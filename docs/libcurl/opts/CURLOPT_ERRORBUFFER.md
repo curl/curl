@@ -101,7 +101,7 @@ int main(void)
 # HISTORY
 
 Before curl 7.60.0. if an error code was returned but there was no error
-detail the buffer was untouched; ie not initialized.
+detail the buffer was untouched: not initialized.
 
 # %AVAILABILITY%
 
