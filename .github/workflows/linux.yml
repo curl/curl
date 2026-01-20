@@ -905,6 +905,7 @@ jobs:
           fi
 
       - name: 'disk space used'
+        if: ${{ !startsWith(matrix.build.container, 'alpine') }}  # has BusyBox 'du' without '-t' option
         run: |
           find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 du --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
