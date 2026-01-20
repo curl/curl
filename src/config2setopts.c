@@ -853,7 +853,7 @@ CURLcode config2setopts(struct OperationConfig *config,
     else {
       result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
       if(!result)
-        my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
+        result = my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
     }
     break;
   default:
