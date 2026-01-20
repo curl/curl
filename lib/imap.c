@@ -1187,12 +1187,12 @@ static bool is_custom_fetch_listing_match(const char *params)
   if(*params++ != ' ') return false;
   while (ISDIGIT(*params)) {
     params++;
-    if(*params == 0) 
+    if(*params == 0)
       return false;
   }
-  if(*params == ':') 
+  if(*params == ':')
     return true;
-  if(*params == ',') 
+  if(*params == ',')
     return true;
   return false;
 }
@@ -1200,7 +1200,7 @@ static bool is_custom_fetch_listing_match(const char *params)
 static bool is_custom_fetch_listing(struct IMAP *imap)
 {
   /* filter out "UID FETCH 1:* (FLAGS ..." queries to list emails */
-  if(!imap->custom) 
+  if(!imap->custom)
     return false;
   else if(curl_strequal(imap->custom, "FETCH") && imap->custom_params) {
     const char *p = imap->custom_params;
