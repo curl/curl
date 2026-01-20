@@ -310,7 +310,8 @@ if(CURL_PURGE_UNUSED)
     endif()
   elseif(MSVC)
     # https://learn.microsoft.com/cpp/build/reference/opt-optimizations
-    # It is the default in Debug configurations. Requires VS2012+.
+    # The toolchain default in Debug configurations.
+    # It seems to not work on VS2010.
     set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
