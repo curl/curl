@@ -309,7 +309,7 @@ if(CURL_PURGE_UNUSED)
       set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,-dead_strip")
     endif()
   elseif(MSVC)
-    # Apparently ignored when using the MSBuild generator
+    # https://learn.microsoft.com/cpp/build/reference/opt-optimizations
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
     else()
