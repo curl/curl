@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 #include "urldata.h"
+#include "rtsp.h"
 
 #ifndef CURL_DISABLE_RTSP
 
@@ -33,7 +34,6 @@
 #include "http.h"
 #include "url.h"
 #include "progress.h"
-#include "rtsp.h"
 #include "strcase.h"
 #include "select.h"
 #include "connect.h"
