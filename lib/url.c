@@ -1884,9 +1884,6 @@ static char *detect_proxy(struct Curl_easy *data,
                           struct connectdata *conn)
 {
   char *proxy = NULL;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   /* If proxy was not specified, we check for default proxy environment
    * variables, to enable i.e Lynx compliance:
@@ -1908,6 +1905,10 @@ static char *detect_proxy(struct Curl_easy *data,
   char proxy_env[20];
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const char *envp = proxy_env;
+#endif
+
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
 #endif
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
