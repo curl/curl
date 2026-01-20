@@ -311,7 +311,7 @@ if(CURL_PURGE_UNUSED)
   elseif(MSVC)
     # https://learn.microsoft.com/cpp/build/reference/opt-optimizations
     set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
-    # Toolchain default in Debug configurations.
+    # Toolchain default in Release configurations.
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
     else()
