@@ -1184,8 +1184,10 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
 static bool is_custom_fetch_listing_match(const char *params)
 {
   /* match " 1:* (FLAGS ..." or " 1,2,3 (FLAGS ..." */
-  if(*params++ != ' ') return false;
-  while (ISDIGIT(*params)) {
+  if(*params++ != ' ')
+    return false;
+
+  while(ISDIGIT(*params)) {
     params++;
     if(*params == 0)
       return false;
