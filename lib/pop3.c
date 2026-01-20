@@ -358,13 +358,12 @@ static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out)
   if(len > 2) {
     /* Find the start of the message */
     len -= 2;
-    for(message += 2; *message == ' ' || *message == '\t'; message++, len--)
+    for(message += 2; ISBLANK(*message); message++, len--)
       ;
 
     /* Find the end of the message */
     while(len--)
-      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
+      if(!ISBLANK(message[len]) && !ISNEWLINE(message[len]))
         break;
 
     /* Terminate the message */
