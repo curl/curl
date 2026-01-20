@@ -213,7 +213,7 @@ int tool_progress_cb(void *clientp,
 #endif
     curl_mfprintf(bar->out, format, line, percent);
 #if defined(__GNUC__) || defined(__clang__)
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 #endif
   }
   fflush(bar->out);
