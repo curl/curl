@@ -237,9 +237,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
   const uint8_t *p, *end = pkt + pktlen;
   size_t sent, len;
   CURLcode result = CURLE_OK;
-#ifdef CURLVERBOSE
-  size_t calls = 0;
-#endif
+  VERBOSE(size_t calls = 0);
 
   *psent = 0;
 
@@ -249,9 +247,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
     if(result)
       goto out;
     *psent += sent;
-#ifdef CURLVERBOSE
-    ++calls;
-#endif
+    VERBOSE(++calls);
   }
 out:
   CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"

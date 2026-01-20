@@ -352,9 +352,7 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
   bool do_more;
   timediff_t next_expire_ms;
   int inconclusive, ongoing;
-#ifdef CURLVERBOSE
-  int i;
-#endif
+  VERBOSE(int i);
 
   if(bs->winner)
     return CURLE_OK;
@@ -363,13 +361,9 @@ evaluate:
   ongoing = inconclusive = 0;
 
   /* check if a running baller connects now */
-#ifdef CURLVERBOSE
-  i = -1;
-#endif
+  VERBOSE(i = -1);
   for(panchor = &bs->running; *panchor; panchor = &((*panchor)->next)) {
-#ifdef CURLVERBOSE
-    ++i;
-#endif
+    VERBOSE(++i);
     a = *panchor;
     a->result = cf_ip_attempt_connect(a, data, connected);
     if(!a->result) {
@@ -462,13 +456,9 @@ evaluate:
       timediff_t delay_ms = bs->attempt_delay_ms - since_ms;
       if(delay_ms <= 0) {
         CURL_TRC_CF(data, cf, "all attempts inconclusive, restarting one");
-#ifdef CURLVERBOSE
-        i = -1;
-#endif
+        VERBOSE(i = -1);
         for(a = bs->running; a; a = a->next) {
-#ifdef CURLVERBOSE
-          ++i;
-#endif
+          VERBOSE(++i);
           if(!a->inconclusive)
             continue;
           result = cf_ip_attempt_restart(a, cf, data);
@@ -493,9 +483,7 @@ evaluate:
       /* no more addresses, no inconclusive attempts */
       CURL_TRC_CF(data, cf, "no more attempts to try");
       result = CURLE_COULDNT_CONNECT;
-#ifdef CURLVERBOSE
-      i = 0;
-#endif
+      VERBOSE(i = 0);
       for(a = bs->running; a; a = a->next) {
         CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
         if(a->result)

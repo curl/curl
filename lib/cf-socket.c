@@ -87,9 +87,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 
   if(setsockopt(sockfd, level, TCP_NODELAY,
                 (void *)&onoff, sizeof(onoff)) < 0) {
-#ifdef CURLVERBOSE
-    char buffer[STRERROR_LEN];
-#endif
+    VERBOSE(char buffer[STRERROR_LEN]);
     CURL_TRC_CF(data, cf, "Could not set TCP_NODELAY: %s",
                 curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
   }
@@ -987,15 +985,11 @@ static void set_local_ip(struct Curl_cfilter *cf,
     /* TFTP does not connect, so it cannot get the IP like this */
     struct Curl_sockaddr_storage ssloc;
     curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
-#ifdef CURLVERBOSE
-    char buffer[STRERROR_LEN];
-#endif
+    VERBOSE(char buffer[STRERROR_LEN]);
 
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr *)&ssloc, &slen)) {
-#ifdef CURLVERBOSE
-      int error = SOCKERRNO;
-#endif
+      VERBOSE(int error = SOCKERRNO);
       infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
@@ -1387,9 +1381,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   curl_socket_t fdsave;
   ssize_t rv;
   CURLcode result = CURLE_OK;
-#ifdef CURLVERBOSE
-  size_t orig_len = len;
-#endif
+  VERBOSE(size_t orig_len = len);
 
   (void)eos;
   *pnwritten = 0;
