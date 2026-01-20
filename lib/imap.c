@@ -1193,8 +1193,12 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
 
   (void)instate;
 
-  if(imap->custom && imapcode == '*') {
-    /* custom not handled here */
+  if (imap->custom && imapcode == '*' &&
+    (curl_strequal(imap->custom, "FETCH") ||
+    (curl_strequal(imap->custom, "UID") &&
+    curl_strnequal(imap->custom_params, " FETCH", 6))))
+  {
+    /* custom FETCH or UID FETCH is not handled here */
   }
   else if(imapcode == '*') {
     /* Check if this response contains a literal (e.g. FETCH responses with
