@@ -1193,7 +1193,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
 
   (void)instate;
 
-  if (imap->custom && imapcode == '*' &&
+  if(imap->custom && imapcode == '*' &&
     (curl_strequal(imap->custom, "FETCH") ||
     (curl_strequal(imap->custom, "UID") &&
     curl_strnequal(imap->custom_params, " FETCH", 6)))) {
