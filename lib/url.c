@@ -1884,6 +1884,9 @@ static char *detect_proxy(struct Curl_easy *data,
                           struct connectdata *conn)
 {
   char *proxy = NULL;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+#endif
 
   /* If proxy was not specified, we check for default proxy environment
    * variables, to enable i.e Lynx compliance:
