@@ -813,9 +813,7 @@ jobs:
 
       - name: 'curl -V'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: |
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
-          bld/src/curl --disable -V
+        run: bld/src/curl --disable -V
 
       - name: 'curl install'
         run: |

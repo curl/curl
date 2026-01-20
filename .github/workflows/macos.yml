@@ -467,9 +467,7 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          bld/src/curl --disable --version
+        run: bld/src/curl --disable --version
 
       - name: 'curl install'
         run: |
@@ -708,9 +706,7 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          bld/src/curl --disable --version
+        run: bld/src/curl --disable --version
 
       - name: 'disk space used'
         run: |
