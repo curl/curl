@@ -677,14 +677,14 @@ static bool out_double(void *userp,
      output characters */
 #ifdef HAVE_SNPRINTF
 #if defined(__GNUC__) || defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#pragma gcc diagnostic push
+#pragma gcc diagnostic ignored "-Wformat-nonliteral"
 #endif
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
   (snprintf)(work, BUFFSIZE, formatbuf, dnum);
 #if defined(__GNUC__) || defined(__clang__)
-#pragma clang diagnostic pop
+#pragma gcc diagnostic pop
 #endif
 #ifdef _WIN32
   /* Old versions of the Windows CRT do not terminate the snprintf output
