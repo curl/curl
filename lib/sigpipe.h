@@ -57,8 +57,10 @@ static CURL_INLINE void sigpipe_ignore(struct Curl_easy *data,
     action = ig->old_pipe_act;
     /* ignore this signal */
     action.sa_handler = SIG_IGN;
+#ifdef SA_SIGINFO
     /* clear SA_SIGINFO flag since we are using sa_handler */
     action.sa_flags &= ~SA_SIGINFO;
+#endif
     sigaction(SIGPIPE, &action, NULL);
   }
 }
