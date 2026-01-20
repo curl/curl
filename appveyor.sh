@@ -159,7 +159,7 @@ fi
 
 # disk space used
 
-find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 du --
+find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
 du -sh .; echo; du -sh -t 250KB ./*
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo; du -h -t 250KB _bld

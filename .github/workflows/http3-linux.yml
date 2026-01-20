@@ -684,7 +684,7 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 du --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
       - name: 'install test prereqs'

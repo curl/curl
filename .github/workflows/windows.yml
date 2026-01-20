@@ -177,7 +177,7 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   msys2:  # both msys and mingw-w64
@@ -407,7 +407,7 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   mingw-w64-standalone-downloads:
@@ -596,7 +596,7 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   linux-cross-mingw-w64:
@@ -695,7 +695,7 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   msvc:
@@ -984,5 +984,5 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 du --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld

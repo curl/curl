@@ -202,7 +202,7 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 du --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   macos:
@@ -547,7 +547,7 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 du --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
@@ -710,5 +710,5 @@ jobs:
 
       - name: 'disk space used'
         run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 du --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
           du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
