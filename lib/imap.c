@@ -1226,7 +1226,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
 
   (void)instate;
 
-  if (imapcode == '*' && is_custom_fetch_listing(imap)) {
+  if(imapcode == '*' && is_custom_fetch_listing(imap)) {
     /* custom FETCH or UID FETCH for listing is not handled here */
   }
   else if(imapcode == '*') {
