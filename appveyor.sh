@@ -115,7 +115,6 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
 fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 file --
-find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
@@ -160,6 +159,7 @@ fi
 
 # disk space used
 
+find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 du --
 du -sh .; echo; du -sh -t 250KB ./*
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo; du -h -t 250KB _bld
