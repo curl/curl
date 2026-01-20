@@ -127,7 +127,6 @@ if(PICKY_COMPILER)
       -Wignored-qualifiers                 # clang  2.8  gcc  4.3
       -Wmissing-field-initializers         # clang  2.7  gcc  4.1
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
-      -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
       -Wno-padded                          # clang  2.9  gcc  4.1               # Not used: We cannot change public structs
       -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-switch-default                  # clang  2.7  gcc  4.1               # Not used: Annoying to fix or silence
