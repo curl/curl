@@ -25,8 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(HAVE_SIGACTION) && \
-  (defined(USE_OPENSSL) || defined(USE_MBEDTLS) || defined(USE_WOLFSSL))
+#if defined(HAVE_SIGACTION) && !defined(USE_SO_NOSIGPIPE)
 #include <signal.h>
 
 struct Curl_sigpipe_ctx {
@@ -58,8 +57,10 @@ static CURL_INLINE void sigpipe_ignore(struct Curl_easy *data,
     action = ig->old_pipe_act;
     /* ignore this signal */
     action.sa_handler = SIG_IGN;
+#ifdef SA_SIGINFO
     /* clear SA_SIGINFO flag since we are using sa_handler */
     action.sa_flags &= ~SA_SIGINFO;
+#endif
     sigaction(SIGPIPE, &action, NULL);
   }
 }
@@ -85,8 +86,8 @@ static CURL_INLINE void sigpipe_apply(struct Curl_easy *data,
   }
 }
 
-#else
-/* for systems without sigaction */
+#else /* !HAVE_SIGACTION || USE_SO_NOSIGPIPE */
+/* for systems without sigaction or where SO_NOSIGPIPE is used. */
 #define sigpipe_ignore(x, y) do { (void)x; (void)y; } while(0)
 #define sigpipe_apply(x, y)  do { (void)x; (void)y; } while(0)
 #define sigpipe_init(x)      do { (void)x; } while(0)
@@ -96,6 +97,6 @@ struct Curl_sigpipe_ctx {
   bool dummy;
 };
 
-#endif
+#endif /* else HAVE_SIGACTION && !USE_SO_NOSIGPIPE */
 
 #endif /* HEADER_CURL_SIGPIPE_H */

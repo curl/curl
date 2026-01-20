@@ -97,32 +97,6 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 #endif
 }
 
-#ifdef SO_NOSIGPIPE
-/* The preferred method on macOS (10.2 and later) to prevent SIGPIPEs when
-   sending data to a dead peer (instead of relying on the 4th argument to send
-   being MSG_NOSIGNAL). Possibly also existing and in use on other BSD
-   systems? */
-static void nosigpipe(struct Curl_cfilter *cf,
-                      struct Curl_easy *data,
-                      curl_socket_t sockfd)
-{
-  int onoff = 1;
-  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
-                (void *)&onoff, sizeof(onoff)) < 0) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char buffer[STRERROR_LEN];
-    CURL_TRC_CF(data, cf, "Could not set SO_NOSIGPIPE: %s",
-                curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-#else
-    (void)cf;
-    (void)data;
-#endif
-  }
-}
-#else
-#define nosigpipe(x, y, z) Curl_nop_stmt
-#endif
-
 #if defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
    (defined(__DragonFly__) && __DragonFly_version < 500702) || \
@@ -357,6 +331,19 @@ static CURLcode socket_open(struct Curl_easy *data,
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     return CURLE_COULDNT_CONNECT;
   }
+
+#ifdef USE_SO_NOSIGPIPE
+  {
+    int onoff = 1;
+    if(setsockopt(*sockfd, SOL_SOCKET, SO_NOSIGPIPE,
+                  (void *)&onoff, sizeof(onoff)) < 0) {
+      failf(data, "setsockopt enable SO_NOSIGPIPE: %s",
+            curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+      *sockfd = CURL_SOCKET_BAD;
+      return CURLE_COULDNT_CONNECT;
+    }
+  }
+#endif /* USE_SO_NOSIGPIPE */
 
 #ifdef HAVE_FCNTL
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
@@ -1100,8 +1087,6 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(cf, data, ctx->sock);
-
-  nosigpipe(cf, data, ctx->sock);
 
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(cf, data, ctx->sock);

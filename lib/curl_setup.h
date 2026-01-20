@@ -453,6 +453,10 @@
 #define USE_EVENTFD
 #endif
 
+#ifdef SO_NOSIGPIPE
+#define USE_SO_NOSIGPIPE
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 
