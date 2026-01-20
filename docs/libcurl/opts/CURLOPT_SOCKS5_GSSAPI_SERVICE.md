@@ -27,7 +27,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_GSSAPI_SERVICE,
 
 # DESCRIPTION
 
-Deprecated since 7.49.0. Use CURLOPT_PROXY_SERVICE_NAME(3) instead.
+Deprecated. Use CURLOPT_PROXY_SERVICE_NAME(3) instead.
 
 Pass a char pointer as parameter to a string holding the *name* of the
 service. The default service name for a SOCKS5 server is *rcmd*. This option

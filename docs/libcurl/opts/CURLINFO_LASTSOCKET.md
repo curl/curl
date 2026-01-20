@@ -28,7 +28,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LASTSOCKET, long *socket);
 
 # DESCRIPTION
 
-Deprecated since 7.45.0. Use CURLINFO_ACTIVESOCKET(3) instead.
+Deprecated. Use CURLINFO_ACTIVESOCKET(3) instead.
 
 Pass a pointer to a long to receive the last socket used by this curl
 session. If the socket is no longer valid, -1 is returned. When you finish
@@ -73,6 +73,10 @@ int main(void)
   }
 }
 ~~~
+
+# DEPRECATED
+
+Deprecated since 7.45.0.
 
 # %AVAILABILITY%
 
