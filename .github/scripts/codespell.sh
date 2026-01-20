@@ -14,6 +14,7 @@ codespell \
   --skip 'docs/THANKS' \
   --skip 'projects/OS400/*' \
   --skip 'projects/vms/*' \
+  --skip 'RELEASE-NOTES' \
   --skip 'scripts/wcurl' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.words' \
