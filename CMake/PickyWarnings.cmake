@@ -439,11 +439,11 @@ if(CMAKE_C_STANDARD STREQUAL 90 AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
     list(APPEND _picky "-Wno-c99-extensions")  # Avoid: warning: '_Bool' is a C99 extension
   endif()
-  list(REMOVE_ITEM _picky "-Wno-format-nonliteral")
-  list(APPEND _picky "-Wno-format-nonliteral")  # Avoid hitting this with vsnprintf in tests/servers
   if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1)
     list(APPEND _picky "-Wno-comma")  # Just silly
   endif()
+  list(REMOVE_ITEM _picky "-Wno-format-nonliteral")
+  list(APPEND _picky "-Wno-format-nonliteral")  # Avoid hitting this with vsnprintf in tests/servers
 endif()
 
 if(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
