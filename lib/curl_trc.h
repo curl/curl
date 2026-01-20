@@ -64,7 +64,8 @@ void Curl_failf(struct Curl_easy *data,
 #define CURL_LOG_LVL_NONE  0
 #define CURL_LOG_LVL_INFO  1
 
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
+    defined(_MSC_VER)
 #define CURL_HAVE_C99
 #endif
 
@@ -133,7 +134,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_TIMER_is_verbose(data) \
   Curl_trc_ft_is_verbose(data, &Curl_trc_feat_timer)
 
-#if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_HAVE_C99
 #define infof(data, ...)             \
   do {                               \
     if(Curl_trc_is_verbose(data))    \
@@ -206,7 +207,7 @@ void Curl_trc_ws(struct Curl_easy *data,
   } while(0)
 #endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
 
-#else /* CURL_HAVE_C99 */
+#else /* !CURL_HAVE_C99 */
 
 #define infof          Curl_infof
 #define CURL_TRC_M     Curl_trc_multi
