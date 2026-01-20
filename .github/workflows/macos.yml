@@ -182,9 +182,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
 
       - name: 'build tests'
         run: |
@@ -201,6 +199,11 @@ jobs:
           else
             make -C bld examples V=1
           fi
+
+      - name: 'disk space used'
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   macos:
     name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.compiler }} ${{ matrix.build.name }}"
@@ -466,7 +469,6 @@ jobs:
       - name: 'curl -V'
         run: |
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version
 
       - name: 'curl install'
@@ -544,6 +546,11 @@ jobs:
           else
             make -C bld examples V=1
           fi
+
+      - name: 'disk space used'
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }}"
@@ -703,5 +710,9 @@ jobs:
       - name: 'curl -V'
         run: |
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version
+
+      - name: 'disk space used'
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld

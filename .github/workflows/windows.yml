@@ -130,7 +130,6 @@ jobs:
         run: |
           PATH=/usr/bin
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
@@ -177,7 +176,9 @@ jobs:
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
@@ -337,7 +338,6 @@ jobs:
             mv bld/src/.libs/curl.exe bld/src/curl.exe || true
           fi
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
@@ -406,7 +406,9 @@ jobs:
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
@@ -553,7 +555,6 @@ jobs:
         timeout-minutes: 1
         run: |
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -594,7 +595,9 @@ jobs:
           cmake --build bld --target curl-examples-build
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
@@ -670,9 +673,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
+        run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
@@ -693,7 +694,9 @@ jobs:
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
@@ -915,7 +918,6 @@ jobs:
         timeout-minutes: 1
         run: |
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 file --
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
@@ -981,4 +983,6 @@ jobs:
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 du --
+          du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
