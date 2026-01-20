@@ -300,7 +300,7 @@ if(CURL_CODE_COVERAGE)
   endif()
 endif()
 
-option(CURL_PURGE_UNUSED "Drop unused code and data from built binaries" ${CMAKE_UNITY_BUILD})
+option(CURL_PURGE_UNUSED "Drop unused code and data from built binaries" ON)
 if(CURL_PURGE_UNUSED)
   if(APPLE)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
@@ -315,7 +315,8 @@ if(CURL_PURGE_UNUSED)
       set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-OPT:REF")
     endif()
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    if(WIN32)  # TEST
+    if(WIN32)
+      # To make -Wl,--gc-sections work on Windows: https://sourceware.org/bugzilla/show_bug.cgi?id=11539
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-fno-asynchronous-unwind-tables")
     endif()
     set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-ffunction-sections" "-fdata-sections")
