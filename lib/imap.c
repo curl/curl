@@ -437,13 +437,12 @@ static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out)
   if(len > 2) {
     /* Find the start of the message */
     len -= 2;
-    for(message += 2; *message == ' ' || *message == '\t'; message++, len--)
+    for(message += 2; ISBLANK(*message); message++, len--)
       ;
 
     /* Find the end of the message */
     while(len--)
-      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
+      if(!ISNEWLINE(message[len]) && !ISBLANK(message[len]))
         break;
 
     /* Terminate the message */
@@ -1035,20 +1034,15 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
     /* Loop through the data line */
     for(;;) {
       size_t wordlen;
-      while(*line &&
-            (*line == ' ' || *line == '\t' ||
-              *line == '\r' || *line == '\n')) {
-
+      while(*line && (ISBLANK(*line) || ISNEWLINE(*line)))
         line++;
-      }
 
       if(!*line)
         break;
 
       /* Extract the word */
-      for(wordlen = 0; line[wordlen] && line[wordlen] != ' ' &&
-                       line[wordlen] != '\t' && line[wordlen] != '\r' &&
-                       line[wordlen] != '\n';)
+      for(wordlen = 0; line[wordlen] && !ISBLANK(line[wordlen]) &&
+            !ISNEWLINE(line[wordlen]);)
         wordlen++;
 
       /* Does the server support the STARTTLS capability? */

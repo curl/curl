@@ -547,13 +547,12 @@ static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
   if(len > 4) {
     /* Find the start of the message */
     len -= 4;
-    for(message += 4; *message == ' ' || *message == '\t'; message++, len--)
+    for(message += 4; ISBLANK(*message); message++, len--)
       ;
 
     /* Find the end of the message */
     while(len--)
-      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
+      if(!ISNEWLINE(message[len]) && !ISBLANK(message[len]))
         break;
 
     /* Terminate the message */
@@ -1234,10 +1233,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
         size_t wordlen;
         unsigned short mechbit;
 
-        while(len &&
-              (*line == ' ' || *line == '\t' ||
-               *line == '\r' || *line == '\n')) {
-
+        while(len && (ISBLANK(*line) || ISNEWLINE(*line))) {
           line++;
           len--;
         }
@@ -1246,9 +1242,8 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
           break;
 
         /* Extract the word */
-        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-              line[wordlen] != '\t' && line[wordlen] != '\r' &&
-              line[wordlen] != '\n';)
+        for(wordlen = 0; wordlen < len && !ISBLANK(line[wordlen]) &&
+              !ISNEWLINE(line[wordlen]);)
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
