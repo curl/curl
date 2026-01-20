@@ -51,7 +51,7 @@
  * while the previous requests are still being downloaded.
  *
  * Note:
- *   For the sake of simplicity, URL length is limited to 1023 char's !
+ *   For the sake of simplicity, URL length is limited to 1023 chars.
  *
  * This is purely a demo app, all retrieved data is simply discarded by
  * the write callback.
