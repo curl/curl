@@ -4329,7 +4329,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         /* trace retry_configs if we got some */
         ossl_trace_ech_retry_configs(data, octx->ssl, 0);
       }
-      if(rv != SSL_ECH_STATUS_SUCCESS && data->set.tls_ech & CURLECH_HARD) {
+      if(rv != SSL_ECH_STATUS_SUCCESS && (data->set.tls_ech & CURLECH_HARD)) {
         infof(data, "ECH: ech-hard failed");
         return CURLE_SSL_CONNECT_ERROR;
       }
