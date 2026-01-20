@@ -2891,7 +2891,7 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT))
+    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT_BLOB))
       return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT], blob);
     return CURLE_NOT_BUILT_IN;
 

@@ -46,6 +46,7 @@ struct dynbuf;
 #define SSLSUPP_ISSUERCERT   (1 << 11) /* supports CURLOPT_ISSUERCERT */
 #define SSLSUPP_SSL_EC_CURVES (1 << 12) /* supports CURLOPT_SSL_EC_CURVES */
 #define SSLSUPP_CRLFILE      (1 << 13) /* supports CURLOPT_CRLFILE */
+#define SSLSUPP_ISSUERCERT_BLOB (1 << 14) /* supports CURLOPT_ISSUERCERT_BLOB */
 
 #ifdef USE_ECH
 # include "../curlx/base64.h"
