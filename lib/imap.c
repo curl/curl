@@ -1181,32 +1181,34 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
 }
 
 /* Detect IMAP listings vs. downloading a single email  */
-static bool is_custom_fetch_listing_match(const char* params)
+static bool is_custom_fetch_listing_match(const char *params)
 {
   /* match " 1:* (FLAGS ..." or " 1,2,3 (FLAGS ..." */
-  if (*params++ != ' ') return false;
+  if(*params++ != ' ') return false;
   while (ISDIGIT(*params)) {
     params++;
-    if (*params == 0) return false;
+    if(*params == 0) 
+      return false;
   }
-  if (*params == ':') return true;
-  if (*params == ',') return true;
+  if(*params == ':') 
+    return true;
+  if(*params == ',') 
+    return true;
   return false;
 }
 
 static bool is_custom_fetch_listing(struct IMAP *imap)
 {
   /* filter out "UID FETCH 1:* (FLAGS ..." queries to list emails */
-  if(imap->custom == NULL) return false;
-  
-  if(curl_strequal(imap->custom, "FETCH") && imap->custom_params) {
-    const char* p = imap->custom_params;
+  if(!imap->custom) 
+    return false;
+  else if(curl_strequal(imap->custom, "FETCH") && imap->custom_params) {
+    const char *p = imap->custom_params;
     return is_custom_fetch_listing_match(p);
   }
-  else
-  if(curl_strequal(imap->custom, "UID") && imap->custom_params) {
+  else if(curl_strequal(imap->custom, "UID") && imap->custom_params) {
     if(curl_strnequal(imap->custom_params, " FETCH ", 7)) {
-      const char* p = imap->custom_params + 6;
+      const char *p = imap->custom_params + 6;
       return is_custom_fetch_listing_match(p);
     }
   }
