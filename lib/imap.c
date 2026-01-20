@@ -1196,8 +1196,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
   if (imap->custom && imapcode == '*' &&
     (curl_strequal(imap->custom, "FETCH") ||
     (curl_strequal(imap->custom, "UID") &&
-    curl_strnequal(imap->custom_params, " FETCH", 6))))
-  {
+    curl_strnequal(imap->custom_params, " FETCH", 6)))) {
     /* custom FETCH or UID FETCH is not handled here */
   }
   else if(imapcode == '*') {
