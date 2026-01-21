@@ -300,6 +300,9 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   }
 #endif
 
+  if(Curl_probeipv6(multi))
+    goto error;
+
   return multi;
 
 error:
