@@ -52,8 +52,6 @@
 #define PORT_MQTT   1883
 #define PORT_MQTTS  8883
 
-struct curl_trc_featt;
-
 #ifdef USE_ECH
 /* CURLECH_ bits for the tls_ech option */
 # define CURLECH_DISABLE    (1 << 0)
