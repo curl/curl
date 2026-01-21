@@ -466,10 +466,6 @@
 #include <curl/stdcheaders.h>
 #endif
 
-#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
-#include <stdint.h>
-#endif
-
 #ifdef __DJGPP__
 /* By default, DJGPP provides this type as a version of 'unsigned long' which
    forces us to use a define use it in printf() format strings without

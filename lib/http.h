@@ -58,11 +58,6 @@ extern const struct Curl_scheme Curl_scheme_https;
 
 #ifndef CURL_DISABLE_HTTP
 
-#ifdef USE_HTTP3
-#include <stdint.h>
-#endif
-
-
 struct dynhds;
 
 struct http_negotiation {

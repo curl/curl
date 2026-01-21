@@ -25,10 +25,6 @@
  ***************************************************************************/
 #include "urldata.h"
 
-#ifdef USE_HTTPSRR
-# include <stdint.h>
-#endif
-
 #ifndef CURL_DISABLE_DOH
 
 typedef enum {

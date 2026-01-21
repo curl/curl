@@ -24,7 +24,6 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
-#include <stdint.h>
 #include <nghttp2/nghttp2.h>
 
 #include "urldata.h"

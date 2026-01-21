@@ -28,10 +28,6 @@
 #include "hash.h"
 #include "curlx/timeval.h" /* for curltime, timediff_t */
 
-#ifdef USE_HTTPSRR
-# include <stdint.h>
-#endif
-
 /* Allocate enough memory to hold the full name information structs and
  * everything. OSF1 is known to require at least 8872 bytes. The buffer
  * required for storing all possible aliases and IP numbers is according to
