@@ -84,13 +84,12 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 #if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   curl_socklen_t onoff = (curl_socklen_t)1;
   int level = IPPROTO_TCP;
+  VERBOSE(char buffer[STRERROR_LEN]);
 
   if(setsockopt(sockfd, level, TCP_NODELAY,
-                (void *)&onoff, sizeof(onoff)) < 0) {
-    VERBOSE(char buffer[STRERROR_LEN]);
+                (void *)&onoff, sizeof(onoff)) < 0)
     CURL_TRC_CF(data, cf, "Could not set TCP_NODELAY: %s",
                 curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-  }
 #else
   (void)cf;
   (void)data;
@@ -835,11 +834,11 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 
   default:
     /* unknown error, fallthrough and try another address! */
-    NOVERBOSE((void)ipaddress);
     {
       VERBOSE(char buffer[STRERROR_LEN]);
       infof(data, "Immediate connect fail for %s: %s", ipaddress,
             curlx_strerror(error, buffer, sizeof(buffer)));
+      NOVERBOSE((void)ipaddress);
     }
     data->state.os_errno = error;
     /* connect failed */

@@ -3349,9 +3349,8 @@ static void multi_timeout(struct Curl_multi *multi,
       *timeout_ms = (long)diff_ms;
     }
     else {
-      if(multi->timetree) {
+      if(multi->timetree)
         VERBOSE(data = Curl_splayget(multi->timetree));
-      }
       /* 0 means immediately */
       *timeout_ms = 0;
     }

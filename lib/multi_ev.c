@@ -190,13 +190,12 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
   struct mev_sh_entry *entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
   int rc = 0;
 
-  NOVERBOSE((void)cause);
-
   if(!entry) /* we never knew or already forgot about this socket */
     return CURLM_OK;
 
   /* We managed this socket before, tell the socket callback to forget it. */
   if(entry->announced && multi->socket_cb) {
+    NOVERBOSE((void)cause);
     CURL_TRC_M(data, "ev %s, call(fd=%" FMT_SOCKET_T ", ev=REMOVE)", cause, s);
     mev_in_callback(multi, TRUE);
     rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,

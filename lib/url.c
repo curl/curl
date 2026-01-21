@@ -1904,7 +1904,6 @@ static char *detect_proxy(struct Curl_easy *data,
    */
   char proxy_env[20];
   const char *envp;
-
   VERBOSE(envp = proxy_env);
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",

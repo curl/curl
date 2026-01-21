@@ -182,9 +182,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
   size_t nwritten;
   CURLcode result;
 
-#ifndef CURLVERBOSE
-  (void)otype;
-#endif
+  NOVERBOSE((void)otype);
 
   DEBUGASSERT(data->conn);
   *pnwritten = 0;

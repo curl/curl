@@ -1102,9 +1102,7 @@ static void http_switch_to_get(struct Curl_easy *data, int code)
 {
   const char *req = data->set.str[STRING_CUSTOMREQUEST];
 
-#ifndef CURLVERBOSE
-  (void)code;
-#endif
+  NOVERBOSE((void)code);
 
   if((req || data->state.httpreq != HTTPREQ_GET) &&
      (data->set.http_follow_mode == CURLFOLLOW_OBEYCODE)) {

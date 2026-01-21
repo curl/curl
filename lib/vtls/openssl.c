@@ -1934,19 +1934,20 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
     connssl->io_need = CURL_SSL_IO_NEED_SEND;
     break;
-  default: {
+  default:
     /* Server seems to have closed the connection without sending us
      * a close notify. */
-    VERBOSE(unsigned long sslerr = ERR_get_error());
-    CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
-                (sslerr ?
-                 ossl_strerror(sslerr, buf, sizeof(buf)) :
-                 SSL_ERROR_to_str(err)),
-                SOCKERRNO);
+    {
+      VERBOSE(unsigned long sslerr = ERR_get_error());
+      CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
+                  (sslerr ?
+                   ossl_strerror(sslerr, buf, sizeof(buf)) :
+                   SSL_ERROR_to_str(err)),
+                  SOCKERRNO);
+    }
     *done = TRUE;
     result = CURLE_OK;
     break;
-  }
   }
 
 out:

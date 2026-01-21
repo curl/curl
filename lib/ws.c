@@ -297,7 +297,6 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
                         const char *msg)
 {
   NOVERBOSE((void)msg);
-
   switch(dec->head_len) {
   case 0:
     break;
