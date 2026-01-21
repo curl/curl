@@ -81,9 +81,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
       options+=' -DCMAKE_UNITY_BUILD=ON'
       root='.'
     fi
-    # CMAKE_GENERATOR env requires CMake 3.15+, pass it manually to make it work with older versions.
     # shellcheck disable=SC2086
-    time cmake -G "${CMAKE_GENERATOR}" \
+    time cmake \
       -DENABLE_DEBUG=ON -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
       -DCURL_DROP_UNUSED=ON \
