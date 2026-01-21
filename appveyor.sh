@@ -85,7 +85,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     # shellcheck disable=SC2086
     time cmake -DENABLE_DEBUG=ON -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
-      -DCURL_USE_LIBPSL=OFF -DCURL_USE_SCHANNEL=ON \
+      -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
       ${CMAKE_GENERATE:-} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
