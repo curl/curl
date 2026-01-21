@@ -83,12 +83,9 @@ if [ -n "${CMAKE_GENERATE:-}" ]; then
       root='.'
     fi
     # shellcheck disable=SC2086
-    time cmake -G "${PRJ_GEN}" \
-      -DENABLE_DEBUG=ON \
-      -DCURL_WERROR=ON \
+    time cmake -DENABLE_DEBUG=ON -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
-      -DCURL_USE_LIBPSL=OFF \
-      -DCURL_USE_SCHANNEL=ON \
+      -DCURL_USE_LIBPSL=OFF -DCURL_USE_SCHANNEL=ON \
       ${CMAKE_GENERATE} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
