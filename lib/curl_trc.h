@@ -129,7 +129,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_TIMER_is_verbose(data) \
   Curl_trc_ft_is_verbose(data, &Curl_trc_feat_timer)
 
-#if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(CURL_HAVE_MACRO_VARARG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define infof(data, ...)             \
   do {                               \
     if(Curl_trc_is_verbose(data))    \
@@ -202,7 +202,7 @@ void Curl_trc_ws(struct Curl_easy *data,
   } while(0)
 #endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
 
-#elif defined(CURL_HAVE_C99) && defined(CURL_DISABLE_VERBOSE_STRINGS)
+#elif defined(CURL_HAVE_MACRO_VARARG) && defined(CURL_DISABLE_VERBOSE_STRINGS)
 
 #define infof(data, ...) \
   do {                   \
@@ -265,7 +265,7 @@ void Curl_trc_ws(struct Curl_easy *data,
   } while(0)
 #endif
 
-#else /* !CURL_HAVE_C99 */
+#else /* !CURL_HAVE_MACRO_VARARG */
 
 #define infof          Curl_infof
 #define CURL_TRC_M     Curl_trc_multi
@@ -291,7 +291,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_WS    Curl_trc_ws
 #endif
 
-#endif /* !CURL_HAVE_C99 */
+#endif /* CURL_HAVE_MACRO_VARARG */
 
 #ifdef CURLVERBOSE
 extern struct curl_trc_feat Curl_trc_feat_multi;
