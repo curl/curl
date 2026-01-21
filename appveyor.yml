@@ -31,6 +31,8 @@
 version: 7.50.0.{build}
 
 environment:
+  PRJ_CFG: Debug
+
   matrix:
     # CMake Visual Studio builds
 
@@ -49,7 +51,6 @@ environment:
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       PRJ_GEN: 'Visual Studio 10 2010'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64'
 
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
@@ -62,33 +63,28 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: '3.18.4'
       PRJ_GEN: 'Visual Studio 12 2013'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64'
 
     - job_name: 'CM VS2015, Debug, x64, Schannel, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: '3.19.8'
       PRJ_GEN: 'Visual Studio 14 2015'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF'
 
     - job_name: 'CM VS2017, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       CMAKE_VERSION: '3.20.6'
       PRJ_GEN: 'Visual Studio 15 2017'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64'
 
     - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       PRJ_GEN: 'Visual Studio 16 2019'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
 
     - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64 -T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
 
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
@@ -101,13 +97,11 @@ environment:
     - job_name: 'CM VS2022, Debug, x64, !ssl, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
 
     - job_name: 'CM VS2022, Debug, x64, !ssl, Static, HTTP-only, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON'
 
     # VisualStudioSolution builds
