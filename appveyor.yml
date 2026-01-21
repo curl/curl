@@ -54,7 +54,7 @@ environment:
       PRJ_CFG: Release
       OPENSSL: 'ON'
       SHARED: 'ON'
-    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, no-DEBUGBUILD, Build-tests'
+    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A ARM64'
@@ -121,7 +121,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       EXAMPLES: 'ON'
       TOOLSET: 'ClangCl'
-    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, no-DEBUGBUILD, Build-tests'
+    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
