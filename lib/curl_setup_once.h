@@ -61,13 +61,14 @@
 #include <unistd.h>
 #endif
 
+/* Set uintptr_t to fallback type for targets known to miss it from stdint.h */
+#ifdef __OS400__
+#define uintptr_t (void *)
+#endif
+
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
-#ifdef HAVE_STDINT_H
-#  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
-#else
-#  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
-#endif
+#define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
 
 #ifdef USE_SCHANNEL
 /* Must set this before <schannel.h> is included directly or indirectly by
