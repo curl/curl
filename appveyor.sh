@@ -123,7 +123,7 @@ fi
 
 # build tests
 
-if [ "${TFLAGS}" != 'skipall' ] && \
+if [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]] && \
    [ -n "${CMAKE_GENERATE:-}" ]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
