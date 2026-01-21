@@ -116,7 +116,67 @@
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void show_resolve_info(struct Curl_easy *data,
-                              struct Curl_dns_entry *dns);
+                              struct Curl_dns_entry *dns)
+{
+  struct Curl_addrinfo *a;
+  CURLcode result = CURLE_OK;
+#ifdef CURLRES_IPV6
+  struct dynbuf out[2];
+#else
+  struct dynbuf out[1];
+#endif
+  DEBUGASSERT(data);
+  DEBUGASSERT(dns);
+
+  if(!data->set.verbose ||
+     /* ignore no name or numerical IP addresses */
+     !dns->hostname[0] || Curl_host_is_ipnum(dns->hostname))
+    return;
+
+  a = dns->addr;
+
+  infof(data, "Host %s:%d was resolved.",
+        (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport);
+
+  curlx_dyn_init(&out[0], 1024);
+#ifdef CURLRES_IPV6
+  curlx_dyn_init(&out[1], 1024);
+#endif
+
+  while(a) {
+    if(
+#ifdef CURLRES_IPV6
+       a->ai_family == PF_INET6 ||
+#endif
+       a->ai_family == PF_INET) {
+      char buf[MAX_IPADR_LEN];
+      struct dynbuf *d = &out[(a->ai_family != PF_INET)];
+      Curl_printable_address(a, buf, sizeof(buf));
+      if(curlx_dyn_len(d))
+        result = curlx_dyn_addn(d, ", ", 2);
+      if(!result)
+        result = curlx_dyn_add(d, buf);
+      if(result) {
+        infof(data, "too many IP, cannot show");
+        goto fail;
+      }
+    }
+    a = a->ai_next;
+  }
+
+#ifdef CURLRES_IPV6
+  infof(data, "IPv6: %s",
+        (curlx_dyn_len(&out[1]) ? curlx_dyn_ptr(&out[1]) : "(none)"));
+#endif
+  infof(data, "IPv4: %s",
+        (curlx_dyn_len(&out[0]) ? curlx_dyn_ptr(&out[0]) : "(none)"));
+
+fail:
+  curlx_dyn_free(&out[0]);
+#ifdef CURLRES_IPV6
+  curlx_dyn_free(&out[1]);
+#endif
+}
 #else
 #define show_resolve_info(x, y) Curl_nop_stmt
 #endif
@@ -1421,71 +1481,6 @@ err:
 
   return CURLE_OK;
 }
-
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void show_resolve_info(struct Curl_easy *data,
-                              struct Curl_dns_entry *dns)
-{
-  struct Curl_addrinfo *a;
-  CURLcode result = CURLE_OK;
-#ifdef CURLRES_IPV6
-  struct dynbuf out[2];
-#else
-  struct dynbuf out[1];
-#endif
-  DEBUGASSERT(data);
-  DEBUGASSERT(dns);
-
-  if(!data->set.verbose ||
-     /* ignore no name or numerical IP addresses */
-     !dns->hostname[0] || Curl_host_is_ipnum(dns->hostname))
-    return;
-
-  a = dns->addr;
-
-  infof(data, "Host %s:%d was resolved.",
-        (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport);
-
-  curlx_dyn_init(&out[0], 1024);
-#ifdef CURLRES_IPV6
-  curlx_dyn_init(&out[1], 1024);
-#endif
-
-  while(a) {
-    if(
-#ifdef CURLRES_IPV6
-       a->ai_family == PF_INET6 ||
-#endif
-       a->ai_family == PF_INET) {
-      char buf[MAX_IPADR_LEN];
-      struct dynbuf *d = &out[(a->ai_family != PF_INET)];
-      Curl_printable_address(a, buf, sizeof(buf));
-      if(curlx_dyn_len(d))
-        result = curlx_dyn_addn(d, ", ", 2);
-      if(!result)
-        result = curlx_dyn_add(d, buf);
-      if(result) {
-        infof(data, "too many IP, cannot show");
-        goto fail;
-      }
-    }
-    a = a->ai_next;
-  }
-
-#ifdef CURLRES_IPV6
-  infof(data, "IPv6: %s",
-        (curlx_dyn_len(&out[1]) ? curlx_dyn_ptr(&out[1]) : "(none)"));
-#endif
-  infof(data, "IPv4: %s",
-        (curlx_dyn_len(&out[0]) ? curlx_dyn_ptr(&out[0]) : "(none)"));
-
-fail:
-  curlx_dyn_free(&out[0]);
-#ifdef CURLRES_IPV6
-  curlx_dyn_free(&out[1]);
-#endif
-}
-#endif
 
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_check(struct Curl_easy *data,
