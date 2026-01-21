@@ -436,7 +436,7 @@ jobs:
             env: 'x86_64'
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0

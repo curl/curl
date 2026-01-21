@@ -89,6 +89,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_SCHANNEL="${SCHANNEL}" \
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
+      ${CMAKE_OPTIONS:-} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..

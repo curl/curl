@@ -614,7 +614,7 @@ static int mqtt_decode_len(size_t *lenp, unsigned char *buf, size_t buflen)
   return 0;
 }
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 static const char *statenames[] = {
   "MQTT_FIRST",
   "MQTT_REMAINING_LENGTH",

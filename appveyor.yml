@@ -41,6 +41,7 @@ environment:
   HTTP_ONLY: 'OFF'
   TFLAGS: 'skiprun'
   EXAMPLES: 'OFF'
+  CMAKE_OPTIONS: ''
 
   matrix:
 
@@ -53,7 +54,7 @@ environment:
       PRJ_CFG: Release
       OPENSSL: 'ON'
       SHARED: 'ON'
-    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, no-DEBUGBUILD, Build-tests'
+    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A ARM64'
@@ -101,7 +102,7 @@ environment:
       SCHANNEL: 'ON'
       SHARED: 'ON'
       TFLAGS: 'skipall'
-    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, Build-tests'
+    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       PRJ_GEN: 'Visual Studio 16 2019'
       TARGET: '-A x64'
@@ -109,6 +110,7 @@ environment:
       OPENSSL: 'ON'
       SCHANNEL: 'ON'
       SHARED: 'ON'
+      CMAKE_OPTIONS: '-DCURL_DISABLE_VERBOSE_STRINGS=ON'
     - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -119,7 +121,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       EXAMPLES: 'ON'
       TOOLSET: 'ClangCl'
-    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, no-DEBUGBUILD, Build-tests'
+    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
