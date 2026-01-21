@@ -335,10 +335,13 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
         Curl_dnscache_mk_entry(data, ares->temp_ai,
                                data->state.async.hostname, 0,
                                data->state.async.port, FALSE);
-      if(data->state.async.dns)
-        ares->temp_ai = NULL; /* temp_ai now owned by entry */
+      if(!data->state.async.dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+      ares->temp_ai = NULL; /* temp_ai now owned by entry */
 #ifdef HTTPSRR_WORKS
-      if(data->state.async.dns) {
+      {
         struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&ares->hinfo);
         if(!lhrr)
           result = CURLE_OUT_OF_MEMORY;
@@ -346,7 +349,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
           data->state.async.dns->hinfo = lhrr;
       }
 #endif
-      if(!result && data->state.async.dns)
+      if(!result)
         result = Curl_dnscache_add(data, data->state.async.dns);
     }
     /* if we have not found anything, report the proper
