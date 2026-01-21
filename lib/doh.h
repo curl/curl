@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "urldata.h"
+
 #ifdef USE_HTTPSRR
 # include <stdint.h>
 #endif
