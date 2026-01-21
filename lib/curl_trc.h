@@ -303,8 +303,10 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #ifdef CURLVERBOSE
 #define VERBOSE(x) x
+#define NOVERBOSE(x) Curl_nop_stmt
 #else
 #define VERBOSE(x) Curl_nop_stmt
+#define NOVERBOSE(x) x
 #endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS

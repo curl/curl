@@ -835,9 +835,7 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 
   default:
     /* unknown error, fallthrough and try another address! */
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-    (void)ipaddress;
-#endif
+    NOVERBOSE((void)ipaddress);
     {
       VERBOSE(char buffer[STRERROR_LEN]);
       infof(data, "Immediate connect fail for %s: %s", ipaddress,
@@ -1291,18 +1289,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 out:
   if(result) {
     if(ctx->error) {
+      VERBOSE(char buffer[STRERROR_LEN]);
       set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      {
-        char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u from %s port %d failed: %s",
-              ctx->ip.remote_ip, ctx->ip.remote_port,
-              ctx->ip.local_ip, ctx->ip.local_port,
-              curlx_strerror(ctx->error, buffer, sizeof(buffer)));
-      }
-#endif
+      infof(data, "connect to %s port %u from %s port %d failed: %s",
+            ctx->ip.remote_ip, ctx->ip.remote_port,
+            ctx->ip.local_ip, ctx->ip.local_port,
+            curlx_strerror(ctx->error, buffer, sizeof(buffer)));
     }
     if(ctx->sock != CURL_SOCKET_BAD) {
       socket_close(data, cf->conn, TRUE, ctx->sock);
