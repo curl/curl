@@ -741,36 +741,33 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
 }
 
 #ifdef USE_IPV6
+/* the nature of most systems is that IPv6 status does not come and go during a
+   program's lifetime so we only probe the first time and then we have the
+   info kept for fast reuse */
+CURLcode Curl_probeipv6(struct Curl_multi *multi)
+{
+  /* probe to see if we have a working IPv6 stack */
+  curl_socket_t s = CURL_SOCKET(PF_INET6, SOCK_DGRAM, 0);
+  multi->ipv6_works = FALSE;
+  if(s == CURL_SOCKET_BAD) {
+    if(SOCKERRNO == SOCKENOMEM)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  else {
+    multi->ipv6_works = TRUE;
+    sclose(s);
+  }
+  return CURLE_OK;
+}
+
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
 bool Curl_ipv6works(struct Curl_easy *data)
 {
-  if(data) {
-    /* the nature of most system is that IPv6 status does not come and go
-       during a program's lifetime so we only probe the first time and then we
-       have the info kept for fast reuse */
-    DEBUGASSERT(data);
-    DEBUGASSERT(data->multi);
-    if(data->multi->ipv6_up == IPV6_UNKNOWN) {
-      bool works = Curl_ipv6works(NULL);
-      data->multi->ipv6_up = works ? IPV6_WORKS : IPV6_DEAD;
-    }
-    return data->multi->ipv6_up == IPV6_WORKS;
-  }
-  else {
-    int ipv6_works = -1;
-    /* probe to see if we have a working IPv6 stack */
-    curl_socket_t s = CURL_SOCKET(PF_INET6, SOCK_DGRAM, 0);
-    if(s == CURL_SOCKET_BAD)
-      /* an IPv6 address was requested but we cannot get/use one */
-      ipv6_works = 0;
-    else {
-      ipv6_works = 1;
-      sclose(s);
-    }
-    return ipv6_works > 0;
-  }
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  return data ? data->multi->ipv6_works : FALSE;
 }
 #endif /* USE_IPV6 */
 
