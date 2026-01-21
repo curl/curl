@@ -37,7 +37,6 @@ environment:
   SCHANNEL: 'OFF'
   ENABLE_UNICODE: 'OFF'
   SHARED: 'OFF'
-  HTTP_ONLY: 'OFF'
   TFLAGS: 'skiprun'
   EXAMPLES: 'OFF'
   CMAKE_OPTIONS: '-DENABLE_DEBUG=ON'
@@ -139,7 +138,7 @@ environment:
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      HTTP_ONLY: 'ON'
+      CMAKE_OPTIONS: '-DHTTP_ONLY=ON'
 
     # generated VisualStudioSolution-based builds
 
