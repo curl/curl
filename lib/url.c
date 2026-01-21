@@ -1533,7 +1533,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 {
   char *zoneid;
   CURLUcode uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
-#if !defined(HAVE_IF_NAMETOINDEX) || defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if !defined(HAVE_IF_NAMETOINDEX) || !defined(CURLVERBOSE)
   (void)data;
 #endif
 
@@ -1549,7 +1549,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
       unsigned int scopeidx = 0;
       scopeidx = if_nametoindex(zoneid);
       if(!scopeidx) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
               curlx_strerror(errno, buffer, sizeof(buffer)));

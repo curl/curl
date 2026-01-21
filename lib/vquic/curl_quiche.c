@@ -1420,7 +1420,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
 out:
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(result && result != CURLE_AGAIN) {
     struct ip_quadruple ip;
 

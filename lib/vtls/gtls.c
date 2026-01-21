@@ -166,7 +166,7 @@ static void gtls_cleanup(void)
   Curl_tls_keylog_close();
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void showtime(struct Curl_easy *data, const char *text, time_t stamp)
 {
   struct tm buffer;
@@ -1326,7 +1326,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 
 void Curl_gtls_report_handshake(struct Curl_easy *data, struct gtls_ctx *gctx)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     const char *ptr;
     gnutls_protocol_t version = gnutls_protocol_get_version(gctx->session);
@@ -1379,7 +1379,7 @@ static void gtls_msg_verify_result(struct Curl_easy *data,
 static void gtls_infof_cert(struct Curl_easy *data,
                             gnutls_x509_crt_t x509_cert)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     gnutls_datum_t certfields;
     int rc, algo;

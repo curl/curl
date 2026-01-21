@@ -114,7 +114,7 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void show_resolve_info(struct Curl_easy *data,
                               struct Curl_dns_entry *dns)
 {

@@ -796,7 +796,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
 
       if(cf->conn->scheme->protocol & PROTO_FAMILY_SSH)
         Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
       if(Curl_trc_cf_is_verbose(cf, data)) {
         struct ip_quadruple ipquad;
         bool is_ipv6;

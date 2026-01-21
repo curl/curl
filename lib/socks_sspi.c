@@ -292,12 +292,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     goto error;
   }
   else {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char *user_utf8 = curlx_convert_tchar_to_UTF8(names.sUserName);
+    VERBOSE(char *user_utf8 = curlx_convert_tchar_to_UTF8(names.sUserName));
     infof(data, "SOCKS5 server authenticated user %s with GSS-API.",
           (user_utf8 ? user_utf8 : "(unknown)"));
-    curlx_free(user_utf8);
-#endif
+    VERBOSE(curlx_free(user_utf8));
     Curl_pSecFn->FreeContextBuffer(names.sUserName);
     names.sUserName = NULL;
   }

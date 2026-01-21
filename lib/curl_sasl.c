@@ -183,7 +183,7 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
                        saslstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
   static const char * const names[]={
     "STOP",
@@ -834,7 +834,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void sasl_unchosen(struct Curl_easy *data, unsigned short mech,
                           unsigned short enabledmechs,
                           bool built_in, bool platform,
@@ -865,11 +865,11 @@ static void sasl_unchosen(struct Curl_easy *data, unsigned short mech,
       infof(data, "SASL: %s is missing username", mname);
   }
 }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 #ifdef USE_KERBEROS5
 #define CURL_SASL_KERBEROS5   TRUE
 #else
@@ -924,7 +924,7 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
                   data->set.str[STRING_BEARER] ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
   }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
   (void)sasl;
   (void)data;
   return CURLE_LOGIN_DENIED;

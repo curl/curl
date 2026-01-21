@@ -1288,7 +1288,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   else if(sx->state != SOCKS_ST_SUCCESS)
     goto out;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     struct ip_quadruple ipquad;
     bool is_ipv6;

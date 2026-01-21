@@ -738,7 +738,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 const char *vquic_h3_err_str(uint64_t error_code)
 {
   if(error_code <= UINT_MAX) {
@@ -786,7 +786,7 @@ const char *vquic_h3_err_str(uint64_t error_code)
     return "NO_ERROR";
   return "unknown";
 }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 #if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
 
