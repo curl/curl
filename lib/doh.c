@@ -1233,12 +1233,10 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       rc[slot] = doh_resp_decode(curlx_dyn_uptr(&p->body),
                                  curlx_dyn_len(&p->body),
                                  p->dnstype, &de);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(rc[slot]) {
         CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
                      doh_type2name(p->dnstype), dohp->host);
       }
-#endif
     } /* next slot */
 
     result = CURLE_COULDNT_RESOLVE_HOST; /* until we know better */

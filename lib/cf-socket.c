@@ -837,13 +837,12 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
     /* unknown error, fallthrough and try another address! */
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
     (void)ipaddress;
-#else
+#endif
     {
-      char buffer[STRERROR_LEN];
+      VERBOSE(char buffer[STRERROR_LEN]);
       infof(data, "Immediate connect fail for %s: %s", ipaddress,
             curlx_strerror(error, buffer, sizeof(buffer)));
     }
-#endif
     data->state.os_errno = error;
     /* connect failed */
     return CURLE_COULDNT_CONNECT;
