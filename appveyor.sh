@@ -65,7 +65,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
     [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
-    [[ "${CMAKE_OPTIONS:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
+    [[ "${GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
       mkdir "_bld${_chkprefill}"
       cd "_bld${_chkprefill}"
@@ -84,7 +84,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_STATIC_CRT=ON \
       -DCURL_USE_LIBPSL=OFF \
       -DCURL_USE_SCHANNEL=ON \
-      ${CMAKE_OPTIONS:-} \
+      ${GENERATE:-} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
@@ -96,8 +96,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
-  [[ "${CMAKE_OPTIONS:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
-  [[ "${CMAKE_OPTIONS:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
+  [[ "${GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
+  [[ "${GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
