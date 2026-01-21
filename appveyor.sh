@@ -148,7 +148,7 @@ fi
 
 # build examples
 
-if [ "${EXAMPLES}" = 'ON' ] && \
+if [[ "${APPVEYOR_JOB_NAME}" = *'examples'* ]] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples-build
 fi

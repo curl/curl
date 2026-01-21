@@ -33,7 +33,6 @@ version: 7.50.0.{build}
 environment:
   BUILD_SYSTEM: CMake
   TFLAGS: 'skiprun'
-  EXAMPLES: 'OFF'
   CMAKE_OPTIONS: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON'
 
   matrix:
@@ -57,7 +56,6 @@ environment:
       PRJ_GEN: 'Visual Studio 10 2010'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      EXAMPLES: 'ON'
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_GEN: 'Visual Studio 11 2012'
@@ -96,7 +94,6 @@ environment:
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      EXAMPLES: 'ON'
       TOOLSET: 'ClangCl'
       CMAKE_OPTIONS: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
