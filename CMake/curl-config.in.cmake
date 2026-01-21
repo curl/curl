@@ -138,7 +138,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${_curl_cmake_module_path_save})
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND WIN32 AND NOT TARGET CURL::win32_winsock)
+if(WIN32 AND NOT TARGET CURL::win32_winsock)
   add_library(CURL::win32_winsock INTERFACE IMPORTED)
   set_target_properties(CURL::win32_winsock PROPERTIES INTERFACE_LINK_LIBRARIES "ws2_32")
 endif()
