@@ -28,20 +28,22 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
-case "${CMAKE_GENERATE:-}" in
-  *-A Win32*) openssl_suffix='-Win32';;
-  *)          openssl_suffix='-Win64';;
-esac
-
-if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-  openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
-  openssl_root="$(cygpath "${openssl_root_win}")"
-elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
-  openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
-  openssl_root="$(cygpath "${openssl_root_win}")"
-fi
-
 if [ -n "${CMAKE_GENERATE:-}" ]; then
+
+  # Configure OpenSSL
+  case "${CMAKE_GENERATE}" in
+    *-A Win32*) openssl_suffix='-Win32';;
+    *)          openssl_suffix='-Win64';;
+  esac
+
+  if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
+    openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
+    openssl_root="$(cygpath "${openssl_root_win}")"
+  elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
+    openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
+    openssl_root="$(cygpath "${openssl_root_win}")"
+  fi
+
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
     cmake_ver=$(printf '%02d%02d' \
