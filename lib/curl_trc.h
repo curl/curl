@@ -64,10 +64,6 @@ void Curl_failf(struct Curl_easy *data,
 #define CURL_LOG_LVL_NONE  0
 #define CURL_LOG_LVL_INFO  1
 
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define CURL_HAVE_C99
-#endif
-
 /**
  * Output an informational message when transfer's verbose logging is enabled.
  */
@@ -297,14 +293,16 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #endif /* !CURL_HAVE_C99 */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-/* informational messages enabled */
-
+#ifdef CURLVERBOSE
 extern struct curl_trc_feat Curl_trc_feat_multi;
 extern struct curl_trc_feat Curl_trc_feat_read;
 extern struct curl_trc_feat Curl_trc_feat_write;
 extern struct curl_trc_feat Curl_trc_feat_dns;
 extern struct curl_trc_feat Curl_trc_feat_timer;
+#endif
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+/* informational messages enabled */
 
 #define Curl_trc_is_verbose(data)                          \
   ((data) && (data)->set.verbose &&                        \

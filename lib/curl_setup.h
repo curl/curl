@@ -1217,7 +1217,12 @@ typedef struct sockaddr_un {
 #  define CURL_INLINE /* empty */
 #endif
 
-#if !defined(CURL_HAVE_C99) || !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define CURL_HAVE_C99
+#endif
+
+#if (defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)) || \
+  !defined(CURL_HAVE_C99)
 #define CURLVERBOSE
 #define VERBOSE(x) x
 #define NOVERBOSE(x) Curl_nop_stmt
