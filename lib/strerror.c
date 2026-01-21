@@ -541,7 +541,7 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
   DWORD old_win_err = GetLastError();
 #endif
   int old_errno = errno;
-  const char *txt;
+  VERBOSE(const char *txt);
 
   if(!buflen)
     return NULL;
@@ -657,7 +657,6 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
       curl_msnprintf(buf, buflen, "%s (0x%08lx)", txt, err);
   }
 #else /* CURLVERBOSE */
-  (void)txt;
   if(err == SEC_E_OK)
     curlx_strcopy(buf, buflen, STRCONST("No error"));
   else
