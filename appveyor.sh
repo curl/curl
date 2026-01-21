@@ -96,8 +96,7 @@ if [ -n "${CMAKE_GENERATE:-}" ]; then
     false
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
-  # shellcheck disable=SC2086
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2
   [[ "${CMAKE_GENERATE}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
   [[ "${CMAKE_GENERATE}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
