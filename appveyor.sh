@@ -32,8 +32,8 @@ if [ -n "${CMAKE_GENERATE:-}" ]; then
 
   # Configure OpenSSL
   case "${CMAKE_GENERATE}" in
-    *-A Win32*) openssl_suffix='-Win32';;
-    *)          openssl_suffix='-Win64';;
+    *Win32*) openssl_suffix='-Win32';;
+    *)       openssl_suffix='-Win64';;
   esac
 
   if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
