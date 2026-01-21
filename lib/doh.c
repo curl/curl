@@ -324,9 +324,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
 
   /* pass in the struct pointer via a local variable to please coverity and
      the gcc typecheck helpers */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  doh->state.feat = &Curl_trc_feat_dns;
-#endif
+  VERBOSE(doh->state.feat = &Curl_trc_feat_dns);
   ERROR_CHECK_SETOPT(CURLOPT_URL, url);
   ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
   ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_probe_write_cb);
