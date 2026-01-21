@@ -33,7 +33,6 @@ version: 7.50.0.{build}
 environment:
   BUILD_SYSTEM: CMake
   TFLAGS: 'skiprun'
-  CMAKE_OPTIONS: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON'
 
   matrix:
 

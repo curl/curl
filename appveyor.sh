@@ -80,9 +80,11 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     fi
     # shellcheck disable=SC2086
     time cmake -G "${PRJ_GEN}" ${TARGET} \
+      -DENABLE_DEBUG=ON \
       -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
       -DCURL_USE_LIBPSL=OFF \
+      -DCURL_USE_SCHANNEL=ON \
       ${CMAKE_OPTIONS:-} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
