@@ -31,7 +31,6 @@
 version: 7.50.0.{build}
 
 environment:
-  BUILD_SYSTEM: CMake
   TFLAGS: 'skiprun'
 
   matrix:
@@ -41,78 +40,70 @@ environment:
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
       PRJ_CFG: Release
-      GENERATE: '-DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
+      GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
     - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A ARM64'
       PRJ_CFG: Release
-      GENERATE: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF'
+      GENERATE: '-A ARM64 -DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF'
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       PRJ_GEN: 'Visual Studio 10 2010'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
+      GENERATE: '-A x64'
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_GEN: 'Visual Studio 11 2012'
-      TARGET: '-A Win32'
       PRJ_CFG: Release
+      GENERATE: '-A Win32'
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: '3.18.4'
       PRJ_GEN: 'Visual Studio 12 2013'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
       TFLAGS: 'skipall'
+      GENERATE: '-A x64'
     - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: '3.19.8'
       PRJ_GEN: 'Visual Studio 14 2015'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
       TFLAGS: 'skipall'
-      GENERATE: '-DBUILD_SHARED_LIBS=OFF'
+      GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF'
     - job_name: 'CM VS2017, Debug, x64, Schannel, Shared, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       CMAKE_VERSION: '3.20.6'
       PRJ_GEN: 'Visual Studio 15 2017'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
       TFLAGS: 'skipall'
+      GENERATE: '-A x64'
     - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       PRJ_GEN: 'Visual Studio 16 2019'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
-      GENERATE: '-DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+      GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
     - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
-      GENERATE: '-T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
+      GENERATE: '-A x64 -T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
       PRJ_CFG: Release
       ENABLE_UNICODE: 'ON'
-      GENERATE: '-DENABLE_UNICODE=ON -DENABLE_DEBUG=OFF'
+      GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=OFF'
     - job_name: 'CM VS2022, Debug, x64, no SSL, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
-      GENERATE: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
+      GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
     - job_name: 'CM VS2022, Debug, x64, no SSL, Static, HTTP only, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
       PRJ_CFG: Debug
-      GENERATE: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON'
+      GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON'
 
     # generated VisualStudioSolution-based builds
 

@@ -28,9 +28,9 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
-case "${TARGET:-}" in
-  *Win32) openssl_suffix='-Win32';;
-  *)      openssl_suffix='-Win64';;
+case "${GENERATE:-}" in
+  *-A Win32*) openssl_suffix='-Win32';;
+  *)          openssl_suffix='-Win64';;
 esac
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
@@ -64,7 +64,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   for _chkprefill in '' ${CHKPREFILL:-}; do
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-    [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+    [[ "${GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
     [[ "${GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
       mkdir "_bld${_chkprefill}"
@@ -78,7 +78,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       root='.'
     fi
     # shellcheck disable=SC2086
-    time cmake -G "${PRJ_GEN}" ${TARGET} \
+    time cmake -G "${PRJ_GEN}" \
       -DENABLE_DEBUG=ON \
       -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
