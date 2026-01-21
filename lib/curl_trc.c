@@ -194,6 +194,29 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
+#ifdef CURLVERBOSE
+struct curl_trc_feat Curl_trc_feat_multi = {
+  "MULTI",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_read = {
+  "READ",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_write = {
+  "WRITE",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_dns = {
+  "DNS",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_timer = {
+  "TIMER",
+  CURL_LOG_LVL_NONE,
+};
+#endif
+
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 
 static void trc_infof(struct Curl_easy *data,
@@ -247,27 +270,6 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
     va_end(ap);
   }
 }
-
-struct curl_trc_feat Curl_trc_feat_multi = {
-  "MULTI",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_read = {
-  "READ",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_write = {
-  "WRITE",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_dns = {
-  "DNS",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_timer = {
-  "TIMER",
-  CURL_LOG_LVL_NONE,
-};
 
 static const char * const Curl_trc_timer_names[] = {
   "100_TIMEOUT",

@@ -420,7 +420,7 @@ CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return CURLE_RECV_ERROR;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static CURLcode cf_verboseconnect(struct Curl_easy *data,
                                   struct Curl_cfilter *cf)
 {

@@ -40,7 +40,7 @@
 
 #define DNS_CLASS_IN 0x01
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static const char * const errors[] = {
   "",
   "Bad label",
@@ -65,7 +65,7 @@ static const char *doh_strerror(DOHcode code)
   return "bad error code";
 }
 
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 /* @unittest 1655
  */
@@ -851,7 +851,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   return DOH_OK; /* ok */
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void doh_show(struct Curl_easy *data,
                      const struct dohentry *d)
 {
@@ -1007,7 +1007,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
   return result;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static const char *doh_type2name(DNStype dnstype)
 {
   switch(dnstype) {
