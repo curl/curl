@@ -33,7 +33,6 @@ version: 7.50.0.{build}
 environment:
   BUILD_SYSTEM: CMake
   UNITY: 'ON'
-  OPENSSL: 'OFF'
   SHARED: 'OFF'
   TFLAGS: 'skiprun'
   EXAMPLES: 'OFF'
@@ -48,9 +47,8 @@ environment:
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Release
-      OPENSSL: 'ON'
       SHARED: 'ON'
-      CMAKE_OPTIONS: '-DCURL_USE_SCHANNEL=OFF'
+      CMAKE_OPTIONS: '-DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
     - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -98,18 +96,16 @@ environment:
       PRJ_GEN: 'Visual Studio 16 2019'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      OPENSSL: 'ON'
       SHARED: 'ON'
-      CMAKE_OPTIONS: '-DCURL_DISABLE_VERBOSE_STRINGS=ON'
+      CMAKE_OPTIONS: '-DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
     - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      OPENSSL: 'ON'
       EXAMPLES: 'ON'
       TOOLSET: 'ClangCl'
-      CMAKE_OPTIONS: '-DENABLE_UNICODE=ON'
+      CMAKE_OPTIONS: '-DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
