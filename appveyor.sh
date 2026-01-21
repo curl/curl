@@ -75,7 +75,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     else
       options+=" -B _bld${_chkprefill}"
       options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-      options+=" -DCMAKE_UNITY_BUILD=${UNITY}"
+      options+=' -DCMAKE_UNITY_BUILD=ON'
       root='.'
     fi
     # shellcheck disable=SC2086

@@ -32,7 +32,6 @@ version: 7.50.0.{build}
 
 environment:
   BUILD_SYSTEM: CMake
-  UNITY: 'ON'
   SHARED: 'OFF'
   TFLAGS: 'skiprun'
   EXAMPLES: 'OFF'
