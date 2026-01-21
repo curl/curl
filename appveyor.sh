@@ -65,7 +65,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
     [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
-    [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [[ "${CMAKE_OPTIONS:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
       mkdir "_bld${_chkprefill}"

@@ -93,8 +93,7 @@ environment:
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      TOOLSET: 'ClangCl'
-      CMAKE_OPTIONS: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
+      CMAKE_OPTIONS: '-T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
