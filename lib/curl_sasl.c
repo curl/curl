@@ -185,7 +185,7 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
 {
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
-  static const char * const names[]={
+  static const char * const names[] = {
     "STOP",
     "PLAIN",
     "LOGIN",
