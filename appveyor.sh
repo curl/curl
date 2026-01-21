@@ -81,7 +81,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     # shellcheck disable=SC2086
     time cmake -G "${PRJ_GEN}" ${TARGET} \
       -DCURL_WERROR=ON \
-      -DBUILD_SHARED_LIBS="${SHARED}" \
       -DCURL_STATIC_CRT=ON \
       -DCURL_USE_LIBPSL=OFF \
       ${CMAKE_OPTIONS:-} \
@@ -96,7 +95,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
-  [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
+  [[ "${CMAKE_OPTIONS:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
   [[ "${CMAKE_OPTIONS:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 else
