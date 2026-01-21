@@ -303,7 +303,6 @@ extern struct curl_trc_feat Curl_trc_feat_timer;
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 /* informational messages enabled */
-
 #define Curl_trc_is_verbose(data)                          \
   ((data) && (data)->set.verbose &&                        \
    (!(data)->state.feat ||                                 \
@@ -323,13 +322,11 @@ extern struct curl_trc_feat Curl_trc_feat_timer;
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
-
 #define Curl_trc_is_verbose(d)        (FALSE)
 #define Curl_trc_cf_is_verbose(x, y)  (FALSE)
 #define Curl_trc_ft_is_verbose(x, y)  (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 #define CURL_TRC_EASY_TIMERS(x)       Curl_nop_stmt
-
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #endif /* HEADER_CURL_TRC_H */
