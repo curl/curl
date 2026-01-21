@@ -123,15 +123,13 @@ fi
 
 # build tests
 
-if [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]] && \
-   [ -n "${CMAKE_GENERATE:-}" ]; then
+if [ -n "${CMAKE_GENERATE:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # build examples
 
-if [[ "${APPVEYOR_JOB_NAME}" = *'examples'* ]] && \
-   [ -n "${CMAKE_GENERATE:-}" ]; then
+if [ -n "${CMAKE_GENERATE:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'examples'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples-build
 fi
 
