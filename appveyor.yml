@@ -56,21 +56,21 @@ environment:
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: '3.18.4'
       PRJ_GEN: 'Visual Studio 12 2013'
       CMAKE_GENERATE: '-A x64'
+      CMAKE_VERSION: '3.18.4'
 
     - job_name: 'CM VS2015, Debug, x64, Schannel, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: '3.19.8'
       PRJ_GEN: 'Visual Studio 14 2015'
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF'
+      CMAKE_VERSION: '3.19.8'
 
     - job_name: 'CM VS2017, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      CMAKE_VERSION: '3.20.6'
       PRJ_GEN: 'Visual Studio 15 2017'
       CMAKE_GENERATE: '-A x64'
+      CMAKE_VERSION: '3.20.6'
 
     - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
