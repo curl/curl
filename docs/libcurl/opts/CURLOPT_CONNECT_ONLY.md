@@ -38,10 +38,9 @@ curl_easy_getinfo(3) as the library can set up the connection and then
 the application can obtain the most recently used socket for special data
 transfers.
 
-Since 7.86.0, this option can be set to '2' and if WebSocket is used,
-libcurl performs the request and reads all response headers before handing
-over control to the application. For other protocols the behavior of '2'
-is undefined.
+This option can be set to '2' and if WebSocket is used, libcurl performs the
+request and reads all response headers before handing over control to the
+application. For other protocols the behavior of '2' is undefined.
 
 Transfers marked connect only do not reuse any existing connections and
 connections marked connect only are not allowed to get reused.

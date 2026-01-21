@@ -170,7 +170,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
  * MD4 Message-Digest Algorithm (RFC 1320).
  *
  * Homepage:
- https://openwall.info/wiki/people/solar/software/public-domain-source-code/md4
+ * https://openwall.info/wiki/people/solar/software/public-domain-source-code/md4
  *
  * Author:
  * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>
@@ -179,8 +179,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
  * claimed, and the software is hereby placed in the public domain. In case
  * this attempt to disclaim copyright and place the software in the public
  * domain is deemed null and void, then the software is Copyright (c) 2001
- * Alexander Peslyak and it is hereby released to the general public under the
- * following terms:
+ * Alexander Peslyak and it is hereby released to the general public under
+ * the following terms:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted.

@@ -23,11 +23,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_TFTP
-extern const struct Curl_handler Curl_handler_tftp;
+extern const struct Curl_scheme Curl_scheme_tftp;
 
 #define TFTP_BLKSIZE_MIN 8
 #define TFTP_BLKSIZE_MAX 65464
-#endif
 
 #endif /* HEADER_CURL_TFTP_H */

@@ -23,7 +23,7 @@ HTTP-only requests to a hostname present in the cache gets internally
 
 - `CURLOPT_HSTS_CTRL` - enable HSTS for this easy handle
 - `CURLOPT_HSTS` - specify filename where to store the HSTS cache on close
- (and possibly read from at startup)
+  (and possibly read from at startup)
 
 ## curl command line options
 

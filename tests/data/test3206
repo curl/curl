@@ -30,7 +30,7 @@ IMAP custom FETCH with larger literal response (~7KB)
 </name>
 # The quoted string contains {50} which must not be parsed as a literal
 <command>
- imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 456 ("fake {50}" BODY[TEXT])'
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 456 ("fake {50}" BODY[TEXT])'
 </command>
 </client>
 

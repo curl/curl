@@ -99,12 +99,10 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
  */
-#ifdef HAVE_STRDUP
 #ifdef _WIN32
 #define system_strdup _strdup
-#else
+#elif defined(HAVE_STRDUP)
 #define system_strdup strdup
-#endif
 #else
 #define system_strdup Curl_strdup
 #endif
@@ -750,7 +748,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   struct Curl_multi *multi;
   CURLMcode mresult;
   CURLcode result = CURLE_OK;
-  SIGPIPE_VARIABLE(pipe_st);
+  struct Curl_sigpipe_ctx sigpipe_ctx;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -807,8 +805,8 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* assign this after curl_multi_add_handle() */
   data->multi_easy = multi;
 
-  sigpipe_init(&pipe_st);
-  sigpipe_apply(data, &pipe_st);
+  sigpipe_init(&sigpipe_ctx);
+  sigpipe_apply(data, &sigpipe_ctx);
 
   /* run the transfer */
   result = events ? easy_events(multi) : easy_transfer(multi);
@@ -817,7 +815,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
      a failure here, room for future improvement! */
   (void)curl_multi_remove_handle(multi, data);
 
-  sigpipe_restore(&pipe_st);
+  sigpipe_restore(&sigpipe_ctx);
 
   /* The multi handle is kept alive, owned by the easy handle */
   return result;
@@ -851,10 +849,10 @@ void curl_easy_cleanup(CURL *ptr)
 {
   struct Curl_easy *data = ptr;
   if(GOOD_EASY_HANDLE(data)) {
-    SIGPIPE_VARIABLE(pipe_st);
-    sigpipe_ignore(data, &pipe_st);
+    struct Curl_sigpipe_ctx sigpipe_ctx;
+    sigpipe_ignore(data, &sigpipe_ctx);
     Curl_close(&data);
-    sigpipe_restore(&pipe_st);
+    sigpipe_restore(&sigpipe_ctx);
   }
 }
 
@@ -1287,7 +1285,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
 {
   CURLcode result;
   struct connectdata *c = NULL;
-  SIGPIPE_VARIABLE(pipe_st);
+  struct Curl_sigpipe_ctx sigpipe_ctx;
 
   *n = 0;
   result = easy_connection(data, &c);
@@ -1299,9 +1297,9 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
        needs to be reattached */
     Curl_attach_connection(data, c);
 
-  sigpipe_ignore(data, &pipe_st);
+  sigpipe_ignore(data, &sigpipe_ctx);
   result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);
-  sigpipe_restore(&pipe_st);
+  sigpipe_restore(&sigpipe_ctx);
 
   if(result && result != CURLE_AGAIN)
     return CURLE_SEND_ERROR;

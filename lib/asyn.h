@@ -25,15 +25,17 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#if defined(USE_HTTPSRR) && defined(USE_ARES)
+#include "httpsrr.h"
+#endif
+
 struct Curl_easy;
 struct Curl_dns_entry;
 
 #ifdef CURLRES_ASYNCH
 
 #include "curl_addrinfo.h"
-#include "httpsrr.h"
 
-struct addrinfo;
 struct hostent;
 struct connectdata;
 struct easy_pollset;

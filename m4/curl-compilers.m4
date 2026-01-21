@@ -812,7 +812,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-compare])
           tmp_CFLAGS="$tmp_CFLAGS -Wno-multichar"
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [undef])
-          tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [endif-labels strict-prototypes])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [declaration-after-statement])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-align])
@@ -1026,11 +1025,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             dnl lots of "`_POSIX_C_SOURCE' is not defined" in system
             dnl headers with gcc 2.95.4 on FreeBSD 4.9
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [undef])
-          fi
-          #
-          dnl Only gcc 2.97 or later
-          if test "$compiler_num" -ge "297"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
           fi
           #
           dnl Only gcc 3.0 or later

@@ -515,7 +515,7 @@ class ExecResult:
         s = self._stats[idx]
 
         url = s['url_effective']
-        # connect time is sometimes reported as 0 by openssl-quic (sigh)
+
         self.check_stat_positive_or_0(s, idx, 'time_connect')
         # all stat keys which reporting timings
         all_keys = {

@@ -50,9 +50,9 @@ been created, but before the connect call to allow applications to change
 specific socket options. The callback's *purpose* argument identifies the
 exact purpose for this particular socket:
 
-*CURLSOCKTYPE_IPCXN* for actively created connections or since 7.28.0
-*CURLSOCKTYPE_ACCEPT* for FTP when the connection was setup with PORT/EPSV
-(in earlier versions these sockets were not passed to this callback).
+*CURLSOCKTYPE_IPCXN* for actively created connections or *CURLSOCKTYPE_ACCEPT*
+for FTP when the connection was setup with PORT/EPSV (in earlier versions
+these sockets were not passed to this callback).
 
 Future versions of libcurl may support more purposes. libcurl passes the newly
 created socket descriptor to the callback in the *curlfd* parameter so

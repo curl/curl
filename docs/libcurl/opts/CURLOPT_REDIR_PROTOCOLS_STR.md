@@ -46,8 +46,8 @@ By default libcurl allows HTTP, HTTPS, FTP and FTPS on redirects (since
 These are the available protocols:
 
 DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS,
-MQTT, POP3, POP3S, RTMP, RTMPE, RTMPS, RTMPT, RTMPTE, RTMPTS, RTSP, SCP, SFTP,
-SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS, WSS
+MQTT, MQTTS, POP3, POP3S, RTMP, RTMPE, RTMPS, RTMPT, RTMPTE, RTMPTS, RTSP,
+SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS, WSS
 
 You can set "ALL" as a short-cut to enable all protocols. Note that by setting
 all, you may enable protocols that were not supported the day you write this
@@ -64,10 +64,7 @@ option.
 
 # DEFAULT
 
-HTTP, HTTPS, FTP and FTPS (Added in 7.65.2).
-
-Older versions defaulted to all protocols except FILE, SCP and since 7.40.0
-SMB and SMBS.
+HTTP, HTTPS, FTP and FTPS
 
 # %PROTOCOLS%
 

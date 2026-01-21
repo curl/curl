@@ -22,10 +22,16 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-
-#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
-
 #include "urldata.h"
+
+#ifdef CURL_DISABLE_HTTP
+/* no WebSockets without HTTP present */
+#undef CURL_DISABLE_WEBSOCKETS
+#define CURL_DISABLE_WEBSOCKETS 1
+#endif
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+
 #include "url.h"
 #include "bufq.h"
 #include "curlx/dynbuf.h"
@@ -836,14 +842,15 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
     return CURLE_SEND_ERROR;
   }
 
-  result = ws_frame_flags2firstbyte(data, flags, enc->contfragment, &firstb);
+  result = ws_frame_flags2firstbyte(data, flags, (bool)enc->contfragment,
+                                    &firstb);
   if(result)
     return result;
 
   /* fragmentation only applies to data frames (text/binary);
    * control frames (close/ping/pong) do not affect the CONT status */
   if(flags & (CURLWS_TEXT | CURLWS_BINARY)) {
-    enc->contfragment = (flags & CURLWS_CONT) ? (bit)TRUE : (bit)FALSE;
+    enc->contfragment = (curl_bit)((flags & CURLWS_CONT) ? TRUE : FALSE);
   }
 
   if(flags & CURLWS_PING && payload_len > WS_MAX_CNTRL_LEN) {
@@ -1177,7 +1184,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
       if(ctx->read_eos)
         ctx->eos = TRUE;
       *pnread = nread;
-      *peos = ctx->eos;
+      *peos = (bool)ctx->eos;
       goto out;
     }
 
@@ -1692,7 +1699,7 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
 
       CURL_TRC_WS(data, "ws_send_raw_blocking() partial, %zu left to send",
                   buflen);
-      left_ms = Curl_timeleft_ms(data, FALSE);
+      left_ms = Curl_timeleft_ms(data);
       if(left_ms < 0) {
         failf(data, "[WS] Timeout waiting for socket becoming writable");
         return CURLE_SEND_ERROR;
@@ -1903,8 +1910,7 @@ out:
   return result;
 }
 
-const struct Curl_handler Curl_handler_ws = {
-  "WS",                                 /* scheme */
+static const struct Curl_protocol Curl_protocol_ws = {
   ws_setup_conn,                        /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
@@ -1922,40 +1928,7 @@ const struct Curl_handler Curl_handler_ws = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   Curl_http_follow,                     /* follow */
-  PORT_HTTP,                            /* defport */
-  CURLPROTO_WS,                         /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_CREDSPERREQUEST |             /* flags */
-  PROTOPT_USERPWDCTRL
 };
-
-#ifdef USE_SSL
-const struct Curl_handler Curl_handler_wss = {
-  "WSS",                                /* scheme */
-  ws_setup_conn,                        /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  NULL,                                 /* connecting */
-  ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_pollset */
-  Curl_http_doing_pollset,              /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  Curl_http_perform_pollset,            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
-  Curl_http_write_resp_hd,              /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_HTTPS,                           /* defport */
-  CURLPROTO_WSS,                        /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
-    PROTOPT_USERPWDCTRL
-};
-#endif
 
 #else
 
@@ -2001,4 +1974,33 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
   return CURLE_NOT_BUILT_IN;
 }
 
-#endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_WEBSOCKETS */
+
+const struct Curl_scheme Curl_scheme_ws = {
+  "WS",                                 /* scheme */
+#ifdef CURL_DISABLE_WEBSOCKETS
+  ZERO_NULL,
+#else
+  &Curl_protocol_ws,
+#endif
+  CURLPROTO_WS,                         /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_CREDSPERREQUEST |             /* flags */
+  PROTOPT_USERPWDCTRL,
+  PORT_HTTP                             /* defport */
+}
+;
+
+const struct Curl_scheme Curl_scheme_wss = {
+  "WSS",                                /* scheme */
+#if defined(CURL_DISABLE_WEBSOCKETS) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_ws,
+#endif
+  CURLPROTO_WSS,                        /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
+  PROTOPT_USERPWDCTRL,
+  PORT_HTTPS                            /* defport */
+};

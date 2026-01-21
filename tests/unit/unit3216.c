@@ -58,9 +58,9 @@ static CURLcode test_unit3216(const char *arg)
   ts.tv_usec += 1000; /* 1ms */
   Curl_rlimit_drain(&r, 3, &ts);
   fail_unless(Curl_rlimit_avail(&r, &ts) == -1, "drain to -1");
-  fail_unless(Curl_rlimit_wait_ms(&r, &ts) == 999, "wait 999ms");
+  fail_unless(Curl_rlimit_wait_ms(&r, &ts) == 1099, "wait 1099ms");
   ts.tv_usec += 1000; /* 1ms */
-  fail_unless(Curl_rlimit_wait_ms(&r, &ts) == 998, "wait 998ms");
+  fail_unless(Curl_rlimit_wait_ms(&r, &ts) == 1098, "wait 1098ms");
   ts.tv_sec += 1;
   fail_unless(Curl_rlimit_avail(&r, &ts) == 9, "10 inc per sec");
   ts.tv_sec += 1;

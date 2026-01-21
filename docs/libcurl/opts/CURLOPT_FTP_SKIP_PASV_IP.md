@@ -41,7 +41,7 @@ This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 
 # DEFAULT
 
-1 since 7.74.0, was 0 before then.
+1, enabled.
 
 # %PROTOCOLS%
 
@@ -63,6 +63,10 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+Before curl 7.74.0, this option was disabled by default.
 
 # %AVAILABILITY%
 

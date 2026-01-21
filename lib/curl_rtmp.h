@@ -23,14 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+extern const struct Curl_scheme Curl_scheme_rtmp;
+extern const struct Curl_scheme Curl_scheme_rtmpt;
+extern const struct Curl_scheme Curl_scheme_rtmpe;
+extern const struct Curl_scheme Curl_scheme_rtmpte;
+extern const struct Curl_scheme Curl_scheme_rtmps;
+extern const struct Curl_scheme Curl_scheme_rtmpts;
 #ifdef USE_LIBRTMP
-extern const struct Curl_handler Curl_handler_rtmp;
-extern const struct Curl_handler Curl_handler_rtmpt;
-extern const struct Curl_handler Curl_handler_rtmpe;
-extern const struct Curl_handler Curl_handler_rtmpte;
-extern const struct Curl_handler Curl_handler_rtmps;
-extern const struct Curl_handler Curl_handler_rtmpts;
-
 void Curl_rtmp_version(char *version, size_t len);
 #endif
 

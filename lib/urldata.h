@@ -50,6 +50,7 @@
 #define PORT_RTMPS  PORT_HTTPS
 #define PORT_GOPHER 70
 #define PORT_MQTT   1883
+#define PORT_MQTTS  8883
 
 struct curl_trc_featt;
 
@@ -131,10 +132,6 @@ typedef uint32_t curl_prot_t;
    input easier and better. */
 #define CURL_MAX_INPUT_LENGTH 8000000
 
-#include "cookie.h"
-#include "psl.h"
-#include "formdata.h"
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -144,6 +141,10 @@ typedef uint32_t curl_prot_t;
 
 #include "curlx/timeval.h"
 
+#include "asyn.h"
+#include "cookie.h"
+#include "psl.h"
+#include "formdata.h"
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
@@ -426,9 +427,7 @@ struct hostname {
  * Specific protocol handler.
  */
 
-struct Curl_handler {
-  const char *scheme;        /* URL scheme name in lowercase */
-
+struct Curl_protocol {
   /* Complement to setup_connection_internals(). This is done before the
      transfer "owns" the connection. */
   CURLcode (*setup_connection)(struct Curl_easy *data,
@@ -513,14 +512,17 @@ struct Curl_handler {
      the way the follow request is performed. */
   CURLcode (*follow)(struct Curl_easy *data, const char *newurl,
                      followtype type);
+};
 
-  uint16_t defport;       /* Default port. */
+struct Curl_scheme {
+  const char *name;       /* URL scheme name in lowercase */
+  const struct Curl_protocol *run; /* implementation */
   curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
                              specific protocol bit */
   curl_prot_t family;     /* single bit for protocol family; basically the
                              non-TLS name of the protocol this is */
-  uint32_t flags;     /* Extra particular characteristics, see PROTOPT_* */
-
+  uint32_t flags;         /* Extra particular characteristics, see PROTOPT_* */
+  uint16_t defport;       /* Default port. */
 };
 
 #define PROTOPT_NONE 0             /* nothing extra */
@@ -658,8 +660,8 @@ struct connectdata {
 #endif
   struct ConnectBits bits;    /* various state-flags for this connection */
 
-  const struct Curl_handler *handler; /* Connection's protocol handler */
-  const struct Curl_handler *given;   /* The protocol first given */
+  const struct Curl_scheme *scheme; /* Connection's protocol handler */
+  const struct Curl_scheme *given;   /* The protocol first given */
 
   /* Protocols can use a custom keepalive mechanism to keep connections alive.
      This allows those protocols to track the last time the keepalive mechanism
@@ -724,8 +726,8 @@ struct connectdata {
   /* HTTP version last responded with by the server or negotiated via ALPN.
    * 0 at start, then one of 09, 10, 11, etc. */
   uint8_t httpversion_seen;
-  uint8_t connect_only;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
+  BIT(connect_only);
 };
 
 #ifndef CURL_DISABLE_PROXY

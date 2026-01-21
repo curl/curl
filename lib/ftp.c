@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
 
 #ifndef CURL_DISABLE_FTP
 
@@ -39,8 +40,8 @@
 #include <inet.h>
 #endif
 
-#include "urldata.h"
 #include "sendf.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "if2ip.h"
 #include "hostip.h"
@@ -583,9 +584,6 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
        size prior to the actual upload. */
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
-    /* set the SO_SNDBUF for the secondary socket for those who need it */
-    Curl_sndbuf_init(data->conn->sock[SECONDARYSOCKET]);
-
     /* FTP upload, shutdown DATA, ignore shutdown errors, as we rely
      * on the server response on the CONTROL connection. */
     Curl_xfer_setup_send(data, SECONDARYSOCKET);
@@ -688,7 +686,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
 
   while(!*ftpcodep && !result) {
     /* check and reset timeout value every lap */
-    timediff_t timeout = Curl_pp_state_timeout(data, pp, FALSE);
+    timediff_t timeout = Curl_pp_state_timeout(data, pp);
     timediff_t interval_ms;
 
     if(timeout <= 0) {
@@ -1521,7 +1519,7 @@ static CURLcode ftp_state_type(struct Curl_easy *data,
      information. Which in FTP cannot be much more than the file size and
      date. */
   if(data->req.no_body && ftpc->file &&
-     ftp_need_type(ftpc, data->state.prefer_ascii)) {
+     ftp_need_type(ftpc, (bool)data->state.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefore many servers
        may not support it! It is however the only way we have to get a file's
        size! */
@@ -1531,7 +1529,8 @@ static CURLcode ftp_state_type(struct Curl_easy *data,
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii, FTP_TYPE);
+    result = ftp_nb_type(data, ftpc, ftp, (bool)data->state.prefer_ascii,
+                         FTP_TYPE);
     if(result)
       return result;
   }
@@ -1572,7 +1571,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
                                    bool sizechecked)
 {
   CURLcode result = CURLE_OK;
-  bool append = data->set.remote_append;
+  curl_bit append = data->set.remote_append;
 
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
@@ -2241,7 +2240,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       }
     }
     else if(data->state.upload) {
-      result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
+      result = ftp_nb_type(data, ftpc, ftp, (bool)data->state.prefer_ascii,
                            FTP_STOR_TYPE);
       if(result)
         return result;
@@ -2286,7 +2285,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
                                FTP_RETR_LIST_TYPE);
         }
         else {
-          result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
+          result = ftp_nb_type(data, ftpc, ftp, (bool)data->state.prefer_ascii,
                                FTP_RETR_TYPE);
         }
         if(result)
@@ -2419,7 +2418,7 @@ static CURLcode client_write_header(struct Curl_easy *data,
    * headers from CONNECT should not automatically be part of the
    * output. */
   CURLcode result;
-  bool save = data->set.include_header;
+  bool save = (bool)data->set.include_header;
   data->set.include_header = TRUE;
   result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, blen);
   data->set.include_header = save;
@@ -4341,10 +4340,9 @@ bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
 }
 
 /*
- * FTP protocol handler.
+ * FTP protocol.
  */
-const struct Curl_handler Curl_handler_ftp = {
-  "ftp",                           /* scheme */
+static const struct Curl_protocol Curl_protocol_ftp = {
   ftp_setup_connection,            /* setup_connection */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
@@ -4362,45 +4360,43 @@ const struct Curl_handler Curl_handler_ftp = {
   ZERO_NULL,                       /* connection_check */
   ZERO_NULL,                       /* attach connection */
   ZERO_NULL,                       /* follow */
-  PORT_FTP,                        /* defport */
+};
+
+#endif /* CURL_DISABLE_FTP */
+
+/*
+ * FTP protocol handler.
+ */
+const struct Curl_scheme Curl_scheme_ftp = {
+  "ftp",                           /* scheme */
+#ifdef CURL_DISABLE_FTP
+  ZERO_NULL,
+#else
+  &Curl_protocol_ftp,
+#endif
   CURLPROTO_FTP,                   /* protocol */
   CURLPROTO_FTP,                   /* family */
   PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
   PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP |
   PROTOPT_WILDCARD | PROTOPT_SSL_REUSE |
-  PROTOPT_CONN_REUSE /* flags */
+  PROTOPT_CONN_REUSE, /* flags */
+  PORT_FTP,                        /* defport */
 };
 
-#ifdef USE_SSL
 /*
  * FTPS protocol handler.
  */
-const struct Curl_handler Curl_handler_ftps = {
+const struct Curl_scheme Curl_scheme_ftps = {
   "ftps",                          /* scheme */
-  ftp_setup_connection,            /* setup_connection */
-  ftp_do,                          /* do_it */
-  ftp_done,                        /* done */
-  ftp_do_more,                     /* do_more */
-  ftp_connect,                     /* connect_it */
-  ftp_multi_statemach,             /* connecting */
-  ftp_doing,                       /* doing */
-  ftp_pollset,                     /* proto_pollset */
-  ftp_pollset,                     /* doing_pollset */
-  ftp_domore_pollset,              /* domore_pollset */
-  ZERO_NULL,                       /* perform_pollset */
-  ftp_disconnect,                  /* disconnect */
-  ZERO_NULL,                       /* write_resp */
-  ZERO_NULL,                       /* write_resp_hd */
-  ZERO_NULL,                       /* connection_check */
-  ZERO_NULL,                       /* attach connection */
-  ZERO_NULL,                       /* follow */
-  PORT_FTPS,                       /* defport */
+#if defined(CURL_DISABLE_FTP) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_ftp,
+#endif
   CURLPROTO_FTPS,                  /* protocol */
   CURLPROTO_FTP,                   /* family */
   PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
   PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY | PROTOPT_WILDCARD |
-  PROTOPT_CONN_REUSE /* flags */
+  PROTOPT_CONN_REUSE, /* flags */
+  PORT_FTPS,                       /* defport */
 };
-#endif
-
-#endif /* CURL_DISABLE_FTP */

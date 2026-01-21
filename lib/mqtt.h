@@ -23,8 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_MQTT
-extern const struct Curl_handler Curl_handler_mqtt;
-#endif
+extern const struct Curl_scheme Curl_scheme_mqtt;
+extern const struct Curl_scheme Curl_scheme_mqtts;
 
 #endif /* HEADER_CURL_MQTT_H */

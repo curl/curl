@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "curl_ldap.h"
 
 #if !defined(CURL_DISABLE_LDAP) && !defined(USE_OPENLDAP)
 
@@ -75,7 +77,6 @@
 # endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
 #endif
 
-#include "urldata.h"
 #include "cfilters.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -84,7 +85,6 @@
 #include "transfer.h"
 #include "curlx/strparse.h"
 #include "bufref.h"
-#include "curl_ldap.h"
 #include "curlx/multibyte.h"
 #include "curlx/base64.h"
 #include "connect.h"
@@ -989,8 +989,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
 /*
  * LDAP protocol handler.
  */
-const struct Curl_handler Curl_handler_ldap = {
-  "ldap",                               /* scheme */
+const struct Curl_protocol Curl_protocol_ldap = {
   ZERO_NULL,                            /* setup_connection */
   ldap_do,                              /* do_it */
   ZERO_NULL,                            /* done */
@@ -1008,44 +1007,42 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  PORT_LDAP,                            /* defport */
-  CURLPROTO_LDAP,                       /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL_REUSE                     /* flags */
 };
-
-#ifdef HAVE_LDAP_SSL
-/*
- * LDAPS protocol handler.
- */
-const struct Curl_handler Curl_handler_ldaps = {
-  "ldaps",                              /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  ldap_do,                              /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_LDAPS,                           /* defport */
-  CURLPROTO_LDAPS,                      /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL                           /* flags */
-};
-#endif
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 
 #endif /* !CURL_DISABLE_LDAP && !USE_OPENLDAP */
+
+/*
+ * LDAP
+ */
+const struct Curl_scheme Curl_scheme_ldap = {
+  "ldap",                               /* scheme */
+#ifdef CURL_DISABLE_LDAP
+  ZERO_NULL,
+#else
+  &Curl_protocol_ldap,
+#endif
+  CURLPROTO_LDAP,                       /* protocol */
+  CURLPROTO_LDAP,                       /* family */
+  PROTOPT_SSL_REUSE,                    /* flags */
+  PORT_LDAP,                            /* defport */
+};
+
+/*
+ * LDAPS
+ */
+const struct Curl_scheme Curl_scheme_ldaps = {
+  "ldaps",                              /* scheme */
+#if defined(CURL_DISABLE_LDAP) || !defined(HAVE_LDAP_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_ldap,
+#endif
+  CURLPROTO_LDAPS,                      /* protocol */
+  CURLPROTO_LDAP,                       /* family */
+  PROTOPT_SSL,                          /* flags */
+  PORT_LDAPS,                           /* defport */
+};

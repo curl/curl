@@ -326,7 +326,7 @@ CURLcode Curl_headers_init(struct Curl_easy *data)
   struct Curl_cwriter *writer;
   CURLcode result;
 
-  if(data->conn && (data->conn->handler->protocol & PROTO_FAMILY_HTTP)) {
+  if(data->conn && (data->conn->scheme->protocol & PROTO_FAMILY_HTTP)) {
     /* avoid installing it twice */
     if(Curl_cwriter_get_by_name(data, hds_cw_collect.name))
       return CURLE_OK;

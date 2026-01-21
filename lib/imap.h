@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-extern const struct Curl_handler Curl_handler_imap;
-extern const struct Curl_handler Curl_handler_imaps;
+extern const struct Curl_scheme Curl_scheme_imap;
+extern const struct Curl_scheme Curl_scheme_imaps;
 
 /* Authentication type flags */
 #define IMAP_TYPE_CLEARTEXT (1 << 0)

@@ -114,7 +114,6 @@ static struct feature_name_presentp {
   { "SSLS-EXPORT",    &feature_ssls_export, 0 },
   { "threadsafe",     NULL,                 CURL_VERSION_THREADSAFE },
   { "TLS-SRP",        &feature_tls_srp,     CURL_VERSION_TLSAUTH_SRP },
-  { "TrackMemory",    NULL,                 CURL_VERSION_CURLDEBUG },
   { "Unicode",        NULL,                 CURL_VERSION_UNICODE },
   { "UnixSockets",    NULL,                 CURL_VERSION_UNIX_SOCKETS },
   { "zstd",           &feature_zstd,        CURL_VERSION_ZSTD },

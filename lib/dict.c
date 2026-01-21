@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "dict.h"
 
 #ifndef CURL_DISABLE_DICT
 
@@ -51,11 +53,9 @@
 #include <unistd.h>
 #endif
 
-#include "urldata.h"
 #include "transfer.h"
 #include "curl_trc.h"
 #include "escape.h"
-#include "dict.h"
 
 #define DICT_MATCH   "/MATCH:"
 #define DICT_MATCH2  "/M:"
@@ -273,10 +273,9 @@ error:
 }
 
 /*
- * DICT protocol handler.
+ * DICT protocol
  */
-const struct Curl_handler Curl_handler_dict = {
-  "dict",                               /* scheme */
+static const struct Curl_protocol Curl_protocol_dict = {
   ZERO_NULL,                            /* setup_connection */
   dict_do,                              /* do_it */
   ZERO_NULL,                            /* done */
@@ -294,10 +293,22 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  PORT_DICT,                            /* defport */
-  CURLPROTO_DICT,                       /* protocol */
-  CURLPROTO_DICT,                       /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
 #endif /* CURL_DISABLE_DICT */
+
+/*
+ * DICT protocol handler.
+ */
+const struct Curl_scheme Curl_scheme_dict = {
+  "dict",                               /* scheme */
+#ifdef CURL_DISABLE_DICT
+  ZERO_NULL,
+#else
+  &Curl_protocol_dict,
+#endif
+  CURLPROTO_DICT,                       /* protocol */
+  CURLPROTO_DICT,                       /* family */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY,    /* flags */
+  PORT_DICT,                            /* defport */
+};

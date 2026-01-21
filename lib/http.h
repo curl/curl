@@ -53,17 +53,15 @@ typedef enum {
 /* bitmask of CURL_HTTP_V* values */
 typedef unsigned char http_majors;
 
+extern const struct Curl_scheme Curl_scheme_http;
+extern const struct Curl_scheme Curl_scheme_https;
+
 #ifndef CURL_DISABLE_HTTP
 
 #ifdef USE_HTTP3
 #include <stdint.h>
 #endif
 
-extern const struct Curl_handler Curl_handler_http;
-
-#ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_https;
-#endif
 
 struct dynhds;
 

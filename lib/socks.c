@@ -34,6 +34,7 @@
 
 #include "urldata.h"
 #include "bufq.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "select.h"
 #include "cfilters.h"
@@ -130,7 +131,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
 
   *pnread = 0;
   for(;;) {
-    timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
+    timediff_t timeout_ms = Curl_timeleft_ms(data);
     if(timeout_ms < 0) {
       /* we already got the timeout */
       return CURLE_OPERATION_TIMEDOUT;
@@ -1307,7 +1308,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   cf->connected = TRUE;
 
 out:
-  *done = cf->connected;
+  *done = (bool)cf->connected;
   return result;
 }
 

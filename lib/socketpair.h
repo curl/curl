@@ -25,53 +25,19 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_EVENTFD
-
-#define wakeup_write         write
-#define wakeup_read          read
-#define wakeup_close         close
-#define wakeup_create(p, nb) Curl_eventfd(p, nb)
-
-int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
-
-#elif defined(HAVE_PIPE)
-
-#define wakeup_write         write
-#define wakeup_read          read
-#define wakeup_close         close
-#define wakeup_create(p, nb) Curl_pipe(p, nb)
-
-int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
-
-#else /* !USE_EVENTFD && !HAVE_PIPE */
-
-#define wakeup_write     swrite
-#define wakeup_read      sread
-#define wakeup_close     sclose
-
-#if defined(USE_UNIX_SOCKETS) && defined(HAVE_SOCKETPAIR)
-#define SOCKETPAIR_FAMILY AF_UNIX
-#elif !defined(HAVE_SOCKETPAIR)
-#define SOCKETPAIR_FAMILY 0 /* not used */
-#else
-#error "unsupported Unix domain and socketpair build combo"
-#endif
-
-#ifdef SOCK_CLOEXEC
-#define SOCKETPAIR_TYPE (SOCK_STREAM | SOCK_CLOEXEC)
-#else
-#define SOCKETPAIR_TYPE SOCK_STREAM
-#endif
-
-#define USE_SOCKETPAIR
-#define wakeup_create(p, nb)                                    \
-  Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
-
-#endif /* USE_EVENTFD */
-
 #ifndef CURL_DISABLE_SOCKETPAIR
-int Curl_socketpair(int domain, int type, int protocol,
-                    curl_socket_t socks[2], bool nonblocking);
+
+/* return < 0 for failure to initialise */
+int Curl_wakeup_init(curl_socket_t socks[2], bool nonblocking);
+void Curl_wakeup_destroy(curl_socket_t socks[2]);
+
+/* return 0 on success or errno on failure */
+int Curl_wakeup_signal(curl_socket_t socks[2]);
+
+CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all);
+
+#else
+#define Curl_wakeup_destroy(x)  Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_SOCKETPAIR_H */

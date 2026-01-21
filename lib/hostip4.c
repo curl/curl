@@ -43,6 +43,7 @@
 #endif
 
 #include "urldata.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "hostip.h"
 #include "url.h"

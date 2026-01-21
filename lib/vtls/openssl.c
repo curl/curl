@@ -43,6 +43,7 @@
 
 #include "../urldata.h"
 #include "../curl_trc.h"
+#include "../httpsrr.h"
 #include "../formdata.h" /* for the boundary function */
 #include "../url.h" /* for the ssl config check function */
 #include "../curlx/inet_pton.h"
@@ -1021,8 +1022,8 @@ static int enginecheck(struct Curl_easy *data,
                        SSL_CTX* ctx,
                        const char *key_file,
                        const char *key_passwd)
-#ifdef USE_OPENSSL_ENGINE
 {
+#ifdef USE_OPENSSL_ENGINE
   EVP_PKEY *priv_key = NULL;
 
   /* Implicitly use pkcs11 engine if none was provided and the
@@ -1065,22 +1066,20 @@ static int enginecheck(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)key_file;
   (void)key_passwd;
   failf(data, "SSL_FILETYPE_ENGINE not supported for private key");
   return 0;
-}
 #endif
+}
 
 static int providercheck(struct Curl_easy *data,
                          SSL_CTX* ctx,
                          const char *key_file)
-#ifdef OPENSSL_HAS_PROVIDERS
 {
+#ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * key_file is a PKCS#11 URI */
@@ -1154,22 +1153,20 @@ static int providercheck(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)key_file;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for private key");
   return 0;
-}
 #endif
+}
 
 static int engineload(struct Curl_easy *data,
                       SSL_CTX* ctx,
                       const char *cert_file)
+{
 /* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <=3.8.3 */
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
-{
   char error_buffer[256];
   /* Implicitly use pkcs11 engine if none was provided and the
    * cert_file is a PKCS#11 URI */
@@ -1227,21 +1224,19 @@ static int engineload(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)cert_file;
   failf(data, "SSL_FILETYPE_ENGINE not supported for certificate");
   return 0;
-}
 #endif
+}
 
 static int providerload(struct Curl_easy *data,
                         SSL_CTX* ctx,
                         const char *cert_file)
-#ifdef OPENSSL_HAS_PROVIDERS
 {
+#ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * cert_file is a PKCS#11 URI */
@@ -1305,15 +1300,13 @@ static int providerload(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)cert_file;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for certificate");
   return 0;
-}
 #endif
+}
 
 static int pkcs12load(struct Curl_easy *data,
                       SSL_CTX* ctx,
@@ -3239,7 +3232,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
      !ossl_cached_x509_store_expired(data, share) &&
      !ossl_cached_x509_store_different(cf, data, share)) {
     store = share->store;
-    *pempty = share->store_is_empty;
+    *pempty = (bool)share->store_is_empty;
   }
 
   return store;
@@ -3332,7 +3325,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 
     result = ossl_populate_x509_store(cf, data, octx, store);
     if(result == CURLE_OK && cache_criteria_met) {
-      ossl_set_cached_x509_store(cf, data, store, octx->store_is_empty);
+      ossl_set_cached_x509_store(cf, data, store, (bool)octx->store_is_empty);
     }
   }
 
@@ -3651,11 +3644,7 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-#ifdef USE_OPENSSL_QUIC
-    *pmethod = OSSL_QUIC_client_method();
-#else
     *pmethod = TLS_method();
-#endif
     break;
   default:
     failf(data, "unsupported transport %d in SSL init", peer->transport);
@@ -5016,7 +5005,7 @@ static bool ossl_data_pending(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   (void)data;
-  return connssl->input_pending;
+  return (bool)connssl->input_pending;
 }
 
 static CURLcode ossl_send(struct Curl_cfilter *cf,
@@ -5418,7 +5407,11 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #endif
   SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY |
-  SSLSUPP_CIPHER_LIST,
+  SSLSUPP_CIPHER_LIST |
+  SSLSUPP_ISSUERCERT |
+  SSLSUPP_ISSUERCERT_BLOB |
+  SSLSUPP_SSL_EC_CURVES |
+  SSLSUPP_CRLFILE,
 
   sizeof(struct ossl_ctx),
 

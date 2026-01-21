@@ -68,8 +68,6 @@ the active ("in use") SSL connection, with the following underlying types:
 CURLINFO_TLS_SESSION(3): **SSL_CTX ***
 
 CURLINFO_TLS_SSL_PTR(3): **SSL ***
-Since 7.48.0 the *internals* member can point to these other SSL backends
-as well:
 
 ## mbedTLS
 
@@ -160,6 +158,8 @@ int main(int argc, char **argv)
 
 This option supersedes CURLINFO_TLS_SESSION(3) which was added in 7.34.0.
 This option is exactly the same as that option except in the case of OpenSSL.
+
+Non-OpenSSL support was added in 7.48.0.
 
 # %AVAILABILITY%
 

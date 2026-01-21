@@ -341,6 +341,9 @@ static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_MQTT
   "mqtt",
 #endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)
+  "mqtts",
+#endif
 #ifndef CURL_DISABLE_POP3
   "pop3",
 #endif
@@ -513,9 +516,13 @@ static const struct feat features_table[] = {
 #ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
 #endif
+#ifdef USE_SSL
 #ifdef USE_APPLE_SECTRUST
   FEATURE("AppleSecTrust", NULL,              0),
+#elif defined(CURL_CA_NATIVE)
+  FEATURE("NativeCA",    NULL,              0),
 #endif
+#endif /* USE_SSL */
 #ifdef USE_SPNEGO
   FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),
 #endif
@@ -533,9 +540,6 @@ static const struct feat features_table[] = {
 #endif
 #ifdef USE_TLS_SRP
   FEATURE("TLS-SRP",     NULL,                CURL_VERSION_TLSAUTH_SRP),
-#endif
-#ifdef CURLDEBUG
-  FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
 #endif
 #if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
   FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
@@ -682,6 +686,10 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
       features |= p->bitmask;
       feature_names[n++] = p->name;
     }
+
+#ifdef DEBUGBUILD
+  features |= CURL_VERSION_CURLDEBUG; /* for compatibility */
+#endif
 
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;

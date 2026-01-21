@@ -28,8 +28,8 @@
 #include "urldata.h"
 #include "curl_addrinfo.h"
 #include "doh.h"
-
 #include "curl_trc.h"
+#include "httpsrr.h"
 #include "multiif.h"
 #include "url.h"
 #include "connect.h"
@@ -304,8 +304,8 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     goto error;
   }
 
-  timeout_ms = Curl_timeleft_ms(data, TRUE);
-  if(timeout_ms <= 0) {
+  timeout_ms = Curl_timeleft_ms(data);
+  if(timeout_ms < 0) {
     result = CURLE_OPERATION_TIMEDOUT;
     goto error;
   }
@@ -495,7 +495,7 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
 #endif
 
 #ifdef USE_HTTPSRR
-  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+  if(conn->scheme->protocol & PROTO_FAMILY_HTTP) {
     /* Only use HTTPS RR for HTTP(S) transfers */
     char *qname = NULL;
     if(port != PORT_HTTPS) {

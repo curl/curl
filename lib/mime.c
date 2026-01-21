@@ -2037,7 +2037,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     if(ctx->total_len >= 0)
       ctx->seen_eos = (ctx->read_len >= ctx->total_len);
     *pnread = nread;
-    *peos = ctx->seen_eos;
+    *peos = (bool)ctx->seen_eos;
     break;
   }
 

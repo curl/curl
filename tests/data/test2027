@@ -12,12 +12,12 @@ HTTP Digest auth
 
 <!--
 
- Explanation for the duplicate 400 requests:
+Explanation for the duplicate 400 requests:
 
- libcurl does not detect that a given Digest password is wrong already on the
- first 401 response (as the data400 gives). libcurl will instead consider the
- new response just as a duplicate and it sends another and detects the auth
- problem on the second 401 response!
+libcurl does not detect that a given Digest password is wrong already on the
+first 401 response (as the data400 gives). libcurl will instead consider the
+new response just as a duplicate and it sends another and detects the auth
+problem on the second 401 response!
 
 -->
 

@@ -2296,7 +2296,9 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_CIPHER_LIST |
-  SSLSUPP_CA_CACHE,
+  SSLSUPP_CA_CACHE |
+  SSLSUPP_ISSUERCERT |
+  SSLSUPP_CRLFILE,
 
   sizeof(struct gtls_ssl_backend_data),
 

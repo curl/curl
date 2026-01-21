@@ -44,10 +44,12 @@
 #include <signal.h>
 
 #include "urldata.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "connect.h"
 #include "hostip.h"
 #include "hash.h"
+#include "httpsrr.h"
 #include "rand.h"
 #include "curl_share.h"
 #include "url.h"
@@ -933,10 +935,12 @@ out:
     return CURLE_OK;
   }
   else if(respwait) {
+#ifdef USE_CURL_ASYNC
     if(!Curl_resolv_check(data, &dns)) {
       *entry = dns;
       return dns ? CURLE_OK : CURLE_AGAIN;
     }
+#endif
     result = CURLE_COULDNT_RESOLVE_HOST;
   }
 error:

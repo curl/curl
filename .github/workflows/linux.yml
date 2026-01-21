@@ -185,12 +185,12 @@ jobs:
             tflags: '--min=910 951 to 9999'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
-          - name: 'openssl intel'
+          - name: 'openssl intel C89'
             install_packages: libssh-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
-          - name: 'openssl arm'
+          - name: 'openssl arm C89'
             image: ubuntu-24.04-arm
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
@@ -338,7 +338,7 @@ jobs:
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
             CC: clang
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=OFF
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON
 
           - name: 'memory-sanitizer'
             install_packages: clang
@@ -813,7 +813,10 @@ jobs:
 
       - name: 'curl -V'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: bld/src/curl --disable -V
+        run: |
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          bld/src/curl --disable -V
 
       - name: 'curl install'
         run: |

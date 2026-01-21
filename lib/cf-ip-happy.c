@@ -50,6 +50,7 @@
 #include "connect.h"
 #include "cfilters.h"
 #include "cf-ip-happy.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
@@ -227,7 +228,7 @@ static CURLcode cf_ip_attempt_connect(struct cf_ip_attempt *a,
                                       struct Curl_easy *data,
                                       bool *connected)
 {
-  *connected = a->connected;
+  *connected = (bool)a->connected;
   if(!a->result && !*connected) {
     /* evaluate again */
     a->result = Curl_conn_cf_connect(a->cf, data, connected);
@@ -495,8 +496,8 @@ out:
     bool more_possible;
 
     /* when do we need to be called again? */
-    next_expire_ms = Curl_timeleft_ms(data, TRUE);
-    if(next_expire_ms <= 0) {
+    next_expire_ms = Curl_timeleft_ms(data);
+    if(next_expire_ms < 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
         curlx_ptimediff_ms(Curl_pgrs_now(data),
                            &data->progress.t_startsingle));
@@ -698,7 +699,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   if(!dns)
     return CURLE_FAILED_INIT;
 
-  if(Curl_timeleft_ms(data, TRUE) < 0) {
+  if(Curl_timeleft_ms(data) < 0) {
     /* a precaution, no need to continue if time already is up */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
@@ -792,7 +793,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
       cf_ip_happy_ctx_clear(cf, data);
       Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
 
-      if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
+      if(cf->conn->scheme->protocol & PROTO_FAMILY_SSH)
         Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(Curl_trc_cf_is_verbose(cf, data)) {

@@ -30,7 +30,7 @@ lib%TESTNUMBER
 HTTP request-injection in URL sent over proxy
 </name>
 <command>
- "http://the.old.moo:%HTTPPORT/%TESTNUMBER" %HOSTIP:%PROXYPORT
+"http://the.old.moo:%HTTPPORT/%TESTNUMBER" %HOSTIP:%PROXYPORT
 </command>
 <features>
 proxy

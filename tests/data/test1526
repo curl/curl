@@ -52,7 +52,7 @@ lib%TESTNUMBER
 CURLOPT_PROXYHEADER: separate host/proxy headers
 </name>
 <command>
- http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
+http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 <features>
 proxy

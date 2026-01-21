@@ -46,6 +46,9 @@ unpacked the source archive):
 
 (Adjust the configure line accordingly to use the TLS library you want.)
 
+By default curl builds with libpsl (Public Suffix List) support. If libpsl is
+not available on your system, install it or disable it with `--without-libpsl`.
+
 You probably need to be root when doing the last command.
 
 Get a full listing of all available configure options by invoking it like:
@@ -65,10 +68,9 @@ your own home directory:
     make
     make install
 
-The configure script always tries to find a working SSL library unless
-explicitly told not to. If you have OpenSSL installed in the default search
-path for your compiler/linker, you do not need to do anything special. If you
-have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
+The configure script requires you to select a TLS backend explicitly unless
+you disable TLS with `--without-ssl`. If you have OpenSSL installed in the
+default search path for your compiler/linker, you can run configure like:
 
     ./configure --with-openssl
 
@@ -91,7 +93,7 @@ header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
 environment variables prior to running configure. Something like this should
 work:
 
-    CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure
+    CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure --with-openssl
 
 If you have shared SSL libs installed in a directory where your runtime
 linker does not find them (which usually causes configure failures), you can
@@ -196,7 +198,7 @@ library check.
 
 # Windows
 
-Building for Windows XP is required as a minimum.
+Building for Windows Vista/Server 2008 is required as a minimum.
 
 You can build curl with:
 
@@ -268,8 +270,8 @@ Download the latest version of the `cygwin` packages required (*and suggested*) 
 
 Once all the packages have been installed, begin the process of installing curl from the source code:
 
- <details>
-     <summary>configure_options</summary>
+<details>
+    <summary>configure_options</summary>
 
 ```
     --with-gnutls
@@ -280,7 +282,7 @@ Once all the packages have been installed, begin the process of installing curl 
     --without-ssl
 ```
 
- </details>
+</details>
 
 1. `sh configure <configure_options>`
 2. `make`
@@ -563,7 +565,7 @@ may be relevant in some environments: `-march=X`, `-mthumb`, `-m32`,
 `-mdynamic-no-pic`, `-flto`, `-fdata-sections`, `-ffunction-sections`,
 `-fno-unwind-tables`, `-fno-asynchronous-unwind-tables`,
 `-fno-record-gcc-switches`, `-fsection-anchors`, `-fno-plt`,
-`-Wl,--gc-sections`, `-Wl,-Bsymbolic`, `-Wl,-s`,
+`-Wl,--gc-sections`, `-Wl,-dead_strip` (Apple), `-Wl,-Bsymbolic`, `-Wl,-s`
 
 For example, this is how to combine a few of these options:
 

@@ -23,9 +23,9 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
-#ifdef USE_SSH
-
 #include "vssh.h"
+#include "ssh.h"
+#ifdef USE_SSH
 #include "../curlx/strparse.h"
 #include "../curl_trc.h"
 #include "../escape.h"
@@ -51,7 +51,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
   curlx_dyn_init(&npath, MAX_SSHPATH_LEN);
 
   /* Check for /~/, indicating relative to the user's home directory */
-  if((data->conn->handler->protocol & CURLPROTO_SCP) &&
+  if((data->conn->scheme->protocol & CURLPROTO_SCP) &&
      (working_path_len > 3) && (!memcmp(working_path, "/~/", 3))) {
     /* It is referenced to the home directory, so strip the leading '/~/' */
     if(curlx_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
@@ -59,7 +59,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     }
   }
-  else if((data->conn->handler->protocol & CURLPROTO_SFTP) &&
+  else if((data->conn->scheme->protocol & CURLPROTO_SFTP) &&
           (!strcmp("/~", working_path) ||
            ((working_path_len > 2) && !memcmp(working_path, "/~/", 3)))) {
     if(curlx_dyn_add(&npath, homedir)) {
@@ -239,3 +239,34 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
 }
 
 #endif /* USE_SSH */
+
+/*
+ * SFTP protocol handler.
+ */
+const struct Curl_scheme Curl_scheme_sftp = {
+  "SFTP",                               /* scheme */
+#ifndef USE_SSH
+  NULL,
+#else
+  &Curl_protocol_sftp,
+#endif
+  CURLPROTO_SFTP,                       /* protocol */
+  CURLPROTO_SFTP,                       /* family */
+  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE,
+  PORT_SSH                              /* defport */
+};
+
+const struct Curl_scheme Curl_scheme_scp = {
+  "SCP",                                /* scheme */
+#ifndef USE_SSH
+  NULL,
+#else
+  &Curl_protocol_scp,
+#endif
+  CURLPROTO_SCP,                        /* protocol */
+  CURLPROTO_SCP,                        /* family */
+  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE,
+  PORT_SSH,                             /* defport */
+};

@@ -7,14 +7,14 @@ SPDX-License-Identifier: curl
 libcurl bindings
 ================
 
- Creative people have written bindings or interfaces for various environments
- and programming languages. Using one of these allows you to take advantage of
- curl powers from within your favourite language or system.
+Creative people have written bindings or interfaces for various environments
+and programming languages. Using one of these allows you to take advantage of
+curl powers from within your favourite language or system.
 
- This is a list of all known interfaces as of this writing.
+This is a list of all known interfaces as of this writing.
 
- The bindings listed below are not part of the curl/libcurl distribution
- archives, but must be downloaded and installed separately.
+The bindings listed below are not part of the curl/libcurl distribution
+archives, but must be downloaded and installed separately.
 
 <!-- markdown-link-check-disable -->
 
@@ -23,8 +23,8 @@ libcurl bindings
 [Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
 C++: [curlpp](https://github.com/jpbarrette/curlpp) Written by Jean-Philippe Barrette-LaPierre,
-[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
-Requests](https://github.com/libcpr/cpr) by Huu Nguyen
+[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and
+[C++ Requests](https://github.com/libcpr/cpr) by Huu Nguyen
 
 [Ch](https://chcurl.sourceforge.net/) Written by Stephen Nestinger and Jonathan Rogado
 

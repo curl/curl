@@ -75,8 +75,6 @@ class TestGoAway:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx):
         proto = 'h3'
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip('OpenSSL QUIC fails here')
         count = 3
         self.r = None
 

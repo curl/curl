@@ -235,22 +235,23 @@ void Curl_cpool_destroy(struct cpool *cpool)
 {
   if(cpool && cpool->initialised && cpool->idata) {
     struct connectdata *conn;
-    SIGPIPE_VARIABLE(pipe_st);
+    struct Curl_sigpipe_ctx pipe_ctx;
 
     CURL_TRC_M(cpool->idata, "%s[CPOOL] destroy, %zu connections",
                cpool->share ? "[SHARE] " : "", cpool->num_conn);
     /* Move all connections to the shutdown list */
-    sigpipe_init(&pipe_st);
+    sigpipe_init(&pipe_ctx);
     CPOOL_LOCK(cpool, cpool->idata);
     conn = cpool_get_first(cpool);
+    if(conn)
+      sigpipe_apply(cpool->idata, &pipe_ctx);
     while(conn) {
       cpool_remove_conn(cpool, conn);
-      sigpipe_apply(cpool->idata, &pipe_st);
       cpool_discard_conn(cpool, cpool->idata, conn, FALSE);
       conn = cpool_get_first(cpool);
     }
     CPOOL_UNLOCK(cpool, cpool->idata);
-    sigpipe_restore(&pipe_st);
+    sigpipe_restore(&pipe_ctx);
     Curl_hash_destroy(&cpool->dest2bundle);
   }
 }

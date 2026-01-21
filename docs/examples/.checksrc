@@ -5,6 +5,7 @@
 allowfunc atoi
 allowfunc atol
 allowfunc calloc
+allowfunc close
 allowfunc fclose
 allowfunc fdopen
 allowfunc fopen

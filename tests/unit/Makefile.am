@@ -53,9 +53,6 @@ AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
 endif
-if CURLDEBUG
-AM_CPPFLAGS += -DCURLDEBUG
-endif
 # unit tests are small pretend-libcurl-programs, pass BUILDING_LIBCURL to reflect that
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 

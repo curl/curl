@@ -61,6 +61,7 @@
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
+#include "curl_addrinfo.h"
 #include "select.h"
 #include "multiif.h"
 #include "curlx/inet_pton.h"
@@ -95,32 +96,6 @@ static void tcpnodelay(struct Curl_cfilter *cf,
   (void)sockfd;
 #endif
 }
-
-#ifdef SO_NOSIGPIPE
-/* The preferred method on macOS (10.2 and later) to prevent SIGPIPEs when
-   sending data to a dead peer (instead of relying on the 4th argument to send
-   being MSG_NOSIGNAL). Possibly also existing and in use on other BSD
-   systems? */
-static void nosigpipe(struct Curl_cfilter *cf,
-                      struct Curl_easy *data,
-                      curl_socket_t sockfd)
-{
-  int onoff = 1;
-  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
-                (void *)&onoff, sizeof(onoff)) < 0) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char buffer[STRERROR_LEN];
-    CURL_TRC_CF(data, cf, "Could not set SO_NOSIGPIPE: %s",
-                curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-#else
-    (void)cf;
-    (void)data;
-#endif
-  }
-}
-#else
-#define nosigpipe(x, y, z) Curl_nop_stmt
-#endif
 
 #if defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
@@ -357,11 +332,24 @@ static CURLcode socket_open(struct Curl_easy *data,
     return CURLE_COULDNT_CONNECT;
   }
 
+#ifdef USE_SO_NOSIGPIPE
+  {
+    int onoff = 1;
+    if(setsockopt(*sockfd, SOL_SOCKET, SO_NOSIGPIPE,
+                  (void *)&onoff, sizeof(onoff)) < 0) {
+      failf(data, "setsockopt enable SO_NOSIGPIPE: %s",
+            curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+      *sockfd = CURL_SOCKET_BAD;
+      return CURLE_COULDNT_CONNECT;
+    }
+  }
+#endif /* USE_SO_NOSIGPIPE */
+
 #ifdef HAVE_FCNTL
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
     failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
-    close(*sockfd);
+    sclose(*sockfd);
     *sockfd = CURL_SOCKET_BAD;
     return CURLE_COULDNT_CONNECT;
   }
@@ -439,37 +427,6 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
 {
   return socket_close(data, conn, FALSE, sock);
 }
-
-#ifdef USE_WINSOCK
-/* When you run a program that uses the Windows Sockets API, you may
-   experience slow performance when you copy data to a TCP server.
-
-   https://learn.microsoft.com/troubleshoot/windows-server/networking/slow-performance-copy-data-tcp-server-sockets-api
-
-   Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
-   Buffer Size
-
-   The problem described in this knowledge-base is applied only to pre-Vista
-   Windows. Following function trying to detect OS version and skips
-   SO_SNDBUF adjustment for Windows Vista and above.
-*/
-
-void Curl_sndbuf_init(curl_socket_t sockfd)
-{
-  int val = CURL_MAX_WRITE_SIZE + 32;
-  int curval = 0;
-  int curlen = sizeof(curval);
-
-  if(Curl_isVistaOrGreater)
-    return;
-
-  if(getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
-    if(curval > val)
-      return;
-
-  setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
-}
-#endif /* USE_WINSOCK */
 
 /*
  * Curl_parse_interface()
@@ -1023,7 +980,7 @@ static void set_local_ip(struct Curl_cfilter *cf,
 
 #ifdef HAVE_GETSOCKNAME
   if((ctx->sock != CURL_SOCKET_BAD) &&
-     !(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+     !(data->conn->scheme->protocol & CURLPROTO_TFTP)) {
     /* TFTP does not connect, so it cannot get the IP like this */
 
     char buffer[STRERROR_LEN];
@@ -1130,10 +1087,6 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(cf, data, ctx->sock);
-
-  nosigpipe(cf, data, ctx->sock);
-
-  Curl_sndbuf_init(ctx->sock);
 
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(cf, data, ctx->sock);
@@ -1295,7 +1248,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     }
 
     /* Connect TCP socket */
-    rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
+    rc = do_connect(cf, data, (bool)cf->conn->bits.tcp_fastopen);
     error = SOCKERRNO;
     set_local_ip(cf, data);
     CURL_TRC_CF(data, cf, "local address %s port %d...",
@@ -2002,7 +1955,7 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
 #endif
 
   /* check if the generic timeout possibly is set shorter */
-  other_ms = Curl_timeleft_ms(data, FALSE);
+  other_ms = Curl_timeleft_ms(data);
   if(other_ms && (other_ms < timeout_ms))
     /* note that this also works fine for when other_ms happens to be negative
        due to it already having elapsed */

@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+extern const struct Curl_scheme Curl_scheme_rtsp;
 #ifndef CURL_DISABLE_RTSP
-extern const struct Curl_handler Curl_handler_rtsp;
 CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
 #else
 #define Curl_rtsp_parseheader(x, y) CURLE_NOT_BUILT_IN

@@ -52,10 +52,10 @@ You can disable this header with CURLOPT_HTTPHEADER(3) as usual.
 
 If you use POST to an HTTP 1.1 server, you can send data without knowing the
 size before starting the POST if you use chunked encoding. You enable this by
-adding a header like "Transfer-Encoding: chunked" with
-CURLOPT_HTTPHEADER(3). With HTTP 1.0 or without chunked transfer, you
-must specify the size in the request. (Since 7.66.0, libcurl automatically
-uses chunked encoding for POSTs if the size is unknown.)
+adding a header like "Transfer-Encoding: chunked" with CURLOPT_HTTPHEADER(3).
+With HTTP 1.0 or without chunked transfer, you must specify the size in the
+request. libcurl automatically uses chunked encoding for POSTs if the size is
+unknown.
 
 When setting CURLOPT_POST(3) to 1, libcurl automatically sets
 CURLOPT_NOBODY(3) and CURLOPT_HTTPGET(3) to 0.

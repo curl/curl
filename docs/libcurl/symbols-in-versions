@@ -161,7 +161,7 @@ CURL_VERSION_ASYNCHDNS          7.10.7
 CURL_VERSION_BITS               7.43.0
 CURL_VERSION_BROTLI             7.57.0
 CURL_VERSION_CONV               7.15.4
-CURL_VERSION_CURLDEBUG          7.19.6
+CURL_VERSION_CURLDEBUG          7.19.6        8.19.0
 CURL_VERSION_DEBUG              7.10.6
 CURL_VERSION_GSASL              7.76.0
 CURL_VERSION_GSSAPI             7.38.0
@@ -968,6 +968,7 @@ CURLPROTO_IMAPS                 7.20.0
 CURLPROTO_LDAP                  7.19.4
 CURLPROTO_LDAPS                 7.19.4
 CURLPROTO_MQTT                  7.71.0
+CURLPROTO_MQTTS                 8.19.0
 CURLPROTO_POP3                  7.20.0
 CURLPROTO_POP3S                 7.20.0
 CURLPROTO_RTMP                  7.21.0
