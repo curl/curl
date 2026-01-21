@@ -26,11 +26,6 @@
 #include "dynhds.h"
 #include "strcase.h"
 
-#ifdef USE_NGHTTP2
-#include <stdint.h>
-#include <nghttp2/nghttp2.h>
-#endif /* USE_NGHTTP2 */
-
 static struct dynhds_entry *entry_new(const char *name, size_t namelen,
                                       const char *value, size_t valuelen,
                                       int opts)
