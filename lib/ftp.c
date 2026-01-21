@@ -160,7 +160,6 @@ static void ftp_state_low(struct Curl_easy *data,
 #endif
   )
 {
-  NOVERBOSE((void)data);
   if(ftpc->state != newstate) {
 #ifdef DEBUGBUILD
     NOVERBOSE((void)lineno);
