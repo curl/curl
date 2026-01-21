@@ -160,22 +160,17 @@ static void ftp_state_low(struct Curl_easy *data,
 #endif
   )
 {
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
+  NOVERBOSE((void)data);
+  if(ftpc->state != newstate) {
 #ifdef DEBUGBUILD
-  (void)lineno;
-#endif
-#else /* CURL_DISABLE_VERBOSE_STRINGS */
-  if(ftpc->state != newstate)
-#ifdef DEBUGBUILD
+    NOVERBOSE((void)lineno);
     CURL_TRC_FTP(data, "[%s] -> [%s] (line %d)", FTP_CSTATE(ftpc),
                  ftp_state_names[newstate], lineno);
 #else
     CURL_TRC_FTP(data, "[%s] -> [%s]", FTP_CSTATE(ftpc),
                  ftp_state_names[newstate]);
 #endif
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
-
+  }
   ftpc->state = newstate;
 }
 
