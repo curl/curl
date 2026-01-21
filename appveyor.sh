@@ -30,6 +30,9 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 if [ -n "${CMAKE_GENERATE:-}" ]; then
 
+  PRJ_CFG='Debug'
+  [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
+
   # Configure OpenSSL
   case "${CMAKE_GENERATE}" in
     *Win32*) openssl_suffix='-Win32';;

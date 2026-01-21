@@ -31,21 +31,17 @@
 version: 7.50.0.{build}
 
 environment:
-  PRJ_CFG: Debug
-
   matrix:
     # CMake Visual Studio builds
 
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      PRJ_CFG: Release
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
 
     - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      PRJ_CFG: Release
       CMAKE_GENERATE: '-A ARM64 -DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF'
 
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
@@ -56,7 +52,6 @@ environment:
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_GEN: 'Visual Studio 11 2012'
-      PRJ_CFG: Release
       CMAKE_GENERATE: '-A Win32'
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
@@ -90,7 +85,6 @@ environment:
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
-      PRJ_CFG: Release
       ENABLE_UNICODE: 'ON'
       CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=OFF'
 
