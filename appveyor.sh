@@ -28,13 +28,13 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
-if [ -n "${CMAKE_GENERATE:-}" ]; then
+if [ -n "${CMAKE_GENERATOR:-}" ]; then
 
   PRJ_CFG='Debug'
   [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
 
   # Configure OpenSSL
-  case "${CMAKE_GENERATE}" in
+  case "${CMAKE_GENERATE:-}" in
     *Win32*) openssl_suffix='-Win32';;
     *)       openssl_suffix='-Win64';;
   esac
@@ -69,8 +69,8 @@ if [ -n "${CMAKE_GENERATE:-}" ]; then
   for _chkprefill in '' ${CHKPREFILL:-}; do
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-    [[ "${CMAKE_GENERATE}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
-    [[ "${CMAKE_GENERATE}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
+    [[ "${CMAKE_GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+    [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
       mkdir "_bld${_chkprefill}"
       cd "_bld${_chkprefill}"
@@ -86,7 +86,7 @@ if [ -n "${CMAKE_GENERATE:-}" ]; then
     time cmake -DENABLE_DEBUG=ON -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
       -DCURL_USE_LIBPSL=OFF -DCURL_USE_SCHANNEL=ON \
-      ${CMAKE_GENERATE} \
+      ${CMAKE_GENERATE:-} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
@@ -97,8 +97,8 @@ if [ -n "${CMAKE_GENERATE:-}" ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2
-  [[ "${CMAKE_GENERATE}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
-  [[ "${CMAKE_GENERATE}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
+  [[ "${CMAKE_GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
+  [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 else
   (
@@ -122,19 +122,19 @@ fi
 
 # build tests
 
-if [ -n "${CMAKE_GENERATE:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
+if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # build examples
 
-if [ -n "${CMAKE_GENERATE:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'examples'* ]]; then
+if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'examples'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples-build
 fi
 
 # disk space used
 
 du -sh .; echo; du -sh -t 250KB ./*
-if [ -n "${CMAKE_GENERATE:-}" ]; then
+if [ -n "${CMAKE_GENERATOR:-}" ]; then
   echo; du -h -t 250KB _bld
 fi
