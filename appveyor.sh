@@ -99,7 +99,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [[ "${CMAKE_OPTIONS:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
   [[ "${CMAKE_OPTIONS:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
-else
+elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects/Windows
     ./generate.bat "${VC_VERSION}"
