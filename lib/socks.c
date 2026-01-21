@@ -43,7 +43,6 @@
 #include "curlx/inet_pton.h"
 #include "url.h"
 
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 /* for the (SOCKS) connect state machine */
 enum socks_state_t {
   SOCKS_ST_INIT,
