@@ -83,7 +83,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
       -DCURL_STATIC_CRT=ON \
-      -DENABLE_DEBUG="${DEBUG}" \
       -DENABLE_UNICODE="${ENABLE_UNICODE}" \
       -DHTTP_ONLY="${HTTP_ONLY}" \
       -DCURL_USE_SCHANNEL="${SCHANNEL}" \
