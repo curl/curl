@@ -160,6 +160,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     return;
 
 #ifdef DEBUGBUILD
+  NOVERBOSE((void)lineno);
   CURL_TRC_M(data, "-> [%s] (line %d)", CURL_MSTATE_NAME(state), lineno);
 #else
   CURL_TRC_M(data, "-> [%s]", CURL_MSTATE_NAME(state));
