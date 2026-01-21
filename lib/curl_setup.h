@@ -466,15 +466,19 @@
 #include <curl/stdcheaders.h>
 #endif
 
-#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
-#endif
+#define HAVE_UINTPTR_T  /* assume uintptr_t is provided by stdint.h */
 
 #ifdef __DJGPP__
 /* By default, DJGPP provides this type as a version of 'unsigned long' which
    forces us to use a define use it in printf() format strings without
    warnings. long and int are both 32 bits for this platform. */
 #define uint32_t unsigned int
+#endif
+
+/* Disable uintptr_t for targets known to miss it from stdint.h */
+#ifdef __OS400__
+#undef HAVE_UINTPTR_T
 #endif
 
 #include <limits.h>

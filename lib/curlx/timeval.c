@@ -117,7 +117,6 @@ void curlx_pnow(struct curltime *pnow)
 
 #elif defined(HAVE_MACH_ABSOLUTE_TIME)
 
-#include <stdint.h>
 #include <mach/mach_time.h>
 
 void curlx_pnow(struct curltime *pnow)
