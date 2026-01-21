@@ -28,20 +28,25 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
-case "${TARGET:-}" in
-  *Win32) openssl_suffix='-Win32';;
-  *)      openssl_suffix='-Win64';;
-esac
+if [ -n "${CMAKE_GENERATOR:-}" ]; then
 
-if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-  openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
-  openssl_root="$(cygpath "${openssl_root_win}")"
-elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
-  openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
-  openssl_root="$(cygpath "${openssl_root_win}")"
-fi
+  PRJ_CFG='Debug'
+  [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
 
-if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  # Configure OpenSSL
+  case "${CMAKE_GENERATE:-}" in
+    *Win32*) openssl_suffix='-Win32';;
+    *)       openssl_suffix='-Win64';;
+  esac
+
+  if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
+    openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
+    openssl_root="$(cygpath "${openssl_root_win}")"
+  elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
+    openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
+    openssl_root="$(cygpath "${openssl_root_win}")"
+  fi
+
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
     cmake_ver=$(printf '%02d%02d' \
@@ -64,9 +69,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   for _chkprefill in '' ${CHKPREFILL:-}; do
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-    [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
-    [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
-    [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
+    [[ "${CMAKE_GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+    [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
       mkdir "_bld${_chkprefill}"
       cd "_bld${_chkprefill}"
@@ -75,21 +79,16 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     else
       options+=" -B _bld${_chkprefill}"
       options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-      options+=" -DCMAKE_UNITY_BUILD=${UNITY}"
+      options+=' -DCMAKE_UNITY_BUILD=ON'
       root='.'
     fi
+    # CMAKE_GENERATOR env requires CMake 3.15+, pass it manually to make it work with older versions.
     # shellcheck disable=SC2086
-    time cmake -G "${PRJ_GEN}" ${TARGET} \
-      -DCURL_WERROR=ON \
-      -DBUILD_SHARED_LIBS="${SHARED}" \
+    time cmake -G "${CMAKE_GENERATOR}" \
+      -DENABLE_DEBUG=ON -DCURL_WERROR=ON \
       -DCURL_STATIC_CRT=ON \
-      -DENABLE_DEBUG="${DEBUG}" \
-      -DENABLE_UNICODE="${ENABLE_UNICODE}" \
-      -DHTTP_ONLY="${HTTP_ONLY}" \
-      -DCURL_USE_SCHANNEL="${SCHANNEL}" \
-      -DCURL_USE_OPENSSL="${OPENSSL}" \
-      -DCURL_USE_LIBPSL=OFF \
-      ${CMAKE_OPTIONS:-} \
+      -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
+      ${CMAKE_GENERATE:-} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
@@ -99,12 +98,11 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     false
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
-  # shellcheck disable=SC2086
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
-  [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
-  [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2
+  [[ "${CMAKE_GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
+  [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
-elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
+else
   (
     cd projects/Windows
     ./generate.bat "${VC_VERSION}"
@@ -126,42 +124,19 @@ fi
 
 # build tests
 
-if [ "${TFLAGS}" != 'skipall' ] && \
-   [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
-fi
-
-# run tests
-
-if [ "${TFLAGS}" != 'skipall' ] && \
-   [ "${TFLAGS}" != 'skiprun' ]; then
-  if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-    TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
-  elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
-    TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
-  fi
-  TFLAGS+=' -j0'
-  if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-    time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
-  else
-    (
-      TFLAGS="-a -p !flaky -r ${TFLAGS}"
-      cd _bld/tests
-      time ./runtests.pl
-    )
-  fi
 fi
 
 # build examples
 
-if [ "${EXAMPLES}" = 'ON' ] && \
-   [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'examples'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples-build
 fi
 
 # disk space used
 
 du -sh .; echo; du -sh -t 250KB ./*
-if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+if [ -n "${CMAKE_GENERATOR:-}" ]; then
   echo; du -h -t 250KB _bld
 fi

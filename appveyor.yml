@@ -31,128 +31,83 @@
 version: 7.50.0.{build}
 
 environment:
-  BUILD_SYSTEM: CMake
-  UNITY: 'ON'
-  OPENSSL: 'OFF'
-  SCHANNEL: 'OFF'
-  ENABLE_UNICODE: 'OFF'
-  DEBUG: 'ON'
-  SHARED: 'OFF'
-  HTTP_ONLY: 'OFF'
-  TFLAGS: 'skiprun'
-  EXAMPLES: 'OFF'
-  CMAKE_OPTIONS: ''
-
   matrix:
-
-    # generated CMake-based Visual Studio builds
+    # CMake Visual Studio builds
 
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
-      PRJ_CFG: Release
-      OPENSSL: 'ON'
-      SHARED: 'ON'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
+
     - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A ARM64'
-      PRJ_CFG: Release
-      SCHANNEL: 'ON'
-      DEBUG: 'OFF'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A ARM64 -DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF'
+
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
-      PRJ_GEN: 'Visual Studio 10 2010'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-      SCHANNEL: 'ON'
-      SHARED: 'ON'
-      EXAMPLES: 'ON'
+      CMAKE_GENERATOR: 'Visual Studio 10 2010'
+      CMAKE_GENERATE: '-A x64'
+
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      PRJ_GEN: 'Visual Studio 11 2012'
-      TARGET: '-A Win32'
-      PRJ_CFG: Release
-      SCHANNEL: 'ON'
-      SHARED: 'ON'
-    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-only'
+      CMAKE_GENERATOR: 'Visual Studio 11 2012'
+      CMAKE_GENERATE: '-A Win32'
+
+    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: '3.18.4'
-      PRJ_GEN: 'Visual Studio 12 2013'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-      SCHANNEL: 'ON'
-      SHARED: 'ON'
-      TFLAGS: 'skipall'
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-only'
+      CMAKE_GENERATOR: 'Visual Studio 12 2013'
+      CMAKE_GENERATE: '-A x64'
+
+    - job_name: 'CM VS2015, Debug, x64, Schannel, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: '3.19.8'
-      PRJ_GEN: 'Visual Studio 14 2015'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-      SCHANNEL: 'ON'
-      TFLAGS: 'skipall'
-    - job_name: 'CM VS2017, Debug, x64, Schannel, Shared, Build-only'
+      CMAKE_GENERATOR: 'Visual Studio 14 2015'
+      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF'
+
+    - job_name: 'CM VS2017, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       CMAKE_VERSION: '3.20.6'
-      PRJ_GEN: 'Visual Studio 15 2017'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-      SCHANNEL: 'ON'
-      SHARED: 'ON'
-      TFLAGS: 'skipall'
+      CMAKE_GENERATOR: 'Visual Studio 15 2017'
+      CMAKE_GENERATE: '-A x64'
+
     - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      PRJ_GEN: 'Visual Studio 16 2019'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-      OPENSSL: 'ON'
-      SCHANNEL: 'ON'
-      SHARED: 'ON'
-      CMAKE_OPTIONS: '-DCURL_DISABLE_VERBOSE_STRINGS=ON'
+      CMAKE_GENERATOR: 'Visual Studio 16 2019'
+      CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+
     - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-      OPENSSL: 'ON'
-      SCHANNEL: 'ON'
-      ENABLE_UNICODE: 'ON'
-      EXAMPLES: 'ON'
-      TOOLSET: 'ClangCl'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
+
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
-      PRJ_CFG: Release
-      SCHANNEL: 'ON'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
       ENABLE_UNICODE: 'ON'
-      SHARED: 'ON'
-      DEBUG: 'OFF'
-    - job_name: 'CM VS2022, Debug, x64, no SSL, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-    - job_name: 'CM VS2022, Debug, x64, no SSL, Static, HTTP only, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      PRJ_GEN: 'Visual Studio 17 2022'
-      TARGET: '-A x64'
-      PRJ_CFG: Debug
-      HTTP_ONLY: 'ON'
+      CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=OFF'
 
-    # generated VisualStudioSolution-based builds
+    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
 
-    - job_name: 'VisualStudioSolution VS2010, Release, x86, Schannel, Build-only'
+    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, HTTP-only, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON'
+
+    # VisualStudioSolution builds
+
+    - job_name: 'VisualStudioSolution VS2010, Release, x86, Schannel'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
-      BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Release - DLL Windows SSPI - DLL WinIDN'
       PLAT: 'Win32'
       VC_VERSION: VC10
-    - job_name: 'VisualStudioSolution VS2013, Debug, x64, Schannel, Build-only'
+
+    - job_name: 'VisualStudioSolution VS2013, Debug, x64, Schannel'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
       PLAT: 'x64'
       VC_VERSION: VC12
