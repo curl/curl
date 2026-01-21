@@ -83,7 +83,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
       -DCURL_STATIC_CRT=ON \
-      -DCURL_USE_SCHANNEL="${SCHANNEL}" \
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
       ${CMAKE_OPTIONS:-} \

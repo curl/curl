@@ -34,11 +34,10 @@ environment:
   BUILD_SYSTEM: CMake
   UNITY: 'ON'
   OPENSSL: 'OFF'
-  SCHANNEL: 'ON'
   SHARED: 'OFF'
   TFLAGS: 'skiprun'
   EXAMPLES: 'OFF'
-  CMAKE_OPTIONS: '-DENABLE_DEBUG=ON'
+  CMAKE_OPTIONS: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON'
 
   matrix:
 
@@ -49,9 +48,9 @@ environment:
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Release
-      SCHANNEL: 'OFF'
       OPENSSL: 'ON'
       SHARED: 'ON'
+      CMAKE_OPTIONS: '-DCURL_USE_SCHANNEL=OFF'
     - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -124,14 +123,13 @@ environment:
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      SCHANNEL: 'OFF'
+      CMAKE_OPTIONS: '-DCURL_USE_SCHANNEL=OFF'
     - job_name: 'CM VS2022, Debug, x64, no SSL, Static, HTTP only, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      SCHANNEL: 'OFF'
-      CMAKE_OPTIONS: '-DHTTP_ONLY=ON'
+      CMAKE_OPTIONS: '-DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON'
 
     # generated VisualStudioSolution-based builds
 
