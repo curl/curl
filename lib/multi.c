@@ -337,7 +337,7 @@ CURLM *curl_multi_init(void)
                            CURL_TLS_SESSION_SIZE);
 }
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 {
   if(!multi->warned) {
