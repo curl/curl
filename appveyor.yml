@@ -98,13 +98,13 @@ environment:
       ENABLE_UNICODE: 'ON'
       CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=OFF'
 
-    - job_name: 'CM VS2022, Debug, x64, no SSL, Static, Build-tests'
+    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       PRJ_CFG: Debug
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
 
-    - job_name: 'CM VS2022, Debug, x64, no SSL, Static, HTTP only, Build-tests'
+    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, HTTP-only, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       PRJ_CFG: Debug
