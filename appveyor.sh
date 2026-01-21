@@ -41,7 +41,7 @@ elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
   openssl_root="$(cygpath "${openssl_root_win}")"
 fi
 
-if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+if [ -n "${GENERATE:-}" ]; then
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
     cmake_ver=$(printf '%02d%02d' \
@@ -64,8 +64,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   for _chkprefill in '' ${CHKPREFILL:-}; do
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-    [[ "${GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
-    [[ "${GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
+    [[ "${GENERATE}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+    [[ "${GENERATE}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
       mkdir "_bld${_chkprefill}"
       cd "_bld${_chkprefill}"
@@ -84,7 +84,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_STATIC_CRT=ON \
       -DCURL_USE_LIBPSL=OFF \
       -DCURL_USE_SCHANNEL=ON \
-      ${GENERATE:-} \
+      ${GENERATE} \
       ${options} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
@@ -96,10 +96,10 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
-  [[ "${GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
-  [[ "${GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
+  [[ "${GENERATE}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
+  [[ "${GENERATE}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
-elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
+else
   (
     cd projects/Windows
     ./generate.bat "${VC_VERSION}"
@@ -122,7 +122,7 @@ fi
 # build tests
 
 if [ "${TFLAGS}" != 'skipall' ] && \
-   [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+   [ -n "${GENERATE:-}" ]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
@@ -136,7 +136,7 @@ if [ "${TFLAGS}" != 'skipall' ] && \
     TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
   fi
   TFLAGS+=' -j0'
-  if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  if [ -n "${GENERATE:-}" ]; then
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     (
@@ -150,13 +150,13 @@ fi
 # build examples
 
 if [[ "${APPVEYOR_JOB_NAME}" = *'examples'* ]] && \
-   [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+   [ -n "${GENERATE:-}" ]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples-build
 fi
 
 # disk space used
 
 du -sh .; echo; du -sh -t 250KB ./*
-if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+if [ -n "${GENERATE:-}" ]; then
   echo; du -h -t 250KB _bld
 fi
