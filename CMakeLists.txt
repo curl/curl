@@ -300,6 +300,8 @@ if(CURL_CODE_COVERAGE)
   endif()
 endif()
 
+set(CURL_CFLAGS "")  # C flags set for libcurl and curl tool (aka public binaries) only
+
 option(CURL_PURGE_UNUSED "Drop unused code and data from built binaries" OFF)
 if(CURL_PURGE_UNUSED)
   if(APPLE)
@@ -311,7 +313,7 @@ if(CURL_PURGE_UNUSED)
   elseif(MSVC)
     # These options are toolchain defaults in Release configurations.
     # Not mandatory, but reduces binary size further, with the cost of larger objects/static libraries:
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
+    list(APPEND CURL_CFLAGS "-Gy")
     # This option does not seem to have an effect with VS2010:
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
@@ -324,7 +326,7 @@ if(CURL_PURGE_UNUSED)
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-fno-asynchronous-unwind-tables")
     endif()
     # Not mandatory, but reduces binary size further, with the cost of larger objects/static libraries:
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-ffunction-sections" "-fdata-sections")
+    list(APPEND CURL_CFLAGS "-ffunction-sections" "-fdata-sections")
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,--gc-sections")
     else()
