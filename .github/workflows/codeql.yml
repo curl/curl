@@ -56,19 +56,19 @@ jobs:
 
   c:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
-    name: 'C'
-    runs-on: ${{ matrix.platform == 'Linux' && 'ubuntu-latest' || 'windows-2022' }}
+    name: "C (${{ contains(matrix.image, 'ubuntu') && 'Linux' || 'Windows' }})"
+    runs-on: ${{ matrix.image }}
     permissions:
       security-events: write  # To create/update security events
     strategy:
       fail-fast: false
       matrix:
-        platform: [Linux, Windows]
+        image: [ubuntu-latest, windows-2022]
     env:
-      MATRIX_PLATFORM: '${{ matrix.platform }}'
+      MATRIX_IMAGE: '${{ matrix.image }}'
     steps:
       - name: 'install prereqs'
-        if: ${{ matrix.platform == 'Linux' }}
+        if: ${{ contains(matrix.image, 'ubuntu') }}
         timeout-minutes: 5
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
@@ -97,7 +97,7 @@ jobs:
         timeout-minutes: 10
         shell: bash
         run: |
-          if [ "${MATRIX_PLATFORM}" = 'Windows' ]; then
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             cmake -B . -DBUILD_SHARED_LIBS=OFF -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
               -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF -DUSE_WIN32_IDN=ON
