@@ -109,10 +109,20 @@ static int wakeup_socketpair(curl_socket_t socks[2], bool nonblocking)
        curlx_nonblock(socks[1], TRUE) < 0) {
       sclose(socks[0]);
       sclose(socks[1]);
+      socks[0] = socks[1] = CURL_SOCKET_BAD;
       return -1;
     }
   }
 #endif
+#ifdef USE_SO_NOSIGPIPE
+  if(Curl_sock_nosigpipe(socks[1]) < 0) {
+    sclose(socks[0]);
+    sclose(socks[1]);
+    socks[0] = socks[1] = CURL_SOCKET_BAD;
+    return -1;
+  }
+#endif /* USE_SO_NOSIGPIPE */
+
   return 0;
 }
 
@@ -253,6 +263,10 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0)
       goto error;
+#ifdef USE_SO_NOSIGPIPE
+  if(Curl_sock_nosigpipe(socks[1]) < 0)
+    goto error;
+#endif
   sclose(listener);
   return 0;
 
@@ -260,6 +274,7 @@ error:
   sclose(listener);
   sclose(socks[0]);
   sclose(socks[1]);
+  socks[0] = socks[1] = CURL_SOCKET_BAD;
   return -1;
 }
 
