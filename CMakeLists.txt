@@ -309,8 +309,12 @@ if(CURL_PURGE_UNUSED)
       set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,-dead_strip")
     endif()
   elseif(MSVC)
+    # Both compiler and linker option are toolchain defaults in Release configurations.
     # https://learn.microsoft.com/cpp/build/reference/opt-optimizations
-    # Toolchain default in Release configurations.
+    # Not mandatory, but helps further reducing binary size. Makes objects/static libraries grow.
+    # https://learn.microsoft.com/cpp/build/reference/gy-enable-function-level-linking
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
+    # This linker option does not seem to have an effect with VS2010.
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
     else()
@@ -328,10 +332,6 @@ if(CURL_PURGE_UNUSED)
       set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,--gc-sections")
     endif()
   endif()
-endif()
-option(CURL_PURGE_UNUSED_TWEAK "Drop unused code and data from built binaries" OFF)
-if(CURL_PURGE_UNUSED_TWEAK AND MSVC)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
 endif()
 
 # For debug libs and exes, add "-d" postfix
