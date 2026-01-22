@@ -195,7 +195,9 @@ static void up_free(struct Curl_easy *data)
   Curl_safefree(up->scheme);
   Curl_safefree(up->hostname);
   Curl_safefree(up->port);
+#if 0
   Curl_safefree(up->user);
+#endif
   Curl_safefree(up->password);
   Curl_safefree(up->options);
   Curl_safefree(up->path);
