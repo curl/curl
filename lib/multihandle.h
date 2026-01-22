@@ -174,10 +174,7 @@ struct Curl_multi {
 #ifdef DEBUGBUILD
   unsigned int now_access_count;
 #endif
-#define IPV6_UNKNOWN 0
-#define IPV6_DEAD    1
-#define IPV6_WORKS   2
-  unsigned char ipv6_up;       /* IPV6_* defined */
+  BIT(ipv6_works);
   BIT(multiplexing);           /* multiplexing wanted */
   BIT(recheckstate);           /* see Curl_multi_connchanged */
   BIT(in_callback);            /* true while executing a callback */

@@ -100,9 +100,8 @@ jobs:
 
       - name: 'install'
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install aspell aspell-en
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-docs.txt
@@ -125,7 +124,7 @@ jobs:
           persist-credentials: false
 
       - name: 'badwords'
-        run: .github/scripts/badwords.pl -w .github/scripts/badwords.ok '**.md' packages/OS400/README.OS400 < .github/scripts/badwords.txt
+        run: .github/scripts/badwords.pl -w .github/scripts/badwords.ok '**.md' projects/OS400/README.OS400 < .github/scripts/badwords.txt
 
       - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
@@ -140,15 +139,3 @@ jobs:
 
       - name: 'verify examples'
         run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
-
-  miscchecks:
-    name: 'spacecheck'
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          persist-credentials: false
-
-      - name: 'spacecheck'
-        run: .github/scripts/spacecheck.pl

@@ -23,10 +23,11 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "doh.h"
-
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
+
+#include "doh.h"
+#include "httpsrr.h"
 
 static CURLcode t1658_setup(void)
 {
@@ -342,7 +343,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x03" /* data size */
-      "\x12\x34\x00", /* 24 bit port number! */
+      "\x12\x34\x00", /* 24-bit port number */
       17,
       "r:43|"
     },
@@ -356,7 +357,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x01" /* data size */
-      "\x12", /* 8 bit port number! */
+      "\x12", /* 8-bit port number */
       15,
       "r:43|"
     },

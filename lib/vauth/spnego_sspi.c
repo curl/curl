@@ -95,10 +95,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   SecBufferDesc resp_desc;
   unsigned long attrs;
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
-
   if(nego->context && nego->status == SEC_E_OK) {
     /* We finished successfully our part of authentication, but server
      * rejected it (since we are again here). Exit with an error since we

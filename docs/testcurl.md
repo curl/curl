@@ -5,7 +5,7 @@ Title: testcurl.pl
 Section: 1
 Source: testcurl
 See-also:
- - runtests.pl
+  - runtests.pl
 Added-in: 7.11.2
 ---
 

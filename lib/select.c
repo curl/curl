@@ -568,7 +568,6 @@ CURLcode Curl_pollset_change(struct Curl_easy *data,
   DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
 #endif
 
-  (void)data;
   DEBUGASSERT(VALID_SOCK(sock));
   if(!VALID_SOCK(sock))
     return CURLE_BAD_FUNCTION_ARGUMENT;

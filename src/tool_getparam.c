@@ -182,7 +182,7 @@ static const struct LongShort aliases[]= {
   {"ip-tos",                     ARG_STRG, ' ', C_IP_TOS},
 #ifndef CURL_DISABLE_IPFS
   {"ipfs-gateway",               ARG_STRG, ' ', C_IPFS_GATEWAY},
-#endif /* !CURL_DISABLE_IPFS */
+#endif
   {"ipv4",                       ARG_NONE, '4', C_IPV4},
   {"ipv6",                       ARG_NONE, '6', C_IPV6},
   {"json",                       ARG_STRG, ' ', C_JSON},
@@ -381,10 +381,9 @@ static const struct LongShort aliases[]= {
  *
  * Unit test 1394
  */
-UNITTEST
-ParameterError parse_cert_parameter(const char *cert_parameter,
-                                    char **certname,
-                                    char **passphrase)
+UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
+                                             char **certname,
+                                             char **passphrase)
 {
   size_t param_length = strlen(cert_parameter);
   size_t span;
@@ -534,54 +533,93 @@ static ParameterError GetFileAndPassword(const char *nextarg, char **file,
   return err;
 }
 
+struct sizeunit {
+  char unit; /* single lowercase ASCII letter */
+  curl_off_t mul;
+  size_t mlen; /* number of digits in 'mul', when written in decimal */
+};
+
+static const struct sizeunit *getunit(char unit)
+{
+  static const struct sizeunit list[] = {
+    {'p', (curl_off_t)1125899906842624, 16 }, /* Peta */
+    {'t', (curl_off_t)1099511627776,    13 }, /* Tera */
+    {'g', 1073741824,                   10 }, /* Giga */
+    {'m', 1048576,                       7 }, /* Mega */
+    {'k', 1024,                          4 }, /* Kilo */
+  };
+
+  size_t i;
+  for(i = 0; i < CURL_ARRAYSIZE(list); i++)
+    if((unit | 0x20) == list[i].unit)
+      return &list[i];
+  return NULL;
+}
+
 /* Get a size parameter for '--limit-rate' or '--max-filesize'.
- * We support a 'G', 'M' or 'K' suffix too.
+   We support P, T, G, M and K (case insensitive) suffixes.
+
+   Unit test 1623
   */
-static ParameterError GetSizeParameter(const char *arg,
-                                       const char *which,
-                                       curl_off_t *value_out)
+UNITTEST ParameterError GetSizeParameter(const char *arg, curl_off_t *out)
 {
   const char *unit = arg;
   curl_off_t value;
+  curl_off_t prec = 0;
+  size_t plen = 0;
+  curl_off_t add = 0;
+  curl_off_t mul = 1;
+  int rc;
 
-  if(curlx_str_number(&unit, &value, CURL_OFF_T_MAX)) {
-    warnf("invalid number specified for %s", which);
-    return PARAM_BAD_USE;
+  rc = curlx_str_number(&unit, &value, CURL_OFF_T_MAX);
+  if(rc == STRE_OVERFLOW)
+    return PARAM_NUMBER_TOO_LARGE;
+  else if(rc)
+    return PARAM_BAD_NUMERIC;
+
+  if(!curlx_str_single(&unit, '.')) {
+    const char *s = unit;
+    if(curlx_str_number(&unit, &prec, CURL_OFF_T_MAX))
+      return PARAM_BAD_NUMERIC;
+    plen = unit - s;
   }
 
-  if(!*unit)
-    unit = "b";
-  else if(strlen(unit) > 1)
-    unit = "w"; /* unsupported */
-
-  switch(*unit) {
-  case 'G':
-  case 'g':
-    if(value > (CURL_OFF_T_MAX / (1024 * 1024 * 1024)))
-      return PARAM_NUMBER_TOO_LARGE;
-    value *= 1024 * 1024 * 1024;
-    break;
-  case 'M':
-  case 'm':
-    if(value > (CURL_OFF_T_MAX / (1024 * 1024)))
-      return PARAM_NUMBER_TOO_LARGE;
-    value *= 1024 * 1024;
-    break;
-  case 'K':
-  case 'k':
-    if(value > (CURL_OFF_T_MAX / 1024))
-      return PARAM_NUMBER_TOO_LARGE;
-    value *= 1024;
-    break;
-  case 'b':
-  case 'B':
-    /* for plain bytes, leave as-is */
-    break;
-  default:
-    warnf("unsupported %s unit. Use G, M, K or B", which);
+  if(strlen(unit) > 1)
     return PARAM_BAD_USE;
+  else if(!*unit || ((*unit | 0x20) == 'b')) {
+    if(plen)
+      /* cannot handle partial bytes */
+      return PARAM_BAD_USE;
   }
-  *value_out = value;
+  else {
+    const struct sizeunit *su = getunit(*unit);
+    if(!su)
+      return PARAM_BAD_USE;
+    mul = su->mul;
+
+    if(prec) {
+      /* precision was provided */
+      curl_off_t frac = 1;
+
+      /* too many precision digits, trim them */
+      while(su->mlen <= plen) {
+        prec /= 10;
+        plen--;
+      }
+
+      while(plen--)
+        frac *= 10;
+
+      if((CURL_OFF_T_MAX / mul) > prec)
+        add = mul * prec / frac;
+      else
+        add = (mul / frac) * prec;
+    }
+  }
+  if(value > ((CURL_OFF_T_MAX - add) / mul))
+    return PARAM_NUMBER_TOO_LARGE;
+
+  *out = value * mul + add;
   return PARAM_OK;
 }
 
@@ -2365,7 +2403,7 @@ static ParameterError opt_string(struct OperationConfig *config,
       err = getstr(&config->dns_servers, nextarg, DENY_BLANK);
     break;
   case C_LIMIT_RATE: /* --limit-rate */
-    err = GetSizeParameter(nextarg, "rate", &value);
+    err = GetSizeParameter(nextarg, &value);
     if(!err) {
       config->recvpersecond = value;
       config->sendpersecond = value;
@@ -2388,7 +2426,7 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_IPFS_GATEWAY: /* --ipfs-gateway */
     err = getstr(&config->ipfs_gateway, nextarg, DENY_BLANK);
     break;
-#endif /* !CURL_DISABLE_IPFS */
+#endif
   case C_AWS_SIGV4: /* --aws-sigv4 */
     config->authtype |= CURLAUTH_AWS_SIGV4;
     err = getstr(&config->aws_sigv4, nextarg, ALLOW_BLANK);
@@ -2401,7 +2439,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&config->haproxy_clientip, nextarg, DENY_BLANK);
     break;
   case C_MAX_FILESIZE: /* --max-filesize */
-    err = GetSizeParameter(nextarg, "max-filesize", &value);
+    err = GetSizeParameter(nextarg, &value);
     if(!err)
       config->max_filesize = value;
     break;

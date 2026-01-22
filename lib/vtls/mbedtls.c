@@ -389,7 +389,7 @@ add_ciphers:
 static void mbed_dump_cert_info(struct Curl_easy *data,
                                 const mbedtls_x509_crt *crt)
 {
-#if defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(MBEDTLS_X509_REMOVE_INFO)
+#if !defined(CURLVERBOSE) || defined(MBEDTLS_X509_REMOVE_INFO)
   (void)data, (void)crt;
 #else
   const size_t bufsize = 16384;
@@ -930,17 +930,21 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+#if defined(MBEDTLS_PK_WRITE_C) && defined(MBEDTLS_SSL_KEEP_PEER_CERTIFICATE)
+#define HAVE_PINNED_PUBKEY
+#endif
+
 static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
-#if defined(MBEDTLS_PK_WRITE_C) || defined(HAS_ALPN_MBEDTLS)
+#if defined(HAVE_PINNED_PUBKEY) || defined(HAS_ALPN_MBEDTLS)
   CURLcode result;
 #endif
   int ret;
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-#ifdef MBEDTLS_PK_WRITE_C
+#ifdef HAVE_PINNED_PUBKEY
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
@@ -986,7 +990,7 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
           mbedtls_ssl_get_version(&backend->ssl), cipher_str);
   }
 
-#ifdef MBEDTLS_PK_WRITE_C
+#ifdef HAVE_PINNED_PUBKEY
   if(pinnedpubkey) {
     int size;
     const mbedtls_x509_crt *peercert;
@@ -1133,7 +1137,6 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   int nwritten;
 
-  (void)data;
   DEBUGASSERT(backend);
   *pnwritten = 0;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
@@ -1305,7 +1308,6 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   int nread;
 
-  (void)data;
   DEBUGASSERT(backend);
   *pnread = 0;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
@@ -1442,7 +1444,7 @@ static int mbedtls_init(void)
                               NULL, 0);
 
   if(ret) {
-    failf(NULL, " failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
+    failf(NULL, "failed: mbedtls_ctr_drbg_seed returned -0x%x",
           (unsigned int)-ret);
     return 0;
   }
@@ -1516,13 +1518,19 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_CERTINFO |
+#ifdef HAVE_PINNED_PUBKEY
   SSLSUPP_PINNEDPUBKEY |
+#endif
   SSLSUPP_SSL_CTX |
 #ifdef MBEDTLS_SSL_PROTO_TLS1_3  /* requires mbedTLS 3.6.0+ */
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
   SSLSUPP_HTTPS_PROXY |
-  SSLSUPP_CIPHER_LIST,
+  SSLSUPP_CIPHER_LIST |
+#ifdef MBEDTLS_X509_CRL_PARSE_C
+  SSLSUPP_CRLFILE |
+#endif
+  0,
 
   sizeof(struct mbed_ssl_backend_data),
 

@@ -101,56 +101,6 @@ AS_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
 ])
 
 
-dnl CURL_CHECK_OPTION_CURLDEBUG
-dnl -------------------------------------------------
-dnl Verify if configure has been invoked with option
-dnl --enable-curldebug or --disable-curldebug, and set
-dnl shell variable want_curldebug value as appropriate.
-
-AC_DEFUN([CURL_CHECK_OPTION_CURLDEBUG], [
-  AC_MSG_CHECKING([whether to enable curl debug memory tracking])
-  OPT_CURLDEBUG_BUILD="default"
-  AC_ARG_ENABLE(curldebug,
-AS_HELP_STRING([--enable-curldebug],[Enable curl debug memory tracking])
-AS_HELP_STRING([--disable-curldebug],[Disable curl debug memory tracking]),
-  OPT_CURLDEBUG_BUILD=$enableval)
-  case "$OPT_CURLDEBUG_BUILD" in
-    no)
-      dnl --disable-curldebug option used
-      want_curldebug="no"
-      AC_MSG_RESULT([no])
-      ;;
-    default)
-      dnl configure's curldebug option not specified. Initially we will
-      dnl handle this as a request to use the same setting as option
-      dnl --enable-debug. IOW, initially, for debug-enabled builds
-      dnl this will be handled as a request to enable curldebug if
-      dnl possible, and for debug-disabled builds this will be handled
-      dnl as a request to disable curldebug.
-      if test "$want_debug" = "yes"; then
-        AC_MSG_RESULT([(assumed) yes])
-      else
-        AC_MSG_RESULT([no])
-      fi
-      want_curldebug_assumed="yes"
-      want_curldebug="$want_debug"
-      ;;
-    *)
-      dnl --enable-curldebug option used.
-      dnl The use of this option value is a request to enable curl's
-      dnl debug memory tracking for the libcurl library. This can only
-      dnl be done when some requisites are simultaneously satisfied.
-      dnl Later on, these requisites are verified and if they are not
-      dnl fully satisfied the option will be ignored and act as if
-      dnl --disable-curldebug had been given setting shell variable
-      dnl want_curldebug to 'no'.
-      want_curldebug="yes"
-      AC_MSG_RESULT([yes])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_OPTION_DEBUG
 dnl -------------------------------------------------
 dnl Verify if configure has been invoked with option
@@ -159,7 +109,6 @@ dnl variable want_debug value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
   AC_BEFORE([$0],[CURL_CHECK_OPTION_WARNINGS])dnl
-  AC_BEFORE([$0],[CURL_CHECK_OPTION_CURLDEBUG])dnl
   AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable debug build options])
   OPT_DEBUG_BUILD="default"
@@ -291,7 +240,7 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
   AC_MSG_CHECKING([whether to disable dependency on -lrt])
   OPT_RT="default"
   AC_ARG_ENABLE(rt,
- AS_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
+AS_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
   OPT_RT=$enableval)
   case "$OPT_RT" in
     no)

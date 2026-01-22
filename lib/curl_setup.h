@@ -89,10 +89,6 @@
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
-/* Avoid VS2005 and upper complaining about portable C functions. */
-#ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
-#endif
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
 #endif
@@ -154,11 +150,19 @@
 #  include "config-os400.h"
 #endif
 
-#ifdef __PLAN9__
-#  include "config-plan9.h"
-#endif
-
 #endif /* HAVE_CONFIG_H */
+
+#ifdef _WIN32
+#  if defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600)
+#    error The minimum build target is Windows Vista (0x0600)
+#  endif
+
+#  if !defined(CURL_WINDOWS_UWP) && (defined(_MSC_VER) || defined(__MINGW32__))
+#    ifndef HAVE_IF_NAMETOINDEX
+#    define HAVE_IF_NAMETOINDEX
+#    endif
+#  endif
+#endif
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
@@ -443,6 +447,10 @@
 /* Whether to use eventfd() */
 #if defined(HAVE_EVENTFD) && defined(HAVE_SYS_EVENTFD_H)
 #define USE_EVENTFD
+#endif
+
+#ifdef SO_NOSIGPIPE
+#define USE_SO_NOSIGPIPE
 #endif
 
 #include <stdio.h>
@@ -796,6 +804,13 @@
 #  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
 #  undef  write
 #  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
+/* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about non-portable funcs */
+#  undef fileno
+#  define fileno(fh) _fileno(fh)
+#  undef unlink
+#  define unlink(fn) _unlink(fn)
+#  undef isatty
+#  define isatty(fd) _isatty(fd)
 #endif
 
 /*
@@ -945,7 +960,11 @@ extern curl_calloc_callback Curl_ccalloc;
 
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
+#define CURL_MEMDEBUG
+#endif
+
+#ifdef CURL_MEMDEBUG
 #ifdef __clang__
 #  define ALLOC_FUNC         __attribute__((__malloc__))
 #  if __clang_major__ >= 4
@@ -1041,7 +1060,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
 
-#else /* !CURLDEBUG */
+#else /* !CURL_MEMDEBUG */
 
 #define sclose(x) CURL_SCLOSE(x)
 #define fake_sclose(x) Curl_nop_stmt
@@ -1057,11 +1076,11 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define CURL_ACCEPT4 accept4
 #endif
 
-#endif /* CURLDEBUG */
+#endif /* CURL_MEMDEBUG */
 
 /* Allocator macros */
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 
 #define curlx_strdup(ptr)          curl_dbg_strdup(ptr, __LINE__, __FILE__)
 #define curlx_malloc(size)         curl_dbg_malloc(size, __LINE__, __FILE__)
@@ -1079,7 +1098,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #endif
 #endif /* _WIN32 */
 
-#else /* !CURLDEBUG */
+#else /* !CURL_MEMDEBUG */
 
 #ifdef BUILDING_LIBCURL
 #define curlx_strdup(ptr)          Curl_cstrdup(ptr)
@@ -1107,7 +1126,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #endif
 #endif /* _WIN32 */
 
-#endif /* CURLDEBUG */
+#endif /* CURL_MEMDEBUG */
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
@@ -1196,6 +1215,22 @@ typedef struct sockaddr_un {
 /* Probably 'inline' is not supported by compiler.
    Define to the empty string to be on the safe side. */
 #  define CURL_INLINE /* empty */
+#endif
+
+/* Detect if compiler supports C99 variadic macros */
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
+  defined(_MSC_VER)
+#define CURL_HAVE_MACRO_VARARG
+#endif
+
+#if !defined(CURL_HAVE_MACRO_VARARG) || \
+  (defined(CURL_HAVE_MACRO_VARARG) && !defined(CURL_DISABLE_VERBOSE_STRINGS))
+#define CURLVERBOSE
+#define VERBOSE(x) x
+#define NOVERBOSE(x) Curl_nop_stmt
+#else
+#define VERBOSE(x) Curl_nop_stmt
+#define NOVERBOSE(x) x
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */

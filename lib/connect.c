@@ -100,25 +100,27 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
  * transfer/connection. If the value is 0, there is no timeout (ie there is
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
- * @param data the transfer to check on
- * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
 timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
-                                const struct curltime *pnow,
-                                bool duringconnect)
+                                const struct curltime *pnow)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
-  timediff_t ctimeout_ms;
 
-  /* The duration of a connect and the total transfer are calculated from two
-     different time-stamps. It can end up with the total timeout being reached
-     before the connect timeout expires and we must acknowledge whichever
-     timeout that is reached first. The total timeout is set per entire
-     operation, while the connect timeout is set per connect. */
-  if((!data->set.timeout || data->set.connect_only) && !duringconnect)
+  if(Curl_shutdown_started(data, FIRSTSOCKET))
+    return Curl_shutdown_timeleft(data, data->conn, FIRSTSOCKET);
+  else if(Curl_is_connecting(data)) {
+    timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
+      data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+    ctimeleft_ms = ctimeout_ms -
+      curlx_ptimediff_ms(pnow, &data->progress.t_startsingle);
+    if(!ctimeleft_ms)
+      ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
+  }
+  else if(!data->set.timeout || data->set.connect_only) {
     return 0; /* no timeout in place or checked, return "no limit" */
+  }
 
   if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
@@ -127,25 +129,16 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   }
 
-  if(!duringconnect)
-    return timeleft_ms; /* no connect check, this is it */
-  ctimeout_ms = (data->set.connecttimeout > 0) ?
-    data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
-  ctimeleft_ms = ctimeout_ms -
-    curlx_ptimediff_ms(pnow, &data->progress.t_startsingle);
   if(!ctimeleft_ms)
-    ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
-  if(!timeleft_ms)
-    return ctimeleft_ms; /* no general timeout, this is it */
-
-  /* return minimal time left or max amount already expired */
-  return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
+    return timeleft_ms;
+  else if(!timeleft_ms)
+    return ctimeleft_ms;
+  return CURLMIN(ctimeleft_ms, timeleft_ms);
 }
 
-timediff_t Curl_timeleft_ms(struct Curl_easy *data,
-                            bool duringconnect)
+timediff_t Curl_timeleft_ms(struct Curl_easy *data)
 {
-  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data), duringconnect);
+  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
@@ -162,6 +155,8 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
   /* Set a timer, unless we operate on the admin handle */
   if(data->mid)
     Curl_expire_ex(data, conn->shutdown.timeout_ms, EXPIRE_SHUTDOWN);
+  CURL_TRC_M(data, "shutdown start on%s connection",
+             sockindex ? " secondary" : "");
 }
 
 timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
@@ -204,8 +199,11 @@ void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
 
 bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
 {
-  struct curltime *pt = &data->conn->shutdown.start[sockindex];
-  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
+  if(data->conn) {
+    struct curltime *pt = &data->conn->shutdown.start[sockindex];
+    return (pt->tv_sec > 0) || (pt->tv_usec > 0);
+  }
+  return FALSE;
 }
 
 /* retrieves ip address and port from a sockaddr structure. note it calls
@@ -299,7 +297,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
  */
 void Curl_conncontrol(struct connectdata *conn,
                       int ctrl /* see defines in header */
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
                       , const char *reason
 #endif
   )
@@ -309,7 +307,7 @@ void Curl_conncontrol(struct connectdata *conn,
      associated with a transfer. */
   bool closeit, is_multiplex;
   DEBUGASSERT(conn);
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   (void)reason; /* useful for debugging */
 #endif
   is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
@@ -317,7 +315,7 @@ void Curl_conncontrol(struct connectdata *conn,
             ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
   if((ctrl == CONNCTRL_STREAM) && is_multiplex)
     ;  /* stream signal on multiplex conn never affects close state */
-  else if((bit)closeit != conn->bits.close) {
+  else if((curl_bit)closeit != conn->bits.close) {
     conn->bits.close = closeit; /* the only place in the source code that
                                    should assign this bit */
   }
@@ -428,7 +426,7 @@ connect_sub_chain:
 #ifdef USE_SSL
     if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-         cf->conn->handler->flags & PROTOPT_SSL))       /* we want SSL */
+         cf->conn->scheme->flags & PROTOPT_SSL))       /* we want SSL */
        && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
       result = Curl_cf_ssl_insert_after(cf, data);
       if(result)
@@ -465,7 +463,6 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
 
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   Curl_safefree(ctx);
 }
@@ -564,7 +561,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  DEBUGASSERT(conn->handler);
+  DEBUGASSERT(conn->scheme);
   DEBUGASSERT(dns);
 
   Curl_resolv_unlink(data, &data->state.dns[sockindex]);
@@ -572,7 +569,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
-     conn->handler->protocol == CURLPROTO_HTTPS) {
+     conn->scheme->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
     result = Curl_cf_https_setup(data, conn, sockindex);
     if(result)

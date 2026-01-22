@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 
 #include <stddef.h>  /* for offsetof() */
 
@@ -115,6 +115,7 @@ static void curl_dbg_cleanup(void)
   }
 #endif
 }
+
 #ifdef USE_BACKTRACE
 static void error_bt_callback(void *data, const char *message,
                               int error_number)
@@ -496,8 +497,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
-  /* !checksrc! disable BANNEDFUNC 1 */
-  FILE *res = fdopen(filedes, mode);
+  FILE *res = CURLX_FDOPEN_LOW(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
@@ -574,4 +574,4 @@ void curl_dbg_log(const char *format, ...)
   curl_dbg_unlock(was_locked);
 }
 
-#endif /* CURLDEBUG */
+#endif /* CURL_MEMDEBUG */

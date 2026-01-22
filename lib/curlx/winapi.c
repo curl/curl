@@ -39,30 +39,27 @@
 const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 {
   char *p;
-  wchar_t wbuf[256];
-  DWORD wlen;
 
   if(!buflen)
     return NULL;
 
-  *buf = '\0';
-  *wbuf = L'\0';
-
   /* We return the local codepage version of the error string because if it is
      output to the user's terminal it will likely be with functions which
      expect the local codepage (eg fprintf, failf, infof). */
-  wlen = FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                         FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                        LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL);
-  if(wlen && !wcstombs_s(NULL, buf, buflen, wbuf, wlen)) {
-    /* Truncate multiple lines */
-    p = strchr(buf, '\n');
-    if(p) {
-      if(p > buf && *(p - 1) == '\r')
-        *(p - 1) = '\0';
-      else
-        *p = '\0';
-    }
+  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
+                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                     LANG_NEUTRAL, buf, (DWORD)buflen, NULL)) {
+    *buf = '\0';
+    return NULL;
+  }
+
+  /* Truncate multiple lines */
+  p = strchr(buf, '\n');
+  if(p) {
+    if(p > buf && *(p - 1) == '\r')
+      *(p - 1) = '\0';
+    else
+      *p = '\0';
   }
 
   return *buf ? buf : NULL;
@@ -78,7 +75,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(!curlx_get_winapi_error(err, buf, buflen)) {
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic push

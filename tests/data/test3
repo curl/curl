@@ -35,7 +35,7 @@ http
 HTTP POST with auth and contents but with content-length set to 0
 </name>
 <command>
- -d "fooo=mooo%AMPpooo=clue%AMPdoo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-d "fooo=mooo%AMPpooo=clue%AMPdoo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

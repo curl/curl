@@ -74,7 +74,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_DOH_URL,
                      "https://cloudflare-dns.com/dns-query");
 
-    /* Disable host name verification of the DoH server */
+    /* Disable hostname verification of the DoH server */
     curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0L);
 
     curl_easy_perform(curl);

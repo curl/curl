@@ -656,8 +656,8 @@ sub checksystemfeatures {
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
 
-            # built with memory tracking support (--enable-curldebug); may be disabled later
-            $feature{"TrackMemory"} = $feat =~ /TrackMemory/i;
+            # built with memory tracking support (--enable-debug); may be disabled later
+            $feature{"TrackMemory"} = $feat =~ /Debug/i;
             # curl was built with --enable-debug
             $feature{"Debug"} = $feat =~ /Debug/i;
             # ssl enabled
@@ -846,7 +846,7 @@ sub checksystemfeatures {
 
     if($torture && !$feature{"TrackMemory"}) {
         die "cannot run torture tests since curl was built without ".
-            "TrackMemory feature (--enable-curldebug)";
+            "TrackMemory feature (--enable-debug)";
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
@@ -2633,7 +2633,7 @@ if(!$randseed) {
     close($curlvh) || die "could not get curl version!";
     # use the first line of output and get the md5 out of it
     my $str = md5($c[0]);
-    $randseed += unpack('S', $str);  # unsigned 16 bit value
+    $randseed += unpack('S', $str);  # unsigned 16-bit value
 }
 srand $randseed;
 

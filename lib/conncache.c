@@ -69,11 +69,6 @@ struct cpool_bundle {
   char dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
 };
 
-static void cpool_discard_conn(struct cpool *cpool,
-                               struct Curl_easy *data,
-                               struct connectdata *conn,
-                               bool aborted);
-
 static struct cpool_bundle *cpool_bundle_create(const char *dest)
 {
   struct cpool_bundle *bundle;
@@ -189,26 +184,74 @@ static void cpool_remove_conn(struct cpool *cpool,
   }
 }
 
+static void cpool_discard_conn(struct cpool *cpool,
+                               struct Curl_easy *data,
+                               struct connectdata *conn,
+                               bool aborted)
+{
+  bool done = FALSE;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(!data->conn);
+  DEBUGASSERT(cpool);
+  DEBUGASSERT(!conn->bits.in_cpool);
+
+  /*
+   * If this connection is not marked to force-close, leave it open if there
+   * are other users of it
+   */
+  if(CONN_INUSE(conn) && !aborted) {
+    CURL_TRC_M(data, "[CPOOL] not discarding #%" FMT_OFF_T
+               " still in use by %u transfers", conn->connection_id,
+               conn->attached_xfers);
+    return;
+  }
+
+  /* treat the connection as aborted in CONNECT_ONLY situations, we do
+   * not know what the APP did with it. */
+  if(conn->connect_only)
+    aborted = TRUE;
+  conn->bits.aborted = aborted;
+
+  /* We do not shutdown dead connections. The term 'dead' can be misleading
+   * here, as we also mark errored connections/transfers as 'dead'.
+   * If we do a shutdown for an aborted transfer, the server might think
+   * it was successful otherwise (for example an ftps: upload). This is
+   * not what we want. */
+  if(aborted)
+    done = TRUE;
+  if(!done) {
+    /* Attempt to shutdown the connection right away. */
+    Curl_cshutdn_run_once(cpool->idata, conn, &done);
+  }
+
+  if(done || !data->multi)
+    Curl_cshutdn_terminate(cpool->idata, conn, FALSE);
+  else
+    Curl_cshutdn_add(&data->multi->cshutdn, conn, cpool->num_conn);
+}
+
 void Curl_cpool_destroy(struct cpool *cpool)
 {
   if(cpool && cpool->initialised && cpool->idata) {
     struct connectdata *conn;
-    SIGPIPE_VARIABLE(pipe_st);
+    struct Curl_sigpipe_ctx pipe_ctx;
 
     CURL_TRC_M(cpool->idata, "%s[CPOOL] destroy, %zu connections",
                cpool->share ? "[SHARE] " : "", cpool->num_conn);
     /* Move all connections to the shutdown list */
-    sigpipe_init(&pipe_st);
+    sigpipe_init(&pipe_ctx);
     CPOOL_LOCK(cpool, cpool->idata);
     conn = cpool_get_first(cpool);
+    if(conn)
+      sigpipe_apply(cpool->idata, &pipe_ctx);
     while(conn) {
       cpool_remove_conn(cpool, conn);
-      sigpipe_apply(cpool->idata, &pipe_st);
       cpool_discard_conn(cpool, cpool->idata, conn, FALSE);
       conn = cpool_get_first(cpool);
     }
     CPOOL_UNLOCK(cpool, cpool->idata);
-    sigpipe_restore(&pipe_st);
+    sigpipe_restore(&pipe_ctx);
     Curl_hash_destroy(&cpool->dest2bundle);
   }
 }
@@ -592,53 +635,6 @@ bool Curl_cpool_find(struct Curl_easy *data,
   return result;
 }
 
-static void cpool_discard_conn(struct cpool *cpool,
-                               struct Curl_easy *data,
-                               struct connectdata *conn,
-                               bool aborted)
-{
-  bool done = FALSE;
-
-  DEBUGASSERT(data);
-  DEBUGASSERT(!data->conn);
-  DEBUGASSERT(cpool);
-  DEBUGASSERT(!conn->bits.in_cpool);
-
-  /*
-   * If this connection is not marked to force-close, leave it open if there
-   * are other users of it
-   */
-  if(CONN_INUSE(conn) && !aborted) {
-    CURL_TRC_M(data, "[CPOOL] not discarding #%" FMT_OFF_T
-               " still in use by %u transfers", conn->connection_id,
-               conn->attached_xfers);
-    return;
-  }
-
-  /* treat the connection as aborted in CONNECT_ONLY situations, we do
-   * not know what the APP did with it. */
-  if(conn->connect_only)
-    aborted = TRUE;
-  conn->bits.aborted = aborted;
-
-  /* We do not shutdown dead connections. The term 'dead' can be misleading
-   * here, as we also mark errored connections/transfers as 'dead'.
-   * If we do a shutdown for an aborted transfer, the server might think
-   * it was successful otherwise (for example an ftps: upload). This is
-   * not what we want. */
-  if(aborted)
-    done = TRUE;
-  if(!done) {
-    /* Attempt to shutdown the connection right away. */
-    Curl_cshutdn_run_once(cpool->idata, conn, &done);
-  }
-
-  if(done || !data->multi)
-    Curl_cshutdn_terminate(cpool->idata, conn, FALSE);
-  else
-    Curl_cshutdn_add(&data->multi->cshutdn, conn, cpool->num_conn);
-}
-
 void Curl_conn_terminate(struct Curl_easy *data,
                          struct connectdata *conn,
                          bool aborted)
@@ -808,7 +804,7 @@ static int cpool_do_conn(struct Curl_easy *data,
                          struct connectdata *conn, void *param)
 {
   struct cpool_do_conn_ctx *dctx = param;
-  (void)data;
+
   if(conn->connection_id == dctx->id) {
     dctx->cb(conn, data, dctx->cbdata);
     return 1;
@@ -858,7 +854,6 @@ static int cpool_mark_stale(struct Curl_easy *data,
 static int cpool_reap_no_reuse(struct Curl_easy *data,
                                struct connectdata *conn, void *param)
 {
-  (void)data;
   (void)param;
   if(!CONN_INUSE(conn) && conn->bits.no_reuse) {
     Curl_conn_terminate(data, conn, FALSE);

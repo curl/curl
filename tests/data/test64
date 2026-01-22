@@ -61,21 +61,21 @@ digest
 HTTP with Digest authorization
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
+'http://%HOSTIP:%HTTPPORT/%TESTNUMBER"' -u testuser:testpass --digest
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-GET /%TESTNUMBER HTTP/1.1
+GET /%TESTNUMBER" HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /%TESTNUMBER HTTP/1.1
+GET /%TESTNUMBER" HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER", response="c55f7f30d83d774a3d2dcacf725abaca"
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER\"", response="1ee14b238b3259f17602e9ce41491ef9"
 User-Agent: curl/%VERSION
 Accept: */*
 

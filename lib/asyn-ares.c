@@ -47,6 +47,7 @@
 
 #include "urldata.h"
 #include "cfilters.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "hostip.h"
 #include "url.h"
@@ -334,10 +335,13 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
         Curl_dnscache_mk_entry(data, ares->temp_ai,
                                data->state.async.hostname, 0,
                                data->state.async.port, FALSE);
-      if(data->state.async.dns)
-        ares->temp_ai = NULL; /* temp_ai now owned by entry */
+      if(!data->state.async.dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+      ares->temp_ai = NULL; /* temp_ai now owned by entry */
 #ifdef HTTPSRR_WORKS
-      if(data->state.async.dns) {
+      {
         struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&ares->hinfo);
         if(!lhrr)
           result = CURLE_OUT_OF_MEMORY;
@@ -345,7 +349,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
           data->state.async.dns->hinfo = lhrr;
       }
 #endif
-      if(!result && data->state.async.dns)
+      if(!result)
         result = Curl_dnscache_add(data, data->state.async.dns);
     }
     /* if we have not found anything, report the proper
@@ -391,7 +395,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
   DEBUGASSERT(entry);
   *entry = NULL; /* clear on entry */
 
-  timeout_ms = Curl_timeleft_ms(data, TRUE);
+  timeout_ms = Curl_timeleft_ms(data);
   if(timeout_ms < 0) {
     /* already expired! */
     connclose(data->conn, "Timed out before name resolve started");
@@ -739,7 +743,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
   ares->ares_status = ARES_ENOTFOUND;
   ares->result = CURLE_OK;
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS) && \
+#if defined(CURLVERBOSE) && \
   ARES_VERSION >= 0x011800  /* >= v1.24.0 */
   if(CURL_TRC_DNS_is_verbose(data)) {
     char *csv = ares_get_servers_csv(ares->channel);
@@ -836,7 +840,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
   const char *servers = data->set.str[STRING_DNS_SERVERS];
   int ares_result = ARES_SUCCESS;
 
-#if defined(CURLDEBUG) && defined(HAVE_CARES_SERVERS_CSV)
+#if defined(DEBUGBUILD) && defined(HAVE_CARES_SERVERS_CSV)
   if(getenv("CURL_DNS_SERVER"))
     servers = getenv("CURL_DNS_SERVER");
 #endif

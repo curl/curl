@@ -23,10 +23,10 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
 
 #ifndef CURL_DISABLE_MQTT
 
-#include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -36,6 +36,8 @@
 #include "url.h"
 #include "escape.h"
 #include "rand.h"
+#include "cfilters.h"
+#include "connect.h"
 
 /* first byte is command.
    second byte is for flags. */
@@ -87,48 +89,6 @@ struct MQTT {
   struct curltime lastTime; /* last time we sent or received data */
   unsigned char firstbyte;
   BIT(pingsent); /* 1 while we wait for ping response */
-};
-
-/*
- * Forward declarations.
- */
-
-static CURLcode mqtt_do(struct Curl_easy *data, bool *done);
-static CURLcode mqtt_done(struct Curl_easy *data,
-                          CURLcode status, bool premature);
-static CURLcode mqtt_doing(struct Curl_easy *data, bool *done);
-static CURLcode mqtt_pollset(struct Curl_easy *data,
-                             struct easy_pollset *ps);
-static CURLcode mqtt_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn);
-
-/*
- * MQTT protocol handler.
- */
-
-const struct Curl_handler Curl_handler_mqtt = {
-  "mqtt",                             /* scheme */
-  mqtt_setup_conn,                    /* setup_connection */
-  mqtt_do,                            /* do_it */
-  mqtt_done,                          /* done */
-  ZERO_NULL,                          /* do_more */
-  ZERO_NULL,                          /* connect_it */
-  ZERO_NULL,                          /* connecting */
-  mqtt_doing,                         /* doing */
-  ZERO_NULL,                          /* proto_pollset */
-  mqtt_pollset,                       /* doing_pollset */
-  ZERO_NULL,                          /* domore_pollset */
-  ZERO_NULL,                          /* perform_pollset */
-  ZERO_NULL,                          /* disconnect */
-  ZERO_NULL,                          /* write_resp */
-  ZERO_NULL,                          /* write_resp_hd */
-  ZERO_NULL,                          /* connection_check */
-  ZERO_NULL,                          /* attach connection */
-  ZERO_NULL,                          /* follow */
-  PORT_MQTT,                          /* defport */
-  CURLPROTO_MQTT,                     /* protocol */
-  CURLPROTO_MQTT,                     /* family */
-  PROTOPT_NONE                        /* flags */
 };
 
 static void mqtt_easy_dtor(void *key, size_t klen, void *entry)
@@ -604,7 +564,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
 
   remaininglength = payloadlen + 2 + topiclen;
   encodelen = mqtt_encode_len(encodedbytes, remaininglength);
-  if(MAX_MQTT_MESSAGE_SIZE - remaininglength - 1 < encodelen) {
+  if(remaininglength > (MAX_MQTT_MESSAGE_SIZE - encodelen - 1)) {
     result = CURLE_TOO_LARGE;
     goto fail;
   }
@@ -654,7 +614,7 @@ static int mqtt_decode_len(size_t *lenp, unsigned char *buf, size_t buflen)
   return 0;
 }
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 static const char *statenames[] = {
   "MQTT_FIRST",
   "MQTT_REMAINING_LENGTH",
@@ -976,4 +936,98 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   return result;
 }
 
+#ifdef USE_SSL
+
+static CURLcode mqtts_connecting(struct Curl_easy *data, bool *done)
+{
+  struct connectdata *conn = data->conn;
+  CURLcode result;
+
+  result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
+  if(result)
+    connclose(conn, "Failed TLS connection");
+  return result;
+}
+
+/*
+ * MQTTS protocol.
+ */
+
+static const struct Curl_protocol Curl_protocol_mqtts = {
+  mqtt_setup_conn,                    /* setup_connection */
+  mqtt_do,                            /* do_it */
+  mqtt_done,                          /* done */
+  ZERO_NULL,                          /* do_more */
+  ZERO_NULL,                          /* connect_it */
+  mqtts_connecting,                   /* connecting */
+  mqtt_doing,                         /* doing */
+  ZERO_NULL,                          /* proto_pollset */
+  mqtt_pollset,                       /* doing_pollset */
+  ZERO_NULL,                          /* domore_pollset */
+  ZERO_NULL,                          /* perform_pollset */
+  ZERO_NULL,                          /* disconnect */
+  ZERO_NULL,                          /* write_resp */
+  ZERO_NULL,                          /* write_resp_hd */
+  ZERO_NULL,                          /* connection_check */
+  ZERO_NULL,                          /* attach connection */
+  ZERO_NULL,                          /* follow */
+};
+
+#endif
+
+/*
+ * MQTT protocol.
+ */
+
+static const struct Curl_protocol Curl_protocol_mqtt = {
+  mqtt_setup_conn,                    /* setup_connection */
+  mqtt_do,                            /* do_it */
+  mqtt_done,                          /* done */
+  ZERO_NULL,                          /* do_more */
+  ZERO_NULL,                          /* connect_it */
+  ZERO_NULL,                          /* connecting */
+  mqtt_doing,                         /* doing */
+  ZERO_NULL,                          /* proto_pollset */
+  mqtt_pollset,                       /* doing_pollset */
+  ZERO_NULL,                          /* domore_pollset */
+  ZERO_NULL,                          /* perform_pollset */
+  ZERO_NULL,                          /* disconnect */
+  ZERO_NULL,                          /* write_resp */
+  ZERO_NULL,                          /* write_resp_hd */
+  ZERO_NULL,                          /* connection_check */
+  ZERO_NULL,                          /* attach connection */
+  ZERO_NULL,                          /* follow */
+};
+
 #endif /* CURL_DISABLE_MQTT */
+
+
+const struct Curl_scheme Curl_scheme_mqtts = {
+  "mqtts",                            /* scheme */
+#if defined(CURL_DISABLE_MQTT) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_mqtts,
+#endif
+  CURLPROTO_MQTTS,                    /* protocol */
+  CURLPROTO_MQTT,                     /* family */
+  PROTOPT_SSL,                        /* flags */
+  PORT_MQTTS,                         /* defport */
+};
+
+/*
+ * MQTT protocol.
+ */
+
+const struct Curl_scheme Curl_scheme_mqtt = {
+  "mqtt",                             /* scheme */
+#ifdef CURL_DISABLE_MQTT
+  ZERO_NULL,
+#else
+  &Curl_protocol_mqtt,
+#endif
+  CURLPROTO_MQTT,                     /* protocol */
+  CURLPROTO_MQTT,                     /* family */
+  PROTOPT_NONE,                       /* flags */
+  PORT_MQTT,                          /* defport */
+};

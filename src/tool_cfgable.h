@@ -107,7 +107,7 @@ struct OperationConfig {
   size_t num_urls;          /* number of URLs added to the list */
 #ifndef CURL_DISABLE_IPFS
   char *ipfs_gateway;
-#endif /* !CURL_DISABLE_IPFS */
+#endif
   char *doh_url;
   char *cipher_list;
   char *proxy_cipher_list;

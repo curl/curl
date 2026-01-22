@@ -36,7 +36,6 @@
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "curl_ngtcp2.h"
-#include "curl_osslq.h"
 #include "curl_quiche.h"
 #include "../multiif.h"
 #include "../progress.h"
@@ -66,8 +65,6 @@ void Curl_quic_ver(char *p, size_t len)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   Curl_ngtcp2_ver(p, len);
-#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
-  Curl_osslq_ver(p, len);
 #elif defined(USE_QUICHE)
   Curl_quiche_ver(p, len);
 #endif
@@ -238,8 +235,9 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
                                    size_t gsolen, size_t *psent)
 {
   const uint8_t *p, *end = pkt + pktlen;
-  size_t sent, len, calls = 0;
+  size_t sent, len;
   CURLcode result = CURLE_OK;
+  VERBOSE(size_t calls = 0);
 
   *psent = 0;
 
@@ -249,7 +247,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
     if(result)
       goto out;
     *psent += sent;
-    ++calls;
+    VERBOSE(++calls);
   }
 out:
   CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
@@ -703,8 +701,6 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   DEBUGASSERT(transport == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
-#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
-  return Curl_cf_osslq_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)
   return Curl_cf_quiche_create(pcf, data, conn, ai);
 #else
@@ -724,7 +720,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
     /* cannot do QUIC over a Unix domain socket */
     return CURLE_QUIC_CONNECT_ERROR;
   }
-  if(!(conn->handler->flags & PROTOPT_SSL)) {
+  if(!(conn->scheme->flags & PROTOPT_SSL)) {
     failf(data, "HTTP/3 requested for non-HTTPS URL");
     return CURLE_URL_MALFORMAT;
   }
@@ -742,7 +738,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 const char *vquic_h3_err_str(uint64_t error_code)
 {
   if(error_code <= UINT_MAX) {
@@ -790,7 +786,7 @@ const char *vquic_h3_err_str(uint64_t error_code)
     return "NO_ERROR";
   return "unknown";
 }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 #if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
 
@@ -854,8 +850,8 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn,
                              unsigned char transport)
 {
-  (void)conn;
   (void)data;
+  (void)conn;
   (void)transport;
   DEBUGF(infof(data, "QUIC is not supported in this build"));
   return CURLE_NOT_BUILT_IN;

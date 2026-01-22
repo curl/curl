@@ -30,28 +30,28 @@
 #include "curl_hmac.h"
 
 #ifdef USE_OPENSSL
-  #include <openssl/opensslconf.h>
-  #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-    #define USE_OPENSSL_MD5
-  #endif
+#include <openssl/opensslconf.h>
+#if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
+#define USE_OPENSSL_MD5
+#endif
 #endif
 
 #ifdef USE_WOLFSSL
-  #include <wolfssl/options.h>
-  #ifndef NO_MD5
-    #define USE_WOLFSSL_MD5
-  #endif
+#include <wolfssl/options.h>
+#ifndef NO_MD5
+#define USE_WOLFSSL_MD5
+#endif
 #endif
 
 #ifdef USE_MBEDTLS
-  #include <mbedtls/version.h>
-  #if MBEDTLS_VERSION_NUMBER < 0x03020000
-    #error "mbedTLS 3.2.0 or later required"
-  #endif
-  #include <psa/crypto_config.h>
-  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
-    #define USE_MBEDTLS_MD5
-  #endif
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+#error "mbedTLS 3.2.0 or later required"
+#endif
+#include <psa/crypto_config.h>
+#if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+#define USE_MBEDTLS_MD5
+#endif
 #endif
 
 #ifdef USE_GNUTLS
@@ -256,17 +256,17 @@ static void my_md5_final(unsigned char *digest, void *in)
  * MD5 Message-Digest Algorithm (RFC 1321).
  *
  * Homepage:
- https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
+ * https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
  *
  * Author:
  * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>
  *
  * This software was written by Alexander Peslyak in 2001. No copyright is
- * claimed, and the software is hereby placed in the public domain.
- * In case this attempt to disclaim copyright and place the software in the
- * public domain is deemed null and void, then the software is
- * Copyright (c) 2001 Alexander Peslyak and it is hereby released to the
- * general public under the following terms:
+ * claimed, and the software is hereby placed in the public domain. In case
+ * this attempt to disclaim copyright and place the software in the public
+ * domain is deemed null and void, then the software is Copyright (c) 2001
+ * Alexander Peslyak and it is hereby released to the general public under
+ * the following terms:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted.
@@ -286,11 +286,6 @@ struct md5_ctx {
   MD5_u32plus block[16];
 };
 typedef struct md5_ctx my_md5_ctx;
-
-static CURLcode my_md5_init(void *ctx);
-static void my_md5_update(void *ctx, const unsigned char *data,
-                          unsigned int size);
-static void my_md5_final(unsigned char *result, void *ctx);
 
 /*
  * The basic MD5 functions.

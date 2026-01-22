@@ -22,38 +22,38 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket API usage together with glib2
+ * multi socket interface with glib2
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
  * download many files at once.
  *
  * Written by Jeff Pohlmeyer
-
- Requires glib-2.x and a (POSIX?) system that has mkfifo().
-
- This is an adaptation of libcurl's "hipev.c" and libevent's "event-test.c"
- sample programs, adapted to use glib's g_io_channel in place of libevent.
-
- When running, the program creates the named pipe "hiper.fifo"
-
- Whenever there is input into the fifo, the program reads the input as a list
- of URL's and creates some new easy handles to fetch each URL via the
- curl_multi "hiper" API.
-
- Thus, you can try a single URL:
- % echo http://www.yahoo.com > hiper.fifo
-
- Or a whole bunch of them:
- % cat my-url-list > hiper.fifo
-
- The fifo buffer is handled almost instantly, so you can even add more URL's
- while the previous requests are still being downloaded.
-
- This is purely a demo app, all retrieved data is simply discarded by the write
- callback.
-
-*/
+ *
+ * Requires glib-2.x and a (POSIX?) system that has mkfifo().
+ *
+ * This is an adaptation of libcurl's "hipev.c" and libevent's "event-test.c"
+ * sample programs, adapted to use glib's g_io_channel in place of libevent.
+ *
+ * When running, the program creates the named pipe "hiper.fifo"
+ *
+ * Whenever there is input into the fifo, the program reads the input as a list
+ * of URL's and creates some new easy handles to fetch each URL via the
+ * curl_multi "hiper" API.
+ *
+ * Thus, you can try a single URL:
+ *   % echo http://www.yahoo.com > hiper.fifo
+ *
+ * Or a whole bunch of them:
+ *   % cat my-url-list > hiper.fifo
+ *
+ * The fifo buffer is handled almost instantly, so you can even add more URL's
+ * while the previous requests are still being downloaded.
+ *
+ * This is purely a demo app, all retrieved data is simply discarded by
+ * the write callback.
+ *
+ */
 #include <glib.h>
 
 #include <unistd.h>
@@ -194,9 +194,8 @@ static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
   CURLMcode mresult;
   int fd = g_io_channel_unix_get_fd(ch);
 
-  int action =
-    ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
-    ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
+  int action = ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
+               ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
 
   mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", mresult);
@@ -230,9 +229,8 @@ static void remsock(struct SockInfo *f)
 static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
                     struct GlobalInfo *g)
 {
-  GIOCondition kind =
-    ((act & CURL_POLL_IN) ? G_IO_IN : 0) |
-    ((act & CURL_POLL_OUT) ? G_IO_OUT : 0);
+  GIOCondition kind = ((act & CURL_POLL_IN) ? G_IO_IN : 0) |
+                      ((act & CURL_POLL_OUT) ? G_IO_OUT : 0);
 
   f->sockfd = s;
   f->action = act;

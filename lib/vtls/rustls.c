@@ -33,6 +33,7 @@
 #include "../curlx/strerr.h"
 #include "../urldata.h"
 #include "../curl_trc.h"
+#include "../httpsrr.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
@@ -82,7 +83,7 @@ static bool cr_data_pending(struct Curl_cfilter *cf,
   (void)data;
   DEBUGASSERT(ctx && ctx->backend);
   backend = (struct rustls_ssl_backend_data *)ctx->backend;
-  return backend->data_in_pending;
+  return (bool)backend->data_in_pending;
 }
 
 struct io_ctx {
@@ -1398,7 +1399,8 @@ const struct Curl_ssl Curl_ssl_rustls = {
   SSLSUPP_CIPHER_LIST |
   SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_CERTINFO |
-  SSLSUPP_ECH,
+  SSLSUPP_ECH |
+  SSLSUPP_CRLFILE,
   sizeof(struct rustls_ssl_backend_data),
 
   NULL,                            /* init */

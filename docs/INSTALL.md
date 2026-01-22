@@ -46,6 +46,9 @@ unpacked the source archive):
 
 (Adjust the configure line accordingly to use the TLS library you want.)
 
+By default curl builds with libpsl (Public Suffix List) support. If libpsl is
+not available on your system, install it or disable it with `--without-libpsl`.
+
 You probably need to be root when doing the last command.
 
 Get a full listing of all available configure options by invoking it like:
@@ -65,10 +68,9 @@ your own home directory:
     make
     make install
 
-The configure script always tries to find a working SSL library unless
-explicitly told not to. If you have OpenSSL installed in the default search
-path for your compiler/linker, you do not need to do anything special. If you
-have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
+The configure script requires you to select a TLS backend explicitly unless
+you disable TLS with `--without-ssl`. If you have OpenSSL installed in the
+default search path for your compiler/linker, you can run configure like:
 
     ./configure --with-openssl
 
@@ -91,7 +93,7 @@ header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
 environment variables prior to running configure. Something like this should
 work:
 
-    CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure
+    CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure --with-openssl
 
 If you have shared SSL libs installed in a directory where your runtime
 linker does not find them (which usually causes configure failures), you can
@@ -137,13 +139,13 @@ alter it, you can select how to deal with each individual library.
 
 These options are provided to select the TLS backend to use.
 
- - AmiSSL: `--with-amissl`
- - GnuTLS: `--with-gnutls`.
- - mbedTLS: `--with-mbedtls`
- - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
- - Rustls: `--with-rustls`
- - Schannel: `--with-schannel`
- - wolfSSL: `--with-wolfssl`
+- AmiSSL: `--with-amissl`
+- GnuTLS: `--with-gnutls`.
+- mbedTLS: `--with-mbedtls`
+- OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
+- Rustls: `--with-rustls`
+- Schannel: `--with-schannel`
+- wolfSSL: `--with-wolfssl`
 
 You can build curl with *multiple* TLS backends at your choice, but some TLS
 backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
@@ -161,16 +163,16 @@ start somewhere. Those "root" certificates make the set of Trust Anchors.
 While the build system tries to find good defaults on the platform you
 use, you may specify these explicitly. The following options are provided:
 
- - `--with-ca-bundle=FILE`: the file that libcurl loads default root
- certificates from.
- - `--with-ca-path=DIRECTORY`: a directory in which root certificates files
- are found.
- - `--with-ca-embed=FILE`: a file read *at build time* and added to `libcurl`.
- - `--with-ca-fallback`: an OpenSSL specific option for delegating default
- trust anchor selection to what OpenSSL thinks is best, *if* there are
-no other certificates configured by the application.
- - `--with-apple-sectrust`: use the system "SecTrust" service on Apple
- operating systems for verification. (Added in 8.17.0)
+- `--with-ca-bundle=FILE`: the file that libcurl loads default root
+  certificates from.
+- `--with-ca-path=DIRECTORY`: a directory in which root certificates files
+  are found.
+- `--with-ca-embed=FILE`: a file read *at build time* and added to `libcurl`.
+- `--with-ca-fallback`: an OpenSSL specific option for delegating default
+  trust anchor selection to what OpenSSL thinks is best, *if* there are
+  no other certificates configured by the application.
+- `--with-apple-sectrust`: use the system "SecTrust" service on Apple
+  operating systems for verification. (Added in 8.17.0)
 
 ## MultiSSL and HTTP/3
 
@@ -196,7 +198,7 @@ library check.
 
 # Windows
 
-Building for Windows XP is required as a minimum.
+Building for Windows Vista/Server 2008 is required as a minimum.
 
 You can build curl with:
 
@@ -205,24 +207,24 @@ You can build curl with:
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues
 
- As a general rule, building a DLL with static CRT linkage is highly
- discouraged, and intermixing CRTs in the same app is something to avoid at
- any cost.
+As a general rule, building a DLL with static CRT linkage is highly
+discouraged, and intermixing CRTs in the same app is something to avoid at
+any cost.
 
- Reading and comprehending Microsoft Knowledge Base articles KB94248 and
- KB140584 is a must for any Windows developer. Especially important is full
- understanding if you are not going to follow the advice given above.
+Reading and comprehending Microsoft Knowledge Base articles KB94248 and
+KB140584 is a must for any Windows developer. Especially important is full
+understanding if you are not going to follow the advice given above.
 
- - [How To Use the C Runtime](https://learn.microsoft.com/troubleshoot/developer/visualstudio/cpp/libraries/use-c-run-time)
- - [Runtime Library Compiler Options](https://learn.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
- - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://learn.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
+- [How To Use the C Runtime](https://learn.microsoft.com/troubleshoot/developer/visualstudio/cpp/libraries/use-c-run-time)
+- [Runtime Library Compiler Options](https://learn.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
+- [Potential Errors Passing CRT Objects Across DLL Boundaries](https://learn.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
 If your app is misbehaving in some strange way, or it is suffering from memory
 corruption, before asking for further help, please try first to rebuild every
 single library your app uses as well as your app using the debug
 multi-threaded dynamic C runtime.
 
- If you get linkage errors read section 5.7 of the FAQ document.
+If you get linkage errors read section 5.7 of the FAQ document.
 
 ## Cygwin
 
@@ -254,22 +256,22 @@ Download the latest version of the `cygwin` packages required (*and suggested*) 
     <summary>Package List</summary>
 
 ```
- binutil - required
- gcc-core - required
- libpsl-devel - required
- libtool - required
- perl - required
- make - required
- - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
-   ln -s /usr/bin/make /usr/bin/gmake
+  binutil - required
+  gcc-core - required
+  libpsl-devel - required
+  libtool - required
+  perl - required
+  make - required
+  - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
+    ln -s /usr/bin/make /usr/bin/gmake
 ```
 
 </details>
 
 Once all the packages have been installed, begin the process of installing curl from the source code:
 
- <details>
-     <summary>configure_options</summary>
+<details>
+    <summary>configure_options</summary>
 
 ```
     --with-gnutls
@@ -280,15 +282,16 @@ Once all the packages have been installed, begin the process of installing curl 
     --without-ssl
 ```
 
- </details>
+</details>
 
- 1. `sh configure <configure_options>`
- 2. `make`
+1. `sh configure <configure_options>`
+2. `make`
 
 If any error occurs during curl installation, try:
- - reinstalling the required `cygwin` packages from the list above
- - temporarily move `cygwin` to the top of your path
- - install all of the suggested `cygwin` packages
+
+- reinstalling the required `cygwin` packages from the list above
+- temporarily move `cygwin` to the top of your path
+- install all of the suggested `cygwin` packages
 
 ## MS-DOS
 
@@ -323,11 +326,11 @@ cmake . \
 
 Notes:
 
- - Requires DJGPP 2.04 or upper.
+- Requires DJGPP 2.04 or upper.
 
- - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
-   things go wrong because things like FS-extensions and `errno` values have
-   been changed between releases.
+- Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
+  things go wrong because things like FS-extensions and `errno` values have
+  been changed between releases.
 
 ## AmigaOS
 
@@ -373,9 +376,9 @@ for the full list.
 
 If you want to set any of these defines you have the following options:
 
- - Modify `lib/config-win32.h`
- - Modify `lib/curl_setup.h`
- - Modify the "Preprocessor Definitions" in the libcurl project
+- Modify `lib/config-win32.h`
+- Modify `lib/curl_setup.h`
+- Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
 under "Project -> Properties -> Configuration Properties -> C/C++ ->
@@ -388,8 +391,8 @@ necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
 visible to libcurl and curl compilation processes. To set this definition you
 have the following alternatives:
 
- - Modify `lib/config-win32.h`
- - Modify the "Preprocessor Definitions" in the libcurl project
+- Modify `lib/config-win32.h`
+- Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
 under "Project -> Properties -> Configuration Properties -> C/C++ ->
@@ -487,7 +490,7 @@ For IBM i (formerly OS/400), you can use curl in two different ways:
 
 - Natively, running in the **ILE**. The obvious use is being able to call curl
   from ILE C or RPG applications.
-- You need to build this from source. See `packages/OS400/README` for the ILE
+- You need to build this from source. See `projects/OS400/README` for the ILE
   specific build instructions.
 - In the **PASE** environment, which runs AIX programs. curl is built as it
   would be on AIX.
@@ -562,7 +565,7 @@ may be relevant in some environments: `-march=X`, `-mthumb`, `-m32`,
 `-mdynamic-no-pic`, `-flto`, `-fdata-sections`, `-ffunction-sections`,
 `-fno-unwind-tables`, `-fno-asynchronous-unwind-tables`,
 `-fno-record-gcc-switches`, `-fsection-anchors`, `-fno-plt`,
-`-Wl,--gc-sections`, `-Wl,-Bsymbolic`, `-Wl,-s`,
+`-Wl,--gc-sections`, `-Wl,-dead_strip` (Apple), `-Wl,-Bsymbolic`, `-Wl,-s`
 
 For example, this is how to combine a few of these options:
 
@@ -578,47 +581,47 @@ know your application is not going to need. Besides specifying the
 use, here are some other flags that can reduce the size of the library by
 disabling support for some features (run `./configure --help` to see them all):
 
- - `--disable-aws` (cryptographic authentication)
- - `--disable-basic-auth` (cryptographic authentication)
- - `--disable-bearer-auth` (cryptographic authentication)
- - `--disable-digest-auth` (cryptographic authentication)
- - `--disable-http-auth` (all HTTP authentication)
- - `--disable-kerberos-auth` (cryptographic authentication)
- - `--disable-negotiate-auth` (cryptographic authentication)
- - `--disable-ntlm` (NTLM authentication)
- - `--disable-alt-svc` (HTTP Alt-Svc)
- - `--disable-ares` (the C-ARES DNS library)
- - `--disable-cookies` (HTTP cookies)
- - `--disable-dateparse` (date parsing for time conditionals)
- - `--disable-dnsshuffle` (internal server load spreading)
- - `--disable-doh` (DNS-over-HTTP)
- - `--disable-form-api` (POST form API)
- - `--disable-get-easy-options` (lookup easy options at runtime)
- - `--disable-headers-api` (API to access headers)
- - `--disable-hsts` (HTTP Strict Transport Security)
- - `--disable-ipv6` (IPv6)
- - `--disable-libcurl-option` (--libcurl C code generation support)
- - `--disable-manual` (--manual built-in documentation)
- - `--disable-mime` (MIME API)
- - `--disable-netrc`  (.netrc file)
- - `--disable-progress-meter` (graphical progress meter in library)
- - `--disable-proxy` (HTTP and SOCKS proxies)
- - `--disable-socketpair` (socketpair for asynchronous name resolving)
- - `--disable-threaded-resolver`  (threaded name resolver)
- - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
- - `--disable-unix-sockets` (Unix sockets)
- - `--disable-verbose` (eliminates debugging strings and error code strings)
- - `--disable-versioned-symbols` (versioned symbols)
- - `--enable-symbol-hiding` (eliminates unneeded symbols in the shared library)
- - `--without-brotli` (Brotli on-the-fly decompression)
- - `--without-libpsl` (Public Suffix List in cookies)
- - `--without-nghttp2` (HTTP/2 using nghttp2)
- - `--without-ngtcp2` (HTTP/2 using ngtcp2)
- - `--without-zstd` (Zstd on-the-fly decompression)
- - `--without-libidn2` (internationalized domain names)
- - `--without-librtmp` (RTMP)
- - `--without-ssl` (SSL/TLS)
- - `--without-zlib` (gzip/deflate on-the-fly decompression)
+- `--disable-aws` (cryptographic authentication)
+- `--disable-basic-auth` (cryptographic authentication)
+- `--disable-bearer-auth` (cryptographic authentication)
+- `--disable-digest-auth` (cryptographic authentication)
+- `--disable-http-auth` (all HTTP authentication)
+- `--disable-kerberos-auth` (cryptographic authentication)
+- `--disable-negotiate-auth` (cryptographic authentication)
+- `--disable-ntlm` (NTLM authentication)
+- `--disable-alt-svc` (HTTP Alt-Svc)
+- `--disable-ares` (the C-ARES DNS library)
+- `--disable-cookies` (HTTP cookies)
+- `--disable-dateparse` (date parsing for time conditionals)
+- `--disable-dnsshuffle` (internal server load spreading)
+- `--disable-doh` (DNS-over-HTTP)
+- `--disable-form-api` (POST form API)
+- `--disable-get-easy-options` (lookup easy options at runtime)
+- `--disable-headers-api` (API to access headers)
+- `--disable-hsts` (HTTP Strict Transport Security)
+- `--disable-ipv6` (IPv6)
+- `--disable-libcurl-option` (--libcurl C code generation support)
+- `--disable-manual` (--manual built-in documentation)
+- `--disable-mime` (MIME API)
+- `--disable-netrc`  (.netrc file)
+- `--disable-progress-meter` (graphical progress meter in library)
+- `--disable-proxy` (HTTP and SOCKS proxies)
+- `--disable-socketpair` (socketpair for asynchronous name resolving)
+- `--disable-threaded-resolver`  (threaded name resolver)
+- `--disable-tls-srp` (Secure Remote Password authentication for TLS)
+- `--disable-unix-sockets` (Unix sockets)
+- `--disable-verbose` (eliminates debugging strings and error code strings)
+- `--disable-versioned-symbols` (versioned symbols)
+- `--enable-symbol-hiding` (eliminates unneeded symbols in the shared library)
+- `--without-brotli` (Brotli on-the-fly decompression)
+- `--without-libpsl` (Public Suffix List in cookies)
+- `--without-nghttp2` (HTTP/2 using nghttp2)
+- `--without-ngtcp2` (HTTP/2 using ngtcp2)
+- `--without-zstd` (Zstd on-the-fly decompression)
+- `--without-libidn2` (internationalized domain names)
+- `--without-librtmp` (RTMP)
+- `--without-ssl` (SSL/TLS)
+- `--without-zlib` (gzip/deflate on-the-fly decompression)
 
 Be sure also to strip debugging symbols from your binaries after compiling
 using 'strip' or an option like `-s`. If space is really tight, you may be able
@@ -639,10 +642,10 @@ relevant tests by specifying certain key words on the `runtests.pl` command
 line. Following is a list of appropriate key words for those configure options
 that are not automatically detected:
 
- - `--disable-cookies`          !cookies
- - `--disable-dateparse`        !RETRY-AFTER !`CURLOPT_TIMECONDITION` !`CURLINFO_FILETIME` !`If-Modified-Since` !`curl_getdate` !`-z`
- - `--disable-libcurl-option`   !`--libcurl`
- - `--disable-verbose`          !verbose\ logs
+- `--disable-cookies`          !cookies
+- `--disable-dateparse`        !RETRY-AFTER !`CURLOPT_TIMECONDITION` !`CURLINFO_FILETIME` !`If-Modified-Since` !`curl_getdate` !`-z`
+- `--disable-libcurl-option`   !`--libcurl`
+- `--disable-verbose`          !verbose\ logs
 
 # Ports
 

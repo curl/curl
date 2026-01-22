@@ -53,6 +53,7 @@
 
 #include "../urldata.h"
 #include "../curl_trc.h"
+#include "../httpsrr.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
@@ -99,10 +100,6 @@
 #else /* HAVE_WOLFSSL_BIO_NEW */
 #undef USE_BIO_CHAIN
 #endif
-
-static CURLcode wssl_connect(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             bool *done);
 
 #ifdef OPENSSL_EXTRA
 /*
@@ -401,7 +398,7 @@ static void wssl_bio_cf_free_methods(void)
 
 #else /* USE_BIO_CHAIN */
 
-#define wssl_bio_cf_init_methods() Curl_nop_stmt
+#define wssl_bio_cf_init_methods() TRUE
 #define wssl_bio_cf_free_methods() Curl_nop_stmt
 
 #endif /* !USE_BIO_CHAIN */
@@ -2286,7 +2283,8 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
   SSLSUPP_CA_CACHE |
-  SSLSUPP_CIPHER_LIST,
+  SSLSUPP_CIPHER_LIST |
+  SSLSUPP_SSL_EC_CURVES,
 
   sizeof(struct wssl_ctx),
 

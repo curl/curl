@@ -43,7 +43,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
 {
   curl_off_t h;
   if(seconds <= 0) {
-    curlx_strcopy(r, rsize, "       ", 7);
+    curlx_strcopy(r, rsize, STRCONST("       "));
     return;
   }
   h = seconds / 3600;
@@ -76,7 +76,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
         if(y <= 99999)
           curl_msnprintf(r, rsize, "%6" FMT_OFF_T "y", y);
         else
-          curlx_strcopy(r, rsize, ">99999y", 7);
+          curlx_strcopy(r, rsize, STRCONST(">99999y"));
       }
     }
   }
@@ -180,7 +180,6 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
 }
 
 /*
-
    New proposed interface, 9th of February 2000:
 
    pgrsStartNow() - sets start time
@@ -190,7 +189,6 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
    pgrsSetUploadCounter() - amount of data currently uploaded
    pgrsUpdate() - show progress
    pgrsDone() - transfer complete
-
 */
 
 int Curl_pgrsDone(struct Curl_easy *data)
@@ -243,7 +241,6 @@ void Curl_pgrsSendPause(struct Curl_easy *data, bool enable)
 }
 
 /*
- *
  * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
  */
 void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
@@ -290,8 +287,8 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_STARTTRANSFER:
     delta = &data->progress.t_starttransfer;
     /* prevent updating t_starttransfer unless:
-     *   1) this is the first time we are setting t_starttransfer
-     *   2) a redirect has occurred since the last time t_starttransfer was set
+     *   1. this is the first time we are setting t_starttransfer
+     *   2. a redirect has occurred since the last time t_starttransfer was set
      * This prevents repeated invocations of the function from incorrectly
      * changing the t_starttransfer time.
      */
@@ -321,7 +318,6 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 }
 
 /*
- *
  * Curl_pgrsTime(). Store the current time at the given label. This fetches a
  * fresh "now" and returns it.
  *
@@ -419,7 +415,7 @@ static bool progress_calc(struct Curl_easy *data,
 {
   struct Progress * const p = &data->progress;
   int i_next, i_oldest, i_latest;
-  timediff_t duration_ms;
+  timediff_t duration_us;
   curl_off_t amount;
 
   /* The time spent so far (from the start) in microseconds */
@@ -470,21 +466,19 @@ static bool progress_calc(struct Curl_easy *data,
   /* How much we transferred between oldest and current records */
   amount = p->speed_amount[i_latest] - p->speed_amount[i_oldest];
   /* How long this took */
-  duration_ms = curlx_ptimediff_ms(&p->speed_time[i_latest],
+  duration_us = curlx_ptimediff_us(&p->speed_time[i_latest],
                                    &p->speed_time[i_oldest]);
-  if(duration_ms <= 0)
-    duration_ms = 1;
+  if(duration_us <= 0)
+    duration_us = 1;
 
-  if(amount > (CURL_OFF_T_MAX / 1000)) {
+  if(amount > (CURL_OFF_T_MAX / 1000000)) {
     /* the 'amount' value is bigger than would fit in 64 bits if
-       multiplied with 1000, so we use the double math for this */
+       multiplied with 1000000, so we use the double math for this */
     p->current_speed =
-      (curl_off_t)(((double)amount * 1000.0) / (double)duration_ms);
+      (curl_off_t)(((double)amount * 1000000.0) / (double)duration_us);
   }
   else {
-    /* the 'amount' value is small enough to fit within 32 bits even
-       when multiplied with 1000 */
-    p->current_speed = amount * 1000 / duration_ms;
+    p->current_speed = amount * 1000000 / duration_us;
   }
 
   if((p->lastshow == pnow->tv_sec) && !data->req.done)
@@ -607,8 +601,7 @@ static void progress_meter(struct Curl_easy *data)
   /* we flush the output stream to make it appear as soon as possible */
   fflush(data->set.err);
 }
-#else
- /* progress bar disabled */
+#else /* CURL_DISABLE_PROGRESS_METER */
 #define progress_meter(x) Curl_nop_stmt
 #endif
 

@@ -14,8 +14,6 @@ name: 'Linux HTTP/3'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -25,8 +23,6 @@ name: 'Linux HTTP/3'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -44,7 +40,7 @@ env:
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 1.65.1
+  AWSLC_VERSION: 1.66.2
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20251124.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver registryUrl=https://github.com
@@ -54,9 +50,9 @@ env:
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   WOLFSSL_VERSION: 5.8.4
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
-  NGHTTP3_VERSION: 1.14.0
+  NGHTTP3_VERSION: 1.15.0
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
-  NGTCP2_VERSION: 1.19.0
+  NGTCP2_VERSION: 1.20.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.68.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
@@ -186,9 +182,8 @@ jobs:
       - name: 'install build prereqs'
         if: ${{ steps.settings.outputs.needs-build == 'true' }}
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libbrotli-dev libzstd-dev zlib1g-dev \
@@ -344,7 +339,7 @@ jobs:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs:
       - build-cache
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
@@ -444,21 +439,6 @@ jobs:
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON
 
-          - name: 'openssl-quic'
-            install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            tflags: '--min=1640'
-            configure: >-
-              LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-openssl=/home/runner/openssl/build --with-openssl-quic
-
-          - name: 'openssl-quic'
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
-              -DCURL_DISABLE_LDAP=ON
-              -DCMAKE_UNITY_BUILD=ON
-
           - name: 'quiche'
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig
@@ -485,9 +465,8 @@ jobs:
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server libev-dev' || '' }}
 
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind \
@@ -692,7 +671,10 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: bld/src/curl --disable -V
+        run: |
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          bld/src/curl --disable -V
 
       - name: 'build tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}

@@ -515,7 +515,7 @@ class ExecResult:
         s = self._stats[idx]
 
         url = s['url_effective']
-        # connect time is sometimes reported as 0 by openssl-quic (sigh)
+
         self.check_stat_positive_or_0(s, idx, 'time_connect')
         # all stat keys which reporting timings
         all_keys = {
@@ -526,7 +526,7 @@ class ExecResult:
         }
         # stat keys where we expect a positive value
         ref_tl = []
-        # time_queue has it's own start timestamp. Other timers start *after*
+        # time_queue has its own start timestamp. Other timers start *after*
         # queueing is done. queue duration might therefore be anywhere.
         somewhere_keys = ['time_queue']
         exact_match = True

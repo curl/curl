@@ -59,10 +59,8 @@ extern FILE *tool_stderr;
 #define CURL_OS "unknown"
 #endif
 
-#ifndef UNPRINTABLE_CHAR
 /* define what to use for unprintable characters */
 #define UNPRINTABLE_CHAR '.'
-#endif
 
 #ifndef HAVE_STRDUP
 #include "tool_strdup.h"

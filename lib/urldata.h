@@ -50,8 +50,7 @@
 #define PORT_RTMPS  PORT_HTTPS
 #define PORT_GOPHER 70
 #define PORT_MQTT   1883
-
-struct curl_trc_featt;
+#define PORT_MQTTS  8883
 
 #ifdef USE_ECH
 /* CURLECH_ bits for the tls_ech option */
@@ -131,10 +130,6 @@ typedef uint32_t curl_prot_t;
    input easier and better. */
 #define CURL_MAX_INPUT_LENGTH 8000000
 
-#include "cookie.h"
-#include "psl.h"
-#include "formdata.h"
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -144,6 +139,10 @@ typedef uint32_t curl_prot_t;
 
 #include "curlx/timeval.h"
 
+#include "asyn.h"
+#include "cookie.h"
+#include "psl.h"
+#include "formdata.h"
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
@@ -426,9 +425,7 @@ struct hostname {
  * Specific protocol handler.
  */
 
-struct Curl_handler {
-  const char *scheme;        /* URL scheme name in lowercase */
-
+struct Curl_protocol {
   /* Complement to setup_connection_internals(). This is done before the
      transfer "owns" the connection. */
   CURLcode (*setup_connection)(struct Curl_easy *data,
@@ -513,14 +510,17 @@ struct Curl_handler {
      the way the follow request is performed. */
   CURLcode (*follow)(struct Curl_easy *data, const char *newurl,
                      followtype type);
+};
 
-  uint16_t defport;       /* Default port. */
+struct Curl_scheme {
+  const char *name;       /* URL scheme name in lowercase */
+  const struct Curl_protocol *run; /* implementation */
   curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
                              specific protocol bit */
   curl_prot_t family;     /* single bit for protocol family; basically the
                              non-TLS name of the protocol this is */
-  uint32_t flags;     /* Extra particular characteristics, see PROTOPT_* */
-
+  uint32_t flags;         /* Extra particular characteristics, see PROTOPT_* */
+  uint16_t defport;       /* Default port. */
 };
 
 #define PROTOPT_NONE 0             /* nothing extra */
@@ -658,8 +658,8 @@ struct connectdata {
 #endif
   struct ConnectBits bits;    /* various state-flags for this connection */
 
-  const struct Curl_handler *handler; /* Connection's protocol handler */
-  const struct Curl_handler *given;   /* The protocol first given */
+  const struct Curl_scheme *scheme; /* Connection's protocol handler */
+  const struct Curl_scheme *given;   /* The protocol first given */
 
   /* Protocols can use a custom keepalive mechanism to keep connections alive.
      This allows those protocols to track the last time the keepalive mechanism
@@ -724,8 +724,8 @@ struct connectdata {
   /* HTTP version last responded with by the server or negotiated via ALPN.
    * 0 at start, then one of 09, 10, 11, etc. */
   uint8_t httpversion_seen;
-  uint8_t connect_only;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
+  BIT(connect_only);
 };
 
 #ifndef CURL_DISABLE_PROXY
@@ -1039,7 +1039,7 @@ struct UrlState {
                                     curl_easy_setopt(COOKIEFILE) calls */
 #endif
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   struct curl_trc_feat *feat; /* opt. trace feature transfer is part of */
 #endif
 
@@ -1080,8 +1080,8 @@ struct UrlState {
                                CONN_MAX_RETRIES */
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
-  uint32_t creds_from:2; /* where is the server credentials originating from,
-                            see the CREDS_* defines above */
+  unsigned int creds_from:2; /* where is the server credentials originating
+                                from, see the CREDS_* defines above */
 
   /* when curl_easy_perform() is called, the multi handle is "owned" by
      the easy handle so curl_easy_cleanup() on such an easy handle will
@@ -1341,7 +1341,7 @@ struct UserDefined {
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_httppost *httppost;  /* linked list of old POST data */
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
-  curl_mimepart mimepost;  /* MIME/POST data. */
+  curl_mimepart *mimepostp;  /* MIME/POST data. */
 #endif
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
@@ -1469,10 +1469,8 @@ struct UserDefined {
   */
   uint8_t ftp_create_missing_dirs;
 #endif
-  uint8_t use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
-                              IMAP or POP3 or others! (type: curl_usessl)*/
-  char keep_post;     /* keep POSTs as POSTs after a 30x request; each
-                         bit represents a request, from 301 to 303 */
+  uint8_t use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or IMAP or
+                        POP3 or others! (type: curl_usessl)*/
   uint8_t timecondition; /* kind of time comparison: curl_TimeCond */
   uint8_t method;   /* what kind of HTTP request: Curl_HttpReq */
   uint8_t httpwant; /* when non-zero, a specific HTTP version requested
@@ -1587,10 +1585,14 @@ struct UserDefined {
   BIT(ws_raw_mode);
   BIT(ws_no_auto_pong);
 #endif
+  BIT(post301); /* keep POSTs as POSTs after a 301 request */
+  BIT(post302); /* keep POSTs as POSTs after a 302 request */
+  BIT(post303); /* keep POSTs as POSTs after a 303 request */
 };
 
 #ifndef CURL_DISABLE_MIME
-#define IS_MIME_POST(a) ((a)->set.mimepost.kind != MIMEKIND_NONE)
+#define IS_MIME_POST(a)                                                 \
+  ((a)->set.mimepostp && ((a)->set.mimepostp->kind != MIMEKIND_NONE))
 #else
 #define IS_MIME_POST(a) FALSE
 #endif

@@ -295,7 +295,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #endif
 
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
@@ -341,7 +341,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #ifndef CURL_DISABLE_PROXY
   sslc = &data->set.proxy_ssl;
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
@@ -752,9 +752,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
@@ -1719,7 +1716,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        data->state.http_neg.preferred,
-                                       conn->bits.tls_enable_alpn));
+                                       (bool)conn->bits.tls_enable_alpn));
 #endif
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1770,7 +1767,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct ssl_connect_data *ctx;
   CURLcode result;
   /* ALPN is default, but if user explicitly disables it, obey */
-  bool use_alpn = data->set.ssl_enable_alpn;
+  bool use_alpn = (bool)data->set.ssl_enable_alpn;
   http_majors wanted = CURL_HTTP_V1x;
 
   (void)conn;

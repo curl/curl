@@ -1420,7 +1420,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
 out:
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(result && result != CURLE_AGAIN) {
     struct ip_quadruple ip;
 
@@ -1629,8 +1629,6 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
-  (void)data;
-  (void)conn;
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;

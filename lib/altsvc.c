@@ -39,7 +39,7 @@
 #include "connect.h"
 
 #define MAX_ALTSVC_LINE    4095
-#define MAX_ALTSVC_DATELEN 256
+#define MAX_ALTSVC_DATELEN 17
 #define MAX_ALTSVC_HOSTLEN 2048
 #define MAX_ALTSVC_ALPNLEN 10
 
@@ -310,10 +310,18 @@ CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 /*
  * Curl_altsvc_ctrl() passes on the external bitmask.
  */
-CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
+CURLcode Curl_altsvc_ctrl(struct Curl_easy *data, const long ctrl)
 {
-  DEBUGASSERT(asi);
-  asi->flags = ctrl;
+  DEBUGASSERT(data);
+  if(!ctrl)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(!data->asi) {
+    data->asi = Curl_altsvc_init();
+    if(!data->asi)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  data->asi->flags = ctrl;
   return CURLE_OK;
 }
 
@@ -459,9 +467,6 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   unsigned short dstport = srcport; /* the same by default */
   size_t entries = 0;
   struct Curl_str alpn;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   DEBUGASSERT(asi);
 

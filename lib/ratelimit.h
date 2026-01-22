@@ -1,5 +1,5 @@
-#ifndef HEADER_Curl_rlimit_H
-#define HEADER_Curl_rlimit_H
+#ifndef HEADER_CURL_RLIMIT_H
+#define HEADER_CURL_RLIMIT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -28,8 +28,10 @@
 struct Curl_easy;
 
 /* This is a rate limiter that provides "tokens" to be consumed
- * per second with a "burst" rate limitation. Example:
- * A rate limit of 1 megabyte per second with a burst rate of 1.5MB.
+ * per second. In the literature, this is referred to as a
+ * "token bucket" (https://en.wikipedia.org/wiki/Token_bucket).
+ * Example:
+ * A rate limit of 1 megabyte per second.
  * - initially 1 million tokens are available.
  * - these are drained in the first second.
  * - checking available tokens before the 2nd second will return 0.
@@ -43,44 +45,55 @@ struct Curl_easy;
  * - setting "burst" to the same value as "rate" would make a
  *   download always try to stay *at/below* the rate and slow times will
  *   not generate extra tokens.
+ *
  * A rate limit can be blocked, causing the available tokens to become
  * always 0 until unblocked. After unblocking, the rate limiting starts
  * again with no history of the past.
+ *
  * Finally, a rate limiter with rate 0 will always have CURL_OFF_T_MAX
  * tokens available, unless blocked.
  */
 
 struct Curl_rlimit {
-  curl_off_t rate_per_step; /* rate tokens are generated per step us */
-  curl_off_t burst_per_step; /* burst rate of tokens per step us */
+  int64_t rate_per_step; /* rate tokens generated per step us */
+  int64_t burst_per_step; /* burst rate of tokens per step us */
   timediff_t step_us;     /* microseconds between token increases */
-  curl_off_t tokens;      /* tokens available in the next second */
+  int64_t tokens;         /* tokens available in the next second */
   timediff_t spare_us;    /* microseconds unaffecting tokens */
   struct curltime ts;     /* time of the last update */
   BIT(blocked);           /* blocking sets available tokens to 0 */
 };
 
 void Curl_rlimit_init(struct Curl_rlimit *r,
-                      curl_off_t rate_per_s,
-                      curl_off_t burst_per_s,
+                      int64_t rate_per_sec,
+                      int64_t burst_per_sec,
                       const struct curltime *pts);
 
-/* Start ratelimiting with the given timestamp. Resets available tokens. */
-void Curl_rlimit_start(struct Curl_rlimit *r, const struct curltime *pts);
+/* Start ratelimiting with the given timestamp. Resets available tokens.
+ * `total_tokens` is either -1 or the number of total tokens expected
+ * to be consumed. */
+void Curl_rlimit_start(struct Curl_rlimit *r, const struct curltime *pts,
+                       int64_t total_tokens);
 
 /* How many milliseconds to wait until token are available again. */
 timediff_t Curl_rlimit_wait_ms(struct Curl_rlimit *r,
                                const struct curltime *pts);
 
+/* When the rate limit will update its tokens again */
+timediff_t Curl_rlimit_next_step_ms(struct Curl_rlimit *r,
+                                    const struct curltime *pts);
+
 /* Return if rate limiting of tokens is active */
 bool Curl_rlimit_active(struct Curl_rlimit *r);
 bool Curl_rlimit_is_blocked(struct Curl_rlimit *r);
+int64_t Curl_rlimit_per_step(struct Curl_rlimit *r);
 
 /* Return how many tokens are available to spend, may be negative */
-curl_off_t Curl_rlimit_avail(struct Curl_rlimit *r,
-                             const struct curltime *pts);
+int64_t Curl_rlimit_avail(struct Curl_rlimit *r,
+                          const struct curltime *pts);
 
-/* Drain tokens from the ratelimit, return how many are now available. */
+/* Drain tokens from the ratelimit, give an estimate of how many tokens
+ * remain to be drained in the future (-1 for unknown). */
 void Curl_rlimit_drain(struct Curl_rlimit *r,
                        size_t tokens,
                        const struct curltime *pts);
@@ -90,4 +103,4 @@ void Curl_rlimit_block(struct Curl_rlimit *r,
                        bool activate,
                        const struct curltime *pts);
 
-#endif /* HEADER_Curl_rlimit_H */
+#endif /* HEADER_CURL_RLIMIT_H */

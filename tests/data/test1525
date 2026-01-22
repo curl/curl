@@ -50,7 +50,7 @@ lib%TESTNUMBER
 CURLOPT_PROXYHEADER is ignored CURLHEADER_UNIFIED
 </name>
 <command>
- http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
+http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 <features>
 proxy

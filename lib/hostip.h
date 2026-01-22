@@ -26,10 +26,7 @@
 #include "curl_setup.h"
 
 #include "hash.h"
-#include "curl_addrinfo.h"
 #include "curlx/timeval.h" /* for curltime, timediff_t */
-#include "asyn.h"
-#include "httpsrr.h"
 
 #ifdef USE_HTTPSRR
 # include <stdint.h>
@@ -50,6 +47,8 @@ struct hostent;
 struct Curl_easy;
 struct connectdata;
 struct easy_pollset;
+struct Curl_https_rrinfo;
+struct Curl_multi;
 
 enum alpnid {
   ALPN_none = 0,
@@ -106,11 +105,15 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
                              timediff_t timeoutms);
 
 #ifdef USE_IPV6
+
+/* probe if it seems to work */
+CURLcode Curl_probeipv6(struct Curl_multi *multi);
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
 bool Curl_ipv6works(struct Curl_easy *data);
 #else
+#define Curl_probeipv6(x) CURLE_OK
 #define Curl_ipv6works(x) FALSE
 #endif
 

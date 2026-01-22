@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
 
 #ifndef CURL_DISABLE_TFTP
 
@@ -45,7 +46,6 @@
 #include <sys/param.h>
 #endif
 
-#include "urldata.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "transfer.h"
@@ -142,49 +142,6 @@ struct tftp_conn {
   BIT(remote_pinned);
 };
 
-/* Forward declarations */
-static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event);
-static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event);
-static CURLcode tftp_connect(struct Curl_easy *data, bool *done);
-static CURLcode tftp_do(struct Curl_easy *data, bool *done);
-static CURLcode tftp_done(struct Curl_easy *data,
-                          CURLcode, bool premature);
-static CURLcode tftp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done);
-static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done);
-static CURLcode tftp_pollset(struct Curl_easy *data,
-                             struct easy_pollset *ps);
-static CURLcode tftp_translate_code(tftp_error_t error);
-
-/*
- * TFTP protocol handler.
- */
-const struct Curl_handler Curl_handler_tftp = {
-  "tftp",                               /* scheme */
-  tftp_setup_connection,                /* setup_connection */
-  tftp_do,                              /* do_it */
-  tftp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  tftp_connect,                         /* connect_it */
-  tftp_multi_statemach,                 /* connecting */
-  tftp_doing,                           /* doing */
-  tftp_pollset,                         /* proto_pollset */
-  tftp_pollset,                         /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_TFTP,                            /* defport */
-  CURLPROTO_TFTP,                       /* protocol */
-  CURLPROTO_TFTP,                       /* family */
-  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY /* flags */
-};
-
 /**********************************************************
  *
  * tftp_set_timeouts -
@@ -199,10 +156,9 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
 {
   time_t timeout;
   timediff_t timeout_ms;
-  bool start = (state->state == TFTP_STATE_START);
 
   /* Compute drop-dead time */
-  timeout_ms = Curl_timeleft_ms(state->data, start);
+  timeout_ms = Curl_timeleft_ms(state->data);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */
@@ -383,307 +339,9 @@ static CURLcode tftp_option_add(struct tftp_conn *state, size_t *csize,
   return CURLE_OK;
 }
 
-static CURLcode tftp_connect_for_tx(struct tftp_conn *state,
-                                    tftp_event_t event)
-{
-  CURLcode result;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  struct Curl_easy *data = state->data;
-
-  infof(data, "%s", "Connected for transmit");
-#endif
-  state->state = TFTP_STATE_TX;
-  result = tftp_set_timeouts(state);
-  if(result)
-    return result;
-  return tftp_tx(state, event);
-}
-
-static CURLcode tftp_connect_for_rx(struct tftp_conn *state,
-                                    tftp_event_t event)
-{
-  CURLcode result;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  struct Curl_easy *data = state->data;
-
-  infof(data, "%s", "Connected for receive");
-#endif
-  state->state = TFTP_STATE_RX;
-  result = tftp_set_timeouts(state);
-  if(result)
-    return result;
-  return tftp_rx(state, event);
-}
-
-static CURLcode tftp_send_first(struct tftp_conn *state,
-                                tftp_event_t event)
-{
-  size_t sbytes;
-  ssize_t senddata;
-  const char *mode = "octet";
-  char *filename;
-  struct Curl_easy *data = state->data;
-  const struct Curl_sockaddr_ex *remote_addr = NULL;
-  CURLcode result = CURLE_OK;
-
-  /* Set ASCII mode if -B flag was used */
-  if(data->state.prefer_ascii)
-    mode = "netascii";
-
-  switch(event) {
-
-  case TFTP_EVENT_INIT:    /* Send the first packet out */
-  case TFTP_EVENT_TIMEOUT: /* Resend the first packet out */
-    /* Increment the retry counter, quit if over the limit */
-    state->retries++;
-    if(state->retries > state->retry_max) {
-      state->error = TFTP_ERR_NORESPONSE;
-      state->state = TFTP_STATE_FIN;
-      return result;
-    }
-
-    if(data->state.upload) {
-      /* If we are uploading, send an WRQ */
-      setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
-      if(data->state.infilesize != -1)
-        Curl_pgrsSetUploadSize(data, data->state.infilesize);
-    }
-    else {
-      /* If we are downloading, send an RRQ */
-      setpacketevent(&state->spacket, TFTP_EVENT_RRQ);
-    }
-    /* As RFC3617 describes the separator slash is not actually part of the
-       filename so we skip the always-present first letter of the path
-       string. */
-    if(!state->data->state.up.path[1]) {
-      failf(data, "Missing filename");
-      return CURLE_TFTP_ILLEGAL;
-    }
-    result = Curl_urldecode(&state->data->state.up.path[1], 0,
-                            &filename, NULL, REJECT_ZERO);
-    if(result)
-      return result;
-
-    if(strlen(filename) > (state->blksize - strlen(mode) - 4)) {
-      failf(data, "TFTP filename too long");
-      curlx_free(filename);
-      return CURLE_TFTP_ILLEGAL; /* too long filename field */
-    }
-
-    curl_msnprintf((char *)state->spacket.data + 2,
-                   state->blksize,
-                   "%s%c%s%c", filename, '\0', mode, '\0');
-    sbytes = 4 + strlen(filename) + strlen(mode);
-    curlx_free(filename);
-
-    /* optional addition of TFTP options */
-    if(!data->set.tftp_no_options) {
-      char buf[64];
-      /* add tsize option */
-      curl_msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
-                     data->state.upload && (data->state.infilesize != -1) ?
-                     data->state.infilesize : 0);
-
-      result = tftp_option_add(state, &sbytes, sbytes, TFTP_OPTION_TSIZE);
-      if(result == CURLE_OK)
-        result = tftp_option_add(state, &sbytes, sbytes, buf);
-
-      /* add blksize option */
-      curl_msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
-      if(result == CURLE_OK)
-        result = tftp_option_add(state, &sbytes, sbytes, TFTP_OPTION_BLKSIZE);
-      if(result == CURLE_OK)
-        result = tftp_option_add(state, &sbytes, sbytes, buf);
-
-      /* add timeout option */
-      curl_msnprintf(buf, sizeof(buf), "%d", state->retry_time);
-      if(result == CURLE_OK)
-        result = tftp_option_add(state, &sbytes, sbytes, TFTP_OPTION_INTERVAL);
-      if(result == CURLE_OK)
-        result = tftp_option_add(state, &sbytes, sbytes, buf);
-
-      if(result != CURLE_OK) {
-        failf(data, "TFTP buffer too small for options");
-        return CURLE_TFTP_ILLEGAL;
-      }
-    }
-
-    /* the typecase for the 3rd argument is mostly for systems that do
-       not have a size_t argument, like older unixes that want an 'int' */
-#ifdef __AMIGA__
-#define CURL_SENDTO_ARG5(x) CURL_UNCONST(x)
-#else
-#define CURL_SENDTO_ARG5(x) (x)
-#endif
-    remote_addr = Curl_conn_get_remote_addr(data, FIRSTSOCKET);
-    if(!remote_addr)
-      return CURLE_FAILED_INIT;
-
-    senddata = sendto(state->sockfd, (void *)state->spacket.data,
-                      (SEND_TYPE_ARG3)sbytes, 0,
-                      CURL_SENDTO_ARG5(&remote_addr->curl_sa_addr),
-                      (curl_socklen_t)remote_addr->addrlen);
-    if(senddata != (ssize_t)sbytes) {
-      char buffer[STRERROR_LEN];
-      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-      return CURLE_SEND_ERROR;
-    }
-    break;
-
-  case TFTP_EVENT_OACK:
-    if(data->state.upload) {
-      result = tftp_connect_for_tx(state, event);
-    }
-    else {
-      result = tftp_connect_for_rx(state, event);
-    }
-    break;
-
-  case TFTP_EVENT_ACK: /* Connected for transmit */
-    result = tftp_connect_for_tx(state, event);
-    break;
-
-  case TFTP_EVENT_DATA: /* Connected for receive */
-    result = tftp_connect_for_rx(state, event);
-    break;
-
-  case TFTP_EVENT_ERROR:
-    state->state = TFTP_STATE_FIN;
-    break;
-
-  default:
-    failf(state->data, "tftp_send_first: internal error");
-    return CURLE_TFTP_ILLEGAL;
-  }
-
-  return result;
-}
-
-/* the next blocknum is x + 1 but it needs to wrap at an unsigned 16bit
+/* the next blocknum is x + 1 but it needs to wrap at an unsigned 16-bit
    boundary */
 #define NEXT_BLOCKNUM(x) (((x) + 1) & 0xffff)
-
-/**********************************************************
- *
- * tftp_rx
- *
- * Event handler for the RX state
- *
- **********************************************************/
-static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event)
-{
-  ssize_t sbytes;
-  int rblock;
-  struct Curl_easy *data = state->data;
-  char buffer[STRERROR_LEN];
-
-  switch(event) {
-
-  case TFTP_EVENT_DATA:
-    /* Is this the block we expect? */
-    rblock = getrpacketblock(&state->rpacket);
-    if(NEXT_BLOCKNUM(state->block) == rblock) {
-      /* This is the expected block. Reset counters and ACK it. */
-      state->retries = 0;
-    }
-    else if(state->block == rblock) {
-      /* This is the last recently received block again. Log it and ACK it
-         again. */
-      infof(data, "Received last DATA packet block %d again.", rblock);
-    }
-    else {
-      /* totally unexpected, just log it */
-      infof(data,
-            "Received unexpected DATA packet block %d, expecting block %d",
-            rblock, NEXT_BLOCKNUM(state->block));
-      break;
-    }
-
-    /* ACK this block. */
-    state->block = (unsigned short)rblock;
-    setpacketevent(&state->spacket, TFTP_EVENT_ACK);
-    setpacketblock(&state->spacket, state->block);
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    4, SEND_4TH_ARG,
-                    (struct sockaddr *)&state->remote_addr,
-                    state->remote_addrlen);
-    if(sbytes < 0) {
-      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-      return CURLE_SEND_ERROR;
-    }
-
-    /* Check if completed (That is, a less than full packet is received) */
-    if(state->rbytes < (ssize_t)state->blksize + 4) {
-      state->state = TFTP_STATE_FIN;
-    }
-    else {
-      state->state = TFTP_STATE_RX;
-    }
-    state->rx_time = time(NULL);
-    break;
-
-  case TFTP_EVENT_OACK:
-    /* ACK option acknowledgement so we can move on to data */
-    state->block = 0;
-    state->retries = 0;
-    setpacketevent(&state->spacket, TFTP_EVENT_ACK);
-    setpacketblock(&state->spacket, state->block);
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    4, SEND_4TH_ARG,
-                    (struct sockaddr *)&state->remote_addr,
-                    state->remote_addrlen);
-    if(sbytes < 0) {
-      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-      return CURLE_SEND_ERROR;
-    }
-
-    /* we are ready to RX data */
-    state->state = TFTP_STATE_RX;
-    state->rx_time = time(NULL);
-    break;
-
-  case TFTP_EVENT_TIMEOUT:
-    /* Increment the retry count and fail if over the limit */
-    state->retries++;
-    infof(data,
-          "Timeout waiting for block %d ACK. Retries = %d",
-          NEXT_BLOCKNUM(state->block), state->retries);
-    if(state->retries > state->retry_max) {
-      state->error = TFTP_ERR_TIMEOUT;
-      state->state = TFTP_STATE_FIN;
-    }
-    else {
-      /* Resend the previous ACK */
-      sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                      4, SEND_4TH_ARG,
-                      (struct sockaddr *)&state->remote_addr,
-                      state->remote_addrlen);
-      if(sbytes < 0) {
-        failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-        return CURLE_SEND_ERROR;
-      }
-    }
-    break;
-
-  case TFTP_EVENT_ERROR:
-    setpacketevent(&state->spacket, TFTP_EVENT_ERROR);
-    setpacketblock(&state->spacket, state->block);
-    (void)sendto(state->sockfd, (void *)state->spacket.data,
-                 4, SEND_4TH_ARG,
-                 (struct sockaddr *)&state->remote_addr,
-                 state->remote_addrlen);
-    /* do not bother with the return code, but if the socket is still up we
-     * should be a good TFTP client and let the server know we are done */
-    state->state = TFTP_STATE_FIN;
-    break;
-
-  default:
-    failf(data, "%s", "tftp_rx: internal error");
-    return CURLE_TFTP_ILLEGAL; /* not really the perfect return code for
-                                  this */
-  }
-  return CURLE_OK;
-}
 
 /**********************************************************
  *
@@ -830,6 +488,300 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
   default:
     failf(data, "tftp_tx: internal error, event: %i", (int)(event));
     break;
+  }
+
+  return result;
+}
+
+static CURLcode tftp_connect_for_tx(struct tftp_conn *state,
+                                    tftp_event_t event)
+{
+  CURLcode result;
+
+  infof(state->data, "%s", "Connected for transmit");
+
+  state->state = TFTP_STATE_TX;
+  result = tftp_set_timeouts(state);
+  if(result)
+    return result;
+  return tftp_tx(state, event);
+}
+
+/**********************************************************
+ *
+ * tftp_rx
+ *
+ * Event handler for the RX state
+ *
+ **********************************************************/
+static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event)
+{
+  ssize_t sbytes;
+  int rblock;
+  struct Curl_easy *data = state->data;
+  char buffer[STRERROR_LEN];
+
+  switch(event) {
+
+  case TFTP_EVENT_DATA:
+    /* Is this the block we expect? */
+    rblock = getrpacketblock(&state->rpacket);
+    if(NEXT_BLOCKNUM(state->block) == rblock) {
+      /* This is the expected block. Reset counters and ACK it. */
+      state->retries = 0;
+    }
+    else if(state->block == rblock) {
+      /* This is the last recently received block again. Log it and ACK it
+         again. */
+      infof(data, "Received last DATA packet block %d again.", rblock);
+    }
+    else {
+      /* totally unexpected, just log it */
+      infof(data,
+            "Received unexpected DATA packet block %d, expecting block %d",
+            rblock, NEXT_BLOCKNUM(state->block));
+      break;
+    }
+
+    /* ACK this block. */
+    state->block = (unsigned short)rblock;
+    setpacketevent(&state->spacket, TFTP_EVENT_ACK);
+    setpacketblock(&state->spacket, state->block);
+    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
+                    4, SEND_4TH_ARG,
+                    (struct sockaddr *)&state->remote_addr,
+                    state->remote_addrlen);
+    if(sbytes < 0) {
+      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+      return CURLE_SEND_ERROR;
+    }
+
+    /* Check if completed (That is, a less than full packet is received) */
+    if(state->rbytes < (ssize_t)state->blksize + 4) {
+      state->state = TFTP_STATE_FIN;
+    }
+    else {
+      state->state = TFTP_STATE_RX;
+    }
+    state->rx_time = time(NULL);
+    break;
+
+  case TFTP_EVENT_OACK:
+    /* ACK option acknowledgement so we can move on to data */
+    state->block = 0;
+    state->retries = 0;
+    setpacketevent(&state->spacket, TFTP_EVENT_ACK);
+    setpacketblock(&state->spacket, state->block);
+    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
+                    4, SEND_4TH_ARG,
+                    (struct sockaddr *)&state->remote_addr,
+                    state->remote_addrlen);
+    if(sbytes < 0) {
+      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+      return CURLE_SEND_ERROR;
+    }
+
+    /* we are ready to RX data */
+    state->state = TFTP_STATE_RX;
+    state->rx_time = time(NULL);
+    break;
+
+  case TFTP_EVENT_TIMEOUT:
+    /* Increment the retry count and fail if over the limit */
+    state->retries++;
+    infof(data,
+          "Timeout waiting for block %d ACK. Retries = %d",
+          NEXT_BLOCKNUM(state->block), state->retries);
+    if(state->retries > state->retry_max) {
+      state->error = TFTP_ERR_TIMEOUT;
+      state->state = TFTP_STATE_FIN;
+    }
+    else {
+      /* Resend the previous ACK */
+      sbytes = sendto(state->sockfd, (void *)state->spacket.data,
+                      4, SEND_4TH_ARG,
+                      (struct sockaddr *)&state->remote_addr,
+                      state->remote_addrlen);
+      if(sbytes < 0) {
+        failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+        return CURLE_SEND_ERROR;
+      }
+    }
+    break;
+
+  case TFTP_EVENT_ERROR:
+    setpacketevent(&state->spacket, TFTP_EVENT_ERROR);
+    setpacketblock(&state->spacket, state->block);
+    (void)sendto(state->sockfd, (void *)state->spacket.data,
+                 4, SEND_4TH_ARG,
+                 (struct sockaddr *)&state->remote_addr,
+                 state->remote_addrlen);
+    /* do not bother with the return code, but if the socket is still up we
+     * should be a good TFTP client and let the server know we are done */
+    state->state = TFTP_STATE_FIN;
+    break;
+
+  default:
+    failf(data, "%s", "tftp_rx: internal error");
+    return CURLE_TFTP_ILLEGAL; /* not really the perfect return code for
+                                  this */
+  }
+  return CURLE_OK;
+}
+
+static CURLcode tftp_connect_for_rx(struct tftp_conn *state,
+                                    tftp_event_t event)
+{
+  CURLcode result;
+
+  infof(state->data, "%s", "Connected for receive");
+
+  state->state = TFTP_STATE_RX;
+  result = tftp_set_timeouts(state);
+  if(result)
+    return result;
+  return tftp_rx(state, event);
+}
+
+static CURLcode tftp_send_first(struct tftp_conn *state,
+                                tftp_event_t event)
+{
+  size_t sbytes;
+  ssize_t senddata;
+  const char *mode = "octet";
+  char *filename;
+  struct Curl_easy *data = state->data;
+  const struct Curl_sockaddr_ex *remote_addr = NULL;
+  CURLcode result = CURLE_OK;
+
+  /* Set ASCII mode if -B flag was used */
+  if(data->state.prefer_ascii)
+    mode = "netascii";
+
+  switch(event) {
+
+  case TFTP_EVENT_INIT:    /* Send the first packet out */
+  case TFTP_EVENT_TIMEOUT: /* Resend the first packet out */
+    /* Increment the retry counter, quit if over the limit */
+    state->retries++;
+    if(state->retries > state->retry_max) {
+      state->error = TFTP_ERR_NORESPONSE;
+      state->state = TFTP_STATE_FIN;
+      return result;
+    }
+
+    if(data->state.upload) {
+      /* If we are uploading, send an WRQ */
+      setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
+      if(data->state.infilesize != -1)
+        Curl_pgrsSetUploadSize(data, data->state.infilesize);
+    }
+    else {
+      /* If we are downloading, send an RRQ */
+      setpacketevent(&state->spacket, TFTP_EVENT_RRQ);
+    }
+    /* As RFC3617 describes the separator slash is not actually part of the
+       filename so we skip the always-present first letter of the path
+       string. */
+    if(!state->data->state.up.path[1]) {
+      failf(data, "Missing filename");
+      return CURLE_TFTP_ILLEGAL;
+    }
+    result = Curl_urldecode(&state->data->state.up.path[1], 0,
+                            &filename, NULL, REJECT_ZERO);
+    if(result)
+      return result;
+
+    if(strlen(filename) + strlen(mode) + 4 > state->blksize) {
+      failf(data, "TFTP filename too long");
+      curlx_free(filename);
+      return CURLE_TFTP_ILLEGAL; /* too long filename field */
+    }
+
+    sbytes = 2 +
+      curl_msnprintf((char *)state->spacket.data + 2,
+                     state->blksize,
+                     "%s%c%s%c", filename, '\0', mode, '\0');
+    curlx_free(filename);
+
+    /* optional addition of TFTP options */
+    if(!data->set.tftp_no_options) {
+      char buf[64];
+      /* add tsize option */
+      curl_msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
+                     data->state.upload && (data->state.infilesize != -1) ?
+                     data->state.infilesize : 0);
+
+      result = tftp_option_add(state, &sbytes, sbytes, TFTP_OPTION_TSIZE);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes, sbytes, buf);
+
+      /* add blksize option */
+      curl_msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes, sbytes, TFTP_OPTION_BLKSIZE);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes, sbytes, buf);
+
+      /* add timeout option */
+      curl_msnprintf(buf, sizeof(buf), "%d", state->retry_time);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes, sbytes, TFTP_OPTION_INTERVAL);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes, sbytes, buf);
+
+      if(result != CURLE_OK) {
+        failf(data, "TFTP buffer too small for options");
+        return CURLE_TFTP_ILLEGAL;
+      }
+    }
+
+    /* the typecase for the 3rd argument is mostly for systems that do
+       not have a size_t argument, like older unixes that want an 'int' */
+#ifdef __AMIGA__
+#define CURL_SENDTO_ARG5(x) CURL_UNCONST(x)
+#else
+#define CURL_SENDTO_ARG5(x) (x)
+#endif
+    remote_addr = Curl_conn_get_remote_addr(data, FIRSTSOCKET);
+    if(!remote_addr)
+      return CURLE_FAILED_INIT;
+
+    senddata = sendto(state->sockfd, (void *)state->spacket.data,
+                      (SEND_TYPE_ARG3)sbytes, 0,
+                      CURL_SENDTO_ARG5(&remote_addr->curl_sa_addr),
+                      (curl_socklen_t)remote_addr->addrlen);
+    if(senddata != (ssize_t)sbytes) {
+      char buffer[STRERROR_LEN];
+      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+      return CURLE_SEND_ERROR;
+    }
+    break;
+
+  case TFTP_EVENT_OACK:
+    if(data->state.upload) {
+      result = tftp_connect_for_tx(state, event);
+    }
+    else {
+      result = tftp_connect_for_rx(state, event);
+    }
+    break;
+
+  case TFTP_EVENT_ACK: /* Connected for transmit */
+    result = tftp_connect_for_tx(state, event);
+    break;
+
+  case TFTP_EVENT_DATA: /* Connected for receive */
+    result = tftp_connect_for_rx(state, event);
+    break;
+
+  case TFTP_EVENT_ERROR:
+    state->state = TFTP_STATE_FIN;
+    break;
+
+  default:
+    failf(state->data, "tftp_send_first: internal error");
+    return CURLE_TFTP_ILLEGAL;
   }
 
   return result;
@@ -1185,8 +1137,7 @@ static timediff_t tftp_state_timeout(struct tftp_conn *state,
   if(event)
     *event = TFTP_EVENT_NONE;
 
-  timeout_ms = Curl_timeleft_ms(state->data,
-                                (state->state == TFTP_STATE_START));
+  timeout_ms = Curl_timeleft_ms(state->data);
   if(timeout_ms < 0) {
     state->error = TFTP_ERR_TIMEOUT;
     state->state = TFTP_STATE_FIN;
@@ -1377,4 +1328,44 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
+/*
+ * TFTP protocol handler.
+ */
+static const struct Curl_protocol Curl_protocol_tftp = {
+  tftp_setup_connection,                /* setup_connection */
+  tftp_do,                              /* do_it */
+  tftp_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  tftp_connect,                         /* connect_it */
+  tftp_multi_statemach,                 /* connecting */
+  tftp_doing,                           /* doing */
+  tftp_pollset,                         /* proto_pollset */
+  tftp_pollset,                         /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+};
+
 #endif
+
+/*
+ * TFTP protocol handler.
+ */
+const struct Curl_scheme Curl_scheme_tftp = {
+  "tftp",                               /* scheme */
+#ifdef CURL_DISABLE_TFTP
+  ZERO_NULL,
+#else
+  &Curl_protocol_tftp,
+#endif
+  CURLPROTO_TFTP,                       /* protocol */
+  CURLPROTO_TFTP,                       /* family */
+  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY, /* flags */
+  PORT_TFTP,                            /* defport */
+};

@@ -28,8 +28,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -39,8 +37,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -58,7 +54,7 @@ env:
 jobs:
   cmake-autotools:
     name: 'autotools & cmake'
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     container: 'debian:stretch'
 
     env:

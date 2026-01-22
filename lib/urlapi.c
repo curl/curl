@@ -83,9 +83,6 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
-static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
-                                      unsigned int flags);
-
 static void free_urlhandle(struct Curl_URL *u)
 {
   curlx_free(u->scheme);
@@ -222,81 +219,6 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
   return 0;
 }
 
-/*
- * Concatenate a relative URL onto a base URL making it absolute.
- */
-static CURLUcode redirect_url(const char *base, const char *relurl,
-                              CURLU *u, unsigned int flags)
-{
-  struct dynbuf urlbuf;
-  bool host_changed = FALSE;
-  const char *useurl = relurl;
-  const char *cutoff = NULL;
-  size_t prelen;
-  CURLUcode uc;
-
-  /* protsep points to the start of the hostname, after [scheme]:// */
-  const char *protsep = base + strlen(u->scheme) + 3;
-  DEBUGASSERT(base && relurl && u); /* all set here */
-  if(!base)
-    return CURLUE_MALFORMED_INPUT; /* should never happen */
-
-  /* handle different relative URL types */
-  switch(relurl[0]) {
-  case '/':
-    if(relurl[1] == '/') {
-      /* protocol-relative URL: //example.com/path */
-      cutoff = protsep;
-      useurl = &relurl[2];
-      host_changed = TRUE;
-    }
-    else
-      /* absolute /path */
-      cutoff = strchr(protsep, '/');
-    break;
-
-  case '#':
-    /* fragment-only change */
-    if(u->fragment)
-      cutoff = strchr(protsep, '#');
-    break;
-
-  default:
-    /* path or query-only change */
-    if(u->query && u->query[0])
-      /* remove existing query */
-      cutoff = strchr(protsep, '?');
-    else if(u->fragment && u->fragment[0])
-      /* Remove existing fragment */
-      cutoff = strchr(protsep, '#');
-
-    if(relurl[0] != '?') {
-      /* append a relative path after the last slash */
-      cutoff = memrchr(protsep, '/',
-                       cutoff ? (size_t)(cutoff - protsep) : strlen(protsep));
-      if(cutoff)
-        cutoff++; /* truncate after last slash */
-    }
-    break;
-  }
-
-  prelen = cutoff ? (size_t)(cutoff - base) : strlen(base);
-
-  /* build new URL */
-  curlx_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
-
-  if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
-     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
-    uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
-                              flags & ~CURLU_PATH_AS_IS);
-  }
-  else
-    uc = CURLUE_OUT_OF_MEMORY;
-
-  curlx_dyn_free(&urlbuf);
-  return uc;
-}
-
 /* scan for byte values <= 31, 127 and sometimes space */
 CURLUcode Curl_junkscan(const char *url, size_t *urllen, bool allowspace)
 {
@@ -334,7 +256,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   char *userp = NULL;
   char *passwdp = NULL;
   char *optionsp = NULL;
-  const struct Curl_handler *h = NULL;
+  const struct Curl_scheme *h = NULL;
 
   /* At this point, we assume all the other special cases have been taken
    * care of, so the host is at most
@@ -359,7 +281,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* if this is a known scheme, get some details */
   if(u->scheme)
-    h = Curl_get_scheme_handler(u->scheme);
+    h = Curl_get_scheme(u->scheme);
 
   /* We could use the login information in the URL so extract it. Only parse
      options if the handler says we should. Note that 'h' might be NULL! */
@@ -1026,7 +948,7 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
     }
 
     schemep = schemebuf;
-    if(!Curl_get_scheme_handler(schemep) &&
+    if(!Curl_get_scheme(schemep) &&
        !(flags & CURLU_NON_SUPPORT_SCHEME))
       return CURLUE_UNSUPPORTED_SCHEME;
 
@@ -1287,6 +1209,81 @@ static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
 }
 
 /*
+ * Concatenate a relative URL onto a base URL making it absolute.
+ */
+static CURLUcode redirect_url(const char *base, const char *relurl,
+                              CURLU *u, unsigned int flags)
+{
+  struct dynbuf urlbuf;
+  bool host_changed = FALSE;
+  const char *useurl = relurl;
+  const char *cutoff = NULL;
+  size_t prelen;
+  CURLUcode uc;
+
+  /* protsep points to the start of the hostname, after [scheme]:// */
+  const char *protsep = base + strlen(u->scheme) + 3;
+  DEBUGASSERT(base && relurl && u); /* all set here */
+  if(!base)
+    return CURLUE_MALFORMED_INPUT; /* should never happen */
+
+  /* handle different relative URL types */
+  switch(relurl[0]) {
+  case '/':
+    if(relurl[1] == '/') {
+      /* protocol-relative URL: //example.com/path */
+      cutoff = protsep;
+      useurl = &relurl[2];
+      host_changed = TRUE;
+    }
+    else
+      /* absolute /path */
+      cutoff = strchr(protsep, '/');
+    break;
+
+  case '#':
+    /* fragment-only change */
+    if(u->fragment)
+      cutoff = strchr(protsep, '#');
+    break;
+
+  default:
+    /* path or query-only change */
+    if(u->query && u->query[0])
+      /* remove existing query */
+      cutoff = strchr(protsep, '?');
+    else if(u->fragment && u->fragment[0])
+      /* Remove existing fragment */
+      cutoff = strchr(protsep, '#');
+
+    if(relurl[0] != '?') {
+      /* append a relative path after the last slash */
+      cutoff = memrchr(protsep, '/',
+                       cutoff ? (size_t)(cutoff - protsep) : strlen(protsep));
+      if(cutoff)
+        cutoff++; /* truncate after last slash */
+    }
+    break;
+  }
+
+  prelen = cutoff ? (size_t)(cutoff - base) : strlen(base);
+
+  /* build new URL */
+  curlx_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
+
+  if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
+     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
+    uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
+                              flags & ~CURLU_PATH_AS_IS);
+  }
+  else
+    uc = CURLUE_OUT_OF_MEMORY;
+
+  curlx_dyn_free(&urlbuf);
+  return uc;
+}
+
+/*
  */
 CURLU *curl_url(void)
 {
@@ -1451,7 +1448,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
   else if(!u->host)
     return CURLUE_NO_HOST;
   else {
-    const struct Curl_handler *h = NULL;
+    const struct Curl_scheme *h = NULL;
     char schemebuf[MAX_SCHEME_LEN + 5];
     if(u->scheme)
       scheme = u->scheme;
@@ -1460,7 +1457,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
     else
       return CURLUE_NO_SCHEME;
 
-    h = Curl_get_scheme_handler(scheme);
+    h = Curl_get_scheme(scheme);
     if(!port && (flags & CURLU_DEFAULT_PORT)) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
@@ -1589,7 +1586,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     if(!ptr && (flags & CURLU_DEFAULT_PORT) && u->scheme) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
-      const struct Curl_handler *h = Curl_get_scheme_handler(u->scheme);
+      const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
       if(h) {
         curl_msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         ptr = portbuf;
@@ -1598,7 +1595,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     else if(ptr && u->scheme) {
       /* there is a stored port number, but ask to inhibit if
          it matches the default one for the scheme */
-      const struct Curl_handler *h = Curl_get_scheme_handler(u->scheme);
+      const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
       if(h && (h->defport == u->portnum) &&
          (flags & CURLU_NO_DEFAULT_PORT))
         ptr = NULL;
@@ -1640,16 +1637,16 @@ static CURLUcode set_url_scheme(CURLU *u, const char *scheme,
                                 unsigned int flags)
 {
   size_t plen = strlen(scheme);
-  const struct Curl_handler *h = NULL;
+  const struct Curl_scheme *h = NULL;
   if((plen > MAX_SCHEME_LEN) || (plen < 1))
     /* too long or too short */
     return CURLUE_BAD_SCHEME;
   /* verify that it is a fine scheme */
-  h = Curl_get_scheme_handler(scheme);
+  h = Curl_get_scheme(scheme);
+  if(!(flags & CURLU_NON_SUPPORT_SCHEME) && (!h || !h->run))
+    return CURLUE_UNSUPPORTED_SCHEME;
   if(!h) {
     const char *s = scheme;
-    if(!(flags & CURLU_NON_SUPPORT_SCHEME))
-      return CURLUE_UNSUPPORTED_SCHEME;
     if(ISALPHA(*s)) {
       /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
       while(--plen) {

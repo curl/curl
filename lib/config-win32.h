@@ -28,53 +28,6 @@
 /*               Hand crafted config file for Windows               */
 /* ================================================================ */
 
-/* Define some minimum and default build targets for Visual Studio */
-#ifdef _MSC_VER
-   /* VS2012 default target settings and minimum build target check. */
-#  if _MSC_VER >= 1700
-     /* The minimum and default build targets for VS2012 are Vista and 8,
-        respectively, unless Update 1 is installed and the v110_xp toolset
-        is chosen. */
-#    ifdef _USING_V110_SDK71_
-#      define VS2012_MIN_TARGET 0x0501  /* XP */
-#      define VS2012_DEF_TARGET 0x0501  /* XP */
-#    else
-#      define VS2012_MIN_TARGET 0x0600  /* Vista */
-#      define VS2012_DEF_TARGET 0x0602  /* 8 */
-#    endif
-
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2012_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2012_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#      ifdef _USING_V110_SDK71_
-#        error VS2012 does not support build targets prior to Windows XP
-#      else
-#        error VS2012 does not support build targets prior to Windows Vista
-#      endif
-#    endif
-   /* VS2010 default target settings and minimum build target check. */
-#  else
-     /* VS2010 default build target is Windows 7 (0x0601).
-        We override default target to be Windows XP. */
-#    define VS2010_MIN_TARGET 0x0501  /* XP */
-#    define VS2010_DEF_TARGET 0x0501  /* XP */
-
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2010_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2010_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2010_MIN_TARGET) || (WINVER < VS2010_MIN_TARGET)
-#      error VS2010 does not support build targets prior to Windows XP
-#    endif
-#  endif
-#endif /* _MSC_VER */
-
 /* ---------------------------------------------------------------- */
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
@@ -281,11 +234,6 @@
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
 /* ---------------------------------------------------------------- */
-
-/* Define if the compiler supports the 'long long' data type. */
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#define HAVE_LONGLONG 1
-#endif
 
 /* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
 #if defined(_MSC_VER) || defined(__MINGW32__)

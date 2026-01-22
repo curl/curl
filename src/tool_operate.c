@@ -289,7 +289,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
     {
       helpf("cannot open '%s'", per->uploadfile);
       if(per->infd != -1) {
-        close(per->infd);
+        curlx_close(per->infd);
         per->infd = STDIN_FILENO;
       }
       return CURLE_READ_ERROR;
@@ -621,7 +621,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   else
 #endif
     if(per->infdopen)
-      close(per->infd);
+      curlx_close(per->infd);
 
   if(per->skip)
     goto skip;
@@ -979,9 +979,17 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   struct State *state = &global->state;
 
   if(!per->outfile) {
+    SANITIZEcode sc;
     /* extract the filename from the URL */
-    CURLcode result = get_url_file_name(&per->outfile, per->url);
-    if(result) {
+    CURLcode result = get_url_file_name(&per->outfile, per->url, &sc);
+    if(sc) {
+      if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+      if(sc == SANITIZE_ERR_INVALID_PATH)
+        errorf("bad output filename");
+      return result;
+    }
+    else if(result) {
       errorf("Failed to extract a filename"
              " from the URL to use for storage");
       return result;
@@ -990,10 +998,18 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   else if(glob_inuse(&state->urlglob)) {
     /* fill '#1' ... '#9' terms from URL pattern */
     char *storefile = per->outfile;
+    SANITIZEcode sc;
     CURLcode result =
-      glob_match_url(&per->outfile, storefile, &state->urlglob);
+      glob_match_url(&per->outfile, storefile, &state->urlglob, &sc);
     tool_safefree(storefile);
-    if(result) {
+    if(sc) {
+      if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+      if(sc == SANITIZE_ERR_INVALID_PATH)
+        warnf("bad output filename");
+      return result;
+    }
+    else if(result) {
       /* bad globbing */
       warnf("bad output glob");
       return result;
@@ -1131,48 +1147,32 @@ static void check_stdin_upload(struct OperationConfig *config,
   }
 }
 
-/* create the next (singular) transfer */
-static CURLcode single_transfer(struct OperationConfig *config,
-                                CURLSH *share, bool *added, bool *skipped)
+static void setup_header_cb(struct OperationConfig *config,
+                            struct HdrCbData *hdrcbdata,
+                            struct getout *u,
+                            struct OutStruct *outs,
+                            struct OutStruct *heads,
+                            struct OutStruct *etag)
 {
+  hdrcbdata->honor_cd_filename = (config->content_disposition && u->useremote);
+  hdrcbdata->outs = outs;
+  hdrcbdata->heads = heads;
+  hdrcbdata->etag_save = etag;
+  hdrcbdata->config = config;
+}
+
+/* create a transfer */
+static CURLcode create_single(struct OperationConfig *config,
+                              CURLSH *share, struct State *state,
+                              bool *added, bool *skipped)
+{
+  const bool orig_isatty = (bool)global->isatty;
+  const bool orig_noprogress = (bool)global->noprogress;
   CURLcode result = CURLE_OK;
-  bool orig_noprogress = global->noprogress;
-  bool orig_isatty = global->isatty;
-  struct State *state = &global->state;
-  char *httpgetfields = state->httpgetfields;
-
-  *skipped = *added = FALSE; /* not yet */
-
-  if(config->postfields) {
-    if(config->use_httpget) {
-      if(!httpgetfields) {
-        /* Use the postfields data for an HTTP get */
-        httpgetfields = state->httpgetfields = config->postfields;
-        config->postfields = NULL;
-        if(SetHTTPrequest((config->no_body ? TOOL_HTTPREQ_HEAD :
-                           TOOL_HTTPREQ_GET), &config->httpreq))
-          return CURLE_FAILED_INIT;
-      }
-    }
-    else if(SetHTTPrequest(TOOL_HTTPREQ_SIMPLEPOST, &config->httpreq))
-      return CURLE_FAILED_INIT;
-  }
-
-  result = set_cert_types(config);
-  if(result)
-    return result;
-
-  if(!state->urlnode) {
-    /* first time caller, setup things */
-    state->urlnode = config->url_list;
-    state->upnum = 1;
-  }
-
   while(state->urlnode) {
     struct per_transfer *per = NULL;
     struct OutStruct *outs;
     struct OutStruct *heads;
-    struct HdrCbData *hdrcbdata = NULL;
     struct OutStruct etag_first;
     CURL *curl;
     struct getout *u = state->urlnode;
@@ -1273,8 +1273,6 @@ static CURLcode single_transfer(struct OperationConfig *config,
       if(result)
         return result;
     }
-    hdrcbdata = &per->hdrcbdata;
-
     outs = &per->outs;
 
     per->outfile = NULL;
@@ -1341,9 +1339,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
       global->isatty = orig_isatty;
     }
 
-    if(httpgetfields || config->query) {
-      result = append2query(config, per,
-                            httpgetfields ? httpgetfields : config->query);
+    if(state->httpgetfields) {
+      result = append2query(config, per, state->httpgetfields);
       if(result)
         return result;
     }
@@ -1358,12 +1355,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     /* explicitly passed to stdout means okaying binary gunk */
     config->terminal_binary_ok = (per->outfile && !strcmp(per->outfile, "-"));
 
-    hdrcbdata->honor_cd_filename =
-      (config->content_disposition && u->useremote);
-    hdrcbdata->outs = outs;
-    hdrcbdata->heads = heads;
-    hdrcbdata->etag_save = &etag_first;
-    hdrcbdata->config = config;
+    setup_header_cb(config, &per->hdrcbdata, u, outs, heads, &etag_first);
 
     result = config2setopts(config, per, curl, share);
     if(result)
@@ -1375,9 +1367,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
     per->retry_sleep = per->retry_sleep_default; /* ms */
     per->retrystart = curlx_now();
 
-    state->urlidx++;
     /* Here's looping around each globbed URL */
-    if(state->urlidx >= state->urlnum) {
+    if(++state->urlidx >= state->urlnum) {
       state->urlidx = state->urlnum = 0;
       glob_cleanup(&state->urlglob);
       state->upidx++;
@@ -1387,6 +1378,46 @@ static CURLcode single_transfer(struct OperationConfig *config,
     break;
   }
   return result;
+}
+
+/* create the next (singular) transfer */
+static CURLcode single_transfer(struct OperationConfig *config,
+                                CURLSH *share, bool *added, bool *skipped)
+{
+  CURLcode result = CURLE_OK;
+  struct State *state = &global->state;
+  char *httpgetfields = state->httpgetfields;
+
+  *skipped = *added = FALSE; /* not yet */
+
+  if(config->postfields) {
+    if(config->use_httpget) {
+      if(!httpgetfields) {
+        /* Use the postfields data for an HTTP get */
+        httpgetfields = state->httpgetfields = config->postfields;
+        config->postfields = NULL;
+        if(SetHTTPrequest((config->no_body ? TOOL_HTTPREQ_HEAD :
+                           TOOL_HTTPREQ_GET), &config->httpreq))
+          return CURLE_FAILED_INIT;
+      }
+    }
+    else if(SetHTTPrequest(TOOL_HTTPREQ_SIMPLEPOST, &config->httpreq))
+      return CURLE_FAILED_INIT;
+  }
+  if(!httpgetfields)
+    state->httpgetfields = config->query;
+
+  result = set_cert_types(config);
+  if(result)
+    return result;
+
+  if(!state->urlnode) {
+    /* first time caller, setup things */
+    state->urlnode = config->url_list;
+    state->upnum = 1;
+  }
+
+  return create_single(config, share, state, added, skipped);
 }
 
 static long all_added; /* number of easy handles currently added */
@@ -2143,8 +2174,8 @@ static CURLcode run_all_transfers(CURLSH *share,
                                   CURLcode result)
 {
   /* Save the values of noprogress and isatty to restore them later on */
-  bool orig_noprogress = global->noprogress;
-  bool orig_isatty = global->isatty;
+  bool orig_noprogress = (bool)global->noprogress;
+  bool orig_isatty = (bool)global->isatty;
   struct per_transfer *per;
 
   /* Time to actually do the transfers */

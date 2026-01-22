@@ -188,7 +188,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       socksreq[0] = 1; /* GSS-API subnegotiation version */
       socksreq[1] = 1; /* authentication message type */
       if(sspi_send_token.cbBuffer > 0xffff) {
-        /* needs to fit in an unsigned 16 bit field */
+        /* needs to fit in an unsigned 16-bit field */
         result = CURLE_COULDNT_CONNECT;
         goto error;
       }
@@ -292,12 +292,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     goto error;
   }
   else {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char *user_utf8 = curlx_convert_tchar_to_UTF8(names.sUserName);
+    VERBOSE(char *user_utf8 = curlx_convert_tchar_to_UTF8(names.sUserName));
     infof(data, "SOCKS5 server authenticated user %s with GSS-API.",
           (user_utf8 ? user_utf8 : "(unknown)"));
-    curlx_free(user_utf8);
-#endif
+    VERBOSE(curlx_free(user_utf8));
     Curl_pSecFn->FreeContextBuffer(names.sUserName);
     names.sUserName = NULL;
   }
@@ -399,7 +397,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     etbuf_size = sspi_w_token[0].cbBuffer + sspi_w_token[1].cbBuffer +
                  sspi_w_token[2].cbBuffer;
     if(etbuf_size > 0xffff) {
-      /* needs to fit in an unsigned 16 bit field */
+      /* needs to fit in an unsigned 16-bit field */
       result = CURLE_COULDNT_CONNECT;
       goto error;
     }

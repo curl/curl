@@ -38,7 +38,6 @@
 #ifdef __VMS
 #  include <in.h>
 #  include <inet.h>
-#  include <stdlib.h>
 #endif
 
 /*
@@ -80,13 +79,13 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
                                      bool abstract);
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) && \
+#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO) && \
   defined(HAVE_FREEADDRINFO)
 void curl_dbg_freeaddrinfo(struct addrinfo *freethis, int line,
                            const char *source);
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
+#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO)
 int curl_dbg_getaddrinfo(const char *hostname, const char *service,
                          const struct addrinfo *hints,
                          struct addrinfo **result, int line,

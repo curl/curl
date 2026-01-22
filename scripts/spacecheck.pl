@@ -29,7 +29,6 @@ use warnings;
 my @tabs = (
     "^m4/zz40-xc-ovr.m4",
     "Makefile\\.(am|example)\$",
-    "/mkfile",
     "\\.sln\$",
     "^tests/data/data1706-stdout.txt",
     "^tests/data/test",
@@ -42,7 +41,8 @@ my @need_crlf = (
 my @double_empty_lines = (
     "RELEASE-NOTES",
     "^lib/.+\\.(c|h)\$",
-    "^packages/",
+    "^projects/OS400",
+    "^projects/vms",
     "^tests/data/test",
     "\\.(m4|py)\$",
 );
@@ -148,15 +148,25 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has multiple EOL at EOF";
     }
 
-    if($content =~ /\n\n\n\n/ ||
-       $content =~ /\r\n\r\n\r\n\r\n/) {
-        push @err, "content: has 3 or more consecutive empty lines";
-    }
-
     if(!fn_match($filename, @double_empty_lines)) {
         if($content =~ /\n\n\n/ ||
            $content =~ /\r\n\r\n\r\n/) {
-            push @err, "content: has 2 consecutive empty lines";
+            my $line = 0;
+            my $blank = 0;
+            for my $l (split(/\n/, $content)) {
+                chomp $l;
+                $line++;
+                if($l =~ /^$/) {
+                    if($blank) {
+                        my $lineno = sprintf("duplicate empty line @ line %d", $line);
+                        push @err, $lineno;
+                    }
+                    $blank = 1;
+                }
+                else {
+                    $blank = 0;
+                }
+            }
         }
     }
 

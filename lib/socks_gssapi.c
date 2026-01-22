@@ -188,7 +188,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
     if(check_gss_err(data, gss_major_status,
                      gss_minor_status, "gss_init_sec_context") ||
-       /* the size needs to fit in a 16 bit field */
+       /* the size needs to fit in a 16-bit field */
        (gss_send_token.length > 0xffff)) {
       gss_release_name(&gss_status, &server);
       gss_release_buffer(&gss_status, &gss_send_token);

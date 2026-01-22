@@ -98,7 +98,7 @@ static int main_checkfds(void)
 #define main_checkfds() 0
 #endif
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 static void memory_tracking_init(void)
 {
   char *env;
@@ -172,6 +172,9 @@ int main(int argc, char *argv[])
   }
 
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE)
+#ifdef DEBUGBUILD
+  if(!curl_getenv("CURL_SIGPIPE_DEBUG"))
+#endif
   (void)signal(SIGPIPE, SIG_IGN);
 #endif
 
@@ -207,4 +210,4 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-#endif /* ndef UNITTESTS */
+#endif /* !UNITTESTS */

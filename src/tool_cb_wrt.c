@@ -89,7 +89,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     if(fd != -1) {
       file = curlx_fdopen(fd, "wb");
       if(!file)
-        close(fd);
+        curlx_close(fd);
     }
   }
 
@@ -231,7 +231,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
   *retp = bytes;
   return 0;
 }
-#endif
+#endif /* _WIN32 */
 
 /*
 ** callback for CURLOPT_WRITEFUNCTION
@@ -244,7 +244,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
-  bool is_tty = global->isatty;
+  bool is_tty = (bool)global->isatty;
 #ifdef _WIN32
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
@@ -303,7 +303,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       return CURL_WRITEFUNC_ERROR;
     }
   }
-#endif
+#endif /* DEBUGBUILD */
 
   if(!outs->stream && !tool_create_output_file(outs, per->config))
     return CURL_WRITEFUNC_ERROR;

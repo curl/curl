@@ -14,8 +14,6 @@ name: 'non-native'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -25,8 +23,6 @@ name: 'non-native'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -139,8 +135,8 @@ jobs:
         include:
           - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
-          - { build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
-          - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
+          # - { build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
+          # - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
       fail-fast: false
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -241,9 +237,10 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
@@ -312,7 +309,9 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -exec file -- '{}' \;
+        run: |
+          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         run: |
@@ -332,9 +331,10 @@ jobs:
 
   msdos:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
       # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced registryUrl=https://github.com
@@ -345,9 +345,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        run: |
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
+        run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -418,7 +416,9 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . \( -name '*.exe' -o -name '*.a' \) -exec file '{}' \;
+        run: |
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time

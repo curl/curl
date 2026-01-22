@@ -143,11 +143,10 @@ bool Curl_auth_allowed_to_host(struct Curl_easy *data)
          (data->state.first_host &&
           curl_strequal(data->state.first_host, conn->host.name) &&
           (data->state.first_remote_port == conn->remote_port) &&
-          (data->state.first_remote_protocol == conn->handler->protocol));
+          (data->state.first_remote_protocol == conn->scheme->protocol));
 }
 
 #ifdef USE_NTLM
-
 static void ntlm_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct ntlmdata *ntlm = entry;
@@ -175,11 +174,9 @@ void Curl_auth_ntlm_remove(struct connectdata *conn, bool proxy)
   Curl_conn_meta_remove(conn, proxy ? CURL_META_NTLM_PROXY_CONN
                                     : CURL_META_NTLM_CONN);
 }
-
 #endif /* USE_NTLM */
 
 #ifdef USE_KERBEROS5
-
 static void krb5_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct kerberos5data *krb5 = entry;
@@ -201,11 +198,9 @@ struct kerberos5data *Curl_auth_krb5_get(struct connectdata *conn)
   }
   return krb5;
 }
-
 #endif /* USE_KERBEROS5 */
 
 #ifdef USE_GSASL
-
 static void gsasl_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct gsasldata *gsasl = entry;
@@ -227,11 +222,9 @@ struct gsasldata *Curl_auth_gsasl_get(struct connectdata *conn)
   }
   return gsasl;
 }
-
 #endif /* USE_GSASL */
 
 #ifdef USE_SPNEGO
-
 static void nego_conn_dtor(void *key, size_t klen, void *entry)
 {
   struct negotiatedata *nego = entry;
@@ -253,5 +246,4 @@ struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy)
   }
   return nego;
 }
-
 #endif /* USE_SPNEGO */

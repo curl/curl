@@ -175,7 +175,7 @@ SPDX-License-Identifier: curl
 ### Memory test
 
   The test script checks that all allocated memory is freed properly IF curl
-  has been built with the `CURLDEBUG` define set. The script automatically
+  has been built with the `DEBUGBUILD` define set. The script automatically
   detects if that is the case, and it uses the `memanalyze.pl` script to
   analyze the memory debugging output.
 

@@ -43,6 +43,7 @@
 #endif
 
 #include "urldata.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "hostip.h"
 #include "url.h"
@@ -74,9 +75,6 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
   struct Curl_addrinfo *ai = NULL;
 
   (void)ip_version;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   ai = Curl_ipv4_resolve_r(hostname, port);
   if(!ai)

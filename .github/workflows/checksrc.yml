@@ -15,7 +15,6 @@ name: 'Source'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'plan9/**'
   pull_request:
     branches:
       - master
@@ -23,7 +22,6 @@ name: 'Source'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'plan9/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -104,9 +102,8 @@ jobs:
     steps:
       - name: 'install pmccabe'
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             pmccabe
 
@@ -124,9 +121,8 @@ jobs:
     steps:
       - name: 'install prereqs'
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libxml2-utils
 
@@ -177,7 +173,7 @@ jobs:
           .github/scripts/shellcheck.sh
 
       - name: 'spacecheck'
-        run: .github/scripts/spacecheck.pl
+        run: scripts/spacecheck.pl
 
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh

@@ -62,20 +62,6 @@ struct pair {
   struct dynbuf value;
 };
 
-static void dyn_array_free(struct dynbuf *db, size_t num_elements);
-static void pair_array_free(struct pair *pair_array, size_t num_elements);
-static CURLcode split_to_dyn_array(const char *source,
-                                   struct dynbuf db[MAX_QUERY_COMPONENTS],
-                                   size_t *num_splits);
-static bool is_reserved_char(const char c);
-static CURLcode uri_encode_path(struct Curl_str *original_path,
-                                struct dynbuf *new_path);
-static CURLcode encode_query_component(char *component, size_t len,
-                                       struct dynbuf *db);
-static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-                                       struct dynbuf *out);
-static bool should_urlencode(struct Curl_str *service_name);
-
 static void sha256_to_hex(char *dst, unsigned char *sha)
 {
   Curl_hexencode(sha, CURL_SHA256_DIGEST_LENGTH,
@@ -127,6 +113,171 @@ static void trim_headers(struct curl_slist *head)
     }
     *store = 0; /* null-terminate */
   }
+}
+
+/*
+ * Frees all allocated strings in a dynbuf pair array, and the dynbuf itself
+ */
+static void pair_array_free(struct pair *pair_array, size_t num_elements)
+{
+  size_t index;
+
+  for(index = 0; index != num_elements; index++) {
+    curlx_dyn_free(&pair_array[index].key);
+    curlx_dyn_free(&pair_array[index].value);
+  }
+}
+
+/*
+ * Frees all allocated strings in a split dynbuf, and the dynbuf itself
+ */
+static void dyn_array_free(struct dynbuf *db, size_t num_elements)
+{
+  size_t index;
+
+  for(index = 0; index < num_elements; index++)
+    curlx_dyn_free((&db[index]));
+}
+
+/*
+ * Splits source string by SPLIT_BY, and creates an array of dynbuf in db.
+ * db is initialized by this function.
+ * Caller is responsible for freeing the array elements with dyn_array_free
+ */
+
+#define SPLIT_BY '&'
+
+static CURLcode split_to_dyn_array(const char *source,
+                                   struct dynbuf db[MAX_QUERY_COMPONENTS],
+                                   size_t *num_splits_out)
+{
+  CURLcode result = CURLE_OK;
+  size_t len = strlen(source);
+  size_t pos;         /* Position in result buffer */
+  size_t start = 0;   /* Start of current segment */
+  size_t segment_length = 0;
+  size_t index = 0;
+  size_t num_splits = 0;
+
+  /* Split source_ptr on SPLIT_BY and store the segment offsets and length in
+   * array */
+  for(pos = 0; pos < len; pos++) {
+    if(source[pos] == SPLIT_BY) {
+      if(segment_length) {
+        curlx_dyn_init(&db[index], segment_length + 1);
+        result = curlx_dyn_addn(&db[index], &source[start], segment_length);
+        if(result)
+          goto fail;
+
+        segment_length = 0;
+        index++;
+        if(++num_splits == MAX_QUERY_COMPONENTS) {
+          result = CURLE_TOO_LARGE;
+          goto fail;
+        }
+      }
+      start = pos + 1;
+    }
+    else {
+      segment_length++;
+    }
+  }
+
+  if(segment_length) {
+    curlx_dyn_init(&db[index], segment_length + 1);
+    result = curlx_dyn_addn(&db[index], &source[start], segment_length);
+    if(!result) {
+      if(++num_splits == MAX_QUERY_COMPONENTS)
+        result = CURLE_TOO_LARGE;
+    }
+  }
+fail:
+  *num_splits_out = num_splits;
+  return result;
+}
+
+static bool is_reserved_char(const char c)
+{
+  return (ISALNUM(c) || ISURLPUNTCS(c));
+}
+
+static CURLcode uri_encode_path(struct Curl_str *original_path,
+                                struct dynbuf *new_path)
+{
+  const char *p = curlx_str(original_path);
+  size_t i;
+
+  for(i = 0; i < curlx_strlen(original_path); i++) {
+    /* Do not encode slashes or unreserved chars from RFC 3986 */
+    CURLcode result = CURLE_OK;
+    unsigned char c = p[i];
+    if(is_reserved_char(c) || c == '/')
+      result = curlx_dyn_addn(new_path, &c, 1);
+    else
+      result = curlx_dyn_addf(new_path, "%%%02X", c);
+    if(result)
+      return result;
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode encode_query_component(char *component, size_t len,
+                                       struct dynbuf *db)
+{
+  size_t i;
+  for(i = 0; i < len; i++) {
+    CURLcode result = CURLE_OK;
+    unsigned char this_char = component[i];
+
+    if(is_reserved_char(this_char))
+      /* Escape unreserved chars from RFC 3986 */
+      result = curlx_dyn_addn(db, &this_char, 1);
+    else if(this_char == '+')
+      /* Encode '+' as space */
+      result = curlx_dyn_add(db, "%20");
+    else
+      result = curlx_dyn_addf(db, "%%%02X", this_char);
+    if(result)
+      return result;
+  }
+
+  return CURLE_OK;
+}
+
+/*
+ * Populates a dynbuf containing url_encode(url_decode(in))
+ */
+static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
+                                       struct dynbuf *out)
+{
+  char *out_s;
+  size_t out_s_len;
+  CURLcode result =
+    Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
+
+  if(!result) {
+    result = encode_query_component(out_s, out_s_len, out);
+    Curl_safefree(out_s);
+  }
+  return result;
+}
+
+static bool should_urlencode(struct Curl_str *service_name)
+{
+  /*
+   * These services require unmodified (not additionally URL-encoded) URL
+   * paths.
+   * should_urlencode == true is equivalent to should_urlencode_uri_path
+   * from the AWS SDK. Urls are already normalized by the curl URL parser
+   */
+
+  if(curlx_str_cmp(service_name, "s3") ||
+     curlx_str_cmp(service_name, "s3-express") ||
+     curlx_str_cmp(service_name, "s3-outposts")) {
+    return false;
+  }
+  return true;
 }
 
 /* maximum length for the aws sivg4 parts */
@@ -971,174 +1122,6 @@ fail:
   curlx_free(secret);
   curlx_free(date_header);
   return result;
-}
-
-/*
- * Frees all allocated strings in a dynbuf pair array, and the dynbuf itself
- */
-
-static void pair_array_free(struct pair *pair_array, size_t num_elements)
-{
-  size_t index;
-
-  for(index = 0; index != num_elements; index++) {
-    curlx_dyn_free(&pair_array[index].key);
-    curlx_dyn_free(&pair_array[index].value);
-  }
-}
-
-/*
- * Frees all allocated strings in a split dynbuf, and the dynbuf itself
- */
-
-static void dyn_array_free(struct dynbuf *db, size_t num_elements)
-{
-  size_t index;
-
-  for(index = 0; index < num_elements; index++)
-    curlx_dyn_free((&db[index]));
-}
-
-/*
- * Splits source string by SPLIT_BY, and creates an array of dynbuf in db.
- * db is initialized by this function.
- * Caller is responsible for freeing the array elements with dyn_array_free
- */
-
-#define SPLIT_BY '&'
-
-static CURLcode split_to_dyn_array(const char *source,
-                                   struct dynbuf db[MAX_QUERY_COMPONENTS],
-                                   size_t *num_splits_out)
-{
-  CURLcode result = CURLE_OK;
-  size_t len = strlen(source);
-  size_t pos;         /* Position in result buffer */
-  size_t start = 0;   /* Start of current segment */
-  size_t segment_length = 0;
-  size_t index = 0;
-  size_t num_splits = 0;
-
-  /* Split source_ptr on SPLIT_BY and store the segment offsets and length in
-   * array */
-  for(pos = 0; pos < len; pos++) {
-    if(source[pos] == SPLIT_BY) {
-      if(segment_length) {
-        curlx_dyn_init(&db[index], segment_length + 1);
-        result = curlx_dyn_addn(&db[index], &source[start], segment_length);
-        if(result)
-          goto fail;
-
-        segment_length = 0;
-        index++;
-        if(++num_splits == MAX_QUERY_COMPONENTS) {
-          result = CURLE_TOO_LARGE;
-          goto fail;
-        }
-      }
-      start = pos + 1;
-    }
-    else {
-      segment_length++;
-    }
-  }
-
-  if(segment_length) {
-    curlx_dyn_init(&db[index], segment_length + 1);
-    result = curlx_dyn_addn(&db[index], &source[start], segment_length);
-    if(!result) {
-      if(++num_splits == MAX_QUERY_COMPONENTS)
-        result = CURLE_TOO_LARGE;
-    }
-  }
-fail:
-  *num_splits_out = num_splits;
-  return result;
-}
-
-static bool is_reserved_char(const char c)
-{
-  return (ISALNUM(c) || ISURLPUNTCS(c));
-}
-
-static CURLcode uri_encode_path(struct Curl_str *original_path,
-                                struct dynbuf *new_path)
-{
-  const char *p = curlx_str(original_path);
-  size_t i;
-
-  for(i = 0; i < curlx_strlen(original_path); i++) {
-    /* Do not encode slashes or unreserved chars from RFC 3986 */
-    CURLcode result = CURLE_OK;
-    unsigned char c = p[i];
-    if(is_reserved_char(c) || c == '/')
-      result = curlx_dyn_addn(new_path, &c, 1);
-    else
-      result = curlx_dyn_addf(new_path, "%%%02X", c);
-    if(result)
-      return result;
-  }
-
-  return CURLE_OK;
-}
-
-static CURLcode encode_query_component(char *component, size_t len,
-                                       struct dynbuf *db)
-{
-  size_t i;
-  for(i = 0; i < len; i++) {
-    CURLcode result = CURLE_OK;
-    unsigned char this_char = component[i];
-
-    if(is_reserved_char(this_char))
-      /* Escape unreserved chars from RFC 3986 */
-      result = curlx_dyn_addn(db, &this_char, 1);
-    else if(this_char == '+')
-      /* Encode '+' as space */
-      result = curlx_dyn_add(db, "%20");
-    else
-      result = curlx_dyn_addf(db, "%%%02X", this_char);
-    if(result)
-      return result;
-  }
-
-  return CURLE_OK;
-}
-
-/*
- * Populates a dynbuf containing url_encode(url_decode(in))
- */
-
-static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-                                       struct dynbuf *out)
-{
-  char *out_s;
-  size_t out_s_len;
-  CURLcode result =
-    Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
-
-  if(!result) {
-    result = encode_query_component(out_s, out_s_len, out);
-    Curl_safefree(out_s);
-  }
-  return result;
-}
-
-static bool should_urlencode(struct Curl_str *service_name)
-{
-  /*
-   * These services require unmodified (not additionally URL-encoded) URL
-   * paths.
-   * should_urlencode == true is equivalent to should_urlencode_uri_path
-   * from the AWS SDK. Urls are already normalized by the curl URL parser
-   */
-
-  if(curlx_str_cmp(service_name, "s3") ||
-     curlx_str_cmp(service_name, "s3-express") ||
-     curlx_str_cmp(service_name, "s3-outposts")) {
-    return false;
-  }
-  return true;
 }
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_AWS */

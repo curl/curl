@@ -507,8 +507,6 @@ class TestUpload:
 
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_07_43_upload_denied(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip("openssl-quic is flaky in filed PUTs")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
         max_upload = 128 * 1024

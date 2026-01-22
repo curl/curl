@@ -46,8 +46,6 @@
 #include "../rand.h"
 
 
-static bool cf_ssl_peer_key_is_global(const char *peer_key);
-
 /* a peer+tls-config we cache sessions for */
 struct Curl_ssl_scache_peer {
   char *ssl_peer_key;      /* id for peer + relevant TLS configuration */
@@ -68,6 +66,235 @@ struct Curl_ssl_scache_peer {
 #define CURL_SCACHE_MAGIC 0x000e1551
 
 #define GOOD_SCACHE(x) ((x) && (x)->magic == CURL_SCACHE_MAGIC)
+
+static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
+                                         const char *name,
+                                         const char *path,
+                                         bool *is_local)
+{
+  if(path && path[0]) {
+    /* We try to add absolute paths, so that the session key can stay
+     * valid when used in another process with different CWD. However,
+     * when a path does not exist, this does not work. Then, we add
+     * the path as is. */
+#ifdef _WIN32
+    char abspath[_MAX_PATH];
+    if(_fullpath(abspath, path, _MAX_PATH))
+      return curlx_dyn_addf(buf, ":%s-%s", name, abspath);
+    *is_local = TRUE;
+#elif defined(HAVE_REALPATH)
+    if(path[0] != '/') {
+      char *abspath = realpath(path, NULL);
+      if(abspath) {
+        CURLcode r = curlx_dyn_addf(buf, ":%s-%s", name, abspath);
+        /* !checksrc! disable BANNEDFUNC 1 */
+        free(abspath); /* allocated by libc, free without memdebug */
+        return r;
+      }
+      *is_local = TRUE;
+    }
+#endif
+    return curlx_dyn_addf(buf, ":%s-%s", name, path);
+  }
+  return CURLE_OK;
+}
+
+static CURLcode cf_ssl_peer_key_add_hash(struct dynbuf *buf,
+                                         const char *name,
+                                         struct curl_blob *blob)
+{
+  CURLcode r = CURLE_OK;
+  if(blob && blob->len) {
+    unsigned char hash[CURL_SHA256_DIGEST_LENGTH];
+    size_t i;
+
+    r = curlx_dyn_addf(buf, ":%s-", name);
+    if(r)
+      goto out;
+    r = Curl_sha256it(hash, blob->data, blob->len);
+    if(r)
+      goto out;
+    for(i = 0; i < CURL_SHA256_DIGEST_LENGTH; ++i) {
+      r = curlx_dyn_addf(buf, "%02x", hash[i]);
+      if(r)
+        goto out;
+    }
+  }
+out:
+  return r;
+}
+
+#define CURL_SSLS_LOCAL_SUFFIX     ":L"
+#define CURL_SSLS_GLOBAL_SUFFIX    ":G"
+
+static bool cf_ssl_peer_key_is_global(const char *peer_key)
+{
+  size_t len = peer_key ? strlen(peer_key) : 0;
+  return (len > 2) &&
+         (peer_key[len - 1] == 'G') &&
+         (peer_key[len - 2] == ':');
+}
+
+CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
+                                const struct ssl_peer *peer,
+                                const char *tls_id,
+                                char **ppeer_key)
+{
+  struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
+  struct dynbuf buf;
+  size_t key_len;
+  bool is_local = FALSE;
+  CURLcode r;
+
+  *ppeer_key = NULL;
+  curlx_dyn_init(&buf, 10 * 1024);
+
+  r = curlx_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
+  if(r)
+    goto out;
+
+  switch(peer->transport) {
+  case TRNSPRT_TCP:
+    break;
+  case TRNSPRT_UDP:
+    r = curlx_dyn_add(&buf, ":UDP");
+    break;
+  case TRNSPRT_QUIC:
+    r = curlx_dyn_add(&buf, ":QUIC");
+    break;
+  case TRNSPRT_UNIX:
+    r = curlx_dyn_add(&buf, ":UNIX");
+    break;
+  default:
+    r = curlx_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
+    break;
+  }
+  if(r)
+    goto out;
+
+  if(!ssl->verifypeer) {
+    r = curlx_dyn_add(&buf, ":NO-VRFY-PEER");
+    if(r)
+      goto out;
+  }
+  if(!ssl->verifyhost) {
+    r = curlx_dyn_add(&buf, ":NO-VRFY-HOST");
+    if(r)
+      goto out;
+  }
+  if(ssl->verifystatus) {
+    r = curlx_dyn_add(&buf, ":VRFY-STATUS");
+    if(r)
+      goto out;
+  }
+  if(!ssl->verifypeer || !ssl->verifyhost) {
+    if(cf->conn->bits.conn_to_host) {
+      r = curlx_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
+      if(r)
+        goto out;
+    }
+    if(cf->conn->bits.conn_to_port) {
+      r = curlx_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
+      if(r)
+        goto out;
+    }
+  }
+
+  if(ssl->version || ssl->version_max) {
+    r = curlx_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
+                       (ssl->version_max >> 16));
+    if(r)
+      goto out;
+  }
+  if(ssl->ssl_options) {
+    r = curlx_dyn_addf(&buf, ":TLSOPT-%x", ssl->ssl_options);
+    if(r)
+      goto out;
+  }
+  if(ssl->cipher_list) {
+    r = curlx_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
+    if(r)
+      goto out;
+  }
+  if(ssl->cipher_list13) {
+    r = curlx_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
+    if(r)
+      goto out;
+  }
+  if(ssl->curves) {
+    r = curlx_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
+    if(r)
+      goto out;
+  }
+  if(ssl->verifypeer) {
+    r = cf_ssl_peer_key_add_path(&buf, "CA", ssl->CAfile, &is_local);
+    if(r)
+      goto out;
+    r = cf_ssl_peer_key_add_path(&buf, "CApath", ssl->CApath, &is_local);
+    if(r)
+      goto out;
+    r = cf_ssl_peer_key_add_path(&buf, "CRL", ssl->CRLfile, &is_local);
+    if(r)
+      goto out;
+    r = cf_ssl_peer_key_add_path(&buf, "Issuer", ssl->issuercert, &is_local);
+    if(r)
+      goto out;
+    if(ssl->cert_blob) {
+      r = cf_ssl_peer_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
+      if(r)
+        goto out;
+    }
+    if(ssl->ca_info_blob) {
+      r = cf_ssl_peer_key_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
+      if(r)
+        goto out;
+    }
+    if(ssl->issuercert_blob) {
+      r = cf_ssl_peer_key_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
+      if(r)
+        goto out;
+    }
+  }
+  if(ssl->pinned_key && ssl->pinned_key[0]) {
+    r = curlx_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
+    if(r)
+      goto out;
+  }
+
+  if(ssl->clientcert && ssl->clientcert[0]) {
+    r = curlx_dyn_add(&buf, ":CCERT");
+    if(r)
+      goto out;
+  }
+#ifdef USE_TLS_SRP
+  if(ssl->username || ssl->password) {
+    r = curlx_dyn_add(&buf, ":SRP-AUTH");
+    if(r)
+      goto out;
+  }
+#endif
+
+  if(!tls_id || !tls_id[0]) {
+    r = CURLE_FAILED_INIT;
+    goto out;
+  }
+  r = curlx_dyn_addf(&buf, ":IMPL-%s", tls_id);
+  if(r)
+    goto out;
+
+  r = curlx_dyn_addf(&buf, is_local ?
+                     CURL_SSLS_LOCAL_SUFFIX : CURL_SSLS_GLOBAL_SUFFIX);
+  if(r)
+    goto out;
+
+  *ppeer_key = curlx_dyn_take(&buf, &key_len);
+  /* we just added printable char, and dynbuf always null-terminates, no need
+   * to track length */
+
+out:
+  curlx_dyn_free(&buf);
+  return r;
+}
 
 struct Curl_ssl_scache {
   unsigned int magic;
@@ -366,235 +593,6 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data)
 {
   if(CURL_SHARE_ssl_scache(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
-}
-
-static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
-                                         const char *name,
-                                         const char *path,
-                                         bool *is_local)
-{
-  if(path && path[0]) {
-    /* We try to add absolute paths, so that the session key can stay
-     * valid when used in another process with different CWD. However,
-     * when a path does not exist, this does not work. Then, we add
-     * the path as is. */
-#ifdef _WIN32
-    char abspath[_MAX_PATH];
-    if(_fullpath(abspath, path, _MAX_PATH))
-      return curlx_dyn_addf(buf, ":%s-%s", name, abspath);
-    *is_local = TRUE;
-#elif defined(HAVE_REALPATH)
-    if(path[0] != '/') {
-      char *abspath = realpath(path, NULL);
-      if(abspath) {
-        CURLcode r = curlx_dyn_addf(buf, ":%s-%s", name, abspath);
-        /* !checksrc! disable BANNEDFUNC 1 */
-        free(abspath); /* allocated by libc, free without memdebug */
-        return r;
-      }
-      *is_local = TRUE;
-    }
-#endif
-    return curlx_dyn_addf(buf, ":%s-%s", name, path);
-  }
-  return CURLE_OK;
-}
-
-static CURLcode cf_ssl_peer_key_add_hash(struct dynbuf *buf,
-                                         const char *name,
-                                         struct curl_blob *blob)
-{
-  CURLcode r = CURLE_OK;
-  if(blob && blob->len) {
-    unsigned char hash[CURL_SHA256_DIGEST_LENGTH];
-    size_t i;
-
-    r = curlx_dyn_addf(buf, ":%s-", name);
-    if(r)
-      goto out;
-    r = Curl_sha256it(hash, blob->data, blob->len);
-    if(r)
-      goto out;
-    for(i = 0; i < CURL_SHA256_DIGEST_LENGTH; ++i) {
-      r = curlx_dyn_addf(buf, "%02x", hash[i]);
-      if(r)
-        goto out;
-    }
-  }
-out:
-  return r;
-}
-
-#define CURL_SSLS_LOCAL_SUFFIX     ":L"
-#define CURL_SSLS_GLOBAL_SUFFIX    ":G"
-
-static bool cf_ssl_peer_key_is_global(const char *peer_key)
-{
-  size_t len = peer_key ? strlen(peer_key) : 0;
-  return (len > 2) &&
-         (peer_key[len - 1] == 'G') &&
-         (peer_key[len - 2] == ':');
-}
-
-CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
-                                const struct ssl_peer *peer,
-                                const char *tls_id,
-                                char **ppeer_key)
-{
-  struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
-  struct dynbuf buf;
-  size_t key_len;
-  bool is_local = FALSE;
-  CURLcode r;
-
-  *ppeer_key = NULL;
-  curlx_dyn_init(&buf, 10 * 1024);
-
-  r = curlx_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
-  if(r)
-    goto out;
-
-  switch(peer->transport) {
-  case TRNSPRT_TCP:
-    break;
-  case TRNSPRT_UDP:
-    r = curlx_dyn_add(&buf, ":UDP");
-    break;
-  case TRNSPRT_QUIC:
-    r = curlx_dyn_add(&buf, ":QUIC");
-    break;
-  case TRNSPRT_UNIX:
-    r = curlx_dyn_add(&buf, ":UNIX");
-    break;
-  default:
-    r = curlx_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
-    break;
-  }
-  if(r)
-    goto out;
-
-  if(!ssl->verifypeer) {
-    r = curlx_dyn_add(&buf, ":NO-VRFY-PEER");
-    if(r)
-      goto out;
-  }
-  if(!ssl->verifyhost) {
-    r = curlx_dyn_add(&buf, ":NO-VRFY-HOST");
-    if(r)
-      goto out;
-  }
-  if(ssl->verifystatus) {
-    r = curlx_dyn_add(&buf, ":VRFY-STATUS");
-    if(r)
-      goto out;
-  }
-  if(!ssl->verifypeer || !ssl->verifyhost) {
-    if(cf->conn->bits.conn_to_host) {
-      r = curlx_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
-      if(r)
-        goto out;
-    }
-    if(cf->conn->bits.conn_to_port) {
-      r = curlx_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
-      if(r)
-        goto out;
-    }
-  }
-
-  if(ssl->version || ssl->version_max) {
-    r = curlx_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
-                       (ssl->version_max >> 16));
-    if(r)
-      goto out;
-  }
-  if(ssl->ssl_options) {
-    r = curlx_dyn_addf(&buf, ":TLSOPT-%x", ssl->ssl_options);
-    if(r)
-      goto out;
-  }
-  if(ssl->cipher_list) {
-    r = curlx_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
-    if(r)
-      goto out;
-  }
-  if(ssl->cipher_list13) {
-    r = curlx_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
-    if(r)
-      goto out;
-  }
-  if(ssl->curves) {
-    r = curlx_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
-    if(r)
-      goto out;
-  }
-  if(ssl->verifypeer) {
-    r = cf_ssl_peer_key_add_path(&buf, "CA", ssl->CAfile, &is_local);
-    if(r)
-      goto out;
-    r = cf_ssl_peer_key_add_path(&buf, "CApath", ssl->CApath, &is_local);
-    if(r)
-      goto out;
-    r = cf_ssl_peer_key_add_path(&buf, "CRL", ssl->CRLfile, &is_local);
-    if(r)
-      goto out;
-    r = cf_ssl_peer_key_add_path(&buf, "Issuer", ssl->issuercert, &is_local);
-    if(r)
-      goto out;
-    if(ssl->cert_blob) {
-      r = cf_ssl_peer_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
-      if(r)
-        goto out;
-    }
-    if(ssl->ca_info_blob) {
-      r = cf_ssl_peer_key_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
-      if(r)
-        goto out;
-    }
-    if(ssl->issuercert_blob) {
-      r = cf_ssl_peer_key_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
-      if(r)
-        goto out;
-    }
-  }
-  if(ssl->pinned_key && ssl->pinned_key[0]) {
-    r = curlx_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
-    if(r)
-      goto out;
-  }
-
-  if(ssl->clientcert && ssl->clientcert[0]) {
-    r = curlx_dyn_add(&buf, ":CCERT");
-    if(r)
-      goto out;
-  }
-#ifdef USE_TLS_SRP
-  if(ssl->username || ssl->password) {
-    r = curlx_dyn_add(&buf, ":SRP-AUTH");
-    if(r)
-      goto out;
-  }
-#endif
-
-  if(!tls_id || !tls_id[0]) {
-    r = CURLE_FAILED_INIT;
-    goto out;
-  }
-  r = curlx_dyn_addf(&buf, ":IMPL-%s", tls_id);
-  if(r)
-    goto out;
-
-  r = curlx_dyn_addf(&buf, is_local ?
-                     CURL_SSLS_LOCAL_SUFFIX : CURL_SSLS_GLOBAL_SUFFIX);
-  if(r)
-    goto out;
-
-  *ppeer_key = curlx_dyn_take(&buf, &key_len);
-  /* we just added printable char, and dynbuf always null-terminates, no need
-   * to track length */
-
-out:
-  curlx_dyn_free(&buf);
-  return r;
 }
 
 static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,

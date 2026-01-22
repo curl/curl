@@ -147,7 +147,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
- #             bytes
+ *             bytes
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
@@ -229,7 +229,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
- #             bytes
+ *             bytes
  * @return always CURLE_OK
  */
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
@@ -663,7 +663,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
- #             bytes
+ *             bytes
  * @return always CURLE_OK
  */
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)

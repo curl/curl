@@ -107,6 +107,11 @@ A fixed faked value to use instead of a proper random number so that functions
 in libcurl that are otherwise getting random outputs can be tested for what
 they generate.
 
+## `CURL_SIGPIPE_DEBUG`
+
+When present, `curl` does not set `SIGPIPE` to ignore. This allows
+verification that `libcurl` does not cause `SIGPIPE` to be raised.
+
 ## `CURL_SMALLREQSEND`
 
 An alternative size of HTTP data to be sent at a time only if smaller than the

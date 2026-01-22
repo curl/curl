@@ -35,34 +35,34 @@ static CURLcode t1609_setup(void)
 
 /* CURLOPT_RESOLVE address parsing test - to test the following defect fix:
 
- 1) if there is already existing host:port pair in the DNS cache and
- we call CURLOPT_RESOLVE, it should also replace addresses.
- for example, if there is "test.com:80" with address "1.1.1.1"
- and we called CURLOPT_RESOLVE with address "2.2.2.2", then DNS entry needs to
- reflect that.
+  1. if there is already existing host:port pair in the DNS cache and
+     we call CURLOPT_RESOLVE, it should also replace addresses.
+     for example, if there is "test.com:80" with address "1.1.1.1"
+     and we called CURLOPT_RESOLVE with address "2.2.2.2", then DNS entry
+     needs to reflect that.
 
- 2) when cached address is already there and close to expire, then by the
- time request is made, it can get expired.  This happens because, when
- we set address using CURLOPT_RESOLVE,
- it usually marks as permanent (by setting timestamp to zero). However,
- if address already exists
-in the cache, then it does not mark it, but just leaves it as it is.
- So we fixing this by timestamp to zero if address already exists too.
+  2. when cached address is already there and close to expire, then by the
+     time request is made, it can get expired.  This happens because, when
+     we set address using CURLOPT_RESOLVE,
+     it usually marks as permanent (by setting timestamp to zero). However,
+     if address already exists
+     in the cache, then it does not mark it, but just leaves it as it is.
+     So we fixing this by timestamp to zero if address already exists too.
 
-Test:
+  Test:
 
- - insert new entry
- - verify that timestamp is not zero
- - call set options with CURLOPT_RESOLVE
- - then, call Curl_loadhostpairs
+  - insert new entry
+  - verify that timestamp is not zero
+  - call set options with CURLOPT_RESOLVE
+  - then, call Curl_loadhostpairs
 
- expected result: cached address has zero timestamp.
+  expected result: cached address has zero timestamp.
 
- - call set options with CURLOPT_RESOLVE with same host:port pair,
-   different address.
- - then, call Curl_loadhostpairs
+  - call set options with CURLOPT_RESOLVE with same host:port pair,
+    different address.
+  - then, call Curl_loadhostpairs
 
- expected result: cached address has zero timestamp and new address
+  expected result: cached address has zero timestamp and new address
 */
 
 static CURLcode test_unit1609(const char *arg)

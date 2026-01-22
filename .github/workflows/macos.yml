@@ -14,8 +14,6 @@ name: 'macOS'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -25,8 +23,6 @@ name: 'macOS'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -51,7 +47,7 @@ env:
 jobs:
   ios:
     name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
-    runs-on: 'macos-latest'
+    runs-on: macos-latest
     timeout-minutes: 10
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
@@ -186,7 +182,9 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file -- '{}' \;
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
 
       - name: 'build tests'
         run: |
@@ -206,7 +204,7 @@ jobs:
 
   macos:
     name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.compiler }} ${{ matrix.build.name }}"
-    runs-on: 'macos-15'
+    runs-on: macos-15
     timeout-minutes: 15
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
@@ -236,7 +234,7 @@ jobs:
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh libnghttp3
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
           - name: '!ssl c-ares'
             compiler: clang
             configure: --enable-debug --enable-ares --without-ssl
@@ -259,11 +257,11 @@ jobs:
             install: libressl
             install_steps: pytest
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-          - name: 'OpenSSL 10.15'
+          - name: 'OpenSSL 10.15 C89'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCMAKE_C_STANDARD=90
             macos-version-min: '10.15'
           - name: 'OpenSSL SecTrust'
             compiler: clang
@@ -334,19 +332,19 @@ jobs:
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: '-t --shallow=25 --min=480 1 to 500'
           - name: 'OpenSSL torture 2'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: '-t --shallow=25 --min=730 501 to 1250'
           - name: 'OpenSSL torture 3'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: '-t --shallow=25 --min=628 1251 to 9999'
 
     steps:
@@ -466,7 +464,10 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: bld/src/curl --disable --version
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          bld/src/curl --disable --version
 
       - name: 'curl install'
         run: |
@@ -700,4 +701,7 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: bld/src/curl --disable --version
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          bld/src/curl --disable --version

@@ -101,22 +101,6 @@ struct cw_out_ctx {
   BIT(errored);
 };
 
-static CURLcode cw_out_write(struct Curl_easy *data,
-                             struct Curl_cwriter *writer, int type,
-                             const char *buf, size_t nbytes);
-static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer);
-static CURLcode cw_out_init(struct Curl_easy *data,
-                            struct Curl_cwriter *writer);
-
-const struct Curl_cwtype Curl_cwt_out = {
-  "cw-out",
-  NULL,
-  cw_out_init,
-  cw_out_write,
-  cw_out_close,
-  sizeof(struct cw_out_ctx)
-};
-
 static CURLcode cw_out_init(struct Curl_easy *data,
                             struct Curl_cwriter *writer)
 {
@@ -198,6 +182,8 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
   size_t nwritten;
   CURLcode result;
 
+  NOVERBOSE((void)otype);
+
   DEBUGASSERT(data->conn);
   *pnwritten = 0;
   Curl_set_in_callback(data, TRUE);
@@ -207,7 +193,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
                  nwritten);
   if(CURL_WRITEFUNC_PAUSE == nwritten) {
-    if(data->conn->handler->flags & PROTOPT_NONETWORK) {
+    if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
       /* Protocols that work without network cannot be paused. This is
          actually only FILE:// just now, and it cannot pause since the
          transfer is not done using the "normal" procedure. */
@@ -455,6 +441,15 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+const struct Curl_cwtype Curl_cwt_out = {
+  "cw-out",
+  NULL,
+  cw_out_init,
+  cw_out_write,
+  cw_out_close,
+  sizeof(struct cw_out_ctx)
+};
+
 bool Curl_cw_out_is_paused(struct Curl_easy *data)
 {
   struct Curl_cwriter *cw_out;
@@ -465,7 +460,7 @@ bool Curl_cw_out_is_paused(struct Curl_easy *data)
     return FALSE;
 
   ctx = (struct cw_out_ctx *)cw_out;
-  return ctx->paused;
+  return (bool)ctx->paused;
 }
 
 static CURLcode cw_out_flush(struct Curl_easy *data,

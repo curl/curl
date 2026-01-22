@@ -56,8 +56,10 @@
 
 #include "urldata.h"
 #include "cfilters.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "hostip.h"
+#include "httpsrr.h"
 #include "url.h"
 #include "multiif.h"
 #include "curl_threads.h"
@@ -116,7 +118,6 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
   struct async_thrdd_addr_ctx *addr_ctx = *paddr_ctx;
   bool destroy;
 
-  (void)data;
   if(!addr_ctx)
     return;
 
@@ -134,12 +135,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
     curlx_free(addr_ctx->hostname);
     if(addr_ctx->res)
       Curl_freeaddrinfo(addr_ctx->res);
-#ifndef CURL_DISABLE_SOCKETPAIR
-#ifndef USE_EVENTFD
-    wakeup_close(addr_ctx->sock_pair[1]);
-#endif
-    wakeup_close(addr_ctx->sock_pair[0]);
-#endif
+    Curl_wakeup_destroy(addr_ctx->sock_pair);
     curlx_free(addr_ctx);
   }
   *paddr_ctx = NULL;
@@ -170,7 +166,7 @@ addr_ctx_create(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_SOCKETPAIR
   /* create socket pair or pipe */
-  if(wakeup_create(addr_ctx->sock_pair, FALSE) < 0) {
+  if(Curl_wakeup_init(addr_ctx->sock_pair, FALSE) < 0) {
     addr_ctx->sock_pair[0] = CURL_SOCKET_BAD;
     addr_ctx->sock_pair[1] = CURL_SOCKET_BAD;
     goto err_exit;
@@ -203,7 +199,7 @@ err_exit:
 static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
-  bool do_abort;
+  curl_bit do_abort;
 
   Curl_mutex_acquire(&addr_ctx->mutx);
   do_abort = addr_ctx->do_abort;
@@ -232,15 +228,11 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
     Curl_mutex_release(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(!do_abort) {
-#ifdef USE_EVENTFD
-      const uint64_t buf[1] = { 1 };
-#else
-      const char buf[1] = { 1 };
-#endif
       /* Thread is done, notify transfer */
-      if(wakeup_write(addr_ctx->sock_pair[1], buf, sizeof(buf)) < 0) {
+      int err = Curl_wakeup_signal(addr_ctx->sock_pair);
+      if(err) {
         /* update sock_error to errno */
-        addr_ctx->sock_error = SOCKERRNO;
+        addr_ctx->sock_error = err;
       }
     }
 #endif
@@ -277,15 +269,10 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
     Curl_mutex_release(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(!do_abort) {
-#ifdef USE_EVENTFD
-      const uint64_t buf[1] = { 1 };
-#else
-      const char buf[1] = { 1 };
-#endif
-      /* Thread is done, notify transfer */
-      if(wakeup_write(addr_ctx->sock_pair[1], buf, sizeof(buf)) < 0) {
+      int err = Curl_wakeup_signal(addr_ctx->sock_pair);
+      if(err) {
         /* update sock_error to errno */
-        addr_ctx->sock_error = SOCKERRNO;
+        addr_ctx->sock_error = err;
       }
     }
 #endif
@@ -314,7 +301,7 @@ static void async_thrdd_destroy(struct Curl_easy *data)
 #endif
 
   if(thrdd->addr && (thrdd->addr->thread_hnd != curl_thread_t_null)) {
-    bool done;
+    curl_bit done;
 
     Curl_mutex_acquire(&addr->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
@@ -373,7 +360,7 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
     curlx_free(rrname);
     return CURLE_FAILED_INIT;
   }
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   if(getenv("CURL_DNS_SERVER")) {
     const char *servers = getenv("CURL_DNS_SERVER");
     status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
@@ -475,7 +462,7 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
   struct async_thrdd_addr_ctx *addr_ctx = thrdd->addr;
-  bool done;
+  curl_bit done;
 
   if(!addr_ctx)
     return;
@@ -582,7 +569,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
                                 struct Curl_dns_entry **dns)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
-  bool done = FALSE;
+  curl_bit done = FALSE;
 
   DEBUGASSERT(dns);
   *dns = NULL;
@@ -679,7 +666,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
   CURLcode result = CURLE_OK;
-  bool thrd_done;
+  curl_bit thrd_done;
 
 #if !defined(USE_HTTPSRR_ARES) && defined(CURL_DISABLE_SOCKETPAIR)
   (void)ps;

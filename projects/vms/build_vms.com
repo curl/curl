@@ -65,7 +65,7 @@ $! Revisions:
 $!
 $!  2-DEC-2003, MSK, the "original" version.
 $!                   It works for me.  Your mileage may vary.
-$! 13-JAN-2004, MSK, moved this procedure to the [.packages.vms] directory
+$! 13-JAN-2004, MSK, moved this procedure to the [.projects.vms] directory
 $!                   and updated it to do hardware dependent builds.
 $! 29-JAN-2004, MSK, moved logical defines into defines.com
 $!  6-FEB-2004, MSK, put in various SSL support bits
@@ -820,17 +820,17 @@ $ then
 $   sys_inc = sys_inc + ",''curl_sys_zlibinc'"
 $ endif
 $! Build LIB
-$ cc_include = "/include=([-.lib],[-.lib.vtls],[-.packages.vms]"
-$ cc_include = cc_include + ",[-.packages.vms.''arch_name'])"
+$ cc_include = "/include=([-.lib],[-.lib.vtls],[-.projects.vms]"
+$ cc_include = cc_include + ",[-.projects.vms.''arch_name'])"
 $ call build "[--.lib]" "*.c" "''objdir'CURLLIB.OLB" "amigaos, nwlib, nwos"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
 $! Build VTLS
 $ cc_include = "/include=([--.lib.vtls],[--.lib],[--.src]"
-$ cc_include = cc_include + ",[--.packages.vms],[--.packages.vms.''arch_name'])"
+$ cc_include = cc_include + ",[--.projects.vms],[--.projects.vms.''arch_name'])"
 $ call build "[--.lib.vtls]" "*.c" "''objdir'CURLLIB.OLB" "amigaos, nwlib, nwos"
 $! Build SRC
 $ cc_include = "/include=([-.src],[-.lib],[-.lib.vtls]"
-$ cc_include = cc_include + ",[-.packages.vms],[-.packages.vms.''arch_name'])"
+$ cc_include = cc_include + ",[-.projects.vms],[-.projects.vms.''arch_name'])"
 $ call build "[--.src]" "*.c" "''objdir'CURLSRC.OLB"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
 $! Build MSG

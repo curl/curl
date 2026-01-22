@@ -33,23 +33,22 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_URL, char *URL);
 
 # DESCRIPTION
 
-Pass in a pointer to the *URL* to work with. The parameter should be a
-char * to a null-terminated string which must be URL-encoded in the following
-format:
+Pass in a pointer to the *URL* to work with. The parameter should be a char *
+to a null-terminated string which must be URL-encoded in the following format:
 
 scheme://host:port/path
 
 For a greater explanation of the format please see RFC 3986.
 
 libcurl does not validate the syntax or use the URL until the transfer is
-started. Even if you set a crazy value here, curl_easy_setopt(3) might
-still return *CURLE_OK*.
+started. Even if you set a crazy value here, curl_easy_setopt(3) might still
+return *CURLE_OK*.
 
 If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
 then libcurl guesses based on the host. If the outermost subdomain name
 matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol gets used,
-otherwise HTTP is used. Since 7.45.0 guessing can be disabled by setting a
-default protocol, see CURLOPT_DEFAULT_PROTOCOL(3) for details.
+otherwise HTTP is used. Scheme guessing can be disabled by setting a default
+protocol, see CURLOPT_DEFAULT_PROTOCOL(3) for details.
 
 Should the protocol, either as specified by the URL scheme or deduced by
 libcurl from the hostname, not be supported by libcurl then
@@ -58,15 +57,15 @@ or curl_multi_perform(3) functions when you call them. Use
 curl_version_info(3) for detailed information of which protocols are supported
 by the build of libcurl you are using.
 
-CURLOPT_PROTOCOLS_STR(3) can be used to limit what protocols libcurl may
-use for this transfer, independent of what libcurl has been compiled to
-support. That may be useful if you accept the URL from an external source and
-want to limit the accessibility.
+CURLOPT_PROTOCOLS_STR(3) can be used to limit what protocols libcurl may use
+for this transfer, independent of what libcurl has been compiled to support.
+That may be useful if you accept the URL from an external source and want to
+limit the accessibility.
 
 The CURLOPT_URL(3) string is ignored if CURLOPT_CURLU(3) is set.
 
-Either CURLOPT_URL(3) or CURLOPT_CURLU(3) must be set before a
-transfer is started.
+Either CURLOPT_URL(3) or CURLOPT_CURLU(3) must be set before a transfer is
+started.
 
 The application does not have to keep the string around after setting this
 option.
@@ -75,13 +74,13 @@ Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again. Note however that
 libcurl needs a URL set to be able to performed a transfer.
 
-The parser used for handling the URL set with CURLOPT_URL(3) is the same
-that curl_url_set(3) uses.
+The parser used for handling the URL set with CURLOPT_URL(3) is the same that
+curl_url_set(3) uses.
 
 # ENCODING
 
-The string pointed to in the CURLOPT_URL(3) argument is generally
-expected to be a sequence of characters using an ASCII compatible encoding.
+The string pointed to in the CURLOPT_URL(3) argument is generally expected to
+be a sequence of characters using an ASCII compatible encoding.
 
 If libcurl is built with IDN support, the server name part of the URL can use
 an "international name" by using the current encoding (according to locale) or

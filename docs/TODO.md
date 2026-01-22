@@ -427,7 +427,7 @@ context information ourselves.
 `CURLOPT_SSL_CTX_FUNCTION` works perfectly for HTTPS and email protocols, but
 it has no effect for LDAPS connections.
 
- [curl issue 4108](https://github.com/curl/curl/issues/4108)
+[curl issue 4108](https://github.com/curl/curl/issues/4108)
 
 ## Paged searches on LDAP server
 
@@ -1058,3 +1058,11 @@ See [curl issue 12655](https://github.com/curl/curl/issues/12655)
 
 Running test suite with `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a 1200 to
 1300` makes several Gopher test cases fail where they should not.
+
+# Signals
+
+## SIGPIPE
+
+Since we control the IO functions for most protocols and disable
+SIGPIPE on sends, libcurl could skip the special SIGPIPE ignore
+handling for those transfers.

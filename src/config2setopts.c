@@ -55,7 +55,7 @@ static int get_address_family(curl_socket_t sockfd)
 #endif
 
 #ifndef SOL_IP
-#  define SOL_IP IPPROTO_IP
+#define SOL_IP IPPROTO_IP
 #endif
 
 #if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
@@ -486,12 +486,14 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 /* only called for HTTP transfers */
 static CURLcode http_setopts(struct OperationConfig *config, CURL *curl)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   long postRedir = 0;
 
   my_setopt_long(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
   my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH, config->unrestricted_auth);
+#ifndef CURL_DISABLE_AWS
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
+#endif
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);
 
   if(config->proxyheaders) {
@@ -851,7 +853,7 @@ CURLcode config2setopts(struct OperationConfig *config,
     else {
       result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
       if(!result)
-        my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
+        result = my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
     }
     break;
   default:

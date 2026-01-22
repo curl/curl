@@ -26,65 +26,52 @@ AUTOMAKE_OPTIONS = foreign
 
 ACLOCAL_AMFLAGS = -I m4
 
-CMAKE_DIST =                                    \
- CMake/cmake_uninstall.in.cmake                 \
- CMake/curl-config.in.cmake                     \
- CMake/CurlSymbolHiding.cmake                   \
- CMake/CurlTests.c                              \
- CMake/FindBrotli.cmake                         \
- CMake/FindCares.cmake                          \
- CMake/FindGnuTLS.cmake                         \
- CMake/FindGSS.cmake                            \
- CMake/FindLDAP.cmake                           \
- CMake/FindLibbacktrace.cmake                   \
- CMake/FindLibgsasl.cmake                       \
- CMake/FindLibidn2.cmake                        \
- CMake/FindLibpsl.cmake                         \
- CMake/FindLibrtmp.cmake                        \
- CMake/FindLibssh.cmake                         \
- CMake/FindLibssh2.cmake                        \
- CMake/FindLibuv.cmake                          \
- CMake/FindMbedTLS.cmake                        \
- CMake/FindNGHTTP2.cmake                        \
- CMake/FindNGHTTP3.cmake                        \
- CMake/FindNGTCP2.cmake                         \
- CMake/FindNettle.cmake                         \
- CMake/FindQuiche.cmake                         \
- CMake/FindRustls.cmake                         \
- CMake/FindWolfSSL.cmake                        \
- CMake/FindZstd.cmake                           \
- CMake/Macros.cmake                             \
- CMake/OtherTests.cmake                         \
- CMake/PickyWarnings.cmake                      \
- CMake/Utilities.cmake                          \
- CMake/unix-cache.cmake                         \
- CMake/win32-cache.cmake                        \
- CMakeLists.txt                                 \
- tests/cmake/CMakeLists.txt                     \
- tests/cmake/test.c                             \
- tests/cmake/test.sh
+CMAKE_DIST =                                     \
+  CMake/cmake_uninstall.in.cmake                 \
+  CMake/curl-config.in.cmake                     \
+  CMake/CurlSymbolHiding.cmake                   \
+  CMake/CurlTests.c                              \
+  CMake/FindBrotli.cmake                         \
+  CMake/FindCares.cmake                          \
+  CMake/FindGnuTLS.cmake                         \
+  CMake/FindGSS.cmake                            \
+  CMake/FindLDAP.cmake                           \
+  CMake/FindLibbacktrace.cmake                   \
+  CMake/FindLibgsasl.cmake                       \
+  CMake/FindLibidn2.cmake                        \
+  CMake/FindLibpsl.cmake                         \
+  CMake/FindLibrtmp.cmake                        \
+  CMake/FindLibssh.cmake                         \
+  CMake/FindLibssh2.cmake                        \
+  CMake/FindLibuv.cmake                          \
+  CMake/FindMbedTLS.cmake                        \
+  CMake/FindNGHTTP2.cmake                        \
+  CMake/FindNGHTTP3.cmake                        \
+  CMake/FindNGTCP2.cmake                         \
+  CMake/FindNettle.cmake                         \
+  CMake/FindQuiche.cmake                         \
+  CMake/FindRustls.cmake                         \
+  CMake/FindWolfSSL.cmake                        \
+  CMake/FindZstd.cmake                           \
+  CMake/Macros.cmake                             \
+  CMake/OtherTests.cmake                         \
+  CMake/PickyWarnings.cmake                      \
+  CMake/Utilities.cmake                          \
+  CMake/unix-cache.cmake                         \
+  CMake/win32-cache.cmake                        \
+  CMakeLists.txt                                 \
+  tests/cmake/CMakeLists.txt                     \
+  tests/cmake/test.c                             \
+  tests/cmake/test.sh
 
-VC_DIST = projects/README.md projects/generate.bat
-
-PLAN9_DIST = plan9/include/mkfile \
- plan9/include/mkfile             \
- plan9/mkfile.proto               \
- plan9/mkfile                     \
- plan9/README                     \
- plan9/lib/mkfile.inc             \
- plan9/lib/mkfile                 \
- plan9/src/mkfile.inc             \
- plan9/src/mkfile
-
-EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig \
- $(CMAKE_DIST) $(VC_DIST) $(PLAN9_DIST)
+EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig $(CMAKE_DIST)
 
 DISTCLEANFILES = buildinfo.txt
 
 bin_SCRIPTS = curl-config
 
 SUBDIRS = lib docs src scripts
-DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
+DIST_SUBDIRS = $(SUBDIRS) tests projects include docs
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
@@ -150,32 +137,6 @@ examples:
 check-docs:
 	@(cd docs/libcurl; $(MAKE) check)
 
-# Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
-# must contain the following line:
-# %_topdir /home/loic/local/rpm
-# and that /home/loic/local/rpm contains the directory SOURCES, BUILD etc.
-#
-# cd /home/loic/local/rpm ; mkdir -p SOURCES BUILD RPMS/i386 SPECS SRPMS
-#
-# If additional configure flags are needed to build the package, add the
-# following in ~/.rpmmacros
-# %configure CFLAGS="%{optflags}" ./configure %{_target_platform} --prefix=%{_prefix} ${AM_CONFIGFLAGS}
-# and run make rpm in the following way:
-# AM_CONFIGFLAGS='--with-uri=/home/users/loic/local/RedHat-6.2' make rpm
-#
-
-rpms:
-	$(MAKE) RPMDIST=curl rpm
-	$(MAKE) RPMDIST=curl-ssl rpm
-
-rpm:
-	RPM_TOPDIR=`rpm --showrc | @PERL@ -n -e 'print if(s/.*_topdir\s+(.*)/$$1/)'` ; \
-	cp $(srcdir)/packages/Linux/RPM/$(RPMDIST).spec $$RPM_TOPDIR/SPECS ; \
-	cp $(PACKAGE)-$(VERSION).tar.gz $$RPM_TOPDIR/SOURCES ; \
-	rpm -ba --clean --rmsource $$RPM_TOPDIR/SPECS/$(RPMDIST).spec ; \
-	mv $$RPM_TOPDIR/RPMS/i386/$(RPMDIST)-*.rpm . ; \
-	mv $$RPM_TOPDIR/SRPMS/$(RPMDIST)-*.src.rpm .
-
 # We extend the standard install with a custom hook:
 if BUILD_DOCS
 install-data-hook:
@@ -208,7 +169,10 @@ checksrc:
 	(cd tests && $(MAKE) checksrc)
 	(cd include/curl && $(MAKE) checksrc)
 	(cd docs/examples && $(MAKE) checksrc)
-	(cd packages && $(MAKE) checksrc)
+	(cd projects && $(MAKE) checksrc)
+
+lint: checksrc
+	@PERL@ $(top_srcdir)/scripts/spacecheck.pl
 
 tidy:
 	(cd src && $(MAKE) tidy)

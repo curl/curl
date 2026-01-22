@@ -180,14 +180,7 @@ static void t582_updateFdSet(struct t582_Sockets *sockets, fd_set *fdset,
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
     FD_SET(sockets->sockets[i], fdset);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
     if(*maxFd < sockets->sockets[i] + 1) {
       *maxFd = sockets->sockets[i] + 1;
     }

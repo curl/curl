@@ -88,6 +88,9 @@ void startfunc(int a, int b) {
 
  // CPP comment ?
 
+ int d = impl->magicbad(1); /* member function always allowed */
+ int e = impl.magicbad(); /* member function always allowed */
+
  /* comment does not end
 
 </file>
@@ -218,6 +221,9 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:65:1: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
   #if  ! defined(__macro_10)
  ^
+./%LOGDIR/code1185.c:65:1: warning: space before preprocessor hash (CPPSPACE)
+  #if  ! defined(__macro_10)
+ ^
 ./%LOGDIR/code1185.c:71:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
   ^
@@ -227,7 +233,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
 %SP
  ^
-checksrc: 0 errors and 44 warnings
+checksrc: 0 errors and 45 warnings
 </stdout>
 <errorcode>
 5

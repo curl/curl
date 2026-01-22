@@ -225,7 +225,7 @@ must be released with curl_free().
   Standard compilation environment does support neither autotools nor make; in
 fact, few common utilities are available. As a consequence, the config-os400.h
 has been coded manually and the compilation scripts are a set of shell scripts
-stored in subdirectory packages/OS400.
+stored in subdirectory projects/OS400.
 
   The test environment is currently not supported on OS/400.
 
@@ -273,7 +273,7 @@ _ Install the curl source directory in IFS. Do NOT install it in the
   installation target directory (which defaults to /curl).
 _ Enter Qshell (QSH, not PASE)
 _ Change current directory to the curl installation directory
-_ Change current directory to ./packages/OS400
+_ Change current directory to ./projects/OS400
 - If you want to change the default configuration parameters like debug info
   generation, optimization level, listing option, target library, ZLIB/LIBSSH2
   availability and location, etc., copy file config400.default to

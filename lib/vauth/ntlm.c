@@ -254,10 +254,6 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
   const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
-
   if(type2len >= 48) {
     target_info_len = Curl_read16_le(&type2[40]);
     target_info_offset = Curl_read32_le(&type2[44]);
@@ -353,10 +349,6 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
-
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   ntlm->flags = 0;
 

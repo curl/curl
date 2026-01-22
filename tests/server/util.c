@@ -111,13 +111,14 @@ void logmsg(const char *msg, ...)
            now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
 
   va_start(ap, msg);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
+/* Suppress for builds where CURL_PRINTF() is not set */
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
   vsnprintf(buffer, sizeof(buffer), msg, ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
 #endif
   va_end(ap);
 
@@ -378,7 +379,7 @@ static void exit_signal_handler(int signum)
 #endif
       static const char msg[] = "exit_signal_handler: called\n";
       (void)!write(fd, msg, sizeof(msg) - 1);
-      close(fd);
+      curlx_close(fd);
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";

@@ -233,7 +233,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     result = SecTrustEvaluateWithError(trust, &error) ?
              CURLE_OK : CURLE_PEER_FAILED_VERIFICATION;
     if(error) {
-      CFIndex code = CFErrorGetCode(error);
+      VERBOSE(CFIndex code = CFErrorGetCode(error));
       error_ref = CFErrorCopyDescription(error);
 
       if(error_ref) {

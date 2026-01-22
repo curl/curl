@@ -43,7 +43,6 @@
 #endif
 
 #include "urldata.h"
-#include "asyn.h"
 #include "hostip.h"
 #include "multiif.h"
 #include "select.h"

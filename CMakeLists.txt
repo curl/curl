@@ -36,7 +36,7 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
       get_property(_cache_var_type CACHE ${_cache_var} PROPERTY TYPE)
       get_property(_cache_var_value CACHE ${_cache_var} PROPERTY VALUE)
       if(_cache_var_type STREQUAL "UNINITIALIZED")
-        set(_cache_var_type)
+        set(_cache_var_type "")
       else()
         set(_cache_var_type ":${_cache_var_type}")
       endif()
@@ -132,6 +132,9 @@ endif()
 if(CMAKE_CROSSCOMPILING)
   string(APPEND _target_flags " CROSS")
 endif()
+if(CMAKE_C_STANDARD)
+  string(APPEND _target_flags " C${CMAKE_C_STANDARD}")
+endif()
 message(STATUS "CMake platform flags:${_target_flags}")
 
 if(CMAKE_CROSSCOMPILING)
@@ -190,9 +193,6 @@ if(WIN32)
 
   # Apply to all feature checks
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")
-  if(MSVC)
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_CRT_NONSTDC_NO_DEPRECATE")  # for strdup() detection
-  endif()
 
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
@@ -253,14 +253,10 @@ option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OF
 if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
-option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 
 set(CURL_DEBUG_MACROS "")
 if(ENABLE_DEBUG)
   list(APPEND CURL_DEBUG_MACROS "DEBUGBUILD")
-endif()
-if(ENABLE_CURLDEBUG)
-  list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
@@ -500,6 +496,8 @@ if(WINDOWS_STORE)
   set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
 endif()
 
+option(CURL_LINT "Run lint checks while building" OFF)
+
 find_package(Perl)
 
 if(PERL_EXECUTABLE)
@@ -512,6 +510,18 @@ if(PERL_EXECUTABLE)
     COMMENT "Generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
+  )
+  if(CURL_LINT)
+    set(_lint_all ALL)
+  endif()
+  add_custom_target(curl-lint "${_lint_all}"
+    COMMENT "Running lint checks" VERBATIM USES_TERMINAL
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl"
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
+    DEPENDS
+      "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
+      "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
   )
 endif()
 
@@ -672,11 +682,6 @@ else()
   set(_openssl_default ON)
 endif()
 cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${_openssl_default} CURL_ENABLE_SSL OFF)
-option(USE_OPENSSL_QUIC "Use OpenSSL and nghttp3 libraries for HTTP/3 support" OFF)
-if(USE_OPENSSL_QUIC AND NOT CURL_USE_OPENSSL)
-  message(WARNING "OpenSSL QUIC has been requested, but without enabling OpenSSL. Will not enable QUIC.")
-  set(USE_OPENSSL_QUIC OFF)
-endif()
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 curl_count_true(_enabled_ssl_options_count
@@ -715,9 +720,9 @@ if(APPLE)
     if(NOT CURL_USE_OPENSSL AND NOT CURL_USE_GNUTLS)
       message(FATAL_ERROR "Apple SecTrust is only supported with Openssl/GnuTLS")
     endif()
-    find_library(COREFOUNDATION_FRAMEWORK NAMES "Security")
-    mark_as_advanced(COREFOUNDATION_FRAMEWORK)
-    if(NOT COREFOUNDATION_FRAMEWORK)
+    find_library(SECURITY_FRAMEWORK NAMES "Security")
+    mark_as_advanced(SECURITY_FRAMEWORK)
+    if(NOT SECURITY_FRAMEWORK)
       message(FATAL_ERROR "Security framework not found")
     endif()
     list(APPEND CURL_LIBS "-framework Security")
@@ -753,7 +758,6 @@ if(CURL_USE_OPENSSL)
   # Depend on OpenSSL via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  set_target_properties(OpenSSL::SSL PROPERTIES INTERFACE_LIBCURL_PC_MODULES "openssl")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
@@ -893,7 +897,6 @@ if(ZLIB_FOUND)
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS ZLIB::ZLIB)
-  set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_LIBCURL_PC_MODULES "zlib")
 endif()
 
 set(HAVE_BROTLI OFF)
@@ -947,7 +950,7 @@ endmacro()
 
 # Ensure that OpenSSL (or fork) or wolfSSL actually supports QUICTLS API.
 macro(curl_openssl_check_quic)
-  if(USE_OPENSSL AND NOT USE_OPENSSL_QUIC)
+  if(USE_OPENSSL)
     if(OPENSSL_VERSION VERSION_GREATER_EQUAL 3.5.0)
       if(NOT DEFINED HAVE_SSL_SET_QUIC_TLS_CBS)
         curl_openssl_check_exists("SSL_set_quic_tls_cbs" HAVE_SSL_SET_QUIC_TLS_CBS)
@@ -1045,7 +1048,7 @@ if(USE_NGTCP2)
       find_package(NGTCP2 REQUIRED COMPONENTS "wolfSSL")
     elseif(HAVE_BORINGSSL OR HAVE_AWSLC)
       find_package(NGTCP2 REQUIRED COMPONENTS "BoringSSL")
-    elseif(OPENSSL_VERSION VERSION_GREATER_EQUAL 3.5.0 AND NOT USE_OPENSSL_QUIC)
+    elseif(OPENSSL_VERSION VERSION_GREATER_EQUAL 3.5.0)
       find_package(NGTCP2 REQUIRED COMPONENTS "ossl")
       if(NGTCP2_VERSION VERSION_LESS 1.12.0)
         message(FATAL_ERROR "ngtcp2 1.12.0 or upper required for OpenSSL")
@@ -1092,19 +1095,6 @@ if(USE_QUICHE)
     check_symbol_exists("quiche_conn_set_qlog_fd" "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
     cmake_pop_check_state()
   endif()
-endif()
-
-if(USE_OPENSSL_QUIC)
-  if(USE_NGTCP2 OR USE_QUICHE)
-    message(FATAL_ERROR "Only one HTTP/3 backend can be selected")
-  elseif(CURL_WITH_MULTI_SSL)
-    message(FATAL_ERROR "MultiSSL cannot be enabled with HTTP/3 and vice versa.")
-  endif()
-  find_package(OpenSSL 3.3.0 REQUIRED)
-
-  find_package(NGHTTP3 REQUIRED)
-  set(USE_NGHTTP3 ON)
-  list(APPEND CURL_LIBS CURL::nghttp3)
 endif()
 
 if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
@@ -1266,10 +1256,10 @@ if(CURL_USE_GSSAPI)
 endif()
 
 # libbacktrace
-option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires build with TrackMemory and DWARF debug information." OFF)
+option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires debug-enabled build and DWARF debug information." OFF)
 if(CURL_USE_LIBBACKTRACE)
-  if(NOT ENABLE_CURLDEBUG)
-    message(FATAL_ERROR "libbacktrace requires TrackMemory enabled")
+  if(NOT ENABLE_DEBUG)
+    message(FATAL_ERROR "libbacktrace requires debug-enabled build for TrackMemory")
   endif()
   if(NOT CMAKE_BUILD_TYPE MATCHES "(Debug|RelWithDebInfo)")
     message(FATAL_ERROR "libbacktrace requires debug information")
@@ -1313,6 +1303,13 @@ endif()
 #
 # CA handling
 #
+option(CURL_CA_NATIVE "Use native CA store" OFF)
+if(CURL_CA_NATIVE)
+  set(_curl_disable_ca_search_default ON)
+else()
+  set(_curl_disable_ca_search_default OFF)
+endif()
+
 if(_curl_ca_bundle_supported)
   set(_ca_opt_desc "Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
 
@@ -1335,7 +1332,7 @@ if(_curl_ca_bundle_supported)
     unset(CURL_CA_BUNDLE CACHE)
   elseif(CURL_CA_BUNDLE STREQUAL "auto")
     unset(CURL_CA_BUNDLE CACHE)
-    if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32 AND NOT USE_APPLE_SECTRUST)
+    if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32 AND NOT USE_APPLE_SECTRUST AND NOT CURL_CA_NATIVE)
       set(_curl_ca_bundle_autodetect TRUE)
     endif()
   else()
@@ -1349,7 +1346,7 @@ if(_curl_ca_bundle_supported)
     unset(CURL_CA_PATH CACHE)
   elseif(CURL_CA_PATH STREQUAL "auto")
     unset(CURL_CA_PATH CACHE)
-    if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32 AND NOT USE_APPLE_SECTRUST)
+    if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32 AND NOT USE_APPLE_SECTRUST AND NOT CURL_CA_NATIVE)
       set(_curl_ca_path_autodetect TRUE)
     endif()
   else()
@@ -1406,7 +1403,7 @@ if(_curl_ca_bundle_supported)
 endif()
 
 if(WIN32)
-  option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" OFF)
+  option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" ${_curl_disable_ca_search_default})
   option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" OFF)
 endif()
 
@@ -1415,21 +1412,9 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501)
-    # Windows XP is required for freeaddrinfo, getaddrinfo
-    message(FATAL_ERROR "Building for Windows XP or newer is required.")
-  endif()
-
-  # Pre-fill detection results based on target OS version
-  if(_CURL_PREFILL)
-    if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
-       WINDOWS_STORE)
-      set(HAVE_IF_NAMETOINDEX 0)
-      unset(HAVE_IF_NAMETOINDEX CACHE)
-    elseif(MSVC OR MINGW)
-      set(HAVE_IF_NAMETOINDEX 1)
-      unset(HAVE_IF_NAMETOINDEX CACHE)
-    endif()
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0600)
+    # Windows Vista is required for freeaddrinfo, getaddrinfo, if_nametoindex
+    message(FATAL_ERROR "Building for Windows Vista or newer is required.")
   endif()
 endif()
 
@@ -1504,7 +1489,6 @@ endforeach()
 
 check_type_size("size_t"      SIZEOF_SIZE_T)
 check_type_size("ssize_t"     SIZEOF_SSIZE_T)
-check_type_size("long long"   SIZEOF_LONG_LONG)
 check_type_size("long"        SIZEOF_LONG)
 check_type_size("int"         SIZEOF_INT)
 check_type_size("__int64"     SIZEOF___INT64)
@@ -1520,9 +1504,6 @@ if(NOT HAVE_SIZEOF_SSIZE_T)
 endif()
 # off_t is sized later, after the HAVE_FILE_OFFSET_BITS test
 
-if(SIZEOF_LONG_LONG)
-  set(HAVE_LONGLONG 1)
-endif()
 if(SIZEOF_SUSECONDS_T)
   set(HAVE_SUSECONDS_T 1)
 endif()
@@ -1553,7 +1534,6 @@ check_symbol_exists("send"            "${CURL_INCLUDES}" HAVE_SEND)  # proto/bsd
 check_function_exists("sendmsg"       HAVE_SENDMSG)
 check_function_exists("sendmmsg"      HAVE_SENDMMSG)
 check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
-check_symbol_exists("strdup"          "string.h" HAVE_STRDUP)
 check_symbol_exists("memrchr"         "string.h" HAVE_MEMRCHR)
 check_symbol_exists("alarm"           "unistd.h" HAVE_ALARM)
 check_symbol_exists("fcntl"           "fcntl.h" HAVE_FCNTL)
@@ -1592,13 +1572,13 @@ check_function_exists("setlocale"     HAVE_SETLOCALE)
 check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 
 if(WIN32)
-  # include wincrypt.h as a workaround for mingw-w64 __MINGW64_VERSION_MAJOR <= 5 header bug */
-  check_symbol_exists("if_nametoindex"  "winsock2.h;wincrypt.h;iphlpapi.h" HAVE_IF_NAMETOINDEX)  # Windows Vista+ non-UWP */
+  set(HAVE_STRDUP 1)  # to not define local implementation. curl uses _strdup() on Windows.
 else()
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
   check_symbol_exists("strcasecmp"        "string.h" HAVE_STRCASECMP)
+  check_symbol_exists("strdup"            "string.h" HAVE_STRDUP)
   check_symbol_exists("stricmp"           "string.h" HAVE_STRICMP)
   check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
 endif()
@@ -1953,6 +1933,7 @@ curl_add_if("IPNS"          NOT CURL_DISABLE_IPFS)
 curl_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
 curl_add_if("RTMP"          USE_LIBRTMP)
 curl_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
+curl_add_if("MQTTS"         NOT CURL_DISABLE_MQTT AND _ssl_enabled)
 curl_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
 curl_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
 if(_items)
@@ -1990,23 +1971,21 @@ curl_add_if("NTLM"          NOT CURL_DISABLE_NTLM AND
                             (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 curl_add_if("TLS-SRP"       USE_TLS_SRP)
 curl_add_if("HTTP2"         USE_NGHTTP2)
-curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
+curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_MBEDTLS OR
                             (USE_WOLFSSL AND HAVE_WOLFSSL_BIO_NEW)))
 curl_add_if("Unicode"       ENABLE_UNICODE)
-curl_add_if("threadsafe"    HAVE_ATOMIC OR
-                            (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
-                            (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
+curl_add_if("threadsafe"    HAVE_ATOMIC OR (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR WIN32)
 curl_add_if("Debug"         ENABLE_DEBUG)
-curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
 curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
 curl_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)
 curl_add_if("PSL"           USE_LIBPSL)
 curl_add_if("CAcert"        CURL_CA_EMBED_SET)
 curl_add_if("SSLS-EXPORT"   _ssl_enabled AND USE_SSLS_EXPORT)
 curl_add_if("AppleSecTrust" USE_APPLE_SECTRUST AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS))
+curl_add_if("NativeCA"      NOT USE_APPLE_SECTRUST AND _ssl_enabled AND CURL_CA_NATIVE)
 if(_items)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
     list(SORT _items CASE INSENSITIVE)
@@ -2144,7 +2123,13 @@ if(NOT CURL_DISABLE_INSTALL)
       if(NOT _libname AND NOT _libs AND NOT _libdirs)
         message(WARNING "Bad lib in library list: ${_lib}")
       endif()
-      get_target_property(_modules "${_lib}" INTERFACE_LIBCURL_PC_MODULES)
+      if(_lib STREQUAL OpenSSL::SSL)
+        set(_modules "openssl")
+      elseif(_lib STREQUAL ZLIB::ZLIB)
+        set(_modules "zlib")
+      else()
+        get_target_property(_modules "${_lib}" INTERFACE_LIBCURL_PC_MODULES)
+      endif()
       if(_modules)
         list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "${_modules}")
       endif()

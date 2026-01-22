@@ -33,7 +33,7 @@ https-proxy
 HTTPS-proxy with Basic auth to HTTP without auth
 </name>
 <command>
- -U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x https://%HOSTIP:%HTTPSPROXYPORT http://we.want.that.site.com/%TESTNUMBER --proxy-insecure
+-U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x https://%HOSTIP:%HTTPSPROXYPORT http://we.want.that.site.com/%TESTNUMBER --proxy-insecure
 </command>
 <features>
 proxy

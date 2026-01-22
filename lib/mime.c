@@ -35,10 +35,9 @@ struct Curl_easy;
 #include "curlx/fopen.h"
 #include "curlx/base64.h"
 
-#if !defined(CURL_DISABLE_MIME) && \
-  (!defined(CURL_DISABLE_HTTP) || \
-   !defined(CURL_DISABLE_SMTP) || \
-   !defined(CURL_DISABLE_IMAP))
+#if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
+                                    !defined(CURL_DISABLE_SMTP) ||      \
+                                    !defined(CURL_DISABLE_IMAP))
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
@@ -48,40 +47,12 @@ struct Curl_easy;
 #include "slist.h"
 #include "curlx/dynbuf.h"
 
-#ifdef _WIN32
-#  ifndef R_OK
-#  define R_OK 4
-#  endif
-#endif
-
 #define READ_ERROR   ((size_t)-1)
 #define STOP_FILLING ((size_t)-2)
 
 static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
                                  void *instream, bool *hasread);
-
-/* Encoders. */
-static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
-                               curl_mimepart *part);
-static curl_off_t encoder_nop_size(curl_mimepart *part);
-static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part);
-static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
-                                  curl_mimepart *part);
-static curl_off_t encoder_base64_size(curl_mimepart *part);
-static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
-                              curl_mimepart *part);
-static curl_off_t encoder_qp_size(curl_mimepart *part);
 static curl_off_t mime_size(curl_mimepart *part);
-
-static const struct mime_encoder encoders[] = {
-  { "binary", encoder_nop_read, encoder_nop_size },
-  { "8bit", encoder_nop_read, encoder_nop_size },
-  { "7bit", encoder_7bit_read, encoder_nop_size },
-  { "base64", encoder_base64_read, encoder_base64_size },
-  { "quoted-printable", encoder_qp_read, encoder_qp_size },
-  { ZERO_NULL, ZERO_NULL, ZERO_NULL }
-};
 
 /* Quoted-printable character class table.
  *
@@ -123,7 +94,7 @@ static const char aschex[] =
   "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x41\x42\x43\x44\x45\x46";
 
 #ifndef __VMS
-#define filesize(name, stat_data) (stat_data.st_size)
+#define filesize(name, stat_data) stat_data.st_size
 #define fopen_read                curlx_fopen
 
 #else
@@ -209,7 +180,7 @@ static FILE *vmsfopenread(const char *file, const char *mode)
 }
 
 #define fopen_read vmsfopenread
-#endif
+#endif /* !__VMS */
 
 #ifndef HAVE_BASENAME
 /*
@@ -258,7 +229,7 @@ static char *Curl_basename(char *path)
 }
 
 #define basename(x)  Curl_basename(x)
-#endif
+#endif /* !HAVE_BASENAME */
 
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
@@ -363,7 +334,7 @@ static void cleanup_encoder_state(struct mime_encoder_state *p)
   p->bufend = 0;
 }
 
-/* Dummy encoder. This is used for 8bit and binary content encodings. */
+/* Dummy encoder. This is used for 8-bit and binary content encodings. */
 static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
                                struct curl_mimepart *part)
 {
@@ -390,7 +361,7 @@ static curl_off_t encoder_nop_size(curl_mimepart *part)
   return part->datasize;
 }
 
-/* 7bit encoder: the encoder is just a data validity check. */
+/* 7-bit encoder: the encoder is just a data validity check. */
 static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part)
 {
@@ -602,7 +573,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
         }
       }
       if(softlinebreak) {
-        curlx_strcopy(buf, sizeof(buf), "\x3D\x0D\x0A", 3);    /* "=\r\n" */
+        curlx_strcopy(buf, sizeof(buf), STRCONST("\x3D\x0D\x0A")); /* =\r\n */
         len = 3;
         consumed = 0;
       }
@@ -1441,6 +1412,15 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
   return CURLE_OK;
 }
 
+static const struct mime_encoder encoders[] = {
+  { "binary", encoder_nop_read, encoder_nop_size },
+  { "8bit", encoder_nop_read, encoder_nop_size },
+  { "7bit", encoder_7bit_read, encoder_nop_size },
+  { "base64", encoder_base64_read, encoder_base64_size },
+  { "quoted-printable", encoder_qp_read, encoder_qp_size },
+  { ZERO_NULL, ZERO_NULL, ZERO_NULL }
+};
+
 /* Set mime data transfer encoder. */
 CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
 {
@@ -2057,7 +2037,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     if(ctx->total_len >= 0)
       ctx->seen_eos = (ctx->read_len >= ctx->total_len);
     *pnread = nread;
-    *peos = ctx->seen_eos;
+    *peos = (bool)ctx->seen_eos;
     break;
   }
 
@@ -2194,7 +2174,8 @@ CURLcode Curl_creader_set_mime(struct Curl_easy *data, curl_mimepart *part)
 }
 
 #else /* !CURL_DISABLE_MIME && (!CURL_DISABLE_HTTP ||
-                                !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP) */
+                                !CURL_DISABLE_SMTP ||
+                                !CURL_DISABLE_IMAP) */
 
 /* Mime not compiled in: define stubs for externally-referenced functions. */
 curl_mime *curl_mime_init(CURL *easy)

@@ -14,8 +14,6 @@ name: 'curl-for-win'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -25,8 +23,6 @@ name: 'curl-for-win'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -72,7 +68,7 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   linux-glibc-gcc-minimal:  # use gcc to minimize installed packages
-    name: 'Linux gcc glibc minimal'
+    name: 'Linux gcc glibc minimal (amd64)'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

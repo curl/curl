@@ -11,13 +11,13 @@ large number of test suites.
 
 Every pull request is verified for each of the following:
 
- - it still builds, warning-free, on Linux, macOS, Windows, BSDs, with both
-   clang and gcc, autotools and cmake, out-of-tree and in-tree.
- - it still builds fine on Windows with all supported MSVC versions
- - it follows rudimentary code style rules
- - the test suite still runs 100% fine
- - the release tarball (the "dist") still works
- - different TLS backends and options still compile and pass tests
+- it still builds, warning-free, on Linux, macOS, Windows, BSDs, with both
+  clang and gcc, autotools and cmake, out-of-tree and in-tree.
+- it still builds fine on Windows with all supported MSVC versions
+- it follows rudimentary code style rules
+- the test suite still runs 100% fine
+- the release tarball (the "dist") still works
+- different TLS backends and options still compile and pass tests
 
 If the pull-request fails one of these tests, it shows up as a red X and you
 are expected to fix the problem. If you do not understand what the issue is or
@@ -26,15 +26,15 @@ can likely help out.
 
 Consider the following table while looking at pull request failures:
 
- | CI platform as shown in PR          | State  | What to look at next       |
- | ----------------------------------- | ------ | -------------------------- |
- | Linux / macOS / Windows / ...       | stable | all errors and failures    |
- | Fuzzer                              | stable | fuzzing results            |
- | Code analyzers                      | stable | new findings               |
- | checkdocs / checksrc / dist / ...   | stable | all errors and failures    |
- | AppVeyor                            | stable | all errors and failures    |
- | buildbot/curl_Schannel ...          | stable | all errors and failures    |
- | curl.curl (linux ...)               | stable | all errors and failures    |
+| CI platform as shown in PR          | State  | What to look at next       |
+| ----------------------------------- | ------ | -------------------------- |
+| Linux / macOS / Windows / ...       | stable | all errors and failures    |
+| Fuzzer                              | stable | fuzzing results            |
+| Code analyzers                      | stable | new findings               |
+| checkdocs / checksrc / dist / ...   | stable | all errors and failures    |
+| AppVeyor                            | stable | all errors and failures    |
+| buildbot/curl_Schannel ...          | stable | all errors and failures    |
+| curl.curl (linux ...)               | stable | all errors and failures    |
 
 Sometimes the tests fail or run slowly due to a dependency service temporarily
 having issues, for example package downloads, or virtualized (non-native)

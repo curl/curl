@@ -105,11 +105,6 @@
  * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
-/* Offered when targeting Vista (XP SP2+) */
-#ifndef CALG_SHA_256
-#define CALG_SHA_256 0x0000800c
-#endif
-
 /* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
@@ -133,10 +128,6 @@
 #define HAS_ALPN_SCHANNEL
 static bool s_win_has_alpn;
 #endif
-
-static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
-                                             const char *pinnedpubkey);
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
                           void *BufDataPtr, unsigned long BufByteSize)
@@ -225,99 +216,48 @@ static const struct algo algs[] = {
   CIPHEROPTION(CALG_MAC),
   CIPHEROPTION(CALG_RSA_SIGN),
   CIPHEROPTION(CALG_DSS_SIGN),
-/* ifdefs for the options that are defined conditionally in wincrypt.h */
-#ifdef CALG_NO_SIGN
   CIPHEROPTION(CALG_NO_SIGN),
-#endif
   CIPHEROPTION(CALG_RSA_KEYX),
   CIPHEROPTION(CALG_DES),
-#ifdef CALG_3DES_112
   CIPHEROPTION(CALG_3DES_112),
-#endif
   CIPHEROPTION(CALG_3DES),
   CIPHEROPTION(CALG_DESX),
   CIPHEROPTION(CALG_RC2),
   CIPHEROPTION(CALG_RC4),
   CIPHEROPTION(CALG_SEAL),
-#ifdef CALG_DH_SF
   CIPHEROPTION(CALG_DH_SF),
-#endif
   CIPHEROPTION(CALG_DH_EPHEM),
-#ifdef CALG_AGREEDKEY_ANY
   CIPHEROPTION(CALG_AGREEDKEY_ANY),
-#endif
-#ifdef CALG_HUGHES_MD5
   CIPHEROPTION(CALG_HUGHES_MD5),
-#endif
   CIPHEROPTION(CALG_SKIPJACK),
-#ifdef CALG_TEK
   CIPHEROPTION(CALG_TEK),
-#endif
   CIPHEROPTION(CALG_CYLINK_MEK), /* spellchecker:disable-line */
   CIPHEROPTION(CALG_SSL3_SHAMD5),
-#ifdef CALG_SSL3_MASTER
   CIPHEROPTION(CALG_SSL3_MASTER),
-#endif
-#ifdef CALG_SCHANNEL_MASTER_HASH
   CIPHEROPTION(CALG_SCHANNEL_MASTER_HASH),
-#endif
-#ifdef CALG_SCHANNEL_MAC_KEY
   CIPHEROPTION(CALG_SCHANNEL_MAC_KEY),
-#endif
-#ifdef CALG_SCHANNEL_ENC_KEY
   CIPHEROPTION(CALG_SCHANNEL_ENC_KEY),
-#endif
-#ifdef CALG_PCT1_MASTER
   CIPHEROPTION(CALG_PCT1_MASTER),
-#endif
-#ifdef CALG_SSL2_MASTER
   CIPHEROPTION(CALG_SSL2_MASTER),
-#endif
-#ifdef CALG_TLS1_MASTER
   CIPHEROPTION(CALG_TLS1_MASTER),
-#endif
-#ifdef CALG_RC5
   CIPHEROPTION(CALG_RC5),
-#endif
-#ifdef CALG_HMAC
   CIPHEROPTION(CALG_HMAC),
-#endif
-#ifdef CALG_TLS1PRF
   CIPHEROPTION(CALG_TLS1PRF),
-#endif
-#ifdef CALG_HASH_REPLACE_OWF
   CIPHEROPTION(CALG_HASH_REPLACE_OWF),
-#endif
-#ifdef CALG_AES_128
   CIPHEROPTION(CALG_AES_128),
-#endif
-#ifdef CALG_AES_192
   CIPHEROPTION(CALG_AES_192),
-#endif
-#ifdef CALG_AES_256
   CIPHEROPTION(CALG_AES_256),
-#endif
-#ifdef CALG_AES
   CIPHEROPTION(CALG_AES),
-#endif
-#ifdef CALG_SHA_256
   CIPHEROPTION(CALG_SHA_256),
-#endif
-#ifdef CALG_SHA_384
   CIPHEROPTION(CALG_SHA_384),
-#endif
-#ifdef CALG_SHA_512
   CIPHEROPTION(CALG_SHA_512),
-#endif
-#ifdef CALG_ECDH
   CIPHEROPTION(CALG_ECDH),
-#endif
+/* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
 #ifdef CALG_ECMQV
   CIPHEROPTION(CALG_ECMQV),
 #endif
-#ifdef CALG_ECDSA
   CIPHEROPTION(CALG_ECDSA),
-#endif
+/* Offered by mingw-w64 v7+. MS SDK 7.0A+. */
 #ifdef CALG_ECDH_EPHEM
   CIPHEROPTION(CALG_ECDH_EPHEM),
 #endif
@@ -617,12 +557,8 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           pszPassword[0] = 0;
 
-        if(Curl_isVistaOrGreater)
-          cert_store = PFXImportCertStore(&datablob, pszPassword,
-                                          PKCS12_NO_PERSIST_KEY);
-        else
-          cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
-
+        cert_store = PFXImportCertStore(&datablob, pszPassword,
+                                        PKCS12_NO_PERSIST_KEY);
         curlx_free(pszPassword);
       }
       if(!blob)
@@ -861,14 +797,6 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
   DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 1/3)",
                connssl->peer.hostname, connssl->peer.port));
-
-  if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
-                                  VERSION_LESS_THAN_EQUAL)) {
-    /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
-       algorithms that may not be supported by all servers. */
-    infof(data, "schannel: Windows version is old and may not be able to "
-          "connect to some servers due to lack of SNI, algorithms, etc.");
-  }
 
 #ifdef HAS_ALPN_SCHANNEL
   backend->use_alpn = connssl->alpn && s_win_has_alpn;
@@ -1115,6 +1043,74 @@ static CURLcode schannel_error(struct Curl_easy *data,
   }
 }
 
+static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
+                                             struct Curl_easy *data,
+                                             const char *pinnedpubkey)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
+  CERT_CONTEXT *pCertContextServer = NULL;
+
+  /* Result is returned to caller */
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+  DEBUGASSERT(backend);
+
+  /* if a path was not specified, do not pin */
+  if(!pinnedpubkey)
+    return CURLE_OK;
+
+  do {
+    SECURITY_STATUS sspi_status;
+    const char *x509_der;
+    DWORD x509_der_len;
+    struct Curl_X509certificate x509_parsed;
+    struct Curl_asn1Element *pubkey;
+
+    sspi_status =
+      Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
+                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                       &pCertContextServer);
+
+    if((sspi_status != SEC_E_OK) || !pCertContextServer) {
+      char buffer[STRERROR_LEN];
+      failf(data, "schannel: Failed to read remote certificate context: %s",
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      break; /* failed */
+    }
+
+    if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+         (pCertContextServer->cbCertEncoded > 0)))
+      break;
+
+    x509_der = (const char *)pCertContextServer->pbCertEncoded;
+    x509_der_len = pCertContextServer->cbCertEncoded;
+    memset(&x509_parsed, 0, sizeof(x509_parsed));
+    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
+      break;
+
+    pubkey = &x509_parsed.subjectPublicKeyInfo;
+    if(!pubkey->header || pubkey->end <= pubkey->header) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
+      break;
+    }
+
+    result = Curl_pin_peer_pubkey(data,
+                                  pinnedpubkey,
+                                  (const unsigned char *)pubkey->header,
+                                  (size_t)(pubkey->end - pubkey->header));
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key");
+    }
+  } while(0);
+
+  if(pCertContextServer)
+    CertFreeCertificateContext(pCertContextServer);
+
+  return result;
+}
+
 static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
                                        struct Curl_easy *data)
 {
@@ -1331,13 +1327,13 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
                     inbuf[1].cbBuffer));
       /*
         There are two cases where we could be getting extra data here:
-        1) If we are renegotiating a connection and the handshake is already
-        complete (from the server perspective), it can encrypted app data
-        (not handshake data) in an extra buffer at this point.
-        2) (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
-        connection and this extra data is part of the handshake.
-        We should process the data immediately; waiting for the socket to
-        be ready may fail since the server is done sending handshake data.
+        1. If we are renegotiating a connection and the handshake is already
+           complete (from the server perspective), it can encrypted app data
+           (not handshake data) in an extra buffer at this point.
+        2. (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
+           connection and this extra data is part of the handshake.
+           We should process the data immediately; waiting for the socket to
+           be ready may fail since the server is done sending handshake data.
       */
       /* check if the remaining data is less than the total amount
          and therefore begins after the already processed data */
@@ -1801,7 +1797,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       remaining = MAX_RENEG_BLOCK_TIME - elapsed;
 
       if(blocking) {
-        timeout_ms = Curl_timeleft_ms(data, FALSE);
+        timeout_ms = Curl_timeleft_ms(data);
 
         if(timeout_ms < 0) {
           result = CURLE_OPERATION_TIMEDOUT;
@@ -1954,7 +1950,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     while(len > *pnwritten) {
       size_t this_write = 0;
       int what;
-      timediff_t timeout_ms = Curl_timeleft_ms(data, FALSE);
+      timediff_t timeout_ms = Curl_timeleft_ms(data);
       if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(data, "schannel: timed out sending data "
@@ -2263,11 +2259,9 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto cleanup;
     }
     else {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       char buffer[STRERROR_LEN];
       failf(data, "schannel: failed to read data from server: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-#endif
       result = CURLE_RECV_ERROR;
       goto cleanup;
     }
@@ -2578,74 +2572,6 @@ static CURLcode schannel_random(struct Curl_easy *data,
   (void)data;
 
   return Curl_win32_random(entropy, length);
-}
-
-static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
-                                             const char *pinnedpubkey)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct schannel_ssl_backend_data *backend =
-    (struct schannel_ssl_backend_data *)connssl->backend;
-  CERT_CONTEXT *pCertContextServer = NULL;
-
-  /* Result is returned to caller */
-  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-
-  DEBUGASSERT(backend);
-
-  /* if a path was not specified, do not pin */
-  if(!pinnedpubkey)
-    return CURLE_OK;
-
-  do {
-    SECURITY_STATUS sspi_status;
-    const char *x509_der;
-    DWORD x509_der_len;
-    struct Curl_X509certificate x509_parsed;
-    struct Curl_asn1Element *pubkey;
-
-    sspi_status =
-      Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
-                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                       &pCertContextServer);
-
-    if((sspi_status != SEC_E_OK) || !pCertContextServer) {
-      char buffer[STRERROR_LEN];
-      failf(data, "schannel: Failed to read remote certificate context: %s",
-            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-      break; /* failed */
-    }
-
-    if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-         (pCertContextServer->cbCertEncoded > 0)))
-      break;
-
-    x509_der = (const char *)pCertContextServer->pbCertEncoded;
-    x509_der_len = pCertContextServer->cbCertEncoded;
-    memset(&x509_parsed, 0, sizeof(x509_parsed));
-    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
-      break;
-
-    pubkey = &x509_parsed.subjectPublicKeyInfo;
-    if(!pubkey->header || pubkey->end <= pubkey->header) {
-      failf(data, "SSL: failed retrieving public key from server certificate");
-      break;
-    }
-
-    result = Curl_pin_peer_pubkey(data,
-                                  pinnedpubkey,
-                                  (const unsigned char *)pubkey->header,
-                                  (size_t)(pubkey->end - pubkey->header));
-    if(result) {
-      failf(data, "SSL: public key does not match pinned public key");
-    }
-  } while(0);
-
-  if(pCertContextServer)
-    CertFreeCertificateContext(pCertContextServer);
-
-  return result;
 }
 
 static void schannel_checksum(const unsigned char *input,

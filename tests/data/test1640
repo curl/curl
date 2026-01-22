@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+MQTT
+MQTT SUBSCRIBE
+MQTTS
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+hello
+</data>
+<datacheck hex="yes">
+00 04 31 31 39 30   68 65 6c 6c 6f 5b 4c 46 5d 0a
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<features>
+mqtts
+</features>
+<server>
+mqtts
+</server>
+<name>
+MQTTS SUBSCRIBE
+</name>
+<command option="binary-trace">
+mqtts://%HOSTIP:%MQTTSPORT/topic --insecure
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# These are hexadecimal protocol dumps from the client
+# Strip out the random part of the client id from the CONNECT message
+# before comparison
+<strippart>
+s/^(.* 00044d5154540402003c000c6375726c).*/$1/
+</strippart>
+<protocol>
+client CONNECT 18 00044d5154540402003c000c6375726c
+server CONNACK 2 20020000
+client SUBSCRIBE a 00010005746f70696300
+server SUBACK 3 9003000100
+server PUBLISH d 300d0005746f70696368656c6c6f0a
+server DISCONNECT 0 e000
+</protocol>
+</verify>
+</testcase>

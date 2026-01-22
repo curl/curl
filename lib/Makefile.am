@@ -28,9 +28,9 @@ include Makefile.inc
 
 CMAKE_DIST = CMakeLists.txt curl_config-cmake.h.in
 
-EXTRA_DIST = config-mac.h config-os400.h config-plan9.h config-riscos.h \
-  config-win32.h curl_config.h.in $(LIB_RCFILES) libcurl.def            \
-  $(CMAKE_DIST) Makefile.soname optiontable.pl
+EXTRA_DIST = config-mac.h config-os400.h config-riscos.h config-win32.h         \
+  curl_config.h.in $(LIB_RCFILES) libcurl.def $(CMAKE_DIST) Makefile.soname     \
+  optiontable.pl
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -65,9 +65,6 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
-endif
-if CURLDEBUG
-AM_CPPFLAGS += -DCURLDEBUG
 endif
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 
@@ -146,8 +143,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	$(CSOURCES) $(HHEADERS))
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(CSOURCES) $(HHEADERS))
 
 if NOT_CURL_CI
 if DEBUGBUILD
