@@ -301,6 +301,7 @@ int Curl_sock_nosigpipe(curl_socket_t sockfd)
   return setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
                     (void *)&onoff, sizeof(onoff));
 #else
+  (void)sockfd;
   return 0;
 #endif /* USE_SO_NOSIGPIPE */
 }
