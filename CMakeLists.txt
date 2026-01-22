@@ -312,18 +312,10 @@ set(CURL_CFLAGS "")  # C flags set for libcurl and curl tool (aka public binarie
 option(CURL_DROP_UNUSED "Drop unused code and data from built binaries" OFF)
 if(CURL_DROP_UNUSED)
   if(APPLE)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,-dead_strip")
-    else()
-      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,-dead_strip")
-    endif()
+    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,-dead_strip")
   elseif(MSVC)  # Options below are toolchain defaults in Release configurations.
     # This option does not seem to have an effect with VS2010:
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
-    else()
-      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-OPT:REF")
-    endif()
+    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-Gy")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -331,11 +323,7 @@ if(CURL_DROP_UNUSED)
       # To make -Wl,--gc-sections work on Windows: https://sourceware.org/bugzilla/show_bug.cgi?id=11539
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-fno-asynchronous-unwind-tables")
     endif()
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,--gc-sections")
-    else()
-      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,--gc-sections")
-    endif()
+    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,--gc-sections")
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-ffunction-sections" "-fdata-sections")
   endif()
