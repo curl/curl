@@ -1185,7 +1185,7 @@ static bool is_custom_fetch_listing_match(const char *params)
 {
   /* match " 1:* (FLAGS ..." or " 1,2,3 (FLAGS ..." */
   if(*params++ != ' ')
-    return false;
+    return FALSE;
 
   while(ISDIGIT(*params)) {
     params++;
