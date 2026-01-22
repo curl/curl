@@ -104,37 +104,40 @@ jobs:
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra
+            install_steps: wolfssl-opensslextra-arm
             tflags: '--min=780 1 to 950'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra
+            install_steps: wolfssl-opensslextra-arm
             tflags: '--min=800 951 to 9999'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'mbedtls gss valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-intel
+            install_steps: mbedtls-latest-arm
             tflags: '--min=830 1 to 950'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON -DCURL_DROP_UNUSED=ON
 
           - name: 'mbedtls gss valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-intel
+            install_steps: mbedtls-latest-arm
             tflags: '--min=800 951 to 9999'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
-            image: ubuntu-24.04-arm
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
-            install_steps: mbedtls-latest-arm pytest
+            install_steps: mbedtls-latest-intel pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
@@ -539,18 +542,18 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples --prefix=/home/runner/wolfssl-all
           make install
 
-      - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') }}
+      - name: 'cache wolfssl (opensslextra-arm)'  # does support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-wolfssl-opensslextra
+        id: cache-wolfssl-opensslextra-arm
         env:
-          cache-name: cache-wolfssl-opensslextra
+          cache-name: cache-wolfssl-opensslextra-arm
         with:
           path: ~/wolfssl-opensslextra
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
-      - name: 'build wolfssl (opensslextra)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true' }}
+      - name: 'build wolfssl (opensslextra-arm)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
