@@ -310,7 +310,6 @@ if(CURL_PURGE_UNUSED)
     endif()
   elseif(MSVC)
     # https://learn.microsoft.com/cpp/build/reference/opt-optimizations
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
     # Toolchain default in Release configurations.
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
@@ -329,6 +328,10 @@ if(CURL_PURGE_UNUSED)
       set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,--gc-sections")
     endif()
   endif()
+endif()
+option(CURL_PURGE_UNUSED_TWEAK "Drop unused code and data from built binaries" OFF)
+if(CURL_PURGE_UNUSED_TWEAK AND MSVC)
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
 endif()
 
 # For debug libs and exes, add "-d" postfix
