@@ -54,16 +54,6 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32'
 
-    - job_name: 'CM VS2012, Debug, x86, Schannel, Shared, Build-tests ON'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_GENERATOR: 'Visual Studio 11 2012'
-      CMAKE_GENERATE: '-A Win32'
-
-    - job_name: 'CM VS2012, Debug, x86, Schannel, Shared, Build-tests OFF'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_GENERATOR: 'Visual Studio 11 2012'
-      CMAKE_GENERATE: '-A Win32 -DCURL_PURGE_UNUSED=OFF'
-
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: '3.18.4'
