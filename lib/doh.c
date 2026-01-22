@@ -755,9 +755,9 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
       return DOH_DNS_OUT_OF_RANGE;
 
     type = doh_get16bit(doh, index);
-    if((type != CURL_DNS_TYPE_CNAME)    /* may be synthesized from DNAME */
-       && (type != CURL_DNS_TYPE_DNAME) /* if present, accept and ignore */
-       && (type != dnstype))
+    if((type != CURL_DNS_TYPE_CNAME) &&  /* may be synthesized from DNAME */
+       (type != CURL_DNS_TYPE_DNAME) &&  /* if present, accept and ignore */
+       (type != dnstype))
       /* Not the same type as was asked for nor CNAME nor DNAME */
       return DOH_DNS_UNEXPECTED_TYPE;
     index += 2;
