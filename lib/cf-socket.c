@@ -294,17 +294,14 @@ static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
   return CURLE_OK;
 }
 
+#ifdef USE_SO_NOSIGPIPE
 int Curl_sock_nosigpipe(curl_socket_t sockfd)
 {
-#ifdef USE_SO_NOSIGPIPE
   int onoff = 1;
   return setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
                     (void *)&onoff, sizeof(onoff));
-#else
-  (void)sockfd;
-  return 0;
-#endif /* USE_SO_NOSIGPIPE */
 }
+#endif /* USE_SO_NOSIGPIPE */
 
 static CURLcode socket_open(struct Curl_easy *data,
                             struct Curl_sockaddr_ex *addr,
