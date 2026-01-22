@@ -383,7 +383,7 @@ jobs:
 
           - name: 'IntelC openssl'
             install_packages: libssl-dev
-            install_steps: intel
+            install_steps: intelc
             configure: CC=icc --enable-debug --with-openssl
 
           - name: 'Slackware !ssl gssapi gcc'
@@ -757,7 +757,7 @@ jobs:
         run: sudo dpkg -i ~/rustls/"librustls_${RUSTLS_VERSION}_amd64.deb"
 
       - name: 'install Intel compilers'
-        if: ${{ contains(matrix.build.install_steps, 'intel') }}
+        if: ${{ contains(matrix.build.install_steps, 'intelc') }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
