@@ -294,6 +294,17 @@ static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
   return CURLE_OK;
 }
 
+int Curl_sock_nosigpipe(curl_socket_t sockfd)
+{
+#ifdef USE_SO_NOSIGPIPE
+  int onoff = 1;
+  return setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
+                    (void *)&onoff, sizeof(onoff));
+#else
+  return 0;
+#endif /* USE_SO_NOSIGPIPE */
+}
+
 static CURLcode socket_open(struct Curl_easy *data,
                             struct Curl_sockaddr_ex *addr,
                             curl_socket_t *sockfd)
@@ -333,15 +344,12 @@ static CURLcode socket_open(struct Curl_easy *data,
   }
 
 #ifdef USE_SO_NOSIGPIPE
-  {
-    int onoff = 1;
-    if(setsockopt(*sockfd, SOL_SOCKET, SO_NOSIGPIPE,
-                  (void *)&onoff, sizeof(onoff)) < 0) {
-      failf(data, "setsockopt enable SO_NOSIGPIPE: %s",
-            curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
-      *sockfd = CURL_SOCKET_BAD;
-      return CURLE_COULDNT_CONNECT;
-    }
+  if(Curl_sock_nosigpipe(*sockfd) < 0) {
+    failf(data, "setsockopt enable SO_NOSIGPIPE: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    sclose(*sockfd);
+    *sockfd = CURL_SOCKET_BAD;
+    return CURLE_COULDNT_CONNECT;
   }
 #endif /* USE_SO_NOSIGPIPE */
 

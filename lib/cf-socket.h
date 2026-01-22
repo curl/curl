@@ -73,6 +73,9 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
                           uint8_t transport,
                           curl_socket_t *sockfd);
 
+/* Set SO_NOSIGPIPE where supported, return < 0 on error. */
+int Curl_sock_nosigpipe(curl_socket_t sockfd);
+
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
 
