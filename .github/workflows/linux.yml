@@ -278,7 +278,7 @@ jobs:
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
-            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra
+            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
             make-custom-target: tidy
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
@@ -290,7 +290,7 @@ jobs:
 
           - name: 'scan-build'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
-            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra
+            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
             CC: clang
             configure-prefix: scan-build
@@ -540,6 +540,27 @@ jobs:
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=/home/runner/wolfssl-all
+          make install
+
+      - name: 'cache wolfssl (opensslextra-intel)'  # does support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') }}
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-wolfssl-opensslextra-intel
+        env:
+          cache-name: cache-wolfssl-opensslextra-intel
+        with:
+          path: ~/wolfssl-opensslextra
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+
+      - name: 'build wolfssl (opensslextra-intel)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') && steps.cache-wolfssl-opensslextra-intel.outputs.cache-hit != 'true' }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
+          cd "wolfssl-${WOLFSSL_VERSION}-stable"
+          ./autogen.sh
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+            --disable-benchmark --disable-crypttests --disable-examples --prefix=/home/runner/wolfssl-opensslextra
           make install
 
       - name: 'cache wolfssl (opensslextra-arm)'  # does support `OPENSSL_COEXIST`
