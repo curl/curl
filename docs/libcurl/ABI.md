@@ -4,8 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-ABI - Application Binary Interface
-==================================
+# ABI - Application Binary Interface
 
 "ABI" describes the low-level interface between an application program and a
 library. Calling conventions, function arguments, return values, struct
