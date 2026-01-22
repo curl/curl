@@ -498,7 +498,6 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl)
 
   if(config->proxyheaders) {
     my_setopt_slist(curl, CURLOPT_PROXYHEADER, config->proxyheaders);
-    my_setopt_long(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
   }
 
   my_setopt_long(curl, CURLOPT_MAXREDIRS, config->maxredirs);
@@ -882,6 +881,11 @@ CURLcode config2setopts(struct OperationConfig *config,
       result = cookie_setopts(config, curl);
     if(result)
       return result;
+    /* Enable header separation when using a proxy with HTTPS or proxytunnel
+     * to prevent --header content from leaking into CONNECT requests */
+    if((config->proxy || config->proxyheaders) &&
+       (use_proto == proto_https || config->proxytunnel))
+      my_setopt_long(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
   }
 
   if(use_proto == proto_ftp || use_proto == proto_ftps) {
