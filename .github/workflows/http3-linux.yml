@@ -389,7 +389,7 @@ jobs:
             tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
-              -DCMAKE_UNITY_BUILD=ON -DCURL_PURGE_UNUSED=ON
+              -DCMAKE_UNITY_BUILD=ON -DCURL_STRIP_UNUSED=ON
 
           - name: 'boringssl'
             install_steps: skipall

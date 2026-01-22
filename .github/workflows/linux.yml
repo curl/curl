@@ -121,7 +121,7 @@ jobs:
             tflags: '--min=830 1 to 950'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON -DCURL_PURGE_UNUSED=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON -DCURL_STRIP_UNUSED=ON
 
           - name: 'mbedtls gss valgrind 2'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
@@ -163,7 +163,7 @@ jobs:
           - name: 'awslc'
             install_packages: libidn2-dev
             install_steps: awslc
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_PURGE_UNUSED=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_STRIP_UNUSED=ON
 
           - name: 'boringssl'
             install_steps: boringssl pytest
