@@ -310,10 +310,10 @@ if(CURL_PURGE_UNUSED)
     endif()
   elseif(MSVC)
     # These options are toolchain defaults in Release configurations.
-    # Not mandatory, but helps further reducing binary size. Makes objects/static libraries grow.
+    # Not mandatory, but helps further reducing binary size. Makes objects/static libraries larger:
     # https://learn.microsoft.com/cpp/build/reference/gy-enable-function-level-linking
     set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Gy")
-    # This option does not seem to have an effect with VS2010.
+    # This option does not seem to have an effect with VS2010:
     # https://learn.microsoft.com/cpp/build/reference/opt-optimizations
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
@@ -325,6 +325,7 @@ if(CURL_PURGE_UNUSED)
       # To make -Wl,--gc-sections work on Windows: https://sourceware.org/bugzilla/show_bug.cgi?id=11539
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-fno-asynchronous-unwind-tables")
     endif()
+    # Not mandatory, but helps further reducing binary size. Makes objects/static libraries larger:
     set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-ffunction-sections" "-fdata-sections")
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,--gc-sections")
