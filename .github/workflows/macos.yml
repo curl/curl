@@ -151,7 +151,7 @@ jobs:
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n "${MATRIX_GENERATOR}" ] && options="-G ${MATRIX_GENERATOR}"
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_STRIP_UNUSED=ON -DCURL_WERROR=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
               ${MATRIX_GENERATE} ${options}
@@ -417,7 +417,7 @@ jobs:
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-                -DCMAKE_UNITY_BUILD=ON -DCURL_STRIP_UNUSED=ON -DCURL_WERROR=ON \
+                -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
                 ${MATRIX_GENERATE} ${options}
@@ -652,7 +652,7 @@ jobs:
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_STRIP_UNUSED=ON -DCURL_WERROR=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
               -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \

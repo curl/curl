@@ -302,8 +302,8 @@ endif()
 
 set(CURL_CFLAGS "")  # C flags set for libcurl and curl tool (aka public binaries) only
 
-option(CURL_STRIP_UNUSED "Drop unused code and data from built binaries" OFF)
-if(CURL_STRIP_UNUSED OR TRUE)
+option(CURL_DROP_UNUSED "Drop unused code and data from built binaries" OFF)
+if(CURL_DROP_UNUSED OR TRUE)
   if(APPLE)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
       set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,-dead_strip")
