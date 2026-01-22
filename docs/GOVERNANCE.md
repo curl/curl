@@ -46,9 +46,8 @@ the project.
 
 Donating plain money to curl is best done to curl's [Open Collective
 fund](https://opencollective.com/curl). Open Collective is a US based
-non-profit organization that holds on to funds for us. This fund is then used
-for paying the curl security bug bounties, to reimburse project related
-expenses etc.
+non-profit organization that holds on to funds for us. This fund is used to
+reimburse and pay for project related expenses etc.
 
 Donations to the project can also come in the form of server hosting, providing
 services and paying for people to work on curl related code etc. Usually, such

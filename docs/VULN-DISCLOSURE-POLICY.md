@@ -29,9 +29,11 @@ mailing lists. Messages associated with any commits should not make any
 reference to the security nature of the commit if done prior to the public
 announcement.
 
-- The person discovering the issue, the reporter, reports the vulnerability on
-  [HackerOne](https://hackerone.com/curl). Issues filed there reach a handful
-  of selected and trusted people.
+- The person discovering the issue, the reporter, reports the vulnerability to
+  the curl project. Do this [on
+  GitHub](https://github.com/curl/curl/security/advisories) or send an email
+  to `security at curl.se`. Such submissions reach a handful of selected and
+  trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
   security vulnerability in curl or libcurl are ignored and no further action
@@ -75,10 +77,6 @@ announcement.
   set to Low or Medium, the fix is allowed to get merged into the master
   repository via a normal PR - but without mentioning it being a security
   vulnerability.
-
-- The monetary reward part of the bug-bounty is managed by the Internet Bug
-  Bounty team and the reporter is asked to request the reward from them after
-  the issue has been completely handled and published by curl.
 
 - No more than seven days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -143,11 +141,6 @@ has been published.
 
 *All* reports submitted to the project, valid or not, should be disclosed and
 made public.
-
-## Bug Bounty
-
-See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
-bug bounty program.
 
 # Severity levels
 
