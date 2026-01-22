@@ -42,8 +42,8 @@ data received by curl
 
 ## *
 
-additional info provided by curl. Text that adds explanations of what goes on
-and about choices curl does.
+additional info provided by curl. Text that adds explanations what goes on and
+about choices curl does.
 
 ##
 
