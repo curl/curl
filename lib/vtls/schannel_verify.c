@@ -663,7 +663,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SECURITY_STATUS sspi_status;
   CURLcode result = CURLE_OK;
@@ -688,7 +687,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   }
 
   if(result == CURLE_OK &&
-     (conn_config->CAfile || conn_config->ca_info_blob) &&
+     (connssl->config->CAfile || connssl->config->ca_info_blob) &&
      BACKEND->use_manual_cred_validation) {
     /*
      * Create a chain engine that uses the certificates in the CA file as
@@ -722,7 +721,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
           result = CURLE_SSL_CACERT_BADFILE;
         }
         else {
-          const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+          const struct curl_blob *ca_info_blob = connssl->config->ca_info_blob;
           own_trust_store = trust_store;
 
           if(ca_info_blob) {
@@ -734,7 +733,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
           }
           else {
             result = add_certs_file_to_store(trust_store,
-                                              conn_config->CAfile,
+                                              connssl->config->CAfile,
                                               data);
           }
           if(result == CURLE_OK) {
@@ -838,7 +837,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   }
 
   if(result == CURLE_OK) {
-    if(conn_config->verifyhost) {
+    if(connssl->config->verifyhost) {
       result = Curl_verify_host(cf, data);
     }
   }

@@ -492,7 +492,8 @@ static bool ssl_prefs_check(struct Curl_easy *data)
 }
 
 static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
-                                           const struct alpn_spec *alpn)
+                                           const struct alpn_spec *alpn,
+                                           struct ssl_primary_config *config)
 {
   struct ssl_connect_data *ctx;
 
@@ -503,6 +504,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
 
   ctx->ssl_impl = Curl_ssl;
   ctx->alpn = alpn;
+  ctx->config = config;
   Curl_bufq_init2(&ctx->earlydata, CURL_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
   ctx->backend = curlx_calloc(1, ctx->ssl_impl->sizeof_ssl_backend_data);
   if(!ctx->backend) {
@@ -1216,6 +1218,7 @@ static ssl_peer_type get_peer_type(const char *hostname)
 
 CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
                             struct Curl_cfilter *cf,
+                            struct ssl_primary_config *config,
                             const char *tls_id,
                             int transport)
 {
@@ -1279,7 +1282,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
     }
   }
 
-  result = Curl_ssl_peer_key_make(cf, peer, tls_id, &peer->scache_key);
+  result = Curl_ssl_peer_key_make(cf, peer, config, tls_id, &peer->scache_key);
 
 out:
   if(result)
@@ -1351,7 +1354,8 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!connssl->peer.hostname) {
     char tls_id[80];
     connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
-    result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
+    result = Curl_ssl_peer_init(&connssl->peer, cf, connssl->config,
+                                tls_id, TRNSPRT_TCP);
     if(result)
       goto out;
   }
@@ -1712,11 +1716,12 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
   (void)conn;
   /* We only support ALPN for HTTP so far. */
   DEBUGASSERT(!conn->bits.tls_enable_alpn);
-  ctx = cf_ctx_new(data, NULL);
+  ctx = cf_ctx_new(data, NULL, &cf->conn->ssl_config);
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        data->state.http_neg.preferred,
-                                       (bool)conn->bits.tls_enable_alpn));
+                                       (bool)conn->bits.tls_enable_alpn),
+                   &conn->ssl_config);
 #endif
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1778,7 +1783,9 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, use_alpn));
+
+  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, use_alpn),
+                   &conn->proxy_ssl_config);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1903,17 +1910,6 @@ Curl_ssl_cf_get_config(struct Curl_cfilter *cf, struct Curl_easy *data)
   return &data->set.ssl;
 #else
   return Curl_ssl_cf_is_proxy(cf) ? &data->set.proxy_ssl : &data->set.ssl;
-#endif
-}
-
-struct ssl_primary_config *
-Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf)
-{
-#ifdef CURL_DISABLE_PROXY
-  return &cf->conn->ssl_config;
-#else
-  return Curl_ssl_cf_is_proxy(cf) ?
-    &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
 #endif
 }
 

@@ -143,6 +143,7 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
  */
 CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
                             struct Curl_cfilter *cf,
+                            struct ssl_primary_config *config,
                             const char *tls_id,
                             int transport);
 /**
@@ -236,12 +237,6 @@ bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
 struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
                                                struct Curl_easy *data);
 
-/**
- * Get the primary config relevant for the filter from its connection.
- */
-struct ssl_primary_config *
-  Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
-
 extern struct Curl_cftype Curl_cft_ssl;
 #ifndef CURL_DISABLE_PROXY
 extern struct Curl_cftype Curl_cft_ssl_proxy;
@@ -263,7 +258,6 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_cfilter_add(a, b, c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a, b, c) CURLE_OK
 #define Curl_ssl_cf_get_config(a, b) NULL
-#define Curl_ssl_cf_get_primary_config(a) NULL
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

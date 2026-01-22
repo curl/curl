@@ -2323,8 +2323,9 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
       quic_tp_len = (size_t)tplen;
     }
 #endif
-    Curl_ossl_add_session(cf, data, ctx->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), "h3", quic_tp, quic_tp_len);
+    Curl_ossl_add_session(cf, data, ctx->tls.ossl.config, ctx->peer.scache_key,
+                          ssl_sessionid, SSL_version(ssl), "h3",
+                          quic_tp, quic_tp_len);
   }
   return 0;
 }
@@ -2392,7 +2393,8 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
         quic_tp = (unsigned char *)tpbuf;
         quic_tp_len = (size_t)tplen;
       }
-      (void)Curl_gtls_cache_session(cf, data, ctx->peer.scache_key,
+      (void)Curl_gtls_cache_session(cf, data, &ctx->tls.gtls,
+                                    ctx->peer.scache_key,
                                     session, 0, "h3", quic_tp, quic_tp_len);
       break;
     }
@@ -2430,7 +2432,8 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
         quic_tp = (unsigned char *)tpbuf;
         quic_tp_len = (size_t)tplen;
       }
-      (void)Curl_wssl_cache_session(cf, data, ctx->peer.scache_key,
+      (void)Curl_wssl_cache_session(cf, data, ctx->tls.wssl.config,
+                                    ctx->peer.scache_key,
                                     session, wolfSSL_version(ssl),
                                     "h3", quic_tp, quic_tp_len);
     }

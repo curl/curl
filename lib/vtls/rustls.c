@@ -1005,23 +1005,21 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
                                 struct rustls_ssl_backend_data * const backend)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
-  const struct ssl_primary_config *conn_config =
-    Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
 
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  const struct curl_blob *ca_info_blob = connssl->config->ca_info_blob;
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
-    (ca_info_blob ? NULL : conn_config->CAfile);
+    (ca_info_blob ? NULL : connssl->config->CAfile);
   CURLcode result = CURLE_OK;
   rustls_result rr;
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  result = init_config_builder(data, conn_config, &config_builder);
+  result = init_config_builder(data, connssl->config, &config_builder);
   if(result != CURLE_OK) {
     return result;
   }
@@ -1030,7 +1028,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     init_config_builder_alpn(data, connssl, config_builder);
   }
 
-  if(!conn_config->verifypeer) {
+  if(!connssl->config->verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
   }
@@ -1044,7 +1042,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
   else if(ca_info_blob || ssl_cafile) {
     result = init_config_builder_verifier(data,
                                           config_builder,
-                                          conn_config,
+                                          connssl->config,
                                           ca_info_blob,
                                           ssl_cafile);
     if(result != CURLE_OK) {
@@ -1053,9 +1051,9 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     }
   }
 
-  if(conn_config->clientcert || ssl_config->key) {
+  if(connssl->config->clientcert || ssl_config->key) {
     result = init_config_builder_client_auth(data,
-                                             conn_config,
+                                             connssl->config,
                                              ssl_config,
                                              config_builder);
     if(result != CURLE_OK) {
