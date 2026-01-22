@@ -250,6 +250,20 @@ jobs:
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
+          - name: 'openssl torture 1'
+            image: ubuntu-24.04-arm
+            install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
+            tflags: '-t --shallow=25 --min=920 1 to 950'
+            torture: true
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
+
+          - name: 'openssl torture 2'
+            image: ubuntu-24.04-arm
+            install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
+            tflags: '-t --shallow=25 --min=900 951 to 9999'
+            torture: true
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
+
           - name: 'openssl i686'
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
             configure: >-
