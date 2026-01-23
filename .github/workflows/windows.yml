@@ -235,7 +235,7 @@ jobs:
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
-          path-type: inherit
+          path-type: inherit  # for 7z
           # https://packages.msys2.org/search
           install: >-
             gcc
@@ -252,7 +252,7 @@ jobs:
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
-          path-type: inherit
+          path-type: inherit  # for 7z
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
@@ -381,6 +381,7 @@ jobs:
           cd /d && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
+          which 7z
           7z x -y pack.bin >/dev/null && rm -r -f pack.bin && bin/stunnel -version
 
       - name: 'run tests'
