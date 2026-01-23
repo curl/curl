@@ -71,7 +71,6 @@ my %remove = (
     '#define HAVE_QUICHE_H 1' => 1,
     '#define HAVE_SSL_SET_QUIC_TLS_CBS 1' => 1,
     '#define HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT 1' => 1,
-    '#define HAVE_STDINT_H 1' => 1,
     '#define HAVE_STDIO_H 1' => 1,
     '#define HAVE_STDLIB_H 1' => 1,
     '#define HAVE_STRING_H 1' => 1,
