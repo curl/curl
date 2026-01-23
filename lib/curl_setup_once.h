@@ -66,6 +66,13 @@
 #define uintptr_t (void *)
 #endif
 
+#ifdef __DJGPP__
+/* By default, DJGPP provides this type as a version of 'unsigned long' which
+   forces us to use a define use it in printf() format strings without
+   warnings. long and int are both 32 bits for this platform. */
+#define uint32_t unsigned int
+#endif
+
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
 #define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
