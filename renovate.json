@@ -71,18 +71,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/.circleci/config.yml/"
-      ],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VER=(?<currentValue>.*)\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
-      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/^.github/workflows/.*\\.yml$/"
+        "/^\\.circleci/config\\.yml/",
+        "/^\\.github/workflows/.*\\.yml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION:\\s*(?<currentValue>.*)\\s"
@@ -93,8 +83,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^.github/workflows/linux.yml$/",
-        "/^.github/workflows/http3-linux.yml$/"
+        "/^\\.github/workflows/http3-linux\\.yml$/",
+        "/^\\.github/workflows/linux\\.yml$/"
       ],
       "matchStrings": [
         "OPENSSL_VERSION: (?<currentValue>.*)\\s"
@@ -107,7 +97,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^.github/workflows/linux.yml$/"
+        "/^\\.github/workflows/linux\\.yml$/"
       ],
       "matchStrings": [
         "OPENLDAP_VERSION: (?<currentValue>.*)\\s"
