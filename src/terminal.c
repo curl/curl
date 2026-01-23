@@ -39,7 +39,6 @@
  * get_terminal_columns() returns the number of columns in the current
  * terminal. It will return 79 on failure. Also, the number can be big.
  */
-
 unsigned int get_terminal_columns(void)
 {
   unsigned int width = 0;
