@@ -92,6 +92,7 @@ jobs:
           languages: cpp
           build-mode: manual
           trap-caching: false
+          matrix: "c:${{ matrix.image }}"
 
       - name: 'build'
         timeout-minutes: 10
