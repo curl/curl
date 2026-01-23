@@ -258,9 +258,7 @@ jobs:
       MAKEFLAGS: ${{ contains(matrix.image, 'macos') && '-j 4' || '-j 5' }}
       MATRIX_IMAGE: '${{ matrix.image }}'
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
-      # first linux arm64 binary: https://github.com/Kitware/CMake/releases/tag/v3.19.3
-      # first macos arm64 binary: https://github.com/Kitware/CMake/releases/tag/v3.19.2
-      OLD_CMAKE_VERSION: 3.18.0
+      OLD_CMAKE_VERSION: 3.19.8
     strategy:
       fail-fast: false
       matrix:
@@ -297,8 +295,8 @@ jobs:
             brew install libpsl openssl
             cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64.tar.gz" | tar -xz
-            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Darwin-x86_64/CMake.app/Contents/bin/cmake > ~/old-cmake-path.txt
+              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-macos-universal.tar.gz" | tar -xz
+            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-macos-universal/CMake.app/Contents/bin/cmake > ~/old-cmake-path.txt
           fi
 
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
