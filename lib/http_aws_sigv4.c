@@ -986,8 +986,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     goto fail;
 
   result = canon_path(data->state.up.path, strlen(data->state.up.path),
-                        &canonical_path,
-                        should_urlencode(&service));
+                      &canonical_path,
+                      should_urlencode(&service));
   if(result)
     goto fail;
   result = CURLE_OUT_OF_MEMORY;

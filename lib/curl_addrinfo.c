@@ -485,7 +485,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
 }
 #endif
 
-#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO) &&  \
+#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO) && \
   defined(HAVE_FREEADDRINFO)
 /*
  * curl_dbg_freeaddrinfo()

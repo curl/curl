@@ -277,7 +277,9 @@ static void set_features(void)
   /* Commented here to prevent future bugs: A program or user should */
   /* never ever enable DECC$POSIX_STYLE_UID. */
   /* It will probably break all code that accesses UIDs */
-  /*  do_not_set_default("DECC$POSIX_STYLE_UID", TRUE); */
+#if 0
+  do_not_set_default("DECC$POSIX_STYLE_UID", TRUE);
+#endif
 }
 
 /* Some boilerplate to force this to be a proper LIB$INITIALIZE section */
@@ -288,22 +290,22 @@ static void set_features(void)
 #pragma extern_model strict_refdef "LIB$INITIALIZE" nowrt, long, nopic
 #else
 #pragma extern_model strict_refdef "LIB$INITIALIZE" nowrt, long
-#    if __INITIAL_POINTER_SIZE
-#        pragma __pointer_size __save
-#        pragma __pointer_size 32
-#    else
-#        pragma __required_pointer_size __save
-#        pragma __required_pointer_size 32
-#    endif
+#  if __INITIAL_POINTER_SIZE
+#    pragma __pointer_size __save
+#    pragma __pointer_size 32
+#  else
+#    pragma __required_pointer_size __save
+#    pragma __required_pointer_size 32
+#  endif
 #endif
 /* Set our contribution to the LIB$INITIALIZE array */
 void (* const iniarray[])(void) = { set_features };
 #ifndef __VAX
-#    if __INITIAL_POINTER_SIZE
-#        pragma __pointer_size __restore
-#    else
-#        pragma __required_pointer_size __restore
-#    endif
+#  if __INITIAL_POINTER_SIZE
+#    pragma __pointer_size __restore
+#  else
+#    pragma __required_pointer_size __restore
+#  endif
 #endif
 
 /*

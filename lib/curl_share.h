@@ -36,8 +36,8 @@ struct Curl_ssl_scache;
 #define CURL_GOOD_SHARE 0x7e117a1e
 #define GOOD_SHARE_HANDLE(x) ((x) && (x)->magic == CURL_GOOD_SHARE)
 
-#define CURL_SHARE_KEEP_CONNECT(s)    \
-        ((s) && ((s)->specifier & (1 << CURL_LOCK_DATA_CONNECT)))
+#define CURL_SHARE_KEEP_CONNECT(s)                          \
+  ((s) && ((s)->specifier & (1 << CURL_LOCK_DATA_CONNECT)))
 
 /* this struct is libcurl-private, do not export details */
 struct Curl_share {

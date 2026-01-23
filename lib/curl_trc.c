@@ -580,7 +580,7 @@ static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
   }
 }
 
-static void trc_apply_level_by_category(int category, int lvl)
+static void trc_apply_level_by_category(unsigned int category, int lvl)
 {
   size_t i;
 

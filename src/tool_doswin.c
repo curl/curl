@@ -46,7 +46,7 @@
 #  ifdef S_IFCHR
 #    define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
 #  else
-#    define S_ISCHR(m) (0) /* cannot tell if file is a device */
+#    define S_ISCHR(m) 0 /* cannot tell if file is a device */
 #  endif
 #endif
 

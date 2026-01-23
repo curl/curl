@@ -1746,7 +1746,7 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
     {
       (void)argc;
       argv[0][0] = ' ';
-      return (argv[0][0] == ' ')?0:1;
+      return (argv[0][0] == ' ') ? 0 : 1;
     }" HAVE_WRITABLE_ARGV)
 endif()
 

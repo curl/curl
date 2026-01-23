@@ -23,12 +23,12 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
+#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) || \
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
 #include "curl_get_line.h"
 
-#define appendnl(b)  curlx_dyn_addn(buf, "\n", 1)
+#define appendnl(b) curlx_dyn_addn(buf, "\n", 1)
 
 /*
  * Curl_get_line() returns only complete whole lines that end with newline.

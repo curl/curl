@@ -86,14 +86,14 @@ static int MD4_Init(MD4_CTX *ctx)
   return CC_MD4_Init(ctx);
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
 {
-  (void)CC_MD4_Update(ctx, data, (CC_LONG)size);
+  (void)CC_MD4_Update(ctx, input, (CC_LONG)len);
 }
 
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 {
-  (void)CC_MD4_Final(result, ctx);
+  (void)CC_MD4_Final(digest, ctx);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
@@ -122,18 +122,18 @@ static int MD4_Init(MD4_CTX *ctx)
   return 1;
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
 {
-  CryptHashData(ctx->hHash, (const BYTE *)data, (unsigned int)size, 0);
+  CryptHashData(ctx->hHash, (const BYTE *)input, (unsigned int)len, 0);
 }
 
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 {
   unsigned long length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == MD4_DIGEST_LENGTH)
-    CryptGetHashParam(ctx->hHash, HP_HASHVAL, result, &length, 0);
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
 
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
@@ -152,14 +152,14 @@ static int MD4_Init(MD4_CTX *ctx)
   return 1;
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
 {
-  md4_update(ctx, size, data);
+  md4_update(ctx, len, input);
 }
 
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 {
-  md4_digest(ctx, MD4_DIGEST_SIZE, result);
+  md4_digest(ctx, MD4_DIGEST_SIZE, digest);
 }
 
 #else
@@ -240,12 +240,12 @@ typedef struct md4_ctx MD4_CTX;
  * the bit counters. There are no alignment requirements.
  */
 static const void *my_md4_body(MD4_CTX *ctx,
-                               const void *data, unsigned long size)
+                               const void *input, unsigned long size)
 {
   const unsigned char *ptr;
   uint32_t a, b, c, d;
 
-  ptr = (const unsigned char *)data;
+  ptr = (const unsigned char *)input;
 
   a = ctx->a;
   b = ctx->b;
@@ -339,45 +339,46 @@ static int MD4_Init(MD4_CTX *ctx)
 
   ctx->lo = 0;
   ctx->hi = 0;
+
   return 1;
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
 {
   uint32_t saved_lo;
   unsigned long used;
 
   saved_lo = ctx->lo;
-  ctx->lo = (saved_lo + size) & 0x1fffffff;
+  ctx->lo = (saved_lo + len) & 0x1fffffff;
   if(ctx->lo < saved_lo)
     ctx->hi++;
-  ctx->hi += (uint32_t)size >> 29;
+  ctx->hi += (uint32_t)len >> 29;
 
   used = saved_lo & 0x3f;
 
   if(used) {
     unsigned long available = 64 - used;
 
-    if(size < available) {
-      memcpy(&ctx->buffer[used], data, size);
+    if(len < available) {
+      memcpy(&ctx->buffer[used], input, len);
       return;
     }
 
-    memcpy(&ctx->buffer[used], data, available);
-    data = (const unsigned char *)data + available;
-    size -= available;
+    memcpy(&ctx->buffer[used], input, available);
+    input = (const unsigned char *)input + available;
+    len -= available;
     my_md4_body(ctx, ctx->buffer, 64);
   }
 
-  if(size >= 64) {
-    data = my_md4_body(ctx, data, size & ~(unsigned long)0x3f);
-    size &= 0x3f;
+  if(len >= 64) {
+    input = my_md4_body(ctx, input, len & ~(unsigned long)0x3f);
+    len &= 0x3f;
   }
 
-  memcpy(ctx->buffer, data, size);
+  memcpy(ctx->buffer, input, len);
 }
 
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 {
   unsigned long used, available;
 
@@ -408,30 +409,30 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
   my_md4_body(ctx, ctx->buffer, 64);
 
-  result[0] = curlx_ultouc((ctx->a) & 0xff);
-  result[1] = curlx_ultouc((ctx->a >> 8) & 0xff);
-  result[2] = curlx_ultouc((ctx->a >> 16) & 0xff);
-  result[3] = curlx_ultouc(ctx->a >> 24);
-  result[4] = curlx_ultouc((ctx->b) & 0xff);
-  result[5] = curlx_ultouc((ctx->b >> 8) & 0xff);
-  result[6] = curlx_ultouc((ctx->b >> 16) & 0xff);
-  result[7] = curlx_ultouc(ctx->b >> 24);
-  result[8] = curlx_ultouc((ctx->c) & 0xff);
-  result[9] = curlx_ultouc((ctx->c >> 8) & 0xff);
-  result[10] = curlx_ultouc((ctx->c >> 16) & 0xff);
-  result[11] = curlx_ultouc(ctx->c >> 24);
-  result[12] = curlx_ultouc((ctx->d) & 0xff);
-  result[13] = curlx_ultouc((ctx->d >> 8) & 0xff);
-  result[14] = curlx_ultouc((ctx->d >> 16) & 0xff);
-  result[15] = curlx_ultouc(ctx->d >> 24);
+  digest[0] = curlx_ultouc((ctx->a) & 0xff);
+  digest[1] = curlx_ultouc((ctx->a >> 8) & 0xff);
+  digest[2] = curlx_ultouc((ctx->a >> 16) & 0xff);
+  digest[3] = curlx_ultouc(ctx->a >> 24);
+  digest[4] = curlx_ultouc((ctx->b) & 0xff);
+  digest[5] = curlx_ultouc((ctx->b >> 8) & 0xff);
+  digest[6] = curlx_ultouc((ctx->b >> 16) & 0xff);
+  digest[7] = curlx_ultouc(ctx->b >> 24);
+  digest[8] = curlx_ultouc((ctx->c) & 0xff);
+  digest[9] = curlx_ultouc((ctx->c >> 8) & 0xff);
+  digest[10] = curlx_ultouc((ctx->c >> 16) & 0xff);
+  digest[11] = curlx_ultouc(ctx->c >> 24);
+  digest[12] = curlx_ultouc((ctx->d) & 0xff);
+  digest[13] = curlx_ultouc((ctx->d >> 8) & 0xff);
+  digest[14] = curlx_ultouc((ctx->d >> 16) & 0xff);
+  digest[15] = curlx_ultouc(ctx->d >> 24);
 
   memset(ctx, 0, sizeof(*ctx));
 }
 
 #endif /* CRYPTO LIBS */
 
-CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
-                    const size_t len)
+CURLcode Curl_md4it(unsigned char *output,
+                    const unsigned char *input, const size_t len)
 {
   MD4_CTX ctx;
 

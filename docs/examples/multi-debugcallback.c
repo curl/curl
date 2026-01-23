@@ -30,9 +30,7 @@
 
 #include <curl/curl.h>
 
-#define TRUE 1
-
-static void dump(const char *text, FILE *stream, const unsigned char *ptr,
+static void dump(const char *text, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;
@@ -44,20 +42,20 @@ static void dump(const char *text, FILE *stream, const unsigned char *ptr,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
+  fprintf(stderr, "%s, %10.10lu bytes (0x%8.8lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%4.4lx: ", (unsigned long)i);
+    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          fprintf(stream, "%02x ", ptr[i + c]);
+          fprintf(stderr, "%02x ", ptr[i + c]);
         else
-          fputs("   ", stream);
+          fputs("   ", stderr);
     }
 
     for(c = 0; (c < width) && (i + c < size); c++) {
@@ -67,7 +65,7 @@ static void dump(const char *text, FILE *stream, const unsigned char *ptr,
         i += (c + 2 - width);
         break;
       }
-      fprintf(stream, "%c",
+      fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
@@ -76,14 +74,12 @@ static void dump(const char *text, FILE *stream, const unsigned char *ptr,
         break;
       }
     }
-    fputc('\n', stream); /* newline */
+    fputc('\n', stderr); /* newline */
   }
-  fflush(stream);
 }
 
 static int my_trace(CURL *curl, curl_infotype type,
-                    unsigned char *data, size_t size,
-                    void *userp)
+                    char *data, size_t size, void *userp)
 {
   const char *text;
 
@@ -110,7 +106,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, stderr, data, size, TRUE);
+  dump(text, (const unsigned char *)data, size, 1);
   return 0;
 }
 

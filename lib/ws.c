@@ -58,18 +58,18 @@
      |N|V|V|V|       |
      | |1|2|3|       |
 */
-#define WSBIT_FIN          (0x80)
-#define WSBIT_RSV1         (0x40)
-#define WSBIT_RSV2         (0x20)
-#define WSBIT_RSV3         (0x10)
+#define WSBIT_FIN          0x80
+#define WSBIT_RSV1         0x40
+#define WSBIT_RSV2         0x20
+#define WSBIT_RSV3         0x10
 #define WSBIT_RSV_MASK     (WSBIT_RSV1 | WSBIT_RSV2 | WSBIT_RSV3)
-#define WSBIT_OPCODE_CONT  (0x0)
-#define WSBIT_OPCODE_TEXT  (0x1)
-#define WSBIT_OPCODE_BIN   (0x2)
-#define WSBIT_OPCODE_CLOSE (0x8)
-#define WSBIT_OPCODE_PING  (0x9)
-#define WSBIT_OPCODE_PONG  (0xa)
-#define WSBIT_OPCODE_MASK  (0xf)
+#define WSBIT_OPCODE_CONT  0x0
+#define WSBIT_OPCODE_TEXT  0x1
+#define WSBIT_OPCODE_BIN   0x2
+#define WSBIT_OPCODE_CLOSE 0x8
+#define WSBIT_OPCODE_PING  0x9
+#define WSBIT_OPCODE_PONG  0xa
+#define WSBIT_OPCODE_MASK  0xf
 
 #define WSBIT_MASK 0x80
 
@@ -387,7 +387,9 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       }
 
       dec->head_len = 1;
-      /* ws_dec_info(dec, data, "seeing opcode"); */
+#if 0
+      ws_dec_info(dec, data, "seeing opcode");
+#endif
       continue;
     }
     else if(dec->head_len == 1) {
@@ -439,7 +441,9 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       Curl_bufq_skip(inraw, 1);
       ++dec->head_len;
       if(dec->head_len < dec->head_total) {
-        /* ws_dec_info(dec, data, "decoding head"); */
+#if 0
+        ws_dec_info(dec, data, "decoding head");
+#endif
         continue;
       }
     }

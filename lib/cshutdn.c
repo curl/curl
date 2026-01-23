@@ -401,8 +401,8 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
 
   /* Add the connection to our shutdown list for non-blocking shutdown
    * during multi processing. */
-  if(max_total > 0 && (max_total <=
-        (conns_in_pool + Curl_llist_count(&cshutdn->list)))) {
+  if(max_total > 0 &&
+     (max_total <= (conns_in_pool + Curl_llist_count(&cshutdn->list)))) {
     CURL_TRC_M(data, "[SHUTDOWN] discarding oldest shutdown connection "
                "due to connection limit of %zu", max_total);
     cshutdn_destroy_oldest(cshutdn, data, NULL);

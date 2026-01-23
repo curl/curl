@@ -254,8 +254,9 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     if(bytestoread && Curl_rlimit_active(&data->progress.dl.rlimit)) {
       curl_off_t dl_avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
                                               Curl_pgrs_now(data));
-      /* DEBUGF(infof(data, "dl_rlimit, available=%" FMT_OFF_T, dl_avail));
-       */
+#if 0
+      DEBUGF(infof(data, "dl_rlimit, available=%" FMT_OFF_T, dl_avail));
+#endif
       /* In case of rate limited downloads: if this loop already got
        * data and less than 16k is left in the limit, break out.
        * We want to stutter a bit to keep in the limit, but too small
@@ -278,7 +279,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
       if(data->req.download_done && data->req.no_body &&
          !data->req.resp_trailer) {
         DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
-               "not waiting for EOS"));
+                     "not waiting for EOS"));
         blen = 0;
         /* continue as if we received the EOS */
       }

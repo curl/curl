@@ -433,7 +433,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   }
   *peos = (bool)ctx->eos;
   DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
-         blen, result, *pnread, *peos));
+               blen, result, *pnread, *peos));
   return result;
 }
 
@@ -700,7 +700,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
   DEBUGASSERT(!smtpc->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   DEBUGF(infof(data, "smtp_perform_upgrade_tls, connect -> %d, %d",
-           result, ssldone));
+               result, ssldone));
   if(!result && ssldone) {
     smtpc->ssldone = ssldone;
     /* perform EHLO now, changes smtp->state out of SMTP_UPGRADETLS */
@@ -849,9 +849,10 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
 
       /* Establish whether we should report SMTPUTF8 to the server for this
          mailbox as per RFC-6531 sect. 3.1 point 6 */
-      utf8 = (smtpc->utf8_supported) &&
-             ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
-              (!Curl_is_ASCII_name(host.name)));
+      utf8 = smtpc->utf8_supported &&
+             (host.encalloc ||
+              !Curl_is_ASCII_name(address) ||
+              !Curl_is_ASCII_name(host.name));
 
       /* Send the VRFY command (Note: The hostname part may be absent when the
          host is a local system) */
@@ -924,9 +925,10 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
 
     /* Establish whether we should report SMTPUTF8 to the server for this
        mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
-    utf8 = (smtpc->utf8_supported) &&
-           ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
-            (!Curl_is_ASCII_name(host.name)));
+    utf8 = smtpc->utf8_supported &&
+           (host.encalloc ||
+            !Curl_is_ASCII_name(address) ||
+            !Curl_is_ASCII_name(host.name));
 
     if(host.name) {
       from = curl_maprintf("<%s@%s>%s", address, host.name, suffix);
@@ -965,9 +967,10 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
 
       /* Establish whether we should report SMTPUTF8 to the server for this
          mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
-      if((!utf8) && (smtpc->utf8_supported) &&
-         ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
-          (!Curl_is_ASCII_name(host.name))))
+      if(!utf8 && smtpc->utf8_supported &&
+         (host.encalloc ||
+          !Curl_is_ASCII_name(address) ||
+          !Curl_is_ASCII_name(host.name)))
         utf8 = TRUE;
 
       if(host.name) {

@@ -55,7 +55,7 @@ struct transfer {
   int num;
 };
 
-static void dump(const char *text, int num, unsigned char *ptr,
+static void dump(const char *text, int num, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;
@@ -136,7 +136,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, num, (unsigned char *)data, size, 1);
+  dump(text, num, (const unsigned char *)data, size, 1);
   return 0;
 }
 

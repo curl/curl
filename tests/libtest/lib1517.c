@@ -95,8 +95,10 @@ static CURLcode test_lib1517(const char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
+#if 0
   /* detect HTTP error codes >= 400 */
-  /* test_setopt(curl, CURLOPT_FAILONERROR, 1L); */
+  test_setopt(curl, CURLOPT_FAILONERROR, 1L);
+#endif
 
   /* Perform the request, result will get the return code */
   result = curl_easy_perform(curl);

@@ -29,7 +29,7 @@
 #error "this test requires FD_SETSIZE"
 #endif
 
-#define T518_SAFETY_MARGIN (16)
+#define T518_SAFETY_MARGIN 16
 
 #define NUM_OPEN   (FD_SETSIZE + 10)
 #define NUM_NEEDED (NUM_OPEN + T518_SAFETY_MARGIN)

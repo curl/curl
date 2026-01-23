@@ -69,14 +69,18 @@ static size_t rtp_write(char *data, size_t size, size_t nmemb, void *stream)
     if(message_size - i > RTP_DATA_SIZE) {
       if(memcmp(RTP_DATA, data + i, RTP_DATA_SIZE) != 0) {
         curl_mprintf("RTP PAYLOAD CORRUPTED [%s]\n", data + i);
-        /* return failure; */
+#if 0
+        return failure;
+#endif
       }
     }
     else {
       if(memcmp(RTP_DATA, data + i, message_size - i) != 0) {
         curl_mprintf("RTP PAYLOAD END CORRUPTED (%d), [%s]\n",
                      message_size - i, data + i);
-        /* return failure; */
+#if 0
+        return failure;
+#endif
       }
     }
   }

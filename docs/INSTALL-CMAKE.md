@@ -511,8 +511,8 @@ Examples:
 
 ## Feature detection variables
 
-By default this CMake build script detects the version of some dependencies
-using `check_symbol_exists`. Those checks do not work in the case that both
+By default the curl CMake build script detects the version of some dependencies
+using `check_symbol_exists()`. Those checks do not work in the case that both
 CURL and its dependency are included as sub-projects in a larger build using
 `FetchContent`. To support that case, additional variables may be defined by
 the parent project, ideally in the "extra" find package redirect file:
@@ -559,13 +559,13 @@ Note: These variables are internal and subject to change.
 - `curl-examples`:          Build examples
                             Individual targets: `curl-example-<name>`,
                             where <name> is the .c filename without extension.
-- `curl-examples-build`:    Build examples quickly but without the ability to run them (for build tests)
-- `curl-man`:               Build man pages (built by default unless disabled)
-- `curl_uninstall`:         Uninstall curl
-- `curl-completion-fish`:   Build shell completions for fish (built by default if enabled)
-- `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
-- `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
-- `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
+- `curl-examples-build`:    Build examples quickly but without the ability to run them. (for build tests)
+- `curl-man`:               Build man pages. (built by default unless disabled)
+- `curl_uninstall`:         Uninstall curl.
+- `curl-completion-fish`:   Build shell completions for fish. (built by default if enabled)
+- `curl-completion-zsh`:    Build shell completions for zsh. (built by default if enabled)
+- `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`.
+- `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`.
 - `curl-lint`:              Run lint checks.
 - `curl-listcats`:          Generate help category constants for `src/tool_help.h` from documentation.
 - `curl-listhelp`:          Generate `src/tool_listhelp.c` from documentation.

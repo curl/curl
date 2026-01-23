@@ -47,7 +47,8 @@ static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 
 int main(void)
 {
-  char ftpurl[] = "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
+  static const char ftpurl[] =
+    "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
   CURL *curl;
   CURLcode result;
   long filetime = -1;
@@ -68,7 +69,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, throw_away);
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     /* Switch on full protocol/debug output */
-    /* curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); */
+#if 0
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+#endif
 
     result = curl_easy_perform(curl);
 

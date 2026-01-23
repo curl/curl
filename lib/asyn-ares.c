@@ -309,7 +309,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
      (ares->happy_eyeballs_dns_time.tv_sec ||
       ares->happy_eyeballs_dns_time.tv_usec) &&
      (curlx_ptimediff_ms(Curl_pgrs_now(data),
-                        &ares->happy_eyeballs_dns_time) >=
+                         &ares->happy_eyeballs_dns_time) >=
       HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
@@ -743,8 +743,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
   ares->ares_status = ARES_ENOTFOUND;
   ares->result = CURLE_OK;
 
-#if defined(CURLVERBOSE) && \
-  ARES_VERSION >= 0x011800  /* >= v1.24.0 */
+#if defined(CURLVERBOSE) && ARES_VERSION >= 0x011800 /* >= v1.24.0 */
   if(CURL_TRC_DNS_is_verbose(data)) {
     char *csv = ares_get_servers_csv(ares->channel);
     CURL_TRC_DNS(data, "asyn-ares: servers=%s", csv);
@@ -759,8 +758,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
     int pf = PF_INET;
     memset(&hints, 0, sizeof(hints));
 #ifdef CURLRES_IPV6
-    if((ip_version != CURL_IPRESOLVE_V4) &&
-       Curl_ipv6works(data)) {
+    if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
       /* The stack seems to be IPv6-enabled */
       if(ip_version == CURL_IPRESOLVE_V6)
         pf = PF_INET6;

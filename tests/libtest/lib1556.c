@@ -42,8 +42,8 @@ static size_t header(char *ptr, size_t size, size_t nmemb, void *stream)
 
 static CURLcode test_lib1556(const char *URL)
 {
-  CURLcode code;
   CURL *curl = NULL;
+  CURLcode code;
   CURLcode result = CURLE_OK;
   struct headerinfo info = { 0 };
 

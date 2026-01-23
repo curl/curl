@@ -2880,7 +2880,7 @@ static ParameterError opt_string(struct OperationConfig *config,
 /* detect e2 80 80 - e2 80 ff */
 static bool has_leading_unicode(const unsigned char *arg)
 {
-  return ((arg[0] == 0xe2) && (arg[1] == 0x80) && (arg[2] & 0x80));
+  return (arg[0] == 0xe2) && (arg[1] == 0x80) && (arg[2] & 0x80);
 }
 
 /* the longest command line option, excluding the leading -- */
@@ -3081,7 +3081,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
         }
 
         err = getparameter(orig_opt, nextarg, &passarg, config,
-                              CONFIG_MAX_LEVELS);
+                           CONFIG_MAX_LEVELS);
 
         unicodefree(CURL_UNCONST(nextarg));
         config = global->last;

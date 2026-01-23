@@ -158,8 +158,8 @@ static gboolean timer_cb(gpointer data)
   struct GlobalInfo *g = (struct GlobalInfo *)data;
   CURLMcode mresult;
 
-  mresult = curl_multi_socket_action(g->multi,
-                                CURL_SOCKET_TIMEOUT, 0, &g->still_running);
+  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
+                                     &g->still_running);
   mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
   return FALSE;
@@ -360,7 +360,7 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
     }
     else {
       buf = g_malloc(BUF_SIZE + 1);
-      while(TRUE) {
+      for(;;) {
         buf[BUF_SIZE] = '\0';
         g_io_channel_read_chars(ch, buf, BUF_SIZE, &len, &err);
         if(len) {

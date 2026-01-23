@@ -565,7 +565,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   DEBUGASSERT(!imapc->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   DEBUGF(infof(data, "imap_perform_upgrade_tls, connect -> %d, %d",
-         result, ssldone));
+               result, ssldone));
   if(!result && ssldone) {
     imapc->ssldone = ssldone;
     /* perform CAPA now, changes imapc->state out of IMAP_UPGRADETLS */
@@ -866,6 +866,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
   /* Prepare the mime data if some. */
   if(IS_MIME_POST(data)) {
     curl_mimepart *postp = data->set.mimepostp;
+
     /* Use the whole structure as data. */
     postp->flags &= ~(unsigned int)MIME_BODY_ONLY;
 

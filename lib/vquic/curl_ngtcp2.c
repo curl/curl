@@ -1607,7 +1607,6 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                                   0, pnwritten);
   if(result)
     goto out;
-
   if(!stream->h1.done) {
     /* need more data */
     goto out;

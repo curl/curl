@@ -63,9 +63,9 @@
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
 #ifdef HAVE_UINTPTR_T
-#  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
+#define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
 #else
-#  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
+#define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
 #endif
 
 #ifdef USE_SCHANNEL
@@ -284,9 +284,9 @@ typedef unsigned int curl_bit;
  */
 #ifdef USE_WINSOCK
 #define SOCKERRNO         ((int)WSAGetLastError())
-#define SET_SOCKERRNO(x)  (WSASetLastError((int)(x)))
+#define SET_SOCKERRNO(x)  WSASetLastError((int)(x))
 #else
-#define SOCKERRNO         (errno)
+#define SOCKERRNO         errno
 #define SET_SOCKERRNO(x)  (errno = (x))
 #endif
 

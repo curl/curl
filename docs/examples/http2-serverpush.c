@@ -47,7 +47,8 @@
 
 static FILE *out_download;
 
-static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
+static void dump(const char *text, const unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -126,7 +127,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, (unsigned char *)data, size, 1);
+  dump(text, (const unsigned char *)data, size, 1);
   return 0;
 }
 
