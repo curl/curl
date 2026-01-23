@@ -136,7 +136,12 @@ bool Curl_ssl_conn_config_match(struct Curl_easy *data,
 /* Update certain connection SSL config flags after they have
  * been changed on the easy handle. Will work for `verifypeer`,
  * `verifyhost` and `verifystatus`. */
-void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
+void Curl_ssl_conn_update(struct Curl_easy *data, bool verifypeer,
+                          bool verifyhost, bool verifystatus);
+#ifndef CURL_DISABLE_PROXY
+void Curl_ssl_proxy_conn_update(struct Curl_easy *data, bool verifypeer,
+                                bool verifyhost, bool verifystatus);
+#endif
 
 /**
  * Init SSL peer information for filter. Can be called repeatedly.
@@ -221,8 +226,19 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                        struct Curl_easy *data);
+                                        struct Curl_easy *data,
+                                        struct ssl_primary_config *config);
 #endif /* !CURL_DISABLE_PROXY */
+
+/*
+ * Fill `info` with information about the TLS instance securing
+ * the connection when available, otherwise e.g. when
+ * Curl_conn_is_ssl() is FALSE, return FALSE.
+ */
+bool Curl_ssl_conn_get_info(struct Curl_easy *data,
+                            struct connectdata *conn, int sockindex,
+                            struct curl_tlssessioninfo *info);
+
 
 /**
  * True iff the underlying SSL implementation supports the option.

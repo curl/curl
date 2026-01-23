@@ -2128,6 +2128,14 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
       Curl_conn_set_multiplex(cf->conn);
     }
     break;
+  case CF_CTRL_SSL_UPDATE: {
+    if(!cf->connected && ctx->tls.config) {
+      ctx->tls.config->verifypeer = (arg1 & CF_CTRL_SSL_VERIFYPEER);
+      ctx->tls.config->verifyhost = (arg1 & CF_CTRL_SSL_VERIFYHOST);
+      ctx->tls.config->verifystatus = (arg1 & CF_CTRL_SSL_VERIFYSTATUS);
+    }
+    break;
+  }
   default:
     break;
   }
@@ -2619,7 +2627,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ctx->conn_ref.get_conn = get_conn;
   ctx->conn_ref.user_data = cf;
 
-  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer, &ALPN_SPEC_H3,
+  result = Curl_vquic_tls_init(&ctx->tls, cf, data, ctx->tls.config,
+                               &ctx->peer, &ALPN_SPEC_H3,
                                cf_ngtcp2_tls_ctx_setup, &ctx->tls,
                                &ctx->conn_ref,
                                cf_ngtcp2_on_session_reuse);
@@ -2906,7 +2915,8 @@ struct Curl_cftype Curl_cft_http3 = {
 CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai)
+                               const struct Curl_addrinfo *ai,
+                               struct ssl_primary_config *config)
 {
   struct cf_ngtcp2_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -2918,6 +2928,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     goto out;
   }
   cf_ngtcp2_ctx_init(ctx);
+  ctx->tls.config = config;
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)

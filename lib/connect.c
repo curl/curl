@@ -385,7 +385,8 @@ connect_sub_chain:
 #ifdef USE_SSL
     if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
        !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
+      result = Curl_cf_ssl_proxy_insert_after(
+        cf, data, &cf->conn->proxy_ssl_config);
       if(result)
         return result;
     }

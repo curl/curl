@@ -53,16 +53,17 @@
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
+                             struct ssl_primary_config *config,
                              struct ssl_peer *peer,
                              const struct alpn_spec *alpns,
                              Curl_vquic_tls_ctx_setup *cb_setup,
                              void *cb_user_data, void *ssl_user_data,
                              Curl_vquic_session_reuse_cb *session_reuse_cb)
 {
-  struct ssl_primary_config *config; /* relevant SSL config */
   char tls_id[80];
   CURLcode result;
 
+  ctx->config = config;
 #ifdef USE_OPENSSL
   Curl_ossl_version(tls_id, sizeof(tls_id));
 #elif defined(USE_GNUTLS)
@@ -75,9 +76,6 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #endif
 
   (void)session_reuse_cb;
-  config = Curl_ssl_cf_is_proxy(cf) ?
-           &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
-
   result = Curl_ssl_peer_init(peer, cf, config, tls_id, TRNSPRT_QUIC);
   if(result)
     return result;

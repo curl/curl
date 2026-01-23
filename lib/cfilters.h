@@ -115,16 +115,22 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  * "ignored" meaning return values are ignored and the event is distributed
  *           to all filters in the chain. Overall result is always CURLE_OK.
  */
-/*      data event                            arg1       arg2     return */
-#define CF_CTRL_DATA_SETUP              4  /* 0          NULL     first fail */
+/*      data event                            arg1       arg2   return */
+#define CF_CTRL_DATA_SETUP              4  /* 0          NULL   first fail */
 /* unused now                           5  */
-#define CF_CTRL_DATA_PAUSE              6  /* on/off     NULL     first fail */
-#define CF_CTRL_DATA_DONE               7  /* premature  NULL     ignored */
-#define CF_CTRL_DATA_DONE_SEND          8  /* 0          NULL     ignored */
+#define CF_CTRL_DATA_PAUSE              6  /* on/off     NULL   first fail */
+#define CF_CTRL_DATA_DONE               7  /* premature  NULL   ignored */
+#define CF_CTRL_DATA_DONE_SEND          8  /* 0          NULL   ignored */
 /* update conn info at connection and data */
-#define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL     ignored */
-#define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
-#define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL     first fail */
+#define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL   ignored */
+#define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL   ignored */
+#define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL   first fail */
+
+#define CF_CTRL_SSL_UPDATE       (256 + 3) /* flags      NULL   ignored */
+/* flag bits for CF_CTRL_SSL_UPDATE */
+#define CF_CTRL_SSL_VERIFYPEER    (1 << 0)
+#define CF_CTRL_SSL_VERIFYHOST    (1 << 1)
+#define CF_CTRL_SSL_VERIFYSTATUS   (1 << 2)
 
 /**
  * Handle event/control for the filter.
@@ -388,14 +394,15 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
  */
 bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex);
 
-/*
- * Fill `info` with information about the TLS instance securing
- * the connection when available, otherwise e.g. when
- * Curl_conn_is_ssl() is FALSE, return FALSE.
- */
-bool Curl_conn_get_ssl_info(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex,
-                            struct curl_tlssessioninfo *info);
+/* Get the SSL filter on the transfer's connection. Returns NULL
+ * when there is none. */
+struct Curl_cfilter *Curl_conn_get_cf_ssl(struct connectdata *conn,
+                                          int sockindex);
+
+#ifndef CURL_DISABLE_PROXY
+struct Curl_cfilter *Curl_conn_get_cf_proxy_ssl(struct connectdata *conn,
+                                                int sockindex);
+#endif /* !CURL_DISABLE_PROXY */
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
                                struct connectdata *conn, int sockindex,
