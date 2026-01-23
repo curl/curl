@@ -99,8 +99,8 @@ jobs:
 
       - name: 'CM build-only build'
         run: |
-          cmake --build bld-1 --verbose
-          cmake --install bld-1 --verbose
+          ~/cmake/bin/cmake --build bld-1 --verbose
+          ~/cmake/bin/cmake --install bld-1 --verbose
 
       - name: 'CM build-only curl -V'
         run: bld-1/src/curl --disable --version
@@ -132,22 +132,22 @@ jobs:
           grep -F '#define' bld-cares/lib/curl_config.h | sort || true
 
       - name: 'CM build'
-        run: cmake --build bld-cares
+        run: ~/cmake/bin/cmake --build bld-cares
 
       - name: 'CM curl -V'
         run: bld-cares/src/curl --disable --version
 
       - name: 'CM install'
-        run: cmake --install bld-cares
+        run: ~/cmake/bin/cmake --install bld-cares
 
       - name: 'CM build tests'
-        run: cmake --build bld-cares --target testdeps
+        run: ~/cmake/bin/cmake --build bld-cares --target testdeps
 
       - name: 'CM run tests'
-        run: cmake --build bld-cares --target test-ci
+        run: ~/cmake/bin/cmake --build bld-cares --target test-ci
 
       - name: 'CM build examples'
-        run: cmake --build bld-cares --target curl-examples-build
+        run: ~/cmake/bin/cmake --build bld-cares --target curl-examples-build
 
       - name: 'AM autoreconf'
         run: autoreconf -fi
