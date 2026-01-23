@@ -1661,9 +1661,9 @@ static CURLcode ssl_cf_proxy_cntrl(struct Curl_cfilter *cf,
   switch(event) {
   case CF_CTRL_SSL_UPDATE:
     if(!cf->connected && connssl->config) {
-      connssl->config->verifypeer = (arg1 & CF_CTRL_SSL_VERIFYPEER);
-      connssl->config->verifyhost = (arg1 & CF_CTRL_SSL_VERIFYHOST);
-      connssl->config->verifystatus = (arg1 & CF_CTRL_SSL_VERIFYSTATUS);
+      connssl->config->verifypeer = !!(arg1 & CF_CTRL_SSL_VERIFYPEER);
+      connssl->config->verifyhost = !!(arg1 & CF_CTRL_SSL_VERIFYHOST);
+      connssl->config->verifystatus = !!(arg1 & CF_CTRL_SSL_VERIFYSTATUS);
     }
     break;
   }

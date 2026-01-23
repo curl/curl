@@ -1233,9 +1233,9 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
     break;
   case CF_CTRL_SSL_UPDATE: {
     if(!cf->connected && ctx->tls.config) {
-      ctx->tls.config->verifypeer = (arg1 & CF_CTRL_SSL_VERIFYPEER);
-      ctx->tls.config->verifyhost = (arg1 & CF_CTRL_SSL_VERIFYHOST);
-      ctx->tls.config->verifystatus = (arg1 & CF_CTRL_SSL_VERIFYSTATUS);
+      ctx->tls.config->verifypeer = !!(arg1 & CF_CTRL_SSL_VERIFYPEER);
+      ctx->tls.config->verifyhost = !!(arg1 & CF_CTRL_SSL_VERIFYHOST);
+      ctx->tls.config->verifystatus = !!(arg1 & CF_CTRL_SSL_VERIFYSTATUS);
     }
     break;
   }
