@@ -728,9 +728,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     ok = 2;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_update(data, s->ssl.primary.verifypeer,
-                         s->ssl.primary.verifyhost,
-                         s->ssl.primary.verifystatus);
+    Curl_ssl_conn_update(data, !!s->ssl.primary.verifypeer,
+                         !!s->ssl.primary.verifyhost,
+                         !!s->ssl.primary.verifystatus);
     break;
   case CURLOPT_SSL_VERIFYSTATUS:
     /*
@@ -742,9 +742,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->ssl.primary.verifystatus = enabled;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_update(data, s->ssl.primary.verifypeer,
-                         s->ssl.primary.verifyhost,
-                         s->ssl.primary.verifystatus);
+    Curl_ssl_conn_update(data, !!s->ssl.primary.verifypeer,
+                         !!s->ssl.primary.verifyhost,
+                         !!s->ssl.primary.verifystatus);
     break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
