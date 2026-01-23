@@ -668,7 +668,7 @@ struct Curl_cfilter *Curl_conn_get_cf_proxy_ssl(struct connectdata *conn,
 
 bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
 {
-  return Curl_conn_get_cf_ssl(conn, sockindex);
+  return !!Curl_conn_get_cf_ssl(conn, sockindex);
 }
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
