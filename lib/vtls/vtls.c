@@ -438,6 +438,7 @@ void Curl_ssl_proxy_conn_update(struct Curl_easy *data, bool verifypeer,
 }
 #endif
 
+#ifdef USE_SSL
 bool Curl_ssl_conn_get_info(struct Curl_easy *data,
                             struct connectdata *conn, int sockindex,
                             struct curl_tlssessioninfo *info)
@@ -451,10 +452,8 @@ bool Curl_ssl_conn_get_info(struct Curl_easy *data,
   return FALSE;
 }
 
-
-#ifdef USE_SSL
 static int multissl_setup(const struct Curl_ssl *backend);
-#endif
+#endif /* USE_SSL */
 
 curl_sslbackend Curl_ssl_backend(void)
 {
