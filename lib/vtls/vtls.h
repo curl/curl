@@ -274,6 +274,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_cfilter_add(a, b, c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a, b, c) CURLE_OK
 #define Curl_ssl_cf_get_config(a, b) NULL
+#define Curl_ssl_conn_get_info(a, b, c, d) FALSE
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */
