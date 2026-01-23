@@ -34,6 +34,7 @@ permissions: {}
 env:
   CURL_CI: github
   CURL_TEST_MIN: 1700
+  STUNNEL_VERSION: 5.76
 
 jobs:
   cygwin:
@@ -44,6 +45,7 @@ jobs:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
+      CURL_TEST_MIN: 1800
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -148,13 +150,22 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          cd /cygdrive/d && mkdir my-stunnel && cd my-stunnel
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
+          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
+
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH=/usr/bin
+          PATH=/usr/bin:/cygdrive/d/my-stunnel/bin
           TFLAGS="-j8 ${TFLAGS}"
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -366,7 +377,10 @@ jobs:
         timeout-minutes: 5
         run: |
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
+          cd /d && mkdir my-stunnel && cd my-stunnel
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
+          /c/ProgramData/Chocolatey/bin/7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -388,7 +402,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PATH:/d/my-stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --verbose --target test-ci
@@ -572,8 +586,11 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+          cd /d && mkdir my-stunnel && cd my-stunnel
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
+          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -587,7 +604,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PWD/bld/lib:$PATH:/d/my-stunnel/bin"
           cmake --build bld --target test-ci
 
       - name: 'build examples'
@@ -951,10 +968,13 @@ jobs:
             unzip bin.zip
             rm -f bin.zip
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
+          cd /c && mkdir my-stunnel && cd my-stunnel
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
+          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -978,7 +998,7 @@ jobs:
             fi
             PATH="/c/OpenSSH-Win64:$PATH"
           fi
-          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/c/my-stunnel/bin"
           cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
 
       - name: 'build examples'
