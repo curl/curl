@@ -155,7 +155,7 @@ jobs:
         run: |
           cd /d && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${{ env.STUNNEL_VERSION }}-win64-installer.exe" --output pack.bin
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
           7z x -y pack.bin >/dev/null && rm -r -f pack.bin && bin/stunnel -version
 
       - name: 'run tests'
@@ -378,7 +378,7 @@ jobs:
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           cd /d && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${{ env.STUNNEL_VERSION }}-win64-installer.exe" --output pack.bin
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
           7z x -y pack.bin >/dev/null && rm -r -f pack.bin && bin/stunnel -version
 
       - name: 'run tests'
@@ -588,7 +588,7 @@ jobs:
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           cd /d && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${{ env.STUNNEL_VERSION }}-win64-installer.exe" --output pack.bin
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
           7z x -y pack.bin >/dev/null && rm -r -f pack.bin && bin/stunnel -version
 
       - name: 'run tests'
@@ -972,7 +972,7 @@ jobs:
           fi
           cd /d && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${{ env.STUNNEL_VERSION }}-win64-installer.exe" --output pack.bin
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
           7z x -y pack.bin >/dev/null && rm -r -f pack.bin && bin/stunnel -version
 
       - name: 'run tests'
