@@ -181,7 +181,7 @@ static size_t doh_probe_write_cb(char *contents, size_t size, size_t nmemb,
   return realsize;
 }
 
-#if defined(USE_HTTPSRR) && defined(DEBUGBUILD)
+#if defined(USE_HTTPSRR) && defined(DEBUGBUILD) && defined(CURLVERBOSE)
 
 /* doh_print_buf truncates if the hex string will be more than this */
 #define LOCAL_PB_HEXMAX 400
@@ -884,7 +884,7 @@ static void doh_show(struct Curl_easy *data,
   }
 #ifdef USE_HTTPSRR
   for(i = 0; i < d->numhttps_rrs; i++) {
-# ifdef DEBUGBUILD
+# if defined(DEBUGBUILD) && defined(CURLVERBOSE)
     doh_print_buf(data, "DoH HTTPS", d->https_rrs[i].val, d->https_rrs[i].len);
 # else
     infof(data, "DoH HTTPS RR: length %d", d->https_rrs[i].len);
@@ -1155,7 +1155,7 @@ err:
   return result;
 }
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
                                 struct Curl_https_rrinfo *hrr);
 
@@ -1267,7 +1267,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
             goto error;
           }
           infof(data, "Some HTTPS RR to process");
-# ifdef DEBUGBUILD
+# if defined(DEBUGBUILD) && defined(CURLVERBOSE)
           doh_print_httpsrr(data, hrr);
 # endif
           dns->hinfo = hrr;

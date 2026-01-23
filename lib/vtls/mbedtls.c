@@ -488,7 +488,6 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   const char * const ssl_cert_type = ssl_config->cert_type;
 #endif
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
-  const char *hostname = connssl->peer.hostname;
   int ret = -1;
   char errorbuf[128];
 
@@ -747,7 +746,8 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
 
-  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->peer.port);
+  infof(data, "mbedTLS: Connecting to %s:%d",
+        connssl->peer.hostname, connssl->peer.port);
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,

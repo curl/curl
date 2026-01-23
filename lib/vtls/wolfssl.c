@@ -1885,9 +1885,9 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
   struct wssl_ctx *wctx = (struct wssl_ctx *)connssl->backend;
   CURLcode result = CURLE_OK;
   char buf[1024];
-  char error_buffer[256];
   int nread = -1, err;
   size_t i;
+  VERBOSE(char error_buffer[256]);
 
   DEBUGASSERT(wctx);
   if(!wctx->ssl || cf->shutdown) {
@@ -2109,6 +2109,7 @@ static bool wssl_data_pending(struct Curl_cfilter *cf,
 
 void Curl_wssl_report_handshake(struct Curl_easy *data, struct wssl_ctx *wssl)
 {
+  (void)wssl;
 #if (LIBWOLFSSL_VERSION_HEX >= 0x03009010)
   infof(data, "SSL connection using %s / %s",
         wolfSSL_get_version(wssl->ssl),
