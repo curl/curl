@@ -467,6 +467,7 @@
 #endif
 
 #include <stdint.h>
+#define HAVE_UINTPTR_T  /* assume uintptr_t is provided by stdint.h */
 
 #ifdef __DJGPP__
 /* By default, DJGPP provides this type as a version of 'unsigned long' which
@@ -475,9 +476,9 @@
 #define uint32_t unsigned int
 #endif
 
-/* Set uintptr_t to fallback type for targets known to miss it from stdint.h */
+/* Disable uintptr_t for targets known to miss it from stdint.h */
 #ifdef __OS400__
-#define uintptr_t void *
+#undef HAVE_UINTPTR_T
 #endif
 
 #include <limits.h>

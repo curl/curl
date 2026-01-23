@@ -310,7 +310,11 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct curl_httppost *lastnode = NULL;
 
 #define form_ptr_arg(t) (forms ? (t)(void *)avalue : va_arg(params, t))
+#ifdef HAVE_UINTPTR_T
 #define form_int_arg(t) (forms ? (t)(uintptr_t)avalue : va_arg(params, t))
+#else
+#define form_int_arg(t) (forms ? (t)(void *)avalue : va_arg(params, t))
+#endif
 
   /*
    * We need to allocate the first struct to fill in.
