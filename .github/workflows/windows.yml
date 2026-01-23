@@ -148,13 +148,22 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          cd /d && mkdir my-stunnel && cd my-stunnel
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            https://www.stunnel.org/archive/5.x/stunnel-5.76-win64-installer.exe --output pack.bin
+          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && bin/stunnel -version
+
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH=/usr/bin
+          PATH=/usr/bin;/cygdrive/d/my-stunnel/bin
           TFLAGS="-j8 ${TFLAGS}"
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
