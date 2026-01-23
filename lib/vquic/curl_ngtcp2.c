@@ -2594,8 +2594,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &sockaddr, NULL))
     return CURLE_QUIC_CONNECT_ERROR;
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
-  rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
-                   &ctx->q.local_addrlen);
+  rv = CURL_GETSOCKNAME(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
+                        &ctx->q.local_addrlen);
   if(rv == -1)
     return CURLE_QUIC_CONNECT_ERROR;
 

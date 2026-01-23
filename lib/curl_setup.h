@@ -1065,18 +1065,60 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define sclose(x) CURL_SCLOSE(x)
 #define fake_sclose(x) Curl_nop_stmt
 
-#define CURL_GETADDRINFO getaddrinfo
+#ifdef USE_LWIPSOCK
+#define CURL_ACCEPT lwip_accept
+#define CURL_FREEADDRINFO lwip_freeaddrinfo
+#define CURL_GETADDRINFO lwip_getaddrinfo
+#define CURL_SOCKET lwip_socket
+#else
+#define CURL_ACCEPT accept
 #define CURL_FREEADDRINFO freeaddrinfo
+#define CURL_GETADDRINFO getaddrinfo
 #define CURL_SOCKET socket
+#endif
+
 #ifdef HAVE_SOCKETPAIR
 #define CURL_SOCKETPAIR socketpair
 #endif
-#define CURL_ACCEPT accept
 #ifdef HAVE_ACCEPT4
 #define CURL_ACCEPT4 accept4
 #endif
 
 #endif /* CURL_MEMDEBUG */
+
+#ifdef USE_LWIPSOCK
+#define CURL_BIND lwip_bind
+#define CURL_CONNECT lwip_connect
+#ifdef HAVE_GETHOSTBYNAME_R_6
+#define CURL_GETHOSTBYNAME_R lwip_gethostbyname_r
+#endif
+#ifdef HAVE_GETPEERNAME
+#define CURL_GETPEERNAME lwip_getpeername
+#endif
+#ifdef HAVE_GETSOCKNAME
+#define CURL_GETSOCKNAME lwip_getsockname
+#endif
+#define CURL_GETSOCKOPT lwip_getsockopt
+#define CURL_LISTEN lwip_listen
+#define CURL_SELECT lwip_select
+#define CURL_SETSOCKOPT lwip_setsockopt
+#else
+#define CURL_BIND bind
+#define CURL_CONNECT connect
+#ifdef HAVE_GETHOSTBYNAME_R_6
+#define CURL_GETHOSTBYNAME_R gethostbyname_r
+#endif
+#ifdef HAVE_GETPEERNAME
+#define CURL_GETPEERNAME getpeername
+#endif
+#ifdef HAVE_GETSOCKNAME
+#define CURL_GETSOCKNAME getsockname
+#endif
+#define CURL_GETSOCKOPT getsockopt
+#define CURL_LISTEN listen
+#define CURL_SELECT select
+#define CURL_SETSOCKOPT setsockopt
+#endif
 
 /* Allocator macros */
 

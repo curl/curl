@@ -35,10 +35,14 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+
 #ifdef __AMIGA__
 #define curlx_inet_ntop(af, addr, buf, size)                            \
   (char *)inet_ntop(af, CURL_UNCONST(addr), (unsigned char *)buf,       \
                     (curl_socklen_t)(size))
+#elif defined(USE_LWIPSOCK)
+#define curlx_inet_ntop(af,addr,buf,size)                               \
+        lwip_inet_ntop(af, addr, buf, (curl_socklen_t)(size))
 #else
 #define curlx_inet_ntop(af, addr, buf, size)                            \
   inet_ntop(af, addr, buf, (curl_socklen_t)(size))

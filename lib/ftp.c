@@ -1044,7 +1044,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     /* not an interface and not a hostname, get default by extracting
        the IP from the control connection */
     sslen = sizeof(ss);
-    if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
+    if(CURL_GETSOCKNAME(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
             curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       goto out;
@@ -1116,7 +1116,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       sa6->sin6_port = htons(port);
 #endif
     /* Try binding the given address. */
-    if(bind(portsock, sa, sslen)) {
+    if(CURL_BIND(portsock, sa, sslen)) {
       /* It failed. */
       error = SOCKERRNO;
       if(possibly_non_local && (error == SOCKEADDRNOTAVAIL)) {
@@ -1127,7 +1127,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
               curlx_strerror(error, buffer, sizeof(buffer)));
 
         sslen = sizeof(ss);
-        if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
+        if(CURL_GETSOCKNAME(conn->sock[FIRSTSOCKET], sa, &sslen)) {
           failf(data, "getsockname() failed: %s",
                 curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
           goto out;
@@ -1158,7 +1158,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* get the name again after the bind() so that we can extract the
      port number it uses now */
   sslen = sizeof(ss);
-  if(getsockname(portsock, sa, &sslen)) {
+  if(CURL_GETSOCKNAME(portsock, sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
           curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     goto out;
@@ -1168,7 +1168,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   /* step 4, listen on the socket */
 
-  if(listen(portsock, 1)) {
+  if(CURL_LISTEN(portsock, 1)) {
     failf(data, "socket failure: %s",
           curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     goto out;

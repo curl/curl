@@ -35,9 +35,13 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+
 #ifdef __AMIGA__
 #define curlx_inet_pton(x, y, z) \
   inet_pton(x, (unsigned char *)CURL_UNCONST(y), z)
+#elif defined(USE_LWIPSOCK)
+#define curlx_inet_pton(x, y, z) \
+  lwip_inet_pton(x, y, z)
 #else
 #define curlx_inet_pton(x, y, z) \
   inet_pton(x, y, z)

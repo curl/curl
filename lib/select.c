@@ -91,7 +91,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
                 fds_write && fds_write->fd_count ? fds_write : NULL,
                 fds_err && fds_err->fd_count ? fds_err : NULL, ptimeout);
 #else
-  return select((int)maxfd + 1, fds_read, fds_write, fds_err, ptimeout);
+  return CURL_SELECT((int)maxfd + 1, fds_read, fds_write, fds_err, ptimeout);
 #endif
 }
 

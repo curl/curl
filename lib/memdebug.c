@@ -392,8 +392,12 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   if(countcheck("socket", line, source))
     return CURL_SOCKET_BAD;
 
+#ifdef USE_LWIPSOCK
+  sockfd = lwip_socket(domain, type, protocol);
+#else
   /* !checksrc! disable BANNEDFUNC 1 */
   sockfd = socket(domain, type, protocol);
+#endif
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d socket() = %" FMT_SOCKET_T "\n",
@@ -425,8 +429,12 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
+#ifdef USE_LWIPSOCK
+  curl_socket_t sockfd = lwip_accept(s, addr, addrlen);
+#else
   /* !checksrc! disable BANNEDFUNC 1 */
   curl_socket_t sockfd = accept(s, addr, addrlen);
+#endif
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
