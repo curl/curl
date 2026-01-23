@@ -484,18 +484,6 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install }}
 
-      - name: 'install test prereqs (stunnel TEST)'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          cd /d
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            https://www.stunnel.org/archive/5.x/stunnel-5.76-win64-installer.exe --output pack.bin
-          pwd
-          7z x -y pack.bin >/dev/null
-          rm -r -f pack.bin
-          ls -l
-
       - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-compiler
@@ -584,7 +572,10 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
+          cd /d && mkdir my-stunnel && cd my-stunnel
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            https://www.stunnel.org/archive/5.x/stunnel-5.76-win64-installer.exe --output pack.bin
+          7z x -y pack.bin >/dev/null && rm -r -f pack.bin
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
       - name: 'run tests'
@@ -599,7 +590,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PWD/bld/lib:$PATH:/d/my-stunnel/bin"
           cmake --build bld --target test-ci
 
       - name: 'build examples'
