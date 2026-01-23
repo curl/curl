@@ -970,7 +970,7 @@ jobs:
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
-          cd /d && mkdir my-stunnel && cd my-stunnel
+          cd /c && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
           7z x -y pack.bin >/dev/null && rm -r -f pack.bin && bin/stunnel -version
@@ -997,7 +997,7 @@ jobs:
             fi
             PATH="/c/OpenSSH-Win64:$PATH"
           fi
-          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/d/my-stunnel/bin"
+          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/c/my-stunnel/bin"
           cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
 
       - name: 'build examples'
