@@ -63,7 +63,7 @@
 
 /* Set uintptr_t to fallback type for targets known to miss it from stdint.h */
 #ifdef __OS400__
-#define uintptr_t (void *)
+#define uintptr_t void *
 #endif
 
 #ifdef __DJGPP__
