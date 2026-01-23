@@ -589,8 +589,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->proxy_ssl.primary.verifypeer = enabled;
 
     /* Update the current connection proxy_ssl_config. */
-    Curl_ssl_proxy_conn_update(data,
-                               !!s->proxy_ssl.primary.verifypeer,
+    Curl_ssl_proxy_conn_update(data, !!s->proxy_ssl.primary.verifypeer,
                                !!s->proxy_ssl.primary.verifyhost,
                                !!s->proxy_ssl.primary.verifystatus);
     break;
@@ -601,8 +600,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->proxy_ssl.primary.verifyhost = enabled;
     ok = 2;
     /* Update the current connection proxy_ssl_config. */
-    Curl_ssl_proxy_conn_update(data,
-                               !!s->proxy_ssl.primary.verifypeer,
+    Curl_ssl_proxy_conn_update(data, !!s->proxy_ssl.primary.verifypeer,
                                !!s->proxy_ssl.primary.verifyhost,
                                !!s->proxy_ssl.primary.verifystatus);
     break;
@@ -689,9 +687,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->ssl.primary.verifypeer = enabled;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_update(data, s->ssl.primary.verifypeer,
-                         s->ssl.primary.verifyhost,
-                         s->ssl.primary.verifystatus);
+    Curl_ssl_conn_update(data, !!s->ssl.primary.verifypeer,
+                         !!s->ssl.primary.verifyhost,
+                         !!s->ssl.primary.verifystatus);
     break;
 #ifndef CURL_DISABLE_DOH
   case CURLOPT_DOH_SSL_VERIFYPEER:
