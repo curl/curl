@@ -31,7 +31,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <stdint.h>
 #include <time.h>
 #include <errno.h>
 
@@ -59,18 +58,6 @@
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-
-/* Set uintptr_t to fallback type for targets known to miss it from stdint.h */
-#ifdef __OS400__
-#define uintptr_t void *
-#endif
-
-#ifdef __DJGPP__
-/* By default, DJGPP provides this type as a version of 'unsigned long' which
-   forces us to use a define use it in printf() format strings without
-   warnings. long and int are both 32 bits for this platform. */
-#define uint32_t unsigned int
 #endif
 
 /* Macro to strip 'const' without triggering a compiler warning.
