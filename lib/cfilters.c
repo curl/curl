@@ -684,10 +684,10 @@ CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
 
 bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
 {
-  return cf_get_first_cf(conn, sockindex,
-                         CF_TYPE_MULTIPLEX, /* mask */
-                         CF_TYPE_MULTIPLEX, /* match */
-                         (CF_TYPE_IP_CONNECT|CF_TYPE_SSL)); /* abort on */
+  return !!cf_get_first_cf(conn, sockindex,
+                           CF_TYPE_MULTIPLEX, /* mask */
+                           CF_TYPE_MULTIPLEX, /* match */
+                           (CF_TYPE_IP_CONNECT|CF_TYPE_SSL)); /* abort on */
 }
 
 unsigned char Curl_conn_get_transport(struct Curl_easy *data,
