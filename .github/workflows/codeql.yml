@@ -92,7 +92,7 @@ jobs:
           languages: cpp
           build-mode: manual
           trap-caching: false
-          matrix: "c:${{ matrix.image }}"
+          matrix: "platform:${{ contains(matrix.image, 'ubuntu') && 'Linux' || 'Windows' }}"
 
       - name: 'build'
         timeout-minutes: 10
