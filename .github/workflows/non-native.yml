@@ -283,11 +283,12 @@ jobs:
               ${MATRIX_OPTIONS}
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror --disable-shared \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
               CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
               --host="aarch64-linux-android${MATRIX_PLATFORM}" \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_OPTIONS}
           fi
 
@@ -388,14 +389,15 @@ jobs:
               -DWATT_ROOT="$HOME/djgpp/net/watt"
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror --disable-shared \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
               CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
               AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
               RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \
               WATT_ROOT="$HOME/djgpp/net/watt" \
               --host=i586-pc-msdosdjgpp \
               --without-ssl --without-libpsl \
-              --with-zlib="$HOME/djgpp"
+              --with-zlib="$HOME/djgpp" \
+              --disable-dependency-tracking --enable-option-checking=fatal
           fi
 
       - name: 'configure log'
