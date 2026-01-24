@@ -38,14 +38,16 @@ To fix before we remove the experimental label:
 
 # ngtcp2 version
 
-Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
+Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3`
+and a QUIC supporting TLS library. The supported TLS libraries are covered
+below.
 
 While any version of `ngtcp2` and `nghttp3` from v1.0.0 on are expected to
 work, using the latest versions often brings functional and performance
 improvements.
 
-The build examples use `$NGHTTP3_VERSION` and `$NGTCP2_VERSION` as placeholders
-for the version you build.
+The build examples use `$NGHTTP3_VERSION` and `$NGTCP2_VERSION` as
+placeholders for the version you build.
 
 ## Build with OpenSSL
 
@@ -224,7 +226,9 @@ Build curl:
 
 quiche support is **EXPERIMENTAL**
 
-Since the quiche build manages its dependencies, curl can be built against the latest version. You are *probably* able to build against their main branch, but in case of problems, we recommend their latest release tag.
+Since the quiche build manages its dependencies, curl can be built against the
+latest version. You are *probably* able to build against their main branch,
+but in case of problems, we recommend their latest release tag.
 
 ## Build
 
@@ -247,8 +251,8 @@ Build curl:
      % make
      % make install
 
- If `make install` results in `Permission denied` error, you need to prepend
- it with `sudo`.
+If `make install` results in `Permission denied` error, you need to prepend
+it with `sudo`.
 
 # `--http3`
 
@@ -284,16 +288,17 @@ or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The
 soft timeout fires, when there has been **no data at all** seen from the
 server on the HTTP/3 connection.
 
-So, without you specifying anything, the hard timeout is 200ms and the soft is 100ms:
+So, without you specifying anything, the hard timeout is 200ms and the soft is
+100ms:
 
- * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection
-   in less than 100ms.
- * When QUIC is not supported (or UDP does not work for this network path), no
-   reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
- * In the worst case, UDP replies start before 100ms, but drag on. This starts
-   the TLS+TCP connection after 200ms.
- * When the QUIC handshake fails, the TLS+TCP connection is attempted right
-   away. For example, when the QUIC server presents the wrong certificate.
+* Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection
+  in less than 100ms.
+* When QUIC is not supported (or UDP does not work for this network path), no
+  reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
+* In the worst case, UDP replies start before 100ms, but drag on. This starts
+  the TLS+TCP connection after 200ms.
+* When the QUIC handshake fails, the TLS+TCP connection is attempted right
+  away. For example, when the QUIC server presents the wrong certificate.
 
 The whole transfer only fails, when **both** QUIC and TLS+TCP fail to
 handshake or time out.
@@ -354,8 +359,8 @@ that exists in curl's test dir.
 
 ### Caddy
 
-[Install Caddy](https://caddyserver.com/docs/install). For easiest use, the binary
-should be either in your PATH or your current directory.
+[Install Caddy](https://caddyserver.com/docs/install). For easiest use, the
+binary should be either in your PATH or your current directory.
 
 Create a `Caddyfile` with the following content:
 ~~~
@@ -368,7 +373,9 @@ Then run Caddy:
 
      % ./caddy start
 
-Making requests to `https://localhost:7443` should tell you which protocol is being used.
+Making requests to `https://localhost:7443` should tell you which protocol is
+being used.
 
-You can change the hard-coded response to something more useful by replacing `respond`
-with `reverse_proxy` or `file_server`, for example: `reverse_proxy localhost:80`
+You can change the hard-coded response to something more useful by replacing
+`respond` with `reverse_proxy` or `file_server`, for example: `reverse_proxy
+localhost:80`

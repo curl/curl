@@ -64,10 +64,6 @@ void Curl_failf(struct Curl_easy *data,
 #define CURL_LOG_LVL_NONE  0
 #define CURL_LOG_LVL_INFO  1
 
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define CURL_HAVE_C99
-#endif
-
 /**
  * Output an informational message when transfer's verbose logging is enabled.
  */
@@ -133,7 +129,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_TIMER_is_verbose(data) \
   Curl_trc_ft_is_verbose(data, &Curl_trc_feat_timer)
 
-#if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(CURL_HAVE_MACRO_VARARG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define infof(data, ...)             \
   do {                               \
     if(Curl_trc_is_verbose(data))    \
@@ -206,7 +202,70 @@ void Curl_trc_ws(struct Curl_easy *data,
   } while(0)
 #endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
 
-#else /* CURL_HAVE_C99 */
+#elif defined(CURL_HAVE_MACRO_VARARG) && defined(CURL_DISABLE_VERBOSE_STRINGS)
+
+#define infof(data, ...) \
+  do {                   \
+    (void)data;          \
+  } while(0)
+#define CURL_TRC_M(data, ...) \
+  do {                        \
+    (void)(data);             \
+  } while(0)
+#define CURL_TRC_CF(data, cf, ...) \
+  do {                             \
+    (void)(data);                  \
+    (void)(cf);                    \
+  } while(0)
+#define CURL_TRC_WRITE(data, ...) \
+  do {                            \
+    (void)(data);                 \
+  } while(0)
+#define CURL_TRC_READ(data, ...) \
+  do {                           \
+    (void)(data);                \
+  } while(0)
+#define CURL_TRC_DNS(data, ...) \
+  do {                          \
+    (void)(data);               \
+  } while(0)
+#define CURL_TRC_TIMER(data, tid, ...) \
+  do {                                 \
+    (void)(data);                      \
+    (void)(tid);                       \
+  } while(0)
+#ifndef CURL_DISABLE_FTP
+#define CURL_TRC_FTP(data, ...) \
+  do {                          \
+    (void)(data);               \
+  } while(0)
+#endif /* !CURL_DISABLE_FTP */
+#ifndef CURL_DISABLE_SMTP
+#define CURL_TRC_SMTP(data, ...) \
+  do {                           \
+    (void)(data);                \
+  } while(0)
+#endif /* !CURL_DISABLE_SMTP */
+#ifdef USE_SSL
+#define CURL_TRC_SSLS(data, ...) \
+  do {                           \
+    (void)(data);                \
+  } while(0)
+#endif /* USE_SSL */
+#ifdef USE_SSH
+#define CURL_TRC_SSH(data, ...) \
+  do {                          \
+    (void)(data);               \
+  } while(0)
+#endif /* USE_SSH */
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#define CURL_TRC_WS(data, ...) \
+  do {                         \
+    (void)(data);              \
+  } while(0)
+#endif
+
+#else /* !CURL_HAVE_MACRO_VARARG */
 
 #define infof          Curl_infof
 #define CURL_TRC_M     Curl_trc_multi
@@ -232,17 +291,18 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_WS    Curl_trc_ws
 #endif
 
-#endif /* !CURL_HAVE_C99 */
+#endif /* CURL_HAVE_MACRO_VARARG */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-/* informational messages enabled */
-
+#ifdef CURLVERBOSE
 extern struct curl_trc_feat Curl_trc_feat_multi;
 extern struct curl_trc_feat Curl_trc_feat_read;
 extern struct curl_trc_feat Curl_trc_feat_write;
 extern struct curl_trc_feat Curl_trc_feat_dns;
 extern struct curl_trc_feat Curl_trc_feat_timer;
+#endif
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+/* informational messages enabled */
 #define Curl_trc_is_verbose(data)                          \
   ((data) && (data)->set.verbose &&                        \
    (!(data)->state.feat ||                                 \
@@ -262,13 +322,11 @@ extern struct curl_trc_feat Curl_trc_feat_timer;
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
-
 #define Curl_trc_is_verbose(d)        (FALSE)
 #define Curl_trc_cf_is_verbose(x, y)  (FALSE)
 #define Curl_trc_ft_is_verbose(x, y)  (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 #define CURL_TRC_EASY_TIMERS(x)       Curl_nop_stmt
-
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #endif /* HEADER_CURL_TRC_H */

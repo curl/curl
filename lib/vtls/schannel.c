@@ -1797,7 +1797,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       remaining = MAX_RENEG_BLOCK_TIME - elapsed;
 
       if(blocking) {
-        timeout_ms = Curl_timeleft_ms(data, FALSE);
+        timeout_ms = Curl_timeleft_ms(data);
 
         if(timeout_ms < 0) {
           result = CURLE_OPERATION_TIMEDOUT;
@@ -1950,7 +1950,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     while(len > *pnwritten) {
       size_t this_write = 0;
       int what;
-      timediff_t timeout_ms = Curl_timeleft_ms(data, FALSE);
+      timediff_t timeout_ms = Curl_timeleft_ms(data);
       if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(data, "schannel: timed out sending data "
@@ -2259,11 +2259,9 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto cleanup;
     }
     else {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       char buffer[STRERROR_LEN];
       failf(data, "schannel: failed to read data from server: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-#endif
       result = CURLE_RECV_ERROR;
       goto cleanup;
     }

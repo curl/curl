@@ -35,6 +35,8 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "imap.h"
 
 #ifndef CURL_DISABLE_IMAP
 
@@ -53,7 +55,6 @@
 #endif
 
 #include "curlx/dynbuf.h"
-#include "urldata.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "hostip.h"
@@ -61,7 +62,6 @@
 #include "transfer.h"
 #include "escape.h"
 #include "pingpong.h"
-#include "imap.h"
 #include "mime.h"
 #include "curlx/strparse.h"
 #include "strcase.h"
@@ -437,13 +437,12 @@ static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out)
   if(len > 2) {
     /* Find the start of the message */
     len -= 2;
-    for(message += 2; *message == ' ' || *message == '\t'; message++, len--)
+    for(message += 2; ISBLANK(*message); message++, len--)
       ;
 
     /* Find the end of the message */
     while(len--)
-      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
+      if(!ISNEWLINE(message[len]) && !ISBLANK(message[len]))
         break;
 
     /* Terminate the message */
@@ -467,7 +466,7 @@ static void imap_state(struct Curl_easy *data,
                        struct imap_conn *imapc,
                        imapstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -491,8 +490,9 @@ static void imap_state(struct Curl_easy *data,
   if(imapc->state != newstate)
     infof(data, "IMAP %p state change from %s to %s",
           (void *)imapc, names[imapc->state], names[newstate]);
-#endif
+#else
   (void)data;
+#endif
   imapc->state = newstate;
 }
 
@@ -559,7 +559,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
     if(result)
       goto out;
     /* Change the connection handler */
-    conn->handler = &Curl_handler_imaps;
+    conn->scheme = &Curl_scheme_imaps;
   }
 
   DEBUGASSERT(!imapc->ssldone);
@@ -1035,20 +1035,15 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
     /* Loop through the data line */
     for(;;) {
       size_t wordlen;
-      while(*line &&
-            (*line == ' ' || *line == '\t' ||
-              *line == '\r' || *line == '\n')) {
-
+      while(*line && (ISBLANK(*line) || ISNEWLINE(*line)))
         line++;
-      }
 
       if(!*line)
         break;
 
       /* Extract the word */
-      for(wordlen = 0; line[wordlen] && line[wordlen] != ' ' &&
-                       line[wordlen] != '\t' && line[wordlen] != '\r' &&
-                       line[wordlen] != '\n';)
+      for(wordlen = 0; line[wordlen] && !ISBLANK(line[wordlen]) &&
+            !ISNEWLINE(line[wordlen]);)
         wordlen++;
 
       /* Does the server support the STARTTLS capability? */
@@ -2301,10 +2296,9 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
 }
 
 /*
- * IMAP protocol handler.
+ * IMAP protocol.
  */
-const struct Curl_handler Curl_handler_imap = {
-  "imap",                           /* scheme */
+static const struct Curl_protocol Curl_protocol_imap = {
   imap_setup_connection,            /* setup_connection */
   imap_do,                          /* do_it */
   imap_done,                        /* done */
@@ -2322,43 +2316,42 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   ZERO_NULL,                        /* follow */
-  PORT_IMAP,                        /* defport */
+};
+
+#endif /* CURL_DISABLE_IMAP */
+
+
+/*
+ * IMAP protocol handler.
+ */
+const struct Curl_scheme Curl_scheme_imap = {
+  "imap",                           /* scheme */
+#ifdef CURL_DISABLE_IMAP
+  ZERO_NULL,
+#else
+  &Curl_protocol_imap,
+#endif
   CURLPROTO_IMAP,                   /* protocol */
   CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION |             /* flags */
   PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
-  PROTOPT_CONN_REUSE
+  PROTOPT_CONN_REUSE,
+  PORT_IMAP,                        /* defport */
 };
 
-#ifdef USE_SSL
 /*
  * IMAPS protocol handler.
  */
-const struct Curl_handler Curl_handler_imaps = {
+const struct Curl_scheme Curl_scheme_imaps = {
   "imaps",                          /* scheme */
-  imap_setup_connection,            /* setup_connection */
-  imap_do,                          /* do_it */
-  imap_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  imap_connect,                     /* connect_it */
-  imap_multi_statemach,             /* connecting */
-  imap_doing,                       /* doing */
-  imap_pollset,                     /* proto_pollset */
-  imap_pollset,                     /* doing_pollset */
-  ZERO_NULL,                        /* domore_pollset */
-  ZERO_NULL,                        /* perform_pollset */
-  imap_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_IMAPS,                       /* defport */
+#if defined(CURL_DISABLE_IMAP) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_imap,
+#endif
   CURLPROTO_IMAPS,                  /* protocol */
   CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
+  PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE,
+  PORT_IMAPS,                       /* defport */
 };
-#endif
-
-#endif /* CURL_DISABLE_IMAP */

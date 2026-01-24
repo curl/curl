@@ -29,6 +29,7 @@
 #include "urldata.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "multiif.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "select.h"
@@ -40,9 +41,9 @@
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
-                                 struct pingpong *pp, bool disconnecting)
+                                 struct pingpong *pp)
 {
-  timediff_t timeout_ms; /* in milliseconds */
+  timediff_t timeout_ms, xfer_timeout_ms;
   timediff_t response_time = data->set.server_response_timeout ?
     data->set.server_response_timeout : RESP_TIMEOUT;
 
@@ -55,19 +56,10 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
      full response to arrive before we bail out */
   timeout_ms = response_time -
                curlx_ptimediff_ms(Curl_pgrs_now(data), &pp->response);
-
-  if(data->set.timeout && !disconnecting) {
-    /* if timeout is requested, find out how much overall remains */
-    timediff_t timeout2_ms = Curl_timeleft_ms(data, FALSE);
-    /* pick the lowest number */
-    timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
-  }
-
-  if(disconnecting) {
-    timediff_t total_left_ms = Curl_timeleft_ms(data, FALSE);
-    timeout_ms = CURLMIN(timeout_ms, CURLMAX(total_left_ms, 0));
-  }
-
+  /* transfer timeout can be 0, which means no timeout applies */
+  xfer_timeout_ms = Curl_timeleft_ms(data);
+  if(xfer_timeout_ms && (xfer_timeout_ms < timeout_ms))
+    return xfer_timeout_ms;
   return timeout_ms;
 }
 
@@ -82,7 +74,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
   timediff_t interval_ms;
-  timediff_t timeout_ms = Curl_pp_state_timeout(data, pp, disconnecting);
+  timediff_t timeout_ms = Curl_pp_state_timeout(data, pp);
   CURLcode result = CURLE_OK;
 
   if(timeout_ms <= 0) {

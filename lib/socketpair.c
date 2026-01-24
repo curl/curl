@@ -64,8 +64,8 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
 #ifdef HAVE_FCNTL
   if(fcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
      fcntl(socks[1], F_SETFD, FD_CLOEXEC)) {
-    close(socks[0]);
-    close(socks[1]);
+    sclose(socks[0]);
+    sclose(socks[1]);
     socks[0] = socks[1] = CURL_SOCKET_BAD;
     return -1;
   }
@@ -73,8 +73,8 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
   if(nonblocking) {
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0) {
-      close(socks[0]);
-      close(socks[1]);
+      sclose(socks[0]);
+      sclose(socks[1]);
       socks[0] = socks[1] = CURL_SOCKET_BAD;
       return -1;
     }
@@ -107,12 +107,22 @@ static int wakeup_socketpair(curl_socket_t socks[2], bool nonblocking)
   if(nonblocking) {
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0) {
-      close(socks[0]);
-      close(socks[1]);
+      sclose(socks[0]);
+      sclose(socks[1]);
+      socks[0] = socks[1] = CURL_SOCKET_BAD;
       return -1;
     }
   }
 #endif
+#ifdef USE_SO_NOSIGPIPE
+  if(Curl_sock_nosigpipe(socks[1]) < 0) {
+    sclose(socks[0]);
+    sclose(socks[1]);
+    socks[0] = socks[1] = CURL_SOCKET_BAD;
+    return -1;
+  }
+#endif /* USE_SO_NOSIGPIPE */
+
   return 0;
 }
 
@@ -253,6 +263,10 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0)
       goto error;
+#ifdef USE_SO_NOSIGPIPE
+  if(Curl_sock_nosigpipe(socks[1]) < 0)
+    goto error;
+#endif
   sclose(listener);
   return 0;
 
@@ -260,6 +274,7 @@ error:
   sclose(listener);
   sclose(socks[0]);
   sclose(socks[1]);
+  socks[0] = socks[1] = CURL_SOCKET_BAD;
   return -1;
 }
 

@@ -108,7 +108,7 @@ static CURLcode sftp_error_to_CURLE(int err)
   return CURLE_SSH;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static const char *myssh_statename(sshstate state)
 {
   static const char * const names[] = {
@@ -179,7 +179,7 @@ static const char *myssh_statename(sshstate state)
 }
 #else
 #define myssh_statename(x)    ""
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 #define myssh_to(x, y, z) myssh_set_state(x, y, z)
 
@@ -191,7 +191,7 @@ static void myssh_set_state(struct Curl_easy *data,
                             struct ssh_conn *sshc,
                             sshstate nowstate)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(sshc->state != nowstate) {
     CURL_TRC_SSH(data, "[%s] -> [%s]",
                  myssh_statename(sshc->state),
@@ -1034,7 +1034,7 @@ static int myssh_in_AUTH_DONE(struct Curl_easy *data,
   conn->recv_idx = FIRSTSOCKET;
   conn->send_idx = -1;
 
-  if(conn->handler->protocol == CURLPROTO_SFTP) {
+  if(conn->scheme->protocol == CURLPROTO_SFTP) {
     myssh_to(data, sshc, SSH_SFTP_INIT);
     return SSH_NO_ERROR;
   }
@@ -2420,7 +2420,7 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
       if(result)
         break;
 
-      left_ms = Curl_timeleft_ms(data, FALSE);
+      left_ms = Curl_timeleft_ms(data);
       if(left_ms < 0) {
         failf(data, "Operation timed out");
         return CURLE_OPERATION_TIMEDOUT;
@@ -2501,7 +2501,7 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
 
   CURL_TRC_SSH(data, "myssh_connect");
-  if(conn->handler->protocol & CURLPROTO_SCP) {
+  if(conn->scheme->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
   }
@@ -3034,7 +3034,7 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
 
   Curl_pgrsReset(data);
 
-  if(conn->handler->protocol & CURLPROTO_SCP)
+  if(conn->scheme->protocol & CURLPROTO_SCP)
     result = scp_perform(data, &connected, done);
   else
     result = sftp_perform(data, &connected, done);
@@ -3062,10 +3062,9 @@ void Curl_ssh_version(char *buffer, size_t buflen)
 }
 
 /*
- * SCP protocol handler.
+ * SCP.
  */
-const struct Curl_handler Curl_handler_scp = {
-  "SCP",                        /* scheme */
+const struct Curl_protocol Curl_protocol_scp = {
   myssh_setup_connection,       /* setup_connection */
   myssh_do_it,                  /* do_it */
   scp_done,                     /* done */
@@ -3083,18 +3082,12 @@ const struct Curl_handler Curl_handler_scp = {
   ZERO_NULL,                    /* connection_check */
   ZERO_NULL,                    /* attach connection */
   ZERO_NULL,                    /* follow */
-  PORT_SSH,                     /* defport */
-  CURLPROTO_SCP,                /* protocol */
-  CURLPROTO_SCP,                /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
 };
 
 /*
- * SFTP protocol handler.
+ * SFTP.
  */
-const struct Curl_handler Curl_handler_sftp = {
-  "SFTP",                               /* scheme */
+const struct Curl_protocol Curl_protocol_sftp = {
   myssh_setup_connection,               /* setup_connection */
   myssh_do_it,                          /* do_it */
   sftp_done,                            /* done */
@@ -3112,11 +3105,6 @@ const struct Curl_handler Curl_handler_sftp = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  PORT_SSH,                             /* defport */
-  CURLPROTO_SFTP,                       /* protocol */
-  CURLPROTO_SFTP,                       /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
 };
 
 #endif /* USE_LIBSSH */

@@ -104,37 +104,40 @@ jobs:
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra
+            install_steps: wolfssl-opensslextra-arm
             tflags: '--min=780 1 to 950'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra
+            install_steps: wolfssl-opensslextra-arm
             tflags: '--min=800 951 to 9999'
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'mbedtls gss valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-intel
+            install_steps: mbedtls-latest-arm
             tflags: '--min=830 1 to 950'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON -DCURL_DROP_UNUSED=ON
 
           - name: 'mbedtls gss valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-intel
+            install_steps: mbedtls-latest-arm
             tflags: '--min=800 951 to 9999'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
-            image: ubuntu-24.04-arm
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
-            install_steps: mbedtls-latest-arm pytest
+            install_steps: mbedtls-latest-intel pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
@@ -163,7 +166,7 @@ jobs:
           - name: 'awslc'
             install_packages: libidn2-dev
             install_steps: awslc
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON
 
           - name: 'boringssl'
             install_steps: boringssl pytest
@@ -185,15 +188,16 @@ jobs:
             tflags: '--min=910 951 to 9999'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
-          - name: 'openssl intel'
+          - name: 'openssl intel C89'
             install_packages: libssh-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
-          - name: 'openssl arm'
+          - name: 'openssl arm C89'
             image: ubuntu-24.04-arm
+            install_packages: libssh2-1-dev
             install_steps: pytest
-            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
+            configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh2 --enable-debug --disable-verbose
 
           - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind
@@ -274,7 +278,7 @@ jobs:
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
-            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra
+            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
             make-custom-target: tidy
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
@@ -286,7 +290,7 @@ jobs:
 
           - name: 'scan-build'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
-            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra
+            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
             CC: clang
             configure-prefix: scan-build
@@ -338,7 +342,7 @@ jobs:
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
             CC: clang
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=OFF
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON
 
           - name: 'memory-sanitizer'
             install_packages: clang
@@ -379,7 +383,7 @@ jobs:
 
           - name: 'IntelC openssl'
             install_packages: libssl-dev
-            install_steps: intel
+            install_steps: intelc
             configure: CC=icc --enable-debug --with-openssl
 
           - name: 'Slackware !ssl gssapi gcc'
@@ -538,18 +542,39 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples --prefix=/home/runner/wolfssl-all
           make install
 
-      - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') }}
+      - name: 'cache wolfssl (opensslextra-intel)'  # does support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') }}
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-wolfssl-opensslextra
+        id: cache-wolfssl-opensslextra-intel
         env:
-          cache-name: cache-wolfssl-opensslextra
+          cache-name: cache-wolfssl-opensslextra-intel
         with:
           path: ~/wolfssl-opensslextra
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
-      - name: 'build wolfssl (opensslextra)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true' }}
+      - name: 'build wolfssl (opensslextra-intel)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') && steps.cache-wolfssl-opensslextra-intel.outputs.cache-hit != 'true' }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
+          cd "wolfssl-${WOLFSSL_VERSION}-stable"
+          ./autogen.sh
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+            --disable-benchmark --disable-crypttests --disable-examples --prefix=/home/runner/wolfssl-opensslextra
+          make install
+
+      - name: 'cache wolfssl (opensslextra-arm)'  # does support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') }}
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-wolfssl-opensslextra-arm
+        env:
+          cache-name: cache-wolfssl-opensslextra-arm
+        with:
+          path: ~/wolfssl-opensslextra
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+
+      - name: 'build wolfssl (opensslextra-arm)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
@@ -732,7 +757,7 @@ jobs:
         run: sudo dpkg -i ~/rustls/"librustls_${RUSTLS_VERSION}_amd64.deb"
 
       - name: 'install Intel compilers'
-        if: ${{ contains(matrix.build.install_steps, 'intel') }}
+        if: ${{ contains(matrix.build.install_steps, 'intelc') }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \

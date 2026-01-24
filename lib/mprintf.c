@@ -673,16 +673,19 @@ static bool out_double(void *userp,
 
   *fptr = 0; /* and a final null-termination */
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
 #ifdef HAVE_SNPRINTF
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
   (snprintf)(work, BUFFSIZE, formatbuf, dnum);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 #ifdef _WIN32
   /* Old versions of the Windows CRT do not terminate the snprintf output
      buffer if it reaches the max size so we do that here. */
@@ -691,9 +694,6 @@ static bool out_double(void *userp,
 #else
   /* float and double outputs do not work without snprintf support */
   work[0] = 0;
-#endif
-#ifdef __clang__
-#pragma clang diagnostic pop
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);
   while(*work) {

@@ -22,10 +22,11 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "rtsp.h"
 
 #ifndef CURL_DISABLE_RTSP
 
-#include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -33,7 +34,6 @@
 #include "http.h"
 #include "url.h"
 #include "progress.h"
-#include "rtsp.h"
 #include "strcase.h"
 #include "select.h"
 #include "connect.h"
@@ -316,7 +316,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       return CURLE_OUT_OF_MEMORY;
 
     data->state.first_remote_port = conn->remote_port;
-    data->state.first_remote_protocol = conn->handler->protocol;
+    data->state.first_remote_protocol = conn->scheme->protocol;
   }
 
   /* Setup the 'p_request' pointer to the proper p_request string
@@ -1045,8 +1045,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 /*
  * RTSP handler interface.
  */
-const struct Curl_handler Curl_handler_rtsp = {
-  "rtsp",                               /* scheme */
+static const struct Curl_protocol Curl_protocol_rtsp = {
   rtsp_setup_connection,                /* setup_connection */
   rtsp_do,                              /* do_it */
   rtsp_done,                            /* done */
@@ -1064,10 +1063,22 @@ const struct Curl_handler Curl_handler_rtsp = {
   rtsp_conncheck,                       /* connection_check */
   ZERO_NULL,                            /* attach connection */
   Curl_http_follow,                     /* follow */
-  PORT_RTSP,                            /* defport */
-  CURLPROTO_RTSP,                       /* protocol */
-  CURLPROTO_RTSP,                       /* family */
-  PROTOPT_CONN_REUSE                    /* flags */
 };
 
 #endif /* CURL_DISABLE_RTSP */
+
+/*
+ * RTSP handler interface.
+ */
+const struct Curl_scheme Curl_scheme_rtsp = {
+  "rtsp",                               /* scheme */
+#ifdef CURL_DISABLE_RTSP
+  ZERO_NULL,
+#else
+  &Curl_protocol_rtsp,
+#endif
+  CURLPROTO_RTSP,                       /* protocol */
+  CURLPROTO_RTSP,                       /* family */
+  PROTOPT_CONN_REUSE,                   /* flags */
+  PORT_RTSP,                            /* defport */
+};

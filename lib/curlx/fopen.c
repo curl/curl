@@ -45,7 +45,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 #include "multibyte.h"
 #include "timeval.h"
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 /*
  * Use system allocators to avoid infinite recursion when called by curl's
  * memory tracker memdebug functions.

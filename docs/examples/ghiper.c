@@ -22,38 +22,38 @@
  *
  ***************************************************************************/
 /* <DESC>
- * multi socket API usage with glib2
+ * multi socket interface with glib2
  * </DESC>
  */
 /* Example application source code using the multi socket interface to
  * download many files at once.
  *
  * Written by Jeff Pohlmeyer
-
- Requires glib-2.x and a (POSIX?) system that has mkfifo().
-
- This is an adaptation of libcurl's "hipev.c" and libevent's "event-test.c"
- sample programs, adapted to use glib's g_io_channel in place of libevent.
-
- When running, the program creates the named pipe "hiper.fifo"
-
- Whenever there is input into the fifo, the program reads the input as a list
- of URL's and creates some new easy handles to fetch each URL via the
- curl_multi "hiper" API.
-
- Thus, you can try a single URL:
- % echo http://www.yahoo.com > hiper.fifo
-
- Or a whole bunch of them:
- % cat my-url-list > hiper.fifo
-
- The fifo buffer is handled almost instantly, so you can even add more URL's
- while the previous requests are still being downloaded.
-
- This is purely a demo app, all retrieved data is simply discarded by the write
- callback.
-
-*/
+ *
+ * Requires glib-2.x and a (POSIX?) system that has mkfifo().
+ *
+ * This is an adaptation of libcurl's "hipev.c" and libevent's "event-test.c"
+ * sample programs, adapted to use glib's g_io_channel in place of libevent.
+ *
+ * When running, the program creates the named pipe "hiper.fifo"
+ *
+ * Whenever there is input into the fifo, the program reads the input as a list
+ * of URL's and creates some new easy handles to fetch each URL via the
+ * curl_multi "hiper" API.
+ *
+ * Thus, you can try a single URL:
+ *   % echo http://www.yahoo.com > hiper.fifo
+ *
+ * Or a whole bunch of them:
+ *   % cat my-url-list > hiper.fifo
+ *
+ * The fifo buffer is handled almost instantly, so you can even add more URL's
+ * while the previous requests are still being downloaded.
+ *
+ * This is purely a demo app, all retrieved data is simply discarded by
+ * the write callback.
+ *
+ */
 #include <glib.h>
 
 #include <unistd.h>

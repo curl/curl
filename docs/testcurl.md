@@ -45,7 +45,7 @@ build.
 Configure options passed to configure.
 
 ## `--crosscompile`
-``
+
 This is a cross-compile. Makes *testcurl* skip a few things.
 
 ## `--desc=[desc]`

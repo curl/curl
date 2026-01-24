@@ -43,17 +43,15 @@
  */
 static const char *get_winsock_error(int err, char *buf, size_t len)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *p;
-  size_t alen;
-#endif
+  VERBOSE(const char *p);
+  VERBOSE(size_t alen);
 
   if(!len)
     return NULL;
 
   *buf = '\0';
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef CURLVERBOSE
   (void)err;
   return NULL;
 #else

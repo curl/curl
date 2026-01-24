@@ -39,6 +39,8 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
+#include "smtp.h"
 
 #ifndef CURL_DISABLE_SMTP
 
@@ -56,7 +58,6 @@
 #include <inet.h>
 #endif
 
-#include "urldata.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "hostip.h"
@@ -65,7 +66,6 @@
 #include "escape.h"
 #include "pingpong.h"
 #include "mime.h"
-#include "smtp.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -547,13 +547,12 @@ static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
   if(len > 4) {
     /* Find the start of the message */
     len -= 4;
-    for(message += 4; *message == ' ' || *message == '\t'; message++, len--)
+    for(message += 4; ISBLANK(*message); message++, len--)
       ;
 
     /* Find the end of the message */
     while(len--)
-      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
+      if(!ISNEWLINE(message[len]) && !ISBLANK(message[len]))
         break;
 
     /* Terminate the message */
@@ -577,7 +576,7 @@ static void smtp_state(struct Curl_easy *data,
                        struct smtp_conn *smtpc,
                        smtpstate newstate)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -695,7 +694,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
     if(result)
       goto out;
     /* Change the connection handler and SMTP state */
-    conn->handler = &Curl_handler_smtps;
+    conn->scheme = &Curl_scheme_smtps;
   }
 
   DEBUGASSERT(!smtpc->ssldone);
@@ -1234,10 +1233,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
         size_t wordlen;
         unsigned short mechbit;
 
-        while(len &&
-              (*line == ' ' || *line == '\t' ||
-               *line == '\r' || *line == '\n')) {
-
+        while(len && (ISBLANK(*line) || ISNEWLINE(*line))) {
           line++;
           len--;
         }
@@ -1246,9 +1242,8 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
           break;
 
         /* Extract the word */
-        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-              line[wordlen] != '\t' && line[wordlen] != '\r' &&
-              line[wordlen] != '\n';)
+        for(wordlen = 0; wordlen < len && !ISBLANK(line[wordlen]) &&
+              !ISNEWLINE(line[wordlen]);)
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
@@ -1987,8 +1982,7 @@ out:
 /*
  * SMTP protocol handler.
  */
-const struct Curl_handler Curl_handler_smtp = {
-  "smtp",                           /* scheme */
+static const struct Curl_protocol Curl_protocol_smtp = {
   smtp_setup_connection,            /* setup_connection */
   smtp_do,                          /* do_it */
   smtp_done,                        /* done */
@@ -2006,42 +2000,40 @@ const struct Curl_handler Curl_handler_smtp = {
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   ZERO_NULL,                        /* follow */
-  PORT_SMTP,                        /* defport */
+};
+
+#endif /* CURL_DISABLE_SMTP */
+
+/*
+ * SMTP protocol handler.
+ */
+const struct Curl_scheme Curl_scheme_smtp = {
+  "smtp",                           /* scheme */
+#ifdef CURL_DISABLE_SMTP
+  ZERO_NULL,
+#else
+  &Curl_protocol_smtp,
+#endif
   CURLPROTO_SMTP,                   /* protocol */
   CURLPROTO_SMTP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-    PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE,
+  PORT_SMTP,                        /* defport */
 };
 
-#ifdef USE_SSL
 /*
  * SMTPS protocol handler.
  */
-const struct Curl_handler Curl_handler_smtps = {
+const struct Curl_scheme Curl_scheme_smtps = {
   "smtps",                          /* scheme */
-  smtp_setup_connection,            /* setup_connection */
-  smtp_do,                          /* do_it */
-  smtp_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  smtp_connect,                     /* connect_it */
-  smtp_multi_statemach,             /* connecting */
-  smtp_doing,                       /* doing */
-  smtp_pollset,                     /* proto_pollset */
-  smtp_pollset,                     /* doing_pollset */
-  ZERO_NULL,                        /* domore_pollset */
-  ZERO_NULL,                        /* perform_pollset */
-  smtp_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_SMTPS,                       /* defport */
+#if defined(CURL_DISABLE_SMTP) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_smtp,
+#endif
   CURLPROTO_SMTPS,                  /* protocol */
   CURLPROTO_SMTP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-    PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
+  PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE,
+  PORT_SMTPS,                       /* defport */
 };
-#endif
-
-#endif /* CURL_DISABLE_SMTP */

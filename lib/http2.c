@@ -52,7 +52,7 @@
 #error too old nghttp2 version, upgrade!
 #endif
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef CURLVERBOSE
 #define nghttp2_session_callbacks_set_error_callback(x, y)
 #endif
 
@@ -1051,7 +1051,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
 {
   switch(frame->hd.type) {
@@ -1149,7 +1149,7 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
   }
   return 0;
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
@@ -1160,7 +1160,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   int32_t stream_id = frame->hd.stream_id;
 
   DEBUGASSERT(data);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
@@ -1168,7 +1168,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] <- %s", frame->hd.stream_id, buffer);
   }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
   if(!stream_id) {
     /* stream ID zero is for connection-oriented stuff */
@@ -1238,14 +1238,14 @@ static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
   data = nghttp2_session_get_stream_user_data(session, stream_id);
   if(data) {
     struct h2_stream_ctx *stream;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
     char buffer[256];
     int len;
     len = fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
     failf(data, "[HTTP2] [%d] received invalid frame: %s, error %d: %s",
           stream_id, buffer, ngerr, nghttp2_strerror(ngerr));
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
     stream = H2_STREAM_CTX(ctx, data);
     if(stream) {
       nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
@@ -1623,7 +1623,7 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   return (nread == 0) ? NGHTTP2_ERR_DEFERRED : nread;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static int error_callback(nghttp2_session *session,
                           const char *msg,
                           size_t len,
@@ -2153,7 +2153,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     goto out;
   }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 #define MAX_ACC 60000  /* <64KB to account for some overhead */
   if(Curl_trc_is_verbose(data)) {
     size_t acc = 0, i;
@@ -2400,7 +2400,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_on_frame_recv_callback(cbs, on_frame_recv);
   nghttp2_session_callbacks_set_on_invalid_frame_recv_callback(cbs,
     cf_h2_on_invalid_frame_recv);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   nghttp2_session_callbacks_set_on_frame_send_callback(cbs, on_frame_send);
 #endif
   nghttp2_session_callbacks_set_on_data_chunk_recv_callback(
@@ -2409,7 +2409,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_on_begin_headers_callback(
     cbs, on_begin_headers);
   nghttp2_session_callbacks_set_on_header_callback(cbs, on_header);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   nghttp2_session_callbacks_set_error_callback(cbs, error_callback);
 #endif
 

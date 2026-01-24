@@ -381,10 +381,9 @@ static const struct LongShort aliases[]= {
  *
  * Unit test 1394
  */
-UNITTEST
-ParameterError parse_cert_parameter(const char *cert_parameter,
-                                    char **certname,
-                                    char **passphrase)
+UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
+                                             char **certname,
+                                             char **passphrase)
 {
   size_t param_length = strlen(cert_parameter);
   size_t span;

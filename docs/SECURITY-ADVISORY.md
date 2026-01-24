@@ -33,11 +33,11 @@ pipe character (`|`).
 
 The eleven fields for each CVE in `vuln.pm` are, in order:
 
- HTML page name, first vulnerable version, last vulnerable version, name of
- the issue, CVE Id, announce date (`YYYYMMDD`), report to the project date
- (`YYYYMMDD`), CWE, awarded reward amount (USD), area (single word), C-issue
- (`-` if not a C issue at all, `OVERFLOW` , `OVERREAD`, `DOUBLE_FREE`,
- `USE_AFTER_FREE`, `NULL_MISTAKE`, `UNINIT`)
+HTML page name, first vulnerable version, last vulnerable version, name of
+the issue, CVE Id, announce date (`YYYYMMDD`), report to the project date
+(`YYYYMMDD`), CWE, awarded reward amount (USD), area (single word), C-issue
+(`-` if not a C issue at all, `OVERFLOW` , `OVERREAD`, `DOUBLE_FREE`,
+`USE_AFTER_FREE`, `NULL_MISTAKE`, `UNINIT`)
 
 ### `Makefile`
 

@@ -23,10 +23,10 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
 
 #ifndef CURL_DISABLE_MQTT
 
-#include "urldata.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -614,7 +614,7 @@ static int mqtt_decode_len(size_t *lenp, unsigned char *buf, size_t buflen)
   return 0;
 }
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 static const char *statenames[] = {
   "MQTT_FIRST",
   "MQTT_REMAINING_LENGTH",
@@ -950,11 +950,10 @@ static CURLcode mqtts_connecting(struct Curl_easy *data, bool *done)
 }
 
 /*
- * MQTTS protocol handler.
+ * MQTTS protocol.
  */
 
-const struct Curl_handler Curl_handler_mqtts = {
-  "mqtts",                            /* scheme */
+static const struct Curl_protocol Curl_protocol_mqtts = {
   mqtt_setup_conn,                    /* setup_connection */
   mqtt_do,                            /* do_it */
   mqtt_done,                          /* done */
@@ -972,20 +971,15 @@ const struct Curl_handler Curl_handler_mqtts = {
   ZERO_NULL,                          /* connection_check */
   ZERO_NULL,                          /* attach connection */
   ZERO_NULL,                          /* follow */
-  PORT_MQTTS,                         /* defport */
-  CURLPROTO_MQTTS,                    /* protocol */
-  CURLPROTO_MQTT,                     /* family */
-  PROTOPT_SSL                         /* flags */
 };
 
 #endif
 
 /*
- * MQTT protocol handler.
+ * MQTT protocol.
  */
 
-const struct Curl_handler Curl_handler_mqtt = {
-  "mqtt",                             /* scheme */
+static const struct Curl_protocol Curl_protocol_mqtt = {
   mqtt_setup_conn,                    /* setup_connection */
   mqtt_do,                            /* do_it */
   mqtt_done,                          /* done */
@@ -1003,10 +997,37 @@ const struct Curl_handler Curl_handler_mqtt = {
   ZERO_NULL,                          /* connection_check */
   ZERO_NULL,                          /* attach connection */
   ZERO_NULL,                          /* follow */
-  PORT_MQTT,                          /* defport */
-  CURLPROTO_MQTT,                     /* protocol */
-  CURLPROTO_MQTT,                     /* family */
-  PROTOPT_NONE                        /* flags */
 };
 
 #endif /* CURL_DISABLE_MQTT */
+
+
+const struct Curl_scheme Curl_scheme_mqtts = {
+  "mqtts",                            /* scheme */
+#if defined(CURL_DISABLE_MQTT) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_mqtts,
+#endif
+  CURLPROTO_MQTTS,                    /* protocol */
+  CURLPROTO_MQTT,                     /* family */
+  PROTOPT_SSL,                        /* flags */
+  PORT_MQTTS,                         /* defport */
+};
+
+/*
+ * MQTT protocol.
+ */
+
+const struct Curl_scheme Curl_scheme_mqtt = {
+  "mqtt",                             /* scheme */
+#ifdef CURL_DISABLE_MQTT
+  ZERO_NULL,
+#else
+  &Curl_protocol_mqtt,
+#endif
+  CURLPROTO_MQTT,                     /* protocol */
+  CURLPROTO_MQTT,                     /* family */
+  PROTOPT_NONE,                       /* flags */
+  PORT_MQTT,                          /* defport */
+};

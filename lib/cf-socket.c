@@ -84,7 +84,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 #if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   curl_socklen_t onoff = (curl_socklen_t)1;
   int level = IPPROTO_TCP;
-  char buffer[STRERROR_LEN];
+  VERBOSE(char buffer[STRERROR_LEN]);
 
   if(setsockopt(sockfd, level, TCP_NODELAY,
                 (void *)&onoff, sizeof(onoff)) < 0)
@@ -96,32 +96,6 @@ static void tcpnodelay(struct Curl_cfilter *cf,
   (void)sockfd;
 #endif
 }
-
-#ifdef SO_NOSIGPIPE
-/* The preferred method on macOS (10.2 and later) to prevent SIGPIPEs when
-   sending data to a dead peer (instead of relying on the 4th argument to send
-   being MSG_NOSIGNAL). Possibly also existing and in use on other BSD
-   systems? */
-static void nosigpipe(struct Curl_cfilter *cf,
-                      struct Curl_easy *data,
-                      curl_socket_t sockfd)
-{
-  int onoff = 1;
-  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
-                (void *)&onoff, sizeof(onoff)) < 0) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char buffer[STRERROR_LEN];
-    CURL_TRC_CF(data, cf, "Could not set SO_NOSIGPIPE: %s",
-                curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-#else
-    (void)cf;
-    (void)data;
-#endif
-  }
-}
-#else
-#define nosigpipe(x, y, z) Curl_nop_stmt
-#endif
 
 #if defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
@@ -320,6 +294,15 @@ static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
   return CURLE_OK;
 }
 
+#ifdef USE_SO_NOSIGPIPE
+int Curl_sock_nosigpipe(curl_socket_t sockfd)
+{
+  int onoff = 1;
+  return setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
+                    (void *)&onoff, sizeof(onoff));
+}
+#endif /* USE_SO_NOSIGPIPE */
+
 static CURLcode socket_open(struct Curl_easy *data,
                             struct Curl_sockaddr_ex *addr,
                             curl_socket_t *sockfd)
@@ -358,11 +341,21 @@ static CURLcode socket_open(struct Curl_easy *data,
     return CURLE_COULDNT_CONNECT;
   }
 
+#ifdef USE_SO_NOSIGPIPE
+  if(Curl_sock_nosigpipe(*sockfd) < 0) {
+    failf(data, "setsockopt enable SO_NOSIGPIPE: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    sclose(*sockfd);
+    *sockfd = CURL_SOCKET_BAD;
+    return CURLE_COULDNT_CONNECT;
+  }
+#endif /* USE_SO_NOSIGPIPE */
+
 #ifdef HAVE_FCNTL
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
     failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
-    close(*sockfd);
+    sclose(*sockfd);
     *sockfd = CURL_SOCKET_BAD;
     return CURLE_COULDNT_CONNECT;
   }
@@ -847,15 +840,12 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 
   default:
     /* unknown error, fallthrough and try another address! */
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-    (void)ipaddress;
-#else
     {
-      char buffer[STRERROR_LEN];
+      VERBOSE(char buffer[STRERROR_LEN]);
       infof(data, "Immediate connect fail for %s: %s", ipaddress,
             curlx_strerror(error, buffer, sizeof(buffer)));
+      NOVERBOSE((void)ipaddress);
     }
-#endif
     data->state.os_errno = error;
     /* connect failed */
     return CURLE_COULDNT_CONNECT;
@@ -993,16 +983,15 @@ static void set_local_ip(struct Curl_cfilter *cf,
 
 #ifdef HAVE_GETSOCKNAME
   if((ctx->sock != CURL_SOCKET_BAD) &&
-     !(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+     !(data->conn->scheme->protocol & CURLPROTO_TFTP)) {
     /* TFTP does not connect, so it cannot get the IP like this */
-
-    char buffer[STRERROR_LEN];
     struct Curl_sockaddr_storage ssloc;
     curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
+    VERBOSE(char buffer[STRERROR_LEN]);
 
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr *)&ssloc, &slen)) {
-      int error = SOCKERRNO;
+      VERBOSE(int error = SOCKERRNO);
       infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
@@ -1100,8 +1089,6 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(cf, data, ctx->sock);
-
-  nosigpipe(cf, data, ctx->sock);
 
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(cf, data, ctx->sock);
@@ -1307,18 +1294,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 out:
   if(result) {
     if(ctx->error) {
+      VERBOSE(char buffer[STRERROR_LEN]);
       set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      {
-        char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u from %s port %d failed: %s",
-              ctx->ip.remote_ip, ctx->ip.remote_port,
-              ctx->ip.local_ip, ctx->ip.local_port,
-              curlx_strerror(ctx->error, buffer, sizeof(buffer)));
-      }
-#endif
+      infof(data, "connect to %s port %u from %s port %d failed: %s",
+            ctx->ip.remote_ip, ctx->ip.remote_port,
+            ctx->ip.local_ip, ctx->ip.local_port,
+            curlx_strerror(ctx->error, buffer, sizeof(buffer)));
     }
     if(ctx->sock != CURL_SOCKET_BAD) {
       socket_close(data, cf->conn, TRUE, ctx->sock);
@@ -1395,8 +1378,8 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
   ssize_t rv;
-  size_t orig_len = len;
   CURLcode result = CURLE_OK;
+  VERBOSE(size_t orig_len = len);
 
   (void)eos;
   *pnwritten = 0;
@@ -1491,10 +1474,9 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
-    size_t orig_len = len;
-    len = ctx->recv_max;
     CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE max read of %zu bytes",
-                orig_len, len);
+                len, ctx->recv_max);
+    len = ctx->recv_max;
   }
 #endif
 
@@ -1970,7 +1952,7 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
 #endif
 
   /* check if the generic timeout possibly is set shorter */
-  other_ms = Curl_timeleft_ms(data, FALSE);
+  other_ms = Curl_timeleft_ms(data);
   if(other_ms && (other_ms < timeout_ms))
     /* note that this also works fine for when other_ms happens to be negative
        due to it already having elapsed */

@@ -177,8 +177,6 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
 
   *done = FALSE;
   if(!Curl_shutdown_started(data, sockindex)) {
-    CURL_TRC_M(data, "shutdown start on%s connection",
-               sockindex ? " secondary" : "");
     Curl_shutdown_start(data, sockindex, 0);
   }
   else {
@@ -422,7 +420,7 @@ CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return CURLE_RECV_ERROR;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static CURLcode cf_verboseconnect(struct Curl_easy *data,
                                   struct Curl_cfilter *cf)
 {
@@ -537,9 +535,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(cf, data);
       data->conn->keepalive = *Curl_pgrs_now(data);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      result = cf_verboseconnect(data, cf);
-#endif
+      VERBOSE(result = cf_verboseconnect(data, cf));
       goto out;
     }
     else if(result) {
@@ -552,7 +548,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     else {
       /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
+      const timediff_t timeout_ms = Curl_timeleft_ms(data);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
 
@@ -611,7 +607,7 @@ bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
   cf = conn->cfilter[sockindex];
   if(cf)
     return (bool)cf->connected;
-  else if(conn->handler->flags & PROTOPT_NONETWORK)
+  else if(conn->scheme->flags & PROTOPT_NONETWORK)
     return TRUE;
   return FALSE;
 }

@@ -23,43 +23,43 @@
 ###########################################################################
 # Shared between CMakeLists.txt and Makefile.am
 
-LIB_CURLX_CFILES = \
-  curlx/base64.c   \
-  curlx/dynbuf.c   \
-  curlx/fopen.c    \
-  curlx/inet_ntop.c \
-  curlx/inet_pton.c \
-  curlx/multibyte.c \
-  curlx/nonblock.c \
-  curlx/strcopy.c  \
-  curlx/strerr.c   \
-  curlx/strparse.c \
-  curlx/timediff.c \
-  curlx/timeval.c  \
+LIB_CURLX_CFILES =      \
+  curlx/base64.c        \
+  curlx/dynbuf.c        \
+  curlx/fopen.c         \
+  curlx/inet_ntop.c     \
+  curlx/inet_pton.c     \
+  curlx/multibyte.c     \
+  curlx/nonblock.c      \
+  curlx/strcopy.c       \
+  curlx/strerr.c        \
+  curlx/strparse.c      \
+  curlx/timediff.c      \
+  curlx/timeval.c       \
   curlx/version_win32.c \
-  curlx/wait.c     \
-  curlx/warnless.c \
+  curlx/wait.c          \
+  curlx/warnless.c      \
   curlx/winapi.c
 
-LIB_CURLX_HFILES = \
-  curlx/binmode.h  \
-  curlx/base64.h   \
-  curlx/curlx.h    \
-  curlx/dynbuf.h   \
-  curlx/fopen.h    \
-  curlx/inet_ntop.h \
-  curlx/inet_pton.h \
-  curlx/multibyte.h \
-  curlx/nonblock.h \
-  curlx/snprintf.h \
-  curlx/strcopy.h  \
-  curlx/strerr.h   \
-  curlx/strparse.h \
-  curlx/timediff.h \
-  curlx/timeval.h  \
+LIB_CURLX_HFILES =      \
+  curlx/binmode.h       \
+  curlx/base64.h        \
+  curlx/curlx.h         \
+  curlx/dynbuf.h        \
+  curlx/fopen.h         \
+  curlx/inet_ntop.h     \
+  curlx/inet_pton.h     \
+  curlx/multibyte.h     \
+  curlx/nonblock.h      \
+  curlx/snprintf.h      \
+  curlx/strcopy.h       \
+  curlx/strerr.h        \
+  curlx/strparse.h      \
+  curlx/timediff.h      \
+  curlx/timeval.h       \
   curlx/version_win32.h \
-  curlx/wait.h     \
-  curlx/warnless.h \
+  curlx/wait.h          \
+  curlx/warnless.h      \
   curlx/winapi.h
 
 LIB_VAUTH_CFILES =      \
@@ -116,22 +116,22 @@ LIB_VTLS_HFILES =           \
   vtls/wolfssl.h            \
   vtls/x509asn1.h
 
-LIB_VQUIC_CFILES = \
+LIB_VQUIC_CFILES =      \
   vquic/curl_ngtcp2.c   \
   vquic/curl_quiche.c   \
-  vquic/vquic.c \
+  vquic/vquic.c         \
   vquic/vquic-tls.c
 
-LIB_VQUIC_HFILES = \
+LIB_VQUIC_HFILES =      \
   vquic/curl_ngtcp2.h   \
   vquic/curl_quiche.h   \
-  vquic/vquic.h    \
-  vquic/vquic_int.h \
+  vquic/vquic.h         \
+  vquic/vquic_int.h     \
   vquic/vquic-tls.h
 
-LIB_VSSH_CFILES =  \
-  vssh/libssh.c    \
-  vssh/libssh2.c   \
+LIB_VSSH_CFILES =    \
+  vssh/libssh.c      \
+  vssh/libssh2.c     \
   vssh/vssh.c
 
 LIB_VSSH_HFILES =    \

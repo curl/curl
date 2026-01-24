@@ -485,7 +485,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
 }
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) &&  \
+#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO) &&  \
   defined(HAVE_FREEADDRINFO)
 /*
  * curl_dbg_freeaddrinfo()
@@ -515,9 +515,9 @@ void curl_dbg_freeaddrinfo(struct addrinfo *freethis,
   freeaddrinfo(freethis);
 #endif
 }
-#endif /* CURLDEBUG && HAVE_FREEADDRINFO */
+#endif /* CURL_MEMDEBUG && HAVE_FREEADDRINFO */
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
+#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO)
 /*
  * curl_dbg_getaddrinfo()
  *
@@ -553,7 +553,7 @@ int curl_dbg_getaddrinfo(const char *hostname,
     curl_dbg_log("ADDR %s:%d getaddrinfo() failed\n", source, line);
   return res;
 }
-#endif /* CURLDEBUG && HAVE_GETADDRINFO */
+#endif /* CURL_MEMDEBUG && HAVE_GETADDRINFO */
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*

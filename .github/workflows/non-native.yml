@@ -240,6 +240,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
@@ -333,6 +334,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
+      LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
       # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced registryUrl=https://github.com

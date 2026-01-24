@@ -123,7 +123,7 @@ struct ldapreqinfo {
 static void oldap_state(struct Curl_easy *data, struct ldapconninfo *li,
                         ldapstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -140,8 +140,9 @@ static void oldap_state(struct Curl_easy *data, struct ldapconninfo *li,
   if(li->state != newstate)
     infof(data, "LDAP %p state change from %s to %s",
           (void *)li, names[li->state], names[newstate]);
-#endif
+#else
   (void)data;
+#endif
   li->state = newstate;
 }
 
@@ -615,7 +616,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     goto out;
 
   hosturl = curl_maprintf("%s://%s%s%s:%d",
-                          conn->handler->scheme,
+                          conn->scheme->name,
                           conn->bits.ipv6_ip ? "[" : "",
                           conn->host.name,
                           conn->bits.ipv6_ip ? "]" : "",
@@ -959,8 +960,7 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
 #ifdef USE_SSL
     if(ssl_installed(conn)) {
       Sockbuf *sb;
-      if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
-         ||
+      if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS ||
          ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
         return CURLE_FAILED_INIT;
     }
@@ -1261,8 +1261,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
 /*
  * LDAP protocol handler.
  */
-const struct Curl_handler Curl_handler_ldap = {
-  "ldap",                               /* scheme */
+const struct Curl_protocol Curl_protocol_ldap = {
   oldap_setup_connection,               /* setup_connection */
   oldap_do,                             /* do_it */
   oldap_done,                           /* done */
@@ -1280,42 +1279,8 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
-  PORT_LDAP,                            /* defport */
-  CURLPROTO_LDAP,                       /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL_REUSE |                   /* flags */
-    PROTOPT_CONN_REUSE
 };
-
-#ifdef USE_SSL
-/*
- * LDAPS protocol handler.
- */
-const struct Curl_handler Curl_handler_ldaps = {
-  "ldaps",                              /* scheme */
-  oldap_setup_connection,               /* setup_connection */
-  oldap_do,                             /* do_it */
-  oldap_done,                           /* done */
-  ZERO_NULL,                            /* do_more */
-  oldap_connect,                        /* connect_it */
-  oldap_connecting,                     /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  oldap_disconnect,                     /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_LDAPS,                           /* defport */
-  CURLPROTO_LDAPS,                      /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL |                         /* flags */
-    PROTOPT_CONN_REUSE
-};
-#endif
 
 #endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */
+
+/* The LDAP scheme structs are in ldap.c */

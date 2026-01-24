@@ -4,10 +4,14 @@ curl and libcurl 8.19.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3577
+ Contributors:                 3582
 
 This release includes the following changes:
 
+ o mqtt: initial support for MQTTS [81]
+ o tool: support fractions for --limit-rate and --max-filesize [79]
+ o vquic: drop support for OpenSSL-QUIC [80]
+ o windows: add build option to use the native CA store [82]
  o windows: bump minimum to Vista (from XP) [12]
 
 This release includes the following bugfixes:
@@ -15,30 +19,41 @@ This release includes the following bugfixes:
  o altsvc: only accept 17 byte dates from files [22]
  o build: detect and include `inttypes.h` again [13]
  o build: drop duplicate C includes [54]
+ o build: drop global suppression of `-Wformat-nonliteral`, fix fallouts [19]
  o build: globally suppress DJGPP warnings in `FD_SET()` [56]
+ o build: merge TrackMemory (`CURLDEBUG`) into debug-enabled option [46]
  o checksrc: do not apply `BANNEDFUNC` to struct member functions [35]
  o checksrc: warn for leading spaces before the preprocessor hash [72]
  o cmake: reference OpenSSL and ZLIB imported targets only when enabled [41]
+ o cmake: silence silly Apple clang warnings in C89 mode, test in CI [14]
  o cmake: silence useless compiler warnings triggered by the FASTBuild generator [43]
  o config-plan9: set `HAVE_STDINT_H` again [17]
+ o config2setopts: fix for --disable-aws build configuration [34]
  o curl: limit Windows-specific code to Windows builds, other tidy-ups [48]
  o curl_easy_nextheader.md: a new transfer invalidates 'prev' [69]
  o digest: handle quotes in the path [50]
+ o docs/INSTALL: update configure details [45]
  o docs: explicitly call out Slowloris as not a security flaw [6]
  o examples: omit forward declarations, apply misc fixes [60]
  o GOVERNANCE.md: Post-Daniel BDFL [31]
  o hostip6: remove debug-only code [24]
+ o hostip: fix unreachable code in rare build configuration [74]
  o http/3: add description for known server error codes [15]
  o imap: check `imap_sendf()` printf masks at compile-time [67]
  o imap: skip literals inside quoted strings [30]
+ o INSTALL-CMAKE.md: document Apple framework options [53]
+ o INSTALL.md: suggest `-Wl,-dead_strip` for Apple targets [68]
  o KNOWN_BUGS.md: absolute Unix domain filename for SOCKS on Windows [37]
  o ldap: silence potential unused variable warning (OS400) [55]
+ o lib: make sigpipe handling more lazy [52]
  o lib: reorder protocol functions to avoid forward declarations (email) [76]
  o lib: reorder protocol functions to avoid forward declarations (ftp) [75]
  o lib: reorder protocol functions to avoid forward declarations (misc cont.) [66]
  o lib: reorder protocol functions to avoid forward declarations (misc) [77]
  o lib: reorder protocol functions to avoid forward declarations (ssh) [65]
+ o lib: separate scheme info from protocol implementation [42]
  o lib: use (u)int64_t instead of long long [39]
+ o libcurl docs: reduce 'since ...' in descriptions [28]
  o Makefile.am: delete RPM targets referencing non-existent files [9]
  o Makefile.am: drop stray VC project files from dist [5]
  o mbedtls: no pinnedpubkey wo MBEDTLS_SSL_KEEP_PEER_CERTIFICATE [29]
@@ -54,11 +69,15 @@ This release includes the following bugfixes:
  o openldap: avoid forward declarations in ldaps code [62]
  o plan9: drop special build and orphaned references [33]
  o ratelimit: download finetune [16]
+ o REUSE: drop broken reference to `MAIL-ETIQUETTE` [59]
+ o sigpipe: unset SA_SIGINFO since it is using sa_handler [40]
  o tftp: correct the filename length check [70]
+ o tls: add new SSLSUPP flags for several options [32]
  o tool: improve error/warning messages when output filename sanitization fails [36]
  o tool_cb_hdr: suppress header output when --out-null [10]
  o tool_dirhie: drop superfluous `F_OK` fallback (Windows) [8]
  o tool_doswin: document `ENABLE_VIRTUAL_TERMINAL_PROCESSING` toolchain support [44]
+ o tool_getparam: avoid `-Wcomma` with Apple clang in C89 mode [38]
  o tool_operate: remove 'else' for VMS [3]
  o url.h: fix `-Wdocumentation` [61]
  o urldata.h: remove two forward-declared structs not used [4]
@@ -86,11 +105,13 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrew Kvalheim, calm329, Daniel Gustafsson, Daniel Stenberg,
-  dependabot[bot], gudyuu on hackerone, James Fuller, Joshua Vandaële,
+  Andrew Kvalheim, Arnav-Purushotam-CUBoulder, calm329, Dag Haavi Finstad,
+  Daniel Gustafsson, Daniel Stenberg, dependabot[bot], Frank Buss,
+  gudyuu on hackerone, James Fuller, Joshua Vandaële, Maksim Ściepanienka,
   Megamouse on github, Michał Antoniak, Patrick Monnerat, Ray Satiro,
-  renovate[bot], Stefan Eissing, Tomáš Malý, Viktor Szakats, z2_, Йоте
-  (18 contributors)
+  renovate[bot], Sascha Frinken, Stefan Eissing, Tomáš Malý, tommy,
+  Viktor Szakats, z2_, Йоте
+  (24 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -106,34 +127,47 @@ References to bug reports and discussions on issues:
  [10] = https://curl.se/bug/?i=20235
  [12] = https://curl.se/bug/?i=17985
  [13] = https://curl.se/bug/?i=20208
+ [14] = https://curl.se/bug/?i=20363
  [15] = https://curl.se/bug/?i=20202
  [16] = https://curl.se/bug/?i=20228
  [17] = https://curl.se/bug/?i=20201
  [18] = https://curl.se/bug/?i=20220
+ [19] = https://curl.se/bug/?i=20366
  [20] = https://curl.se/bug/?i=20260
  [21] = https://curl.se/bug/?i=20262
  [22] = https://curl.se/bug/?i=20259
  [24] = https://curl.se/bug/?i=20334
  [25] = https://curl.se/bug/?i=20333
  [27] = https://curl.se/bug/?i=20250
+ [28] = https://curl.se/bug/?i=20369
  [29] = https://curl.se/bug/?i=20319
  [30] = https://curl.se/bug/?i=20320
  [31] = https://curl.se/bug/?i=20325
+ [32] = https://curl.se/bug/?i=20364
  [33] = https://curl.se/bug/?i=20243
+ [34] = https://curl.se/bug/?i=20368
  [35] = https://curl.se/bug/?i=20323
  [36] = https://curl.se/bug/?i=20044
  [37] = https://curl.se/bug/?i=20236
+ [38] = https://curl.se/bug/?i=20362
  [39] = https://curl.se/bug/?i=20233
+ [40] = https://curl.se/bug/?i=20278
  [41] = https://curl.se/bug/?i=20217
+ [42] = https://curl.se/bug/?i=20351
  [43] = https://curl.se/bug/?i=20230
  [44] = https://curl.se/bug/?i=20315
+ [45] = https://curl.se/bug/?i=20301
+ [46] = https://curl.se/bug/?i=20331
  [47] = https://curl.se/bug/?i=20227
  [48] = https://curl.se/bug/?i=20213
  [50] = https://curl.se/bug/?i=20295
+ [52] = https://curl.se/bug/?i=20326
+ [53] = https://curl.se/bug/?i=20350
  [54] = https://curl.se/bug/?i=20303
  [55] = https://curl.se/bug/?i=20302
  [56] = https://curl.se/bug/?i=20299
  [58] = https://curl.se/bug/?i=20298
+ [59] = https://curl.se/bug/?i=20348
  [60] = https://curl.se/bug/?i=20296
  [61] = https://curl.se/bug/?i=20294
  [62] = https://curl.se/bug/?i=20293
@@ -142,10 +176,16 @@ References to bug reports and discussions on issues:
  [65] = https://curl.se/bug/?i=20290
  [66] = https://curl.se/bug/?i=20289
  [67] = https://curl.se/bug/?i=20287
+ [68] = https://curl.se/bug/?i=20346
  [69] = https://curl.se/bug/?i=20285
  [70] = https://hackerone.com/reports/3508321
  [72] = https://curl.se/bug/?i=20282
  [73] = https://hackerone.com/reports/3508500
+ [74] = https://curl.se/bug/?i=20344
  [75] = https://curl.se/bug/?i=20276
  [76] = https://curl.se/bug/?i=20275
  [77] = https://curl.se/bug/?i=20274
+ [79] = https://curl.se/bug/?i=20266
+ [80] = https://curl.se/bug/?i=20226
+ [81] = https://curl.se/bug/?i=19418
+ [82] = https://curl.se/bug/?i=18279

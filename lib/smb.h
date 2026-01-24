@@ -24,12 +24,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-  (SIZEOF_CURL_OFF_T > 4)
-
-extern const struct Curl_handler Curl_handler_smb;
-extern const struct Curl_handler Curl_handler_smbs;
-
-#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */
+extern const struct Curl_scheme Curl_scheme_smb;
+extern const struct Curl_scheme Curl_scheme_smbs;
 
 #endif /* HEADER_CURL_SMB_H */

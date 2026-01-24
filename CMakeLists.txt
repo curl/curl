@@ -132,6 +132,9 @@ endif()
 if(CMAKE_CROSSCOMPILING)
   string(APPEND _target_flags " CROSS")
 endif()
+if(CMAKE_C_STANDARD)
+  string(APPEND _target_flags " C${CMAKE_C_STANDARD}")
+endif()
 message(STATUS "CMake platform flags:${_target_flags}")
 
 if(CMAKE_CROSSCOMPILING)
@@ -190,9 +193,6 @@ if(WIN32)
 
   # Apply to all feature checks
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")
-  if(MSVC)
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_CRT_NONSTDC_NO_DEPRECATE")  # for strdup() detection
-  endif()
 
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
@@ -253,14 +253,10 @@ option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OF
 if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
-option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 
 set(CURL_DEBUG_MACROS "")
 if(ENABLE_DEBUG)
   list(APPEND CURL_DEBUG_MACROS "DEBUGBUILD")
-endif()
-if(ENABLE_CURLDEBUG)
-  list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
@@ -301,6 +297,40 @@ if(CURL_CODE_COVERAGE)
     set(CURL_COVERAGE_LDFLAGS "-fprofile-instr-generate" "-fcoverage-mapping")
   else()
     set(CURL_CODE_COVERAGE OFF)
+  endif()
+endif()
+
+set(CURL_CFLAGS "")  # C flags set for libcurl and curl tool (aka public binaries) only
+
+option(CURL_DROP_UNUSED "Drop unused code and data from built binaries" OFF)
+if(CURL_DROP_UNUSED OR TRUE)
+  if(APPLE)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,-dead_strip")
+    else()
+      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,-dead_strip")
+    endif()
+  elseif(MSVC)  # Options below are toolchain defaults in Release configurations.
+    # This option does not seem to have an effect with VS2010:
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
+    else()
+      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-OPT:REF")
+    endif()
+    # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
+    list(APPEND CURL_CFLAGS "-Gy")
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+    if(WIN32)
+      # To make -Wl,--gc-sections work on Windows: https://sourceware.org/bugzilla/show_bug.cgi?id=11539
+      set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-fno-asynchronous-unwind-tables")
+    endif()
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,--gc-sections")
+    else()
+      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,--gc-sections")
+    endif()
+    # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
+    list(APPEND CURL_CFLAGS "-ffunction-sections" "-fdata-sections")
   endif()
 endif()
 
@@ -1260,10 +1290,10 @@ if(CURL_USE_GSSAPI)
 endif()
 
 # libbacktrace
-option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires build with TrackMemory and DWARF debug information." OFF)
+option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires debug-enabled build and DWARF debug information." OFF)
 if(CURL_USE_LIBBACKTRACE)
-  if(NOT ENABLE_CURLDEBUG)
-    message(FATAL_ERROR "libbacktrace requires TrackMemory enabled")
+  if(NOT ENABLE_DEBUG)
+    message(FATAL_ERROR "libbacktrace requires debug-enabled build for TrackMemory")
   endif()
   if(NOT CMAKE_BUILD_TYPE MATCHES "(Debug|RelWithDebInfo)")
     message(FATAL_ERROR "libbacktrace requires debug information")
@@ -1538,7 +1568,6 @@ check_symbol_exists("send"            "${CURL_INCLUDES}" HAVE_SEND)  # proto/bsd
 check_function_exists("sendmsg"       HAVE_SENDMSG)
 check_function_exists("sendmmsg"      HAVE_SENDMMSG)
 check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
-check_symbol_exists("strdup"          "string.h" HAVE_STRDUP)
 check_symbol_exists("memrchr"         "string.h" HAVE_MEMRCHR)
 check_symbol_exists("alarm"           "unistd.h" HAVE_ALARM)
 check_symbol_exists("fcntl"           "fcntl.h" HAVE_FCNTL)
@@ -1576,11 +1605,14 @@ check_function_exists("getrlimit"     HAVE_GETRLIMIT)
 check_function_exists("setlocale"     HAVE_SETLOCALE)
 check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 
-if(NOT WIN32)
+if(WIN32)
+  set(HAVE_STRDUP 1)  # to not define local implementation. curl uses _strdup() on Windows.
+else()
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
   check_symbol_exists("strcasecmp"        "string.h" HAVE_STRCASECMP)
+  check_symbol_exists("strdup"            "string.h" HAVE_STRDUP)
   check_symbol_exists("stricmp"           "string.h" HAVE_STRICMP)
   check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
 endif()
@@ -1981,7 +2013,6 @@ curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPE
 curl_add_if("Unicode"       ENABLE_UNICODE)
 curl_add_if("threadsafe"    HAVE_ATOMIC OR (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR WIN32)
 curl_add_if("Debug"         ENABLE_DEBUG)
-curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
 curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
 curl_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)
 curl_add_if("PSL"           USE_LIBPSL)

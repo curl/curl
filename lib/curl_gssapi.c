@@ -436,6 +436,7 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
 
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);
 
+  NOVERBOSE((void)prefix);
   infof(data, "%s%s", prefix, buf);
 }
 

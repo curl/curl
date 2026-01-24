@@ -214,9 +214,9 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     str = strchr(str, ',');
     tlen = str ? (size_t)(str - token) : strlen(token);
     if(tlen) {
-      const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
+      const struct Curl_scheme *h = Curl_getn_scheme(token, tlen);
 
-      if(!h)
+      if(!h || !h->run)
         return CURLE_UNSUPPORTED_PROTOCOL;
 
       *val |= h->protocol;
@@ -851,9 +851,9 @@ static CURLcode setopt_long_net(struct Curl_easy *data, CURLoption option,
     s->dns_cache_timeout_ms = -1;
     break;
   case CURLOPT_MAXCONNECTS:
-    result = value_range(&arg, 1, 1, UINT_MAX);
+    result = value_range(&arg, 1, 1, INT_MAX);
     if(!result)
-      s->maxconnects = (unsigned int)arg;
+      s->maxconnects = (uint32_t)arg;
     break;
   case CURLOPT_SERVER_RESPONSE_TIMEOUT:
     return setopt_set_timeout_sec(&s->server_response_timeout, arg);
@@ -1867,7 +1867,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set CRL file info for SSL connection. Specify filename of the CRL
      * to check certificates revocation
      */
-    return Curl_setstropt(&s->str[STRING_SSL_CRLFILE], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_CRLFILE))
+      return Curl_setstropt(&s->str[STRING_SSL_CRLFILE], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_SSL_CIPHER_LIST:
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
       /* set a list of cipher we want to use in the SSL connection */
@@ -2265,7 +2267,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set Issuer certificate file
      * to check certificates issuer
      */
-    return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT))
+      return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_PRIVATE:
     /*
      * Set private data pointer.
@@ -2278,7 +2282,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set accepted curves in SSL connection setup.
      * Specify colon-delimited list of curve algorithm names.
      */
-    return Curl_setstropt(&s->str[STRING_SSL_EC_CURVES], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_SSL_EC_CURVES))
+      return Curl_setstropt(&s->str[STRING_SSL_EC_CURVES], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_SSL_SIGNATURE_ALGORITHMS:
     /*
      * Set accepted signature algorithms.
@@ -2885,7 +2891,9 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT], blob);
+    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT_BLOB))
+      return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT], blob);
+    return CURLE_NOT_BUILT_IN;
 
   default:
     return CURLE_UNKNOWN_OPTION;

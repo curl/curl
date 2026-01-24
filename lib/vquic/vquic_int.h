@@ -53,11 +53,11 @@ typedef enum {
   CURL_H3_ERR_VERSION_FALLBACK = 0x0110,
 } vquic_h3_error;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 const char *vquic_h3_err_str(uint64_t error_code);
 #else
 #define vquic_h3_err_str(x)   ""
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 struct cf_quic_ctx {
   curl_socket_t sockfd;               /* connected UDP socket */

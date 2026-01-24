@@ -71,6 +71,7 @@
 #include "mime.h"
 #include "bufref.h"
 #include "vtls/vtls.h"
+#include "vssh/vssh.h"
 #include "hostip.h"
 #include "transfer.h"
 #include "curl_addrinfo.h"
@@ -148,15 +149,15 @@ static void data_priority_cleanup(struct Curl_easy *data);
  *
  * Parameters:
  *
- * 'h'  [in]  - struct Curl_handler pointer.
+ * 's'  [in]  - struct Curl_scheme pointer.
  *
  * Returns the family as a single bit protocol identifier.
  */
-static curl_prot_t get_protocol_family(const struct Curl_handler *h)
+static curl_prot_t get_protocol_family(const struct Curl_scheme *s)
 {
-  DEBUGASSERT(h);
-  DEBUGASSERT(h->family);
-  return h->family;
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->family);
+  return s->family;
 }
 
 void Curl_freeset(struct Curl_easy *data)
@@ -519,9 +520,9 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 
   DEBUGASSERT(conn);
 
-  if(conn->handler && conn->handler->disconnect &&
+  if(conn->scheme && conn->scheme->run->disconnect &&
      !conn->bits.shutdown_handler)
-    conn->handler->disconnect(data, conn, TRUE);
+    conn->scheme->run->disconnect(data, conn, TRUE);
 
   for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
     Curl_conn_cf_discard_all(data, conn, (int)i);
@@ -571,7 +572,7 @@ static bool xfer_may_multiplex(const struct Curl_easy *data,
 {
 #ifndef CURL_DISABLE_HTTP
   /* If an HTTP protocol and multiplexing is enabled */
-  if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+  if((conn->scheme->protocol & PROTO_FAMILY_HTTP) &&
      (!conn->bits.protoconnstart || !conn->bits.close)) {
 
     if(Curl_multiplex_wanted(data->multi) &&
@@ -670,7 +671,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
       /* avoid check if already too old */
       dead = TRUE;
     }
-    else if(conn->handler->connection_check) {
+    else if(conn->scheme->run->connection_check) {
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
       unsigned int state;
@@ -679,7 +680,8 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
          checking it */
       Curl_attach_connection(data, conn);
 
-      state = conn->handler->connection_check(data, conn, CONNCHECK_ISDEAD);
+      state = conn->scheme->run->connection_check(data, conn,
+                                                     CONNCHECK_ISDEAD);
       dead = (state & CONNRESULT_DEAD);
       /* detach the connection again */
       Curl_detach_connection(data);
@@ -724,10 +726,11 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
 
   /* briefly attach for action */
   Curl_attach_connection(data, conn);
-  if(conn->handler->connection_check) {
+  if(conn->scheme->run->connection_check) {
     /* Do a protocol-specific keepalive check on the connection. */
     unsigned int rc;
-    rc = conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
+    rc = conn->scheme->run->connection_check(data, conn,
+                                                CONNCHECK_KEEPALIVE);
     if(rc & CONNRESULT_DEAD)
       result = CURLE_RECV_ERROR;
   }
@@ -901,7 +904,7 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
 static bool url_match_ssl_use(struct connectdata *conn,
                               struct url_conn_match *m)
 {
-  if(m->needle->handler->flags & PROTOPT_SSL) {
+  if(m->needle->scheme->flags & PROTOPT_SSL) {
     /* We are looking for SSL, if `conn` does not do it, not a match. */
     if(!Curl_conn_is_ssl(conn, FIRSTSOCKET))
       return FALSE;
@@ -909,8 +912,8 @@ static bool url_match_ssl_use(struct connectdata *conn,
   else if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     /* If the protocol does not allow reuse of SSL connections OR
        is of another protocol family, not a match. */
-    if(!(m->needle->handler->flags & PROTOPT_SSL_REUSE) ||
-       (get_protocol_family(conn->handler) != m->needle->handler->protocol))
+    if(!(m->needle->scheme->flags & PROTOPT_SSL_REUSE) ||
+       (get_protocol_family(conn->scheme) != m->needle->scheme->protocol))
       return FALSE;
   }
   return TRUE;
@@ -963,7 +966,7 @@ static bool url_match_http_multiplex(struct connectdata *conn,
 {
   if(m->may_multiplex &&
      (m->data->state.http_neg.allowed & (CURL_HTTP_V2x | CURL_HTTP_V3x)) &&
-     (m->needle->handler->protocol & CURLPROTO_HTTP) &&
+     (m->needle->scheme->protocol & CURLPROTO_HTTP) &&
      !conn->httpversion_seen) {
     if(m->data->set.pipewait) {
       infof(m->data, "Server upgrade does not support multiplex yet, wait");
@@ -982,7 +985,7 @@ static bool url_match_http_version(struct connectdata *conn,
 {
   /* If looking for HTTP and the HTTP versions allowed do not include
    * the HTTP version of conn, continue looking. */
-  if((m->needle->handler->protocol & PROTO_FAMILY_HTTP)) {
+  if((m->needle->scheme->protocol & PROTO_FAMILY_HTTP)) {
     switch(Curl_conn_http_version(m->data, conn)) {
     case 30:
       if(!(m->data->state.http_neg.allowed & CURL_HTTP_V3x)) {
@@ -1021,13 +1024,13 @@ static bool url_match_proto_config(struct connectdata *conn,
     return FALSE;
 
 #ifdef USE_SSH
-  if(get_protocol_family(m->needle->handler) & PROTO_FAMILY_SSH) {
+  if(get_protocol_family(m->needle->scheme) & PROTO_FAMILY_SSH) {
     if(!ssh_config_matches(m->needle, conn))
       return FALSE;
   }
 #endif
 #ifndef CURL_DISABLE_FTP
-  else if(get_protocol_family(m->needle->handler) & PROTO_FAMILY_FTP) {
+  else if(get_protocol_family(m->needle->scheme) & PROTO_FAMILY_FTP) {
     if(!ftp_conns_match(m->needle, conn))
       return FALSE;
   }
@@ -1038,7 +1041,7 @@ static bool url_match_proto_config(struct connectdata *conn,
 static bool url_match_auth(struct connectdata *conn,
                            struct url_conn_match *m)
 {
-  if(!(m->needle->handler->flags & PROTOPT_CREDSPERREQUEST)) {
+  if(!(m->needle->scheme->flags & PROTOPT_CREDSPERREQUEST)) {
     /* This protocol requires credentials per connection,
        so verify that we are using the same name and password as well */
     if(Curl_timestrcmp(m->needle->user, conn->user) ||
@@ -1064,14 +1067,14 @@ static bool url_match_destination(struct connectdata *conn,
 {
   /* Additional match requirements if talking TLS OR
    * not talking to an HTTP proxy OR using a tunnel through a proxy */
-  if((m->needle->handler->flags & PROTOPT_SSL)
+  if((m->needle->scheme->flags & PROTOPT_SSL)
 #ifndef CURL_DISABLE_PROXY
      || !m->needle->bits.httpproxy || m->needle->bits.tunnel_proxy
 #endif
     ) {
-    if(!curl_strequal(m->needle->handler->scheme, conn->handler->scheme)) {
+    if(!curl_strequal(m->needle->scheme->name, conn->scheme->name)) {
       /* `needle` and `conn` do not have the same scheme... */
-      if(get_protocol_family(conn->handler) != m->needle->handler->protocol) {
+      if(get_protocol_family(conn->scheme) != m->needle->scheme->protocol) {
         /* and `conn`s protocol family is not the protocol `needle` wants.
          * IMAPS would work for IMAP, but no vice versa. */
         return FALSE;
@@ -1104,7 +1107,7 @@ static bool url_match_ssl_config(struct connectdata *conn,
                                  struct url_conn_match *m)
 {
   /* If talking TLS, conn needs to use the same SSL options. */
-  if((m->needle->handler->flags & PROTOPT_SSL) &&
+  if((m->needle->scheme->flags & PROTOPT_SSL) &&
      !Curl_ssl_conn_config_match(m->data, conn, FALSE)) {
     DEBUGF(infof(m->data,
                  "Connection #%" FMT_OFF_T
@@ -1292,12 +1295,12 @@ static bool ConnectionExists(struct Curl_easy *data,
 
 #ifdef USE_NTLM
   match.want_ntlm_http = ((data->state.authhost.want & CURLAUTH_NTLM) &&
-                          (needle->handler->protocol & PROTO_FAMILY_HTTP));
+                          (needle->scheme->protocol & PROTO_FAMILY_HTTP));
 #ifndef CURL_DISABLE_PROXY
   match.want_proxy_ntlm_http =
     (needle->bits.proxy_user_passwd &&
      (data->state.authproxy.want & CURLAUTH_NTLM) &&
-     (needle->handler->protocol & PROTO_FAMILY_HTTP));
+     (needle->scheme->protocol & PROTO_FAMILY_HTTP));
 #endif
 #endif
 
@@ -1398,14 +1401,15 @@ error:
   return NULL;
 }
 
-const struct Curl_handler *Curl_get_scheme_handler(const char *scheme)
+const struct Curl_scheme *Curl_get_scheme(const char *scheme)
 {
-  return Curl_getn_scheme_handler(scheme, strlen(scheme));
+  return Curl_getn_scheme(scheme, strlen(scheme));
 }
 
-/* returns the handler if the given scheme is built-in */
-const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
-                                                    size_t len)
+/* Returns a struct scheme pointer if the name is a known scheme. Check the
+   ->run struct field for non-NULL to figure out if an implementation is
+   present. */
+const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len)
 {
   /* table generated by schemetable.c:
      1. gcc schemetable.c && ./a.out
@@ -1415,199 +1419,47 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
      5. copy the table into this source code
      6. make sure this function uses the same hash function that worked for
      schemetable.c
-     7. if needed, adjust the #ifdefs in schemetable.c and rerun
      */
-  static const struct Curl_handler * const protocols[67] = {
-#ifndef CURL_DISABLE_FILE
-    &Curl_handler_file,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)
-    &Curl_handler_mqtts,
-#else
-    NULL,
-#endif
-    NULL,
-#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
-    &Curl_handler_gophers,
-#else
-    NULL,
-#endif
-    NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmpe,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_SMTP
-    &Curl_handler_smtp,
-#else
-    NULL,
-#endif
-#ifdef USE_SSH
-    &Curl_handler_sftp,
-#else
-    NULL,
-#endif
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-  (SIZEOF_CURL_OFF_T > 4)
-    &Curl_handler_smb,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)
-    &Curl_handler_smtps,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_TELNET
-    &Curl_handler_telnet,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_GOPHER
-    &Curl_handler_gopher,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_TFTP
-    &Curl_handler_tftp,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
-    &Curl_handler_ftps,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_HTTP
-    &Curl_handler_http,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_IMAP
-    &Curl_handler_imap,
-#else
-    NULL,
-#endif
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmps,
-#else
-    NULL,
-#endif
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmpt,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#if !defined(CURL_DISABLE_LDAP) && \
-  !defined(CURL_DISABLE_LDAPS) && \
-  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
-    &Curl_handler_ldaps,
-#else
-    NULL,
-#endif
-#if !defined(CURL_DISABLE_WEBSOCKETS) &&                \
-  defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
-    &Curl_handler_wss,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
-    &Curl_handler_https,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-#ifndef CURL_DISABLE_RTSP
-    &Curl_handler_rtsp,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_SMB) && \
-  defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)
-    &Curl_handler_smbs,
-#else
-    NULL,
-#endif
-#ifdef USE_SSH
-    &Curl_handler_scp,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#ifndef CURL_DISABLE_POP3
-    &Curl_handler_pop3,
-#else
-    NULL,
-#endif
-    NULL, NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmp,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmpte,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#ifndef CURL_DISABLE_DICT
-    &Curl_handler_dict,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#ifndef CURL_DISABLE_MQTT
-    &Curl_handler_mqtt,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
-    &Curl_handler_pop3s,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)
-    &Curl_handler_imaps,
-#else
-    NULL,
-#endif
-    NULL,
-#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
-    &Curl_handler_ws,
-#else
-    NULL,
-#endif
-    NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmpts,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_LDAP
-    &Curl_handler_ldap,
-#else
-    NULL,
-#endif
-    NULL, NULL,
-#ifndef CURL_DISABLE_FTP
-    &Curl_handler_ftp,
-#else
-    NULL,
-#endif
+  static const struct Curl_scheme * const all_schemes[67] = {
+    &Curl_scheme_file,
+    &Curl_scheme_mqtts, NULL,
+    &Curl_scheme_gophers, NULL,
+    &Curl_scheme_rtmpe,
+    &Curl_scheme_smtp,
+    &Curl_scheme_sftp,
+    &Curl_scheme_smb,
+    &Curl_scheme_smtps,
+    &Curl_scheme_telnet,
+    &Curl_scheme_gopher,
+    &Curl_scheme_tftp, NULL, NULL, NULL,
+    &Curl_scheme_ftps,
+    &Curl_scheme_http,
+    &Curl_scheme_imap,
+    &Curl_scheme_rtmps,
+    &Curl_scheme_rtmpt, NULL, NULL, NULL,
+    &Curl_scheme_ldaps,
+    &Curl_scheme_wss,
+    &Curl_scheme_https, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    &Curl_scheme_rtsp,
+    &Curl_scheme_smbs,
+    &Curl_scheme_scp, NULL, NULL, NULL,
+    &Curl_scheme_pop3, NULL, NULL,
+    &Curl_scheme_rtmp, NULL, NULL, NULL,
+    &Curl_scheme_rtmpte, NULL, NULL, NULL,
+    &Curl_scheme_dict, NULL, NULL, NULL,
+    &Curl_scheme_mqtt,
+    &Curl_scheme_pop3s,
+    &Curl_scheme_imaps, NULL,
+    &Curl_scheme_ws, NULL,
+    &Curl_scheme_rtmpts,
+    &Curl_scheme_ldap, NULL, NULL,
+    &Curl_scheme_ftp,
   };
 
   if(len && (len <= 7)) {
     const char *s = scheme;
     size_t l = len;
-    const struct Curl_handler *h;
+    const struct Curl_scheme *h;
     unsigned int c = 978;
     while(l) {
       c <<= 5;
@@ -1616,8 +1468,8 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
       l--;
     }
 
-    h = protocols[c % 67];
-    if(h && curl_strnequal(scheme, h->scheme, len) && !h->scheme[len])
+    h = all_schemes[c % 67];
+    if(h && curl_strnequal(scheme, h->name, len) && !h->name[len])
       return h;
   }
   return NULL;
@@ -1627,9 +1479,9 @@ static CURLcode findprotocol(struct Curl_easy *data,
                              struct connectdata *conn,
                              const char *protostr)
 {
-  const struct Curl_handler *p = Curl_get_scheme_handler(protostr);
+  const struct Curl_scheme *p = Curl_get_scheme(protostr);
 
-  if(p && /* Protocol found in table. Check if allowed */
+  if(p && p->run && /* Protocol found supported. Check if allowed */
      (data->set.allowed_protocols & p->protocol)) {
 
     /* it is allowed for "normal" request, now do an extra check if this is
@@ -1640,7 +1492,7 @@ static CURLcode findprotocol(struct Curl_easy *data,
       ;
     else {
       /* Perform setup complement if some. */
-      conn->handler = conn->given = p;
+      conn->scheme = conn->given = p;
       /* 'port' and 'remote_port' are set in setup_connection_internals() */
       return CURLE_OK;
     }
@@ -1681,7 +1533,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 {
   char *zoneid;
   CURLUcode uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
-#if !defined(HAVE_IF_NAMETOINDEX) || defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if !defined(HAVE_IF_NAMETOINDEX) || !defined(CURLVERBOSE)
   (void)data;
 #endif
 
@@ -1697,7 +1549,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
       unsigned int scopeidx = 0;
       scopeidx = if_nametoindex(zoneid);
       if(!scopeidx) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
               curlx_strerror(errno, buffer, sizeof(buffer)));
@@ -1850,7 +1702,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     if(!uc) {
       char *decoded;
       result = Curl_urldecode(data->state.up.password, 0, &decoded, NULL,
-                              conn->handler->flags&PROTOPT_USERPWDCTRL ?
+                              conn->scheme->flags&PROTOPT_USERPWDCTRL ?
                               REJECT_ZERO : REJECT_CTRL);
       if(result)
         return result;
@@ -1872,7 +1724,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     if(!uc) {
       char *decoded;
       result = Curl_urldecode(data->state.up.user, 0, &decoded, NULL,
-                              conn->handler->flags&PROTOPT_USERPWDCTRL ?
+                              conn->scheme->flags&PROTOPT_USERPWDCTRL ?
                               REJECT_ZERO : REJECT_CTRL);
       if(result)
         return result;
@@ -1982,8 +1834,8 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
-  if(conn->handler->setup_connection) {
-    result = conn->handler->setup_connection(data, conn);
+  if(conn->scheme->run->setup_connection) {
+    result = conn->scheme->run->setup_connection(data, conn);
     if(result)
       return result;
   }
@@ -2051,10 +1903,11 @@ static char *detect_proxy(struct Curl_easy *data,
    * checked if the lowercase versions do not exist.
    */
   char proxy_env[20];
-  const char *envp = proxy_env;
+  const char *envp;
+  VERBOSE(envp = proxy_env);
 
   curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
-                 conn->handler->scheme);
+                 conn->scheme->name);
 
   /* read the protocol proxy: */
   proxy = curl_getenv(proxy_env);
@@ -2415,13 +2268,13 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
   }
 #endif
 
-  if(proxy && (!*proxy || (conn->handler->flags & PROTOPT_NONETWORK))) {
+  if(proxy && (!*proxy || (conn->scheme->flags & PROTOPT_NONETWORK))) {
     curlx_free(proxy);  /* Do not bother with an empty proxy string
                            or if the protocol does not work with network */
     proxy = NULL;
   }
   if(socksproxy && (!*socksproxy ||
-                    (conn->handler->flags & PROTOPT_NONETWORK))) {
+                    (conn->scheme->flags & PROTOPT_NONETWORK))) {
     curlx_free(socksproxy);  /* Do not bother with an empty socks proxy string
                                 or if the protocol does not work with
                                 network */
@@ -2457,10 +2310,10 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
       goto out;
 #else
       /* force this connection's protocol to become HTTP if compatible */
-      if(!(conn->handler->protocol & PROTO_FAMILY_HTTP)) {
-        if((conn->handler->flags & PROTOPT_PROXY_AS_HTTP) &&
+      if(!(conn->scheme->protocol & PROTO_FAMILY_HTTP)) {
+        if((conn->scheme->flags & PROTOPT_PROXY_AS_HTTP) &&
            !conn->bits.tunnel_proxy)
-          conn->handler = &Curl_handler_http;
+          conn->scheme = &Curl_scheme_http;
         else
           /* if not converting to HTTP over the proxy, enforce tunneling */
           conn->bits.tunnel_proxy = TRUE;
@@ -2705,7 +2558,7 @@ static CURLcode override_login(struct Curl_easy *data,
         return CURLE_READ_ERROR;
       }
       else {
-        if(!(conn->handler->flags & PROTOPT_USERPWDCTRL)) {
+        if(!(conn->scheme->flags & PROTOPT_USERPWDCTRL)) {
           /* if the protocol cannot handle control codes in credentials, make
              sure there are none */
           if(str_has_ctrl(*userp) || str_has_ctrl(*passwdp)) {
@@ -2788,7 +2641,7 @@ static CURLcode set_login(struct Curl_easy *data,
   const char *setpasswd = CURL_DEFAULT_PASSWORD;
 
   /* If our protocol needs a password and we have none, use the defaults */
-  if((conn->handler->flags & PROTOPT_NEEDSPWD) && !data->state.aptr.user)
+  if((conn->scheme->flags & PROTOPT_NEEDSPWD) && !data->state.aptr.user)
     ;
   else {
     setuser = "";
@@ -3025,7 +2878,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_ALTSVC
   if(data->asi && !host && (port == -1) &&
-     ((conn->handler->protocol == CURLPROTO_HTTPS) ||
+     ((conn->scheme->protocol == CURLPROTO_HTTPS) ||
 #ifdef DEBUGBUILD
       /* allow debug builds to circumvent the HTTPS restriction */
       getenv("CURL_ALTSVC_HTTP")
@@ -3187,7 +3040,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 {
   struct hostname *ehost;
   int eport;
-  timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
+  timediff_t timeout_ms = Curl_timeleft_ms(data);
   const char *peertype = "host";
   CURLcode result;
 
@@ -3533,15 +3386,15 @@ static CURLcode create_conn(struct Curl_easy *data,
    * file: is a special case in that it does not need a network connection
    ***********************************************************************/
 #ifndef CURL_DISABLE_FILE
-  if(conn->handler->flags & PROTOPT_NONETWORK) {
+  if(conn->scheme->flags & PROTOPT_NONETWORK) {
     bool done;
     /* this is supposed to be the connect function so we better at least check
        that the file is present here! */
-    DEBUGASSERT(conn->handler->connect_it);
-    data->info.conn_scheme = conn->handler->scheme;
+    DEBUGASSERT(conn->scheme->run->connect_it);
+    data->info.conn_scheme = conn->scheme->name;
     /* conn_protocol can only provide "old" protocols */
-    data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
-    result = conn->handler->connect_it(data, &done);
+    data->info.conn_protocol = (conn->scheme->protocol) & CURLPROTO_MASK;
+    result = conn->scheme->run->connect_it(data, &done);
     if(result)
       goto out;
 
@@ -3558,9 +3411,9 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
 
     if(result) {
-      DEBUGASSERT(conn->handler->done);
+      DEBUGASSERT(conn->scheme->run->done);
       /* we ignore the return code for the protocol-specific DONE */
-      (void)conn->handler->done(data, result, FALSE);
+      (void)conn->scheme->run->done(data, result, FALSE);
     }
     goto out;
   }
@@ -3605,8 +3458,8 @@ static CURLcode create_conn(struct Curl_easy *data,
      * `existing` and thus we need to cleanup the one we just
      * allocated before we can move along and use `existing`.
      */
-    bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
-                         Curl_conn_is_ssl(conn, FIRSTSOCKET));
+    VERBOSE(bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
+                                 Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
     reuse_conn(data, conn, existing);
     conn = existing;
@@ -3614,7 +3467,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
     infof(data, "Reusing existing %s: connection%s with %s %s",
-          conn->given->scheme,
+          conn->given->name,
           tls_upgraded ? " (upgraded to SSL)" : "",
           conn->bits.proxy ? "proxy" : "host",
           conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
@@ -3622,7 +3475,7 @@ static CURLcode create_conn(struct Curl_easy *data,
           conn->host.dispname);
 #else
     infof(data, "Reusing existing %s: connection%s with host %s",
-          conn->given->scheme,
+          conn->given->name,
           tls_upgraded ? " (upgraded to SSL)" : "",
           conn->host.dispname);
 #endif
@@ -3633,7 +3486,7 @@ static CURLcode create_conn(struct Curl_easy *data,
        connections we are allowed to open. */
     DEBUGF(infof(data, "new connection, bits.close=%d", conn->bits.close));
 
-    if(conn->handler->flags & PROTOPT_ALPN) {
+    if(conn->scheme->flags & PROTOPT_ALPN) {
       /* The protocol wants it, so set the bits if enabled in the easy handle
          (default) */
       if(data->set.ssl_enable_alpn)
@@ -3733,9 +3586,9 @@ static CURLcode create_conn(struct Curl_easy *data,
   }
 
   /* persist the scheme and handler the transfer is using */
-  data->info.conn_scheme = conn->handler->scheme;
+  data->info.conn_scheme = conn->scheme->name;
   /* conn_protocol can only provide "old" protocols */
-  data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
+  data->info.conn_protocol = (conn->scheme->protocol) & CURLPROTO_MASK;
   data->info.used_proxy =
 #ifdef CURL_DISABLE_PROXY
     0
@@ -3808,7 +3661,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
         /* multiplexed */
         *protocol_done = TRUE;
     }
-    else if(conn->handler->flags & PROTOPT_NONETWORK) {
+    else if(conn->scheme->flags & PROTOPT_NONETWORK) {
       *asyncp = FALSE;
       Curl_pgrsTime(data, TIMER_NAMELOOKUP);
       *protocol_done = TRUE;
@@ -3859,7 +3712,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
                                    use */
     /* if the protocol used does not support wildcards, switch it off */
     if(data->state.wildcardmatch &&
-       !(conn->handler->flags & PROTOPT_WILDCARD))
+       !(conn->scheme->flags & PROTOPT_WILDCARD))
       data->state.wildcardmatch = FALSE;
   }
 

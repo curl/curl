@@ -48,8 +48,6 @@ AM_CONDITIONAL(DEBUGBUILD, test "$want_debug" = "yes")
 CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 CURL_CHECK_OPTION_WERROR
-CURL_CHECK_OPTION_CURLDEBUG
-AM_CONDITIONAL(CURLDEBUG, test "$want_curldebug" = "yes")
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
 CURL_CHECK_OPTION_RT
@@ -333,7 +331,7 @@ dnl we would like an httpd as test server
 dnl
 HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
-                         [where to find httpd/apache2 for testing])],
+                        [where to find httpd/apache2 for testing])],
   [request_httpd=$withval], [request_httpd=check])
 if test "x$request_httpd" = "xcheck" || test "x$request_httpd" = "xyes"; then
   if test -x "/usr/sbin/apache2"; then
@@ -413,7 +411,7 @@ dnl we would like a sshd as test server
 dnl
 SSHD_ENABLED="maybe"
 AC_ARG_WITH(test-sshd, [AS_HELP_STRING([--with-test-sshd=PATH],
-                         [where to find sshd for testing])],
+                       [where to find sshd for testing])],
   [request_sshd=$withval], [request_sshd=check])
 if test "x$request_sshd" = "xcheck" || test "x$request_sshd" = "xyes"; then
   if test -x "/usr/sbin/sshd"; then
@@ -5312,9 +5310,6 @@ fi
 if test "$want_debug" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
 fi
-if test "$want_curldebug" = "yes"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
-fi
 if test -n "$CURL_CA_EMBED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
   CURL_CA_EMBED_msg="$CURL_CA_EMBED"
@@ -5452,11 +5447,6 @@ XC_CHECK_BUILD_FLAGS
 
 SSL_BACKENDS=${ssl_backends}
 AC_SUBST(SSL_BACKENDS)
-
-if test "$want_curldebug_assumed" = "yes" &&
-   test "$want_curldebug" = "yes" && test "$USE_ARES" = "1"; then
-  ac_configure_args="$ac_configure_args --enable-curldebug"
-fi
 
 CURL_PREPARE_CONFIGUREHELP_PM
 

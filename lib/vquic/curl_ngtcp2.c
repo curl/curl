@@ -55,6 +55,7 @@
 #include "../cf-socket.h"
 #include "../connect.h"
 #include "../progress.h"
+#include "../curlx/fopen.h"
 #include "../curlx/dynbuf.h"
 #include "../http1.h"
 #include "../select.h"
@@ -449,7 +450,7 @@ static void qlog_callback(void *user_data, uint32_t flags,
     ssize_t rc = write(ctx->qlogfd, data, datalen);
     if(rc == -1) {
       /* on write error, stop further write attempts */
-      close(ctx->qlogfd);
+      curlx_close(ctx->qlogfd);
       ctx->qlogfd = -1;
     }
   }
@@ -515,7 +516,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 
   ctx->tls_vrfy_result = Curl_vquic_tls_verify_peer(&ctx->tls, cf,
                                                     data, &ctx->peer);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     const ngtcp2_transport_params *rp;
     rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
@@ -1400,6 +1401,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)ctx;
   (void)buf;
+  NOVERBOSE((void)blen);
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
@@ -1729,7 +1731,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
       goto out;
     }
-    stream = H3_STREAM_CTX(ctx, data);
+    VERBOSE(stream = H3_STREAM_CTX(ctx, data));
   }
   else if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);
@@ -2140,7 +2142,7 @@ static void cf_ngtcp2_ctx_close(struct cf_ngtcp2_ctx *ctx)
   if(!ctx->initialized)
     return;
   if(ctx->qlogfd != -1) {
-    close(ctx->qlogfd);
+    curlx_close(ctx->qlogfd);
   }
   ctx->qlogfd = -1;
   Curl_vquic_tls_cleanup(&ctx->tls);
@@ -2734,7 +2736,7 @@ out:
     }
   }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(result) {
     struct ip_quadruple ip;
 

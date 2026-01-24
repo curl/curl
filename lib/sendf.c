@@ -696,7 +696,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     break;
 
   case CURL_READFUNC_PAUSE:
-    if(data->conn->handler->flags & PROTOPT_NONETWORK) {
+    if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
       /* protocols that work without network cannot be paused. This is
          actually only FILE:// just now, and it cannot pause since the transfer
          is not done using the "normal" procedure. */

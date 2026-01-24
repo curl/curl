@@ -79,18 +79,18 @@ generate the project. After the project is generated, you can run make.
 CMake also comes with a Qt based GUI called `cmake-gui`. To configure with
 `cmake-gui`, you run `cmake-gui` and follow these steps:
 
- 1. Fill in the "Where is the source code" combo box with the path to
-    the curl source tree.
- 2. Fill in the "Where to build the binaries" combo box with the path to
-    the directory for your build tree, ideally this should not be the same
-    as the source tree, but a parallel directory called curl-build or
-    something similar.
- 3. Once the source and binary directories are specified, press the
-    "Configure" button.
- 4. Select the native build tool that you want to use.
- 5. At this point you can change any of the options presented in the GUI.
-    Once you have selected all the options you want, click the "Generate"
-    button.
+1. Fill in the "Where is the source code" combo box with the path to
+   the curl source tree.
+2. Fill in the "Where to build the binaries" combo box with the path to
+   the directory for your build tree, ideally this should not be the same
+   as the source tree, but a parallel directory called curl-build or
+   something similar.
+3. Once the source and binary directories are specified, press the
+   "Configure" button.
+4. Select the native build tool that you want to use.
+5. At this point you can change any of the options presented in the GUI.
+   Once you have selected all the options you want, click the "Generate"
+   button.
 
 # Building
 
@@ -243,10 +243,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX`:  Override default versioned symbol prefix. Default: `<TLS-BACKEND>_` or `MULTISSL_`
 - `CURL_LINT`:                              Run lint checks while building. Default: `OFF`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
+- `CURL_DROP_UNUSED`:                       Drop unused code and data from built binaries. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
-- `ENABLE_CURLDEBUG`:                       Enable TrackMemory debug feature. Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
 - `ENABLE_DEBUG`:                           Enable curl debug features (for developing curl itself). Default: `OFF`
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp` for MSVC-like toolchains, otherwise empty.
@@ -346,7 +346,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CMAKE_INSTALL_PREFIX`                    (see CMake)
 - `CMAKE_STATIC_LIBRARY_SUFFIX`             (see CMake)
 - `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Set the number of sources in a "unity" unit. Default: `0` (all)
-- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka jumbo) builds. Default: `OFF`
+- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka "jumbo") builds. Default: `OFF`
 
 Details via CMake
 [variables](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html) and
@@ -358,7 +358,7 @@ Details via CMake
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
-- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires build with TrackMemory and DWARF debug information. Default: `OFF`
+- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires debug-enabled build and DWARF debug information. Default: `OFF`
 - `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
 - `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
 - `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`

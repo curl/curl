@@ -182,6 +182,8 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
   size_t nwritten;
   CURLcode result;
 
+  NOVERBOSE((void)otype);
+
   DEBUGASSERT(data->conn);
   *pnwritten = 0;
   Curl_set_in_callback(data, TRUE);
@@ -191,7 +193,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
                  nwritten);
   if(CURL_WRITEFUNC_PAUSE == nwritten) {
-    if(data->conn->handler->flags & PROTOPT_NONETWORK) {
+    if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
       /* Protocols that work without network cannot be paused. This is
          actually only FILE:// just now, and it cannot pause since the
          transfer is not done using the "normal" procedure. */

@@ -27,13 +27,10 @@
 
 #include "pingpong.h"
 
+extern const struct Curl_scheme Curl_scheme_ftp;
+extern const struct Curl_scheme Curl_scheme_ftps;
+
 #ifndef CURL_DISABLE_FTP
-extern const struct Curl_handler Curl_handler_ftp;
-
-#ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_ftps;
-#endif
-
 bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn);
 
 #endif /* CURL_DISABLE_FTP */

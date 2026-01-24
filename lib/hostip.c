@@ -114,9 +114,69 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void show_resolve_info(struct Curl_easy *data,
-                              struct Curl_dns_entry *dns);
+                              struct Curl_dns_entry *dns)
+{
+  struct Curl_addrinfo *a;
+  CURLcode result = CURLE_OK;
+#ifdef CURLRES_IPV6
+  struct dynbuf out[2];
+#else
+  struct dynbuf out[1];
+#endif
+  DEBUGASSERT(data);
+  DEBUGASSERT(dns);
+
+  if(!data->set.verbose ||
+     /* ignore no name or numerical IP addresses */
+     !dns->hostname[0] || Curl_host_is_ipnum(dns->hostname))
+    return;
+
+  a = dns->addr;
+
+  infof(data, "Host %s:%d was resolved.",
+        (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport);
+
+  curlx_dyn_init(&out[0], 1024);
+#ifdef CURLRES_IPV6
+  curlx_dyn_init(&out[1], 1024);
+#endif
+
+  while(a) {
+    if(
+#ifdef CURLRES_IPV6
+       a->ai_family == PF_INET6 ||
+#endif
+       a->ai_family == PF_INET) {
+      char buf[MAX_IPADR_LEN];
+      struct dynbuf *d = &out[(a->ai_family != PF_INET)];
+      Curl_printable_address(a, buf, sizeof(buf));
+      if(curlx_dyn_len(d))
+        result = curlx_dyn_addn(d, ", ", 2);
+      if(!result)
+        result = curlx_dyn_add(d, buf);
+      if(result) {
+        infof(data, "too many IP, cannot show");
+        goto fail;
+      }
+    }
+    a = a->ai_next;
+  }
+
+#ifdef CURLRES_IPV6
+  infof(data, "IPv6: %s",
+        (curlx_dyn_len(&out[1]) ? curlx_dyn_ptr(&out[1]) : "(none)"));
+#endif
+  infof(data, "IPv4: %s",
+        (curlx_dyn_len(&out[0]) ? curlx_dyn_ptr(&out[0]) : "(none)"));
+
+fail:
+  curlx_dyn_free(&out[0]);
+#ifdef CURLRES_IPV6
+  curlx_dyn_free(&out[1]);
+#endif
+}
 #else
 #define show_resolve_info(x, y) Curl_nop_stmt
 #endif
@@ -681,36 +741,33 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
 }
 
 #ifdef USE_IPV6
+/* the nature of most systems is that IPv6 status does not come and go during a
+   program's lifetime so we only probe the first time and then we have the
+   info kept for fast reuse */
+CURLcode Curl_probeipv6(struct Curl_multi *multi)
+{
+  /* probe to see if we have a working IPv6 stack */
+  curl_socket_t s = CURL_SOCKET(PF_INET6, SOCK_DGRAM, 0);
+  multi->ipv6_works = FALSE;
+  if(s == CURL_SOCKET_BAD) {
+    if(SOCKERRNO == SOCKENOMEM)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  else {
+    multi->ipv6_works = TRUE;
+    sclose(s);
+  }
+  return CURLE_OK;
+}
+
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
 bool Curl_ipv6works(struct Curl_easy *data)
 {
-  if(data) {
-    /* the nature of most system is that IPv6 status does not come and go
-       during a program's lifetime so we only probe the first time and then we
-       have the info kept for fast reuse */
-    DEBUGASSERT(data);
-    DEBUGASSERT(data->multi);
-    if(data->multi->ipv6_up == IPV6_UNKNOWN) {
-      bool works = Curl_ipv6works(NULL);
-      data->multi->ipv6_up = works ? IPV6_WORKS : IPV6_DEAD;
-    }
-    return data->multi->ipv6_up == IPV6_WORKS;
-  }
-  else {
-    int ipv6_works = -1;
-    /* probe to see if we have a working IPv6 stack */
-    curl_socket_t s = CURL_SOCKET(PF_INET6, SOCK_DGRAM, 0);
-    if(s == CURL_SOCKET_BAD)
-      /* an IPv6 address was requested but we cannot get/use one */
-      ipv6_works = 0;
-    else {
-      ipv6_works = 1;
-      sclose(s);
-    }
-    return ipv6_works > 0;
-  }
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  return data ? data->multi->ipv6_works : FALSE;
 }
 #endif /* USE_IPV6 */
 
@@ -1268,12 +1325,10 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       struct Curl_addrinfo *head = NULL, *tail = NULL;
       size_t entry_len;
       char address[64];
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      const char *addresses = NULL;
-#endif
       curl_off_t port = 0;
       bool permanent = TRUE;
       bool error = TRUE;
+      VERBOSE(const char *addresses = NULL);
 
       if(*host == '+') {
         host++;
@@ -1293,9 +1348,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
          curlx_str_single(&host, ':'))
         goto err;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      addresses = host;
-#endif
+      VERBOSE(addresses = host);
 
       /* start the address section */
       while(*host) {
@@ -1403,11 +1456,9 @@ err:
       if(!dns)
         return CURLE_OUT_OF_MEMORY;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
             (int)curlx_strlen(&source), curlx_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
-#endif
 
       /* Wildcard hostname */
       if(curlx_str_casecompare(&source, "*")) {
@@ -1421,71 +1472,6 @@ err:
 
   return CURLE_OK;
 }
-
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void show_resolve_info(struct Curl_easy *data,
-                              struct Curl_dns_entry *dns)
-{
-  struct Curl_addrinfo *a;
-  CURLcode result = CURLE_OK;
-#ifdef CURLRES_IPV6
-  struct dynbuf out[2];
-#else
-  struct dynbuf out[1];
-#endif
-  DEBUGASSERT(data);
-  DEBUGASSERT(dns);
-
-  if(!data->set.verbose ||
-     /* ignore no name or numerical IP addresses */
-     !dns->hostname[0] || Curl_host_is_ipnum(dns->hostname))
-    return;
-
-  a = dns->addr;
-
-  infof(data, "Host %s:%d was resolved.",
-        (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport);
-
-  curlx_dyn_init(&out[0], 1024);
-#ifdef CURLRES_IPV6
-  curlx_dyn_init(&out[1], 1024);
-#endif
-
-  while(a) {
-    if(
-#ifdef CURLRES_IPV6
-       a->ai_family == PF_INET6 ||
-#endif
-       a->ai_family == PF_INET) {
-      char buf[MAX_IPADR_LEN];
-      struct dynbuf *d = &out[(a->ai_family != PF_INET)];
-      Curl_printable_address(a, buf, sizeof(buf));
-      if(curlx_dyn_len(d))
-        result = curlx_dyn_addn(d, ", ", 2);
-      if(!result)
-        result = curlx_dyn_add(d, buf);
-      if(result) {
-        infof(data, "too many IP, cannot show");
-        goto fail;
-      }
-    }
-    a = a->ai_next;
-  }
-
-#ifdef CURLRES_IPV6
-  infof(data, "IPv6: %s",
-        (curlx_dyn_len(&out[1]) ? curlx_dyn_ptr(&out[1]) : "(none)"));
-#endif
-  infof(data, "IPv4: %s",
-        (curlx_dyn_len(&out[0]) ? curlx_dyn_ptr(&out[0]) : "(none)"));
-
-fail:
-  curlx_dyn_free(&out[0]);
-#ifdef CURLRES_IPV6
-  curlx_dyn_free(&out[1]);
-#endif
-}
-#endif
 
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_check(struct Curl_easy *data,
