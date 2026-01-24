@@ -91,7 +91,7 @@ jobs:
         with:
           languages: cpp
           build-mode: manual
-          queries: +security-and-quality
+          queries: security-and-quality
           trap-caching: false
 
       - name: 'build'
