@@ -1389,7 +1389,7 @@ struct UserDefined {
 #ifdef USE_SSH
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
-  int ssh_auth_types;    /* allowed SSH auth types */
+  uint32_t ssh_auth_types;   /* allowed SSH auth types */
   uint32_t new_directory_perms; /* when creating remote dirs */
 #endif
   uint32_t new_file_perms;      /* when creating remote files */

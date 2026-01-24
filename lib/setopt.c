@@ -1194,7 +1194,7 @@ static CURLcode setopt_long_proto(struct Curl_easy *data, CURLoption option,
 #endif
 #ifdef USE_SSH
   case CURLOPT_SSH_AUTH_TYPES:
-    s->ssh_auth_types = (int)arg;
+    s->ssh_auth_types = (uint32_t)arg;
     break;
   case CURLOPT_NEW_DIRECTORY_PERMS:
     if((arg < 0) || (arg > 0777))
