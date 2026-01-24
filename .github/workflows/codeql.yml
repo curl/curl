@@ -92,7 +92,6 @@ jobs:
           languages: cpp
           build-mode: manual
           trap-caching: false
-          matrix: "{platform: ${{ contains(matrix.image, 'ubuntu') && 'Linux' || 'Windows' }}}"
 
       - name: 'build'
         timeout-minutes: 10
@@ -134,3 +133,5 @@ jobs:
       - name: 'perform analysis'
         # https://github.com/github/codeql-action/blob/main/analyze/action.yml
         uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9
+        with:
+          category: "${{ github.workflow }}:${{ github.job }}/platform:${{ contains(matrix.image, 'ubuntu') && 'Linux' || 'Windows' }}"
