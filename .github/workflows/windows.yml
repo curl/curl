@@ -98,8 +98,7 @@ jobs:
               -DCURL_WERROR=ON \
               ${MATRIX_CONFIG}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
-              --prefix="$HOME"/curl-install \
+            mkdir bld && cd bld && ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIG}
@@ -312,8 +311,7 @@ jobs:
             fi
           else
             export CFLAGS CPPFLAGS
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
-              --prefix="$HOME"/curl-install \
+            mkdir bld && cd bld && ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIG}

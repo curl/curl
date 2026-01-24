@@ -186,8 +186,7 @@ jobs:
                 options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
               fi
               mkdir bld && cd bld
-              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
-                --prefix="$HOME"/curl-install \
+              time ../configure --prefix="$HOME"/curl-install --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
                 --with-openssl \
                 --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
                 --disable-dependency-tracking --enable-option-checking=fatal \
