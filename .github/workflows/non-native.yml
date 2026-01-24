@@ -388,7 +388,7 @@ jobs:
               -DWATT_ROOT="$HOME/djgpp/net/watt"
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --disable-shared \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror --disable-shared \
               CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
               AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
               RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \
