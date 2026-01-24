@@ -269,8 +269,8 @@ jobs:
           git clone --quiet --depth 1 -b "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl
           cd wolfssl
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-all --enable-quic \
-            --disable-benchmark --disable-crypttests --disable-examples --prefix="$PWD"/build
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-all --enable-quic \
+            --disable-benchmark --disable-crypttests --disable-examples
           make
           make install
 
@@ -294,13 +294,14 @@ jobs:
           git clone --quiet --depth 1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            PKG_CONFIG_PATH=/home/runner/libressl/build/lib/pkgconfig --enable-lib-only --with-openssl
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
+            PKG_CONFIG_PATH=/home/runner/libressl/build/lib/pkgconfig \
+            --with-openssl
           make install
           make clean
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
-            --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
+            --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
           make install
@@ -312,8 +313,8 @@ jobs:
           git clone --quiet --depth 1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-boringssl
           cd ngtcp2-boringssl
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            --enable-lib-only --with-openssl=no --with-boringssl \
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
+            --with-openssl=no --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/boringssl/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/boringssl/build/include'
           make install
@@ -328,11 +329,10 @@ jobs:
           autoreconf -fi
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-app --enable-http3 \
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig \
             LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib \
-            --with-libbrotlienc --with-libbrotlidec \
-            --enable-app --enable-http3
+            --with-libbrotlienc --with-libbrotlidec
           make install
 
   linux:
