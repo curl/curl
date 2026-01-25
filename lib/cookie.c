@@ -331,7 +331,7 @@ static bool bad_domain(const char *domain, size_t len)
     return FALSE;
   else {
     /* there must be a dot present, but that dot must not be a trailing dot */
-    char *dot = memchr(domain, '.', len);
+    const char *dot = memchr(domain, '.', len);
     if(dot) {
       size_t i = dot - domain;
       if((len - i) > 1)

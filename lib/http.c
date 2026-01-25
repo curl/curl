@@ -3829,7 +3829,7 @@ static CURLcode verify_header(struct Curl_easy *data,
                               const char *hd, size_t hdlen)
 {
   struct SingleRequest *k = &data->req;
-  char *ptr = memchr(hd, 0x00, hdlen);
+  const char *ptr = memchr(hd, 0x00, hdlen);
   if(ptr) {
     /* this is bad, bail out */
     failf(data, "Nul byte in header");
@@ -4369,7 +4369,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  char *end_ptr;
+  const char *end_ptr;
   bool leftover_body = FALSE;
 
   /* we have bytes for the next header, make sure it is not a folded header

@@ -215,7 +215,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
   }
   else {
     char *orgcmd = NULL;
-    char *cmd = NULL;
+    const char *cmd = NULL;
     size_t cmdsize = 0;
     int num = 0;
 
@@ -230,7 +230,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
 
     cmd = orgcmd;
     while(cmd && cmdsize) {
-      char *check;
+      const char *check;
 
       if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
         logmsg("instructed to require authorization header");
@@ -308,7 +308,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   static char request[REQUEST_KEYWORD_SIZE];
   int prot_major = 0;
   int prot_minor = 0;
-  char *end = strstr(line, end_of_headers);
+  const char *end = strstr(line, end_of_headers);
   const char *pval;
   curl_off_t num;
 
@@ -329,7 +329,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   }
 
   else if(req->testno == DOCNUMBER_NOTHING) {
-    char *http;
+    const char *http;
     bool fine = FALSE;
     char *httppath = NULL;
     size_t npath = 0; /* httppath length */
@@ -512,7 +512,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   if(use_gopher) {
     /* when using gopher we cannot check the request until the entire
        thing has been received */
-    char *ptr;
+    const char *ptr;
 
     /* find the last slash in the line */
     ptr = strrchr(line, '/');
