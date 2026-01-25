@@ -1812,6 +1812,25 @@ endif()
 # list on the linker command-line for some reason. This makes them appear
 # before dependencies detected via curl's custom Find modules, and breaks
 # linkers sensitive to lib order. There must be a better solution to this.
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  if(USE_OPENSSL AND TARGET OpenSSL::Crypto)
+    add_library(CURL::OpenSSL_Crypto INTERFACE IMPORTED)
+    get_target_property(_curl_libname OpenSSL::Crypto LOCATION)
+    set_target_properties(CURL::OpenSSL_Crypto PROPERTIES INTERFACE_LINK_LIBRARIES "${_curl_libname}")
+    list(APPEND CURL_LIBS CURL::OpenSSL_Crypto)
+  endif()
+  if(HAVE_LIBZ AND TARGET ZLIB::ZLIB)
+    add_library(CURL::ZLIB INTERFACE IMPORTED)
+    get_target_property(_curl_libname ZLIB::ZLIB LOCATION)
+    set_target_properties(CURL::ZLIB PROPERTIES INTERFACE_LINK_LIBRARIES "${_curl_libname}")
+    list(APPEND CURL_LIBS CURL::ZLIB)
+  endif()
+  if(WIN32)
+    add_library(CURL::win32_winsock INTERFACE IMPORTED)
+    set_target_properties(CURL::win32_winsock PROPERTIES INTERFACE_LINK_LIBRARIES "ws2_32")
+    list(APPEND CURL_LIBS CURL::win32_winsock)
+  endif()
+endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
