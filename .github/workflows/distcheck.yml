@@ -207,26 +207,9 @@ jobs:
           curl-install/bin/curl --disable --version
           curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
-  missing-files-slim:
-    name: 'missing files (slim)'
-    runs-on: ubuntu-slim
-    timeout-minutes: 5
-    needs: maketgz-and-verify-in-tree
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          persist-credentials: false
-
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: 'release-tgz'
-
-      - name: 'detect files missing from release tarball'
-        run: .github/scripts/distfiles.sh curl-99.98.97.tar.gz
-
-  missing-files-arm:
-    name: 'missing files (arm)'
-    runs-on: ubuntu-24.04-arm
+  missing-files:
+    name: 'missing files'
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
