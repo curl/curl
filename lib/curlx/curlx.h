@@ -31,6 +31,9 @@
  * be.
  */
 
+#include "basename.h"
+/* for curlx_basename() function */
+
 #include "binmode.h"
 /* "binmode.h" provides macro CURLX_SET_BINMODE() */
 

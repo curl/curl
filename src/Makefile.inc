@@ -34,6 +34,7 @@
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/curlx/base64.c \
+  ../lib/curlx/basename.c \
   ../lib/curlx/dynbuf.c \
   ../lib/curlx/fopen.c \
   ../lib/curlx/multibyte.c \
@@ -76,7 +77,6 @@ CURL_CFILES = \
   config2setopts.c \
   slist_wc.c \
   terminal.c \
-  tool_bname.c \
   tool_cb_dbg.c \
   tool_cb_hdr.c \
   tool_cb_prg.c \
@@ -122,7 +122,6 @@ CURL_HFILES = \
   config2setopts.h \
   slist_wc.h \
   terminal.h \
-  tool_bname.h \
   tool_cb_dbg.h \
   tool_cb_hdr.h \
   tool_cb_prg.h \
