@@ -29,8 +29,8 @@
 
 char *tool_basename(char *path)
 {
-  const char *s1;
-  const char *s2;
+  char *s1;
+  char *s2;
 
   s1 = strrchr(path, '/');
   s2 = strrchr(path, '\\');
