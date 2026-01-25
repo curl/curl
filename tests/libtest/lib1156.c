@@ -160,7 +160,7 @@ static CURLcode test_lib1156(const char *URL)
 
   curl_global_cleanup();
   curl_mprintf("%d\n", status);
-  return (CURLcode)status;
+  return status ? TEST_ERR_FAILURE : CURLE_OK;
 
 test_cleanup:
 
