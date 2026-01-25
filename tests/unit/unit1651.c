@@ -364,7 +364,7 @@ static CURLcode test_unit1651(const char *arg)
     0x48, 0x88, 0x61, 0x54, 0x4A, 0x2B, 0xB7, 0x6A, 0x12, 0x08, 0xFB,
   };
 
-  CURLcode res;
+  CURLcode result;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
   struct Curl_easy *data;
@@ -378,9 +378,9 @@ static CURLcode test_unit1651(const char *arg)
 
   data = curl_easy_init();
   if(data) {
-    res = Curl_extract_certinfo(data, 0, beg, end);
+    result = Curl_extract_certinfo(data, 0, beg, end);
 
-    fail_unless(res == CURLE_OK, "Curl_extract_certinfo returned error");
+    fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
 
     /* a poor man's fuzzing of some initial data to make sure nothing bad
        happens */
