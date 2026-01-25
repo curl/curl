@@ -1673,7 +1673,7 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
     bool negate;
     const struct flagmap *map;
     size_t len;
-    char *next = strchr(flag, ','); /* Find next comma or end */
+    const char *next = strchr(flag, ','); /* Find next comma or end */
     if(next)
       len = next - flag;
     else

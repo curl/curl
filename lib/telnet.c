@@ -115,8 +115,8 @@ struct TELNET {
   int himq[256];
   int him_preferred[256];
   int subnegotiation[256];
-  char *subopt_ttype;                /* Set with suboption TTYPE */
-  char *subopt_xdisploc;             /* Set with suboption XDISPLOC */
+  const char *subopt_ttype;          /* Set with suboption TTYPE */
+  const char *subopt_xdisploc;       /* Set with suboption XDISPLOC */
   unsigned short subopt_wsx;         /* Set with suboption NAWS */
   unsigned short subopt_wsy;         /* Set with suboption NAWS */
   TelnetReceive telrcv_state;
@@ -860,9 +860,9 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
   for(head = data->set.telnet_options; head && !result; head = head->next) {
     size_t olen;
-    char *option = head->data;
-    char *arg;
-    char *sep = strchr(option, '=');
+    const char *option = head->data;
+    const char *arg;
+    const char *sep = strchr(option, '=');
     if(sep) {
       olen = sep - option;
       arg = ++sep;
@@ -1037,7 +1037,7 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
         return CURLE_BAD_FUNCTION_ARGUMENT;
       /* Add the variable if it fits */
       if(len + tmplen < (int)sizeof(temp) - 6) {
-        char *s = strchr(v->data, ',');
+        const char *s = strchr(v->data, ',');
         if(!s)
           len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
                                 "%c%s", CURL_NEW_ENV_VAR, v->data);

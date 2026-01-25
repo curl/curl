@@ -935,7 +935,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   if(data->set.str[STRING_FTPPORT] &&
      (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
-    char *ip_end = NULL;
+    const char *ip_end = NULL;
 
 #ifdef USE_IPV6
     if(*string_ftpport == '[') {
@@ -1952,7 +1952,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   if((ftpc->count1 == 0) &&
      (ftpcode == 229)) {
     /* positive EPSV response */
-    char *ptr = strchr(str, '(');
+    const char *ptr = strchr(str, '(');
     if(ptr) {
       char sep;
       ptr++;

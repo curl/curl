@@ -548,7 +548,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
   }
   else {
     char *orgcmd = NULL;
-    char *cmd = NULL;
+    const char *cmd = NULL;
     size_t cmdsize = 0;
     int num = 0;
 
@@ -562,7 +562,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
 
     cmd = orgcmd;
     while(cmd && cmdsize) {
-      char *check;
+      const char *check;
       if(sscanf(cmd, "writedelay: %d", &num) == 1) {
         logmsg("instructed to delay %d secs between packets", num);
         req->writedelay = num;
@@ -600,7 +600,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
 static int validate_access(struct testcase *test,
                            const char *filename, unsigned short mode)
 {
-  char *ptr;
+  const char *ptr;
 
   logmsg("trying to get file: %s mode %x", filename, mode);
 

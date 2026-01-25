@@ -211,8 +211,8 @@ static char *Curl_basename(char *path)
 {
   /* Ignore all the details above for now and make a quick and simple
      implementation here */
-  char *s1;
-  char *s2;
+  const char *s1;
+  const char *s2;
 
   s1 = strrchr(path, '/');
   s2 = strrchr(path, '\\');

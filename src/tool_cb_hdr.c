@@ -452,7 +452,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     }
   }
   if(hdrcbdata->config->writeout) {
-    char *value = memchr(ptr, ':', cb);
+    const char *value = memchr(ptr, ':', cb);
     if(value) {
       if(per->was_last_header_empty)
         per->num_headers = 0;
@@ -466,7 +466,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
      (scheme == proto_http || scheme == proto_https ||
       scheme == proto_rtsp || scheme == proto_file)) {
     /* bold headers only for selected protocols */
-    char *value = NULL;
+    const char *value = NULL;
 
     if(!outs->stream && !tool_create_output_file(outs, per->config))
       return CURL_WRITEFUNC_ERROR;
