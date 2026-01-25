@@ -148,7 +148,6 @@ static bool match_host(const char *token, size_t tokenlen,
 static bool match_ip(int type, const char *token, size_t tokenlen,
                      const char *name)
 {
-  const char *check = token;
   char *slash;
   unsigned int bits = 0;
   char checkip[128];
@@ -156,11 +155,10 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
     /* this cannot match */
     return FALSE;
   /* copy the check name to a temp buffer */
-  memcpy(checkip, check, tokenlen);
+  memcpy(checkip, token, tokenlen);
   checkip[tokenlen] = 0;
-  check = checkip;
 
-  slash = strchr(check, '/');
+  slash = strchr(checkip, '/');
   /* if the slash is part of this token, use it */
   if(slash) {
     curl_off_t value;
@@ -172,9 +170,9 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
     *slash = 0; /* null-terminate there */
   }
   if(type == TYPE_IPV6)
-    return Curl_cidr6_match(name, check, bits);
+    return Curl_cidr6_match(name, checkip, bits);
   else
-    return Curl_cidr4_match(name, check, bits);
+    return Curl_cidr4_match(name, checkip, bits);
 }
 
 /****************************************************************
