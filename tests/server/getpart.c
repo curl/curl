@@ -185,7 +185,7 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
 static int decodedata(char  **buf, /* dest buffer */
                       size_t *len) /* dest buffer data length */
 {
-  CURLcode error = CURLE_OK;
+  CURLcode result = CURLE_OK;
   unsigned char *buf64 = NULL;
   size_t src_len = 0;
 
@@ -193,8 +193,8 @@ static int decodedata(char  **buf, /* dest buffer */
     return GPE_OK;
 
   /* base64 decode the given buffer */
-  error = curlx_base64_decode(*buf, &buf64, &src_len);
-  if(error)
+  result = curlx_base64_decode(*buf, &buf64, &src_len);
+  if(result)
     return GPE_OUT_OF_MEMORY;
 
   if(!src_len) {
