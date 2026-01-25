@@ -31,6 +31,7 @@ struct Curl_easy;
 #include "curl_trc.h"
 #include "transfer.h"
 #include "strdup.h"
+#include "curlx/basename.h"
 #include "curlx/strcopy.h"
 #include "curlx/fopen.h"
 #include "curlx/base64.h"
@@ -38,10 +39,6 @@ struct Curl_easy;
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
                                     !defined(CURL_DISABLE_SMTP) ||      \
                                     !defined(CURL_DISABLE_IMAP))
-
-#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#include <libgen.h>
-#endif
 
 #include "rand.h"
 #include "slist.h"
@@ -182,55 +179,6 @@ static FILE *vmsfopenread(const char *file, const char *mode)
 #define fopen_read vmsfopenread
 #endif /* !__VMS */
 
-#ifndef HAVE_BASENAME
-/*
-  (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004
-  Edition)
-
-  The basename() function shall take the pathname pointed to by path and
-  return a pointer to the final component of the pathname, deleting any
-  trailing '/' characters.
-
-  If the string pointed to by path consists entirely of the '/' character,
-  basename() shall return a pointer to the string "/". If the string pointed
-  to by path is exactly "//", it is implementation-defined whether '/' or "//"
-  is returned.
-
-  If path is a null pointer or points to an empty string, basename() shall
-  return a pointer to the string ".".
-
-  The basename() function may modify the string pointed to by path, and may
-  return a pointer to static storage that may then be overwritten by a
-  subsequent call to basename().
-
-  The basename() function need not be reentrant. A function that is not
-  required to be reentrant is not required to be thread-safe.
-
-*/
-static char *Curl_basename(char *path)
-{
-  /* Ignore all the details above for now and make a quick and simple
-     implementation here */
-  char *s1;
-  char *s2;
-
-  s1 = strrchr(path, '/');
-  s2 = strrchr(path, '\\');
-
-  if(s1 && s2) {
-    path = (s1 > s2 ? s1 : s2) + 1;
-  }
-  else if(s1)
-    path = s1 + 1;
-  else if(s2)
-    path = s2 + 1;
-
-  return path;
-}
-
-#define basename(x)  Curl_basename(x)
-#endif /* !HAVE_BASENAME */
-
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
                          enum mimestate tok, void *ptr)
@@ -319,7 +267,7 @@ static char *strippath(const char *fullfile)
                                         the buffer it works on */
   if(!filename)
     return NULL;
-  base = curlx_strdup(basename(filename));
+  base = curlx_strdup(curlx_basename(filename));
 
   curlx_free(filename); /* free temporary buffer */
 

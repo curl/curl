@@ -292,8 +292,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     }
 
     do {
-      char *line = curlx_dyn_ptr(&pp->recvbuf);
-      char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
+      const char *line = curlx_dyn_ptr(&pp->recvbuf);
+      const char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
       if(nl) {
         /* a newline is CRLF in pp-talk, so the CR is ignored as
            the line is not really terminated until the LF comes */

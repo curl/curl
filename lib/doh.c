@@ -129,7 +129,7 @@ UNITTEST DOHcode doh_req_encode(const char *host,
   /* encode each label and store it in the QNAME */
   while(*hostp) {
     size_t labellen;
-    char *dot = strchr(hostp, '.');
+    const char *dot = strchr(hostp, '.');
     if(dot)
       labellen = dot - hostp;
     else

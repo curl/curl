@@ -90,33 +90,33 @@ static void easysrc_free(void)
 /* Add a source line to the main code or remarks */
 CURLcode easysrc_add(struct slist_wc **plist, const char *line)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct slist_wc *list = slist_wc_append(*plist, line);
   if(!list) {
     easysrc_free();
-    ret = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
   }
   else
     *plist = list;
-  return ret;
+  return result;
 }
 
 CURLcode easysrc_addf(struct slist_wc **plist, const char *fmt, ...)
 {
-  CURLcode ret;
+  CURLcode result;
   char *bufp;
   va_list ap;
   va_start(ap, fmt);
   bufp = curl_mvaprintf(fmt, ap);
   va_end(ap);
   if(!bufp) {
-    ret = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
   }
   else {
-    ret = easysrc_add(plist, bufp);
+    result = easysrc_add(plist, bufp);
     curl_free(bufp);
   }
-  return ret;
+  return result;
 }
 
 CURLcode easysrc_init(void)
@@ -126,46 +126,46 @@ CURLcode easysrc_init(void)
 
 CURLcode easysrc_perform(void)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode result = CURLE_OK;
   /* Note any setopt calls which we could not convert */
   if(easysrc_toohard) {
     int i;
     struct curl_slist *ptr;
-    ret = easysrc_add(&easysrc_code, "");
+    result = easysrc_add(&easysrc_code, "");
     /* Preamble comment */
-    for(i = 0; srchard[i] && !ret; i++)
-      ret = easysrc_add(&easysrc_code, srchard[i]);
+    for(i = 0; srchard[i] && !result; i++)
+      result = easysrc_add(&easysrc_code, srchard[i]);
     /* Each unconverted option */
-    if(easysrc_toohard && !ret) {
-      for(ptr = easysrc_toohard->first; ptr && !ret; ptr = ptr->next)
-        ret = easysrc_add(&easysrc_code, ptr->data);
+    if(easysrc_toohard && !result) {
+      for(ptr = easysrc_toohard->first; ptr && !result; ptr = ptr->next)
+        result = easysrc_add(&easysrc_code, ptr->data);
     }
-    if(!ret)
-      ret = easysrc_add(&easysrc_code, "");
-    if(!ret)
-      ret = easysrc_add(&easysrc_code, "*/");
+    if(!result)
+      result = easysrc_add(&easysrc_code, "");
+    if(!result)
+      result = easysrc_add(&easysrc_code, "*/");
 
     slist_wc_free_all(easysrc_toohard);
     easysrc_toohard = NULL;
   }
 
-  if(!ret)
-    ret = easysrc_add(&easysrc_code, "");
-  if(!ret)
-    ret = easysrc_add(&easysrc_code, "ret = curl_easy_perform(hnd);");
-  if(!ret)
-    ret = easysrc_add(&easysrc_code, "");
+  if(!result)
+    result = easysrc_add(&easysrc_code, "");
+  if(!result)
+    result = easysrc_add(&easysrc_code, "ret = curl_easy_perform(hnd);");
+  if(!result)
+    result = easysrc_add(&easysrc_code, "");
 
-  return ret;
+  return result;
 }
 
 CURLcode easysrc_cleanup(void)
 {
-  CURLcode ret = easysrc_add(&easysrc_code, "curl_easy_cleanup(hnd);");
-  if(!ret)
-    ret = easysrc_add(&easysrc_code, "hnd = NULL;");
+  CURLcode result = easysrc_add(&easysrc_code, "curl_easy_cleanup(hnd);");
+  if(!result)
+    result = easysrc_add(&easysrc_code, "hnd = NULL;");
 
-  return ret;
+  return result;
 }
 
 void dumpeasysrc(void)

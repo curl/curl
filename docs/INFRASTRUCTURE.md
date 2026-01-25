@@ -64,7 +64,7 @@ us free of charge.
 
 ## CodeSonar
 
-[CodeSonar](https://codesecure.com/our-products/codesonar/) analyzes the curl
+[CodeSonar](https://www.adacore.com/codesonar) analyzes the curl
 source code daily and emails Daniel Stenberg whenever it finds suspected
 problems in the source code. I hope and expect that we can invite other
 maintainers to access these reports soon.

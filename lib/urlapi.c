@@ -265,7 +265,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
    *
    * We need somewhere to put the embedded details, so do that first.
    */
-  char *ptr;
+  const char *ptr;
 
   DEBUGASSERT(login);
 
@@ -577,7 +577,7 @@ static int ipv4_normalize(struct dynbuf *host)
 /* if necessary, replace the host content with a URL decoded version */
 static CURLUcode urldecode_host(struct dynbuf *host)
 {
-  char *per = NULL;
+  const char *per;
   const char *hostname = curlx_dyn_ptr(host);
   per = strchr(hostname, '%');
   if(!per)
@@ -780,8 +780,8 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
           /* remove the last segment from the output buffer */
           size_t len = curlx_dyn_len(&out);
           if(len) {
-            char *ptr = curlx_dyn_ptr(&out);
-            char *last = memrchr(ptr, '/', len);
+            const char *ptr = curlx_dyn_ptr(&out);
+            const char *last = memrchr(ptr, '/', len);
             if(last)
               /* trim the output at the slash */
               curlx_dyn_setlen(&out, last - ptr);

@@ -122,7 +122,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
                               any order */
   bool our_login = FALSE;  /* found our login name */
   bool done = FALSE;
-  char *netrcbuffer;
+  const char *netrcbuffer;
   struct dynbuf token;
   struct dynbuf *filebuf = &store->filebuf;
   DEBUGASSERT(!*passwordp);
@@ -326,7 +326,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
       tok = ++tok_end;
     }
     if(!done) {
-      char *nl = NULL;
+      const char *nl = NULL;
       if(tok)
         nl = strchr(tok, '\n');
       if(!nl)

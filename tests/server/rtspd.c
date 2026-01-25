@@ -149,7 +149,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   static char doc[MAXDOCNAMELEN];
   static char prot_str[5];
   int prot_major, prot_minor;
-  char *end = strstr(line, END_OF_HEADERS);
+  const char *end = strstr(line, END_OF_HEADERS);
 
   logmsg("rtspd_ProcessRequest() called with testno %ld and line [%s]",
          req->testno, line);
@@ -164,7 +164,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
             prot_str,
             &prot_major,
             &prot_minor) == 5) {
-    char *ptr;
+    const char *ptr;
     const char *pval;
     curl_off_t testnum;
 
@@ -367,7 +367,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
         else if(!strncmp(doc, "test", 4)) {
           /* if the hostname starts with test, the port number used in the
              CONNECT line will be used as test number! */
-          char *portp = strchr(doc, ':');
+          const char *portp = strchr(doc, ':');
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
             pval = portp + 1;
             if(!curlx_str_number(&pval, &testnum, INT_MAX))

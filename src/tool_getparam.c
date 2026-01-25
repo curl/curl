@@ -1673,7 +1673,7 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
     bool negate;
     const struct flagmap *map;
     size_t len;
-    char *next = strchr(flag, ','); /* Find next comma or end */
+    const char *next = strchr(flag, ','); /* Find next comma or end */
     if(next)
       len = next - flag;
     else
@@ -3055,10 +3055,10 @@ ParameterError parse_args(int argc, argv_item_t argv[])
   int i;
   bool stillflags;
   const char *orig_opt = NULL;
-  ParameterError result = PARAM_OK;
+  ParameterError err = PARAM_OK;
   struct OperationConfig *config = global->first;
 
-  for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
+  for(i = 1, stillflags = TRUE; i < argc && !err; i++) {
     orig_opt = convert_tchar_to_UTF8(argv[i]);
     if(!orig_opt)
       return PARAM_NO_MEM;
@@ -3080,15 +3080,15 @@ ParameterError parse_args(int argc, argv_item_t argv[])
           }
         }
 
-        result = getparameter(orig_opt, nextarg, &passarg, config,
+        err = getparameter(orig_opt, nextarg, &passarg, config,
                               CONFIG_MAX_LEVELS);
 
         unicodefree(CURL_UNCONST(nextarg));
         config = global->last;
-        if(result == PARAM_NEXT_OPERATION) {
-          /* Reset result as PARAM_NEXT_OPERATION is only used here and not
+        if(err == PARAM_NEXT_OPERATION) {
+          /* Reset err as PARAM_NEXT_OPERATION is only used here and not
              returned from this function */
-          result = PARAM_OK;
+          err = PARAM_OK;
 
           if(config->url_list && config->url_list->url) {
             /* Allocate the next config */
@@ -3102,14 +3102,14 @@ ParameterError parse_args(int argc, argv_item_t argv[])
               config = config->next;
             }
             else
-              result = PARAM_NO_MEM;
+              err = PARAM_NO_MEM;
           }
           else {
             errorf("missing URL before --next");
-            result = PARAM_BAD_USE;
+            err = PARAM_BAD_USE;
           }
         }
-        else if(!result && passarg)
+        else if(!err && passarg)
           i++; /* we are supposed to skip this */
       }
     }
@@ -3117,26 +3117,26 @@ ParameterError parse_args(int argc, argv_item_t argv[])
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, &used, config, 0);
+      err = getparameter("--url", orig_opt, &used, config, 0);
     }
 
-    if(!result) {
+    if(!err) {
       unicodefree(CURL_UNCONST(orig_opt));
       orig_opt = NULL;
     }
   }
 
-  if(!result && config->content_disposition) {
+  if(!err && config->content_disposition) {
     if(config->resume_from_current)
-      result = PARAM_CONTDISP_RESUME_FROM;
+      err = PARAM_CONTDISP_RESUME_FROM;
   }
 
-  if(result && result != PARAM_HELP_REQUESTED &&
-     result != PARAM_MANUAL_REQUESTED &&
-     result != PARAM_VERSION_INFO_REQUESTED &&
-     result != PARAM_ENGINES_REQUESTED &&
-     result != PARAM_CA_EMBED_REQUESTED) {
-    const char *reason = param2text(result);
+  if(err && err != PARAM_HELP_REQUESTED &&
+     err != PARAM_MANUAL_REQUESTED &&
+     err != PARAM_VERSION_INFO_REQUESTED &&
+     err != PARAM_ENGINES_REQUESTED &&
+     err != PARAM_CA_EMBED_REQUESTED) {
+    const char *reason = param2text(err);
 
     if(orig_opt && strcmp(":", orig_opt))
       helpf("option %s: %s", orig_opt, reason);
@@ -3145,5 +3145,5 @@ ParameterError parse_args(int argc, argv_item_t argv[])
   }
 
   unicodefree(CURL_UNCONST(orig_opt));
-  return result;
+  return err;
 }

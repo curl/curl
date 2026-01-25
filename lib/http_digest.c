@@ -69,7 +69,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 {
   CURLcode result;
   unsigned char *path = NULL;
-  char *tmp = NULL;
+  const char *tmp = NULL;
   char *response;
   size_t len;
   bool have_chlg;
