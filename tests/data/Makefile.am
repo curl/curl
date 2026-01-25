@@ -218,7 +218,7 @@ test1620 test1621 test1622 test1623 \
 \
 test1630 test1631 test1632 test1633 test1634 test1635 test1636 \
 \
-test1640 \
+test1640 test1641 test1642 test1643 \
 \
 test1650 test1651 test1652 test1653 test1654 test1655 test1656 test1657 \
 test1658 \
