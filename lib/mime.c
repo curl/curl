@@ -40,10 +40,6 @@ struct Curl_easy;
                                     !defined(CURL_DISABLE_SMTP) ||      \
                                     !defined(CURL_DISABLE_IMAP))
 
-#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#include <libgen.h>
-#endif
-
 #include "rand.h"
 #include "slist.h"
 #include "curlx/dynbuf.h"
@@ -271,7 +267,7 @@ static char *strippath(const char *fullfile)
                                         the buffer it works on */
   if(!filename)
     return NULL;
-  base = curlx_strdup(basename(filename));
+  base = curlx_strdup(curlx_basename(filename));
 
   curlx_free(filename); /* free temporary buffer */
 

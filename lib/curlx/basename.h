@@ -26,11 +26,14 @@
 #include "../curl_setup.h"
 
 #ifndef HAVE_BASENAME
-
 char *curlx_basename(char *path);
+#else
 
-#define basename(x) curlx_basename(x)
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
 
-#endif /* HAVE_BASENAME */
+#define curlx_basename(x) basename(x)
+#endif
 
 #endif /* HEADER_CURLX_BASENAME_H */
