@@ -1185,7 +1185,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 
   /* make sure the last command ends with a comma too! */
   while(p) {
-    char *e = strchr(p, ',');
+    const char *e = strchr(p, ',');
     if(e) {
       size_t n = (size_t)(e - p);
       char buf[80];
