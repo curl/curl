@@ -734,10 +734,10 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
       }
       else {
         /* this is meant as a variable to output */
-        char *end;
+        const char *end;
         size_t vlen;
         if('{' == ptr[1]) {
-          struct writeoutvar *wv = NULL;
+          const struct writeoutvar *wv = NULL;
           struct writeoutvar find = { 0 };
           end = strchr(ptr, '}');
           ptr += 2; /* pass the % and the { */

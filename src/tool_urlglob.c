@@ -352,7 +352,7 @@ static CURLcode peek_ipv6(const char *str, size_t *skip, bool *ipv6p)
    */
   char hostname[MAX_IP6LEN];
   CURLU *u;
-  char *endbr = strchr(str, ']');
+  const char *endbr = strchr(str, ']');
   size_t hlen;
   CURLUcode rc;
   CURLcode result = CURLE_OK;
