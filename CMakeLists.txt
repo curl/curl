@@ -563,6 +563,11 @@ option(BUILD_LIBCURL_DOCS "Build libcurl man pages" ON)
 option(BUILD_MISC_DOCS "Build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
 option(ENABLE_CURL_MANUAL "Build the man page for curl and enable its -M/--manual option" ON)
 
+option(CURL_BUILD_ALL "Build optional build targets (examples, tests) by default" OFF)
+if(CURL_BUILD_ALL)
+  set(CURL_BUILD_ALL_KEYWORD ALL)
+endif()
+
 if((ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS) AND NOT Perl_FOUND)
   message(WARNING "Perl not found. Will not build manuals.")
 endif()
