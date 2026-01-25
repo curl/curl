@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-  CURLcode ret;
+  CURLcode result;
   CURL *hnd;
   curl_mime *mime1;
   curl_mimepart *part1;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
   */
 
-  ret = curl_easy_perform(hnd);
+  result = curl_easy_perform(hnd);
 
   curl_easy_cleanup(hnd);
   hnd = NULL;
@@ -78,6 +78,6 @@ int main(int argc, char *argv[])
   curl_slist_free_all(slist1);
   slist1 = NULL;
 
-  return (int)ret;
+  return (int)result;
 }
 /**** End of sample code ****/

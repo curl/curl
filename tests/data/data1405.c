@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-  CURLcode ret;
+  CURLcode result;
   CURL *hnd;
   struct curl_slist *slist1;
   struct curl_slist *slist2;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
   */
 
-  ret = curl_easy_perform(hnd);
+  result = curl_easy_perform(hnd);
 
   curl_easy_cleanup(hnd);
   hnd = NULL;
@@ -61,6 +61,6 @@ int main(int argc, char *argv[])
   curl_slist_free_all(slist3);
   slist3 = NULL;
 
-  return (int)ret;
+  return (int)result;
 }
 /**** End of sample code ****/

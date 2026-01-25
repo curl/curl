@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-  CURLcode ret;
+  CURLcode result;
   CURL *hnd;
 
   hnd = curl_easy_init();
@@ -36,11 +36,11 @@ int main(int argc, char *argv[])
 
   */
 
-  ret = curl_easy_perform(hnd);
+  result = curl_easy_perform(hnd);
 
   curl_easy_cleanup(hnd);
   hnd = NULL;
 
-  return (int)ret;
+  return (int)result;
 }
 /**** End of sample code ****/
