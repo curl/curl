@@ -71,4 +71,4 @@ char *curlx_basename(char *path)
   return path;
 }
 
-#endif /* HAVE_BASENAME */
+#endif /* !HAVE_BASENAME */

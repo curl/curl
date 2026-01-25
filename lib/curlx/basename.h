@@ -34,6 +34,6 @@ char *curlx_basename(char *path);
 #endif
 
 #define curlx_basename(x) basename(x)
-#endif
+#endif /* !HAVE_BASENAME */
 
 #endif /* HEADER_CURLX_BASENAME_H */
