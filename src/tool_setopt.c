@@ -253,12 +253,12 @@ CURLcode tool_setopt_enum(CURL *curl, const char *name, CURLoption tag,
       /* If no definition was found, output an explicit value.
        * This could happen if new values are defined and used
        * but the NameValue list is not updated. */
-      result = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, %ldL);",
+      result = easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, %ldL);",
                             name, lval);
     }
     else
       result =
-        easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, (long)%s);",
+        easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, (long)%s);",
                      name, nv->name);
   }
 
@@ -296,19 +296,19 @@ CURLcode tool_setopt_SSLVERSION(CURL *curl, const char *name, CURLoption tag,
       /* If no definition was found, output an explicit value.
        * This could happen if new values are defined and used
        * but the NameValue list is not updated. */
-      result = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, %ldL);",
+      result = easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, %ldL);",
                             name, lval);
     }
     else {
       if(nv2->name && *nv2->name)
         /* if max is set */
         result = easysrc_addf(&easysrc_code,
-                              "curl_easy_setopt(hnd, %s, (long)(%s | %s));",
+                              "curl_easy_setopt(curl, %s, (long)(%s | %s));",
                               name, nv->name, nv2->name);
       else
         /* without a max */
         result = easysrc_addf(&easysrc_code,
-                              "curl_easy_setopt(hnd, %s, (long)%s);",
+                              "curl_easy_setopt(curl, %s, (long)%s);",
                               name, nv->name);
     }
   }
@@ -336,7 +336,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, const char *name, CURLoption tag,
     unsigned long rest = (unsigned long)lval;
     const struct NameValueUnsigned *nv = NULL;
     curl_msnprintf(preamble, sizeof(preamble),
-                   "curl_easy_setopt(hnd, %s, ", name);
+                   "curl_easy_setopt(curl, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~rest) == 0) {
         /* all value flags contained in rest */
@@ -533,7 +533,7 @@ static CURLcode libcurl_generate_mime(CURL *curl,
   if(!result)
     result = easysrc_addf(&easysrc_data, "mime%d = NULL;", *mimeno);
   if(!result)
-    result = easysrc_addf(&easysrc_code, "mime%d = curl_mime_init(hnd);",
+    result = easysrc_addf(&easysrc_code, "mime%d = curl_mime_init(curl);",
                           *mimeno);
   if(!result)
     result = easysrc_addf(&easysrc_clean, "curl_mime_free(mime%d);", *mimeno);
@@ -563,7 +563,7 @@ CURLcode tool_setopt_mimepost(CURL *curl, struct OperationConfig *config,
 
     if(!result)
       result =
-        easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, mime%d);",
+        easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, mime%d);",
                      name, mimeno);
   }
 
@@ -584,7 +584,7 @@ CURLcode tool_setopt_slist(CURL *curl, const char *name, CURLoption tag,
     result = libcurl_generate_slist(list, &i);
     if(!result)
       result =
-        easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, slist%d);",
+        easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, slist%d);",
                      name, i);
   }
 
@@ -610,7 +610,7 @@ CURLcode tool_setopt_long(CURL *curl, const char *name, CURLoption tag,
   result = curl_easy_setopt(curl, tag, lval);
   if((lval != defval) && global->libcurl && !result) {
     /* we only use this for real if --libcurl was used */
-    result = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, %ldL);",
+    result = easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, %ldL);",
                           name, lval);
   }
   return result;
@@ -627,7 +627,7 @@ CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
   if(global->libcurl && !result && lval) {
     /* we only use this for real if --libcurl was used */
     result =
-      easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, (curl_off_t)%"
+      easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, (curl_off_t)%"
                    CURL_FORMAT_CURL_OFF_T ");", name, lval);
   }
 
@@ -690,7 +690,7 @@ CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
     escaped = c_escape(str, len);
     if(escaped) {
       result = easysrc_addf(&easysrc_code,
-                            "curl_easy_setopt(hnd, %s, \"%s\");",
+                            "curl_easy_setopt(curl, %s, \"%s\");",
                             name, escaped);
       curlx_free(escaped);
     }

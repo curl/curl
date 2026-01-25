@@ -50,8 +50,8 @@ static const char * const srchead[] = {
   "",
   "int main(int argc, char *argv[])",
   "{",
-  "  CURLcode ret;",
-  "  CURL *hnd;",
+  "  CURLcode result;",
+  "  CURL *curl;",
   NULL
 };
 /* easysrc_decl declarations come here */
@@ -66,7 +66,7 @@ static const char * const srchard[] = {
 };
 static const char *const srcend[] = {
   "",
-  "  return (int)ret;",
+  "  return (int)result;",
   "}",
   "/**** End of sample code ****/",
   NULL
@@ -121,7 +121,7 @@ CURLcode easysrc_addf(struct slist_wc **plist, const char *fmt, ...)
 
 CURLcode easysrc_init(void)
 {
-  return easysrc_add(&easysrc_code, "hnd = curl_easy_init();");
+  return easysrc_add(&easysrc_code, "curl = curl_easy_init();");
 }
 
 CURLcode easysrc_perform(void)
@@ -152,7 +152,7 @@ CURLcode easysrc_perform(void)
   if(!result)
     result = easysrc_add(&easysrc_code, "");
   if(!result)
-    result = easysrc_add(&easysrc_code, "ret = curl_easy_perform(hnd);");
+    result = easysrc_add(&easysrc_code, "result = curl_easy_perform(curl);");
   if(!result)
     result = easysrc_add(&easysrc_code, "");
 
@@ -161,9 +161,9 @@ CURLcode easysrc_perform(void)
 
 CURLcode easysrc_cleanup(void)
 {
-  CURLcode result = easysrc_add(&easysrc_code, "curl_easy_cleanup(hnd);");
+  CURLcode result = easysrc_add(&easysrc_code, "curl_easy_cleanup(curl);");
   if(!result)
-    result = easysrc_add(&easysrc_code, "hnd = NULL;");
+    result = easysrc_add(&easysrc_code, "curl = NULL;");
 
   return result;
 }
