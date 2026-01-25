@@ -187,9 +187,9 @@ jobs:
               fi
               mkdir bld && cd bld
               time ../configure --prefix="$HOME"/curl-install --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
+                --disable-dependency-tracking --enable-option-checking=fatal \
                 --with-openssl \
                 --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
-                --disable-dependency-tracking --enable-option-checking=fatal \
                 ${options} \
                 ${MATRIX_OPTIONS} \
                 || { tail -n 1000 config.log; false; }
@@ -283,11 +283,11 @@ jobs:
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
               --host="aarch64-linux-android${MATRIX_PLATFORM}" \
-              --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_OPTIONS}
           fi
 
@@ -389,14 +389,14 @@ jobs:
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
               AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
               RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \
               WATT_ROOT="$HOME/djgpp/net/watt" \
               --host=i586-pc-msdosdjgpp \
               --without-ssl --without-libpsl \
-              --with-zlib="$HOME/djgpp" \
-              --disable-dependency-tracking --enable-option-checking=fatal
+              --with-zlib="$HOME/djgpp"
           fi
 
       - name: 'configure log'

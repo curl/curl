@@ -99,8 +99,8 @@ jobs:
               ${MATRIX_CONFIG}
           else
             mkdir bld && cd bld && ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
-              --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
+              --with-libssh2 \
               ${MATRIX_CONFIG}
           fi
 
@@ -312,8 +312,8 @@ jobs:
           else
             export CFLAGS CPPFLAGS
             mkdir bld && cd bld && ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
-              --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
+              --with-libssh2 \
               ${MATRIX_CONFIG}
           fi
 
@@ -666,10 +666,10 @@ jobs:
               ${options}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               --host="${TRIPLET}" \
               --with-schannel --with-winidn \
-              --without-libpsl \
-              --disable-dependency-tracking --enable-option-checking=fatal
+              --without-libpsl
           fi
 
       - name: 'configure log'
