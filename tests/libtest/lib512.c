@@ -28,11 +28,11 @@
 
 static CURLcode test_lib512(const char *URL)
 {
-  CURLcode code;
+  CURLcode result;
   int rc = 99;
 
-  code = curl_global_init(CURL_GLOBAL_ALL);
-  if(code == CURLE_OK) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result == CURLE_OK) {
     CURL *curl = curl_easy_init();
     if(curl) {
       CURL *curl2;
@@ -43,11 +43,11 @@ static CURLcode test_lib512(const char *URL)
       curl2 = curl_easy_duphandle(curl);
       if(curl2) {
 
-        code = curl_easy_setopt(curl2, CURLOPT_URL, URL);
-        if(code == CURLE_OK) {
+        result = curl_easy_setopt(curl2, CURLOPT_URL, URL);
+        if(result == CURLE_OK) {
 
-          code = curl_easy_perform(curl2);
-          if(code == CURLE_OK)
+          result = curl_easy_perform(curl2);
+          if(result == CURLE_OK)
             rc = 0;
           else
             rc = 1;

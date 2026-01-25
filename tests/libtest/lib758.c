@@ -485,14 +485,14 @@ test_cleanup:
 
 static CURLcode test_lib758(const char *URL)
 {
-  CURLcode rc;
+  CURLcode result;
   /* rerun the same transfer multiple times and make it fail in different
      callback calls */
-  rc = t758_one(URL, 0, 0); /* no callback fails */
-  if(rc)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), rc);
+  result = t758_one(URL, 0, 0); /* no callback fails */
+  if(result)
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), result);
 
-  return rc;
+  return result;
 }
 
 #else /* T578_ENABLED */

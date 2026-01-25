@@ -60,7 +60,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
 
 static CURLcode test_cert_blob(const char *url, const char *cafile)
 {
-  CURLcode code = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   CURL *curl;
   struct curl_blob blob;
   size_t certsize;
@@ -84,11 +84,11 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
     blob.flags = CURL_BLOB_COPY;
     curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
     curlx_free(certdata);
-    code = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
   curl_easy_cleanup(curl);
 
-  return code;
+  return result;
 }
 
 static CURLcode test_lib678(const char *URL)
