@@ -383,7 +383,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
       goto cleanup;
     }
     for(i = 0; i < transfer_count_u; ++i) {
-      CURLcode result;
+      CURLcode rc;
       t = &transfer_u[i];
       t->curl = curl;
       if(setup_hx_upload(t->curl, url, t, http_version, host, share,
@@ -394,8 +394,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
       }
 
       curl_mfprintf(stderr, "[t-%zu] STARTING\n", t->idx);
-      result = curl_easy_perform(curl);
-      curl_mfprintf(stderr, "[t-%zu] DONE -> %d\n", t->idx, result);
+      rc = curl_easy_perform(curl);
+      curl_mfprintf(stderr, "[t-%zu] DONE -> %d\n", t->idx, rc);
       t->curl = NULL;
       curl_easy_reset(curl);
     }

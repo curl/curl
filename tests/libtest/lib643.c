@@ -224,19 +224,19 @@ static CURLcode t643_cyclic_add(void)
   CURL *curl = curl_easy_init();
   curl_mime *mime = curl_mime_init(curl);
   curl_mimepart *part = curl_mime_addpart(mime);
-  CURLcode a1 = curl_mime_subparts(part, mime);
+  CURLcode result = curl_mime_subparts(part, mime);
 
-  if(a1 == CURLE_BAD_FUNCTION_ARGUMENT) {
+  if(result == CURLE_BAD_FUNCTION_ARGUMENT) {
     curl_mime *submime = curl_mime_init(curl);
     curl_mimepart *subpart = curl_mime_addpart(submime);
 
     curl_mime_subparts(part, submime);
-    a1 = curl_mime_subparts(subpart, mime);
+    result = curl_mime_subparts(subpart, mime);
   }
 
   curl_mime_free(mime);
   curl_easy_cleanup(curl);
-  if(a1 != CURLE_BAD_FUNCTION_ARGUMENT)
+  if(result != CURLE_BAD_FUNCTION_ARGUMENT)
     /* that should have failed */
     return TEST_ERR_FAILURE;
 
