@@ -2270,20 +2270,20 @@ CURLcode operate(int argc, argv_item_t argv[])
 
   if(!result) {
     /* Parse the command line arguments */
-    ParameterError res = parse_args(argc, argv);
+    ParameterError err = parse_args(argc, argv);
     if(found_curlrc) {
       /* After parse_args so notef knows the verbosity */
       notef("Read config file from '%s'", curlrc_path);
       curlx_free(curlrc_path);
     }
-    if(res) {
+    if(err) {
       result = CURLE_OK;
 
       /* Check if we were asked for the help */
-      if(res == PARAM_HELP_REQUESTED)
+      if(err == PARAM_HELP_REQUESTED)
         ; /* already done */
       /* Check if we were asked for the manual */
-      else if(res == PARAM_MANUAL_REQUESTED) {
+      else if(err == PARAM_MANUAL_REQUESTED) {
 #ifdef USE_MANUAL
         hugehelp();
 #else
@@ -2291,20 +2291,20 @@ CURLcode operate(int argc, argv_item_t argv[])
 #endif
       }
       /* Check if we were asked for the version information */
-      else if(res == PARAM_VERSION_INFO_REQUESTED)
+      else if(err == PARAM_VERSION_INFO_REQUESTED)
         tool_version_info();
       /* Check if we were asked to list the SSL engines */
-      else if(res == PARAM_ENGINES_REQUESTED)
+      else if(err == PARAM_ENGINES_REQUESTED)
         tool_list_engines();
       /* Check if we were asked to dump the embedded CA bundle */
-      else if(res == PARAM_CA_EMBED_REQUESTED) {
+      else if(err == PARAM_CA_EMBED_REQUESTED) {
 #ifdef CURL_CA_EMBED
         curl_mprintf("%s", curl_ca_embed);
 #endif
       }
-      else if(res == PARAM_LIBCURL_UNSUPPORTED_PROTOCOL)
+      else if(err == PARAM_LIBCURL_UNSUPPORTED_PROTOCOL)
         result = CURLE_UNSUPPORTED_PROTOCOL;
-      else if(res == PARAM_READ_ERROR)
+      else if(err == PARAM_READ_ERROR)
         result = CURLE_READ_ERROR;
       else
         result = CURLE_FAILED_INIT;

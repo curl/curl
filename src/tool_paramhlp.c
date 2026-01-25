@@ -251,9 +251,9 @@ ParameterError oct2nummax(long *val, const char *str, long max)
 
 ParameterError str2unum(long *val, const char *str)
 {
-  ParameterError result = str2num(val, str);
-  if(result != PARAM_OK)
-    return result;
+  ParameterError err = str2num(val, str);
+  if(err != PARAM_OK)
+    return err;
   if(*val < 0)
     return PARAM_NEGATIVE_NUMERIC;
 
@@ -272,9 +272,9 @@ ParameterError str2unum(long *val, const char *str)
 
 ParameterError str2unummax(long *val, const char *str, long max)
 {
-  ParameterError result = str2unum(val, str);
-  if(result != PARAM_OK)
-    return result;
+  ParameterError err = str2unum(val, str);
+  if(err != PARAM_OK)
+    return err;
   if(*val > max)
     return PARAM_NUMBER_TOO_LARGE;
 
