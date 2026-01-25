@@ -559,14 +559,19 @@ if(PERL_EXECUTABLE)
   )
 endif()
 
+option(CURL_BUILD_EVERYTHING "Build optional build targets (examples, tests) by default" OFF)
+if(CURL_BUILD_EVERYTHING)  # Set internal variables to hold "ALL" keywords when told to building everything
+  set(CURL_BUILD_ALL ALL)
+  if(CURL_BUILD_EVERYTHING STREQUAL "QUICK")
+    set(CURL_BUILD_ALL_QUICK ALL)
+  else()
+    set(CURL_BUILD_ALL_NORMAL ALL)
+  endif()
+endif()
+
 option(BUILD_LIBCURL_DOCS "Build libcurl man pages" ON)
 option(BUILD_MISC_DOCS "Build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
 option(ENABLE_CURL_MANUAL "Build the man page for curl and enable its -M/--manual option" ON)
-
-option(CURL_BUILD_EVERYTHING "Build optional build targets (examples, tests) by default" OFF)
-if(CURL_BUILD_EVERYTHING)
-  set(CURL_BUILD_ALL ALL)  # Internal variable to hold "ALL" keyword when told to building everything
-endif()
 
 if((ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS) AND NOT Perl_FOUND)
   message(WARNING "Perl not found. Will not build manuals.")
