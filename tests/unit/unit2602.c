@@ -33,7 +33,7 @@ static CURLcode test_unit2602(const char *arg)
 
   struct dynhds hds;
   struct dynbuf dbuf;
-  CURLcode res;
+  CURLcode result;
   size_t i;
 
   /* add 1 more header than allowed */
@@ -62,8 +62,8 @@ static CURLcode test_unit2602(const char *arg)
   }
   fail_unless(Curl_dynhds_count(&hds) == 2, "should hold 2");
   /* exceed limit on # of entries */
-  res = Curl_dynhds_add(&hds, "test3", 5, "789", 3);
-  fail_unless(res, "add should have failed");
+  result = Curl_dynhds_add(&hds, "test3", 5, "789", 3);
+  fail_unless(result, "add should have failed");
 
   fail_unless(Curl_dynhds_count_name(&hds, "test", 4) == 0, "false positive");
   fail_unless(Curl_dynhds_count_name(&hds, "test1", 4) == 0, "false positive");
@@ -94,9 +94,9 @@ static CURLcode test_unit2602(const char *arg)
   fail_unless(Curl_dynhds_cremove(&hds, "blablabla") == 2, "should");
   fail_if(Curl_dynhds_ccontains(&hds, "blablabla"), "should not");
 
-  res = Curl_dynhds_h1_cadd_line(&hds, "blablabla thingies");
-  fail_unless(res, "add should have failed");
-  if(!res) {
+  result = Curl_dynhds_h1_cadd_line(&hds, "blablabla thingies");
+  fail_unless(result, "add should have failed");
+  if(!result) {
     fail_unless(Curl_dynhds_ccount_name(&hds, "bLABlaBlA") == 0, "should");
     fail_if(Curl_dynhds_cadd(&hds, "Bla-Bla", "thingies"), "add failed");
 

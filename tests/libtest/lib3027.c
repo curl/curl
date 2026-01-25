@@ -25,7 +25,7 @@
 
 static CURLcode test_lib3027(const char *URL)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl;
   start_test_timing();
 
@@ -35,18 +35,18 @@ static CURLcode test_lib3027(const char *URL)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, URL);
     curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
-    ret = curl_easy_perform(curl);
-    if(CURLE_OK == ret) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK) {
       long filetime;
-      ret = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+      result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
       /* MTDM fails with 550, so filetime should be -1 */
-      if((CURLE_OK == ret) && (filetime != -1)) {
+      if((result == CURLE_OK) && (filetime != -1)) {
         /* we just need to return something which is not CURLE_OK */
-        ret = CURLE_UNSUPPORTED_PROTOCOL;
+        result = CURLE_UNSUPPORTED_PROTOCOL;
       }
     }
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return ret;
+  return result;
 }

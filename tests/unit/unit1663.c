@@ -43,13 +43,13 @@ static void t1663_parse(const char *input_data,
                         const char *exp_dev,
                         const char *exp_iface,
                         const char *exp_host,
-                        CURLcode exp_rc)
+                        CURLcode result_exp)
 {
   char *dev = NULL;
   char *iface = NULL;
   char *host = NULL;
-  CURLcode rc = Curl_parse_interface(input_data, &dev, &iface, &host);
-  fail_unless(rc == exp_rc, "Curl_parse_interface() failed");
+  CURLcode result = Curl_parse_interface(input_data, &dev, &iface, &host);
+  fail_unless(result == result_exp, "Curl_parse_interface() failed");
 
   fail_unless(!!exp_dev == !!dev, "dev expectation failed.");
   fail_unless(!!exp_iface == !!iface, "iface expectation failed");

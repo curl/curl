@@ -45,9 +45,9 @@ static CURLcode test_unit1660(const char *arg)
 
   struct testit {
     const char *host;
-    const char *chost;  /* if non-NULL, use to lookup with */
-    const char *hdr;    /* if NULL, just do the lookup */
-    const CURLcode res; /* parse result */
+    const char *chost;     /* if non-NULL, use to lookup with */
+    const char *hdr;       /* if NULL, just do the lookup */
+    const CURLcode result; /* parse result */
   };
 
   static const struct testit headers[] = {
@@ -102,7 +102,7 @@ static CURLcode test_unit1660(const char *arg)
     { NULL, NULL, NULL, CURLE_OK }
   };
 
-  CURLcode res;
+  CURLcode result;
   struct stsentry *e;
   struct hsts *h = Curl_hsts_init();
   int i;
@@ -124,16 +124,16 @@ static CURLcode test_unit1660(const char *arg)
 
   for(i = 0; headers[i].host; i++) {
     if(headers[i].hdr) {
-      res = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
+      result = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
 
-      if(res != headers[i].res) {
+      if(result != headers[i].result) {
         curl_mfprintf(stderr, "Curl_hsts_parse(%s) failed: %d\n",
-                      headers[i].hdr, res);
+                      headers[i].hdr, result);
         unitfail++;
         continue;
       }
-      else if(res) {
-        curl_mprintf("Input %u: error %d\n", i, (int)res);
+      else if(result) {
+        curl_mprintf("Input %u: error %d\n", i, (int)result);
         continue;
       }
     }

@@ -97,7 +97,7 @@ static void t586_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 /* the dummy thread function */
 static void *t586_test_fire(void *ptr)
 {
-  CURLcode code;
+  CURLcode result;
   struct t586_Tdata *tdata = (struct t586_Tdata *)ptr;
   CURL *curl;
 
@@ -114,11 +114,11 @@ static void *t586_test_fire(void *ptr)
   curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
 
   curl_mprintf("PERFORM\n");
-  code = curl_easy_perform(curl);
-  if(code != CURLE_OK) {
+  result = curl_easy_perform(curl);
+  if(result != CURLE_OK) {
     int i = 0;
     curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, code);
+                  tdata->url, i, result);
   }
 
   curl_mprintf("CLEANUP\n");

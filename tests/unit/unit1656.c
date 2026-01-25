@@ -30,23 +30,23 @@
 struct test_spec {
   const char *input;
   const char *exp_output;
-  CURLcode exp_res;
+  CURLcode result_exp;
 };
 
 static bool do_test(const struct test_spec *spec, size_t i,
                     struct dynbuf *dbuf)
 {
-  CURLcode res;
+  CURLcode result;
   const char *in = spec->input;
 
   curlx_dyn_reset(dbuf);
-  res = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
-  if(res != spec->exp_res) {
+  result = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
+  if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
-                  i, spec->exp_res, res);
+                  i, spec->result_exp, result);
     return FALSE;
   }
-  else if(!res && strcmp(spec->exp_output, curlx_dyn_ptr(dbuf))) {
+  else if(!result && strcmp(spec->exp_output, curlx_dyn_ptr(dbuf))) {
     curl_mfprintf(stderr,
                   "test %zu: input '%s', expected output '%s', got '%s'\n",
                   i, in, spec->exp_output, curlx_dyn_ptr(dbuf));
