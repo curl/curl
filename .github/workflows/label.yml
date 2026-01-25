@@ -22,7 +22,7 @@ permissions: {}
 jobs:
   label:
     name: 'Labeler'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       contents: read        # To comply with https://github.com/actions/labeler documentation
       pull-requests: write  # To edit labels on PRs

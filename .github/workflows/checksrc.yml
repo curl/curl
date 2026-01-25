@@ -97,7 +97,7 @@ jobs:
 
   complexity:
     name: 'complexity'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 3
     steps:
       - name: 'install pmccabe'
@@ -116,7 +116,7 @@ jobs:
 
   xmllint:
     name: 'xmllint'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 3
     steps:
       - name: 'install prereqs'
