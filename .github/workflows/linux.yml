@@ -538,9 +538,8 @@ jobs:
             --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --prefix=/home/runner/wolfssl-all --enable-tls13 --enable-harden --enable-all \
-            --disable-benchmark --disable-crypttests --disable-examples \
-            --disable-dependency-tracking
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-all --enable-tls13 --enable-harden --enable-all \
+            --disable-benchmark --disable-crypttests --disable-examples
           make install
 
       - name: 'cache wolfssl (opensslextra-intel)'  # does support `OPENSSL_COEXIST`
@@ -560,9 +559,8 @@ jobs:
             --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
-            --disable-benchmark --disable-crypttests --disable-examples \
-            --disable-dependency-tracking
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+            --disable-benchmark --disable-crypttests --disable-examples
           make install
 
       - name: 'cache wolfssl (opensslextra-arm)'  # does support `OPENSSL_COEXIST`
@@ -582,9 +580,8 @@ jobs:
             --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
-            --disable-benchmark --disable-crypttests --disable-examples \
-            --disable-dependency-tracking
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+            --disable-benchmark --disable-crypttests --disable-examples
           make install
 
       - name: 'cache mbedtls (latest-intel)'
