@@ -136,7 +136,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
 
 static CURLcode dict_do(struct Curl_easy *data, bool *done)
 {
-  const char *word;
+  char *word;
   char *eword = NULL;
   char *ppath;
   char *database = NULL;
