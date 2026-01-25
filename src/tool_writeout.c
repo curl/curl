@@ -163,8 +163,9 @@ static void certinfo(struct per_transfer *per)
 {
   if(!per->certinfo) {
     struct curl_certinfo *certinfo;
-    CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
-    per->certinfo = (!res && certinfo) ? certinfo : NULL;
+    CURLcode result = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO,
+                                        &certinfo);
+    per->certinfo = (!result && certinfo) ? certinfo : NULL;
   }
 }
 
