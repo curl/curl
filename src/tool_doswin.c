@@ -41,7 +41,6 @@
 #endif
 
 #include "tool_cfgable.h"
-#include "tool_bname.h"
 #include "tool_doswin.h"
 #include "tool_msgs.h"
 
