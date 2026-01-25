@@ -21,7 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
 add_custom_target(curl-examples)
 
 # Get check_PROGRAMS, COMPLICATED_MAY_BUILD, COMPLICATED_EXAMPLES variables
@@ -89,4 +88,10 @@ endforeach()
 
 if(_with_deps)
   message(STATUS "Enabled examples with dependencies:${_with_deps}")
+endif()
+
+if(CURL_BUILD_EVERYTHING STREQUAL "QUICK")
+  set_target_properties(curl-examples-build PROPERTIES EXCLUDE_FROM_ALL FALSE)
+elseif(CURL_BUILD_EVERYTHING AND NOT CURL_BUILD_EVERYTHING STREQUAL "NOEXAMPLES")
+  set_target_properties(curl-examples PROPERTIES EXCLUDE_FROM_ALL FALSE)
 endif()
