@@ -37,7 +37,7 @@ jobs:
   gha_python:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
     name: 'GHA and Python'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       security-events: write  # To create/update security events
     steps:
