@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-add_custom_target(curl-examples ${CURL_BUILD_ALL_KEYWORD})
+add_custom_target(curl-examples ${CURL_BUILD_ALL})
 
 # Get check_PROGRAMS, COMPLICATED_MAY_BUILD, COMPLICATED_EXAMPLES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")

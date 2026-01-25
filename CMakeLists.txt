@@ -565,7 +565,7 @@ option(ENABLE_CURL_MANUAL "Build the man page for curl and enable its -M/--manua
 
 option(CURL_BUILD_EVERYTHING "Build optional build targets (examples, tests) by default" OFF)
 if(CURL_BUILD_EVERYTHING)
-  set(CURL_BUILD_ALL_KEYWORD ALL)
+  set(CURL_BUILD_ALL ALL)  # Internal variable to hold "ALL" keyword when told to building everything
 endif()
 
 if((ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS) AND NOT Perl_FOUND)
