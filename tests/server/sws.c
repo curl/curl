@@ -491,7 +491,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 
   if(req->testno == DOCNUMBER_NOTHING) {
     /* check for a Testno: header with the test case number */
-    char *testno = strstr(line, "\nTestno: ");
+    const char *testno = strstr(line, "\nTestno: ");
     if(testno) {
       pval = &testno[9];
       if(!curlx_str_number(&pval, &num, INT_MAX)) {
@@ -596,7 +596,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
         return 1; /* done */
       }
       else if(strstr(req->reqbuf, "\r\n0\r\n")) {
-        char *last_crlf_char = strstr(req->reqbuf, "\r\n\r\n");
+        const char *last_crlf_char = strstr(req->reqbuf, "\r\n\r\n");
         while(TRUE) {
           if(!strstr(last_crlf_char + 4, "\r\n\r\n"))
             break;
