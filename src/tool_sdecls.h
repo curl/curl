@@ -36,7 +36,8 @@
  * dynamically allocated and 'belongs' to this OutStruct, otherwise FALSE.
  *
  * 'is_cd_filename' member is TRUE when string pointed by 'filename' has been
- * set using a server-specified Content-Disposition filename, otherwise FALSE.
+ * set using a server-specified Content-Disposition or Location filename,
+ * otherwise FALSE.
  *
  * 'regular_file' member is TRUE when output goes to a regular file, this also
  * implies that output is 'seekable' and 'appendable' and also that member

@@ -148,30 +148,40 @@ locdone:
 /*
  * Copies a filename part and returns an ALLOCATED data buffer.
  */
-static char *parse_filename(const char *ptr, size_t len)
+static char *parse_filename(const char *ptr, size_t len, char stop)
 {
   char *copy;
   char *p;
   char *q;
-  char stop = '\0';
 
   copy = memdup0(ptr, len);
   if(!copy)
     return NULL;
 
   p = copy;
-  if(*p == '\'' || *p == '"') {
-    /* store the starting quote */
-    stop = *p;
-    p++;
-  }
-  else
-    stop = ';';
+  if(stop) {
+    /* a Content-Disposition: header */
+    if(*p == '\'' || *p == '"') {
+      /* store the starting quote */
+      stop = *p;
+      p++;
+    }
 
-  /* scan for the end letter and stop there */
-  q = strchr(p, stop);
-  if(q)
-    *q = '\0';
+    /* scan for the end letter and stop there */
+    q = strchr(p, stop);
+    if(q)
+      *q = '\0';
+  }
+  else {
+    /* this is a Location: header, so we need to trim off any queries and
+       fragments present */
+    q = strchr(p, '?'); /* trim off query, if present */
+    if(q)
+      *q = '\0';
+    q = strchr(p, '#'); /* trim off fragment, if present */
+    if(q)
+      *q = '\0';
+  }
 
   /* if the filename contains a path, only use filename portion */
   q = strrchr(p, '/');
@@ -283,12 +293,44 @@ static size_t save_etag(const char *etag_h, const char *endp,
  * Content-Disposition header specifying a filename property.
  */
 static size_t content_disposition(const char *str, const char *end,
-                                  size_t cb, struct per_transfer *per)
+                                  size_t cb, struct per_transfer *per,
+                                  long response) /* response code */
 {
   struct HdrCbData *hdrcbdata = &per->hdrcbdata;
   struct OutStruct *outs = &per->outs;
 
-  if((cb > 20) && checkprefix("Content-disposition:", str)) {
+  if((cb > 9) && checkprefix("Location:", str) && (response/100 == 3)) {
+    /* Get the name off the location header as a temporary measure in case
+       there is no Content-Disposition */
+    const char *p = &str[9];
+    curlx_str_passblanks(&p);
+    if(p < end) { /* as a precaution */
+      char *filename = parse_filename(p, cb - (p - str), 0);
+      if(filename) {
+        if(outs->stream) {
+          /* indication of problem, get out! */
+          curlx_free(filename);
+          return CURL_WRITEFUNC_ERROR;
+        }
+        if(outs->alloc_filename)
+          curlx_free(outs->filename);
+
+        if(per->config->output_dir) {
+          outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
+                                         filename);
+          curlx_free(filename);
+          if(!outs->filename)
+            return CURL_WRITEFUNC_ERROR;
+        }
+        else
+          outs->filename = filename;
+        outs->alloc_filename = TRUE;
+        outs->is_cd_filename = TRUE; /* set to avoid clobbering existing files
+                                        by default */
+      }
+    }
+  }
+  else if((cb > 20) && checkprefix("Content-disposition:", str)) {
     const char *p = str + 20;
     /* look for the 'filename=' parameter (encoded filenames (*=) are not
        supported) */
@@ -312,14 +354,17 @@ static size_t content_disposition(const char *str, const char *end,
       }
       p += 9;
 
+      curlx_str_passblanks(&p);
       len = cb - (size_t)(p - str);
-      filename = parse_filename(p, len);
+      filename = parse_filename(p, len, ';');
       if(filename) {
         if(outs->stream) {
           /* indication of problem, get out! */
           curlx_free(filename);
           return CURL_WRITEFUNC_ERROR;
         }
+        if(outs->alloc_filename)
+          curlx_free(outs->filename);
 
         if(per->config->output_dir) {
           outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
@@ -440,13 +485,13 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         return rc;
     }
 
-    /* Parse the content-disposition header. When honor_cd_filename is true
-       other headers may be stored until the content-disposition header is
-       reached, at which point the saved headers can be written. That means
-       the content_disposition() may return an rc when it has saved a
-       different header for writing later. */
+    /* Parse the content-disposition and location headers. When
+       honor_cd_filename is true, other headers may be stored until the
+       content-disposition header is reached, at which point the saved headers
+       can be written. That means the content_disposition() may return an rc
+       when it has saved a different header for writing later. */
     else if(hdrcbdata->honor_cd_filename) {
-      size_t rc = content_disposition(str, end, cb, per);
+      size_t rc = content_disposition(str, end, cb, per, response);
       if(rc)
         return rc;
     }
