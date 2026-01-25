@@ -36,11 +36,11 @@ static CURLcode test_lib3027(const char *URL)
     curl_easy_setopt(curl, CURLOPT_URL, URL);
     curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
     ret = curl_easy_perform(curl);
-    if(CURLE_OK == ret) {
+    if(ret == CURLE_OK) {
       long filetime;
       ret = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
       /* MTDM fails with 550, so filetime should be -1 */
-      if((CURLE_OK == ret) && (filetime != -1)) {
+      if((ret == CURLE_OK) && (filetime != -1)) {
         /* we just need to return something which is not CURLE_OK */
         ret = CURLE_UNSUPPORTED_PROTOCOL;
       }

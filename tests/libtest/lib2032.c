@@ -44,7 +44,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
   code = curl_easy_getinfo(ntlm_curls[idx], CURLINFO_LASTSOCKET, &longdata);
 
-  if(CURLE_OK != code) {
+  if(code != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
                   "with code %d (%s)\n",
                   __FILE__, __LINE__, code, curl_easy_strerror(code));
