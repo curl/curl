@@ -20,7 +20,7 @@ body
   yours sincerely
 </data>
 <datacheck crlf="yes">
-* FETCH FETCH (1 BODY[] {73}
+* FETCH FETCH (1 BODY[] {71}
 From: me@somewhere
 To: fake@nowhere
 
