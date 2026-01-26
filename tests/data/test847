@@ -30,7 +30,7 @@ imap
 IMAP FETCH message
 </name>
 <command>
-'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;UID=1' -u '"user:sec"ret{'
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER' --request 'UID FETCH 1 BODY[]' -u '"user:sec"ret{'
 </command>
 </client>
 
