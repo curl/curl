@@ -342,7 +342,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, const char *name, CURLoption tag,
         /* all value flags contained in rest */
         rest &= ~nv->value;    /* remove bits handled here */
         result = easysrc_addf(&easysrc_code, "%s(long)%s%s",
-                           preamble, nv->name, rest ? " |" : ");");
+                              preamble, nv->name, rest ? " |" : ");");
         if(!rest || result)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */

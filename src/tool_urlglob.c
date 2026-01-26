@@ -455,7 +455,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
     if(curlx_dyn_len(&glob->buf)) {
       /* we got a literal string, add it as a single-item list */
       result = glob_fixed(glob, curlx_dyn_ptr(&glob->buf),
-                       curlx_dyn_len(&glob->buf));
+                          curlx_dyn_len(&glob->buf));
       if(!result)
         result = add_glob(glob, pos);
       curlx_dyn_reset(&glob->buf);

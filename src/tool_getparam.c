@@ -3081,7 +3081,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
         }
 
         err = getparameter(orig_opt, nextarg, &passarg, config,
-                              CONFIG_MAX_LEVELS);
+                           CONFIG_MAX_LEVELS);
 
         unicodefree(CURL_UNCONST(nextarg));
         config = global->last;
