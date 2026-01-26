@@ -23,7 +23,7 @@
 ###########################################################################
 if(CURL_BUILD_EVERYTHING STREQUAL "QUICK")
   set(_curl_example_build_all ALL)
-elseif(CURL_BUILD_EVERYTHING)
+elseif(CURL_BUILD_EVERYTHING AND NOT CURL_BUILD_EVERYTHING STREQUAL "NOEXAMPLES")
   set(_curl_example_all ALL)
 endif()
 
