@@ -11,7 +11,7 @@ FETCH
 # Server-side
 <reply>
 <data crlf="yes">
-* FETCH FETCH (1 BODY[] {71}
+* FETCH FETCH (1 BODY[] {101}
 From: me@somewhere
 To: fake@nowhere
 
