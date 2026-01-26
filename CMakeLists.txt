@@ -546,10 +546,7 @@ if(PERL_EXECUTABLE)
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
   )
-  if(CURL_LINT)
-    set(_lint_all ALL)
-  endif()
-  add_custom_target(curl-lint "${_lint_all}"
+  add_custom_target(curl-lint
     COMMENT "Running lint checks" VERBATIM USES_TERMINAL
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl"
@@ -558,6 +555,9 @@ if(PERL_EXECUTABLE)
       "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
       "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
   )
+  if(CURL_LINT)
+    set_target_properties(curl-lint PROPERTIES EXCLUDE_FROM_ALL FALSE)
+  endif()
 endif()
 
 option(BUILD_LIBCURL_DOCS "Build libcurl man pages" ON)

@@ -21,13 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-if(CURL_BUILD_EVERYTHING STREQUAL "QUICK")
-  set(_curl_example_build_all ALL)
-elseif(CURL_BUILD_EVERYTHING AND NOT CURL_BUILD_EVERYTHING STREQUAL "NOEXAMPLES")
-  set(_curl_example_all ALL)
-endif()
-
-add_custom_target(curl-examples ${_curl_example_all})
+add_custom_target(curl-examples)
 
 # Get check_PROGRAMS, COMPLICATED_MAY_BUILD, COMPLICATED_EXAMPLES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
@@ -66,8 +60,7 @@ foreach(_target IN LISTS COMPLICATED_MAY_BUILD check_PROGRAMS _all)  # keep 'COM
     if(_with_deps)
       set(_more_libs ${CURL_LIBS})  # If any examples required dependencies, link them
     endif()
-    # Special target to compile all tests quickly and build a single test to probe linkage
-    add_custom_target(curl-examples-build ${_curl_example_build_all})
+    add_custom_target(curl-examples-build)  # Special target to compile all tests quickly and build a single test to probe linkage
     add_dependencies(curl-examples-build ${_target_name} ${_all_canary})  # Include a full build of a single test
   else()
     # Check if the example requires a build option. Then check if that build option is enabled.
@@ -95,4 +88,10 @@ endforeach()
 
 if(_with_deps)
   message(STATUS "Enabled examples with dependencies:${_with_deps}")
+endif()
+
+if(CURL_BUILD_EVERYTHING STREQUAL "QUICK")
+  set_target_properties(curl-examples-build PROPERTIES EXCLUDE_FROM_ALL FALSE)
+elseif(CURL_BUILD_EVERYTHING AND NOT CURL_BUILD_EVERYTHING STREQUAL "NOEXAMPLES")
+  set_target_properties(curl-examples PROPERTIES EXCLUDE_FROM_ALL FALSE)
 endif()
