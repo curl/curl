@@ -11,7 +11,6 @@ FETCH
 # Server-side
 <reply>
 <data crlf="yes">
-* FETCH FETCH (1 BODY[] {102}
 From: me@somewhere
 To: fake@nowhere
 
@@ -20,6 +19,16 @@ body
 --
   yours sincerely
 </data>
+<datacheck crlf="yes">
+* FETCH FETCH (1 BODY[] {73}
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</datacheck>
 </reply>
 
 # Client-side
