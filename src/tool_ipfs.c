@@ -33,7 +33,7 @@
 static bool has_trailing_slash(const char *input)
 {
   size_t len = strlen(input);
-  return (len && input[len - 1] == '/');
+  return len && input[len - 1] == '/';
 }
 
 static char *ipfs_gateway(void)
