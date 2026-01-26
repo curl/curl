@@ -307,15 +307,15 @@ static CURLMcode t758_checkFdSet(CURLM *multi, struct t758_Sockets *sockets,
                                  const char *name)
 {
   int i;
-  CURLMcode result = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      result = t758_saction(multi, sockets->sockets[i], evBitmask, name);
-      if(result)
+      mresult = t758_saction(multi, sockets->sockets[i], evBitmask, name);
+      if(mresult)
         break;
     }
   }
-  return result;
+  return mresult;
 }
 
 static CURLcode t758_one(const char *URL, int timer_fail_at,
@@ -485,14 +485,14 @@ test_cleanup:
 
 static CURLcode test_lib758(const char *URL)
 {
-  CURLcode rc;
+  CURLcode result;
   /* rerun the same transfer multiple times and make it fail in different
      callback calls */
-  rc = t758_one(URL, 0, 0); /* no callback fails */
-  if(rc)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), rc);
+  result = t758_one(URL, 0, 0); /* no callback fails */
+  if(result)
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), result);
 
-  return rc;
+  return result;
 }
 
 #else /* T578_ENABLED */

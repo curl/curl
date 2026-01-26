@@ -89,7 +89,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
   char *path = NULL;
   char *query = NULL;
   if(uh) {
-    char *ptr;
+    const char *ptr;
     uerr = curl_url_set(uh, CURLUPART_URL, *inurlp,
                         CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
     if(uerr) {
@@ -116,7 +116,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
       /* We only want the part of the local path that is on the right
          side of the rightmost slash and backslash. */
       const char *filep = strrchr(filename, '/');
-      char *file2 = strrchr(filep ? filep : filename, '\\');
+      const char *file2 = strrchr(filep ? filep : filename, '\\');
       char *encfile;
 
       if(file2)

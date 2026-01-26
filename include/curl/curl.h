@@ -842,10 +842,13 @@ typedef enum {
 #define CURLAUTH_BEARER       (((unsigned long)1) << 6)
 #define CURLAUTH_AWS_SIGV4    (((unsigned long)1) << 7)
 #define CURLAUTH_ONLY         (((unsigned long)1) << 31)
-#define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
-#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE))
+#define CURLAUTH_ANY          ((~CURLAUTH_DIGEST_IE) & \
+                               ((unsigned long)0xffffffff))
+#define CURLAUTH_ANYSAFE      ((~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE)) & \
+                               ((unsigned long)0xffffffff))
 
-#define CURLSSH_AUTH_ANY       ~0L       /* all types supported by server */
+/* all types supported by server */
+#define CURLSSH_AUTH_ANY       ((unsigned long)0xffffffff)
 #define CURLSSH_AUTH_NONE      0L        /* none allowed, silly but complete */
 #define CURLSSH_AUTH_PUBLICKEY (1L << 0) /* public/private key files */
 #define CURLSSH_AUTH_PASSWORD  (1L << 1) /* password */
@@ -1101,7 +1104,7 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLPROTO_MQTT    (1L << 28)
 #define CURLPROTO_GOPHERS (1L << 29)
 #define CURLPROTO_MQTTS   (1L << 30)
-#define CURLPROTO_ALL     (~0L) /* enable everything */
+#define CURLPROTO_ALL     ((unsigned long)0xffffffff) /* enable everything */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */

@@ -2812,7 +2812,7 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
     }
     else {
       /* check whether the URL's port matches */
-      char *ptr_next = strchr(ptr, ':');
+      const char *ptr_next = strchr(ptr, ':');
       if(ptr_next) {
         curl_off_t port_to_match;
         if(!curlx_str_number(&ptr, &port_to_match, 0xffff) &&

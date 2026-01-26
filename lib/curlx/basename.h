@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_BNAME_H
-#define HEADER_CURL_TOOL_BNAME_H
+#ifndef HEADER_CURLX_BASENAME_H
+#define HEADER_CURLX_BASENAME_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,14 +23,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
+#include "../curl_setup.h"
 
 #ifndef HAVE_BASENAME
+char *curlx_basename(char *path);
+#else
 
-char *tool_basename(char *path);
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
 
-#define basename(x) tool_basename(x)
+#define curlx_basename(x) basename(x)
+#endif /* !HAVE_BASENAME */
 
-#endif /* HAVE_BASENAME */
-
-#endif /* HEADER_CURL_TOOL_BNAME_H */
+#endif /* HEADER_CURLX_BASENAME_H */

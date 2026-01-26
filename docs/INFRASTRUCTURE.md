@@ -64,7 +64,7 @@ us free of charge.
 
 ## CodeSonar
 
-[CodeSonar](https://codesecure.com/our-products/codesonar/) analyzes the curl
+[CodeSonar](https://www.adacore.com/codesonar) analyzes the curl
 source code daily and emails Daniel Stenberg whenever it finds suspected
 problems in the source code. I hope and expect that we can invite other
 maintainers to access these reports soon.
@@ -171,14 +171,6 @@ instances used for this.
 
 We use a few rare additional curl related email aliases in the curl domains.
 They go through the mail server `mail.haxx.se` maintained by Daniel Stenberg
-
-## Bug-bounty
-
-We run a [bug-bounty](https://curl.se/docs/bugbounty.html) on HackerOne. The
-setup runs entirely at https://hackerone.com/curl.
-
-The money part for the bug bounty is sponsored by the [Internet Bug
-Bounty](https://hackerone.com/ibb).
 
 ## Open Collective
 

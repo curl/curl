@@ -25,10 +25,6 @@
 
 #if defined(_WIN32) || defined(MSDOS)
 
-#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#  include <libgen.h>
-#endif
-
 #ifdef _WIN32
 #  include <tlhelp32.h>
 #  undef  PATH_MAX
@@ -41,7 +37,6 @@
 #endif
 
 #include "tool_cfgable.h"
-#include "tool_bname.h"
 #include "tool_doswin.h"
 #include "tool_msgs.h"
 
@@ -327,7 +322,7 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
 
   memcpy(buffer, file_name, len + 1);
 
-  base = basename(buffer);
+  base = curlx_basename(buffer);
 
   /* Rename reserved device names that are known to be accessible without \\.\
      Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
@@ -378,7 +373,7 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
 
     /* the basename pointer must be updated since the path has expanded */
     if(p == buffer)
-      base = basename(buffer);
+      base = curlx_basename(buffer);
   }
 
   /* This is the legacy portion from rename_if_dos_device_name that checks for

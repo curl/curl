@@ -352,7 +352,7 @@ static CURLcode peek_ipv6(const char *str, size_t *skip, bool *ipv6p)
    */
   char hostname[MAX_IP6LEN];
   CURLU *u;
-  char *endbr = strchr(str, ']');
+  const char *endbr = strchr(str, ']');
   size_t hlen;
   CURLUcode rc;
   CURLcode result = CURLE_OK;
@@ -410,20 +410,20 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
    */
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int globindex = 0; /* count "actual" globs */
 
   *amount = 1;
 
-  while(*pattern && !res) {
+  while(*pattern && !result) {
     while(*pattern && *pattern != '{') {
       if(*pattern == '[') {
         /* skip over IPv6 literals and [] */
         size_t skip = 0;
         bool ipv6;
-        res = peek_ipv6(pattern, &skip, &ipv6);
-        if(res)
-          return res;
+        result = peek_ipv6(pattern, &skip, &ipv6);
+        if(result)
+          return result;
         if(!ipv6 && (pattern[1] == ']'))
           skip = 2;
         if(skip) {
@@ -454,10 +454,10 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
     }
     if(curlx_dyn_len(&glob->buf)) {
       /* we got a literal string, add it as a single-item list */
-      res = glob_fixed(glob, curlx_dyn_ptr(&glob->buf),
+      result = glob_fixed(glob, curlx_dyn_ptr(&glob->buf),
                        curlx_dyn_len(&glob->buf));
-      if(!res)
-        res = add_glob(glob, pos);
+      if(!result)
+        result = add_glob(glob, pos);
       curlx_dyn_reset(&glob->buf);
     }
     else {
@@ -467,21 +467,21 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
         /* process set pattern */
         pattern++;
         pos++;
-        res = glob_set(glob, &pattern, &pos, amount, globindex++);
-        if(!res)
-          res = add_glob(glob, pos);
+        result = glob_set(glob, &pattern, &pos, amount, globindex++);
+        if(!result)
+          result = add_glob(glob, pos);
       }
       else if(*pattern == '[') {
         /* process range pattern */
         pattern++;
         pos++;
-        res = glob_range(glob, &pattern, &pos, amount, globindex++);
-        if(!res)
-          res = add_glob(glob, pos);
+        result = glob_range(glob, &pattern, &pos, amount, globindex++);
+        if(!result)
+          result = add_glob(glob, pos);
       }
     }
   }
-  return res;
+  return result;
 }
 
 bool glob_inuse(struct URLGlob *glob)
@@ -497,7 +497,7 @@ CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
    * as the specified URL!
    */
   curl_off_t amount = 0;
-  CURLcode res;
+  CURLcode result;
 
   memset(glob, 0, sizeof(struct URLGlob));
   curlx_dyn_init(&glob->buf, MAX_CONFIG_LINE_LENGTH);
@@ -506,8 +506,8 @@ CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
     return CURLE_OUT_OF_MEMORY;
   glob->palloc = 2;
 
-  res = glob_parse(glob, url, 1, &amount);
-  if(res) {
+  result = glob_parse(glob, url, 1, &amount);
+  if(result) {
     if(error && glob->error) {
       char text[512];
       const char *t;
@@ -521,10 +521,10 @@ CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
         t = glob->error;
 
       /* send error description to the error-stream */
-      curl_mfprintf(error, "curl: (%d) %s\n", res, t);
+      curl_mfprintf(error, "curl: (%d) %s\n", result, t);
     }
     *urlnum = 1;
-    return res;
+    return result;
   }
   *urlnum = amount;
   return CURLE_OK;

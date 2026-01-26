@@ -6,18 +6,18 @@
 
 int main(int argc, char *argv[])
 {
-  CURLcode ret;
-  CURL *hnd;
+  CURLcode result;
+  CURL *curl;
 
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
-  curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, "ab\201cd\000e\\\"\?\r\n\t\001fghi\x1ajklm\xfd");
-  curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)24);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
-  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
+  curl_easy_setopt(curl, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "ab\201cd\000e\\\"\?\r\n\t\001fghi\x1ajklm\xfd");
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)24);
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
+  curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may choose to either not use them or implement
@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
 
   */
 
-  ret = curl_easy_perform(hnd);
+  result = curl_easy_perform(curl);
 
-  curl_easy_cleanup(hnd);
-  hnd = NULL;
+  curl_easy_cleanup(curl);
+  curl = NULL;
 
-  return (int)ret;
+  return (int)result;
 }
 /**** End of sample code ****/

@@ -76,7 +76,7 @@ static void t1652_stop(struct Curl_easy *easy)
 static int verify(const char *info, const char *two)
 {
   /* the 'info' one has a newline appended */
-  char *nl = strchr(info, '\n');
+  const char *nl = strchr(info, '\n');
   if(!nl)
     return 1; /* nope */
   return strncmp(info, two, nl - info);

@@ -117,7 +117,7 @@ bool Curl_auth_user_contains_domain(const char *user)
 
   if(user && *user) {
     /* Check we have a domain name or UPN present */
-    char *p = strpbrk(user, "\\/@");
+    const char *p = strpbrk(user, "\\/@");
 
     valid = (p != NULL && p > user && p < user + strlen(user) - 1);
   }

@@ -17,8 +17,8 @@ two to spend work hours on curl related tasks.
 
 We promise to use donated funds for things and activities that we believe are
 beneficial for the project and its development. That includes but is not
-limited to bug-bounties, developer conferences, infrastructure, development,
-services and hardware.
+limited to developer conferences, infrastructure, development, services and
+hardware.
 
 Recurring donations above a certain amount of money puts the sponsor at a
 named sponsor level: **Silver**, **Gold**, **Platinum** or **Top**.

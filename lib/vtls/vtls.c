@@ -689,7 +689,7 @@ CURLcode Curl_ssl_random(struct Curl_easy *data,
 static CURLcode pubkey_pem_to_der(const char *pem,
                                   unsigned char **der, size_t *der_len)
 {
-  char *begin_pos, *end_pos;
+  const char *begin_pos, *end_pos;
   size_t pem_count, pem_len;
   CURLcode result;
   struct dynbuf pbuf;

@@ -186,11 +186,10 @@ jobs:
                 options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
               fi
               mkdir bld && cd bld
-              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
-                --prefix="$HOME"/curl-install \
+              time ../configure --prefix="$HOME"/curl-install --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
+                --disable-dependency-tracking --enable-option-checking=fatal \
                 --with-openssl \
                 --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
-                --disable-dependency-tracking --enable-option-checking=fatal \
                 ${options} \
                 ${MATRIX_OPTIONS} \
                 || { tail -n 1000 config.log; false; }
@@ -283,7 +282,8 @@ jobs:
               ${MATRIX_OPTIONS}
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror --disable-shared \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
@@ -388,7 +388,8 @@ jobs:
               -DWATT_ROOT="$HOME/djgpp/net/watt"
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --disable-shared \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
               AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
               RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \

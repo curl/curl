@@ -333,8 +333,8 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
 
     if(compare_header_names(curr->data, next->data) == 0) {
       struct dynbuf buf;
-      char *colon_next;
-      char *val_next;
+      const char *colon_next;
+      const char *val_next;
 
       curlx_dyn_init(&buf, CURL_MAX_HTTP_HEADER);
 
@@ -441,8 +441,9 @@ static CURLcode make_headers(struct Curl_easy *data,
      semi-colon, are not added to this list.
      */
   for(l = data->set.headers; l; l = l->next) {
-    char *dupdata, *ptr;
-    char *sep = strchr(l->data, ':');
+    char *dupdata;
+    const char *ptr;
+    const char *sep = strchr(l->data, ':');
     if(!sep)
       sep = strchr(l->data, ';');
     if(!sep || (*sep == ':' && !*(sep + 1)))
@@ -729,7 +730,7 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   for(index = 0; index < num_query_components; index++) {
     const char *in_key;
     size_t in_key_len;
-    char *offset;
+    const char *offset;
     size_t query_part_len = curlx_dyn_len(&query_array[index]);
     char *query_part = curlx_dyn_ptr(&query_array[index]);
 

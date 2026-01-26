@@ -75,7 +75,7 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
 
 static ParameterError varfunc(char *c, /* content */
                               size_t clen, /* content length */
-                              char *f, /* functions */
+                              const char *f, /* functions */
                               size_t flen, /* function string length */
                               struct dynbuf *out)
 {
@@ -207,7 +207,7 @@ static ParameterError varfunc(char *c, /* content */
 ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
 {
   CURLcode result;
-  char *envp;
+  const char *envp;
   bool added = FALSE;
   const char *input = line;
   *replaced = FALSE;
@@ -232,8 +232,8 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
       char name[MAX_VAR_LEN];
       size_t nlen;
       size_t i;
-      char *funcp;
-      char *clp = strstr(envp, "}}");
+      const char *funcp;
+      const char *clp = strstr(envp, "}}");
       size_t prefix;
 
       if(!clp) {
@@ -304,7 +304,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
           if(value && vlen > 0) {
             /* A variable might contain null bytes. Such bytes cannot be shown
                using normal means, this is an error. */
-            char *nb = memchr(value, '\0', vlen);
+            const char *nb = memchr(value, '\0', vlen);
             if(nb) {
               errorf("variable contains null byte");
               return PARAM_EXPAND_ERROR;

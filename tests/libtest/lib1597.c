@@ -28,7 +28,7 @@
 
 struct pair {
   const char *in;
-  CURLcode *exp;
+  CURLcode *result_exp;
 };
 
 static CURLcode test_lib1597(const char *URL)
@@ -95,7 +95,7 @@ static CURLcode test_lib1597(const char *URL)
   /* Run the tests. */
   for(i = 0; prots[i].in; i++) {
     result = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
-    if(result != *prots[i].exp) {
+    if(result != *prots[i].result_exp) {
       curl_mprintf("unexpectedly '%s' returned %d\n", prots[i].in, result);
       break;
     }

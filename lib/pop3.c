@@ -809,8 +809,8 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
   }
   else if(len > 3) {
     /* Does the server support APOP authentication? */
-    char *lt;
-    char *gt = NULL;
+    const char *lt;
+    const char *gt = NULL;
 
     /* Look for the APOP timestamp */
     lt = memchr(line, '<', len);
@@ -820,7 +820,7 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
     if(gt) {
       /* the length of the timestamp, including the brackets */
       size_t timestamplen = gt - lt + 1;
-      char *at = memchr(lt, '@', timestamplen);
+      const char *at = memchr(lt, '@', timestamplen);
       /* If the timestamp does not contain '@' it is not (as required by
          RFC-1939) conformant to the RFC-822 message id syntax, and we
          therefore do not use APOP authentication. */

@@ -163,8 +163,9 @@ static void certinfo(struct per_transfer *per)
 {
   if(!per->certinfo) {
     struct curl_certinfo *certinfo;
-    CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
-    per->certinfo = (!res && certinfo) ? certinfo : NULL;
+    CURLcode result = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO,
+                                        &certinfo);
+    per->certinfo = (!result && certinfo) ? certinfo : NULL;
   }
 }
 
@@ -734,10 +735,10 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
       }
       else {
         /* this is meant as a variable to output */
-        char *end;
+        const char *end;
         size_t vlen;
         if('{' == ptr[1]) {
-          struct writeoutvar *wv = NULL;
+          const struct writeoutvar *wv = NULL;
           struct writeoutvar find = { 0 };
           end = strchr(ptr, '}');
           ptr += 2; /* pass the % and the { */

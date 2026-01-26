@@ -39,9 +39,21 @@ if("@USE_OPENSSL@")
   else()
     find_dependency(OpenSSL)
   endif()
+  # Define lib duplicate to fixup lib order for GCC binutils ld in static builds
+  if(TARGET OpenSSL::Crypto AND NOT TARGET CURL::OpenSSL_Crypto)
+    add_library(CURL::OpenSSL_Crypto INTERFACE IMPORTED)
+    get_target_property(_curl_libname OpenSSL::Crypto LOCATION)
+    set_target_properties(CURL::OpenSSL_Crypto PROPERTIES INTERFACE_LINK_LIBRARIES "${_curl_libname}")
+  endif()
 endif()
 if("@HAVE_LIBZ@")
   find_dependency(ZLIB "@ZLIB_VERSION_MAJOR@")
+  # Define lib duplicate to fixup lib order for GCC binutils ld in static builds
+  if(TARGET ZLIB::ZLIB AND NOT TARGET CURL::ZLIB)
+    add_library(CURL::ZLIB INTERFACE IMPORTED)
+    get_target_property(_curl_libname ZLIB::ZLIB LOCATION)
+    set_target_properties(CURL::ZLIB PROPERTIES INTERFACE_LINK_LIBRARIES "${_curl_libname}")
+  endif()
 endif()
 
 set(_curl_cmake_module_path_save ${CMAKE_MODULE_PATH})
@@ -138,6 +150,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${_curl_cmake_module_path_save})
 
+# Define lib duplicate to fixup lib order for GCC binutils ld in static builds
 if(WIN32 AND NOT TARGET CURL::win32_winsock)
   add_library(CURL::win32_winsock INTERFACE IMPORTED)
   set_target_properties(CURL::win32_winsock PROPERTIES INTERFACE_LINK_LIBRARIES "ws2_32")

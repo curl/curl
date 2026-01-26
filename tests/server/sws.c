@@ -215,7 +215,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
   }
   else {
     char *orgcmd = NULL;
-    char *cmd = NULL;
+    const char *cmd = NULL;
     size_t cmdsize = 0;
     int num = 0;
 
@@ -230,7 +230,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
 
     cmd = orgcmd;
     while(cmd && cmdsize) {
-      char *check;
+      const char *check;
 
       if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
         logmsg("instructed to require authorization header");
@@ -308,7 +308,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   static char request[REQUEST_KEYWORD_SIZE];
   int prot_major = 0;
   int prot_minor = 0;
-  char *end = strstr(line, end_of_headers);
+  const char *end = strstr(line, end_of_headers);
   const char *pval;
   curl_off_t num;
 
@@ -329,7 +329,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   }
 
   else if(req->testno == DOCNUMBER_NOTHING) {
-    char *http;
+    const char *http;
     bool fine = FALSE;
     char *httppath = NULL;
     size_t npath = 0; /* httppath length */
@@ -491,7 +491,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 
   if(req->testno == DOCNUMBER_NOTHING) {
     /* check for a Testno: header with the test case number */
-    char *testno = strstr(line, "\nTestno: ");
+    const char *testno = strstr(line, "\nTestno: ");
     if(testno) {
       pval = &testno[9];
       if(!curlx_str_number(&pval, &num, INT_MAX)) {
@@ -512,7 +512,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   if(use_gopher) {
     /* when using gopher we cannot check the request until the entire
        thing has been received */
-    char *ptr;
+    const char *ptr;
 
     /* find the last slash in the line */
     ptr = strrchr(line, '/');
@@ -596,7 +596,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
         return 1; /* done */
       }
       else if(strstr(req->reqbuf, "\r\n0\r\n")) {
-        char *last_crlf_char = strstr(req->reqbuf, "\r\n\r\n");
+        const char *last_crlf_char = strstr(req->reqbuf, "\r\n\r\n");
         while(TRUE) {
           if(!strstr(last_crlf_char + 4, "\r\n\r\n"))
             break;

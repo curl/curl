@@ -25,6 +25,7 @@
 
 LIB_CURLX_CFILES =      \
   curlx/base64.c        \
+  curlx/basename.c      \
   curlx/dynbuf.c        \
   curlx/fopen.c         \
   curlx/inet_ntop.c     \
@@ -42,8 +43,9 @@ LIB_CURLX_CFILES =      \
   curlx/winapi.c
 
 LIB_CURLX_HFILES =      \
-  curlx/binmode.h       \
   curlx/base64.h        \
+  curlx/binmode.h       \
+  curlx/basename.h      \
   curlx/curlx.h         \
   curlx/dynbuf.h        \
   curlx/fopen.h         \

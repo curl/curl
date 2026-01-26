@@ -169,7 +169,7 @@ the web based archives of the mailing lists), thus saving us from having to
 repeat ourselves even more. Thanks for respecting this.
 
 If you have found or simply suspect a security problem in curl or libcurl,
-submit all the details at [HackerOne](https://hackerone.com/curl). On there we
+[submit all the details to us](https://curl.se/dev/vuln-disclosure.html). We
 keep the issue private while we investigate, confirm it, work and validate a
 fix and agree on a time schedule for publication etc. That way we produce a
 fix in a timely manner before the flaw is announced to the world, reducing the
