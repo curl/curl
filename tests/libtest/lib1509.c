@@ -43,10 +43,10 @@ static size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream)
 
 static CURLcode test_lib1509(const char *URL)
 {
-  long headerSize;
-  CURLcode code;
   CURL *curl = NULL;
+  CURLcode code;
   CURLcode result = CURLE_OK;
+  long headerSize;
 
   global_init(CURL_GLOBAL_ALL);
 
