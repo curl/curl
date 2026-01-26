@@ -307,15 +307,15 @@ static CURLMcode t758_checkFdSet(CURLM *multi, struct t758_Sockets *sockets,
                                  const char *name)
 {
   int i;
-  CURLMcode result = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      result = t758_saction(multi, sockets->sockets[i], evBitmask, name);
-      if(result)
+      mresult = t758_saction(multi, sockets->sockets[i], evBitmask, name);
+      if(mresult)
         break;
     }
   }
-  return result;
+  return mresult;
 }
 
 static CURLcode t758_one(const char *URL, int timer_fail_at,
