@@ -5,6 +5,7 @@
 IMAP
 Clear Text
 FETCH
+CUSTOMREQUEST
 </keywords>
 </info>
 
