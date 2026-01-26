@@ -29,7 +29,10 @@ mark_as_advanced(TEST_NGHTTPX)
 # Consumed variables: TEST_NGHTTPX
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
-add_custom_target(testdeps ${CURL_BUILD_ALL})
+if(CURL_BUILD_EVERYTHING)
+  set(_curl_test_all ALL)
+endif()
+add_custom_target(testdeps ${_curl_test_all})
 if(BUILD_CURL_EXE)
   add_dependencies(testdeps "curlinfo")
 endif()

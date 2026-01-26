@@ -178,6 +178,7 @@ option(BUILD_STATIC_LIBS "Build static libraries" OFF)
 option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
 option(ENABLE_ARES "Enable c-ares support" OFF)
 option(CURL_DISABLE_INSTALL "Disable installation targets" OFF)
+option(CURL_BUILD_EVERYTHING "Build optional build targets (examples, tests) by default" OFF)
 
 if(WIN32)
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
@@ -557,16 +558,6 @@ if(PERL_EXECUTABLE)
       "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
       "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
   )
-endif()
-
-option(CURL_BUILD_EVERYTHING "Build optional build targets (examples, tests) by default" OFF)
-if(CURL_BUILD_EVERYTHING)  # Set internal variables to hold "ALL" keywords when told to building everything
-  set(CURL_BUILD_ALL ALL)
-  if(CURL_BUILD_EVERYTHING STREQUAL "QUICK")
-    set(CURL_BUILD_ALL_QUICK ALL)
-  else()
-    set(CURL_BUILD_ALL_NORMAL ALL)
-  endif()
 endif()
 
 option(BUILD_LIBCURL_DOCS "Build libcurl man pages" ON)
