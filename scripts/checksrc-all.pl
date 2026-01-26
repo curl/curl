@@ -11,8 +11,10 @@ use File::Find;
 use Cwd 'abs_path';
 
 my @files;
+my $is_git = 0;
 if(system('git rev-parse --is-inside-work-tree >/dev/null 2>&1') == 0) {
-    @files = `git ls-files '*.[ch]'`;
+    @files = `git ls-files \"*.[ch]\"`;
+    $is_git = 1;
 }
 else {
     find(sub { if(/\.[ch]$/) { push(@files, $File::Find::name) } }, ('.'));
@@ -30,7 +32,13 @@ my $scripts_dir = dirname(abs_path($0));
 my $anyfailed = 0;
 
 for my $dir (@dirs) {
-    @files = glob("$dir/*.[ch]");
+    if($is_git) {
+        @files = `git ls-files \"$dir/*.[ch]\"`;
+        chomp(@files);
+    }
+    else {
+        @files = glob("$dir/*.[ch]");
+    }
     if(@files && system("$scripts_dir/checksrc.pl", @files) != 0) {
         $anyfailed = 1;
     }
