@@ -309,6 +309,10 @@ static CURLcode socket_open(struct Curl_easy *data,
 {
   char errbuf[STRERROR_LEN];
 
+#ifdef SOCK_CLOEXEC
+  addr->socktype |= SOCK_CLOEXEC;
+#endif
+
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   if(data->set.fopensocket) {
@@ -351,7 +355,7 @@ static CURLcode socket_open(struct Curl_easy *data,
   }
 #endif /* USE_SO_NOSIGPIPE */
 
-#ifdef HAVE_FCNTL
+#if defined(HAVE_FCNTL) && !defined(SOCK_CLOEXEC)
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
     failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
