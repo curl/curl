@@ -571,6 +571,7 @@ cleanup:
 optcleanup:
 
   curlx_free(resolve);
+  curlx_free(cafile);
 
   return result;
 }
