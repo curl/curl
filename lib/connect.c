@@ -315,7 +315,7 @@ void Curl_conncontrol(struct connectdata *conn,
             ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
   if((ctrl == CONNCTRL_STREAM) && is_multiplex)
     ;  /* stream signal on multiplex conn never affects close state */
-  else if((curl_bit)closeit != conn->bits.close) {
+  else if(conn && ((curl_bit)closeit != conn->bits.close)) {
     conn->bits.close = closeit; /* the only place in the source code that
                                    should assign this bit */
   }
@@ -385,7 +385,8 @@ connect_sub_chain:
 #ifdef USE_SSL
     if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
        !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
+      result = Curl_cf_ssl_proxy_insert_after(
+        cf, data, &cf->conn->proxy_ssl_config);
       if(result)
         return result;
     }
