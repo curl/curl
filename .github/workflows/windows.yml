@@ -51,7 +51,7 @@ jobs:
       - name: 'install test prereqs (stunnel)'
         if: ${{ steps.cache-stunnel.outputs.cache-hit != 'true' }}
         timeout-minutes: 2
-        shell: msys2 {0}  # zizmor: ignore[misfeature]
+        shell: bash
         run: |
           cd /c && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
