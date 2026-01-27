@@ -37,6 +37,10 @@ env:
   STUNNEL_VERSION: 5.76
 
 jobs:
+  dummy:
+    name: 'do nothing'
+    runs-on: ubuntu-slim
+
   build-cache:
     name: 'Build caches'
     runs-on: ubuntu-slim
@@ -748,7 +752,7 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-    needs: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && 'build-cache' || '' }}
+    needs: ${{ (matrix.tflags != 'skipall' && matrix.tflags != 'skiprun') && 'build-cache' || 'dummy' }}
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ matrix.arch == 'arm64' && 12 || 10 }}
     defaults:
