@@ -37,8 +37,30 @@ env:
   STUNNEL_VERSION: 5.76
 
 jobs:
+  build-cache:
+    name: 'Build caches'
+    runs-on: windows-2022
+    steps:
+      - name: 'cache test prereqs (stunnel)'
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-stunnel
+        with:
+          path: C:\my-stunnel
+          key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+
+      - name: 'install test prereqs (stunnel)'
+        if: ${{ steps.cache-stunnel.outputs.cache-hit != 'true' }}
+        timeout-minutes: 2
+        shell: msys2 {0}  # zizmor: ignore[misfeature]
+        run: |
+          cd /c && mkdir my-stunnel && cd my-stunnel
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
+          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
+
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
+    needs: build-cache
     runs-on: windows-2022
     timeout-minutes: 10
     defaults:
@@ -149,14 +171,14 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
-      - name: 'install test prereqs'
+      - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          cd /cygdrive/d && mkdir my-stunnel && cd my-stunnel
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
-          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-stunnel
+        with:
+          path: C:\my-stunnel
+          key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          fail-on-cache-miss: true
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -164,7 +186,7 @@ jobs:
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH=/usr/bin:/cygdrive/d/my-stunnel/bin
+          PATH=/usr/bin:/cygdrive/c/my-stunnel/bin
           TFLAGS="-j8 ${TFLAGS}"
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -192,6 +214,7 @@ jobs:
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
+    needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ contains(matrix.tflags, '-t') && 14 || 10 }}
     defaults:
@@ -370,15 +393,19 @@ jobs:
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
           fi
 
+      - name: 'cache test prereqs (stunnel)'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-stunnel
+        with:
+          path: C:\my-stunnel
+          key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          fail-on-cache-miss: true
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-          cd /d && mkdir my-stunnel && cd my-stunnel
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
-          /c/ProgramData/Chocolatey/bin/7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
+        timeout-minutes: 2
+        run: /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -400,7 +427,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          PATH="$PATH:/d/my-stunnel/bin"
+          PATH="$PATH:/c/my-stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --verbose --target test-ci
@@ -424,6 +451,7 @@ jobs:
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
+    needs: build-cache
     runs-on: windows-2022
     timeout-minutes: 10
     defaults:
@@ -580,15 +608,19 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
+      - name: 'cache test prereqs (stunnel)'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-stunnel
+        with:
+          path: C:\my-stunnel
+          key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          fail-on-cache-miss: true
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          cd /d && mkdir my-stunnel && cd my-stunnel
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
-          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
+        timeout-minutes: 2
+        run: python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -602,7 +634,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          PATH="$PWD/bld/lib:$PATH:/d/my-stunnel/bin"
+          PATH="$PWD/bld/lib:$PATH:/c/my-stunnel/bin"
           cmake --build bld --target test-ci
 
       - name: 'build examples'
@@ -717,6 +749,7 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
+    needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ matrix.arch == 'arm64' && 12 || 10 }}
     defaults:
@@ -947,6 +980,15 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
+      - name: 'cache test prereqs (stunnel)'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: cache-stunnel
+        with:
+          path: C:\my-stunnel
+          key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          fail-on-cache-miss: true
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
@@ -969,10 +1011,6 @@ jobs:
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
-          cd /c && mkdir my-stunnel && cd my-stunnel
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
-            "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
-          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}

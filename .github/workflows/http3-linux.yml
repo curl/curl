@@ -337,8 +337,7 @@ jobs:
 
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    needs:
-      - build-cache
+    needs: build-cache
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
