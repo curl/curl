@@ -123,7 +123,8 @@ class TestShutdown:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
-             '-n', f'{count}', '-f', '-V', proto, url
+             '-n', f'{count}', '-f', '-C', env.ca.cert_file,
+             '-V', proto, url
         ])
         r.check_exit_code(0)
         shutdowns = [line for line in r.trace_lines
@@ -199,6 +200,7 @@ class TestShutdown:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
              '-n', f'{count}',  # that many transfers
+             '-C', env.ca.cert_file,
              '-f',  # forbid conn reuse
              '-m', '10',  # max parallel
              '-T', '5',  # max total conns at a time
