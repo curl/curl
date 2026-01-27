@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: 'no-op'
-      - run: echo 'foobar'
+        run: echo 'foobar'
 
   build-cache:
     name: 'Build caches'
