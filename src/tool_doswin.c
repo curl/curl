@@ -716,7 +716,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   int clientAddrLen = sizeof(clientAddr);
 
   curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l,
-                                       (struct sockaddr*)&clientAddr,
+                                       (struct sockaddr *)&clientAddr,
                                        &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
@@ -793,13 +793,13 @@ curl_socket_t win32_stdin_read_thread(void)
     selfaddr.sin_family = AF_INET;
     selfaddr.sin_addr.S_un.S_addr = htonl(INADDR_LOOPBACK);
     /* Bind to any available loopback port */
-    if(bind(tdata->socket_l, (const struct sockaddr*)&selfaddr, socksize)) {
+    if(bind(tdata->socket_l, (const struct sockaddr *)&selfaddr, socksize)) {
       errorf("bind error: %d", SOCKERRNO);
       break;
     }
 
     /* Bind to any available loopback port */
-    if(getsockname(tdata->socket_l, (struct sockaddr*)&selfaddr, &socksize)) {
+    if(getsockname(tdata->socket_l, (struct sockaddr *)&selfaddr, &socksize)) {
       errorf("getsockname error: %d", SOCKERRNO);
       break;
     }
@@ -841,7 +841,7 @@ curl_socket_t win32_stdin_read_thread(void)
     /* Hard close the socket on closesocket() */
     setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
 
-    if(connect(socket_r, (const struct sockaddr*)&selfaddr, socksize)) {
+    if(connect(socket_r, (const struct sockaddr *)&selfaddr, socksize)) {
       errorf("connect error: %d", SOCKERRNO);
       break;
     }
