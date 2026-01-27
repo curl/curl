@@ -71,7 +71,6 @@
  * just as under Linux (e.g. <sys/socket.h>) and the Winsock headers should
  * never be included when __CYGWIN__ is defined.
  */
-
 #ifdef _WIN32
 #  if defined(UNICODE) && !defined(_UNICODE)
 #    error "UNICODE is defined but _UNICODE is not defined"
@@ -89,7 +88,6 @@
  * those symbols to compare against, and even those that do may be missing
  * newer symbols.
  */
-
 #ifndef _WIN32_WINNT_VISTA
 #define _WIN32_WINNT_VISTA          0x0600   /* Windows Vista */
 #endif
