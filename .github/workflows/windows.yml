@@ -57,7 +57,6 @@ jobs:
             "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
           7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
 
-jobs:
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     needs: build-cache
