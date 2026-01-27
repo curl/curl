@@ -168,7 +168,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       return CURLE_AGAIN;
     case SOCKEMSGSIZE:
       /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
-      break;
+      return CURLE_SEND_ERROR;
     case EIO:
       if(pktlen > gsolen) {
         /* GSO failure */
