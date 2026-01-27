@@ -40,6 +40,8 @@ jobs:
   dummy:
     name: 'do nothing'
     runs-on: ubuntu-slim
+    steps:
+      - name: 'no-op'
 
   build-cache:
     name: 'Build caches'
