@@ -1119,7 +1119,7 @@ static void check_stdin_upload(struct OperationConfig *config,
 
   CURLX_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP)
     /* non-blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */

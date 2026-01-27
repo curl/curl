@@ -693,6 +693,7 @@ static void init_terminal(void)
   }
 }
 
+#ifdef USE_WINSOCK
 /* The following STDIN non - blocking read techniques are heavily inspired
    by nmap and ncat (https://nmap.org/ncat/) */
 struct win_thread_data {
@@ -895,6 +896,7 @@ curl_socket_t win32_stdin_read_thread(void)
   assert(socket_r != CURL_SOCKET_BAD);
   return socket_r;
 }
+#endif /* USE_WINSOCK */
 
 #endif /* !CURL_WINDOWS_UWP */
 

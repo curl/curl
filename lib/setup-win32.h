@@ -45,20 +45,22 @@
   /* Define to use BSD-style lwIP TCP/IP stack. */
   /* #define USE_LWIPSOCK 1 */
 #  undef HAVE_GETHOSTNAME
-#  undef LWIP_POSIX_SOCKETS_IO_NAMES
-#  undef RECV_TYPE_ARG1
-#  undef RECV_TYPE_ARG3
-#  undef SEND_TYPE_ARG1
-#  undef SEND_TYPE_ARG3
 #  define HAVE_GETHOSTBYNAME_R
 #  define HAVE_GETHOSTBYNAME_R_6
+#  undef LWIP_POSIX_SOCKETS_IO_NAMES
 #  define LWIP_POSIX_SOCKETS_IO_NAMES 0
+#  undef RECV_TYPE_ARG1
 #  define RECV_TYPE_ARG1 int
+#  undef RECV_TYPE_ARG3
 #  define RECV_TYPE_ARG3 size_t
+#  undef SEND_TYPE_ARG1
 #  define SEND_TYPE_ARG1 int
+#  undef SEND_TYPE_ARG3
 #  define SEND_TYPE_ARG3 size_t
 #elif defined(_WIN32)
 #  define USE_WINSOCK 2
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
 #endif
 
 /*
@@ -77,8 +79,6 @@
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    error "_UNICODE is defined but UNICODE is not defined"
 #  endif
-#  include <winsock2.h>
-#  include <ws2tcpip.h>
 #  include <windows.h>
 #  include <winerror.h>
 #  include <tchar.h>
