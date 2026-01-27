@@ -198,8 +198,8 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
 #endif
     ;
 
+  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
   switch(conn_config->version) {
-  case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:

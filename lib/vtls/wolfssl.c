@@ -1028,8 +1028,9 @@ static CURLcode ssl_version(struct Curl_easy *data,
 {
   int res;
   *min_version = *max_version = 0;
+  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
+
   switch(conn_config->version) {
-  case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
     *min_version = TLS1_VERSION;
