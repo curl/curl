@@ -76,8 +76,8 @@ int main(void)
     for(;;) {
       CURLMcode mresult = curl_multi_perform(multi, &still_running);
       if(mresult != CURLM_OK) {
-        fprintf(stderr,
-          "curl_multi_perform() failed, code %d.\n", (int)mresult);
+        fprintf(stderr, "curl_multi_perform() failed, code %d.\n",
+                (int)mresult);
         break;
       }
 
