@@ -39,7 +39,10 @@ env:
 jobs:
   build-cache:
     name: 'Build caches'
-    runs-on: windows-2022
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        image: [windows-11-arm, windows-2022]  # Cannot share cache between arm and intel: https://github.com/actions/cache/issues/1622
     steps:
       - name: 'cache test prereqs (stunnel)'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -51,7 +54,7 @@ jobs:
       - name: 'install test prereqs (stunnel)'
         if: ${{ steps.cache-stunnel.outputs.cache-hit != 'true' }}
         timeout-minutes: 2
-        shell: msys2 {0}  # zizmor: ignore[misfeature]
+        shell: bash
         run: |
           cd /c && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
