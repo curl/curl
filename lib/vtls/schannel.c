@@ -428,8 +428,8 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   else
     infof(data, "schannel: enabled automatic use of client certificate");
 
+  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
   switch(conn_config->version) {
-  case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:

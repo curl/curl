@@ -3620,11 +3620,11 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
 
   *pmethod = NULL;
   *pssl_version_min = conn_config->version;
+  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
   switch(peer->transport) {
   case TRNSPRT_TCP:
     /* check to see if we have been told to use an explicit SSL/TLS version */
     switch(*pssl_version_min) {
-    case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
@@ -3770,13 +3770,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(!ssl_config->enable_beast)
     ctx_options &= ~(ctx_option_t)SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 
+  DEBUGASSERT(ssl_version_min != CURL_SSLVERSION_DEFAULT);
   switch(ssl_version_min) {
   case CURL_SSLVERSION_SSLv2:
   case CURL_SSLVERSION_SSLv3:
     return CURLE_NOT_BUILT_IN;
 
     /* "--tlsv<x.y>" options mean TLS >= version <x.y> */
-  case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:   /* TLS >= version 1.0 */
   case CURL_SSLVERSION_TLSv1_0: /* TLS >= version 1.0 */
   case CURL_SSLVERSION_TLSv1_1: /* TLS >= version 1.1 */
