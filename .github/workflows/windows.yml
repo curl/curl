@@ -46,7 +46,7 @@ jobs:
 
   build-cache:
     name: 'Build caches'
-    runs-on: ubuntu-slim
+    runs-on: windows-2022
     steps:
       - name: 'cache test prereqs (stunnel)'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
