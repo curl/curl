@@ -36,7 +36,7 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1600
   # handled in renovate.json
-  OPENSSL_VERSION: 3.6.0
+  OPENSSL_VERSION: 3.6.1
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
