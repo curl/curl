@@ -73,10 +73,11 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     curl_multi_add_handle(multi, curl);
-    for (;;) {
+    for(;;) {
       CURLMcode mresult = curl_multi_perform(multi, &still_running);
       if(mresult != CURLM_OK) {
-        fprintf(stderr, "curl_multi_perform() failed, code %d.\n", (int)mresult);
+        fprintf(stderr,
+          "curl_multi_perform() failed, code %d.\n", (int)mresult);
         break;
       }
 
