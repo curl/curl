@@ -37,7 +37,7 @@
    2. For systems with config-*.h files, define them there.
 */
 
-#ifdef _WIN32
+#ifdef USE_WINSOCK
 /* int recv(SOCKET, char *, int, int) */
 #define RECV_TYPE_ARG1 SOCKET
 #define RECV_TYPE_ARG2 char *
