@@ -73,19 +73,25 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     curl_multi_add_handle(multi, curl);
-    do {
+    for(;;) {
       CURLMcode mresult = curl_multi_perform(multi, &still_running);
-
-      if(!mresult && still_running)
-        /* wait for activity, timeout or "nothing" */
-        mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
-
-      if(mresult) {
-        fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mresult);
+      if(mresult != CURLM_OK) {
+        fprintf(stderr, "curl_multi_perform() failed, code %d.\n",
+                (int)mresult);
         break;
       }
 
-    } while(still_running);  /* if there are still transfers, loop */
+      if(!still_running) {
+        break;
+      }
+
+      /* wait for activity, timeout or "nothing" */
+      mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      if(mresult != CURLM_OK) {
+        fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mresult);
+        break;
+      }
+    } /* if there are still transfers, loop */
   }
 }
 ~~~

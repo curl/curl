@@ -286,7 +286,8 @@ class TestDownload:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
-             '-n', f'{count}', '-P', f'{pause_offset}', '-V', proto, url
+             '-n', f'{count}', '-P', f'{pause_offset}',
+             '-C', env.ca.cert_file, '-V', proto, url
         ])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
@@ -305,7 +306,8 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}',
-            '-P', f'{pause_offset}', '-V', proto, url
+            '-P', f'{pause_offset}', '-C', env.ca.cert_file,
+            '-V', proto, url
         ])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
@@ -329,6 +331,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
+            '-C', env.ca.cert_file,
             '-P', f'{pause_offset}', '-V', proto, url
         ])
         r.check_exit_code(0)
@@ -354,6 +357,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
+            '-C', env.ca.cert_file,
             '-A', f'{abort_offset}', '-V', proto, url
         ])
         r.check_exit_code(42)  # CURLE_ABORTED_BY_CALLBACK
@@ -379,6 +383,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
+            '-C', env.ca.cert_file,
             '-F', f'{fail_offset}', '-V', proto, url
         ])
         r.check_exit_code(23)  # CURLE_WRITE_ERROR
@@ -487,7 +492,8 @@ class TestDownload:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
-             '-n', f'{count}', '-P', f'{pause_offset}', '-V', proto, url
+             '-n', f'{count}', '-P', f'{pause_offset}',
+             '-C', env.ca.cert_file, '-V', proto, url
         ])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
@@ -549,6 +555,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
              '-n', f'{count}',
+             '-C', env.ca.cert_file,
              '-e',  # use TLS earlydata
              '-f',  # forbid reuse of connections
              '-r', f'{env.domain1}:{port}:127.0.0.1',
@@ -596,6 +603,7 @@ class TestDownload:
         r = client.run(args=[
              '-n', f'{count}',
              '-m', f'{max_parallel}',
+             '-C', env.ca.cert_file,
              '-x',  # always use a fresh connection
              '-M',  str(max_host_conns),  # limit conns per host
              '-r', f'{env.domain1}:{port}:127.0.0.1',
@@ -634,6 +642,7 @@ class TestDownload:
         r = client.run(args=[
              '-n', f'{count}',
              '-m', f'{max_parallel}',
+             '-C', env.ca.cert_file,
              '-x',  # always use a fresh connection
              '-T',  str(max_total_conns),  # limit total connections
              '-r', f'{env.domain1}:{port}:127.0.0.1',
@@ -673,7 +682,8 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
              '-n', f'{count}', '-m', f'{count}',
-             '-P', f'{pause_offset}', '-V', proto, url
+             '-P', f'{pause_offset}', '-C', env.ca.cert_file,
+             '-V', proto, url
         ])
         r.check_exit_code(0)
 

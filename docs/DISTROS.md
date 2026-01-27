@@ -152,6 +152,12 @@ Issues and patches for this are managed in the main curl project.
 Homebrew's policy is that all patches and issues should be submitted upstream
 unless it is specific to Homebrew's way of packaging software.
 
+## LibreELEC
+
+- curl: https://github.com/LibreELEC/LibreELEC.tv/blob/master/packages/web/curl/
+- curl issues: https://github.com/LibreELEC/LibreELEC.tv/issues?q=is%3Aissue%20state%3Aopen%20curl
+- curl patches: https://github.com/LibreELEC/LibreELEC.tv/blob/master/packages/web/curl/patches/
+
 ## MacPorts
 
 *Rolling Release*

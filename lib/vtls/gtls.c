@@ -1572,8 +1572,6 @@ static CURLcode glts_apple_verify(struct Curl_cfilter *cf,
   result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
                                   gtls_chain_get_der, chain, NULL, 0);
   *pverified = !result;
-  if(*pverified)
-    infof(data, "  SSL certificate verified by Apple SecTrust.");
   return result;
 }
 #endif /* USE_APPLE_SECTRUST */

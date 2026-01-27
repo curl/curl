@@ -211,13 +211,13 @@ static int my_progress_d_cb(void *userdata,
 static int setup_hx_download(CURL *curl, const char *url, struct transfer_d *t,
                              long http_version, struct curl_slist *host,
                              CURLSH *share, int use_earlydata,
-                             int fresh_connect)
+                             int fresh_connect, char *cafile)
 {
   curl_easy_setopt(curl, CURLOPT_SHARE, share);
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  if(cafile)
+    curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_write_d_cb);
@@ -292,11 +292,12 @@ static CURLcode test_cli_hx_download(const char *URL)
   size_t max_host_conns = 0;
   size_t max_total_conns = 0;
   int fresh_connect = 0;
+  char *cafile = NULL;
   CURLcode result = CURLE_OK;
 
   (void)URL;
 
-  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:F:M:P:r:T:V:"))
+  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:C:F:M:P:r:T:V:"))
         != -1) {
     const char *opt = coptarg;
     curl_off_t num;
@@ -328,6 +329,10 @@ static CURLcode test_cli_hx_download(const char *URL)
     case 'A':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
         abort_offset = (size_t)num;
+      break;
+    case 'C':
+      curlx_free(cafile);
+      cafile = curlx_strdup(coptarg);
       break;
     case 'F':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
@@ -432,7 +437,7 @@ static CURLcode test_cli_hx_download(const char *URL)
     t->curl = curl_easy_init();
     if(!t->curl ||
        setup_hx_download(t->curl, url, t, http_version, host, share,
-                         use_earlydata, fresh_connect)) {
+                         use_earlydata, fresh_connect, cafile)) {
       curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
       result = (CURLcode)1;
       goto cleanup;
@@ -515,7 +520,7 @@ static CURLcode test_cli_hx_download(const char *URL)
             t->curl = curl_easy_init();
             if(!t->curl ||
                setup_hx_download(t->curl, url, t, http_version, host, share,
-                                 use_earlydata, fresh_connect)) {
+                                 use_earlydata, fresh_connect, cafile)) {
               curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
               result = (CURLcode)1;
               goto cleanup;
@@ -566,6 +571,7 @@ cleanup:
 optcleanup:
 
   curlx_free(resolve);
+  curlx_free(cafile);
 
   return result;
 }
