@@ -382,7 +382,7 @@ class TestSSLUse:
         if not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_uses_lib('quictls') and \
-           not (env.curl_uses_lib('openssl') and env.curl_uses_lib('ngtcp2')) and \
+           not env.curl_uses_lib('openssl') and \
            not env.curl_uses_lib('gnutls') and \
            not env.curl_uses_lib('wolfssl'):
             pytest.skip("QUIC session reuse not implemented")
@@ -395,6 +395,7 @@ class TestSSLUse:
         r = client.run(args=[
              '-n', f'{count}',
              '-f',  # forbid reuse of connections
+             '-C', env.ca.cert_file,
              '-r', f'{env.domain1}:{env.port_for("h3")}:127.0.0.1',
              '-V', 'h3', url
         ])
