@@ -749,7 +749,7 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-    needs: [${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && 'build-cache' }}]
+    needs: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && 'build-cache' || '' }}
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ matrix.arch == 'arm64' && 12 || 10 }}
     defaults:
