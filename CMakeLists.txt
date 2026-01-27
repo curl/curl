@@ -1442,6 +1442,8 @@ if(WIN32)
   option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" OFF)
 endif()
 
+set(CURL_INCLUDES "")
+
 # Check for header files
 if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
