@@ -737,7 +737,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if(n == 0)
       break;
-    nwritten = send(socket_w, buffer, n, 0);
+    nwritten = swrite(socket_w, buffer, n);
     if(nwritten == -1)
       break;
     if((DWORD)nwritten != n)

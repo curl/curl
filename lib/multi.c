@@ -1327,7 +1327,7 @@ static void reset_socket_fdwrite(curl_socket_t s)
   int t;
   int l = (int)sizeof(t);
   if(!getsockopt(s, SOL_SOCKET, SO_TYPE, (char *)&t, &l) && t == SOCK_STREAM)
-    send(s, NULL, 0, 0);
+    swrite(s, NULL, 0);
 }
 #endif
 

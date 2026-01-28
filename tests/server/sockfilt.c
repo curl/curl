@@ -703,7 +703,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
         wsaevent = WSACreateEvent();
         if(wsaevent != WSA_INVALID_EVENT) {
           if(wsaevents.lNetworkEvents & FD_WRITE) {
-            send(wsasock, NULL, 0, 0); /* reset FD_WRITE */
+            swrite(wsasock, NULL, 0); /* reset FD_WRITE */
           }
           error = WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents);
           if(error != SOCKET_ERROR) {
