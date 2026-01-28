@@ -75,7 +75,7 @@ class TestGoAway:
     # nghttpx during transfers. This proved to be unreliable. The nature of
     # UDP makes QUIC streams error (ERR_DRAINGIN, e.g. connection closes)
     # at possibly any point. We do not retry on requests in all such
-    # situations which made the test fail in CI ocasionally. Not good enough.
+    # situations which made the test fail in CI occasionally. Not good enough.
     # def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx):
 
     # download files sequentially with delay, reload server for GOAWAY
