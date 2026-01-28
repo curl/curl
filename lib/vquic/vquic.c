@@ -207,8 +207,8 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       goto out;
     }
     else {
-      failf(data, "send() returned %zd (errno %d)", rv, SOCKERRNO);
       if(SOCKERRNO != SOCKEMSGSIZE) {
+        failf(data, "send() returned %zd (errno %d)", rv, SOCKERRNO);
         result = CURLE_SEND_ERROR;
         goto out;
       }
