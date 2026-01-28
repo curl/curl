@@ -39,7 +39,10 @@ env:
 jobs:
   build-cache:
     name: 'Build caches'
-    runs-on: windows-11-arm
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        image: [windows-11-arm, windows-2022]
     steps:
       - name: 'cache test prereqs (stunnel)'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -178,7 +181,6 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'run tests'
@@ -401,7 +403,6 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'install test prereqs'
@@ -617,7 +618,6 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'install test prereqs'
@@ -990,7 +990,6 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'install test prereqs'
