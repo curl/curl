@@ -144,9 +144,10 @@ struct timeval {
  * which is used to write outgoing data on a connected socket.
  * If yours has another name then do not define HAVE_SEND.
  *
- * If HAVE_SEND is defined then SEND_TYPE_ARG1, SEND_QUAL_ARG2,
- * SEND_TYPE_ARG2, SEND_TYPE_ARG3, SEND_TYPE_ARG4 and
- * SEND_TYPE_RETV must also be defined.
+ * If HAVE_SEND is defined then SEND_TYPE_ARG1, SEND_TYPE_ARG2,
+ * SEND_TYPE_ARG3, SEND_TYPE_ARG4 and SEND_TYPE_RETV must also
+ * be defined. SEND_NONCONST_ARG2 must also be defined if ARG2
+ * does not accept const.
  */
 
 #define sread(x, y, z) (ssize_t)recv((RECV_TYPE_ARG1)(x), \
@@ -165,10 +166,17 @@ struct timeval {
                                        (SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                        (SEND_TYPE_ARG3)(z))
 #elif defined(HAVE_SEND)
+#ifdef SEND_NONCONST_ARG2
 #define swrite(x, y, z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
-                              (SEND_QUAL_ARG2 SEND_TYPE_ARG2)CURL_UNCONST(y), \
+                                      (SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                       (SEND_TYPE_ARG3)(z), \
                                       (SEND_TYPE_ARG4)(SEND_4TH_ARG))
+#else
+#define swrite(x, y, z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
+                                      (const SEND_TYPE_ARG2)(y), \
+                                      (SEND_TYPE_ARG3)(z), \
+                                      (SEND_TYPE_ARG4)(SEND_4TH_ARG))
+#endif /* SEND_NONCONST_ARG2 */
 #else /* HAVE_SEND */
 #ifndef swrite
 #error "Missing definition of macro swrite!"
