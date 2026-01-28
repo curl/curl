@@ -306,7 +306,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   socksd_getconfig();
 
-  rc = sread(fd, (char *)buffer, sizeof(buffer), 0);
+  rc = sread(fd, (char *)buffer, sizeof(buffer));
   if(rc <= 0) {
     logmsg("SOCKS identifier message missing, recv returned %zd", rc);
     return CURL_SOCKET_BAD;
@@ -353,7 +353,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   loghex(response, rc);
 
   /* expect the request or auth */
-  rc = sread(fd, (char *)buffer, sizeof(buffer), 0);
+  rc = sread(fd, (char *)buffer, sizeof(buffer));
   if(rc <= 0) {
     logmsg("SOCKS5 request or auth message missing, recv returned %zd", rc);
     return CURL_SOCKET_BAD;
@@ -412,7 +412,7 @@ static curl_socket_t sockit(curl_socket_t fd)
       return CURL_SOCKET_BAD;
 
     /* expect the request */
-    rc = sread(fd, (char *)buffer, sizeof(buffer), 0);
+    rc = sread(fd, (char *)buffer, sizeof(buffer));
     if(rc <= 0) {
       logmsg("SOCKS5 request message missing, recv returned %zd", rc);
       return CURL_SOCKET_BAD;
@@ -581,7 +581,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   char buffer[512];
   if(FD_ISSET(cp->clientfd, fds)) {
     /* read from client, send to remote */
-    nread = sread(cp->clientfd, buffer, sizeof(buffer), 0);
+    nread = sread(cp->clientfd, buffer, sizeof(buffer));
     if(nread > 0) {
       nwrite = swrite(cp->remotefd, (char *)buffer, nread, 0);
       if(nwrite != nread)
@@ -593,7 +593,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   }
   if(FD_ISSET(cp->remotefd, fds)) {
     /* read from remote, send to client */
-    nread = sread(cp->remotefd, buffer, sizeof(buffer), 0);
+    nread = sread(cp->remotefd, buffer, sizeof(buffer));
     if(nread > 0) {
       nwrite = swrite(cp->clientfd, (char *)buffer, nread, 0);
       if(nwrite != nread)
