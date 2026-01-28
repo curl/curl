@@ -583,7 +583,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
     /* read from client, send to remote */
     nread = sread(cp->clientfd, buffer, sizeof(buffer), 0);
     if(nread > 0) {
-      nwrite = send(cp->remotefd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
+      nwrite = swrite(cp->remotefd, (char *)buffer, nread, 0);
       if(nwrite != nread)
         return 1;
       cp->fromclient += nwrite;
@@ -595,7 +595,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
     /* read from remote, send to client */
     nread = sread(cp->remotefd, buffer, sizeof(buffer), 0);
     if(nread > 0) {
-      nwrite = send(cp->clientfd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
+      nwrite = swrite(cp->clientfd, (char *)buffer, nread, 0);
       if(nwrite != nread)
         return 1;
       cp->fromremote += nwrite;
