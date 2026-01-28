@@ -3289,18 +3289,18 @@ static CURLcode url_create_needle(struct Curl_easy *data,
   if(needle->bits.httpproxy) {
     result = Curl_idnconvert_hostname(&needle->http_proxy.host);
     if(result)
-      return result;
+      goto out;
   }
   if(needle->bits.socksproxy) {
     result = Curl_idnconvert_hostname(&needle->socks_proxy.host);
     if(result)
-      return result;
+      goto out;
   }
 #endif
   if(needle->bits.conn_to_host) {
     result = Curl_idnconvert_hostname(&needle->conn_to_host);
     if(result)
-      return result;
+      goto out;
   }
 
   /*************************************************************
