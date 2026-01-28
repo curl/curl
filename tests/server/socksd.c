@@ -273,7 +273,7 @@ static curl_socket_t socks4(curl_socket_t fd,
   response[1] = cd; /* result */
   /* copy port and address from connect request */
   memcpy(&response[2], &buffer[SOCKS4_DSTPORT], 6);
-  rc = (send)(fd, (char *)response, 8, 0);
+  rc = swrite(fd, response, 8);
   if(rc != 8) {
     logmsg("Sending SOCKS4 response failed!");
     return CURL_SOCKET_BAD;
@@ -344,7 +344,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   /* respond with two bytes: VERSION + METHOD */
   response[0] = s_config.responseversion;
   response[1] = s_config.responsemethod;
-  rc = (send)(fd, (char *)response, 2, 0);
+  rc = swrite(fd, response, 2);
   if(rc != 2) {
     logmsg("Sending response failed!");
     return CURL_SOCKET_BAD;
@@ -401,7 +401,7 @@ static curl_socket_t sockit(curl_socket_t fd)
     }
     response[0] = 1;
     response[1] = login ? 0 : 1;
-    rc = (send)(fd, (char *)response, 2, 0);
+    rc = swrite(fd, response, 2);
     if(rc != 2) {
       logmsg("Sending auth response failed!");
       return CURL_SOCKET_BAD;
@@ -548,7 +548,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   memcpy(&response[SOCKS5_BNDADDR + len],
          &buffer[SOCKS5_DSTADDR + len], sizeof(socksport));
 
-  rc = (send)(fd, (char *)response, (SEND_TYPE_ARG3)(len + 6), 0);
+  rc = swrite(fd, response, len + 6);
   if(rc != (len + 6)) {
     logmsg("Sending connect response failed!");
     return CURL_SOCKET_BAD;
