@@ -196,8 +196,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 
   *psent = 0;
 
-  while((rv = send(qctx->sockfd, (const char *)pkt,
-                   (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
+  while((rv = swrite(qctx->sockfd, (const char *)pkt, pktlen, 0)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;
 
