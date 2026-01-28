@@ -1584,6 +1584,7 @@ struct UserDefined {
 #ifndef CURL_DISABLE_WEBSOCKETS
   BIT(ws_raw_mode);
   BIT(ws_no_auto_pong);
+  BIT(ws_upgrd_refused_ok);
 #endif
   BIT(post301); /* keep POSTs as POSTs after a 301 request */
   BIT(post302); /* keep POSTs as POSTs after a 302 request */
