@@ -62,7 +62,7 @@ int curlx_str_until(const char **linep, struct Curl_str *out, const size_t max,
 int curlx_str_untilnl(const char **linep, struct Curl_str *out,
                       const size_t max);
 
-/* Get a "quoted" word. No escaping possible.
+/* Get a "quoted" word. Escaped quotes are supported.
    return non-zero on error */
 int curlx_str_quotedword(const char **linep, struct Curl_str *out,
                          const size_t max);
@@ -106,7 +106,7 @@ void curlx_str_passblanks(const char **linep);
    returns 10. THIS ONLY WORKS ON VALID HEXADECIMAL LETTER INPUT. Verify
    before calling this!
 */
-extern const unsigned char Curl_hexasciitable[];
-#define Curl_hexval(x) (unsigned char)(Curl_hexasciitable[(x) - '0'] & 0x0f)
+extern const unsigned char curlx_hexasciitable[];
+#define curlx_hexval(x) (unsigned char)(curlx_hexasciitable[(x) - '0'] & 0x0f)
 
 #endif /* HEADER_CURL_STRPARSE_H */

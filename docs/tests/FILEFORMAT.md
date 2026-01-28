@@ -11,10 +11,9 @@ XML. All data for a single test case resides in a single ASCII file. Labels
 mark the beginning and the end of all sections, and each label must be written
 in its own line. Comments are either XML-style (enclosed with `<!--` and
 `-->`) or shell script style (beginning with `#`) and must appear on their own
-lines and not alongside actual test data. Most test data files are
-syntactically-valid XML (a few files are not); lack of support for character
-entities is a big difference but macros like %CR fill that particular role
-here.
+lines and not alongside actual test data. Test data files are syntactically
+valid XML; lack of support for character entities is a big difference but macros
+like %CR fill that particular role here.
 
 Each test case source exists as a file matching the format
 `tests/data/testNUM`, where `NUM` is the unique test number, and must begin
@@ -185,6 +184,7 @@ Available substitute variables include:
 - `%IMAPPORT` - Port number of the IMAP server
 - `%LOGDIR` - Log directory relative to %PWD
 - `%MQTTPORT` - Port number of the MQTT server
+- `%MQTTSPORT` - Port number of the MQTTS server
 - `%NOLISTENPORT` - Port number where no service is listening
 - `%POP36PORT` - IPv6 port number of the POP3 server
 - `%POP3PORT` - Port number of the POP3 server
@@ -257,11 +257,6 @@ often run on overloaded machines with unpredictable timing.
 Tests using non-7-bit-ASCII characters must provide them with `%hex[]` or
 similar.
 
-In most cases test files comply with the XML format, and pass xmllint cleanly.
-If the data file uses the `&` character, or has other, non-compliant content,
-and making it XML-compliant is not possible or unpractical, use the `notxml`
-keyword to exclude it from linter checks.
-
 ## `<reply>`
 
 ### `<data [nocheck="yes"] [sendzero="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes|headers"]>`
@@ -308,14 +303,14 @@ test file to load the list content.
 
 Send back this contents instead of the `<data>` one. The `NUM` is set by:
 
- - The test number in the request line is >10000 and this is the remainder
-   of [test case number]%10000.
- - The request was HTTP and included digest details, which adds 1000 to `NUM`
- - If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
- - If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
- - If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
- - If an HTTP request is Negotiate, `NUM` gets incremented by one for each
-   request with Negotiate authorization header on the same test case.
+- The test number in the request line is >10000 and this is the remainder of
+  [test case number]%10000.
+- The request was HTTP and included digest details, which adds 1000 to `NUM`
+- If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
+- If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
+- If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
+- If an HTTP request is Negotiate, `NUM` gets incremented by one for each
+  request with Negotiate authorization header on the same test case.
 
 Dynamically changing `NUM` in this way allows the test harness to be used to
 test authentication negotiation where several different requests must be sent

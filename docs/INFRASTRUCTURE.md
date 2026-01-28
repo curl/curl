@@ -60,11 +60,11 @@ account.
 
 We regularly run our code through the [Coverity static code
 analyzer](https://scan.coverity.com/) thanks to them offering this service to
-us for free.
+us free of charge.
 
 ## CodeSonar
 
-[CodeSonar](https://codesecure.com/our-products/codesonar/) analyzes the curl
+[CodeSonar](https://www.adacore.com/codesonar) analyzes the curl
 source code daily and emails Daniel Stenberg whenever it finds suspected
 problems in the source code. I hope and expect that we can invite other
 maintainers to access these reports soon.
@@ -76,7 +76,7 @@ domain names, including `curl.se` and `curl.dev`. Daniel Stenberg owns these
 domain names.
 
 Until a few years ago, the curl website was present at `curl.haxx.se`. The
-`haxx.se` domain is owned by Haxx AB, administrated by Daniel Stenberg. The
+`haxx.se` domain is owned by Haxx AB, administered by Daniel Stenberg. The
 curl.haxx.se name is meant to keep working and be redirecting to curl.se for
 the foreseeable future.
 
@@ -100,11 +100,11 @@ company). The machine is physically located in Sweden.
 curl release tarballs are hosted on https://curl.se/download.html. They are
 uploaded there at release-time by the release manager.
 
-curl-for-win downloads are hosted on https://curl.se/windows and are uploaded
+curl-for-win downloads are hosted on https://curl.se/windows/ and are uploaded
 to the server by Viktor Szakats.
 
-curl-for-QNX downloads are hosted on <https://curl.se/qnx> and are uploaded to
-the server by Daniel Stenberg.
+curl-for-QNX downloads are hosted on <https://curl.se/qnx/> and are uploaded
+to the server by Daniel Stenberg.
 
 Daily release tarball-like snapshots are generated automatically and are
 provided for download at <https://curl.se/snapshots/>.
@@ -171,14 +171,6 @@ instances used for this.
 
 We use a few rare additional curl related email aliases in the curl domains.
 They go through the mail server `mail.haxx.se` maintained by Daniel Stenberg
-
-## Bug-bounty
-
-We run a [bug-bounty](https://curl.se/docs/bugbounty.html) on HackerOne. The
-setup runs entirely at https://hackerone.com/curl.
-
-The money part for the bug bounty is sponsored by the [Internet Bug
-Bounty](https://hackerone.com/ibb).
 
 ## Open Collective
 

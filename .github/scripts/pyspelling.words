@@ -778,6 +778,7 @@ singlecwd
 SINIX
 Sintonen
 sizeof
+Slowloris
 SLE
 slist
 sln
@@ -826,6 +827,7 @@ stateful
 statvfs
 stderr
 stdin
+stdint
 stdout
 Steinar
 Stenberg
@@ -904,6 +906,7 @@ UDP
 UI
 UID
 UIDL
+uint
 Ultrix
 umask
 Unary

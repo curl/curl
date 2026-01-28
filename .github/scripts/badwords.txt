@@ -10,6 +10,9 @@ tool chain:toolchain
 tool-chain:toolchain
 wild-card:wildcard
 wild card:wildcard
+\bthread ?safe[^."t]:thread-safe
+\bthread ?unsafe[^."t]:thread-unsafe
+multi ?thread:multi-thread
 \bit's:it is
 aren't:are not
 can't:cannot
@@ -70,16 +73,14 @@ host name\b:hostname
 host names\b:hostnames
 [^;<]file name\b:filename
 file names\b:filenames
+\bfist\b:first
 \buser name\b:username
 \buser names\b:usernames
 \bpass phrase:passphrase
 \bwill\b:rewrite to present tense
-\b32bit:32-bit
-\b64bit:64-bit
-32 bit\b:32-bit
-64 bit\b:64-bit
-64-bits:64 bits or 64-bit
-32-bits:32 bits or 32-bit
+\b[0-9]+bit[^*"'%,]: NN-bit
+\b([02-9]|[1-9][0-9]+) bit\b: NN-bit
+[0-9]+-bits:NN bits or NN-bit
 \bvery\b:rephrase using an alternative word
 \bCurl\b=curl
 \bcURL\b=curl

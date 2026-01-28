@@ -65,8 +65,6 @@ class TestAuth:
     def test_14_03_digest_put_auth(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_has_feature('digest'):
             pytest.skip("curl built without digest")
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip("openssl-quic is flaky in retrying POST")
         data='0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
@@ -97,7 +95,7 @@ class TestAuth:
     def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
-            pytest.skip("quiche/openssl-quic have problems with large requests")
+            pytest.skip("quiche has problems with large requests")
         # just large enough that nghttp2 will submit
         password = 'x' * (47 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
@@ -107,8 +105,9 @@ class TestAuth:
             '--basic', '--user', f'test:{password}',
             '--trace-config', 'http/2,http/3'
         ])
-        # but apache denies on length limit
-        r.check_response(http_status=431)
+        # but apache either denies on length limit or gives a 400
+        r.check_exit_code(0)
+        assert r.stats[0]['http_code'] in [400, 431]
 
     # PUT data, basic auth with very large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())

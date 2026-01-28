@@ -25,7 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <curl/curl.h>
 #include "curlx/dynbuf.h"
 
 struct dynbuf;
@@ -126,7 +125,6 @@ size_t Curl_dynhds_remove(struct dynhds *dynhds,
                           const char *name, size_t namelen);
 size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name);
 
-
 /**
  * Set the give header name and value, replacing any entries with
  * the same name. The header is added at the end of all (remaining)
@@ -177,7 +175,6 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf);
 
 #ifdef USE_NGHTTP2
 
-#include <stdint.h>
 #include <nghttp2/nghttp2.h>
 
 nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount);

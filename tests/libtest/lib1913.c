@@ -25,7 +25,7 @@
 
 static CURLcode test_lib1913(const char *URL)
 {
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   CURL *curl;
   start_test_timing();
 
@@ -38,9 +38,9 @@ static CURLcode test_lib1913(const char *URL)
     if(libtest_arg2)
       /* test1914 sets this extra arg */
       curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return res;
+  return result;
 }

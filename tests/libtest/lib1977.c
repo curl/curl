@@ -25,7 +25,7 @@
 
 static CURLcode test_lib1977(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLU *curlu = curl_url();
   CURLU *curlu_2 = curl_url();
   CURL *curl;
@@ -38,13 +38,13 @@ static CURLcode test_lib1977(const char *URL)
   curl_url_set(curlu, CURLUPART_URL, URL, CURLU_DEFAULT_SCHEME);
   easy_setopt(curl, CURLOPT_CURLU, curlu);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   effective = NULL;
-  res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
-  if(res)
+  result = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
+  if(result)
     goto test_cleanup;
   curl_mprintf("effective URL: %s\n", effective);
 
@@ -53,13 +53,13 @@ static CURLcode test_lib1977(const char *URL)
   curl_url_set(curlu_2, CURLUPART_QUERY, "foo", 0);
   easy_setopt(curl, CURLOPT_CURLU, curlu_2);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   effective = NULL;
-  res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
-  if(res)
+  result = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
+  if(result)
     goto test_cleanup;
   curl_mprintf("effective URL: %s\n", effective);
 
@@ -69,13 +69,13 @@ static CURLcode test_lib1977(const char *URL)
      CURLOPT_CURLU again */
   curl_url_set(curlu_2, CURLUPART_QUERY, "bar", CURLU_APPENDQUERY);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   effective = NULL;
-  res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
-  if(res)
+  result = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
+  if(result)
     goto test_cleanup;
   curl_mprintf("effective URL: %s\n", effective);
 
@@ -85,5 +85,5 @@ test_cleanup:
   curl_url_cleanup(curlu_2);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

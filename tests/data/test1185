@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ checksrc
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <name>
@@ -79,14 +79,23 @@ void startfunc(int a, int b) {
  if(sprintf(buffer, "%s", moo)) {}
  *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
 
+# if defined(SINGLE_MACRO)
+ #if  ! defined(__macro_10)
+#elif !defined(TESTMACRO)
+#endif
+#endif
+#endif
+
  // CPP comment ?
+
+ int d = impl->magicbad(1); /* member function always allowed */
+ int e = impl.magicbad(); /* member function always allowed */
 
  /* comment does not end
 
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
@@ -206,7 +215,16 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:62:25: warning: use of alsobad is banned (BANNEDFUNC)
   *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
                          ^
-./%LOGDIR/code1185.c:64:2: warning: // comment (CPPCOMMENTS)
+./%LOGDIR/code1185.c:64:1: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
+ # if defined(SINGLE_MACRO)
+ ^
+./%LOGDIR/code1185.c:65:1: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
+  #if  ! defined(__macro_10)
+ ^
+./%LOGDIR/code1185.c:65:1: warning: space before preprocessor hash (CPPSPACE)
+  #if  ! defined(__macro_10)
+ ^
+./%LOGDIR/code1185.c:71:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
   ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
@@ -215,7 +233,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
 %SP
  ^
-checksrc: 0 errors and 42 warnings
+checksrc: 0 errors and 45 warnings
 </stdout>
 <errorcode>
 5

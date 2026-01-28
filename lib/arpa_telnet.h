@@ -27,7 +27,7 @@
 /*
  * Telnet option defines. Add more here if in need.
  */
-#define CURL_TELOPT_BINARY   0  /* binary 8bit data */
+#define CURL_TELOPT_BINARY   0  /* binary 8-bit data */
 #define CURL_TELOPT_ECHO     1  /* just echo! */
 #define CURL_TELOPT_SGA      3  /* Suppress Go Ahead */
 #define CURL_TELOPT_EXOPL  255  /* EXtended OPtions List */
@@ -39,7 +39,7 @@
 #define CURL_NEW_ENV_VAR   0
 #define CURL_NEW_ENV_VALUE 1
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 /*
  * The telnet options represented as strings
  */
@@ -81,7 +81,7 @@ static const char * const telnetoptions[] = {
 #define CURL_DONT 254 /* DO NOT use this option! */
 #define CURL_IAC  255 /* Interpret As Command */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 /*
  * Then those numbers represented as strings:
  */
@@ -104,7 +104,7 @@ static const char * const telnetcmds[] = {
 #define CURL_TELCMD_OK(x)  (((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
                             ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM))
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 #define CURL_TELCMD(x)    telnetcmds[(x) - CURL_TELCMD_MINIMUM]
 #else
 #define CURL_TELCMD(x)    ""

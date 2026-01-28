@@ -21,10 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
@@ -56,8 +53,11 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
   curl_thread_t t = curlx_malloc(sizeof(pthread_t));
-  struct Curl_actual_call *ac = curlx_malloc(sizeof(struct Curl_actual_call));
+  struct Curl_actual_call *ac = NULL;
   int rc;
+
+  if(t)
+    ac = curlx_malloc(sizeof(struct Curl_actual_call));
   if(!(ac && t))
     goto err;
 

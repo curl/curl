@@ -108,7 +108,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   CURL *curl = NULL;
   CURLM *multi;
   int transfers = 1; /* we start with one */
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   debug_config.nohex = TRUE;
   debug_config.tracetime = FALSE;
@@ -125,19 +125,19 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   multi = curl_multi_init();
   if(!multi) {
-    res = (CURLcode)1;
+    result = (CURLcode)1;
     goto cleanup;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    res = (CURLcode)1;
+    result = (CURLcode)1;
     goto cleanup;
   }
 
   if(setup_h2_serverpush(curl, URL)) {
     curl_mfprintf(stderr, "failed\n");
-    res = (CURLcode)1;
+    result = (CURLcode)1;
     goto cleanup;
   }
 
@@ -150,13 +150,13 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   do {
     struct CURLMsg *m;
     int still_running; /* keep number of running handles */
-    CURLMcode mc = curl_multi_perform(multi, &still_running);
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if(mresult)
       break;
 
     /*
@@ -188,5 +188,5 @@ cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

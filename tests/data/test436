@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -17,7 +17,6 @@ Content-Type: text/1
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <file1 name="%LOGDIR/.config/curlrc">
@@ -41,7 +40,6 @@ Find .curlrc in .config/curlrc via CURL_HOME
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">

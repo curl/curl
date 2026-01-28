@@ -43,7 +43,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example");
     curl_easy_setopt(curl, CURLOPT_PROXYAUTH,
@@ -51,12 +51,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, "shrek");
     curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, "swamp");
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       long auth;
-      res = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &auth);
-      if(!res) {
+      result = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &auth);
+      if(!result) {
         if(!auth)
           printf("No auth used\n");
         else {

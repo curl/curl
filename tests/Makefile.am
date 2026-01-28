@@ -24,65 +24,65 @@
 
 # scripts used in test cases
 TESTSCRIPTS = \
- test1119.pl  \
- test1135.pl  \
- test1139.pl  \
- test1140.pl  \
- test1165.pl  \
- test1167.pl  \
- test1173.pl  \
- test1175.pl  \
- test1177.pl  \
- test1222.pl  \
- test1275.pl  \
- test1276.pl  \
- test1477.pl  \
- test1486.pl  \
- test1488.pl  \
- test1544.pl  \
- test1707.pl  \
- test745.pl  \
- test971.pl
+  test1119.pl \
+  test1135.pl \
+  test1139.pl \
+  test1140.pl \
+  test1165.pl \
+  test1167.pl \
+  test1173.pl \
+  test1175.pl \
+  test1177.pl \
+  test1222.pl \
+  test1275.pl \
+  test1276.pl \
+  test1477.pl \
+  test1486.pl \
+  test1488.pl \
+  test1544.pl \
+  test1707.pl \
+  test745.pl  \
+  test971.pl
 
-EXTRA_DIST =        \
- CMakeLists.txt     \
- allversions.pm     \
- appveyor.pm        \
- azure.pm           \
- devtest.pl         \
- dictserver.py      \
- directories.pm     \
- ech_combos.py      \
- ech_tests.sh       \
- ftpserver.pl       \
- getpart.pm         \
- globalconfig.pm    \
- http-server.pl     \
- http2-server.pl    \
- http3-server.pl    \
- memanalyze.pl      \
- memanalyzer.pm     \
- negtelnetserver.py \
- nghttpx.conf       \
- pathhelp.pm        \
- processhelp.pm     \
- requirements.txt   \
- rtspserver.pl      \
- runner.pm          \
- runtests.pl        \
- secureserver.pl    \
- serverhelp.pm      \
- servers.pm         \
- smbserver.py       \
- sshhelp.pm         \
- sshserver.pl       \
- testcurl.pl        \
- testutil.pm        \
- tftpserver.pl      \
- util.py            \
- valgrind.pm        \
- valgrind.supp      \
- $(TESTSCRIPTS)
+EXTRA_DIST =         \
+  CMakeLists.txt     \
+  allversions.pm     \
+  appveyor.pm        \
+  azure.pm           \
+  devtest.pl         \
+  dictserver.py      \
+  directories.pm     \
+  ech_combos.py      \
+  ech_tests.sh       \
+  ftpserver.pl       \
+  getpart.pm         \
+  globalconfig.pm    \
+  http-server.pl     \
+  http2-server.pl    \
+  http3-server.pl    \
+  memanalyze.pl      \
+  memanalyzer.pm     \
+  negtelnetserver.py \
+  nghttpx.conf       \
+  pathhelp.pm        \
+  processhelp.pm     \
+  requirements.txt   \
+  rtspserver.pl      \
+  runner.pm          \
+  runtests.pl        \
+  secureserver.pl    \
+  serverhelp.pm      \
+  servers.pm         \
+  smbserver.py       \
+  sshhelp.pm         \
+  sshserver.pl       \
+  testcurl.pl        \
+  testutil.pm        \
+  tftpserver.pl      \
+  util.py            \
+  valgrind.pm        \
+  valgrind.supp      \
+  $(TESTSCRIPTS)
 
 # we have two variables here to make sure DIST_SUBDIRS does not get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
@@ -118,18 +118,18 @@ TEST_COMMON += !documentation
 endif
 
 TEST = srcdir=$(srcdir) @PERL@ $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON)
-TEST_Q = -a -w -s
-TEST_AM = -a -w -am
-TEST_F = -a -w -p -r
-TEST_T = -a -w -t -j20
-TEST_E = -a -w -e
+TEST_Q = -a -s
+TEST_AM = -a -am
+TEST_F = -a -p -r
+TEST_T = -a -t -j20
+TEST_E = -a -e
 
 # ~<keyword> means that it runs all tests matching the keyword, but ignores
 # their results (since these ones are likely to fail for no good reason)
-TEST_NF = -a -w -p ~flaky ~timing-dependent
+TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special target for CI use
-TEST_CI = -a -p ~flaky ~timing-dependent -r --retry=5 -j20 --buildinfo
+TEST_CI = $(TEST_NF) -r --retry=5 -j20 --buildinfo
 
 PYTEST = pytest
 endif

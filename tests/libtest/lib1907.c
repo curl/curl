@@ -27,7 +27,7 @@ static CURLcode test_lib1907(const char *URL)
 {
   char *url_after;
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char error_buffer[CURL_ERROR_SIZE] = "";
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -35,11 +35,11 @@ static CURLcode test_lib1907(const char *URL)
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  res = curl_easy_perform(curl);
-  if(!res)
+  result = curl_easy_perform(curl);
+  if(!result)
     curl_mfprintf(stderr, "failure expected, "
                   "curl_easy_perform returned %d: <%s>, <%s>\n",
-                  res, curl_easy_strerror(res), error_buffer);
+                  result, curl_easy_strerror(result), error_buffer);
 
   /* print the used URL */
   if(!curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url_after))
@@ -48,5 +48,5 @@ static CURLcode test_lib1907(const char *URL)
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

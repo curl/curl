@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -23,7 +23,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -37,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/junk -J -O --show-headers --output-dir %LOGDIR
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

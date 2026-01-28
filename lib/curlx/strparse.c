@@ -21,12 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "strparse.h"
-
-#ifndef WITHOUT_LIBCURL
-#include <curl/curl.h>  /* for curl_strnequal() */
-#endif
 
 void curlx_str_init(struct Curl_str *out)
 {
@@ -94,7 +89,7 @@ int curlx_str_untilnl(const char **linep, struct Curl_str *out,
   return STRE_OK;
 }
 
-/* Get a "quoted" word. No escaping possible.
+/* Get a "quoted" word. Escaped quotes are supported.
    return non-zero on error */
 int curlx_str_quotedword(const char **linep, struct Curl_str *out,
                          const size_t max)
@@ -108,6 +103,11 @@ int curlx_str_quotedword(const char **linep, struct Curl_str *out,
     return STRE_BEGQUOTE;
   s++;
   while(*s && (*s != '\"')) {
+    if(*s == '\\' && s[1]) {
+      s++;
+      if(++len > max)
+        return STRE_BIG;
+    }
     s++;
     if(++len > max)
       return STRE_BIG;
@@ -140,12 +140,12 @@ int curlx_str_singlespace(const char **linep)
 
 /* given an ASCII character and max ascii, return TRUE if valid */
 #define valid_digit(x, m) \
-  (((x) >= '0') && ((x) <= m) && Curl_hexasciitable[(x) - '0'])
+  (((x) >= '0') && ((x) <= m) && curlx_hexasciitable[(x) - '0'])
 
 /* We use 16 for the zero index (and the necessary bitwise AND in the loop)
    to be able to have a non-zero value there to make valid_digit() able to
    use the info */
-const unsigned char Curl_hexasciitable[] = {
+const unsigned char curlx_hexasciitable[] = {
   16, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 0x30: 0 - 9 */
   0, 0, 0, 0, 0, 0, 0,
   10, 11, 12, 13, 14, 15,        /* 0x41: A - F */
@@ -171,7 +171,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
   if(max < base) {
     /* special-case low max scenario because check needs to be different */
     do {
-      int n = Curl_hexval(*p++);
+      int n = curlx_hexval(*p++);
       num = num * base + n;
       if(num > max)
         return STRE_OVERFLOW;
@@ -179,7 +179,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
   }
   else {
     do {
-      int n = Curl_hexval(*p++);
+      int n = curlx_hexval(*p++);
       if(num > ((max - n) / base))
         return STRE_OVERFLOW;
       num = num * base + n;

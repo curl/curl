@@ -75,9 +75,15 @@ if(PICKY_COMPILER)
       set(_picky_enable "-W")
     endif()
 
-    list(APPEND _picky_enable
-      -Wall -pedantic
-    )
+    list(APPEND _picky_enable "-Wall")
+
+    if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.2) OR
+       (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2) OR
+       CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+      list(APPEND _picky_enable "-Wpedantic")  # clang  3.2  gcc  4.8  appleclang  4.2
+    else()
+      list(APPEND _picky_enable "-pedantic")
+    endif()
 
     # ----------------------------------
     # Add new options here, if in doubt:
@@ -121,7 +127,6 @@ if(PICKY_COMPILER)
       -Wignored-qualifiers                 # clang  2.8  gcc  4.3
       -Wmissing-field-initializers         # clang  2.7  gcc  4.1
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
-      -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
       -Wno-padded                          # clang  2.9  gcc  4.1               # Not used: We cannot change public structs
       -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-switch-default                  # clang  2.7  gcc  4.1               # Not used: Annoying to fix or silence
@@ -220,6 +225,14 @@ if(PICKY_COMPILER)
             -Wno-reserved-macro-identifier # clang 13.0            appleclang 13.1  # External macros have to be set sometimes
         )
       endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0.3))
+        if(CMAKE_GENERATOR STREQUAL "FASTBuild")
+          list(APPEND _picky_enable
+            -Wno-gnu-line-marker           # clang 15.0            appleclang 14.0.3
+          )
+        endif()
+      endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0))
         list(APPEND _picky_enable
@@ -230,6 +243,12 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0))
         list(APPEND _picky_enable
           -Wcast-function-type-strict      # clang 16.0            appleclang 16.0
+        )
+      endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 17.0))
+        list(APPEND _picky_enable
+          -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0  # In clang-cl enums are signed ints by default
         )
       endif()
       if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.1)
@@ -282,6 +301,7 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
         list(APPEND _picky_enable
           -Warray-bounds=2                 # clang  3.0  gcc  5.0 (clang default: -Warray-bounds)
+          -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
@@ -413,6 +433,19 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
     endforeach()
     set("${_wlist}" ${_picky_tmp})  # cmake-lint: disable=C0103
   endforeach()
+endif()
+
+if(CMAKE_C_STANDARD STREQUAL 90 AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+    list(APPEND _picky "-Wno-c99-extensions")  # Avoid: warning: '_Bool' is a C99 extension
+  endif()
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1)
+    list(APPEND _picky "-Wno-comma")  # Just silly
+  endif()
+endif()
+
+if(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
+  list(APPEND _picky "-Wno-arith-conversion")  # Avoid warnings in DJGPP's built-in FD_SET() macro
 endif()
 
 if(_picky_nocheck OR _picky)

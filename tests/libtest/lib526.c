@@ -44,7 +44,7 @@
 
 static CURLcode test_lib526(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl[NUM_HANDLES];
   int running;
   CURLM *multi = NULL;
@@ -149,7 +149,7 @@ test_cleanup:
        cleanup'ed yet, in this case we have to cleanup them or otherwise these
        will be leaked, let's use undocumented cleanup sequence - type UB */
 
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
         curl_easy_cleanup(curl[i]);
 
@@ -165,5 +165,5 @@ test_cleanup:
     curl_global_cleanup();
   }
 
-  return res;
+  return result;
 }

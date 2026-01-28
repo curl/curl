@@ -16,7 +16,6 @@
  *
  * SPDX-License-Identifier: ISC
  */
-
 #include "../curl_setup.h"
 
 #ifndef HAVE_INET_NTOP
@@ -33,6 +32,7 @@
 
 #include "inet_ntop.h"
 #include "snprintf.h"
+#include "strcopy.h"
 
 #define IN6ADDRSZ       16
 /* #define INADDRSZ         4 */
@@ -78,7 +78,7 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 #endif
     return NULL;
   }
-  strcpy(dst, tmp);
+  curlx_strcopy(dst, size, tmp, len);
   return dst;
 }
 
@@ -166,7 +166,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
       static const unsigned char ldigits[] = "0123456789abcdef";
 
       unsigned int w = words[i];
-      /* output lowercase 16bit hex number but ignore leading zeroes */
+      /* output lowercase 16-bit hex number but ignore leading zeroes */
       if(w & 0xf000)
         *tp++ = ldigits[(w & 0xf000) >> 12];
       if(w & 0xff00)
@@ -181,11 +181,9 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
    */
   if(best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
     *tp++ = ':';
-  *tp++ = '\0';
 
-  /* Check for overflow, copy, and we are done.
-   */
-  if((size_t)(tp - tmp) > size) {
+  /* Check for overflow, copy, and we are done. */
+  if((size_t)(tp - tmp) >= size) {
 #ifdef USE_WINSOCK
     errno = WSAEINVAL;
 #else
@@ -193,7 +191,8 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
 #endif
     return NULL;
   }
-  strcpy(dst, tmp);
+
+  curlx_strcopy(dst, size, tmp, tp - tmp);
   return dst;
 }
 

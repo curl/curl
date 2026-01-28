@@ -98,8 +98,6 @@ enum {
   DOCNUMBER_404        = -1
 };
 
-#include <curl/curl.h> /* for curl_socket_t */
-
 #ifdef USE_UNIX_SOCKETS
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
@@ -128,7 +126,7 @@ extern int getpart(char **outbuf, size_t *outlen,
 
 /* utility functions */
 extern char *data_to_hex(char *data, size_t len);
-extern void logmsg(const char *msg, ...);
+extern void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 extern void loghex(unsigned char *buffer, ssize_t len);
 extern int win32_init(void);
 extern FILE *test2fopen(long testno, const char *logdir2);

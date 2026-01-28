@@ -35,19 +35,19 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   ssize_t idx = ((CURL **)data) - ntlm_curls;
   curl_socket_t sock;
   long longdata;
-  CURLcode code;
+  CURLcode result;
   const size_t failure = (size && nmemb) ? 0 : 1;
   (void)ptr;
 
   ntlm_counter[idx] += (int)(size * nmemb);
 
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
-  code = curl_easy_getinfo(ntlm_curls[idx], CURLINFO_LASTSOCKET, &longdata);
+  result = curl_easy_getinfo(ntlm_curls[idx], CURLINFO_LASTSOCKET, &longdata);
 
-  if(CURLE_OK != code) {
+  if(result != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, code, curl_easy_strerror(code));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
@@ -83,7 +83,7 @@ static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
     NoMoreHandles
   };
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLM *multi = NULL;
   int running;
   int i;
@@ -105,9 +105,9 @@ static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
   }
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(result) {
     curlx_free(full_url);
-    return res;
+    return result;
   }
 
   multi_init(multi);
@@ -147,7 +147,7 @@ static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
       multi_add_handle(multi, ntlm_curls[num_handles]);
       num_handles += 1;
       state = NeedSocketForNewHandle;
-      res = ntlmcb_res;
+      result = ntlmcb_res;
     }
 
     multi_perform(multi, &running);
@@ -229,5 +229,5 @@ test_cleanup:
 
   curlx_free(full_url);
 
-  return res;
+  return result;
 }

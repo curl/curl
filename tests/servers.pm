@@ -117,7 +117,6 @@ use testutil qw(
     exerunner
     );
 
-
 my %serverpidfile; # all server pid filenames, identified by server id
 my %serverportfile;# all server port filenames, identified by server id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -149,7 +148,6 @@ our $SOCKSIN="socksd-request.log"; # what curl sent to the SOCKS proxy
 our $err_unexpected; # error instead of warning on server unexpectedly alive
 our $debugprotocol;  # nonzero for verbose server logs
 our $stunnel;        # path to stunnel command
-
 
 #######################################################################
 # Check for a command in the PATH of the test server.
@@ -239,8 +237,8 @@ sub init_serverpidfile_hash {
         }
     }
     for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                    'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls',
-                    'dns')) {
+                    'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'mqtts',
+                    'https-mtls', 'dns')) {
         for my $ipvnum ((4, 6)) {
             for my $idnum ((1, 2)) {
                 my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -266,7 +264,6 @@ sub init_serverpidfile_hash {
     }
 }
 
-
 #######################################################################
 # Check if a given child process has just died. Reaps it if so.
 #
@@ -279,7 +276,6 @@ sub checkdied {
     my $rc = pidwait($pid, &WNOHANG);
     return ($rc == $pid)?1:0;
 }
-
 
 ##############################################################################
 # This function makes sure the right set of server is running for the
@@ -330,7 +326,6 @@ sub serverfortest {
 
     return &startservers(@what);
 }
-
 
 #######################################################################
 # Start a new thread/process and run the given command line in there.
@@ -410,7 +405,6 @@ sub startnew {
     return ($child, $pid2);
 }
 
-
 #######################################################################
 # Return the port to use for the given protocol.
 #
@@ -418,7 +412,6 @@ sub protoport {
     my ($proto) = @_;
     return $PORT{$proto} || "[not running]";
 }
-
 
 #######################################################################
 # Stop a test server along with pids which are not in the %run hash yet.
@@ -505,7 +498,6 @@ sub stopserver {
 
     return $result;
 }
-
 
 #######################################################################
 # Return flags to let curl use an external HTTP proxy
@@ -1038,6 +1030,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'pop3s' => \&verifyftp,
                  'imaps' => \&verifyftp,
                  'mqtt' => \&verifypid,
+                 'mqtts' => \&verifypid,
                  'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
@@ -1071,7 +1064,6 @@ sub responsiveserver {
     logmsg " server precheck FAILED (unresponsive $srvrname server)\n";
     return 0;
 }
-
 
 #######################################################################
 # start the http server
@@ -1166,7 +1158,6 @@ sub runhttpserver {
 
     return (0, $httppid, $pid2, $port);
 }
-
 
 #######################################################################
 # start the http2 server
@@ -1338,6 +1329,9 @@ sub runhttpsserver {
     }
     if($proto eq "gophers") {
         $flags .= "--connect " . protoport("gopher");
+    }
+    elsif($proto eq "mqtts") {
+        $flags .= "--connect " . protoport("mqtt");
     }
     elsif(!$proxy) {
         $flags .= "--connect " . protoport("http");
@@ -1790,7 +1784,6 @@ sub runrtspserver {
     return (0, $rtsppid, $pid2, $port);
 }
 
-
 #######################################################################
 # Start the ssh (scp/sftp) server
 #
@@ -2237,7 +2230,6 @@ sub runnegtelnetserver {
     return (0+!$ntelpid, $ntelpid, $pid2, $port);
 }
 
-
 #######################################################################
 # Single shot http and gopher server responsiveness test. This should only
 # be used to verify that a server present in %run hash is still functional
@@ -2497,7 +2489,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for http)", $serr);
                 }
                 logmsg sprintf ("* pid http => %d %d\n", $pid, $pid2)
                     if($verbose);
@@ -2654,7 +2646,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for https/https-mtls)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
@@ -2695,7 +2687,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for http/2)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
@@ -2736,7 +2728,7 @@ sub startservers {
                 ($serr, $pid, $pid2, $PORT{'http'}) =
                     runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
-                    return ("failed starting HTTP server", $serr);
+                    return ("failed starting HTTP server (for http/3)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
@@ -2967,6 +2959,36 @@ sub startservers {
                 $run{'mqtt'}="$pid $pid2";
             }
         }
+        elsif($what eq "mqtts" ) {
+            if(!$stunnel) {
+                # we cannot run mqtts tests without stunnel
+                return ("no stunnel", 4);
+            }
+            if($run{'mqtt'} &&
+               !responsive_mqtt_server("mqtt", "", $verbose)) {
+                if(stopserver('mqtt')) {
+                    return ("failed stopping unresponsive MQTT server", 3);
+                }
+            }
+            if(!$run{'mqtt'}) {
+                ($serr, $pid, $pid2, $PORT{"mqtt"}) = runmqttserver("", $verbose);
+                if($pid <= 0) {
+                    return ("failed starting mqtt server", $serr);
+                }
+                logmsg sprintf("* pid mqtt => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'mqtt'}="$pid $pid2";
+            }
+            if(!$run{$what}) {
+                ($serr, $pid, $pid2, $PORT{$what}) =
+                    runhttpsserver($verbose, $what, "", $certfile);
+                if($pid <= 0) {
+                    return ("failed starting MQTTS server (stunnel)", $serr);
+                }
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{$what}="$pid $pid2";
+            }
+        }
         elsif($what eq "http-unix") {
             if($run{'http-unix'} &&
                !responsive_http_server("http", $verbose, "unix", $HTTPUNIXPATH)) {
@@ -3084,7 +3106,6 @@ sub stopservers {
     return $result;
 }
 
-
 #######################################################################
 # substitute the variable stuff into either a joined up file or
 # a command, in either case passed by reference
@@ -3107,7 +3128,7 @@ sub subvariables {
                        'HTTP2', 'HTTP2TLS',
                        'HTTP3',
                        'IMAP', 'IMAP6', 'IMAPS',
-                       'MQTT',
+                       'MQTT', 'MQTTS',
                        'NOLISTEN',
                        'POP3', 'POP36', 'POP3S',
                        'RTSP', 'RTSP6',

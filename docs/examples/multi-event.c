@@ -41,50 +41,6 @@ struct curl_context {
   curl_socket_t sockfd;
 };
 
-static void curl_perform(int fd, short event, void *arg);
-
-static struct curl_context *create_curl_context(curl_socket_t sockfd)
-{
-  struct curl_context *context;
-
-  context = (struct curl_context *)malloc(sizeof(*context));
-
-  context->sockfd = sockfd;
-
-  context->event = event_new(base, sockfd, 0, curl_perform, context);
-
-  return context;
-}
-
-static void destroy_curl_context(struct curl_context *context)
-{
-  event_del(context->event);
-  event_free(context->event);
-  free(context);
-}
-
-static void add_download(const char *url, int num)
-{
-  char filename[50];
-  FILE *file;
-  CURL *curl;
-
-  snprintf(filename, sizeof(filename), "%d.download", num);
-
-  file = fopen(filename, "wb");
-  if(!file) {
-    fprintf(stderr, "Error opening %s\n", filename);
-    return;
-  }
-
-  curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-  curl_easy_setopt(curl, CURLOPT_PRIVATE, file);
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  curl_multi_add_handle(multi, curl);
-  fprintf(stderr, "Added download %s -> %s\n", url, filename);
-}
-
 static void check_multi_info(void)
 {
   char *done_url;
@@ -139,6 +95,48 @@ static void curl_perform(int fd, short event, void *arg)
   curl_multi_socket_action(multi, context->sockfd, flags, &running_handles);
 
   check_multi_info();
+}
+
+static struct curl_context *create_curl_context(curl_socket_t sockfd)
+{
+  struct curl_context *context;
+
+  context = (struct curl_context *)malloc(sizeof(*context));
+
+  context->sockfd = sockfd;
+
+  context->event = event_new(base, sockfd, 0, curl_perform, context);
+
+  return context;
+}
+
+static void destroy_curl_context(struct curl_context *context)
+{
+  event_del(context->event);
+  event_free(context->event);
+  free(context);
+}
+
+static void add_download(const char *url, int num)
+{
+  char filename[50];
+  FILE *file;
+  CURL *curl;
+
+  snprintf(filename, sizeof(filename), "%d.download", num);
+
+  file = fopen(filename, "wb");
+  if(!file) {
+    fprintf(stderr, "Error opening %s\n", filename);
+    return;
+  }
+
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, file);
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_multi_add_handle(multi, curl);
+  fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
 static void on_timeout(evutil_socket_t fd, short events, void *arg)
@@ -217,15 +215,15 @@ static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
+  CURLcode result;
 
   if(argc <= 1)
     return 0;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result) {
     fprintf(stderr, "Could not init curl\n");
-    return (int)res;
+    return (int)result;
   }
 
   base = event_base_new();

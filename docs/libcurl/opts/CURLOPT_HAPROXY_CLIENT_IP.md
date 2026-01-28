@@ -40,6 +40,10 @@ previous ones. Set it to NULL to disable its use again.
 The application does not have to keep the string around after setting this
 option.
 
+Note that if you want to send a *different* HAProxy client IP in a subsequent
+request, you need to make sure that it is done over a fresh connection as
+libcurl does not send it again while reusing connections.
+
 # DEFAULT
 
 NULL, no HAProxy header is sent
@@ -53,10 +57,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_HAPROXY_CLIENT_IP, "1.1.1.1");
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

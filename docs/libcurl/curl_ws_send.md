@@ -88,7 +88,7 @@ int main(void)
 {
   const char *buffer = "PAYLOAD";
   size_t offset = 0;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = curl_easy_init();
 
   curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com/");
@@ -96,24 +96,25 @@ int main(void)
   /* start HTTPS connection and upgrade to WSS, then return control */
   curl_easy_perform(curl);
 
-  while(!res) {
+  while(!result) {
     size_t sent;
-    res = curl_ws_send(curl, buffer + offset, strlen(buffer) - offset, &sent,
-                       0, CURLWS_TEXT);
+    result = curl_ws_send(curl, buffer + offset,
+                          strlen(buffer) - offset, &sent,
+                          0, CURLWS_TEXT);
     offset += sent;
 
-    if(res == CURLE_OK) {
+    if(result == CURLE_OK) {
       if(offset == strlen(buffer))
         break; /* finished sending */
     }
 
-    if(res == CURLE_AGAIN)
+    if(result == CURLE_AGAIN)
       /* in real application: wait for socket here, e.g. using select() */
-      res = CURLE_OK;
+      result = CURLE_OK;
   }
 
   curl_easy_cleanup(curl);
-  return (int)res;
+  return (int)result;
 }
 ~~~
 

@@ -25,7 +25,7 @@
 
 static CURLcode test_lib598(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -47,8 +47,8 @@ static CURLcode test_lib598(const char *URL)
   test_setopt(curl, CURLOPT_COOKIE, "name=moo");
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
-  if(res) {
+  result = curl_easy_perform(curl);
+  if(result) {
     curl_mfprintf(stderr, "retrieve 1 failed\n");
     goto test_cleanup;
   }
@@ -59,8 +59,8 @@ static CURLcode test_lib598(const char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     curl_mfprintf(stderr, "retrieve 2 failed\n");
 
 test_cleanup:
@@ -68,5 +68,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

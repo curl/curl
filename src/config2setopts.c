@@ -26,6 +26,7 @@
 #include "tool_cfgable.h"
 #include "tool_setopt.h"
 #include "tool_findfile.h"
+#include "tool_formparse.h"
 #include "tool_msgs.h"
 #include "tool_libinfo.h"
 #include "tool_cb_soc.h"
@@ -54,7 +55,7 @@ static int get_address_family(curl_socket_t sockfd)
 #endif
 
 #ifndef SOL_IP
-#  define SOL_IP IPPROTO_IP
+#define SOL_IP IPPROTO_IP
 #endif
 
 #if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
@@ -485,17 +486,18 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 /* only called for HTTP transfers */
 static CURLcode http_setopts(struct OperationConfig *config, CURL *curl)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   long postRedir = 0;
 
   my_setopt_long(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
   my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH, config->unrestricted_auth);
+#ifndef CURL_DISABLE_AWS
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
+#endif
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);
 
   if(config->proxyheaders) {
     my_setopt_slist(curl, CURLOPT_PROXYHEADER, config->proxyheaders);
-    my_setopt_long(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
   }
 
   my_setopt_long(curl, CURLOPT_MAXREDIRS, config->maxredirs);
@@ -546,8 +548,8 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
       if(cl == config->cookies)
         result = curlx_dyn_add(&cookies, cl->data);
       else
-        result = curlx_dyn_addf(&cookies, ";%s", cl->data);
-
+        result = curlx_dyn_addf(&cookies, ";%s%s",
+                                ISBLANK(cl->data[0]) ? "" : " ", cl->data);
       if(result) {
         warnf("skipped provided cookie, the cookie header "
               "would go over %u bytes", MAX_COOKIE_LINE);
@@ -850,7 +852,7 @@ CURLcode config2setopts(struct OperationConfig *config,
     else {
       result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
       if(!result)
-        my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
+        result = my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
     }
     break;
   default:
@@ -879,6 +881,11 @@ CURLcode config2setopts(struct OperationConfig *config,
       result = cookie_setopts(config, curl);
     if(result)
       return result;
+    /* Enable header separation when using a proxy with HTTPS or proxytunnel
+     * to prevent --header content from leaking into CONNECT requests */
+    if((config->proxy || config->proxyheaders) &&
+       (use_proto == proto_https || config->proxytunnel))
+      my_setopt_long(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
   }
 
   if(use_proto == proto_ftp || use_proto == proto_ftps) {

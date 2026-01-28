@@ -28,7 +28,7 @@
 
 static CURLcode t1303_setup(struct Curl_easy **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   *easy = curl_easy_init();
@@ -36,7 +36,7 @@ static CURLcode t1303_setup(struct Curl_easy **easy)
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
-  return res;
+  return result;
 }
 
 static void t1303_stop(struct Curl_easy *easy)
@@ -147,7 +147,9 @@ static CURLcode test_unit1303(const char *arg)
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout = Curl_timeleft_ms(easy, &now, run[i].connecting);
+    easy->progress.now = now;
+    easy->mstate = run[i].connecting ? MSTATE_INIT : MSTATE_DO;
+    timeout = Curl_timeleft_now_ms(easy, &now);
     if(timeout != run[i].result)
       fail(run[i].comment);
   }

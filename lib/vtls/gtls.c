@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all GnuTLS-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
@@ -29,7 +28,6 @@
  * Note: do not use the GnuTLS' *_t variable type names in this source code,
  * since they were not present in 1.0.X.
  */
-
 #include "../curl_setup.h"
 
 #ifdef USE_GNUTLS
@@ -41,8 +39,7 @@
 #include <nettle/sha2.h>
 
 #include "../urldata.h"
-#include "../sendf.h"
-#include "../curlx/inet_pton.h"
+#include "../curl_trc.h"
 #include "keylog.h"
 #include "gtls.h"
 #include "vtls.h"
@@ -53,12 +50,9 @@
 #include "../parsedate.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
-#include "../select.h"
 #include "../strdup.h"
 #include "../curlx/fopen.h"
-#include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */
@@ -148,7 +142,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
  * gtls_init()
  *
  * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
- * are not thread-safe (It is thread safe since GnuTLS 3.3.0) and thus this
+ * are not thread-safe (It is thread-safe since GnuTLS 3.3.0) and thus this
  * function itself is not thread-safe and must only be called from within
  * curl_global_init() to keep the thread situation under control!
  *
@@ -172,13 +166,13 @@ static void gtls_cleanup(void)
   Curl_tls_keylog_close();
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void showtime(struct Curl_easy *data, const char *text, time_t stamp)
 {
   struct tm buffer;
   const struct tm *tm = &buffer;
   char str[96];
-  CURLcode result = Curl_gmtime(stamp, &buffer);
+  CURLcode result = curlx_gmtime(stamp, &buffer);
   if(result)
     return;
 
@@ -306,7 +300,7 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
   return GNUTLS_X509_FMT_PEM; /* default to PEM */
 }
 
-#define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:"\
+#define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:" \
   "-CTYPE-ALL:+CTYPE-X509"
 /* If GnuTLS was compiled without support for SRP it will error out if SRP is
    requested in the priority string, so treat it specially
@@ -329,8 +323,8 @@ gnutls_set_ssl_version_min_max(struct Curl_easy *data,
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
 
-  if((ssl_version == CURL_SSLVERSION_DEFAULT) ||
-     (ssl_version == CURL_SSLVERSION_TLSv1))
+  DEBUGASSERT(ssl_version != CURL_SSLVERSION_DEFAULT);
+  if(ssl_version <= CURL_SSLVERSION_TLSv1)
     ssl_version = CURL_SSLVERSION_TLSv1_0;
   if((ssl_version_max == CURL_SSLVERSION_MAX_NONE) ||
      (ssl_version_max == CURL_SSLVERSION_MAX_DEFAULT))
@@ -411,7 +405,7 @@ CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
   }
 
   shared->refcount = 1;
-  shared->time = curlx_now();
+  shared->time = *Curl_pgrs_now(data);
   *pcreds = shared;
   return CURLE_OK;
 }
@@ -558,12 +552,11 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
 /* key to use at `multi->proto_hash` */
 #define MPROTO_GTLS_X509_KEY   "tls:gtls:x509:share"
 
-static bool gtls_shared_creds_expired(const struct Curl_easy *data,
+static bool gtls_shared_creds_expired(struct Curl_easy *data,
                                       const struct gtls_shared_creds *sc)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  struct curltime now = curlx_now();
-  timediff_t elapsed_ms = curlx_timediff_ms(now, sc->time);
+  timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &sc->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
@@ -1333,7 +1326,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 
 void Curl_gtls_report_handshake(struct Curl_easy *data, struct gtls_ctx *gctx)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     const char *ptr;
     gnutls_protocol_t version = gnutls_protocol_get_version(gctx->session);
@@ -1386,7 +1379,7 @@ static void gtls_msg_verify_result(struct Curl_easy *data,
 static void gtls_infof_cert(struct Curl_easy *data,
                             gnutls_x509_crt_t x509_cert)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     gnutls_datum_t certfields;
     int rc, algo;
@@ -1579,8 +1572,6 @@ static CURLcode glts_apple_verify(struct Curl_cfilter *cf,
   result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
                                   gtls_chain_get_der, chain, NULL, 0);
   *pverified = !result;
-  if(*pverified)
-    infof(data, "  SSL certificate verified by Apple SecTrust.");
   return result;
 }
 #endif /* USE_APPLE_SECTRUST */
@@ -2076,7 +2067,6 @@ static CURLcode gtls_send(struct Curl_cfilter *cf,
   ssize_t nwritten;
   size_t remain = blen;
 
-  (void)data;
   DEBUGASSERT(backend);
   *pnwritten = 0;
 
@@ -2193,7 +2183,6 @@ static void gtls_close(struct Curl_cfilter *cf,
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
 
-  (void)data;
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "close");
   if(backend->gtls.session) {
@@ -2222,7 +2211,6 @@ static CURLcode gtls_recv(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   ssize_t nread;
 
-  (void)data;
   DEBUGASSERT(backend);
 
   nread = gnutls_record_recv(backend->gtls.session, buf, blen);
@@ -2306,7 +2294,9 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_CIPHER_LIST |
-  SSLSUPP_CA_CACHE,
+  SSLSUPP_CA_CACHE |
+  SSLSUPP_ISSUERCERT |
+  SSLSUPP_CRLFILE,
 
   sizeof(struct gtls_ssl_backend_data),
 

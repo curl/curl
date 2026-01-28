@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 retry
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -27,7 +27,6 @@ ok
 
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -41,7 +40,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 3 -o /dev/null
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

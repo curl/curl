@@ -46,7 +46,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
@@ -57,13 +57,13 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
 
     /* Perform the request */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       /* check the time condition */
       long unmet;
-      res = curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
-      if(!res) {
+      result = curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
+      if(!result) {
         printf("The time condition was %sfulfilled\n", unmet?"NOT":"");
       }
     }

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * The purpose of this tool is to figure out which, if any, features that are
  * disabled which should otherwise exist and work. These are not visible in
@@ -30,14 +29,19 @@
  * Disabled protocols are visible in curl_version_info() and are not included
  * in this table.
  */
-
 #include "curl_setup.h"
+
 #include "multihandle.h" /* for ENABLE_WAKEUP */
 #include "tool_xattr.h" /* for USE_XATTR */
 #include "curl_sha512_256.h" /* for CURL_HAVE_SHA512_256 */
 #include "asyn.h" /* for CURLRES_ARES */
 #include "fake_addrinfo.h" /* for USE_FAKE_GETADDRINFO */
+
 #include <stdio.h>
+
+#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP */
+#endif
 
 static const char *disabled[] = {
   "bindlocal: "
@@ -230,7 +234,7 @@ static const char *disabled[] = {
 #endif
   ,
   "override-dns: "
-#if defined(CURLDEBUG) &&                                       \
+#if defined(CURL_MEMDEBUG) &&                              \
   (defined(CURLRES_ARES) || defined(USE_FAKE_GETADDRINFO))
   "ON"
 #else
@@ -239,6 +243,14 @@ static const char *disabled[] = {
   ,
   "ssl-sessions: "
 #ifdef USE_SSLS_EXPORT
+  "ON"
+#else
+  "OFF"
+#endif
+  ,
+  "cert-status: "
+#if defined(USE_GNUTLS) || \
+  ((defined(USE_QUICHE) || defined(USE_OPENSSL)) && !defined(OPENSSL_NO_OCSP))
   "ON"
 #else
   "OFF"
@@ -253,8 +265,7 @@ int main(int argc, char **argv)
   (void)argv;
 
   for(i = 0; i < CURL_ARRAYSIZE(disabled); i++)
-    /* !checksrc! disable BANNEDFUNC 1 */
-    printf("%s\n", disabled[i]);
+    puts(disabled[i]);
 
   return 0;
 }

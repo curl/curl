@@ -398,7 +398,6 @@ honest a bit of a hack.
 Please see the following thread for more information:
 https://curl.se/mail/lib-2012-05/0178.html
 
-
 # POP3
 
 ## Enhanced capability support
@@ -428,7 +427,7 @@ context information ourselves.
 `CURLOPT_SSL_CTX_FUNCTION` works perfectly for HTTPS and email protocols, but
 it has no effect for LDAPS connections.
 
- [curl issue 4108](https://github.com/curl/curl/issues/4108)
+[curl issue 4108](https://github.com/curl/curl/issues/4108)
 
 ## Paged searches on LDAP server
 
@@ -530,8 +529,8 @@ for 1) efficiency and 2) safety.
 ## Support DANE
 
 [DNS-Based Authentication of Named Entities
-(DANE)](https://www.rfc-editor.org/rfc/rfc6698.txt) is a way to provide SSL
-keys and certs over DNS using DNSSEC as an alternative to the CA model.
+(DANE)](https://datatracker.ietf.org/doc/html/rfc6698) is a way to provide
+SSL keys and certs over DNS using DNSSEC as an alternative to the CA model.
 
 A patch was posted on March 7 2013
 (https://curl.se/mail/lib-2013-03/0075.html) but it was a too simple approach.
@@ -704,6 +703,17 @@ follow suite.
 
 # Command line tool
 
+## multi-threading
+
+When asked to do transfers in parallel, the curl tool could be extended to use
+a number of independent worker threads. This would allow faster transfers in
+situations where curl becomes CPU bound.
+
+Ideally, curl would (with permission) fire up new threads on demand when it
+deems that it might be helpful. Perhaps, if it has more transfers to add and
+the existing transfers make the CPU busy enough and there are more cores
+available.
+
 ## sync
 
 `curl --sync http://example.com/feed[1-100].rss` or
@@ -808,25 +818,6 @@ possible) so that it does not have to transfer the same data again that was
 already transferred before the retry.
 
 See [curl issue 1084](https://github.com/curl/curl/issues/1084)
-
-## consider filename from the redirected URL with `-O` ?
-
-When a user gives a URL and uses `-O`, and curl follows a redirect to a new
-URL, the filename is not extracted and used from the newly redirected-to URL
-even if the new URL may have a much more sensible filename.
-
-This is clearly documented and helps for security since there is no surprise
-to users which filename that might get overwritten, but maybe a new option
-could allow for this or maybe `-J` should imply such a treatment as well as
-`-J` already allows for the server to decide what filename to use so it
-already provides the "may overwrite any file" risk.
-
-This is extra tricky if the original URL has no filename part at all since
-then the current code path does error out with an error message, and we cannot
-*know* already at that point if curl is redirected to a URL that has a
-filename...
-
-See [curl issue 1241](https://github.com/curl/curl/issues/1241)
 
 ## retry on network is unreachable
 

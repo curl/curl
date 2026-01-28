@@ -39,7 +39,6 @@
 #include "tool_operate.h"
 #include "tool_vms.h"
 #include "tool_main.h"
-#include "tool_libinfo.h"
 #include "tool_stderr.h"
 
 #ifdef __VMS
@@ -99,7 +98,7 @@ static int main_checkfds(void)
 #define main_checkfds() 0
 #endif
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 static void memory_tracking_init(void)
 {
   char *env;
@@ -108,9 +107,7 @@ static void memory_tracking_init(void)
   if(env) {
     /* use the value as filename */
     char fname[512];
-    if(strlen(env) >= sizeof(fname))
-      env[sizeof(fname) - 1] = '\0';
-    strcpy(fname, env);
+    curlx_strcopy(fname, sizeof(fname), env, strlen(env));
     curl_free(env);
     curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called before
@@ -175,6 +172,9 @@ int main(int argc, char *argv[])
   }
 
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE)
+#ifdef DEBUGBUILD
+  if(!curl_getenv("CURL_SIGPIPE_DEBUG"))
+#endif
   (void)signal(SIGPIPE, SIG_IGN);
 #endif
 
@@ -210,4 +210,4 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-#endif /* ndef UNITTESTS */
+#endif /* !UNITTESTS */

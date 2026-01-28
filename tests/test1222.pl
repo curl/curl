@@ -51,7 +51,6 @@ my %hdr;            # Public header files deprecations.
 my %funcman;        # Function man pages deprecations.
 my %optman;         # Option man pages deprecations.
 
-
 # Scan header file for public function and enum values. Flag them with
 # the version they are deprecated in, if some.
 sub scan_header {
@@ -238,10 +237,9 @@ sub scan_man_page {
     }
 }
 
-
 # Read symbols-in-versions.
 open(my $fh, "<", "$root/docs/libcurl/symbols-in-versions") ||
-  die "$root/docs/libcurl/symbols-in-versions";
+    die "$root/docs/libcurl/symbols-in-versions";
 while(<$fh>) {
     if($_ =~ /^((?:CURL|LIBCURL)\S+)\s+\S+\s*(\S*)\s*(\S*)$/) {
         if($3 eq "") {

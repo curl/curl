@@ -65,15 +65,13 @@ build:
               **/*.mk,\
               *.m4,\
               docs/INSTALL-CMAKE.md,\
-              lib/curl_config.h.cmake,\
+              lib/curl_config-cmake.h.in,\
               lib/libcurl*.in,\
               CMake/**,\
               CMakeLists.txt,\
               configure.ac,\
               m4/**,\
               Makefile.*,\
-              packages/**,\
-              plan9/**,\
               projects/**,\
               lib/libcurl.def,\
               tests/cmake/**\
@@ -98,7 +96,7 @@ cmake:
               **/CMakeLists.txt,\
               CMake/**,\
               docs/INSTALL-CMAKE.md,\
-              lib/curl_config.h.cmake,\
+              lib/curl_config-cmake.h.in,\
               tests/cmake/**\
               }"
 

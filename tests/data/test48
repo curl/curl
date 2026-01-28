@@ -1,13 +1,12 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP HEAD
 -G
-notxml
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <servercmd>
@@ -20,7 +19,6 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -30,20 +28,19 @@ http
 HTTP with -d and -G and -I
 </name>
 <command>
--d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -G -I http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-d "foo=moo%AMPmoo=poo" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -G -I http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-HEAD /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
+HEAD /%TESTNUMBER?foo=moo%AMPmoo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-HEAD /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
+HEAD /%TESTNUMBER?foo=moo%AMPmoo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

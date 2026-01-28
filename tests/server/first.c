@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include <stdio.h>
-#include <string.h>
 
 int main(int argc, char **argv)
 {
@@ -50,6 +49,11 @@ int main(int argc, char **argv)
     fprintf(stderr, "Test '%s' not found.\n", entry_name);
     return 99;
   }
+
+#ifdef _WIN32
+  if(win32_init())
+    return 2;
+#endif
 
   return entry_func(argc - 1, argv + 1);
 }

@@ -26,7 +26,9 @@
 static CURLcode test_lib589(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
+  curl_mime *mime = NULL;
+  curl_mimepart *part;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -46,27 +48,29 @@ static CURLcode test_lib589(const char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
   if(testnum == 584) {
-    curl_mime *mime = curl_mime_init(curl);
-    curl_mimepart *part = curl_mime_addpart(mime);
-    curl_mime_name(part, "fake");
-    curl_mime_data(part, "party", 5);
-    test_setopt(curl, CURLOPT_MIMEPOST, mime);
-    res = curl_easy_perform(curl);
-    curl_mime_free(mime);
-    if(res)
+    mime = curl_mime_init(curl);
+    part = curl_mime_addpart(mime);
+    if(mime && part) {
+      curl_mime_name(part, "fake");
+      curl_mime_data(part, "party", 5);
+      test_setopt(curl, CURLOPT_MIMEPOST, mime);
+      result = curl_easy_perform(curl);
+    }
+    if(result)
       goto test_cleanup;
   }
 
   test_setopt(curl, CURLOPT_MIMEPOST, NULL);
 
   /* Now, we should be making a zero byte POST request */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   /* always cleanup */
+  curl_mime_free(mime);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

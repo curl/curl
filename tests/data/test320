@@ -1,10 +1,10 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTPS
 HTTP GET
 TLS-SRP
-notxml
 </keywords>
 </info>
 
@@ -43,11 +43,11 @@ Accept: */*
 
 </file>
 <stripfile>
-s/^<p>Connected as user 'jsmith'.*/FINE/
+s/^%LTp%GTConnected as user 'jsmith'.*/FINE/
 s/Protocol version:.*[0-9]//
 s/GNUTLS/GnuTLS/
 s/(AES[-_])\d\d\d([-_]CBC)/$1NNN$2/
-s/^<.*\n//
+s/^%LT.*\n//
 s/^\n//
 </stripfile>
 </verify>

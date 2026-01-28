@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ compressed
 FAILURE
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 # this brotli chunk has three bytes removed from the beginning and is cut off
@@ -37,7 +37,6 @@ Content-Length: 1056
 
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -54,7 +53,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>

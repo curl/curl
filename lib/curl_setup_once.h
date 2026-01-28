@@ -28,7 +28,6 @@
  * Inclusion of common header files.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -63,7 +62,7 @@
 
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
-#ifdef HAVE_STDINT_H
+#ifdef HAVE_UINTPTR_T
 #  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
 #else
 #  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
@@ -160,7 +159,6 @@ struct timeval {
 #endif
 #endif /* HAVE_RECV */
 
-
 #ifdef __minix
 /* Minix does not support send on TCP sockets */
 #define swrite(x, y, z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
@@ -235,13 +233,8 @@ struct timeval {
 #endif
 
 /* the type we use for storing a single boolean bit */
-#ifdef _MSC_VER
-typedef bool bit;
-#define BIT(x) bool x
-#else
-typedef unsigned int bit;
-#define BIT(x) bit x:1
-#endif
+typedef unsigned int curl_bit;
+#define BIT(x) curl_bit x:1
 
 /*
  * Redefine TRUE and FALSE too, to catch current use. With this
@@ -264,7 +257,7 @@ typedef unsigned int bit;
 #ifdef DEBUGBUILD
 #define DEBUGF(x) x
 #else
-#define DEBUGF(x) do { } while(0)
+#define DEBUGF(x) do {} while(0)
 #endif
 
 /*
@@ -274,7 +267,7 @@ typedef unsigned int bit;
 #ifdef DEBUGBUILD
 #define DEBUGASSERT(x) assert(x)
 #else
-#define DEBUGASSERT(x) do { } while(0)
+#define DEBUGASSERT(x) do {} while(0)
 #endif
 
 /*

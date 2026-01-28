@@ -37,7 +37,7 @@ protocol.
 Usually, you just let the URL decide which port to use but this allows the
 application to override that.
 
-While this option accepts a 'long', a port number is an unsigned 16 bit number
+While this option accepts a 'long', a port number is an unsigned 16-bit number
 and therefore using a port number lower than zero or over 65535 causes a
 **CURLE_BAD_FUNCTION_ARGUMENT** error.
 
@@ -55,10 +55,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
     curl_easy_setopt(curl, CURLOPT_PORT, 8080L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

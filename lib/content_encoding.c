@@ -21,12 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include <curl/curl.h>
-#include <stddef.h>
+#include "curlx/dynbuf.h"
 
 #ifdef HAVE_LIBZ
 #include <zlib.h>
@@ -49,7 +47,7 @@
 #endif
 
 #include "sendf.h"
-#include "http.h"
+#include "curl_trc.h"
 #include "content_encoding.h"
 
 #define CONTENT_ENCODING_DEFAULT  "identity"
@@ -287,8 +285,10 @@ static const struct Curl_cwtype deflate_encoding = {
   sizeof(struct zlib_writer)
 };
 
+/*
+ * Gzip handler.
+ */
 
-/* Gzip handler. */
 static CURLcode gzip_do_init(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {
@@ -606,41 +606,27 @@ static const struct Curl_cwtype * const transfer_unencoders[] = {
   NULL
 };
 
-/* Provide a list of comma-separated names of supported encodings.
+/* Return the list of comma-separated names of supported encodings.
  */
-void Curl_all_content_encodings(char *buf, size_t blen)
+char *Curl_get_content_encodings(void)
 {
-  size_t len = 0;
+  struct dynbuf enc;
   const struct Curl_cwtype * const *cep;
-  const struct Curl_cwtype *ce;
+  CURLcode result = CURLE_OK;
+  curlx_dyn_init(&enc, 255);
 
-  DEBUGASSERT(buf);
-  DEBUGASSERT(blen);
-  buf[0] = 0;
-
-  for(cep = general_unencoders; *cep; cep++) {
-    ce = *cep;
-    if(!curl_strequal(ce->name, CONTENT_ENCODING_DEFAULT))
-      len += strlen(ce->name) + 2;
-  }
-
-  if(!len) {
-    if(blen >= sizeof(CONTENT_ENCODING_DEFAULT))
-      strcpy(buf, CONTENT_ENCODING_DEFAULT);
-  }
-  else if(blen > len) {
-    char *p = buf;
-    for(cep = general_unencoders; *cep; cep++) {
-      ce = *cep;
-      if(!curl_strequal(ce->name, CONTENT_ENCODING_DEFAULT)) {
-        strcpy(p, ce->name);
-        p += strlen(p);
-        *p++ = ',';
-        *p++ = ' ';
-      }
+  for(cep = general_unencoders; *cep && !result; cep++) {
+    const struct Curl_cwtype *ce = *cep;
+    if(!curl_strequal(ce->name, CONTENT_ENCODING_DEFAULT)) {
+      if(curlx_dyn_len(&enc))
+        result = curlx_dyn_addn(&enc, ", ", 2);
+      if(!result)
+        result = curlx_dyn_add(&enc, ce->name);
     }
-    p[-2] = '\0';
   }
+  if(!result)
+    return curlx_dyn_ptr(&enc);
+  return NULL;
 }
 
 /* Deferred error dummy writer. */
@@ -662,12 +648,7 @@ static CURLcode error_do_write(struct Curl_easy *data,
 
   if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
-  else {
-    char all[256];
-    (void)Curl_all_content_encodings(all, sizeof(all));
-    failf(data, "Unrecognized content encoding type. "
-          "libcurl understands %s content encodings.", all);
-  }
+  failf(data, "Unrecognized content encoding type");
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
@@ -698,8 +679,8 @@ static const struct Curl_cwtype *find_unencode_writer(const char *name,
     for(cep = transfer_unencoders; *cep; cep++) {
       const struct Curl_cwtype *ce = *cep;
       if((curl_strnequal(name, ce->name, len) && !ce->name[len]) ||
-         (ce->alias && curl_strnequal(name, ce->alias, len)
-                    && !ce->alias[len]))
+         (ce->alias && curl_strnequal(name, ce->alias, len) &&
+          !ce->alias[len]))
         return ce;
     }
   }
@@ -834,14 +815,9 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-void Curl_all_content_encodings(char *buf, size_t blen)
+char *Curl_get_content_encodings(void)
 {
-  DEBUGASSERT(buf);
-  DEBUGASSERT(blen);
-  if(blen < sizeof(CONTENT_ENCODING_DEFAULT))
-    buf[0] = 0;
-  else
-    strcpy(buf, CONTENT_ENCODING_DEFAULT);
+  return curlx_strdup(CONTENT_ENCODING_DEFAULT);
 }
 
 #endif /* CURL_DISABLE_HTTP */

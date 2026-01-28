@@ -27,14 +27,10 @@
 #include "tool_msgs.h"
 #include "tool_cb_dbg.h"
 #include "tool_util.h"
-
-static void dump(const char *timebuf, const char *idsbuf, const char *text,
-                 FILE *stream, const unsigned char *ptr, size_t size,
-                 trace tracetype, curl_infotype infotype);
+#include "toolx/tool_time.h"
 
 /*
  * Return the formatted HH:MM:SS for the tv_sec given.
- * NOT thread safe.
  */
 static const char *hms_for_sec(time_t tv_sec)
 {
@@ -42,10 +38,12 @@ static const char *hms_for_sec(time_t tv_sec)
   static char hms_buf[12];
 
   if(tv_sec != cached_tv_sec) {
-    /* !checksrc! disable BANNEDFUNC 1 */
-    struct tm *now = localtime(&tv_sec);  /* not thread safe either */
+    struct tm now;
+    CURLcode result = toolx_localtime(tv_sec, &now);
+    if(result)
+      memset(&now, 0, sizeof(now));
     curl_msnprintf(hms_buf, sizeof(hms_buf), "%02d:%02d:%02d",
-                   now->tm_hour, now->tm_min, now->tm_sec);
+                   now.tm_hour, now.tm_min, now.tm_sec);
     cached_tv_sec = tv_sec;
   }
   return hms_buf;
@@ -65,6 +63,60 @@ static void log_line_start(FILE *log, const char *timebuf,
     curl_mfprintf(log, "%s%s%s", timebuf, idsbuf, s_infotype[type]);
   else
     fputs(s_infotype[type], log);
+}
+
+static void dump(const char *timebuf, const char *idsbuf, const char *text,
+                 FILE *stream, const unsigned char *ptr, size_t size,
+                 trace tracetype, curl_infotype infotype)
+{
+  size_t i;
+  size_t c;
+
+  unsigned int width = 0x10;
+
+  if(tracetype == TRACE_ASCII)
+    /* without the hex output, we can fit more on screen */
+    width = 0x40;
+
+  curl_mfprintf(stream, "%s%s%s, %zu bytes (0x%zx)\n", timebuf, idsbuf,
+                text, size, size);
+
+  for(i = 0; i < size; i += width) {
+
+    curl_mfprintf(stream, "%04zx: ", i);
+
+    if(tracetype == TRACE_BIN) {
+      /* hex not disabled, show it */
+      for(c = 0; c < width; c++)
+        if(i + c < size)
+          curl_mfprintf(stream, "%02x ", ptr[i + c]);
+        else
+          fputs("   ", stream);
+    }
+
+    for(c = 0; (c < width) && (i + c < size); c++) {
+      /* check for 0D0A; if found, skip past and start a new line of output */
+      if((tracetype == TRACE_ASCII) &&
+         (i + c + 1 < size) && (ptr[i + c] == 0x0D) &&
+         (ptr[i + c + 1] == 0x0A)) {
+        i += (c + 2 - width);
+        break;
+      }
+      (void)infotype;
+      curl_mfprintf(stream, "%c",
+                    ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x7F)) ?
+                    ptr[i + c] : UNPRINTABLE_CHAR);
+      /* check again for 0D0A, to avoid an extra \n if it is at width */
+      if((tracetype == TRACE_ASCII) &&
+         (i + c + 2 < size) && (ptr[i + c + 1] == 0x0D) &&
+         (ptr[i + c + 2] == 0x0A)) {
+        i += (c + 3 - width);
+        break;
+      }
+    }
+    fputc('\n', stream); /* newline */
+  }
+  fflush(stream);
 }
 
 #define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
@@ -227,58 +279,4 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   dump(timebuf, idsbuf, text, output, (unsigned char *)data, size,
        global->tracetype, type);
   return 0;
-}
-
-static void dump(const char *timebuf, const char *idsbuf, const char *text,
-                 FILE *stream, const unsigned char *ptr, size_t size,
-                 trace tracetype, curl_infotype infotype)
-{
-  size_t i;
-  size_t c;
-
-  unsigned int width = 0x10;
-
-  if(tracetype == TRACE_ASCII)
-    /* without the hex output, we can fit more on screen */
-    width = 0x40;
-
-  curl_mfprintf(stream, "%s%s%s, %zu bytes (0x%zx)\n", timebuf, idsbuf,
-                text, size, size);
-
-  for(i = 0; i < size; i += width) {
-
-    curl_mfprintf(stream, "%04zx: ", i);
-
-    if(tracetype == TRACE_BIN) {
-      /* hex not disabled, show it */
-      for(c = 0; c < width; c++)
-        if(i + c < size)
-          curl_mfprintf(stream, "%02x ", ptr[i + c]);
-        else
-          fputs("   ", stream);
-    }
-
-    for(c = 0; (c < width) && (i + c < size); c++) {
-      /* check for 0D0A; if found, skip past and start a new line of output */
-      if((tracetype == TRACE_ASCII) &&
-         (i + c + 1 < size) && (ptr[i + c] == 0x0D) &&
-         (ptr[i + c + 1] == 0x0A)) {
-        i += (c + 2 - width);
-        break;
-      }
-      (void)infotype;
-      curl_mfprintf(stream, "%c",
-                    ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x7F)) ?
-                    ptr[i + c] : UNPRINTABLE_CHAR);
-      /* check again for 0D0A, to avoid an extra \n if it is at width */
-      if((tracetype == TRACE_ASCII) &&
-         (i + c + 2 < size) && (ptr[i + c + 1] == 0x0D) &&
-         (ptr[i + c + 2] == 0x0A)) {
-        i += (c + 3 - width);
-        break;
-      }
-    }
-    fputc('\n', stream); /* newline */
-  }
-  fflush(stream);
 }

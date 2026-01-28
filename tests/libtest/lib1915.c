@@ -58,10 +58,10 @@ static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
-  if(host && (strlen(host) < e->namelen)) {
-    strcpy(e->name, host);
+  if(host) {
+    curlx_strcopy(e->name, e->namelen, host, strlen(host));
     e->includeSubDomains = FALSE;
-    strcpy(e->expire, expire);
+    curlx_strcopy(e->expire, sizeof(e->expire), expire, strlen(expire));
     curl_mfprintf(stderr, "add '%s'\n", host);
   }
   else
@@ -95,7 +95,7 @@ static CURLSTScode hstswrite(CURL *curl, struct curl_hstsentry *e,
 
 static CURLcode test_lib1915(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl;
   struct state st = { 0 };
 
@@ -115,13 +115,13 @@ static CURLcode test_lib1915(const char *URL)
   easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
   curl = NULL;
-  if(res == CURLE_OPERATION_TIMEDOUT) /* we expect that on Windows */
-    res = CURLE_COULDNT_CONNECT;
-  curl_mprintf("First request returned %d\n", res);
-  res = CURLE_OK;
+  if(result == CURLE_OPERATION_TIMEDOUT) /* we expect that on Windows */
+    result = CURLE_COULDNT_CONNECT;
+  curl_mprintf("First request returned %d\n", result);
+  result = CURLE_OK;
 
   easy_init(curl);
   easy_setopt(curl, CURLOPT_URL, URL);
@@ -134,13 +134,13 @@ static CURLcode test_lib1915(const char *URL)
   easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
   curl = NULL;
-  curl_mprintf("Second request returned %d\n", res);
+  curl_mprintf("Second request returned %d\n", result);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

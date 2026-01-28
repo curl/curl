@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -24,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -41,7 +40,6 @@ warn about Unicode quote character read from config file
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">

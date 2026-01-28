@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_QUICHE)
@@ -33,7 +32,7 @@
 #include "../urldata.h"
 #include "../cfilters.h"
 #include "../cf-socket.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../connect.h"
@@ -47,8 +46,6 @@
 #include "../transfer.h"
 #include "../url.h"
 #include "../bufref.h"
-#include "../curlx/inet_pton.h"
-#include "../curlx/warnless.h"
 #include "../vtls/openssl.h"
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
@@ -91,7 +88,7 @@ struct cf_quiche_ctx {
   struct curltime started_at;        /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
   struct uint_hash streams;          /* hash `data->mid` to `stream_ctx` */
-  struct dynbuf scratch;             /* temp buffer for header construction */
+  struct dynbuf h1hdr;               /* temp buffer for header construction */
   struct bufq writebuf;              /* temp buffer for writing bodies */
   curl_off_t data_recvd;
   BIT(initialized);
@@ -121,7 +118,7 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
     debug_log_init = 1;
   }
 #endif
-  curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
+  curlx_dyn_init(&ctx->h1hdr, CURL_MAX_HTTP_HEADER);
   Curl_uint32_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   Curl_bufq_init2(&ctx->writebuf, H3_STREAM_CHUNK_SIZE, H3_STREAM_RECV_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
@@ -138,7 +135,7 @@ static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
     Curl_ssl_peer_cleanup(&ctx->peer);
     vquic_ctx_free(&ctx->q);
     Curl_uint32_hash_destroy(&ctx->streams);
-    curlx_dyn_free(&ctx->scratch);
+    curlx_dyn_free(&ctx->h1hdr);
     Curl_bufq_free(&ctx->writebuf);
   }
   curlx_free(ctx);
@@ -354,6 +351,19 @@ struct cb_ctx {
   struct h3_stream_ctx *stream;
 };
 
+static bool is_valid_h3_header(const uint8_t *hdr, size_t hlen)
+{
+  while(hlen--) {
+    switch(*hdr++) {
+    case '\n':
+    case '\r':
+    case '\0':
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
 static int cb_each_header(uint8_t *name, size_t name_len,
                           uint8_t *value, size_t value_len,
                           void *argp)
@@ -363,46 +373,50 @@ static int cb_each_header(uint8_t *name, size_t name_len,
   struct Curl_easy *data = x->data;
   struct h3_stream_ctx *stream = x->stream;
   struct cf_quiche_ctx *ctx = cf->ctx;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   if(!stream || stream->xfer_result)
     return 1; /* abort iteration */
 
-  if((name_len == 7) && !strncmp(HTTP_PSEUDO_STATUS, (char *)name, 7)) {
-    curlx_dyn_reset(&ctx->scratch);
+  if((name_len == 7) && !strncmp(HTTP_PSEUDO_STATUS, (char *)name, 7) &&
+     is_valid_h3_header(value, value_len)) {
+    curlx_dyn_reset(&ctx->h1hdr);
     result = Curl_http_decode_status(&stream->status_code,
                                      (const char *)value, value_len);
     if(!result)
-      result = curlx_dyn_addn(&ctx->scratch, STRCONST("HTTP/3 "));
+      result = curlx_dyn_addn(&ctx->h1hdr, STRCONST("HTTP/3 "));
     if(!result)
-      result = curlx_dyn_addn(&ctx->scratch,
-                              (const char *)value, value_len);
+      result = curlx_dyn_addn(&ctx->h1hdr, (const char *)value, value_len);
     if(!result)
-      result = curlx_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
+      result = curlx_dyn_addn(&ctx->h1hdr, STRCONST(" \r\n"));
     if(!result)
-      cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->scratch),
-                         curlx_dyn_len(&ctx->scratch), FALSE);
+      cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->h1hdr),
+                         curlx_dyn_len(&ctx->h1hdr), FALSE);
     CURL_TRC_CF(data, cf, "[%" PRId64 "] status: %s",
-                stream->id, curlx_dyn_ptr(&ctx->scratch));
+                stream->id, curlx_dyn_ptr(&ctx->h1hdr));
   }
   else {
-    /* store as an HTTP1-style header */
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s",
-                stream->id, (int)name_len, name,
-                (int)value_len, value);
-    curlx_dyn_reset(&ctx->scratch);
-    result = curlx_dyn_addn(&ctx->scratch,
-                            (const char *)name, name_len);
-    if(!result)
-      result = curlx_dyn_addn(&ctx->scratch, STRCONST(": "));
-    if(!result)
-      result = curlx_dyn_addn(&ctx->scratch,
-                              (const char *)value, value_len);
-    if(!result)
-      result = curlx_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
-    if(!result)
-      cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->scratch),
-                         curlx_dyn_len(&ctx->scratch), FALSE);
+    if(is_valid_h3_header(value, value_len) &&
+       is_valid_h3_header(name, name_len)) {
+      /* store as an HTTP1-style header */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s",
+                  stream->id, (int)name_len, name,
+                  (int)value_len, value);
+      curlx_dyn_reset(&ctx->h1hdr);
+      result = curlx_dyn_addn(&ctx->h1hdr, (const char *)name, name_len);
+      if(!result)
+        result = curlx_dyn_addn(&ctx->h1hdr, STRCONST(": "));
+      if(!result)
+        result = curlx_dyn_addn(&ctx->h1hdr, (const char *)value, value_len);
+      if(!result)
+        result = curlx_dyn_addn(&ctx->h1hdr, STRCONST("\r\n"));
+      if(!result)
+        cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->h1hdr),
+                           curlx_dyn_len(&ctx->h1hdr), FALSE);
+    }
+    else
+      CURL_TRC_CF(x->data, x->cf, "[%" PRIu64 "] ignore %zu bytes bad header",
+                  stream->id, value_len + name_len);
   }
 
   if(result) {
@@ -841,7 +855,23 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
   DEBUGASSERT(stream);
   *pnread = 0;
   if(stream->reset) {
-    failf(data, "HTTP/3 stream %" PRIu64 " reset by server", stream->id);
+    if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
+      infof(data, "HTTP/3 stream %" PRIu64 " refused by server, try again "
+            "on a new connection", stream->id);
+      connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
+      data->state.refused_stream = TRUE;
+      return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
+    }
+    else if(stream->resp_hds_complete && data->req.no_body) {
+        CURL_TRC_CF(data, cf, "[%" PRIu64 "] error after response headers, "
+                    "but we did not want a body anyway, ignore error 0x%"
+                    PRIx64 " %s", stream->id, stream->error3,
+                    vquic_h3_err_str(stream->error3));
+        return CURLE_OK;
+    }
+    failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
+          " %s)", stream->id, stream->error3,
+          vquic_h3_err_str(stream->error3));
     result = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_recv, was reset -> %d",
                 stream->id, result);
@@ -865,7 +895,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   *pnread = 0;
   (void)buf;
   (void)blen;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   if(!stream)
     return CURLE_RECV_ERROR;
@@ -1075,7 +1105,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result;
 
   *pnwritten = 0;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   result = cf_process_ingress(cf, data);
   if(result)
@@ -1233,7 +1263,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx->q.sockfd != CURL_SOCKET_BAD);
   DEBUGASSERT(ctx->initialized);
 
-  result = vquic_ctx_init(&ctx->q);
+  result = vquic_ctx_init(data, &ctx->q);
   if(result)
     return result;
 
@@ -1352,7 +1382,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   if(!ctx->qconn) {
     result = cf_quiche_ctx_open(cf, data);
@@ -1375,7 +1405,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   if(quiche_conn_is_established(ctx->qconn)) {
     ctx->handshake_at = ctx->q.last_op;
     CURL_TRC_CF(data, cf, "handshake complete after %" FMT_TIMEDIFF_T "ms",
-                curlx_timediff_ms(ctx->handshake_at, ctx->started_at));
+                curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at));
     result = cf_quiche_verify_peer(cf, data);
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
@@ -1404,7 +1434,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
 out:
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(result && result != CURLE_AGAIN) {
     struct ip_quadruple ip;
 
@@ -1434,7 +1464,7 @@ static CURLcode cf_quiche_shutdown(struct Curl_cfilter *cf,
     int err;
 
     ctx->shutdown_started = TRUE;
-    vquic_ctx_update_time(&ctx->q);
+    vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
     err = quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
     if(err) {
       CURL_TRC_CF(data, cf, "error %d adding shutdown packet, "
@@ -1505,7 +1535,8 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
-      timediff_t ms = curlx_timediff_ms(ctx->q.first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_ptimediff_ms(&ctx->q.first_byte_at,
+                                         &ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -1612,8 +1643,6 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
-  (void)data;
-  (void)conn;
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;

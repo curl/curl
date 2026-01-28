@@ -21,17 +21,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_PROXY
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-haproxy.h"
 #include "curl_trc.h"
-#include "multiif.h"
 #include "select.h"
 
 
@@ -159,7 +156,6 @@ out:
 static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   cf_haproxy_ctx_free(cf->ctx);
 }

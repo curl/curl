@@ -25,22 +25,8 @@
 
 #if defined(_WIN32) || defined(MSDOS)
 
-#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#  include <libgen.h>
-#endif
-
 #ifdef _WIN32
-#  include <stdlib.h>
 #  include <tlhelp32.h>
-#  include "tool_cfgable.h"
-#  include "tool_libinfo.h"
-#endif
-
-#include "tool_bname.h"
-#include "tool_doswin.h"
-#include "tool_msgs.h"
-
-#ifdef _WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
@@ -49,6 +35,10 @@
 #  include <fcntl.h>         /* for _use_lfn(f) prototype */
 #  define CURL_USE_LFN(f) _use_lfn(f)
 #endif
+
+#include "tool_cfgable.h"
+#include "tool_doswin.h"
+#include "tool_msgs.h"
 
 #ifdef MSDOS
 
@@ -60,157 +50,22 @@
 #  endif
 #endif
 
-/* only used by msdosify() */
-static SANITIZEcode truncate_dryrun(const char *path,
-                                    const size_t truncate_pos);
-static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
-                             int flags);
-#endif
-static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
-                                           const char *file_name,
-                                           int flags);
+/* The functions msdosify, rename_if_dos_device_name and __crt0_glob_function
+ * were taken with modification from the DJGPP port of tar 1.12. They use
+ * algorithms originally from DJTAR.
+ */
 
+#ifdef __DJGPP__
 /*
-Sanitize a file or path name.
-
-All banned characters are replaced by underscores, for example:
-f?*foo => f__foo
-f:foo::$DATA => f_foo__$DATA
-f:\foo:bar => f__foo_bar
-f:\foo:bar => f:\foo:bar   (flag SANITIZE_ALLOW_PATH)
-
-This function was implemented according to the guidelines in 'Naming Files,
-Paths, and Namespaces' section 'Naming Conventions'.
-https://learn.microsoft.com/windows/win32/fileio/naming-a-file
-
-Flags
------
-SANITIZE_ALLOW_PATH:       Allow path separators and colons.
-Without this flag path separators and colons are sanitized.
-
-SANITIZE_ALLOW_RESERVED:   Allow reserved device names.
-Without this flag a reserved device name is renamed (COM1 => _COM1) unless it
-is in a UNC prefixed path.
-
-Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
-Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
-*/
-SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
-                                int flags)
+ * Disable program default argument globbing. We do it on our own.
+ */
+char **__crt0_glob_function(char *arg)
 {
-  char *p, *target;
-  size_t len;
-  SANITIZEcode sc;
-  size_t max_sanitized_len;
-
-  if(!sanitized)
-    return SANITIZE_ERR_BAD_ARGUMENT;
-
-  *sanitized = NULL;
-
-  if(!file_name)
-    return SANITIZE_ERR_BAD_ARGUMENT;
-
-  if(flags & SANITIZE_ALLOW_PATH) {
-#ifndef MSDOS
-    if(file_name[0] == '\\' && file_name[1] == '\\')
-      /* UNC prefixed path \\ (eg \\?\C:\foo) */
-      max_sanitized_len = 32767 - 1;
-    else
-#endif
-      max_sanitized_len = PATH_MAX - 1;
-  }
-  else
-    /* The maximum length of a filename. FILENAME_MAX is often the same as
-       PATH_MAX, in other words it is 260 and does not discount the path
-       information therefore we should not use it. */
-    max_sanitized_len = (PATH_MAX - 1 > 255) ? 255 : PATH_MAX - 1;
-
-  len = strlen(file_name);
-  if(len > max_sanitized_len)
-    return SANITIZE_ERR_INVALID_PATH;
-
-  target = curlx_strdup(file_name);
-  if(!target)
-    return SANITIZE_ERR_OUT_OF_MEMORY;
-
-#ifndef MSDOS
-  if((flags & SANITIZE_ALLOW_PATH) && !strncmp(target, "\\\\?\\", 4))
-    /* Skip the literal path prefix \\?\ */
-    p = target + 4;
-  else
-#endif
-    p = target;
-
-  /* replace control characters and other banned characters */
-  for(; *p; ++p) {
-    const char *banned;
-
-    if((1 <= *p && *p <= 31) ||
-       (!(flags & SANITIZE_ALLOW_PATH) && *p == ':') ||
-       (!(flags & SANITIZE_ALLOW_PATH) && (*p == '/' || *p == '\\'))) {
-      *p = '_';
-      continue;
-    }
-
-    for(banned = "|<>\"?*"; *banned; ++banned) {
-      if(*p == *banned) {
-        *p = '_';
-        break;
-      }
-    }
-  }
-
-  /* remove trailing spaces and periods if not allowing paths */
-  if(!(flags & SANITIZE_ALLOW_PATH) && len) {
-    char *clip = NULL;
-
-    p = &target[len];
-    do {
-      --p;
-      if(*p != ' ' && *p != '.')
-        break;
-      clip = p;
-    } while(p != target);
-
-    if(clip) {
-      *clip = '\0';
-    }
-  }
-
-#ifdef MSDOS
-  sc = msdosify(&p, target, flags);
-  curlx_free(target);
-  if(sc)
-    return sc;
-  target = p;
-  len = strlen(target);
-
-  if(len > max_sanitized_len) {
-    curlx_free(target);
-    return SANITIZE_ERR_INVALID_PATH;
-  }
-#endif
-
-  if(!(flags & SANITIZE_ALLOW_RESERVED)) {
-    sc = rename_if_reserved_dos(&p, target, flags);
-    curlx_free(target);
-    if(sc)
-      return sc;
-    target = p;
-    len = strlen(target);
-
-    if(len > max_sanitized_len) {
-      curlx_free(target);
-      return SANITIZE_ERR_INVALID_PATH;
-    }
-  }
-
-  *sanitized = target;
-  return SANITIZE_ERR_OK;
+  (void)arg;
+  return (char **)0;
 }
+#endif
 
-#ifdef MSDOS
 /*
 Test if truncating a path to a file will leave at least a single character in
 the filename. Filenames suffixed by an alternate data stream cannot be
@@ -267,11 +122,6 @@ static SANITIZEcode truncate_dryrun(const char *path,
 
   return SANITIZE_ERR_OK;
 }
-
-/* The functions msdosify, rename_if_dos_device_name and __crt0_glob_function
- * were taken with modification from the DJGPP port of tar 1.12. They use
- * algorithms originally from DJTAR.
- */
 
 /*
 Extra sanitization MS-DOS for file_name.
@@ -439,20 +289,18 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
   /* We could have a file whose name is a device on MS-DOS. Trying to
    * retrieve such a file would fail at best and wedge us at worst. We need
    * to rename such files. */
-  char *p, *base;
-  char fname[PATH_MAX];
+  char *p, *base, *buffer;
 #ifdef MSDOS
   struct_stat st_buf;
 #endif
-  size_t len;
+  size_t len, bufsize;
 
   if(!sanitized || !file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
   *sanitized = NULL;
-  len = strlen(file_name);
 
-  /* Ignore UNC prefixed paths, they are allowed to contain a reserved name. */
+  /* Ignore "\\" prefixed paths, they are allowed to use reserved names. */
 #ifndef MSDOS
   if((flags & SANITIZE_ALLOW_PATH) &&
      file_name[0] == '\\' && file_name[1] == '\\') {
@@ -463,19 +311,25 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
   }
 #endif
 
-  if(len > PATH_MAX - 1)
-    return SANITIZE_ERR_INVALID_PATH;
+  /* The buffer contains two extra bytes to allow for path expansion that
+     occurs if reserved name(s) need an underscore prepended. */
+  len = strlen(file_name);
+  bufsize = len + 2 + 1;
 
-  memcpy(fname, file_name, len);
-  fname[len] = '\0';
-  base = basename(fname);
+  buffer = curlx_malloc(bufsize);
+  if(!buffer)
+    return SANITIZE_ERR_OUT_OF_MEMORY;
+
+  memcpy(buffer, file_name, len + 1);
+
+  base = curlx_basename(buffer);
 
   /* Rename reserved device names that are known to be accessible without \\.\
      Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
      https://web.archive.org/web/20160314141551/support.microsoft.com/en-us/kb/74496
      https://learn.microsoft.com/windows/win32/fileio/naming-a-file
      */
-  for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
+  for(p = buffer; p; p = (p == buffer && buffer != base ? base : NULL)) {
     size_t p_len;
     int x = (curl_strnequal(p, "CON", 3) ||
              curl_strnequal(p, "PRN", 3) ||
@@ -512,15 +366,14 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
     p_len = strlen(p);
 
     /* Prepend a '_' */
-    if(strlen(fname) == PATH_MAX - 1)
-      return SANITIZE_ERR_INVALID_PATH;
     memmove(p + 1, p, p_len + 1);
     p[0] = '_';
     ++p_len;
+    ++len;
 
-    /* if fname was just modified then the basename pointer must be updated */
-    if(p == fname)
-      base = basename(fname);
+    /* the basename pointer must be updated since the path has expanded */
+    if(p == buffer)
+      base = curlx_basename(buffer);
   }
 
   /* This is the legacy portion from rename_if_dos_device_name that checks for
@@ -535,28 +388,140 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
     /* Prepend a '_' */
     size_t blen = strlen(base);
     if(blen) {
-      if(strlen(fname) >= PATH_MAX - 1)
+      if(len == bufsize - 1) {
+        curlx_free(buffer);
         return SANITIZE_ERR_INVALID_PATH;
+      }
       memmove(base + 1, base, blen + 1);
       base[0] = '_';
+      ++len;
     }
   }
 #endif
 
-  *sanitized = curlx_strdup(fname);
-  return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
+  *sanitized = buffer;
+  return SANITIZE_ERR_OK;
 }
 
-#ifdef __DJGPP__
 /*
- * Disable program default argument globbing. We do it on our own.
- */
-char **__crt0_glob_function(char *arg)
+Sanitize a file or path name.
+
+All banned characters are replaced by underscores, for example:
+f?*foo => f__foo
+f:foo::$DATA => f_foo__$DATA
+f:\foo:bar => f__foo_bar
+f:\foo:bar => f:\foo:bar   (flag SANITIZE_ALLOW_PATH)
+
+This function was implemented according to the guidelines in 'Naming Files,
+Paths, and Namespaces' section 'Naming Conventions'.
+https://learn.microsoft.com/windows/win32/fileio/naming-a-file
+
+Flags
+-----
+SANITIZE_ALLOW_PATH:       Allow path separators and colons.
+Without this flag path separators and colons are sanitized.
+
+SANITIZE_ALLOW_RESERVED:   Allow reserved device names.
+Without this flag a reserved device name is renamed (COM1 => _COM1).
+
+To fully block reserved device names requires not passing either flag. Some
+less common path styles are allowed to use reserved device names. For example,
+a "\\" prefixed path may use reserved device names if paths are allowed.
+
+Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
+Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
+*/
+SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
+                                int flags)
 {
-  (void)arg;
-  return (char **)0;
-}
+  char *p, *target;
+  size_t len;
+  SANITIZEcode sc;
+
+  if(!sanitized)
+    return SANITIZE_ERR_BAD_ARGUMENT;
+
+  *sanitized = NULL;
+
+  if(!file_name)
+    return SANITIZE_ERR_BAD_ARGUMENT;
+
+  len = strlen(file_name);
+
+  target = curlx_strdup(file_name);
+  if(!target)
+    return SANITIZE_ERR_OUT_OF_MEMORY;
+
+#ifndef MSDOS
+  if((flags & SANITIZE_ALLOW_PATH) && !strncmp(target, "\\\\?\\", 4))
+    /* Skip the literal-path prefix \\?\ */
+    p = target + 4;
+  else
 #endif
+    p = target;
+
+  /* replace control characters and other banned characters */
+  for(; *p; ++p) {
+    const char *banned;
+
+    if((1 <= *p && *p <= 31) ||
+       (!(flags & SANITIZE_ALLOW_PATH) && *p == ':') ||
+       (!(flags & SANITIZE_ALLOW_PATH) && (*p == '/' || *p == '\\'))) {
+      *p = '_';
+      continue;
+    }
+
+    for(banned = "|<>\"?*"; *banned; ++banned) {
+      if(*p == *banned) {
+        *p = '_';
+        break;
+      }
+    }
+  }
+
+  /* remove trailing spaces and periods if not allowing paths */
+  if(!(flags & SANITIZE_ALLOW_PATH) && len) {
+    char *clip = NULL;
+
+    p = &target[len];
+    do {
+      --p;
+      if(*p != ' ' && *p != '.')
+        break;
+      clip = p;
+    } while(p != target);
+
+    if(clip) {
+      *clip = '\0';
+    }
+  }
+
+#ifdef MSDOS
+  sc = msdosify(&p, target, flags);
+  curlx_free(target);
+  if(sc)
+    return sc;
+  target = p;
+#endif
+
+  if(!(flags & SANITIZE_ALLOW_RESERVED)) {
+    sc = rename_if_reserved_dos(&p, target, flags);
+    curlx_free(target);
+    if(sc)
+      return sc;
+    target = p;
+  }
+
+#ifdef DEBUGBUILD
+  if(getenv("CURL_FN_SANITIZE_BAD"))
+    return SANITIZE_ERR_INVALID_PATH;
+  if(getenv("CURL_FN_SANITIZE_OOM"))
+    return SANITIZE_ERR_OUT_OF_MEMORY;
+#endif
+
+  *sanitized = target;
+  return SANITIZE_ERR_OK;
+}
 
 #ifdef _WIN32
 
@@ -668,6 +633,7 @@ static struct TerminalSettings {
   LONG valid;
 } TerminalSettings;
 
+/* Offered by mingw-w64 v7+. MS SDK ~10.16299/~VS2017+. */
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
@@ -726,19 +692,8 @@ static void init_terminal(void)
     }
   }
 }
-#endif
 
-CURLcode win32_init(void)
-{
-  curlx_now_init();
-#ifndef CURL_WINDOWS_UWP
-  init_terminal();
-#endif
-
-  return CURLE_OK;
-}
-
-#ifndef CURL_WINDOWS_UWP
+#ifdef USE_WINSOCK
 /* The following STDIN non - blocking read techniques are heavily inspired
    by nmap and ncat (https://nmap.org/ncat/) */
 struct win_thread_data {
@@ -754,15 +709,15 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
   DWORD n;
-  int nwritten;
+  ssize_t nwritten;
   char buffer[BUFSIZ];
   BOOL r;
 
-  SOCKADDR_IN clientAddr;
+  struct sockaddr_in clientAddr;
   int clientAddrLen = sizeof(clientAddr);
 
   curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l,
-                                       (SOCKADDR *)&clientAddr,
+                                       (struct sockaddr *)&clientAddr,
                                        &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
@@ -772,7 +727,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 
   sclose(tdata->socket_l);
   tdata->socket_l = CURL_SOCKET_BAD;
-  if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
+  if(shutdown(socket_w, SHUT_RD)) {
     errorf("shutdown error: %d", SOCKERRNO);
     goto ThreadCleanup;
   }
@@ -782,8 +737,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if(n == 0)
       break;
-    nwritten = CURL_SEND(socket_w, buffer, n, 0);
-    if(nwritten == SOCKET_ERROR)
+    nwritten = swrite(socket_w, buffer, n);
+    if(nwritten == -1)
       break;
     if((DWORD)nwritten != n)
       break;
@@ -805,11 +760,11 @@ ThreadCleanup:
 /* The background thread that reads and buffers the true stdin. */
 curl_socket_t win32_stdin_read_thread(void)
 {
-  int result;
   bool r;
-  int rc = 0, socksize = 0;
+  int rc = 0;
+  curl_socklen_t socksize = 0;
   struct win_thread_data *tdata = NULL;
-  SOCKADDR_IN selfaddr;
+  struct sockaddr_in selfaddr;
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
@@ -838,23 +793,20 @@ curl_socket_t win32_stdin_read_thread(void)
     socksize = sizeof(selfaddr);
     memset(&selfaddr, 0, socksize);
     selfaddr.sin_family = AF_INET;
-    selfaddr.sin_addr.S_un.S_addr = htonl(INADDR_LOOPBACK);
+    selfaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     /* Bind to any available loopback port */
-    result = bind(tdata->socket_l, (SOCKADDR *)&selfaddr, socksize);
-    if(result == SOCKET_ERROR) {
+    if(bind(tdata->socket_l, (const struct sockaddr *)&selfaddr, socksize)) {
       errorf("bind error: %d", SOCKERRNO);
       break;
     }
 
     /* Bind to any available loopback port */
-    result = getsockname(tdata->socket_l, (SOCKADDR *)&selfaddr, &socksize);
-    if(result == SOCKET_ERROR) {
+    if(getsockname(tdata->socket_l, (struct sockaddr *)&selfaddr, &socksize)) {
       errorf("getsockname error: %d", SOCKERRNO);
       break;
     }
 
-    result = listen(tdata->socket_l, 1);
-    if(result == SOCKET_ERROR) {
+    if(listen(tdata->socket_l, 1)) {
       errorf("listen error: %d", SOCKERRNO);
       break;
     }
@@ -891,12 +843,12 @@ curl_socket_t win32_stdin_read_thread(void)
     /* Hard close the socket on closesocket() */
     setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
 
-    if(connect(socket_r, (SOCKADDR *)&selfaddr, socksize) == SOCKET_ERROR) {
+    if(connect(socket_r, (const struct sockaddr *)&selfaddr, socksize)) {
       errorf("connect error: %d", SOCKERRNO);
       break;
     }
 
-    if(shutdown(socket_r, SD_SEND) == SOCKET_ERROR) {
+    if(shutdown(socket_r, SHUT_WR)) {
       errorf("shutdown error: %d", SOCKERRNO);
       break;
     }
@@ -944,8 +896,19 @@ curl_socket_t win32_stdin_read_thread(void)
   assert(socket_r != CURL_SOCKET_BAD);
   return socket_r;
 }
+#endif /* USE_WINSOCK */
 
 #endif /* !CURL_WINDOWS_UWP */
+
+CURLcode win32_init(void)
+{
+  curlx_now_init();
+#ifndef CURL_WINDOWS_UWP
+  init_terminal();
+#endif
+
+  return CURLE_OK;
+}
 
 #endif /* _WIN32 */
 

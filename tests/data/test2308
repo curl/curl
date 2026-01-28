@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTP
 HTTP GET
 </keywords>
 </info>
-#
 # This reproduces the #13669 issue
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -41,7 +41,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

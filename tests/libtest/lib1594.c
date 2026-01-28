@@ -31,7 +31,7 @@ static CURLcode test_lib1594(const char *URL)
   struct curl_slist *header = NULL;
   curl_off_t retry;
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -39,12 +39,12 @@ static CURLcode test_lib1594(const char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  res = curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry);
-  if(res)
+  result = curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry);
+  if(result)
     goto test_cleanup;
 
   curl_mprintf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry);
@@ -56,5 +56,5 @@ test_cleanup:
   curl_slist_free_all(header);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

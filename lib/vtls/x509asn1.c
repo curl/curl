@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
@@ -37,14 +36,9 @@
 #define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
 #endif
 
-#include <curl/curl.h>
 #include "../urldata.h"
-#include "../curl_ctype.h"
-#include "hostcheck.h"
 #include "vtls.h"
-#include "vtls_int.h"
-#include "../sendf.h"
-#include "../curlx/inet_pton.h"
+#include "../curl_trc.h"
 #include "../curlx/base64.h"
 #include "x509asn1.h"
 #include "../curlx/dynbuf.h"
@@ -54,7 +48,7 @@
  */
 
 /* Largest supported ASN.1 structure. */
-#define CURL_ASN1_MAX                   ((size_t) 0x40000)      /* 256K */
+#define CURL_ASN1_MAX                   ((size_t)0x40000)      /* 256K */
 
 /* ASN.1 classes. */
 /* #define CURL_ASN1_UNIVERSAL             0 */
@@ -91,7 +85,6 @@
 #define CURL_ASN1_UNIVERSAL_STRING      28
 /* #define CURL_ASN1_CHARACTER_STRING      29 */
 #define CURL_ASN1_BMP_STRING            30
-
 
 #ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
@@ -1266,5 +1259,5 @@ done:
 
 #endif /* WANT_EXTRACT_CERTINFO */
 
-#endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_MBEDTLS or
+#endif /* USE_GNUTLS || USE_WOLFSSL || USE_SCHANNEL || USE_MBEDTLS ||
           USE_RUSTLS */

@@ -89,13 +89,8 @@
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
-/* Avoid VS2005 and upper complaining about portable C functions. */
-#ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
-#endif
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), gmtime(), strcpy(),
-                                    in tests: localtime(), sscanf() */
+#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
 #endif
 #endif /* _MSC_VER */
 
@@ -155,15 +150,23 @@
 #  include "config-os400.h"
 #endif
 
-#ifdef __PLAN9__
-#  include "config-plan9.h"
-#endif
-
 #endif /* HAVE_CONFIG_H */
+
+#ifdef _WIN32
+#  if defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600)
+#    error The minimum build target is Windows Vista (0x0600)
+#  endif
+
+#  if !defined(CURL_WINDOWS_UWP) && (defined(_MSC_VER) || defined(__MINGW32__))
+#    ifndef HAVE_IF_NAMETOINDEX
+#    define HAVE_IF_NAMETOINDEX
+#    endif
+#  endif
+#endif
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
-/* behavior or generated code characteristics must be done here,   */
+/* behavior or generated code characteristics must be done here,    */
 /* as appropriate, before any system header file is included. It is */
 /* also possible to have them defined in the config file included   */
 /* before this point. As a result of all this we frown inclusion of */
@@ -446,11 +449,15 @@
 #define USE_EVENTFD
 #endif
 
+#ifdef SO_NOSIGPIPE
+#define USE_SO_NOSIGPIPE
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
-#  if ! defined __LP64
+#  ifndef __LP64
 #    include <floss.h> /* FLOSS is only used for 32-bit builds. */
 #  endif
 #endif
@@ -459,8 +466,19 @@
 #include <curl/stdcheaders.h>
 #endif
 
-#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
+#define HAVE_UINTPTR_T  /* assume uintptr_t is provided by stdint.h */
+
+#ifdef __DJGPP__
+/* By default, DJGPP provides this type as a version of 'unsigned long' which
+   forces us to use a define use it in printf() format strings without
+   warnings. long and int are both 32 bits for this platform. */
+#define uint32_t unsigned int
+#endif
+
+/* Disable uintptr_t for targets known to miss it from stdint.h */
+#ifdef __OS400__
+#undef HAVE_UINTPTR_T
 #endif
 
 #include <limits.h>
@@ -471,22 +489,13 @@
 #  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifdef USE_WIN32_LARGE_FILES
-     /* Large file (>2Gb) support using Win32 functions. */
-#    undef  lseek
-#    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
-#    undef  fstat
-#    define fstat(fdes, stp)             _fstati64(fdes, stp)
-#    define struct_stat                  struct _stati64
-#    define LSEEK_ERROR                  (__int64)-1
-#  else
-     /* Small file (<2Gb) support using Win32 functions. */
-#    undef  lseek
-#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#    define fstat(fdes, stp)             _fstat(fdes, stp)
-#    define struct_stat                  struct _stat
-#    define LSEEK_ERROR                  (long)-1
-#  endif
+   /* Large file (>2Gb) support using Win32 functions. */
+#  undef  lseek
+#  define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
+#  undef  fstat
+#  define fstat(fdes, stp)             _fstati64(fdes, stp)
+#  define struct_stat                  struct _stati64
+#  define LSEEK_ERROR                  (__int64)-1
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
@@ -510,7 +519,7 @@
 
 #ifndef SIZEOF_CURL_SOCKET_T
 /* configure and cmake check and set the define */
-#  ifdef _WIN64
+#  if defined(USE_WINSOCK) && defined(_WIN64)
 #    define SIZEOF_CURL_SOCKET_T 8
 #  else
 /* default guess */
@@ -519,12 +528,12 @@
 #endif
 
 #if SIZEOF_CURL_SOCKET_T < 8
-#ifdef _WIN32
+#ifdef USE_WINSOCK
 #  define FMT_SOCKET_T "u"
 #else
 #  define FMT_SOCKET_T "d"
 #endif
-#elif defined(_WIN32)
+#elif defined(USE_WINSOCK)
 #  define FMT_SOCKET_T "zu"
 #else
 #  define FMT_SOCKET_T "qd"
@@ -790,10 +799,29 @@
 #endif
 
 /*
+ * Macros and functions to safely suppress warnings
+ */
+#include "curlx/warnless.h"
+
+#ifdef _WIN32
+#  undef  read
+#  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
+#  undef  write
+#  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
+/* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about non-portable funcs */
+#  undef fileno
+#  define fileno(fh) _fileno(fh)
+#  undef unlink
+#  define unlink(fn) _unlink(fn)
+#  undef isatty
+#  define isatty(fd) _isatty(fd)
+#endif
+
+/*
  * Definition of our NOP statement Object-like macro
  */
 #ifndef Curl_nop_stmt
-#define Curl_nop_stmt do { } while(0)
+#define Curl_nop_stmt do {} while(0)
 #endif
 
 /*
@@ -853,8 +881,8 @@
 Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 */
 #if defined(_WIN32) || defined(MSDOS)
-#define FOPEN_READTEXT "rt"
-#define FOPEN_WRITETEXT "wt"
+#define FOPEN_READTEXT   "rt"
+#define FOPEN_WRITETEXT  "wt"
 #define FOPEN_APPENDTEXT "at"
 #elif defined(__CYGWIN__)
 /* Cygwin has specific behavior we need to address when _WIN32 is not defined.
@@ -863,18 +891,18 @@ For write we want our output to have line endings of LF and be compatible with
 other Cygwin utilities. For read we want to handle input that may have line
 endings either CRLF or LF so 't' is appropriate.
 */
-#define FOPEN_READTEXT "rt"
-#define FOPEN_WRITETEXT "w"
+#define FOPEN_READTEXT   "rt"
+#define FOPEN_WRITETEXT  "w"
 #define FOPEN_APPENDTEXT "a"
 #else
-#define FOPEN_READTEXT "r"
-#define FOPEN_WRITETEXT "w"
+#define FOPEN_READTEXT   "r"
+#define FOPEN_WRITETEXT  "w"
 #define FOPEN_APPENDTEXT "a"
 #endif
 
 /* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#  ifdef _WIN32
+#  ifdef USE_WINSOCK
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
 #  elif defined(HAVE_SA_FAMILY_T)
 #    define CURL_SA_FAMILY_T sa_family_t
@@ -929,11 +957,18 @@ extern curl_calloc_callback Curl_ccalloc;
  * This macro also assigns NULL to given pointer when free'd.
  */
 #define Curl_safefree(ptr) \
-  do { curlx_free(ptr); (ptr) = NULL;} while(0)
+  do {                     \
+    curlx_free(ptr);       \
+    (ptr) = NULL;          \
+  } while(0)
 
-#include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
+#include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
+#define CURL_MEMDEBUG
+#endif
+
+#ifdef CURL_MEMDEBUG
 #ifdef __clang__
 #  define ALLOC_FUNC         __attribute__((__malloc__))
 #  if __clang_major__ >= 4
@@ -998,29 +1033,15 @@ CURL_EXTERN int curl_dbg_socketpair(int domain, int type, int protocol,
                                     int line, const char *source);
 #endif
 
-/* send/receive sockets */
-CURL_EXTERN SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
-                                         SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
-                                         SEND_TYPE_ARG3 len,
-                                         SEND_TYPE_ARG4 flags, int line,
-                                         const char *source);
-CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
-                                         RECV_TYPE_ARG2 buf,
-                                         RECV_TYPE_ARG3 len,
-                                         RECV_TYPE_ARG4 flags, int line,
-                                         const char *source);
-
 /* FILE functions */
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_fopen(const char *file, const char *mode,
-                       int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
-                         int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                        int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
+                                            int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_freopen(const char *file,
+                                              const char *mode, FILE *fh,
+                                              int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                                             int line, const char *source);
 
 #define sclose(sockfd) curl_dbg_sclose(sockfd, __LINE__, __FILE__)
 #define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd, __LINE__, __FILE__)
@@ -1042,10 +1063,8 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_ACCEPT4(sock, addr, len, flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
-#define CURL_SEND(a, b, c, d) curl_dbg_send(a, b, c, d, __LINE__, __FILE__)
-#define CURL_RECV(a, b, c, d) curl_dbg_recv(a, b, c, d, __LINE__, __FILE__)
 
-#else /* !CURLDEBUG */
+#else /* !CURL_MEMDEBUG */
 
 #define sclose(x) CURL_SCLOSE(x)
 #define fake_sclose(x) Curl_nop_stmt
@@ -1060,60 +1079,58 @@ CURL_EXTERN ALLOC_FUNC
 #ifdef HAVE_ACCEPT4
 #define CURL_ACCEPT4 accept4
 #endif
-#define CURL_SEND send
-#define CURL_RECV recv
 
-#endif /* CURLDEBUG */
+#endif /* CURL_MEMDEBUG */
 
 /* Allocator macros */
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 
-#define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
-#define curlx_calloc(nbelem,size) \
-                              curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
-#define curlx_realloc(ptr,size)   \
-                              curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
-#define curlx_free(ptr)           curl_dbg_free(ptr, __LINE__, __FILE__)
+#define curlx_strdup(ptr)          curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define curlx_malloc(size)         curl_dbg_malloc(size, __LINE__, __FILE__)
+#define curlx_calloc(nbelem, size) \
+  curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#define curlx_realloc(ptr, size) \
+  curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#define curlx_free(ptr)            curl_dbg_free(ptr, __LINE__, __FILE__)
 
 #ifdef _WIN32
 #ifdef UNICODE
-#define curlx_tcsdup(ptr)         curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#define curlx_tcsdup(ptr)          curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
 #else
-#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#define curlx_tcsdup(ptr)          curlx_strdup(ptr)
 #endif
 #endif /* _WIN32 */
 
-#else /* !CURLDEBUG */
+#else /* !CURL_MEMDEBUG */
 
 #ifdef BUILDING_LIBCURL
-#define curlx_strdup(ptr)         Curl_cstrdup(ptr)
-#define curlx_malloc(size)        Curl_cmalloc(size)
-#define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
-#define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
-#define curlx_free(ptr)           Curl_cfree(ptr)
+#define curlx_strdup(ptr)          Curl_cstrdup(ptr)
+#define curlx_malloc(size)         Curl_cmalloc(size)
+#define curlx_calloc(nbelem, size) Curl_ccalloc(nbelem, size)
+#define curlx_realloc(ptr, size)   Curl_crealloc(ptr, size)
+#define curlx_free(ptr)            Curl_cfree(ptr)
 #else /* !BUILDING_LIBCURL */
 #ifdef _WIN32
-#define curlx_strdup(ptr)         _strdup(ptr)
+#define curlx_strdup(ptr)          _strdup(ptr)
 #else
-#define curlx_strdup(ptr)         strdup(ptr)
+#define curlx_strdup(ptr)          strdup(ptr)
 #endif
-#define curlx_malloc(size)        malloc(size)
-#define curlx_calloc(nbelem,size) calloc(nbelem, size)
-#define curlx_realloc(ptr,size)   realloc(ptr, size)
-#define curlx_free(ptr)           free(ptr)
+#define curlx_malloc(size)         malloc(size)
+#define curlx_calloc(nbelem, size) calloc(nbelem, size)
+#define curlx_realloc(ptr, size)   realloc(ptr, size)
+#define curlx_free(ptr)            free(ptr)
 #endif /* BUILDING_LIBCURL */
 
 #ifdef _WIN32
 #ifdef UNICODE
-#define curlx_tcsdup(ptr)         Curl_wcsdup(ptr)
+#define curlx_tcsdup(ptr)          Curl_wcsdup(ptr)
 #else
-#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#define curlx_tcsdup(ptr)          curlx_strdup(ptr)
 #endif
 #endif /* _WIN32 */
 
-#endif /* CURLDEBUG */
+#endif /* CURL_MEMDEBUG */
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
@@ -1134,8 +1151,8 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
-    (defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)) || \
-    defined(USE_QUICHE)
+  (defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)) || \
+  defined(USE_QUICHE)
 
 #ifdef CURL_WITH_MULTI_SSL
 #error "MultiSSL combined with QUIC is not supported"
@@ -1157,17 +1174,17 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(_WIN32)
-#  ifndef UNIX_PATH_MAX
-     /* Replicating logic present in afunix.h
-        (distributed with newer Windows 10 SDK versions only) */
-#    define UNIX_PATH_MAX 108
-     /* !checksrc! disable TYPEDEFSTRUCT 1 */
-     typedef struct sockaddr_un {
-       CURL_SA_FAMILY_T sun_family;
-       char sun_path[UNIX_PATH_MAX];
-     } SOCKADDR_UN, *PSOCKADDR_UN;
-#    define WIN32_SOCKADDR_UN
-#  endif
+/* Offered by mingw-w64 v10+. MS SDK 10.17763/~VS2017+. */
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR >= 10)
+#  include <afunix.h>
+#elif !defined(UNIX_PATH_MAX) /* Replicate logic present in afunix.h */
+#  define UNIX_PATH_MAX 108
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct sockaddr_un {
+  CURL_SA_FAMILY_T sun_family;
+  char sun_path[UNIX_PATH_MAX];
+} SOCKADDR_UN, *PSOCKADDR_UN;
+#endif
 #endif
 
 #ifdef USE_OPENSSL
@@ -1202,6 +1219,22 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 /* Probably 'inline' is not supported by compiler.
    Define to the empty string to be on the safe side. */
 #  define CURL_INLINE /* empty */
+#endif
+
+/* Detect if compiler supports C99 variadic macros */
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
+  defined(_MSC_VER)
+#define CURL_HAVE_MACRO_VARARG
+#endif
+
+#if !defined(CURL_HAVE_MACRO_VARARG) || \
+  (defined(CURL_HAVE_MACRO_VARARG) && !defined(CURL_DISABLE_VERBOSE_STRINGS))
+#define CURLVERBOSE
+#define VERBOSE(x) x
+#define NOVERBOSE(x) Curl_nop_stmt
+#else
+#define VERBOSE(x) Curl_nop_stmt
+#define NOVERBOSE(x) x
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */

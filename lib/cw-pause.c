@@ -21,17 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #include "urldata.h"
 #include "bufq.h"
 #include "cfilters.h"
-#include "headers.h"
-#include "multiif.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "cw-pause.h"
 
 
@@ -72,23 +68,6 @@ struct cw_pause_ctx {
   struct Curl_cwriter super;
   struct cw_pause_buf *buf;
   size_t buf_total;
-};
-
-static CURLcode cw_pause_write(struct Curl_easy *data,
-                               struct Curl_cwriter *writer, int type,
-                               const char *buf, size_t nbytes);
-static void cw_pause_close(struct Curl_easy *data,
-                           struct Curl_cwriter *writer);
-static CURLcode cw_pause_init(struct Curl_easy *data,
-                              struct Curl_cwriter *writer);
-
-const struct Curl_cwtype Curl_cwt_pause = {
-  "cw-pause",
-  NULL,
-  cw_pause_init,
-  cw_pause_write,
-  cw_pause_close,
-  sizeof(struct cw_pause_ctx)
 };
 
 static CURLcode cw_pause_init(struct Curl_easy *data,
@@ -223,6 +202,15 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
 
   return result;
 }
+
+const struct Curl_cwtype Curl_cwt_pause = {
+  "cw-pause",
+  NULL,
+  cw_pause_init,
+  cw_pause_write,
+  cw_pause_close,
+  sizeof(struct cw_pause_ctx)
+};
 
 CURLcode Curl_cw_pause_flush(struct Curl_easy *data)
 {

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Test that the fragment is not send as part of the path.
 <info>
@@ -29,7 +30,6 @@ HTTP GET with URL that contains fragment after the path
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER#test
 </command>
 </client>
-
 
 # Verify data after the test has been "shot"
 <verify>

@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 struct Curl_easy;
 struct Curl_cfilter;
 
@@ -64,11 +63,6 @@ void Curl_failf(struct Curl_easy *data,
 
 #define CURL_LOG_LVL_NONE  0
 #define CURL_LOG_LVL_INFO  1
-
-
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define CURL_HAVE_C99
-#endif
 
 /**
  * Output an informational message when transfer's verbose logging is enabled.
@@ -120,7 +114,7 @@ void Curl_trc_ssls(struct Curl_easy *data,
 #ifdef USE_SSH
 extern struct curl_trc_feat Curl_trc_feat_ssh;
 void Curl_trc_ssh(struct Curl_easy *data,
-                   const char *fmt, ...) CURL_PRINTF(2, 3);
+                  const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 extern struct curl_trc_feat Curl_trc_feat_ws;
@@ -135,56 +129,143 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_TIMER_is_verbose(data) \
   Curl_trc_ft_is_verbose(data, &Curl_trc_feat_timer)
 
-#if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-#define infof(data, ...) \
-  do { if(Curl_trc_is_verbose(data)) \
-         Curl_infof(data, __VA_ARGS__); } while(0)
-#define CURL_TRC_M(data, ...) \
-  do { if(CURL_TRC_M_is_verbose(data)) \
-         Curl_trc_multi(data, __VA_ARGS__); } while(0)
-#define CURL_TRC_CF(data, cf, ...) \
-  do { if(Curl_trc_cf_is_verbose(cf, data)) \
-         Curl_trc_cf_infof(data, cf, __VA_ARGS__); } while(0)
-#define CURL_TRC_WRITE(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_write)) \
-         Curl_trc_write(data, __VA_ARGS__); } while(0)
-#define CURL_TRC_READ(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) \
-         Curl_trc_read(data, __VA_ARGS__); } while(0)
-#define CURL_TRC_DNS(data, ...) \
-  do { if(CURL_TRC_DNS_is_verbose(data)) \
-         Curl_trc_dns(data, __VA_ARGS__); } while(0)
-#define CURL_TRC_TIMER(data, tid, ...) \
-  do { if(CURL_TRC_TIMER_is_verbose(data)) \
-         Curl_trc_timer(data, tid, __VA_ARGS__); } while(0)
+#if defined(CURL_HAVE_MACRO_VARARG) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#define infof(data, ...)             \
+  do {                               \
+    if(Curl_trc_is_verbose(data))    \
+      Curl_infof(data, __VA_ARGS__); \
+  } while(0)
+#define CURL_TRC_M(data, ...)            \
+  do {                                   \
+    if(CURL_TRC_M_is_verbose(data))      \
+      Curl_trc_multi(data, __VA_ARGS__); \
+  } while(0)
+#define CURL_TRC_CF(data, cf, ...)              \
+  do {                                          \
+    if(Curl_trc_cf_is_verbose(cf, data))        \
+      Curl_trc_cf_infof(data, cf, __VA_ARGS__); \
+  } while(0)
+#define CURL_TRC_WRITE(data, ...)                          \
+  do {                                                     \
+    if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_write)) \
+      Curl_trc_write(data, __VA_ARGS__);                   \
+  } while(0)
+#define CURL_TRC_READ(data, ...)                          \
+  do {                                                    \
+    if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) \
+      Curl_trc_read(data, __VA_ARGS__);                   \
+  } while(0)
+#define CURL_TRC_DNS(data, ...)        \
+  do {                                 \
+    if(CURL_TRC_DNS_is_verbose(data))  \
+      Curl_trc_dns(data, __VA_ARGS__); \
+  } while(0)
+#define CURL_TRC_TIMER(data, tid, ...)        \
+  do {                                        \
+    if(CURL_TRC_TIMER_is_verbose(data))       \
+      Curl_trc_timer(data, tid, __VA_ARGS__); \
+  } while(0)
 
 #ifndef CURL_DISABLE_FTP
+#define CURL_TRC_FTP(data, ...)                          \
+  do {                                                   \
+    if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ftp)) \
+      Curl_trc_ftp(data, __VA_ARGS__);                   \
+  } while(0)
+#endif /* !CURL_DISABLE_FTP */
+#ifndef CURL_DISABLE_SMTP
+#define CURL_TRC_SMTP(data, ...)                          \
+  do {                                                    \
+    if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) \
+      Curl_trc_smtp(data, __VA_ARGS__);                   \
+  } while(0)
+#endif /* !CURL_DISABLE_SMTP */
+#ifdef USE_SSL
+#define CURL_TRC_SSLS(data, ...)                          \
+  do {                                                    \
+    if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) \
+      Curl_trc_ssls(data, __VA_ARGS__);                   \
+  } while(0)
+#endif /* USE_SSL */
+#ifdef USE_SSH
+#define CURL_TRC_SSH(data, ...)                          \
+  do {                                                   \
+    if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssh)) \
+      Curl_trc_ssh(data, __VA_ARGS__);                   \
+  } while(0)
+#endif /* USE_SSH */
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#define CURL_TRC_WS(data, ...)                          \
+  do {                                                  \
+    if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) \
+      Curl_trc_ws(data, __VA_ARGS__);                   \
+  } while(0)
+#endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
+
+#elif defined(CURL_HAVE_MACRO_VARARG) && defined(CURL_DISABLE_VERBOSE_STRINGS)
+
+#define infof(data, ...) \
+  do {                   \
+    (void)data;          \
+  } while(0)
+#define CURL_TRC_M(data, ...) \
+  do {                        \
+    (void)(data);             \
+  } while(0)
+#define CURL_TRC_CF(data, cf, ...) \
+  do {                             \
+    (void)(data);                  \
+    (void)(cf);                    \
+  } while(0)
+#define CURL_TRC_WRITE(data, ...) \
+  do {                            \
+    (void)(data);                 \
+  } while(0)
+#define CURL_TRC_READ(data, ...) \
+  do {                           \
+    (void)(data);                \
+  } while(0)
+#define CURL_TRC_DNS(data, ...) \
+  do {                          \
+    (void)(data);               \
+  } while(0)
+#define CURL_TRC_TIMER(data, tid, ...) \
+  do {                                 \
+    (void)(data);                      \
+    (void)(tid);                       \
+  } while(0)
+#ifndef CURL_DISABLE_FTP
 #define CURL_TRC_FTP(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ftp)) \
-         Curl_trc_ftp(data, __VA_ARGS__); } while(0)
+  do {                          \
+    (void)(data);               \
+  } while(0)
 #endif /* !CURL_DISABLE_FTP */
 #ifndef CURL_DISABLE_SMTP
 #define CURL_TRC_SMTP(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) \
-         Curl_trc_smtp(data, __VA_ARGS__); } while(0)
+  do {                           \
+    (void)(data);                \
+  } while(0)
 #endif /* !CURL_DISABLE_SMTP */
 #ifdef USE_SSL
 #define CURL_TRC_SSLS(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) \
-         Curl_trc_ssls(data, __VA_ARGS__); } while(0)
+  do {                           \
+    (void)(data);                \
+  } while(0)
 #endif /* USE_SSL */
 #ifdef USE_SSH
 #define CURL_TRC_SSH(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssh)) \
-         Curl_trc_ssh(data, __VA_ARGS__); } while(0)
+  do {                          \
+    (void)(data);               \
+  } while(0)
 #endif /* USE_SSH */
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
-#define CURL_TRC_WS(data, ...)                             \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) \
-         Curl_trc_ws(data, __VA_ARGS__); } while(0)
-#endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
+#define CURL_TRC_WS(data, ...) \
+  do {                         \
+    (void)(data);              \
+  } while(0)
+#endif
 
-#else /* CURL_HAVE_C99 */
+#else /* !CURL_HAVE_MACRO_VARARG */
 
 #define infof          Curl_infof
 #define CURL_TRC_M     Curl_trc_multi
@@ -210,41 +291,42 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_WS    Curl_trc_ws
 #endif
 
-#endif /* !CURL_HAVE_C99 */
+#endif /* CURL_HAVE_MACRO_VARARG */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-/* informational messages enabled */
-
+#ifdef CURLVERBOSE
 extern struct curl_trc_feat Curl_trc_feat_multi;
 extern struct curl_trc_feat Curl_trc_feat_read;
 extern struct curl_trc_feat Curl_trc_feat_write;
 extern struct curl_trc_feat Curl_trc_feat_dns;
 extern struct curl_trc_feat Curl_trc_feat_timer;
+#endif
 
-#define Curl_trc_is_verbose(data) \
-            ((data) && (data)->set.verbose && \
-            (!(data)->state.feat || \
-             ((data)->state.feat->log_level >= CURL_LOG_LVL_INFO)))
-#define Curl_trc_cf_is_verbose(cf, data) \
-            (Curl_trc_is_verbose(data) && \
-             (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+/* informational messages enabled */
+#define Curl_trc_is_verbose(data)                          \
+  ((data) && (data)->set.verbose &&                        \
+   (!(data)->state.feat ||                                 \
+    ((data)->state.feat->log_level >= CURL_LOG_LVL_INFO)))
+#define Curl_trc_cf_is_verbose(cf, data)              \
+  (Curl_trc_is_verbose(data) &&                       \
+   (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
 #define Curl_trc_ft_is_verbose(data, ft) \
-            (Curl_trc_is_verbose(data) && \
-             (ft)->log_level >= CURL_LOG_LVL_INFO)
+  (Curl_trc_is_verbose(data) &&          \
+   (ft)->log_level >= CURL_LOG_LVL_INFO)
 #define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
-#define CURL_TRC_EASY_TIMERS(data) \
-  do { if(CURL_TRC_TIMER_is_verbose(data)) \
-         Curl_trc_easy_timers(data); } while(0)
+#define CURL_TRC_EASY_TIMERS(data)      \
+  do {                                  \
+    if(CURL_TRC_TIMER_is_verbose(data)) \
+      Curl_trc_easy_timers(data);       \
+  } while(0)
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
-
 #define Curl_trc_is_verbose(d)        (FALSE)
 #define Curl_trc_cf_is_verbose(x, y)  (FALSE)
 #define Curl_trc_ft_is_verbose(x, y)  (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 #define CURL_TRC_EASY_TIMERS(x)       Curl_nop_stmt
-
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #endif /* HEADER_CURL_TRC_H */

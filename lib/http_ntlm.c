@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
@@ -34,7 +33,7 @@
  */
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "strcase.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_core.h"
@@ -176,7 +175,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
 #ifdef USE_WINDOWS_SSPI
   if(!Curl_pSecFn) {
-    /* not thread safe and leaks - use curl_global_init() to avoid */
+    /* not thread-safe and leaks - use curl_global_init() to avoid */
     CURLcode err = Curl_sspi_global_init();
     if(!Curl_pSecFn)
       return err;

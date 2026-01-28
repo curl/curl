@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 /* defaults:
@@ -38,7 +37,7 @@
    2. For systems with config-*.h files, define them there.
 */
 
-#ifdef _WIN32
+#ifdef USE_WINSOCK
 /* int recv(SOCKET, char *, int, int) */
 #define RECV_TYPE_ARG1 SOCKET
 #define RECV_TYPE_ARG2 char *
@@ -67,7 +66,6 @@
 #define SEND_TYPE_ARG3 int
 #define SEND_TYPE_RETV int
 #endif
-
 
 #ifndef RECV_TYPE_ARG1
 #define RECV_TYPE_ARG1 int

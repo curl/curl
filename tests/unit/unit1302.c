@@ -36,7 +36,7 @@ struct etest {
 static CURLcode test_unit1302(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-  CURLcode rc;
+  CURLcode result;
   unsigned int i;
 
   /* common base64 encoding */
@@ -132,8 +132,9 @@ static CURLcode test_unit1302(const char *arg)
     size_t dlen;
 
     /* first encode */
-    rc = curlx_base64_encode((const uint8_t *)e->input, e->ilen, &out, &olen);
-    abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+    result = curlx_base64_encode((const uint8_t *)e->input, e->ilen,
+                                 &out, &olen);
+    abort_unless(result == CURLE_OK, "return code should be CURLE_OK");
     abort_unless(olen == e->olen, "wrong output size");
     if(memcmp(out, e->output, e->olen)) {
       curl_mfprintf(stderr, "Test %u encoded badly\n", i);
@@ -142,9 +143,10 @@ static CURLcode test_unit1302(const char *arg)
     Curl_safefree(out);
 
     /* then verify decode */
-    rc = curlx_base64_decode(e->output, &decoded, &dlen);
-    if(rc != CURLE_OK) {
-      curl_mfprintf(stderr, "Test %u URL decode returned %d\n", i, (int)rc);
+    result = curlx_base64_decode(e->output, &decoded, &dlen);
+    if(result != CURLE_OK) {
+      curl_mfprintf(stderr, "Test %u URL decode returned %d\n", i,
+                    (int)result);
       unitfail++;
     }
     if(dlen != e->ilen) {
@@ -165,9 +167,9 @@ static CURLcode test_unit1302(const char *arg)
     struct etest *e = &url[i];
     char *out;
     size_t olen;
-    rc = curlx_base64url_encode((const uint8_t *)e->input, e->ilen,
-                                &out, &olen);
-    abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+    result = curlx_base64url_encode((const uint8_t *)e->input, e->ilen,
+                                    &out, &olen);
+    abort_unless(result == CURLE_OK, "return code should be CURLE_OK");
     if(olen != e->olen) {
       curl_mfprintf(stderr, "Test %u URL encoded output length %zu "
                     "instead of %zu\n", i, olen, e->olen);
@@ -186,11 +188,11 @@ static CURLcode test_unit1302(const char *arg)
     size_t dlen;
 
     /* then verify decode with illegal inputs */
-    rc = curlx_base64_decode(e->output, &decoded, &dlen);
-    if(rc != CURLE_BAD_CONTENT_ENCODING) {
+    result = curlx_base64_decode(e->output, &decoded, &dlen);
+    if(result != CURLE_BAD_CONTENT_ENCODING) {
       curl_mfprintf(stderr, "Test %u URL bad decoded badly. "
                     "Returned '%d', expected '%d'\n",
-                    i, (int)rc, CURLE_BAD_CONTENT_ENCODING);
+                    i, (int)result, CURLE_BAD_CONTENT_ENCODING);
       unitfail++;
     }
   }

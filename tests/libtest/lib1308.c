@@ -26,7 +26,7 @@
 static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
 {
   fwrite(buf, len, 1, stdout);
-  (*(size_t *)arg) += len;
+  *((size_t *)arg) += len;
   return len;
 }
 
@@ -43,7 +43,7 @@ static CURLcode test_lib1308(const char *URL)
 {
   int errorcount = 0;
   CURLFORMcode rc;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int formres = 0;
   struct curl_httppost *post = NULL;
   struct curl_httppost *last = NULL;

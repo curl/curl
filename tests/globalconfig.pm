@@ -50,6 +50,7 @@ BEGIN {
         $LOCKDIR
         $LOGDIR
         $maxtime
+        $mintotal
         $memanalyze
         $MEMDUMP
         $perlcmd
@@ -74,7 +75,6 @@ BEGIN {
         %keywords
         @protocols
         $dev_null
-        $checktests
     );
 }
 use pathhelp qw(
@@ -84,7 +84,6 @@ use pathhelp qw(
     );
 use Cwd qw(getcwd);
 use File::Spec;
-
 
 #######################################################################
 # global configuration variables
@@ -96,7 +95,6 @@ our $torture;         # 1 to enable torture testing
 our $proxy_address;   # external HTTP proxy address
 our $listonly;        # only list the tests
 our $buildinfo;       # dump buildinfo.txt
-our $checktests;      # 1 to run a check on test data
 our $run_duphandle;   # run curl with --test-duphandle to verify handle duplication
 our $run_event_based; # run curl with --test-event to test the event API
 our $automakestyle;   # use automake-like test status output format
@@ -105,6 +103,7 @@ our $CURLVERSION="";  # curl's reported version number
 our $CURLVERNUM="";   # curl's reported version number (without -DEV)
 our $randseed = 0;    # random number seed
 our $maxtime;         # curl command timeout override
+our $mintotal;        # minimum number of tests to run
 
 # paths
 our $pwd = getcwd();  # current working directory

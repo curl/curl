@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 /***********************************************************************
@@ -44,10 +43,9 @@
 #endif
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_addrinfo.h"
+#include "curl_trc.h"
 #include "hostip.h"
-#include "hash.h"
-#include "curl_share.h"
 #include "url.h"
 
 
@@ -77,9 +75,6 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
   struct Curl_addrinfo *ai = NULL;
 
   (void)ip_version;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   ai = Curl_ipv4_resolve_r(hostname, port);
   if(!ai)
@@ -93,10 +88,10 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
 #if defined(CURLRES_IPV4) && !defined(CURLRES_ARES) && !defined(CURLRES_AMIGA)
 
 /*
- * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
+ * Curl_ipv4_resolve_r() - ipv4 thread-safe resolver function.
  *
  * This is used for both synchronous and asynchronous resolver builds,
- * implying that only threadsafe code and function calls may be used.
+ * implying that only thread-safe code and function calls may be used.
  *
  */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
@@ -153,7 +148,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                       &h_errnop);
 
   /* If the buffer is too small, it returns NULL and sets errno to
-   * ERANGE. The errno is thread safe if this is compiled with
+   * ERANGE. The errno is thread-safe if this is compiled with
    * -D_REENTRANT as then the 'errno' variable is a macro defined to get
    * used properly for threads.
    */
@@ -263,7 +258,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #else /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
           HAVE_GETHOSTBYNAME_R */
   /*
-   * Here is code for platforms that do not have a thread safe
+   * Here is code for platforms that do not have a thread-safe
    * getaddrinfo() nor gethostbyname_r() function or for which
    * gethostbyname() is the preferred one.
    */

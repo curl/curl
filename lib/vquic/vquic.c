@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifdef HAVE_NETINET_UDP_H
@@ -34,13 +33,12 @@
 #include "../bufq.h"
 #include "../curlx/dynbuf.h"
 #include "../curlx/fopen.h"
-#include "../curlx/warnless.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "curl_ngtcp2.h"
-#include "curl_osslq.h"
 #include "curl_quiche.h"
 #include "../multiif.h"
+#include "../progress.h"
 #include "../rand.h"
 #include "vquic.h"
 #include "vquic_int.h"
@@ -52,7 +50,6 @@
 
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    1
-
 
 int Curl_vquic_init(void)
 {
@@ -68,14 +65,13 @@ void Curl_quic_ver(char *p, size_t len)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   Curl_ngtcp2_ver(p, len);
-#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
-  Curl_osslq_ver(p, len);
 #elif defined(USE_QUICHE)
   Curl_quiche_ver(p, len);
 #endif
 }
 
-CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
+CURLcode vquic_ctx_init(struct Curl_easy *data,
+                        struct cf_quic_ctx *qctx)
 {
   Curl_bufq_init2(&qctx->sendbuf, NW_CHUNK_SIZE, NW_SEND_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
@@ -94,7 +90,7 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
     }
   }
 #endif
-  vquic_ctx_update_time(qctx);
+  vquic_ctx_set_time(qctx, Curl_pgrs_now(data));
 
   return CURLE_OK;
 }
@@ -104,9 +100,16 @@ void vquic_ctx_free(struct cf_quic_ctx *qctx)
   Curl_bufq_free(&qctx->sendbuf);
 }
 
-void vquic_ctx_update_time(struct cf_quic_ctx *qctx)
+void vquic_ctx_set_time(struct cf_quic_ctx *qctx,
+                        const struct curltime *pnow)
 {
-  qctx->last_op = curlx_now();
+  qctx->last_op = *pnow;
+}
+
+void vquic_ctx_update_time(struct cf_quic_ctx *qctx,
+                           const struct curltime *pnow)
+{
+  qctx->last_op = *pnow;
 }
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
@@ -165,6 +168,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       return CURLE_AGAIN;
     case SOCKEMSGSIZE:
       /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
+      *psent = pktlen;
       break;
     case EIO:
       if(pktlen > gsolen) {
@@ -192,8 +196,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 
   *psent = 0;
 
-  while((rv = CURL_SEND(qctx->sockfd, (const char *)pkt,
-                        (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
+  while((rv = swrite(qctx->sockfd, pkt, pktlen)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;
 
@@ -203,13 +206,13 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       goto out;
     }
     else {
-      failf(data, "send() returned %zd (errno %d)", rv, SOCKERRNO);
       if(SOCKERRNO != SOCKEMSGSIZE) {
+        failf(data, "send() returned %zd (errno %d)", rv, SOCKERRNO);
         result = CURLE_SEND_ERROR;
         goto out;
       }
-      /* UDP datagram is too large; caused by PMTUD. Just let it be
-         lost. */
+      /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
+      *psent = pktlen;
     }
   }
 #endif
@@ -232,8 +235,9 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
                                    size_t gsolen, size_t *psent)
 {
   const uint8_t *p, *end = pkt + pktlen;
-  size_t sent, len, calls = 0;
+  size_t sent, len;
   CURLcode result = CURLE_OK;
+  VERBOSE(size_t calls = 0);
 
   *psent = 0;
 
@@ -243,7 +247,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
     if(result)
       goto out;
     *psent += sent;
-    ++calls;
+    VERBOSE(++calls);
   }
 out:
   CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
@@ -441,12 +445,14 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
     ++calls;
     for(i = 0; i < mcount; ++i) {
+      /* A zero-length UDP packet is no QUIC packet. Ignore. */
+      if(!mmsg[i].msg_len)
+        continue;
       total_nread += mmsg[i].msg_len;
 
       gso_size = vquic_msghdr_get_udp_gro(&mmsg[i].msg_hdr);
-      if(gso_size == 0) {
+      if(gso_size == 0)
         gso_size = mmsg[i].msg_len;
-      }
 
       result = recv_cb(bufs[i], mmsg[i].msg_len, gso_size,
                        mmsg[i].msg_hdr.msg_name,
@@ -523,10 +529,13 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     total_nread += nread;
     ++calls;
 
+    /* A 0-length UDP packet is no QUIC packet */
+    if(!nread)
+      continue;
+
     gso_size = vquic_msghdr_get_udp_gro(&msg);
-    if(gso_size == 0) {
+    if(gso_size == 0)
       gso_size = nread;
-    }
 
     result = recv_cb(buf, nread, gso_size,
                      msg.msg_name, msg.msg_namelen, 0, userp);
@@ -587,6 +596,11 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
 
     ++pkts;
     ++calls;
+
+    /* A 0-length UDP packet is no QUIC packet */
+    if(!nread)
+      continue;
+
     total_nread += nread;
     result = recv_cb(buf, nread, nread, &remote_addr, remote_addrlen,
                      0, userp);
@@ -687,8 +701,6 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   DEBUGASSERT(transport == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
-#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
-  return Curl_cf_osslq_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)
   return Curl_cf_quiche_create(pcf, data, conn, ai);
 #else
@@ -708,7 +720,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
     /* cannot do QUIC over a Unix domain socket */
     return CURLE_QUIC_CONNECT_ERROR;
   }
-  if(!(conn->handler->flags & PROTOPT_SSL)) {
+  if(!(conn->scheme->flags & PROTOPT_SSL)) {
     failf(data, "HTTP/3 requested for non-HTTPS URL");
     return CURLE_URL_MALFORMAT;
   }
@@ -725,6 +737,56 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
+#ifdef CURLVERBOSE
+const char *vquic_h3_err_str(uint64_t error_code)
+{
+  if(error_code <= UINT_MAX) {
+    switch((unsigned int)error_code) {
+    case CURL_H3_ERR_NO_ERROR:
+      return "NO_ERROR";
+    case CURL_H3_ERR_GENERAL_PROTOCOL_ERROR:
+      return "GENERAL_PROTOCOL_ERROR";
+    case CURL_H3_ERR_INTERNAL_ERROR:
+      return "INTERNAL_ERROR";
+    case CURL_H3_ERR_STREAM_CREATION_ERROR:
+      return "STREAM_CREATION_ERROR";
+    case CURL_H3_ERR_CLOSED_CRITICAL_STREAM:
+      return "CLOSED_CRITICAL_STREAM";
+    case CURL_H3_ERR_FRAME_UNEXPECTED:
+      return "FRAME_UNEXPECTED";
+    case CURL_H3_ERR_FRAME_ERROR:
+      return "FRAME_ERROR";
+    case CURL_H3_ERR_EXCESSIVE_LOAD:
+      return "EXCESSIVE_LOAD";
+    case CURL_H3_ERR_ID_ERROR:
+      return "ID_ERROR";
+    case CURL_H3_ERR_SETTINGS_ERROR:
+      return "SETTINGS_ERROR";
+    case CURL_H3_ERR_MISSING_SETTINGS:
+      return "MISSING_SETTINGS";
+    case CURL_H3_ERR_REQUEST_REJECTED:
+      return "REQUEST_REJECTED";
+    case CURL_H3_ERR_REQUEST_CANCELLED:
+      return "REQUEST_CANCELLED";
+    case CURL_H3_ERR_REQUEST_INCOMPLETE:
+      return "REQUEST_INCOMPLETE";
+    case CURL_H3_ERR_MESSAGE_ERROR:
+      return "MESSAGE_ERROR";
+    case CURL_H3_ERR_CONNECT_ERROR:
+      return "CONNECT_ERROR";
+    case CURL_H3_ERR_VERSION_FALLBACK:
+      return "VERSION_FALLBACK";
+    default:
+      break;
+    }
+  }
+  /* RFC 9114 ch. 8.1 + 9, reserved future error codes that are NO_ERROR */
+  if((error_code >= 0x21) && !((error_code - 0x21) % 0x1f))
+    return "NO_ERROR";
+  return "unknown";
+}
+#endif /* CURLVERBOSE */
 
 #if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
 
@@ -788,8 +850,8 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn,
                              unsigned char transport)
 {
-  (void)conn;
   (void)data;
+  (void)conn;
   (void)transport;
   DEBUGF(infof(data, "QUIC is not supported in this build"));
   return CURLE_NOT_BUILT_IN;

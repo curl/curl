@@ -64,11 +64,34 @@ class Card:
         if val is None or val < 0:
             return '--'
         if val >= (1024*1024):
-            return f'{val/(1024*1024):0.000f} MB/s'
+            return f'{val/(1024*1024):.3g} MB/s'
         elif val >= 1024:
-            return f'{val / 1024:0.000f} KB/s'
+            return f'{val / 1024:.3g} KB/s'
         else:
-            return f'{val:0.000f} B/s'
+            return f'{val:.3g} B/s'
+
+    @classmethod
+    def fmt_speed(cls, val):
+        if val is None or val < 0:
+            return '--'
+        if val >= (10*1024*1024):
+            return f'{(val/(1024*1024)):.3f} MB/s'
+        elif val >= (10*1024):
+            return f'{val/1024:.3f} KB/s'
+        else:
+            return f'{val:.3f} B/s'
+
+    @classmethod
+    def fmt_speed_result(cls, val, limit):
+        if val is None or val < 0:
+            return '--'
+        pct = ((val / limit) * 100) - 100
+        if val >= (10*1024*1024):
+            return f'{(val/(1024*1024)):.3f} MB/s, {pct:+.1f}%'
+        elif val >= (10*1024):
+            return f'{val/1024:.3f} KB/s, {pct:+.1f}%'
+        else:
+            return f'{val:.3f} B/s, {pct:+.1f}%'
 
     @classmethod
     def fmt_reqs(cls, val):
@@ -80,6 +103,19 @@ class Card:
         cell = {
             'val': val,
             'sval': Card.fmt_mbs(val) if val >= 0 else '--',
+        }
+        if len(profiles):
+            cell['stats'] = RunProfile.AverageStats(profiles)
+        if len(errors):
+            cell['errors'] = errors
+        return cell
+
+    @classmethod
+    def mk_speed_cell(cls, samples, profiles, errors, limit):
+        val = mean(samples) if len(samples) else -1
+        cell = {
+            'val': val,
+            'sval': Card.fmt_speed_result(val, limit) if val >= 0 else '--',
         }
         if len(profiles):
             cell['stats'] = RunProfile.AverageStats(profiles)
@@ -198,7 +234,8 @@ class ScoreRunner:
                  server_addr: Optional[str] = None,
                  with_flame: bool = False,
                  socks_args: Optional[List[str]] = None,
-                 limit_rate: Optional[str] = None):
+                 limit_rate: Optional[str] = None,
+                 suppress_cl: bool = False):
         self.verbose = verbose
         self.env = env
         self.protocol = protocol
@@ -210,7 +247,24 @@ class ScoreRunner:
         self._upload_parallel = upload_parallel
         self._with_flame = with_flame
         self._socks_args = socks_args
+        self._limit_rate_num = 0
         self._limit_rate = limit_rate
+        if self._limit_rate:
+            m = re.match(r'(\d+(\.\d+)?)([gmkb])?', self._limit_rate.lower())
+            if not m:
+                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+            self._limit_rate_num = float(m.group(1))
+            if m.group(3) == 'g':
+                self._limit_rate_num *= (1024*1024*1024)
+            elif m.group(3) == 'm':
+                self._limit_rate_num *= (1024*1024)
+            elif m.group(3) == 'k':
+                self._limit_rate_num *= (1024)
+            elif m.group(3) == 'b':
+                pass
+            else:
+                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+        self.suppress_cl = suppress_cl
 
     def info(self, msg):
         if self.verbose > 0:
@@ -304,11 +358,18 @@ class ScoreRunner:
             err = self._check_downloads(r, count)
             if err:
                 errors.append(err)
+            elif self._limit_rate:
+                total_speed = sum([s['speed_download'] for s in r.stats])
+                samples.append(total_speed / len(r.stats))
+                profiles.append(r.profile)
             else:
                 total_size = sum([s['size_download'] for s in r.stats])
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
-        return Card.mk_mbs_cell(samples, profiles, errors)
+        if self._limit_rate:
+            return Card.mk_speed_cell(samples, profiles, errors, self._limit_rate_num)
+        else:
+            return Card.mk_mbs_cell(samples, profiles, errors)
 
     def dl_serial(self, url: str, count: int, nsamples: int = 1):
         samples = []
@@ -326,11 +387,18 @@ class ScoreRunner:
             err = self._check_downloads(r, count)
             if err:
                 errors.append(err)
+            elif self._limit_rate:
+                total_speed = sum([s['speed_download'] for s in r.stats])
+                samples.append(total_speed / len(r.stats))
+                profiles.append(r.profile)
             else:
                 total_size = sum([s['size_download'] for s in r.stats])
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
-        return Card.mk_mbs_cell(samples, profiles, errors)
+        if self._limit_rate:
+            return Card.mk_speed_cell(samples, profiles, errors, self._limit_rate_num)
+        else:
+            return Card.mk_mbs_cell(samples, profiles, errors)
 
     def dl_parallel(self, url: str, count: int, nsamples: int = 1):
         samples = []
@@ -353,11 +421,18 @@ class ScoreRunner:
             err = self._check_downloads(r, count)
             if err:
                 errors.append(err)
+            elif self._limit_rate:
+                total_speed = sum([s['speed_download'] for s in r.stats])
+                samples.append(total_speed / len(r.stats))
+                profiles.append(r.profile)
             else:
                 total_size = sum([s['size_download'] for s in r.stats])
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
-        return Card.mk_mbs_cell(samples, profiles, errors)
+        if self._limit_rate:
+            return Card.mk_speed_cell(samples, profiles, errors, self._limit_rate_num)
+        else:
+            return Card.mk_mbs_cell(samples, profiles, errors)
 
     def downloads(self, count: int, fsizes: List[int], meta: Dict[str, Any]) -> Dict[str, Any]:
         nsamples = meta['samples']
@@ -368,7 +443,10 @@ class ScoreRunner:
             if count > 1:
                 cols.append(f'serial({count})')
         if count > 1:
-            cols.append(f'parallel({count}x{max_parallel})')
+            if max_parallel == 1:
+                cols.append(f'serial({count})')
+            else:
+                cols.append(f'parallel({count}x{max_parallel})')
         rows = []
         for fsize in fsizes:
             row = [{
@@ -385,7 +463,10 @@ class ScoreRunner:
                 row.append(self.dl_parallel(url=url, count=count, nsamples=nsamples))
             rows.append(row)
             self.info('done.\n')
-        title = f'Downloads from {meta["server"]}'
+        if self._limit_rate:
+            title = f'Download Speed ({self.protocol}), limit={Card.fmt_speed(self._limit_rate_num)}, from {meta["server"]}'
+        else:
+            title = f'Downloads ({self.protocol})from {meta["server"]}'
         if self._socks_args:
             title += f' via {self._socks_args}'
         return {
@@ -419,7 +500,8 @@ class ScoreRunner:
         for _ in range(nsamples):
             curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
-                              with_headers=False, with_profile=True)
+                              with_headers=False, with_profile=True,
+                              suppress_cl=self.suppress_cl)
             err = self._check_uploads(r, 1)
             if err:
                 errors.append(err)
@@ -438,7 +520,8 @@ class ScoreRunner:
         for _ in range(nsamples):
             curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
-                              with_headers=False, with_profile=True)
+                              with_headers=False, with_profile=True,
+                              suppress_cl=self.suppress_cl)
             err = self._check_uploads(r, count)
             if err:
                 errors.append(err)
@@ -459,9 +542,10 @@ class ScoreRunner:
             curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True,
+                              suppress_cl=self.suppress_cl,
                               extra_args=[
                                    '--parallel',
-                                   '--parallel-max', str(max_parallel)
+                                   '--parallel-max', str(max_parallel),
                               ])
             err = self._check_uploads(r, count)
             if err:
@@ -476,11 +560,14 @@ class ScoreRunner:
         nsamples = meta['samples']
         max_parallel = self._upload_parallel if self._upload_parallel > 0 else count
         cols = ['size']
-        if not self._upload_parallel:
+        run_single = not self._upload_parallel
+        run_serial = not self._upload_parallel and count > 1
+        run_parallel = self._upload_parallel or count > 1
+        if run_single:
             cols.append('single')
-            if count > 1:
-                cols.append(f'serial({count})')
-        if count > 1:
+        if run_serial:
+            cols.append(f'serial({count})')
+        if run_parallel:
             cols.append(f'parallel({count}x{max_parallel})')
         rows = []
         for fsize in fsizes:
@@ -489,15 +576,15 @@ class ScoreRunner:
                 'sval': Card.fmt_size(fsize)
             }]
             self.info(f'{row[0]["sval"]} uploads...')
-            url = f'https://{self.env.domain2}:{self.server_port}/curltest/put'
+            url = f'https://{self.env.domain1}:{self.server_port}/curltest/put'
             fname = f'upload{row[0]["sval"]}.data'
             fpath = self._make_docs_file(docs_dir=self.env.gen_dir,
                                          fname=fname, fsize=fsize)
-            if 'single' in cols:
+            if run_single:
                 row.append(self.ul_single(url=url, fpath=fpath, nsamples=nsamples))
-            if count > 1:
-                if 'single' in cols:
-                    row.append(self.ul_serial(url=url, fpath=fpath, count=count, nsamples=nsamples))
+            if run_serial:
+                row.append(self.ul_serial(url=url, fpath=fpath, count=count, nsamples=nsamples))
+            if run_parallel:
                 row.append(self.ul_parallel(url=url, fpath=fpath, count=count, nsamples=nsamples))
             rows.append(row)
             self.info('done.\n')
@@ -732,7 +819,8 @@ def run_score(args, protocol):
                                upload_parallel=args.upload_parallel,
                                with_flame=args.flame,
                                socks_args=socks_args,
-                               limit_rate=args.limit_rate)
+                               limit_rate=args.limit_rate,
+                               suppress_cl=args.upload_no_cl)
             cards.append(card)
 
         if test_httpd:
@@ -899,6 +987,8 @@ def main():
     parser.add_argument("--upload-parallel", action='store', type=int,
                         metavar='number', default=0,
                         help="perform that many uploads in parallel (default all)")
+    parser.add_argument("--upload-no-cl", action='store_true',
+                        default=False, help="suppress content-length on upload")
 
     parser.add_argument("-r", "--requests", action='store_true',
                         default=False, help="evaluate requests")

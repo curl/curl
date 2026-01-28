@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTP
 netrc
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -24,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -41,7 +40,6 @@ machine %HOSTIP login user1 password "with spaces and \"\n\r\t\a"
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

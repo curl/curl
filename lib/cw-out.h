@@ -23,10 +23,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#include "sendf.h"
+struct Curl_easy;
 
 /**
  * The client writer type "cw-out" that does the actual writing to

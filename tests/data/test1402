@@ -1,10 +1,10 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP POST
 --libcurl
-notxml
 </keywords>
 </info>
 
@@ -50,7 +50,7 @@ Accept: */*
 Content-Length: 16
 Content-Type: application/x-www-form-urlencoded
 
-foo=bar&baz=quux
+foo=bar%AMPbaz=quux
 </protocol>
 <stripfile>
 # CURLOPT_SSL_VERIFYPEER, SSH_KNOWNHOSTS and HTTP_VERSION vary with

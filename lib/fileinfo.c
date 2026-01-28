@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
@@ -42,4 +41,4 @@ void Curl_fileinfo_cleanup(struct fileinfo *finfo)
   curlx_free(finfo);
 }
 
-#endif
+#endif /* !CURL_DISABLE_FTP */

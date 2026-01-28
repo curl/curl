@@ -6,24 +6,24 @@
 
 int main(int argc, char *argv[])
 {
-  CURLcode ret;
-  CURL *hnd;
+  CURLcode result;
+  CURL *curl;
   struct curl_slist *slist1;
 
   slist1 = NULL;
   slist1 = curl_slist_append(slist1, "recipient.one@example.com");
   slist1 = curl_slist_append(slist1, "recipient.two@example.com");
 
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER");
-  curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
-  curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_MAIL_FROM, "sender@example.com");
-  curl_easy_setopt(hnd, CURLOPT_MAIL_RCPT, slist1);
-  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER");
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
+  curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "sender@example.com");
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, slist1);
+  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may choose to either not use them or implement
@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
 
   */
 
-  ret = curl_easy_perform(hnd);
+  result = curl_easy_perform(curl);
 
-  curl_easy_cleanup(hnd);
-  hnd = NULL;
+  curl_easy_cleanup(curl);
+  curl = NULL;
   curl_slist_free_all(slist1);
   slist1 = NULL;
 
-  return (int)ret;
+  return (int)result;
 }
 /**** End of sample code ****/

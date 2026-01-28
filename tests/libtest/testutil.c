@@ -38,16 +38,9 @@ void tutil_rlim2str(char *buf, size_t len, rlim_t val)
     return;
   }
 #endif
-#ifdef HAVE_LONGLONG
-  if(sizeof(rlim_t) > sizeof(long))
-    curl_msnprintf(buf, len, "%llu", (unsigned long long)val);
+  if(sizeof(rlim_t) == SIZEOF_INT)
+    curl_msnprintf(buf, len, "%u", (unsigned int)val);
   else
-#endif
-  {
-    if(sizeof(rlim_t) < sizeof(long))
-      curl_msnprintf(buf, len, "%u", (unsigned int)val);
-    else
-      curl_msnprintf(buf, len, "%lu", (unsigned long)val);
-  }
+    curl_msnprintf(buf, len, "%lu", (unsigned long)val);
 }
 #endif

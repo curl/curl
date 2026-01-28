@@ -21,13 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
 #include "curl_sha512_256.h"
-#include "curlx/warnless.h"
 
 /* The recommended order of the TLS backends:
  * 1. OpenSSL
@@ -42,12 +40,10 @@
 #  include <openssl/opensslv.h>
 #  if !defined(LIBRESSL_VERSION_NUMBER) || \
   (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x3080000fL)
-#    include <openssl/opensslconf.h>
-#    if !defined(OPENSSL_NO_SHA) && !defined(OPENSSL_NO_SHA512)
-#      include <openssl/evp.h>
-#      define USE_OPENSSL_SHA512_256          1
-#      define HAS_SHA512_256_IMPLEMENTATION   1
-#      ifdef __NetBSD__
+#    include <openssl/evp.h>
+#    define USE_OPENSSL_SHA512_256          1
+#    define HAS_SHA512_256_IMPLEMENTATION   1
+#    ifdef __NetBSD__
 /* Some NetBSD versions has a bug in SHA-512/256.
  * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
  * The problematic versions:
@@ -58,15 +54,13 @@
  * NetBSD 10.99.11 development.
  * It is safe to apply the workaround even if the bug is not present, as
  * the workaround just reduces performance slightly. */
-#        include <sys/param.h>
-#        if  __NetBSD_Version__ <   904000000 ||  \
-            (__NetBSD_Version__ >=  999000000 &&  \
-             __NetBSD_Version__ <  1000000000) || \
-            (__NetBSD_Version__ >= 1099000000 &&  \
-             __NetBSD_Version__ <  1099001100)
-#          define NEED_NETBSD_SHA512_256_WORKAROUND 1
-#          include <string.h>
-#        endif
+#      include <sys/param.h>
+#      if  __NetBSD_Version__ <   904000000 ||  \
+          (__NetBSD_Version__ >=  999000000 &&  \
+           __NetBSD_Version__ <  1000000000) || \
+          (__NetBSD_Version__ >= 1099000000 &&  \
+           __NetBSD_Version__ <  1099001100)
+#        define NEED_NETBSD_SHA512_256_WORKAROUND 1
 #      endif
 #    endif
 #  endif
@@ -77,7 +71,7 @@
 #  ifdef SHA512_256_DIGEST_SIZE
 #    define USE_GNUTLS_SHA512_256           1
 #  endif
-#endif /* ! HAS_SHA512_256_IMPLEMENTATION && USE_GNUTLS */
+#endif /* !HAS_SHA512_256_IMPLEMENTATION && USE_GNUTLS */
 
 #ifdef USE_OPENSSL_SHA512_256
 
@@ -153,7 +147,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
- #             bytes
+ *             bytes
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
@@ -171,9 +165,9 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   if(ret == CURLE_OK)
     memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
   explicit_memset(tmp_digest, 0, sizeof(tmp_digest));
-#else  /* ! NEED_NETBSD_SHA512_256_WORKAROUND */
+#else /* !NEED_NETBSD_SHA512_256_WORKAROUND */
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
-#endif /* ! NEED_NETBSD_SHA512_256_WORKAROUND */
+#endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
 
   EVP_MD_CTX_destroy(*ctx);
   *ctx = NULL;
@@ -235,7 +229,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
- #             bytes
+ *             bytes
  * @return always CURLE_OK
  */
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
@@ -290,15 +284,16 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
    ((uint64_t)(((const uint8_t *)(ptr))[6]) << 8)  | \
     (uint64_t)(((const uint8_t *)(ptr))[7]))
 
-#define CURL_PUT_64BIT_BE(ptr,val) do {                        \
-    ((uint8_t*)(ptr))[7] = (uint8_t) ((uint64_t)(val));        \
-    ((uint8_t*)(ptr))[6] = (uint8_t)(((uint64_t)(val)) >> 8);  \
-    ((uint8_t*)(ptr))[5] = (uint8_t)(((uint64_t)(val)) >> 16); \
-    ((uint8_t*)(ptr))[4] = (uint8_t)(((uint64_t)(val)) >> 24); \
-    ((uint8_t*)(ptr))[3] = (uint8_t)(((uint64_t)(val)) >> 32); \
-    ((uint8_t*)(ptr))[2] = (uint8_t)(((uint64_t)(val)) >> 40); \
-    ((uint8_t*)(ptr))[1] = (uint8_t)(((uint64_t)(val)) >> 48); \
-    ((uint8_t*)(ptr))[0] = (uint8_t)(((uint64_t)(val)) >> 56); \
+#define CURL_PUT_64BIT_BE(ptr, val)                             \
+  do {                                                          \
+    ((uint8_t *)(ptr))[7] = (uint8_t)((uint64_t)(val));         \
+    ((uint8_t *)(ptr))[6] = (uint8_t)(((uint64_t)(val)) >> 8);  \
+    ((uint8_t *)(ptr))[5] = (uint8_t)(((uint64_t)(val)) >> 16); \
+    ((uint8_t *)(ptr))[4] = (uint8_t)(((uint64_t)(val)) >> 24); \
+    ((uint8_t *)(ptr))[3] = (uint8_t)(((uint64_t)(val)) >> 32); \
+    ((uint8_t *)(ptr))[2] = (uint8_t)(((uint64_t)(val)) >> 40); \
+    ((uint8_t *)(ptr))[1] = (uint8_t)(((uint64_t)(val)) >> 48); \
+    ((uint8_t *)(ptr))[0] = (uint8_t)(((uint64_t)(val)) >> 56); \
   } while(0)
 
 /* Defined as a function. The macro version may duplicate the binary code
@@ -461,9 +456,9 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
   (Curl_rotr64((x), 28) ^ Curl_rotr64((x), 34) ^ Curl_rotr64((x), 39))
 #define SIG1(x)                                                         \
   (Curl_rotr64((x), 14) ^ Curl_rotr64((x), 18) ^ Curl_rotr64((x), 41))
-#define sig0(x)                                                 \
-  (Curl_rotr64((x), 1) ^ Curl_rotr64((x), 8) ^ ((x) >> 7))
-#define sig1(x)                                                 \
+#define sig0(x)                                               \
+  (Curl_rotr64((x),  1) ^ Curl_rotr64((x),  8) ^ ((x) >> 7))
+#define sig1(x)                                               \
   (Curl_rotr64((x), 19) ^ Curl_rotr64((x), 61) ^ ((x) >> 6))
 
   if(1) {
@@ -603,7 +598,7 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        const unsigned char *data,
                                        size_t length)
 {
-  unsigned int bytes_have; /**< Number of bytes in the context buffer */
+  unsigned int bytes_have; /* Number of bytes in the context buffer */
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;
@@ -627,7 +622,7 @@ static CURLcode Curl_sha512_256_update(void *context,
     if(length >= bytes_left) {
       /* Combine new data with data in the buffer and process the full
          block. */
-      memcpy(((unsigned char *)ctx_buf) + bytes_have, data, bytes_left);
+      memcpy((unsigned char *)ctx_buf + bytes_have, data, bytes_left);
       data += bytes_left;
       length -= bytes_left;
       Curl_sha512_256_transform(ctx->H, ctx->buffer);
@@ -646,7 +641,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   if(length) {
     /* Copy incomplete block of new data (if any)
        to the buffer. */
-    memcpy(((unsigned char *)ctx_buf) + bytes_have, data, length);
+    memcpy((unsigned char *)ctx_buf + bytes_have, data, length);
   }
 
   return CURLE_OK;
@@ -668,14 +663,14 @@ static CURLcode Curl_sha512_256_update(void *context,
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
- #             bytes
+ *             bytes
  * @return always CURLE_OK
  */
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
-  uint64_t num_bits;   /**< Number of processed bits */
-  unsigned int bytes_have; /**< Number of bytes in the context buffer */
+  uint64_t num_bits;   /* Number of processed bits */
+  unsigned int bytes_have; /* Number of bytes in the context buffer */
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;
 
@@ -704,7 +699,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
     /* No space in the current block to put the total length of message.
        Pad the current block with zeros and process it. */
     if(bytes_have < CURL_SHA512_256_BLOCK_SIZE)
-      memset(((unsigned char *)ctx_buf) + bytes_have, 0,
+      memset((unsigned char *)ctx_buf + bytes_have, 0,
              CURL_SHA512_256_BLOCK_SIZE - bytes_have);
     /* Process the full block. */
     Curl_sha512_256_transform(ctx->H, ctx->buffer);
@@ -713,31 +708,29 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   }
 
   /* Pad the rest of the buffer with zeros. */
-  memset(((unsigned char *)ctx_buf) + bytes_have, 0,
+  memset((unsigned char *)ctx_buf + bytes_have, 0,
          CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD - bytes_have);
   /* Put high part of number of bits in processed message and then lower
      part of number of bits as big-endian values.
      See FIPS PUB 180-4 section 5.1.2. */
   /* Note: the target location is predefined and buffer is always aligned */
-  CURL_PUT_64BIT_BE(((unsigned char *)ctx_buf)        \
-                      + CURL_SHA512_256_BLOCK_SIZE    \
-                      - SHA512_256_SIZE_OF_LEN_ADD,   \
-                      ctx->count_bits_hi);
-  CURL_PUT_64BIT_BE(((unsigned char *)ctx_buf)        \
-                      + CURL_SHA512_256_BLOCK_SIZE    \
-                      - SHA512_256_SIZE_OF_LEN_ADD    \
-                      + SHA512_256_BYTES_IN_WORD,     \
-                      num_bits);
+  CURL_PUT_64BIT_BE((unsigned char *)ctx_buf +
+                    CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD,
+                    ctx->count_bits_hi);
+  CURL_PUT_64BIT_BE((unsigned char *)ctx_buf +
+                    CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD +
+                    SHA512_256_BYTES_IN_WORD,
+                    num_bits);
   /* Process the full final block. */
   Curl_sha512_256_transform(ctx->H, ctx->buffer);
 
   /* Put in BE mode the leftmost part of the hash as the final digest.
      See FIPS PUB 180-4 section 6.7. */
 
-  CURL_PUT_64BIT_BE((digest + 0 * SHA512_256_BYTES_IN_WORD), ctx->H[0]);
-  CURL_PUT_64BIT_BE((digest + 1 * SHA512_256_BYTES_IN_WORD), ctx->H[1]);
-  CURL_PUT_64BIT_BE((digest + 2 * SHA512_256_BYTES_IN_WORD), ctx->H[2]);
-  CURL_PUT_64BIT_BE((digest + 3 * SHA512_256_BYTES_IN_WORD), ctx->H[3]);
+  CURL_PUT_64BIT_BE(digest + 0 * SHA512_256_BYTES_IN_WORD, ctx->H[0]);
+  CURL_PUT_64BIT_BE(digest + 1 * SHA512_256_BYTES_IN_WORD, ctx->H[1]);
+  CURL_PUT_64BIT_BE(digest + 2 * SHA512_256_BYTES_IN_WORD, ctx->H[2]);
+  CURL_PUT_64BIT_BE(digest + 3 * SHA512_256_BYTES_IN_WORD, ctx->H[3]);
 
   /* Erase potentially sensitive data. */
   memset(ctx, 0, sizeof(struct Curl_sha512_256ctx));

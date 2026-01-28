@@ -23,10 +23,11 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "doh.h"
-
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
+
+#include "doh.h"
+#include "httpsrr.h"
 
 static CURLcode t1658_setup(void)
 {
@@ -342,7 +343,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x03" /* data size */
-      "\x12\x34\x00", /* 24 bit port number! */
+      "\x12\x34\x00", /* 24-bit port number */
       17,
       "r:43|"
     },
@@ -356,7 +357,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x01" /* data size */
-      "\x12", /* 8 bit port number! */
+      "\x12", /* 8-bit port number */
       15,
       "r:43|"
     },
@@ -502,7 +503,7 @@ static CURLcode test_unit1658(const char *arg)
     }
   };
 
-  CURLcode res = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   CURL *easy;
 
   easy = curl_easy_init();
@@ -516,10 +517,10 @@ static CURLcode test_unit1658(const char *arg)
 
       curl_mprintf("test %u: %s\n", i, t[i].name);
 
-      res = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
+      result = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
 
       /* create an output */
-      rrresults(hrr, res);
+      rrresults(hrr, result);
 
       /* is the output the expected? */
       if(strcmp(rrbuffer, t[i].expect)) {
@@ -541,7 +542,7 @@ static CURLcode test_unit1658(const char *arg)
   UNITTEST_END(curl_global_cleanup())
 }
 
-#else /* CURL_DISABLE_DOH or not HTTPSRR enabled */
+#else /* CURL_DISABLE_DOH || !USE_HTTPSRR */
 
 static CURLcode test_unit1658(const char *arg)
 {

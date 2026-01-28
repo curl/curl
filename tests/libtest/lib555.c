@@ -48,7 +48,7 @@ static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 
   if(size * nmemb >= T555_DATALEN) {
     curl_mfprintf(stderr, "READ!\n");
-    strcpy(ptr, t555_uploadthis);
+    memcpy(ptr, t555_uploadthis, T555_DATALEN);
     return T555_DATALEN;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");
@@ -68,7 +68,7 @@ static curlioerr t555_ioctl_callback(CURL *curl, int cmd, void *clientp)
 
 static CURLcode test_lib555(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   int counter = 0;
   CURLM *multi = NULL;
@@ -141,5 +141,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

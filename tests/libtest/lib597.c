@@ -36,7 +36,7 @@ static CURLcode test_lib597(const char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int running;
   int msgs_left;
   CURLMsg *msg;
@@ -109,7 +109,7 @@ static CURLcode test_lib597(const char *URL)
 
   msg = curl_multi_info_read(multi, &msgs_left);
   if(msg)
-    res = msg->data.result;
+    result = msg->data.result;
 
   multi_remove_handle(multi, curl);
 
@@ -121,5 +121,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

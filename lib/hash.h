@@ -23,12 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <stddef.h>
-
-#include "llist.h"
 
 /* Hash function prototype */
 typedef size_t (*hash_function)(void *key,

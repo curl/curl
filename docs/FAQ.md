@@ -21,7 +21,7 @@ The curl project produces two products:
 ### libcurl
 
 A client-side URL transfer library, supporting DICT, FILE, FTP, FTPS, GOPHER,
-GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP,
+GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3, POP3S, RTMP,
 RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
 
 libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
@@ -169,7 +169,7 @@ the web based archives of the mailing lists), thus saving us from having to
 repeat ourselves even more. Thanks for respecting this.
 
 If you have found or simply suspect a security problem in curl or libcurl,
-submit all the details at [HackerOne](https://hackerone.com/curl). On there we
+[submit all the details to us](https://curl.se/dev/vuln-disclosure.html). We
 keep the issue private while we investigate, confirm it, work and validate a
 fix and agree on a time schedule for publication etc. That way we produce a
 fix in a timely manner before the flaw is announced to the world, reducing the
@@ -303,7 +303,7 @@ library comparison](https://curl.se/docs/ssl-compared.html).
 The curl tool that is shipped as an integrated component of Windows 10 and
 Windows 11 is managed by Microsoft. If you were to delete the file or replace
 it with a newer version downloaded from [the curl
-website](https://curl.se/windows), then Windows Update will cease to work on
+website](https://curl.se/windows/), then Windows Update will cease to work on
 your system.
 
 There is no way to independently force an upgrade of the curl.exe that is part
@@ -312,7 +312,7 @@ also nothing the curl project itself can do about this, since this is managed
 and controlled entirely by Microsoft as owners of the operating system.
 
 You can always download and install [the latest version of curl for
-Windows](https://curl.se/windows) into a separate location.
+Windows](https://curl.se/windows/) into a separate location.
 
 ## Does curl support SOCKS (RFC 1928) ?
 
@@ -827,7 +827,6 @@ chain.
 Details are also in [the SSL certificates
 document](https://curl.se/docs/sslcerts.html).
 
-
 ## Why is curl -R on Windows one hour off?
 
 Since curl 7.53.0 this issue should be fixed as long as curl was built with
@@ -891,7 +890,7 @@ the second. No more than three packets are sent, no matter how long the
 timeout is set.
 
 See option `TcpMaxConnectRetransmissions` on [this
-page](https://support.microsoft.com/bg-bg/topic/hotfix-enables-the-configuration-of-the-tcp-maximum-syn-retransmission-amount-in-windows-7-or-windows-server-2008-r2-1b6f8352-2c5f-58bb-ead7-2cf021407c8e).
+page](https://support.microsoft.com/topic/hotfix-enables-the-configuration-of-the-tcp-maximum-syn-retransmission-amount-in-windows-7-or-windows-server-2008-r2-1b6f8352-2c5f-58bb-ead7-2cf021407c8e).
 
 Also, even on non-Windows systems there may run a firewall or anti-virus
 software or similar that accepts the connection but does not actually do
@@ -908,12 +907,12 @@ format:
 you will find that even if `D:\blah.txt` does exist, curl returns a 'file not
 found' error.
 
-According to [RFC 1738](https://www.ietf.org/rfc/rfc1738.txt), `file://` URLs
-must contain a host component, but it is ignored by most implementations. In
-the above example, `D:` is treated as the host component, and is taken away.
-Thus, curl tries to open `/blah.txt`. If your system is installed to drive C:,
-that will resolve to `C:\blah.txt`, and if that does not exist you will get
-the not found error.
+According to [RFC 1738](https://datatracker.ietf.org/doc/html/rfc1738),
+`file://` URLs must contain a host component, but it is ignored by most
+implementations. In the above example, `D:` is treated as the host component,
+and is taken away. Thus, curl tries to open `/blah.txt`. If your system is
+installed to drive C:, that will resolve to `C:\blah.txt`, and if that does
+not exist you will get the not found error.
 
 To fix this problem, use `file://` URLs with *three* leading slashes:
 

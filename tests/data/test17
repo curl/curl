@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -26,13 +27,10 @@ http
 HTTP with config file on stdin
 </name>
 <stdin>
-#
 # Use a silly request without '--':
 request MOOO
-#
 # Set the user-agent using a short-option:
 -A "agent007 license to drill\t"
-#
 # long option *with* '--':
 --max-time 180
 </stdin>

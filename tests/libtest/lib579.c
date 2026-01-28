@@ -101,7 +101,7 @@ static size_t t579_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib579(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct curl_slist *slist = NULL;
   struct t579_WriteThis pooh;
   pooh.counter = 0;
@@ -154,8 +154,8 @@ static CURLcode test_lib579(const char *URL)
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
   test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t579_progress_callback);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
   progress_final_report();
 
@@ -169,5 +169,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

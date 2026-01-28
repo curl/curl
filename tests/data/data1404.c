@@ -6,8 +6,8 @@
 
 int main(int argc, char *argv[])
 {
-  CURLcode ret;
-  CURL *hnd;
+  CURLcode result;
+  CURL *curl;
   curl_mime *mime1;
   curl_mimepart *part1;
   curl_mime *mime2;
@@ -20,16 +20,16 @@ int main(int argc, char *argv[])
   slist1 = curl_slist_append(slist1, "X-testheader-1: header 1");
   slist1 = curl_slist_append(slist1, "X-testheader-2: header 2");
 
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
-  mime1 = curl_mime_init(hnd);
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
+  curl_easy_setopt(curl, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
+  mime1 = curl_mime_init(curl);
   part1 = curl_mime_addpart(mime1);
   curl_mime_data(part1, "value", CURL_ZERO_TERMINATED);
   curl_mime_name(part1, "name");
   part1 = curl_mime_addpart(mime1);
-  mime2 = curl_mime_init(hnd);
+  mime2 = curl_mime_init(curl);
   part2 = curl_mime_addpart(mime2);
   curl_mime_filedata(part2, "%LOGDIR/test%TESTNUMBER.txt");
   part2 = curl_mime_addpart(mime2);
@@ -43,10 +43,10 @@ int main(int argc, char *argv[])
   curl_mime_subparts(part1, mime2);
   mime2 = NULL;
   curl_mime_name(part1, "file");
-  curl_easy_setopt(hnd, CURLOPT_MIMEPOST, mime1);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
-  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+  curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime1);
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
+  curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may choose to either not use them or implement
@@ -67,10 +67,10 @@ int main(int argc, char *argv[])
 
   */
 
-  ret = curl_easy_perform(hnd);
+  result = curl_easy_perform(curl);
 
-  curl_easy_cleanup(hnd);
-  hnd = NULL;
+  curl_easy_cleanup(curl);
+  curl = NULL;
   curl_mime_free(mime1);
   mime1 = NULL;
   curl_mime_free(mime2);
@@ -78,6 +78,6 @@ int main(int argc, char *argv[])
   curl_slist_free_all(slist1);
   slist1 = NULL;
 
-  return (int)ret;
+  return (int)result;
 }
 /**** End of sample code ****/

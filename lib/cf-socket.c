@@ -21,14 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
-#endif
-#ifdef HAVE_SYS_UN_H
-#include <sys/un.h> /* for sockaddr_un */
 #endif
 #ifdef HAVE_LINUX_TCP_H
 #include <linux/tcp.h>
@@ -60,24 +56,22 @@
 
 #include "urldata.h"
 #include "bufq.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "if2ip.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
+#include "curl_addrinfo.h"
 #include "select.h"
-#include "url.h" /* for Curl_safefree() */
 #include "multiif.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_pton.h"
 #include "progress.h"
-#include "curlx/warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
 #include "rand.h"
-#include "curl_share.h"
 #include "strdup.h"
 #include "system_win32.h"
+#include "curlx/nonblock.h"
 #include "curlx/version_win32.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
@@ -90,7 +84,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 #if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   curl_socklen_t onoff = (curl_socklen_t)1;
   int level = IPPROTO_TCP;
-  char buffer[STRERROR_LEN];
+  VERBOSE(char buffer[STRERROR_LEN]);
 
   if(setsockopt(sockfd, level, TCP_NODELAY,
                 (void *)&onoff, sizeof(onoff)) < 0)
@@ -102,32 +96,6 @@ static void tcpnodelay(struct Curl_cfilter *cf,
   (void)sockfd;
 #endif
 }
-
-#ifdef SO_NOSIGPIPE
-/* The preferred method on macOS (10.2 and later) to prevent SIGPIPEs when
-   sending data to a dead peer (instead of relying on the 4th argument to send
-   being MSG_NOSIGNAL). Possibly also existing and in use on other BSD
-   systems? */
-static void nosigpipe(struct Curl_cfilter *cf,
-                      struct Curl_easy *data,
-                      curl_socket_t sockfd)
-{
-  int onoff = 1;
-  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
-                (void *)&onoff, sizeof(onoff)) < 0) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char buffer[STRERROR_LEN];
-    CURL_TRC_CF(data, cf, "Could not set SO_NOSIGPIPE: %s",
-                curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-#else
-    (void)cf;
-    (void)data;
-#endif
-  }
-}
-#else
-#define nosigpipe(x, y, z) Curl_nop_stmt
-#endif
 
 #if defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
@@ -154,14 +122,26 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
   }
   else {
 #ifdef USE_WINSOCK
-/* Offered by mingw-w64 v12+. MS SDK ~10+/~VS2017+. */
-#if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
     /* Windows 10, version 1709 (10.0.16299) and later versions can use
        setsockopt() TCP_KEEP*. Older versions return with failure. */
     if(curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       CURL_TRC_CF(data, cf, "Set TCP_KEEP* on fd=%" FMT_SOCKET_T, sockfd);
       optval = curlx_sltosi(data->set.tcp_keepidle);
+/* Offered by mingw-w64 v12+. MS SDK 6.0A+. */
+#ifndef TCP_KEEPALIVE
+#define TCP_KEEPALIVE 3
+#endif
+/* Offered by mingw-w64 v12+. MS SDK ~10+/~VS2017+. */
+#ifndef TCP_KEEPCNT
+#define TCP_KEEPCNT 16
+#endif
+#ifndef TCP_KEEPIDLE
+#define TCP_KEEPIDLE TCP_KEEPALIVE
+#endif
+#ifndef TCP_KEEPINTVL
+#define TCP_KEEPINTVL 17
+#endif
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                     (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
@@ -180,9 +160,7 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
                     "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
       }
     }
-    else
-#endif /* TCP_KEEPIDLE && TCP_KEEPINTVL && TCP_KEEPCNT */
-    {
+    else {
 /* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
 #ifndef SIO_KEEPALIVE_VALS
 #define SIO_KEEPALIVE_VALS  _WSAIOW(IOC_VENDOR, 4)
@@ -316,11 +294,24 @@ static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
   return CURLE_OK;
 }
 
+#ifdef USE_SO_NOSIGPIPE
+int Curl_sock_nosigpipe(curl_socket_t sockfd)
+{
+  int onoff = 1;
+  return setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
+                    (void *)&onoff, sizeof(onoff));
+}
+#endif /* USE_SO_NOSIGPIPE */
+
 static CURLcode socket_open(struct Curl_easy *data,
                             struct Curl_sockaddr_ex *addr,
                             curl_socket_t *sockfd)
 {
   char errbuf[STRERROR_LEN];
+
+#ifdef SOCK_CLOEXEC
+  addr->socktype |= SOCK_CLOEXEC;
+#endif
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
@@ -343,6 +334,8 @@ static CURLcode socket_open(struct Curl_easy *data,
   else {
     /* opensocket callback not set, so simply create the socket now */
     *sockfd = CURL_SOCKET(addr->family, addr->socktype, addr->protocol);
+    if((*sockfd == CURL_SOCKET_BAD) && (SOCKERRNO == SOCKENOMEM))
+      return CURLE_OUT_OF_MEMORY;
   }
 
   if(*sockfd == CURL_SOCKET_BAD) {
@@ -352,11 +345,21 @@ static CURLcode socket_open(struct Curl_easy *data,
     return CURLE_COULDNT_CONNECT;
   }
 
-#ifdef HAVE_FCNTL
+#ifdef USE_SO_NOSIGPIPE
+  if(Curl_sock_nosigpipe(*sockfd) < 0) {
+    failf(data, "setsockopt enable SO_NOSIGPIPE: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    sclose(*sockfd);
+    *sockfd = CURL_SOCKET_BAD;
+    return CURLE_COULDNT_CONNECT;
+  }
+#endif /* USE_SO_NOSIGPIPE */
+
+#if defined(HAVE_FCNTL) && !defined(SOCK_CLOEXEC)
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
     failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
-    close(*sockfd);
+    sclose(*sockfd);
     *sockfd = CURL_SOCKET_BAD;
     return CURLE_COULDNT_CONNECT;
   }
@@ -434,37 +437,6 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
 {
   return socket_close(data, conn, FALSE, sock);
 }
-
-#ifdef USE_WINSOCK
-/* When you run a program that uses the Windows Sockets API, you may
-   experience slow performance when you copy data to a TCP server.
-
-   https://learn.microsoft.com/troubleshoot/windows-server/networking/slow-performance-copy-data-tcp-server-sockets-api
-
-   Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
-   Buffer Size
-
-   The problem described in this knowledge-base is applied only to pre-Vista
-   Windows. Following function trying to detect OS version and skips
-   SO_SNDBUF adjustment for Windows Vista and above.
-*/
-
-void Curl_sndbuf_init(curl_socket_t sockfd)
-{
-  int val = CURL_MAX_WRITE_SIZE + 32;
-  int curval = 0;
-  int curlen = sizeof(curval);
-
-  if(Curl_isVistaOrGreater)
-    return;
-
-  if(getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
-    if(curval > val)
-      return;
-
-  setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
-}
-#endif /* USE_WINSOCK */
 
 /*
  * Curl_parse_interface()
@@ -872,15 +844,12 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 
   default:
     /* unknown error, fallthrough and try another address! */
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-    (void)ipaddress;
-#else
     {
-      char buffer[STRERROR_LEN];
+      VERBOSE(char buffer[STRERROR_LEN]);
       infof(data, "Immediate connect fail for %s: %s", ipaddress,
             curlx_strerror(error, buffer, sizeof(buffer)));
+      NOVERBOSE((void)ipaddress);
     }
-#endif
     data->state.os_errno = error;
     /* connect failed */
     return CURLE_COULDNT_CONNECT;
@@ -1018,16 +987,15 @@ static void set_local_ip(struct Curl_cfilter *cf,
 
 #ifdef HAVE_GETSOCKNAME
   if((ctx->sock != CURL_SOCKET_BAD) &&
-     !(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+     !(data->conn->scheme->protocol & CURLPROTO_TFTP)) {
     /* TFTP does not connect, so it cannot get the IP like this */
-
-    char buffer[STRERROR_LEN];
     struct Curl_sockaddr_storage ssloc;
     curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
+    VERBOSE(char buffer[STRERROR_LEN]);
 
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr *)&ssloc, &slen)) {
-      int error = SOCKERRNO;
+      VERBOSE(int error = SOCKERRNO);
       infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
@@ -1072,9 +1040,8 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   CURLcode result = CURLE_COULDNT_CONNECT;
   bool is_tcp;
 
-  (void)data;
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
-  ctx->started_at = curlx_now();
+  ctx->started_at = *Curl_pgrs_now(data);
 #ifdef SOCK_NONBLOCK
   /* Do not tuck SOCK_NONBLOCK into socktype when opensocket callback is set
    * because we would not know how socketype is about to be used in the
@@ -1126,10 +1093,6 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(cf, data, ctx->sock);
-
-  nosigpipe(cf, data, ctx->sock);
-
-  Curl_sndbuf_init(ctx->sock);
 
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(cf, data, ctx->sock);
@@ -1201,7 +1164,7 @@ out:
   }
   else if(isconnected) {
     set_local_ip(cf, data);
-    ctx->connected_at = curlx_now();
+    ctx->connected_at = *Curl_pgrs_now(data);
     cf->connected = TRUE;
   }
   CURL_TRC_CF(data, cf, "cf_socket_open() -> %d, fd=%" FMT_SOCKET_T,
@@ -1272,7 +1235,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   CURLcode result = CURLE_COULDNT_CONNECT;
   int rc = 0;
 
-  (void)data;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -1292,7 +1254,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     }
 
     /* Connect TCP socket */
-    rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
+    rc = do_connect(cf, data, (bool)cf->conn->bits.tcp_fastopen);
     error = SOCKERRNO;
     set_local_ip(cf, data);
     CURL_TRC_CF(data, cf, "local address %s port %d...",
@@ -1320,7 +1282,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
     if(verifyconnect(ctx->sock, &ctx->error)) {
       /* we are connected with TCP, awesome! */
-      ctx->connected_at = curlx_now();
+      ctx->connected_at = *Curl_pgrs_now(data);
       set_local_ip(cf, data);
       *done = TRUE;
       cf->connected = TRUE;
@@ -1336,18 +1298,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 out:
   if(result) {
     if(ctx->error) {
+      VERBOSE(char buffer[STRERROR_LEN]);
       set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      {
-        char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u from %s port %d failed: %s",
-              ctx->ip.remote_ip, ctx->ip.remote_port,
-              ctx->ip.local_ip, ctx->ip.local_port,
-              curlx_strerror(ctx->error, buffer, sizeof(buffer)));
-      }
-#endif
+      infof(data, "connect to %s port %u from %s port %d failed: %s",
+            ctx->ip.remote_ip, ctx->ip.remote_port,
+            ctx->ip.local_ip, ctx->ip.local_port,
+            curlx_strerror(ctx->error, buffer, sizeof(buffer)));
     }
     if(ctx->sock != CURL_SOCKET_BAD) {
       socket_close(data, cf->conn, TRUE, ctx->sock);
@@ -1396,13 +1354,14 @@ static CURLcode cf_socket_adjust_pollset(struct Curl_cfilter *cf,
 #define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
 #endif
 
-static void win_update_sndbuf_size(struct cf_socket_ctx *ctx)
+static void win_update_sndbuf_size(struct Curl_easy *data,
+                                   struct cf_socket_ctx *ctx)
 {
   ULONG ideal;
   DWORD ideallen;
-  struct curltime n = curlx_now();
 
-  if(curlx_timediff_ms(n, ctx->last_sndbuf_query_at) > 1000) {
+  if(curlx_ptimediff_ms(Curl_pgrs_now(data),
+                        &ctx->last_sndbuf_query_at) > 1000) {
     if(!WSAIoctl(ctx->sock, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
                  &ideal, sizeof(ideal), &ideallen, 0, 0) &&
        ideal != ctx->sndbuf_size &&
@@ -1410,7 +1369,7 @@ static void win_update_sndbuf_size(struct cf_socket_ctx *ctx)
                    (const char *)&ideal, sizeof(ideal))) {
       ctx->sndbuf_size = ideal;
     }
-    ctx->last_sndbuf_query_at = n;
+    ctx->last_sndbuf_query_at = *Curl_pgrs_now(data);
   }
 }
 
@@ -1423,8 +1382,8 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
   ssize_t rv;
-  size_t orig_len = len;
   CURLcode result = CURLE_OK;
+  VERBOSE(size_t orig_len = len);
 
   (void)eos;
   *pnwritten = 0;
@@ -1491,7 +1450,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 #ifdef USE_WINSOCK
   if(!result)
-    win_update_sndbuf_size(ctx);
+    win_update_sndbuf_size(data, ctx);
 #endif
 
   CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, %zu",
@@ -1519,10 +1478,9 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
-    size_t orig_len = len;
-    len = ctx->recv_max;
     CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE max read of %zu bytes",
-                orig_len, len);
+                len, ctx->recv_max);
+    len = ctx->recv_max;
   }
 #endif
 
@@ -1557,7 +1515,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
   if(!result && !ctx->got_first_byte) {
-    ctx->first_byte_at = curlx_now();
+    ctx->first_byte_at = *Curl_pgrs_now(data);
     ctx->got_first_byte = TRUE;
   }
   return result;
@@ -1621,7 +1579,7 @@ static bool cf_socket_conn_is_alive(struct Curl_cfilter *cf,
   int r;
 
   *input_pending = FALSE;
-  (void)data;
+
   if(!ctx || ctx->sock == CURL_SOCKET_BAD)
     return FALSE;
 
@@ -1671,7 +1629,8 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     return CURLE_OK;
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->got_first_byte) {
-      timediff_t ms = curlx_timediff_ms(ctx->first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_ptimediff_ms(&ctx->first_byte_at,
+                                         &ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -1990,23 +1949,21 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
   timediff_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
   timediff_t other_ms;
-  struct curltime now;
 
 #ifndef CURL_DISABLE_FTP
   if(data->set.accepttimeout > 0)
     timeout_ms = data->set.accepttimeout;
 #endif
 
-  now = curlx_now();
   /* check if the generic timeout possibly is set shorter */
-  other_ms = Curl_timeleft_ms(data, &now, FALSE);
+  other_ms = Curl_timeleft_ms(data);
   if(other_ms && (other_ms < timeout_ms))
     /* note that this also works fine for when other_ms happens to be negative
        due to it already having elapsed */
     timeout_ms = other_ms;
   else {
     /* subtract elapsed time */
-    timeout_ms -= curlx_timediff_ms(now, ctx->started_at);
+    timeout_ms -= curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->started_at);
     if(!timeout_ms)
       /* avoid returning 0 as that means no timeout! */
       timeout_ms = -1;
@@ -2080,8 +2037,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "Checking for incoming on fd=%" FMT_SOCKET_T
               " ip=%s:%d", ctx->sock, ctx->ip.local_ip, ctx->ip.local_port);
-  socketstate = Curl_socket_check(ctx->sock, CURL_SOCKET_BAD,
-                                  CURL_SOCKET_BAD, 0);
+  socketstate = SOCKET_READABLE(ctx->sock, 0);
   CURL_TRC_CF(data, cf, "socket_check -> %x", socketstate);
   switch(socketstate) {
   case -1: /* error */
@@ -2142,7 +2098,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   cf_tcp_set_accepted_remote_ip(cf, data);
   set_local_ip(cf, data);
   ctx->active = TRUE;
-  ctx->connected_at = curlx_now();
+  ctx->connected_at = *Curl_pgrs_now(data);
   cf->connected = TRUE;
   CURL_TRC_CF(data, cf, "accepted_set(sock=%" FMT_SOCKET_T
               ", remote=%s port=%d)",
@@ -2208,7 +2164,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
 
-  ctx->started_at = curlx_now();
+  ctx->started_at = *Curl_pgrs_now(data);
   conn->sock[sockindex] = ctx->sock;
   set_local_ip(cf, data);
   CURL_TRC_CF(data, cf, "set filter for listen socket fd=%" FMT_SOCKET_T

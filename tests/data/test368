@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ Range
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -20,7 +20,6 @@ Connection: close
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -34,7 +33,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -r 4
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

@@ -67,15 +67,14 @@ BEGIN {
     );
 }
 
-
 #######################################################################
 # Block for cached static variables
 #
 {
     # Cached static variable, Perl 5.0-compatible.
-    my $is_win = $^O eq 'MSWin32'
-              || $^O eq 'cygwin'
-              || $^O eq 'msys';
+    my $is_win = $^O eq 'MSWin32' ||
+                 $^O eq 'cygwin' ||
+                 $^O eq 'msys';
 
     # Returns boolean true if OS is any form of Windows.
     sub os_is_win {

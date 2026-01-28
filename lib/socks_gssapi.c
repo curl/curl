@@ -22,19 +22,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_PROXY)
 
 #include "curl_gssapi.h"
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "curlx/timeval.h"
+#include "curlx/nonblock.h"
 #include "socks.h"
-#include "curlx/warnless.h"
 #include "strdup.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
@@ -190,7 +188,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
     if(check_gss_err(data, gss_major_status,
                      gss_minor_status, "gss_init_sec_context") ||
-       /* the size needs to fit in a 16 bit field */
+       /* the size needs to fit in a 16-bit field */
        (gss_send_token.length > 0xffff)) {
       gss_release_name(&gss_status, &server);
       gss_release_buffer(&gss_status, &gss_send_token);

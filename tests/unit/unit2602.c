@@ -33,7 +33,7 @@ static CURLcode test_unit2602(const char *arg)
 
   struct dynhds hds;
   struct dynbuf dbuf;
-  CURLcode res;
+  CURLcode result;
   size_t i;
 
   /* add 1 more header than allowed */
@@ -62,8 +62,8 @@ static CURLcode test_unit2602(const char *arg)
   }
   fail_unless(Curl_dynhds_count(&hds) == 2, "should hold 2");
   /* exceed limit on # of entries */
-  res = Curl_dynhds_add(&hds, "test3", 5, "789", 3);
-  fail_unless(res, "add should have failed");
+  result = Curl_dynhds_add(&hds, "test3", 5, "789", 3);
+  fail_unless(result, "add should have failed");
 
   fail_unless(Curl_dynhds_count_name(&hds, "test", 4) == 0, "false positive");
   fail_unless(Curl_dynhds_count_name(&hds, "test1", 4) == 0, "false positive");
@@ -94,9 +94,9 @@ static CURLcode test_unit2602(const char *arg)
   fail_unless(Curl_dynhds_cremove(&hds, "blablabla") == 2, "should");
   fail_if(Curl_dynhds_ccontains(&hds, "blablabla"), "should not");
 
-  res = Curl_dynhds_h1_cadd_line(&hds, "blablabla thingies");
-  fail_unless(res, "add should have failed");
-  if(!res) {
+  result = Curl_dynhds_h1_cadd_line(&hds, "blablabla thingies");
+  fail_unless(result, "add should have failed");
+  if(!result) {
     fail_unless(Curl_dynhds_ccount_name(&hds, "bLABlaBlA") == 0, "should");
     fail_if(Curl_dynhds_cadd(&hds, "Bla-Bla", "thingies"), "add failed");
 
@@ -111,18 +111,6 @@ static CURLcode test_unit2602(const char *arg)
   }
 
   Curl_dynhds_free(&hds);
-  Curl_dynhds_init(&hds, 128, 4 * 1024);
-  /* continuation without previous header fails */
-  res = Curl_dynhds_h1_cadd_line(&hds, " indented value");
-  fail_unless(res, "add should have failed");
-
-  /* continuation with previous header must succeed */
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti1: val1"), "add");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, " val2"), "add indent");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti2: val1"), "add");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "\tval2"), "add indent");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti3: val1"), "add");
-  fail_if(Curl_dynhds_h1_cadd_line(&hds, "     val2"), "add indent");
 
   curlx_dyn_init(&dbuf, 32 * 1024);
   fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");

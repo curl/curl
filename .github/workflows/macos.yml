@@ -14,8 +14,6 @@ name: 'macOS'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -25,8 +23,6 @@ name: 'macOS'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -44,13 +40,14 @@ permissions: {}
 
 env:
   CURL_CI: github
+  CURL_TEST_MIN: 1700
   MAKEFLAGS: -j 4
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
 
 jobs:
   ios:
     name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
-    runs-on: 'macos-latest'
+    runs-on: macos-latest
     timeout-minutes: 10
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
@@ -112,7 +109,7 @@ jobs:
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -136,7 +133,7 @@ jobs:
           cmake --build .
           cmake --install . --verbose
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -154,7 +151,7 @@ jobs:
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n "${MATRIX_GENERATOR}" ] && options="-G ${MATRIX_GENERATOR}"
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
               ${MATRIX_GENERATE} ${options}
@@ -185,7 +182,9 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file -- '{}' \;
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
 
       - name: 'build tests'
         run: |
@@ -204,37 +203,30 @@ jobs:
           fi
 
   macos:
-    name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.build.name }}"
-    runs-on: 'macos-15'
-    timeout-minutes: 25
+    name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.compiler }} ${{ matrix.build.name }}"
+    runs-on: macos-15
+    timeout-minutes: 15
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
-      CC: '${{ matrix.compiler }}'
+      CC: '${{ matrix.build.compiler }}'
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
-      MATRIX_COMPILER: '${{ matrix.compiler }}'
+      MATRIX_COMPILER: '${{ matrix.build.compiler }}'
       MATRIX_INSTALL: '${{ matrix.build.install }}'
       MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
       MATRIX_MACOS_VERSION_MIN: '${{ matrix.build.macos-version-min }}'
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, llvm@18, gcc-13]
         build:
-          # autotools
           - name: '!ssl !debug brotli zstd'
-            compiler: clang
-            install: brotli zstd
-            configure: --without-ssl --with-brotli --with-zstd
-            xcode: ''  # default Xcode. Set it once to silence actionlint.
-          - name: '!ssl !debug'
             compiler: gcc-13
-            configure: --without-ssl
-          - name: '!ssl'
-            compiler: clang
-            configure: --enable-debug --without-ssl
+            configure: --without-ssl --with-brotli --with-zstd --with-apple-idn
+            tflags: '--min=1450'
+            xcode: ''  # default Xcode. Set it once to silence actionlint.
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
-            configure: --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2 --without-ssl --with-apple-idn
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+            tflags: '--min=1550'
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
             install: libssh
@@ -242,32 +234,34 @@ jobs:
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh libnghttp3
-            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --with-openssl-quic
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
           - name: '!ssl c-ares'
             compiler: clang
             configure: --enable-debug --enable-ares --without-ssl
+            tflags: '--min=1500'
           - name: '!ssl HTTP-only'
             compiler: clang
-            configure: >-
-              --enable-debug
-              --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
-              --disable-ldap --disable-pop3 --without-librtmp --disable-rtsp
-              --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
-              --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp
-              --without-libssh2 --without-libssh
-              --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
+            tflags: '--min=930'
+            generate: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_ENABLE_SSL=OFF -DHTTP_ONLY=ON -DCURL_DISABLE_WEBSOCKETS=ON
+              -DCURL_DISABLE_NTLM=ON -DCURL_DISABLE_ALTSVC=ON -DENABLE_UNIX_SOCKETS=OFF
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_NGHTTP2=OFF
+              -DCURL_USE_GSSAPI=OFF -DUSE_LIBIDN2=OFF -DCURL_USE_LIBPSL=OFF -DUSE_LIBRTMP=OFF
+              -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF
+              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
 
             macos-version-min: '10.15'  # Catalina (2019)
           - name: 'LibreSSL !ldap +examples'
             compiler: clang
             install: libressl
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl --disable-ldap
-          - name: 'OpenSSL 10.15'
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
+          - name: 'OpenSSL 10.15 C89'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCMAKE_C_STANDARD=90
             macos-version-min: '10.15'
           - name: 'OpenSSL SecTrust'
             compiler: clang
@@ -276,15 +270,15 @@ jobs:
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust
           - name: 'OpenSSL event-based'
             compiler: clang
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
-            tflags: --test-event
-          # cmake
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
+            tflags: '--test-event --min=1300'
           - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
+            compiler: clang
             install: libnghttp3 libngtcp2 gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
-            install: llvm brotli zstd gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
+            install: llvm gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
             install_steps: clang-tidy skiprun
             chkprefill: _chkprefill
             generate: >-
@@ -292,23 +286,27 @@ jobs:
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'HTTP/3 clang-tidy'
             compiler: clang
-            install: llvm brotli zstd libnghttp3 libngtcp2 openldap krb5
+            install: llvm libnghttp3 libngtcp2 openldap krb5
             install_steps: clang-tidy skipall
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
               -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
 
           - name: 'LibreSSL openldap krb5 c-ares +examples'
+            compiler: clang
             install: libressl krb5 openldap
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
           - name: 'wolfSSL !ldap brotli zstd'
+            compiler: clang
             install: brotli wolfssl zstd
             install_steps: pytest
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
@@ -318,6 +316,7 @@ jobs:
             install_steps: codeset-test
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DUSE_APPLE_IDN=ON
           - name: 'GnuTLS !ldap krb5 +examples'
+            compiler: clang
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
           - name: 'aws-lc'
@@ -328,26 +327,25 @@ jobs:
             compiler: clang
             install: rustls-ffi
             generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
-          - name: 'OpenSSL torture !FTP'
+            tflags: '--min=1650'
+          - name: 'OpenSSL torture 1'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: -t --shallow=25 !FTP
-          - name: 'OpenSSL torture FTP'
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            tflags: '-t --shallow=25 --min=480 1 to 500'
+          - name: 'OpenSSL torture 2'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
-            tflags: -t --shallow=20 FTP
-        exclude:
-          # opt out jobs from combinations that have the compiler set manually
-          - { compiler: llvm@18, build: { compiler: 'clang' } }
-          - { compiler: llvm@18, build: { compiler: 'gcc-13' } }
-          - { compiler: gcc-13, build: { compiler: 'clang' } }
-          - { compiler: gcc-13, build: { compiler: 'llvm@18' } }
-          - { compiler: clang, build: { compiler: 'gcc-13' } }
-          - { compiler: clang, build: { compiler: 'llvm@18' } }
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            tflags: '-t --shallow=25 --min=730 501 to 1250'
+          - name: 'OpenSSL torture 3'
+            compiler: clang
+            install: libnghttp3
+            install_steps: torture
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            tflags: '-t --shallow=25 --min=628 1251 to 9999'
 
     steps:
       - name: 'brew install'
@@ -385,7 +383,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -419,7 +417,7 @@ jobs:
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-                -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+                -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
                 ${MATRIX_GENERATE} ${options}
@@ -439,7 +437,7 @@ jobs:
             fi
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
-            mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libpsl=/opt/homebrew/opt/libpsl \
               ${MATRIX_CONFIGURE} ${options}
@@ -466,7 +464,10 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: bld/src/curl --disable --version
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          bld/src/curl --disable --version
 
       - name: 'curl install'
         run: |
@@ -584,10 +585,22 @@ jobs:
           - { image: macos-15, compiler: 'llvm@20' }
           - { image: macos-26, compiler: 'llvm@15' }
           - { image: macos-26, compiler: 'llvm@18' }
+          # Covered by the main workflow
+          - { image: macos-15, compiler: 'gcc-13' }
+          - { image: macos-15, compiler: 'llvm@18' }
+          - { image: macos-15, compiler: 'clang' }
           # Reduce build combinations, by dropping less interesting ones
           - { image: macos-26, compiler: 'gcc-13' }
-          - { compiler: gcc-14, build: cmake }
-          - { compiler: gcc-15, build: autotools }
+          - { compiler: 'gcc-14' , build: cmake }
+          # Reduce autotools to just one job that is also build with cmake
+          - { compiler: 'gcc-13' , build: autotools }
+          - { compiler: 'gcc-14' , build: autotools }
+          - { compiler: 'gcc-15' , build: autotools }
+          - { compiler: 'llvm@15', build: autotools }
+          - { compiler: 'llvm@18', build: autotools }
+          - { compiler: 'llvm@20', build: autotools }
+          - { image: macos-14,     build: autotools }
+          - { image: macos-15,     build: autotools }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
@@ -608,7 +621,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages preinstalled'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -618,7 +631,7 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ] ; then
+          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ]; then
             # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
             /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
           fi
@@ -639,7 +652,7 @@ jobs:
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
               -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
@@ -647,6 +660,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
               -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
+              -DUSE_APPLE_IDN=ON -DUSE_APPLE_SECTRUST=ON \
               ${options}
           else
             export CFLAGS
@@ -659,12 +673,13 @@ jobs:
             fi
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --disable-docs --disable-manual \
               --with-openssl="$(brew --prefix openssl)" \
               --without-nghttp2 --without-libidn2 \
               --without-libpsl \
+              --with-apple-idn --with-apple-sectrust \
               ${options}
           fi
 
@@ -686,4 +701,7 @@ jobs:
           fi
 
       - name: 'curl -V'
-        run: bld/src/curl --disable --version
+        run: |
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          bld/src/curl --disable --version

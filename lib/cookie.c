@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
@@ -29,7 +28,7 @@
 #include "urldata.h"
 #include "cookie.h"
 #include "psl.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "slist.h"
 #include "curl_share.h"
 #include "strcase.h"
@@ -37,7 +36,6 @@
 #include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "parsedate.h"
-#include "rename.h"
 #include "strdup.h"
 #include "llist.h"
 #include "bufref.h"
@@ -333,7 +331,7 @@ static bool bad_domain(const char *domain, size_t len)
     return FALSE;
   else {
     /* there must be a dot present, but that dot must not be a trailing dot */
-    char *dot = memchr(domain, '.', len);
+    const char *dot = memchr(domain, '.', len);
     if(dot) {
       size_t i = dot - domain;
       if((len - i) > 1)
@@ -1013,6 +1011,7 @@ Curl_cookie_add(struct Curl_easy *data,
   co = Curl_memdup(&comem, sizeof(comem));
   if(!co) {
     co = &comem;
+    result = CURLE_OUT_OF_MEMORY;
     goto fail; /* bail out if we are this low on memory */
   }
 
@@ -1170,7 +1169,7 @@ CURLcode Curl_cookie_loadfiles(struct Curl_easy *data)
       data->state.cookie_engine = TRUE;
       while(list) {
         result = cookie_load(data, list->data, data->cookies,
-                             data->set.cookiesession);
+                             (bool)data->set.cookiesession);
         if(result)
           break;
         list = list->next;
@@ -1235,7 +1234,7 @@ static int cookie_sort_ct(const void *p1, const void *p2)
 
 bool Curl_secure_context(struct connectdata *conn, const char *host)
 {
-  return conn->handler->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS) ||
+  return conn->scheme->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS) ||
     curl_strequal("localhost", host) ||
     !strcmp(host, "127.0.0.1") ||
     !strcmp(host, "::1");
@@ -1533,7 +1532,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
   if(!use_stdout) {
     curlx_fclose(out);
     out = NULL;
-    if(tempstore && Curl_rename(tempstore, filename)) {
+    if(tempstore && curlx_rename(tempstore, filename)) {
       error = CURLE_WRITE_ERROR;
       goto error;
     }
@@ -1607,22 +1606,24 @@ struct curl_slist *Curl_cookie_list(struct Curl_easy *data)
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
 {
   Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-  /* only save the cookie file if a transfer was started (data->state.url is
+  /* only save the cookie file if a transfer was started (cookies->running is
      set), as otherwise the cookies were not completely initialized and there
-     might be cookie files that were not loaded so saving the file is the wrong
-     thing. */
-  if(data->set.str[STRING_COOKIEJAR] && Curl_bufref_ptr(&data->state.url)) {
-    /* if we have a destination file for all the cookies to get dumped to */
-    CURLcode result = cookie_output(data, data->cookies,
-                                    data->set.str[STRING_COOKIEJAR]);
-    if(result)
-      infof(data, "WARNING: failed to save cookies in %s: %s",
-            data->set.str[STRING_COOKIEJAR], curl_easy_strerror(result));
-  }
+     might be cookie files that were not loaded so saving the file is the
+     wrong thing. */
+  if(data->cookies) {
+    if(data->set.str[STRING_COOKIEJAR] && data->cookies->running) {
+      /* if we have a destination file for all the cookies to get dumped to */
+      CURLcode result = cookie_output(data, data->cookies,
+                                      data->set.str[STRING_COOKIEJAR]);
+      if(result)
+        infof(data, "WARNING: failed to save cookies in %s: %s",
+              data->set.str[STRING_COOKIEJAR], curl_easy_strerror(result));
+    }
 
-  if(cleanup && (!data->share || (data->cookies != data->share->cookies))) {
-    Curl_cookie_cleanup(data->cookies);
-    data->cookies = NULL;
+    if(cleanup && (!data->share || (data->cookies != data->share->cookies))) {
+      Curl_cookie_cleanup(data->cookies);
+      data->cookies = NULL;
+    }
   }
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 }

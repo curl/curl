@@ -25,12 +25,6 @@
  * Preload domains to HSTS
  * </DESC>
  */
-#ifdef _MSC_VER
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for strcpy() */
-#endif
-#endif
-
 #include <stdio.h>
 #include <string.h>
 
@@ -51,6 +45,16 @@ struct state {
   int index;
 };
 
+static void strcopy(char *dest, size_t dsize, const char *src, size_t slen)
+{
+  if(slen < dsize) {
+    memcpy(dest, src, slen);
+    dest[slen] = 0;
+  }
+  else if(dsize)
+    dest[0] = 0;
+}
+
 /* "read" is from the point of the library, it wants data from us. One domain
    entry per invoke. */
 static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
@@ -62,10 +66,10 @@ static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
-  if(host && (strlen(host) < e->namelen)) {
-    strcpy(e->name, host);
+  if(host) {
+    strcopy(e->name, e->namelen, host, strlen(host));
     e->includeSubDomains = 0;
-    strcpy(e->expire, expire);
+    strcopy(e->expire, sizeof(e->expire), expire, strlen(expire));
     fprintf(stderr, "HSTS preload '%s' until '%s'\n", host, expire);
   }
   else
@@ -87,9 +91,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -113,16 +117,16 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

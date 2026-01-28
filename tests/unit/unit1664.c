@@ -32,9 +32,9 @@
 
 static CURLcode t1664_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
 static CURLcode test_unit1664(const char *arg)
@@ -88,6 +88,11 @@ static CURLcode test_unit1664(const char *arg)
       "\"perfect\"",
       "\"p r e t\"",
       "\"perfec\\\"",
+      "\"trail\\\"\"",
+      "\"trail2\\\"\"",
+      "\"trail33\\\"\"",
+      "\"0\\\\\\\\\\\\\"",
+      "\"1\\\\\\\\\\\\\\\"",
       "\"\"",
       "",
       "\"longerth\"",
@@ -126,6 +131,7 @@ static CURLcode test_unit1664(const char *arg)
                    i, orgline, rc, (int)(line - orgline));
     }
   }
+
   {
     static const char *single[] = {
       "a",
@@ -169,6 +175,7 @@ static CURLcode test_unit1664(const char *arg)
                    i, orgline, rc, (int)(line - orgline));
     }
   }
+
   {
     static const char *nums[] = {
       "1",

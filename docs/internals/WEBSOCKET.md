@@ -38,17 +38,17 @@ WebSocket with libcurl can be done two ways.
 
 The new options to `curl_easy_setopt()`:
 
- `CURLOPT_WS_OPTIONS` - to control specific behavior. `CURLWS_RAW_MODE` makes
- libcurl provide all WebSocket traffic raw in the callback. `CURLWS_NOAUTOPONG`
- disables automatic `PONG` replies.
+`CURLOPT_WS_OPTIONS` - to control specific behavior. `CURLWS_RAW_MODE` makes
+libcurl provide all WebSocket traffic raw in the callback. `CURLWS_NOAUTOPONG`
+disables automatic `PONG` replies.
 
 The new function calls:
 
- `curl_ws_recv()` - receive a WebSocket frame
+`curl_ws_recv()` - receive a WebSocket frame
 
- `curl_ws_send()` - send a WebSocket frame
+`curl_ws_send()` - send a WebSocket frame
 
- `curl_ws_meta()` - return WebSocket metadata within a write callback
+`curl_ws_meta()` - return WebSocket metadata within a write callback
 
 ## Max frame size
 
@@ -88,13 +88,13 @@ work has not been started.
 
 Ideas:
 
- - Read stdin and send off as messages. Consider newline as end of fragment.
-   (default to text? offer option to set binary)
- - Respond to PINGs automatically
- - Issue PINGs at some default interval (option to switch off/change interval?)
- - Allow `-d` to specify (initial) data to send (should the format allow for
-   multiple separate frames?)
- - Exit after N messages received, where N can be zero.
+- Read stdin and send off as messages. Consider newline as end of fragment.
+  (default to text? offer option to set binary)
+- Respond to PINGs automatically
+- Issue PINGs at some default interval (option to switch off/change interval?)
+- Allow `-d` to specify (initial) data to send (should the format allow for
+  multiple separate frames?)
+- Exit after N messages received, where N can be zero.
 
 ## Future work
 

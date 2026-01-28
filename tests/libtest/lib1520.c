@@ -65,7 +65,7 @@ static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode test_lib1520(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   struct curl_slist *rcpt_list = NULL;
   struct upload_status upload_ctx = { 0 };
@@ -95,7 +95,7 @@ static CURLcode test_lib1520(const char *URL)
   test_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -103,5 +103,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

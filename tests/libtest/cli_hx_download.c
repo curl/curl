@@ -59,7 +59,7 @@ struct transfer_d {
   int resumed;
   int done;
   int checked_ssl;
-  CURLcode res;
+  CURLcode result;
 };
 
 static size_t transfer_count_d = 1;
@@ -136,13 +136,13 @@ static int my_progress_d_cb(void *userdata,
   defined(USE_GNUTLS) || defined(USE_MBEDTLS) || defined(USE_RUSTLS)
   if(!t->checked_ssl && dlnow > 0) {
     struct curl_tlssessioninfo *tls;
-    CURLcode res;
+    CURLcode result;
 
     t->checked_ssl = TRUE;
-    res = curl_easy_getinfo(t->curl, CURLINFO_TLS_SSL_PTR, &tls);
-    if(res) {
+    result = curl_easy_getinfo(t->curl, CURLINFO_TLS_SSL_PTR, &tls);
+    if(result) {
       curl_mfprintf(stderr, "[t-%zu] info CURLINFO_TLS_SSL_PTR failed: %d\n",
-                    t->idx, res);
+                    t->idx, result);
       assert(0);
     }
     else {
@@ -211,13 +211,13 @@ static int my_progress_d_cb(void *userdata,
 static int setup_hx_download(CURL *curl, const char *url, struct transfer_d *t,
                              long http_version, struct curl_slist *host,
                              CURLSH *share, int use_earlydata,
-                             int fresh_connect)
+                             int fresh_connect, char *cafile)
 {
   curl_easy_setopt(curl, CURLOPT_SHARE, share);
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  if(cafile)
+    curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_write_d_cb);
@@ -292,18 +292,19 @@ static CURLcode test_cli_hx_download(const char *URL)
   size_t max_host_conns = 0;
   size_t max_total_conns = 0;
   int fresh_connect = 0;
-  CURLcode res = CURLE_OK;
+  char *cafile = NULL;
+  CURLcode result = CURLE_OK;
 
   (void)URL;
 
-  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:F:M:P:r:T:V:"))
+  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:C:F:M:P:r:T:V:"))
         != -1) {
     const char *opt = coptarg;
     curl_off_t num;
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
-      res = (CURLcode)2;
+      result = (CURLcode)2;
       goto optcleanup;
     case 'a':
       abort_paused = 1;
@@ -328,6 +329,10 @@ static CURLcode test_cli_hx_download(const char *URL)
     case 'A':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
         abort_offset = (size_t)num;
+      break;
+    case 'C':
+      curlx_free(cafile);
+      cafile = curlx_strdup(coptarg);
       break;
     case 'F':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
@@ -358,14 +363,14 @@ static CURLcode test_cli_hx_download(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_download("invalid http version");
-        res = (CURLcode)1;
+        result = (CURLcode)1;
         goto optcleanup;
       }
       break;
     }
     default:
       usage_hx_download("invalid option");
-      res = (CURLcode)1;
+      result = (CURLcode)1;
       goto optcleanup;
     }
   }
@@ -376,14 +381,14 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   if(test_argc != 1) {
     usage_hx_download("not enough arguments");
-    res = (CURLcode)2;
+    result = (CURLcode)2;
     goto optcleanup;
   }
   url = test_argv[0];
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    res = (CURLcode)3;
+    result = (CURLcode)3;
     goto optcleanup;
   }
 
@@ -393,7 +398,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    res = (CURLcode)1;
+    result = (CURLcode)1;
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -406,7 +411,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   transfer_d = curlx_calloc(transfer_count_d, sizeof(*transfer_d));
   if(!transfer_d) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    res = (CURLcode)1;
+    result = (CURLcode)1;
     goto cleanup;
   }
 
@@ -432,9 +437,9 @@ static CURLcode test_cli_hx_download(const char *URL)
     t->curl = curl_easy_init();
     if(!t->curl ||
        setup_hx_download(t->curl, url, t, http_version, host, share,
-                         use_earlydata, fresh_connect)) {
+                         use_earlydata, fresh_connect, cafile)) {
       curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-      res = (CURLcode)1;
+      result = (CURLcode)1;
       goto cleanup;
     }
     curl_multi_add_handle(multi, t->curl);
@@ -445,14 +450,14 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   do {
     int still_running; /* keep number of running handles */
-    CURLMcode mc = curl_multi_perform(multi, &still_running);
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
     if(still_running) {
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 500, NULL);
+      mresult = curl_multi_poll(multi, NULL, 0, 500, NULL);
     }
 
-    if(mc)
+    if(mresult)
       break;
 
     do {
@@ -465,9 +470,9 @@ static CURLcode test_cli_hx_download(const char *URL)
         t = get_transfer_for_easy_d(easy);
         if(t) {
           t->done = 1;
-          t->res = m->data.result;
+          t->result = m->data.result;
           curl_mfprintf(stderr, "[t-%zu] FINISHED with result %d\n",
-                        t->idx, t->res);
+                        t->idx, t->result);
           if(use_earlydata) {
             curl_off_t sent;
             curl_easy_getinfo(easy, CURLINFO_EARLYDATA_SENT_T, &sent);
@@ -515,9 +520,9 @@ static CURLcode test_cli_hx_download(const char *URL)
             t->curl = curl_easy_init();
             if(!t->curl ||
                setup_hx_download(t->curl, url, t, http_version, host, share,
-                                 use_earlydata, fresh_connect)) {
+                                 use_earlydata, fresh_connect, cafile)) {
               curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-              res = (CURLcode)1;
+              result = (CURLcode)1;
               goto cleanup;
             }
             curl_multi_add_handle(multi, t->curl);
@@ -550,8 +555,8 @@ cleanup:
         curl_easy_cleanup(t->curl);
         t->curl = NULL;
       }
-      if(t->res)
-        res = t->res;
+      if(t->result)
+        result = t->result;
       else /* on success we expect ssl to have been checked */
         assert(t->checked_ssl);
     }
@@ -566,6 +571,7 @@ cleanup:
 optcleanup:
 
   curlx_free(resolve);
+  curlx_free(cafile);
 
-  return res;
+  return result;
 }

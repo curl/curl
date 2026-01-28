@@ -34,10 +34,12 @@
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/curlx/base64.c \
+  ../lib/curlx/basename.c \
   ../lib/curlx/dynbuf.c \
   ../lib/curlx/fopen.c \
   ../lib/curlx/multibyte.c \
   ../lib/curlx/nonblock.c \
+  ../lib/curlx/strcopy.c \
   ../lib/curlx/strerr.c \
   ../lib/curlx/strparse.c \
   ../lib/curlx/timediff.c \
@@ -55,6 +57,7 @@ CURLX_HFILES = \
   ../lib/curlx/multibyte.h \
   ../lib/curlx/nonblock.h \
   ../lib/curlx/snprintf.h \
+  ../lib/curlx/strcopy.h \
   ../lib/curlx/strerr.h \
   ../lib/curlx/strparse.h \
   ../lib/curlx/timediff.h \
@@ -64,11 +67,16 @@ CURLX_HFILES = \
   ../lib/curlx/warnless.h \
   ../lib/curlx/winapi.h
 
+TOOLX_CFILES = \
+  toolx/tool_time.c
+
+TOOLX_HFILES = \
+  toolx/tool_time.h
+
 CURL_CFILES = \
   config2setopts.c \
   slist_wc.c \
   terminal.c \
-  tool_bname.c \
   tool_cb_dbg.c \
   tool_cb_hdr.c \
   tool_cb_prg.c \
@@ -107,13 +115,13 @@ CURL_CFILES = \
   tool_writeout.c \
   tool_writeout_json.c \
   tool_xattr.c \
-  var.c
+  var.c \
+  $(TOOLX_CFILES)
 
 CURL_HFILES = \
   config2setopts.h \
   slist_wc.h \
   terminal.h \
-  tool_bname.h \
   tool_cb_dbg.h \
   tool_cb_hdr.h \
   tool_cb_prg.h \
@@ -154,6 +162,7 @@ CURL_HFILES = \
   tool_writeout.h \
   tool_writeout_json.h \
   tool_xattr.h \
-  var.h
+  var.h \
+  $(TOOLX_HFILES)
 
 CURL_RCFILES = curl.rc

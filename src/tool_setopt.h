@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "tool_formparse.h"
-
 /*
  * Macros used in operate()
  */

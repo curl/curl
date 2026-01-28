@@ -1,12 +1,13 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 unittest
 urlapi
+url
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <setenv>

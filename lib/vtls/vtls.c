@@ -60,23 +60,19 @@
 #include "rustls.h"         /* Rustls versions */
 
 #include "../slist.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strcase.h"
 #include "../url.h"
 #include "../progress.h"
-#include "../curl_share.h"
-#include "../multiif.h"
 #include "../curlx/fopen.h"
-#include "../curlx/timeval.h"
 #include "../curl_sha256.h"
-#include "../curlx/warnless.h"
 #include "../curlx/base64.h"
 #include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
 #include "../setopt.h"
-#include "../rand.h"
 #include "../strdup.h"
+#include "../curlx/strcopy.h"
 
 #ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
@@ -146,22 +142,28 @@ static const struct alpn_spec ALPN_SPEC_H2 = {
 static const struct alpn_spec ALPN_SPEC_H2_H11 = {
   { ALPN_H2, ALPN_HTTP_1_1 }, 2
 };
+static const struct alpn_spec ALPN_SPEC_H11_H2 = {
+  { ALPN_HTTP_1_1, ALPN_H2 }, 2
+};
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
-static const struct alpn_spec *alpn_get_spec(http_majors allowed,
+static const struct alpn_spec *alpn_get_spec(http_majors wanted,
+                                             http_majors preferred,
                                              bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
 #ifdef USE_HTTP2
-  if(allowed & CURL_HTTP_V2x) {
-    if(allowed & CURL_HTTP_V1x)
-      return &ALPN_SPEC_H2_H11;
+  if(wanted & CURL_HTTP_V2x) {
+    if(wanted & CURL_HTTP_V1x)
+      return (preferred == CURL_HTTP_V1x) ?
+        &ALPN_SPEC_H11_H2 : &ALPN_SPEC_H2_H11;
     return &ALPN_SPEC_H2;
   }
 #else
-  (void)allowed;
+  (void)wanted;
+  (void)preferred;
 #endif
   /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
      Avoid "http/1.0" because some servers do not support it. */
@@ -294,7 +296,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #endif
 
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
@@ -340,7 +342,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #ifndef CURL_DISABLE_PROXY
   sslc = &data->set.proxy_ssl;
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
@@ -688,7 +690,7 @@ CURLcode Curl_ssl_random(struct Curl_easy *data,
 static CURLcode pubkey_pem_to_der(const char *pem,
                                   unsigned char **der, size_t *der_len)
 {
-  char *begin_pos, *end_pos;
+  const char *begin_pos, *end_pos;
   size_t pem_count, pem_len;
   CURLcode result;
   struct dynbuf pbuf;
@@ -751,9 +753,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
@@ -1081,10 +1080,7 @@ static size_t multissl_version(char *buffer, size_t size)
   }
 
   if(size) {
-    if(backends_len < size)
-      strcpy(buffer, backends);
-    else
-      *buffer = 0; /* did not fit */
+    curlx_strcopy(buffer, size, backends, backends_len);
   }
   return 0;
 }
@@ -1372,8 +1368,9 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
 
   if(!result && *done) {
     cf->connected = TRUE;
-    if(connssl->state == ssl_connection_complete)
-      connssl->handshake_done = curlx_now();
+    if(connssl->state == ssl_connection_complete) {
+      connssl->handshake_done = *Curl_pgrs_now(data);
+    }
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||
                 connssl->state == ssl_connection_deferred);
@@ -1726,7 +1723,8 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
   ctx = cf_ctx_new(data, NULL);
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
-                                       conn->bits.tls_enable_alpn));
+                                       data->state.http_neg.preferred,
+                                       (bool)conn->bits.tls_enable_alpn));
 #endif
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1777,18 +1775,18 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct ssl_connect_data *ctx;
   CURLcode result;
   /* ALPN is default, but if user explicitly disables it, obey */
-  bool use_alpn = data->set.ssl_enable_alpn;
-  http_majors allowed = CURL_HTTP_V1x;
+  bool use_alpn = (bool)data->set.ssl_enable_alpn;
+  http_majors wanted = CURL_HTTP_V1x;
 
   (void)conn;
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
-    allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x);
+    wanted = (CURL_HTTP_V1x | CURL_HTTP_V2x);
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(allowed, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1840,7 +1838,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
 
   *done = FALSE;
   while(!result && !*done && loop--) {
-    timeout_ms = Curl_shutdown_timeleft(cf->conn, cf->sockindex, NULL);
+    timeout_ms = Curl_shutdown_timeleft(data, cf->conn, cf->sockindex);
 
     if(timeout_ms < 0) {
       /* no need to continue if time is already up */
@@ -1887,7 +1885,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
     if(cf->cft == &Curl_cft_ssl) {
       bool done;
       CURL_TRC_CF(data, cf, "shutdown and remove SSL, start");
-      Curl_shutdown_start(data, sockindex, 0, NULL);
+      Curl_shutdown_start(data, sockindex, 0);
       result = vtls_shutdown_blocking(cf, data, send_shutdown, &done);
       Curl_shutdown_clear(data, sockindex);
       if(!result && !done) /* blocking failed? */

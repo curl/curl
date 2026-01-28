@@ -36,12 +36,13 @@
  * dynamically allocated and 'belongs' to this OutStruct, otherwise FALSE.
  *
  * 'is_cd_filename' member is TRUE when string pointed by 'filename' has been
- * set using a server-specified Content-Disposition filename, otherwise FALSE.
+ * set using a server-specified Content-Disposition or Location filename,
+ * otherwise FALSE.
  *
- * 's_isreg' member is TRUE when output goes to a regular file, this also
+ * 'regular_file' member is TRUE when output goes to a regular file, this also
  * implies that output is 'seekable' and 'appendable' and also that member
  * 'filename' points to filename's string. For any standard stream member
- * 's_isreg' will be FALSE.
+ * 'regular_file' will be FALSE.
  *
  * 'fopened' member is TRUE when output goes to a regular file and it
  * has been fopen'ed, requiring it to be closed later on. In any other
@@ -61,7 +62,6 @@
  * 'utf8seq' member holds an incomplete UTF-8 sequence destined for the console
  * until it can be completed (1-4 bytes) + NUL.
  */
-
 struct OutStruct {
   char *filename;
   FILE *stream;
@@ -72,7 +72,7 @@ struct OutStruct {
 #endif
   BIT(alloc_filename);
   BIT(is_cd_filename);
-  BIT(s_isreg);
+  BIT(regular_file);
   BIT(fopened);
   BIT(out_null);
 };
@@ -82,7 +82,6 @@ struct OutStruct {
  * as well as information relative to where URL contents should
  * be stored or which file should be uploaded.
  */
-
 struct getout {
   struct getout *next;      /* next one */
   char          *url;       /* the URL we deal with */
@@ -98,10 +97,10 @@ struct getout {
   BIT(noglob);    /* disable globbing for this URL */
   BIT(out_null);  /* discard output for this URL */
 };
+
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.
  */
-
 typedef enum {
   TRACE_NONE,  /* no trace/verbose output at all */
   TRACE_BIN,   /* tcpdump inspired look */
@@ -112,7 +111,6 @@ typedef enum {
 /*
  * 'HttpReq' enumeration represents HTTP request types.
  */
-
 typedef enum {
   TOOL_HTTPREQ_UNSPEC,  /* first in list */
   TOOL_HTTPREQ_GET,
@@ -122,11 +120,18 @@ typedef enum {
   TOOL_HTTPREQ_PUT
 } HttpReq;
 
+typedef enum {
+  SANITIZE_ERR_OK = 0,           /* 0 - OK */
+  SANITIZE_ERR_INVALID_PATH,     /* 1 - the path is invalid */
+  SANITIZE_ERR_BAD_ARGUMENT,     /* 2 - bad function parameter */
+  SANITIZE_ERR_OUT_OF_MEMORY,    /* 3 - out of memory */
+  SANITIZE_ERR_LAST /* never use! */
+} SANITIZEcode;
+
 /*
  * Complete struct declarations which have OperationConfig struct members,
  * just in case this header is directly included in some source file.
  */
-
 #include "tool_cfgable.h"
 
 #endif /* HEADER_CURL_TOOL_SDECLS_H */

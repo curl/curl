@@ -5,7 +5,7 @@ Title: testcurl.pl
 Section: 1
 Source: testcurl
 See-also:
- - runtests.pl
+  - runtests.pl
 Added-in: 7.11.2
 ---
 
@@ -45,7 +45,7 @@ build.
 Configure options passed to configure.
 
 ## `--crosscompile`
-``
+
 This is a cross-compile. Makes *testcurl* skip a few things.
 
 ## `--desc=[desc]`

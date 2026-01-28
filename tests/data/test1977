@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 CURLOPT_CURLU
 CURLINFO_EFFECTIVE_URL
-notxml
 </keywords>
 </info>
 
@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <stdout>
 effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER?foo
-effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER?foo&bar
+effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER?foo%AMPbar
 </stdout>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
@@ -54,7 +54,7 @@ GET /%TESTNUMBER?foo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /%TESTNUMBER?foo&bar HTTP/1.1
+GET /%TESTNUMBER?foo%AMPbar HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

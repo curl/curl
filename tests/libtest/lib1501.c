@@ -32,7 +32,7 @@ static CURLcode test_lib1501(const char *URL)
 
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int still_running = 0;
 
   start_test_timing();
@@ -89,7 +89,7 @@ static CURLcode test_lib1501(const char *URL)
     curl_mfprintf(stderr, "pong = %ld\n", (long)e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
-      res = CURLE_TOO_LARGE;
+      result = CURLE_TOO_LARGE;
       break;
     }
   }
@@ -102,5 +102,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

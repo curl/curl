@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -45,7 +44,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
@@ -53,27 +51,25 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
-#include "curl_share.h"
 #include "strdup.h"
-#include "progress.h"
 #include "easyif.h"
 #include "multiif.h"
+#include "multi_ev.h"
 #include "select.h"
 #include "cfilters.h"
-#include "sendf.h" /* for failf function prototype */
+#include "sendf.h"
+#include "curl_trc.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
 #include "mime.h"
 #include "amigaos.h"
 #include "macos.h"
-#include "curlx/warnless.h"
 #include "curlx/wait.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
 #include "setopt.h"
 #include "http_digest.h"
 #include "system_win32.h"
-#include "http2.h"
 #include "curlx/dynbuf.h"
 #include "bufref.h"
 #include "altsvc.h"
@@ -103,12 +99,10 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
  */
-#ifdef HAVE_STRDUP
 #ifdef _WIN32
 #define system_strdup _strdup
-#else
+#elif defined(HAVE_STRDUP)
 #define system_strdup strdup
-#endif
 #else
 #define system_strdup Curl_strdup
 #endif
@@ -365,7 +359,7 @@ CURL *curl_easy_init(void)
   }
   global_init_unlock();
 
-  /* We use curl_open() with undefined URL so far */
+  /* We use Curl_open() with undefined URL so far */
   result = Curl_open(&data);
   if(result) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_open failed\n"));
@@ -600,18 +594,18 @@ static CURLcode poll_fds(struct events *ev,
 static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
   bool done = FALSE;
-  CURLMcode mcode = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
 
   while(!done) {
     CURLMsg *msg;
     struct pollfd fds[4];
     int pollrc;
-    struct curltime before;
+    struct curltime start;
     const unsigned int numfds = populate_fds(fds, ev);
 
     /* get the time stamp to use to figure out how long poll takes */
-    before = curlx_now();
+    curlx_pnow(&start);
 
     result = poll_fds(ev, fds, numfds, &pollrc);
     if(result)
@@ -623,8 +617,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       /* timeout! */
       ev->ms = 0;
       /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
-      mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
-                                       &ev->running_handles);
+      mresult = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
+                                         &ev->running_handles);
     }
     else {
       /* here pollrc is > 0 */
@@ -638,21 +632,20 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
           /* sending infof "randomly" to the first easy handle */
           infof(multi->admin, "call curl_multi_socket_action(socket "
                 "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
-          mcode = curl_multi_socket_action(multi, fds[i].fd, act,
-                                           &ev->running_handles);
+          mresult = curl_multi_socket_action(multi, fds[i].fd, act,
+                                             &ev->running_handles);
         }
       }
-
 
       if(!ev->msbump && ev->ms >= 0) {
         /* If nothing updated the timeout, we decrease it by the spent time.
          * If it was updated, it has the new timeout time stored already.
          */
-        timediff_t spent_ms = curlx_timediff_ms(curlx_now(), before);
+        timediff_t spent_ms = curlx_timediff_ms(curlx_now(), start);
         if(spent_ms > 0) {
 #if DEBUG_EV_POLL
         curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
-                      "time spent %ldms\n", ev->ms, (long)timediff);
+                      "time spent %ldms\n", ev->ms, (long)spent_ms);
 #endif
           if(spent_ms > ev->ms)
             ev->ms = 0;
@@ -662,7 +655,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       }
     }
 
-    if(mcode)
+    if(mresult)
       return CURLE_URL_MALFORMAT;
 
     /* we do not really care about the "msgs_in_queue" value returned in the
@@ -700,19 +693,19 @@ static CURLcode easy_events(struct Curl_multi *multi)
 static CURLcode easy_transfer(struct Curl_multi *multi)
 {
   bool done = FALSE;
-  CURLMcode mcode = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
 
-  while(!done && !mcode) {
+  while(!done && !mresult) {
     int still_running = 0;
 
-    mcode = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+    mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(!mcode)
-      mcode = curl_multi_perform(multi, &still_running);
+    if(!mresult)
+      mresult = curl_multi_perform(multi, &still_running);
 
     /* only read 'still_running' if curl_multi_perform() return OK */
-    if(!mcode && !still_running) {
+    if(!mresult && !still_running) {
       int rc;
       CURLMsg *msg = curl_multi_info_read(multi, &rc);
       if(msg) {
@@ -723,8 +716,8 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
   }
 
   /* Make sure to return some kind of error if there was a multi problem */
-  if(mcode) {
-    result = (mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
+  if(mresult) {
+    result = (mresult == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
       /* The other multi errors should never happen, so return
          something suitably generic */
       CURLE_BAD_FUNCTION_ARGUMENT;
@@ -753,9 +746,9 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 static CURLcode easy_perform(struct Curl_easy *data, bool events)
 {
   struct Curl_multi *multi;
-  CURLMcode mcode;
+  CURLMcode mresult;
   CURLcode result = CURLE_OK;
-  SIGPIPE_VARIABLE(pipe_st);
+  struct Curl_sigpipe_ctx sigpipe_ctx;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -801,10 +794,10 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
 
   data->multi_easy = NULL; /* pretend it does not exist */
-  mcode = curl_multi_add_handle(multi, data);
-  if(mcode) {
+  mresult = curl_multi_add_handle(multi, data);
+  if(mresult) {
     curl_multi_cleanup(multi);
-    if(mcode == CURLM_OUT_OF_MEMORY)
+    if(mresult == CURLM_OUT_OF_MEMORY)
       return CURLE_OUT_OF_MEMORY;
     return CURLE_FAILED_INIT;
   }
@@ -812,8 +805,8 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* assign this after curl_multi_add_handle() */
   data->multi_easy = multi;
 
-  sigpipe_init(&pipe_st);
-  sigpipe_apply(data, &pipe_st);
+  sigpipe_init(&sigpipe_ctx);
+  sigpipe_apply(data, &sigpipe_ctx);
 
   /* run the transfer */
   result = events ? easy_events(multi) : easy_transfer(multi);
@@ -822,7 +815,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
      a failure here, room for future improvement! */
   (void)curl_multi_remove_handle(multi, data);
 
-  sigpipe_restore(&pipe_st);
+  sigpipe_restore(&sigpipe_ctx);
 
   /* The multi handle is kept alive, owned by the easy handle */
   return result;
@@ -856,10 +849,10 @@ void curl_easy_cleanup(CURL *ptr)
 {
   struct Curl_easy *data = ptr;
   if(GOOD_EASY_HANDLE(data)) {
-    SIGPIPE_VARIABLE(pipe_st);
-    sigpipe_ignore(data, &pipe_st);
+    struct Curl_sigpipe_ctx sigpipe_ctx;
+    sigpipe_ignore(data, &sigpipe_ctx);
     Curl_close(&data);
-    sigpipe_restore(&pipe_st);
+    sigpipe_restore(&sigpipe_ctx);
   }
 }
 
@@ -896,8 +889,9 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* Copy src->set into dst->set first, then deal with the strings
      afterwards */
   dst->set = src->set;
-  Curl_mime_initpart(&dst->set.mimepost);
-
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  dst->set.mimepostp = NULL;
+#endif
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
@@ -932,8 +926,19 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     dst->set.postfields = dst->set.str[i];
   }
 
-  /* Duplicate mime data. */
-  result = Curl_mime_duppart(dst, &dst->set.mimepost, &src->set.mimepost);
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  if(src->set.mimepostp) {
+    /* Duplicate mime data. Get a mimepost struct for the clone as well */
+    dst->set.mimepostp = curlx_malloc(sizeof(*dst->set.mimepostp));
+    if(!dst->set.mimepostp)
+      return CURLE_OUT_OF_MEMORY;
+
+    Curl_mime_initpart(dst->set.mimepostp);
+    result = Curl_mime_duppart(dst, dst->set.mimepostp, src->set.mimepostp);
+    if(result)
+      return result;
+  }
+#endif
 
   if(src->set.resolve)
     dst->state.resolve = dst->set.resolve;
@@ -1280,7 +1285,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
 {
   CURLcode result;
   struct connectdata *c = NULL;
-  SIGPIPE_VARIABLE(pipe_st);
+  struct Curl_sigpipe_ctx sigpipe_ctx;
 
   *n = 0;
   result = easy_connection(data, &c);
@@ -1292,9 +1297,9 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
        needs to be reattached */
     Curl_attach_connection(data, c);
 
-  sigpipe_ignore(data, &pipe_st);
+  sigpipe_ignore(data, &sigpipe_ctx);
   result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);
-  sigpipe_restore(&pipe_st);
+  sigpipe_restore(&sigpipe_ctx);
 
   if(result && result != CURLE_AGAIN)
     return CURLE_SEND_ERROR;

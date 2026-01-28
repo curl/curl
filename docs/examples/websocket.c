@@ -39,17 +39,17 @@
 
 static CURLcode ping(CURL *curl, const char *send_payload)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   const char *buf = send_payload;
   size_t sent, blen = strlen(send_payload);
 
   while(blen) {
-    res = curl_ws_send(curl, buf, blen, &sent, 0, CURLWS_PING);
-    if(!res) {
+    result = curl_ws_send(curl, buf, blen, &sent, 0, CURLWS_PING);
+    if(!result) {
       buf += sent; /* deduct what was sent */
       blen -= sent;
     }
-    else if(res == CURLE_AGAIN) { /* blocked on sending */
+    else if(result == CURLE_AGAIN) { /* blocked on sending */
       fprintf(stderr, "ws: sent PING blocked, waiting a second\n");
       sleep(1); /* either select() on socket or max timeout would
                    be good here. */
@@ -57,9 +57,9 @@ static CURLcode ping(CURL *curl, const char *send_payload)
     else /* real error sending */
       break;
   }
-  if(!res)
+  if(!result)
     fprintf(stderr, "ws: sent PING with payload\n");
-  return res;
+  return result;
 }
 
 static CURLcode recv_pong(CURL *curl, const char *expected_payload)
@@ -67,11 +67,11 @@ static CURLcode recv_pong(CURL *curl, const char *expected_payload)
   size_t rlen = 0;
   const struct curl_ws_frame *meta;
   char buffer[256];
-  CURLcode res;
+  CURLcode result;
 
 retry:
-  res = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(!res) {
+  result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  if(!result) {
     /* on small PING content, this example assumes the complete
      * PONG content arrives in one go. Larger frames will arrive
      * in chunks, however. */
@@ -98,16 +98,16 @@ retry:
       goto retry;
     }
   }
-  else if(res == CURLE_AGAIN) { /* blocked on receiving */
+  else if(result == CURLE_AGAIN) { /* blocked on receiving */
     fprintf(stderr, "ws: PONG not there yet, waiting a second\n");
     sleep(1); /* either select() on socket or max timeout would
                  be good here. */
     goto retry;
   }
-  if(res)
+  if(result)
     fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n",
-            (unsigned int)res, (unsigned int)rlen);
-  return res;
+            (unsigned int)result, (unsigned int)rlen);
+  return result;
 }
 
 /* close the connection */
@@ -119,28 +119,28 @@ static void websocket_close(CURL *curl)
 
 static CURLcode websocket(CURL *curl)
 {
-  CURLcode res;
+  CURLcode result;
   int i = 0;
   do {
-    res = ping(curl, "foobar");
-    if(res)
+    result = ping(curl, "foobar");
+    if(result)
       break;
-    res = recv_pong(curl, "foobar");
-    if(res)
+    result = recv_pong(curl, "foobar");
+    if(result)
       break;
     sleep(1);
   } while(i++ < 10);
   websocket_close(curl);
-  return res;
+  return result;
 }
 
 int main(int argc, const char *argv[])
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -151,20 +151,20 @@ int main(int argc, const char *argv[])
 
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     else {
       /* connected and ready */
-      res = websocket(curl);
+      result = websocket(curl);
     }
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

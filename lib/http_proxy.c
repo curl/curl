@@ -21,26 +21,20 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "http_proxy.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
 
-#include <curl/curl.h>
-#include "sendf.h"
+#include "curl_trc.h"
 #include "http.h"
 #include "url.h"
-#include "select.h"
-#include "progress.h"
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
 #include "connect.h"
-#include "vtls/vtls.h"
 #include "transfer.h"
-#include "multiif.h"
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"
 
@@ -193,7 +187,7 @@ void Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
   if(*phostname != cf->conn->host.name)
     *pipv6_ip = (strchr(*phostname, ':') != NULL);
   else
-    *pipv6_ip = cf->conn->bits.ipv6_ip;
+    *pipv6_ip = (bool)cf->conn->bits.ipv6_ip;
 }
 
 struct cf_proxy_ctx {
@@ -386,7 +380,6 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
 
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   curlx_free(ctx);
 }
@@ -442,4 +435,4 @@ out:
   return result;
 }
 
-#endif /* ! CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */

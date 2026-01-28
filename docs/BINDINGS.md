@@ -7,14 +7,14 @@ SPDX-License-Identifier: curl
 libcurl bindings
 ================
 
- Creative people have written bindings or interfaces for various environments
- and programming languages. Using one of these allows you to take advantage of
- curl powers from within your favourite language or system.
+Creative people have written bindings or interfaces for various environments
+and programming languages. Using one of these allows you to take advantage of
+curl powers from within your favourite language or system.
 
- This is a list of all known interfaces as of this writing.
+This is a list of all known interfaces as of this writing.
 
- The bindings listed below are not part of the curl/libcurl distribution
- archives, but must be downloaded and installed separately.
+The bindings listed below are not part of the curl/libcurl distribution
+archives, but must be downloaded and installed separately.
 
 <!-- markdown-link-check-disable -->
 
@@ -23,8 +23,8 @@ libcurl bindings
 [Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
 C++: [curlpp](https://github.com/jpbarrette/curlpp) Written by Jean-Philippe Barrette-LaPierre,
-[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
-Requests](https://github.com/libcpr/cpr) by Huu Nguyen
+[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and
+[C++ Requests](https://github.com/libcpr/cpr) by Huu Nguyen
 
 [Ch](https://chcurl.sourceforge.net/) Written by Stephen Nestinger and Jonathan Rogado
 
@@ -49,7 +49,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 [Fortran](https://github.com/interkosmos/fortran-curl) Written by Philipp Engel
 
-[Gambas](https://gambas.sourceforge.net/)
+[Gambas](https://gambaswiki.org/website/en/main.html)
 
 [glib/GTK+](https://web.archive.org/web/20100526203452/atterer.net/glibcurl) Written by Richard Atterer
 
@@ -102,7 +102,7 @@ Bailiff and Bálint Szilakszi,
 
 [PureBasic](https://web.archive.org/web/20250325015028/www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
 
-[Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
+[Python](https://github.com/pycurl/pycurl) PycURL by Kjetil Jacobsen
 
 [Python](https://pypi.org/project/pymcurl/) mcurl by Ganesh Viswanathan
 
@@ -112,7 +112,7 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxcurl.sourceforge.net/) Written Mark Hessling
 
-[Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+[Ring](https://ring-lang.github.io/doc1.24/libcurl.html) RingLibCurl by Mahmoud Fayed
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 

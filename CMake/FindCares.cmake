@@ -25,14 +25,15 @@
 #
 # Input variables:
 #
-# - `CARES_INCLUDE_DIR`:  Absolute path to c-ares include directory.
-# - `CARES_LIBRARY`:      Absolute path to `cares` library.
+# - `CARES_INCLUDE_DIR`:      Absolute path to c-ares include directory.
+# - `CARES_LIBRARY`:          Absolute path to `cares` library.
+# - `CARES_USE_STATIC_LIBS`:  Configure for static c-ares libraries.
 #
 # Defines:
 #
-# - `CARES_FOUND`:        System has c-ares.
-# - `CARES_VERSION`:      Version of c-ares.
-# - `CURL::cares`:        c-ares library target.
+# - `CARES_FOUND`:            System has c-ares.
+# - `CARES_VERSION`:          Version of c-ares.
+# - `CURL::cares`:            c-ares library target.
 
 set(_cares_pc_requires "libcares")
 
@@ -47,10 +48,21 @@ if(_cares_FOUND)
   set(Cares_FOUND TRUE)
   set(CARES_FOUND TRUE)
   set(CARES_VERSION ${_cares_VERSION})
+  if(CARES_USE_STATIC_LIBS)
+    set(_cares_CFLAGS       "${_cares_STATIC_CFLAGS}")
+    set(_cares_INCLUDE_DIRS "${_cares_STATIC_INCLUDE_DIRS}")
+    set(_cares_LIBRARY_DIRS "${_cares_STATIC_LIBRARY_DIRS}")
+    set(_cares_LIBRARIES    "${_cares_STATIC_LIBRARIES}")
+  endif()
   message(STATUS "Found Cares (via pkg-config): ${_cares_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
 else()
   find_path(CARES_INCLUDE_DIR NAMES "ares.h")
-  find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
+  if(CARES_USE_STATIC_LIBS)
+    set(_cares_CFLAGS "-DCARES_STATICLIB")
+    find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares_static" "cares")
+  else()
+    find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
+  endif()
 
   unset(CARES_VERSION CACHE)
   if(CARES_INCLUDE_DIR AND EXISTS "${CARES_INCLUDE_DIR}/ares_version.h")

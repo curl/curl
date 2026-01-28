@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ WebSockets
 </keywords>
 </info>
 
-#
 # Close connection during websocket upgrade
 <reply>
 <data nocheck="yes" nonewline="yes">
@@ -23,7 +23,6 @@ upgrade
 </servercmd>
 </reply>
 
-#
 # Client-side
 <client>
 # require Debug for the forced CURL_ENTROPY
@@ -48,9 +47,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # PONG with no data and the 32-bit mask
-#
 <verify>
 <protocol crlf="headers" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1

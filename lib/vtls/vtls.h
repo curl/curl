@@ -32,24 +32,26 @@ struct Curl_cfilter;
 struct Curl_easy;
 struct dynbuf;
 
-#define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
-#define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
-#define SSLSUPP_PINNEDPUBKEY (1<<2) /* supports CURLOPT_PINNEDPUBLICKEY */
-#define SSLSUPP_SSL_CTX      (1<<3) /* supports CURLOPT_SSL_CTX */
-#define SSLSUPP_HTTPS_PROXY  (1<<4) /* supports access via HTTPS proxies */
-#define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
-#define SSLSUPP_CAINFO_BLOB  (1<<6)
-#define SSLSUPP_ECH          (1<<7)
-#define SSLSUPP_CA_CACHE     (1<<8)
-#define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
-#define SSLSUPP_SIGNATURE_ALGORITHMS (1<<10) /* supports TLS sigalgs */
+#define SSLSUPP_CA_PATH      (1 << 0) /* supports CAPATH */
+#define SSLSUPP_CERTINFO     (1 << 1) /* supports CURLOPT_CERTINFO */
+#define SSLSUPP_PINNEDPUBKEY (1 << 2) /* supports CURLOPT_PINNEDPUBLICKEY */
+#define SSLSUPP_SSL_CTX      (1 << 3) /* supports CURLOPT_SSL_CTX */
+#define SSLSUPP_HTTPS_PROXY  (1 << 4) /* supports access via HTTPS proxies */
+#define SSLSUPP_TLS13_CIPHERSUITES (1 << 5) /* supports TLS 1.3 ciphersuites */
+#define SSLSUPP_CAINFO_BLOB  (1 << 6)
+#define SSLSUPP_ECH          (1 << 7)
+#define SSLSUPP_CA_CACHE     (1 << 8)
+#define SSLSUPP_CIPHER_LIST  (1 << 9) /* supports TLS 1.0-1.2 ciphersuites */
+#define SSLSUPP_SIGNATURE_ALGORITHMS (1 << 10) /* supports TLS sigalgs */
+#define SSLSUPP_ISSUERCERT   (1 << 11) /* supports CURLOPT_ISSUERCERT */
+#define SSLSUPP_SSL_EC_CURVES (1 << 12) /* supports CURLOPT_SSL_EC_CURVES */
+#define SSLSUPP_CRLFILE      (1 << 13) /* supports CURLOPT_CRLFILE */
+#define SSLSUPP_ISSUERCERT_BLOB (1 << 14) /* CURLOPT_ISSUERCERT_BLOB */
 
 #ifdef USE_ECH
 # include "../curlx/base64.h"
 # define ECH_ENABLED(__data__) \
-    (__data__->set.tls_ech && \
-     !(__data__->set.tls_ech & CURLECH_DISABLE)\
-    )
+  (__data__->set.tls_ech && !(__data__->set.tls_ech & CURLECH_DISABLE))
 #endif /* USE_ECH */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
@@ -95,9 +97,7 @@ struct ssl_peer {
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
                                    const curl_ssl_backend ***avail);
 
-#ifndef MAX_PINNED_PUBKEY_SIZE
-#define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */
-#endif
+#define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1 MiB */
 
 curl_sslbackend Curl_ssl_backend(void);
 

@@ -27,7 +27,6 @@
 
 #include "bufq.h"
 #include "dynhds.h"
-#include "ws.h"
 
 typedef enum {
   HTTPREQ_GET,
@@ -54,17 +53,10 @@ typedef enum {
 /* bitmask of CURL_HTTP_V* values */
 typedef unsigned char http_majors;
 
+extern const struct Curl_scheme Curl_scheme_http;
+extern const struct Curl_scheme Curl_scheme_https;
+
 #ifndef CURL_DISABLE_HTTP
-
-#ifdef USE_HTTP3
-#include <stdint.h>
-#endif
-
-extern const struct Curl_handler Curl_handler_http;
-
-#ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_https;
-#endif
 
 struct dynhds;
 
@@ -72,6 +64,7 @@ struct http_negotiation {
   unsigned char rcvd_min; /* minimum version seen in responses, 09, 10, 11 */
   http_majors wanted;  /* wanted major versions when talking to server */
   http_majors allowed; /* allowed major versions when talking to server */
+  http_majors preferred; /* preferred major version when talking to server */
   BIT(h2_upgrade);  /* Do HTTP Upgrade from 1.1 to 2 */
   BIT(h2_prior_knowledge); /* Directly do HTTP/2 without ALPN/SSL */
   BIT(accept_09); /* Accept an HTTP/0.9 response */
@@ -104,6 +97,8 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
 CURLcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
                                 struct dynhds *hds);
 
+void Curl_http_to_fold(struct dynbuf *bf);
+
 void Curl_http_method(struct Curl_easy *data,
                       const char **method, Curl_HttpReq *);
 
@@ -112,7 +107,6 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
-CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_doing_pollset(struct Curl_easy *data,
                                  struct easy_pollset *ps);
 CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
@@ -212,7 +206,6 @@ Curl_http_output_auth(struct Curl_easy *data,
 
 /* Decode HTTP status code string. */
 CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
-
 
 /**
  * All about a core HTTP request, excluding body and trailers

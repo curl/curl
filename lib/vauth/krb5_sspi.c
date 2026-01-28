@@ -23,16 +23,12 @@
  * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && defined(USE_KERBEROS5)
 
-#include <curl/curl.h>
-
 #include "vauth.h"
-#include "../curlx/warnless.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 
 /*
  * Curl_auth_is_gssapi_supported()
@@ -262,10 +258,6 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   unsigned long max_size = 0;
   SecPkgContext_Sizes sizes;
   SECURITY_STATUS status;
-
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   /* Ensure we have a valid challenge message */
   DEBUGASSERT(chlg);

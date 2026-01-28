@@ -35,27 +35,27 @@ static CURLcode test_lib1939(const char *URL)
   if(multi) {
     curl = curl_easy_init();
     if(curl) {
-      CURLcode c;
-      CURLMcode m;
+      CURLcode result;
+      CURLMcode mresult;
 
       /* Crash only happens when using HTTPS */
-      c = curl_easy_setopt(curl, CURLOPT_URL, URL);
-      if(!c)
+      result = curl_easy_setopt(curl, CURLOPT_URL, URL);
+      if(!result)
         /* Any old HTTP tunneling proxy will do here */
-        c = curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
+        result = curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
 
-      if(!c) {
+      if(!result) {
 
         /* We are going to drive the transfer using multi interface here,
            because we want to stop during the middle. */
-        m = curl_multi_add_handle(multi, curl);
+        mresult = curl_multi_add_handle(multi, curl);
 
-        if(!m)
+        if(!mresult)
           /* Run the multi handle once, just enough to start establishing an
              HTTPS connection. */
-          m = curl_multi_perform(multi, &running_handles);
+          mresult = curl_multi_perform(multi, &running_handles);
 
-        if(m)
+        if(mresult)
           curl_mfprintf(stderr, "curl_multi_perform failed\n");
       }
       /* Close the easy handle *before* the multi handle. Doing it the other

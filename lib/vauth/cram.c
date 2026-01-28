@@ -23,18 +23,13 @@
  * RFC2195 CRAM-MD5 authentication
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
-#include <curl/curl.h>
-
 #include "vauth.h"
 #include "../curl_hmac.h"
 #include "../curl_md5.h"
-#include "../curlx/warnless.h"
-
 
 /*
  * Curl_auth_create_cram_md5_message()

@@ -58,7 +58,7 @@
 /* <wincrypt.h> has been included via the above <schnlsp.h>.
  * Or in case of ldap.c, it was included via <winldap.h>.
  * And since <wincrypt.h> has this:
- *   #define X509_NAME  ((LPCSTR) 7)
+ *   #define X509_NAME  ((LPCSTR)7)
  *
  * And in BoringSSL's <openssl/base.h> there is:
  *  typedef struct X509_name_st X509_NAME;

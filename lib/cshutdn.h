@@ -24,16 +24,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include <curl/curl.h>
-#include "curlx/timeval.h"
-
 struct connectdata;
 struct Curl_easy;
 struct curl_pollfds;
 struct Curl_waitfds;
 struct Curl_multi;
 struct Curl_share;
+struct Curl_sigpipe_ctx;
 
 /* Run the shutdown of the connection once.
  * Will shortly attach/detach `data` to `conn` while doing so.
@@ -101,10 +98,9 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
                          fd_set *read_fd_set, fd_set *write_fd_set,
                          int *maxfd);
 
-/* Run shut down connections using socket. If socket is CURL_SOCKET_TIMEOUT,
- * run maintenance on all connections. */
+/* Run maintenance on all connections. */
 void Curl_cshutdn_perform(struct cshutdn *cshutdn,
                           struct Curl_easy *data,
-                          curl_socket_t s);
+                          struct Curl_sigpipe_ctx *sigpipe_ctx);
 
 #endif /* HEADER_CURL_CSHUTDN_H */

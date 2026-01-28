@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include <toolx/tool_time.h>
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -83,8 +85,9 @@ void logmsg(const char *msg, ...)
   char buffer[2048 + 1];
   FILE *logfp;
   struct curltime tv;
+  CURLcode result;
   time_t sec;
-  struct tm *now;
+  struct tm now;
   char timebuf[50];
   static time_t epoch_offset;
   static int    known_offset;
@@ -100,21 +103,22 @@ void logmsg(const char *msg, ...)
     known_offset = 1;
   }
   sec = epoch_offset + tv.tv_sec;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  now = localtime(&sec); /* not thread safe but we do not care */
+  result = toolx_localtime(sec, &now);
+  if(result)
+    memset(&now, 0, sizeof(now));
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-           (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
-           (long)tv.tv_usec);
+           now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
 
   va_start(ap, msg);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
+/* Suppress for builds where CURL_PRINTF() is not set */
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
   vsnprintf(buffer, sizeof(buffer), msg, ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
 #endif
   va_end(ap);
 
@@ -375,7 +379,7 @@ static void exit_signal_handler(int signum)
 #endif
       static const char msg[] = "exit_signal_handler: called\n";
       (void)!write(fd, msg, sizeof(msg) - 1);
-      close(fd);
+      curlx_close(fd);
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";
@@ -404,7 +408,7 @@ static void exit_signal_handler(int signum)
  * SIGINT is not supported for any Win32 application. When a CTRL+C
  * interrupt occurs, Win32 operating systems generate a new thread
  * to specifically handle that interrupt. This can cause a single-thread
- * application, such as one in UNIX, to become multithreaded and cause
+ * application, such as one in UNIX, to become multi-threaded and cause
  * unexpected behavior.
  * [...]
  * The SIGKILL and SIGTERM signals are not generated under Windows.
@@ -691,7 +695,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     logmsg("Too long unix socket domain path (%zd)", len);
     return -1;
   }
-  strcpy(sau->sun_path, unix_socket);
+  curlx_strcopy(sau->sun_path, sizeof(sau->sun_path), unix_socket, len);
   rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
   if(rc && SOCKERRNO == SOCKEADDRINUSE) {
     struct_stat statbuf;

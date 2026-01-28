@@ -24,30 +24,28 @@
  *   IMAP, POP3, SMTP and whatever more that likes them.
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #include "urldata.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "multiif.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "select.h"
 #include "progress.h"
 #include "pingpong.h"
-#include "multiif.h"
-#include "vtls/vtls.h"
 
 #ifdef USE_PINGPONG
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
-                                 struct pingpong *pp, bool disconnecting)
+                                 struct pingpong *pp)
 {
-  timediff_t timeout_ms; /* in milliseconds */
+  timediff_t timeout_ms, xfer_timeout_ms;
   timediff_t response_time = data->set.server_response_timeout ?
     data->set.server_response_timeout : RESP_TIMEOUT;
-  struct curltime now = curlx_now();
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
      remaining time, or use pp->response because SERVER_RESPONSE_TIMEOUT is
@@ -56,20 +54,12 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
 
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
-  timeout_ms = response_time - curlx_timediff_ms(now, pp->response);
-
-  if(data->set.timeout && !disconnecting) {
-    /* if timeout is requested, find out how much overall remains */
-    timediff_t timeout2_ms = Curl_timeleft_ms(data, &now, FALSE);
-    /* pick the lowest number */
-    timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
-  }
-
-  if(disconnecting) {
-    timediff_t total_left_ms = Curl_timeleft_ms(data, NULL, FALSE);
-    timeout_ms = CURLMIN(timeout_ms, CURLMAX(total_left_ms, 0));
-  }
-
+  timeout_ms = response_time -
+               curlx_ptimediff_ms(Curl_pgrs_now(data), &pp->response);
+  /* transfer timeout can be 0, which means no timeout applies */
+  xfer_timeout_ms = Curl_timeleft_ms(data);
+  if(xfer_timeout_ms && (xfer_timeout_ms < timeout_ms))
+    return xfer_timeout_ms;
   return timeout_ms;
 }
 
@@ -84,7 +74,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
   timediff_t interval_ms;
-  timediff_t timeout_ms = Curl_pp_state_timeout(data, pp, disconnecting);
+  timediff_t timeout_ms = Curl_pp_state_timeout(data, pp);
   CURLcode result = CURLE_OK;
 
   if(timeout_ms <= 0) {
@@ -135,11 +125,11 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 }
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct pingpong *pp)
+void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow)
 {
   DEBUGASSERT(!pp->initialised);
   pp->nread_resp = 0;
-  pp->response = curlx_now(); /* start response time-out now! */
+  pp->response = *pnow; /* start response time-out */
   pp->pending_resp = TRUE;
   curlx_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
   curlx_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
@@ -208,7 +198,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   else {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = curlx_now();
+    pp->response = *Curl_pgrs_now(data);
   }
 
   return CURLE_OK;
@@ -302,8 +292,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     }
 
     do {
-      char *line = curlx_dyn_ptr(&pp->recvbuf);
-      char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
+      const char *line = curlx_dyn_ptr(&pp->recvbuf);
+      const char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
       if(nl) {
         /* a newline is CRLF in pp-talk, so the CR is ignored as
            the line is not really terminated until the LF comes */
@@ -399,7 +389,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   else {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = curlx_now();
+    pp->response = *Curl_pgrs_now(data);
   }
   return CURLE_OK;
 }

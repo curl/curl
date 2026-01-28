@@ -46,9 +46,8 @@ the project.
 
 Donating plain money to curl is best done to curl's [Open Collective
 fund](https://opencollective.com/curl). Open Collective is a US based
-non-profit organization that holds on to funds for us. This fund is then used
-for paying the curl security bug bounties, to reimburse project related
-expenses etc.
+non-profit organization that holds on to funds for us. This fund is used to
+reimburse and pay for project related expenses etc.
 
 Donations to the project can also come in the form of server hosting, providing
 services and paying for people to work on curl related code etc. Usually, such
@@ -200,3 +199,18 @@ You need to have gotten a few quality patches merged as a proof of this.
 
 If you (appear to) not be active in the project anymore, you may be removed as
 a maintainer. Thank you for your service.
+
+# Post-Daniel BDFL
+
+At the point in a future when Daniel steps away from the project and stops
+being the project lead, there is reason to reconsider how to keep driving the
+project forward. Countries, companies and organizations have a single
+president or CEO for a reason; having a single leader that responsibly can
+take quick daily decisions is efficient. Without Daniel as BDFL, either
+someone else needs to step up and become president, or the project needs to
+adopt a council-driven process. Maybe both? Maybe vote a new project leader
+for one year or a few years at a time?
+
+Deciding the replacement person and governance is a subject for the curl core
+team to vote on. When that happens, this section of this document should also
+get updated.

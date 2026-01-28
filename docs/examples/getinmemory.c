@@ -60,13 +60,13 @@ static size_t write_cb(void *contents, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   struct MemoryStruct chunk;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   chunk.memory = malloc(1); /* grown as needed by the realloc above */
   chunk.size = 0;           /* no data at this point */
@@ -89,12 +89,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
     /* get it! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* check for errors */
-    if(res != CURLE_OK) {
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     }
     else {
       /*
@@ -116,5 +116,5 @@ int main(void)
   /* we are done with libcurl, so clean it up */
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

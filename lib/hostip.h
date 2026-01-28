@@ -23,19 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #include "hash.h"
-#include "curl_addrinfo.h"
-#include "curlx/timeval.h" /* for timediff_t */
-#include "asyn.h"
-#include "httpsrr.h"
-
-#include <setjmp.h>
-
-#ifdef USE_HTTPSRR
-# include <stdint.h>
-#endif
+#include "curlx/timeval.h" /* for curltime, timediff_t */
 
 /* Allocate enough memory to hold the full name information structs and
  * everything. OSF1 is known to require at least 8872 bytes. The buffer
@@ -52,6 +43,8 @@ struct hostent;
 struct Curl_easy;
 struct connectdata;
 struct easy_pollset;
+struct Curl_https_rrinfo;
+struct Curl_multi;
 
 enum alpnid {
   ALPN_none = 0,
@@ -108,14 +101,17 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
                              timediff_t timeoutms);
 
 #ifdef USE_IPV6
+
+/* probe if it seems to work */
+CURLcode Curl_probeipv6(struct Curl_multi *multi);
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
 bool Curl_ipv6works(struct Curl_easy *data);
 #else
+#define Curl_probeipv6(x) CURLE_OK
 #define Curl_ipv6works(x) FALSE
 #endif
-
 
 /* unlink a dns entry, potentially shared with a cache */
 void Curl_resolv_unlink(struct Curl_easy *data,
@@ -132,7 +128,7 @@ void Curl_dnscache_prune(struct Curl_easy *data);
 /* clear the DNS cache */
 void Curl_dnscache_clear(struct Curl_easy *data);
 
-/* IPv4 threadsafe resolve function used for synch and asynch builds */
+/* IPv4 thread-safe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
 CURLcode Curl_once_resolved(struct Curl_easy *data,

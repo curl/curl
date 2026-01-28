@@ -53,7 +53,7 @@ static void setupcallbacks(CURL *curl)
 
 static CURLcode test_lib500(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   char *ipstr = NULL;
 
@@ -84,10 +84,10 @@ static CURLcode test_lib500(const char *URL)
   if(testnum == 585 || testnum == 586 || testnum == 595 || testnum == 596)
     setupcallbacks(curl);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
-  if(!res) {
-    res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
+  if(!result) {
+    result = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
     if(libtest_arg2) {
       FILE *moo = curlx_fopen(libtest_arg2, "wb");
       if(moo) {
@@ -175,5 +175,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

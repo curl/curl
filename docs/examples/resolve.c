@@ -42,15 +42,15 @@ int main(void)
   struct curl_slist *host = curl_slist_append(NULL,
                                               "example.com:443:127.0.0.1");
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
@@ -59,5 +59,5 @@ int main(void)
   curl_slist_free_all(host);
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

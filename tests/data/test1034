@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,12 +11,10 @@ config file
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -41,7 +40,6 @@ url = "http://invalid-utf8-%hex[%e2%90]hex%.local/page/%TESTNUMBER"
 </command>
 </client>
 
-#
 <verify>
 <errorcode>
 3

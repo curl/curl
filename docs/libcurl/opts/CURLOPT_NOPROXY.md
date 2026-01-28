@@ -43,10 +43,10 @@ brackets:
 
     "example.com,::1,localhost"
 
-Since 7.86.0, IP addresses specified to this option can be provided using CIDR
-notation: an appended slash and number specifies the number of "network bits"
-out of the address to use in the comparison. For example "192.168.0.0/16"
-would match all addresses starting with "192.168".
+IP addresses specified to this option can be provided using CIDR notation: an
+appended slash and number specifies the number of "network bits" out of the
+address to use in the comparison. For example "192.168.0.0/16" would match all
+addresses starting with "192.168".
 
 The application does not have to keep the string around after setting this
 option.
@@ -77,12 +77,16 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* use this proxy */
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example:80");
-    /* ... but make sure this host name is not proxied */
+    /* ... but make sure this hostname is not proxied */
     curl_easy_setopt(curl, CURLOPT_NOPROXY, "www.example.com");
     curl_easy_perform(curl);
   }
 }
 ~~~
+
+# HISTORY
+
+CIDR format support was added in 7.86.0.
 
 # %AVAILABILITY%
 

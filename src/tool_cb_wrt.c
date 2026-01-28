@@ -89,7 +89,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     if(fd != -1) {
       file = curlx_fdopen(fd, "wb");
       if(!file)
-        close(fd);
+        curlx_close(fd);
     }
   }
 
@@ -99,7 +99,7 @@ bool tool_create_output_file(struct OutStruct *outs,
           curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return FALSE;
   }
-  outs->s_isreg = TRUE;
+  outs->regular_file = TRUE;
   outs->fopened = TRUE;
   outs->stream = file;
   outs->bytes = 0;
@@ -231,7 +231,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
   *retp = bytes;
   return 0;
 }
-#endif
+#endif /* _WIN32 */
 
 /*
 ** callback for CURLOPT_WRITEFUNCTION
@@ -244,7 +244,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
-  bool is_tty = global->isatty;
+  bool is_tty = (bool)global->isatty;
 #ifdef _WIN32
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
@@ -282,7 +282,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       /* regular file */
       if(!*outs->filename)
         check_fails = TRUE;
-      if(!outs->s_isreg)
+      if(!outs->regular_file)
         check_fails = TRUE;
       if(outs->fopened && !outs->stream)
         check_fails = TRUE;
@@ -293,7 +293,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
     else {
       /* standard stream */
-      if(!outs->stream || outs->s_isreg || outs->fopened)
+      if(!outs->stream || outs->regular_file || outs->fopened)
         check_fails = TRUE;
       if(outs->alloc_filename || outs->is_cd_filename || outs->init)
         check_fails = TRUE;
@@ -303,7 +303,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       return CURL_WRITEFUNC_ERROR;
     }
   }
-#endif
+#endif /* DEBUGBUILD */
 
   if(!outs->stream && !tool_create_output_file(outs, per->config))
     return CURL_WRITEFUNC_ERROR;

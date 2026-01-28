@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_PROXY
@@ -35,19 +34,14 @@
 
 #include "urldata.h"
 #include "bufq.h"
-#include "sendf.h"
+#include "curl_addrinfo.h"
+#include "curl_trc.h"
 #include "select.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "curlx/timeval.h"
 #include "socks.h"
-#include "multiif.h" /* for getsock macros */
 #include "curlx/inet_pton.h"
 #include "url.h"
-
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-#define DEBUG_AND_VERBOSE
-#endif
 
 /* for the (SOCKS) connect state machine */
 enum socks_state_t {
@@ -74,7 +68,7 @@ enum socks_state_t {
   SOCKS_ST_FAILED
 };
 
-#ifdef DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 static const char * const cf_socks_statename[] = {
   "SOCKS_INIT",
   "SOCKS4_START",
@@ -133,7 +127,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
 
   *pnread = 0;
   for(;;) {
-    timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, TRUE);
+    timediff_t timeout_ms = Curl_timeleft_ms(data);
     if(timeout_ms < 0) {
       /* we already got the timeout */
       return CURLE_OPERATION_TIMEDOUT;
@@ -162,8 +156,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
 }
 #endif
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-#define DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
 #define sxstate(x, c, d, y) socksstate(x, c, d, y, __LINE__)
 #else
 #define sxstate(x, c, d, y) socksstate(x, c, d, y)
@@ -174,24 +167,26 @@ static void socksstate(struct socks_state *sx,
                        struct Curl_cfilter *cf,
                        struct Curl_easy *data,
                        enum socks_state_t state
-#ifdef DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
                        , int lineno
 #endif
 )
 {
   enum socks_state_t oldstate = sx->state;
-  (void)cf;
-  (void)data;
+
   if(oldstate == state)
     /* do not bother when the new state is the same as the old state */
     return;
 
   sx->state = state;
 
-#ifdef DEBUG_AND_VERBOSE
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   CURL_TRC_CF(data, cf, "[%s] -> [%s] (line %d)",
               cf_socks_statename[oldstate],
               cf_socks_statename[sx->state], lineno);
+#else
+  (void)cf;
+  (void)data;
 #endif
 }
 
@@ -1290,7 +1285,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   else if(sx->state != SOCKS_ST_SUCCESS)
     goto out;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     struct ip_quadruple ipquad;
     bool is_ipv6;
@@ -1310,7 +1305,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   cf->connected = TRUE;
 
 out:
-  *done = cf->connected;
+  *done = (bool)cf->connected;
   return result;
 }
 

@@ -24,9 +24,9 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+
 #include "curlx/dynbuf.h"
 #include "urldata.h"
-#include "curlx/strparse.h"
 
 /* this is for creating aws_sigv4 header output */
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data);

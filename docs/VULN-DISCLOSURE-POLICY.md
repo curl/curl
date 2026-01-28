@@ -29,9 +29,11 @@ mailing lists. Messages associated with any commits should not make any
 reference to the security nature of the commit if done prior to the public
 announcement.
 
-- The person discovering the issue, the reporter, reports the vulnerability on
-  [HackerOne](https://hackerone.com/curl). Issues filed there reach a handful
-  of selected and trusted people.
+- The person discovering the issue, the reporter, reports the vulnerability to
+  the curl project. Do this [on
+  GitHub](https://github.com/curl/curl/security/advisories) or send an email
+  to `security at curl.se`. Such submissions reach a handful of selected and
+  trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
   security vulnerability in curl or libcurl are ignored and no further action
@@ -75,10 +77,6 @@ announcement.
   set to Low or Medium, the fix is allowed to get merged into the master
   repository via a normal PR - but without mentioning it being a security
   vulnerability.
-
-- The monetary reward part of the bug-bounty is managed by the Internet Bug
-  Bounty team and the reporter is asked to request the reward from them after
-  the issue has been completely handled and published by curl.
 
 - No more than seven days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -143,11 +141,6 @@ has been published.
 
 *All* reports submitted to the project, valid or not, should be disclosed and
 made public.
-
-## Bug Bounty
-
-See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
-bug bounty program.
 
 # Severity levels
 
@@ -224,7 +217,8 @@ problem. There are already several benign and likely reasons for transfers to
 stall and never end, so applications that cannot deal with never-ending
 transfers already need to have counter-measures established.
 
-If the problem avoids the regular counter-measures when it causes a never-
+Well known attacks, like [Slowloris](https://en.wikipedia.org/wiki/Slowloris_(cyber_attack)), that send partial
+requests are usually not considered a flaw. If the problem avoids the regular counter-measures when it causes a never-
 ending transfer, it might be a security problem.
 
 ## Not practically possible
@@ -276,12 +270,12 @@ arguments, even though some that are not blanked might contain sensitive
 data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
- - not all systems allow the arguments to be blanked in the first place
- - since curl blanks the argument itself they are readable for a short moment
-   no matter what
- - virtually every argument can contain sensitive data, depending on use
- - blanking all arguments would make it impractical for users to differentiate
-   curl command lines in process listings
+- not all systems allow the arguments to be blanked in the first place
+- since curl blanks the argument itself they are readable for a short moment
+  no matter what
+- virtually every argument can contain sensitive data, depending on use
+- blanking all arguments would make it impractical for users to differentiate
+  curl command lines in process listings
 
 ## Busy-loops
 
@@ -353,6 +347,21 @@ using the protocols or options that require the use of those algorithms.
 
 When servers upgrade to use secure alternatives, curl users should use those
 options/protocols.
+
+## CRLF in data
+
+curl makes barely any claims of *cleaning* input or rejecting invalid data. A
+user that uses a curl feature can send in *creative* sequences that include
+carriage-return (CR) or line-feed (LF) characters.
+
+Therefore, we reject the idea of *CRLF injection* as a security problem. It is
+a *feature* that users can send creative byte sequences. If users do not want
+to send such octets, they are in control and should avoid sending such bytes
+to curl.
+
+For example, a user might pass in a username that looks like
+`Mr[CR][LF]Smith`. It may cause some minor havoc in the protocol handling,
+depending on what protocol is used.
 
 # curl major incident response
 

@@ -94,7 +94,6 @@ sub allsymbols {
     close($f);
 }
 
-
 my %ref = (
     'curl.1' => 1
     );
@@ -265,7 +264,6 @@ sub scanmanpage {
             print STDERR "$file:$line unrefed curl call: $2\n";
             $errors++;
         }
-
 
         if($optpage && $SH && ($SH !~ /^(SYNOPSIS|EXAMPLE|NAME|SEE ALSO)/i) &&
            ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_|SHOPT_)[A-Z0-9_]*)/)) {

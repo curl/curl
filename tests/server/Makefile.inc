@@ -40,6 +40,7 @@ CURLX_C = \
   ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/nonblock.c \
+  ../../lib/curlx/strcopy.c \
   ../../lib/curlx/strerr.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \
@@ -48,6 +49,9 @@ CURLX_C = \
   ../../lib/curlx/wait.c \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
+
+TOOLX_C = \
+  ../../src/toolx/tool_time.c
 
 # All test servers
 TESTS_C = \

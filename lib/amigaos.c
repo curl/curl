@@ -21,18 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef __AMIGA__
 
-#include <curl/curl.h>
-
 #include "hostip.h"
+#include "curl_addrinfo.h"
 #include "amigaos.h"
 
 #ifdef HAVE_PROTO_BSDSOCKET_H
-#  if defined(__amigaos4__)
+#  ifdef __amigaos4__
 #    include <bsdsocket/socketbasetags.h>
 #  elif !defined(USE_AMISSL)
 #    include <amitcp/socketbasetags.h>
@@ -116,7 +114,7 @@ void Curl_amiga_cleanup(void)
  * Because we need to handle the different cases in hostip4.c at runtime,
  * not at compile-time, based on what was detected in Curl_amiga_init(),
  * we replace it completely with our own as to not complicate the baseline
- * code. Assumes malloc/calloc/free are thread safe because Curl_he2ai()
+ * code. Assumes malloc/calloc/free are thread-safe because Curl_he2ai()
  * allocates memory also.
  */
 
@@ -144,7 +142,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port)
   }
   else {
 #ifdef CURLRES_THREADED
-    /* gethostbyname() is not thread safe, so we need to reopen bsdsocket
+    /* gethostbyname() is not thread-safe, so we need to reopen bsdsocket
      * on the thread's context
      */
     struct Library *base = OpenLibrary("bsdsocket.library", 4);

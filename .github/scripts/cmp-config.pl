@@ -68,7 +68,6 @@ my %remove = (
     '#define HAVE_OPENSSL_PEM_H 1' => 1,
     '#define HAVE_OPENSSL_RSA_H 1' => 1,
     '#define HAVE_OPENSSL_SSL_H 1' => 1,
-    '#define HAVE_OPENSSL_X509_H 1' => 1,
     '#define HAVE_QUICHE_H 1' => 1,
     '#define HAVE_SSL_SET_QUIC_TLS_CBS 1' => 1,
     '#define HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT 1' => 1,
@@ -91,7 +90,6 @@ my %remove = (
     '#define PACKAGE_TARNAME "curl"' => 1,
     '#define PACKAGE_URL ""' => 1,
     '#define PACKAGE_VERSION "-"' => 1,
-    '#define SIZEOF_LONG_LONG 8' => 1,
     '#define VERSION "-"' => 1,
     '#define _FILE_OFFSET_BITS 64' => 1,
     );
@@ -135,7 +133,6 @@ foreach my $v (keys %remove) {
         print "Ignored, never matched line: $v\n";
     }
 }
-
 
 # return the exit code from diff
 exit system("diff -u /tmp/autotools /tmp/cmake") >> 8;

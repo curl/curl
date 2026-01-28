@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <stdlib.h>
-
 /* Function
  *
  * Accepts a TCP connection on a custom port (IPv4 or IPv6). Connects to a
@@ -101,9 +99,12 @@ static void socksd_resetdefaults(void)
   s_config.reqcmd = CONFIG_REQCMD;
   s_config.connectrep = CONFIG_CONNECTREP;
   s_config.port = CONFIG_PORT;
-  strcpy(s_config.addr, CONFIG_ADDR);
-  strcpy(s_config.user, "user");
-  strcpy(s_config.password, "password");
+  curlx_strcopy(s_config.addr, sizeof(s_config.addr),
+                CONFIG_ADDR, strlen(CONFIG_ADDR));
+  curlx_strcopy(s_config.user, sizeof(s_config.user),
+                "user", strlen("user"));
+  curlx_strcopy(s_config.password, sizeof(s_config.password),
+                "password", strlen("password"));
 }
 
 static void socksd_getconfig(void)
@@ -141,7 +142,8 @@ static void socksd_getconfig(void)
           }
         }
         else if(!strcmp(key, "backend")) {
-          strcpy(s_config.addr, value);
+          curlx_strcopy(s_config.addr, sizeof(s_config.addr),
+                        value, strlen(value));
           logmsg("backend [%s] set", s_config.addr);
         }
         else if(!strcmp(key, "backendport")) {
@@ -152,11 +154,13 @@ static void socksd_getconfig(void)
           }
         }
         else if(!strcmp(key, "user")) {
-          strcpy(s_config.user, value);
+          curlx_strcopy(s_config.user, sizeof(s_config.user),
+                        value, strlen(value));
           logmsg("user [%s] set", s_config.user);
         }
         else if(!strcmp(key, "password")) {
-          strcpy(s_config.password, value);
+          curlx_strcopy(s_config.password, sizeof(s_config.password),
+                        value, strlen(value));
           logmsg("password [%s] set", s_config.password);
         }
         /* Methods:
@@ -269,7 +273,7 @@ static curl_socket_t socks4(curl_socket_t fd,
   response[1] = cd; /* result */
   /* copy port and address from connect request */
   memcpy(&response[2], &buffer[SOCKS4_DSTPORT], 6);
-  rc = (send)(fd, (char *)response, 8, 0);
+  rc = swrite(fd, response, 8);
   if(rc != 8) {
     logmsg("Sending SOCKS4 response failed!");
     return CURL_SOCKET_BAD;
@@ -302,7 +306,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   socksd_getconfig();
 
-  rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
+  rc = sread(fd, buffer, sizeof(buffer));
   if(rc <= 0) {
     logmsg("SOCKS identifier message missing, recv returned %zd", rc);
     return CURL_SOCKET_BAD;
@@ -340,7 +344,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   /* respond with two bytes: VERSION + METHOD */
   response[0] = s_config.responseversion;
   response[1] = s_config.responsemethod;
-  rc = (send)(fd, (char *)response, 2, 0);
+  rc = swrite(fd, response, 2);
   if(rc != 2) {
     logmsg("Sending response failed!");
     return CURL_SOCKET_BAD;
@@ -349,7 +353,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   loghex(response, rc);
 
   /* expect the request or auth */
-  rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
+  rc = sread(fd, buffer, sizeof(buffer));
   if(rc <= 0) {
     logmsg("SOCKS5 request or auth message missing, recv returned %zd", rc);
     return CURL_SOCKET_BAD;
@@ -397,7 +401,7 @@ static curl_socket_t sockit(curl_socket_t fd)
     }
     response[0] = 1;
     response[1] = login ? 0 : 1;
-    rc = (send)(fd, (char *)response, 2, 0);
+    rc = swrite(fd, response, 2);
     if(rc != 2) {
       logmsg("Sending auth response failed!");
       return CURL_SOCKET_BAD;
@@ -408,7 +412,7 @@ static curl_socket_t sockit(curl_socket_t fd)
       return CURL_SOCKET_BAD;
 
     /* expect the request */
-    rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
+    rc = sread(fd, buffer, sizeof(buffer));
     if(rc <= 0) {
       logmsg("SOCKS5 request message missing, recv returned %zd", rc);
       return CURL_SOCKET_BAD;
@@ -544,7 +548,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   memcpy(&response[SOCKS5_BNDADDR + len],
          &buffer[SOCKS5_DSTADDR + len], sizeof(socksport));
 
-  rc = (send)(fd, (char *)response, (SEND_TYPE_ARG3)(len + 6), 0);
+  rc = swrite(fd, response, len + 6);
   if(rc != (len + 6)) {
     logmsg("Sending connect response failed!");
     return CURL_SOCKET_BAD;
@@ -577,9 +581,9 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   char buffer[512];
   if(FD_ISSET(cp->clientfd, fds)) {
     /* read from client, send to remote */
-    nread = recv(cp->clientfd, buffer, sizeof(buffer), 0);
+    nread = sread(cp->clientfd, buffer, sizeof(buffer));
     if(nread > 0) {
-      nwrite = send(cp->remotefd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
+      nwrite = swrite(cp->remotefd, buffer, nread);
       if(nwrite != nread)
         return 1;
       cp->fromclient += nwrite;
@@ -589,9 +593,9 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   }
   if(FD_ISSET(cp->remotefd, fds)) {
     /* read from remote, send to client */
-    nread = recv(cp->remotefd, buffer, sizeof(buffer), 0);
+    nread = sread(cp->remotefd, buffer, sizeof(buffer));
     if(nread > 0) {
-      nwrite = send(cp->clientfd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
+      nwrite = swrite(cp->clientfd, buffer, nread);
       if(nwrite != nread)
         return 1;
       cp->fromremote += nwrite;
@@ -643,37 +647,16 @@ static bool socksd_incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_err);
 
     /* there is always a socket to wait for */
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
     FD_SET(sockfd, &fds_read);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
 
     for(i = 0; i < 2; i++) {
       if(c[i].used) {
         curl_socket_t fd = c[i].clientfd;
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
         FD_SET(fd, &fds_read);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
         if((int)fd > maxfd)
           maxfd = (int)fd;
         fd = c[i].remotefd;
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
         FD_SET(fd, &fds_read);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
         if((int)fd > maxfd)
           maxfd = (int)fd;
       }
@@ -874,11 +857,6 @@ static int test_socksd(int argc, char *argv[])
       return 0;
     }
   }
-
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
 
   CURLX_SET_BINMODE(stdin);
   CURLX_SET_BINMODE(stdout);

@@ -24,17 +24,17 @@
 
 AC_DEFUN([CURL_WITH_SCHANNEL], [
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS])
-if test "x$OPT_SCHANNEL" != xno; then
+if test "x$OPT_SCHANNEL" != "xno"; then
   ssl_msg=
   if test "x$OPT_SCHANNEL" != "xno" &&
-     test "x$curl_cv_native_windows" = "xyes"; then
-    if test "$curl_cv_winuwp" = 'yes'; then
+     test "$curl_cv_native_windows" = "yes"; then
+    if test "$curl_cv_winuwp" = "yes"; then
       AC_MSG_ERROR([UWP does not support Schannel.])
     fi
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     ssl_msg="Schannel"
-    test schannel != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+    test "schannel" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     SCHANNEL_ENABLED=1
     # --with-schannel implies --enable-sspi
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])

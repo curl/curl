@@ -308,7 +308,6 @@ if(!$confopts) {
     }
 }
 
-
 if($fixed < 4) {
     $fixed=4;
     open(my $f, ">", "$setupfile") or die;

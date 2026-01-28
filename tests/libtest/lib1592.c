@@ -43,8 +43,8 @@ static CURLcode test_lib1592(const char *URL)
   int stillRunning;
   CURLM *multi = NULL;
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
-  CURLMcode mres;
+  CURLcode result = CURLE_OK;
+  CURLMcode mresult;
   long timeout;
 
   global_init(CURL_GLOBAL_ALL);
@@ -98,11 +98,11 @@ static CURLcode test_lib1592(const char *URL)
   /* Start measuring how long it takes to remove the handle. */
   curl_mfprintf(stderr, "curl_multi_remove_handle()...\n");
   start_test_timing();
-  mres = curl_multi_remove_handle(multi, curl);
-  if(mres) {
-    curl_mfprintf(stderr,
-                  "curl_multi_remove_handle() failed, with code %d\n", mres);
-    res = TEST_ERR_MULTI;
+  mresult = curl_multi_remove_handle(multi, curl);
+  if(mresult) {
+    curl_mfprintf(stderr, "curl_multi_remove_handle() failed, with code %d\n",
+                  mresult);
+    result = TEST_ERR_MULTI;
     goto test_cleanup;
   }
   curl_mfprintf(stderr, "curl_multi_remove_handle() succeeded\n");
@@ -117,5 +117,5 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

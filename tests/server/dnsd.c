@@ -474,11 +474,6 @@ static int test_dnsd(int argc, char **argv)
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/dnsd-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
 #ifdef USE_IPV6
   if(!use_ipv6)
 #endif

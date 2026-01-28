@@ -21,6 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
+
+#include "parsedate.h"
+#include "curlx/strparse.h"
+
 /*
   A brief summary of the date string formats this parser groks:
 
@@ -74,28 +79,6 @@
   20040911 +0200
 
 */
-
-#include "curl_setup.h"
-
-#include <limits.h>
-
-#include <curl/curl.h>
-#include "curlx/warnless.h"
-#include "parsedate.h"
-#include "curlx/strparse.h"
-
-/*
- * parsedate()
- *
- * Returns:
- *
- * PARSEDATE_OK     - a fine conversion
- * PARSEDATE_FAIL   - failed to convert
- * PARSEDATE_LATER  - time overflow at the far end of time_t
- * PARSEDATE_SOONER - time underflow at the low end of time_t
- */
-
-static int parsedate(const char *date, time_t *output);
 
 #define PARSEDATE_OK     0
 #define PARSEDATE_FAIL   -1
@@ -597,28 +580,4 @@ int Curl_getdate_capped(const char *p, time_t *tp)
 {
   int rc = parsedate(p, tp);
   return (rc == PARSEDATE_FAIL);
-}
-
-/*
- * Curl_gmtime() is a gmtime() replacement for portability. Do not use the
- * gmtime_r() or gmtime() functions anywhere else but here.
- *
- */
-
-CURLcode Curl_gmtime(time_t intime, struct tm *store)
-{
-  const struct tm *tm;
-#ifdef HAVE_GMTIME_R
-  /* thread-safe version */
-  tm = (struct tm *)gmtime_r(&intime, store);
-#else
-  /* !checksrc! disable BANNEDFUNC 1 */
-  tm = gmtime(&intime);
-  if(tm)
-    *store = *tm; /* copy the pointed struct to the local copy */
-#endif
-
-  if(!tm)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  return CURLE_OK;
 }

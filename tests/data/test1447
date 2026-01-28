@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,12 +6,10 @@ HTTP proxy
 FAILURE
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -25,7 +24,6 @@ Provide illegal proxy name
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # Could not resolve proxy name

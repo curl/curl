@@ -35,7 +35,6 @@
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
 #include "tool_operate.h"
-#include "tool_util.h"
 #include "tool_msgs.h"
 
 #ifndef _WIN32
@@ -66,14 +65,7 @@ static bool waitfd(int waitms, int fd)
   timeout.tv_usec = (int)((waitms % 1000) * 1000);
 
   FD_ZERO(&bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
   FD_SET(fd, &bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
   if(!select(fd + 1, &bits, NULL, NULL, &timeout))
     return TRUE; /* timeout */
   return FALSE;
@@ -114,14 +106,15 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
 
+#ifdef _WIN32
   /* If we are on Windows, and using `-T .`, then per->infd points to a socket
    connected to stdin via a reader thread, and needs to be read with recv()
    Make sure we are in non-blocking mode and infd is not regular stdin
    On Linux per->infd should be stdin (0) and the block below should not
    execute */
   if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-    rc = CURL_RECV(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
+#ifndef CURL_WINDOWS_UWP
+    rc = sread(per->infd, buffer, curlx_uztosi(sz * nmemb));
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {
         errno = 0;
@@ -132,11 +125,13 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
 #else
-    warnf("per->infd != 0: FD == %d. This behavior"
-          " is only supported on desktop Windows", per->infd);
+    warnf("per->infd != 0: FD == %d. "
+          "This behavior is only supported on desktop Windows", per->infd);
 #endif
   }
-  else {
+  else
+#endif /* _WIN32 */
+  {
     rc = read(per->infd, buffer, sz * nmemb);
     if(rc < 0) {
       if(errno == EAGAIN) {
@@ -148,6 +143,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
   }
+
   if((per->uploadfilesize != -1) &&
      (per->uploadedsofar + rc > per->uploadfilesize)) {
     /* do not allow uploading more than originally set out to do */

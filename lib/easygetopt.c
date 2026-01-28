@@ -21,8 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #include "easyoptions.h"
 
 #ifndef CURL_DISABLE_GETOPTIONS

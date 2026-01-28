@@ -129,7 +129,7 @@ the same, on any of the platforms it compiles and builds on.
 
 # THREADS
 
-libcurl is thread safe but there are a few exceptions. Refer to
+libcurl is thread-safe but there are a few exceptions. Refer to
 libcurl-thread(3) for more information.
 
 # PERSISTENT CONNECTIONS
@@ -176,7 +176,7 @@ The global constant functions are thread-safe since libcurl 7.84.0 if
 curl_version_info(3) has the CURL_VERSION_THREADSAFE feature bit set
 (most platforms). Read libcurl-thread(3) for thread safety guidelines.
 
-If the global constant functions are *not thread safe*, then you must
+If the global constant functions are *not thread-safe*, then you must
 not call them when any other thread in the program is running. It
 is not good enough that no other thread is using libcurl at the time,
 because these functions internally call similar functions of other
@@ -184,7 +184,7 @@ libraries, and those functions are similarly thread-unsafe. You cannot
 generally know what these libraries are, or whether other threads are
 using them.
 
-If the global constant functions are *not thread safe*, then the basic rule
+If the global constant functions are *not thread-safe*, then the basic rule
 for constructing a program that uses libcurl is this: Call
 curl_global_init(3), with a *CURL_GLOBAL_ALL* argument, immediately
 after the program starts, while it is still only one thread and before it uses

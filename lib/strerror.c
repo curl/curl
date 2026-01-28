@@ -21,11 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
-#include <curl/mprintf.h>
 
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
@@ -33,10 +29,11 @@
 
 #include "curlx/winapi.h"
 #include "strerror.h"
+#include "curlx/strcopy.h"
 
 const char *curl_easy_strerror(CURLcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   switch(error) {
   case CURLE_OK:
     return "No error";
@@ -328,7 +325,7 @@ const char *curl_easy_strerror(CURLcode error)
 
 const char *curl_multi_strerror(CURLMcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   switch(error) {
   case CURLM_CALL_MULTI_PERFORM:
     return "Please call curl_multi_perform() soon";
@@ -387,7 +384,7 @@ const char *curl_multi_strerror(CURLMcode error)
 
 const char *curl_share_strerror(CURLSHcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   switch(error) {
   case CURLSHE_OK:
     return "No error";
@@ -422,7 +419,7 @@ const char *curl_share_strerror(CURLSHcode error)
 
 const char *curl_url_strerror(CURLUcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   switch(error) {
   case CURLUE_OK:
     return "No error";
@@ -544,15 +541,14 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
   DWORD old_win_err = GetLastError();
 #endif
   int old_errno = errno;
-  const char *txt;
+  VERBOSE(const char *txt);
 
   if(!buflen)
     return NULL;
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-
+#ifdef CURLVERBOSE
   switch(err) {
   case SEC_E_OK:
     txt = "No error";
@@ -660,14 +656,11 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
     else
       curl_msnprintf(buf, buflen, "%s (0x%08lx)", txt, err);
   }
-
-#else
+#else /* CURLVERBOSE */
   if(err == SEC_E_OK)
-    txt = "No error";
+    curlx_strcopy(buf, buflen, STRCONST("No error"));
   else
-    txt = "Error";
-  if(buflen > strlen(txt))
-    strcpy(buf, txt);
+    curlx_strcopy(buf, buflen, STRCONST("Error"));
 #endif
 
   if(errno != old_errno)

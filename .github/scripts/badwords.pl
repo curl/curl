@@ -94,13 +94,13 @@ sub file {
                 my $ch = "$f:$l:$w";
                 if($wl{$ch}) {
                     # whitelisted filename + line + word
-                    print STDERR "$ch found but whitelisted\n";
+                    #print STDERR "$ch found but whitelisted\n";
                     next;
                 }
                 $ch = $f . "::" . $w;
                 if($wl{$ch}) {
                     # whitelisted filename + word
-                    print STDERR "$ch found but whitelisted\n";
+                    #print STDERR "$ch found but whitelisted\n";
                     next;
                 }
 

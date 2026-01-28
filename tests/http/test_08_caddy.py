@@ -184,6 +184,7 @@ class TestCaddy:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
              '-n', f'{count}',
+             '-C', env.ca.cert_file,
              '-e',  # use TLS earlydata
              '-f',  # forbid reuse of connections
              '-r', f'{env.domain1}:{caddy.port}:127.0.0.1',

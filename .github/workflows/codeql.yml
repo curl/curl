@@ -13,8 +13,6 @@ name: 'CodeQL'
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
   pull_request:
@@ -24,8 +22,6 @@ name: 'CodeQL'
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
   schedule:
@@ -45,18 +41,18 @@ jobs:
     permissions:
       security-events: write  # To create/update security events
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
       - name: 'initialize'
-        uses: github/codeql-action/init@014f16e7ab1402f30e7c3329d33797e7948572db # v4.31.3
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9
         with:
           languages: actions, python
           queries: security-extended
 
       - name: 'perform analysis'
-        uses: github/codeql-action/analyze@014f16e7ab1402f30e7c3329d33797e7948572db # v4.31.3
+        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9
 
   c:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
@@ -75,19 +71,23 @@ jobs:
         if: ${{ matrix.platform == 'Linux' }}
         timeout-minutes: 5
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
             libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev libwolfssl-dev
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
+      - name: 'delete test input C files'
+        shell: bash
+        run: find tests/data -name '*.c' -delete
+
       - name: 'initialize'
-        uses: github/codeql-action/init@014f16e7ab1402f30e7c3329d33797e7948572db # v4.31.3
+        # https://github.com/github/codeql-action/blob/main/init/action.yml
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9
         with:
           languages: cpp
           build-mode: manual
@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: |
           if [ "${MATRIX_PLATFORM}" = 'Windows' ]; then
-            cmake -B . -DBUILD_SHARED_LIBS=OFF \
+            cmake -B . -DBUILD_SHARED_LIBS=OFF -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
               -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF -DUSE_WIN32_IDN=ON
             cmake --build . --verbose
@@ -108,7 +108,7 @@ jobs:
 
             # MultiSSL
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix c-ares)/lib/pkgconfig:$(brew --prefix mbedtls)/lib/pkgconfig:$(brew --prefix rustls-ffi)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
-            cmake -B _bld1 -G Ninja -DCURL_DISABLE_TYPECHECK=ON -DENABLE_DEBUG=ON \
+            cmake -B _bld1 -G Ninja -DCURL_DISABLE_TYPECHECK=ON -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DCURL_USE_WOLFSSL=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON \
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
@@ -118,7 +118,7 @@ jobs:
 
             # HTTP/3
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix libnghttp3)/lib/pkgconfig:$(brew --prefix libngtcp2)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
-            cmake -B _bld2 -G Ninja -DCURL_DISABLE_TYPECHECK=ON \
+            cmake -B _bld2 -G Ninja -DCURL_DISABLE_TYPECHECK=ON -DCURL_WERROR=ON \
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR="$(brew --prefix openssl)" -DUSE_NGTCP2=ON \
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
@@ -131,4 +131,5 @@ jobs:
           fi
 
       - name: 'perform analysis'
-        uses: github/codeql-action/analyze@014f16e7ab1402f30e7c3329d33797e7948572db # v4.31.3
+        # https://github.com/github/codeql-action/blob/main/analyze/action.yml
+        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4.31.9

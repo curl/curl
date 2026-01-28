@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_PATH_H
-#define HEADER_CURL_PATH_H
+#ifndef HEADER_CURL_VSSH_VSSH_H
+#define HEADER_CURL_VSSH_VSSH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,9 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
-#include <curl/curl.h>
+
 #include "../urldata.h"
 
 CURLcode Curl_getworkingpath(struct Curl_easy *data,
@@ -37,4 +36,5 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
 CURLcode Curl_ssh_range(struct Curl_easy *data,
                         const char *range, curl_off_t filesize,
                         curl_off_t *startp, curl_off_t *sizep);
-#endif /* HEADER_CURL_PATH_H */
+
+#endif /* HEADER_CURL_VSSH_VSSH_H */

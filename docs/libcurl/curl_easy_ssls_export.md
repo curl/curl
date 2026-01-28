@@ -139,7 +139,7 @@ int main(void)
 {
   CURLSHcode sh;
   CURLSH *share = curl_share_init();
-  CURLcode rc;
+  CURLcode result;
   CURL *curl;
 
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
@@ -156,7 +156,7 @@ int main(void)
     curl_easy_perform(curl);
 
     /* export the TLS sessions collected in the share */
-    rc = curl_easy_ssls_export(curl, my_export_cb, NULL);
+    result = curl_easy_ssls_export(curl, my_export_cb, NULL);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

@@ -29,7 +29,7 @@ static CURLcode test_lib591(const char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int running;
   int msgs_left;
   CURLMsg *msg;
@@ -51,9 +51,9 @@ static CURLcode test_lib591(const char *URL)
   }
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(result) {
     curlx_fclose(upload);
-    return res;
+    return result;
   }
 
   easy_init(curl);
@@ -129,7 +129,7 @@ static CURLcode test_lib591(const char *URL)
 
   msg = curl_multi_info_read(multi, &msgs_left);
   if(msg)
-    res = msg->data.result;
+    result = msg->data.result;
 
 test_cleanup:
 
@@ -142,5 +142,5 @@ test_cleanup:
   /* close the local file */
   curlx_fclose(upload);
 
-  return res;
+  return result;
 }

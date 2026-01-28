@@ -63,7 +63,7 @@ static void t518_close_file_descriptors(void)
       t518_num_open.rlim_cur < t518_num_open.rlim_max;
       t518_num_open.rlim_cur++)
     if(t518_testfd[t518_num_open.rlim_cur] > 0)
-      close(t518_testfd[t518_num_open.rlim_cur]);
+      curlx_close(t518_testfd[t518_num_open.rlim_cur]);
   curlx_free(t518_testfd);
   t518_testfd = NULL;
 }
@@ -333,7 +333,7 @@ static int t518_test_rlimit(int keep_open)
       for(t518_num_open.rlim_cur = 0;
           t518_testfd[t518_num_open.rlim_cur] >= 0;
           t518_num_open.rlim_cur++)
-        close(t518_testfd[t518_num_open.rlim_cur]);
+        curlx_close(t518_testfd[t518_num_open.rlim_cur]);
       curlx_free(t518_testfd);
       t518_testfd = NULL;
       curlx_free(memchunk);
@@ -424,7 +424,7 @@ static int t518_test_rlimit(int keep_open)
 
 static CURLcode test_lib518(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   if(!strcmp(URL, "check")) {
@@ -461,7 +461,7 @@ static CURLcode test_lib518(const char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -469,7 +469,7 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }
 
 #else /* HAVE_GETRLIMIT && HAVE_SETRLIMIT */

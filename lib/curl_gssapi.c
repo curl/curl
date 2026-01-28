@@ -21,13 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_GSSAPI
 
 #include "curl_gssapi.h"
-#include "sendf.h"
+#include "curl_trc.h"
+#include "curlx/strcopy.h"
 
 #ifdef DEBUGBUILD
 #if defined(HAVE_GSSGNU) || !defined(_WIN32)
@@ -224,7 +224,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    strcpy(ctx->creds, creds);
+    curlx_strcopy(ctx->creds, sizeof(ctx->creds), creds, strlen(creds));
     ctx->flags = req_flags;
   }
 
@@ -436,11 +436,8 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
 
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);
 
+  NOVERBOSE((void)prefix);
   infof(data, "%s%s", prefix, buf);
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-  (void)prefix;
-#endif
 }
 
 #if defined(__GNUC__) && defined(__APPLE__)

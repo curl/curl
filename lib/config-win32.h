@@ -28,59 +28,9 @@
 /*               Hand crafted config file for Windows               */
 /* ================================================================ */
 
-/* Define some minimum and default build targets for Visual Studio */
-#ifdef _MSC_VER
-   /* VS2012 default target settings and minimum build target check. */
-#  if _MSC_VER >= 1700
-     /* The minimum and default build targets for VS2012 are Vista and 8,
-        respectively, unless Update 1 is installed and the v110_xp toolset
-        is chosen. */
-#    ifdef _USING_V110_SDK71_
-#      define VS2012_MIN_TARGET 0x0501  /* XP */
-#      define VS2012_DEF_TARGET 0x0501  /* XP */
-#    else
-#      define VS2012_MIN_TARGET 0x0600  /* Vista */
-#      define VS2012_DEF_TARGET 0x0602  /* 8 */
-#    endif
-
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2012_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2012_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#      ifdef _USING_V110_SDK71_
-#        error VS2012 does not support build targets prior to Windows XP
-#      else
-#        error VS2012 does not support build targets prior to Windows Vista
-#      endif
-#    endif
-   /* VS2010 default target settings and minimum build target check. */
-#  else
-     /* VS2010 default build target is Windows 7 (0x0601).
-        We override default target to be Windows XP. */
-#    define VS2010_MIN_TARGET 0x0501  /* XP */
-#    define VS2010_DEF_TARGET 0x0501  /* XP */
-
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2010_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2010_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2010_MIN_TARGET) || (WINVER < VS2010_MIN_TARGET)
-#      error VS2010 does not support build targets prior to Windows XP
-#    endif
-#  endif
-#endif /* _MSC_VER */
-
 /* ---------------------------------------------------------------- */
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
-
-/* Define if you have the <arpa/inet.h> header file. */
-/* #define HAVE_ARPA_INET_H 1 */
 
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -91,20 +41,9 @@
 /* Define if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
 
-/* Define if you have the <netdb.h> header file. */
-/* #define HAVE_NETDB_H 1 */
-
-/* Define if you have the <netinet/in.h> header file. */
-/* #define HAVE_NETINET_IN_H 1 */
-
 /* Define to 1 if you have the <stdbool.h> header file. */
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
 #define HAVE_STDBOOL_H 1
-#endif
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#define HAVE_STDINT_H 1
 #endif
 
 /* Define if you have the <sys/param.h> header file. */
@@ -112,23 +51,11 @@
 #define HAVE_SYS_PARAM_H 1
 #endif
 
-/* Define if you have the <sys/select.h> header file. */
-/* #define HAVE_SYS_SELECT_H 1 */
-
-/* Define if you have the <sys/sockio.h> header file. */
-/* #define HAVE_SYS_SOCKIO_H 1 */
-
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
 /* Define if you have the <sys/utime.h> header file. */
 #define HAVE_SYS_UTIME_H 1
-
-/* Define if you have the <termio.h> header file. */
-/* #define HAVE_TERMIO_H 1 */
-
-/* Define if you have the <termios.h> header file. */
-/* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file. */
 #ifdef __MINGW32__
@@ -286,9 +213,6 @@
 /* Define to the size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 
-/* Define to the size of `long long', as computed by sizeof. */
-/* #define SIZEOF_LONG_LONG 8 */
-
 /* Define to the size of `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
 
@@ -305,20 +229,6 @@
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
 /* ---------------------------------------------------------------- */
-
-/* Define to nothing if compiler does not support 'const' qualifier. */
-/* #define const */
-
-/* Define to nothing if compiler does not support 'volatile' qualifier. */
-/* #define volatile */
-
-/* Windows should not have HAVE_GMTIME_R defined */
-/* #undef HAVE_GMTIME_R */
-
-/* Define if the compiler supports the 'long long' data type. */
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#define HAVE_LONGLONG 1
-#endif
 
 /* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
 #if defined(_MSC_VER) || defined(__MINGW32__)
@@ -351,19 +261,14 @@
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#  define USE_WIN32_LARGE_FILES
 /* Number of bits in a file offset, on hosts where this is settable. */
-#  ifdef __MINGW32__
-#    ifndef _FILE_OFFSET_BITS
-#    define _FILE_OFFSET_BITS 64
-#    endif
-#  endif
+#ifdef __MINGW32__
+#  undef _FILE_OFFSET_BITS
+#  define _FILE_OFFSET_BITS 64
 #endif
 
 /* Define to the size of `off_t', as computed by sizeof. */
-#if defined(__MINGW32__) && \
-  defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
+#ifdef __MINGW32__
 #  define SIZEOF_OFF_T 8
 #else
 #  define SIZEOF_OFF_T 4
@@ -376,9 +281,6 @@
 /*
  * Undefine both USE_ARES and USE_THREADS_WIN32 for synchronous DNS.
  */
-
-/* Define to enable c-ares asynchronous DNS lookups. */
-/* #define USE_ARES 1 */
 
 /* Default define to enable threaded asynchronous DNS lookups. */
 #if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
@@ -394,10 +296,7 @@
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#ifdef CURL_HAS_OPENLDAP_LDAPSDK
-#undef USE_WIN32_LDAP
-#define HAVE_LDAP_URL_PARSE 1
-#elif !defined(CURL_WINDOWS_UWP)
+#ifndef CURL_WINDOWS_UWP
 #undef HAVE_LDAP_URL_PARSE
 #define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1

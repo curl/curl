@@ -47,7 +47,7 @@ static int max_total = 20000;
 static int max_requests = 500;
 static size_t max_link_per_page = 5;
 static int follow_relative_links = 0;
-static const char *start_page = "https://www.reuters.com";
+static const char *start_page = "https://www.reuters.com/";
 
 static int pending_interrupt = 0;
 static void sighandler(int dummy)
@@ -183,11 +183,11 @@ int main(void)
   int pending;
   int complete;
   int still_running;
-  CURLcode res;
+  CURLcode result;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   signal(SIGINT, sighandler);
   LIBXML_TEST_VERSION

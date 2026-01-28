@@ -21,20 +21,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #include "curl_trc.h"
 #include "urldata.h"
-#include "easyif.h"
 #include "cfilters.h"
 #include "multiif.h"
 
 #include "cf-socket.h"
 #include "connect.h"
-#include "doh.h"
 #include "http2.h"
 #include "http_proxy.h"
 #include "cf-h1-proxy.h"
@@ -42,10 +37,12 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
+#include "curlx/strcopy.h"
 
 static void trc_write(struct Curl_easy *data, curl_infotype type,
                       const char *ptr, size_t size)
@@ -88,8 +85,8 @@ static struct curl_trc_feat Curl_trc_feat_ids = {
   CURL_LOG_LVL_NONE,
 };
 #define CURL_TRC_IDS(data) \
-             (Curl_trc_is_verbose(data) && \
-             Curl_trc_feat_ids.log_level >= CURL_LOG_LVL_INFO)
+  (Curl_trc_is_verbose(data) && \
+  Curl_trc_feat_ids.log_level >= CURL_LOG_LVL_INFO)
 
 static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 {
@@ -187,7 +184,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     len = curl_mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
-      strcpy(data->set.errorbuffer, error);
+      curlx_strcopy(data->set.errorbuffer, CURL_ERROR_SIZE, error, len);
       data->state.errorbuf = TRUE; /* wrote error string */
     }
     error[len++] = '\n';
@@ -196,6 +193,29 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     va_end(ap);
   }
 }
+
+#ifdef CURLVERBOSE
+struct curl_trc_feat Curl_trc_feat_multi = {
+  "MULTI",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_read = {
+  "READ",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_write = {
+  "WRITE",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_dns = {
+  "DNS",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_timer = {
+  "TIMER",
+  CURL_LOG_LVL_NONE,
+};
+#endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 
@@ -251,27 +271,6 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
   }
 }
 
-struct curl_trc_feat Curl_trc_feat_multi = {
-  "MULTI",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_read = {
-  "READ",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_write = {
-  "WRITE",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_dns = {
-  "DNS",
-  CURL_LOG_LVL_NONE,
-};
-struct curl_trc_feat Curl_trc_feat_timer = {
-  "TIMER",
-  CURL_LOG_LVL_NONE,
-};
-
 static const char * const Curl_trc_timer_names[] = {
   "100_TIMEOUT",
   "ASYNC_NAME",
@@ -314,12 +313,12 @@ void Curl_trc_easy_timers(struct Curl_easy *data)
   if(CURL_TRC_TIMER_is_verbose(data)) {
     struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
     if(e) {
-      struct curltime now = curlx_now();
+      const struct curltime *pnow = Curl_pgrs_now(data);
       while(e) {
         struct time_node *n = Curl_node_elem(e);
         e = Curl_node_next(e);
         CURL_TRC_TIMER(data, n->eid, "expires in %" FMT_TIMEDIFF_T "ns",
-                       curlx_timediff_us(n->time, now));
+                       curlx_ptimediff_us(&n->time, pnow));
       }
     }
   }
@@ -332,7 +331,6 @@ static const char * const Curl_trc_mstate_names[] = {
   "CONNECT",
   "RESOLVING",
   "CONNECTING",
-  "TUNNELING",
   "PROTOCONNECT",
   "PROTOCONNECTING",
   "DO",
@@ -509,8 +507,6 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_timer,     TRC_CT_NETWORK },
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
-#endif
-#ifndef CURL_DISABLE_DOH
 #endif
 #ifndef CURL_DISABLE_SMTP
   { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },

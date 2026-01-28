@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ Largefile
 FAILURE
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -31,7 +31,6 @@ Funny-head: yesyes
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -48,7 +47,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 33 is CURLE_RANGE_ERROR

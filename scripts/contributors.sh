@@ -62,7 +62,7 @@ CURLWWW="${CURLWWW:-../curl-www}"
       git -C "$CURLWWW" log --pretty=full --use-mailmap "$start..HEAD"
     fi
   } | \
-  grep -Eai '(^Author|^Commit|by):' | \
+  grep -Eai '(^Author|^Commit|^ +[a-z-]+-by):' | \
   cut -d: -f2- | \
   cut '-d(' -f1 | \
   cut '-d<' -f1 | \
@@ -80,16 +80,16 @@ sed -f ./docs/THANKS-filter | \
 sort -fu | \
 awk '
 {
- if(length($0)) {
-   num++;
-   n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
-   #print n;
-   if(length(n) > 77) {
-     printf("  %s\n", p);
-     n=sprintf("%s,", $0);
-   }
-   p=n;
- }
+  if(length($0)) {
+    num++;
+    n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
+    #print n;
+    if(length(n) > 77) {
+      printf("  %s\n", p);
+      n=sprintf("%s,", $0);
+    }
+    p=n;
+  }
 }
 
 END {

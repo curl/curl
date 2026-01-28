@@ -48,14 +48,14 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct stat file_info;
   curl_off_t speed_upload, total_time;
   FILE *fd;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   fd = fopen("debugit", "rb"); /* open file to upload */
   if(!fd) {
@@ -89,11 +89,11 @@ int main(void)
     /* enable verbose for easier tracing */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK) {
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     }
     else {
       /* now extract transfer info */

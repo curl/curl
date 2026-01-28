@@ -21,8 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+#include "urldata.h"
+#include "file.h"
 
 #ifndef CURL_DISABLE_FILE
 
@@ -54,18 +55,15 @@
 #include <dirent.h>
 #endif
 
-#include "urldata.h"
-#include <curl/curl.h>
 #include "progress.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "escape.h"
-#include "file.h"
 #include "multiif.h"
 #include "transfer.h"
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "curlx/fopen.h"
-#include "curlx/warnless.h"
 #include "curl_range.h"
 
 #if defined(_WIN32) || defined(MSDOS)
@@ -84,55 +82,12 @@ struct FILEPROTO {
   int fd;     /* open file descriptor to read from! */
 };
 
-/*
- * Forward declarations.
- */
-
-static CURLcode file_do(struct Curl_easy *data, bool *done);
-static CURLcode file_done(struct Curl_easy *data,
-                          CURLcode status, bool premature);
-static CURLcode file_connect(struct Curl_easy *data, bool *done);
-static CURLcode file_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn,
-                                bool dead_connection);
-static CURLcode file_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-
-/*
- * FILE scheme handler.
- */
-
-const struct Curl_handler Curl_handler_file = {
-  "file",                               /* scheme */
-  file_setup_connection,                /* setup_connection */
-  file_do,                              /* do_it */
-  file_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  file_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_pollset */
-  ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
-  file_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  0,                                    /* defport */
-  CURLPROTO_FILE,                       /* protocol */
-  CURLPROTO_FILE,                       /* family */
-  PROTOPT_NONETWORK | PROTOPT_NOURLQUERY /* flags */
-};
-
 static void file_cleanup(struct FILEPROTO *file)
 {
   Curl_safefree(file->freepath);
   file->path = NULL;
   if(file->fd != -1) {
-    close(file->fd);
+    curlx_close(file->fd);
     file->fd = -1;
   }
 }
@@ -156,6 +111,19 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
   if(!filep ||
      Curl_meta_set(data, CURL_META_FILE_EASY, filep, file_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
+}
+
+static CURLcode file_done(struct Curl_easy *data,
+                          CURLcode status, bool premature)
+{
+  struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
+  (void)status;
+  (void)premature;
+
+  if(file)
+    file_cleanup(file);
 
   return CURLE_OK;
 }
@@ -236,7 +204,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     return CURLE_URL_MALFORMAT;
   }
 
-  #ifdef AMIGA_FILESYSTEM
+#ifdef AMIGA_FILESYSTEM
   /*
    * A leading slash in an AmigaDOS path denotes the parent
    * directory, and hence we block this as it is relative.
@@ -259,10 +227,10 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       fd = curlx_open(real_path, O_RDONLY);
     }
   }
-  #else
+#else
   fd = curlx_open(real_path, O_RDONLY);
   file->path = real_path;
-  #endif
+#endif
 #endif
   curlx_free(file->freepath);
   file->freepath = real_path; /* free this when done */
@@ -274,19 +242,6 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     return CURLE_FILE_COULDNT_READ_FILE;
   }
   *done = TRUE;
-
-  return CURLE_OK;
-}
-
-static CURLcode file_done(struct Curl_easy *data,
-                          CURLcode status, bool premature)
-{
-  struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
-  (void)status;
-  (void)premature;
-
-  if(file)
-    file_cleanup(file);
 
   return CURLE_OK;
 }
@@ -315,7 +270,6 @@ static CURLcode file_upload(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   char *xfer_ulbuf;
   size_t xfer_ulblen;
-  curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *sendbuf;
   bool eos = FALSE;
@@ -358,7 +312,7 @@ static CURLcode file_upload(struct Curl_easy *data,
   /* treat the negative resume offset value as the case of "-" */
   if(data->state.resume_from < 0) {
     if(fstat(fd, &file_stat)) {
-      close(fd);
+      curlx_close(fd);
       failf(data, "cannot get the size of %s", file->path);
       return CURLE_WRITE_ERROR;
     }
@@ -405,9 +359,7 @@ static CURLcode file_upload(struct Curl_easy *data,
       result = CURLE_SEND_ERROR;
       break;
     }
-    bytecount += nwritten;
-
-    Curl_pgrsSetUploadCounter(data, bytecount);
+    Curl_pgrs_upload_inc(data, nwritten);
 
     result = Curl_pgrsCheck(data);
   }
@@ -415,7 +367,7 @@ static CURLcode file_upload(struct Curl_easy *data,
     result = Curl_pgrsUpdate(data);
 
 out:
-  close(fd);
+  curlx_close(fd);
   Curl_multi_xfer_ulbuf_release(data, xfer_ulbuf);
 
   return result;
@@ -493,7 +445,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     }
 
     filetime = (time_t)statbuf.st_mtime;
-    result = Curl_gmtime(filetime, &buffer);
+    result = curlx_gmtime(filetime, &buffer);
     if(result)
       return result;
 
@@ -653,4 +605,40 @@ out:
   return result;
 }
 
+static const struct Curl_protocol Curl_protocol_file = {
+  file_setup_connection,                /* setup_connection */
+  file_do,                              /* do_it */
+  file_done,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  file_connect,                         /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  file_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+};
+
 #endif
+
+/*
+ * FILE scheme handler.
+ */
+const struct Curl_scheme Curl_scheme_file = {
+  "file",                               /* scheme */
+#ifdef CURL_DISABLE_FILE
+  ZERO_NULL,
+#else
+  &Curl_protocol_file,
+#endif
+  CURLPROTO_FILE,                       /* protocol */
+  CURLPROTO_FILE,                       /* family */
+  PROTOPT_NONETWORK | PROTOPT_NOURLQUERY, /* flags */
+  0                                     /* defport */
+};

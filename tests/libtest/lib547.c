@@ -44,7 +44,7 @@ static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 
   if(size * nmemb >= T547_DATALEN) {
     curl_mfprintf(stderr, "READ!\n");
-    strcpy(ptr, t547_uploadthis);
+    memcpy(ptr, t547_uploadthis, T547_DATALEN);
     return T547_DATALEN;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");
@@ -64,7 +64,7 @@ static curlioerr t547_ioctl_callback(CURL *curl, int cmd, void *clientp)
 
 static CURLcode test_lib547(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   int counter = 0;
 
@@ -104,12 +104,12 @@ static CURLcode test_lib547(const char *URL)
   test_setopt(curl, CURLOPT_PROXYAUTH,
               CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

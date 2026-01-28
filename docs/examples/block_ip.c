@@ -38,11 +38,7 @@ int main(void)
 }
 #else
 
-#ifdef _WIN32
-#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600  /* Requires Windows Vista */
-#endif
+#ifdef _WIN32  /* Requires Windows Vista+ */
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
@@ -110,7 +106,7 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
   struct ip *ip, *last;
   char *cidr;
 
-  ip = (struct ip *)calloc(1, sizeof(*ip));
+  ip = calloc(1, sizeof(*ip));
   if(!ip)
     return NULL;
 
@@ -293,17 +289,17 @@ static curl_socket_t opensocket(void *clientp,
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct connection_filter *filter;
 
-  filter = (struct connection_filter *)calloc(1, sizeof(*filter));
+  filter = calloc(1, sizeof(*filter));
   if(!filter)
     return 1;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result) {
     free(filter);
-    return (int)res;
+    return (int)result;
   }
 
   curl = curl_easy_init();
@@ -336,12 +332,12 @@ int main(void)
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Perform the request */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
   /* Check for errors */
-  if(res != CURLE_OK) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+            curl_easy_strerror(result));
   }
 
   /* Clean up */

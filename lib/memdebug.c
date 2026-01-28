@@ -21,12 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 
-#include <curl/curl.h>
+#include <stddef.h>  /* for offsetof() */
 
 #include "urldata.h"
 #include "curl_threads.h"
@@ -52,7 +51,7 @@ struct memdebug {
  * For advanced analysis, record a log file and write perl scripts to analyze
  * them!
  *
- * Do not use these with multithreaded test programs!
+ * Do not use these with multi-threaded test programs!
  */
 
 FILE *curl_dbg_logfile = NULL;
@@ -70,6 +69,29 @@ static size_t memwidx = 0; /* write index */
 static bool dbg_mutex_init = 0;
 static curl_mutex_t dbg_mutex;
 #endif
+
+static bool curl_dbg_lock(void)
+{
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+  if(dbg_mutex_init) {
+    Curl_mutex_acquire(&dbg_mutex);
+    return TRUE;
+  }
+#endif
+  return FALSE;
+}
+
+static void curl_dbg_unlock(bool was_locked)
+{
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+  if(was_locked)
+    Curl_mutex_release(&dbg_mutex);
+#else
+  (void)was_locked;
+#endif
+}
+
+static void curl_dbg_log_locked(const char *format, ...) CURL_PRINTF(1, 2);
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
@@ -93,6 +115,7 @@ static void curl_dbg_cleanup(void)
   }
 #endif
 }
+
 #ifdef USE_BACKTRACE
 static void error_bt_callback(void *data, const char *message,
                               int error_number)
@@ -295,6 +318,7 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
                        int line, const char *source)
 {
   struct memdebug *mem = NULL;
+  bool was_locked;
 
   size_t size = sizeof(struct memdebug) + wantedsize;
 
@@ -303,6 +327,10 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
   if(countcheck("realloc", line, source))
     return NULL;
 
+  /* need to realloc under lock, as we get out-of-order log
+   * entries otherwise, since another thread might alloc the
+   * memory released by realloc() before otherwise would log it. */
+  was_locked = curl_dbg_lock();
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:1684)
@@ -318,10 +346,11 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
 
   mem = (Curl_crealloc)(mem, size);
   if(source)
-    curl_dbg_log("MEM %s:%d realloc(%p, %zu) = %p\n",
-                source, line, (void *)ptr, wantedsize,
-                mem ? (void *)mem->mem : (void *)0);
+    curl_dbg_log_locked("MEM %s:%d realloc(%p, %zu) = %p\n",
+                        source, line, (void *)ptr, wantedsize,
+                        mem ? (void *)mem->mem : (void *)0);
 
+  curl_dbg_unlock(was_locked);
   if(mem) {
     mem->size = wantedsize;
     return mem->mem;
@@ -371,37 +400,6 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
                  source, line, sockfd);
 
   return sockfd;
-}
-
-SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
-                             SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
-                             SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags,
-                             int line, const char *source)
-{
-  SEND_TYPE_RETV rc;
-  if(countcheck("send", line, source))
-    return -1;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  rc = send(sockfd, buf, len, flags);
-  if(source)
-    curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
-                 source, line, (unsigned long)len, (long)rc);
-  return rc;
-}
-
-RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
-                             RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags,
-                             int line, const char *source)
-{
-  RECV_TYPE_RETV rc;
-  if(countcheck("recv", line, source))
-    return -1;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  rc = recv(sockfd, buf, len, flags);
-  if(source)
-    curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
-                 source, line, (unsigned long)len, (long)rc);
-  return rc;
 }
 
 #ifdef HAVE_SOCKETPAIR
@@ -499,8 +497,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
-  /* !checksrc! disable BANNEDFUNC 1 */
-  FILE *res = fdopen(filedes, mode);
+  FILE *res = CURLX_FDOPEN_LOW(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
@@ -522,29 +519,18 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
   return res;
 }
 
-/* this does the writing to the memory tracking log file */
-void curl_dbg_log(const char *format, ...)
+static void curl_dbg_vlog(const char * const fmt,
+                          va_list ap) CURL_PRINTF(1, 0);
+
+static void curl_dbg_vlog(const char * const fmt, va_list ap)
 {
   char buf[1024];
-  size_t nchars;
-  va_list ap;
-
-  if(!curl_dbg_logfile)
-    return;
-
-  va_start(ap, format);
-  nchars = curl_mvsnprintf(buf, sizeof(buf), format, ap);
-  va_end(ap);
+  size_t nchars = curl_mvsnprintf(buf, sizeof(buf), fmt, ap);
 
   if(nchars > (int)sizeof(buf) - 1)
     nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0) {
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-    bool lock_mutex = dbg_mutex_init;
-    if(lock_mutex)
-      Curl_mutex_acquire(&dbg_mutex);
-#endif
     if(sizeof(membuf) - nchars < memwidx) {
       /* flush */
       fwrite(membuf, 1, memwidx, curl_dbg_logfile);
@@ -557,11 +543,35 @@ void curl_dbg_log(const char *format, ...)
     }
     memcpy(&membuf[memwidx], buf, nchars);
     memwidx += nchars;
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-    if(lock_mutex)
-      Curl_mutex_release(&dbg_mutex);
-#endif
   }
 }
 
-#endif /* CURLDEBUG */
+static void curl_dbg_log_locked(const char *format, ...)
+{
+  va_list ap;
+
+  if(!curl_dbg_logfile)
+    return;
+
+  va_start(ap, format);
+  curl_dbg_vlog(format, ap);
+  va_end(ap);
+}
+
+/* this does the writing to the memory tracking log file */
+void curl_dbg_log(const char *format, ...)
+{
+  bool was_locked;
+  va_list ap;
+
+  if(!curl_dbg_logfile)
+    return;
+
+  was_locked = curl_dbg_lock();
+  va_start(ap, format);
+  curl_dbg_vlog(format, ap);
+  va_end(ap);
+  curl_dbg_unlock(was_locked);
+}
+
+#endif /* CURL_MEMDEBUG */

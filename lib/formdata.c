@@ -21,25 +21,19 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 struct Curl_easy;
 
 #include "formdata.h"
+
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
 
 #include "urldata.h" /* for struct Curl_easy */
 #include "mime.h"
-#include "vtls/vtls.h"
-#include "sendf.h"
 #include "strdup.h"
-#include "rand.h"
 #include "bufref.h"
 #include "curlx/fopen.h"
-#include "curlx/warnless.h"
 
 
 #define HTTPPOST_PTRNAME     CURL_HTTPPOST_PTRNAME
@@ -316,7 +310,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct curl_httppost *lastnode = NULL;
 
 #define form_ptr_arg(t) (forms ? (t)(void *)avalue : va_arg(params, t))
-#ifdef HAVE_STDINT_H
+#ifdef HAVE_UINTPTR_T
 #define form_int_arg(t) (forms ? (t)(uintptr_t)avalue : va_arg(params, t))
 #else
 #define form_int_arg(t) (forms ? (t)(void *)avalue : va_arg(params, t))
@@ -846,8 +840,7 @@ CURLcode Curl_getformdata(CURL *data,
   return result;
 }
 
-#else
-/* if disabled */
+#else /* if disabled */
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                           struct curl_httppost **last_post, ...)
 {

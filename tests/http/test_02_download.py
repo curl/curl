@@ -286,7 +286,8 @@ class TestDownload:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
-             '-n', f'{count}', '-P', f'{pause_offset}', '-V', proto, url
+             '-n', f'{count}', '-P', f'{pause_offset}',
+             '-C', env.ca.cert_file, '-V', proto, url
         ])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
@@ -305,7 +306,8 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}',
-            '-P', f'{pause_offset}', '-V', proto, url
+            '-P', f'{pause_offset}', '-C', env.ca.cert_file,
+            '-V', proto, url
         ])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
@@ -314,8 +316,6 @@ class TestDownload:
     # download, several at a time, pause and abort paused
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_23a_lib_abort_paused(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
@@ -331,6 +331,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
+            '-C', env.ca.cert_file,
             '-P', f'{pause_offset}', '-V', proto, url
         ])
         r.check_exit_code(0)
@@ -341,8 +342,6 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_23b_lib_abort_offset(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
@@ -358,6 +357,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
+            '-C', env.ca.cert_file,
             '-A', f'{abort_offset}', '-V', proto, url
         ])
         r.check_exit_code(42)  # CURLE_ABORTED_BY_CALLBACK
@@ -368,8 +368,6 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_23c_lib_fail_offset(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and env.curl_uses_ossl_quic():
-            pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
@@ -385,6 +383,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
+            '-C', env.ca.cert_file,
             '-F', f'{fail_offset}', '-V', proto, url
         ])
         r.check_exit_code(23)  # CURLE_WRITE_ERROR
@@ -395,20 +394,18 @@ class TestDownload:
     # speed limited download
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_24_speed_limit(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
+            pytest.skip("precise h3 rate limits only with ngtcp2")
         count = 1
         url = f'https://{env.authority_for(env.domain1, proto)}/data-1m'
         curl = CurlClient(env=env)
-        speed_limit = 256 * 1024
+        speed_limit = 512 * 1024
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--limit-rate', f'{speed_limit}'
         ])
         r.check_response(count=count, http_status=200)
         dl_speed = r.stats[0]['speed_download']
-        # speed limit is only exact on long durations. Ideally this transfer
-        # would take 4 seconds, but it may end just after 3 because then
-        # we have downloaded the rest and will not wait for the rate
-        # limit to increase again.
-        assert dl_speed <= ((1024*1024)/3), f'{r.stats[0]}'
+        assert dl_speed <= (speed_limit * 1.1), f'{r.stats[0]}'
 
     # make extreme parallel h2 upgrades, check invalid conn reuse
     # before protocol switch has happened
@@ -495,7 +492,8 @@ class TestDownload:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
-             '-n', f'{count}', '-P', f'{pause_offset}', '-V', proto, url
+             '-n', f'{count}', '-P', f'{pause_offset}',
+             '-C', env.ca.cert_file, '-V', proto, url
         ])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
@@ -557,6 +555,7 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
              '-n', f'{count}',
+             '-C', env.ca.cert_file,
              '-e',  # use TLS earlydata
              '-f',  # forbid reuse of connections
              '-r', f'{env.domain1}:{port}:127.0.0.1',
@@ -604,6 +603,7 @@ class TestDownload:
         r = client.run(args=[
              '-n', f'{count}',
              '-m', f'{max_parallel}',
+             '-C', env.ca.cert_file,
              '-x',  # always use a fresh connection
              '-M',  str(max_host_conns),  # limit conns per host
              '-r', f'{env.domain1}:{port}:127.0.0.1',
@@ -642,6 +642,7 @@ class TestDownload:
         r = client.run(args=[
              '-n', f'{count}',
              '-m', f'{max_parallel}',
+             '-C', env.ca.cert_file,
              '-x',  # always use a fresh connection
              '-T',  str(max_total_conns),  # limit total connections
              '-r', f'{env.domain1}:{port}:127.0.0.1',
@@ -681,7 +682,8 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
              '-n', f'{count}', '-m', f'{count}',
-             '-P', f'{pause_offset}', '-V', proto, url
+             '-P', f'{pause_offset}', '-C', env.ca.cert_file,
+             '-V', proto, url
         ])
         r.check_exit_code(0)
 

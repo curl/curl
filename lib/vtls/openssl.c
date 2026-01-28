@@ -21,17 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Source file for all OpenSSL-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  */
-
 #include "../curl_setup.h"
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
-
-#include <limits.h>
 
 /* Wincrypt must be included before anything that could include OpenSSL. */
 #ifdef USE_WIN32_CRYPTO
@@ -46,15 +42,14 @@
 #endif
 
 #include "../urldata.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
+#include "../httpsrr.h"
 #include "../formdata.h" /* for the boundary function */
 #include "../url.h" /* for the ssl config check function */
 #include "../curlx/inet_pton.h"
 #include "openssl.h"
 #include "../connect.h"
-#include "../slist.h"
-#include "../select.h"
-#include "../curlx/wait.h"
+#include "../progress.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
@@ -65,10 +60,10 @@
 #include "../multiif.h"
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
+#include "../curlx/strcopy.h"
 #include "../strdup.h"
 #include "apple.h"
 
-#include <openssl/ssl.h>
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
 #ifndef OPENSSL_NO_DSA
@@ -76,12 +71,10 @@
 #endif
 #include <openssl/dh.h>
 #include <openssl/err.h>
-#include <openssl/md5.h>
 #include <openssl/conf.h>
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
 #include <openssl/bio.h>
-#include <openssl/buffer.h>
 #include <openssl/pkcs12.h>
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
@@ -115,8 +108,6 @@
 #include <openssl/store.h>
 /* this is used in the following conditions to make them easier to read */
 #define OPENSSL_HAS_PROVIDERS
-
-static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
 /* AWS-LC fixed a bug with large buffers in v1.61.0 which also introduced
@@ -125,8 +116,6 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
   (!defined(OPENSSL_IS_AWSLC) || defined(X509_V_ERR_EC_KEY_EXPLICIT_PARAMS))
 #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
-
-#include "../curlx/warnless.h"
 
 #if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
@@ -190,8 +179,6 @@ typedef int numcert_t;
 typedef unsigned long sslerr_t;
 #endif
 #define ossl_valsize_t numcert_t
-
-static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
 static CURLcode push_certinfo(struct Curl_easy *data,
                               BIO *mem, const char *label, int num)
@@ -311,11 +298,11 @@ static CURLcode get_pkey_rsa(struct Curl_easy *data,
   return result;
 }
 
+#ifndef OPENSSL_NO_DSA
 static CURLcode get_pkey_dsa(struct Curl_easy *data,
                              EVP_PKEY *pubkey, BIO *mem, int i)
 {
   CURLcode result = CURLE_OK;
-#ifndef OPENSSL_NO_DSA
 #ifndef HAVE_EVP_PKEY_GET_PARAMS
   DSA *dsa = EVP_PKEY_get0_DSA(pubkey);
 #endif /* !HAVE_EVP_PKEY_GET_PARAMS */
@@ -343,9 +330,9 @@ static CURLcode get_pkey_dsa(struct Curl_easy *data,
   FREE_PKEY_PARAM_BIGNUM(q);
   FREE_PKEY_PARAM_BIGNUM(g);
   FREE_PKEY_PARAM_BIGNUM(pub_key);
-#endif /* !OPENSSL_NO_DSA */
   return result;
 }
+#endif /* !OPENSSL_NO_DSA */
 
 static CURLcode get_pkey_dh(struct Curl_easy *data,
                             EVP_PKEY *pubkey, BIO *mem, int i)
@@ -493,9 +480,11 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
         result = get_pkey_rsa(data, pubkey, mem, i);
         break;
 
+#ifndef OPENSSL_NO_DSA
       case EVP_PKEY_DSA:
         result = get_pkey_dsa(data, pubkey, mem, i);
         break;
+#endif
 
       case EVP_PKEY_DH:
         result = get_pkey_dh(data, pubkey, mem, i);
@@ -526,7 +515,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
   return result;
 }
 
-#endif /* quiche or OpenSSL */
+#endif /* USE_QUICHE || USE_OPENSSL */
 
 #ifdef USE_OPENSSL
 
@@ -782,8 +771,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
-    if(strlen(msg) < size)
-      strcpy(buf, msg);
+    curlx_strcopy(buf, size, msg, strlen(msg));
   }
 
   return buf;
@@ -1034,8 +1022,8 @@ static int enginecheck(struct Curl_easy *data,
                        SSL_CTX* ctx,
                        const char *key_file,
                        const char *key_passwd)
-#ifdef USE_OPENSSL_ENGINE
 {
+#ifdef USE_OPENSSL_ENGINE
   EVP_PKEY *priv_key = NULL;
 
   /* Implicitly use pkcs11 engine if none was provided and the
@@ -1078,22 +1066,20 @@ static int enginecheck(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)key_file;
   (void)key_passwd;
   failf(data, "SSL_FILETYPE_ENGINE not supported for private key");
   return 0;
-}
 #endif
+}
 
 static int providercheck(struct Curl_easy *data,
                          SSL_CTX* ctx,
                          const char *key_file)
-#ifdef OPENSSL_HAS_PROVIDERS
 {
+#ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * key_file is a PKCS#11 URI */
@@ -1167,22 +1153,20 @@ static int providercheck(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)key_file;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for private key");
   return 0;
-}
 #endif
+}
 
 static int engineload(struct Curl_easy *data,
                       SSL_CTX* ctx,
                       const char *cert_file)
+{
 /* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <=3.8.3 */
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
-{
   char error_buffer[256];
   /* Implicitly use pkcs11 engine if none was provided and the
    * cert_file is a PKCS#11 URI */
@@ -1212,8 +1196,7 @@ static int engineload(struct Curl_easy *data,
     }
 
     /* Load the certificate from the engine */
-    if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name,
-                        0, &params, NULL, 1)) {
+    if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name, 0, &params, NULL, 1)) {
       failf(data, "ssl engine cannot load client cert with id '%s' [%s]",
             cert_file,
             ossl_strerror(ERR_get_error(), error_buffer,
@@ -1240,21 +1223,19 @@ static int engineload(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)cert_file;
   failf(data, "SSL_FILETYPE_ENGINE not supported for certificate");
   return 0;
-}
 #endif
+}
 
 static int providerload(struct Curl_easy *data,
                         SSL_CTX* ctx,
                         const char *cert_file)
-#ifdef OPENSSL_HAS_PROVIDERS
 {
+#ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * cert_file is a PKCS#11 URI */
@@ -1318,15 +1299,13 @@ static int providerload(struct Curl_easy *data,
     return 0;
   }
   return 1;
-}
 #else
-{
   (void)ctx;
   (void)cert_file;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for certificate");
   return 0;
-}
 #endif
+}
 
 static int pkcs12load(struct Curl_easy *data,
                       SSL_CTX* ctx,
@@ -1346,7 +1325,7 @@ static int pkcs12load(struct Curl_easy *data,
     if(!cert_bio) {
       failf(data, "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
-                          sizeof(error_buffer)) );
+                          sizeof(error_buffer)));
       return 0;
     }
   }
@@ -1355,7 +1334,7 @@ static int pkcs12load(struct Curl_easy *data,
     if(!cert_bio) {
       failf(data, "BIO_new return NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
-                          sizeof(error_buffer)) );
+                          sizeof(error_buffer)));
       return 0;
     }
 
@@ -1442,7 +1421,6 @@ fail:
     return 0; /* failure! */
   return 1;
 }
-
 
 static CURLcode client_cert(struct Curl_easy *data,
                             SSL_CTX* ctx,
@@ -1617,7 +1595,7 @@ static CURLcode client_cert(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 /* returns non-zero on failure */
 static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
 {
@@ -1866,7 +1844,6 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   char buf[1024];
   int nread = -1, err;
-  unsigned long sslerr;
   size_t i;
 
   DEBUGASSERT(octx);
@@ -1959,12 +1936,14 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   default:
     /* Server seems to have closed the connection without sending us
      * a close notify. */
-    sslerr = ERR_get_error();
-    CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
-                (sslerr ?
-                 ossl_strerror(sslerr, buf, sizeof(buf)) :
-                 SSL_ERROR_to_str(err)),
-                SOCKERRNO);
+    {
+      VERBOSE(unsigned long sslerr = ERR_get_error());
+      CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
+                  (sslerr ?
+                   ossl_strerror(sslerr, buf, sizeof(buf)) :
+                   SSL_ERROR_to_str(err)),
+                  SOCKERRNO);
+    }
     *done = TRUE;
     result = CURLE_OK;
     break;
@@ -2241,7 +2220,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   return result;
 }
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
 static CURLcode verifystatus(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ossl_ctx *octx)
@@ -2601,14 +2580,9 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   (void)ssl;
 }
 
-/* Check for ALPN support. */
-#ifndef OPENSSL_NO_TLSEXT
-#  define HAS_ALPN_OPENSSL
-#endif
-
-static CURLcode
-ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
-                             unsigned int ssl_version_min)
+static CURLcode ossl_set_ssl_version_min_max(struct Curl_cfilter *cf,
+                                             SSL_CTX *ctx,
+                                             unsigned int ssl_version_min)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   /* first, TLS min version... */
@@ -2739,7 +2713,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     result = Curl_ssl_session_create2(der_session_buf, der_session_size,
                                       ietf_tls_id, alpn,
                                       (curl_off_t)time(NULL) +
-                                      SSL_SESSION_get_timeout(session),
+                                        SSL_SESSION_get_timeout(session),
                                       earlydata_max, qtp_clone, quic_tp_len,
                                       &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
@@ -2764,8 +2738,7 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     struct ssl_connect_data *connssl = cf->ctx;
     Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), connssl->negotiated.alpn,
-                          NULL, 0);
+                          SSL_version(ssl), connssl->negotiated.alpn, NULL, 0);
   }
   return 0;
 }
@@ -2868,7 +2841,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
       if(!pContext)
         break;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
       else {
         char cert_name[256];
         if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
@@ -2957,7 +2930,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
          such as duplicate certificate, which is allowed by MS but not
          OpenSSL. */
       if(X509_STORE_add_cert(store, x509) == 1) {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef DEBUGBUILD
         infof(data, "SSL: Imported cert");
 #endif
         *padded = TRUE;
@@ -3156,7 +3129,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
      * revocation */
     lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
     if(!lookup ||
-       (!X509_load_crl_file(lookup, ssl_crlfile, X509_FILETYPE_PEM)) ) {
+       (!X509_load_crl_file(lookup, ssl_crlfile, X509_FILETYPE_PEM))) {
       failf(data, "error loading CRL file: %s", ssl_crlfile);
       return CURLE_SSL_CRL_BADFILE;
     }
@@ -3196,6 +3169,7 @@ struct ossl_x509_share {
   X509_STORE *store;    /* cached X509 store or NULL if none */
   struct curltime time; /* when the cached store was created */
   BIT(store_is_empty);  /* no certs/paths/blobs are in the store */
+  BIT(no_partialchain); /* keep partial chain state */
 };
 
 static void oss_x509_share_free(void *key, size_t key_len, void *p)
@@ -3212,15 +3186,14 @@ static void oss_x509_share_free(void *key, size_t key_len, void *p)
   curlx_free(share);
 }
 
-static bool ossl_cached_x509_store_expired(const struct Curl_easy *data,
+static bool ossl_cached_x509_store_expired(struct Curl_easy *data,
                                            const struct ossl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   if(cfg->ca_cache_timeout < 0)
     return FALSE;
   else {
-    struct curltime now = curlx_now();
-    timediff_t elapsed_ms = curlx_timediff_ms(now, mb->time);
+    timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &mb->time);
     timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
     return elapsed_ms >= timeout_ms;
@@ -3228,17 +3201,21 @@ static bool ossl_cached_x509_store_expired(const struct Curl_easy *data,
 }
 
 static bool ossl_cached_x509_store_different(struct Curl_cfilter *cf,
+                                             const struct Curl_easy *data,
                                              const struct ossl_x509_share *mb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config =
+    Curl_ssl_cf_get_config(cf, CURL_UNCONST(data));
+  if(mb->no_partialchain != ssl_config->no_partialchain)
+    return TRUE;
   if(!mb->CAfile || !conn_config->CAfile)
     return mb->CAfile != conn_config->CAfile;
-
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
 static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
-                                              const struct Curl_easy *data,
+                                              struct Curl_easy *data,
                                               bool *pempty)
 {
   struct Curl_multi *multi = data->multi;
@@ -3252,16 +3229,16 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
                                  sizeof(MPROTO_OSSL_X509_KEY) - 1) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
-     !ossl_cached_x509_store_different(cf, share)) {
+     !ossl_cached_x509_store_different(cf, data, share)) {
     store = share->store;
-    *pempty = share->store_is_empty;
+    *pempty = (bool)share->store_is_empty;
   }
 
   return store;
 }
 
 static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
-                                       const struct Curl_easy *data,
+                                       struct Curl_easy *data,
                                        X509_STORE *store,
                                        bool is_empty)
 {
@@ -3291,6 +3268,8 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
 
   if(X509_STORE_up_ref(store)) {
     char *CAfile = NULL;
+    struct ssl_config_data *ssl_config =
+      Curl_ssl_cf_get_config(cf, CURL_UNCONST(data));
 
     if(conn_config->CAfile) {
       CAfile = curlx_strdup(conn_config->CAfile);
@@ -3305,10 +3284,11 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       curlx_free(share->CAfile);
     }
 
-    share->time = curlx_now();
+    share->time = *Curl_pgrs_now(data);
     share->store = store;
     share->store_is_empty = is_empty;
     share->CAfile = CAfile;
+    share->no_partialchain = ssl_config->no_partialchain;
   }
 }
 
@@ -3344,7 +3324,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 
     result = ossl_populate_x509_store(cf, data, octx, store);
     if(result == CURLE_OK && cache_criteria_met) {
-      ossl_set_cached_x509_store(cf, data, store, octx->store_is_empty);
+      ossl_set_cached_x509_store(cf, data, store, (bool)octx->store_is_empty);
     }
   }
 
@@ -3364,7 +3344,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_cfg = Curl_ssl_cf_get_primary_config(cf);
   struct alpn_spec alpns;
-  char error_buffer[256];
   CURLcode result;
 
   Curl_alpn_copy(&alpns, alpns_requested);
@@ -3385,38 +3364,49 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                                     (long)der_sessionid_size);
       if(ssl_session) {
         if(!SSL_set_session(octx->ssl, ssl_session)) {
+          VERBOSE(char error_buffer[256]);
           infof(data, "SSL: SSL_set_session not accepted, "
                 "continuing without: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
                               sizeof(error_buffer)));
         }
         else {
-          infof(data, "SSL reusing session with ALPN '%s'",
-                scs->alpn ? scs->alpn : "-");
-          octx->reused_session = TRUE;
+          if(conn_cfg->verifypeer &&
+             (SSL_get_verify_result(octx->ssl) != X509_V_OK)) {
+            /* Session was from unverified connection, cannot reuse here */
+            SSL_set_session(octx->ssl, NULL);
+            infof(data, "SSL session not peer verified, not reusing");
+          }
+          else {
+            infof(data, "SSL reusing session with ALPN '%s'",
+                  scs->alpn ? scs->alpn : "-");
+            octx->reused_session = TRUE;
+            infof(data, "SSL verify result: %lx",
+                  SSL_get_verify_result(octx->ssl));
 #ifdef HAVE_OPENSSL_EARLYDATA
-          if(ssl_config->earlydata && scs->alpn &&
-             SSL_SESSION_get_max_early_data(ssl_session) &&
-             !cf->conn->connect_only &&
-             (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
-            bool do_early_data = FALSE;
-            if(sess_reuse_cb) {
-              result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
-              if(result) {
-                SSL_SESSION_free(ssl_session);
-                return result;
+            if(ssl_config->earlydata && scs->alpn &&
+               SSL_SESSION_get_max_early_data(ssl_session) &&
+               !cf->conn->connect_only &&
+               (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
+              bool do_early_data = FALSE;
+              if(sess_reuse_cb) {
+                result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
+                if(result) {
+                  SSL_SESSION_free(ssl_session);
+                  return result;
+                }
+              }
+              if(do_early_data) {
+                /* We only try the ALPN protocol the session used before,
+                 * otherwise we might send early data for the wrong protocol */
+                Curl_alpn_restrict_to(&alpns, scs->alpn);
               }
             }
-            if(do_early_data) {
-              /* We only try the ALPN protocol the session used before,
-               * otherwise we might send early data for the wrong protocol */
-              Curl_alpn_restrict_to(&alpns, scs->alpn);
-            }
-          }
 #else
-          (void)ssl_config;
-          (void)sess_reuse_cb;
+            (void)ssl_config;
+            (void)sess_reuse_cb;
 #endif
+          }
         }
         SSL_SESSION_free(ssl_session);
       }
@@ -3427,7 +3417,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
     Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   }
 
-#ifdef HAS_ALPN_OPENSSL
   if(alpns.count) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
@@ -3441,7 +3430,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#endif
 
   return CURLE_OK;
 }
@@ -3596,7 +3584,7 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
 
   SSL_set_app_data(octx->ssl, ssl_user_data);
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   if(Curl_ssl_cf_get_primary_config(cf)->verifystatus)
     SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
 #endif
@@ -3622,7 +3610,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                                      alpns_requested, sess_reuse_cb);
 }
 
-
 static CURLcode ossl_init_method(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct ssl_peer *peer,
@@ -3633,11 +3620,11 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
 
   *pmethod = NULL;
   *pssl_version_min = conn_config->version;
+  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
   switch(peer->transport) {
   case TRNSPRT_TCP:
     /* check to see if we have been told to use an explicit SSL/TLS version */
     switch(*pssl_version_min) {
-    case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
@@ -3666,11 +3653,7 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-#ifdef USE_OPENSSL_QUIC
-    *pmethod = OSSL_QUIC_client_method();
-#else
     *pmethod = TLS_method();
-#endif
     break;
   default:
     failf(data, "unsupported transport %d in SSL init", peer->transport);
@@ -3787,13 +3770,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(!ssl_config->enable_beast)
     ctx_options &= ~(ctx_option_t)SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 
+  DEBUGASSERT(ssl_version_min != CURL_SSLVERSION_DEFAULT);
   switch(ssl_version_min) {
   case CURL_SSLVERSION_SSLv2:
   case CURL_SSLVERSION_SSLv3:
     return CURLE_NOT_BUILT_IN;
 
     /* "--tlsv<x.y>" options mean TLS >= version <x.y> */
-  case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:   /* TLS >= version 1.0 */
   case CURL_SSLVERSION_TLSv1_0: /* TLS >= version 1.0 */
   case CURL_SSLVERSION_TLSv1_1: /* TLS >= version 1.1 */
@@ -3821,7 +3804,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      OpenSSL supports processing "jumbo TLS record" (8 TLS records) in one go
      for some algorithms, so match that here.
      Experimentation shows that a slightly larger buffer is needed
-      to avoid short reads.
+     to avoid short reads.
 
      However using a large buffer (8 packets) actually decreases performance.
      4 packets is better.
@@ -4002,8 +3985,8 @@ static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
     connssl->earlydata_state = ssl_earlydata_await;
     connssl->state = ssl_connection_deferred;
     result = Curl_alpn_set_negotiated(cf, data, connssl,
-                    (const unsigned char *)scs->alpn,
-                    scs->alpn ? strlen(scs->alpn) : 0);
+                                      (const unsigned char *)scs->alpn,
+                                      scs->alpn ? strlen(scs->alpn) : 0);
     *do_early_data = !result;
   }
   return result;
@@ -4011,7 +3994,7 @@ static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
 
 void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     int psigtype_nid = NID_undef;
     const char *negotiated_group_name = NULL;
@@ -4036,7 +4019,7 @@ void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx)
 #else
   (void)data;
   (void)octx;
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 }
 
 static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
@@ -4078,14 +4061,13 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   SSL_set_bio(octx->ssl, bio, bio);
 #endif
 
-#ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn && (connssl->state != ssl_connection_deferred)) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
-#endif
+
   connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
 }
@@ -4357,8 +4339,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         /* trace retry_configs if we got some */
         ossl_trace_ech_retry_configs(data, octx->ssl, 0);
       }
-      if(rv != SSL_ECH_STATUS_SUCCESS
-         && data->set.tls_ech & CURLECH_HARD) {
+      if(rv != SSL_ECH_STATUS_SUCCESS && (data->set.tls_ech & CURLECH_HARD)) {
         infof(data, "ECH: ech-hard failed");
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -4368,7 +4349,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
 #endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST && !HAVE_BORINGSSL_LIKE */
 
-#ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
      * negotiated
      */
@@ -4379,7 +4359,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
       return Curl_alpn_set_negotiated(cf, data, connssl, neg_protocol, len);
     }
-#endif
 
     return CURLE_OK;
   }
@@ -4442,7 +4421,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509 *cert,
 
 #if !(defined(LIBRESSL_VERSION_NUMBER) && \
   LIBRESSL_VERSION_NUMBER < 0x3060000fL) && \
-  !defined(HAVE_BORINGSSL_LIKE) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  !defined(HAVE_BORINGSSL_LIKE) && defined(CURLVERBOSE)
 static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 {
   STACK_OF(X509) *certstack;
@@ -4609,7 +4588,7 @@ static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
   return result;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 #define MAX_CERT_NAME_LENGTH 2048
 static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
@@ -4660,8 +4639,7 @@ out:
   curlx_dyn_free(&dname);
   return result;
 }
-#endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
-
+#endif /* CURLVERBOSE */
 
 #ifdef USE_APPLE_SECTRUST
 struct ossl_certs_ctx {
@@ -4713,8 +4691,15 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
 
   if(!chain.num_certs &&
      (conn_config->verifypeer || conn_config->verifyhost)) {
-    failf(data, "SSL: could not get peer certificate");
-    result = CURLE_PEER_FAILED_VERIFICATION;
+    if(!octx->reused_session) {
+      failf(data, "SSL: could not get peer certificate chain");
+      result = CURLE_PEER_FAILED_VERIFICATION;
+    }
+    else {
+      /* when session was reused, there is no peer cert chain */
+      *pverified = FALSE;
+      return CURLE_OK;
+    }
   }
   else {
 #ifdef HAVE_BORINGSSL_LIKE
@@ -4751,7 +4736,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   long ossl_verify;
   X509 *server_cert;
   bool verified = FALSE;
-#ifdef USE_APPLE_SECTRUST
+#if !defined(OPENSSL_NO_OCSP) && defined(USE_APPLE_SECTRUST)
   bool sectrust_verified = FALSE;
 #endif
 
@@ -4774,7 +4759,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     goto out;
   }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   result = ossl_infof_cert(cf, data, server_cert);
   if(result)
     goto out;
@@ -4790,6 +4775,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   ossl_verify = SSL_get_verify_result(octx->ssl);
   ssl_config->certverifyresult = ossl_verify;
+  infof(data, "OpenSSL verify result: %lx", ossl_verify);
 
   verified = (ossl_verify == X509_V_OK);
   if(verified)
@@ -4806,7 +4792,9 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
       ssl_config->certverifyresult = X509_V_OK;
+#ifndef OPENSSL_NO_OCSP
       sectrust_verified = TRUE;
+#endif
     }
   }
 #endif
@@ -4822,7 +4810,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     infof(data, " SSL certificate verification failed, continuing anyway!");
   }
 
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   if(conn_config->verifystatus &&
 #ifdef USE_APPLE_SECTRUST
      !sectrust_verified && /* already verified via apple sectrust, cannot
@@ -5033,7 +5021,7 @@ static bool ossl_data_pending(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   (void)data;
-  return connssl->input_pending;
+  return (bool)connssl->input_pending;
 }
 
 static CURLcode ossl_send(struct Curl_cfilter *cf,
@@ -5053,7 +5041,6 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   int nwritten;
 
-  (void)data;
   DEBUGASSERT(octx);
   *pnwritten = 0;
   ERR_clear_error();
@@ -5146,7 +5133,6 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   int nread;
 
-  (void)data;
   DEBUGASSERT(octx);
 
   *pnread = 0;
@@ -5377,7 +5363,6 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-#ifndef OPENSSL_NO_SHA256
 static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
                                size_t tmplen,
                                unsigned char *sha256sum /* output */,
@@ -5399,11 +5384,10 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
   EVP_MD_CTX_destroy(mdctx);
   return CURLE_OK;
 }
-#endif
 
 static bool ossl_cert_status_request(void)
 {
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
   return TRUE;
 #else
   return FALSE;
@@ -5439,7 +5423,11 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #endif
   SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY |
-  SSLSUPP_CIPHER_LIST,
+  SSLSUPP_CIPHER_LIST |
+  SSLSUPP_ISSUERCERT |
+  SSLSUPP_ISSUERCERT_BLOB |
+  SSLSUPP_SSL_EC_CURVES |
+  SSLSUPP_CRLFILE,
 
   sizeof(struct ossl_ctx),
 
@@ -5458,11 +5446,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_set_engine,          /* set_engine or provider */
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
-#ifndef OPENSSL_NO_SHA256
   ossl_sha256sum,           /* sha256sum */
-#else
-  NULL,                     /* sha256sum */
-#endif
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
   ossl_get_channel_binding  /* get_channel_binding */

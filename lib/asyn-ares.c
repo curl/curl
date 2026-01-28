@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef CURLRES_ARES
@@ -32,7 +31,6 @@
  * as defined in asyn.h, nothing else belongs in this file!
  **********************************************************************/
 
-#include <limits.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -49,10 +47,9 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "sendf.h"
+#include "curl_addrinfo.h"
+#include "curl_trc.h"
 #include "hostip.h"
-#include "hash.h"
-#include "curl_share.h"
 #include "url.h"
 #include "multiif.h"
 #include "curlx/inet_pton.h"
@@ -311,7 +308,8 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
      /* This is only set to non-zero if the timer was started. */
      (ares->happy_eyeballs_dns_time.tv_sec ||
       ares->happy_eyeballs_dns_time.tv_usec) &&
-     (curlx_timediff_ms(curlx_now(), ares->happy_eyeballs_dns_time) >=
+     (curlx_ptimediff_ms(Curl_pgrs_now(data),
+                        &ares->happy_eyeballs_dns_time) >=
       HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
@@ -337,10 +335,13 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
         Curl_dnscache_mk_entry(data, ares->temp_ai,
                                data->state.async.hostname, 0,
                                data->state.async.port, FALSE);
-      if(data->state.async.dns)
-        ares->temp_ai = NULL; /* temp_ai now owned by entry */
+      if(!data->state.async.dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+      ares->temp_ai = NULL; /* temp_ai now owned by entry */
 #ifdef HTTPSRR_WORKS
-      if(data->state.async.dns) {
+      {
         struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&ares->hinfo);
         if(!lhrr)
           result = CURLE_OUT_OF_MEMORY;
@@ -348,7 +349,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
           data->state.async.dns->hinfo = lhrr;
       }
 #endif
-      if(!result && data->state.async.dns)
+      if(!result)
         result = Curl_dnscache_add(data, data->state.async.dns);
     }
     /* if we have not found anything, report the proper
@@ -390,12 +391,11 @@ CURLcode Curl_async_await(struct Curl_easy *data,
   struct async_ares_ctx *ares = &data->state.async.ares;
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms;
-  struct curltime now = curlx_now();
 
   DEBUGASSERT(entry);
   *entry = NULL; /* clear on entry */
 
-  timeout_ms = Curl_timeleft_ms(data, &now, TRUE);
+  timeout_ms = Curl_timeleft_ms(data);
   if(timeout_ms < 0) {
     /* already expired! */
     connclose(data->conn, "Timed out before name resolve started");
@@ -439,15 +439,14 @@ CURLcode Curl_async_await(struct Curl_easy *data,
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
-      struct curltime now2 = curlx_now();
-      timediff_t elapsed_ms = curlx_timediff_ms(now2, now); /* spent time */
+      struct curltime now = curlx_now(); /* update in loop */
+      timediff_t elapsed_ms = curlx_ptimediff_ms(&now, Curl_pgrs_now(data));
       if(elapsed_ms <= 0)
         timeout_ms -= 1; /* always deduct at least 1 */
       else if(elapsed_ms > timeout_ms)
         timeout_ms = -1;
       else
         timeout_ms -= elapsed_ms;
-      now = now2; /* for next loop */
     }
     if(timeout_ms < 0)
       result = CURLE_OPERATION_TIMEDOUT;
@@ -583,7 +582,7 @@ static void async_ares_hostbyname_cb(void *user_data,
        timeout to prevent it. After all, we do not even know where in the
        c-ares retry cycle each request is.
     */
-    ares->happy_eyeballs_dns_time = curlx_now();
+    ares->happy_eyeballs_dns_time = *Curl_pgrs_now(data);
     Curl_expire(data, HAPPY_EYEBALLS_DNS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS_DNS);
   }
 }
@@ -744,7 +743,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
   ares->ares_status = ARES_ENOTFOUND;
   ares->result = CURLE_OK;
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS) && \
+#if defined(CURLVERBOSE) && \
   ARES_VERSION >= 0x011800  /* >= v1.24.0 */
   if(CURL_TRC_DNS_is_verbose(data)) {
     char *csv = ares_get_servers_csv(ares->channel);
@@ -841,7 +840,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
   const char *servers = data->set.str[STRING_DNS_SERVERS];
   int ares_result = ARES_SUCCESS;
 
-#if defined(CURLDEBUG) && defined(HAVE_CARES_SERVERS_CSV)
+#if defined(DEBUGBUILD) && defined(HAVE_CARES_SERVERS_CSV)
   if(getenv("CURL_DNS_SERVER"))
     servers = getenv("CURL_DNS_SERVER");
 #endif
@@ -876,7 +875,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   }
-#else /* too old c-ares version! */
+#else /* c-ares version too old! */
   (void)data;
   (void)(ares_result);
 #endif

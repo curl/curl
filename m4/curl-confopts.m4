@@ -73,7 +73,6 @@ dnl --enable-ares or --disable-ares, and
 dnl set shell variable want_ares as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_ARES], [
-dnl   AC_BEFORE([$0],[CURL_CHECK_OPTION_THREADS])dnl
   AC_BEFORE([$0],[CURL_CHECK_LIB_ARES])dnl
   AC_MSG_CHECKING([whether to enable c-ares for DNS lookups])
   OPT_ARES="default"
@@ -93,63 +92,12 @@ AS_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
     *)
       dnl --enable-ares option used
       want_ares="yes"
-      if test -n "$enableval" && test "$enableval" != "yes"; then
+      if test -n "$enableval" && test "x$enableval" != "xyes"; then
         want_ares_path="$enableval"
       fi
       ;;
   esac
   AC_MSG_RESULT([$want_ares])
-])
-
-
-dnl CURL_CHECK_OPTION_CURLDEBUG
-dnl -------------------------------------------------
-dnl Verify if configure has been invoked with option
-dnl --enable-curldebug or --disable-curldebug, and set
-dnl shell variable want_curldebug value as appropriate.
-
-AC_DEFUN([CURL_CHECK_OPTION_CURLDEBUG], [
-  AC_BEFORE([$0],[CURL_CHECK_CURLDEBUG])dnl
-  AC_MSG_CHECKING([whether to enable curl debug memory tracking])
-  OPT_CURLDEBUG_BUILD="default"
-  AC_ARG_ENABLE(curldebug,
-AS_HELP_STRING([--enable-curldebug],[Enable curl debug memory tracking])
-AS_HELP_STRING([--disable-curldebug],[Disable curl debug memory tracking]),
-  OPT_CURLDEBUG_BUILD=$enableval)
-  case "$OPT_CURLDEBUG_BUILD" in
-    no)
-      dnl --disable-curldebug option used
-      want_curldebug="no"
-      AC_MSG_RESULT([no])
-      ;;
-    default)
-      dnl configure's curldebug option not specified. Initially we will
-      dnl handle this as a request to use the same setting as option
-      dnl --enable-debug. IOW, initially, for debug-enabled builds
-      dnl this will be handled as a request to enable curldebug if
-      dnl possible, and for debug-disabled builds this will be handled
-      dnl as a request to disable curldebug.
-      if test "$want_debug" = "yes"; then
-        AC_MSG_RESULT([(assumed) yes])
-      else
-        AC_MSG_RESULT([no])
-      fi
-      want_curldebug_assumed="yes"
-      want_curldebug="$want_debug"
-      ;;
-    *)
-      dnl --enable-curldebug option used.
-      dnl The use of this option value is a request to enable curl's
-      dnl debug memory tracking for the libcurl library. This can only
-      dnl be done when some requisites are simultaneously satisfied.
-      dnl Later on, these requisites are verified and if they are not
-      dnl fully satisfied the option will be ignored and act as if
-      dnl --disable-curldebug had been given setting shell variable
-      dnl want_curldebug to 'no'.
-      want_curldebug="yes"
-      AC_MSG_RESULT([yes])
-      ;;
-  esac
 ])
 
 
@@ -161,7 +109,6 @@ dnl variable want_debug value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
   AC_BEFORE([$0],[CURL_CHECK_OPTION_WARNINGS])dnl
-  AC_BEFORE([$0],[CURL_CHECK_OPTION_CURLDEBUG])dnl
   AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable debug build options])
   OPT_DEBUG_BUILD="default"
@@ -293,7 +240,7 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
   AC_MSG_CHECKING([whether to disable dependency on -lrt])
   OPT_RT="default"
   AC_ARG_ENABLE(rt,
- AS_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
+AS_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
   OPT_RT=$enableval)
   case "$OPT_RT" in
     no)
@@ -392,15 +339,15 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
-  if test "x$curl_cv_func_fcntl_o_nonblock" = "xyes"; then
+  if test "$curl_cv_func_fcntl_o_nonblock" = "yes"; then
     tst_method="fcntl O_NONBLOCK"
-  elif test "x$curl_cv_func_ioctl_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctl_fionbio" = "yes"; then
     tst_method="ioctl FIONBIO"
-  elif test "x$curl_cv_func_ioctlsocket_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctlsocket_fionbio" = "yes"; then
     tst_method="ioctlsocket FIONBIO"
-  elif test "x$curl_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctlsocket_camel_fionbio" = "yes"; then
     tst_method="IoctlSocket FIONBIO"
-  elif test "x$curl_cv_func_setsockopt_so_nonblock" = "xyes"; then
+  elif test "$curl_cv_func_setsockopt_so_nonblock" = "yes"; then
     tst_method="setsockopt SO_NONBLOCK"
   fi
   AC_MSG_RESULT([$tst_method])
@@ -433,7 +380,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   else
     AC_MSG_RESULT([no])
   fi
-  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test x$doing_symbol_hiding = xyes)
+  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test "$doing_symbol_hiding" = "yes")
   AC_SUBST(CFLAG_CURL_SYMBOL_HIDING)
 ])
 
@@ -456,7 +403,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       dnl c-ares library path has been specified
       ARES_PCDIR="$want_ares_path/lib/pkgconfig"
       CURL_CHECK_PKGCONFIG(libcares, [$ARES_PCDIR])
-      if test "$PKGCONFIG" != "no" ; then
+      if test "$PKGCONFIG" != "no"; then
         ares_LIBS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
           $PKGCONFIG --libs-only-l libcares`
         ares_LDFLAGS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
@@ -475,7 +422,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     else
       dnl c-ares path not specified, use defaults
       CURL_CHECK_PKGCONFIG(libcares)
-      if test "$PKGCONFIG" != "no" ; then
+      if test "$PKGCONFIG" != "no"; then
         ares_LIBS=`$PKGCONFIG --libs-only-l libcares`
         ares_LDFLAGS=`$PKGCONFIG --libs-only-L libcares`
         ares_CPPFLAGS=`$PKGCONFIG --cflags-only-I libcares`

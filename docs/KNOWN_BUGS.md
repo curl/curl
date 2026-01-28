@@ -161,7 +161,7 @@ Passing in a Unicode filename with -o:
 
 Passing in Unicode character with -d:
 
- [curl issue 12231](https://github.com/curl/curl/issues/12231)
+[curl issue 12231](https://github.com/curl/curl/issues/12231)
 
 Windows Unicode builds use the home directory in current locale.
 
@@ -181,9 +181,9 @@ libcurl are not equipped for that at the moment except when built with
 _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as a
 locale.
 
- https://curl.se/bug/?i=345
- https://curl.se/bug/?i=731
- https://curl.se/bug/?i=3747
+https://curl.se/bug/?i=345
+https://curl.se/bug/?i=731
+https://curl.se/bug/?i=3747
 
 NTLM authentication and Unicode
 
@@ -215,8 +215,10 @@ what `winhttp` does. See https://curl.se/bug/view.cgi?id=535
 
 ## NTLM does not support password with Unicode 'SECTION SIGN' character
 
- https://en.wikipedia.org/wiki/Section_sign
- [curl issue 2120](https://github.com/curl/curl/issues/2120)
+Code point: U+00A7
+
+https://en.wikipedia.org/wiki/Section_sign
+[curl issue 2120](https://github.com/curl/curl/issues/2120)
 
 ## libcurl can fail to try alternatives with `--proxy-any`
 
@@ -231,7 +233,7 @@ using NTLM.
 
 ## Do not clear digest for single realm
 
- [curl issue 3267](https://github.com/curl/curl/issues/3267)
+[curl issue 3267](https://github.com/curl/curl/issues/3267)
 
 ## SHA-256 digest not supported in Windows SSPI builds
 
@@ -243,7 +245,7 @@ with `SEC_E_QOP_NOT_SUPPORTED` which causes curl to fail with
 Microsoft does not document supported digest algorithms and that `SEC_E` error
 code is not a documented error for `InitializeSecurityContext` (digest).
 
- [curl issue 6302](https://github.com/curl/curl/issues/6302)
+[curl issue 6302](https://github.com/curl/curl/issues/6302)
 
 ## curl never completes Negotiate over HTTP
 
@@ -306,7 +308,7 @@ In the `SSH_SFTP_INIT` state for libssh, the ssh session working mode is set
 to blocking mode. If the network is suddenly disconnected during sftp
 transmission, curl is stuck, even if curl is configured with a timeout.
 
- [curl issue 8632](https://github.com/curl/curl/issues/8632)
+[curl issue 8632](https://github.com/curl/curl/issues/8632)
 
 ## Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
@@ -346,6 +348,18 @@ authenticated username and reports the supported data-protection level, but
 then immediately deletes the negotiated SSPI security context and frees the
 credentials before returning. The negotiated context is not stored on the
 connection and is therefore never used to protect later SOCKS5 traffic.
+
+## cannot use absolute Unix domain filename for SOCKS on Windows
+
+curl supports using a Unix domain socket path for speaking SOCKS to a proxy,
+by providing a filename in the URL used for `-x` (`CURLOPT_PROXY`), but that
+path cannot be a proper absolute Windows path with a drive letter etc.
+
+A solution for this probably requires that we add and provide a
+`--unix-socket` (`CURLOPT_UNIX_SOCKET_PATH`) option alternative for proxy
+communication.
+
+See [curl issue 19825](https://github.com/curl/curl/issues/19825)
 
 # Internals
 
@@ -494,7 +508,7 @@ cannot be built.
 
 ## HTTP/2 prior knowledge over proxy
 
- [curl issue 12641](https://github.com/curl/curl/issues/12641)
+[curl issue 12641](https://github.com/curl/curl/issues/12641)
 
 ## HTTP/2 frames while in the connection pool kill reuse
 

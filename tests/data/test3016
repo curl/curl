@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ FILE
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
@@ -25,7 +25,6 @@ file://%FILE_PWD/
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

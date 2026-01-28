@@ -83,11 +83,6 @@ static int test_resolve(int argc, char *argv[])
     return 1;
   }
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
 #ifdef CURLRES_IPV6
   if(use_ipv6) {
     /* Check that the system has IPv6 enabled before checking the resolver */

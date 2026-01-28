@@ -36,7 +36,7 @@ but you would still prefer to avoid implementing all the magic of figuring out
 the new URL.
 
 This URL is also set if the CURLOPT_MAXREDIRS(3) limit prevented a redirect to
-happen (since 7.54.1).
+happen.
 
 # %PROTOCOLS%
 
@@ -47,10 +47,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK) {
       char *url = NULL;
       curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &url);
       if(url)

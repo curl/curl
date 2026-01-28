@@ -28,8 +28,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
   pull_request:
     branches:
@@ -39,8 +37,6 @@ name: 'Linux Old'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
       - 'projects/**'
 
 concurrency:
@@ -52,12 +48,13 @@ permissions: {}
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
+  CURL_TEST_MIN: 1500
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
   cmake-autotools:
     name: 'autotools & cmake'
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     container: 'debian:stretch'
 
     env:
@@ -91,7 +88,7 @@ jobs:
           rm -f "${fn}".tar*.gz
           mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -161,9 +158,9 @@ jobs:
         run: |
           mkdir bld-am
           cd bld-am
-          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
-            --without-ssl --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
-            --prefix="$PWD"/../curl-install-am
+          ../configure --prefix="$PWD"/../curl-install-am --enable-unity --enable-warnings --enable-werror --disable-shared \
+            --disable-dependency-tracking --enable-option-checking=fatal \
+            --without-ssl --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp
 
       - name: 'AM configure log'
         if: ${{ !cancelled() }}

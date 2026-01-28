@@ -21,8 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_NETRC
 
 #ifdef HAVE_PWD_H
@@ -35,7 +35,6 @@
 #endif
 #endif
 
-#include <curl/curl.h>
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
@@ -123,7 +122,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
                               any order */
   bool our_login = FALSE;  /* found our login name */
   bool done = FALSE;
-  char *netrcbuffer;
+  const char *netrcbuffer;
   struct dynbuf token;
   struct dynbuf *filebuf = &store->filebuf;
   DEBUGASSERT(!*passwordp);
@@ -327,7 +326,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
       tok = ++tok_end;
     }
     if(!done) {
-      char *nl = NULL;
+      const char *nl = NULL;
       if(tok)
         nl = strchr(tok, '\n');
       if(!nl)

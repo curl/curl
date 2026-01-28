@@ -56,7 +56,7 @@ static CURLcode test_lib667(const char *URL)
   CURL *curl = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
-  CURLcode res = TEST_ERR_FAILURE;
+  CURLcode result = TEST_ERR_FAILURE;
   struct t667_WriteThis pooh;
 
   /*
@@ -96,8 +96,8 @@ static CURLcode test_lib667(const char *URL)
   test_setopt(curl, CURLOPT_MIMEPOST, mime);
 
   /* Send data. */
-  res = curl_easy_perform(curl);
-  if(res != CURLE_OK) {
+  result = curl_easy_perform(curl);
+  if(result != CURLE_OK) {
     curl_mfprintf(stderr, "curl_easy_perform() failed\n");
   }
 
@@ -105,5 +105,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_mime_free(mime);
   curl_global_cleanup();
-  return res;
+  return result;
 }

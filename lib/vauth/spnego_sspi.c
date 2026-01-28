@@ -23,17 +23,13 @@
  * RFC4178 Simple and Protected GSS-API Negotiation Mechanism
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && defined(USE_SPNEGO)
 
-#include <curl/curl.h>
-
 #include "vauth.h"
 #include "../curlx/base64.h"
-#include "../curlx/warnless.h"
-#include "../sendf.h"
+#include "../curl_trc.h"
 #include "../strerror.h"
 
 /*
@@ -98,10 +94,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   SecBufferDesc chlg_desc;
   SecBufferDesc resp_desc;
   unsigned long attrs;
-
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
 
   if(nego->context && nego->status == SEC_E_OK) {
     /* We finished successfully our part of authentication, but server

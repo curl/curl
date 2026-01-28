@@ -31,7 +31,6 @@
   defined(USE_QUICHE) || \
   defined(USE_RUSTLS)
 
-#include <curl/curl.h>
 #include "../escape.h"
 #include "../curlx/fopen.h"
 
@@ -162,4 +161,4 @@ const char *Curl_tls_keylog_file_name(void)
   return NULL;
 }
 
-#endif  /* TLS or QUIC backend */
+#endif /* TLS or QUIC backend */

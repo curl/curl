@@ -24,8 +24,8 @@ need to copy the style already used in the source code and there are no
 particularly unusual rules in our set of rules.
 
 We also work hard on writing code that are warning-free on all the major
-platforms and in general on as many platforms as possible. Code that obviously
-causes warnings is not accepted as-is.
+platforms and in general on as many platforms as possible. Code that causes
+warnings is not accepted as-is.
 
 ## Readability
 
@@ -353,6 +353,10 @@ This is the full list of functions generally banned.
     atoi
     atol
     calloc
+    close
+    CreateFile
+    CreateFileA
+    CreateFileW
     fclose
     fdopen
     fopen
@@ -372,12 +376,16 @@ This is the full list of functions generally banned.
     localtime
     malloc
     mbstowcs
+    MoveFileEx
+    MoveFileExA
+    MoveFileExW
     msnprintf
     mvsnprintf
     open
     printf
     realloc
     recv
+    rename
     send
     snprintf
     socket
@@ -386,6 +394,7 @@ This is the full list of functions generally banned.
     sscanf
     stat
     strcat
+    strcpy
     strdup
     strerror
     strncat

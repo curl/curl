@@ -30,15 +30,15 @@ from the `projects/Windows` Visual Studio solution files, see
 You can configure for in source tree builds or for a build tree
 that is apart from the source tree.
 
- - Build in the source tree.
+- Build in the source tree.
 
-       $ cmake -B .
+      $ cmake -B .
 
- - Build in a separate directory (parallel to the curl source tree in this
-   example). The build directory is created for you. This is recommended over
-   building in the source tree to separate source and build artifacts.
+- Build in a separate directory (parallel to the curl source tree in this
+  example). The build directory is created for you. This is recommended over
+  building in the source tree to separate source and build artifacts.
 
-       $ cmake -B ../curl-build
+      $ cmake -B ../curl-build
 
 For the full list of CMake build configuration variables see
 [the corresponding section](#cmake-build-options).
@@ -79,18 +79,18 @@ generate the project. After the project is generated, you can run make.
 CMake also comes with a Qt based GUI called `cmake-gui`. To configure with
 `cmake-gui`, you run `cmake-gui` and follow these steps:
 
- 1. Fill in the "Where is the source code" combo box with the path to
-    the curl source tree.
- 2. Fill in the "Where to build the binaries" combo box with the path to
-    the directory for your build tree, ideally this should not be the same
-    as the source tree, but a parallel directory called curl-build or
-    something similar.
- 3. Once the source and binary directories are specified, press the
-    "Configure" button.
- 4. Select the native build tool that you want to use.
- 5. At this point you can change any of the options presented in the GUI.
-    Once you have selected all the options you want, click the "Generate"
-    button.
+1. Fill in the "Where is the source code" combo box with the path to
+   the curl source tree.
+2. Fill in the "Where to build the binaries" combo box with the path to
+   the directory for your build tree, ideally this should not be the same
+   as the source tree, but a parallel directory called curl-build or
+   something similar.
+3. Once the source and binary directories are specified, press the
+   "Configure" button.
+4. Select the native build tool that you want to use.
+5. At this point you can change any of the options presented in the GUI.
+   Once you have selected all the options you want, click the "Generate"
+   button.
 
 # Building
 
@@ -225,7 +225,11 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF` (turns to `ON`, when building static libcurl only)
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF` (turns to `ON` if `BUILD_SHARED_LIBS` is `OFF`)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
+- `CURL_BUILD_EVERYTHING`:                  Build optional build targets (examples, tests) by default. Default: `OFF`
+                                            Set `QUICK` to build examples quickly with the `curl-examples-build` target (for build tests).
+                                            Set `NOEXAMPLES` to not build examples.
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
+                                            If enabled, it implies `CMAKE_UNITY_BUILD=OFF` and `CURL_DISABLE_TYPECHECK=ON`.
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
 - `CURL_CODE_COVERAGE`:                     Enable code coverage build options. Default: `OFF`
 - `CURL_COMPLETION_FISH`:                   Install fish completions. Default: `OFF`
@@ -240,11 +244,12 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
 - `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
 - `CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX`:  Override default versioned symbol prefix. Default: `<TLS-BACKEND>_` or `MULTISSL_`
+- `CURL_LINT`:                              Run lint checks while building. Default: `OFF`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
+- `CURL_DROP_UNUSED`:                       Drop unused code and data from built binaries. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
-- `ENABLE_CURLDEBUG`:                       Enable TrackMemory debug feature. Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
 - `ENABLE_DEBUG`:                           Enable curl debug features (for developing curl itself). Default: `OFF`
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp` for MSVC-like toolchains, otherwise empty.
@@ -258,6 +263,8 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_CA_BUNDLE`:                         Absolute path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_EMBED`:                          Absolute path to the CA bundle to embed in the curl tool. Default: (disabled)
 - `CURL_CA_FALLBACK`:                       Use built-in CA store of OpenSSL. Default: `OFF`
+- `CURL_CA_NATIVE`:                         Use native CA store. Default: `OFF`
+                                            Supported by GnuTLS, OpenSSL (including forks) on Windows, wolfSSL.
 - `CURL_CA_PATH`:                           Absolute path to a directory containing CA certificates stored individually. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
 
@@ -271,7 +278,6 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
 - `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
-- `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export. Default: `OFF`
 
 ## Disabling features
@@ -281,7 +287,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
 - `CURL_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
 - `CURL_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
-- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF`
+- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF` (turns to `ON`, when `CURL_CA_NATIVE=ON`)
 - `CURL_DISABLE_COOKIES`:                   Disable cookies support. Default: `OFF`
 - `CURL_DISABLE_DICT`:                      Disable DICT. Default: `OFF`
 - `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
@@ -343,7 +349,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CMAKE_INSTALL_PREFIX`                    (see CMake)
 - `CMAKE_STATIC_LIBRARY_SUFFIX`             (see CMake)
 - `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Set the number of sources in a "unity" unit. Default: `0` (all)
-- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka jumbo) builds. Default: `OFF`
+- `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka "jumbo") builds. Default: `OFF`
 
 Details via CMake
 [variables](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html) and
@@ -355,7 +361,7 @@ Details via CMake
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
-- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires build with TrackMemory and DWARF debug information. Default: `OFF`
+- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires debug-enabled build and DWARF debug information. Default: `OFF`
 - `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
 - `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
 - `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
@@ -388,7 +394,7 @@ Details via CMake
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
 - `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
-- `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
+- `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
 
 ## Dependency options (tools)
 
@@ -403,8 +409,10 @@ Details via CMake
 - `BROTLI_INCLUDE_DIR`:                     Absolute path to brotli include directory.
 - `BROTLICOMMON_LIBRARY`:                   Absolute path to `brotlicommon` library.
 - `BROTLIDEC_LIBRARY`:                      Absolute path to `brotlidec` library.
+- `BROTLI_USE_STATIC_LIBS`:                 Configure for static brotli libraries. (experimental)
 - `CARES_INCLUDE_DIR`:                      Absolute path to c-ares include directory.
 - `CARES_LIBRARY`:                          Absolute path to `cares` library.
+- `CARES_USE_STATIC_LIBS`:                  Configure for static c-ares libraries. (experimental)
 - `DL_LIBRARY`:                             Absolute path to `dl` library. (for Rustls)
 - `GNUTLS_INCLUDE_DIR`:                     Absolute path to GnuTLS include directory.
 - `GNUTLS_LIBRARY`:                         Absolute path to `gnutls` library.
@@ -424,8 +432,10 @@ Details via CMake
 - `LIBRTMP_LIBRARY`:                        Absolute path to `librtmp` library.
 - `LIBSSH_INCLUDE_DIR`:                     Absolute path to libssh include directory.
 - `LIBSSH_LIBRARY`:                         Absolute path to `libssh` library.
+- `LIBSSH_USE_STATIC_LIBS`:                 Configure for static libssh libraries. (experimental)
 - `LIBSSH2_INCLUDE_DIR`:                    Absolute path to libssh2 include directory.
 - `LIBSSH2_LIBRARY`:                        Absolute path to `libssh2` library.
+- `LIBSSH2_USE_STATIC_LIBS`:                Configure for static libssh2 libraries. (experimental)
 - `LIBUV_INCLUDE_DIR`:                      Absolute path to libuv include directory.
 - `LIBUV_LIBRARY`:                          Absolute path to `libuv` library.
 - `MATH_LIBRARY`:                           Absolute path to `m` library. (for Rustls, wolfSSL)
@@ -433,10 +443,13 @@ Details via CMake
 - `MBEDTLS_LIBRARY`:                        Absolute path to `mbedtls` library.
 - `MBEDX509_LIBRARY`:                       Absolute path to `mbedx509` library.
 - `MBEDCRYPTO_LIBRARY`:                     Absolute path to `mbedcrypto` library.
+- `MBEDTLS_USE_STATIC_LIBS`:                Configure for static mbedTLS libraries. (experimental)
 - `NGHTTP2_INCLUDE_DIR`:                    Absolute path to nghttp2 include directory.
 - `NGHTTP2_LIBRARY`:                        Absolute path to `nghttp2` library.
+- `NGHTTP2_USE_STATIC_LIBS`:                Configure for static nghttp2 libraries. (experimental)
 - `NGHTTP3_INCLUDE_DIR`:                    Absolute path to nghttp3 include directory.
 - `NGHTTP3_LIBRARY`:                        Absolute path to `nghttp3` library.
+- `NGHTTP3_USE_STATIC_LIBS`:                Configure for static nghttp3 libraries. (experimental)
 - `NGTCP2_INCLUDE_DIR`:                     Absolute path to ngtcp2 include directory.
 - `NGTCP2_LIBRARY`:                         Absolute path to `ngtcp2` library.
 - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Absolute path to `ngtcp2_crypto_boringssl` library. (also for AWS-LC)
@@ -445,6 +458,7 @@ Details via CMake
 - `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Absolute path to `ngtcp2_crypto_ossl` library.
 - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Absolute path to `ngtcp2_crypto_quictls` library. (also for LibreSSL with ngtcp2 <1.15.0)
 - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Absolute path to `ngtcp2_crypto_wolfssl` library.
+- `NGTCP2_USE_STATIC_LIBS`:                 Configure for static ngtcp2 libraries. (experimental)
 - `NETTLE_INCLUDE_DIR`:                     Absolute path to nettle include directory.
 - `NETTLE_LIBRARY`:                         Absolute path to `nettle` library.
 - `PTHREAD_LIBRARY`:                        Absolute path to `pthread` library. (for Rustls)
@@ -457,6 +471,7 @@ Details via CMake
 - `WOLFSSL_LIBRARY`:                        Absolute path to `wolfssl` library.
 - `ZSTD_INCLUDE_DIR`:                       Absolute path to zstd include directory.
 - `ZSTD_LIBRARY`:                           Absolute path to `zstd` library.
+- `ZSTD_USE_STATIC_LIBS`:                   Configure for static zstd libraries. (experimental)
 
 Examples:
 
@@ -474,6 +489,14 @@ Examples:
   which directory (typically) contains `include` and `lib` subdirectories.
   No ending slash or backslash is necessary.
 
+## Dependency options (Apple frameworks)
+
+- `COREFOUNDATION_FRAMEWORK`:               Absolute path to `CoreFoundation` framework. (for IPv6 non-c-ares, SecTrust, wolfSSL)
+- `CORESERVICES_FRAMEWORK`:                 Absolute path to `CoreServices` framework. (for IPv6 non-c-ares, SecTrust)
+- `FOUNDATION_FRAMEWORK`:                   Absolute path to `Foundation` framework. (for Rustls)
+- `SECURITY_FRAMEWORK`:                     Absolute path to `Security` framework. (for Rustls, SecTrust, wolfSSL)
+- `SYSTEMCONFIGURATION_FRAMEWORK`:          Absolute path to `SystemConfiguration` framework. (for IPv6 non-c-ares)
+
 ## Test tools
 
 - `APXS`:                                   Default: `apxs`
@@ -483,6 +506,8 @@ Examples:
 - `DANTED`:                                 Default: `danted`
 - `TEST_NGHTTPX`:                           Default: `nghttpx`
 - `VSFTPD`:                                 Default: `vsftps`
+- `SSHD`:                                   Default: `sshd`
+- `SFTPD`:                                  Default: `sftp-server`
 
 ## Feature detection variables
 
@@ -541,6 +566,10 @@ Note: These variables are internal and subject to change.
 - `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
 - `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
 - `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
+- `curl-lint`:              Run lint checks.
+- `curl-listcats`:          Generate help category constants for `src/tool_help.h` from documentation.
+- `curl-listhelp`:          Generate `src/tool_listhelp.c` from documentation.
+- `curl-optiontable`:       Generate `lib/easyoptions.c` from documentation.
 
 # Migrating from Visual Studio IDE Project Files
 
@@ -573,9 +602,9 @@ Configuration element             | Equivalent CMake options
 
 For example these commands:
 
-    > cd projects
+    > cd projects/Windows
     > ./generate.bat VC12
-    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/curl-all.sln
+    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" VC12/curl-all.sln
 
 translate to:
 

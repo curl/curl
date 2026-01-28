@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ HTTP/3
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -43,7 +42,6 @@ HTTP/3 GET:
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strip>
@@ -74,7 +72,7 @@ via: 1.1 nghttpx
 s/^server: nghttpx.*\r?\n//
 </stripfile>
 <limits>
-Allocations: 150
+Allocations: 155
 Maximum allocated: 1800000
 </limits>
 </verify>

@@ -26,12 +26,10 @@
 
 #include "../curl_setup.h"
 
-#include <curl/curl.h>
-#include "warnless.h"
 #include "base64.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
-const char Curl_base64encdec[] =
+const char curlx_base64encdec[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
@@ -243,7 +241,7 @@ static CURLcode base64_encode(const char *table64,
 CURLcode curlx_base64_encode(const uint8_t *inputbuff, size_t insize,
                              char **outptr, size_t *outlen)
 {
-  return base64_encode(Curl_base64encdec, '=',
+  return base64_encode(curlx_base64encdec, '=',
                        inputbuff, insize, outptr, outlen);
 }
 

@@ -48,7 +48,7 @@ static CURLcode test_unit3212(const char *arg)
 
   UNITTEST_BEGIN(t3212_setup(&tbl))
 
-  unsigned int i, key, n;
+  uint32_t i, key, n;
   void *entry;
 
   fail_unless(Curl_uint32_tbl_capacity(&tbl) == TBL_SIZE, "wrong capacity");

@@ -21,14 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_NGHTTP2
 #include <nghttp2/nghttp2.h>
 #endif
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "http2.h"
@@ -343,6 +341,9 @@ static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_MQTT
   "mqtt",
 #endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)
+  "mqtts",
+#endif
 #ifndef CURL_DISABLE_POP3
   "pop3",
 #endif
@@ -500,8 +501,7 @@ static const struct feat features_table[] = {
 #ifdef USE_KERBEROS5
   FEATURE("Kerberos",    NULL,                CURL_VERSION_KERBEROS5),
 #endif
-#if (SIZEOF_CURL_OFF_T > 4) && \
-    ( (SIZEOF_OFF_T > 4) || defined(USE_WIN32_LARGE_FILES) )
+#if (SIZEOF_CURL_OFF_T > 4) && ((SIZEOF_OFF_T > 4) || defined(_WIN32))
   FEATURE("Largefile",   NULL,                CURL_VERSION_LARGEFILE),
 #endif
 #ifdef HAVE_LIBZ
@@ -516,9 +516,13 @@ static const struct feat features_table[] = {
 #ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
 #endif
+#ifdef USE_SSL
 #ifdef USE_APPLE_SECTRUST
   FEATURE("AppleSecTrust", NULL,              0),
+#elif defined(CURL_CA_NATIVE)
+  FEATURE("NativeCA",    NULL,              0),
 #endif
+#endif /* USE_SSL */
 #ifdef USE_SPNEGO
   FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),
 #endif
@@ -537,9 +541,6 @@ static const struct feat features_table[] = {
 #ifdef USE_TLS_SRP
   FEATURE("TLS-SRP",     NULL,                CURL_VERSION_TLSAUTH_SRP),
 #endif
-#ifdef CURLDEBUG
-  FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
-#endif
 #if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
   FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
 #endif
@@ -552,9 +553,7 @@ static const struct feat features_table[] = {
   {NULL,                 NULL,                0}
 };
 
-static const char *feature_names[sizeof(features_table) /
-                                 sizeof(features_table[0])] = {NULL};
-
+static const char *feature_names[CURL_ARRAYSIZE(features_table)] = { NULL };
 
 static curl_version_info_data version_info = {
   CURLVERSION_NOW,
@@ -687,6 +686,10 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
       features |= p->bitmask;
       feature_names[n++] = p->name;
     }
+
+#ifdef DEBUGBUILD
+  features |= CURL_VERSION_CURLDEBUG; /* for compatibility */
+#endif
 
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;

@@ -25,7 +25,7 @@
 
 #include "uint-hash.h"
 
-static void t1616_mydtor(unsigned int id, void *elem)
+static void t1616_mydtor(uint32_t id, void *elem)
 {
   int *ptr = (int *)elem;
   (void)id;
@@ -53,8 +53,8 @@ static CURLcode test_unit1616(const char *arg)
   int *value2;
   bool ok;
 
-  unsigned int key = 20;
-  unsigned int key2 = 25;
+  uint32_t key = 20;
+  uint32_t key2 = 25;
 
   value = curlx_malloc(sizeof(int));
   abort_unless(value != NULL, "Out of memory");

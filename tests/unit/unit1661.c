@@ -51,7 +51,7 @@ static CURLcode test_unit1661(const char *arg)
   UNITTEST_BEGIN(t1661_setup(&bufref))
 
   const char *buffer = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   /**
    * testing Curl_bufref_init.
@@ -89,8 +89,8 @@ static CURLcode test_unit1661(const char *arg)
   /**
    * testing Curl_bufref_memdup0
    */
-  res = Curl_bufref_memdup0(&bufref, "1661", 3);
-  abort_unless(res == CURLE_OK, curl_easy_strerror(res));
+  result = Curl_bufref_memdup0(&bufref, "1661", 3);
+  abort_unless(result == CURLE_OK, curl_easy_strerror(result));
   fail_unless(freecount == 1, "Destructor not called");
   fail_unless((const char *)bufref.ptr != buffer, "Returned pointer not set");
   buffer = (const char *)Curl_bufref_ptr(&bufref);

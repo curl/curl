@@ -21,14 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(HAVE_SELECT) && !defined(HAVE_POLL)
 #error "We cannot compile without select() or poll() support."
 #endif
-
-#include <limits.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -36,15 +33,12 @@
 #include <unistd.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
 #include "curl_trc.h"
 #include "curlx/timediff.h"
 #include "curlx/wait.h"
-#include "curlx/warnless.h"
 
 #ifndef HAVE_POLL
 /*
@@ -268,7 +262,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       ufds[i].revents |= POLLIN | POLLOUT;
   }
 
-#else  /* HAVE_POLL */
+#else /* !HAVE_POLL */
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
@@ -334,7 +328,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       r++;
   }
 
-#endif  /* HAVE_POLL */
+#endif /* HAVE_POLL */
 
   return r;
 }
@@ -574,7 +568,6 @@ CURLcode Curl_pollset_change(struct Curl_easy *data,
   DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
 #endif
 
-  (void)data;
   DEBUGASSERT(VALID_SOCK(sock));
   if(!VALID_SOCK(sock))
     return CURLE_BAD_FUNCTION_ARGUMENT;

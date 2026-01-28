@@ -39,7 +39,7 @@
 
 static CURLcode test_lib590(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   long usedauth = 0;
 
@@ -66,11 +66,11 @@ static CURLcode test_lib590(const char *URL)
   test_setopt(curl, CURLOPT_PROXYPASSWORD, "password");
   test_setopt(curl, CURLOPT_PROXYUSERPWD, "me:password");
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  res = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &usedauth);
+  result = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &usedauth);
   if(CURLAUTH_NTLM != usedauth) {
     curl_mprintf("CURLINFO_PROXYAUTH_USED did not say NTLM\n");
   }
@@ -80,5 +80,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

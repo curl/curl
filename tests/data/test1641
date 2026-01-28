@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-J
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 OK
+Location: %TESTNUMBER0002
+
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
+
+12345
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET with -J, a redirect and Content-Disposition in the second response
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -L -O --output-dir %LOGDIR
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="%LOGDIR/name%TESTNUMBER">
+12345
+</file>
+
+</verify>
+</testcase>

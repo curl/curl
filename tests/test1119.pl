@@ -134,7 +134,6 @@ sub scanman_md_dir {
     }
 }
 
-
 scanallheaders();
 scanman_md_dir("$root/docs/libcurl");
 scanman_md_dir("$root/docs/libcurl/opts");
