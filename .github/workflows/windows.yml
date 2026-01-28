@@ -47,7 +47,6 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          enableCrossOsArchive: true
 
       - name: 'install test prereqs (stunnel)'
         if: ${{ steps.cache-stunnel.outputs.cache-hit != 'true' }}
@@ -179,6 +178,7 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'run tests'
@@ -401,6 +401,7 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'install test prereqs'
@@ -616,6 +617,7 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'install test prereqs'
@@ -988,6 +990,7 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: 'install test prereqs'
