@@ -125,7 +125,7 @@ int main(void)
       do {
         nsent = 0;
         result = curl_easy_send(curl, request + nsent_total,
-                             request_len - nsent_total, &nsent);
+                                request_len - nsent_total, &nsent);
         nsent_total += nsent;
 
         if(result == CURLE_AGAIN && !wait_on_socket(sockfd, 0, 60000L)) {
