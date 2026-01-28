@@ -290,22 +290,22 @@ static void set_features(void)
 #pragma extern_model strict_refdef "LIB$INITIALIZE" nowrt, long, nopic
 #else
 #pragma extern_model strict_refdef "LIB$INITIALIZE" nowrt, long
-#    if __INITIAL_POINTER_SIZE
-#        pragma __pointer_size __save
-#        pragma __pointer_size 32
-#    else
-#        pragma __required_pointer_size __save
-#        pragma __required_pointer_size 32
-#    endif
+#  if __INITIAL_POINTER_SIZE
+#    pragma __pointer_size __save
+#    pragma __pointer_size 32
+#  else
+#    pragma __required_pointer_size __save
+#    pragma __required_pointer_size 32
+#  endif
 #endif
 /* Set our contribution to the LIB$INITIALIZE array */
 void (* const iniarray[])(void) = { set_features };
 #ifndef __VAX
-#    if __INITIAL_POINTER_SIZE
-#        pragma __pointer_size __restore
-#    else
-#        pragma __required_pointer_size __restore
-#    endif
+#  if __INITIAL_POINTER_SIZE
+#    pragma __pointer_size __restore
+#  else
+#    pragma __required_pointer_size __restore
+#  endif
 #endif
 
 /*
