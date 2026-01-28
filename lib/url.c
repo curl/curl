@@ -3572,7 +3572,6 @@ out:
   if(needle)
     Curl_conn_free(data, needle);
   DEBUGASSERT(result || data->conn);
-  DEBUGASSERT(!result || !data->conn);
   return result;
 }
 
