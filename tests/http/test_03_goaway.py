@@ -71,37 +71,12 @@ class TestGoAway:
         # this should take `count` seconds to retrieve
         assert r.duration >= timedelta(seconds=count)
 
-    # download files sequentially with delay, reload server for GOAWAY
-    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx):
-        proto = 'h3'
-        count = 3
-        self.r = None
-
-        def long_run():
-            curl = CurlClient(env=env)
-            #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
-            urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                f'/curltest/tweak?id=[0-{count - 1}]'\
-                '&chunks=10&chunk_size=1024&chunk_delay=100ms'
-            self.r = curl.http_download(urls=[urln], alpn_proto=proto)
-
-        t = Thread(target=long_run)
-        t.start()
-        # each request will take a second, reload the server in the middle
-        # of the first one.
-        time.sleep(1.5)
-        assert nghttpx.reload(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
-        t.join()
-        r: ExecResult = self.r
-        # this should take `count` seconds to retrieve, maybe a little less
-        assert r.duration >= timedelta(seconds=count-1)
-        r.check_response(count=count, http_status=200, connect_count=2)
-        # reload will shut down the connection gracefully with GOAWAY
-        # we expect to see a second connection opened afterwards
-        for idx, s in enumerate(r.stats):
-            if s['num_connects'] > 0:
-                log.debug(f'request {idx} connected')
+    # We had a test for HTTP/3, same as the ones for h1/h2, where we restart
+    # nghttpx during transfers. This proved to be unreliable. The nature of
+    # UDP makes QUIC streams error (ERR_DRAINGIN, e.g. connection closes)
+    # at possibly any point. We do not retry on requests in all such
+    # situations which made the test fail in CI occasionally. Not good enough.
+    # def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx):
 
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_03_h1_goaway(self, env: Env, httpd, nghttpx):
