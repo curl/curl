@@ -47,6 +47,7 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
+          enableCrossOsArchive: true
 
       - name: 'install test prereqs (stunnel)'
         if: ${{ steps.cache-stunnel.outputs.cache-hit != 'true' }}
