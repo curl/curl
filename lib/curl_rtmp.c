@@ -104,8 +104,8 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
     r->Link.lFlags |= RTMP_LF_BUFX;
 
   (void)curlx_nonblock(r->m_sb.sb_socket, FALSE);
-  setsockopt(r->m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO,
-             (char *)&tv, sizeof(tv));
+  CURL_SETSOCKOPT(r->m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO,
+                  (char *)&tv, sizeof(tv));
 
   if(!RTMP_Connect1(r, NULL))
     return CURLE_FAILED_INIT;

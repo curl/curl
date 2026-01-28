@@ -1292,8 +1292,8 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     return CURLE_QUIC_CONNECT_ERROR;
 
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
-  rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
-                   &ctx->q.local_addrlen);
+  rv = CURL_GETSOCKNAME(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
+                        &ctx->q.local_addrlen);
   if(rv == -1)
     return CURLE_QUIC_CONNECT_ERROR;
 

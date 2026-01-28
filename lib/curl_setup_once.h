@@ -149,10 +149,18 @@ struct timeval {
  * SEND_TYPE_RETV must also be defined.
  */
 
+#ifdef USE_LWIPSOCK
+#define sread(x, y, z) (ssize_t)lwip_recv((RECV_TYPE_ARG1)(x), \
+                                          (RECV_TYPE_ARG2)(y), \
+                                          (RECV_TYPE_ARG3)(z), \
+                                          (RECV_TYPE_ARG4)(0))
+#else /* USE_LWIPSOCK */
 #define sread(x, y, z) (ssize_t)recv((RECV_TYPE_ARG1)(x), \
                                      (RECV_TYPE_ARG2)(y), \
                                      (RECV_TYPE_ARG3)(z), \
                                      (RECV_TYPE_ARG4)(0))
+#endif /* USE_LWIPSOCK */
+
 #else /* HAVE_RECV */
 #ifndef sread
 #error "Missing definition of macro sread!"
@@ -165,10 +173,18 @@ struct timeval {
                                        (SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                        (SEND_TYPE_ARG3)(z))
 #elif defined(HAVE_SEND)
+#ifdef USE_LWIPSOCK
+#define swrite(x, y, z) (ssize_t)lwip_send((RECV_TYPE_ARG1)(x), \
+                              (SEND_QUAL_ARG2 SEND_TYPE_ARG2)CURL_UNCONST(y), \
+                                           (RECV_TYPE_ARG3)(z), \
+                                           (RECV_TYPE_ARG4)(SEND_4TH_ARG))
+#else /* USE_LWIPSOCK */
 #define swrite(x, y, z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
                               (SEND_QUAL_ARG2 SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                       (SEND_TYPE_ARG3)(z), \
                                       (SEND_TYPE_ARG4)(SEND_4TH_ARG))
+#endif /* USE_LWIPSOCK */
+
 #else /* HAVE_SEND */
 #ifndef swrite
 #error "Missing definition of macro swrite!"

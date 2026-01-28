@@ -62,8 +62,8 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
   if(pipe(socks))
     return -1;
 #ifdef HAVE_FCNTL
-  if(fcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
-     fcntl(socks[1], F_SETFD, FD_CLOEXEC)) {
+  if(sfcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
+     sfcntl(socks[1], F_SETFD, FD_CLOEXEC)) {
     sclose(socks[0]);
     sclose(socks[1]);
     socks[0] = socks[1] = CURL_SOCKET_BAD;
@@ -172,27 +172,28 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
 #ifdef SO_EXCLUSIVEADDRUSE
   {
     int exclusive = 1;
-    if(setsockopt(listener, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
-                  (char *)&exclusive, (curl_socklen_t)sizeof(exclusive)) == -1)
+    if(CURL_SETSOCKOPT(listener, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
+                       (char *)&exclusive,
+                       (curl_socklen_t)sizeof(exclusive)) == -1)
       goto error;
   }
 #endif
 #else
-  if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
-                (char *)&reuse, (curl_socklen_t)sizeof(reuse)) == -1)
+  if(CURL_SETSOCKOPT(listener, SOL_SOCKET, SO_REUSEADDR,
+                     (char *)&reuse, (curl_socklen_t)sizeof(reuse)) == -1)
     goto error;
 #endif
-  if(bind(listener, &a.addr, sizeof(a.inaddr)) == -1)
+  if(CURL_BIND(listener, &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
-  if(getsockname(listener, &a.addr, &addrlen) == -1 ||
+  if(CURL_GETSOCKNAME(listener, &a.addr, &addrlen) == -1 ||
      addrlen < (int)sizeof(a.inaddr))
     goto error;
-  if(listen(listener, 1) == -1)
+  if(CURL_LISTEN(listener, 1) == -1)
     goto error;
   socks[0] = CURL_SOCKET(AF_INET, SOCK_STREAM, 0);
   if(socks[0] == CURL_SOCKET_BAD)
     goto error;
-  if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
+  if(CURL_CONNECT(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
 
   /* use non-blocking accept to make sure we do not block forever */

@@ -84,7 +84,7 @@ int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
 
   /* Orbis OS */
   long b = nonblock ? 1L : 0L;
-  return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
+  return CURL_SETSOCKOPT(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
 
 #else
 #error "no non-blocking method was found/used/set"

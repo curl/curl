@@ -80,7 +80,8 @@ int curlx_wait_ms(timediff_t timeout_ms)
      on Apple operating systems */
   {
     struct timeval pending_tv;
-    r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
+    r = CURL_SELECT(0, NULL, NULL, NULL,
+                    curlx_mstotv(&pending_tv, timeout_ms));
   }
 #endif /* _WIN32 */
   if(r) {
