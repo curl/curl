@@ -133,7 +133,9 @@ int main(int argc, char **argv)
   curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &data);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 
-  /* curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); */
+#if 0
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+#endif
 
   /* set a URL containing wildcard pattern (only in the last part) */
   if(argc == 2)

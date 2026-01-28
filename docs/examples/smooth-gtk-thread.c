@@ -152,7 +152,9 @@ static void *create_thread(void *progress_bar)
   gtk_widget_destroy(progress_bar);
 
   /* [Un]Comment this out to kill the program rather than pushing close. */
-  /* gtk_main_quit(); */
+#if 0
+  gtk_main_quit();
+#endif
 
   return NULL;
 }
