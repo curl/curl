@@ -42,7 +42,7 @@ jobs:
     runs-on: ${{ matrix.image }}
     strategy:
       matrix:
-        image: [windows-11-arm, windows-2022]
+        image: [windows-11-arm, windows-2022]  # Cannot share cache between arm and intel: https://github.com/actions/cache/issues/1622
     steps:
       - name: 'cache test prereqs (stunnel)'
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
