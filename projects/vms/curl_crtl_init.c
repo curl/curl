@@ -277,7 +277,9 @@ static void set_features(void)
   /* Commented here to prevent future bugs: A program or user should */
   /* never ever enable DECC$POSIX_STYLE_UID. */
   /* It will probably break all code that accesses UIDs */
-  /*  do_not_set_default("DECC$POSIX_STYLE_UID", TRUE); */
+#if 0
+  do_not_set_default("DECC$POSIX_STYLE_UID", TRUE);
+#endif
 }
 
 /* Some boilerplate to force this to be a proper LIB$INITIALIZE section */

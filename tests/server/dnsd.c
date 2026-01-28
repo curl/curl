@@ -632,7 +632,9 @@ static int test_dnsd(int argc, char **argv)
       clear_advisor_read_lock(loglockfile);
     }
 
-    /* logmsg("end of one transfer"); */
+#if 0
+    logmsg("end of one transfer");
+#endif
   }
 
 dnsd_cleanup:

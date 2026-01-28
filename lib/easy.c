@@ -616,7 +616,9 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     if(!pollrc) {
       /* timeout! */
       ev->ms = 0;
-      /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
+#if 0
+      curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n");
+#endif
       mresult = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
                                          &ev->running_handles);
     }

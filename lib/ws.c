@@ -387,7 +387,9 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       }
 
       dec->head_len = 1;
-      /* ws_dec_info(dec, data, "seeing opcode"); */
+#if 0
+      ws_dec_info(dec, data, "seeing opcode");
+#endif
       continue;
     }
     else if(dec->head_len == 1) {
@@ -439,7 +441,9 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       Curl_bufq_skip(inraw, 1);
       ++dec->head_len;
       if(dec->head_len < dec->head_total) {
-        /* ws_dec_info(dec, data, "decoding head"); */
+#if 0
+        ws_dec_info(dec, data, "decoding head");
+#endif
         continue;
       }
     }

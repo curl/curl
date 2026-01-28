@@ -65,7 +65,9 @@ static int progress_callback(void *clientp,
   {
     CURL *curl = (CURL *)clientp;
     curl_easy_pause(curl, CURLPAUSE_CONT);
-    /* curl_easy_pause(curl, CURLPAUSE_RECV_CONT); */
+#if 0
+    curl_easy_pause(curl, CURLPAUSE_RECV_CONT);
+#endif
   }
 #endif
   return 0;
