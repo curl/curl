@@ -1582,13 +1582,6 @@ $!      Process SEND directives
 $!-------------------------------------
 $       if key2a .eqs. "SEND"
 $       then
-$           if key2 .eqs. "SEND_QUAL_ARG2"
-$           then
-$               write tf "#ifndef ''key2'"
-$               write tf "#define ''key2' const"
-$               write tf "#endif"
-$               goto cfgh_in_loop1
-$           endif
 $           if key2 .eqs. "SEND_TYPE_ARG1"
 $           then
 $               write tf "#ifndef ''key2'"
