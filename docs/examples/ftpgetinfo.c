@@ -47,7 +47,8 @@ static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 
 int main(void)
 {
-  const char ftpurl[] = "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
+  static const char ftpurl[] =
+    "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
   CURL *curl;
   CURLcode result;
   long filetime = -1;

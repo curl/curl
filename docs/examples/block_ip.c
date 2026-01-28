@@ -229,8 +229,7 @@ static int is_ipv4_mapped_ipv6_address(int family, void *netaddr)
 }
 #endif /* AF_INET6 */
 
-static curl_socket_t opensocket(void *clientp,
-                                curlsocktype purpose,
+static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
                                 struct curl_sockaddr *address)
 {
   /* filter the address */
