@@ -146,8 +146,8 @@ struct timeval {
  *
  * If HAVE_SEND is defined then SEND_TYPE_ARG1, SEND_TYPE_ARG2,
  * SEND_TYPE_ARG3, SEND_TYPE_ARG4 and SEND_TYPE_RETV must also
- * be defined. And optionally SEND_NONCONST_ARG2 be defined
- * if ARG2 does not support const.
+ * be defined. SEND_NONCONST_ARG2 must also be defined if ARG2
+ * does not accept const.
  */
 
 #define sread(x, y, z) (ssize_t)recv((RECV_TYPE_ARG1)(x), \
