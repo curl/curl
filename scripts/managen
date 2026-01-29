@@ -1168,7 +1168,7 @@ sub listcats {
     @categories = sort @categories;
     for my $i (0..$#categories) {
         printf("#define CURLHELP_%-10s (%s)\n",
-               uc($categories[$i]), "1u << ${i}u");
+               uc($categories[$i]), "1 << ${i}");
     }
 }
 
