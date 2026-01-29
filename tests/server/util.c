@@ -144,12 +144,12 @@ void logmsg(const char *msg, ...)
 /* use instead of perror() on generic Windows */
 static void win32_perror(const char *msg)
 {
-  char buf[512];
+  char buffer[WINAPI_ERROR_LEN];
   int err = SOCKERRNO;
-  curlx_winapi_strerror(err, buf, sizeof(buf));
+  curlx_winapi_strerror(err, buffer, sizeof(buffer));
   if(msg)
     fprintf(stderr, "%s: ", msg);
-  fprintf(stderr, "%s\n", buf);
+  fprintf(stderr, "%s\n", buffer);
 }
 
 static void win32_cleanup(void)
