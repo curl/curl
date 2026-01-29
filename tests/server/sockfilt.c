@@ -526,7 +526,10 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
         /* if the pipe has NOT been closed, sleep and continue waiting */
         ret = GetLastError();
         if(ret != ERROR_BROKEN_PIPE) {
-          logmsg("[select_ws_wait_thread] PeekNamedPipe error (%lu)", ret);
+          char buffer[WINAPI_ERROR_LEN];
+          curlx_winapi_strerror(ret, buffer, sizeof(buffer));
+          logmsg("[select_ws_wait_thread] PeekNamedPipe error: (0x%08lx) - %s",
+                 ret, buffer);
           SleepEx(0, FALSE);
           continue;
         }

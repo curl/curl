@@ -141,17 +141,6 @@ void logmsg(const char *msg, ...)
 }
 
 #ifdef _WIN32
-/* use instead of perror() on generic Windows */
-static void win32_perror(const char *msg)
-{
-  char buf[512];
-  int err = SOCKERRNO;
-  curlx_winapi_strerror(err, buf, sizeof(buf));
-  if(msg)
-    fprintf(stderr, "%s: ", msg);
-  fprintf(stderr, "%s\n", buf);
-}
-
 static void win32_cleanup(void)
 {
 #ifdef USE_WINSOCK
@@ -170,12 +159,13 @@ int win32_init(void)
     WORD wVersionRequested;
     WSADATA wsaData;
     int err;
+    char buffer[STRERROR_LEN];
 
     wVersionRequested = MAKEWORD(2, 2);
     err = WSAStartup(wVersionRequested, &wsaData);
-
     if(err) {
-      win32_perror("Winsock init failed");
+      curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
+      fprintf(stderr, "Winsock init failed: %s\n", buffer);
       logmsg("Error initialising Winsock -- aborting");
       return 1;
     }
@@ -183,7 +173,8 @@ int win32_init(void)
     if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
        HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
       WSACleanup();
-      win32_perror("Winsock init failed");
+      curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
+      fprintf(stderr, "Winsock init failed: %s\n", buffer);
       logmsg("No suitable winsock.dll found -- aborting");
       return 1;
     }
@@ -485,13 +476,17 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   WNDCLASS wc;
   BOOL ret;
   MSG msg;
+  DWORD err;
+  char buffer[WINAPI_ERROR_LEN];
 
   ZeroMemory(&wc, sizeof(wc));
   wc.lpfnWndProc = (WNDPROC)main_window_proc;
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
-    win32_perror("RegisterClass failed");
+    err = GetLastError();
+    curlx_winapi_strerror(err, buffer, sizeof(buffer));
+    fprintf(stderr, "RegisterClass failed: %s\n", buffer);
     return (DWORD)-1;
   }
 
@@ -503,14 +498,18 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, NULL);
   if(!hidden_main_window) {
-    win32_perror("CreateWindowEx failed");
+    err = GetLastError();
+    curlx_winapi_strerror(err, buffer, sizeof(buffer));
+    fprintf(stderr, "CreateWindowEx failed: (0x%08lx) - %s\n", err, buffer);
     return (DWORD)-1;
   }
 
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
-      win32_perror("GetMessage failed");
+      err = GetLastError();
+      curlx_winapi_strerror(err, buffer, sizeof(buffer));
+      fprintf(stderr, "GetMessage failed: (0x%08lx) - %s\n", err, buffer);
       return (DWORD)-1;
     }
     else if(ret) {
