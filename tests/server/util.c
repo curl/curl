@@ -474,7 +474,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
  */
 static DWORD WINAPI main_window_loop(void *lpParameter)
 {
-  char buffer[STRERROR_LEN];
+  char buffer[WINAPI_ERROR_LEN];
   WNDCLASS wc;
   BOOL ret;
   MSG msg;
@@ -484,7 +484,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
-    curlx_strerror((int)GetLastError(), buffer, sizeof(buffer));
+    curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer));
     fprintf(stderr, "RegisterClass failed: %s\n", msg, buffer);
     return (DWORD)-1;
   }
@@ -497,7 +497,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, NULL);
   if(!hidden_main_window) {
-    curlx_strerror((int)GetLastError(), buffer, sizeof(buffer));
+    curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer));
     fprintf(stderr, "CreateWindowEx failed: %s\n", msg, buffer);
     return (DWORD)-1;
   }
@@ -505,7 +505,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
-      curlx_strerror((int)GetLastError(), buffer, sizeof(buffer));
+      curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer));
       fprintf(stderr, "GetMessage failed: %s\n", msg, buffer);
       return (DWORD)-1;
     }
