@@ -528,10 +528,9 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
         if(ret != ERROR_BROKEN_PIPE) {
           char buffer[WINAPI_ERROR_LEN];
           curlx_winapi_strerror(ret, buffer, sizeof(buffer));
-          logmsg("[select_ws_wait_thread] PeekNamedPipe error: %lu: %s", ret,
-                 buffer);
+          logmsg("[select_ws_wait_thread] PeekNamedPipe error: (0x%08lx) - %s",
+                 ret, buffer);
           SleepEx(0, FALSE);
-          /* FIXME: potential endless loop */
           continue;
         }
         else {

@@ -163,10 +163,9 @@ int win32_init(void)
 
     wVersionRequested = MAKEWORD(2, 2);
     err = WSAStartup(wVersionRequested, &wsaData);
-
     if(err) {
       curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
-      fprintf(stderr, "Winsock init failed: %s\n", msg, buffer);
+      fprintf(stderr, "Winsock init failed: %s\n", buffer);
       logmsg("Error initialising Winsock -- aborting");
       return 1;
     }
@@ -175,7 +174,7 @@ int win32_init(void)
        HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
       WSACleanup();
       curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
-      fprintf(stderr, "Winsock init failed: %s\n", msg, buffer);
+      fprintf(stderr, "Winsock init failed: %s\n", buffer);
       logmsg("No suitable winsock.dll found -- aborting");
       return 1;
     }
@@ -475,6 +474,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 static DWORD WINAPI main_window_loop(void *lpParameter)
 {
   char buffer[WINAPI_ERROR_LEN];
+  DWORD err;
   WNDCLASS wc;
   BOOL ret;
   MSG msg;
@@ -484,8 +484,9 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
-    curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer));
-    fprintf(stderr, "RegisterClass failed: %s\n", msg, buffer);
+    err = GetLastError();
+    curlx_winapi_strerror(err, buffer, sizeof(buffer));
+    fprintf(stderr, "RegisterClass failed: %s\n", buffer);
     return (DWORD)-1;
   }
 
@@ -497,16 +498,18 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, NULL);
   if(!hidden_main_window) {
-    curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer));
-    fprintf(stderr, "CreateWindowEx failed: %s\n", msg, buffer);
+    err = GetLastError();
+    curlx_winapi_strerror(err, buffer, sizeof(buffer));
+    fprintf(stderr, "CreateWindowEx failed: (0x%08lx) - %s\n", err, buffer);
     return (DWORD)-1;
   }
 
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
-      curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer));
-      fprintf(stderr, "GetMessage failed: %s\n", msg, buffer);
+      err = GetLastError();
+      curlx_winapi_strerror(err, buffer, sizeof(buffer));
+      fprintf(stderr, "GetMessage failed: (0x%08lx) - %s\n", err, buffer);
       return (DWORD)-1;
     }
     else if(ret) {
