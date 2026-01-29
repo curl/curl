@@ -27,6 +27,17 @@
 
 #include "../urldata.h"
 
+#ifdef CURLVERBOSE
+const char *Curl_ssh_statename(sshstate state);
+#else
+#define Curl_ssh_statename(x) ""
+#endif
+void Curl_ssh_set_state(struct Curl_easy *data,
+                        struct ssh_conn *sshc,
+                        sshstate nowstate);
+
+#define myssh_to(x, y, z) Curl_ssh_set_state(x, y, z)
+
 CURLcode Curl_getworkingpath(struct Curl_easy *data,
                              char *homedir,
                              char **path);
