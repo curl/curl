@@ -198,6 +198,11 @@ CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
  */
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
 
+CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct alpn_spec *alpns,
+                               struct Curl_ssl_session *scs,
+                               bool *do_early_data, bool early_data_allowed);
 #endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */

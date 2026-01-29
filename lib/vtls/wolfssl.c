@@ -498,36 +498,18 @@ static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
                                       bool *do_early_data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
-  CURLcode result = CURLE_OK;
-
-  *do_early_data = FALSE;
 #ifdef WOLFSSL_EARLY_DATA
+  struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
+
   connssl->earlydata_max = wolfSSL_SESSION_get_max_early_data(
     wolfSSL_get_session(wssl->ssl));
 #else
-  (void)wssl;
   connssl->earlydata_max = 0;
 #endif
 
-  if(!connssl->earlydata_max) {
-    /* Seems to be no WolfSSL way to signal no EarlyData in session */
-    CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
-  }
-  else if(!Curl_alpn_contains_proto(alpns, scs->alpn)) {
-    CURL_TRC_CF(data, cf, "SSL session has different ALPN, no early data");
-  }
-  else {
-    infof(data, "SSL session allows %zu bytes of early data, "
-          "reusing ALPN '%s'", connssl->earlydata_max, scs->alpn);
-    connssl->earlydata_state = ssl_earlydata_await;
-    connssl->state = ssl_connection_deferred;
-    result = Curl_alpn_set_negotiated(cf, data, connssl,
-                                      (const unsigned char *)scs->alpn,
-                                      scs->alpn ? strlen(scs->alpn) : 0);
-    *do_early_data = !result;
-  }
-  return result;
+  /* Seems to be no wolfSSL way to signal no EarlyData in session */
+  return Curl_on_session_reuse(cf, data, alpns, scs, do_early_data,
+                               connssl->earlydata_max);
 }
 
 static CURLcode
