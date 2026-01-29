@@ -151,13 +151,14 @@ void Curl_printable_address(const struct Curl_addrinfo *ip,
  * The entry is created with a reference count of 1.
  * Use `Curl_resolv_unlink()` to release your hold on it.
  *
- * The call takes ownership of `addr`and makes a copy of `hostname`.
+ * The call takes ownership of `addr`, even in case of failure, and always
+ * clears `*paddr`. It makes a copy of `hostname`.
  *
  * Returns entry or NULL on OOM.
  */
 struct Curl_dns_entry *
 Curl_dnscache_mk_entry(struct Curl_easy *data,
-                       struct Curl_addrinfo *addr,
+                       struct Curl_addrinfo **paddr,
                        const char *hostname,
                        size_t hostlen, /* length or zero */
                        int port,

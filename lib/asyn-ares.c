@@ -332,14 +332,13 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     result = ares->result;
     if(ares->ares_status == ARES_SUCCESS && !result) {
       data->state.async.dns =
-        Curl_dnscache_mk_entry(data, ares->temp_ai,
+        Curl_dnscache_mk_entry(data, &ares->temp_ai,
                                data->state.async.hostname, 0,
                                data->state.async.port, FALSE);
       if(!data->state.async.dns) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;
       }
-      ares->temp_ai = NULL; /* temp_ai now owned by entry */
 #ifdef HTTPSRR_WORKS
       {
         struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&ares->hinfo);

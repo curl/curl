@@ -559,20 +559,20 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 
 struct Curl_dns_entry *
 Curl_dnscache_mk_entry(struct Curl_easy *data,
-                       struct Curl_addrinfo *addr,
+                       struct Curl_addrinfo **paddr,
                        const char *hostname,
                        size_t hostlen, /* length or zero */
                        int port,
                        bool permanent)
 {
-  struct Curl_dns_entry *dns;
+  struct Curl_dns_entry *dns = NULL;
 
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   /* shuffle addresses if requested */
-  if(data->set.dns_shuffle_addresses) {
-    CURLcode result = Curl_shuffle_addr(data, &addr);
+  if(data->set.dns_shuffle_addresses && paddr) {
+    CURLcode result = Curl_shuffle_addr(data, paddr);
     if(result)
-      return NULL;
+      goto out;
   }
 #else
   (void)data;
@@ -583,10 +583,10 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
   /* Create a new cache entry */
   dns = curlx_calloc(1, sizeof(struct Curl_dns_entry) + hostlen);
   if(!dns)
-    return NULL;
+    goto out;
 
   dns->refcount = 1; /* the cache has the first reference */
-  dns->addr = addr; /* this is the address(es) */
+  dns->addr = paddr ? *paddr : NULL; /* this is the address(es) */
   if(permanent) {
     dns->timestamp.tv_sec = 0; /* an entry that never goes stale */
     dns->timestamp.tv_usec = 0; /* an entry that never goes stale */
@@ -598,13 +598,19 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
   if(hostlen)
     memcpy(dns->hostname, hostname, hostlen);
 
+out:
+  if(paddr) {
+    if(!dns)
+      Curl_freeaddrinfo(*paddr);
+    *paddr = NULL;
+  }
   return dns;
 }
 
 static struct Curl_dns_entry *
 dnscache_add_addr(struct Curl_easy *data,
                   struct Curl_dnscache *dnscache,
-                  struct Curl_addrinfo *addr,
+                  struct Curl_addrinfo **paddr,
                   const char *hostname,
                   size_t hlen, /* length or zero */
                   int port,
@@ -615,7 +621,7 @@ dnscache_add_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
-  dns = Curl_dnscache_mk_entry(data, addr, hostname, hlen, port, permanent);
+  dns = Curl_dnscache_mk_entry(data, paddr, hostname, hlen, port, permanent);
   if(!dns)
     return NULL;
 
@@ -627,7 +633,6 @@ dnscache_add_addr(struct Curl_easy *data,
   dns2 = Curl_hash_add(&dnscache->entries, entry_id, entry_len + 1,
                        (void *)dns);
   if(!dns2) {
-    dns->addr = NULL;
     dnscache_entry_free(dns);
     return NULL;
   }
@@ -977,13 +982,9 @@ out:
   }
   else if(addr) {
     /* we got a response, create a dns entry, add to cache, return */
-    dns = Curl_dnscache_mk_entry(data, addr, hostname, 0, port, FALSE);
+    dns = Curl_dnscache_mk_entry(data, &addr, hostname, 0, port, FALSE);
     if(!dns || Curl_dnscache_add(data, dns)) {
       /* this is OOM or similar, do not store such negative resolves */
-      Curl_freeaddrinfo(addr);
-      if(dns)
-        /* avoid a dangling pointer to addr in the dying dns entry */
-        dns->addr = NULL;
       result = CURLE_OUT_OF_MEMORY;
       goto error;
     }
@@ -1442,14 +1443,12 @@ err:
       }
 
       /* put this new host in the cache */
-      dns = dnscache_add_addr(data, dnscache, head, curlx_str(&source),
+      dns = dnscache_add_addr(data, dnscache, &head, curlx_str(&source),
                               curlx_strlen(&source), (int)port, permanent);
       if(dns)
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
         dns->refcount--;
-      else
-        Curl_freeaddrinfo(head);
 
       dnscache_unlock(data, dnscache);
 
