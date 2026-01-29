@@ -633,7 +633,6 @@ dnscache_add_addr(struct Curl_easy *data,
   dns2 = Curl_hash_add(&dnscache->entries, entry_id, entry_len + 1,
                        (void *)dns);
   if(!dns2) {
-    dns->addr = NULL;
     dnscache_entry_free(dns);
     return NULL;
   }
