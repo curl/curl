@@ -473,11 +473,11 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
  */
 static DWORD WINAPI main_window_loop(void *lpParameter)
 {
-  char buffer[WINAPI_ERROR_LEN];
-  DWORD err;
   WNDCLASS wc;
   BOOL ret;
   MSG msg;
+  DWORD err;
+  char buffer[WINAPI_ERROR_LEN];
 
   ZeroMemory(&wc, sizeof(wc));
   wc.lpfnWndProc = (WNDPROC)main_window_proc;
