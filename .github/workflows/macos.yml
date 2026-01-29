@@ -178,6 +178,7 @@ jobs:
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
 
       - name: 'build tests'
+        if: ${{ matrix.build.generate }}  # skip for autotools to save time
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target testdeps --verbose
@@ -186,6 +187,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.build.generate }}  # skip for autotools to save time
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples-build --verbose
