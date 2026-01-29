@@ -604,10 +604,9 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
 
     if(thrdd->addr->res) {
       data->state.async.dns =
-        Curl_dnscache_mk_entry(data, thrdd->addr->res,
+        Curl_dnscache_mk_entry(data, &thrdd->addr->res,
                                data->state.async.hostname, 0,
                                data->state.async.port, FALSE);
-      thrdd->addr->res = NULL;
       if(!data->state.async.dns)
         result = CURLE_OUT_OF_MEMORY;
 
