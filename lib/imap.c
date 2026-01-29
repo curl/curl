@@ -866,6 +866,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
   /* Prepare the mime data if some. */
   if(IS_MIME_POST(data)) {
     curl_mimepart *postp = data->set.mimepostp;
+
     /* Use the whole structure as data. */
     postp->flags &= ~(unsigned int)MIME_BODY_ONLY;
 
