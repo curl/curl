@@ -108,101 +108,6 @@ static CURLcode sftp_error_to_CURLE(int err)
   return CURLE_SSH;
 }
 
-#ifdef CURLVERBOSE
-static const char *myssh_statename(sshstate state)
-{
-  static const char * const names[] = {
-    "SSH_STOP",
-    "SSH_INIT",
-    "SSH_S_STARTUP",
-    "SSH_HOSTKEY",
-    "SSH_AUTHLIST",
-    "SSH_AUTH_PKEY_INIT",
-    "SSH_AUTH_PKEY",
-    "SSH_AUTH_PASS_INIT",
-    "SSH_AUTH_PASS",
-    "SSH_AUTH_AGENT_INIT",
-    "SSH_AUTH_AGENT_LIST",
-    "SSH_AUTH_AGENT",
-    "SSH_AUTH_HOST_INIT",
-    "SSH_AUTH_HOST",
-    "SSH_AUTH_KEY_INIT",
-    "SSH_AUTH_KEY",
-    "SSH_AUTH_GSSAPI",
-    "SSH_AUTH_DONE",
-    "SSH_SFTP_INIT",
-    "SSH_SFTP_REALPATH",
-    "SSH_SFTP_QUOTE_INIT",
-    "SSH_SFTP_POSTQUOTE_INIT",
-    "SSH_SFTP_QUOTE",
-    "SSH_SFTP_NEXT_QUOTE",
-    "SSH_SFTP_QUOTE_STAT",
-    "SSH_SFTP_QUOTE_SETSTAT",
-    "SSH_SFTP_QUOTE_SYMLINK",
-    "SSH_SFTP_QUOTE_MKDIR",
-    "SSH_SFTP_QUOTE_RENAME",
-    "SSH_SFTP_QUOTE_RMDIR",
-    "SSH_SFTP_QUOTE_UNLINK",
-    "SSH_SFTP_QUOTE_STATVFS",
-    "SSH_SFTP_GETINFO",
-    "SSH_SFTP_FILETIME",
-    "SSH_SFTP_TRANS_INIT",
-    "SSH_SFTP_UPLOAD_INIT",
-    "SSH_SFTP_CREATE_DIRS_INIT",
-    "SSH_SFTP_CREATE_DIRS",
-    "SSH_SFTP_CREATE_DIRS_MKDIR",
-    "SSH_SFTP_READDIR_INIT",
-    "SSH_SFTP_READDIR",
-    "SSH_SFTP_READDIR_LINK",
-    "SSH_SFTP_READDIR_BOTTOM",
-    "SSH_SFTP_READDIR_DONE",
-    "SSH_SFTP_DOWNLOAD_INIT",
-    "SSH_SFTP_DOWNLOAD_STAT",
-    "SSH_SFTP_CLOSE",
-    "SSH_SFTP_SHUTDOWN",
-    "SSH_SCP_TRANS_INIT",
-    "SSH_SCP_UPLOAD_INIT",
-    "SSH_SCP_DOWNLOAD_INIT",
-    "SSH_SCP_DOWNLOAD",
-    "SSH_SCP_DONE",
-    "SSH_SCP_SEND_EOF",
-    "SSH_SCP_WAIT_EOF",
-    "SSH_SCP_WAIT_CLOSE",
-    "SSH_SCP_CHANNEL_FREE",
-    "SSH_SESSION_DISCONNECT",
-    "SSH_SESSION_FREE",
-    "QUIT"
-  };
-  /* a precaution to make sure the lists are in sync */
-  DEBUGASSERT(CURL_ARRAYSIZE(names) == SSH_LAST);
-  return ((size_t)state < CURL_ARRAYSIZE(names)) ? names[state] : "";
-}
-#else
-#define myssh_statename(x)    ""
-#endif /* CURLVERBOSE */
-
-#define myssh_to(x, y, z) myssh_set_state(x, y, z)
-
-/*
- * SSH State machine related code
- */
-/* This is the ONLY way to change SSH state! */
-static void myssh_set_state(struct Curl_easy *data,
-                            struct ssh_conn *sshc,
-                            sshstate nowstate)
-{
-#ifdef CURLVERBOSE
-  if(sshc->state != nowstate) {
-    CURL_TRC_SSH(data, "[%s] -> [%s]",
-                 myssh_statename(sshc->state),
-                 myssh_statename(nowstate));
-  }
-#else
-  (void)data;
-#endif
-  sshc->state = nowstate;
-}
-
 /* Multiple options:
  * 1. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] is set with an MD5
  *    hash (90s style auth, not sure we should have it here)
@@ -2345,7 +2250,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
   if(!result && (sshc->state == SSH_STOP))
     result = sshc->actualcode;
   CURL_TRC_SSH(data, "[%s] statemachine() -> %d, block=%d",
-               myssh_statename(sshc->state), result, *block);
+               Curl_ssh_statename(sshc->state), result, *block);
   return result;
 }
 

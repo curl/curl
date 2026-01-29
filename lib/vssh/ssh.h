@@ -238,6 +238,17 @@ struct ssh_conn {
 
 #ifdef USE_SSH
 
+#ifdef CURLVERBOSE
+const char *Curl_ssh_statename(sshstate state);
+#else
+#define Curl_ssh_statename(x) ""
+#endif
+void Curl_ssh_set_state(struct Curl_easy *data,
+                        struct ssh_conn *sshc,
+                        sshstate nowstate);
+
+#define myssh_to(x, y, z) Curl_ssh_set_state(x, y, z)
+
 /* generic SSH backend functions */
 CURLcode Curl_ssh_init(void);
 void Curl_ssh_cleanup(void);
