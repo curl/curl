@@ -427,77 +427,6 @@ static ssize_t on_session_send(nghttp2_session *h2,
 }
 
 #ifdef CURLVERBOSE
-static int proxy_h2_fr_print(const nghttp2_frame *frame,
-                             char *buffer, size_t blen)
-{
-  switch(frame->hd.type) {
-  case NGHTTP2_DATA: {
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[DATA, len=%d, eos=%d, padlen=%d]",
-                          (int)frame->hd.length,
-                          !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM),
-                          (int)frame->data.padlen);
-  }
-  case NGHTTP2_HEADERS: {
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[HEADERS, len=%d, hend=%d, eos=%d]",
-                          (int)frame->hd.length,
-                          !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS),
-                          !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM));
-  }
-  case NGHTTP2_PRIORITY: {
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[PRIORITY, len=%d, flags=%d]",
-                          (int)frame->hd.length, frame->hd.flags);
-  }
-  case NGHTTP2_RST_STREAM: {
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
-                          (int)frame->hd.length, frame->hd.flags,
-                          frame->rst_stream.error_code);
-  }
-  case NGHTTP2_SETTINGS: {
-    if(frame->hd.flags & NGHTTP2_FLAG_ACK) {
-      return curl_msnprintf(buffer, blen, "FRAME[SETTINGS, ack=1]");
-    }
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
-  }
-  case NGHTTP2_PUSH_PROMISE:
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
-                          (int)frame->hd.length,
-                          !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
-  case NGHTTP2_PING:
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[PING, len=%d, ack=%d]",
-                          (int)frame->hd.length,
-                          frame->hd.flags & NGHTTP2_FLAG_ACK);
-  case NGHTTP2_GOAWAY: {
-    char scratch[128];
-    size_t s_len = CURL_ARRAYSIZE(scratch);
-    size_t len = (frame->goaway.opaque_data_len < s_len) ?
-      frame->goaway.opaque_data_len : s_len-1;
-    if(len)
-      memcpy(scratch, frame->goaway.opaque_data, len);
-    scratch[len] = '\0';
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[GOAWAY, error=%d, reason='%s', "
-                          "last_stream=%d]", frame->goaway.error_code,
-                          scratch, frame->goaway.last_stream_id);
-  }
-  case NGHTTP2_WINDOW_UPDATE: {
-    return curl_msnprintf(buffer, blen,
-                          "FRAME[WINDOW_UPDATE, incr=%d]",
-                          frame->window_update.window_size_increment);
-  }
-  default:
-    return curl_msnprintf(buffer, blen, "FRAME[%d, len=%d, flags=%d]",
-                          frame->hd.type, (int)frame->hd.length,
-                          frame->hd.flags);
-  }
-}
-
 static int proxy_h2_on_frame_send(nghttp2_session *session,
                                   const nghttp2_frame *frame,
                                   void *userp)
@@ -510,7 +439,7 @@ static int proxy_h2_on_frame_send(nghttp2_session *session,
   if(data && Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer) - 1);
+    len = Curl_nghttp2_fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] -> %s", frame->hd.stream_id, buffer);
   }
@@ -533,7 +462,7 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer) - 1);
+    len = Curl_nghttp2_fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] <- %s", frame->hd.stream_id, buffer);
   }
