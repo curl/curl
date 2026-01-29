@@ -34,6 +34,7 @@
 
 struct Curl_ssl;
 struct ssl_connect_data;
+struct Curl_ssl_session;
 
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
 #define ALPN_HTTP_1_1_LENGTH 8
