@@ -142,14 +142,11 @@ void logmsg(const char *msg, ...)
 
 #ifdef _WIN32
 /* use instead of perror() on generic Windows */
-static void win32_perror(const char *msg)
+static void win32_perror(const char *msg, int err)
 {
-  char buffer[WINAPI_ERROR_LEN];
-  int err = SOCKERRNO;
-  curlx_winapi_strerror(err, buffer, sizeof(buffer));
-  if(msg)
-    fprintf(stderr, "%s: ", msg);
-  fprintf(stderr, "%s\n", buffer);
+  char buffer[STRERROR_LEN];
+  curlx_strerror(err, buffer, sizeof(buffer));
+  fprintf(stderr, "%s: %s\n", msg, buffer);
 }
 
 static void win32_cleanup(void)
@@ -175,7 +172,7 @@ int win32_init(void)
     err = WSAStartup(wVersionRequested, &wsaData);
 
     if(err) {
-      win32_perror("Winsock init failed");
+      win32_perror("Winsock init failed", SOCKERRNO);
       logmsg("Error initialising Winsock -- aborting");
       return 1;
     }
@@ -183,7 +180,7 @@ int win32_init(void)
     if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
        HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
       WSACleanup();
-      win32_perror("Winsock init failed");
+      win32_perror("Winsock init failed", SOCKERRNO);
       logmsg("No suitable winsock.dll found -- aborting");
       return 1;
     }
@@ -491,7 +488,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
-    win32_perror("RegisterClass failed");
+    win32_perror("RegisterClass failed", (int)GetLastError());
     return (DWORD)-1;
   }
 
@@ -503,14 +500,14 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, NULL);
   if(!hidden_main_window) {
-    win32_perror("CreateWindowEx failed");
+    win32_perror("CreateWindowEx failed", (int)GetLastError());
     return (DWORD)-1;
   }
 
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
-      win32_perror("GetMessage failed");
+      win32_perror("GetMessage failed", (int)GetLastError());
       return (DWORD)-1;
     }
     else if(ret) {
