@@ -68,15 +68,6 @@ jobs:
           - name: 'libressl'
             install_steps: libressl
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
-            generate: >-
-              -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
-              -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
-              -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
-              -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
-              -DCURL_USE_LIBPSL=OFF
-
-          - name: 'libressl'
-            install_steps: libressl
             generator: Xcode
             xcode: ''  # default Xcode. Set it once to silence actionlint.
             options: --config Debug
@@ -187,6 +178,7 @@ jobs:
           find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
 
       - name: 'build tests'
+        if: ${{ matrix.build.generate }}  # skip for autotools to save time
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target testdeps --verbose
@@ -195,6 +187,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.build.generate }}  # skip for autotools to save time
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples-build --verbose
@@ -235,15 +228,11 @@ jobs:
             compiler: llvm@18
             install: libssh libnghttp3
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
-          - name: '!ssl c-ares'
-            compiler: clang
-            configure: --enable-debug --enable-ares --without-ssl
-            tflags: '--min=1500'
-          - name: '!ssl HTTP-only'
+          - name: '!ssl HTTP-only c-ares'
             compiler: clang
             tflags: '--min=930'
             generate: >-
-              -DENABLE_DEBUG=ON
+              -DENABLE_DEBUG=ON -DENABLE_ARES=ON
               -DCURL_ENABLE_SSL=OFF -DHTTP_ONLY=ON -DCURL_DISABLE_WEBSOCKETS=ON
               -DCURL_DISABLE_NTLM=ON -DCURL_DISABLE_ALTSVC=ON -DENABLE_UNIX_SOCKETS=OFF
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_NGHTTP2=OFF
