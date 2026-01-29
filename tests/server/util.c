@@ -156,10 +156,10 @@ int win32_init(void)
   curlx_now_init();
 #ifdef USE_WINSOCK
   {
-    char buffer[STRERROR_LEN];
     WORD wVersionRequested;
     WSADATA wsaData;
     int err;
+    char buffer[STRERROR_LEN];
 
     wVersionRequested = MAKEWORD(2, 2);
     err = WSAStartup(wVersionRequested, &wsaData);
