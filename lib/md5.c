@@ -276,14 +276,11 @@ static void my_md5_final(unsigned char *digest, void *in)
  * (This is a heavily cut-down "BSD license".)
  */
 
-/* Any 32-bit or wider unsigned integer data type will do */
-typedef unsigned int MD5_u32plus;
-
 struct md5_ctx {
-  MD5_u32plus lo, hi;
-  MD5_u32plus a, b, c, d;
+  uint32_t lo, hi;
+  uint32_t a, b, c, d;
   unsigned char buffer[64];
-  MD5_u32plus block[16];
+  uint32_t block[16];
 };
 typedef struct md5_ctx my_md5_ctx;
 
@@ -317,14 +314,14 @@ typedef struct md5_ctx my_md5_ctx;
  * does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
-#define MD5_SET(n) (*(const MD5_u32plus *)(const void *)&ptr[(n) * 4])
+#define MD5_SET(n) (*(const uint32_t *)(const void *)&ptr[(n) * 4])
 #define MD5_GET(n) MD5_SET(n)
 #else
 #define MD5_SET(n) (ctx->block[(n)] = \
-   (MD5_u32plus)ptr[(n) * 4] | \
-  ((MD5_u32plus)ptr[(n) * 4 + 1] <<  8) | \
-  ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
-  ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
+   (uint32_t)ptr[(n) * 4] | \
+  ((uint32_t)ptr[(n) * 4 + 1] <<  8) | \
+  ((uint32_t)ptr[(n) * 4 + 2] << 16) | \
+  ((uint32_t)ptr[(n) * 4 + 3] << 24))
 #define MD5_GET(n) (ctx->block[(n)])
 #endif
 
@@ -336,7 +333,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
                                const void *data, unsigned long size)
 {
   const unsigned char *ptr;
-  MD5_u32plus a, b, c, d;
+  uint32_t a, b, c, d;
 
   ptr = (const unsigned char *)data;
 
@@ -346,7 +343,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
   d = ctx->d;
 
   do {
-    MD5_u32plus saved_a, saved_b, saved_c, saved_d;
+    uint32_t saved_a, saved_b, saved_c, saved_d;
 
     saved_a = a;
     saved_b = b;
@@ -458,7 +455,7 @@ static CURLcode my_md5_init(void *in)
 static void my_md5_update(void *in, const unsigned char *data,
                           unsigned int size)
 {
-  MD5_u32plus saved_lo;
+  uint32_t saved_lo;
   unsigned int used;
   my_md5_ctx *ctx = (my_md5_ctx *)in;
 
@@ -466,7 +463,7 @@ static void my_md5_update(void *in, const unsigned char *data,
   ctx->lo = (saved_lo + size) & 0x1fffffff;
   if(ctx->lo < saved_lo)
     ctx->hi++;
-  ctx->hi += (MD5_u32plus)size >> 29;
+  ctx->hi += (uint32_t)size >> 29;
 
   used = saved_lo & 0x3f;
 
