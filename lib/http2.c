@@ -1050,7 +1050,8 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
 }
 
 #ifdef CURLVERBOSE
-static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
+int Curl_nghttp2_fr_print(const nghttp2_frame *frame, char *buffer,
+                          size_t blen)
 {
   switch(frame->hd.type) {
   case NGHTTP2_DATA: {
@@ -1085,18 +1086,16 @@ static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
     return curl_msnprintf(buffer, blen,
                           "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
   }
-  case NGHTTP2_PUSH_PROMISE: {
+  case NGHTTP2_PUSH_PROMISE:
     return curl_msnprintf(buffer, blen,
                           "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
                           (int)frame->hd.length,
                           !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
-  }
-  case NGHTTP2_PING: {
+  case NGHTTP2_PING:
     return curl_msnprintf(buffer, blen,
                           "FRAME[PING, len=%d, ack=%d]",
                           (int)frame->hd.length,
                           frame->hd.flags & NGHTTP2_FLAG_ACK);
-  }
   case NGHTTP2_GOAWAY: {
     char scratch[128];
     size_t s_len = CURL_ARRAYSIZE(scratch);
@@ -1134,7 +1133,7 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
   if(data && Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, sizeof(buffer) - 1);
+    len = Curl_nghttp2_fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] -> %s", frame->hd.stream_id, buffer);
   }
@@ -1162,7 +1161,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, sizeof(buffer) - 1);
+    len = Curl_nghttp2_fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] <- %s", frame->hd.stream_id, buffer);
   }
@@ -1239,7 +1238,7 @@ static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
 #ifdef CURLVERBOSE
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, sizeof(buffer) - 1);
+    len = Curl_nghttp2_fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
     failf(data, "[HTTP2] [%d] received invalid frame: %s, error %d: %s",
           stream_id, buffer, ngerr, nghttp2_strerror(ngerr));

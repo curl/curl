@@ -36,6 +36,11 @@
  */
 void Curl_http2_ver(char *p, size_t len);
 
+#ifdef CURLVERBOSE
+int Curl_nghttp2_fr_print(const nghttp2_frame *frame, char *buffer,
+                          size_t blen);
+#endif
+
 CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                                     struct Curl_easy *data);
 
