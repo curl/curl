@@ -190,14 +190,11 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
  * (This is a heavily cut-down "BSD license".)
  */
 
-/* Any 32-bit or wider unsigned integer data type will do */
-typedef unsigned int MD4_u32plus;
-
 struct md4_ctx {
-  MD4_u32plus lo, hi;
-  MD4_u32plus a, b, c, d;
+  uint32_t lo, hi;
+  uint32_t a, b, c, d;
   unsigned char buffer[64];
-  MD4_u32plus block[16];
+  uint32_t block[16];
 };
 typedef struct md4_ctx MD4_CTX;
 
@@ -227,14 +224,14 @@ typedef struct md4_ctx MD4_CTX;
  * does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
-#define MD4_SET(n) (*(const MD4_u32plus *)(const void *)&ptr[(n) * 4])
+#define MD4_SET(n) (*(const uint32_t *)(const void *)&ptr[(n) * 4])
 #define MD4_GET(n) MD4_SET(n)
 #else
 #define MD4_SET(n) (ctx->block[(n)] = \
-   (MD4_u32plus)ptr[(n) * 4] | \
-  ((MD4_u32plus)ptr[(n) * 4 + 1] <<  8) | \
-  ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
-  ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
+   (uint32_t)ptr[(n) * 4] | \
+  ((uint32_t)ptr[(n) * 4 + 1] <<  8) | \
+  ((uint32_t)ptr[(n) * 4 + 2] << 16) | \
+  ((uint32_t)ptr[(n) * 4 + 3] << 24))
 #define MD4_GET(n) (ctx->block[(n)])
 #endif
 
@@ -246,7 +243,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
                                const void *data, unsigned long size)
 {
   const unsigned char *ptr;
-  MD4_u32plus a, b, c, d;
+  uint32_t a, b, c, d;
 
   ptr = (const unsigned char *)data;
 
@@ -256,7 +253,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
   d = ctx->d;
 
   do {
-    MD4_u32plus saved_a, saved_b, saved_c, saved_d;
+    uint32_t saved_a, saved_b, saved_c, saved_d;
 
     saved_a = a;
     saved_b = b;
@@ -347,14 +344,14 @@ static int MD4_Init(MD4_CTX *ctx)
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  MD4_u32plus saved_lo;
+  uint32_t saved_lo;
   unsigned long used;
 
   saved_lo = ctx->lo;
   ctx->lo = (saved_lo + size) & 0x1fffffff;
   if(ctx->lo < saved_lo)
     ctx->hi++;
-  ctx->hi += (MD4_u32plus)size >> 29;
+  ctx->hi += (uint32_t)size >> 29;
 
   used = saved_lo & 0x3f;
 
