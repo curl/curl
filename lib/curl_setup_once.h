@@ -284,9 +284,9 @@ typedef unsigned int curl_bit;
  */
 #ifdef USE_WINSOCK
 #define SOCKERRNO         ((int)WSAGetLastError())
-#define SET_SOCKERRNO(x)  (WSASetLastError((int)(x)))
+#define SET_SOCKERRNO(x)  WSASetLastError((int)(x))
 #else
-#define SOCKERRNO         (errno)
+#define SOCKERRNO         errno
 #define SET_SOCKERRNO(x)  (errno = (x))
 #endif
 
