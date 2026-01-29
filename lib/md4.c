@@ -431,8 +431,8 @@ static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 
 #endif /* CRYPTO LIBS */
 
-CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
-                    const size_t len)
+CURLcode Curl_md4it(unsigned char *output,
+                    const unsigned char *input, const size_t len)
 {
   MD4_CTX ctx;
 
