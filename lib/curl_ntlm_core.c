@@ -84,13 +84,10 @@
 #    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
 #    define DES_ecb_encrypt       wolfSSL_DES_ecb_encrypt
 #    define DESKEY(x)             ((WOLFSSL_DES_key_schedule *)(x))
-
-#    if defined(LIBWOLFSSL_VERSION_HEX) &&      \
-       (LIBWOLFSSL_VERSION_HEX >= 0x05007006)
+#    if defined(LIBWOLFSSL_VERSION_HEX) && LIBWOLFSSL_VERSION_HEX >= 0x05007006
 #      define DES_ENCRYPT WC_DES_ENCRYPT
 #      define DES_DECRYPT WC_DES_DECRYPT
 #    endif
-
 #  else
 #    define DESKEY(x) &x
 #  endif
