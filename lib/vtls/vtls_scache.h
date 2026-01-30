@@ -56,6 +56,7 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
  * information.
  * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
+ * @param config  the relevant SSL configuration
  * @param tls_id  identifier of TLS implementation for sessions. Should
  *                include full version if session data from other versions
  *                is to be avoided.
@@ -63,6 +64,7 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
  */
 CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
                                 const struct ssl_peer *peer,
+                                struct ssl_primary_config *config,
                                 const char *tls_id,
                                 char **ppeer_key);
 
@@ -96,6 +98,7 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data);
  */
 void *Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
+                              struct ssl_primary_config *config,
                               const char *ssl_peer_key);
 
 typedef void Curl_ssl_scache_obj_dtor(void *sobj);
@@ -110,12 +113,14 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * with cache (e.g. incrementing refcount on success)
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
+ * @param config  the relevant ssl configuration
  * @param ssl_peer_key the key for lookup
  * @param sobj    the TLS session object
  * @param sobj_free_cb callback to free the session objectt
  */
 CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
+                                 struct ssl_primary_config *config,
                                  const char *ssl_peer_key,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
@@ -164,22 +169,26 @@ void Curl_ssl_session_destroy(struct Curl_ssl_session *s);
  * Call takes ownership of `s` in all outcomes.
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
+ * @param config  the relevant ssl configuration
  * @param ssl_peer_key the key for lookup
  * @param s       the scache session object
  */
 CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
+                             struct ssl_primary_config *config,
                              const char *ssl_peer_key,
                              struct Curl_ssl_session *s);
 
 /* Take a matching scache session from the cache. Does NOT need locking.
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
+ * @param config  the relevant ssl configuration
  * @param ssl_peer_key the key for lookup
  * @param s       on return, the scache session object or NULL
  */
 CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
+                              struct ssl_primary_config *config,
                               const char *ssl_peer_key,
                               struct Curl_ssl_session **ps);
 
@@ -189,12 +198,14 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
  */
 void Curl_ssl_scache_return(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
+                            struct ssl_primary_config *config,
                             const char *ssl_peer_key,
                             struct Curl_ssl_session *s);
 
 /* Remove all sessions and obj for the peer_key. Does NOT need locking. */
 void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
+                                struct ssl_primary_config *config,
                                 const char *ssl_peer_key);
 
 #ifdef USE_SSLS_EXPORT

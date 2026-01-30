@@ -589,7 +589,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->proxy_ssl.primary.verifypeer = enabled;
 
     /* Update the current connection proxy_ssl_config. */
-    Curl_ssl_conn_config_update(data, TRUE);
+    Curl_ssl_proxy_conn_update(data, !!s->proxy_ssl.primary.verifypeer,
+                               !!s->proxy_ssl.primary.verifyhost,
+                               !!s->proxy_ssl.primary.verifystatus);
     break;
   case CURLOPT_PROXY_SSL_VERIFYHOST:
     /*
@@ -598,7 +600,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->proxy_ssl.primary.verifyhost = enabled;
     ok = 2;
     /* Update the current connection proxy_ssl_config. */
-    Curl_ssl_conn_config_update(data, TRUE);
+    Curl_ssl_proxy_conn_update(data, !!s->proxy_ssl.primary.verifypeer,
+                               !!s->proxy_ssl.primary.verifyhost,
+                               !!s->proxy_ssl.primary.verifystatus);
     break;
   case CURLOPT_PROXY_TRANSFER_MODE:
     /*
@@ -683,7 +687,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->ssl.primary.verifypeer = enabled;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_config_update(data, FALSE);
+    Curl_ssl_conn_update(data, !!s->ssl.primary.verifypeer,
+                         !!s->ssl.primary.verifyhost,
+                         !!s->ssl.primary.verifystatus);
     break;
 #ifndef CURL_DISABLE_DOH
   case CURLOPT_DOH_SSL_VERIFYPEER:
@@ -722,7 +728,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     ok = 2;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_config_update(data, FALSE);
+    Curl_ssl_conn_update(data, !!s->ssl.primary.verifypeer,
+                         !!s->ssl.primary.verifyhost,
+                         !!s->ssl.primary.verifystatus);
     break;
   case CURLOPT_SSL_VERIFYSTATUS:
     /*
@@ -734,7 +742,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->ssl.primary.verifystatus = enabled;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_config_update(data, FALSE);
+    Curl_ssl_conn_update(data, !!s->ssl.primary.verifypeer,
+                         !!s->ssl.primary.verifyhost,
+                         !!s->ssl.primary.verifystatus);
     break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL

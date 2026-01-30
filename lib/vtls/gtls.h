@@ -64,6 +64,7 @@ void Curl_gtls_shared_creds_free(struct gtls_shared_creds **pcreds);
 
 struct gtls_ctx {
   gnutls_session_t session;
+  struct ssl_primary_config *config;
   struct gtls_shared_creds *shared_creds;
 #ifdef USE_GNUTLS_SRP
   gnutls_srp_client_credentials_t srp_client_cred;
@@ -89,6 +90,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
                             const struct alpn_spec *alpns,
+                            struct ssl_primary_config *config,
                             Curl_gtls_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             void *ssl_user_data,
@@ -100,8 +102,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 
 CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                gnutls_session_t session,
-                                struct ssl_primary_config *config,
+                                struct gtls_ctx *gctx,
                                 struct ssl_config_data *ssl_config,
                                 struct ssl_peer *peer,
                                 const char *pinned_key);
@@ -109,6 +110,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 /* Extract TLS session and place in cache, if configured. */
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
+                                 struct gtls_ctx *gctx,
                                  const char *ssl_peer_key,
                                  gnutls_session_t session,
                                  curl_off_t valid_until,

@@ -83,6 +83,7 @@
 #include "rtsp.h"
 #include "ws.h"
 #include "bufref.h"
+#include "vtls/vtls.h"
 #include "curlx/strparse.h"
 
 void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg)

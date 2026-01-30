@@ -47,6 +47,7 @@ struct curl_tls_ctx {
 #elif defined(USE_WOLFSSL)
   struct wssl_ctx wssl;
 #endif
+  struct ssl_primary_config *config;
 };
 
 /**
@@ -72,6 +73,7 @@ typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
  * @param ctx              the TLS context to initialize
  * @param cf               the connection filter involved
  * @param data             the transfer involved
+ * @param config           the relevant ssl configuration
  * @param peer             the peer that will be connected to
  * @param alpns            the ALPN specifications to negotiate, may be NULL
  * @param cb_setup         optional callback for early TLS config
@@ -82,6 +84,7 @@ typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
+                             struct ssl_primary_config *config,
                              struct ssl_peer *peer,
                              const struct alpn_spec *alpns,
                              Curl_vquic_tls_ctx_setup *cb_setup,

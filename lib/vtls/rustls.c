@@ -516,7 +516,7 @@ static void cr_keylog_log_cb(struct rustls_str label,
 
 static CURLcode
 init_config_builder(struct Curl_easy *data,
-                    const struct ssl_primary_config *conn_config,
+                    const struct ssl_primary_config *config,
                     struct rustls_client_config_builder **config_builder)
 {
   const struct rustls_supported_ciphersuite **cipher_suites = NULL;
@@ -533,8 +533,8 @@ init_config_builder(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   rustls_result rr;
 
-  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
-  switch(conn_config->version) {
+  DEBUGASSERT(config->version != CURL_SSLVERSION_DEFAULT);
+  switch(config->version) {
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
@@ -550,7 +550,7 @@ init_config_builder(struct Curl_easy *data,
     goto cleanup;
   }
 
-  switch(conn_config->version_max) {
+  switch(config->version_max) {
   case CURL_SSLVERSION_MAX_DEFAULT:
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_TLSv1_3:
@@ -584,8 +584,8 @@ init_config_builder(struct Curl_easy *data,
   }
 
   cr_get_selected_ciphers(data,
-                          conn_config->cipher_list,
-                          conn_config->cipher_list13,
+                          config->cipher_list,
+                          config->cipher_list13,
                           cipher_suites, &cipher_suites_len);
   if(cipher_suites_len == 0) {
     failf(data, "rustls: no supported cipher in list");
@@ -666,7 +666,7 @@ init_config_builder_alpn(struct Curl_easy *data,
 
 static CURLcode init_config_builder_verifier_crl(
   struct Curl_easy *data,
-  const struct ssl_primary_config *conn_config,
+  const struct ssl_primary_config *config,
   struct rustls_web_pki_server_cert_verifier_builder *builder)
 {
   CURLcode result = CURLE_OK;
@@ -674,7 +674,7 @@ static CURLcode init_config_builder_verifier_crl(
   rustls_result rr;
 
   curlx_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
-  if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
+  if(!read_file_into(config->CRLfile, &crl_contents)) {
     failf(data, "rustls: failed to read revocation list file");
     result = CURLE_SSL_CRL_BADFILE;
     goto cleanup;
@@ -698,7 +698,7 @@ cleanup:
 static CURLcode
 init_config_builder_verifier(struct Curl_easy *data,
                              struct rustls_client_config_builder *builder,
-                             const struct ssl_primary_config *conn_config,
+                             const struct ssl_primary_config *config,
                              const struct curl_blob *ca_info_blob,
                              const char * const ssl_cafile)
 {
@@ -745,9 +745,9 @@ init_config_builder_verifier(struct Curl_easy *data,
     goto cleanup;
   }
 
-  if(conn_config->CRLfile) {
+  if(config->CRLfile) {
     result = init_config_builder_verifier_crl(data,
-                                              conn_config,
+                                              config,
                                               verifier_builder);
     if(result) {
       goto cleanup;
@@ -831,7 +831,7 @@ init_config_builder_keylog(struct Curl_easy *data,
 
 static CURLcode
 init_config_builder_client_auth(struct Curl_easy *data,
-                                const struct ssl_primary_config *conn_config,
+                                const struct ssl_primary_config *config,
                                 const struct ssl_config_data *ssl_config,
                                 struct rustls_client_config_builder *builder)
 {
@@ -841,12 +841,12 @@ init_config_builder_client_auth(struct Curl_easy *data,
   const struct rustls_certified_key *certified_key = NULL;
   CURLcode result = CURLE_OK;
 
-  if(conn_config->clientcert && !ssl_config->key) {
+  if(config->clientcert && !ssl_config->key) {
     failf(data, "rustls: must provide key with certificate '%s'",
-          conn_config->clientcert);
+          config->clientcert);
     return CURLE_SSL_CERTPROBLEM;
   }
-  else if(!conn_config->clientcert && ssl_config->key) {
+  else if(!config->clientcert && ssl_config->key) {
     failf(data, "rustls: must provide certificate with key '%s'",
           ssl_config->key);
     return CURLE_SSL_CERTPROBLEM;
@@ -855,9 +855,9 @@ init_config_builder_client_auth(struct Curl_easy *data,
   curlx_dyn_init(&cert_contents, DYN_CERTFILE_SIZE);
   curlx_dyn_init(&key_contents, DYN_KEYFILE_SIZE);
 
-  if(!read_file_into(conn_config->clientcert, &cert_contents)) {
+  if(!read_file_into(config->clientcert, &cert_contents)) {
     failf(data, "rustls: failed to read client certificate file: '%s'",
-          conn_config->clientcert);
+          config->clientcert);
     result = CURLE_SSL_CERTPROBLEM;
     goto cleanup;
   }
@@ -1005,23 +1005,21 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
                                 struct rustls_ssl_backend_data * const backend)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
-  const struct ssl_primary_config *conn_config =
-    Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
 
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  const struct curl_blob *ca_info_blob = connssl->config->ca_info_blob;
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
-    (ca_info_blob ? NULL : conn_config->CAfile);
+    (ca_info_blob ? NULL : connssl->config->CAfile);
   CURLcode result = CURLE_OK;
   rustls_result rr;
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  result = init_config_builder(data, conn_config, &config_builder);
+  result = init_config_builder(data, connssl->config, &config_builder);
   if(result != CURLE_OK) {
     return result;
   }
@@ -1030,7 +1028,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     init_config_builder_alpn(data, connssl, config_builder);
   }
 
-  if(!conn_config->verifypeer) {
+  if(!connssl->config->verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
   }
@@ -1044,7 +1042,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
   else if(ca_info_blob || ssl_cafile) {
     result = init_config_builder_verifier(data,
                                           config_builder,
-                                          conn_config,
+                                          connssl->config,
                                           ca_info_blob,
                                           ssl_cafile);
     if(result != CURLE_OK) {
@@ -1053,9 +1051,9 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     }
   }
 
-  if(conn_config->clientcert || ssl_config->key) {
+  if(connssl->config->clientcert || ssl_config->key) {
     result = init_config_builder_client_auth(data,
-                                             conn_config,
+                                             connssl->config,
                                              ssl_config,
                                              config_builder);
     if(result != CURLE_OK) {

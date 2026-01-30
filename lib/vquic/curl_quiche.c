@@ -1245,6 +1245,14 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
       Curl_conn_set_multiplex(cf->conn);
     }
     break;
+  case CF_CTRL_SSL_UPDATE: {
+    if(!cf->connected && ctx->tls.config) {
+      ctx->tls.config->verifypeer = !!(arg1 & CF_CTRL_SSL_VERIFYPEER);
+      ctx->tls.config->verifyhost = !!(arg1 & CF_CTRL_SSL_VERIFYHOST);
+      ctx->tls.config->verifystatus = !!(arg1 & CF_CTRL_SSL_VERIFYSTATUS);
+    }
+    break;
+  }
   default:
     break;
   }
@@ -1293,8 +1301,9 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
                                        sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
                                        - 1);
 
-  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
-                               &ALPN_SPEC_H3, NULL, NULL, cf, NULL);
+  result = Curl_vquic_tls_init(&ctx->tls, cf, data, ctx->tls.config,
+                               &ctx->peer, &ALPN_SPEC_H3, NULL, NULL, cf,
+                               NULL);
   if(result)
     return result;
 
@@ -1637,7 +1646,8 @@ struct Curl_cftype Curl_cft_http3 = {
 CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai)
+                               const struct Curl_addrinfo *ai,
+                               struct ssl_primary_config *config)
 {
   struct cf_quiche_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1649,6 +1659,7 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
     goto out;
   }
   cf_quiche_ctx_init(ctx);
+  ctx->tls.config = config;
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
