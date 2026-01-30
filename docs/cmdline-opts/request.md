@@ -5,7 +5,7 @@ Long: request
 Short: X
 Arg: <method>
 Help: Specify request method to use
-Category: important connection pop3 ftp imap smtp
+Category: connection pop3 ftp imap smtp
 Added: 6.0
 Multi: single
 See-also:

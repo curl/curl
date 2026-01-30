@@ -6,7 +6,6 @@ Usage: curl [options...] <url>
  -h, --help <subject>         Get help for commands
  -o, --output <file>          Write to file instead of stdout
  -O, --remote-name            Write output to file named as remote file
- -X, --request <method>       Specify request method to use
  -i, --show-headers           Show response headers in output
  -s, --silent                 Silent mode
  -T, --upload-file <file>     Transfer local FILE to destination

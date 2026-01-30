@@ -634,8 +634,8 @@ const struct helptxt helptext[] = {
     CURLHELP_OUTPUT },
   { "-X, --request <method>",
     "Specify request method to use",
-    CURLHELP_IMPORTANT | CURLHELP_CONNECTION | CURLHELP_POP3 | CURLHELP_FTP |
-    CURLHELP_IMAP | CURLHELP_SMTP },
+    CURLHELP_CONNECTION | CURLHELP_POP3 | CURLHELP_FTP | CURLHELP_IMAP |
+    CURLHELP_SMTP },
   { "    --request-target <path>",
     "Specify the target for this request",
     CURLHELP_HTTP },
