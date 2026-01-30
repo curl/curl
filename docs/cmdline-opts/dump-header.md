@@ -6,7 +6,7 @@ Short: D
 Arg: <filename>
 Help: Write the received headers to <filename>
 Protocols: HTTP FTP
-Category: http ftp
+Category: http ftp common
 Added: 5.7
 Multi: single
 See-also:

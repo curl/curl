@@ -5,7 +5,7 @@ Short: C
 Long: continue-at
 Arg: <offset>
 Help: Resumed transfer offset
-Category: connection
+Category: connection common
 Added: 4.8
 Multi: single
 See-also:

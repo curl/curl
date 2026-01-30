@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: limit-rate
 Arg: <speed>
 Help: Limit transfer speed to RATE
-Category: connection
+Category: connection common
 Added: 7.10
 Multi: single
 See-also:

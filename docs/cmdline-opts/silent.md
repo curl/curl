@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: silent
 Short: s
 Help: Silent mode
-Category: important verbose
+Category: important verbose common
 Added: 4.0
 Multi: boolean
 See-also:

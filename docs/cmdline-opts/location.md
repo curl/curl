@@ -5,7 +5,7 @@ Long: location
 Short: L
 Help: Follow redirects
 Protocols: HTTP
-Category: http
+Category: http common
 Added: 4.9
 Multi: boolean
 See-also:

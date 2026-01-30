@@ -6,7 +6,7 @@ Short: r
 Help: Retrieve only the bytes within RANGE
 Arg: <range>
 Protocols: HTTP FTP SFTP FILE
-Category: http ftp sftp file
+Category: http ftp sftp file common
 Added: 4.0
 Multi: single
 See-also:
