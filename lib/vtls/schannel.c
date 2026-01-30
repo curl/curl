@@ -149,9 +149,9 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
                                                  struct Curl_cfilter *cf,
                                                  struct Curl_easy *data)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  long ssl_version = conn_config->version;
-  long ssl_version_max = (long)conn_config->version_max;
+  struct ssl_connect_data *connssl = cf->ctx;
+  long ssl_version = connssl->config->version;
+  long ssl_version_max = (long)connssl->config->version_max;
   long i = ssl_version;
 
   switch(ssl_version_max) {
@@ -363,7 +363,6 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                                    struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
 
   PCCERT_CONTEXT client_certs[1] = { NULL };
@@ -380,7 +379,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  if(conn_config->verifypeer) {
+  if(connssl->config->verifypeer) {
     if(backend->use_manual_cred_validation)
       flags = SCH_CRED_MANUAL_CRED_VALIDATION;
     else
@@ -413,7 +412,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     DEBUGF(infof(data, "schannel: disabled server cert revocation checks"));
   }
 
-  if(!conn_config->verifyhost) {
+  if(!connssl->config->verifyhost) {
     flags |= SCH_CRED_NO_SERVERNAME_CHECK;
     DEBUGF(infof(data, "schannel: verifyhost setting prevents Schannel from "
                        "comparing the supplied target name with the subject "
@@ -428,8 +427,8 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   else
     infof(data, "schannel: enabled automatic use of client certificate");
 
-  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
-  switch(conn_config->version) {
+  DEBUGASSERT(connssl->config->version != CURL_SSLVERSION_DEFAULT);
+  switch(connssl->config->version) {
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
@@ -676,7 +675,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   /* We support TLS 1.3 starting in Windows 10 version 1809 (OS build 17763) as
      long as the user did not set a legacy algorithm list
      (CURLOPT_SSL_CIPHER_LIST). */
-  if(!conn_config->cipher_list &&
+  if(!connssl->config->cipher_list &&
      curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL)) {
 
@@ -715,7 +714,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
        Schannel will not negotiate TLS 1.3 when SCHANNEL_CRED is used. */
     ALG_ID algIds[NUM_CIPHERS];
-    char *ciphers = conn_config->cipher_list;
+    char *ciphers = connssl->config->cipher_list;
     SCHANNEL_CRED schannel_cred = { 0 };
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
     schannel_cred.dwFlags = flags;
@@ -782,7 +781,6 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
@@ -804,7 +802,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   backend->use_alpn = FALSE;
 #endif
 
-  if(conn_config->CAfile || conn_config->ca_info_blob) {
+  if(connssl->config->CAfile || connssl->config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       backend->use_manual_cred_validation = TRUE;
@@ -824,7 +822,8 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   if(Curl_ssl_scache_use(cf, data)) {
     struct Curl_schannel_cred *old_cred;
     Curl_ssl_scache_lock(data);
-    old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
+    old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->config,
+                                       connssl->peer.scache_key);
     if(old_cred) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
@@ -1117,7 +1116,6 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   int i;
   size_t nread = 0, written = 0;
   unsigned char *reallocated_buffer;
@@ -1382,14 +1380,14 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
     }
   }
 
-  if(conn_config->verifypeer && backend->use_manual_cred_validation) {
+  if(connssl->config->verifypeer && backend->use_manual_cred_validation) {
     /* Certificate verification also verifies the hostname if verifyhost */
     return Curl_verify_certificate(cf, data);
   }
 
   /* Verify the hostname manually when certificate verification is disabled,
      because in that case Schannel will not verify it. */
-  if(!conn_config->verifypeer && conn_config->verifyhost)
+  if(!connssl->config->verifypeer && connssl->config->verifyhost)
     return Curl_verify_host(cf, data);
 
   return CURLE_OK;
@@ -1562,7 +1560,8 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
     Curl_ssl_scache_lock(data);
     /* Up ref count since call takes ownership */
     backend->cred->refcount++;
-    result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
+    result = Curl_ssl_scache_add_obj(cf, data, connssl->config,
+                                     connssl->peer.scache_key,
                                      backend->cred, schannel_session_free);
     Curl_ssl_scache_unlock(data);
     if(result)
@@ -2646,9 +2645,9 @@ static void *schannel_get_internals(struct ssl_connect_data *connssl,
 HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
                                                struct Curl_easy *data)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_multi *multi = data->multi;
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  const struct curl_blob *ca_info_blob = connssl->config->ca_info_blob;
   struct schannel_cert_share *share;
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   timediff_t timeout_ms;
@@ -2698,8 +2697,8 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     }
   }
   else {
-    if(!conn_config->CAfile || !share->CAfile ||
-       strcmp(share->CAfile, conn_config->CAfile)) {
+    if(!connssl->config->CAfile || !share->CAfile ||
+       strcmp(share->CAfile, connssl->config->CAfile)) {
       return NULL;
     }
   }
@@ -2725,9 +2724,9 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
                                          HCERTSTORE cert_store)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_multi *multi = data->multi;
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  const struct curl_blob *ca_info_blob = connssl->config->ca_info_blob;
   struct schannel_cert_share *share;
   size_t CAinfo_blob_size = 0;
   char *CAfile = NULL;
@@ -2763,8 +2762,8 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     CAinfo_blob_size = ca_info_blob->len;
   }
   else {
-    if(conn_config->CAfile) {
-      CAfile = curlx_strdup(conn_config->CAfile);
+    if(connssl->config->CAfile) {
+      CAfile = curlx_strdup(connssl->config->CAfile);
       if(!CAfile) {
         return FALSE;
       }

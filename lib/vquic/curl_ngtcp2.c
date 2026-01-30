@@ -2142,6 +2142,14 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
       Curl_conn_set_multiplex(cf->conn);
     }
     break;
+  case CF_CTRL_SSL_UPDATE: {
+    if(!cf->connected && ctx->tls.config) {
+      ctx->tls.config->verifypeer = !!(arg1 & CF_CTRL_SSL_VERIFYPEER);
+      ctx->tls.config->verifyhost = !!(arg1 & CF_CTRL_SSL_VERIFYHOST);
+      ctx->tls.config->verifystatus = !!(arg1 & CF_CTRL_SSL_VERIFYSTATUS);
+    }
+    break;
+  }
   default:
     break;
   }
@@ -2337,8 +2345,9 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
       quic_tp_len = (size_t)tplen;
     }
 #endif
-    Curl_ossl_add_session(cf, data, ctx->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), "h3", quic_tp, quic_tp_len);
+    Curl_ossl_add_session(cf, data, ctx->tls.ossl.config, ctx->peer.scache_key,
+                          ssl_sessionid, SSL_version(ssl), "h3",
+                          quic_tp, quic_tp_len);
   }
   return 0;
 }
@@ -2406,7 +2415,8 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
         quic_tp = (unsigned char *)tpbuf;
         quic_tp_len = (size_t)tplen;
       }
-      (void)Curl_gtls_cache_session(cf, data, ctx->peer.scache_key,
+      (void)Curl_gtls_cache_session(cf, data, &ctx->tls.gtls,
+                                    ctx->peer.scache_key,
                                     session, 0, "h3", quic_tp, quic_tp_len);
       break;
     }
@@ -2444,7 +2454,8 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
         quic_tp = (unsigned char *)tpbuf;
         quic_tp_len = (size_t)tplen;
       }
-      (void)Curl_wssl_cache_session(cf, data, ctx->peer.scache_key,
+      (void)Curl_wssl_cache_session(cf, data, ctx->tls.wssl.config,
+                                    ctx->peer.scache_key,
                                     session, wolfSSL_version(ssl),
                                     "h3", quic_tp, quic_tp_len);
     }
@@ -2630,7 +2641,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ctx->conn_ref.get_conn = get_conn;
   ctx->conn_ref.user_data = cf;
 
-  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer, &ALPN_SPEC_H3,
+  result = Curl_vquic_tls_init(&ctx->tls, cf, data, ctx->tls.config,
+                               &ctx->peer, &ALPN_SPEC_H3,
                                cf_ngtcp2_tls_ctx_setup, &ctx->tls,
                                &ctx->conn_ref,
                                cf_ngtcp2_on_session_reuse);
@@ -2917,7 +2929,8 @@ struct Curl_cftype Curl_cft_http3 = {
 CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai)
+                               const struct Curl_addrinfo *ai,
+                               struct ssl_primary_config *config)
 {
   struct cf_ngtcp2_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -2929,6 +2942,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     goto out;
   }
   cf_ngtcp2_ctx_init(ctx);
+  ctx->tls.config = config;
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)

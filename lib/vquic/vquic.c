@@ -697,12 +697,13 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              const struct Curl_addrinfo *ai,
                              uint8_t transport)
 {
+  struct ssl_primary_config *config = &conn->ssl_config;
   (void)transport;
   DEBUGASSERT(transport == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
+  return Curl_cf_ngtcp2_create(pcf, data, conn, ai, config);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_create(pcf, data, conn, ai);
+  return Curl_cf_quiche_create(pcf, data, conn, ai, config);
 #else
   *pcf = NULL;
   (void)data;
