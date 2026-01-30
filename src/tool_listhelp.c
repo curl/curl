@@ -850,7 +850,8 @@ const struct helptxt helptext[] = {
     CURLHELP_CURL },
   { "-v, --verbose",
     "Make the operation more talkative",
-    CURLHELP_IMPORTANT | CURLHELP_VERBOSE | CURLHELP_GLOBAL | CURLHELP_COMMON },
+    CURLHELP_IMPORTANT | CURLHELP_VERBOSE | CURLHELP_GLOBAL |
+    CURLHELP_COMMON },
   { "-V, --version",
     "Show version number and quit",
     CURLHELP_IMPORTANT | CURLHELP_CURL },
