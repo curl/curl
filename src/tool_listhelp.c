@@ -266,10 +266,10 @@ const struct helptxt helptext[] = {
     CURLHELP_HTTP | CURLHELP_PROXY },
   { "-I, --head",
     "Show document info only",
-    CURLHELP_HTTP | CURLHELP_FTP | CURLHELP_FILE },
+    CURLHELP_IMPORTANT | CURLHELP_HTTP | CURLHELP_FTP | CURLHELP_FILE },
   { "-H, --header <header/@file>",
     "Pass custom header(s) to server",
-    CURLHELP_HTTP | CURLHELP_IMAP | CURLHELP_SMTP },
+    CURLHELP_IMPORTANT | CURLHELP_HTTP | CURLHELP_IMAP | CURLHELP_SMTP },
   { "-h, --help <subject>",
     "Get help for commands",
     CURLHELP_IMPORTANT | CURLHELP_CURL },
@@ -634,8 +634,8 @@ const struct helptxt helptext[] = {
     CURLHELP_OUTPUT },
   { "-X, --request <method>",
     "Specify request method to use",
-    CURLHELP_CONNECTION | CURLHELP_POP3 | CURLHELP_FTP | CURLHELP_IMAP |
-    CURLHELP_SMTP },
+    CURLHELP_IMPORTANT | CURLHELP_CONNECTION | CURLHELP_POP3 | CURLHELP_FTP |
+    CURLHELP_IMAP | CURLHELP_SMTP },
   { "    --request-target <path>",
     "Specify the target for this request",
     CURLHELP_HTTP },

@@ -5,7 +5,7 @@ Long: head
 Short: I
 Help: Show document info only
 Protocols: HTTP FTP FILE
-Category: http ftp file
+Category: important http ftp file
 Added: 4.0
 Multi: boolean
 See-also:
