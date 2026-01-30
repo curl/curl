@@ -181,7 +181,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 static CURLcode
 mbed_set_ssl_version_min_max(struct Curl_easy *data,
                              struct mbed_ssl_backend_data *backend,
-                             struct ssl_primary_config *conn_config)
+                             struct ssl_primary_config *config)
 {
   mbedtls_ssl_protocol_version ver_min =
 #ifdef MBEDTLS_SSL_PROTO_TLS1_2
@@ -198,8 +198,8 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
 #endif
     ;
 
-  DEBUGASSERT(conn_config->version != CURL_SSLVERSION_DEFAULT);
-  switch(conn_config->version) {
+  DEBUGASSERT(config->version != CURL_SSLVERSION_DEFAULT);
+  switch(config->version) {
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
@@ -215,11 +215,11 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
 #endif
   default:
     failf(data, "mbedTLS: unsupported minimum TLS version value: %x",
-          conn_config->version);
+          config->version);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch(conn_config->version_max) {
+  switch(config->version_max) {
   case CURL_SSLVERSION_MAX_DEFAULT:
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_TLSv1_3:
@@ -440,7 +440,7 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
                           int depth, uint32_t *flags)
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)ptr;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
   if(depth == 0) {
@@ -450,9 +450,9 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
       mbed_extract_certinfo(data, crt);
   }
 
-  if(!conn_config->verifypeer)
+  if(!connssl->config->verifypeer)
     *flags = 0;
-  else if(!conn_config->verifyhost)
+  else if(!connssl->config->verifyhost)
     *flags &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
 
   if(*flags) {
@@ -474,14 +474,13 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  const struct curl_blob *ca_info_blob = connssl->config->ca_info_blob;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
-    (ca_info_blob ? NULL : conn_config->CAfile);
-  const bool verifypeer = conn_config->verifypeer;
-  const char * const ssl_capath = conn_config->CApath;
+    (ca_info_blob ? NULL : connssl->config->CAfile);
+  const bool verifypeer = connssl->config->verifypeer;
+  const char * const ssl_capath = connssl->config->CApath;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
 #ifdef MBEDTLS_PEM_PARSE_C
@@ -494,8 +493,8 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
   DEBUGASSERT(!backend->initialized);
 
-  if((conn_config->version == CURL_SSLVERSION_SSLv2) ||
-     (conn_config->version == CURL_SSLVERSION_SSLv3)) {
+  if((connssl->config->version == CURL_SSLVERSION_SSLv2) ||
+     (connssl->config->version == CURL_SSLVERSION_SSLv3)) {
     failf(data, "Not supported SSL version");
     return CURLE_NOT_BUILT_IN;
   }
@@ -792,7 +791,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   mbedtls_ssl_conf_cert_profile(&backend->config,
                                 &mbedtls_x509_crt_profile_next);
 
-  ret = mbed_set_ssl_version_min_max(data, backend, conn_config);
+  ret = mbed_set_ssl_version_min_max(data, backend, connssl->config);
   if(ret != CURLE_OK)
     return ret;
 
@@ -815,15 +814,14 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
                       NULL /*  rev_timeout() */);
 
 #ifndef MBEDTLS_SSL_PROTO_TLS1_3
-  if(conn_config->cipher_list) {
-    CURLcode result = mbed_set_selected_ciphers(data, backend,
-                                                conn_config->cipher_list,
-                                                NULL);
+  if(connssl->config->cipher_list) {
+    CURLcode result = mbed_set_selected_ciphers(
+      data, backend, connssl->config->cipher_list, NULL);
 #else
-  if(conn_config->cipher_list || conn_config->cipher_list13) {
-    CURLcode result = mbed_set_selected_ciphers(data, backend,
-                                                conn_config->cipher_list,
-                                                conn_config->cipher_list13);
+  if(connssl->config->cipher_list || connssl->config->cipher_list13) {
+    CURLcode result = mbed_set_selected_ciphers(
+      data, backend, connssl->config->cipher_list,
+      connssl->config->cipher_list13);
 #endif
     if(result != CURLE_OK) {
       failf(data, "mbedTLS: failed to set cipher suites");
@@ -850,8 +848,8 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
     struct Curl_ssl_session *sc_session = NULL;
     CURLcode result;
 
-    result = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
-                                  &sc_session);
+    result = Curl_ssl_scache_take(cf, data, connssl->config,
+                                  connssl->peer.scache_key, &sc_session);
     if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {
       mbedtls_ssl_session session;
 
@@ -870,7 +868,8 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
       }
       mbedtls_ssl_session_free(&session);
     }
-    Curl_ssl_scache_return(cf, data, connssl->peer.scache_key, sc_session);
+    Curl_ssl_scache_return(cf, data, connssl->config,
+                           connssl->peer.scache_key, sc_session);
   }
 
   mbedtls_ssl_conf_ca_chain(&backend->config,
@@ -1118,8 +1117,8 @@ static CURLcode mbed_new_session(struct Curl_cfilter *cf,
                                    &sc_session);
   sdata = NULL;  /* call took ownership */
   if(!result)
-    result = Curl_ssl_scache_put(cf, data, connssl->peer.scache_key,
-                                 sc_session);
+    result = Curl_ssl_scache_put(cf, data, connssl->config,
+                                 connssl->peer.scache_key, sc_session);
 
 out:
   if(msession_alloced)

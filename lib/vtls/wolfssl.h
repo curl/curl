@@ -42,6 +42,7 @@ extern const struct Curl_ssl Curl_ssl_wolfssl;
 struct wssl_ctx {
   struct WOLFSSL_CTX *ssl_ctx;
   struct WOLFSSL *ssl;
+  struct ssl_primary_config *config;
   CURLcode io_result;      /* result of last BIO cfilter operation */
   CURLcode hs_result;      /* result of handshake */
   int io_send_blocked_len; /* length of last BIO write that EAGAIN-ed */
@@ -66,6 +67,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
                             const struct alpn_spec *alpns,
+                            struct ssl_primary_config *config,
                             Curl_wssl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             void *ssl_user_data,
@@ -78,6 +80,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
 #ifdef HAVE_EX_DATA
 CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
+                                 struct ssl_primary_config *config,
                                  const char *ssl_peer_key,
                                  struct WOLFSSL_SESSION *session,
                                  int ietf_tls_id,
