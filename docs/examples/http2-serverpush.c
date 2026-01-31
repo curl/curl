@@ -47,8 +47,8 @@
 
 static FILE *out_download;
 
-static void dump(const char *text, const unsigned char *ptr, size_t size,
-                 char nohex)
+static void dump(const char *text, const unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
