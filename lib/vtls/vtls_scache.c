@@ -131,8 +131,8 @@ static bool cf_ssl_peer_key_is_global(const char *peer_key)
 {
   size_t len = peer_key ? strlen(peer_key) : 0;
   return (len > 2) &&
-    (peer_key[len - 1] == 'G') &&
-    (peer_key[len - 2] == ':');
+         (peer_key[len - 1] == 'G') &&
+         (peer_key[len - 2] == ':');
 }
 
 CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,

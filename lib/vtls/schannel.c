@@ -2332,10 +2332,10 @@ static bool schannel_data_pending(struct Curl_cfilter *cf,
 
   if(backend->ctxt) /* SSL/TLS is in use */
     return backend->decdata_offset > 0 ||
-      (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
-      backend->recv_connection_closed ||
-      backend->recv_sspi_close_notify ||
-      backend->recv_unrecoverable_err;
+           (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
+           backend->recv_connection_closed ||
+           backend->recv_sspi_close_notify ||
+           backend->recv_unrecoverable_err;
   else
     return FALSE;
 }

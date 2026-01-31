@@ -420,18 +420,18 @@ bool Curl_req_want_send(struct Curl_easy *data)
    * - request has buffered data to send
    * - connection has pending data to send */
   return !data->req.done &&
-    !Curl_rlimit_is_blocked(&data->progress.ul.rlimit) &&
-    ((data->req.keepon & KEEP_SEND) ||
-     !Curl_req_sendbuf_empty(data) ||
-     Curl_xfer_needs_flush(data));
+         !Curl_rlimit_is_blocked(&data->progress.ul.rlimit) &&
+         ((data->req.keepon & KEEP_SEND) ||
+          !Curl_req_sendbuf_empty(data) ||
+          Curl_xfer_needs_flush(data));
 }
 
 bool Curl_req_want_recv(struct Curl_easy *data)
 {
   /* Not done and download not blocked and KEEP_RECV */
   return !data->req.done &&
-    !Curl_rlimit_is_blocked(&data->progress.dl.rlimit) &&
-    (data->req.keepon & KEEP_RECV);
+         !Curl_rlimit_is_blocked(&data->progress.dl.rlimit) &&
+         (data->req.keepon & KEEP_RECV);
 }
 
 bool Curl_req_done_sending(struct Curl_easy *data)

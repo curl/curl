@@ -752,8 +752,8 @@ static bool ssh_config_matches(struct connectdata *one,
 
   sshc1 = Curl_conn_meta_get(one, CURL_META_SSH_CONN);
   sshc2 = Curl_conn_meta_get(two, CURL_META_SSH_CONN);
-  return sshc1 && sshc2 && Curl_safecmp(sshc1->rsa, sshc2->rsa) &&
-    Curl_safecmp(sshc1->rsa_pub, sshc2->rsa_pub);
+  return (sshc1 && sshc2 && Curl_safecmp(sshc1->rsa, sshc2->rsa) &&
+          Curl_safecmp(sshc1->rsa_pub, sshc2->rsa_pub));
 }
 #endif
 
