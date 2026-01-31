@@ -2196,10 +2196,11 @@ bool Curl_conn_is_tcp_listen(struct Curl_easy *data,
  */
 static bool cf_is_socket(struct Curl_cfilter *cf)
 {
-  return cf && (cf->cft == &Curl_cft_tcp ||
-                cf->cft == &Curl_cft_udp ||
-                cf->cft == &Curl_cft_unix ||
-                cf->cft == &Curl_cft_tcp_accept);
+  return cf &&
+    (cf->cft == &Curl_cft_tcp ||
+     cf->cft == &Curl_cft_udp ||
+     cf->cft == &Curl_cft_unix ||
+     cf->cft == &Curl_cft_tcp_accept);
 }
 
 CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,

@@ -110,8 +110,8 @@ static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return (!rcvd_eagain &&
-          conn->scheme->protocol & (CURLPROTO_SCP | CURLPROTO_SFTP)) ||
-         Curl_conn_data_pending(data, FIRSTSOCKET);
+    conn->scheme->protocol & (CURLPROTO_SCP | CURLPROTO_SFTP)) ||
+    Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
 /*

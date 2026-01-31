@@ -708,6 +708,6 @@ CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
 bool setopt_bad(CURLcode result)
 {
   return result &&
-         (result != CURLE_NOT_BUILT_IN) &&
-         (result != CURLE_UNKNOWN_OPTION);
+    (result != CURLE_NOT_BUILT_IN) &&
+    (result != CURLE_UNKNOWN_OPTION);
 }

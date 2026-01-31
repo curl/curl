@@ -1140,12 +1140,12 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
   if(Curl_ssl != &Curl_ssl_multi)
     return id == Curl_ssl->info.id ||
-           (name && curl_strequal(name, Curl_ssl->info.name)) ?
-           CURLSSLSET_OK :
+      (name && curl_strequal(name, Curl_ssl->info.name)) ?
+      CURLSSLSET_OK :
 #ifdef CURL_WITH_MULTI_SSL
-           CURLSSLSET_TOO_LATE;
+      CURLSSLSET_TOO_LATE;
 #else
-           CURLSSLSET_UNKNOWN_BACKEND;
+      CURLSSLSET_UNKNOWN_BACKEND;
 #endif
 
   for(i = 0; available_backends[i]; i++) {

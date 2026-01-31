@@ -999,7 +999,7 @@ bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
 {
   struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
   return cf && !cf->conn->bits.close &&
-         cf->cft->is_alive(cf, data, input_pending);
+    cf->cft->is_alive(cf, data, input_pending);
 }
 
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
