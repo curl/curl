@@ -279,7 +279,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
       if(data->req.download_done && data->req.no_body &&
          !data->req.resp_trailer) {
         DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
-               "not waiting for EOS"));
+                     "not waiting for EOS"));
         blen = 0;
         /* continue as if we received the EOS */
       }

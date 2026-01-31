@@ -372,10 +372,10 @@ static bool invalid_octets(const char *ptr, size_t len)
 */
 #define MAX_DATE_LENGTH 80
 
-#define COOKIE_NAME 0
-#define COOKIE_VALUE 1
+#define COOKIE_NAME   0
+#define COOKIE_VALUE  1
 #define COOKIE_DOMAIN 2
-#define COOKIE_PATH 3
+#define COOKIE_PATH   3
 
 #define COOKIE_PIECES 4 /* the list above */
 
@@ -783,7 +783,7 @@ static bool is_public_suffix(struct Curl_easy *data,
    * dereference it.
    */
   DEBUGF(infof(data, "PSL check set-cookie '%s' for domain=%s in %s",
-         co->name, co->domain, domain));
+               co->name, co->domain, domain));
   if(data && (domain && co->domain && !Curl_host_is_ipnum(co->domain))) {
     bool acceptable = FALSE;
     char lcase[256];
@@ -814,7 +814,7 @@ static bool is_public_suffix(struct Curl_easy *data,
   (void)co;
   (void)domain;
   DEBUGF(infof(data, "NO PSL to check set-cookie '%s' for domain=%s in %s",
-         co->name, co->domain, domain));
+               co->name, co->domain, domain));
 #endif
   return FALSE;
 }

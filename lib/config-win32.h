@@ -280,8 +280,7 @@
  */
 
 /* Default define to enable threaded asynchronous DNS lookups. */
-#if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
-    !defined(USE_THREADS_WIN32)
+#if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && !defined(USE_THREADS_WIN32)
 #  define USE_THREADS_WIN32 1
 #endif
 

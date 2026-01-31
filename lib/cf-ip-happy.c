@@ -500,8 +500,8 @@ out:
     next_expire_ms = Curl_timeleft_ms(data);
     if(next_expire_ms < 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-        curlx_ptimediff_ms(Curl_pgrs_now(data),
-                           &data->progress.t_startsingle));
+            curlx_ptimediff_ms(Curl_pgrs_now(data),
+                               &data->progress.t_startsingle));
       return CURLE_OPERATION_TIMEDOUT;
     }
 

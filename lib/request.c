@@ -292,7 +292,7 @@ static CURLcode req_flush(struct Curl_easy *data)
       return result;
     if(!Curl_bufq_is_empty(&data->req.sendbuf)) {
       DEBUGF(infof(data, "Curl_req_flush(len=%zu) -> EAGAIN",
-             Curl_bufq_len(&data->req.sendbuf)));
+                   Curl_bufq_len(&data->req.sendbuf)));
       return CURLE_AGAIN;
     }
   }

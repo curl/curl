@@ -52,7 +52,7 @@
     }                                                                   \
   } while(0)
 
-#define CPOOL_UNLOCK(c,d)                                               \
+#define CPOOL_UNLOCK(c, d)                                              \
   do {                                                                  \
     if(c) {                                                             \
       DEBUGASSERT((c)->locked);                                         \

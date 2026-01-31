@@ -990,21 +990,21 @@ static bool url_match_http_version(struct connectdata *conn,
     case 30:
       if(!(m->data->state.http_neg.allowed & CURL_HTTP_V3x)) {
         DEBUGF(infof(m->data, "not reusing conn #%" CURL_FORMAT_CURL_OFF_T
-               ", we do not want h3", conn->connection_id));
+                     ", we do not want h3", conn->connection_id));
         return FALSE;
       }
       break;
     case 20:
       if(!(m->data->state.http_neg.allowed & CURL_HTTP_V2x)) {
         DEBUGF(infof(m->data, "not reusing conn #%" CURL_FORMAT_CURL_OFF_T
-               ", we do not want h2", conn->connection_id));
+                     ", we do not want h2", conn->connection_id));
         return FALSE;
       }
       break;
     default:
       if(!(m->data->state.http_neg.allowed & CURL_HTTP_V1x)) {
         DEBUGF(infof(m->data, "not reusing conn #%" CURL_FORMAT_CURL_OFF_T
-               ", we do not want h1", conn->connection_id));
+                     ", we do not want h1", conn->connection_id));
         return FALSE;
       }
       break;
@@ -1081,9 +1081,9 @@ static bool url_match_destination(struct connectdata *conn,
       }
       /* We are in an IMAPS vs IMAP like case. We expect `conn` to have SSL */
       if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-        DEBUGF(infof(m->data,
-          "Connection #%" FMT_OFF_T " has compatible protocol family, "
-          "but no SSL, no match", conn->connection_id));
+        DEBUGF(infof(m->data, "Connection #%" FMT_OFF_T
+                     " has compatible protocol family, but no SSL, no match",
+                     conn->connection_id));
         return FALSE;
       }
     }
@@ -1109,8 +1109,7 @@ static bool url_match_ssl_config(struct connectdata *conn,
   /* If talking TLS, conn needs to use the same SSL options. */
   if((m->needle->scheme->flags & PROTOPT_SSL) &&
      !Curl_ssl_conn_config_match(m->data, conn, FALSE)) {
-    DEBUGF(infof(m->data,
-                 "Connection #%" FMT_OFF_T
+    DEBUGF(infof(m->data, "Connection #%" FMT_OFF_T
                  " has different SSL parameters, cannot reuse",
                  conn->connection_id));
     return FALSE;
