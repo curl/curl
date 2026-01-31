@@ -360,7 +360,7 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
     }
     else {
       buf = g_malloc(BUF_SIZE + 1);
-      while(TRUE) {
+      for(;;) {
         buf[BUF_SIZE] = '\0';
         g_io_channel_read_chars(ch, buf, BUF_SIZE, &len, &err);
         if(len) {

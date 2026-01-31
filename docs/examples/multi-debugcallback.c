@@ -30,8 +30,6 @@
 
 #include <curl/curl.h>
 
-#define TRUE 1
-
 static void dump(const char *text, FILE *stream, const unsigned char *ptr,
                  size_t size, char nohex)
 {
@@ -82,8 +80,7 @@ static void dump(const char *text, FILE *stream, const unsigned char *ptr,
 }
 
 static int my_trace(CURL *curl, curl_infotype type,
-                    unsigned char *data, size_t size,
-                    void *userp)
+                    char *data, size_t size, void *userp)
 {
   const char *text;
 
@@ -110,7 +107,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, stderr, data, size, TRUE);
+  dump(text, stderr, (const unsigned char *)data, size, 1);
   return 0;
 }
 

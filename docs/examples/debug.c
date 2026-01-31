@@ -115,7 +115,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, stderr, (unsigned char *)data, size, config->trace_ascii);
+  dump(text, stderr, (const unsigned char *)data, size, config->trace_ascii);
   return 0;
 }
 
