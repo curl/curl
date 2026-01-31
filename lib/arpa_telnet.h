@@ -27,14 +27,13 @@
 /*
  * Telnet option defines. Add more here if in need.
  */
-#define CURL_TELOPT_BINARY   0  /* binary 8-bit data */
-#define CURL_TELOPT_ECHO     1  /* just echo! */
-#define CURL_TELOPT_SGA      3  /* Suppress Go Ahead */
-#define CURL_TELOPT_EXOPL  255  /* EXtended OPtions List */
-#define CURL_TELOPT_TTYPE   24  /* Terminal TYPE */
-#define CURL_TELOPT_NAWS    31  /* Negotiate About Window Size */
-#define CURL_TELOPT_XDISPLOC 35 /* X DISPlay LOCation */
-
+#define CURL_TELOPT_BINARY      0   /* binary 8-bit data */
+#define CURL_TELOPT_ECHO        1   /* just echo! */
+#define CURL_TELOPT_SGA         3   /* Suppress Go Ahead */
+#define CURL_TELOPT_EXOPL       255 /* EXtended OPtions List */
+#define CURL_TELOPT_TTYPE       24  /* Terminal TYPE */
+#define CURL_TELOPT_NAWS        31  /* Negotiate About Window Size */
+#define CURL_TELOPT_XDISPLOC    35  /* X DISPlay LOCation */
 #define CURL_TELOPT_NEW_ENVIRON 39  /* NEW ENVIRONment variables */
 #define CURL_NEW_ENV_VAR   0
 #define CURL_NEW_ENV_VALUE 1
@@ -55,9 +54,9 @@ static const char * const telnetoptions[] = {
   "TERM SPEED",  "LFLOW",          "LINEMODE",      "XDISPLOC",
   "OLD-ENVIRON", "AUTHENTICATION", "ENCRYPT",       "NEW-ENVIRON"
 };
-#define CURL_TELOPT(x)    telnetoptions[x]
+#define CURL_TELOPT(x) telnetoptions[x]
 #else
-#define CURL_TELOPT(x)    ""
+#define CURL_TELOPT(x) ""
 #endif
 
 #define CURL_TELOPT_MAXIMUM CURL_TELOPT_NEW_ENVIRON
@@ -101,13 +100,14 @@ static const char * const telnetcmds[] = {
 #define CURL_TELQUAL_INFO 2
 #define CURL_TELQUAL_NAME 3
 
-#define CURL_TELCMD_OK(x)  (((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
-                            ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM))
+#define CURL_TELCMD_OK(x)                        \
+  (((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
+   ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM))
 
 #ifdef CURLVERBOSE
-#define CURL_TELCMD(x)    telnetcmds[(x) - CURL_TELCMD_MINIMUM]
+#define CURL_TELCMD(x) telnetcmds[(x) - CURL_TELCMD_MINIMUM]
 #else
-#define CURL_TELCMD(x)    ""
+#define CURL_TELCMD(x) ""
 #endif
 
 #endif /* CURL_DISABLE_TELNET */
