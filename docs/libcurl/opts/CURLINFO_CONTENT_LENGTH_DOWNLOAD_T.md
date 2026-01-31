@@ -9,7 +9,7 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
 Protocol:
-  - HTTP
+  - All
 Added-in: 7.55.0
 ---
 
