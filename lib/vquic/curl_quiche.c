@@ -51,7 +51,7 @@
 #include "../vtls/vtls.h"
 
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
-#define CURL_H3_NO_ERROR  (0x0100)
+#define CURL_H3_NO_ERROR  0x0100
 
 #define QUIC_MAX_STREAMS              (100)
 

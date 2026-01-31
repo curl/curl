@@ -29,7 +29,7 @@
 #error "this test requires FD_SETSIZE"
 #endif
 
-#define T537_SAFETY_MARGIN (11)
+#define T537_SAFETY_MARGIN 11
 
 #if defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"

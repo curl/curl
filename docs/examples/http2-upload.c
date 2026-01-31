@@ -73,7 +73,7 @@ static int my_gettimeofday(struct timeval *tp, void *tzp)
   (void)tzp;
   if(tp) {
 /* Offset between 1601-01-01 and 1970-01-01 in 100 nanosec units */
-#define WIN32_FT_OFFSET (116444736000000000)
+#define WIN32_FT_OFFSET 116444736000000000
     union {
       CURL_TYPEOF_CURL_OFF_T ns100; /* time since 1 Jan 1601 in 100ns units */
       FILETIME ft;
