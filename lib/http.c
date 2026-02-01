@@ -4343,7 +4343,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
 void Curl_http_to_fold(struct dynbuf *bf)
 {
   size_t len = curlx_dyn_len(bf);
-  char *hd = curlx_dyn_ptr(bf);
+  const char *hd = curlx_dyn_ptr(bf);
   if(len && (hd[len - 1] == '\n'))
     len--;
   if(len && (hd[len - 1] == '\r'))
@@ -4397,7 +4397,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
   while(blen && k->header) {
     size_t consumed;
     size_t hlen;
-    char *hd;
+    const char *hd;
     size_t unfold_len = 0;
 
     if(data->state.leading_unfold) {
