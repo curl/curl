@@ -494,18 +494,18 @@
 #  define fstat(fdes, stp)                _fstati64(fdes, stp)
 #  define struct_stat                     struct _stati64
 #  define curl_lseek                      _lseeki64
-#  define LSEEK_ERROR                     (__int64)-1
+#  define LSEEK_ERROR                     ((__int64)-1)
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
 #  define curl_lseek                      llseek
-#  define LSEEK_ERROR                     (offset_t)-1
+#  define LSEEK_ERROR                     ((offset_t)-1)
 #elif defined(__AMIGA__)
 #  define curl_lseek(fd, offset, whence)  lseek(fd, (off_t)(offset), whence)
-#  define LSEEK_ERROR                     (off_t)-1
+#  define LSEEK_ERROR                     ((off_t)-1)
 #else
 #  define curl_lseek                      lseek
-#  define LSEEK_ERROR                     (off_t)-1
+#  define LSEEK_ERROR                     ((off_t)-1)
 #endif
 
 #ifndef struct_stat
