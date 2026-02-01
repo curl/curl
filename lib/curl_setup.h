@@ -502,14 +502,12 @@
 #  undef  lseek
 #  define lseek(fdes, offset, whence)  llseek(fdes, offset, whence)
 #  define LSEEK_ERROR                  (offset_t)-1
+#else
+#  define LSEEK_ERROR                  (off_t)-1
 #endif
 
 #ifndef struct_stat
 #define struct_stat struct stat
-#endif
-
-#ifndef LSEEK_ERROR
-#define LSEEK_ERROR (off_t)-1
 #endif
 
 #ifndef SIZEOF_TIME_T
