@@ -28,7 +28,7 @@
 #include "../urldata.h"
 
 CURLcode Curl_getworkingpath(struct Curl_easy *data,
-                             char *homedir,
+                             const char *homedir,
                              char **path);
 
 CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
