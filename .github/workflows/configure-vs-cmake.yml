@@ -41,7 +41,7 @@ jobs:
     name: 'Linux'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -89,7 +89,7 @@ jobs:
       - name: 'toolchain versions'
         run: echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -136,7 +136,7 @@ jobs:
       - name: 'install packages'
         run: sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
