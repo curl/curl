@@ -138,7 +138,7 @@
  *
  * bytes       [in/out] - The data whose parity bits are to be adjusted for
  *                        odd parity.
- * len         [out]    - The length of the data.
+ * len         [in]     - The length of the data.
  */
 static void curl_des_set_odd_parity(unsigned char *bytes, size_t len)
 {
