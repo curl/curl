@@ -699,10 +699,10 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
       rc = libssh2_session_method_pref(sshc->ssh_session,
                                        LIBSSH2_METHOD_HOSTKEY, hostkey_method);
       if(rc) {
-        char *errmsg = NULL;
+        char *err_msg = NULL;
         int errlen;
-        libssh2_session_last_error(sshc->ssh_session, &errmsg, &errlen, 0);
-        failf(data, "libssh2 method '%s' failed: %s", hostkey_method, errmsg);
+        libssh2_session_last_error(sshc->ssh_session, &err_msg, &errlen, 0);
+        failf(data, "libssh2 method '%s' failed: %s", hostkey_method, err_msg);
         result = libssh2_session_error_to_CURLE(rc);
       }
     }
