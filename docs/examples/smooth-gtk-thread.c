@@ -65,7 +65,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return fwrite(ptr, size, nmemb, stream);
 }
 
-static void run_one(gchar *http, int j)
+static void run_one(const gchar *http, int j)
 {
   CURL *curl;
 
