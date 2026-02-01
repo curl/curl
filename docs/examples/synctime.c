@@ -226,7 +226,7 @@ static void showUsage(void)
   return;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   CURLcode result;
   CURL *curl;

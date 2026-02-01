@@ -285,7 +285,7 @@ static int setup(struct input *t, int num, const char *upload)
 /*
  * Upload all files over HTTP/2, using the same physical connection!
  */
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURLcode result;
   struct input *trans;

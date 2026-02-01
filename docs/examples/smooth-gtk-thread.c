@@ -165,7 +165,7 @@ static gboolean cb_delete(GtkWidget *window, gpointer data)
   return FALSE;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   GtkWidget *top_window, *outside_frame, *inside_frame, *progress_bar;
 

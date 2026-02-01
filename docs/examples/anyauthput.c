@@ -88,15 +88,15 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return nread;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURL *curl;
   CURLcode result;
   FILE *fp;
   struct stat file_info;
 
-  char *file;
-  char *url;
+  const char *file;
+  const char *url;
 
   if(argc < 3)
     return 1;
