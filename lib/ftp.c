@@ -1924,7 +1924,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   CURLcode result;
   struct Curl_dns_entry *dns = NULL;
   unsigned short connectport; /* the local port connect() should use! */
-  struct pingpong *pp = &ftpc->pp;
+  const struct pingpong *pp = &ftpc->pp;
   char *newhost = NULL;
   unsigned short newport = 0;
   const char *str = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
