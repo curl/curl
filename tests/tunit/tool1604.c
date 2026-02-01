@@ -28,31 +28,23 @@
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 
-static char *getflagstr(int flags)
+static void getflagstr(char *buf, size_t len, int flags)
 {
-  char *buf = curlx_malloc(256);
-  if(buf) {
-    curl_msnprintf(buf, 256, "%s,%s",
-                   ((flags & SANITIZE_ALLOW_PATH) ?
-                    "SANITIZE_ALLOW_PATH" : ""),
-                   ((flags & SANITIZE_ALLOW_RESERVED) ?
-                    "SANITIZE_ALLOW_RESERVED" : ""));
-  }
-  return buf;
+  curl_msnprintf(buf, len, "%s,%s",
+                 ((flags & SANITIZE_ALLOW_PATH) ?
+                  "SANITIZE_ALLOW_PATH" : ""),
+                 ((flags & SANITIZE_ALLOW_RESERVED) ?
+                  "SANITIZE_ALLOW_RESERVED" : ""));
 }
 
-static char *getcurlcodestr(int cc)
+static void getcurlcodestr(char *buf, size_t len, int cc)
 {
-  char *buf = curlx_malloc(256);
-  if(buf) {
-    curl_msnprintf(buf, 256, "%s (%d)",
+  curl_msnprintf(buf, len, "%s (%d)",
              (cc == SANITIZE_ERR_OK ? "SANITIZE_ERR_OK" :
               cc == SANITIZE_ERR_BAD_ARGUMENT ? "SANITIZE_ERR_BAD_ARGUMENT" :
               cc == SANITIZE_ERR_INVALID_PATH ? "SANITIZE_ERR_INVALID_PATH" :
               cc == SANITIZE_ERR_OUT_OF_MEMORY ? "SANITIZE_ERR_OUT_OF_MEMORY" :
               "unexpected error code - add name"), cc);
-  }
-  return buf;
 }
 #endif
 
@@ -188,9 +180,12 @@ static CURLcode test_tool1604(const char *arg)
 
   for(i = 0; i < CURL_ARRAYSIZE(data); ++i) {
     char *output = NULL;
-    char *flagstr = NULL;
-    char *received_ccstr = NULL;
-    char *expected_ccstr = NULL;
+    char flagstr[256];
+    char receivedstr[256];
+    char expectedstr[256];
+    const char *flg = flagstr;
+    const char *rec = receivedstr;
+    const char *exp = expectedstr;
     SANITIZEcode res;
 
     res = sanitize_file_name(&output, data[i].input, data[i].flags);
@@ -203,12 +198,12 @@ static CURLcode test_tool1604(const char *arg)
       continue;
     }
 
-    flagstr = getflagstr(data[i].flags);
-    abort_unless(flagstr, "out of memory");
-    received_ccstr = getcurlcodestr(res);
-    abort_unless(received_ccstr, "out of memory");
-    expected_ccstr = getcurlcodestr(data[i].expected_result);
-    abort_unless(expected_ccstr, "out of memory");
+    getflagstr(flagstr, sizeof(flagstr), data[i].flags);
+    abort_unless(flg, "out of memory");
+    getcurlcodestr(receivedstr, sizeof(receivedstr), res);
+    abort_unless(rec, "out of memory");
+    getcurlcodestr(expectedstr, sizeof(expectedstr), data[i].expected_result);
+    abort_unless(exp, "out of memory");
 
     unitfail++;
     curl_mfprintf(stderr, "\n"
@@ -223,14 +218,11 @@ static CURLcode test_tool1604(const char *arg)
                   data[i].input,
                   flagstr,
                   output ? output : "(null)",
-                  received_ccstr,
+                  receivedstr,
                   data[i].expected_output ? data[i].expected_output : "(null)",
-                  expected_ccstr);
+                  expectedstr);
 
     curlx_free(output);
-    curlx_free(flagstr);
-    curlx_free(received_ccstr);
-    curlx_free(expected_ccstr);
   }
   /* END sanitize_file_name */
 #else
