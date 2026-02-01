@@ -125,7 +125,7 @@ extern int getpart(char **outbuf, size_t *outlen,
                    const char *main, const char *sub, FILE *stream);
 
 /* utility functions */
-extern char *data_to_hex(char *data, size_t len);
+extern char *data_to_hex(const char *data, size_t len);
 extern void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 extern void loghex(const unsigned char *buffer, ssize_t len);
 extern int win32_init(void);
