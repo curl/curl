@@ -3879,6 +3879,50 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+static CURLcode scheme_change_ws_to_http(struct Curl_easy *data)
+{
+  CURLUcode uc;
+  const char *new_scheme = NULL;
+  char *url;
+  CURLcode result;
+
+  if(curl_strequal("ws", data->state.up.scheme))
+    new_scheme = "http";
+  if(curl_strequal("wss", data->state.up.scheme))
+    new_scheme = "https";
+  if(!new_scheme)
+    return CURLE_URL_MALFORMAT;
+
+  uc = curl_url_set(data->state.uh, CURLUPART_SCHEME, new_scheme, 0);
+  if(uc)
+    return Curl_uc_to_curlcode(uc);
+
+  /* after update, get the updated version */
+  uc = curl_url_get(data->state.uh, CURLUPART_URL, &url, 0);
+  if(uc)
+    return Curl_uc_to_curlcode(uc);
+
+  infof(data, "Switching from %s to %s due to refused upgrade: %s",
+        data->state.up.scheme, new_scheme, url);
+
+  Curl_safefree(data->state.up.scheme);
+  uc = curl_url_get(data->state.uh, CURLUPART_SCHEME,
+                    &data->state.up.scheme, 0);
+  if(uc) {
+    curlx_free(url);
+    return Curl_uc_to_curlcode(uc);
+  }
+  Curl_bufref_set(&data->state.url, url, 0, curl_free);
+
+  result = Curl_findprotocol(data, data->conn, data->state.up.scheme);
+  if(result)
+    return result;
+
+  return CURLE_OK;
+}
+#endif
+
 static CURLcode http_on_response(struct Curl_easy *data,
                                  const char *last_hd, size_t last_hd_len,
                                  const char *buf, size_t blen,
@@ -4041,9 +4085,19 @@ static CURLcode http_on_response(struct Curl_easy *data,
 #ifndef CURL_DISABLE_WEBSOCKETS
   /* All >=200 HTTP status codes are errors when wanting WebSocket */
   if(data->req.upgr101 == UPGR101_WS) {
-    failf(data, "Refused WebSocket upgrade: %d", k->httpcode);
-    result = CURLE_HTTP_RETURNED_ERROR;
-    goto out;
+    CURLcode result2;
+    if(!data->set.ws_upgrd_refused_ok) {
+      failf(data, "Refused WebSocket upgrade: %d", k->httpcode);
+      result = CURLE_HTTP_RETURNED_ERROR;
+      goto out;
+    }
+    infof(data, "WebSocket upgrade refused but continuing: %d", k->httpcode);
+    result2 = scheme_change_ws_to_http(data);
+    if(result2) {
+      result = result2;
+      infof(data, "Failed to switch from WebSocket to http scheme/handler");
+      goto out;
+    }
   }
 #endif
 

@@ -51,6 +51,13 @@ Disable the automatic reply to PING messages. This means users must
 send a PONG message with curl_ws_send(3). This feature is added with
 version 8.14.0.
 
+## CURLWS_UPGRD_REFUSED_OK (3)
+
+Allow a WebSocket upgrade to be refused by the server without causing
+an error. The response is processed as a normal http(s) response. In this
+case the caller must check the response status code to know if the upgrade
+succeeded. This feature is added with version 8.19.0.
+
 # DEFAULT
 
 0

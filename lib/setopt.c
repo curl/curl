@@ -1213,6 +1213,7 @@ static CURLcode setopt_long_proto(struct Curl_easy *data, CURLoption option,
   case CURLOPT_WS_OPTIONS:
     s->ws_raw_mode = (bool)(arg & CURLWS_RAW_MODE);
     s->ws_no_auto_pong = (bool)(arg & CURLWS_NOAUTOPONG);
+    s->ws_upgrd_refused_ok = (bool)(arg & CURLWS_UPGRD_REFUSED_OK);
     break;
 #endif
   default:
