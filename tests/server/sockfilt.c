@@ -313,11 +313,11 @@ static bool write_stdout(const void *buffer, size_t nbytes)
   return TRUE;
 }
 
-static void lograw(unsigned char *buffer, ssize_t len)
+static void lograw(const unsigned char *buffer, ssize_t len)
 {
   char data[120];
   ssize_t i;
-  unsigned char *ptr = buffer;
+  const unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width = 0;
   int left = sizeof(data);
