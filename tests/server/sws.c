@@ -156,6 +156,33 @@ static const char *doc404 =
   "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n"
   "</BODY></HTML>\n";
 
+/* This function returns a pointer to STATIC memory. It converts the given
+ * binary lump to a hex formatted string usable for output in logs or
+ * whatever.
+ */
+static char *data_to_hex(const char *data, size_t len)
+{
+  static char buf[256 * 3];
+  size_t i;
+  char *optr = buf;
+  const char *iptr = data;
+
+  if(len > 255)
+    len = 255;
+
+  for(i = 0; i < len; i++) {
+    if((data[i] >= 0x20) && (data[i] < 0x7f))
+      *optr++ = *iptr++;
+    else {
+      snprintf(optr, 4, "%%%02x", (unsigned char)*iptr++);
+      optr += 3;
+    }
+  }
+  *optr = 0; /* in case no sprintf was used */
+
+  return buf;
+}
+
 /* work around for handling trailing headers */
 static int already_recv_zeroed_chunk = FALSE;
 
@@ -303,7 +330,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
 
 static int sws_ProcessRequest(struct sws_httprequest *req)
 {
-  char *line = &req->reqbuf[req->checkindex];
+  const char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
   int prot_major = 0;
@@ -331,7 +358,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   else if(req->testno == DOCNUMBER_NOTHING) {
     const char *http;
     bool fine = FALSE;
-    char *httppath = NULL;
+    const char *httppath = NULL;
     size_t npath = 0; /* httppath length */
 
     if(sscanf(line, "%" REQUEST_KEYWORD_SIZE_TXT "s ", request) == 1) {
@@ -357,7 +384,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     }
 
     if(fine) {
-      char *ptr;
+      const char *ptr;
 
       req->prot_version = prot_major * 10 + prot_minor;
 
@@ -476,7 +503,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
         sws_parse_servercmd(req);
     }
     else if((req->offset >= 3)) {
-      unsigned char *l = (unsigned char *)line;
+      const unsigned char *l = (const unsigned char *)line;
       logmsg("** Unusual request. Starts with %02x %02x %02x (%c%c%c)",
              l[0], l[1], l[2], l[0], l[1], l[2]);
     }
@@ -1934,7 +1961,7 @@ static int service_connection(curl_socket_t *msgsock,
   return -1;
 }
 
-static int test_sws(int argc, char *argv[])
+static int test_sws(int argc, const char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

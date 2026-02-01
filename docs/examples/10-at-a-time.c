@@ -131,7 +131,7 @@ int main(void)
       /* !checksrc! disable EQUALSNULL 1 */
       while((msg = curl_multi_info_read(multi, &msgs_left)) != NULL) {
         if(msg->msg == CURLMSG_DONE) {
-          char *url;
+          const char *url;
           CURL *curl = msg->easy_handle;
           curl_easy_getinfo(curl, CURLINFO_PRIVATE, &url);
           fprintf(stderr, "R: %d - %s <%s>\n",

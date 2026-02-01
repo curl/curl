@@ -277,7 +277,7 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
   char buffer[128];
   curlx_dyn_reset(buf);
   while(1) {
-    char *b = fgets(buffer, sizeof(buffer), input);
+    const char *b = fgets(buffer, sizeof(buffer), input);
 
     if(b) {
       size_t rlen = strlen(b);

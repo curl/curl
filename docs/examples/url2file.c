@@ -42,7 +42,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
   return written;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   static const char *pagefilename = "page.out";
 

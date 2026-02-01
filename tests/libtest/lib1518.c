@@ -41,8 +41,8 @@ static CURLcode test_lib1518(const char *URL)
   CURLcode result = CURLE_OK;
   long curlResponseCode;
   long curlRedirectCount;
-  char *effectiveUrl = NULL;
-  char *redirectUrl = NULL;
+  const char *effectiveUrl = NULL;
+  const char *redirectUrl = NULL;
   CURLU *urlu = NULL;
   curl = curl_easy_init();
   if(!curl) {

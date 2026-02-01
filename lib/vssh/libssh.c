@@ -1367,7 +1367,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
   /*
    * Support some of the "FTP" commands
    */
-  char *cmd = sshc->quote_item->data;
+  const char *cmd = sshc->quote_item->data;
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never
@@ -1578,7 +1578,7 @@ static int myssh_in_SFTP_NEXT_QUOTE(struct Curl_easy *data,
 static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
                                     struct ssh_conn *sshc)
 {
-  char *cmd = sshc->quote_item->data;
+  const char *cmd = sshc->quote_item->data;
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never

@@ -496,9 +496,9 @@ static void rec_wont(struct Curl_easy *data, struct TELNET *tn, int option)
 }
 
 static void printsub(struct Curl_easy *data,
-                     int direction,             /* '<' or '>' */
-                     unsigned char *pointer,    /* where suboption data is */
-                     size_t length)             /* length of suboption data */
+                     int direction,                /* '<' or '>' */
+                     const unsigned char *pointer, /* ptr to suboption data */
+                     size_t length)                /* suboption data length */
 {
   if(data->set.verbose) {
     unsigned int i = 0;
@@ -611,10 +611,10 @@ static void printsub(struct Curl_easy *data,
 /* Escape and send a telnet data block */
 static CURLcode send_telnet_data(struct Curl_easy *data,
                                  struct TELNET *tn,
-                                 char *buffer, ssize_t nread)
+                                 const char *buffer, ssize_t nread)
 {
   size_t i, outlen;
-  unsigned char *outbuf;
+  const unsigned char *outbuf;
   CURLcode result = CURLE_OK;
   size_t bytes_written;
   size_t total_written = 0;
@@ -641,7 +641,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
   }
   else {
     outlen = (size_t)nread;
-    outbuf = (unsigned char *)buffer;
+    outbuf = (const unsigned char *)buffer;
   }
   while(!result && total_written < outlen) {
     /* Make sure socket is writable to avoid EWOULDBLOCK condition */
@@ -676,7 +676,7 @@ static void sendsuboption(struct Curl_easy *data,
   ssize_t bytes_written;
   int err;
   unsigned short x, y;
-  unsigned char *uc1, *uc2;
+  const unsigned char *uc1, *uc2;
   struct connectdata *conn = data->conn;
 
   switch(option) {
@@ -690,8 +690,8 @@ static void sendsuboption(struct Curl_easy *data,
     /* Window size must be sent according to the 'network order' */
     x = htons(tn->subopt_wsx);
     y = htons(tn->subopt_wsy);
-    uc1 = (unsigned char *)&x;
-    uc2 = (unsigned char *)&y;
+    uc1 = (const unsigned char *)&x;
+    uc2 = (const unsigned char *)&y;
     CURL_SB_ACCUM(tn, uc1[0]);
     CURL_SB_ACCUM(tn, uc1[1]);
     CURL_SB_ACCUM(tn, uc2[0]);
@@ -702,7 +702,7 @@ static void sendsuboption(struct Curl_easy *data,
     CURL_SB_TERM(tn);
     /* data suboption is now ready */
 
-    printsub(data, '>', (unsigned char *)tn->subbuffer + 2,
+    printsub(data, '>', (const unsigned char *)tn->subbuffer + 2,
              CURL_SB_LEN(tn) - 2);
 
     /* we send the header of the suboption... */
@@ -713,7 +713,7 @@ static void sendsuboption(struct Curl_easy *data,
     }
     /* ... then the window size with the send_telnet_data() function
        to deal with 0xFF cases ... */
-    send_telnet_data(data, tn, (char *)tn->subbuffer + 3, 4);
+    send_telnet_data(data, tn, (const char *)tn->subbuffer + 3, 4);
     /* ... and the footer */
     bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer + 7, 2);
     if(bytes_written < 0) {
@@ -986,7 +986,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
   if(!CURL_SB_LEN(tn)) /* ignore empty suboption */
     return CURLE_OK;
 
-  printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
+  printsub(data, '<', (const unsigned char *)tn->subbuffer,
+           CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
   case CURL_TELOPT_TTYPE:
     if(bad_option(tn->subopt_ttype))

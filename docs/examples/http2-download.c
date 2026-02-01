@@ -187,7 +187,7 @@ static int setup(struct transfer *t, int num)
 /*
  * Download many transfers over HTTP/2, using the same connection!
  */
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURLcode result;
   struct transfer *trans;

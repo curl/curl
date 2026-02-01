@@ -242,7 +242,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
 
     case CHUNK_TRAILER:
       if((*buf == 0x0d) || (*buf == 0x0a)) {
-        char *tr = curlx_dyn_ptr(&ch->trailer);
+        const char *tr = curlx_dyn_ptr(&ch->trailer);
         /* this is the end of a trailer, but if the trailer was zero bytes
            there was no trailer and we move on */
 
@@ -517,7 +517,7 @@ static CURLcode add_last_chunk(struct Curl_easy *data,
 
   for(tr = trailers; tr; tr = tr->next) {
     /* only add correctly formatted trailers */
-    char *ptr = strchr(tr->data, ':');
+    const char *ptr = strchr(tr->data, ':');
     if(!ptr || *(ptr + 1) != ' ') {
       infof(data, "Malformatted trailing header, skipping trailer");
       continue;

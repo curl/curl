@@ -732,7 +732,7 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
     size_t in_key_len;
     const char *offset;
     size_t query_part_len = curlx_dyn_len(&query_array[index]);
-    char *query_part = curlx_dyn_ptr(&query_array[index]);
+    const char *query_part = curlx_dyn_ptr(&query_array[index]);
 
     in_key = query_part;
 
@@ -788,8 +788,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
     if(index)
       result = curlx_dyn_addn(dq, "&", 1);
     if(!result) {
-      char *key_ptr = curlx_dyn_ptr(&encoded_query_array[index].key);
-      char *value_ptr = curlx_dyn_ptr(&encoded_query_array[index].value);
+      const char *key_ptr = curlx_dyn_ptr(&encoded_query_array[index].key);
+      const char *value_ptr = curlx_dyn_ptr(&encoded_query_array[index].value);
       size_t vlen = curlx_dyn_len(&encoded_query_array[index].value);
       if(value_ptr && vlen) {
         result = curlx_dyn_addf(dq, "%s=%s", key_ptr, value_ptr);

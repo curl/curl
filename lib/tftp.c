@@ -1078,7 +1078,7 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
       if(state->rbytes > 4 &&
          (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
         result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                   (char *)state->rpacket.data + 4,
+                                   (const char *)state->rpacket.data + 4,
                                    state->rbytes - 4);
         if(result) {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
@@ -1088,7 +1088,7 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
       break;
     case TFTP_EVENT_ERROR: {
       unsigned short error = getrpacketblock(&state->rpacket);
-      char *str = (char *)state->rpacket.data + 4;
+      const char *str = (const char *)state->rpacket.data + 4;
       size_t strn = state->rbytes - 4;
       state->error = (tftp_error_t)error;
       if(tftp_strnlen(str, strn) < strn)

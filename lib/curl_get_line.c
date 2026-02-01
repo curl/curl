@@ -41,7 +41,7 @@ CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof)
   curlx_dyn_reset(buf);
   while(1) {
     size_t rlen;
-    char *b = fgets(buffer, sizeof(buffer), input);
+    const char *b = fgets(buffer, sizeof(buffer), input);
 
     *eof = feof(input);
 

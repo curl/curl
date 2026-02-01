@@ -403,7 +403,7 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
 {
   struct MQTT *mq = Curl_meta_get(data, CURL_META_MQTT_EASY);
   CURLcode result;
-  char *ptr;
+  const char *ptr;
 
   DEBUGASSERT(mq);
   if(!mq)
@@ -433,7 +433,7 @@ fail:
 static CURLcode mqtt_get_topic(struct Curl_easy *data,
                                char **topic, size_t *topiclen)
 {
-  char *path = data->state.up.path;
+  const char *path = data->state.up.path;
   CURLcode result = CURLE_URL_MALFORMAT;
   if(strlen(path) > 1) {
     result = Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
@@ -506,7 +506,7 @@ static CURLcode mqtt_verify_suback(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   struct mqtt_conn *mqtt = Curl_conn_meta_get(conn, CURL_META_MQTT_CONN);
   CURLcode result;
-  char *ptr;
+  const char *ptr;
 
   if(!mqtt || !mq)
     return CURLE_FAILED_INIT;
@@ -595,7 +595,8 @@ fail:
 }
 
 /* return 0 on success, non-zero on error */
-static int mqtt_decode_len(size_t *lenp, unsigned char *buf, size_t buflen)
+static int mqtt_decode_len(size_t *lenp, const unsigned char *buf,
+                           size_t buflen)
 {
   size_t len = 0;
   size_t mult = 1;

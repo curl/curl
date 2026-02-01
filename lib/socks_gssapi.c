@@ -317,7 +317,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
 
   infof(data, "SOCKS5 server authenticated user %.*s with GSS-API.",
-        (int)gss_send_token.length, (char *)gss_send_token.value);
+        (int)gss_send_token.length, (const char *)gss_send_token.value);
 
   gss_release_name(&gss_status, &gss_client_name);
   gss_release_buffer(&gss_status, &gss_send_token);

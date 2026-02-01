@@ -28,7 +28,7 @@
 static CURLcode test_lib1536(const char *URL)
 {
   CURL *curl, *dupe = NULL;
-  char *scheme;
+  const char *scheme;
   CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);

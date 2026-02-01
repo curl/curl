@@ -40,7 +40,7 @@
  *  **** This example only works with libcurl 7.56.0 and later! ****
  */
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   const char *name = argc > 1 ? argv[1] : "openssl";
   CURLsslset result;

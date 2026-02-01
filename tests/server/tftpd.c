@@ -111,14 +111,14 @@ struct tftphdr {
  *****************************************************************************/
 
 struct testcase {
-  char *buffer;   /* holds the file data to send to the client */
-  size_t bufsize; /* size of the data in buffer */
-  char *rptr;     /* read pointer into the buffer */
-  size_t rcount;  /* amount of data left to read of the file */
-  long testno;    /* test case number */
-  int ofile;      /* file descriptor for output file when uploading to us */
+  char *buffer;     /* holds the file data to send to the client */
+  size_t bufsize;   /* size of the data in buffer */
+  const char *rptr; /* read pointer into the buffer */
+  size_t rcount;    /* amount of data left to read of the file */
+  long testno;      /* test case number */
+  int ofile;        /* file descriptor for output file when uploading to us */
 
-  int writedelay; /* number of seconds between each packet */
+  int writedelay;   /* number of seconds between each packet */
 };
 
 struct formats {
@@ -889,7 +889,8 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   char *cp;
   int first = 1, ecode;
   const struct formats *pf;
-  char *filename, *mode = NULL;
+  const char *filename;
+  char *mode = NULL;
 #ifdef USE_WINSOCK
   DWORD recvtimeout, recvtimeoutbak;
 #endif
@@ -1004,7 +1005,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   return 0;
 }
 
-static int test_tftpd(int argc, char **argv)
+static int test_tftpd(int argc, const char **argv)
 {
   srvr_sockaddr_union_t me;
   struct tftphdr *tp;

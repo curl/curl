@@ -313,11 +313,11 @@ static bool write_stdout(const void *buffer, size_t nbytes)
   return TRUE;
 }
 
-static void lograw(unsigned char *buffer, ssize_t len)
+static void lograw(const unsigned char *buffer, ssize_t len)
 {
   char data[120];
   ssize_t i;
-  unsigned char *ptr = buffer;
+  const unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width = 0;
   int left = sizeof(data);
@@ -372,7 +372,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   buffer[5] = '\0';
 
-  endp = (char *)buffer;
+  endp = (const char *)buffer;
   if(curlx_str_hex(&endp, &value, 0xfffff)) {
     logmsg("Failed to decode buffer size");
     return FALSE;
@@ -1066,7 +1066,7 @@ static bool juggle(curl_socket_t *sockfdp,
          Replies to PORT with "IPv[num]/[port]" */
       snprintf((char *)buffer, sizeof(buffer), "%s/%hu\n",
                ipv_inuse, server_port);
-      buffer_len = (ssize_t)strlen((char *)buffer);
+      buffer_len = (ssize_t)strlen((const char *)buffer);
       snprintf(data, sizeof(data), "PORT\n%04x\n", (int)buffer_len);
       if(!write_stdout(data, 10))
         return FALSE;
@@ -1171,7 +1171,7 @@ static bool juggle(curl_socket_t *sockfdp,
   return TRUE;
 }
 
-static int test_sockfilt(int argc, char *argv[])
+static int test_sockfilt(int argc, const char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

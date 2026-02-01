@@ -49,7 +49,7 @@ int main(void)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
               curl_easy_strerror(result));
     else {
-      char *hdr;
+      const char *hdr;
       result = curl_easy_getinfo(curl, CURLINFO_REFERER, &hdr);
       if((result == CURLE_OK) && hdr)
         printf("Referrer header: %s\n", hdr);

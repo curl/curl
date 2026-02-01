@@ -211,7 +211,7 @@ static int my_progress_d_cb(void *userdata,
 static int setup_hx_download(CURL *curl, const char *url, struct transfer_d *t,
                              long http_version, struct curl_slist *host,
                              CURLSH *share, int use_earlydata,
-                             int fresh_connect, char *cafile)
+                             int fresh_connect, const char *cafile)
 {
   curl_easy_setopt(curl, CURLOPT_SHARE, share);
   curl_easy_setopt(curl, CURLOPT_URL, url);

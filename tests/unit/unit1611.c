@@ -33,7 +33,7 @@ static CURLcode test_unit1611(const char *arg)
   static const char string1[] = "1";
   static const char string2[] = "hello-you-fool";
   unsigned char output[MD4_DIGEST_LENGTH];
-  unsigned char *testp = output;
+  const unsigned char *testp = output;
 
   Curl_md4it(output, (const unsigned char *)string1, strlen(string1));
 

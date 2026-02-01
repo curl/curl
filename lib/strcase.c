@@ -116,7 +116,7 @@ void Curl_strntolower(char *dest, const char *src, size_t n)
 /* Compare case-sensitive null-terminated strings, taking care of possible
  * null pointers. Return true if arguments match.
  */
-bool Curl_safecmp(char *a, char *b)
+bool Curl_safecmp(const char *a, const char *b)
 {
   if(a && b)
     return !strcmp(a, b);

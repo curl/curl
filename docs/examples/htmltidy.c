@@ -74,7 +74,7 @@ static void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
   }
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURL *curl;
   char curl_errbuf[CURL_ERROR_SIZE];

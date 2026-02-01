@@ -130,8 +130,9 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
 
 #ifndef USE_WINDOWS_SSPI
 /* Convert MD5 chunk to RFC2617 (section 3.1.3) -suitable ASCII string */
-static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
-                                     unsigned char *dest)   /* 33 bytes */
+static void auth_digest_md5_to_ascii(
+  const unsigned char *source, /* 16 bytes */
+  unsigned char *dest)         /* 33 bytes */
 {
   int i;
   for(i = 0; i < 16; i++)
@@ -139,8 +140,9 @@ static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
 }
 
 /* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
-static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
-                                        unsigned char *dest)   /* 65 bytes */
+static void auth_digest_sha256_to_ascii(
+  const unsigned char *source, /* 32 bytes */
+  unsigned char *dest)         /* 65 bytes */
 {
   int i;
   for(i = 0; i < 32; i++)
@@ -670,7 +672,7 @@ static CURLcode auth_create_digest_http_message(
   const unsigned char *uripath,
   struct digestdata *digest,
   char **outptr, size_t *outlen,
-  void (*convert_to_ascii)(unsigned char *, unsigned char *),
+  void (*convert_to_ascii)(const unsigned char *, unsigned char *),
   CURLcode (*hash)(unsigned char *, const unsigned char *, const size_t))
 {
   CURLcode result;

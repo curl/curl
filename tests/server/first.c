@@ -25,10 +25,10 @@
 
 #include <stdio.h>
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   entry_func_t entry_func;
-  char *entry_name;
+  const char *entry_name;
   size_t tmp;
 
   if(argc < 2) {

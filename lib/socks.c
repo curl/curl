@@ -837,7 +837,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
   struct Curl_dns_entry *dns = NULL;
   struct Curl_addrinfo *hp = NULL;
   char dest[MAX_IPADR_LEN];  /* printable address */
-  unsigned char *destination = NULL;
+  const unsigned char *destination = NULL;
   unsigned char desttype = 1, destlen = 4;
   unsigned char req[2];
   CURLcode result;
@@ -896,7 +896,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     desttype = 1; /* ATYP: IPv4 = 1 */
     destlen = 4;
     saddr_in = (struct sockaddr_in *)(void *)hp->ai_addr;
-    destination = (unsigned char *)&saddr_in->sin_addr.s_addr;
+    destination = (const unsigned char *)&saddr_in->sin_addr.s_addr;
     CURL_TRC_CF(data, cf, "SOCKS5 connect to %s:%d (locally resolved)",
                 dest, sx->remote_port);
   }
@@ -906,7 +906,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     desttype = 4; /* ATYP: IPv6 = 4 */
     destlen = 16;
     saddr_in6 = (struct sockaddr_in6 *)(void *)hp->ai_addr;
-    destination = (unsigned char *)&saddr_in6->sin6_addr.s6_addr;
+    destination = (const unsigned char *)&saddr_in6->sin6_addr.s6_addr;
     CURL_TRC_CF(data, cf, "SOCKS5 connect to [%s]:%d (locally resolved)",
                 dest, sx->remote_port);
   }

@@ -65,7 +65,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return fwrite(ptr, size, nmemb, stream);
 }
 
-static void run_one(gchar *http, int j)
+static void run_one(const gchar *http, int j)
 {
   CURL *curl;
 
@@ -94,6 +94,7 @@ static void *pull_one_url(void *NaN)
   /* protect the reading and increasing of 'j' with a mutex */
   pthread_mutex_lock(&lock);
   while(j < num_urls) {
+    gchar *http;
     int i = j;
     j++;
     pthread_mutex_unlock(&lock);
@@ -165,7 +166,7 @@ static gboolean cb_delete(GtkWidget *window, gpointer data)
   return FALSE;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   GtkWidget *top_window, *outside_frame, *inside_frame, *progress_bar;
 

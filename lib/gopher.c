@@ -63,8 +63,8 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   char *gopherpath;
-  char *path = data->state.up.path;
-  char *query = data->state.up.query;
+  const char *path = data->state.up.path;
+  const char *query = data->state.up.query;
   const char *buf = NULL;
   char *buf_alloc = NULL;
   size_t nwritten, buf_len;
@@ -91,7 +91,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     curlx_free(gopherpath);
   }
   else {
-    char *newp;
+    const char *newp;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
     newp = gopherpath;

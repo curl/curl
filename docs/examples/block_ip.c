@@ -191,8 +191,8 @@ static int ip_match(struct ip *ip, void *netaddr)
   int bytes, tailbits;
   const unsigned char *x, *y;
 
-  x = (unsigned char *)&ip->netaddr;
-  y = (unsigned char *)netaddr;
+  x = (const unsigned char *)&ip->netaddr;
+  y = (const unsigned char *)netaddr;
 
   for(bytes = ip->maskbits / 8; bytes; --bytes) {
     if(*x++ != *y++)
@@ -214,7 +214,7 @@ static int is_ipv4_mapped_ipv6_address(int family, void *netaddr)
 {
   if(family == AF_INET6) {
     int i;
-    unsigned char *x = (unsigned char *)netaddr;
+    const unsigned char *x = (const unsigned char *)netaddr;
     for(i = 0; i < 12; ++i) {
       if(x[i])
         break;

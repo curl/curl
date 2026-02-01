@@ -66,13 +66,13 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
   return (size_t)(size * nmemb);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   CURL *curl;
   CURLcode result;
   int prtall = 0, prtsep = 0, prttime = 0;
   const char *url = URL_1M;
-  char *appname = argv[0];
+  const char *appname = argv[0];
 
   if(argc > 1) {
     /* parse input parameters */

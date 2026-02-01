@@ -118,7 +118,7 @@
 static void show_resolve_info(struct Curl_easy *data,
                               struct Curl_dns_entry *dns)
 {
-  struct Curl_addrinfo *a;
+  const struct Curl_addrinfo *a;
   CURLcode result = CURLE_OK;
 #ifdef CURLRES_IPV6
   struct dynbuf out[2];

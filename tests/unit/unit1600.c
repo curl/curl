@@ -54,7 +54,8 @@ static CURLcode test_unit1600(const char *arg)
 #if defined(USE_NTLM) &&                                    \
   (!defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO))
   unsigned char output[21];
-  unsigned char *testp = output;
+  const unsigned char *testp = output;
+
   Curl_ntlm_core_mk_nt_hash("1", output);
 
   verify_memory(testp,

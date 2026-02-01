@@ -146,7 +146,7 @@ static const struct Curl_OID OIDtable[] = {
   { "2.16.840.1.101.3.4.2.2",   "sha384" },
   { "2.16.840.1.101.3.4.2.3",   "sha512" },
   { "1.2.840.113549.1.9.2",     "unstructuredName" },
-  { (const char *)NULL,         (const char *)NULL }
+  { NULL,                       NULL }
 };
 
 #endif /* WANT_EXTRACT_CERTINFO */
@@ -932,7 +932,7 @@ static CURLcode ssl_push_certinfo_dyn(struct Curl_easy *data,
                                       struct dynbuf *ptr)
 {
   size_t valuelen = curlx_dyn_len(ptr);
-  char *value = curlx_dyn_ptr(ptr);
+  const char *value = curlx_dyn_ptr(ptr);
 
   CURLcode result = Curl_ssl_push_certinfo_len(data, certnum, label,
                                                value, valuelen);

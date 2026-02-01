@@ -562,11 +562,11 @@ static CURLcode test_unit3205(const char *arg)
     if(test->id >= 0x0011 && test->id < 0x0017) {
       if(expect && memcmp(expect, "EDH-", 4) == 0) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
-        expect = (char *)memcpy(alt, "DHE-", 4);
+        expect = (const char *)memcpy(alt, "DHE-", 4);
       }
       if(expect && memcmp(expect + 4, "EDH-", 4) == 0) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
-        expect = (char *)memcpy(alt + 4, "DHE-", 4) - 4;
+        expect = (const char *)memcpy(alt + 4, "DHE-", 4) - 4;
       }
     }
 

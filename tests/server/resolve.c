@@ -33,7 +33,7 @@
  *
  */
 
-static int test_resolve(int argc, char *argv[])
+static int test_resolve(int argc, const char *argv[])
 {
   int arg = 1;
   const char *host = NULL;

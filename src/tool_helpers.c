@@ -96,7 +96,7 @@ int SetHTTPrequest(HttpReq req, HttpReq *store)
   return 1;
 }
 
-void customrequest_helper(HttpReq req, char *method)
+void customrequest_helper(HttpReq req, const char *method)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
   const char *dflt[] = {

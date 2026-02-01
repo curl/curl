@@ -1341,7 +1341,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data,
                                         smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
+  const char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   size_t len = smtpc->pp.nfinal;
 
   (void)instate;

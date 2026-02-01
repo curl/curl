@@ -304,7 +304,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct FormInfo *first_form, *curr, *form = NULL;
   CURLFORMcode retval = CURL_FORMADD_OK;
   CURLformoption option;
-  struct curl_forms *forms = NULL;
+  const struct curl_forms *forms = NULL;
   char *avalue = NULL;
   struct curl_httppost *newchain = NULL;
   struct curl_httppost *lastnode = NULL;

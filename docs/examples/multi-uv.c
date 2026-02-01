@@ -227,7 +227,7 @@ static int cb_socket(CURL *curl, curl_socket_t s, int action,
   return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURLcode result;
   struct datauv uv = { 0 };

@@ -141,12 +141,13 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
  *   GPE_OUT_OF_MEMORY
  *   GPE_OK
  */
-static int appenddata(char  **dst_buf,   /* dest buffer */
-                      size_t *dst_len,   /* dest buffer data length */
-                      size_t *dst_alloc, /* dest buffer allocated size */
-                      char   *src_buf,   /* source buffer */
-                      size_t  src_len,   /* source buffer length */
-                      int     src_b64)   /* != 0 if source is base64 encoded */
+static int appenddata(char **dst_buf,      /* dest buffer */
+                      size_t *dst_len,     /* dest buffer data length */
+                      size_t *dst_alloc,   /* dest buffer allocated size */
+                      const char *src_buf, /* source buffer */
+                      size_t src_len,      /* source buffer length */
+                      int src_b64)         /* != 0 if source is base64
+                                              encoded */
 {
   size_t need_alloc = 0;
 
@@ -182,7 +183,7 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
   return GPE_OK;
 }
 
-static int decodedata(char  **buf, /* dest buffer */
+static int decodedata(char **buf,  /* dest buffer */
                       size_t *len) /* dest buffer data length */
 {
   CURLcode result = CURLE_OK;

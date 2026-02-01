@@ -233,7 +233,7 @@ static unsigned char ancount_aaaa;
 /* this is an answer to a question */
 static int send_response(curl_socket_t sock,
                          const struct sockaddr *addr, curl_socklen_t addrlen,
-                         unsigned char *qbuf, size_t qlen,
+                         const unsigned char *qbuf, size_t qlen,
                          unsigned short qtype, unsigned short id)
 {
   ssize_t rc;
@@ -378,7 +378,7 @@ static void read_instructions(void)
     logmsg("Error opening file '%s'", file);
 }
 
-static int test_dnsd(int argc, char **argv)
+static int test_dnsd(int argc, const char **argv)
 {
   srvr_sockaddr_union_t me;
   ssize_t n = 0;

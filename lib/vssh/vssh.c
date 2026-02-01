@@ -125,7 +125,7 @@ void Curl_ssh_set_state(struct Curl_easy *data,
 
 /* figure out the path to work with in this particular request */
 CURLcode Curl_getworkingpath(struct Curl_easy *data,
-                             char *homedir,  /* when SFTP is used */
+                             const char *homedir, /* when SFTP is used */
                              char **path) /* returns the  allocated
                                              real path to work with */
 {
