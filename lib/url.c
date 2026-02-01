@@ -1965,7 +1965,7 @@ static char *detect_proxy(struct Curl_easy *data,
  * that may exist registered to the same proxy host.
  */
 static CURLcode parse_proxy(struct Curl_easy *data,
-                            struct connectdata *conn, char *proxy,
+                            struct connectdata *conn, const char *proxy,
                             long proxytype)
 {
   char *portptr = NULL;
