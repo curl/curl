@@ -125,7 +125,7 @@ static CURLcode test_unit1302(const char *arg)
   };
 
   for(i = 0; i < CURL_ARRAYSIZE(encode); i++) {
-    struct etest *e = &encode[i];
+    const struct etest *e = &encode[i];
     char *out;
     unsigned char *decoded;
     size_t olen;
@@ -164,7 +164,7 @@ static CURLcode test_unit1302(const char *arg)
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(url); i++) {
-    struct etest *e = &url[i];
+    const struct etest *e = &url[i];
     char *out;
     size_t olen;
     result = curlx_base64url_encode((const uint8_t *)e->input, e->ilen,
