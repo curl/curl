@@ -1253,7 +1253,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         goto error;
 
       /* we got a response, create a dns entry. */
-      dns = Curl_dnscache_mk_entry(data, ai, dohp->host, 0, dohp->port, FALSE);
+      dns = Curl_dnscache_mk_entry(data, &ai, dohp->host, 0,
+                                   dohp->port, FALSE);
       if(dns) {
         /* Now add and HTTPSRR information if we have */
 #ifdef USE_HTTPSRR
@@ -1278,8 +1279,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         result = Curl_dnscache_add(data, dns);
         *dnsp = data->state.async.dns;
       }
-      else
-        Curl_freeaddrinfo(ai);
     } /* address processing done */
 
     /* All done */
