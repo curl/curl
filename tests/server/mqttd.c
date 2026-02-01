@@ -279,7 +279,7 @@ static size_t encode_length(size_t packetlen,
   return bytes;
 }
 
-static size_t decode_length(unsigned char *buffer,
+static size_t decode_length(const unsigned char *buffer,
                             size_t buflen, size_t *lenbytes)
 {
   size_t len = 0;
