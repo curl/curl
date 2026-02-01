@@ -118,8 +118,8 @@ static const char *find_host_sep(const char *url)
 }
 
 /* convert CURLcode to CURLUcode */
-#define cc2cu(x) ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE :   \
-                  CURLUE_OUT_OF_MEMORY)
+#define cc2cu(x) \
+  ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE : CURLUE_OUT_OF_MEMORY)
 
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
