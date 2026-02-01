@@ -1004,7 +1004,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   return 0;
 }
 
-static int test_tftpd(int argc, char **argv)
+static int test_tftpd(int argc, const char **argv)
 {
   srvr_sockaddr_union_t me;
   struct tftphdr *tp;

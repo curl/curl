@@ -39,7 +39,7 @@
 
 #include "curl_setup.h"
 
-typedef int (*entry_func_t)(int, char **);
+typedef int (*entry_func_t)(int, const char **);
 
 struct entry_s {
   const char *name;

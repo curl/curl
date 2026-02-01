@@ -1171,7 +1171,7 @@ static bool juggle(curl_socket_t *sockfdp,
   return TRUE;
 }
 
-static int test_sockfilt(int argc, char *argv[])
+static int test_sockfilt(int argc, const char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

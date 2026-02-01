@@ -997,7 +997,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   return 0;
 }
 
-static int test_rtspd(int argc, char *argv[])
+static int test_rtspd(int argc, const char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

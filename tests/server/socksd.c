@@ -726,7 +726,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
   return TRUE;
 }
 
-static int test_socksd(int argc, char *argv[])
+static int test_socksd(int argc, const char *argv[])
 {
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;

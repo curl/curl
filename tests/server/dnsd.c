@@ -378,7 +378,7 @@ static void read_instructions(void)
     logmsg("Error opening file '%s'", file);
 }
 
-static int test_dnsd(int argc, char **argv)
+static int test_dnsd(int argc, const char **argv)
 {
   srvr_sockaddr_union_t me;
   ssize_t n = 0;

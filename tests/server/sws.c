@@ -1961,7 +1961,7 @@ static int service_connection(curl_socket_t *msgsock,
   return -1;
 }
 
-static int test_sws(int argc, char *argv[])
+static int test_sws(int argc, const char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;
