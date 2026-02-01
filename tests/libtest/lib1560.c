@@ -1150,7 +1150,7 @@ static const struct setcase set_parts_list[] = {
   {NULL, NULL, NULL, 0, 0, CURLUE_OK, CURLUE_OK}
 };
 
-static CURLUPart part2id(char *part)
+static CURLUPart part2id(const char *part)
 {
   if(!strcmp("url", part))
     return CURLUPART_URL;
