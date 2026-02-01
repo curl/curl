@@ -224,10 +224,11 @@ static CURLcode test_unit1650(const char *arg)
       ptr += o;
     }
     de_cleanup(&d);
-    if(resp[i].out && strcmp((char *)buffer, resp[i].out)) {
+    if(resp[i].out && strcmp((const char *)buffer, resp[i].out)) {
       curl_mfprintf(stderr, "resp %zu: Expected %s got %s\n", i,
                     resp[i].out, buffer);
-      abort_if(resp[i].out && strcmp((char *)buffer, resp[i].out), "content");
+      abort_if(resp[i].out && strcmp((const char *)buffer, resp[i].out),
+               "content");
     }
   }
 
@@ -271,9 +272,9 @@ static CURLcode test_unit1650(const char *arg)
     p = &a->ip.v4[0];
     curl_msnprintf((char *)buffer, sizeof(buffer),
                    "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
-    if(rc || strcmp((char *)buffer, "127.0.0.1")) {
+    if(rc || strcmp((const char *)buffer, "127.0.0.1")) {
       curl_mfprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
-      abort_if(rc || strcmp((char *)buffer, "127.0.0.1"), "bad address");
+      abort_if(rc || strcmp((const char *)buffer, "127.0.0.1"), "bad address");
     }
     fail_if(d.numcname, "bad cname counter");
   }
