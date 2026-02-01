@@ -233,7 +233,7 @@ static unsigned char ancount_aaaa;
 /* this is an answer to a question */
 static int send_response(curl_socket_t sock,
                          const struct sockaddr *addr, curl_socklen_t addrlen,
-                         unsigned char *qbuf, size_t qlen,
+                         const unsigned char *qbuf, size_t qlen,
                          unsigned short qtype, unsigned short id)
 {
   ssize_t rc;
