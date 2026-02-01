@@ -355,7 +355,7 @@ static CURLcode single_header(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   const char *linep = curlx_dyn_ptr(&ts->rcvbuf);
   size_t line_len = curlx_dyn_len(&ts->rcvbuf); /* bytes in this line */
-  struct SingleRequest *k = &data->req;
+  const struct SingleRequest *k = &data->req;
   int writetype;
   ts->headerlines++;
 
