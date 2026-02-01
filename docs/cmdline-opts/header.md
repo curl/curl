@@ -6,7 +6,7 @@ Short: H
 Arg: <header/@file>
 Help: Pass custom header(s) to server
 Protocols: HTTP IMAP SMTP
-Category: http imap smtp
+Category: important http imap smtp
 Added: 5.0
 Multi: append
 See-also:
