@@ -372,7 +372,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   buffer[5] = '\0';
 
-  endp = (char *)buffer;
+  endp = (const char *)buffer;
   if(curlx_str_hex(&endp, &value, 0xfffff)) {
     logmsg("Failed to decode buffer size");
     return FALSE;
