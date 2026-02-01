@@ -60,11 +60,11 @@ char *data_to_hex(char *data, size_t len)
   return buf;
 }
 
-void loghex(unsigned char *buffer, ssize_t len)
+void loghex(const unsigned char *buffer, ssize_t len)
 {
   char data[12000];
   ssize_t i;
-  unsigned char *ptr = buffer;
+  const unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width = 0;
   int left = sizeof(data);
