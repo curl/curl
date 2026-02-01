@@ -49,6 +49,7 @@ my @ignore_line;
 
 my %banfunc = (
     "_access" => 1,
+    "_lseeki64" => 1,
     "_mbscat" => 1,
     "_mbsncat" => 1,
     "_open" => 1,
@@ -84,6 +85,7 @@ my %banfunc = (
     "getaddrinfo" => 1,
     "gets" => 1,
     "gmtime" => 1,
+    "llseek" => 1,
     "LoadLibrary" => 1,
     "LoadLibraryA" => 1,
     "LoadLibraryEx" => 1,
@@ -91,6 +93,7 @@ my %banfunc = (
     "LoadLibraryExW" => 1,
     "LoadLibraryW" => 1,
     "localtime" => 1,
+    "lseek" => 1,
     "malloc" => 1,
     "mbstowcs" => 1,
     "MoveFileEx" => 1,
