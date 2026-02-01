@@ -227,8 +227,7 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
  *
  * Parameters:
  *
- * conn  [in]              - The connection handle.
- * fqma  [in]              - The fully qualified mailbox address (which may or
+ * fqma           [in]     - The fully qualified mailbox address (which may or
  *                           may not contain UTF-8 characters).
  * address        [in/out] - A new allocated buffer which holds the local
  *                           address part of the mailbox. This buffer must be
