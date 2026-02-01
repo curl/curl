@@ -1927,8 +1927,8 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   struct pingpong *pp = &ftpc->pp;
   char *newhost = NULL;
   unsigned short newport = 0;
-  char *str = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first letter */
-
+  const char *str = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                        letter */
   if((ftpc->count1 == 0) &&
      (ftpcode == 229)) {
     /* positive EPSV response */
@@ -2419,7 +2419,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
        last .sss part is optional and means fractions of a second */
     int year, month, day, hour, minute, second;
     struct pingpong *pp = &ftpc->pp;
-    char *resp = curlx_dyn_ptr(&pp->recvbuf) + 4;
+    const char *resp = curlx_dyn_ptr(&pp->recvbuf) + 4;
     bool showtime = FALSE;
     if(ftp_213_date(resp, &year, &month, &day, &hour, &minute, &second)) {
       /* we have a time, reformat it */
@@ -2561,7 +2561,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   curl_off_t filesize = -1;
-  char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
+  const char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
   size_t len = ftpc->pp.nfinal;
 
   /* get the size from the ascii string: */
@@ -2569,7 +2569,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     /* To allow servers to prepend "rubbish" in the response string, we scan
        for all the digits at the end of the response and parse only those as a
        number. */
-    char *start = &buf[4];
+    const char *start = &buf[4];
     const char *fdigit = memchr(start, '\r', len - 4);
     if(fdigit) {
       fdigit--;
@@ -2740,7 +2740,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
         size_t i;
         for(i = 0; i < len - 7; i++) {
           curl_off_t what;
-          char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
+          const char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
           const char *c = &buf[i];
           if(!curlx_str_number(&c, &what, CURL_OFF_T_MAX) &&
              !curlx_str_single(&c, ' ') &&
@@ -2910,8 +2910,8 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
   CURLcode result;
 
   if(ftpcode == 257) {
-    char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
-                                                    letter */
+    const char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                          letter */
     bool entry_extracted = FALSE;
     struct dynbuf out;
     curlx_dyn_init(&out, 1000);
@@ -3183,10 +3183,10 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
   case FTP_SYST:
     if(ftpcode == 215) {
-      char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
-                                                      letter */
+      const char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                            letter */
+      const char *start;
       char *os;
-      char *start;
 
       /* Reply format is like
          215<space><OS-name><space><commentary>
