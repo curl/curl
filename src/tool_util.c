@@ -86,7 +86,7 @@ int tool_ftruncate64(int fd, curl_off_t where)
 {
   intptr_t handle = _get_osfhandle(fd);
 
-  if(_lseeki64(fd, where, SEEK_SET) < 0)
+  if(lseek(fd, where, SEEK_SET) < 0)
     return -1;
 
   if(!SetEndOfFile((HANDLE)handle))
