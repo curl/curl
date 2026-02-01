@@ -153,6 +153,7 @@ void hugehelp(void)
   }
   inflateEnd(&z);
 }
+
 /* Show the help text for the 'arg' curl argument on stdout */
 void showhelp(const char *trigger, const char *arg, const char *endarg)
 {
