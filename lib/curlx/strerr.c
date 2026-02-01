@@ -292,7 +292,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
    */
   {
     char buffer[256];
-    char *msg = strerror_r(err, buffer, sizeof(buffer));
+    const char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg && buflen > 1)
       SNPRINTF(buf, buflen, "%s", msg);
     else if(buflen > sizeof("Unknown error ") + 20)
