@@ -33,7 +33,6 @@ static CURLcode test_lib569(const char *URL)
   CURLcode result;
   CURL *curl;
   char *stream_uri = NULL;
-  char *rtsp_session_id;
   int request = 1;
   int i;
 
@@ -74,6 +73,7 @@ static CURLcode test_lib569(const char *URL)
 
   /* Go through the various Session IDs */
   for(i = 0; i < 3; i++) {
+    const char *rtsp_session_id;
     stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
       result = TEST_ERR_MAJOR_BAD;
