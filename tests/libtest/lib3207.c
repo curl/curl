@@ -46,7 +46,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   /* append the data to contents */
   size_t realsize = size * nmemb;
   struct Ctx *mem = (struct Ctx *)userp;
-  char *data = (char *)curlx_malloc(realsize + 1);
+  char *data = curlx_malloc(realsize + 1);
   struct curl_slist *item_append = NULL;
   if(!data) {
     curl_mprintf("not enough memory (malloc returned NULL)\n");
