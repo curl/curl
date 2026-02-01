@@ -1010,16 +1010,13 @@ static bool juggle(curl_socket_t *sockfdp,
   } /* switch(*mode) */
 
   do {
-
     /* select() blocking behavior call on blocking descriptors please */
-
     rc = SOCKFILT_select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
 
     if(got_exit_signal) {
       logmsg("signalled to die, exiting...");
       return FALSE;
     }
-
   } while((rc == -1) && ((error = SOCKERRNO) == SOCKEINTR));
 
   if(rc < 0) {
