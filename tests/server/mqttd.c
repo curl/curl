@@ -131,11 +131,11 @@ typedef enum {
 static void logprotocol(mqttdir dir,
                         const char *prefix, size_t remlen,
                         FILE *output,
-                        unsigned char *buffer, ssize_t len)
+                        const unsigned char *buffer, ssize_t len)
 {
   char data[12000] = "";
   ssize_t i;
-  unsigned char *ptr = buffer;
+  const unsigned char *ptr = buffer;
   char *optr = data;
   int left = sizeof(data);
 
