@@ -1220,7 +1220,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
                                            imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
+  const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
   size_t len = imapc->pp.nfinal;
   struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
 

@@ -338,7 +338,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else /* !USE_WIN32_LDAP */
     int ldap_option;
-    char *ldap_ca = conn->ssl_config.CAfile;
+    const char *ldap_ca = conn->ssl_config.CAfile;
 #ifdef LDAP_OPT_X_TLS
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
