@@ -886,7 +886,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   char myhost[MAX_IPADR_LEN + 1] = "";
 
   struct Curl_sockaddr_storage ss;
-  struct Curl_addrinfo *res, *ai;
+  const struct Curl_addrinfo *res, *ai;
   curl_socklen_t sslen;
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa = (struct sockaddr *)&ss;
@@ -896,15 +896,15 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 #endif
   static const char mode[][5] = { "EPRT", "PORT" };
   int error;
-  char *host = NULL;
-  char *string_ftpport = data->set.str[STRING_FTPPORT];
+  const char *host = NULL;
+  const char *string_ftpport = data->set.str[STRING_FTPPORT];
   struct Curl_dns_entry *dns_entry = NULL;
   unsigned short port_min = 0;
   unsigned short port_max = 0;
   unsigned short port;
   bool possibly_non_local = TRUE;
   char buffer[STRERROR_LEN];
-  char *addr = NULL;
+  const char *addr = NULL;
   size_t addrlen = 0;
   char ipstr[50];
 
@@ -920,7 +920,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 #ifdef USE_IPV6
     if(*string_ftpport == '[') {
       /* [ipv6]:port(-range) */
-      char *ip_start = string_ftpport + 1;
+      const char *ip_start = string_ftpport + 1;
       ip_end = strchr(ip_start, ']');
       if(ip_end) {
         addrlen = ip_end - ip_start;
