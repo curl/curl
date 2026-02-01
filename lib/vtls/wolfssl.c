@@ -1135,7 +1135,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 
 #ifndef WOLFSSL_TLS13
   {
-    char *ciphers = conn_config->cipher_list;
+    const char *ciphers = conn_config->cipher_list;
     if(ciphers) {
       if(!SSL_CTX_set_cipher_list(wctx->ssl_ctx, ciphers)) {
         failf(data, "failed setting cipher list: %s", ciphers);
