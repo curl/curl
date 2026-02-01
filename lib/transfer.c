@@ -127,16 +127,14 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   case CURL_TIMECOND_IFMODSINCE:
   default:
     if(timeofdoc <= data->set.timevalue) {
-      infof(data,
-            "The requested document is not new enough");
+      infof(data, "The requested document is not new enough");
       data->info.timecond = TRUE;
       return FALSE;
     }
     break;
   case CURL_TIMECOND_IFUNMODSINCE:
     if(timeofdoc >= data->set.timevalue) {
-      infof(data,
-            "The requested document is not old enough");
+      infof(data, "The requested document is not old enough");
       data->info.timecond = TRUE;
       return FALSE;
     }

@@ -44,24 +44,24 @@
  */
 
 #ifdef USE_WIN32_LDAP           /* Use Windows LDAP implementation. */
-# include <winldap.h>
-/* Undefine indirect <wincrypt.h> symbols conflicting with BoringSSL. */
-#undef X509_NAME
-#undef X509_EXTENSIONS
-#undef PKCS7_ISSUER_AND_SERIAL
-#undef PKCS7_SIGNER_INFO
-#undef OCSP_REQUEST
-#undef OCSP_RESPONSE
-# include <winber.h>
+#  include <winldap.h>
+/* Undefine indirect <wincrypt.h> symbols conflicting with BoringSSL/AWS-LC. */
+#  undef X509_NAME
+#  undef X509_EXTENSIONS
+#  undef PKCS7_ISSUER_AND_SERIAL
+#  undef PKCS7_SIGNER_INFO
+#  undef OCSP_REQUEST
+#  undef OCSP_RESPONSE
+#  include <winber.h>
 #else
-# define LDAP_DEPRECATED 1      /* Be sure ldap_init() is defined. */
-# ifdef HAVE_LBER_H
-#  include <lber.h>
-# endif
-# include <ldap.h>
-# if defined(HAVE_LDAP_SSL) && defined(HAVE_LDAP_SSL_H)
-#  include <ldap_ssl.h>
-# endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
+#  define LDAP_DEPRECATED 1     /* Be sure ldap_init() is defined. */
+#  ifdef HAVE_LBER_H
+#    include <lber.h>
+#  endif
+#  include <ldap.h>
+#  if defined(HAVE_LDAP_SSL) && defined(HAVE_LDAP_SSL_H)
+#    include <ldap_ssl.h>
+#  endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
 #endif
 
 #include "cfilters.h"
@@ -80,7 +80,7 @@
 #define FREE_ON_WINLDAP(x) curlx_free(x)
 #define curl_ldap_num_t    ULONG
 #else
-#define FREE_ON_WINLDAP(x)
+#define FREE_ON_WINLDAP(x) do {} while(0)
 #define curl_ldap_num_t    int
 #endif
 

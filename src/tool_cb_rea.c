@@ -57,8 +57,7 @@ static bool waitfd(int waitms, int fd)
   struct timeval timeout;
 
   if(fd >= FD_SETSIZE)
-    /* cannot wait! */
-    return FALSE;
+    return FALSE; /* cannot wait! */
 
   /* wait this long at the most */
   timeout.tv_sec = waitms / 1000;
@@ -94,8 +93,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     long msdelta = (long)curlx_timediff_ms(now, per->start);
 
     if(msdelta > config->timeout_ms)
-      /* timeout */
-      return 0;
+      return 0; /* timeout */
 #ifndef _WIN32
     else {
       long w = config->timeout_ms - msdelta;
@@ -181,8 +179,7 @@ int tool_readbusy_cb(void *clientp,
 #ifndef _WIN32
       waitfd(1, per->infd);
 #else
-      /* sleep */
-      curlx_wait_ms(1);
+      curlx_wait_ms(1); /* sleep */
 #endif
     }
 

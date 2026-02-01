@@ -550,7 +550,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted BUT NOT USED.",
-        (socksreq[0] == 0) ? "out GSS-API data":
+        (socksreq[0] == 0) ? "out GSS-API data" :
         ((socksreq[0] == 1) ? " GSS-API integrity" :
          " GSS-API confidentiality"));
 

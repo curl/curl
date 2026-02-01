@@ -381,24 +381,24 @@ jobs:
               -DCMAKE_SYSTEM_NAME=DOS \
               -DCMAKE_SYSTEM_PROCESSOR=x86 \
               -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
-              -DCMAKE_C_COMPILER="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
+              -DCMAKE_C_COMPILER="$HOME"/djgpp/bin/i586-pc-msdosdjgpp-gcc \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF \
-              -DZLIB_INCLUDE_DIR="$HOME/djgpp/include" \
-              -DZLIB_LIBRARY="$HOME/djgpp/lib/libz.a" \
-              -DWATT_ROOT="$HOME/djgpp/net/watt"
+              -DZLIB_INCLUDE_DIR="$HOME"/djgpp/include \
+              -DZLIB_LIBRARY="$HOME"/djgpp/lib/libz.a \
+              -DWATT_ROOT="$HOME"/djgpp/net/watt
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
-              AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
-              RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \
-              WATT_ROOT="$HOME/djgpp/net/watt" \
+              CC="$HOME"/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+              AR="$HOME"/djgpp/bin/i586-pc-msdosdjgpp-ar \
+              RANLIB="$HOME"/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
+              WATT_ROOT="$HOME"/djgpp/net/watt \
               --host=i586-pc-msdosdjgpp \
               --without-ssl --without-libpsl \
-              --with-zlib="$HOME/djgpp"
+              --with-zlib="$HOME"/djgpp
           fi
 
       - name: 'configure log'

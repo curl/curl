@@ -765,7 +765,7 @@ sub checksystemfeatures {
         }
         elsif($versretval & 127) {
             logmsg sprintf("command died with signal %d, and %s coredump.\n",
-                           ($versretval & 127), ($versretval & 128)?"a":"no");
+                           ($versretval & 127), ($versretval & 128) ? "a" : "no");
         }
         else {
             logmsg sprintf("command exited with value %d \n", $versretval >> 8);
@@ -873,11 +873,11 @@ sub checksystemfeatures {
     }
 
     my $env = sprintf("%s%s%s%s%s",
-                      $valgrind?"Valgrind ":"",
-                      $run_duphandle?"test-duphandle ":"",
-                      $run_event_based?"event-based ":"",
-                      $nghttpx_h3?"nghttpx-h3 " :"",
-                      $libtool?"Libtool ":"");
+                      $valgrind ? "Valgrind " : "",
+                      $run_duphandle ? "test-duphandle " : "",
+                      $run_event_based ? "event-based " : "",
+                      $nghttpx_h3 ? "nghttpx-h3 " : "",
+                      $libtool ? "Libtool " : "");
     if($env) {
         logmsg "* Env: $env\n";
     }
@@ -894,10 +894,10 @@ sub checksystemfeatures {
 # display information about server features
 #
 sub displayserverfeatures {
-    logmsg sprintf("* Servers: %s", $stunnel?"SSL ":"");
-    logmsg sprintf("%s", $http_ipv6?"HTTP-IPv6 ":"");
-    logmsg sprintf("%s", $http_unix?"HTTP-unix ":"");
-    logmsg sprintf("%s\n", $ftp_ipv6?"FTP-IPv6 ":"");
+    logmsg sprintf("* Servers: %s", $stunnel ? "SSL " : "");
+    logmsg sprintf("%s", $http_ipv6 ? "HTTP-IPv6 " : "");
+    logmsg sprintf("%s", $http_unix ? "HTTP-unix " : "");
+    logmsg sprintf("%s\n", $ftp_ipv6 ? "FTP-IPv6 " : "");
     logmsg "***************************************** \n";
 }
 
@@ -1732,7 +1732,7 @@ sub singletest_check {
     else {
         if(!$short) {
             logmsg sprintf("\n%s returned $cmdres, when expecting %s\n",
-                           (!$tool)?"curl":$tool, $errorcode);
+                           (!$tool) ? "curl" : $tool, $errorcode);
         }
         logmsg " $testnum: exit FAILED\n";
         # timestamp test result verification end
@@ -2192,7 +2192,7 @@ sub runtimestats {
 
     $counter = 25;
     logmsg "\nTest server starting and verification time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+        sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timesrvr) {
@@ -2202,7 +2202,7 @@ sub runtimestats {
 
     $counter = 10;
     logmsg "\nTest definition reading and preparation time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+        sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timeprep) {
@@ -2212,7 +2212,7 @@ sub runtimestats {
 
     $counter = 25;
     logmsg "\nTest tool execution time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+        sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timetool) {
@@ -2222,7 +2222,7 @@ sub runtimestats {
 
     $counter = 15;
     logmsg "\nTest server logs lock removal time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+        sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timelock) {
@@ -2232,7 +2232,7 @@ sub runtimestats {
 
     $counter = 10;
     logmsg "\nTest results verification time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+        sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timevrfy) {
@@ -2242,7 +2242,7 @@ sub runtimestats {
 
     $counter = 50;
     logmsg "\nTotal time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+        sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timetest) {

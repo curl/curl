@@ -82,9 +82,9 @@ m4_define([AC_LANG_FUNC_LINK_TRY(C)],
 [
 #define $1 innocuous_$1
 #ifdef __STDC__
-# include <limits.h>
+#  include <limits.h>
 #else
-# include <assert.h>
+#  include <assert.h>
 #endif
 #undef $1
 #ifdef __cplusplus

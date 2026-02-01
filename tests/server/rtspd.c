@@ -1250,7 +1250,7 @@ static int test_rtspd(int argc, const char *argv[])
      */
     flag = 1;
     if(setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
-                   (void *)&flag, sizeof(flag)) == -1) {
+                  (void *)&flag, sizeof(flag)) == -1) {
       logmsg("====> TCP_NODELAY failed");
     }
 #endif

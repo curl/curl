@@ -67,30 +67,30 @@ char **__crt0_glob_function(char *arg)
 #endif
 
 /*
-Test if truncating a path to a file will leave at least a single character in
-the filename. Filenames suffixed by an alternate data stream cannot be
-truncated. This performs a dry run, nothing is modified.
-
-Good truncate_pos 9:    C:\foo\bar  =>  C:\foo\ba
-Good truncate_pos 6:    C:\foo      =>  C:\foo
-Good truncate_pos 5:    C:\foo      =>  C:\fo
-Bad* truncate_pos 5:    C:foo       =>  C:foo
-Bad truncate_pos 5:     C:\foo:ads  =>  C:\fo
-Bad truncate_pos 9:     C:\foo:ads  =>  C:\foo:ad
-Bad truncate_pos 5:     C:\foo\bar  =>  C:\fo
-Bad truncate_pos 5:     C:\foo\     =>  C:\fo
-Bad truncate_pos 7:     C:\foo\     =>  C:\foo\
-Error truncate_pos 7:   C:\foo      =>  (pos out of range)
-Bad truncate_pos 1:     C:\foo\     =>  C
-
-* C:foo is ambiguous, C could end up being a drive or file therefore something
-  like C:superlongfilename cannot be truncated.
-
-Returns
-SANITIZE_ERR_OK: Good -- 'path' can be truncated
-SANITIZE_ERR_INVALID_PATH: Bad -- 'path' cannot be truncated
-!= SANITIZE_ERR_OK && != SANITIZE_ERR_INVALID_PATH: Error
-*/
+ * Test if truncating a path to a file will leave at least a single character
+ * in the filename. Filenames suffixed by an alternate data stream cannot be
+ * truncated. This performs a dry run, nothing is modified.
+ *
+ * Good truncate_pos 9:    C:\foo\bar  =>  C:\foo\ba
+ * Good truncate_pos 6:    C:\foo      =>  C:\foo
+ * Good truncate_pos 5:    C:\foo      =>  C:\fo
+ * Bad* truncate_pos 5:    C:foo       =>  C:foo
+ * Bad truncate_pos 5:     C:\foo:ads  =>  C:\fo
+ * Bad truncate_pos 9:     C:\foo:ads  =>  C:\foo:ad
+ * Bad truncate_pos 5:     C:\foo\bar  =>  C:\fo
+ * Bad truncate_pos 5:     C:\foo\     =>  C:\fo
+ * Bad truncate_pos 7:     C:\foo\     =>  C:\foo\
+ * Error truncate_pos 7:   C:\foo      =>  (pos out of range)
+ * Bad truncate_pos 1:     C:\foo\     =>  C
+ *
+ * * C:foo is ambiguous, C could end up being a drive or file therefore
+ *   something like C:superlongfilename cannot be truncated.
+ *
+ * Returns
+ * SANITIZE_ERR_OK: Good -- 'path' can be truncated
+ * SANITIZE_ERR_INVALID_PATH: Bad -- 'path' cannot be truncated
+ * != SANITIZE_ERR_OK && != SANITIZE_ERR_INVALID_PATH: Error
+ */
 static SANITIZEcode truncate_dryrun(const char *path,
                                     const size_t truncate_pos)
 {
@@ -124,18 +124,18 @@ static SANITIZEcode truncate_dryrun(const char *path,
 }
 
 /*
-Extra sanitization MS-DOS for file_name.
-
-This is a supporting function for sanitize_file_name.
-
-Warning: This is an MS-DOS legacy function and was purposely written in a way
-that some path information may pass through. For example drive letter names
-(C:, D:, etc) are allowed to pass through. For sanitizing a filename use
-sanitize_file_name.
-
-Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
-Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
-*/
+ * Extra sanitization MS-DOS for file_name.
+ *
+ * This is a supporting function for sanitize_file_name.
+ *
+ * Warning: This is an MS-DOS legacy function and was purposely written in
+ * a way that some path information may pass through. For example drive letter
+ * names (C:, D:, etc) are allowed to pass through. For sanitizing a filename
+ * use sanitize_file_name.
+ *
+ * Success: SANITIZE_ERR_OK *sanitized points to a sanitized copy of file_name.
+ * Failure: != SANITIZE_ERR_OK *sanitized is NULL.
+ */
 static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
                              int flags)
 {
@@ -171,7 +171,7 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
   /* Get past the drive letter, if any. */
   if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
     *d++ = *s++;
-    *d = ((flags & SANITIZE_ALLOW_PATH)) ? ':' : '_';
+    *d = (flags & SANITIZE_ALLOW_PATH) ? ':' : '_';
     ++d;
     ++s;
   }
@@ -270,25 +270,25 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
 #endif /* MSDOS */
 
 /*
-Rename file_name if it is a reserved dos device name.
-
-This is a supporting function for sanitize_file_name.
-
-Warning: This is an MS-DOS legacy function and was purposely written in a way
-that some path information may pass through. For example drive letter names
-(C:, D:, etc) are allowed to pass through. For sanitizing a filename use
-sanitize_file_name.
-
-Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
-Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
-*/
+ * Rename file_name if it is a reserved dos device name.
+ *
+ * This is a supporting function for sanitize_file_name.
+ *
+ * Warning: This is an MS-DOS legacy function and was purposely written in
+ * a way that some path information may pass through. For example drive letter
+ * names (C:, D:, etc) are allowed to pass through. For sanitizing a filename
+ * use sanitize_file_name.
+ *
+ * Success: SANITIZE_ERR_OK *sanitized points to a sanitized copy of file_name.
+ * Failure: != SANITIZE_ERR_OK *sanitized is NULL.
+ */
 static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
                                            const char *file_name,
                                            int flags)
 {
   /* We could have a file whose name is a device on MS-DOS. Trying to
-   * retrieve such a file would fail at best and wedge us at worst. We need
-   * to rename such files. */
+     retrieve such a file would fail at best and wedge us at worst. We need
+     to rename such files. */
   char *p, *base, *buffer;
 #ifdef MSDOS
   curlx_struct_stat st_buf;
@@ -404,33 +404,34 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
 }
 
 /*
-Sanitize a file or path name.
-
-All banned characters are replaced by underscores, for example:
-f?*foo => f__foo
-f:foo::$DATA => f_foo__$DATA
-f:\foo:bar => f__foo_bar
-f:\foo:bar => f:\foo:bar   (flag SANITIZE_ALLOW_PATH)
-
-This function was implemented according to the guidelines in 'Naming Files,
-Paths, and Namespaces' section 'Naming Conventions'.
-https://learn.microsoft.com/windows/win32/fileio/naming-a-file
-
-Flags
------
-SANITIZE_ALLOW_PATH:       Allow path separators and colons.
-Without this flag path separators and colons are sanitized.
-
-SANITIZE_ALLOW_RESERVED:   Allow reserved device names.
-Without this flag a reserved device name is renamed (COM1 => _COM1).
-
-To fully block reserved device names requires not passing either flag. Some
-less common path styles are allowed to use reserved device names. For example,
-a "\\" prefixed path may use reserved device names if paths are allowed.
-
-Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
-Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
-*/
+ * Sanitize a file or path name.
+ *
+ * All banned characters are replaced by underscores, for example:
+ * f?*foo => f__foo
+ * f:foo::$DATA => f_foo__$DATA
+ * f:\foo:bar => f__foo_bar
+ * f:\foo:bar => f:\foo:bar   (flag SANITIZE_ALLOW_PATH)
+ *
+ * This function was implemented according to the guidelines in 'Naming Files,
+ * Paths, and Namespaces' section 'Naming Conventions'.
+ * https://learn.microsoft.com/windows/win32/fileio/naming-a-file
+ *
+ * Flags
+ * -----
+ * SANITIZE_ALLOW_PATH:       Allow path separators and colons.
+ * Without this flag path separators and colons are sanitized.
+ *
+ * SANITIZE_ALLOW_RESERVED:   Allow reserved device names.
+ * Without this flag a reserved device name is renamed (COM1 => _COM1).
+ *
+ * To fully block reserved device names requires not passing either flag.
+ * Some less common path styles are allowed to use reserved device names.
+ * For example, a "\\" prefixed path may use reserved device names if paths
+ * are allowed.
+ *
+ * Success: SANITIZE_ERR_OK *sanitized points to a sanitized copy of file_name.
+ * Failure: != SANITIZE_ERR_OK *sanitized is NULL.
+ */
 SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
                                 int flags)
 {
@@ -708,11 +709,6 @@ struct win_thread_data {
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
-  DWORD n;
-  ssize_t nwritten;
-  char buffer[BUFSIZ];
-  BOOL r;
-
   struct sockaddr_in clientAddr;
   int clientAddrLen = sizeof(clientAddr);
 
@@ -732,8 +728,11 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     goto ThreadCleanup;
   }
   for(;;) {
-    r = ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL);
-    if(r == 0)
+    DWORD n;
+    ssize_t nwritten;
+    char buffer[BUFSIZ];
+
+    if(!ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL))
       break;
     if(n == 0)
       break;
@@ -760,11 +759,8 @@ ThreadCleanup:
 /* The background thread that reads and buffers the true stdin. */
 curl_socket_t win32_stdin_read_thread(void)
 {
-  bool r;
   int rc = 0;
-  curl_socklen_t socksize = 0;
   struct win_thread_data *tdata = NULL;
-  struct sockaddr_in selfaddr;
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
@@ -775,6 +771,9 @@ curl_socket_t win32_stdin_read_thread(void)
   assert(stdin_thread == NULL);
 
   do {
+    curl_socklen_t socksize = 0;
+    struct sockaddr_in selfaddr;
+
     /* Prepare handles for thread */
     tdata = (struct win_thread_data *)
       curlx_calloc(1, sizeof(struct win_thread_data));
@@ -812,11 +811,9 @@ curl_socket_t win32_stdin_read_thread(void)
     }
 
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
-    r = DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
+    if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
                         GetCurrentProcess(), &tdata->stdin_handle,
-                        0, FALSE, DUPLICATE_SAME_ACCESS);
-
-    if(!r) {
+                        0, FALSE, DUPLICATE_SAME_ACCESS)) {
       errorf("DuplicateHandle error: 0x%08lx", GetLastError());
       break;
     }

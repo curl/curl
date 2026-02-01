@@ -1279,8 +1279,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   /* Tell Winsock what events we want to listen to */
-  if(WSAEventSelect(sockfd, event_handle, FD_READ | FD_CLOSE) ==
-     SOCKET_ERROR) {
+  if(WSAEventSelect(sockfd, event_handle, FD_READ | FD_CLOSE) != 0) {
     WSACloseEvent(event_handle);
     return CURLE_RECV_ERROR;
   }
@@ -1378,7 +1377,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
     case WAIT_OBJECT_0: {
       events.lNetworkEvents = 0;
-      if(WSAEnumNetworkEvents(sockfd, event_handle, &events) == SOCKET_ERROR) {
+      if(WSAEnumNetworkEvents(sockfd, event_handle, &events) != 0) {
         err = SOCKERRNO;
         if(err != SOCKEINPROGRESS) {
           infof(data, "WSAEnumNetworkEvents failed (%d)", err);

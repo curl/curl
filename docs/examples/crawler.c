@@ -131,18 +131,18 @@ static size_t follow_links(CURLM *multi, struct memory *mem, const char *url)
   xmlChar *xpath;
   xmlNodeSetPtr nodeset;
   xmlXPathContextPtr context;
-  xmlXPathObjectPtr result;
+  xmlXPathObjectPtr object;
   if(!doc)
     return 0;
   xpath = (xmlChar *)"//a/@href";
   context = xmlXPathNewContext(doc);
-  result = xmlXPathEvalExpression(xpath, context);
+  object = xmlXPathEvalExpression(xpath, context);
   xmlXPathFreeContext(context);
-  if(!result)
+  if(!object)
     return 0;
-  nodeset = result->nodesetval;
+  nodeset = object->nodesetval;
   if(xmlXPathNodeSetIsEmpty(nodeset)) {
-    xmlXPathFreeObject(result);
+    xmlXPathFreeObject(object);
     return 0;
   }
   count = 0;
@@ -167,7 +167,7 @@ static size_t follow_links(CURLM *multi, struct memory *mem, const char *url)
     }
     xmlFree(link);
   }
-  xmlXPathFreeObject(result);
+  xmlXPathFreeObject(object);
   return count;
 }
 

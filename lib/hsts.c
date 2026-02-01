@@ -318,7 +318,7 @@ static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
   }
   else
     curl_mfprintf(fp, "%s%s \"%s\"\n",
-                  sts->includeSubDomains ? ".": "", sts->host, UNLIMITED);
+                  sts->includeSubDomains ? "." : "", sts->host, UNLIMITED);
   return CURLE_OK;
 }
 

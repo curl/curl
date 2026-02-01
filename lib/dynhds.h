@@ -50,7 +50,7 @@ struct dynhds {
   int opts;
 };
 
-#define DYNHDS_OPT_NONE          (0)
+#define DYNHDS_OPT_NONE          0
 #define DYNHDS_OPT_LOWERCASE     (1 << 0)
 
 /**

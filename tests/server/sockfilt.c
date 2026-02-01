@@ -597,12 +597,10 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 {
   DWORD timeout_ms, wait, nfd, nth, nws, i;
   HANDLE abort, signal, handle, *handles;
-  fd_set readsock, writesock, exceptsock;
   struct select_ws_data *data;
   WSANETWORKEVENTS wsaevents;
   curl_socket_t wsasock;
-  int error, ret, fd;
-  WSAEVENT wsaevent;
+  int ret, fd;
 
   /* check if the input value is valid */
   if(nfds < 0) {
@@ -653,6 +651,8 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   nth = 0; /* number of internal waiting threads */
   nws = 0; /* number of handled Winsock sockets */
   for(fd = 0; fd < nfds; fd++) {
+    fd_set readsock, writesock, exceptsock;
+
     wsasock = (curl_socket_t)fd;
     wsaevents.lNetworkEvents = 0;
     handles[nfd] = 0;
@@ -705,13 +705,14 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
         nfd++;
       }
       else {
+        WSAEVENT wsaevent;
         wsaevent = WSACreateEvent();
         if(wsaevent != WSA_INVALID_EVENT) {
           if(wsaevents.lNetworkEvents & FD_WRITE) {
             swrite(wsasock, NULL, 0); /* reset FD_WRITE */
           }
-          error = WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents);
-          if(error != SOCKET_ERROR) {
+          if(WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents)
+             == 0) {
             handles[nfd] = (HANDLE)wsaevent;
             data[nws].wsasock = wsasock;
             data[nws].wsaevent = wsaevent;
@@ -799,8 +800,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       else {
         /* try to handle the event with the Winsock2 functions */
         wsaevents.lNetworkEvents = 0;
-        error = WSAEnumNetworkEvents(wsasock, handle, &wsaevents);
-        if(error != SOCKET_ERROR) {
+        if(WSAEnumNetworkEvents(wsasock, handle, &wsaevents) == 0) {
           /* merge result from pre-check using select */
           wsaevents.lNetworkEvents |= data[i].wsastate;
 
@@ -1010,16 +1010,13 @@ static bool juggle(curl_socket_t *sockfdp,
   } /* switch(*mode) */
 
   do {
-
     /* select() blocking behavior call on blocking descriptors please */
-
     rc = SOCKFILT_select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
 
     if(got_exit_signal) {
       logmsg("signalled to die, exiting...");
       return FALSE;
     }
-
   } while((rc == -1) && ((error = SOCKERRNO) == SOCKEINTR));
 
   if(rc < 0) {

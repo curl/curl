@@ -69,7 +69,7 @@ sub outseealso {
     my @o;
     push @o, ".SH SEE ALSO\n";
     for my $s (sort @sa) {
-        push @o, sprintf "%s.BR $s", $comma ? ",\n": "";
+        push @o, sprintf "%s.BR $s", $comma ? ",\n" : "";
         $comma = 1;
     }
     push @o, "\n";

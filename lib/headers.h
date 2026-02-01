@@ -30,7 +30,7 @@
 struct Curl_header_store {
   struct Curl_llist_node node;
   char *name; /* points into 'buffer' */
-  char *value; /* points into 'buffer */
+  char *value; /* points into 'buffer' */
   int request; /* 0 is the first request, then 1.. 2.. */
   unsigned char type; /* CURLH_* defines */
   char buffer[1]; /* this is the raw header blob */

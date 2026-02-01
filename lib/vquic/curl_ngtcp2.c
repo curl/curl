@@ -2534,7 +2534,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
 #endif
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
   (defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA))
-  if((!ctx->earlydata_max)) {
+  if(!ctx->earlydata_max) {
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
   else if(!Curl_alpn_contains_proto(alpns, scs->alpn)) {

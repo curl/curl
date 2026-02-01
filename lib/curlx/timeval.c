@@ -53,19 +53,19 @@ void curlx_pnow(struct curltime *pnow)
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** clock_gettime() is granted to be increased monotonically when the
-  ** monotonic clock is queried. Time starting point is unspecified, it
-  ** could be the system start-up time, the Epoch, or something else,
-  ** in any case the time starting point does not change once that the
-  ** system has started up.
-  */
+   * clock_gettime() is granted to be increased monotonically when the
+   * monotonic clock is queried. Time starting point is unspecified, it
+   * could be the system start-up time, the Epoch, or something else,
+   * in any case the time starting point does not change once that the
+   * system has started up.
+   */
   struct timespec tsnow;
 
   /*
-  ** clock_gettime() may be defined by Apple's SDK as weak symbol thus
-  ** code compiles but fails during runtime if clock_gettime() is
-  ** called on unsupported OS version.
-  */
+   * clock_gettime() may be defined by Apple's SDK as weak symbol thus
+   * code compiles but fails during runtime if clock_gettime() is
+   * called on unsupported OS version.
+   */
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
   (HAVE_BUILTIN_AVAILABLE == 1)
   bool have_clock_gettime = FALSE;
@@ -96,10 +96,10 @@ void curlx_pnow(struct curltime *pnow)
     pnow->tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   /*
-  ** Even when the configure process has truly detected monotonic clock
-  ** availability, it might happen that it is not actually available at
-  ** runtime. When this occurs simply fallback to other time source.
-  */
+   * Even when the configure process has truly detected monotonic clock
+   * availability, it might happen that it is not actually available at
+   * runtime. When this occurs simply fallback to other time source.
+   */
 #ifdef HAVE_GETTIMEOFDAY
   else {
     struct timeval now;
@@ -122,11 +122,11 @@ void curlx_pnow(struct curltime *pnow)
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** Monotonic timer on macOS is provided by mach_absolute_time(), which
-  ** returns time in Mach "absolute time units," which are platform-dependent.
-  ** To convert to nanoseconds, one must use conversion factors specified by
-  ** mach_timebase_info().
-  */
+   * Monotonic timer on macOS is provided by mach_absolute_time(), which
+   * returns time in Mach "absolute time units," which are platform-dependent.
+   * To convert to nanoseconds, one must use conversion factors specified by
+   * mach_timebase_info().
+   */
   static mach_timebase_info_data_t timebase;
   uint64_t usecs;
 
@@ -147,10 +147,10 @@ void curlx_pnow(struct curltime *pnow)
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** gettimeofday() is not granted to be increased monotonically, due to
-  ** clock drifting and external source time synchronization it can jump
-  ** forward or backward in time.
-  */
+   * gettimeofday() is not granted to be increased monotonically, due to
+   * clock drifting and external source time synchronization it can jump
+   * forward or backward in time.
+   */
   struct timeval now;
   (void)gettimeofday(&now, NULL);
   pnow->tv_sec = now.tv_sec;
@@ -162,8 +162,8 @@ void curlx_pnow(struct curltime *pnow)
 void curlx_pnow(struct curltime *pnow)
 {
   /*
-  ** time() returns the value of time in seconds since the Epoch.
-  */
+   * time() returns the value of time in seconds since the Epoch.
+   */
   pnow->tv_sec = time(NULL);
   pnow->tv_usec = 0;
 }

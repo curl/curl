@@ -166,7 +166,7 @@ sub HELP_MESSAGE() {
     print "\t-b\tbackup an existing version of ca-bundle.crt\n";
     print "\t-d\tspecify Mozilla tree to pull certdata.txt or custom URL\n";
     print "\t\t  Valid names are:\n";
-    print "\t\t    ", join( ", ", map { ( $_ =~ m/$opt_d/ ) ? "$_ (default)" : "$_" } sort keys %urls ), "\n";
+    print "\t\t    ", join(", ", map { ($_ =~ m/$opt_d/) ? "$_ (default)" : "$_" } sort keys %urls), "\n";
     print "\t-f\tforce rebuild even if certdata.txt is current\n";
     print "\t-i\tprint version info about used modules\n";
     print "\t-k\tallow URLs other than HTTPS, enable HTTP fallback (insecure)\n";
@@ -175,13 +175,13 @@ sub HELP_MESSAGE() {
     print "\t-n\tno download of certdata.txt (to use existing)\n";
     print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. (default: $default_mozilla_trust_purposes:$default_mozilla_trust_levels)"), "\n";
     print "\t\t  Valid purposes are:\n";
-    print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_mozilla_trust_purposes ) ), "\n";
+    print wrap("\t\t    ","\t\t    ", join(", ", "ALL", @valid_mozilla_trust_purposes)), "\n";
     print "\t\t  Valid levels are:\n";
-    print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_mozilla_trust_levels ) ), "\n";
+    print wrap("\t\t    ","\t\t    ", join(", ", "ALL", @valid_mozilla_trust_levels)), "\n";
     print "\t-q\tbe really quiet (no progress output at all)\n";
     print wrap("\t","\t\t", "-s\tcomma separated list of certificate signatures/hashes to output in plain text mode. (default: $default_signature_algorithms)\n");
     print "\t\t  Valid signature algorithms are:\n";
-    print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_signature_algorithms ) ), "\n";
+    print wrap("\t\t    ","\t\t    ", join(", ", "ALL", @valid_signature_algorithms)), "\n";
     print "\t-t\tinclude plain text listing of certificates\n";
     print "\t-u\tunlink (remove) certdata.txt after processing\n";
     print "\t-v\tbe verbose and print out processed CAs\n";
@@ -193,7 +193,7 @@ sub VERSION_MESSAGE() {
     print "${0} version ${version} running Perl ${]} on ${^O}\n";
 }
 
-warning_message() unless ($opt_q || $url =~ m/^(ht|f)tps:/i );
+warning_message() unless ($opt_q || $url =~ m/^(ht|f)tps:/i);
 HELP_MESSAGE() if($opt_h);
 
 sub report($@) {
@@ -219,7 +219,7 @@ sub parse_csv_param($$@) {
         s/^\s+//;  # strip leading spaces
         s/\s+$//;  # strip trailing spaces
         uc $_      # return the modified string as upper case
-    } split( ',', $param_string );
+    } split(',', $param_string);
 
     # Find all values which are not in the list of valid values or "ALL"
     my @invalid = grep { !is_in_list($_,"ALL",@valid_values) } @values;
@@ -227,7 +227,7 @@ sub parse_csv_param($$@) {
     if(scalar(@invalid) > 0) {
         # Tell the user which parameters were invalid and print the standard help
         # message which will exit
-        print "Error: Invalid ", $description, scalar(@invalid) == 1 ? ": " : "s: ", join( ", ", map { "\"$_\"" } @invalid ), "\n";
+        print "Error: Invalid ", $description, scalar(@invalid) == 1 ? ": " : "s: ", join(", ", map { "\"$_\"" } @invalid), "\n";
         HELP_MESSAGE();
     }
 
@@ -272,11 +272,11 @@ if($opt_p !~ m/:/) {
     HELP_MESSAGE();
 }
 
-(my $included_mozilla_trust_purposes_string, my $included_mozilla_trust_levels_string) = split( ':', $opt_p );
-my @included_mozilla_trust_purposes = parse_csv_param( "trust purpose", $included_mozilla_trust_purposes_string, @valid_mozilla_trust_purposes );
-my @included_mozilla_trust_levels = parse_csv_param( "trust level", $included_mozilla_trust_levels_string, @valid_mozilla_trust_levels );
+(my $included_mozilla_trust_purposes_string, my $included_mozilla_trust_levels_string) = split(':', $opt_p);
+my @included_mozilla_trust_purposes = parse_csv_param("trust purpose", $included_mozilla_trust_purposes_string, @valid_mozilla_trust_purposes);
+my @included_mozilla_trust_levels = parse_csv_param("trust level", $included_mozilla_trust_levels_string, @valid_mozilla_trust_levels);
 
-my @included_signature_algorithms = parse_csv_param( "signature algorithm", $opt_s, @valid_signature_algorithms );
+my @included_signature_algorithms = parse_csv_param("signature algorithm", $opt_s, @valid_signature_algorithms);
 
 sub should_output_cert(%) {
     my %trust_purposes_by_level = @_;
@@ -284,7 +284,7 @@ sub should_output_cert(%) {
     foreach my $level (@included_mozilla_trust_levels) {
         # for each level we want to output, see if any of our desired purposes are
         # included
-        return 1 if(defined( List::Util::first { is_in_list( $_, @included_mozilla_trust_purposes ) } @{$trust_purposes_by_level{$level}} ));
+        return 1 if(defined(List::Util::first { is_in_list($_, @included_mozilla_trust_purposes) } @{$trust_purposes_by_level{$level}}));
     }
 
     return 0;
@@ -378,7 +378,7 @@ my $datesrc = "as of";
 if(!$filedate) {
     # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
     $filedate = time();
-    $datesrc="downloaded on";
+    $datesrc = "downloaded on";
 }
 
 # get the hash from the download file

@@ -116,7 +116,7 @@ sub justline {
             print " ";
             $spare--;
         }
-        printf "%s%s", $prev?" ":"", $_;
+        printf "%s%s", $prev ? " " : "", $_;
         $prev = 1;
         $spare += $ratio;
     }
@@ -131,7 +131,7 @@ sub lastline {
     prefixline($lvl * $indent + $l);
     my $prev = 0;
     for(@line) {
-        printf "%s%s", $prev?" ":"", $_;
+        printf "%s%s", $prev ? " " : "", $_;
         $prev = 1;
     }
     print "\n";
@@ -526,7 +526,7 @@ sub render {
         push @desc, "\n" if($blankline && !$header);
         $blankline = 0;
         push @desc, $d if($manpage);
-        my $qstr = $quote ? "q": "";
+        my $qstr = $quote ? "q" : "";
         push @desc, "[".(1 + $level)."$qstr]$d" if(!$manpage);
         $header = 0;
 
@@ -760,7 +760,7 @@ sub single {
         push @leading, "$pref**WARNING**: this option is experimental. Do not use in production.\n\n";
     }
 
-    my $pre = $manpage ? "\n": "[1]";
+    my $pre = $manpage ? "\n" : "[1]";
 
     if($scope) {
         if($category !~ /global/) {
@@ -846,7 +846,7 @@ sub single {
         if($and && ($i < $and)) {
             $sep = ",";
         }
-        $mstr .= sprintf "%s$l", $mstr?"$sep ":"";
+        $mstr .= sprintf "%s$l", $mstr ? "$sep " : "";
         $i++;
     }
 

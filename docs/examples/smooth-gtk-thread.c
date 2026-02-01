@@ -34,7 +34,6 @@
  * gcc -ggdb `pkg-config --cflags  --libs gtk+-2.0` -lcurl -lssl -lcrypto
  *   -lgthread-2.0 -dl  smooth-gtk-thread.c -o smooth-gtk-thread
  */
-
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <glib.h>

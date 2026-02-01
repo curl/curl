@@ -33,12 +33,12 @@
 #include "curlx/strparse.h"
 
 /*
- * Chunk format (simplified):
- *
- * <HEX SIZE>[ chunk extension ] CRLF
- * <DATA> CRLF
- *
- * Highlights from RFC2616 section 3.6 say:
+   Chunk format (simplified):
+
+   <HEX SIZE>[ chunk extension ] CRLF
+   <DATA> CRLF
+
+   Highlights from RFC2616 section 3.6 say:
 
    The chunked encoding modifies the body of a message in order to
    transfer it as a series of chunks, each with its own size indicator,
@@ -460,7 +460,7 @@ const struct Curl_cwtype Curl_httpchunk_unencoder = {
 };
 
 /* max length of an HTTP chunk that we want to generate */
-#define CURL_CHUNKED_MINLEN   (1024)
+#define CURL_CHUNKED_MINLEN   1024
 #define CURL_CHUNKED_MAXLEN   (64 * 1024)
 
 struct chunked_reader {
@@ -583,7 +583,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
     if(!result)
       result = Curl_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
     CURL_TRC_READ(data, "http_chunk, made chunk of %zu bytes -> %d",
-                 nread, result);
+                  nread, result);
     if(result)
       return result;
   }

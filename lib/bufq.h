@@ -104,7 +104,7 @@ struct bufq {
  * Default behaviour: chunk limit is "hard", meaning attempts to write
  * more bytes than can be hold in `max_chunks` is refused and will return
  * -1, CURLE_AGAIN. */
-#define BUFQ_OPT_NONE        (0)
+#define BUFQ_OPT_NONE        0
 /**
  * Make `max_chunks` a "soft" limit. A bufq will report that it is "full"
  * when `max_chunks` are used, but allows writing beyond this limit.

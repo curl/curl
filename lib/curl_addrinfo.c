@@ -62,9 +62,9 @@
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
   defined(__OPTIMIZE__) && defined(__unix__) && defined(__i386__)
   /* workaround icc 9.1 optimizer issue */
-# define vqualifier volatile
+#  define vqualifier volatile
 #else
-# define vqualifier
+#  define vqualifier
 #endif
 
 void Curl_freeaddrinfo(struct Curl_addrinfo *cahead)

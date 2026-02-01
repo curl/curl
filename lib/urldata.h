@@ -54,11 +54,11 @@
 
 #ifdef USE_ECH
 /* CURLECH_ bits for the tls_ech option */
-# define CURLECH_DISABLE    (1 << 0)
-# define CURLECH_GREASE     (1 << 1)
-# define CURLECH_ENABLE     (1 << 2)
-# define CURLECH_HARD       (1 << 3)
-# define CURLECH_CLA_CFG    (1 << 4)
+#define CURLECH_DISABLE    (1 << 0)
+#define CURLECH_GREASE     (1 << 1)
+#define CURLECH_ENABLE     (1 << 2)
+#define CURLECH_HARD       (1 << 3)
+#define CURLECH_CLA_CFG    (1 << 4)
 #endif
 
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -179,14 +179,14 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #include "cf-socket.h"
 
 #ifdef HAVE_GSSAPI
-# ifdef HAVE_GSSGNU
-#  include <gss.h>
-# elif defined(HAVE_GSSAPI_H)
-#  include <gssapi.h>
-# else /* MIT Kerberos */
-#  include <gssapi/gssapi.h>
-#  include <gssapi/gssapi_krb5.h> /* for GSS_C_CHANNEL_BOUND_FLAG, in 1.19+ */
-# endif
+#  ifdef HAVE_GSSGNU
+#    include <gss.h>
+#  elif defined(HAVE_GSSAPI_H)
+#    include <gssapi.h>
+#  else /* MIT Kerberos */
+#    include <gssapi/gssapi.h>
+#    include <gssapi/gssapi_krb5.h> /* for GSS_C_CHANNEL_BOUND_FLAG in 1.19+ */
+#  endif
 #endif
 
 #ifdef USE_LIBSSH2

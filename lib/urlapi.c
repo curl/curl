@@ -118,8 +118,8 @@ static const char *find_host_sep(const char *url)
 }
 
 /* convert CURLcode to CURLUcode */
-#define cc2cu(x) ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE :   \
-                  CURLUE_OUT_OF_MEMORY)
+#define cc2cu(x) \
+  ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE : CURLUE_OUT_OF_MEMORY)
 
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
@@ -1440,9 +1440,9 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
   if(u->scheme && curl_strequal("file", u->scheme)) {
     url = curl_maprintf("file://%s%s%s%s%s",
                         u->path,
-                        show_query ? "?": "",
+                        show_query ? "?" : "",
                         u->query ? u->query : "",
-                        show_fragment ? "#": "",
+                        show_fragment ? "#" : "",
                         u->fragment ? u->fragment : "");
   }
   else if(!u->host)
@@ -1517,18 +1517,18 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
     url = curl_maprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
                         schemebuf,
                         u->user ? u->user : "",
-                        u->password ? ":": "",
+                        u->password ? ":" : "",
                         u->password ? u->password : "",
                         options ? ";" : "",
                         options ? options : "",
-                        (u->user || u->password || options) ? "@": "",
+                        (u->user || u->password || options) ? "@" : "",
                         allochost ? allochost : u->host,
-                        port ? ":": "",
+                        port ? ":" : "",
                         port ? port : "",
                         u->path ? u->path : "/",
-                        show_query ? "?": "",
+                        show_query ? "?" : "",
                         u->query ? u->query : "",
-                        show_fragment ? "#": "",
+                        show_fragment ? "#" : "",
                         u->fragment ? u->fragment : "");
     curlx_free(allochost);
   }

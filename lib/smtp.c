@@ -227,8 +227,7 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
  *
  * Parameters:
  *
- * conn  [in]              - The connection handle.
- * fqma  [in]              - The fully qualified mailbox address (which may or
+ * fqma           [in]     - The fully qualified mailbox address (which may or
  *                           may not contain UTF-8 characters).
  * address        [in/out] - A new allocated buffer which holds the local
  *                           address part of the mailbox. This buffer must be
@@ -835,7 +834,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
        whether the hostname is encoded using IDN ACE */
     bool utf8 = FALSE;
 
-    if((!smtp->custom) || (!smtp->custom[0])) {
+    if(!smtp->custom || !smtp->custom[0]) {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
       const char *suffix = "";

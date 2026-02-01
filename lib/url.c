@@ -423,8 +423,8 @@ void Curl_init_userdefined(struct Curl_easy *data)
 #endif
 #ifndef CURL_DISABLE_FTP
   set->wildcard_enabled = FALSE;
-  set->chunk_bgn      = ZERO_NULL;
-  set->chunk_end      = ZERO_NULL;
+  set->chunk_bgn = ZERO_NULL;
+  set->chunk_end = ZERO_NULL;
   set->fnmatch = ZERO_NULL;
 #endif
   set->tcp_keepalive = FALSE;

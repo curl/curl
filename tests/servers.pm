@@ -274,7 +274,7 @@ sub checkdied {
     }
     use POSIX ":sys_wait_h";
     my $rc = pidwait($pid, &WNOHANG);
-    return ($rc == $pid)?1:0;
+    return ($rc == $pid) ? 1 : 0;
 }
 
 ##############################################################################
@@ -650,12 +650,12 @@ sub verifyftp {
     }
     # we can/should use the time it took to verify the FTP server as a measure
     # on how fast/slow this host/FTP is.
-    my $took = int(0.5+time()-$time);
+    my $took = int(0.5 + time() - $time);
 
     if($verbose) {
         logmsg "RUN: Verifying our test $server server took $took seconds\n";
     }
-    $ftpchecktime = $took>=1?$took:1; # make sure it never is below 1
+    $ftpchecktime = ($took >= 1) ? $took : 1; # make sure it never is below 1
 
     return $pid;
 }

@@ -34,7 +34,7 @@
 int curlx_fseek(void *stream, curl_off_t offset, int whence);
 
 #ifdef _WIN32
-#include <sys/stat.h>  /* for _fstati64, struct _stati64 */
+#include <sys/stat.h>  /* for _fstati64(), struct _stati64 */
 #ifndef CURL_WINDOWS_UWP
 HANDLE curlx_CreateFile(const char *filename,
                         DWORD dwDesiredAccess,

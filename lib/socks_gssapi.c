@@ -168,8 +168,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   (void)curlx_nonblock(sock, FALSE);
 
-  /* As long as we need to keep sending some context info, and there is no  */
-  /* errors, keep sending it...                                            */
+  /* As long as we need to keep sending some context info, and there is no
+   * errors, keep sending it... */
   for(;;) {
     gss_major_status = Curl_gss_init_sec_context(data,
                                                  &gss_minor_status,
@@ -515,7 +515,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.",
-        (socksreq[0] == 0) ? "out GSS-API data":
+        (socksreq[0] == 0) ? "out GSS-API data" :
         ((socksreq[0] == 1) ? " GSS-API integrity" :
          " GSS-API confidentiality"));
 

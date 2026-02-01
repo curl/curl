@@ -3130,7 +3130,8 @@ ParameterError parse_args(int argc, argv_item_t argv[])
       err = PARAM_CONTDISP_RESUME_FROM;
   }
 
-  if(err && err != PARAM_HELP_REQUESTED &&
+  if(err &&
+     err != PARAM_HELP_REQUESTED &&
      err != PARAM_MANUAL_REQUESTED &&
      err != PARAM_VERSION_INFO_REQUESTED &&
      err != PARAM_ENGINES_REQUESTED &&

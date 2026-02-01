@@ -59,7 +59,7 @@
 
 #define HAVE_SIGACTION          1
 
-#define CURL_DISABLE_LDAP       1
+#define CURL_DISABLE_LDAP
 
 #define HAVE_IOCTL_FIONBIO      1
 

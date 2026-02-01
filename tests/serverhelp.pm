@@ -247,7 +247,7 @@ sub mainsockf_pidfilename {
     my ($piddir, $proto, $ipver, $idnum) = @_;
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
-    my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
+    my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid' : '_sockfilt.pid';
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
@@ -258,7 +258,7 @@ sub mainsockf_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
-    my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.log':'_sockfilt.log';
+    my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.log' : '_sockfilt.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 

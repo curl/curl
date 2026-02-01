@@ -286,16 +286,36 @@
  * When HTTP is disabled, disable HTTP-only features
  */
 #ifdef CURL_DISABLE_HTTP
-#  define CURL_DISABLE_ALTSVC 1
-#  define CURL_DISABLE_COOKIES 1
-#  define CURL_DISABLE_BASIC_AUTH 1
-#  define CURL_DISABLE_BEARER_AUTH 1
-#  define CURL_DISABLE_AWS 1
-#  define CURL_DISABLE_DOH 1
-#  define CURL_DISABLE_FORM_API 1
-#  define CURL_DISABLE_HEADERS_API 1
-#  define CURL_DISABLE_HSTS 1
-#  define CURL_DISABLE_HTTP_AUTH 1
+#  ifndef CURL_DISABLE_ALTSVC
+#  define CURL_DISABLE_ALTSVC
+#  endif
+#  ifndef CURL_DISABLE_COOKIES
+#  define CURL_DISABLE_COOKIES
+#  endif
+#  ifndef CURL_DISABLE_BASIC_AUTH
+#  define CURL_DISABLE_BASIC_AUTH
+#  endif
+#  ifndef CURL_DISABLE_BEARER_AUTH
+#  define CURL_DISABLE_BEARER_AUTH
+#  endif
+#  ifndef CURL_DISABLE_AWS
+#  define CURL_DISABLE_AWS
+#  endif
+#  ifndef CURL_DISABLE_DOH
+#  define CURL_DISABLE_DOH
+#  endif
+#  ifndef CURL_DISABLE_FORM_API
+#  define CURL_DISABLE_FORM_API
+#  endif
+#  ifndef CURL_DISABLE_HEADERS_API
+#  define CURL_DISABLE_HEADERS_API
+#  endif
+#  ifndef CURL_DISABLE_HSTS
+#  define CURL_DISABLE_HSTS
+#  endif
+#  ifndef CURL_DISABLE_HTTP_AUTH
+#  define CURL_DISABLE_HTTP_AUTH
+#  endif
 #  ifndef CURL_DISABLE_WEBSOCKETS
 #  define CURL_DISABLE_WEBSOCKETS /* no WebSockets without HTTP present */
 #  endif
@@ -793,7 +813,7 @@
     (defined(__clang__) && __clang_major__ >= 10)
 #  define FALLTHROUGH()  __attribute__((fallthrough))
 #else
-#  define FALLTHROUGH()  do {} while (0)
+#  define FALLTHROUGH()  do {} while(0)
 #endif
 #endif
 
@@ -1131,9 +1151,9 @@ typedef unsigned int curl_bit;
 #include "curlx/warnless.h"
 
 #ifdef _WIN32
-#  undef  read
+#  undef read
 #  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
-#  undef  write
+#  undef write
 #  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
 /* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about non-portable funcs */
 #  undef fileno

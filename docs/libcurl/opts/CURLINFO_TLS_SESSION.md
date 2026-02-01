@@ -37,7 +37,7 @@ This option is exactly the same as CURLINFO_TLS_SSL_PTR(3) except in the case
 of OpenSSL and wolfSSL. If the session *backend* is CURLSSLBACKEND_OPENSSL the
 session *internals* pointer varies depending on the option:
 
-## OpenSSL:
+## OpenSSL
 
 CURLINFO_TLS_SESSION(3) OpenSSL session *internals* is **SSL_CTX ***.
 

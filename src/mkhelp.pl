@@ -153,6 +153,7 @@ void hugehelp(void)
   }
   inflateEnd(&z);
 }
+
 /* Show the help text for the 'arg' curl argument on stdout */
 void showhelp(const char *trigger, const char *arg, const char *endarg)
 {
@@ -219,7 +220,7 @@ for my $n (@out) {
     }
     else {
         $n =~ s/        /\\t/g;
-        printf("  \"%s%s\",\n", $blank?"\\n":"", $n);
+        printf("  \"%s%s\",\n", $blank ? "\\n" : "", $n);
         $blank = 0;
     }
 }

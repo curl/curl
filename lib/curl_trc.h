@@ -206,7 +206,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #define infof(data, ...) \
   do {                   \
-    (void)data;          \
+    (void)(data);        \
   } while(0)
 #define CURL_TRC_M(data, ...) \
   do {                        \
@@ -322,9 +322,9 @@ extern struct curl_trc_feat Curl_trc_feat_timer;
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
-#define Curl_trc_is_verbose(d)        (FALSE)
-#define Curl_trc_cf_is_verbose(x, y)  (FALSE)
-#define Curl_trc_ft_is_verbose(x, y)  (FALSE)
+#define Curl_trc_is_verbose(d)        FALSE
+#define Curl_trc_cf_is_verbose(x, y)  FALSE
+#define Curl_trc_ft_is_verbose(x, y)  FALSE
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 #define CURL_TRC_EASY_TIMERS(x)       Curl_nop_stmt
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */

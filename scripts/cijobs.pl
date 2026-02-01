@@ -98,7 +98,7 @@ sub githubactions {
                     # matrix job
                     #print "name: $1\n";
                     $job{'name'} = $1;
-                    $j += ($m?$m:1);
+                    $j += ($m ? $m : 1);
                 }
                 elsif($_ =~ /install: (.*)/) {
                     $job{'install'} = $1;
@@ -258,22 +258,22 @@ sub appveyor {
             $job{'config'} = $1;
         }
         elsif($_ =~ /^      OPENSSL: \'(.*)\'/) {
-            $job{'openssl'} = $1 eq "ON" ? "true": "false";
+            $job{'openssl'} = $1 eq "ON" ? "true" : "false";
         }
         elsif($_ =~ /^      SCHANNEL: \'(.*)\'/) {
-            $job{'schannel'} = $1 eq "ON" ? "true": "false";
+            $job{'schannel'} = $1 eq "ON" ? "true" : "false";
         }
         elsif($_ =~ /^      ENABLE_UNICODE: \'(.*)\'/) {
-            $job{'unicode'} = $1 eq "ON" ? "true": "false";
+            $job{'unicode'} = $1 eq "ON" ? "true" : "false";
         }
         elsif($_ =~ /^      HTTP_ONLY: \'(.*)\'/) {
-            $job{'http-only'} = $1 eq "ON" ? "true": "false";
+            $job{'http-only'} = $1 eq "ON" ? "true" : "false";
         }
         elsif($_ =~ /^      TESTING: \'(.*)\'/) {
-            $job{'testing'} = $1 eq "ON" ? "true": "false";
+            $job{'testing'} = $1 eq "ON" ? "true" : "false";
         }
         elsif($_ =~ /^      SHARED: \'(.*)\'/) {
-            $job{'shared'} = $1 eq "ON" ? "true": "false";
+            $job{'shared'} = $1 eq "ON" ? "true" : "false";
         }
         elsif($_ =~ /^      TARGET: \'-A (.*)\'/) {
             $job{'target'} = $1;
@@ -464,7 +464,7 @@ sub zuul {
                         $var = "compiler";
                     }
                     elsif($var eq "CHECKSRC") {
-                        $job{'checksrc'} = $value ? "true": "false";
+                        $job{'checksrc'} = $value ? "true" : "false";
                         $var = "";
                     }
                     else {

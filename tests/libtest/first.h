@@ -87,16 +87,15 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
 #ifndef CURL_DISABLE_WEBSOCKETS
 CURLcode ws_send_ping(CURL *curl, const char *send_payload);
 CURLcode ws_recv_pong(CURL *curl, const char *expected_payload);
-/* just close the connection */
-void ws_close(CURL *curl);
+void ws_close(CURL *curl);  /* just close the connection */
 #endif
 
 /*
-** TEST_ERR_* values must within the CURLcode range to not cause compiler
-** errors.
-
-** For portability reasons TEST_ERR_* values should be less than 127.
-*/
+ * TEST_ERR_* values must within the CURLcode range to not cause compiler
+ * errors.
+ *
+ * For portability reasons TEST_ERR_* values should be less than 127.
+ */
 
 #define TEST_ERR_MAJOR_BAD    CURLE_OBSOLETE20
 #define TEST_ERR_RUNS_FOREVER CURLE_OBSOLETE24
@@ -112,33 +111,33 @@ void ws_close(CURL *curl);
 #define TEST_ERR_BAD_TIMEOUT  CURLE_OBSOLETE57
 
 /*
-** Macros for test source code readability/maintainability.
-**
-** All of the following macros require that an int data type 'res' variable
-** exists in scope where macro is used, and that it has been initialized to
-** zero before the macro is used.
-**
-** exe_* and chk_* macros are helper macros not intended to be used from
-** outside of this header file. Arguments 'Y' and 'Z' of these represent
-** source code file and line number, while Arguments 'A', 'B', etc, are
-** the arguments used to actually call a libcurl function.
-**
-** All easy_* and multi_* macros call a libcurl function and evaluate if
-** the function has succeeded or failed. When the function succeeds 'res'
-** variable is not set nor cleared and program continues normal flow. On
-** the other hand if function fails 'res' variable is set and a jump to
-** label 'test_cleanup' is performed.
-**
-** Every easy_* and multi_* macros have a res_easy_* and res_multi_* macro
-** counterpart that operates in the same way with the exception that no
-** jump takes place in case of failure. res_easy_* and res_multi_* macros
-** should be immediately followed by checking if 'res' variable has been
-** set.
-**
-** 'res' variable when set will hold a CURLcode, CURLMcode, or any of the
-** TEST_ERR_* values defined above. It is advisable to return this value
-** as test result.
-*/
+ * Macros for test source code readability/maintainability.
+ *
+ * All of the following macros require that an int data type 'res' variable
+ * exists in scope where macro is used, and that it has been initialized to
+ * zero before the macro is used.
+ *
+ * exe_* and chk_* macros are helper macros not intended to be used from
+ * outside of this header file. Arguments 'Y' and 'Z' of these represent
+ * source code file and line number, while Arguments 'A', 'B', etc, are
+ * the arguments used to actually call a libcurl function.
+ *
+ * All easy_* and multi_* macros call a libcurl function and evaluate if
+ * the function has succeeded or failed. When the function succeeds 'res'
+ * variable is not set nor cleared and program continues normal flow. On
+ * the other hand if function fails 'res' variable is set and a jump to
+ * label 'test_cleanup' is performed.
+ *
+ * Every easy_* and multi_* macros have a res_easy_* and res_multi_* macro
+ * counterpart that operates in the same way with the exception that no
+ * jump takes place in case of failure. res_easy_* and res_multi_* macros
+ * should be immediately followed by checking if 'res' variable has been
+ * set.
+ *
+ * 'res' variable when set will hold a CURLcode, CURLMcode, or any of the
+ * TEST_ERR_* values defined above. It is advisable to return this value
+ * as test result.
+ */
 
 /* ---------------------------------------------------------------- */
 
@@ -156,7 +155,7 @@ void ws_close(CURL *curl);
 #define chk_easy_init(A, Y, Z) \
   do {                         \
     exe_easy_init(A, Y, Z);    \
-    if(result)                    \
+    if(result)                 \
       goto test_cleanup;       \
   } while(0)
 
@@ -296,23 +295,23 @@ void ws_close(CURL *curl);
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_perform(A, B, Y, Z)                                   \
-  do {                                                                  \
-    CURLMcode ec;                                                       \
-    if((ec = curl_multi_perform(A, B)) != CURLM_OK) {                   \
-      curl_mfprintf(stderr,                                             \
-                    "%s:%d curl_multi_perform() failed, "               \
-                    "with code %d (%s)\n",                              \
-                    Y, Z, ec, curl_multi_strerror(ec));                 \
-      result = TEST_ERR_MULTI;                                          \
-    }                                                                   \
-    else if(*(B) < 0) {                                                 \
-      curl_mfprintf(stderr,                                             \
-                    "%s:%d curl_multi_perform() succeeded, "            \
+#define exe_multi_perform(A, B, Y, Z)                                    \
+  do {                                                                   \
+    CURLMcode ec;                                                        \
+    if((ec = curl_multi_perform(A, B)) != CURLM_OK) {                    \
+      curl_mfprintf(stderr,                                              \
+                    "%s:%d curl_multi_perform() failed, "                \
+                    "with code %d (%s)\n",                               \
+                    Y, Z, ec, curl_multi_strerror(ec));                  \
+      result = TEST_ERR_MULTI;                                           \
+    }                                                                    \
+    else if(*(B) < 0) {                                                  \
+      curl_mfprintf(stderr,                                              \
+                    "%s:%d curl_multi_perform() succeeded, "             \
                     "but returned invalid running_handles value (%d)\n", \
-                    Y, Z, (int)*(B));                                   \
-      result = TEST_ERR_NUM_HANDLES;                                    \
-    }                                                                   \
+                    Y, Z, (int)*(B));                                    \
+      result = TEST_ERR_NUM_HANDLES;                                     \
+    }                                                                    \
   } while(0)
 
 #define res_multi_perform(A, B) \
@@ -450,7 +449,7 @@ void ws_close(CURL *curl);
 #define chk_multi_wakeup(A, Y, Z) \
   do {                            \
     exe_multi_wakeup(A, Y, Z);    \
-    if(result)                       \
+    if(result)                    \
       goto test_cleanup;          \
   } while(0)
 

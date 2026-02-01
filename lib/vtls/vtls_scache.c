@@ -1204,7 +1204,6 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
       ++ntickets;
       n = Curl_node_next(n);
     }
-
   }
   r = CURLE_OK;
   CURL_TRC_SSLS(data, "exported %zu session tickets for %zu peers",

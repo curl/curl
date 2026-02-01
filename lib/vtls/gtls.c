@@ -55,7 +55,9 @@
 #include "x509asn1.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
-/*#define GTLSDEBUG */
+#if 0
+#define GTLSDEBUG
+#endif
 
 #ifdef GTLSDEBUG
 static void tls_log_func(int level, const char *str)
@@ -723,7 +725,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
               "and store in cache", sdata_len, alpn ? alpn : "-",
               earlydata_max);
   if(quic_tp && quic_tp_len) {
-    qtp_clone = curlx_memdup0((char *)quic_tp, quic_tp_len);
+    qtp_clone = curlx_memdup0((const char *)quic_tp, quic_tp_len);
     if(!qtp_clone) {
       curlx_free(sdata);
       return CURLE_OUT_OF_MEMORY;

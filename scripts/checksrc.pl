@@ -273,7 +273,7 @@ sub readlocalfile {
 sub checkwarn {
     my ($name, $num, $col, $file, $line, $msg, $error) = @_;
 
-    my $w=$error?"error":"warning";
+    my $w=$error ? "error" : "warning";
     my $nowarn=0;
 
     #if(!$warnings{$name}) {

@@ -31,7 +31,7 @@
 
 #ifdef USE_SCHANNEL
 #ifndef USE_WINDOWS_SSPI
-#error "cannot compile SCHANNEL support without SSPI."
+#error "cannot compile Schannel support without SSPI."
 #endif
 
 #include "schannel.h"
