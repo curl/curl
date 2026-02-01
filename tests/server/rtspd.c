@@ -143,7 +143,7 @@ static const char *RTP_DATA = "$_1234\n\0Rsdf";
 
 static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 {
-  char *line = &req->reqbuf[req->checkindex];
+  const char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
   static char doc[MAXDOCNAMELEN];
