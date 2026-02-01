@@ -551,9 +551,9 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
-                                       unsigned char *challenge_client,
-                                       struct ntlmdata *ntlm,
+CURLcode Curl_ntlm_core_mk_ntlmv2_resp(const unsigned char *ntlmv2hash,
+                                       const unsigned char *challenge_client,
+                                       const struct ntlmdata *ntlm,
                                        unsigned char **ntresp,
                                        unsigned int *ntresp_len)
 {
@@ -644,9 +644,9 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
-                                     unsigned char *challenge_client,
-                                     unsigned char *challenge_server,
+CURLcode Curl_ntlm_core_mk_lmv2_resp(const unsigned char *ntlmv2hash,
+                                     const unsigned char *challenge_client,
+                                     const unsigned char *challenge_server,
                                      unsigned char *lmresp)
 {
   unsigned char data[16];
