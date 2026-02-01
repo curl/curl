@@ -55,7 +55,7 @@ static CURLcode test_lib500(const char *URL)
 {
   CURLcode result;
   CURL *curl;
-  char *ipstr = NULL;
+  const char *ipstr = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
