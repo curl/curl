@@ -932,7 +932,7 @@ static CURLcode ssl_push_certinfo_dyn(struct Curl_easy *data,
                                       struct dynbuf *ptr)
 {
   size_t valuelen = curlx_dyn_len(ptr);
-  char *value = curlx_dyn_ptr(ptr);
+  const char *value = curlx_dyn_ptr(ptr);
 
   CURLcode result = Curl_ssl_push_certinfo_len(data, certnum, label,
                                                value, valuelen);
