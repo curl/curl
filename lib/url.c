@@ -2997,7 +2997,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 #ifdef USE_UNIX_SOCKETS
 static CURLcode resolve_unix(struct Curl_easy *data,
                              struct connectdata *conn,
-                             char *unix_path,
+                             const char *unix_path,
                              struct Curl_dns_entry **pdns)
 {
   struct Curl_dns_entry *hostaddr;
@@ -3047,7 +3047,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 
 #ifdef USE_UNIX_SOCKETS
   {
-    char *unix_path = conn->unix_domain_socket;
+    const char *unix_path = conn->unix_domain_socket;
 
 #ifndef CURL_DISABLE_PROXY
     if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
