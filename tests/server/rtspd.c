@@ -539,7 +539,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 }
 
 /* store the entire request in a file */
-static void rtspd_storerequest(char *reqbuf, size_t totalsize)
+static void rtspd_storerequest(const char *reqbuf, size_t totalsize)
 {
   int res;
   int error = 0;
