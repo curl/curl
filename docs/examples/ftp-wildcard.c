@@ -97,7 +97,7 @@ static size_t write_cb(char *buff, size_t size, size_t nmemb, void *cb_data)
   return written;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   /* curl easy handle */
   CURL *curl;
