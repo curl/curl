@@ -490,20 +490,19 @@
 #  include <sys/types.h>
 #  include <sys/stat.h>
    /* Large file (>2Gb) support using Win32 functions. */
-#  undef  lseek
-#  define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
+#  define curl_lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
 #  undef  fstat
-#  define fstat(fdes, stp)             _fstati64(fdes, stp)
-#  define struct_stat                  struct _stati64
-#  define LSEEK_ERROR                  (__int64)-1
+#  define fstat(fdes, stp)                  _fstati64(fdes, stp)
+#  define struct_stat                       struct _stati64
+#  define LSEEK_ERROR                       (__int64)-1
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
-#  undef  lseek
-#  define lseek(fdes, offset, whence)  llseek(fdes, offset, whence)
-#  define LSEEK_ERROR                  (offset_t)-1
+#  define curl_lseek(fdes, offset, whence)  llseek(fdes, offset, whence)
+#  define LSEEK_ERROR                       (offset_t)-1
 #else
-#  define LSEEK_ERROR                  (off_t)-1
+#  define curl_lseek(fdes, offset, whence)  lseek(fdes, offset, whence)
+#  define LSEEK_ERROR                       (off_t)-1
 #endif
 
 #ifndef struct_stat

@@ -519,10 +519,10 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(!S_ISDIR(statbuf.st_mode)) {
 #ifdef __AMIGA__
       if(data->state.resume_from !=
-         lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
+         curl_lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
 #else
       if(data->state.resume_from !=
-         lseek(fd, data->state.resume_from, SEEK_SET))
+         curl_lseek(fd, data->state.resume_from, SEEK_SET))
 #endif
         return CURLE_BAD_DOWNLOAD_RESUME;
     }
