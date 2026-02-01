@@ -80,7 +80,7 @@ static CURLcode test_unit3200(const char *arg)
     FILE *fp;
     struct dynbuf buf;
     size_t len = 4096;
-    char *line;
+    const char *line;
     bool eof;
     curlx_dyn_init(&buf, len);
 
