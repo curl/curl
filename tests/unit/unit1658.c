@@ -51,7 +51,7 @@ extern void doh_print_httpsrr(struct Curl_easy *data,
 static char rrbuffer[256];
 static void rrresults(struct Curl_https_rrinfo *rr, CURLcode res)
 {
-  const char *p = rrbuffer;
+  char *p = rrbuffer;
   const char *pend = rrbuffer + sizeof(rrbuffer);
   curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)res);
   p += strlen(rrbuffer);
