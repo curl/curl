@@ -37,7 +37,7 @@ static CURLcode test_unit1612(const char *arg)
   static const char string1[] = "1";
   static const char string2[] = "hello-you-fool";
   unsigned char output[HMAC_MD5_LENGTH];
-  unsigned char *testp = output;
+  const unsigned char *testp = output;
 
   Curl_hmacit(&Curl_HMAC_MD5,
               (const unsigned char *)password, strlen(password),
