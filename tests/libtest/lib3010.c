@@ -28,7 +28,7 @@ static CURLcode test_lib3010(const char *URL)
   CURLcode result = TEST_ERR_MAJOR_BAD;
   CURL *curl = NULL;
   curl_off_t retry_after;
-  char *follow_url = NULL;
+  const char *follow_url = NULL;
 
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();

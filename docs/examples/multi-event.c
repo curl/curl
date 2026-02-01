@@ -213,7 +213,7 @@ static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
   return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURLcode result;
 

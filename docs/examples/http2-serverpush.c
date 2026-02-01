@@ -172,7 +172,7 @@ static int server_push_callback(CURL *parent,
                                 struct curl_pushheaders *headers,
                                 void *userp)
 {
-  char *headp;
+  const char *headp;
   size_t i;
   int *transfers = (int *)userp;
   char filename[128];
@@ -214,7 +214,7 @@ static int server_push_callback(CURL *parent,
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   CURLcode result;
   CURL *curl;

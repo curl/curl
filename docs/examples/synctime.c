@@ -126,7 +126,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   if(ShowAllHeader == 1)
     fprintf(stderr, "%.*s", (int)nmemb, (char *)ptr);
 
-  if((nmemb >= 5) && !strncmp((char *)ptr, "Date:", 5)) {
+  if((nmemb >= 5) && !strncmp((const char *)ptr, "Date:", 5)) {
     if(ShowAllHeader == 0)
       fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
@@ -163,7 +163,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
     }
   }
 
-  if((nmemb >= 12) && !strncmp((char *)ptr, "X-Cache: HIT", 12)) {
+  if((nmemb >= 12) && !strncmp((const char *)ptr, "X-Cache: HIT", 12)) {
     fprintf(stderr, "ERROR: HTTP Server data is cached."
             " Server Date is no longer valid.\n");
     AutoSyncTime = 0;
@@ -226,7 +226,7 @@ static void showUsage(void)
   return;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   CURLcode result;
   CURL *curl;

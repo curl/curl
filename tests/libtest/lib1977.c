@@ -29,7 +29,7 @@ static CURLcode test_lib1977(const char *URL)
   CURLU *curlu = curl_url();
   CURLU *curlu_2 = curl_url();
   CURL *curl;
-  char *effective = NULL;
+  const char *effective = NULL;
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);

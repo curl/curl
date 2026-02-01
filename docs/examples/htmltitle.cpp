@@ -250,7 +250,7 @@ static void parseHtml(const std::string &html,
   title = context.title;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   CURL *curl = NULL;
   CURLcode result;
