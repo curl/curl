@@ -197,8 +197,9 @@ static void event_cb(int fd, short kind, void *userp)
   struct GlobalInfo *g = (struct GlobalInfo *)userp;
   CURLMcode mresult;
 
-  int action = ((kind & EV_READ) ? CURL_CSELECT_IN : 0) |
-               ((kind & EV_WRITE) ? CURL_CSELECT_OUT : 0);
+  int action =
+    ((kind & EV_READ) ? CURL_CSELECT_IN : 0) |
+    ((kind & EV_WRITE) ? CURL_CSELECT_OUT : 0);
 
   mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", mresult);
@@ -241,8 +242,9 @@ static void remsock(struct SockInfo *f)
 static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
                     struct GlobalInfo *g)
 {
-  int kind = ((act & CURL_POLL_IN) ? EV_READ : 0) |
-             ((act & CURL_POLL_OUT) ? EV_WRITE : 0) | EV_PERSIST;
+  int kind =
+    ((act & CURL_POLL_IN) ? EV_READ : 0) |
+    ((act & CURL_POLL_OUT) ? EV_WRITE : 0) | EV_PERSIST;
 
   f->sockfd = s;
   f->action = act;

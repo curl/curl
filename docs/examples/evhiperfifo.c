@@ -204,8 +204,9 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
   CURLMcode mresult;
   struct GlobalInfo *g;
 
-  int action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
-               ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
+  int action =
+    ((revents & EV_READ) ? CURL_POLL_IN : 0) |
+    ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
 
   printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
   g = (struct GlobalInfo *)w->data;
@@ -235,8 +236,9 @@ static void remsock(struct SockInfo *f, struct GlobalInfo *g)
 static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
                     struct GlobalInfo *g)
 {
-  int kind = ((act & CURL_POLL_IN) ? EV_READ : 0) |
-             ((act & CURL_POLL_OUT) ? EV_WRITE : 0);
+  int kind =
+    ((act & CURL_POLL_IN) ? EV_READ : 0) |
+    ((act & CURL_POLL_OUT) ? EV_WRITE : 0);
 
   printf("%s  \n", __PRETTY_FUNCTION__);
 
