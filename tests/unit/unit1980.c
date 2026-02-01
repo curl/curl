@@ -82,7 +82,7 @@ static CURLcode test_unit1980(const char *arg)
     struct dynbuf canonical_query;
 
     char buffer[1024];
-    char *canonical_query_ptr;
+    const char *canonical_query_ptr;
     int result;
     int msnprintf_result;
 
