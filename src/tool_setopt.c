@@ -465,10 +465,10 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   case TOOLMIME_STDINDATA:
     /* Can only be reading stdin in the current context. */
     result = easysrc_addf(&easysrc_code, "curl_mime_data_cb(part%d, -1, "
-                          "(curl_read_callback) fread, \\", mimeno);
+                          "(curl_read_callback)fread, \\", mimeno);
     if(!result)
       result = easysrc_addf(&easysrc_code, "                  "
-                            "(curl_seek_callback) fseek, NULL, stdin);");
+                            "(curl_seek_callback)fseek, NULL, stdin);");
     break;
   default:
     /* Other cases not possible in this context. */
