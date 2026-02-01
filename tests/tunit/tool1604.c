@@ -181,11 +181,11 @@ static CURLcode test_tool1604(const char *arg)
   for(i = 0; i < CURL_ARRAYSIZE(data); ++i) {
     char *output = NULL;
     char flagstr[256];
-    char received_ccstr[256];
-    char expected_ccstr[256];
+    char receivedstr[256];
+    char expectedstr[256];
     const char *flg = flagstr;
-    const char *rec = received_ccstr;
-    const char *exp = expected_ccstr;
+    const char *rec = receivedstr;
+    const char *exp = expectedstr;
     SANITIZEcode res;
 
     res = sanitize_file_name(&output, data[i].input, data[i].flags);
@@ -200,10 +200,9 @@ static CURLcode test_tool1604(const char *arg)
 
     getflagstr(flagstr, sizeof(flagstr), data[i].flags);
     abort_unless(flg, "out of memory");
-    getcurlcodestr(received_ccstr, sizeof(received_ccstr), res);
+    getcurlcodestr(receivedstr, sizeof(receivedstr), res);
     abort_unless(rec, "out of memory");
-    getcurlcodestr(expected_ccstr, sizeof(expected_ccstr),
-      data[i].expected_result);
+    getcurlcodestr(expectedstr, sizeof(expectedstr), data[i].expected_result);
     abort_unless(exp, "out of memory");
 
     unitfail++;
@@ -219,9 +218,9 @@ static CURLcode test_tool1604(const char *arg)
                   data[i].input,
                   flagstr,
                   output ? output : "(null)",
-                  received_ccstr,
+                  receivedstr,
                   data[i].expected_output ? data[i].expected_output : "(null)",
-                  expected_ccstr);
+                  expectedstr);
 
     curlx_free(output);
   }
