@@ -94,6 +94,7 @@ static void *pull_one_url(void *NaN)
   /* protect the reading and increasing of 'j' with a mutex */
   pthread_mutex_lock(&lock);
   while(j < num_urls) {
+    gchar *http;
     int i = j;
     j++;
     pthread_mutex_unlock(&lock);
