@@ -76,11 +76,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   }
 #endif
 
-#ifdef __AMIGA__
-  if(curl_lseek(per->infd, (off_t)offset, whence) == LSEEK_ERROR)
-#else
   if(curl_lseek(per->infd, offset, whence) == LSEEK_ERROR)
-#endif
     /* could not rewind, the reason is in errno but errno is just not portable
        enough and we do not actually care that much why we failed. We will let
        libcurl know that it may try other means if it wants to. */

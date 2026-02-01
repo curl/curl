@@ -500,6 +500,9 @@
 #  include <unistd.h>
 #  define curl_lseek(fdes, offset, whence)  llseek(fdes, offset, whence)
 #  define LSEEK_ERROR                       (offset_t)-1
+#elif defined(__AMIGA__)
+#  define curl_lseek(fdes, offset, whence)  lseek(fdes, (off_t)(offset), whence)
+#  define LSEEK_ERROR                       (off_t)-1
 #else
 #  define curl_lseek(fdes, offset, whence)  lseek(fdes, offset, whence)
 #  define LSEEK_ERROR                       (off_t)-1
