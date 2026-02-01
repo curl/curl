@@ -60,7 +60,7 @@ static int server_push_callback(CURL *parent,
                                 struct curl_pushheaders *headers,
                                 void *userp)
 {
-  char *headp;
+  const char *headp;
   size_t i;
   int *transfers = (int *)userp;
   char filename[128];
