@@ -27,7 +27,7 @@
 #include "curl/urlapi.h"
 #include "urlapi-int.h"
 
-static CURLUcode parse_port(CURLU *url, char *h, bool has_scheme)
+static CURLUcode parse_port(CURLU *url, const char *h, bool has_scheme)
 {
   struct dynbuf host;
   CURLUcode ret;
