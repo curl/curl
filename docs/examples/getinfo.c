@@ -43,7 +43,7 @@ int main(void)
     result = curl_easy_perform(curl);
 
     if(CURLE_OK == result) {
-      char *ct;
+      const char *ct;
       /* ask for the content-type */
       result = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
 
