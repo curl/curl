@@ -27,14 +27,9 @@
 #include "tool_msgs.h"
 
 #ifdef UNITTESTS
-#  define toolx_mkdir(x, y) create_dir_hierarchy_trace_mkdir(x)
-#elif defined(_WIN32)
-#  include <direct.h>
-#  define toolx_mkdir(x, y) _mkdir(x)
-#elif defined(MSDOS) && !defined(__DJGPP__)
-#  define toolx_mkdir(x, y) mkdir(x)
+#define toolx_mkdir(x, y) create_dir_hierarchy_trace_mkdir(x)
 #else
-#  define toolx_mkdir mkdir
+#include "toolx/tool_file.h"
 #endif
 
 #ifdef UNITTESTS
