@@ -50,16 +50,16 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
   };
 
   struct part parts[] = {
-    {CURLUPART_SCHEME, "scheme"},
-    {CURLUPART_USER, "user"},
-    {CURLUPART_PASSWORD, "password"},
-    {CURLUPART_OPTIONS, "options"},
-    {CURLUPART_HOST, "host"},
-    {CURLUPART_PORT, "port"},
-    {CURLUPART_PATH, "path"},
-    {CURLUPART_QUERY, "query"},
-    {CURLUPART_FRAGMENT, "fragment"},
-    {CURLUPART_URL, NULL}
+    { CURLUPART_SCHEME, "scheme" },
+    { CURLUPART_USER, "user" },
+    { CURLUPART_PASSWORD, "password" },
+    { CURLUPART_OPTIONS, "options" },
+    { CURLUPART_HOST, "host" },
+    { CURLUPART_PORT, "port" },
+    { CURLUPART_PATH, "path" },
+    { CURLUPART_QUERY, "query" },
+    { CURLUPART_FRAGMENT, "fragment" },
+    { CURLUPART_URL, NULL }
   };
   memset(buf, 0, sizeof(buf));
 
