@@ -61,13 +61,13 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
       /* this code path does not support other types */
       return CURL_SEEKFUNC_FAIL;
 
-    if(LSEEK_ERROR == lseek(per->infd, 0, SEEK_SET))
+    if(curl_lseek(per->infd, 0, SEEK_SET) == LSEEK_ERROR)
       /* could not rewind to beginning */
       return CURL_SEEKFUNC_FAIL;
 
     while(left) {
       long step = (left > OUR_MAX_SEEK_O) ? OUR_MAX_SEEK_L : (long)left;
-      if(LSEEK_ERROR == lseek(per->infd, step, SEEK_CUR))
+      if(curl_lseek(per->infd, step, SEEK_CUR) == LSEEK_ERROR)
         /* could not seek forwards the desired amount */
         return CURL_SEEKFUNC_FAIL;
       left -= step;
@@ -76,11 +76,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   }
 #endif
 
-#ifdef __AMIGA__
-  if(LSEEK_ERROR == lseek(per->infd, (off_t)offset, whence))
-#else
-  if(LSEEK_ERROR == lseek(per->infd, offset, whence))
-#endif
+  if(curl_lseek(per->infd, offset, whence) == LSEEK_ERROR)
     /* could not rewind, the reason is in errno but errno is just not portable
        enough and we do not actually care that much why we failed. We will let
        libcurl know that it may try other means if it wants to. */

@@ -454,7 +454,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
     c = *p++;                     /* pick up a character */
     if(prevchar == '\r') {        /* if prev char was cr */
       if(c == '\n')               /* if have cr,lf then just */
-        lseek(test->ofile, -1, SEEK_CUR); /* smash lf on top of the cr */
+        curl_lseek(test->ofile, -1, SEEK_CUR); /* smash lf on top of the cr */
       else if(c == '\0')          /* if have cr,nul then */
         goto skipit;              /* just skip over the putc */
       /* else just fall through and allow it */
