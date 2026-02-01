@@ -238,7 +238,7 @@ static curl_socket_t socksconnect(unsigned short connectport,
 }
 
 static curl_socket_t socks4(curl_socket_t fd,
-                            unsigned char *buffer,
+                            const unsigned char *buffer,
                             ssize_t rc)
 {
   unsigned char response[256 + 16];
@@ -299,7 +299,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   unsigned char len;
   unsigned char type;
   unsigned char rep = 0;
-  unsigned char *address;
+  const unsigned char *address;
   unsigned short socksport;
   curl_socket_t connfd = CURL_SOCKET_BAD;
   unsigned short s5port;
@@ -502,7 +502,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   }
 
   if(!s_config.port) {
-    unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
+    const unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
     s5port = (unsigned short)((portp[0] << 8) | (portp[1]));
   }
   else
