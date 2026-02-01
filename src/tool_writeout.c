@@ -86,7 +86,7 @@ static int urlpart(struct per_transfer *per, writeoutid vid,
   if(uh) {
     CURLUPart cpart = CURLUPART_HOST;
     char *part = NULL;
-    const char *url = NULL;
+    char *url = NULL;
 
     if(vid >= VAR_INPUT_URLESCHEME) {
       if(curl_easy_getinfo(per->curl, CURLINFO_EFFECTIVE_URL, &url))
@@ -162,7 +162,7 @@ static int urlpart(struct per_transfer *per, writeoutid vid,
 static void certinfo(struct per_transfer *per)
 {
   if(!per->certinfo) {
-    struct curl_certinfo *certinfo;
+    const struct curl_certinfo *certinfo;
     CURLcode result = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO,
                                         &certinfo);
     per->certinfo = (!result && certinfo) ? certinfo : NULL;

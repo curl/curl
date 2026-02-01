@@ -66,8 +66,8 @@ static void write_linked_location(CURL *curl, const char *location,
 {
   /* This would so simple if CURLINFO_REDIRECT_URL were available here */
   CURLU *u = NULL;
-  char *copyloc = NULL, *locurl = NULL, *scheme = NULL, *finalurl = NULL;
-  const char *loc = location;
+  char *copyloc = NULL, *scheme = NULL, *finalurl = NULL;
+  const char *loc = location, *locurl = NULL;
   size_t llen = loclen;
   int space_skipped = 0;
   const char *vver = getenv("VTE_VERSION");

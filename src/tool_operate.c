@@ -1753,7 +1753,7 @@ static CURLcode check_finished(struct parastate *s)
       struct per_transfer *ended;
       CURL *easy = msg->easy_handle;
       CURLcode tres = msg->data.result;
-      curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
+      curl_easy_getinfo(easy, CURLINFO_PRIVATE, &ended);
       curl_multi_remove_handle(s->multi, easy);
 
       if(ended->abort && (tres == CURLE_ABORTED_BY_CALLBACK)) {
@@ -2022,7 +2022,7 @@ static CURLcode is_using_schannel(int *pusing)
   if(using_schannel == -1) {
     CURL *curltls = curl_easy_init();
     /* The TLS backend remains, so keep the info */
-    struct curl_tlssessioninfo *tls_backend_info = NULL;
+    const struct curl_tlssessioninfo *tls_backend_info = NULL;
 
     if(!curltls)
       result = CURLE_OUT_OF_MEMORY;
