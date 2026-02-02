@@ -32,7 +32,7 @@
 #ifdef _WIN32
 /***************************************************************************
  *
- * Curl_wcsdup(source)
+ * curlx_wcsdup(source)
  *
  * Copies the 'source' wchar string to a newly allocated buffer (that is
  * returned).
@@ -40,7 +40,7 @@
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-wchar_t *Curl_wcsdup(const wchar_t *src)
+wchar_t *curlx_wcsdup(const wchar_t *src)
 {
   size_t length = wcslen(src);
 

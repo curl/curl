@@ -1119,7 +1119,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 
 #ifdef _WIN32
 #ifdef UNICODE
-#define curlx_tcsdup               Curl_wcsdup
+#define curlx_tcsdup               curlx_wcsdup
 #else
 #define curlx_tcsdup               curlx_strdup
 #endif
