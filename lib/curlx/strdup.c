@@ -97,7 +97,7 @@ void *Curl_memdup0(const char *src, size_t length)
 
 /***************************************************************************
  *
- * Curl_saferealloc(ptr, size)
+ * curlx_saferealloc(ptr, size)
  *
  * Does a normal curlx_realloc(), but will free the data pointer if the realloc
  * fails. If 'size' is non-zero, it will free the data and return a failure.
@@ -109,7 +109,7 @@ void *Curl_memdup0(const char *src, size_t length)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-void *Curl_saferealloc(void *ptr, size_t size)
+void *curlx_saferealloc(void *ptr, size_t size)
 {
   void *datap = curlx_realloc(ptr, size);
   if(size && !datap)

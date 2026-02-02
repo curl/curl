@@ -29,6 +29,6 @@
 wchar_t *curlx_wcsdup(const wchar_t *src);
 #endif
 void *Curl_memdup(const void *src, size_t buffer_length);
-void *Curl_saferealloc(void *ptr, size_t size);
+void *curlx_saferealloc(void *ptr, size_t size);
 void *Curl_memdup0(const char *src, size_t length);
 #endif /* HEADER_CURLX_STRDUP_H */

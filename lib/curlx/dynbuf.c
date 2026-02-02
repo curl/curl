@@ -102,7 +102,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   }
 
   if(a != s->allc) {
-    /* this logic is not using Curl_saferealloc() to make the tool not have to
+    /* this logic is not using curlx_saferealloc() to make the tool not have to
        include that as well when it uses this code */
     void *p = curlx_realloc(s->bufr, a);
     if(!p) {
