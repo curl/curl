@@ -86,7 +86,7 @@
 
 #ifndef CURLVERBOSE
 #define FTP_CSTATE(c)  ((void)(c), "")
-#else /* !CURLVERBOSE */
+#else
 /* for tracing purposes */
 static const char * const ftp_state_names[] = {
   "STOP",
