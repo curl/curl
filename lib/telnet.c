@@ -496,9 +496,9 @@ static void rec_wont(struct Curl_easy *data, struct TELNET *tn, int option)
 }
 
 static void printsub(struct Curl_easy *data,
-                     int direction,             /* '<' or '>' */
-                     unsigned char *pointer,    /* where suboption data is */
-                     size_t length)             /* length of suboption data */
+                     int direction,                /* '<' or '>' */
+                     const unsigned char *pointer, /* ptr to suboption data */
+                     size_t length)                /* suboption data length */
 {
   if(data->set.verbose) {
     unsigned int i = 0;
