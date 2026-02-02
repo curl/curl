@@ -1079,8 +1079,6 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 
 #ifdef _WIN32
 #define CURLX_STRDUP_LOW _strdup
-#elif !defined(HAVE_STRDUP)
-#define CURLX_STRDUP_LOW curlx_strdup_low
 #else
 #define CURLX_STRDUP_LOW strdup
 #endif
