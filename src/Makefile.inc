@@ -40,6 +40,7 @@ CURLX_CFILES = \
   ../lib/curlx/multibyte.c \
   ../lib/curlx/nonblock.c \
   ../lib/curlx/strcopy.c \
+  ../lib/curlx/strdup.c \
   ../lib/curlx/strerr.c \
   ../lib/curlx/strparse.c \
   ../lib/curlx/timediff.c \
@@ -58,6 +59,7 @@ CURLX_HFILES = \
   ../lib/curlx/nonblock.h \
   ../lib/curlx/snprintf.h \
   ../lib/curlx/strcopy.h \
+  ../lib/curlx/strdup.h \
   ../lib/curlx/strerr.h \
   ../lib/curlx/strparse.h \
   ../lib/curlx/timediff.h \
@@ -108,7 +110,6 @@ CURL_CFILES = \
   tool_setopt.c \
   tool_ssls.c \
   tool_stderr.c \
-  tool_strdup.c \
   tool_urlglob.c \
   tool_util.c \
   tool_vms.c \
@@ -154,7 +155,6 @@ CURL_HFILES = \
   tool_setup.h \
   tool_ssls.h \
   tool_stderr.h \
-  tool_strdup.h \
   tool_urlglob.h \
   tool_util.h \
   tool_version.h \

@@ -36,7 +36,6 @@
 #include "tool_main.h"
 #include "tool_stderr.h"
 #include "tool_help.h"
-#include "tool_strdup.h"
 #include "var.h"
 
 #define ALLOW_BLANK TRUE
@@ -70,7 +69,7 @@ static ParameterError getstrn(char **str, const char *val,
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
 
-  *str = memdup0(val, len);
+  *str = Curl_memdup0(val, len);
   if(!*str)
     return PARAM_NO_MEM;
 
