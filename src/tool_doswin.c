@@ -291,7 +291,7 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
    * to rename such files. */
   char *p, *base, *buffer;
 #ifdef MSDOS
-  struct_stat st_buf;
+  curl_struct_stat st_buf;
 #endif
   size_t len, bufsize;
 

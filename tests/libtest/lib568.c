@@ -35,7 +35,7 @@ static CURLcode test_lib568(const char *URL)
   char errbuf[STRERROR_LEN];
   int sdp;
   FILE *sdpf = NULL;
-  struct_stat file_info;
+  curl_struct_stat file_info;
   char *stream_uri = NULL;
   int request = 1;
   struct curl_slist *custom_headers = NULL;

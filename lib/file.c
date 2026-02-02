@@ -270,7 +270,7 @@ static CURLcode file_upload(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   char *xfer_ulbuf;
   size_t xfer_ulblen;
-  struct_stat file_stat;
+  curl_struct_stat file_stat;
   const char *sendbuf;
   bool eos = FALSE;
 
@@ -390,9 +390,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   */
   struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
   CURLcode result = CURLE_OK;
-  struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
-                          Windows version to have a different struct without
-                          having to redefine the simple word 'stat' */
+  curl_struct_stat statbuf;
   curl_off_t expected_size = -1;
   bool size_known;
   bool fstated = FALSE;
