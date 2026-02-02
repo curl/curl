@@ -490,9 +490,6 @@
 #  include <sys/types.h>
 #  include <sys/stat.h>
    /* Large file (>2Gb) support using Win32 functions. */
-#  undef  fstat
-#  define fstat(fdes, stp)                _fstati64(fdes, stp)
-#  define struct_stat                     struct _stati64
 #  define curl_lseek                      _lseeki64
 #  define LSEEK_ERROR                     ((__int64)-1)
 #elif defined(__DJGPP__)
@@ -506,10 +503,6 @@
 #else
 #  define curl_lseek                      lseek
 #  define LSEEK_ERROR                     ((off_t)-1)
-#endif
-
-#ifndef struct_stat
-#define struct_stat struct stat
 #endif
 
 #ifndef SIZEOF_TIME_T

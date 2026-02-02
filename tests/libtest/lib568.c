@@ -74,7 +74,7 @@ static CURLcode test_lib568(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  fstat(sdp, &file_info);
+  curlx_fstat(sdp, &file_info);
   curlx_close(sdp);
 
   sdpf = curlx_fopen(libtest_arg2, "rb");

@@ -92,7 +92,7 @@ static CURLcode test_lib572(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  fstat(params, &file_info);
+  curlx_fstat(params, &file_info);
   curlx_close(params);
 
   paramsf = curlx_fopen(libtest_arg2, "rb");

@@ -34,6 +34,7 @@
 int curlx_fseek(void *stream, curl_off_t offset, int whence);
 
 #ifdef _WIN32
+#include <sys/stat.h>  /* for _fstati64, struct _stati64 */
 #ifndef CURL_WINDOWS_UWP
 HANDLE curlx_CreateFile(const char *filename,
                         DWORD dwDesiredAccess,
@@ -55,6 +56,8 @@ int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define curlx_open                         curlx_win32_open
 #define curlx_close                        _close
 #define curlx_rename                       curlx_win32_rename
+#define curlx_fstat                        _fstati64
+#define struct_stat                        struct _stati64
 #else
 #define CURLX_FOPEN_LOW                    fopen
 #define CURLX_FREOPEN_LOW                  freopen
@@ -63,6 +66,8 @@ int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define curlx_open                         open
 #define curlx_close                        close
 #define curlx_rename                       rename
+#define curlx_fstat                        fstat
+#define struct_stat                        struct stat
 #endif
 
 #ifdef CURL_MEMDEBUG

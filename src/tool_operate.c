@@ -284,7 +284,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
     if(per->infd == -1)
 #else
       per->infd = curlx_open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
-    if((per->infd == -1) || fstat(per->infd, &fileinfo))
+    if((per->infd == -1) || curlx_fstat(per->infd, &fileinfo))
 #endif
     {
       helpf("cannot open '%s'", per->uploadfile);
@@ -551,7 +551,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
 
       /* The output can be a named pipe or a character device etc that
          cannot be truncated. Only truncate regular files. */
-      if(!fstat(fileno(outs->stream), &fileinfo) &&
+      if(!curlx_fstat(fileno(outs->stream), &fileinfo) &&
          S_ISREG(fileinfo.st_mode)) {
         int rc;
         /* We have written data to an output file, we truncate file */

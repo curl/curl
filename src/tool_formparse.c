@@ -128,7 +128,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */
-    if(fd >= 0 && origin >= 0 && !fstat(fd, &sbuf) &&
+    if(fd >= 0 && origin >= 0 && !curlx_fstat(fd, &sbuf) &&
 #ifdef __VMS
        sbuf.st_fab_rfm != FAB$C_VAR && sbuf.st_fab_rfm != FAB$C_VFC &&
 #endif
