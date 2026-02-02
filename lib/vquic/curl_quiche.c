@@ -53,10 +53,10 @@
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
 #define CURL_H3_NO_ERROR  0x0100
 
-#define QUIC_MAX_STREAMS              (100)
+#define QUIC_MAX_STREAMS       100
 
-#define H3_STREAM_WINDOW_SIZE  (128 * 1024)
-#define H3_STREAM_CHUNK_SIZE    (16 * 1024)
+#define H3_STREAM_WINDOW_SIZE  (1024 * 128)
+#define H3_STREAM_CHUNK_SIZE   (1024 * 16)
 /* The pool keeps spares around and half of a full stream windows seems good.
  * More does not seem to improve performance. The benefit of the pool is that
  * stream buffer to not keep spares. Memory consumption goes down when streams

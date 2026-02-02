@@ -102,12 +102,12 @@ typedef enum {
   ssl_earlydata_rejected
 } ssl_earlydata_state;
 
-#define CURL_SSL_IO_NEED_NONE   (0)
+#define CURL_SSL_IO_NEED_NONE   0
 #define CURL_SSL_IO_NEED_RECV   (1 << 0)
 #define CURL_SSL_IO_NEED_SEND   (1 << 1)
 
 /* Max earlydata payload we want to send */
-#define CURL_SSL_EARLY_MAX       (64 * 1024)
+#define CURL_SSL_EARLY_MAX      (64 * 1024)
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {

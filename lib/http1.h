@@ -29,7 +29,7 @@
 #include "bufq.h"
 #include "http.h"
 
-#define H1_PARSE_OPT_NONE       (0)
+#define H1_PARSE_OPT_NONE       0
 #define H1_PARSE_OPT_STRICT     (1 << 0)
 
 #define H1_PARSE_DEFAULT_MAX_LINE_LEN   DYN_HTTP_REQUEST

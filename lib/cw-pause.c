@@ -34,7 +34,7 @@
 /* body dynbuf sizes */
 #define CW_PAUSE_BUF_CHUNK         (16 * 1024)
 /* when content decoding, write data in chunks */
-#define CW_PAUSE_DEC_WRITE_CHUNK   (4096)
+#define CW_PAUSE_DEC_WRITE_CHUNK   4096
 
 struct cw_pause_buf {
   struct cw_pause_buf *next;

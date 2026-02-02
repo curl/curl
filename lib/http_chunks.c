@@ -460,7 +460,7 @@ const struct Curl_cwtype Curl_httpchunk_unencoder = {
 };
 
 /* max length of an HTTP chunk that we want to generate */
-#define CURL_CHUNKED_MINLEN   (1024)
+#define CURL_CHUNKED_MINLEN   1024
 #define CURL_CHUNKED_MAXLEN   (64 * 1024)
 
 struct chunked_reader {
