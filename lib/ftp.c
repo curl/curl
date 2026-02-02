@@ -2976,12 +2976,12 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
          The method used here is to check the server OS: we do it only
          if the path name looks strange to minimize overhead on other
          systems. */
-      char *dir = curlx_dyn_ptr(&out);
+      const char *dir = curlx_dyn_ptr(&out);
 
       if(!ftpc->server_os && dir[0] != '/') {
         result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
         if(result) {
-          curlx_free(dir);
+          curlx_dyn_free(&out);
           return result;
         }
       }
