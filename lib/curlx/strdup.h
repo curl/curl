@@ -26,7 +26,7 @@
 #include "../curl_setup.h"
 
 #ifdef _WIN32
-wchar_t *curlx_wcsdup(const wchar_t *src);
+wchar_t *curlx_wcsdup(const wchar_t *src);  /* for curlx_tcsdup() */
 #endif
 void *curlx_memdup(const void *src, size_t buffer_length);
 void *curlx_memdup0(const char *src, size_t length);

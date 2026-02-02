@@ -35,7 +35,7 @@
  * curlx_wcsdup(source)
  *
  * Copies the 'source' wchar string to a newly allocated buffer (that is
- * returned).
+ * returned). Used by macro curlx_tcsdup().
  *
  * Returns the new pointer or NULL on failure.
  *

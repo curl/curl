@@ -46,7 +46,6 @@ extern FILE *tool_stderr;
  */
 
 #include <curlx/curlx.h>
-#include <curlx/strdup.h>
 
 /*
  * Platform specific stuff.

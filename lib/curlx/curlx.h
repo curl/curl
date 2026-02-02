@@ -31,56 +31,23 @@
  * be.
  */
 
-#include "basename.h"
-/* for curlx_basename() function */
-
-#include "binmode.h"
-/* "binmode.h" provides macro CURLX_SET_BINMODE() */
-
-#include "nonblock.h"
-/* "nonblock.h" provides curlx_nonblock() */
-
-#include "multibyte.h"
-/* "multibyte.h" provides these functions and macros:
-
-  curlx_convert_UTF8_to_wchar()
-  curlx_convert_wchar_to_UTF8()
-  curlx_convert_UTF8_to_tchar()
-  curlx_convert_tchar_to_UTF8()
-*/
-
-#include "version_win32.h"
-/* provides curlx_verify_windows_version() */
-
-#include "strerr.h"
-/* The curlx_strerror() function */
-
-#include "strparse.h"
-/* The curlx_str_* parsing functions */
-
-#include "strcopy.h"
-/* curlx_strcopy */
-
-#include "dynbuf.h"
-/* The curlx_dyn_* functions */
-
-#include "fopen.h"
-/* The curlx_f* functions */
-
-#include "base64.h"
-#include "timeval.h"
-#include "timediff.h"
-
-#include "wait.h"
-/* for curlx_wait_ms */
-
-#include "winapi.h"
-/* for curlx_winapi_strerror */
-
-#include "inet_pton.h"
-/* for curlx_inet_pton */
-
-#include "inet_ntop.h"
-/* for curlx_inet_ntop */
+#include "base64.h" /* for curlx_base64* */
+#include "basename.h" /* for curlx_basename() */
+#include "binmode.h" /* for macro CURLX_SET_BINMODE() */
+#include "dynbuf.h" /* for curlx_dyn_*() */
+#include "fopen.h" /* for curlx_f*() */
+#include "inet_ntop.h" /* for curlx_inet_ntop() */
+#include "inet_pton.h" /* for curlx_inet_pton() */
+#include "multibyte.h" /* for curlx_convert_*() */
+#include "nonblock.h" /* for curlx_nonblock() */
+#include "strcopy.h" /* for curlx_strcopy() */
+#include "strdup.h" /* for curlx_memdup*() and curlx_tcsdup() */
+#include "strerr.h" /* for curlx_strerror() */
+#include "strparse.h" /* for curlx_str_* parsing functions */
+#include "timediff.h" /* for timediff_t type and related functions */
+#include "timeval.h" /* for curlx_now type and related functions */
+#include "version_win32.h" /* for curlx_verify_windows_version() */
+#include "wait.h" /* for curlx_wait_ms() */
+#include "winapi.h" /* for curlx_winapi_strerror() */
 
 #endif /* HEADER_CURL_CURLX_H */
