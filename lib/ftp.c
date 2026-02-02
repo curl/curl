@@ -3453,7 +3453,7 @@ static CURLcode ftp_sendquote(struct Curl_easy *data,
   while(item) {
     if(item->data) {
       size_t nread;
-      char *cmd = item->data;
+      const char *cmd = item->data;
       bool acceptfail = FALSE;
       CURLcode result;
       int ftpcode = 0;

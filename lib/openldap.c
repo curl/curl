@@ -337,7 +337,7 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-  char *binddn = NULL;
+  const char *binddn = NULL;
   struct berval passwd;
   int rc;
 
@@ -724,8 +724,9 @@ static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
       if(bvals) {
         for(i = 0; bvals[i].bv_val; i++) {
           size_t llen;
-          unsigned short mech = Curl_sasl_decode_mech((char *)bvals[i].bv_val,
-                                                      bvals[i].bv_len, &llen);
+          unsigned short mech =
+            Curl_sasl_decode_mech((const char *)bvals[i].bv_val,
+                                  bvals[i].bv_len, &llen);
           if(bvals[i].bv_len == llen)
             li->sasl.authmechs |= mech;
         }
