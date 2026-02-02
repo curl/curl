@@ -405,7 +405,7 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(data->state.aptr.host) {
       /* remove /r/n as the separator for canonical request must be '\n' */
       size_t pos = strcspn(data->state.aptr.host, "\n\r");
-      fullhost = Curl_memdup0(data->state.aptr.host, pos);
+      fullhost = curlx_memdup0(data->state.aptr.host, pos);
     }
     else
       fullhost = curl_maprintf("host:%s", hostname);

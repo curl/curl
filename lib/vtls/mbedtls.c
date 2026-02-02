@@ -521,7 +521,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
          provided the exact length). The function accepts PEM or DER
          formats, but we cannot assume if the user passed in a PEM
          format cert that it is null-terminated. */
-      unsigned char *newblob = Curl_memdup0(ca_info_blob->data,
+      unsigned char *newblob = curlx_memdup0(ca_info_blob->data,
                                             ca_info_blob->len);
       if(!newblob)
         return CURLE_OUT_OF_MEMORY;
@@ -620,7 +620,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
          provided the exact length). The function accepts PEM or DER
          formats, but we cannot assume if the user passed in a PEM
          format cert that it is null-terminated. */
-      unsigned char *newblob = Curl_memdup0(ssl_cert_blob->data,
+      unsigned char *newblob = curlx_memdup0(ssl_cert_blob->data,
                                             ssl_cert_blob->len);
       if(!newblob)
         return CURLE_OUT_OF_MEMORY;

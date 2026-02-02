@@ -826,7 +826,7 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
          therefore do not use APOP authentication. */
       if(at) {
         /* dupe the timestamp */
-        pop3c->apoptimestamp = Curl_memdup0(lt, timestamplen);
+        pop3c->apoptimestamp = curlx_memdup0(lt, timestamplen);
         if(!pop3c->apoptimestamp)
           return CURLE_OUT_OF_MEMORY;
         /* Store the APOP capability */

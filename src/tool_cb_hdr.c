@@ -97,7 +97,7 @@ static void write_linked_location(CURL *curl, const char *location,
     goto locout;
 
   /* Create a null-terminated and whitespace-stripped copy of Location: */
-  copyloc = Curl_memdup0(loc, llen);
+  copyloc = curlx_memdup0(loc, llen);
   if(!copyloc)
     goto locout;
 
@@ -153,7 +153,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   char *p;
   char *q;
 
-  copy = Curl_memdup0(ptr, len);
+  copy = curlx_memdup0(ptr, len);
   if(!copy)
     return NULL;
 

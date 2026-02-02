@@ -696,7 +696,7 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 
   if(!name || !len)
     return curl_mime_name(part, name);
-  zname = Curl_memdup0(name, len);
+  zname = curlx_memdup0(name, len);
   if(!zname)
     return CURLE_OUT_OF_MEMORY;
   res = curl_mime_name(part, zname);

@@ -189,7 +189,7 @@ static ParameterError varfunc(char *c, /* content */
       curlx_free(c);
 
     clen = curlx_dyn_len(out);
-    c = Curl_memdup0(curlx_dyn_ptr(out), clen);
+    c = curlx_memdup0(curlx_dyn_ptr(out), clen);
     if(!c) {
       err = PARAM_NO_MEM;
       break;
@@ -356,7 +356,7 @@ static ParameterError addvariable(const char *name,
     memcpy(p->name, name, nlen);
     /* the null termination byte is already present from above */
 
-    p->content = contalloc ? content : Curl_memdup0(content, clen);
+    p->content = contalloc ? content : curlx_memdup0(content, clen);
     if(p->content) {
       p->clen = clen;
 

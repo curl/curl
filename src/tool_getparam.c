@@ -69,7 +69,7 @@ static ParameterError getstrn(char **str, const char *val,
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
 
-  *str = Curl_memdup0(val, len);
+  *str = curlx_memdup0(val, len);
   if(!*str)
     return PARAM_NO_MEM;
 
