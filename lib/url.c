@@ -94,7 +94,7 @@
 #include "http_proxy.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "setopt.h"
 #include "altsvc.h"
 #include "curlx/dynbuf.h"

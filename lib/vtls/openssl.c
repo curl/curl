@@ -61,7 +61,7 @@
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 #include "../curlx/strcopy.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "apple.h"
 
 #include <openssl/rand.h>

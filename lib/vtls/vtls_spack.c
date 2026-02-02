@@ -29,7 +29,7 @@
 #include "../curl_trc.h"
 #include "vtls_scache.h"
 #include "vtls_spack.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff

@@ -30,7 +30,7 @@ struct Curl_easy;
 #include "sendf.h"
 #include "curl_trc.h"
 #include "transfer.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "curlx/basename.h"
 #include "curlx/strcopy.h"
 #include "curlx/fopen.h"

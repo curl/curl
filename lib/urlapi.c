@@ -30,7 +30,7 @@
 #include "escape.h"
 #include "curlx/inet_pton.h"
 #include "curlx/inet_ntop.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "idn.h"
 #include "curlx/strparse.h"
 #include "curl_memrchr.h"

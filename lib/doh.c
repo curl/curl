@@ -33,7 +33,7 @@
 #include "multiif.h"
 #include "url.h"
 #include "connect.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "curlx/dynbuf.h"
 #include "escape.h"
 #include "urlapi-int.h"

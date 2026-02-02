@@ -46,7 +46,7 @@
 #include "altsvc.h"
 #include "hsts.h"
 #include "tftp.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "escape.h"
 #include "bufref.h"
 

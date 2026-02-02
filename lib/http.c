@@ -77,7 +77,7 @@
 #include "http2.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "altsvc.h"
 #include "hsts.h"
 #include "rtsp.h"

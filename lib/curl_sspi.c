@@ -26,7 +26,7 @@
 #ifdef USE_WINDOWS_SSPI
 
 #include "curl_sspi.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "curlx/multibyte.h"
 
 /* Pointer to SSPI dispatch table */

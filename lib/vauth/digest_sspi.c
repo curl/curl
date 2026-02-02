@@ -32,7 +32,7 @@
 #include "digest.h"
 #include "../curlx/multibyte.h"
 #include "../curl_trc.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../strcase.h"
 #include "../strerror.h"
 

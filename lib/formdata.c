@@ -31,7 +31,7 @@ struct Curl_easy;
 
 #include "urldata.h" /* for struct Curl_easy */
 #include "mime.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "bufref.h"
 #include "curlx/fopen.h"
 

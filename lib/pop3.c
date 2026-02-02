@@ -71,7 +71,7 @@
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "curl_md5.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 
 /* Authentication type flags */
 #define POP3_TYPE_CLEARTEXT (1 << 0)

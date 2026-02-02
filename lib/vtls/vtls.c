@@ -70,7 +70,7 @@
 #include "../connect.h"
 #include "../select.h"
 #include "../setopt.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../curlx/strcopy.h"
 
 #ifdef USE_APPLE_SECTRUST

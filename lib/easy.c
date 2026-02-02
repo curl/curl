@@ -51,7 +51,7 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "easyif.h"
 #include "multiif.h"
 #include "multi_ev.h"

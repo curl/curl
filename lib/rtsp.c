@@ -38,7 +38,7 @@
 #include "select.h"
 #include "connect.h"
 #include "cfilters.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
 

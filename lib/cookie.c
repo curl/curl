@@ -36,7 +36,7 @@
 #include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "parsedate.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "llist.h"
 #include "bufref.h"
 #include "curlx/strparse.h"

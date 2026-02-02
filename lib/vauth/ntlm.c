@@ -38,7 +38,7 @@
 #include "../curl_trc.h"
 #include "../curl_ntlm_core.h"
 #include "../rand.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../curl_endian.h"
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */

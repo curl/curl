@@ -28,7 +28,7 @@
 #include "vauth.h"
 #include "../curl_ntlm_core.h"
 #include "../curl_trc.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 
 /*
  * Curl_auth_is_ntlm_supported()

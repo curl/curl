@@ -60,7 +60,7 @@
 #include "keylog.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../curlx/strcopy.h"
 #include "x509asn1.h"
 

@@ -33,7 +33,7 @@
 #include "connect.h"
 #include "curlx/nonblock.h"
 #include "socks.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push

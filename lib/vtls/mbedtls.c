@@ -65,7 +65,7 @@
 #include "vtls_scache.h"
 #include "x509asn1.h"
 #include "../connect.h" /* for the connect timeout */
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../curl_sha256.h"
 
 /* ALPN for http2 */

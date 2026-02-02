@@ -65,7 +65,7 @@
 #include "multiif.h"
 #include "url.h"
 #include "http_proxy.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
