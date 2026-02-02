@@ -33,6 +33,7 @@ LIB_CURLX_CFILES =      \
   curlx/multibyte.c     \
   curlx/nonblock.c      \
   curlx/strcopy.c       \
+  curlx/strdup.c        \
   curlx/strerr.c        \
   curlx/strparse.c      \
   curlx/timediff.c      \
@@ -55,6 +56,7 @@ LIB_CURLX_HFILES =      \
   curlx/nonblock.h      \
   curlx/snprintf.h      \
   curlx/strcopy.h       \
+  curlx/strdup.h        \
   curlx/strerr.h        \
   curlx/strparse.h      \
   curlx/timediff.h      \
@@ -252,7 +254,6 @@ LIB_CFILES =         \
   socks_sspi.c       \
   splay.c            \
   strcase.c          \
-  strdup.c           \
   strequal.c         \
   strerror.c         \
   system_win32.c     \
@@ -382,7 +383,6 @@ LIB_HFILES =         \
   socks.h            \
   splay.h            \
   strcase.h          \
-  strdup.h           \
   strerror.h         \
   system_win32.h     \
   telnet.h           \

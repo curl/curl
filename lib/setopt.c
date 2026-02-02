@@ -46,7 +46,7 @@
 #include "altsvc.h"
 #include "hsts.h"
 #include "tftp.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "escape.h"
 #include "bufref.h"
 
@@ -1920,7 +1920,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
            mark that postfields is used rather than read function or form
            data.
         */
-        char *p = Curl_memdup0(ptr, pflen);
+        char *p = curlx_memdup0(ptr, pflen);
         if(!p)
           return CURLE_OUT_OF_MEMORY;
         else {

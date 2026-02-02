@@ -38,7 +38,7 @@
 #include "../curl_trc.h"
 #include "../curl_ntlm_core.h"
 #include "../rand.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../curl_endian.h"
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */
@@ -267,8 +267,8 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
       }
 
       curlx_free(ntlm->target_info); /* replace any previous data */
-      ntlm->target_info = Curl_memdup(&type2[target_info_offset],
-                                      target_info_len);
+      ntlm->target_info = curlx_memdup(&type2[target_info_offset],
+                                       target_info_len);
       if(!ntlm->target_info)
         return CURLE_OUT_OF_MEMORY;
     }

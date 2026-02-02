@@ -36,7 +36,7 @@
 #include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "parsedate.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "llist.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
@@ -245,7 +245,7 @@ static char *sanitize_cookie_path(const char *cookie_path, size_t len)
   if(len > 1 && cookie_path[len - 1] == '/')
     len--;
 
-  return Curl_memdup0(cookie_path, len);
+  return curlx_memdup0(cookie_path, len);
 }
 
 /*
@@ -264,7 +264,7 @@ static CURLcode strstore(char **str, const char *newstr, size_t len)
     len++;
     newstr = "";
   }
-  *str = Curl_memdup0(newstr, len);
+  *str = curlx_memdup0(newstr, len);
   if(!*str)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
@@ -694,7 +694,7 @@ static CURLcode parse_netscape(struct Cookie *co,
         ptr++;
         len--;
       }
-      co->domain = Curl_memdup0(ptr, len);
+      co->domain = curlx_memdup0(ptr, len);
       if(!co->domain)
         return CURLE_OUT_OF_MEMORY;
       break;
@@ -737,7 +737,7 @@ static CURLcode parse_netscape(struct Cookie *co,
         return CURLE_OK;
       break;
     case 5:
-      co->name = Curl_memdup0(ptr, len);
+      co->name = curlx_memdup0(ptr, len);
       if(!co->name)
         return CURLE_OUT_OF_MEMORY;
       else {
@@ -749,7 +749,7 @@ static CURLcode parse_netscape(struct Cookie *co,
       }
       break;
     case 6:
-      co->value = Curl_memdup0(ptr, len);
+      co->value = curlx_memdup0(ptr, len);
       if(!co->value)
         return CURLE_OUT_OF_MEMORY;
       break;
@@ -1008,7 +1008,7 @@ Curl_cookie_add(struct Curl_easy *data,
     goto fail;
 
   /* clone the stack struct into heap */
-  co = Curl_memdup(&comem, sizeof(comem));
+  co = curlx_memdup(&comem, sizeof(comem));
   if(!co) {
     co = &comem;
     result = CURLE_OUT_OF_MEMORY;

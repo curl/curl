@@ -38,7 +38,7 @@
 #include "select.h"
 #include "connect.h"
 #include "cfilters.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
 
@@ -1028,7 +1028,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
        */
 
       /* Copy the id substring into a new buffer */
-      data->set.str[STRING_RTSP_SESSION_ID] = Curl_memdup0(start, idlen);
+      data->set.str[STRING_RTSP_SESSION_ID] = curlx_memdup0(start, idlen);
       if(!data->set.str[STRING_RTSP_SESSION_ID])
         return CURLE_OUT_OF_MEMORY;
     }

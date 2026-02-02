@@ -29,7 +29,7 @@
 #include "httpsrr.h"
 #include "connect.h"
 #include "curl_trc.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 
 static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
                                     unsigned char *alpns)
@@ -92,7 +92,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     if(!vlen || (vlen & 3)) /* the size must be 4-byte aligned */
       return CURLE_BAD_FUNCTION_ARGUMENT;
     curlx_free(hi->ipv4hints);
-    hi->ipv4hints = Curl_memdup(val, vlen);
+    hi->ipv4hints = curlx_memdup(val, vlen);
     if(!hi->ipv4hints)
       return CURLE_OUT_OF_MEMORY;
     hi->ipv4hints_len = vlen;
@@ -102,7 +102,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     if(!vlen)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     curlx_free(hi->echconfiglist);
-    hi->echconfiglist = Curl_memdup(val, vlen);
+    hi->echconfiglist = curlx_memdup(val, vlen);
     if(!hi->echconfiglist)
       return CURLE_OUT_OF_MEMORY;
     hi->echconfiglist_len = vlen;
@@ -112,7 +112,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     if(!vlen || (vlen & 15)) /* the size must be 16-byte aligned */
       return CURLE_BAD_FUNCTION_ARGUMENT;
     curlx_free(hi->ipv6hints);
-    hi->ipv6hints = Curl_memdup(val, vlen);
+    hi->ipv6hints = curlx_memdup(val, vlen);
     if(!hi->ipv6hints)
       return CURLE_OUT_OF_MEMORY;
     hi->ipv6hints_len = vlen;
@@ -134,7 +134,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
 struct Curl_https_rrinfo *
 Curl_httpsrr_dup_move(struct Curl_https_rrinfo *rrinfo)
 {
-  struct Curl_https_rrinfo *dup = Curl_memdup(rrinfo, sizeof(*rrinfo));
+  struct Curl_https_rrinfo *dup = curlx_memdup(rrinfo, sizeof(*rrinfo));
   if(dup)
     memset(rrinfo, 0, sizeof(*rrinfo));
   return dup;

@@ -610,7 +610,7 @@ static int validate_access(struct testcase *test,
                             (long)our_getpid());
 
     logmsg("Are-we-friendly question received");
-    test->buffer = strdup(weare);
+    test->buffer = curlx_strdup(weare);
     test->rptr = test->buffer; /* set read pointer */
     test->bufsize = count;    /* set total count */
     test->rcount = count;     /* set data left to read */

@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef _WIN32
 #include <wchar.h>
@@ -29,8 +29,28 @@
 
 #include "strdup.h"
 
-#ifndef HAVE_STRDUP
-char *Curl_strdup(const char *str)
+#ifdef _WIN32
+/***************************************************************************
+ *
+ * curlx_wcsdup(source)
+ *
+ * Copies the 'source' wchar string to a newly allocated buffer (that is
+ * returned). Used by macro curlx_tcsdup().
+ *
+ * Returns the new pointer or NULL on failure.
+ *
+ ***************************************************************************/
+wchar_t *curlx_wcsdup(const wchar_t *src)
+{
+  size_t length = wcslen(src);
+
+  if(length > (SIZE_MAX / sizeof(wchar_t)) - 1)
+    return (wchar_t *)NULL; /* integer overflow */
+
+  return (wchar_t *)curlx_memdup(src, (length + 1) * sizeof(wchar_t));
+}
+#elif !defined(HAVE_STRDUP)
+char *curlx_strdup_low(const char *str)
 {
   size_t len;
   char *newstr;
@@ -49,31 +69,9 @@ char *Curl_strdup(const char *str)
 }
 #endif
 
-#ifdef _WIN32
 /***************************************************************************
  *
- * Curl_wcsdup(source)
- *
- * Copies the 'source' wchar string to a newly allocated buffer (that is
- * returned).
- *
- * Returns the new pointer or NULL on failure.
- *
- ***************************************************************************/
-wchar_t *Curl_wcsdup(const wchar_t *src)
-{
-  size_t length = wcslen(src);
-
-  if(length > (SIZE_MAX / sizeof(wchar_t)) - 1)
-    return (wchar_t *)NULL; /* integer overflow */
-
-  return (wchar_t *)Curl_memdup(src, (length + 1) * sizeof(wchar_t));
-}
-#endif
-
-/***************************************************************************
- *
- * Curl_memdup(source, length)
+ * curlx_memdup(source, length)
  *
  * Copies the 'source' data to a newly allocated buffer (that is
  * returned). Copies 'length' bytes.
@@ -81,7 +79,7 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-void *Curl_memdup(const void *src, size_t length)
+void *curlx_memdup(const void *src, size_t length)
 {
   void *buffer = curlx_malloc(length);
   if(!buffer)
@@ -94,7 +92,7 @@ void *Curl_memdup(const void *src, size_t length)
 
 /***************************************************************************
  *
- * Curl_memdup0(source, length)
+ * curlx_memdup0(source, length)
  *
  * Copies the 'source' string to a newly allocated buffer (that is returned).
  * Copies 'length' bytes then adds a null-terminator.
@@ -102,7 +100,7 @@ void *Curl_memdup(const void *src, size_t length)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-void *Curl_memdup0(const char *src, size_t length)
+void *curlx_memdup0(const char *src, size_t length)
 {
   char *buf = (length < SIZE_MAX) ? curlx_malloc(length + 1) : NULL;
   if(!buf)
@@ -117,7 +115,7 @@ void *Curl_memdup0(const char *src, size_t length)
 
 /***************************************************************************
  *
- * Curl_saferealloc(ptr, size)
+ * curlx_saferealloc(ptr, size)
  *
  * Does a normal curlx_realloc(), but will free the data pointer if the realloc
  * fails. If 'size' is non-zero, it will free the data and return a failure.
@@ -129,7 +127,7 @@ void *Curl_memdup0(const char *src, size_t length)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-void *Curl_saferealloc(void *ptr, size_t size)
+void *curlx_saferealloc(void *ptr, size_t size)
 {
   void *datap = curlx_realloc(ptr, size);
   if(size && !datap)

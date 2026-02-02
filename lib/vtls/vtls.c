@@ -70,7 +70,7 @@
 #include "../connect.h"
 #include "../select.h"
 #include "../setopt.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../curlx/strcopy.h"
 
 #ifdef USE_APPLE_SECTRUST
@@ -2039,7 +2039,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    connssl->negotiated.alpn = Curl_memdup0((const char *)proto, proto_len);
+    connssl->negotiated.alpn = curlx_memdup0((const char *)proto, proto_len);
     if(!connssl->negotiated.alpn)
       return CURLE_OUT_OF_MEMORY;
   }

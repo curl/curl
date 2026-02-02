@@ -27,7 +27,6 @@
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
-#include "tool_strdup.h"
 
 static CURLcode globerror(struct URLGlob *glob, const char *err,
                           size_t pos, CURLcode error)
@@ -49,7 +48,7 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
   if(!pat->c.set.elem)
     return globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
 
-  pat->c.set.elem[0] = memdup0(fixed, len);
+  pat->c.set.elem[0] = curlx_memdup0(fixed, len);
   if(!pat->c.set.elem[0]) {
     tool_safefree(pat->c.set.elem);
     return globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);

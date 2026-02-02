@@ -61,7 +61,7 @@
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 #include "../curlx/strcopy.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "apple.h"
 
 #include <openssl/rand.h>
@@ -2703,7 +2703,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     earlydata_max = SSL_SESSION_get_max_early_data(session);
 #endif
     if(quic_tp && quic_tp_len) {
-      qtp_clone = Curl_memdup0((char *)quic_tp, quic_tp_len);
+      qtp_clone = curlx_memdup0((char *)quic_tp, quic_tp_len);
       if(!qtp_clone) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;

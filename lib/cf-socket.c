@@ -69,7 +69,7 @@
 #include "conncache.h"
 #include "multihandle.h"
 #include "rand.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "system_win32.h"
 #include "curlx/nonblock.h"
 #include "curlx/version_win32.h"
@@ -483,14 +483,14 @@ CURLcode Curl_parse_interface(const char *input,
     input += strlen(if_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *iface = Curl_memdup0(input, len - strlen(if_prefix));
+    *iface = curlx_memdup0(input, len - strlen(if_prefix));
     return *iface ? CURLE_OK : CURLE_OUT_OF_MEMORY;
   }
   else if(!strncmp(host_prefix, input, strlen(host_prefix))) {
     input += strlen(host_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *host = Curl_memdup0(input, len - strlen(host_prefix));
+    *host = curlx_memdup0(input, len - strlen(host_prefix));
     return *host ? CURLE_OK : CURLE_OUT_OF_MEMORY;
   }
   else if(!strncmp(if_host_prefix, input, strlen(if_host_prefix))) {
@@ -500,11 +500,11 @@ CURLcode Curl_parse_interface(const char *input,
     host_part = memchr(input, '!', len);
     if(!host_part || !*(host_part + 1))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *iface = Curl_memdup0(input, host_part - input);
+    *iface = curlx_memdup0(input, host_part - input);
     if(!*iface)
       return CURLE_OUT_OF_MEMORY;
     ++host_part;
-    *host = Curl_memdup0(host_part, len - (host_part - input));
+    *host = curlx_memdup0(host_part, len - (host_part - input));
     if(!*host) {
       curlx_free(*iface);
       *iface = NULL;
@@ -515,7 +515,7 @@ CURLcode Curl_parse_interface(const char *input,
 
   if(!*input)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  *dev = Curl_memdup0(input, len);
+  *dev = curlx_memdup0(input, len);
   return *dev ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 

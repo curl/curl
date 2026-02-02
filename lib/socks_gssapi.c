@@ -33,7 +33,7 @@
 #include "connect.h"
 #include "curlx/nonblock.h"
 #include "socks.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push
@@ -135,7 +135,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   /* prepare service name */
   if(strchr(serviceptr, '/')) {
     service.length = serviceptr_length;
-    service.value = Curl_memdup(serviceptr, service.length);
+    service.value = curlx_memdup(serviceptr, service.length);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
 
@@ -374,7 +374,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
   else {
     gss_send_token.length = 1;
-    gss_send_token.value = Curl_memdup(&gss_enc, gss_send_token.length);
+    gss_send_token.value = curlx_memdup(&gss_enc, gss_send_token.length);
     if(!gss_send_token.value) {
       Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
       return CURLE_OUT_OF_MEMORY;

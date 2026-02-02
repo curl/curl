@@ -33,7 +33,7 @@
 #include "multiif.h"
 #include "url.h"
 #include "connect.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "curlx/dynbuf.h"
 #include "escape.h"
 #include "urlapi-int.h"
@@ -592,7 +592,7 @@ static DOHcode doh_store_https(const unsigned char *doh, int index,
   /* silently ignore RRs over the limit */
   if(d->numhttps_rrs < DOH_MAX_HTTPS) {
     struct dohhttps_rr *h = &d->https_rrs[d->numhttps_rrs];
-    h->val = Curl_memdup(&doh[index], len);
+    h->val = curlx_memdup(&doh[index], len);
     if(!h->val)
       return DOH_OUT_OF_MEM;
     h->len = len;

@@ -36,11 +36,7 @@
 curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
 curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-#ifdef _WIN32
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)_strdup;
-#else
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
-#endif
+curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)CURLX_STRDUP_LOW;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 
 #if defined(_MSC_VER) && defined(_DLL)

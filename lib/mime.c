@@ -30,7 +30,7 @@ struct Curl_easy;
 #include "sendf.h"
 #include "curl_trc.h"
 #include "transfer.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "curlx/basename.h"
 #include "curlx/strcopy.h"
 #include "curlx/fopen.h"
@@ -1281,7 +1281,7 @@ CURLcode curl_mime_data(curl_mimepart *part, const char *ptr, size_t datasize)
     if(datasize == CURL_ZERO_TERMINATED)
       datasize = strlen(ptr);
 
-    part->data = Curl_memdup0(ptr, datasize);
+    part->data = curlx_memdup0(ptr, datasize);
     if(!part->data)
       return CURLE_OUT_OF_MEMORY;
 

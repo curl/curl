@@ -1077,6 +1077,14 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 
 /* Allocator macros */
 
+#ifdef _WIN32
+#define CURLX_STRDUP_LOW _strdup
+#elif !defined(HAVE_STRDUP)
+#define CURLX_STRDUP_LOW curlx_strdup_low
+#else
+#define CURLX_STRDUP_LOW strdup
+#endif
+
 #ifdef CURL_MEMDEBUG
 
 #define curlx_strdup(ptr)          curl_dbg_strdup(ptr, __LINE__, __FILE__)
@@ -1104,11 +1112,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define curlx_realloc              Curl_crealloc
 #define curlx_free                 Curl_cfree
 #else /* !BUILDING_LIBCURL */
-#ifdef _WIN32
-#define curlx_strdup               _strdup
-#else
-#define curlx_strdup               strdup
-#endif
+#define curlx_strdup               CURLX_STRDUP_LOW
 #define curlx_malloc               malloc
 #define curlx_calloc               calloc
 #define curlx_realloc              realloc
@@ -1117,7 +1121,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 
 #ifdef _WIN32
 #ifdef UNICODE
-#define curlx_tcsdup               Curl_wcsdup
+#define curlx_tcsdup               curlx_wcsdup
 #else
 #define curlx_tcsdup               curlx_strdup
 #endif

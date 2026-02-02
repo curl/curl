@@ -32,7 +32,7 @@
 #include "digest.h"
 #include "../curlx/multibyte.h"
 #include "../curl_trc.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 #include "../strcase.h"
 #include "../strerror.h"
 
@@ -351,7 +351,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   }
 
   /* Store the challenge for use later */
-  digest->input_token = (BYTE *)Curl_memdup(chlg, chlglen + 1);
+  digest->input_token = (BYTE *)curlx_memdup(chlg, chlglen + 1);
   if(!digest->input_token)
     return CURLE_OUT_OF_MEMORY;
 
@@ -612,7 +612,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     Curl_sspi_free_identity(p_identity);
   }
 
-  resp = Curl_memdup0((const char *)output_token, output_token_len);
+  resp = curlx_memdup0((const char *)output_token, output_token_len);
   curlx_free(output_token);
   if(!resp) {
     return CURLE_OUT_OF_MEMORY;

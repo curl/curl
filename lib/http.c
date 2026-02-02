@@ -77,7 +77,7 @@
 #include "http2.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "altsvc.h"
 #include "hsts.h"
 #include "rtsp.h"
@@ -200,7 +200,7 @@ static CURLcode copy_custom_value(const char *header, char **valp)
     curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
     curlx_str_trimblanks(&out);
 
-    *valp = Curl_memdup0(curlx_str(&out), curlx_strlen(&out));
+    *valp = curlx_memdup0(curlx_str(&out), curlx_strlen(&out));
     if(*valp)
       return CURLE_OK;
     return CURLE_OUT_OF_MEMORY;
@@ -227,7 +227,7 @@ char *Curl_copy_header_value(const char *header)
      !curlx_str_single(&header, ':')) {
     curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
     curlx_str_trimblanks(&out);
-    return Curl_memdup0(curlx_str(&out), curlx_strlen(&out));
+    return curlx_memdup0(curlx_str(&out), curlx_strlen(&out));
   }
   /* bad input, should never happen */
   DEBUGASSERT(0);
@@ -4659,17 +4659,17 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
 #pragma GCC diagnostic pop
 #endif
   if(scheme) {
-    req->scheme = Curl_memdup0(scheme, s_len);
+    req->scheme = curlx_memdup0(scheme, s_len);
     if(!req->scheme)
       goto out;
   }
   if(authority) {
-    req->authority = Curl_memdup0(authority, a_len);
+    req->authority = curlx_memdup0(authority, a_len);
     if(!req->authority)
       goto out;
   }
   if(path) {
-    req->path = Curl_memdup0(path, p_len);
+    req->path = curlx_memdup0(path, p_len);
     if(!req->path)
       goto out;
   }

@@ -29,7 +29,7 @@
 #include "../curl_trc.h"
 #include "vtls_scache.h"
 #include "vtls_spack.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff
@@ -152,7 +152,7 @@ static CURLcode spack_decstr16(char **val, const uint8_t **src,
     return r;
   if(end - *src < slen)
     return CURLE_READ_ERROR;
-  *val = Curl_memdup0((const char *)(*src), slen);
+  *val = curlx_memdup0((const char *)(*src), slen);
   *src += slen;
   return *val ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
@@ -182,7 +182,7 @@ static CURLcode spack_decdata16(uint8_t **val, size_t *val_len,
     return r;
   if(end - *src < data_len)
     return CURLE_READ_ERROR;
-  *val = Curl_memdup0((const char *)(*src), data_len);
+  *val = curlx_memdup0((const char *)(*src), data_len);
   *val_len = data_len;
   *src += data_len;
   return *val ? CURLE_OK : CURLE_OUT_OF_MEMORY;

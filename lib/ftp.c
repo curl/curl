@@ -65,7 +65,7 @@
 #include "multiif.h"
 #include "url.h"
 #include "http_proxy.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
@@ -3195,7 +3195,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
         ptr++;
       for(start = ptr; *ptr && *ptr != ' '; ptr++)
         ;
-      os = Curl_memdup0(start, ptr - start);
+      os = curlx_memdup0(start, ptr - start);
       if(!os)
         return CURLE_OUT_OF_MEMORY;
 
@@ -3578,7 +3578,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
           else
             /* file is url-decoded */
             pathLen -= ftpc->file ? strlen(ftpc->file) : 0;
-          ftpc->prevpath = Curl_memdup0(rawPath, pathLen);
+          ftpc->prevpath = curlx_memdup0(rawPath, pathLen);
         }
         else
           ftpc->prevpath = NULL; /* no path */

@@ -51,7 +51,7 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "easyif.h"
 #include "multiif.h"
 #include "multi_ev.h"
@@ -94,19 +94,6 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 
 #endif
 
-/*
- * strdup (and other memory functions) is redefined in complicated
- * ways, but at this point it must be defined as the system-supplied strdup
- * so the callback pointer is initialized correctly.
- */
-#ifdef _WIN32
-#define system_strdup _strdup
-#elif defined(HAVE_STRDUP)
-#define system_strdup strdup
-#else
-#define system_strdup Curl_strdup
-#endif
-
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(push)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
@@ -119,7 +106,7 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
 curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
+curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)CURLX_STRDUP_LOW;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -144,7 +131,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_cmalloc = (curl_malloc_callback)malloc;
     Curl_cfree = (curl_free_callback)free;
     Curl_crealloc = (curl_realloc_callback)realloc;
-    Curl_cstrdup = (curl_strdup_callback)system_strdup;
+    Curl_cstrdup = (curl_strdup_callback)CURLX_STRDUP_LOW;
     Curl_ccalloc = (curl_calloc_callback)calloc;
   }
 
@@ -919,9 +906,9 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     if(src->set.postfieldsize == -1)
       dst->set.str[i] = curlx_strdup(src->set.str[i]);
     else
-      /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
-      dst->set.str[i] = Curl_memdup(src->set.str[i],
-                                    curlx_sotouz(src->set.postfieldsize));
+      /* postfieldsize is curl_off_t, curlx_memdup() takes a size_t ... */
+      dst->set.str[i] = curlx_memdup(src->set.str[i],
+                                     curlx_sotouz(src->set.postfieldsize));
     if(!dst->set.str[i])
       return CURLE_OUT_OF_MEMORY;
     /* point to the new copy */

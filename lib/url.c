@@ -94,7 +94,7 @@
 #include "http_proxy.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "setopt.h"
 #include "altsvc.h"
 #include "curlx/dynbuf.h"
@@ -2431,13 +2431,13 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
            (size_t)(login + len - osep)) - 1 : 0);
 
   /* Clone the user portion buffer, which can be zero length */
-  ubuf = Curl_memdup0(login, ulen);
+  ubuf = curlx_memdup0(login, ulen);
   if(!ubuf)
     goto error;
 
   /* Clone the password portion buffer */
   if(psep) {
-    pbuf = Curl_memdup0(&psep[1], plen);
+    pbuf = curlx_memdup0(&psep[1], plen);
     if(!pbuf)
       goto error;
   }
@@ -2446,7 +2446,7 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
   if(optionsp) {
     char *obuf = NULL;
     if(olen) {
-      obuf = Curl_memdup0(&osep[1], olen);
+      obuf = curlx_memdup0(&osep[1], olen);
       if(!obuf)
         goto error;
     }

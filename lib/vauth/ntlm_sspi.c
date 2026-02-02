@@ -28,7 +28,7 @@
 #include "vauth.h"
 #include "../curl_ntlm_core.h"
 #include "../curl_trc.h"
-#include "../strdup.h"
+#include "../curlx/strdup.h"
 
 /*
  * Curl_auth_is_ntlm_supported()
@@ -201,8 +201,8 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   }
 
   /* Store the challenge for later use */
-  ntlm->input_token = Curl_memdup0(Curl_bufref_ptr(type2),
-                                   Curl_bufref_len(type2));
+  ntlm->input_token = curlx_memdup0(Curl_bufref_ptr(type2),
+                                    Curl_bufref_len(type2));
   if(!ntlm->input_token)
     return CURLE_OUT_OF_MEMORY;
   ntlm->input_token_len = Curl_bufref_len(type2);

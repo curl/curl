@@ -34,7 +34,6 @@
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
 #include "tool_libinfo.h"
-#include "tool_strdup.h"
 
 #ifdef _WIN32
 #define BOLD    "\x1b[1m"
@@ -98,7 +97,7 @@ static void write_linked_location(CURL *curl, const char *location,
     goto locout;
 
   /* Create a null-terminated and whitespace-stripped copy of Location: */
-  copyloc = memdup0(loc, llen);
+  copyloc = curlx_memdup0(loc, llen);
   if(!copyloc)
     goto locout;
 
@@ -154,7 +153,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   char *p;
   char *q;
 
-  copy = memdup0(ptr, len);
+  copy = curlx_memdup0(ptr, len);
   if(!copy)
     return NULL;
 

@@ -30,7 +30,7 @@
 #include "escape.h"
 #include "curlx/inet_pton.h"
 #include "curlx/inet_ntop.h"
-#include "strdup.h"
+#include "curlx/strdup.h"
 #include "idn.h"
 #include "curlx/strparse.h"
 #include "curl_memrchr.h"
@@ -1025,7 +1025,7 @@ static CURLUcode handle_fragment(CURLU *u, const char *fragment,
       u->fragment = curlx_dyn_ptr(&enc);
     }
     else {
-      u->fragment = Curl_memdup0(fragment + 1, fraglen - 1);
+      u->fragment = curlx_memdup0(fragment + 1, fraglen - 1);
       if(!u->fragment)
         return CURLUE_OUT_OF_MEMORY;
     }
@@ -1049,7 +1049,7 @@ static CURLUcode handle_query(CURLU *u, const char *query,
       u->query = curlx_dyn_ptr(&enc);
     }
     else {
-      u->query = Curl_memdup0(query + 1, qlen - 1);
+      u->query = curlx_memdup0(query + 1, qlen - 1);
       if(!u->query)
         return CURLUE_OUT_OF_MEMORY;
     }
@@ -1083,7 +1083,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
   }
   else {
     if(!u->path) {
-      u->path = Curl_memdup0(path, pathlen);
+      u->path = curlx_memdup0(path, pathlen);
       if(!u->path)
         return CURLUE_OUT_OF_MEMORY;
       path = u->path;
@@ -1364,7 +1364,7 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
   bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
   bool punycode = (flags & CURLU_PUNYCODE) && (what == CURLUPART_HOST);
   bool depunyfy = (flags & CURLU_PUNY2IDN) && (what == CURLUPART_HOST);
-  char *part = Curl_memdup0(ptr, partlen);
+  char *part = curlx_memdup0(ptr, partlen);
   *partp = NULL;
   if(!part)
     return CURLUE_OUT_OF_MEMORY;

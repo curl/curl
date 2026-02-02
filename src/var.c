@@ -28,7 +28,6 @@
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
 #include "tool_writeout_json.h"
-#include "tool_strdup.h"
 #include "var.h"
 
 #define MAX_EXPAND_CONTENT 10000000
@@ -190,7 +189,7 @@ static ParameterError varfunc(char *c, /* content */
       curlx_free(c);
 
     clen = curlx_dyn_len(out);
-    c = memdup0(curlx_dyn_ptr(out), clen);
+    c = curlx_memdup0(curlx_dyn_ptr(out), clen);
     if(!c) {
       err = PARAM_NO_MEM;
       break;
@@ -357,7 +356,7 @@ static ParameterError addvariable(const char *name,
     memcpy(p->name, name, nlen);
     /* the null termination byte is already present from above */
 
-    p->content = contalloc ? content : memdup0(content, clen);
+    p->content = contalloc ? content : curlx_memdup0(content, clen);
     if(p->content) {
       p->clen = clen;
 
