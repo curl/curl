@@ -690,7 +690,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket server is not alive, now check if it was actually a socket. */
 #ifdef _WIN32
     /* Windows does not have lstat function. */
-    rc = curlx_win32_stat(unix_socket, &statbuf);
+    rc = curlx_stat(unix_socket, &statbuf);
 #else
     rc = lstat(unix_socket, &statbuf);
 #endif
