@@ -36,13 +36,13 @@ char *Curl_strdup(const char *str)
   char *newstr;
 
   if(!str)
-    return (char *)NULL;
+    return NULL;
 
   len = strlen(str) + 1;
 
   newstr = curlx_malloc(len);
   if(!newstr)
-    return (char *)NULL;
+    return NULL;
 
   memcpy(newstr, str, len);
   return newstr;
