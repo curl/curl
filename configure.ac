@@ -1784,7 +1784,7 @@ int main(int argc, char **argv)
 #else
   (void)argc;
   argv[0][0] = ' ';
-  return (argv[0][0] == ' ')?0:1;
+  return (argv[0][0] == ' ') ? 0 : 1;
 #endif
 }
 ]],[
