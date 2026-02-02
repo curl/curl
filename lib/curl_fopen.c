@@ -88,21 +88,21 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   CURLcode result = CURLE_WRITE_ERROR;
   unsigned char randbuf[41];
   char *tempstore = NULL;
+#ifndef _WIN32
+  curl_struct_stat sb;
+#endif
   int fd = -1;
   char *dir = NULL;
   *tempname = NULL;
 
 #ifndef _WIN32
-  {
-    curl_struct_stat sb;
-    *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
-    if(!*fh)
-      goto fail;
-    if(curlx_fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
-      return CURLE_OK;
-    }
-    curlx_fclose(*fh);
+  *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
+  if(!*fh)
+    goto fail;
+  if(curlx_fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
+    return CURLE_OK;
   }
+  curlx_fclose(*fh);
 #endif
   *fh = NULL;
 
