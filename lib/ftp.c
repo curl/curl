@@ -2981,7 +2981,7 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
       if(!ftpc->server_os && dir[0] != '/') {
         result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
         if(result) {
-          curlx_free(dir);
+          curlx_dyn_free(&out);
           return result;
         }
       }
