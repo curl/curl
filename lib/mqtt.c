@@ -595,7 +595,8 @@ fail:
 }
 
 /* return 0 on success, non-zero on error */
-static int mqtt_decode_len(size_t *lenp, const unsigned char *buf, size_t buflen)
+static int mqtt_decode_len(size_t *lenp, const unsigned char *buf,
+                           size_t buflen)
 {
   size_t len = 0;
   size_t mult = 1;
