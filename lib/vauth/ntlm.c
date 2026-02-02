@@ -565,7 +565,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned int ntrespoff;
   unsigned int ntresplen = 24;
   unsigned char ntresp[24]; /* fixed-size */
-  unsigned char *ptr_ntresp = &ntresp[0];
+  const unsigned char *ptr_ntresp = &ntresp[0];
   unsigned char *ntlmv2resp = NULL;
   bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE);
   /* The fixed hostname we provide, in order to not leak our real local host
