@@ -535,9 +535,6 @@
 /* Define to 1 if you have the strcmpi function. */
 #cmakedefine HAVE_STRCMPI 1
 
-/* Define to 1 if you have the strdup function. */
-#cmakedefine HAVE_STRDUP 1
-
 /* Define to 1 if you have the strerror_r function. */
 #cmakedefine HAVE_STRERROR_R 1
 
