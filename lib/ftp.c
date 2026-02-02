@@ -1214,7 +1214,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(PORT == fcmd) {
       /* large enough for [IP address],[num],[num] */
       char target[sizeof(myhost) + 20];
-      char *source = myhost;
+      const char *source = myhost;
       char *dest = target;
 
       /* translate x.x.x.x to x,x,x,x */
@@ -1766,7 +1766,7 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
       i++;
     }
     if(item) {
-      char *cmd = item->data;
+      const char *cmd = item->data;
       if(cmd[0] == '*') {
         cmd++;
         ftpc->count2 = 1; /* the sent command is allowed to fail */
