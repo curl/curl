@@ -227,13 +227,14 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
 
   result = sasl->params->getmessage(data, out);
   if(!result && (sasl->params->flags & SASL_FLAG_BASE64)) {
-    unsigned char *msg;
-    size_t msglen;
     const char *serverdata = Curl_bufref_ptr(out);
 
     if(!*serverdata || *serverdata == '=')
       Curl_bufref_set(out, NULL, 0, NULL);
     else {
+      unsigned char *msg;
+      size_t msglen;
+
       result = curlx_base64_decode(serverdata, &msg, &msglen);
       if(!result)
         Curl_bufref_set(out, msg, msglen, curl_free);
