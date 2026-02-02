@@ -49,6 +49,7 @@ my @ignore_line;
 
 my %banfunc = (
     "_access" => 1,
+    "_fstati64" => 1,
     "_lseeki64" => 1,
     "_mbscat" => 1,
     "_mbsncat" => 1,
@@ -82,6 +83,7 @@ my %banfunc = (
     "free" => 1,
     "freeaddrinfo" => 1,
     "freopen" => 1,
+    "fstat" => 1,
     "getaddrinfo" => 1,
     "gets" => 1,
     "gmtime" => 1,
