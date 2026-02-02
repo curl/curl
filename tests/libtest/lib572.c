@@ -35,7 +35,7 @@ static CURLcode test_lib572(const char *URL)
   char errbuf[STRERROR_LEN];
   int params;
   FILE *paramsf = NULL;
-  struct_stat file_info;
+  curl_struct_stat file_info;
   char *stream_uri = NULL;
   int request = 1;
   struct curl_slist *custom_headers = NULL;
@@ -92,7 +92,7 @@ static CURLcode test_lib572(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  fstat(params, &file_info);
+  curlx_fstat(params, &file_info);
   curlx_close(params);
 
   paramsf = curlx_fopen(libtest_arg2, "rb");

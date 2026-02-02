@@ -89,7 +89,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   unsigned char randbuf[41];
   char *tempstore = NULL;
 #ifndef _WIN32
-  struct_stat sb;
+  curl_struct_stat sb;
 #endif
   int fd = -1;
   char *dir = NULL;
@@ -99,7 +99,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
-  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
+  if(curlx_fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
     return CURLE_OK;
   }
   curlx_fclose(*fh);

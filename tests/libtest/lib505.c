@@ -37,7 +37,7 @@ static CURLcode test_lib505(const char *URL)
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
-  struct_stat file_info;
+  curl_struct_stat file_info;
   struct curl_slist *hl;
 
   struct curl_slist *headerlist = NULL;
@@ -59,7 +59,7 @@ static CURLcode test_lib505(const char *URL)
   }
 
   /* get the file size of the local file */
-  hd = fstat(fileno(hd_src), &file_info);
+  hd = curlx_fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* cannot open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",

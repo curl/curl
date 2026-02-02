@@ -670,7 +670,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   curlx_strcopy(sau->sun_path, sizeof(sau->sun_path), unix_socket, len);
   rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
   if(rc && SOCKERRNO == SOCKEADDRINUSE) {
-    struct_stat statbuf;
+    curl_struct_stat statbuf;
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(CURL_SOCKET_BAD == unixfd) {
@@ -690,7 +690,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket server is not alive, now check if it was actually a socket. */
 #ifdef _WIN32
     /* Windows does not have lstat function. */
-    rc = curlx_win32_stat(unix_socket, &statbuf);
+    rc = curlx_stat(unix_socket, &statbuf);
 #else
     rc = lstat(unix_socket, &statbuf);
 #endif

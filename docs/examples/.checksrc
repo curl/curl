@@ -11,6 +11,7 @@ allowfunc fdopen
 allowfunc fopen
 allowfunc fprintf
 allowfunc free
+allowfunc fstat
 allowfunc gmtime
 allowfunc localtime
 allowfunc malloc

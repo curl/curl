@@ -332,6 +332,7 @@ makes us write better code.
 This is the full list of functions generally banned.
 
     _access
+    _fstati64
     _lseeki64
     _mbscat
     _mbsncat
@@ -365,6 +366,7 @@ This is the full list of functions generally banned.
     free
     freeaddrinfo
     freopen
+    fstat
     getaddrinfo
     gets
     gmtime
