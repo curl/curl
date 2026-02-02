@@ -505,6 +505,12 @@
 #  define LSEEK_ERROR                     ((off_t)-1)
 #endif
 
+#ifdef _WIN32
+#define CURL_STRDUP_LOW _strdup
+#else
+#define CURL_STRDUP_LOW strdup
+#endif
+
 #ifndef SIZEOF_TIME_T
 /* assume default size of time_t to be 32 bits */
 #define SIZEOF_TIME_T 4
@@ -1104,11 +1110,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define curlx_realloc              Curl_crealloc
 #define curlx_free                 Curl_cfree
 #else /* !BUILDING_LIBCURL */
-#ifdef _WIN32
-#define curlx_strdup               _strdup
-#else
-#define curlx_strdup               strdup
-#endif
+#define curlx_strdup               CURL_STRDUP_LOW
 #define curlx_malloc               malloc
 #define curlx_calloc               calloc
 #define curlx_realloc              realloc
