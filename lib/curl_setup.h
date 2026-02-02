@@ -1131,9 +1131,9 @@ typedef unsigned int curl_bit;
 #include "curlx/warnless.h"
 
 #ifdef _WIN32
-#  undef  read
+#  undef read
 #  define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
-#  undef  write
+#  undef write
 #  define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
 /* Avoid VS2005+ _CRT_NONSTDC_NO_DEPRECATE warnings about non-portable funcs */
 #  undef fileno
