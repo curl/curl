@@ -702,7 +702,7 @@ static void sendsuboption(struct Curl_easy *data,
     CURL_SB_TERM(tn);
     /* data suboption is now ready */
 
-    printsub(data, '>', (unsigned char *)tn->subbuffer + 2,
+    printsub(data, '>', (const unsigned char *)tn->subbuffer + 2,
              CURL_SB_LEN(tn) - 2);
 
     /* we send the header of the suboption... */
@@ -713,7 +713,7 @@ static void sendsuboption(struct Curl_easy *data,
     }
     /* ... then the window size with the send_telnet_data() function
        to deal with 0xFF cases ... */
-    send_telnet_data(data, tn, (char *)tn->subbuffer + 3, 4);
+    send_telnet_data(data, tn, (const char *)tn->subbuffer + 3, 4);
     /* ... and the footer */
     bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer + 7, 2);
     if(bytes_written < 0) {
@@ -986,7 +986,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
   if(!CURL_SB_LEN(tn)) /* ignore empty suboption */
     return CURLE_OK;
 
-  printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
+  printsub(data, '<', (const unsigned char *)tn->subbuffer,
+           CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
   case CURL_TELOPT_TTYPE:
     if(bad_option(tn->subopt_ttype))
