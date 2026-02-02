@@ -101,10 +101,8 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
  */
 #ifdef _WIN32
 #define system_strdup _strdup
-#elif defined(HAVE_STRDUP)
-#define system_strdup strdup
 #else
-#define system_strdup Curl_strdup
+#define system_strdup strdup
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
