@@ -85,28 +85,8 @@
 #define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
 
 #ifndef CURLVERBOSE
-#define ftp_pasv_verbose(a, b, c, d)  Curl_nop_stmt
 #define FTP_CSTATE(c)  ((void)(c), "")
 #else /* !CURLVERBOSE */
-/***************************************************************************
- *
- * ftp_pasv_verbose()
- *
- * This function only outputs some informationals about this second connection
- * when we have issued a PASV command before and thus we have connected to a
- * possibly new IP address.
- *
- */
-static void ftp_pasv_verbose(struct Curl_easy *data,
-                             struct Curl_addrinfo *ai,
-                             char *newhost, /* ASCII version */
-                             int port)
-{
-  char buf[256];
-  Curl_printable_address(ai, buf, sizeof(buf));
-  infof(data, "Connecting to %s (%s) port %d", newhost, buf, port);
-}
-
 /* for tracing purposes */
 static const char * const ftp_state_names[] = {
   "STOP",
@@ -2101,9 +2081,16 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
    * connect to connect.
    */
 
-  if(data->set.verbose)
-    /* this just dumps information about this second connection */
-    ftp_pasv_verbose(data, dns->addr, newhost, connectport);
+#ifdef CURLVERBOSE
+  if(data->set.verbose) {
+    /* Dump information about this second connection when we have issued a PASV
+     * command before and thus we have connected to a possibly new IP address.
+     */
+    char buf[256];
+    Curl_printable_address(dns->addr, buf, sizeof(buf));
+    infof(data, "Connecting to %s (%s) port %d", newhost, buf, connectport);
+  }
+#endif
 
   curlx_free(conn->secondaryhostname);
   conn->secondary_port = newport;
