@@ -1204,7 +1204,7 @@ curl_mime *curl_mime_init(void *easy)
 /* Initialize a mime part. */
 void Curl_mime_initpart(curl_mimepart *part)
 {
-  memset((char *)part, 0, sizeof(*part));
+  memset(part, 0, sizeof(*part));
   part->lastreadstatus = 1; /* Successful read status. */
   mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
 }
