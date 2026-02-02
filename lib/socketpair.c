@@ -209,7 +209,7 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
     struct curltime start = curlx_now();
     char rnd[9];
     char check[sizeof(rnd)];
-    char *p = &check[0];
+    const char *p = &check[0];
     size_t s = sizeof(check);
 
     if(Curl_rand(NULL, (unsigned char *)rnd, sizeof(rnd)))
