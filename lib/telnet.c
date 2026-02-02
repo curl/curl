@@ -676,7 +676,7 @@ static void sendsuboption(struct Curl_easy *data,
   ssize_t bytes_written;
   int err;
   unsigned short x, y;
-  unsigned char *uc1, *uc2;
+  const unsigned char *uc1, *uc2;
   struct connectdata *conn = data->conn;
 
   switch(option) {
