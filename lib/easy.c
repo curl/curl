@@ -908,7 +908,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     else
       /* postfieldsize is curl_off_t, curlx_memdup() takes a size_t ... */
       dst->set.str[i] = curlx_memdup(src->set.str[i],
-                                    curlx_sotouz(src->set.postfieldsize));
+                                     curlx_sotouz(src->set.postfieldsize));
     if(!dst->set.str[i])
       return CURLE_OUT_OF_MEMORY;
     /* point to the new copy */
