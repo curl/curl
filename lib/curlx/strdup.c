@@ -29,27 +29,8 @@
 
 #include "strdup.h"
 
-#ifndef HAVE_STRDUP
-char *curlx_strdup(const char *str)
-{
-  size_t len;
-  char *newstr;
-
-  if(!str)
-    return NULL;
-
-  len = strlen(str) + 1;
-
-  newstr = curlx_malloc(len);
-  if(!newstr)
-    return NULL;
-
-  memcpy(newstr, str, len);
-  return newstr;
-}
-#endif
-
 #ifdef _WIN32
+
 /***************************************************************************
  *
  * curlx_wcsdup(source)
@@ -69,6 +50,27 @@ wchar_t *curlx_wcsdup(const wchar_t *src)
 
   return (wchar_t *)curlx_memdup(src, (length + 1) * sizeof(wchar_t));
 }
+
+#elif !defined(HAVE_STRDUP)
+
+char *curlx_strdup(const char *str)
+{
+  size_t len;
+  char *newstr;
+
+  if(!str)
+    return NULL;
+
+  len = strlen(str) + 1;
+
+  newstr = curlx_malloc(len);
+  if(!newstr)
+    return NULL;
+
+  memcpy(newstr, str, len);
+  return newstr;
+}
+
 #endif
 
 /***************************************************************************

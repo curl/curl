@@ -507,10 +507,10 @@
 
 #ifdef _WIN32
 #define CURL_STRDUP_LOW _strdup
-#elif defined(HAVE_STRDUP)
-#define CURL_STRDUP_LOW strdup
-#else
+#elif !defined(HAVE_STRDUP)
 #define CURL_STRDUP_LOW curlx_strdup
+#else
+#define CURL_STRDUP_LOW strdup
 #endif
 
 #ifndef SIZEOF_TIME_T
