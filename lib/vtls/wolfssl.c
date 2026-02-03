@@ -443,7 +443,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
     goto out;
   }
   if(quic_tp && quic_tp_len) {
-    qtp_clone = curlx_memdup0((char *)quic_tp, quic_tp_len);
+    qtp_clone = curlx_memdup0((const char *)quic_tp, quic_tp_len);
     if(!qtp_clone) {
       curlx_free(sdata);
       return CURLE_OUT_OF_MEMORY;
