@@ -129,6 +129,9 @@
 /* Define if you have the `strcmpi' function. */
 #undef HAVE_STRCMPI
 
+/* Define if you have the `strdup' function. */
+#define HAVE_STRDUP
+
 /* Define if you have the `stricmp' function. */
 #define HAVE_STRICMP
 

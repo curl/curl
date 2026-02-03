@@ -148,6 +148,9 @@
 /* Define if you have the `stricmp' function. */
 #define HAVE_STRICMP
 
+/* Define if you have the `strdup' function. */
+#define HAVE_STRDUP
+
 /* Define if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H
 
