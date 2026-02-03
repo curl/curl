@@ -753,7 +753,6 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   bool premature;
   struct Curl_llist_node *e;
   CURLMcode mresult;
-  bool removed_timer = FALSE;
   uint32_t mid;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
@@ -808,7 +807,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   /* The timer must be shut down before data->multi is set to NULL, else the
      timenode will remain in the splay tree after curl_easy_cleanup is
      called. Do it after multi_done() in case that sets another time! */
-  removed_timer = Curl_expire_clear(data);
+  Curl_expire_clear(data);
 
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
   if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid))
@@ -881,11 +880,9 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
      We do not touch the easy handle here! */
   process_pending_handles(multi);
 
-  if(removed_timer) {
-    mresult = Curl_update_timer(multi);
-    if(mresult)
-      return mresult;
-  }
+  mresult = Curl_update_timer(multi);
+  if(mresult)
+    return mresult;
 
   CURL_TRC_M(data, "removed from multi, mid=%u, running=%u, total=%u",
              mid, Curl_multi_xfers_running(multi),
@@ -3604,7 +3601,7 @@ void Curl_expire_done(struct Curl_easy *data, expire_id eid)
  *
  * Clear ALL timeout values for this handle.
  */
-bool Curl_expire_clear(struct Curl_easy *data)
+void Curl_expire_clear(struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct curltime *nowp = &data->state.expiretime;
@@ -3612,7 +3609,7 @@ bool Curl_expire_clear(struct Curl_easy *data)
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
-    return FALSE;
+    return;
 
   if(nowp->tv_sec || nowp->tv_usec) {
     /* Since this is an cleared time, we must remove the previous entry from
@@ -3632,9 +3629,7 @@ bool Curl_expire_clear(struct Curl_easy *data)
       CURL_TRC_M(data, "[TIMEOUT] all cleared");
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;
-    return TRUE;
   }
-  return FALSE;
 }
 
 CURLMcode curl_multi_assign(CURLM *m, curl_socket_t s,
