@@ -251,13 +251,13 @@ cleanup:
 }
 
 #ifndef CURL_WINDOWS_UWP
-HANDLE curlx_win32_CreateFile(const char *filename,
-                              DWORD dwDesiredAccess,
-                              DWORD dwShareMode,
-                              LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-                              DWORD dwCreationDisposition,
-                              DWORD dwFlagsAndAttributes,
-                              HANDLE hTemplateFile)
+HANDLE curlx_CreateFile(const char *filename,
+                        DWORD dwDesiredAccess,
+                        DWORD dwShareMode,
+                        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                        DWORD dwCreationDisposition,
+                        DWORD dwFlagsAndAttributes,
+                        HANDLE hTemplateFile)
 {
   HANDLE handle = INVALID_HANDLE_VALUE;
 

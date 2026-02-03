@@ -264,13 +264,13 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
    * optimizes for the common case where the CA file will be relatively
    * small ( < 1 MiB ).
    */
-  ca_file_handle = curlx_win32_CreateFile(ca_file,
-                                          GENERIC_READ,
-                                          FILE_SHARE_READ,
-                                          NULL,
-                                          OPEN_EXISTING,
-                                          FILE_ATTRIBUTE_NORMAL,
-                                          NULL);
+  ca_file_handle = curlx_CreateFile(ca_file,
+                                    GENERIC_READ,
+                                    FILE_SHARE_READ,
+                                    NULL,
+                                    OPEN_EXISTING,
+                                    FILE_ATTRIBUTE_NORMAL,
+                                    NULL);
   if(ca_file_handle == INVALID_HANDLE_VALUE) {
     char buffer[WINAPI_ERROR_LEN];
     failf(data, "schannel: failed to open CA file '%s': %s", ca_file,
