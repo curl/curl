@@ -25,6 +25,9 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
+#ifndef HAVE_STRDUP
+char *curlx_strdup(const char *str);
+#endif
 #ifdef _WIN32
 wchar_t *curlx_wcsdup(const wchar_t *src);  /* for curlx_tcsdup() */
 #endif
