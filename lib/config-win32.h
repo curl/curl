@@ -126,9 +126,6 @@
 /* Define if you have the socket function. */
 #define HAVE_SOCKET 1
 
-/* Define if you have the strdup function. */
-#define HAVE_STRDUP 1
-
 /* Define if you have the utime function. */
 #define HAVE_UTIME 1
 
