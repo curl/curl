@@ -2208,7 +2208,7 @@ static ParameterError existingfile(char **store,
                                    const struct LongShort *a,
                                    const char *filename)
 {
-  curl_struct_stat info;
+  curlx_struct_stat info;
   if(curlx_stat(filename, &info)) {
     errorf("The file '%s' provided to --%s does not exist",
            filename, a->lname);

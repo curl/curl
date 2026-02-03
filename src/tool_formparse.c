@@ -122,7 +122,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     char *data = NULL;
     curl_off_t size;
     curl_off_t origin;
-    curl_struct_stat sbuf;
+    curlx_struct_stat sbuf;
 
     CURLX_SET_BINMODE(stdin);
     origin = ftell(stdin);

@@ -89,7 +89,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   unsigned char randbuf[41];
   char *tempstore = NULL;
 #ifndef _WIN32
-  curl_struct_stat sb;
+  curlx_struct_stat sb;
 #endif
   int fd = -1;
   char *dir = NULL;

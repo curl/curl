@@ -34,7 +34,7 @@ static CURLcode test_lib541(const char *URL)
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
-  curl_struct_stat file_info;
+  curlx_struct_stat file_info;
 
   if(!libtest_arg2) {
     curl_mfprintf(stderr, "Usage: <url> <file-to-upload>\n");
