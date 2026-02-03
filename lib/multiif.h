@@ -30,7 +30,7 @@
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_ex(struct Curl_easy *data,
                     timediff_t milli, expire_id id);
-bool Curl_expire_clear(struct Curl_easy *data);
+void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
 void Curl_attach_connection(struct Curl_easy *data,
