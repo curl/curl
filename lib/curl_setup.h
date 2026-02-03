@@ -793,7 +793,7 @@
     (defined(__clang__) && __clang_major__ >= 10)
 #  define FALLTHROUGH()  __attribute__((fallthrough))
 #else
-#  define FALLTHROUGH()  do {} while (0)
+#  define FALLTHROUGH()  do {} while(0)
 #endif
 #endif
 
