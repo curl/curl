@@ -1078,11 +1078,11 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 /* Allocator macros */
 
 #ifdef _WIN32
-#define CURL_STRDUP_LOW _strdup
+#define CURLX_STRDUP_LOW _strdup
 #elif !defined(HAVE_STRDUP)
-#define CURL_STRDUP_LOW curlx_strdup_low
+#define CURLX_STRDUP_LOW curlx_strdup_low
 #else
-#define CURL_STRDUP_LOW strdup
+#define CURLX_STRDUP_LOW strdup
 #endif
 
 #ifdef CURL_MEMDEBUG
@@ -1112,7 +1112,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #define curlx_realloc              Curl_crealloc
 #define curlx_free                 Curl_cfree
 #else /* !BUILDING_LIBCURL */
-#define curlx_strdup               CURL_STRDUP_LOW
+#define curlx_strdup               CURLX_STRDUP_LOW
 #define curlx_malloc               malloc
 #define curlx_calloc               calloc
 #define curlx_realloc              realloc

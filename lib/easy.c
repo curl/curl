@@ -106,7 +106,7 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
 curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)CURL_STRDUP_LOW;
+curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)CURLX_STRDUP_LOW;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -131,7 +131,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_cmalloc = (curl_malloc_callback)malloc;
     Curl_cfree = (curl_free_callback)free;
     Curl_crealloc = (curl_realloc_callback)realloc;
-    Curl_cstrdup = (curl_strdup_callback)CURL_STRDUP_LOW;
+    Curl_cstrdup = (curl_strdup_callback)CURLX_STRDUP_LOW;
     Curl_ccalloc = (curl_calloc_callback)calloc;
   }
 

@@ -52,7 +52,7 @@ static void *custom_malloc(size_t size)
 static char *custom_strdup(const char *ptr)
 {
   seen++;
-  return CURL_STRDUP_LOW(ptr);
+  return CURLX_STRDUP_LOW(ptr);
 }
 
 static void *custom_realloc(void *ptr, size_t size)
