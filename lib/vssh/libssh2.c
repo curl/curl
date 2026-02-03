@@ -1089,7 +1089,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
       /* To ponder about: should really the lib be messing about with the
          HOME environment variable etc? */
       char *home = curl_getenv("HOME");
-      curl_struct_stat sbuf;
+      curlx_struct_stat sbuf;
 
       /* If no private key file is specified, try some common paths. */
       if(home) {

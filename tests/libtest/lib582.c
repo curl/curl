@@ -220,7 +220,7 @@ static CURLcode test_lib582(const char *URL)
   char errbuf[STRERROR_LEN];
   FILE *hd_src = NULL;
   int hd;
-  curl_struct_stat file_info;
+  curlx_struct_stat file_info;
   CURLM *multi = NULL;
   struct t582_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
   int success = 0;

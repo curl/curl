@@ -45,10 +45,10 @@ HANDLE curlx_CreateFile(const char *filename,
                         HANDLE hTemplateFile);
 #endif /* !CURL_WINDOWS_UWP */
 #define curlx_fstat             _fstati64
-#define curl_struct_stat        struct _stati64
+#define curlx_struct_stat       struct _stati64
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
 FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fh);
-int curlx_win32_stat(const char *path, curl_struct_stat *buffer);
+int curlx_win32_stat(const char *path, curlx_struct_stat *buffer);
 int curlx_win32_open(const char *filename, int oflag, ...);
 int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define CURLX_FOPEN_LOW         curlx_win32_fopen
@@ -60,7 +60,7 @@ int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define curlx_rename            curlx_win32_rename
 #else
 #define curlx_fstat             fstat
-#define curl_struct_stat        struct stat
+#define curlx_struct_stat       struct stat
 #define CURLX_FOPEN_LOW         fopen
 #define CURLX_FREOPEN_LOW       freopen
 #define CURLX_FDOPEN_LOW        fdopen

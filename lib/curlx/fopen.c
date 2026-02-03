@@ -405,7 +405,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
   return result;
 }
 
-int curlx_win32_stat(const char *path, curl_struct_stat *buffer)
+int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
 {
   int result = -1;
   TCHAR *fixed = NULL;

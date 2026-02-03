@@ -30,7 +30,7 @@ static CURLcode test_lib525(const char *URL)
   char errbuf[STRERROR_LEN];
   FILE *hd_src = NULL;
   int hd;
-  curl_struct_stat file_info;
+  curlx_struct_stat file_info;
   CURLM *multi = NULL;
   int running;
 

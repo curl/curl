@@ -37,7 +37,7 @@ static CURLcode test_lib505(const char *URL)
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
-  curl_struct_stat file_info;
+  curlx_struct_stat file_info;
   struct curl_slist *hl;
 
   struct curl_slist *headerlist = NULL;
