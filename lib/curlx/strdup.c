@@ -112,3 +112,26 @@ void *curlx_memdup0(const char *src, size_t length)
   buf[length] = 0;
   return buf;
 }
+
+/***************************************************************************
+ *
+ * curlx_saferealloc(ptr, size)
+ *
+ * Does a normal curlx_realloc(), but will free the data pointer if the realloc
+ * fails. If 'size' is non-zero, it will free the data and return a failure.
+ *
+ * This convenience function is provided and used to help us avoid a common
+ * mistake pattern when we could pass in a zero, catch the NULL return and end
+ * up free'ing the memory twice.
+ *
+ * Returns the new pointer or NULL on failure.
+ *
+ ***************************************************************************/
+void *curlx_saferealloc(void *ptr, size_t size)
+{
+  void *datap = curlx_realloc(ptr, size);
+  if(size && !datap)
+    /* only free 'ptr' if size was non-zero */
+    curlx_free(ptr);
+  return datap;
+}
