@@ -16,5 +16,4 @@ allowfunc send
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
-allowfunc strdup
 allowfunc vsnprintf
