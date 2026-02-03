@@ -25,8 +25,6 @@
  * Simple RTSP request sending OPTIONS.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

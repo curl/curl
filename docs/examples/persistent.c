@@ -25,8 +25,6 @@
  * reusing handles to do HTTP persistent connections
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

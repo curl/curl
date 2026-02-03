@@ -26,8 +26,6 @@
  * libcurl version.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 #define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL 3000000

@@ -25,7 +25,6 @@
  * FTP upload a file from memory
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

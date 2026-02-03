@@ -25,7 +25,6 @@
  * Preload domains to HSTS
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

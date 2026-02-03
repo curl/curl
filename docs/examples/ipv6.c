@@ -25,8 +25,6 @@
  * HTTPS GET using IPv6 only
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

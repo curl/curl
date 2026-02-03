@@ -25,8 +25,6 @@
  * Simple HTTP GET
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

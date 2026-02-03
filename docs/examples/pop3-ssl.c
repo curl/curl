@@ -25,8 +25,6 @@
  * Get POP3 email using implicit SSL
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* This is a simple example showing how to retrieve mail using libcurl's POP3

@@ -25,8 +25,6 @@
  * Use getinfo to get content-type after completed transfer.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

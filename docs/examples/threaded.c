@@ -38,8 +38,6 @@
 /* Requires: HAVE_PTHREAD_H */
 /* Also requires TLS support to run */
 
-#include <stdio.h>
-
 #include <pthread.h>
 
 #include <curl/curl.h>

@@ -25,8 +25,6 @@
  * HTTP request with custom modified, removed and added headers
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

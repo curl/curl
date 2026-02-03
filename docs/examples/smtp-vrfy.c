@@ -25,7 +25,6 @@
  * Verify an SMTP email address
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

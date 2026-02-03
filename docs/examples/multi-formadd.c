@@ -29,7 +29,6 @@
  * Warning: this example uses the deprecated form API. See "multi-post.c"
  *          for a similar example using the mime API.
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

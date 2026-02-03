@@ -40,7 +40,6 @@
  * <input type="submit" value="send" name="submit">
  * </form>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

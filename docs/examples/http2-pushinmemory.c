@@ -25,7 +25,6 @@
  * HTTP/2 server push. Receive all data in memory.
  * </DESC>
  */
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

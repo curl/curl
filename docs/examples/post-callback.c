@@ -25,7 +25,6 @@
  * Issue an HTTP POST and provide the data through the read callback.
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

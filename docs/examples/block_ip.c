@@ -50,7 +50,6 @@ int main(void)
 #include <arpa/inet.h>
 #endif
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

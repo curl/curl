@@ -25,7 +25,6 @@
  * Demonstrate curl_easy_send() and curl_easy_recv() usage.
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

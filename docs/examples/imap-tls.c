@@ -25,8 +25,6 @@
  * IMAP using TLS
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* This is a simple example showing how to fetch mail using libcurl's IMAP

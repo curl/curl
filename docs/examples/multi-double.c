@@ -25,7 +25,6 @@
  * multi interface code doing two parallel HTTP transfers
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

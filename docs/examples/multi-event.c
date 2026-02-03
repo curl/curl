@@ -25,7 +25,6 @@
  * multi_socket API using libevent
  * </DESC>
  */
-#include <stdio.h>
 #include <stdlib.h>
 
 #include <event2/event.h>

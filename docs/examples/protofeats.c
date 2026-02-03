@@ -25,8 +25,6 @@
  * Outputs all protocols and features supported
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 #if !CURL_AT_LEAST_VERSION(7, 87, 0)

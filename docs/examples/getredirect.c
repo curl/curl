@@ -25,8 +25,6 @@
  * Show how to extract Location: header and URL to redirect to.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

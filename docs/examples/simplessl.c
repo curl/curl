@@ -31,8 +31,6 @@
 #endif
 #endif
 
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* some requirements for this to work:

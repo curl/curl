@@ -25,8 +25,6 @@
  * Checks if HTTP/3 support is present in libcurl.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

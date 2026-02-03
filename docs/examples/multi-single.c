@@ -25,8 +25,6 @@
  * using the multi interface to do a single download
  * </DESC>
  */
-
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

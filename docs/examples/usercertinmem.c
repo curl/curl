@@ -41,8 +41,6 @@
 
 #include <curl/curl.h>
 
-#include <stdio.h>
-
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif

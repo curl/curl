@@ -25,8 +25,6 @@
  * Copy an email from one IMAP folder to another
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* This is a simple example showing how to copy a mail from one mailbox folder

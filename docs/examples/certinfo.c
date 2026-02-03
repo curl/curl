@@ -25,8 +25,6 @@
  * Extract lots of TLS certificate info.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)

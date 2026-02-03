@@ -25,8 +25,6 @@
  * Use CURLOPT_CONNECT_TO to connect to "wrong" hostname
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

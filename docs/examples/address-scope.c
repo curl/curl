@@ -25,8 +25,6 @@
  * HTTP GET to an IPv6 address with specific scope
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 #if !defined(_WIN32) && !defined(MSDOS) && !defined(__AMIGA__)

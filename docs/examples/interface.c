@@ -25,8 +25,6 @@
  * Use CURLOPT_INTERFACE to bind the outgoing socket to an interface
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

@@ -25,7 +25,6 @@
  * Expand an SMTP email mailing list
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

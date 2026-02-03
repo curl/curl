@@ -25,8 +25,6 @@
  * Set maximum number of persistent connections to 1.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

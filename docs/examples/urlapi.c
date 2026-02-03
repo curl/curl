@@ -25,7 +25,6 @@
  * Set working URL with CURLU *.
  * </DESC>
  */
-#include <stdio.h>
 #include <curl/curl.h>
 
 #if !CURL_AT_LEAST_VERSION(7, 80, 0)

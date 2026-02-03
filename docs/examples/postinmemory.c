@@ -25,7 +25,6 @@
  * Make an HTTP POST with data from memory and receive response in memory.
  * </DESC>
  */
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

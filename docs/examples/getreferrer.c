@@ -25,8 +25,6 @@
  * Show how to extract referrer header.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

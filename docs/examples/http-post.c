@@ -25,8 +25,6 @@
  * simple HTTP POST using the easy interface
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 int main(void)

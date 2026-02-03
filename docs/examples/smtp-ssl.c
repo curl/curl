@@ -25,7 +25,6 @@
  * Send SMTP email using implicit SSL
  * </DESC>
  */
-#include <stdio.h>
 #include <string.h>
 
 #include <curl/curl.h>

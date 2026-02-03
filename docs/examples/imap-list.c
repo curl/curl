@@ -25,8 +25,6 @@
  * List the folders within an IMAP mailbox
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* This is a simple example showing how to list the folders within an IMAP

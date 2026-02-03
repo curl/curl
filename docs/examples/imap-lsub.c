@@ -25,8 +25,6 @@
  * List the subscribed IMAP folders
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* This is a simple example showing how to list the subscribed folders within

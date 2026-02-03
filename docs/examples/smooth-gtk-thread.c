@@ -35,7 +35,6 @@
  *   -lgthread-2.0 -dl  smooth-gtk-thread.c -o smooth-gtk-thread
  */
 
-#include <stdio.h>
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <unistd.h>

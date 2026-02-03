@@ -25,7 +25,6 @@
  * WebSocket download-only using write callback
  * </DESC>
  */
-#include <stdio.h>
 #include <curl/curl.h>
 
 static size_t write_cb(char *b, size_t size, size_t nitems, void *p)

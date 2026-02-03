@@ -32,7 +32,6 @@
   g++ -Wall -I/opt/curl/include -I/opt/libxml/include/libxml2 htmltitle.cpp \
     -o htmltitle -L/opt/curl/lib -L/opt/libxml/lib -lcurl -lxml2
 */
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <string>

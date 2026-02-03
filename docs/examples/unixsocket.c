@@ -25,7 +25,6 @@
  * Access HTTP server over Unix domain socket
  * </DESC>
  */
-#include <stdio.h>
 #include <curl/curl.h>
 
 #ifdef USE_ABSTRACT

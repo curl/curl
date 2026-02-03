@@ -25,8 +25,6 @@
  * Basic URL API use.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 #if !CURL_AT_LEAST_VERSION(7, 62, 0)

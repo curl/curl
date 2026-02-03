@@ -28,8 +28,6 @@
 /*
  * LibTidy => https://www.html-tidy.org/
  */
-#include <stdio.h>
-
 #include <tidy/tidy.h>
 #include <tidy/tidybuffio.h>
 

@@ -25,8 +25,6 @@
  * Show how CURLOPT_DEBUGFUNCTION can be used.
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 struct data {

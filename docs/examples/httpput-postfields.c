@@ -25,7 +25,6 @@
  * HTTP PUT using CURLOPT_POSTFIELDS
  * </DESC>
  */
-#include <stdio.h>
 #include <fcntl.h>
 
 #include <curl/curl.h>

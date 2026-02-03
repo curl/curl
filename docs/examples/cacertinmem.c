@@ -30,8 +30,6 @@
 
 #include <openssl/ssl.h>
 
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 #if defined(__GNUC__) || defined(__clang__)

@@ -25,8 +25,6 @@
  * Create a new IMAP folder
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* This is a simple example showing how to create a new mailbox folder using

@@ -25,8 +25,6 @@
  * Search for new IMAP emails
  * </DESC>
  */
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 /* This is a simple example showing how to search for new messages using
