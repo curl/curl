@@ -32,5 +32,4 @@ char *curlx_strdup_low(const char *str);
 #endif
 void *curlx_memdup(const void *src, size_t buffer_length);
 void *curlx_memdup0(const char *src, size_t length);
-void *curlx_saferealloc(void *ptr, size_t size);
 #endif /* HEADER_CURLX_STRDUP_H */
