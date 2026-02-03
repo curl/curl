@@ -880,6 +880,12 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = CURLE_WEIRD_SERVER_REPLY;
       break;
     }
+    if(mqtt->nextstate == MQTT_CONNACK &&
+        mq->remaining_length != MQTT_CONNACK_LEN) {
+      failf(data, "Invalid CONNACK length: %zu", mq->remaining_length);
+      result = CURLE_WEIRD_SERVER_REPLY;
+      break;
+    }
     mq->npacket = 0;
     if(mq->remaining_length) {
       mqstate(data, mqtt->nextstate, MQTT_NOSTATE);
