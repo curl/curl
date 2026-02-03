@@ -505,14 +505,6 @@
 #  define LSEEK_ERROR                     ((off_t)-1)
 #endif
 
-#ifdef _WIN32
-#define CURL_STRDUP_LOW _strdup
-#elif !defined(HAVE_STRDUP)
-#define CURL_STRDUP_LOW curlx_strdup_low
-#else
-#define CURL_STRDUP_LOW strdup
-#endif
-
 #ifndef SIZEOF_TIME_T
 /* assume default size of time_t to be 32 bits */
 #define SIZEOF_TIME_T 4
@@ -1084,6 +1076,14 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
 #endif /* CURL_MEMDEBUG */
 
 /* Allocator macros */
+
+#ifdef _WIN32
+#define CURL_STRDUP_LOW _strdup
+#elif !defined(HAVE_STRDUP)
+#define CURL_STRDUP_LOW curlx_strdup_low
+#else
+#define CURL_STRDUP_LOW strdup
+#endif
 
 #ifdef CURL_MEMDEBUG
 
