@@ -508,7 +508,7 @@
 #ifdef _WIN32
 #define CURL_STRDUP_LOW _strdup
 #elif !defined(HAVE_STRDUP)
-#define CURL_STRDUP_LOW curlx_strdup
+#define CURL_STRDUP_LOW curlx_strdup_low
 #else
 #define CURL_STRDUP_LOW strdup
 #endif
