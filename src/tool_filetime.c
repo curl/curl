@@ -41,9 +41,10 @@ int getfiletime(const char *filename, curl_off_t *stamp)
    access to a 64-bit type we can bypass stat and get the times directly. */
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
   HANDLE hfile;
-  hfile = curlx_CreateFile(filename, FILE_READ_ATTRIBUTES,
-                           FILE_SHARE_READ | FILE_SHARE_WRITE |
-                           FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
+  hfile = curlx_win32_CreateFile(filename, FILE_READ_ATTRIBUTES,
+                                 FILE_SHARE_READ | FILE_SHARE_WRITE |
+                                 FILE_SHARE_DELETE, NULL, OPEN_EXISTING,
+                                 0, NULL);
   if(hfile != INVALID_HANDLE_VALUE) {
     FILETIME ft;
     if(GetFileTime(hfile, NULL, NULL, &ft)) {
@@ -104,9 +105,10 @@ void setfiletime(curl_off_t filetime, const char *filename)
     warnf("Capping set filetime to minimum to avoid overflow");
   }
 
-  hfile = curlx_CreateFile(filename, FILE_WRITE_ATTRIBUTES,
-                           FILE_SHARE_READ | FILE_SHARE_WRITE |
-                           FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
+  hfile = curlx_win32_CreateFile(filename, FILE_WRITE_ATTRIBUTES,
+                                 FILE_SHARE_READ | FILE_SHARE_WRITE |
+                                 FILE_SHARE_DELETE, NULL, OPEN_EXISTING,
+                                 0, NULL);
   if(hfile != INVALID_HANDLE_VALUE) {
     curl_off_t converted = ((curl_off_t)filetime * 10000000) +
       116444736000000000;
