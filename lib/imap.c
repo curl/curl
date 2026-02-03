@@ -1224,6 +1224,9 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
   size_t len = imapc->pp.nfinal;
   struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
 
+  DEBUGASSERT(imap);
+  if(!imap)
+    return CURLE_FAILED_INIT;
   (void)instate;
 
   if(imapcode == '*' && is_custom_fetch_listing(imap)) {
