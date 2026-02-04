@@ -770,7 +770,7 @@ curl_socket_t win32_stdin_read_thread(void)
   assert(stdin_thread == NULL);
 
   do {
-    bool r;
+    BOOL r;
     curl_socklen_t socksize = 0;
     struct sockaddr_in selfaddr;
 
