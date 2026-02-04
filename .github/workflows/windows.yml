@@ -35,6 +35,7 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1700
   STUNNEL_VERSION: 5.76
+  STUNNEL_SHA256: 'd93c7c01366d38ebd27689d606e45197ba8e2e2a32d1a186a81d2b01186bfb56'
 
 jobs:
   build-cache:
@@ -477,6 +478,7 @@ jobs:
             env: 'x86_64'
             ver: '15.1.0'
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x64-2.2.0.7z.exe'
+            sha256: 'e02de30b97196329662007d64bc4509fbd7f5e14339d344075c7f1223dead4a2'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF'
             type: 'Release'
           - name: 'schannel'  # mingw-w64 10.0
@@ -485,6 +487,7 @@ jobs:
             env: 'x86_64'
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
+            sha256: '41637132ea7dc36a7f86a1961eaa334c380b5a3423d36aecb481cabcd006e3fe'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON'
             type: 'Release'
             tflags: 'skiprun'
@@ -494,6 +497,7 @@ jobs:
             env: 'x86_64'
             ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
+            sha256: '9dc08c9c2bdd5d8173f87791bed644f6e290624f739de474f117b590dfd8a721'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             install: mingw-w64-x86_64-mbedtls
             type: 'Release'
@@ -504,6 +508,7 @@ jobs:
             env: 'i686'
             ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
+            sha256: '12d2c62ad4527ec8a52275ea8485678dcbe20bec4716a3c7ba274f225d696085'
             config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             type: 'Debug'
             tflags: 'skiprun'
@@ -513,6 +518,7 @@ jobs:
             env: 'x86_64'
             ver: '4.8.1'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
+            sha256: '1353d997e85bb4494ebbebb432d824848d66b32c6045900da9a38a767b3c4ab4'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             type: 'Debug'
             tflags: 'skipall'
@@ -772,6 +778,7 @@ jobs:
       MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
       OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
+      OPENSSH_WINDOWS_SHA256: 'c7a1369cd73c8165be00c66e90291c4dd67784de7c3aa3af18c68ebedffa6ea9'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
