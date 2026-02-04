@@ -770,7 +770,6 @@ curl_socket_t win32_stdin_read_thread(void)
   assert(stdin_thread == NULL);
 
   do {
-    BOOL r;
     curl_socklen_t socksize = 0;
     struct sockaddr_in selfaddr;
 
@@ -811,11 +810,9 @@ curl_socket_t win32_stdin_read_thread(void)
     }
 
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
-    r = DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
+    if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
                         GetCurrentProcess(), &tdata->stdin_handle,
-                        0, FALSE, DUPLICATE_SAME_ACCESS);
-
-    if(!r) {
+                        0, FALSE, DUPLICATE_SAME_ACCESS)) {
       errorf("DuplicateHandle error: 0x%08lx", GetLastError());
       break;
     }
