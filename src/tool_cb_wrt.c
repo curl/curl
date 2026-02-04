@@ -29,7 +29,7 @@
 #include "tool_operate.h"
 
 #ifdef _WIN32
-#define OPENMODE S_IREAD | S_IWRITE
+#define OPENMODE _S_IREAD | _S_IWRITE
 #else
 #define OPENMODE S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
 #endif

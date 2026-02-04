@@ -125,8 +125,8 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
 
   result = CURLE_WRITE_ERROR;
 #ifdef _WIN32
-  fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  S_IREAD | S_IWRITE);
+  fd = curlx_open(tempstore, _O_WRONLY | _O_CREAT | _O_EXCL,
+                  _S_IREAD | _S_IWRITE);
 #elif (defined(ANDROID) || defined(__ANDROID__)) && \
   (defined(__i386__) || defined(__arm__))
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
