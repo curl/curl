@@ -61,7 +61,7 @@ jobs:
           cd /c && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
-          openssl dgst -sha256 pack.bin
+          openssl dgst -sha256 pack.bin | tee /dev/stderr | grep -q -a -F -w -- "${STUNNEL_SHA256}"
           7z x -y pack.bin >/dev/null && rm -f pack.bin && ls -l && bin/tstunnel -version
 
   cygwin:
@@ -548,6 +548,7 @@ jobs:
         timeout-minutes: 5
         env:
           MATRIX_URL: '${{ matrix.url }}'
+          MATRIX_SHA256: '${{ matrix.sha256 }}'
         run: |
           cd /d
           mkdir my-cache
@@ -555,7 +556,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             --location --proto-redir =https "${MATRIX_URL}" --output pack.bin
           pwd
-          openssl dgst -sha256 pack.bin
+          openssl dgst -sha256 pack.bin | tee /dev/stderr | grep -q -a -F -w -- "${MATRIX_SHA256}"
           7z x -y pack.bin >/dev/null
           rm -f pack.bin
           ls -l
@@ -1020,7 +1021,7 @@ jobs:
             cd /c  # no D: drive on windows-11-arm runners
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
-            openssl dgst -sha256 bin.zip
+            openssl dgst -sha256 bin.zip | tee /dev/stderr | grep -q -a -F -w -- "${OPENSSH_WINDOWS_SHA256}"
             unzip bin.zip
             rm -f bin.zip
           fi
