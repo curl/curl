@@ -54,7 +54,7 @@ When using the multi interface with a connection cache, the following
 observed behavior applies. It is relevant for applications that manage
 large numbers of sockets and custom polling loops (e.g. kqueue or epoll).
 
-**CURLOPT_CLOSESOCKETFUNCTION lifecycle**
+## Callback lifecycle
 
 The callback and CURLOPT_CLOSESOCKETDATA(3) are copied from the *first* easy
 handle that creates the connection. Changing this option on a subsequent
@@ -64,17 +64,17 @@ closed after CURL_CSELECT_ERR (e.g. when the socket has already been
 reported as in error state). Applications should not rely on the close
 callback to be called for every socket that leaves use.
 
-**Idle connection polling**
+## Idle connection polling
 
-Connections in the idle pool may still receive read (or error) events
+Connections in the idle pool may still receive read or error events
 from the kernel. Polling backends (kqueue, epoll, etc.) can deliver
-events even after libcurl has removed read/write interest for that
+events even after libcurl has removed read or write interest for that
 socket. This can surface as zero-length reads or spurious data when
 the connection is later closed or reused. Applications using
 CURLMOPT_SOCKETFUNCTION(3) should handle such events without assuming
 the socket is still actively used by libcurl.
 
-**CURLMOPT_SOCKETFUNCTION and idle sockets**
+## Socket callback and idle sockets
 
 When a connection enters the idle pool, libcurl invokes the socket
 callback with CURL_POLL_REMOVE. Subsequent callbacks for that socket

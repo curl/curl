@@ -92,7 +92,7 @@ writable.
 
 ## CURL_POLL_REMOVE
 
-The specified socket/file descriptor is no longer used by libcurl for any
+The specified socket or file descriptor is no longer used by libcurl for any
 active transfer. It might soon be added again. When a connection enters
 the idle pool, libcurl invokes the callback with CURL_POLL_REMOVE.
 Subsequent callbacks for that socket may have *socketp* set to NULL; do
