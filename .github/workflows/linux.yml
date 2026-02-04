@@ -745,12 +745,12 @@ jobs:
       - name: 'fetch rustls deb'
         if: ${{ contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true' }}
         run: |
-          mkdir -p ~/rustls
+          cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output ~/rustls/librustls.zip
-          openssl dgst -sha256 ~/rustls/librustls.zip
-          unzip ~/rustls/librustls.zip -d ~/rustls
-          rm ~/rustls/librustls.zip
+            --location "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output pkg.bin
+          openssl dgst -sha256 pkg.bin
+          unzip pkg.bin -d rustls
+          rm -f pkg.bin
 
       - name: 'build rustls'
         # Note: we do not check cache-hit here. If the cache is hit, we need to dpkg install the deb.
