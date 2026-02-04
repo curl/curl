@@ -730,10 +730,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     DWORD n;
     ssize_t nwritten;
     char buffer[BUFSIZ];
-    BOOL r;
 
-    r = ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL);
-    if(r == 0)
+    if(!ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL))
       break;
     if(n == 0)
       break;
