@@ -408,10 +408,15 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
   DEBUGASSERT(mq);
   if(!mq)
     return CURLE_FAILED_INIT;
+  if(mq->remaining_length != 2) {
+    failf(data, "CONNACK expected Remaining Length 2, got %zu",
+          mq->remaining_length);
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
 
   result = mqtt_recv_atleast(data, MQTT_CONNACK_LEN);
   if(result)
-    goto fail;
+    return result;
 
   /* verify CONNACK */
   DEBUGASSERT(curlx_dyn_len(&mq->recvbuf) >= MQTT_CONNACK_LEN);
@@ -422,12 +427,10 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
     failf(data, "Expected %02x%02x but got %02x%02x",
           0x00, 0x00, ptr[0], ptr[1]);
     curlx_dyn_reset(&mq->recvbuf);
-    result = CURLE_WEIRD_SERVER_REPLY;
-    goto fail;
+    return CURLE_WEIRD_SERVER_REPLY;
   }
   mqtt_recv_consume(data, MQTT_CONNACK_LEN);
-fail:
-  return result;
+  return CURLE_OK;
 }
 
 static CURLcode mqtt_get_topic(struct Curl_easy *data,
@@ -510,6 +513,12 @@ static CURLcode mqtt_verify_suback(struct Curl_easy *data)
 
   if(!mqtt || !mq)
     return CURLE_FAILED_INIT;
+
+  if(mq->remaining_length != 3) {
+    failf(data, "SUBACK expected Remaining Length 3, got %zu",
+          mq->remaining_length);
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
 
   result = mqtt_recv_atleast(data, MQTT_SUBACK_LEN);
   if(result)

@@ -43,13 +43,14 @@
 #define MQTT_MSG_DISCONNECT 0xe0
 
 struct mqttd_configurable {
+  int testnum;
   unsigned char version; /* initial version byte in the request must match
                             this */
   bool publish_before_suback;
   bool short_publish;
   bool excessive_remaining;
   unsigned char error_connack;
-  int testnum;
+  unsigned char remlen_connack;
 };
 
 #define REQUEST_DUMP   "server.input"
@@ -65,6 +66,7 @@ static void mqttd_resetdefaults(void)
   m_config.short_publish = FALSE;
   m_config.excessive_remaining = FALSE;
   m_config.error_connack = 0;
+  m_config.remlen_connack = 0;
   m_config.testnum = 0;
 }
 
@@ -101,6 +103,13 @@ static void mqttd_getconfig(void)
           if(!curlx_str_number(&pval, &num, 0xff)) {
             m_config.error_connack = (unsigned char)num;
             logmsg("error-CONNACK = %d", m_config.error_connack);
+          }
+        }
+        else if(!strcmp(key, "remlen-CONNACK")) {
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            m_config.remlen_connack = (unsigned char)num;
+            logmsg("remlen-CONNACK = %d", m_config.remlen_connack);
           }
         }
         else if(!strcmp(key, "Testnum")) {
@@ -158,13 +167,16 @@ static int connack(FILE *dump, curl_socket_t fd)
   };
   ssize_t rc;
 
+  if(m_config.remlen_connack)
+    packet[1] = m_config.remlen_connack;
   packet[3] = m_config.error_connack;
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc > 0) {
     logmsg("WROTE %zd bytes [CONNACK]", rc);
     loghex(packet, rc);
-    logprotocol(FROM_SERVER, "CONNACK", 2, dump, packet, sizeof(packet));
+    logprotocol(FROM_SERVER, "CONNACK", packet[1], dump,
+                packet, sizeof(packet));
   }
   if(rc == sizeof(packet)) {
     return 0;
