@@ -359,7 +359,9 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
-            --location "https://github.com/andrewwutw/build-djgpp/releases/download/v${TOOLCHAIN_VERSION}/djgpp-linux64-gcc1220.tar.bz2" | tar -xj
+            --location "https://github.com/andrewwutw/build-djgpp/releases/download/v${TOOLCHAIN_VERSION}/djgpp-linux64-gcc1220.tar.bz2" --output bin.tar.gz
+          tar -xjf bin.tar.gz
+          rm -f bin.tar.gz
           cd djgpp
           for f in wat3211b.zip zlb13b.zip; do
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
