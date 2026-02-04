@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_CLOSESOCKETDATA (3)
   - CURLOPT_OPENSOCKETFUNCTION (3)
+  - CURLMOPT_SOCKETFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.21.7
@@ -46,6 +47,40 @@ Note that when using multi/share handles, your callback may get invoked even
 after the easy handle has been cleaned up. The callback and data is
 inherited by a new connection and that connection may live longer
 than the transfer itself in the multi/share handle's connection cache.
+
+# NOTES ON IDLE CONNECTIONS
+
+When using the multi interface with a connection cache, the following
+observed behavior applies. It is relevant for applications that manage
+large numbers of sockets and custom polling loops (e.g. kqueue or epoll).
+
+**CURLOPT_CLOSESOCKETFUNCTION lifecycle**
+
+The callback and CURLOPT_CLOSESOCKETDATA(3) are copied from the *first* easy
+handle that creates the connection. Changing this option on a subsequent
+easy handle that reuses the same connection has no effect for that
+connection. The callback is not invoked when an idle connection is
+closed after CURL_CSELECT_ERR (e.g. when the socket has already been
+reported as in error state). Applications should not rely on the close
+callback to be called for every socket that leaves use.
+
+**Idle connection polling**
+
+Connections in the idle pool may still receive read (or error) events
+from the kernel. Polling backends (kqueue, epoll, etc.) can deliver
+events even after libcurl has removed read/write interest for that
+socket. This can surface as zero-length reads or spurious data when
+the connection is later closed or reused. Applications using
+CURLMOPT_SOCKETFUNCTION(3) should handle such events without assuming
+the socket is still actively used by libcurl.
+
+**CURLMOPT_SOCKETFUNCTION and idle sockets**
+
+When a connection enters the idle pool, libcurl invokes the socket
+callback with CURL_POLL_REMOVE. Subsequent callbacks for that socket
+may have *socketp* set to NULL. Do not rely on *socketp* to track idle
+connections; use the socket descriptor and *easy* (or your own mapping)
+instead.
 
 # DEFAULT
 

@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLMOPT_SOCKETDATA (3)
   - CURLMOPT_TIMERFUNCTION (3)
+  - CURLOPT_CLOSESOCKETFUNCTION (3)
   - curl_multi_socket_action (3)
 Protocol:
   - All
@@ -92,7 +93,11 @@ writable.
 ## CURL_POLL_REMOVE
 
 The specified socket/file descriptor is no longer used by libcurl for any
-active transfer. It might soon be added again.
+active transfer. It might soon be added again. When a connection enters
+the idle pool, libcurl invokes the callback with CURL_POLL_REMOVE.
+Subsequent callbacks for that socket may have *socketp* set to NULL; do
+not rely on *socketp* to track idle connections. For more on idle
+connection behavior, see CURLOPT_CLOSESOCKETFUNCTION(3).
 
 # DEFAULT
 
