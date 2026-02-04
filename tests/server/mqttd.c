@@ -175,7 +175,8 @@ static int connack(FILE *dump, curl_socket_t fd)
   if(rc > 0) {
     logmsg("WROTE %zd bytes [CONNACK]", rc);
     loghex(packet, rc);
-    logprotocol(FROM_SERVER, "CONNACK", 2, dump, packet, sizeof(packet));
+    logprotocol(FROM_SERVER, "CONNACK", packet[1], dump,
+                packet, sizeof(packet));
   }
   if(rc == sizeof(packet)) {
     return 0;
