@@ -514,8 +514,8 @@ static CURLcode mqtt_verify_suback(struct Curl_easy *data)
   if(!mqtt || !mq)
     return CURLE_FAILED_INIT;
 
-  if(mq->remaining_length >= 2) {
-    failf(data, "SUBACK expected Remaining Length at least 2, got %zu",
+  if(mq->remaining_length < 3) {
+    failf(data, "SUBACK expected Remaining Length at least 3, got %zu",
           mq->remaining_length);
     return CURLE_WEIRD_SERVER_REPLY;
   }
