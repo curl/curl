@@ -758,18 +758,7 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache rustls'
-        if: ${{ contains(matrix.build.install_steps, 'rustls') }}
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-rustls
-        env:
-          cache-name: cache-rustls
-        with:
-          path: ~/rustls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
-
       - name: 'fetch rustls deb'
-        if: ${{ contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
