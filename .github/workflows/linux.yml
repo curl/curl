@@ -453,8 +453,8 @@ jobs:
         run: |
           cd /home/runner
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" | tar -xJ
-          mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
+            --location "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" --output pkg.bin
+          sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin && mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
           cd filc
           ./setup.sh
 
@@ -472,7 +472,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') && steps.cache-libressl-c-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
+            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl
           cmake --build .
@@ -492,7 +493,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && steps.cache-libressl-filc.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
+            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl \
             -DCMAKE_C_COMPILER=/home/runner/filc/build/bin/filcc -DENABLE_ASM=OFF
@@ -513,7 +515,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') && steps.cache-nghttp2-filc.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.xz" | tar -xJ
+            --location "https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.xz" --output pkg.bin
+          sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin
           cd "nghttp2-${NGHTTP2_VERSION}"
           cmake -B . -G Ninja -DENABLE_LIB_ONLY=ON -DBUILD_TESTING=OFF -DENABLE_DOC=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/nghttp2 \
             -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF \
@@ -535,7 +538,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') && steps.cache-wolfssl-all-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
+            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-all --enable-tls13 --enable-harden --enable-all \
@@ -556,7 +560,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') && steps.cache-wolfssl-opensslextra-intel.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
+            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
@@ -577,7 +582,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
+            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
@@ -598,7 +604,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') && steps.cache-mbedtls-latest-intel.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
+            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
+          sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
@@ -621,7 +628,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && steps.cache-mbedtls-latest-arm.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
+            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
+          sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
@@ -644,7 +652,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-prev.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION_PREV}/mbedtls-${MBEDTLS_VERSION_PREV}.tar.bz2" | tar -xj
+            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION_PREV}/mbedtls-${MBEDTLS_VERSION_PREV}.tar.bz2" --output pkg.bin
+          sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_VERSION_PREV}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
@@ -667,7 +676,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') && steps.cache-openldap-static.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" | tar -xz
+            --location "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openldap-${OPENLDAP_VERSION}"
           ./configure --prefix=/home/runner/openldap-static --enable-static --disable-shared --disable-slapd
           make install
@@ -705,7 +715,8 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
+            --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "aws-lc-${AWSLC_VERSION}"
           cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
@@ -727,7 +738,8 @@ jobs:
           mkdir boringssl-src
           cd boringssl-src
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            "https://boringssl.googlesource.com/boringssl/+archive/${BORINGSSL_VERSION}.tar.gz" | tar -xz
+            "https://boringssl.googlesource.com/boringssl/+archive/${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
@@ -745,11 +757,10 @@ jobs:
       - name: 'fetch rustls deb'
         if: ${{ contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true' }}
         run: |
-          mkdir -p ~/rustls
+          cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output ~/rustls/librustls.zip
-          unzip ~/rustls/librustls.zip -d ~/rustls
-          rm ~/rustls/librustls.zip
+            --location "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output pkg.bin
+          sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
 
       - name: 'build rustls'
         # Note: we do not check cache-hit here. If the cache is hit, we need to dpkg install the deb.

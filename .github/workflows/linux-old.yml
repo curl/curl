@@ -57,8 +57,6 @@ jobs:
     runs-on: ubuntu-latest
     container: 'debian:stretch'
 
-    env:
-      CMAKE_VERSION: '3.7.0'  # Earliest version supported by curl
     steps:
       - name: 'install prereqs'
         # Remember, this shell is dash, not bash
@@ -68,7 +66,7 @@ jobs:
           # See comment above if this fails after 2025-05-20
           apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack
           httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb
-          dpkg -i freexian-archive-keyring_2022.06.08_all.deb
+          sha256sum freexian-archive-keyring_2022.06.08_all.deb && dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get -o Dpkg::Use-Pty=0 update
           apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libc-ares-dev libkrb5-dev libldap2-dev librtmp-dev stunnel4
@@ -77,15 +75,17 @@ jobs:
           # the main repo, so force the install.
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/glibc/libc6_2.28-10+deb10u5_amd64.deb
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb
-          dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
+          sha256sum libc6_*_amd64.deb libstdc++6_*_amd64.deb && dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
 
       - name: 'install prereqs (cmake)'
+        env:
+          CMAKE_VERSION: 3.7.0  # Earliest version supported by curl
+          CMAKE_SHA256: e075f63e6a9104b1c3d11666ae9546bc8812f7e791a49c4ce11effc063141b2a
         run: |
           cd ~
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
-          tar -xf "${fn}".tar*.gz
-          rm -f "${fn}".tar*.gz
+          sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -qwF -- "${CMAKE_SHA256}" && tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
           mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
