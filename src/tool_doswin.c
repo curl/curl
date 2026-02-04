@@ -708,11 +708,6 @@ struct win_thread_data {
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
-  DWORD n;
-  ssize_t nwritten;
-  char buffer[BUFSIZ];
-  BOOL r;
-
   struct sockaddr_in clientAddr;
   int clientAddrLen = sizeof(clientAddr);
 
@@ -732,6 +727,11 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     goto ThreadCleanup;
   }
   for(;;) {
+    DWORD n;
+    ssize_t nwritten;
+    char buffer[BUFSIZ];
+    BOOL r;
+
     r = ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL);
     if(r == 0)
       break;
@@ -760,11 +760,8 @@ ThreadCleanup:
 /* The background thread that reads and buffers the true stdin. */
 curl_socket_t win32_stdin_read_thread(void)
 {
-  bool r;
   int rc = 0;
-  curl_socklen_t socksize = 0;
   struct win_thread_data *tdata = NULL;
-  struct sockaddr_in selfaddr;
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
@@ -775,6 +772,10 @@ curl_socket_t win32_stdin_read_thread(void)
   assert(stdin_thread == NULL);
 
   do {
+    bool r;
+    curl_socklen_t socksize = 0;
+    struct sockaddr_in selfaddr;
+
     /* Prepare handles for thread */
     tdata = (struct win_thread_data *)
       curlx_calloc(1, sizeof(struct win_thread_data));
