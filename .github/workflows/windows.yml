@@ -62,7 +62,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pack.bin
           openssl dgst -sha256 pack.bin
-          7z x -y pack.bin >/dev/null && rm -r -f pack.bin && ls -l && bin/tstunnel -version
+          7z x -y pack.bin >/dev/null && rm -f pack.bin && ls -l && bin/tstunnel -version
 
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
@@ -557,7 +557,7 @@ jobs:
           pwd
           openssl dgst -sha256 pack.bin
           7z x -y pack.bin >/dev/null
-          rm -r -f pack.bin
+          rm -f pack.bin
           ls -l
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
