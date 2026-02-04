@@ -54,7 +54,7 @@ When using the multi interface with a connection cache, the following
 observed behavior applies. It is relevant for applications that manage
 large numbers of sockets and custom polling loops (e.g. kqueue or epoll).
 
-## Callback lifecycle
+## Callback life cycle
 
 The callback and CURLOPT_CLOSESOCKETDATA(3) are copied from the *first* easy
 handle that creates the connection. Changing this option on a subsequent
