@@ -259,9 +259,9 @@ jobs:
       MATRIX_IMAGE: '${{ matrix.image }}'
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
       OLD_CMAKE_VERSION: 3.19.8
-      OLD_CMAKE_SHA256_LINUX_ARM: '807f5afb2a560e00af9640e496d5673afefc2888bf0ed076412884a5ebb547a1'
-      OLD_CMAKE_SHA256_MACOS_UNI: '0976d23d982af05dcbfb3aa34fcb62ead43bea27f0e3bb95222f2a78161423f2'
-      OLD_CMAKE_SHA256_WIN_INTEL: '2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380'
+      OLD_CMAKE_SHA256_LINUX_ARM: '1807f5afb2a560e00af9640e496d5673afefc2888bf0ed076412884a5ebb547a1'
+      OLD_CMAKE_SHA256_MACOS_UNI: '1976d23d982af05dcbfb3aa34fcb62ead43bea27f0e3bb95222f2a78161423f2'
+      OLD_CMAKE_SHA256_WIN_INTEL: '2a30877a3d6b50da405b289f4d1c03befdfaeb2edba02a563c681e883d810380'
     strategy:
       fail-fast: false
       matrix:
