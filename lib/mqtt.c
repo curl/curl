@@ -409,7 +409,7 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
   if(!mq)
     return CURLE_FAILED_INIT;
   if(mq->remaining_length != 2) {
-    failf(data, "Expected Remaining Length 2, got %zu",
+    failf(data, "CONNACK expected Remaining Length 2, got %zu",
           mq->remaining_length);
     return CURLE_WEIRD_SERVER_REPLY;
   }
@@ -513,6 +513,12 @@ static CURLcode mqtt_verify_suback(struct Curl_easy *data)
 
   if(!mqtt || !mq)
     return CURLE_FAILED_INIT;
+
+  if(mq->remaining_length != 2) {
+    failf(data, "SUBACK expected Remaining Length 2, got %zu",
+          mq->remaining_length);
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
 
   result = mqtt_recv_atleast(data, MQTT_SUBACK_LEN);
   if(result)
