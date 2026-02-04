@@ -1021,7 +1021,7 @@ jobs:
             cd /c  # no D: drive on windows-11-arm runners
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
-            openssl dgst -sha256 bin.zip | tee /proc/self/fd/2 | grep -q -a -F -w -- "${OPENSSH_WINDOWS_SHA256}"
+            openssl dgst -sha256 bin.zip | tee -a /dev/stderr | grep -q -a -F -w -- "${OPENSSH_WINDOWS_SHA256}"
             unzip bin.zip
             rm -f bin.zip
           fi
