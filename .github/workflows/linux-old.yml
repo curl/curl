@@ -57,8 +57,6 @@ jobs:
     runs-on: ubuntu-latest
     container: 'debian:stretch'
 
-    env:
-      CMAKE_VERSION: '3.7.0'  # Earliest version supported by curl
     steps:
       - name: 'install prereqs'
         # Remember, this shell is dash, not bash
@@ -80,10 +78,14 @@ jobs:
           dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
 
       - name: 'install prereqs (cmake)'
+        env:
+          CMAKE_VERSION: '3.7.0'  # Earliest version supported by curl
+          CMAKE_SHA256: 'e075f63e6a9104b1c3d11666ae9546bc8812f7e791a49c4ce11effc063141b2a'
         run: |
           cd ~
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
+          openssl dgst -sha256 "${fn}".tar*.gz | tee /dev/stderr | grep -q -a -F -w -- "${CMAKE_SHA256}"
           tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
           mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 
