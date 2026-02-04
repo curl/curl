@@ -171,7 +171,7 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
   /* Get past the drive letter, if any. */
   if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
     *d++ = *s++;
-    *d = ((flags & SANITIZE_ALLOW_PATH)) ? ':' : '_';
+    *d = (flags & SANITIZE_ALLOW_PATH) ? ':' : '_';
     ++d;
     ++s;
   }
