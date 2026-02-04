@@ -364,6 +364,7 @@ jobs:
           for f in wat3211b.zip zlb13b.zip; do
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               "https://www.delorie.com/pub/djgpp/current/v2tk/$f" --output bin.zip
+            openssl dgst -sha256 bin.zip
             unzip -q bin.zip
             rm -f bin.zip
           done
