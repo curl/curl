@@ -557,9 +557,7 @@ jobs:
             --location --proto-redir =https "${MATRIX_URL}" --output pkg.bin
           pwd
           openssl dgst -sha256 pkg.bin && openssl dgst -sha256 pkg.bin | grep -q -a -F -w -- "${MATRIX_SHA256}"
-          7z x -y pkg.bin >/dev/null
-          rm -f pkg.bin
-          ls -l
+          7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -1022,8 +1020,7 @@ jobs:
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
             openssl dgst -sha256 pkg.bin && openssl dgst -sha256 pkg.bin | grep -q -a -F -w -- "${OPENSSH_WINDOWS_SHA256}"
-            unzip pkg.bin
-            rm -f pkg.bin
+            unzip pkg.bin && rm -f pkg.bin
           fi
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt

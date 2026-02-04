@@ -360,15 +360,13 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
             --location "https://github.com/andrewwutw/build-djgpp/releases/download/v${TOOLCHAIN_VERSION}/djgpp-linux64-gcc1220.tar.bz2" --output pkg.bin
-          tar -xjf pkg.bin
-          rm -f pkg.bin
+          tar -xjf pkg.bin && rm -f pkg.bin
           cd djgpp
           for f in wat3211b.zip zlb13b.zip; do
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               "https://www.delorie.com/pub/djgpp/current/v2tk/$f" --output pkg.bin
             openssl dgst -sha256 pkg.bin
-            unzip -q pkg.bin
-            rm -f pkg.bin
+            unzip -q pkg.bin && rm -f pkg.bin
           done
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
