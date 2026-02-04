@@ -31,9 +31,8 @@ announcement.
 
 - The person discovering the issue, the reporter, reports the vulnerability to
   the curl project. Do this [on
-  GitHub](https://github.com/curl/curl/security/advisories) or send an email
-  to `security at curl.se`. Such submissions reach a handful of selected and
-  trusted people.
+  GitHub](https://github.com/curl/curl/security/advisories). Such submissions
+  reach a handful of selected and trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
   security vulnerability in curl or libcurl are ignored and no further action
