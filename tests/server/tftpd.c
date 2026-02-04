@@ -420,7 +420,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
     snprintf(outfile, sizeof(outfile), "%s/upload.%ld", logdir, test->testno);
     test->ofile = curlx_open(outfile, O_CREAT | O_RDWR | CURL_O_BINARY,
 #ifdef _WIN32
-                             S_IREAD | S_IWRITE
+                             _S_IREAD | _S_IWRITE
 #else
                              S_IRUSR | S_IWUSR | S_IXUSR |
                              S_IRGRP | S_IWGRP | S_IXGRP |

@@ -333,8 +333,8 @@ static void exit_signal_handler(int signum)
   else {
     int fd = -1;
 #ifdef _WIN32
-    if(!_sopen_s(&fd, serverlogfile, O_WRONLY | O_CREAT | O_APPEND,
-                 _SH_DENYNO, S_IREAD | S_IWRITE) &&
+    if(!_sopen_s(&fd, serverlogfile, _O_WRONLY | _O_CREAT | _O_APPEND,
+                 _SH_DENYNO, _S_IREAD | _S_IWRITE) &&
        fd != -1) {
 #else
     /* !checksrc! disable BANNEDFUNC 1 */
