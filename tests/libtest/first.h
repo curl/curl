@@ -156,7 +156,7 @@ void ws_close(CURL *curl);
 #define chk_easy_init(A, Y, Z) \
   do {                         \
     exe_easy_init(A, Y, Z);    \
-    if(result)                    \
+    if(result)                 \
       goto test_cleanup;       \
   } while(0)
 
@@ -296,23 +296,23 @@ void ws_close(CURL *curl);
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_perform(A, B, Y, Z)                                   \
-  do {                                                                  \
-    CURLMcode ec;                                                       \
-    if((ec = curl_multi_perform(A, B)) != CURLM_OK) {                   \
-      curl_mfprintf(stderr,                                             \
-                    "%s:%d curl_multi_perform() failed, "               \
-                    "with code %d (%s)\n",                              \
-                    Y, Z, ec, curl_multi_strerror(ec));                 \
-      result = TEST_ERR_MULTI;                                          \
-    }                                                                   \
-    else if(*(B) < 0) {                                                 \
-      curl_mfprintf(stderr,                                             \
-                    "%s:%d curl_multi_perform() succeeded, "            \
+#define exe_multi_perform(A, B, Y, Z)                                    \
+  do {                                                                   \
+    CURLMcode ec;                                                        \
+    if((ec = curl_multi_perform(A, B)) != CURLM_OK) {                    \
+      curl_mfprintf(stderr,                                              \
+                    "%s:%d curl_multi_perform() failed, "                \
+                    "with code %d (%s)\n",                               \
+                    Y, Z, ec, curl_multi_strerror(ec));                  \
+      result = TEST_ERR_MULTI;                                           \
+    }                                                                    \
+    else if(*(B) < 0) {                                                  \
+      curl_mfprintf(stderr,                                              \
+                    "%s:%d curl_multi_perform() succeeded, "             \
                     "but returned invalid running_handles value (%d)\n", \
-                    Y, Z, (int)*(B));                                   \
-      result = TEST_ERR_NUM_HANDLES;                                    \
-    }                                                                   \
+                    Y, Z, (int)*(B));                                    \
+      result = TEST_ERR_NUM_HANDLES;                                     \
+    }                                                                    \
   } while(0)
 
 #define res_multi_perform(A, B) \
@@ -450,7 +450,7 @@ void ws_close(CURL *curl);
 #define chk_multi_wakeup(A, Y, Z) \
   do {                            \
     exe_multi_wakeup(A, Y, Z);    \
-    if(result)                       \
+    if(result)                    \
       goto test_cleanup;          \
   } while(0)
 
