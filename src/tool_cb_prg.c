@@ -107,13 +107,6 @@ static void fly(struct ProgressData *bar, bool moved)
 ** callback for CURLOPT_XFERINFOFUNCTION
 */
 
-#if (SIZEOF_CURL_OFF_T < 8)
-#error "too small curl_off_t"
-#else
-   /* assume SIZEOF_CURL_OFF_T == 8 */
-#  define CURL_OFF_T_MAX 0x7FFFFFFFFFFFFFFF
-#endif
-
 static void update_width(struct ProgressData *bar)
 {
   int cols = get_terminal_columns();
