@@ -66,7 +66,7 @@ jobs:
           # See comment above if this fails after 2025-05-20
           apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack
           httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb
-          openssl dgst -sha256 freexian-archive-keyring_2022.06.08_all.deb
+          command -v sha256sum sha256
           dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get -o Dpkg::Use-Pty=0 update
