@@ -37,7 +37,7 @@ use Getopt::Std;
 use MIME::Base64;
 use strict;
 use warnings;
-use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
+use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_r $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
 use Time::Local;
@@ -53,6 +53,7 @@ my %urls = (
     'autoland' => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt',
     'beta'     => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/beta/security/nss/lib/ckfw/builtins/certdata.txt',
     'release'  => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/release/security/nss/lib/ckfw/builtins/certdata.txt',
+    'ref'      => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/CUSTOMREF/security/nss/lib/ckfw/builtins/certdata.txt',
 );
 
 $opt_d = 'release';
@@ -110,9 +111,12 @@ my @valid_signature_algorithms = (
 
 $0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
-getopts('bd:fhiklmnp:qs:tuvw:');
+getopts('bd:fhiklmnp:qr:s:tuvw:');
 
-if(!defined($opt_d)) {
+if(defined($opt_r)) {
+    $opt_d = 'ref';
+}
+elsif(!defined($opt_d)) {
     # to make plain "-d" use not cause warnings, and actually still work
     $opt_d = 'release';
 }
@@ -121,6 +125,9 @@ if(!defined($opt_d)) {
 my $url;
 if(defined($urls{$opt_d})) {
     $url = $urls{$opt_d};
+    if($opt_d eq 'ref') {
+        $url =~ s/CUSTOMREF/$opt_r/;
+    }
     if(!$opt_k && $url !~ /^https:\/\//i) {
         die "The URL for '$opt_d' is not HTTPS. Use -k to override (insecure).\n";
     }
@@ -128,6 +135,8 @@ if(defined($urls{$opt_d})) {
 else {
   $url = $opt_d;
 }
+
+print "Using URL: $url\n";
 
 if($opt_i) {
     print ("=" x 78 . "\n");
@@ -179,6 +188,7 @@ sub HELP_MESSAGE() {
     print "\t\t  Valid levels are:\n";
     print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_mozilla_trust_levels ) ), "\n";
     print "\t-q\tbe really quiet (no progress output at all)\n";
+    print "\t-r\tuse specific commit ref or hash in the Mozilla certdata.txt URL\n";
     print wrap("\t","\t\t", "-s\tcomma separated list of certificate signatures/hashes to output in plain text mode. (default: $default_signature_algorithms)\n");
     print "\t\t  Valid signature algorithms are:\n";
     print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_signature_algorithms ) ), "\n";
@@ -373,12 +383,35 @@ if(!$opt_n) {
     }
 }
 
-my $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
-my $datesrc = "as of";
+my $filedate;
+my $datesrc;
+if($opt_d eq 'ref') {
+    my $out = '';
+    if(open(my $fh, '-|', 'curl', '--user-agent', 'curl', '--silent', '--fail',
+            '--header', 'X-GitHub-Api-Version: 2022-11-28',
+            "https://api.github.com/repos/mozilla-firefox/firefox/commits/$opt_r")) {
+        $out = do { local $/; <$fh> };
+        close $fh;
+    }
+    if($out) {
+        use JSON::PP;
+        my $json = decode_json($out);
+        my $filedate_iso = $json->{commit}->{committer}->{date};
+        if($filedate_iso) {
+            my $time = Time::Piece->strptime($filedate_iso, '%Y-%m-%dT%H:%M:%SZ');
+            $filedate = $time->epoch;
+            $datesrc = "last updated on";
+        }
+    }
+}
+if(!$filedate) {
+    $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
+    $datesrc = "as of";
+}
 if(!$filedate) {
     # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
     $filedate = time();
-    $datesrc="downloaded on";
+    $datesrc = "downloaded on";
 }
 
 # get the hash from the download file
