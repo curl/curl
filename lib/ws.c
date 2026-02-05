@@ -24,12 +24,6 @@
 #include "curl_setup.h"
 #include "urldata.h"
 
-#ifdef CURL_DISABLE_HTTP
-/* no WebSockets without HTTP present */
-#undef CURL_DISABLE_WEBSOCKETS
-#define CURL_DISABLE_WEBSOCKETS 1
-#endif
-
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 #include "url.h"
