@@ -96,7 +96,7 @@ jobs:
         run: |
           mkdir bld-1
           cd bld-1
-          "$HOME"/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          ~/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
 
       - name: 'CM build-only build'
@@ -120,7 +120,7 @@ jobs:
         run: |
           mkdir bld-cares
           cd bld-cares
-          "$HOME"/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          ~/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
