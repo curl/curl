@@ -8,8 +8,8 @@ SPDX-License-Identifier: curl
 
 curl is a command-line tool for transferring data from or to a server using
 URLs. It supports these protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS,
-HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP,
-SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
+HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3, POP3S, RTMP, RTMPS,
+RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
 
 Learn how to use curl by reading [the
 man page](https://curl.se/docs/manpage.html) or [everything
