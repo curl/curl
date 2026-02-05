@@ -59,8 +59,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     fi
     curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
       --location "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.zip" --output pkg.bin
-    sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${CMAKE_SHA256}"
-    7z x -y pkg.bin >/dev/null && rm -f pkg.bin
+    sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${CMAKE_SHA256}" && 7z x -y pkg.bin >/dev/null && rm -f pkg.bin
     PATH="$PWD/${fn}/bin:$PATH"
   fi
 
