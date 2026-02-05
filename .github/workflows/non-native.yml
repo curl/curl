@@ -348,15 +348,7 @@ jobs:
       - name: 'install packages'
         run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
 
-      - name: 'cache compiler (djgpp)'
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-compiler
-        with:
-          path: ~/djgpp
-          key: ${{ runner.os }}-djgpp-${{ env.TOOLCHAIN_VERSION }}-amd64
-
       - name: 'install compiler (djgpp)'
-        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
