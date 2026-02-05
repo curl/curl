@@ -66,13 +66,15 @@ callback to be called for every socket that leaves use.
 
 ## Idle connection polling
 
-Connections in the idle pool may still receive read or error events
-from the kernel. Polling backends (kqueue, epoll, etc.) can deliver
-events even after libcurl has removed read or write interest for that
-socket. This can surface as zero-length reads or spurious data when
-the connection is later closed or reused. Applications using
-CURLMOPT_SOCKETFUNCTION(3) should handle such events without assuming
-the socket is still actively used by libcurl.
+Idle connections are not expected to receive application data. Read or
+error events may still occur when the peer closes the connection, or as
+zero-length reads, or for HTTPS when encrypted data decrypts to
+zero-length. libcurl cannot safely interpret or act on such events
+once the socket has been removed from polling (CURL_POLL_REMOVE), and
+applications cannot forward them to libcurl for idle connections.
+Applications must handle fd reuse and spurious readiness events
+defensively; the underlying risk is the kernel closing or reusing the
+fd after libcurl has stopped monitoring it.
 
 ## Socket callback and idle sockets
 
