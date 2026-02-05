@@ -25,10 +25,6 @@
 
 #include "testutil.h"
 
-#ifndef FD_SETSIZE
-#error "this test requires FD_SETSIZE"
-#endif
-
 #define T518_SAFETY_MARGIN 16
 
 #define NUM_OPEN   (FD_SETSIZE + 10)
@@ -345,7 +341,6 @@ static int t518_test_rlimit(int keep_open)
   curl_mfprintf(stderr, "%s file descriptors open\n", strbuff);
 
 #if !defined(HAVE_POLL) && !defined(USE_WINSOCK)
-
   /*
    * when using select() instead of poll() we cannot test
    * libcurl functionality with a socket number equal or
@@ -383,8 +378,7 @@ static int t518_test_rlimit(int keep_open)
       return -11;
     }
   }
-
-#endif /* using an FD_SETSIZE bound select() */
+#endif /* !HAVE_POLL && !USE_WINSOCK */
 
   /*
    * Old or 'backwards compatible' implementations of stdio do not allow

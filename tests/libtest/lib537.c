@@ -25,10 +25,6 @@
 
 #include "testutil.h"
 
-#if !defined(HAVE_POLL) && !defined(USE_WINSOCK) && !defined(FD_SETSIZE)
-#error "this test requires FD_SETSIZE"
-#endif
-
 #define T537_SAFETY_MARGIN 11
 
 #if defined(_WIN32) || defined(MSDOS)
@@ -360,7 +356,6 @@ static int t537_test_rlimit(int keep_open)
   curl_mfprintf(stderr, "%s file descriptors open\n", strbuff);
 
 #if !defined(HAVE_POLL) && !defined(USE_WINSOCK)
-
   /*
    * when using select() instead of poll() we cannot test
    * libcurl functionality with a socket number equal or
@@ -398,8 +393,7 @@ static int t537_test_rlimit(int keep_open)
       return -9;
     }
   }
-
-#endif /* using an FD_SETSIZE bound select() */
+#endif /* !HAVE_POLL && !USE_WINSOCK */
 
   /*
    * Old or 'backwards compatible' implementations of stdio do not allow
