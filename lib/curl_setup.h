@@ -263,6 +263,9 @@
 #  ifndef CURL_DISABLE_TFTP
 #  define CURL_DISABLE_TFTP
 #  endif
+#  ifndef CURL_DISABLE_WEBSOCKETS
+#  define CURL_DISABLE_WEBSOCKETS
+#  endif
 #endif
 
 /*
