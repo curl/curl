@@ -35,7 +35,7 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1700
   STUNNEL_VERSION: 5.76
-  STUNNEL_SHA256: 'd93c7c01366d38ebd27689d606e45197ba8e2e2a32d1a186a81d2b01186bfb56'
+  STUNNEL_SHA256: d93c7c01366d38ebd27689d606e45197ba8e2e2a32d1a186a81d2b01186bfb56
 
 jobs:
   build-cache:
@@ -774,8 +774,8 @@ jobs:
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
-      OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
-      OPENSSH_WINDOWS_SHA256: 'c7a1369cd73c8165be00c66e90291c4dd67784de7c3aa3af18c68ebedffa6ea9'
+      OPENSSH_WINDOWS_VERSION: v9.8.1.0p1-Preview
+      OPENSSH_WINDOWS_SHA256: c7a1369cd73c8165be00c66e90291c4dd67784de7c3aa3af18c68ebedffa6ea9
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:

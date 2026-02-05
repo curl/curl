@@ -79,8 +79,8 @@ jobs:
 
       - name: 'install prereqs (cmake)'
         env:
-          CMAKE_VERSION: '3.7.0'  # Earliest version supported by curl
-          CMAKE_SHA256: 'e075f63e6a9104b1c3d11666ae9546bc8812f7e791a49c4ce11effc063141b2a'
+          CMAKE_VERSION: 3.7.0  # Earliest version supported by curl
+          CMAKE_SHA256: e075f63e6a9104b1c3d11666ae9546bc8812f7e791a49c4ce11effc063141b2a
         run: |
           cd ~
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
