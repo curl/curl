@@ -87,7 +87,7 @@ jobs:
           cd ~
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
-          sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -q -a -F -w -- "${CMAKE_SHA256}"
+          sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -qwF -- "${CMAKE_SHA256}"
           tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
           mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 

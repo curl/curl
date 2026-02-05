@@ -365,11 +365,11 @@ jobs:
           cd djgpp
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
             https://www.delorie.com/pub/djgpp/current/v2tk/wat3211b.zip --output pkg.bin
-          sha256sum pkg.bin | tee /dev/stderr | grep -q -a -F -w -- 'faa2222ab5deb2c2aac229c760bf4d45aca5379f5af97865c308a0467046b67a'
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF 'faa2222ab5deb2c2aac229c760bf4d45aca5379f5af97865c308a0467046b67a'
           unzip -q pkg.bin && rm -f pkg.bin
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
             https://www.delorie.com/pub/djgpp/current/v2tk/zlb13b.zip --output pkg.bin
-          sha256sum pkg.bin | tee /dev/stderr | grep -q -a -F -w -- 'f3d2fa8129e7591c7e79074306d8ab91a70ec172cc01baedeae74992285dd3a3'
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF 'f3d2fa8129e7591c7e79074306d8ab91a70ec172cc01baedeae74992285dd3a3'
           unzip -q pkg.bin && rm -f pkg.bin
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
