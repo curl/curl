@@ -68,13 +68,13 @@ callback to be called for every socket that leaves use.
 
 Idle connections are not expected to receive application data. Read or
 error events may still occur when the peer closes the connection, or as
-zero-length reads, or for HTTPS when encrypted data decrypts to
+zero-length reads, or for HTTPS when encrypted data `decrypts` to
 zero-length. libcurl cannot safely interpret or act on such events
 once the socket has been removed from polling (CURL_POLL_REMOVE), and
 applications cannot forward them to libcurl for idle connections.
-Applications must handle fd reuse and spurious readiness events
+Applications must handle `fd` reuse and spurious readiness events
 defensively; the underlying risk is the kernel closing or reusing the
-fd after libcurl has stopped monitoring it.
+`fd` after libcurl has stopped monitoring it.
 
 ## Socket callback and idle sockets
 
