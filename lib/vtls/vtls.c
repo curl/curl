@@ -1723,7 +1723,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        data->state.http_neg.preferred,
-                                       data->state.http_neg.only_10,
+                                       (bool)data->state.http_neg.only_10,
                                        (bool)conn->bits.tls_enable_alpn));
 #endif
   if(!ctx) {
