@@ -66,6 +66,7 @@ jobs:
           # See comment above if this fails after 2025-05-20
           apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack
           httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb
+          openssl dgst -sha256 freexian-archive-keyring_2022.06.08_all.deb
           dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get -o Dpkg::Use-Pty=0 update
@@ -75,6 +76,7 @@ jobs:
           # the main repo, so force the install.
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/glibc/libc6_2.28-10+deb10u5_amd64.deb
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb
+          openssl dgst -sha256 libc6_*_amd64.deb libstdc++6_*_amd64.deb
           dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
 
       - name: 'install prereqs (cmake)'
