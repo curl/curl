@@ -1920,7 +1920,7 @@ endif()
 macro(curl_add_if _label)
   # Needs to be a macro to allow this indirection
   if(${ARGN})
-    set(_items ${_items} "${_label}")
+    list(APPEND _items "${_label}")
   endif()
 endmacro()
 
