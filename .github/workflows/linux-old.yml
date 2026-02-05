@@ -76,7 +76,7 @@ jobs:
           # the main repo, so force the install.
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/glibc/libc6_2.28-10+deb10u5_amd64.deb
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb
-          openssl dgst -sha256 libc6_*_amd64.deb libstdc++6_*_amd64.deb
+          sha256sum libc6_*_amd64.deb libstdc++6_*_amd64.deb
           dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
 
       - name: 'install prereqs (cmake)'
@@ -87,7 +87,7 @@ jobs:
           cd ~
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
-          openssl dgst -sha256 "${fn}".tar*.gz | tee /dev/stderr | grep -q -a -F -w -- "${CMAKE_SHA256}"
+          sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -q -a -F -w -- "${CMAKE_SHA256}"
           tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
           mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 

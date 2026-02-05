@@ -209,7 +209,7 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
-          openssl dgst -sha256 pkg.bin
+          sha256sum pkg.bin
           tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl/build
@@ -222,7 +222,7 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
-          openssl dgst -sha256 pkg.bin
+          sha256sum pkg.bin
           tar -xzf pkg.bin && rm -f pkg.bin
           cd "aws-lc-${AWSLC_VERSION}"
           cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build
@@ -236,7 +236,7 @@ jobs:
           cd boringssl-src
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             "https://boringssl.googlesource.com/boringssl/+archive/${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
-          openssl dgst -sha256 pkg.bin
+          sha256sum pkg.bin
           tar -xzf pkg.bin && rm -f pkg.bin
           cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl/build
           cmake --build .
@@ -248,7 +248,7 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" --output pkg.bin
-          openssl dgst -sha256 pkg.bin
+          sha256sum pkg.bin
           tar -xzf pkg.bin && rm -f pkg.bin
           cd "nettle-${NETTLE_VERSION}"
           ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
@@ -261,7 +261,7 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             "https://www.gnupg.org/ftp/gcrypt/gnutls/v${GNUTLS_VERSION%.*}/gnutls-${GNUTLS_VERSION}.tar.xz" --output pkg.bin
-          openssl dgst -sha256 pkg.bin
+          sha256sum pkg.bin
           tar -xJf pkg.bin && rm -f pkg.bin
           cd "gnutls-${GNUTLS_VERSION}"
           # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
