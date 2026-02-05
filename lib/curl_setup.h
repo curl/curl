@@ -286,16 +286,16 @@
  * When HTTP is disabled, disable HTTP-only features
  */
 #ifdef CURL_DISABLE_HTTP
-#  define CURL_DISABLE_ALTSVC 1
-#  define CURL_DISABLE_COOKIES 1
-#  define CURL_DISABLE_BASIC_AUTH 1
-#  define CURL_DISABLE_BEARER_AUTH 1
-#  define CURL_DISABLE_AWS 1
-#  define CURL_DISABLE_DOH 1
-#  define CURL_DISABLE_FORM_API 1
-#  define CURL_DISABLE_HEADERS_API 1
-#  define CURL_DISABLE_HSTS 1
-#  define CURL_DISABLE_HTTP_AUTH 1
+#  define CURL_DISABLE_ALTSVC
+#  define CURL_DISABLE_COOKIES
+#  define CURL_DISABLE_BASIC_AUTH
+#  define CURL_DISABLE_BEARER_AUTH
+#  define CURL_DISABLE_AWS
+#  define CURL_DISABLE_DOH
+#  define CURL_DISABLE_FORM_API
+#  define CURL_DISABLE_HEADERS_API
+#  define CURL_DISABLE_HSTS
+#  define CURL_DISABLE_HTTP_AUTH
 #  ifndef CURL_DISABLE_WEBSOCKETS
 #  define CURL_DISABLE_WEBSOCKETS /* no WebSockets without HTTP present */
 #  endif
