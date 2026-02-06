@@ -1196,14 +1196,8 @@ static bool url_match_auth_nego(struct connectdata *conn,
      so that we can reuse Negotiate connections if possible. */
   if(m->want_nego_http) {
     if(Curl_timestrcmp(m->needle->user, conn->user) ||
-       Curl_timestrcmp(m->needle->passwd, conn->passwd)) {
-
-      /* we prefer a credential match, but this is at least a connection that
-         can be reused and "upgraded" to Negotiate */
-      if(conn->http_negotiate_state == GSS_AUTHNONE)
-        m->found = conn;
+       Curl_timestrcmp(m->needle->passwd, conn->passwd))
       return FALSE;
-    }
   }
   else if(conn->http_negotiate_state != GSS_AUTHNONE) {
     /* Connection is using Negotiate auth but we do not want Negotiate */
