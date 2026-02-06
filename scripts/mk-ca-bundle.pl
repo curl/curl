@@ -323,7 +323,11 @@ if(!$opt_n) {
                 push @opts, '--proto', '=https' if !$opt_k;
                 push @opts, '-s' if $opt_q;
                 my $out = '';
-                if(open(my $fh, '-|', 'curl', '--location', '--write-out', '%{response_code}', (@opts), '-o', $txt, $url)) {
+                if(open(my $fh, '-|', 'curl', '--fail', '--silent', '--show-error',
+                                              '--connect-timeout', '15', '--max-time', '60',
+                                              '--retry', '6', '--retry-connrefused',
+                                              '--location', '--write-out', '%{response_code}',
+                                              (@opts), '--output', $txt, $url)) {
                     $out = <$fh>;  # read first line
                     chomp $out;
                     close $fh;
