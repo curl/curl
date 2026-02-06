@@ -676,6 +676,10 @@
 #endif
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#define USE_THREADS
+#endif
+
+#ifdef USE_THREADS
 #  define CURLRES_ASYNCH
 #  define CURLRES_THREADED
 #elif defined(USE_ARES)
