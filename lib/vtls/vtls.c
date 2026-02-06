@@ -133,8 +133,8 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
 static const struct alpn_spec ALPN_SPEC_H11 = {
   { ALPN_HTTP_1_1 }, 1
 };
-static const struct alpn_spec ALPN_SPEC_H11_H10 = {
-  { ALPN_HTTP_1_1, ALPN_HTTP_1_0 }, 2
+static const struct alpn_spec ALPN_SPEC_H10_H11 = {
+  { ALPN_HTTP_1_0, ALPN_HTTP_1_1 }, 2
 };
 #endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
 #ifdef USE_HTTP2
@@ -157,11 +157,11 @@ static const struct alpn_spec *alpn_get_spec(http_majors wanted,
 {
   if(!use_alpn)
     return NULL;
-  /* If HTTP/1.0 is the wanted protocol then use ALPN http/1.1 and http/1.0.
+  /* If HTTP/1.0 is the wanted protocol then use ALPN http/1.0 and http/1.1.
      This is for compatibility reasons since some HTTP/1.0 servers with old
      ALPN implementations understand ALPN http/1.1 but not http/1.0. */
   if(only_http_10 && (wanted & CURL_HTTP_V1x))
-    return &ALPN_SPEC_H11_H10;
+    return &ALPN_SPEC_H10_H11;
 #ifdef USE_HTTP2
   if(wanted & CURL_HTTP_V2x) {
     if(wanted & CURL_HTTP_V1x)
