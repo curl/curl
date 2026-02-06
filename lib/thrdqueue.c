@@ -93,9 +93,11 @@ static void *thrdq_tpool_take(void *user_data)
   struct Curl_llist_node *e;
 
   Curl_mutex_acquire(&tqueue->lock);
-  e = Curl_llist_head(&tqueue->sendq);
-  if(e) {
-    qitem = Curl_node_take_elem(e);
+  if(!tqueue->aborted) {
+    e = Curl_llist_head(&tqueue->sendq);
+    if(e) {
+      qitem = Curl_node_take_elem(e);
+    }
   }
   Curl_mutex_release(&tqueue->lock);
   return qitem;
@@ -105,8 +107,8 @@ static void thrdq_tpool_return(void *item, void *user_data)
 {
   struct curl_thrdq *tqueue = user_data;
   struct thrdq_item *qitem = item;
-  Curl_thrdq_ev_cb *fn_event;
-  void *fn_user_data;
+  Curl_thrdq_ev_cb *fn_event = NULL;
+  void *fn_user_data = NULL;
 
   if(!tqueue) {
     thrdq_item_destroy(item);
@@ -114,11 +116,16 @@ static void thrdq_tpool_return(void *item, void *user_data)
   }
 
   Curl_mutex_acquire(&tqueue->lock);
-  DEBUGASSERT(!Curl_node_llist(&qitem->node));
-  Curl_llist_append(&tqueue->recvq, qitem, &qitem->node);
-  tqueue->nprocessed++;
-  fn_event = tqueue->fn_event;
-  fn_user_data = tqueue->fn_user_data;
+  if(tqueue->aborted) {
+    thrdq_item_destroy(item);
+  }
+  else {
+    DEBUGASSERT(!Curl_node_llist(&qitem->node));
+    Curl_llist_append(&tqueue->recvq, qitem, &qitem->node);
+    tqueue->nprocessed++;
+    fn_event = tqueue->fn_event;
+    fn_user_data = tqueue->fn_user_data;
+  }
   Curl_mutex_release(&tqueue->lock);
   /* avoiding deadlocks */
   if(fn_event)
@@ -135,8 +142,12 @@ static void thrdq_unlink(struct curl_thrdq *tqueue, bool locked, bool join)
 {
   DEBUGASSERT(tqueue->aborted);
   if(tqueue->tpool) {
+    if(locked)
+      Curl_mutex_release(&tqueue->lock);
     Curl_thrdpool_destroy(tqueue->tpool, join);
     tqueue->tpool = NULL;
+    if(locked)
+      Curl_mutex_acquire(&tqueue->lock);
   }
 
   Curl_llist_destroy(&tqueue->sendq, NULL);
