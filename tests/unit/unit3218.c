@@ -29,21 +29,21 @@
 #ifdef USE_THREADS
 
 struct unit3218_item {
-  uint64_t id;
+  int id;
   BIT(processed);
 };
 
 struct unit3218_ctx {
-  uint64_t ndone;
+  int ndone;
 };
 
-static struct unit3218_item *unit3218_item_create(uint64_t id)
+static struct unit3218_item *unit3218_item_create(int id)
 {
   struct unit3218_item *uitem;
   uitem = curlx_calloc(1, sizeof(*uitem));
   if(uitem) {
     uitem->id = id;
-    curl_mfprintf(stderr, "created item %" PRIu64 "\n", uitem->id);
+    curl_mfprintf(stderr, "created item %d\n", uitem->id);
   }
   return uitem;
 }
@@ -51,7 +51,7 @@ static struct unit3218_item *unit3218_item_create(uint64_t id)
 static void unit3218_item_free(void *item)
 {
   struct unit3218_item *uitem = item;
-  curl_mfprintf(stderr, "free item %" PRIu64 "\n", uitem->id);
+  curl_mfprintf(stderr, "free item %d\n", uitem->id);
   curlx_free(uitem);
 }
 
@@ -73,10 +73,10 @@ static void unit3218_event(const struct curl_thrdq *tqueue,
 static void unit3218_process(void *item)
 {
   struct unit3218_item *uitem = item;
-  curl_mfprintf(stderr, "start item %" PRIu64 "\n", uitem->id);
+  curl_mfprintf(stderr, "start item %d\n", uitem->id);
   curlx_wait_ms(1);
   uitem->processed = TRUE;
-  curl_mfprintf(stderr, "end item %" PRIu64 "\n", uitem->id);
+  curl_mfprintf(stderr, "end item %d\n", uitem->id);
 }
 
 static CURLcode test_unit3218(const char *arg)
@@ -84,7 +84,7 @@ static CURLcode test_unit3218(const char *arg)
   UNITTEST_BEGIN_SIMPLE
   struct curl_thrdq *tqueue;
   struct unit3218_ctx ctx;
-  uint64_t i, count;
+  int i, count;
   CURLcode r;
 
   /* create and teardown queue */
