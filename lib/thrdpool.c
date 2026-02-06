@@ -112,7 +112,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
     tslot->idle = TRUE;
     thrdpool_join_zombies(tpool);
     Curl_cond_signal(&tpool->await);
-    /* Only wait with idle timeout when we are above the minumum
+    /* Only wait with idle timeout when we are above the minimum
      * number of threads. Otherwise short idle timeouts will keep
      * on activating threads that have no means to shut down. */
     if((tpool->idle_time_ms > 0) &&
