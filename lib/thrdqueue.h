@@ -25,6 +25,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#ifdef USE_THREADS
+
 struct curl_thrdq;
 
 typedef enum {
@@ -99,5 +101,7 @@ void Curl_thrdq_clear(struct curl_thrdq *tqueue,
 
 CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
                                uint32_t timeout_ms);
+
+#endif /* USE_THREADS */
 
 #endif /* HEADER_CURL_THRDQUEUE_H */
