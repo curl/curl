@@ -589,7 +589,7 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
     /* we are exposing a pointer to internal memory with unknown
      * lifetime here. */
     *tsip = tsi;
-    if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, tsi)) {
+    if(!Curl_ssl_conn_get_info(data, data->conn, FIRSTSOCKET, tsi)) {
       tsi->backend = Curl_ssl_backend();
       tsi->internals = NULL;
     }

@@ -112,6 +112,7 @@ struct ssl_connect_data {
   const struct Curl_ssl *ssl_impl;  /* TLS backend for this filter */
   struct ssl_peer peer;             /* peer the filter talks to */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
+  struct ssl_primary_config *config; /* relevant SSL config */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
