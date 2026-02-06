@@ -1223,6 +1223,14 @@ static bool url_match_auth_nego(struct connectdata *conn,
     return FALSE;
   }
 #endif
+  if((m->want_nego_http &&
+      (conn->http_negotiate_state != GSS_AUTHNONE)) ||
+     (m->want_proxy_nego_http &&
+      (conn->proxy_negotiate_state != GSS_AUTHNONE))) {
+    /* We must use this connection, no other */
+    m->force_reuse = TRUE;
+    return TRUE;
+  }
   return TRUE;
 }
 #else
@@ -1274,6 +1282,8 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
   if(!url_match_auth_nego(conn, m))
     return FALSE;
+  else if(m->force_reuse)
+    return TRUE;
 
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
