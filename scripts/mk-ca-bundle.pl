@@ -390,9 +390,12 @@ my $filedate;
 my $datesrc;
 if($opt_d eq 'ref') {
     my $out = '';
-    if(open(my $fh, '-|', 'curl', '--user-agent', 'curl', '--silent', '--fail',
-            '--header', 'X-GitHub-Api-Version: 2022-11-28',
-            "https://api.github.com/repos/mozilla-firefox/firefox/commits/$opt_r")) {
+    if(open(my $fh, '-|', 'curl', '--user-agent', 'curl',
+                                  '--fail', '--silent', '--show-error',
+                                  '--connect-timeout', '15', '--max-time', '60',
+                                  '--retry', '6', '--retry-connrefused',
+                                  '--header', 'X-GitHub-Api-Version: 2022-11-28',
+                                  "https://api.github.com/repos/mozilla-firefox/firefox/commits/$opt_r")) {
         $out = do { local $/; <$fh> };
         close $fh;
     }
