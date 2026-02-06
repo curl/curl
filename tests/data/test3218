@@ -13,7 +13,7 @@ threads
 unittest
 </features>
 <name>
-thrdpool unit tests
+thrdqueue unit tests
 </name>
 </client>
 </testcase>

@@ -259,6 +259,7 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
 
 out:
   if(result && tpool) {
+    tpool->aborted = TRUE;
     thrdpool_unlink(tpool, FALSE);
     tpool = NULL;
   }

@@ -28,15 +28,11 @@
 struct curl_thrdq;
 
 typedef enum {
-  CURL_THRDQ_EV_ITEM_DONE, /* an item has been processed and is ready */
-  CURL_THRDQ_EV_ALL_DONE,  /* all items have been processed */
-  CURL_THRDQ_EV_FATAL_ERROR /* a fatal error in queue/thread handling
-                               was encountered, e.g. OOM or error starting
-                               a thread. */
+  CURL_THRDQ_EV_ITEM_DONE /* an item has been processed and is ready */
 } Curl_thrdq_event;
 
 /* Notification callback when "events" happen in the queue. May be
- * call from any thread while queue is locked. */
+ * call from any thread, tqueue is not locked. */
 typedef void Curl_thrdq_ev_cb(const struct curl_thrdq *tqueue,
                               Curl_thrdq_event ev,
                               void *user_data);
@@ -53,12 +49,13 @@ typedef void Curl_thrdq_item_free_cb(void *item);
  */
 CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
                            const char *name,
-                           uint32_t max_len,
-                           Curl_thrdq_item_free_cb *fn_free,
-                           Curl_thrdq_item_process_cb *fn_process,
+                           uint32_t max_len, /* 0 for unlimited */
                            uint32_t min_threads,
                            uint32_t max_threads,
                            uint32_t idle_time_ms,
+                           Curl_thrdq_item_free_cb *fn_free,
+                           Curl_thrdq_item_process_cb *fn_process,
+                           Curl_thrdq_ev_cb *fn_event, /* optional */
                            void *user_data);
 
 /* Destroy the queue, free all queued items unprocessed and destroy
@@ -66,22 +63,19 @@ CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
  * @param join TRUE when thread pool shall be joined. FALSE for
  *             detaching any running threads.
  */
-void Curl_thrdq_destroy(struct curl_thrdq **ptqueue, bool join);
+void Curl_thrdq_destroy(struct curl_thrdq *tqueue, bool join);
 
 /* Get information about the current queue state. Parameters may be
  * passed as NULL if caller is not interested. */
-void Curl_thrdq_stat(const struct curl_thrdq *tqueue,
+void Curl_thrdq_stat(struct curl_thrdq *tqueue,
                      uint32_t *pnsend, /* # of items awaitting processing */
                      uint32_t *pnrecv, /* # of items ready for recv */
                      uint64_t *pnscheduled, /* total items added */
-                     uint64_t *pnprocessed, /* total items processed */
-                     CURLcode *perr_fatal); /* fatal error or CURLE_OK */
+                     uint64_t *pnprocessed); /* total items processed */
 
 /* Send "item" onto the queue. The caller needs to clear any reference
  * to "item" on success, e.g. the queue takes ownership.
  * Returns CURLE_AGAIN when the queue has already been full.
- * If the queue ever experienced a fatal error, sending fails with
- * that error.
  */
 CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item);
 
@@ -90,8 +84,6 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item);
  * relinquishes all references to item.
  * Returns CURLE_AGAIN when there is no processed item, setting `pitem`
  * to NULL.
- * If the queue ever experienced a fatal error, receiving fails with
- * that error.
  */
 CURLcode Curl_thrdq_recv(struct curl_thrdq *tqueue, void **pitem);
 
@@ -100,11 +92,12 @@ typedef bool Curl_thrdq_item_match_cb(void *item, void *match_data);
 
 /* Clear all scheduled/processed items that match from the queue. This
  * will *not* be able to clear items that are being processed.
- * If the queue ever experienced a fatal error, clearing fails with
- * that error.
  */
-CURLcode Curl_thrdq_clear(struct curl_thrdq *tqueue,
-                          Curl_thrdq_item_match_cb *fn_match,
-                          void *match_data);
+void Curl_thrdq_clear(struct curl_thrdq *tqueue,
+                      Curl_thrdq_item_match_cb *fn_match,
+                      void *match_data);
+
+CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
+                               uint32_t timeout_ms);
 
 #endif /* HEADER_CURL_THRDQUEUE_H */
