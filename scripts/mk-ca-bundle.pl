@@ -136,8 +136,6 @@ else {
   $url = $opt_d;
 }
 
-print "Using URL: $url\n";
-
 if($opt_i) {
     print ("=" x 78 . "\n");
     print "Script Version                   : $version\n";
@@ -312,6 +310,7 @@ my $oldhash = oldhash($crt);
 report "SHA256 of old file: $oldhash";
 
 if(!$opt_n) {
+    report "Using URL: $url";
     report "Downloading $txt ...";
 
     # If we have an HTTPS URL then use curl
