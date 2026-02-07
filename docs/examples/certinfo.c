@@ -42,7 +42,7 @@ int main(void)
   CURLcode result;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   curl = curl_easy_init();
@@ -59,7 +59,7 @@ int main(void)
 
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       struct curl_certinfo *certinfo;
 
       result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &certinfo);

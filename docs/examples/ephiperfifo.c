@@ -464,7 +464,7 @@ int main(void)
   struct epoll_event events[10];
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   g_should_exit_ = 0;

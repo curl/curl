@@ -81,7 +81,7 @@ int main(void)
   size_t request_len = strlen(request);
 
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   /* A general note of caution here: if you are using curl_easy_recv() or

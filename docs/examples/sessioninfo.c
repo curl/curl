@@ -97,7 +97,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 int main(void)
 {
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   curl = curl_easy_init();

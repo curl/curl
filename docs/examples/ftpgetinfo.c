@@ -56,7 +56,7 @@ int main(void)
   const char *filename = strrchr(ftpurl, '/') + 1;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   curl = curl_easy_init();

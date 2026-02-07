@@ -88,7 +88,7 @@ int main(void)
 
   /* Must initialize libcurl before any threads are started */
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   for(i = 0; i < NUMT; i++) {

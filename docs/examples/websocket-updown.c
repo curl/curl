@@ -67,7 +67,7 @@ static size_t read_cb(char *buf, size_t nitems, size_t buflen, void *p)
      * CURLWS_BINARY otherwise). */
     result = curl_ws_start_frame(ctx->curl, CURLWS_TEXT,
                                  (curl_off_t)ctx->blen);
-    if(result) {
+    if(result != CURLE_OK) {
       fprintf(stderr, "error starting frame: %d\n", result);
       return CURL_READFUNC_ABORT;
     }
@@ -90,7 +90,7 @@ int main(int argc, const char *argv[])
   const char *payload = "Hello, friend!";
 
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   memset(&rctx, 0, sizeof(rctx));

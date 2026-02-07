@@ -206,7 +206,7 @@ int main(int argc, const char **argv)
     num_transfers = 3; /* a suitable low default */
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   trans = calloc(num_transfers, sizeof(*trans));

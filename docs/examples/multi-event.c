@@ -221,7 +221,7 @@ int main(int argc, const char **argv)
     return 0;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "Could not init curl\n");
     return (int)result;
   }

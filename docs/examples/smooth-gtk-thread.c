@@ -172,7 +172,7 @@ int main(int argc, const char **argv)
 
   /* Must initialize libcurl before any threads are started */
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   /* Init thread */

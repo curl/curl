@@ -107,7 +107,7 @@ int main(void)
 
   /* In Windows, this inits the Winsock stuff */
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result) {
+  if(result != CURLE_OK) {
     fclose(hd_src);
     return (int)result;
   }
