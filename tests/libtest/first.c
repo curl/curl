@@ -217,7 +217,9 @@ int main(int argc, const char **argv)
   const char *env;
   size_t tmp;
 
+#ifndef UNITTESTS /* for libtests only */
   toolx_binmode(stdout);
+#endif
 
   memory_tracking_init();
 #ifdef _WIN32
