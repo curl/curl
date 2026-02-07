@@ -697,11 +697,6 @@ if test "$curl_cv_apple" = "yes"; then
   CURL_SUPPORTS_BUILTIN_AVAILABLE
 fi
 
-curl_cv_cygwin='no'
-case $host_os in
-  cygwin*|msys*) curl_cv_cygwin='yes';;
-esac
-
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
 
@@ -4205,11 +4200,6 @@ if test "$curl_cv_native_windows" != "yes"; then
   CURL_CHECK_FUNC_STRCASECMP
   CURL_CHECK_FUNC_STRCMPI
   CURL_CHECK_FUNC_STRICMP
-fi
-
-AC_CHECK_FUNCS([setmode])
-if test "$curl_cv_native_windows" = "yes" || test "$curl_cv_cygwin" = "yes"; then
-  AC_CHECK_FUNCS([_setmode])
 fi
 
 if test -z "$ssl_backends"; then
