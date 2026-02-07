@@ -3103,7 +3103,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     data->req.upload_chunky = FALSE;
 
 out:
-  if(CURLE_TOO_LARGE == result)
+  if(result == CURLE_TOO_LARGE)
     failf(data, "HTTP request too large");
 
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials

@@ -589,7 +589,7 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(result) {
-    if(CURLE_AGAIN == result)
+    if(result == CURLE_AGAIN)
       BIO_set_retry_write(bio);
     return -1;
   }
@@ -618,7 +618,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(result) {
-    if(CURLE_AGAIN == result)
+    if(result == CURLE_AGAIN)
       BIO_set_retry_read(bio);
   }
   else {
@@ -4255,7 +4255,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
        * (RST connection, etc.), OpenSSL gives no explanation whatsoever and
        * the SO_ERROR is also lost.
        */
-      if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
+      if(result == CURLE_SSL_CONNECT_ERROR && errdetail == 0) {
         char extramsg[80] = "";
         int sockerr = SOCKERRNO;
 

@@ -53,11 +53,11 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     result = curl_easy_perform(curl);
 
-    if(CURLE_OK == result) {
+    if(result == CURLE_OK) {
       long port;
       result = curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT, &port);
 
-      if(CURLE_OK == result) {
+      if(result == CURLE_OK) {
         printf("We used local port: %ld\n", port);
       }
     }

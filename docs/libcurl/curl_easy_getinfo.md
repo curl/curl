@@ -417,12 +417,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     result = curl_easy_perform(curl);
 
-    if(CURLE_OK == result) {
+    if(result == CURLE_OK) {
       char *ct;
       /* ask for the content-type */
       result = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
 
-      if((CURLE_OK == result) && ct)
+      if((result == CURLE_OK) && ct)
         printf("We received Content-Type: %s\n", ct);
     }
 

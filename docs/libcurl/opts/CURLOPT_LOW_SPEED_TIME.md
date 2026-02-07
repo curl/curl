@@ -50,7 +50,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 60L);
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 30L);
     result = curl_easy_perform(curl);
-    if(CURLE_OPERATION_TIMEDOUT == result) {
+    if(result == CURLE_OPERATION_TIMEDOUT) {
       printf("Timeout.\n");
     }
     /* always cleanup */

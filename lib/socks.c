@@ -137,7 +137,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
     if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0)
       return CURLE_OPERATION_TIMEDOUT;
     result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
-    if(CURLE_AGAIN == result)
+    if(result == CURLE_AGAIN)
       continue;
     else if(result)
       return result;

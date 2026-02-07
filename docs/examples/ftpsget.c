@@ -90,7 +90,7 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    if(CURLE_OK != result) {
+    if(result != CURLE_OK) {
       /* we failed */
       fprintf(stderr, "curl told us %d\n", result);
     }

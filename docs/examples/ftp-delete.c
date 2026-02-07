@@ -72,7 +72,7 @@ int main(void)
     /* clean up the FTP commands list */
     curl_slist_free_all(headerlist);
 
-    if(CURLE_OK != result) {
+    if(result != CURLE_OK) {
       /* we failed */
       fprintf(stderr, "curl told us %d\n", result);
     }
