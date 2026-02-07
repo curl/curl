@@ -50,9 +50,9 @@ than the transfer itself in the multi/share handle's connection cache.
 
 # NOTES ON IDLE CONNECTIONS
 
-When using the multi interface with a connection cache, the following
-observed behavior applies. It is relevant for applications that manage
-large numbers of sockets and custom polling loops (e.g. kqueue or epoll).
+When using the multi interface with a connection cache, applications must
+not assume that sockets associated with idle connections behave the same
+as active connections.
 
 ## Callback life cycle
 
@@ -60,29 +60,27 @@ The callback and CURLOPT_CLOSESOCKETDATA(3) are copied from the *first* easy
 handle that creates the connection. Changing this option on a subsequent
 easy handle that reuses the same connection has no effect for that
 connection. The callback is not invoked when an idle connection is
-closed after CURL_CSELECT_ERR (e.g. when the socket has already been
-reported as in error state). Applications should not rely on the close
+closed after CURL_CSELECT_ERR. Applications should not rely on the close
 callback to be called for every socket that leaves use.
 
-## Idle connection polling
+## Readiness events after CURL_POLL_REMOVE
 
-Idle connections are not expected to receive application data. Read or
-error events may still occur when the peer closes the connection, or as
-zero-length reads, or for HTTPS when encrypted data `decrypts` to
-zero-length. libcurl cannot safely interpret or act on such events
-once the socket has been removed from polling (CURL_POLL_REMOVE), and
-applications cannot forward them to libcurl for idle connections.
-Applications must handle `fd` reuse and spurious readiness events
-defensively; the underlying risk is the kernel closing or reusing the
-`fd` after libcurl has stopped monitoring it.
+Applications must not assume that receiving readiness events for a socket
+implies that libcurl still expects the socket to be reported back via
+curl_multi_socket_action(3). Readiness events may occur for reasons
+outside libcurl's control, but libcurl provides no API for reporting such
+events once a socket has been removed from polling. Applications
+integrating with external polling systems must defensively handle
+unexpected readiness events.
 
 ## Socket callback and idle sockets
 
-When a connection enters the idle pool, libcurl invokes the socket
-callback with CURL_POLL_REMOVE. Subsequent callbacks for that socket
-may have *socketp* set to NULL. Do not rely on *socketp* to track idle
-connections; use the socket descriptor and *easy* (or your own mapping)
-instead.
+After libcurl signals CURL_POLL_REMOVE for a socket, the application must
+stop monitoring that socket for read and write events on libcurl's behalf.
+libcurl may still retain the connection internally for reuse. When the
+socket has been removed, the pointer previously assigned to it with
+curl_multi_assign(3) is forgotten by libcurl. Applications must not rely
+on *socketp* to track idle connections.
 
 # DEFAULT
 

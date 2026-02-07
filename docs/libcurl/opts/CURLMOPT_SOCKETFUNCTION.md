@@ -93,11 +93,12 @@ writable.
 ## CURL_POLL_REMOVE
 
 The specified socket or file descriptor is no longer used by libcurl for any
-active transfer. It might soon be added again. When a connection enters
-the idle pool, libcurl invokes the callback with CURL_POLL_REMOVE.
-Subsequent callbacks for that socket may have *socketp* set to NULL; do
-not rely on *socketp* to track idle connections. For more on idle
-connection behavior, see CURLOPT_CLOSESOCKETFUNCTION(3).
+active transfer. It might soon be added again. After libcurl signals
+CURL_POLL_REMOVE, the application must stop monitoring that socket for
+read and write events on libcurl's behalf. The pointer previously assigned
+to the socket with curl_multi_assign(3) is forgotten by libcurl.
+Applications must not rely on *socketp* to track idle connections. For
+more on idle connection behavior, see CURLOPT_CLOSESOCKETFUNCTION(3).
 
 # DEFAULT
 
