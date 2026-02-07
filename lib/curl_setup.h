@@ -870,9 +870,9 @@
 
 /* Since O_BINARY is used in bitmasks, setting it to zero makes it usable in
    source code but yet it does not ruin anything */
-#ifdef _O_BINARY  /* for _WIN32 */
+#ifdef _O_BINARY  /* for _WIN32 || MSDOS */
 #define CURL_O_BINARY _O_BINARY
-#elif defined(O_BINARY)
+#elif defined(O_BINARY)  /* __CYGWIN__ */
 #define CURL_O_BINARY O_BINARY
 #else
 #define CURL_O_BINARY 0
