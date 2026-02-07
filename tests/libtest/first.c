@@ -220,9 +220,7 @@ int main(int argc, const char **argv)
   size_t tmp;
 
 #ifndef UNITTESTS /* for libtests only */
-#if 0
   toolx_binmode(stdout);
-#endif
 #endif
 
   memory_tracking_init();
