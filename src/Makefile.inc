@@ -52,12 +52,13 @@ CURLX_CFILES = \
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
+  ../lib/curlx/base64.h \
+  ../lib/curlx/basename.h \
   ../lib/curlx/binmode.h \
   ../lib/curlx/dynbuf.h \
   ../lib/curlx/fopen.h \
   ../lib/curlx/multibyte.h \
   ../lib/curlx/nonblock.h \
-  ../lib/curlx/snprintf.h \
   ../lib/curlx/strcopy.h \
   ../lib/curlx/strdup.h \
   ../lib/curlx/strerr.h \
