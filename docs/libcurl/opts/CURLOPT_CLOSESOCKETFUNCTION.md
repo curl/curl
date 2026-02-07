@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_CLOSESOCKETDATA (3)
   - CURLOPT_OPENSOCKETFUNCTION (3)
+  - CURLMOPT_SOCKETFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.21.7
@@ -46,6 +47,39 @@ Note that when using multi/share handles, your callback may get invoked even
 after the easy handle has been cleaned up. The callback and data is
 inherited by a new connection and that connection may live longer
 than the transfer itself in the multi/share handle's connection cache.
+
+# NOTES ON IDLE CONNECTIONS
+
+When using the multi interface with a connection cache, applications must
+not assume that sockets associated with idle connections behave the same
+as active connections.
+
+## Callback life cycle
+
+The callback and CURLOPT_CLOSESOCKETDATA(3) are copied from the *first* easy
+handle that creates the connection. Changing this option on a subsequent
+easy handle that reuses the same connection has no effect for that
+connection. The callback is not invoked when an idle connection is
+closed after CURL_CSELECT_ERR. Applications should not rely on the close
+callback to be called for every socket that leaves use.
+
+## Readiness events after CURL_POLL_REMOVE
+
+Applications must not assume that receiving readiness events for a socket
+implies that libcurl still expects the socket to be reported back via
+curl_multi_socket_action(3). Readiness events may occur for reasons
+outside libcurl's control, but libcurl provides no API for reporting such
+events once a socket has been removed from polling. Applications
+integrating with external polling systems must defensively handle
+unexpected readiness events.
+
+## Socket callback and idle sockets
+
+After libcurl signals CURL_POLL_REMOVE for a socket, the application must
+stop monitoring that socket on libcurl's behalf.
+libcurl may still retain the connection internally for reuse. When the
+socket has been removed, the pointer previously assigned to it with
+curl_multi_assign(3) is forgotten by libcurl. libcurl does not track idle connections.
 
 # DEFAULT
 
