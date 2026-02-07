@@ -29,10 +29,8 @@ void toolx_binmode(FILE *stream)
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
   (void)_setmode(fileno(stream), CURL_O_BINARY);
-#error WIN32_CYGWIN
 #else
   (void)setmode(fileno(stream), CURL_O_BINARY);
-#error MSDOS_MSDOS
 #endif
 }
 #endif
