@@ -1617,9 +1617,8 @@ if(NOT WIN32)
   check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
 endif()
 
-check_function_exists("setmode" HAVE_SETMODE)
-if(WIN32 OR CYGWIN)
-  check_function_exists("_setmode" HAVE__SETMODE)
+if(NOT WIN32 AND NOT CYGWIN)
+  check_function_exists("setmode" HAVE_SETMODE)
 endif()
 
 if(AMIGA)
