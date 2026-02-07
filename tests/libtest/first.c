@@ -23,7 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
+#ifndef UNITTESTS /* for libtests only */
 #include <toolx/binmode.h>
+#endif
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h> /* for setlocale() */
