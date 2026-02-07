@@ -911,7 +911,7 @@ static CURLcode etag_store(struct OperationConfig *config,
   }
   else {
     /* always use binary mode for protocol header output */
-    CURLX_SET_BINMODE(etag_save->stream);
+    toolx_binmode(etag_save->stream);
   }
   return CURLE_OK;
 }
@@ -924,7 +924,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
   if(!strcmp(config->headerfile, "%")) {
     heads->stream = stderr;
     /* use binary mode for protocol header output */
-    CURLX_SET_BINMODE(heads->stream);
+    toolx_binmode(heads->stream);
   }
   else if(strcmp(config->headerfile, "-")) {
     FILE *newfile;
@@ -964,7 +964,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
   }
   else {
     /* always use binary mode for protocol header output */
-    CURLX_SET_BINMODE(heads->stream);
+    toolx_binmode(heads->stream);
   }
   return CURLE_OK;
 }
@@ -1119,7 +1119,7 @@ static void check_stdin_upload(struct OperationConfig *config,
   DEBUGASSERT(per->infdopen == FALSE);
   DEBUGASSERT(per->infd == STDIN_FILENO);
 
-  CURLX_SET_BINMODE(stdin);
+  toolx_binmode(stdin);
   if(!strcmp(per->uploadfile, ".")) {
 #if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP)
     /* non-blocking stdin behavior on Windows is challenging
@@ -1351,7 +1351,7 @@ static CURLcode create_single(struct OperationConfig *config,
        !config->use_ascii) {
       /* We get the output to stdout and we have not got the ASCII/text flag,
          then set stdout to be binary */
-      CURLX_SET_BINMODE(stdout);
+      toolx_binmode(stdout);
     }
 
     /* explicitly passed to stdout means okaying binary gunk */

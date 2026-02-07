@@ -676,7 +676,7 @@ static ParameterError data_urlencode(const char *nextarg,
     /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
-      CURLX_SET_BINMODE(stdin);
+      toolx_binmode(stdin);
     }
     else {
       file = curlx_fopen(p, "rb");
@@ -950,7 +950,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!strcmp("-", nextarg)) {
       file = stdin;
       if(cmd == C_DATA_BINARY) /* forced data-binary */
-        CURLX_SET_BINMODE(stdin);
+        toolx_binmode(stdin);
     }
     else {
       file = curlx_fopen(nextarg, "rb");
