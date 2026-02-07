@@ -4207,9 +4207,8 @@ if test "$curl_cv_native_windows" != "yes"; then
   CURL_CHECK_FUNC_STRICMP
 fi
 
-AC_CHECK_FUNCS([setmode])
-if test "$curl_cv_native_windows" = "yes" || test "$curl_cv_cygwin" = "yes"; then
-  AC_CHECK_FUNCS([_setmode])
+if test "$curl_cv_native_windows" != "yes" && test "$curl_cv_cygwin" != "yes"; then
+  AC_CHECK_FUNCS([setmode])
 fi
 
 if test -z "$ssl_backends"; then
