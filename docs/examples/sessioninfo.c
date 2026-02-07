@@ -53,7 +53,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 
   result = curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &info);
 
-  if(!result) {
+  if(result == CURLE_OK) {
     unsigned int cert_list_size;
     const gnutls_datum_t *chainp;
 

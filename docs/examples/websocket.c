@@ -45,7 +45,7 @@ static CURLcode ping(CURL *curl, const char *send_payload)
 
   while(blen) {
     result = curl_ws_send(curl, buf, blen, &sent, 0, CURLWS_PING);
-    if(!result) {
+    if(result == CURLE_OK) {
       buf += sent; /* deduct what was sent */
       blen -= sent;
     }
@@ -57,7 +57,7 @@ static CURLcode ping(CURL *curl, const char *send_payload)
     else /* real error sending */
       break;
   }
-  if(!result)
+  if(result == CURLE_OK)
     fprintf(stderr, "ws: sent PING with payload\n");
   return result;
 }
@@ -71,7 +71,7 @@ static CURLcode recv_pong(CURL *curl, const char *expected_payload)
 
 retry:
   result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(!result) {
+  if(result == CURLE_OK) {
     /* on small PING content, this example assumes the complete
      * PONG content arrives in one go. Larger frames will arrive
      * in chunks, however. */
