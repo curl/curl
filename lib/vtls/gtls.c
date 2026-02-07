@@ -55,7 +55,9 @@
 #include "x509asn1.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
-/*#define GTLSDEBUG */
+#if 0
+#define GTLSDEBUG
+#endif
 
 #ifdef GTLSDEBUG
 static void tls_log_func(int level, const char *str)
