@@ -203,7 +203,7 @@ if2ip_result_t Curl_if2ip(int af,
     return IF2IP_NOT_FOUND;
 
   dummy = CURL_SOCKET(AF_INET, SOCK_STREAM, 0);
-  if(CURL_SOCKET_BAD == dummy)
+  if(dummy == CURL_SOCKET_BAD)
     return IF2IP_NOT_FOUND;
 
   memset(&req, 0, sizeof(req));

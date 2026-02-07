@@ -406,7 +406,7 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
 static int socket_close(struct Curl_easy *data, struct connectdata *conn,
                         int use_callback, curl_socket_t sock)
 {
-  if(CURL_SOCKET_BAD == sock)
+  if(sock == CURL_SOCKET_BAD)
     return 0;
 
   if(use_callback && conn && conn->fclosesocket) {
@@ -932,7 +932,7 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 
-  if(ctx && CURL_SOCKET_BAD != ctx->sock) {
+  if(ctx && ctx->sock != CURL_SOCKET_BAD) {
     CURL_TRC_CF(data, cf, "cf_socket_close, fd=%" FMT_SOCKET_T, ctx->sock);
     if(ctx->sock == cf->conn->sock[cf->sockindex])
       cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
@@ -2065,7 +2065,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   s_accepted = CURL_ACCEPT(ctx->sock, (struct sockaddr *)&add, &size);
 #endif
 
-  if(CURL_SOCKET_BAD == s_accepted) {
+  if(s_accepted == CURL_SOCKET_BAD) {
     failf(data, "Error accept()ing server connect: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     return CURLE_FTP_ACCEPT_FAILED;

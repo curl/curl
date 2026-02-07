@@ -192,7 +192,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
   CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes -> %zu",
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
                  nwritten);
-  if(CURL_WRITEFUNC_PAUSE == nwritten) {
+  if(nwritten == CURL_WRITEFUNC_PAUSE) {
     if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
       /* Protocols that work without network cannot be paused. This is
          actually only FILE:// just now, and it cannot pause since the
@@ -205,7 +205,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
     result = Curl_xfer_pause_recv(data, TRUE);
     return result ? result : CURLE_AGAIN;
   }
-  else if(CURL_WRITEFUNC_ERROR == nwritten) {
+  else if(nwritten == CURL_WRITEFUNC_ERROR) {
     failf(data, "client returned ERROR on write of %zu bytes", blen);
     return CURLE_WRITE_ERROR;
   }

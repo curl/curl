@@ -679,7 +679,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
 
     if((clients < 2) && FD_ISSET(sockfd, &fds_read)) {
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
-      if(CURL_SOCKET_BAD == newfd) {
+      if(newfd == CURL_SOCKET_BAD) {
         error = SOCKERRNO;
         logmsg("accept() failed with error (%d) %s",
                error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -866,7 +866,7 @@ static int test_socksd(int argc, const char *argv[])
 
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
-  if(CURL_SOCKET_BAD == sock) {
+  if(sock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -876,7 +876,7 @@ static int test_socksd(int argc, const char *argv[])
   {
     /* passive daemon style */
     sock = sockdaemon(sock, &server_port, unix_socket, FALSE);
-    if(CURL_SOCKET_BAD == sock) {
+    if(sock == CURL_SOCKET_BAD) {
       goto socks5_cleanup;
     }
 #ifdef USE_UNIX_SOCKETS
