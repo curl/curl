@@ -1082,7 +1082,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
     CURLcode r2 = CURLE_OK;
 
     r2 = cf_quiche_send_body(cf, data, stream, buf, blen, eos, &nwritten);
-    if(r2 && (CURLE_AGAIN != r2)) {  /* real error, fail */
+    if(r2 && (r2 != CURLE_AGAIN)) {  /* real error, fail */
       result = r2;
     }
     else if(nwritten > 0) {
