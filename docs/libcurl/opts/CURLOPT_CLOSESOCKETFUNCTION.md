@@ -79,8 +79,7 @@ After libcurl signals CURL_POLL_REMOVE for a socket, the application must
 stop monitoring that socket on libcurl's behalf.
 libcurl may still retain the connection internally for reuse. When the
 socket has been removed, the pointer previously assigned to it with
-curl_multi_assign(3) is forgotten by libcurl. Applications must not rely
-on *socketp* to track idle connections.
+curl_multi_assign(3) is forgotten by libcurl. libcurl does not track idle connections.
 
 # DEFAULT
 
