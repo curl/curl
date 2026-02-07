@@ -25,12 +25,12 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
+#if defined(HAVE_SETMODE) || defined(HAVE__SETMODE)
 /* Requires io.h and/or fcntl.h when available */
 #ifdef HAVE__SETMODE
-#  define CURLX_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
+#  define CURLX_SET_BINMODE(stream)  (void)_setmode(fileno(stream), CURL_O_BINARY)
 #else
-#  define CURLX_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
+#  define CURLX_SET_BINMODE(stream)  (void)setmode(fileno(stream), CURL_O_BINARY)
 #endif
 #else
 #  define CURLX_SET_BINMODE(stream)  (void)stream
