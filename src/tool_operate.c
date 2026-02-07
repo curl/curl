@@ -80,6 +80,7 @@
 #include "tool_ipfs.h"
 #include "config2setopts.h"
 #include "var.h"
+#include "toolx/binmode.h"
 
 #ifdef DEBUGBUILD
 /* libcurl's debug-only curl_easy_perform_ev() */

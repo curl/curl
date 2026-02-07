@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include <toolx/binmode.h>
+
 #ifdef HAVE_LOCALE_H
 #include <locale.h> /* for setlocale() */
 #endif

@@ -28,6 +28,7 @@
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
 #include "tool_parsecfg.h"
+#include "toolx/binmode.h"
 
 /* tool_mime functions. */
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,

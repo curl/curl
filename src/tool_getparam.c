@@ -37,6 +37,7 @@
 #include "tool_stderr.h"
 #include "tool_help.h"
 #include "var.h"
+#include "toolx/binmode.h"
 
 #define ALLOW_BLANK TRUE
 #define DENY_BLANK  FALSE
