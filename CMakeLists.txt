@@ -1617,10 +1617,6 @@ if(NOT WIN32)
   check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
 endif()
 
-if(NOT WIN32 AND NOT CYGWIN)
-  check_function_exists("setmode" HAVE_SETMODE)
-endif()
-
 if(AMIGA)
   check_symbol_exists("CloseSocket" "${CURL_INCLUDES}" HAVE_CLOSESOCKET_CAMEL)  # sys/socket.h proto/bsdsocket.h
 endif()

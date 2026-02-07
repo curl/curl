@@ -1451,9 +1451,9 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   if test "$curl_cv_winuwp" = "yes"; then
     curl_pflags="${curl_pflags} UWP"
   fi
-  if test "$curl_cv_cygwin" = "yes"; then
-    curl_pflags="${curl_pflags} CYGWIN"
-  fi
+  case $host_os in
+    cygwin*|msys*) curl_pflags="${curl_pflags} CYGWIN";;
+  esac
   case $host_os in
     msdos*) curl_pflags="${curl_pflags} DOS";;
     amiga*) curl_pflags="${curl_pflags} AMIGA";;
