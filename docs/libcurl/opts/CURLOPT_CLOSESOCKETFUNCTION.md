@@ -50,36 +50,14 @@ than the transfer itself in the multi/share handle's connection cache.
 
 # NOTES ON IDLE CONNECTIONS
 
-When using the multi interface with a connection cache, applications must
-not assume that sockets associated with idle connections behave the same
-as active connections.
-
-## Callback life cycle
-
+The close socket callback is invoked when libcurl closes a socket it owns.
 The callback and CURLOPT_CLOSESOCKETDATA(3) are copied from the *first* easy
-handle that creates the connection. Changing this option on a subsequent
+handle that creates the connection; changing this option on a subsequent
 easy handle that reuses the same connection has no effect for that
-connection. The callback is not invoked when an idle connection is
-closed after CURL_CSELECT_ERR. Applications should not rely on the close
-callback to be called for every socket that leaves use.
-
-## Readiness events after CURL_POLL_REMOVE
-
-Applications must not assume that receiving readiness events for a socket
-implies that libcurl still expects the socket to be reported back via
-curl_multi_socket_action(3). Readiness events may occur for reasons
-outside libcurl's control, but libcurl provides no API for reporting such
-events once a socket has been removed from polling. Applications
-integrating with external polling systems must defensively handle
-unexpected readiness events.
-
-## Socket callback and idle sockets
-
-After libcurl signals CURL_POLL_REMOVE for a socket, the application must
-stop monitoring that socket on libcurl's behalf.
-libcurl may still retain the connection internally for reuse. When the
-socket has been removed, the pointer previously assigned to it with
-curl_multi_assign(3) is forgotten by libcurl. libcurl does not track idle connections.
+connection. The callback is not guaranteed to be called for every socket
+that leaves use, for example when connections are kept alive in the
+connection cache and reused. Applications must not assume the callback is
+called for every socket lifecycle.
 
 # DEFAULT
 
