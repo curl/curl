@@ -99,6 +99,23 @@ announcement.
 - The security webpage on the website should get the new vulnerability
   mentioned.
 
+## GitHub Advisories
+
+We receive *advisories* submitted on GitHub but we consider them to be
+*reports*. Since we want to keep the original report as-is and preserved, we
+cannot use this system to author nor publish the actual final advisory for a
+confirmed vulnerability.
+
+The security reports submitted on GitHub are not published, instead they are
+always closed weather confirmed or not.
+
+Confirmed security reports are instead published as security advisories on the
+curl website in sync with the curl release in which the fix is published for
+the vulnerability.
+
+Unfortunately, GitHub does not allow us to disclose the reports. They can only
+be published as "advisories" - and they are not.
+
 ## security (at curl dot se)
 
 This is a private mailing list for discussions on and about curl security
