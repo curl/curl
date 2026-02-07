@@ -105,7 +105,7 @@ static int read_cb(void *userdata, uint8_t *buf, uintptr_t len,
   if(result) {
     nread = 0;
     /* !checksrc! disable ERRNOVAR 4 */
-    if(CURLE_AGAIN == result)
+    if(result == CURLE_AGAIN)
       ret = EAGAIN;
     else
       ret = EINVAL;
@@ -130,7 +130,7 @@ static int write_cb(void *userdata, const uint8_t *buf, uintptr_t len,
                              buf, len, FALSE, &nwritten);
   if(result) {
     nwritten = 0;
-    if(CURLE_AGAIN == result)
+    if(result == CURLE_AGAIN)
       ret = EAGAIN;
     else
       ret = EINVAL;
@@ -355,7 +355,7 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   result = cr_flush_out(cf, data, rconn);
   if(result) {
-    if(CURLE_AGAIN == result) {
+    if(result == CURLE_AGAIN) {
       /* The TLS bytes may have been partially written, but we fail the
        * complete send() and remember how much we already added to Rustls. */
       backend->plain_out_buffered = plainwritten;

@@ -49,9 +49,9 @@ int main(void)
     curl_off_t queue;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     result = curl_easy_perform(curl);
-    if(CURLE_OK == result) {
+    if(result == CURLE_OK) {
       result = curl_easy_getinfo(curl, CURLINFO_QUEUE_TIME_T, &queue);
-      if(CURLE_OK == result) {
+      if(result == CURLE_OK) {
         printf("Queued: %" CURL_FORMAT_CURL_OFF_T ".%06ld us", queue / 1000000,
                (long)(queue % 1000000));
       }

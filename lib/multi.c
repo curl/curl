@@ -707,7 +707,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   else
     result = status;
 
-  if(CURLE_ABORTED_BY_CALLBACK != result) {
+  if(result != CURLE_ABORTED_BY_CALLBACK) {
     /* avoid this if we already aborted by callback to avoid this calling
        another callback */
     int rc = Curl_pgrsDone(data);
@@ -1956,7 +1956,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
     }
   }
 #ifndef CURL_DISABLE_HTTP
-  else if((CURLE_HTTP2_STREAM == result) &&
+  else if((result == CURLE_HTTP2_STREAM) &&
           Curl_h2_http_1_1_error(data)) {
     CURLcode ret = Curl_retry_request(data, &newurl);
 
@@ -2135,7 +2135,7 @@ static CURLMcode state_do(struct Curl_easy *data,
         mresult = CURLM_CALL_MULTI_PERFORM;
       }
     }
-    else if((CURLE_SEND_ERROR == result) &&
+    else if((result == CURLE_SEND_ERROR) &&
             data->conn->bits.reuse) {
       /*
        * In this situation, a connection that we were trying to use may have
@@ -2282,7 +2282,7 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   bool async;
   CURLMcode mresult = CURLM_OK;
   CURLcode result = Curl_connect(data, &async, &connected);
-  if(CURLE_NO_CONNECTION_AVAILABLE == result) {
+  if(result == CURLE_NO_CONNECTION_AVAILABLE) {
     /* There was no connection available. We will go to the pending state and
        wait for an available connection. */
     multistate(data, MSTATE_PENDING);

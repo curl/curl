@@ -48,11 +48,11 @@ int main(void)
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     result = curl_easy_perform(curl);
-    if(CURLE_OK == result) {
+    if(result == CURLE_OK) {
       curl_off_t posttransfer;
       result = curl_easy_getinfo(curl, CURLINFO_POSTTRANSFER_TIME_T,
                               &posttransfer);
-      if(CURLE_OK == result) {
+      if(result == CURLE_OK) {
         printf("Request sent after: %" CURL_FORMAT_CURL_OFF_T ".%06ld s",
                posttransfer / 1000000, (long)(posttransfer % 1000000));
       }

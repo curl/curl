@@ -183,17 +183,17 @@ int main(int argc, const char *argv[])
     /* get it! */
     result = curl_easy_perform(curl);
 
-    if(CURLE_OK == result) {
+    if(result == CURLE_OK) {
       curl_off_t val;
 
       /* check for bytes downloaded */
       result = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &val);
-      if((CURLE_OK == result) && (val > 0))
+      if((result == CURLE_OK) && (val > 0))
         printf("Data downloaded: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", val);
 
       /* check for total download time */
       result = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &val);
-      if((CURLE_OK == result) && (val > 0))
+      if((result == CURLE_OK) && (val > 0))
         printf("Total download time: %" CURL_FORMAT_CURL_OFF_T
                ".%06" CURL_FORMAT_CURL_OFF_T " sec.\n",
                val / 1000000,
@@ -201,7 +201,7 @@ int main(int argc, const char *argv[])
 
       /* check for average download speed */
       result = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &val);
-      if((CURLE_OK == result) && (val > 0))
+      if((result == CURLE_OK) && (val > 0))
         printf("Average download speed: "
                "%" CURL_FORMAT_CURL_OFF_T " kbyte/sec.\n",
                val / 1024);
@@ -209,7 +209,7 @@ int main(int argc, const char *argv[])
       if(prtall) {
         /* check for name resolution time */
         result = curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME_T, &val);
-        if((CURLE_OK == result) && (val > 0))
+        if((result == CURLE_OK) && (val > 0))
           printf("Name lookup time: %" CURL_FORMAT_CURL_OFF_T
                  ".%06" CURL_FORMAT_CURL_OFF_T " sec.\n",
                  val / 1000000,
@@ -217,7 +217,7 @@ int main(int argc, const char *argv[])
 
         /* check for connect time */
         result = curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &val);
-        if((CURLE_OK == result) && (val > 0))
+        if((result == CURLE_OK) && (val > 0))
           printf("Connect time: %" CURL_FORMAT_CURL_OFF_T
                  ".%06" CURL_FORMAT_CURL_OFF_T " sec.\n",
                  val / 1000000,

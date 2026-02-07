@@ -673,7 +673,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     curlx_struct_stat statbuf;
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if(CURL_SOCKET_BAD == unixfd) {
+    if(unixfd == CURL_SOCKET_BAD) {
       logmsg("Failed to create socket at %s (%d) %s", unix_socket,
              SOCKERRNO, curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
       return -1;

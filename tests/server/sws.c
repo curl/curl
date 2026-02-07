@@ -1266,7 +1266,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   logmsg("about to connect to %s%s%s:%hu", op_br, ipaddr, cl_br, port);
 
   serverfd = socket(socket_domain, SOCK_STREAM, 0);
-  if(CURL_SOCKET_BAD == serverfd) {
+  if(serverfd == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
     logmsg("Error creating socket for server connection (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -1815,12 +1815,12 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   msgsock = accept(sock, NULL, NULL);
 
   if(got_exit_signal) {
-    if(CURL_SOCKET_BAD != msgsock)
+    if(msgsock != CURL_SOCKET_BAD)
       sclose(msgsock);
     return CURL_SOCKET_BAD;
   }
 
-  if(CURL_SOCKET_BAD == msgsock) {
+  if(msgsock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
     if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
       /* nothing to accept */
@@ -2146,7 +2146,7 @@ static int test_sws(int argc, const char *argv[])
   all_sockets[0] = sock;
   num_sockets = 1;
 
-  if(CURL_SOCKET_BAD == sock) {
+  if(sock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -2303,7 +2303,7 @@ static int test_sws(int argc, const char *argv[])
 
     /* Clear out closed sockets */
     for(socket_idx = num_sockets - 1; socket_idx >= 1; --socket_idx) {
-      if(CURL_SOCKET_BAD == all_sockets[socket_idx]) {
+      if(all_sockets[socket_idx] == CURL_SOCKET_BAD) {
         char *dst = (char *)(all_sockets + socket_idx);
         char *src = (char *)(all_sockets + socket_idx + 1);
         char *end = (char *)(all_sockets + num_sockets);
@@ -2357,7 +2357,7 @@ static int test_sws(int argc, const char *argv[])
         msgsock = accept_connection(sock);
         logmsg("accept_connection %ld returned %ld",
                (long)sock, (long)msgsock);
-        if(CURL_SOCKET_BAD == msgsock)
+        if(msgsock == CURL_SOCKET_BAD)
           goto sws_cleanup;
         if(req->delay)
           curlx_wait_ms(req->delay);

@@ -725,7 +725,7 @@ MQTT_SUBACK_COMING:
       rest = sizeof(buffer);
     result = Curl_xfer_recv(data, buffer, rest, &nread);
     if(result) {
-      if(CURLE_AGAIN == result) {
+      if(result == CURLE_AGAIN) {
         infof(data, "EEEE AAAAGAIN");
       }
       goto end;

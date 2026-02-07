@@ -648,7 +648,7 @@ static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
   wrote = writeit((char *)CURL_UNCONST(ptr), 1, len, user_ptr);
   Curl_set_in_callback(data, FALSE);
 
-  if(CURL_WRITEFUNC_PAUSE == wrote) {
+  if(wrote == CURL_WRITEFUNC_PAUSE) {
     failf(data, "Cannot pause RTP");
     return CURLE_WRITE_ERROR;
   }

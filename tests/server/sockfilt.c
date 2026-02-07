@@ -974,7 +974,7 @@ static bool juggle(curl_socket_t *sockfdp,
   case PASSIVE_CONNECT:
 
     sockfd = *sockfdp;
-    if(CURL_SOCKET_BAD == sockfd) {
+    if(sockfd == CURL_SOCKET_BAD) {
       /* eeek, we are supposedly connected and then this cannot be -1 ! */
       logmsg("socket is -1! on %s:%d", __FILE__, __LINE__);
       maxfd = 0; /* stdin */
@@ -990,7 +990,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
     sockfd = *sockfdp;
     /* sockfd turns CURL_SOCKET_BAD when our connection has been closed */
-    if(CURL_SOCKET_BAD != sockfd) {
+    if(sockfd != CURL_SOCKET_BAD) {
       FD_SET(sockfd, &fds_read);
       maxfd = (int)sockfd;
     }
@@ -1125,7 +1125,7 @@ static bool juggle(curl_socket_t *sockfdp,
       /* there is no stream set up yet, this is an indication that there is a
          client connecting. */
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
-      if(CURL_SOCKET_BAD == newfd) {
+      if(newfd == CURL_SOCKET_BAD) {
         error = SOCKERRNO;
         logmsg("accept() failed with error (%d) %s",
                error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -1298,7 +1298,7 @@ static int test_sockfilt(int argc, const char *argv[])
 
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
-  if(CURL_SOCKET_BAD == sock) {
+  if(sock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -1349,7 +1349,7 @@ static int test_sockfilt(int argc, const char *argv[])
   else {
     /* passive daemon style */
     sock = sockdaemon(sock, &server_port, NULL, s_bind_only);
-    if(CURL_SOCKET_BAD == sock) {
+    if(sock == CURL_SOCKET_BAD) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }

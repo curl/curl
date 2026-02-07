@@ -1120,7 +1120,7 @@ static int test_tftpd(int argc, const char **argv)
     sock = socket(AF_INET6, SOCK_DGRAM, 0);
 #endif
 
-  if(CURL_SOCKET_BAD == sock) {
+  if(sock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -1251,7 +1251,7 @@ static int test_tftpd(int argc, const char **argv)
 #endif
       from.sa4.sin_family = AF_INET;
       peer = socket(AF_INET, SOCK_DGRAM, 0);
-      if(CURL_SOCKET_BAD == peer) {
+      if(peer == CURL_SOCKET_BAD) {
         logmsg("socket");
         result = 2;
         break;
@@ -1266,7 +1266,7 @@ static int test_tftpd(int argc, const char **argv)
     else {
       from.sa6.sin6_family = AF_INET6;
       peer = socket(AF_INET6, SOCK_DGRAM, 0);
-      if(CURL_SOCKET_BAD == peer) {
+      if(peer == CURL_SOCKET_BAD) {
         logmsg("socket");
         result = 2;
         break;

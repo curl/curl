@@ -54,10 +54,10 @@ int main(void)
     /* Ask for filetime */
     curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
     result = curl_easy_perform(curl);
-    if(CURLE_OK == result) {
+    if(result == CURLE_OK) {
       long filetime;
       result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
-      if((CURLE_OK == result) && (filetime >= 0)) {
+      if((result == CURLE_OK) && (filetime >= 0)) {
         time_t file_time = (time_t)filetime;
         printf("filetime: %s", ctime(&file_time));
       }

@@ -97,7 +97,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
   if(result) {
     /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
-                               (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
+                               (result == CURLE_AGAIN) ? EAGAIN : EINVAL);
     return -1;
   }
   return (ssize_t)nwritten;
@@ -130,7 +130,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   if(result) {
     /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
-                               (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
+                               (result == CURLE_AGAIN) ? EAGAIN : EINVAL);
     return -1;
   }
   else if(nread == 0)

@@ -1111,7 +1111,7 @@ static int test_rtspd(int argc, const char *argv[])
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 #endif
 
-  if(CURL_SOCKET_BAD == sock) {
+  if(sock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -1225,7 +1225,7 @@ static int test_rtspd(int argc, const char *argv[])
 
     if(got_exit_signal)
       break;
-    if(CURL_SOCKET_BAD == msgsock) {
+    if(msgsock == CURL_SOCKET_BAD) {
       error = SOCKERRNO;
       logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
              error, curlx_strerror(error, errbuf, sizeof(errbuf)));

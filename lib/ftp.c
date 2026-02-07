@@ -3616,7 +3616,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     pp->response = *Curl_pgrs_now(data); /* timeout relative now */
     result = getftpresponse(data, &nread, &ftpcode);
 
-    if(!nread && (CURLE_OPERATION_TIMEDOUT == result)) {
+    if(!nread && (result == CURLE_OPERATION_TIMEDOUT)) {
       failf(data, "control connection looks dead");
       ftpc->ctl_valid = FALSE; /* mark control connection as bad */
       connclose(conn, "Timeout or similar in FTP DONE operation"); /* close */
