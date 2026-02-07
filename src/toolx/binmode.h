@@ -27,11 +27,11 @@
 
 /* Requires io.h and/or fcntl.h when available */
 #if defined(HAVE__SETMODE)
-#  define CURLX_SET_BINMODE(stream)  (void)_setmode(fileno(stream), CURL_O_BINARY)
+#  define CURLX_SET_BINMODE(stream) (void)_setmode(fileno(stream), CURL_O_BINARY)
 #elif defined(HAVE_SETMODE)
-#  define CURLX_SET_BINMODE(stream)  (void)setmode(fileno(stream), CURL_O_BINARY)
+#  define CURLX_SET_BINMODE(stream) (void)setmode(fileno(stream), CURL_O_BINARY)
 #else
-#  define CURLX_SET_BINMODE(stream)  (void)stream
+#  define CURLX_SET_BINMODE(stream) (void)stream
 #endif
 
 #endif /* HEADER_TOOLX_BINMODE_H */
