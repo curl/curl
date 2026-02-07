@@ -34,7 +34,7 @@ HSTS
 </client>
 
 <verify>
-<stdout>
+<stdout mode="text">
 readfrom.example [readfrom.example]: 1633063661 includeSubDomains
 'old.example' is not HSTS
 'readfrom.example' is not HSTS
