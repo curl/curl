@@ -60,9 +60,9 @@ static size_t read_cb(char *buf, size_t nitems, size_t buflen, void *p)
   struct read_ctx *ctx = p;
   size_t len = nitems * buflen;
   size_t left = ctx->blen - ctx->nsent;
-  CURLcode result;
 
   if(!ctx->nsent) {
+    CURLcode result;
     /* On first call, set the FRAME information to be used (it defaults to
      * CURLWS_BINARY otherwise). */
     result = curl_ws_start_frame(ctx->curl, CURLWS_TEXT,
