@@ -51,6 +51,7 @@ CURLX_C = \
   ../../lib/curlx/winapi.c
 
 TOOLX_C = \
+  ../../src/toolx/binmode.c \
   ../../src/toolx/tool_time.c
 
 # All test servers

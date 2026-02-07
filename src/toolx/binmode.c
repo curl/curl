@@ -1,5 +1,3 @@
-#ifndef HEADER_TOOLX_BINMODE_H
-#define HEADER_TOOLX_BINMODE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "binmode.h"
 
+/* Requires io.h and/or fcntl.h when available */
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(HAVE_SETMODE)
-void toolx_binmode(FILE *stream);
-#else
-#define toolx_binmode(stream) do { (void)stream; } while(0)
+void toolx_binmode(FILE *stream)
+{
+#if defined(_WIN32) || defined(__CYGWIN__)
+  (void)_setmode(fileno(stream), CURL_O_BINARY);
+#elif defined(HAVE_SETMODE)
+  (void)setmode(fileno(stream), CURL_O_BINARY);
 #endif
-
-#endif /* HEADER_TOOLX_BINMODE_H */
+}
+#endif
