@@ -86,8 +86,9 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
                                          curl_off_t frame_len);
 
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
-#define CURLWS_RAW_MODE   (1L << 0)
-#define CURLWS_NOAUTOPONG (1L << 1)
+#define CURLWS_RAW_MODE         (1L << 0)
+#define CURLWS_NOAUTOPONG       (1L << 1)
+#define CURLWS_UPGRD_REFUSED_OK (1L << 2)
 
 CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 
