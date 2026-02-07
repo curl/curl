@@ -47,7 +47,7 @@ int main(void)
     if(result == CURLE_OK) {
       long req;
       result = curl_easy_getinfo(curl, CURLINFO_REQUEST_SIZE, &req);
-      if(!result)
+      if(result == CURLE_OK)
         printf("Request size: %ld bytes\n", req);
     }
     curl_easy_cleanup(curl);

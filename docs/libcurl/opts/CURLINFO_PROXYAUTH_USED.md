@@ -53,10 +53,10 @@ int main(void)
 
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       long auth;
       result = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &auth);
-      if(!result) {
+      if(result == CURLE_OK) {
         if(!auth)
           printf("No auth used\n");
         else {

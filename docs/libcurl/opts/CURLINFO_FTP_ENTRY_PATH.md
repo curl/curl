@@ -50,7 +50,7 @@ int main(void)
 
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       /* extract the entry path */
       char *ep = NULL;
       result = curl_easy_getinfo(curl, CURLINFO_FTP_ENTRY_PATH, &ep);

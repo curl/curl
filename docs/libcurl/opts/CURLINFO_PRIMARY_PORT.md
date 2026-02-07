@@ -56,7 +56,7 @@ int main(void)
     if(result == CURLE_OK) {
       long port;
       result = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
-      if(!result)
+      if(result == CURLE_OK)
         printf("Connected to remote port: %ld\n", port);
     }
     curl_easy_cleanup(curl);

@@ -60,7 +60,7 @@ int main(void)
 
     result = curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
                                &verifyresult);
-    if(!result) {
+    if(result == CURLE_OK) {
       printf("The peer verification said %s\n",
              (verifyresult ? "bad" : "fine"));
     }
