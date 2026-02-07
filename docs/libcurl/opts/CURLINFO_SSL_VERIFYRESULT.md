@@ -52,7 +52,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     result = curl_easy_perform(curl);
-    if(result) {
+    if(result != CURLE_OK) {
       printf("error: %s\n", curl_easy_strerror(result));
       curl_easy_cleanup(curl);
       return 1;
@@ -60,7 +60,7 @@ int main(void)
 
     result = curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
                                &verifyresult);
-    if(!result) {
+    if(result == CURLE_OK) {
       printf("The peer verification said %s\n",
              (verifyresult ? "bad" : "fine"));
     }

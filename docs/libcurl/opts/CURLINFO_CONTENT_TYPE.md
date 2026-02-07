@@ -54,7 +54,7 @@ int main(void)
 
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       /* extract the content-type */
       char *ct = NULL;
       result = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);

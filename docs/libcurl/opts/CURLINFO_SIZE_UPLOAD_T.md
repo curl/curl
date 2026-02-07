@@ -47,10 +47,10 @@ int main(void)
     /* Perform the request */
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       curl_off_t ul;
       result = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &ul);
-      if(!result) {
+      if(result == CURLE_OK) {
         printf("Uploaded %" CURL_FORMAT_CURL_OFF_T " bytes\n", ul);
       }
     }

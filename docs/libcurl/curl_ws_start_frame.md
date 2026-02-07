@@ -77,13 +77,13 @@ static size_t readcb(char *buf, size_t nitems, size_t buflen, void *p)
   struct read_ctx *ctx = p;
   size_t len = nitems * buflen;
   size_t left = ctx->msg_len - ctx->nsent;
-  CURLcode result;
 
   if(!ctx->nsent) {
+    CURLcode result;
     /* Want to send TEXT frame. */
     result = curl_ws_start_frame(ctx->easy, CURLWS_TEXT,
                                  (curl_off_t)ctx->msg_len);
-    if(result) {
+    if(result != CURLE_OK) {
       fprintf(stderr, "error starting frame: %d\n", result);
       return CURL_READFUNC_ABORT;
     }

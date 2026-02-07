@@ -104,7 +104,7 @@ int main(void)
   curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, mypem);
   result = curl_easy_perform(curl);
-  if(!result)
+  if(result == CURLE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");

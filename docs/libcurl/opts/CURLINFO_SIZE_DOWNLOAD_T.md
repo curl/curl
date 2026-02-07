@@ -50,11 +50,11 @@ int main(void)
     /* Perform the request */
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       /* check the size */
       curl_off_t dl;
       result = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &dl);
-      if(!result) {
+      if(result == CURLE_OK) {
         printf("Downloaded %" CURL_FORMAT_CURL_OFF_T " bytes\n", dl);
       }
     }

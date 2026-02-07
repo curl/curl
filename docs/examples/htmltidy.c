@@ -89,7 +89,7 @@ int main(int argc, const char **argv)
   }
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   tdoc = tidyCreate();
@@ -108,7 +108,7 @@ int main(int argc, const char **argv)
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
     result = curl_easy_perform(curl);
-    if(!result) {
+    if(result == CURLE_OK) {
       result = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
       if(result >= 0) {
         result = tidyCleanAndRepair(tdoc); /* fix any problems */

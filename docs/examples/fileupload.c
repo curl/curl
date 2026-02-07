@@ -54,7 +54,7 @@ int main(void)
   FILE *fd;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   fd = fopen("debugit", "rb"); /* open file to upload */

@@ -162,7 +162,7 @@ int main(int argc, const char *argv[])
 
   /* init libcurl */
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   /* init the curl session */

@@ -226,7 +226,7 @@ int main(int argc, const char *argv[])
     url = argv[1];
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   /* init a multi stack */

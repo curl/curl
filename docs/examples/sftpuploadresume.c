@@ -73,7 +73,7 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
     if(result == CURLE_OK) {
       result = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                                  &remoteFileSizeByte);
-      if(result)
+      if(result != CURLE_OK)
         return -1;
       printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
     }
@@ -129,7 +129,7 @@ int main(void)
   CURL *curl = NULL;
 
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   curl = curl_easy_init();

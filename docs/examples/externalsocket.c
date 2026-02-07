@@ -104,7 +104,7 @@ int main(void)
   curl_socket_t sockfd;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   curl = curl_easy_init();
@@ -163,7 +163,7 @@ int main(void)
 
     close(sockfd);
 
-    if(result) {
+    if(result != CURLE_OK) {
       printf("libcurl error: %d\n", result);
       return 4;
     }

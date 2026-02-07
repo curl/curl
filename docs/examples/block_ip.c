@@ -296,7 +296,7 @@ int main(void)
     return 1;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result) {
+  if(result != CURLE_OK) {
     free(filter);
     return (int)result;
   }

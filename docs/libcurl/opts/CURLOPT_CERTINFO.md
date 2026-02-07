@@ -64,11 +64,11 @@ int main(void)
 
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       struct curl_certinfo *ci;
       result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
 
-      if(!result) {
+      if(result == CURLE_OK) {
         int i;
         printf("%d certs!\n", ci->num_of_certs);
 

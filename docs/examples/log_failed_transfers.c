@@ -225,7 +225,7 @@ int main(void)
   transfer[1].logfile = "400_transfer_log.txt";
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "curl_global_init failed\n");
     return (int)result;
   }

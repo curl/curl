@@ -45,7 +45,7 @@ static CURLcode ping(CURL *curl, const char *send_payload)
 
   while(blen) {
     result = curl_ws_send(curl, buf, blen, &sent, 0, CURLWS_PING);
-    if(!result) {
+    if(result == CURLE_OK) {
       buf += sent; /* deduct what was sent */
       blen -= sent;
     }
@@ -57,7 +57,7 @@ static CURLcode ping(CURL *curl, const char *send_payload)
     else /* real error sending */
       break;
   }
-  if(!result)
+  if(result == CURLE_OK)
     fprintf(stderr, "ws: sent PING with payload\n");
   return result;
 }
@@ -71,7 +71,7 @@ static CURLcode recv_pong(CURL *curl, const char *expected_payload)
 
 retry:
   result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(!result) {
+  if(result == CURLE_OK) {
     /* on small PING content, this example assumes the complete
      * PONG content arrives in one go. Larger frames will arrive
      * in chunks, however. */
@@ -104,7 +104,7 @@ retry:
                  be good here. */
     goto retry;
   }
-  if(result)
+  if(result != CURLE_OK)
     fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n",
             (unsigned int)result, (unsigned int)rlen);
   return result;
@@ -123,10 +123,10 @@ static CURLcode websocket(CURL *curl)
   int i = 0;
   do {
     result = ping(curl, "foobar");
-    if(result)
+    if(result != CURLE_OK)
       break;
     result = recv_pong(curl, "foobar");
-    if(result)
+    if(result != CURLE_OK)
       break;
     sleep(1);
   } while(i++ < 10);
@@ -139,7 +139,7 @@ int main(int argc, const char *argv[])
   CURL *curl;
 
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   curl = curl_easy_init();

@@ -107,7 +107,7 @@ int main(void)
   CURLM *multi;
 
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   multi = curl_multi_init();

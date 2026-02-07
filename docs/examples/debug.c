@@ -125,7 +125,7 @@ int main(void)
   struct data config;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
-  if(result)
+  if(result != CURLE_OK)
     return (int)result;
 
   config.trace_ascii = 1; /* enable ASCII tracing */

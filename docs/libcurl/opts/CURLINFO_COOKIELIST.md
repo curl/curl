@@ -54,7 +54,7 @@ int main(void)
 
     result = curl_easy_perform(curl);
 
-    if(!result) {
+    if(result == CURLE_OK) {
       /* extract all known cookies */
       struct curl_slist *cookies = NULL;
       result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
