@@ -24,12 +24,13 @@
 #include "binmode.h"
 
 /* Requires io.h and/or fcntl.h when available */
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(HAVE_SETMODE)
+#if defined(_WIN32) || defined(__CYGWIN__) || \
+  (defined(HAVE_SETMODE) && defined(O_BINARY))
 void toolx_binmode(FILE *stream)
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
   (void)_setmode(fileno(stream), CURL_O_BINARY);
-#elif defined(HAVE_SETMODE)
+#elif defined(HAVE_SETMODE) && defined(O_BINARY)
   (void)setmode(fileno(stream), CURL_O_BINARY);
 #endif
 }

@@ -25,7 +25,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(HAVE_SETMODE)
+#if defined(_WIN32) || defined(__CYGWIN__) || \
+  (defined(HAVE_SETMODE) && defined(O_BINARY))
 void toolx_binmode(FILE *stream);
 #else
 #define toolx_binmode(stream) do { (void)stream; } while(0)
