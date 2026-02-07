@@ -3234,8 +3234,8 @@ static void url_conn_reuse_adjust(struct Curl_easy *data,
    * - we use a proxy (not tunneling). we want to send all requests
    *   that use the same proxy on this connection.
    * - we have a "connect-to" setting that may redirect the hostname of
-   *   a new request to the same remote endpoint of an conn conn.
-   *   We want to reuse an conn conn to the remote endpoint.
+   *   a new request to the same remote endpoint of an existing conn.
+   *   We want to reuse an existing conn to the remote endpoint.
    * Since connection reuse does not match on conn->host necessarily, we
    * switch conn to needle's host settings.
    */
