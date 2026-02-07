@@ -378,7 +378,7 @@ my $datesrc = "as of";
 if(!$filedate) {
     # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
     $filedate = time();
-    $datesrc="downloaded on";
+    $datesrc = "downloaded on";
 }
 
 # get the hash from the download file
