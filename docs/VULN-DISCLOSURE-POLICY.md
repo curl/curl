@@ -109,12 +109,12 @@ confirmed vulnerability.
 The security reports submitted on GitHub will not be published, instead they
 are always closed weather confirmed or not.
 
-Confirmed security reports will be publised as security advisories on the curl
-website in sync with the curl release in which the fix is published for the
-vulnerability.
+Confirmed security reports will be published as security advisories on the
+curl website in sync with the curl release in which the fix is published for
+the vulnerability.
 
 Unfortunately, GitHub does not allow us to disclose the reports. They can only
-be publised as "advisories" - and they are not.
+be published as "advisories" - and they are not.
 
 ## security (at curl dot se)
 
