@@ -15,7 +15,7 @@ RFC4954
 <servercmd>
 AUTH EXTERNAL
 REPLY AUTH 334 EXTERNAL supported
-REPLY dXNlcg== 235 Authenticated
+REPLY %b64[user]b64% 235 Authenticated
 </servercmd>
 </reply>
 
@@ -40,7 +40,7 @@ mail body
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH EXTERNAL
-dXNlcg==
+%b64[user]b64%
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
 DATA

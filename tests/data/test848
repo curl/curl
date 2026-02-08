@@ -14,7 +14,7 @@ RFC4616
 <servercmd>
 AUTH PLAIN
 REPLY AUTHENTICATE +
-REPLY c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ= A002 OK AUTHENTICATE completed
+REPLY %b64[shared-mailbox%00user%00secret]b64% A002 OK AUTHENTICATE completed
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -45,7 +45,7 @@ IMAP plain authentication with alternative authorization identity
 <protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
-c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ=
+%b64[shared-mailbox%00user%00secret]b64%
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT

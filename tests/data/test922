@@ -39,7 +39,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-AUTH XOAUTH2 dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
+AUTH XOAUTH2 %b64[user=user%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
 DATA

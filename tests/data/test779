@@ -13,7 +13,7 @@ followlocation
 <servercmd>
 AUTH XOAUTH2
 REPLY AUTHENTICATE +
-REPLY dXNlcj12AWF1dGg9QmVhcmVyIHMzY3IzdAEB B002 OK AUTHENTICATE completed
+REPLY %b64[user=v%01auth=Bearer s3cr3t%01%01]b64% B002 OK AUTHENTICATE completed
 </servercmd>
 <data>
 HTTP/1.1 302 OK

@@ -115,7 +115,7 @@ Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
-Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+Proxy-Authorization: NTLM %b64[NTLMSSP%00%01%00%00%00%06%82%08%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00]b64%
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 

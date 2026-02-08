@@ -14,9 +14,9 @@ RFC5034
 <reply>
 <servercmd>
 AUTH LOGIN
-REPLY AUTH + VXNlcm5hbWU6
-REPLY dXNlcg== + UGFzc3dvcmQ6
-REPLY c2VjcmV0 +OK Login successful
+REPLY AUTH + %b64[Username:]b64%
+REPLY %b64[user]b64% + %b64[Password:]b64%
+REPLY %b64[secret]b64% +OK Login successful
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -47,8 +47,8 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 <protocol crlf="yes">
 CAPA
 AUTH LOGIN
-dXNlcg==
-c2VjcmV0
+%b64[user]b64%
+%b64[secret]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>

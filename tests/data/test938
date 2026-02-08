@@ -16,8 +16,8 @@ RFC4954
 <servercmd>
 AUTH PLAIN
 REPLY AUTH 334 PLAIN supported
-REPLY dXNlci5vbmUAdXNlci5vbmUAc2VjcmV0 235 Authenticated
-REPLY dXNlci50d28AdXNlci50d28Ac2VjcmV0 235 Authenticated
+REPLY %b64[user.one%00user.one%00secret]b64% 235 Authenticated
+REPLY %b64[user.two%00user.two%00secret]b64% 235 Authenticated
 </servercmd>
 </reply>
 
@@ -43,14 +43,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail
 <protocol crlf="yes">
 EHLO %TESTNUMBER001
 AUTH PLAIN
-dXNlci5vbmUAdXNlci5vbmUAc2VjcmV0
+%b64[user.one%00user.one%00secret]b64%
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 EHLO %TESTNUMBER002
 AUTH PLAIN
-dXNlci50d28AdXNlci50d28Ac2VjcmV0
+%b64[user.two%00user.two%00secret]b64%
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
 DATA

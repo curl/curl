@@ -46,7 +46,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-ir
 <verify>
 <protocol crlf="yes">
 CAPA
-AUTH PLAIN AHVzZXIAc2VjcmV0
+AUTH PLAIN %b64[%00user%00secret]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>

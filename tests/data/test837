@@ -14,7 +14,7 @@ RFC4422
 <servercmd>
 AUTH EXTERNAL
 REPLY AUTHENTICATE +
-REPLY dXNlcg== A002 OK AUTHENTICATE completed
+REPLY %b64[user]b64% A002 OK AUTHENTICATE completed
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -45,7 +45,7 @@ IMAP external authentication
 <protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE EXTERNAL
-dXNlcg==
+%b64[user]b64%
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT

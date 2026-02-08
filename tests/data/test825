@@ -45,7 +45,7 @@ IMAP plain authentication with initial response
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY
-A002 AUTHENTICATE PLAIN AHVzZXIAc2VjcmV0
+A002 AUTHENTICATE PLAIN %b64[%00user%00secret]b64%
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT

@@ -68,7 +68,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --ntlm -d "junkelijunk"
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+Authorization: NTLM %b64[NTLMSSP%00%01%00%00%00%06%82%08%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0

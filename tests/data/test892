@@ -16,7 +16,7 @@ RFC5034
 <servercmd>
 AUTH PLAIN
 REPLY AUTH +
-REPLY c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ= +OK Login successful
+REPLY %b64[shared-mailbox%00user%00secret]b64% +OK Login successful
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -47,7 +47,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-authzid shared-mailbo
 <protocol crlf="yes">
 CAPA
 AUTH PLAIN
-c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ=
+%b64[shared-mailbox%00user%00secret]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>

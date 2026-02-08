@@ -46,7 +46,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM --s
 <verify>
 <protocol crlf="yes">
 CAPA
-AUTH XOAUTH2 dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
+AUTH XOAUTH2 %b64[user=user%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>
