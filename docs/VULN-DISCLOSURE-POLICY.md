@@ -107,7 +107,7 @@ cannot use this system to author nor publish the actual final advisory for a
 confirmed vulnerability.
 
 The security reports submitted on GitHub are not published, instead they are
-always closed weather confirmed or not.
+always closed whether confirmed or not.
 
 Confirmed security reports are instead published as security advisories on the
 curl website in sync with the curl release in which the fix is published for
