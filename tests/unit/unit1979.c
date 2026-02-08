@@ -84,6 +84,12 @@ static CURLcode test_unit1979(const char *arg)
       "/example%20space/"
     },
     {
+      "get-plus-normalized",
+      true,
+      "/example+space/",
+      "/example%2Bspace/"
+    },
+    {
       "get-slash-dot-slash-unnormalized",
       false,
       "/./",

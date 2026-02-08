@@ -233,9 +233,6 @@ static CURLcode encode_query_component(char *component, size_t len,
     if(is_reserved_char(this_char))
       /* Escape unreserved chars from RFC 3986 */
       result = curlx_dyn_addn(db, &this_char, 1);
-    else if(this_char == '+')
-      /* Encode '+' as space */
-      result = curlx_dyn_add(db, "%20");
     else
       result = curlx_dyn_addf(db, "%%%02X", this_char);
     if(result)
