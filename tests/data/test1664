@@ -19,7 +19,7 @@ unit tests for strparse.c string parsing functions
 </client>
 
 <verify>
-<stdout mode="text">
+<stdout>
 curlx_str_word
 0: ("word") 0, "word" [4], line 4
 1: ("word ") 0, "word" [4], line 4

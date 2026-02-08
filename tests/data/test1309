@@ -18,7 +18,7 @@ splay unit tests
 </client>
 
 <verify>
-<stdout mode="text">
+<stdout>
 Result:
       0.1013[3]
     0.1003[2]

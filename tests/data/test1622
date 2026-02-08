@@ -21,7 +21,7 @@ tool%TESTNUMBER
 </client>
 
 <verify>
-<stdout mode="text">
+<stdout>
 time2str
                    0 - %SP%SP%SP%SP%SP%SP%SP%SP
                    1 - 00:00:01
