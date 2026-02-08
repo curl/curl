@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#ifndef UNITTESTS /* for libtests only */
-#include <toolx/binmode.h>
-#endif
-
 #ifdef HAVE_LOCALE_H
 #include <locale.h> /* for setlocale() */
 #endif
@@ -220,7 +216,7 @@ int main(int argc, const char **argv)
   size_t tmp;
 
 #ifndef UNITTESTS /* for libtests only */
-  toolx_binmode(stdout);
+  CURL_BINMODE(stdout);
 #endif
 
   memory_tracking_init();

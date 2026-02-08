@@ -1290,9 +1290,9 @@ static int test_sockfilt(int argc, const char *argv[])
     }
   }
 
-  toolx_binmode(stdin);
-  toolx_binmode(stdout);
-  toolx_binmode(stderr);
+  CURL_BINMODE(stdin);
+  CURL_BINMODE(stdout);
+  CURL_BINMODE(stderr);
 
   install_signal_handlers(false);
 

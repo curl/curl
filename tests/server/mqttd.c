@@ -824,9 +824,9 @@ static int test_mqttd(int argc, const char *argv[])
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-  toolx_binmode(stdin);
-  toolx_binmode(stdout);
-  toolx_binmode(stderr);
+  CURL_BINMODE(stdin);
+  CURL_BINMODE(stdout);
+  CURL_BINMODE(stderr);
 
   install_signal_handlers(FALSE);
 

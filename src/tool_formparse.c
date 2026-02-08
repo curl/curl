@@ -28,7 +28,6 @@
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
 #include "tool_parsecfg.h"
-#include "toolx/binmode.h"
 
 /* tool_mime functions. */
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
@@ -125,7 +124,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     curl_off_t origin;
     curlx_struct_stat sbuf;
 
-    toolx_binmode(stdin);
+    CURL_BINMODE(stdin);
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */

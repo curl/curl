@@ -80,7 +80,6 @@
 #include "tool_ipfs.h"
 #include "config2setopts.h"
 #include "var.h"
-#include "toolx/binmode.h"
 
 #ifdef DEBUGBUILD
 /* libcurl's debug-only curl_easy_perform_ev() */
@@ -911,7 +910,7 @@ static CURLcode etag_store(struct OperationConfig *config,
   }
   else {
     /* always use binary mode for protocol header output */
-    toolx_binmode(etag_save->stream);
+    CURL_BINMODE(etag_save->stream);
   }
   return CURLE_OK;
 }
@@ -924,7 +923,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
   if(!strcmp(config->headerfile, "%")) {
     heads->stream = stderr;
     /* use binary mode for protocol header output */
-    toolx_binmode(heads->stream);
+    CURL_BINMODE(heads->stream);
   }
   else if(strcmp(config->headerfile, "-")) {
     FILE *newfile;
@@ -964,7 +963,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
   }
   else {
     /* always use binary mode for protocol header output */
-    toolx_binmode(heads->stream);
+    CURL_BINMODE(heads->stream);
   }
   return CURLE_OK;
 }
@@ -1119,7 +1118,7 @@ static void check_stdin_upload(struct OperationConfig *config,
   DEBUGASSERT(per->infdopen == FALSE);
   DEBUGASSERT(per->infd == STDIN_FILENO);
 
-  toolx_binmode(stdin);
+  CURL_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
 #if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP)
     /* non-blocking stdin behavior on Windows is challenging
@@ -1351,7 +1350,7 @@ static CURLcode create_single(struct OperationConfig *config,
        !config->use_ascii) {
       /* We get the output to stdout and we have not got the ASCII/text flag,
          then set stdout to be binary */
-      toolx_binmode(stdout);
+      CURL_BINMODE(stdout);
     }
 
     /* explicitly passed to stdout means okaying binary gunk */

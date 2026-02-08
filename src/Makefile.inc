@@ -70,11 +70,9 @@ CURLX_HFILES = \
   ../lib/curlx/winapi.h
 
 TOOLX_CFILES = \
-  toolx/binmode.c \
   toolx/tool_time.c
 
 TOOLX_HFILES = \
-  toolx/binmode.h \
   toolx/tool_time.h
 
 CURL_CFILES = \

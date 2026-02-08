@@ -37,7 +37,6 @@
 #include "tool_stderr.h"
 #include "tool_help.h"
 #include "var.h"
-#include "toolx/binmode.h"
 
 #define ALLOW_BLANK TRUE
 #define DENY_BLANK  FALSE
@@ -676,7 +675,7 @@ static ParameterError data_urlencode(const char *nextarg,
     /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
-      toolx_binmode(stdin);
+      CURL_BINMODE(stdin);
     }
     else {
       file = curlx_fopen(p, "rb");
@@ -950,7 +949,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!strcmp("-", nextarg)) {
       file = stdin;
       if(cmd == C_DATA_BINARY) /* forced data-binary */
-        toolx_binmode(stdin);
+        CURL_BINMODE(stdin);
     }
     else {
       file = curlx_fopen(nextarg, "rb");
