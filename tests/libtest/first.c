@@ -215,9 +215,7 @@ int main(int argc, const char **argv)
   const char *env;
   size_t tmp;
 
-#ifndef UNITTESTS /* for libtests only */
   CURL_BINMODE(stdout);
-#endif
 
   memory_tracking_init();
 #ifdef _WIN32
