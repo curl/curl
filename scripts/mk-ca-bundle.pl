@@ -388,7 +388,7 @@ if(!$opt_n) {
 
 my $filedate;
 my $datesrc;
-if($opt_d eq 'ref') {
+if(!$opt_n && $opt_d eq 'ref') {
     my $out = '';
     if(open(my $fh, '-|', 'curl', '--user-agent', 'curl',
                                   '--fail', '--silent', '--show-error',
