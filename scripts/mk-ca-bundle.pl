@@ -407,6 +407,7 @@ if(!$opt_n && $opt_d eq 'ref') {
             my $time = Time::Piece->strptime($filedate_iso, '%Y-%m-%dT%H:%M:%SZ');
             $filedate = $time->epoch;
             $datesrc = "last updated on";
+            utime($filedate, $filedate, $txt);
         }
     }
 }
@@ -693,6 +694,7 @@ while(<TXT>) {
 }
 close(TXT) or die "Could not close $txt: $!\n";
 close(CRT) or die "Could not close $crt.~: $!\n";
+utime($filedate, $filedate, "$crt.~");
 unless($stdout) {
     if($opt_b && -e $crt) {
         my $bk = 1;
