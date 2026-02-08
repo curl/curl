@@ -879,10 +879,10 @@
 #endif
 
 /* Requires io.h when available */
-#if defined(_WIN32) || defined(__CYGWIN__)
-#define CURL_BINMODE(stream) (void)_setmode(fileno(stream), CURL_O_BINARY)
-#elif defined(MSDOS)
+#ifdef MSDOS
 #define CURL_BINMODE(stream) (void)setmode(fileno(stream), CURL_O_BINARY)
+#elif defined(_WIN32) || defined(__CYGWIN__)
+#define CURL_BINMODE(stream) (void)_setmode(fileno(stream), CURL_O_BINARY)
 #else
 #define CURL_BINMODE(stream) (void)stream
 #endif
