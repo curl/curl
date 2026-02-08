@@ -858,9 +858,9 @@ static int test_socksd(int argc, const char *argv[])
     }
   }
 
-  CURLX_SET_BINMODE(stdin);
-  CURLX_SET_BINMODE(stdout);
-  CURLX_SET_BINMODE(stderr);
+  CURL_BINMODE(stdin);
+  CURL_BINMODE(stdout);
+  CURL_BINMODE(stderr);
 
   install_signal_handlers(false);
 

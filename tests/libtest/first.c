@@ -215,7 +215,7 @@ int main(int argc, const char **argv)
   const char *env;
   size_t tmp;
 
-  CURLX_SET_BINMODE(stdout);
+  CURL_BINMODE(stdout);
 
   memory_tracking_init();
 #ifdef _WIN32

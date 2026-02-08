@@ -124,7 +124,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     curl_off_t origin;
     curlx_struct_stat sbuf;
 
-    CURLX_SET_BINMODE(stdin);
+    CURL_BINMODE(stdin);
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */

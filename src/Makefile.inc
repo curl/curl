@@ -54,7 +54,6 @@ CURLX_HFILES = \
   ../lib/curl_setup.h \
   ../lib/curlx/base64.h \
   ../lib/curlx/basename.h \
-  ../lib/curlx/binmode.h \
   ../lib/curlx/dynbuf.h \
   ../lib/curlx/fopen.h \
   ../lib/curlx/multibyte.h \

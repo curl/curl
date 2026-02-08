@@ -33,7 +33,6 @@
 
 #include "base64.h" /* for curlx_base64* */
 #include "basename.h" /* for curlx_basename() */
-#include "binmode.h" /* for macro CURLX_SET_BINMODE() */
 #include "dynbuf.h" /* for curlx_dyn_*() */
 #include "fopen.h" /* for curlx_f*() */
 #include "inet_ntop.h" /* for curlx_inet_ntop() */
