@@ -793,9 +793,7 @@
 /*
  * Include macros and defines that should only be processed once.
  */
-#ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
-#endif
 
 /*
  * Macros and functions to safely suppress warnings
