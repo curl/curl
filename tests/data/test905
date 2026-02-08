@@ -14,8 +14,8 @@ RFC4954
 <reply>
 <servercmd>
 AUTH CRAM-MD5
-REPLY AUTH 334 PDE5NzIuOTg3NjU0MzIxQGN1cmw+
-REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== 235 Authenticated
+REPLY AUTH 334 %b64[%3c1972.987654321@curl%3e]b64%
+REPLY %b64[user 7031725599fdbb5d412689aa323e3e0b]b64% 235 Authenticated
 </servercmd>
 </reply>
 
@@ -44,7 +44,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH CRAM-MD5
-dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
+%b64[user 7031725599fdbb5d412689aa323e3e0b]b64%
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
 DATA

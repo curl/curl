@@ -17,10 +17,10 @@ RFC5034
 <servercmd>
 AUTH NTLM PLAIN
 REPLY "AUTH NTLM" +
-REPLY TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA= + Rubbish
+REPLY %b64[NTLMSSP%00%01%00%00%00%06%82%08%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00]b64% + Rubbish
 REPLY * -ERR AUTH exchange cancelled by client
 REPLY "AUTH PLAIN" +
-REPLY AHVzZXIAc2VjcmV0 +OK Login successful
+REPLY %b64[%00user%00secret]b64% +OK Login successful
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -56,10 +56,10 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 <protocol crlf="yes">
 CAPA
 AUTH NTLM
-TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+%b64[NTLMSSP%00%01%00%00%00%06%82%08%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00]b64%
 *
 AUTH PLAIN
-AHVzZXIAc2VjcmV0
+%b64[%00user%00secret]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>

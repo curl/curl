@@ -19,7 +19,7 @@ AUTH DIGEST-MD5 PLAIN
 REPLY "AUTH DIGEST-MD5" 334 Rubbish
 REPLY * 501 AUTH exchange cancelled by client
 REPLY "AUTH PLAIN" 334 PLAIN supported
-REPLY AHVzZXIAc2VjcmV0 235 Authenticated
+REPLY %b64[%00user%00secret]b64% 235 Authenticated
 </servercmd>
 </reply>
 
@@ -52,7 +52,7 @@ EHLO %TESTNUMBER
 AUTH DIGEST-MD5
 *
 AUTH PLAIN
-AHVzZXIAc2VjcmV0
+%b64[%00user%00secret]b64%
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
 DATA

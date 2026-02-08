@@ -14,7 +14,7 @@ RFC6749
 <servercmd>
 AUTH XOAUTH2
 REPLY AUTHENTICATE +
-REPLY dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB A002 OK AUTHENTICATE completed
+REPLY %b64[user=user%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% A002 OK AUTHENTICATE completed
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -45,7 +45,7 @@ IMAP OAuth 2.0 (XOAUTH2) authentication
 <protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE XOAUTH2
-dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
+%b64[user=user%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT

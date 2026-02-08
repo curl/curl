@@ -16,7 +16,7 @@ RFC5034
 <servercmd>
 AUTH EXTERNAL
 REPLY AUTH +
-REPLY dXNlcg== +OK Login successful
+REPLY %b64[user]b64% +OK Login successful
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -47,7 +47,7 @@ POP3 external authentication
 <protocol crlf="yes">
 CAPA
 AUTH EXTERNAL
-dXNlcg==
+%b64[user]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>

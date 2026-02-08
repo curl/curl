@@ -45,7 +45,7 @@ IMAP external authentication with initial response
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY
-A002 AUTHENTICATE EXTERNAL dXNlcg==
+A002 AUTHENTICATE EXTERNAL %b64[user]b64%
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT

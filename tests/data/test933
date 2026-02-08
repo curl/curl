@@ -15,7 +15,7 @@ RFC4954
 <servercmd>
 AUTH NTLM
 REPLY AUTH 334 NTLM supported
-REPLY TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA= 334 Rubbish
+REPLY %b64[NTLMSSP%00%01%00%00%00%06%82%08%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00]b64% 334 Rubbish
 REPLY * 501 AUTH exchange cancelled by client
 </servercmd>
 </reply>
@@ -49,7 +49,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH NTLM
-TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+%b64[NTLMSSP%00%01%00%00%00%06%82%08%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00]b64%
 *
 </protocol>
 </verify>

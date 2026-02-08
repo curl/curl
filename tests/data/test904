@@ -14,8 +14,8 @@ RFC4954
 <servercmd>
 AUTH LOGIN
 REPLY AUTH 334 VXNlcm5hbWU6
-REPLY dXNlcg== 334 UGFzc3dvcmQ6
-REPLY c2VjcmV0 235 Authenticated
+REPLY %b64[user]b64% 334 %b64[Password:]b64%
+REPLY %b64[secret]b64% 235 Authenticated
 </servercmd>
 </reply>
 
@@ -40,8 +40,8 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH LOGIN
-dXNlcg==
-c2VjcmV0
+%b64[user]b64%
+%b64[secret]b64%
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
 DATA

@@ -12,9 +12,9 @@ SASL AUTH LOGIN
 <reply>
 <servercmd>
 AUTH LOGIN
-REPLY AUTHENTICATE + VXNlcm5hbWU6
-REPLY dXNlcg== + UGFzc3dvcmQ6
-REPLY c2VjcmV0 A002 OK AUTHENTICATE completed
+REPLY AUTHENTICATE + %b64[Username:]b64%
+REPLY %b64[user]b64% + %b64[Password:]b64%
+REPLY %b64[secret]b64% A002 OK AUTHENTICATE completed
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -45,8 +45,8 @@ IMAP login authentication
 <protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE LOGIN
-dXNlcg==
-c2VjcmV0
+%b64[user]b64%
+%b64[secret]b64%
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT

@@ -46,7 +46,7 @@ POP3 external authentication with initial response
 <verify>
 <protocol crlf="yes">
 CAPA
-AUTH EXTERNAL dXNlcg==
+AUTH EXTERNAL %b64[user]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>
