@@ -33,12 +33,12 @@
 #include "curlx/strparse.h"
 
 /*
- * Chunk format (simplified):
- *
- * <HEX SIZE>[ chunk extension ] CRLF
- * <DATA> CRLF
- *
- * Highlights from RFC2616 section 3.6 say:
+   Chunk format (simplified):
+
+   <HEX SIZE>[ chunk extension ] CRLF
+   <DATA> CRLF
+
+   Highlights from RFC2616 section 3.6 say:
 
    The chunked encoding modifies the body of a message in order to
    transfer it as a series of chunks, each with its own size indicator,
