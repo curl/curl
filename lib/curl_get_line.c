@@ -28,8 +28,6 @@
 
 #include "curl_get_line.h"
 
-#define appendnl(b) curlx_dyn_addn(buf, "\n", 1)
-
 /*
  * Curl_get_line() returns only complete whole lines that end with newline.
  * When 'eof' is set TRUE, the last line has been read.
@@ -60,7 +58,7 @@ CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof)
       return CURLE_OK; /* all good */
     if(*eof)
       /* append a newline */
-      return appendnl(buf);
+      return curlx_dyn_addn(buf, "\n", 1);
     /* otherwise get next line to append */
   }
   /* UNREACHABLE */
