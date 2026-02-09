@@ -222,44 +222,44 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
   return CURLE_OK;
 }
 
-static CURLcode encode_query_component(char *component, size_t len,
-                                       struct dynbuf *db)
+/* Normalize the query part. Make sure %2B is left percent encoded, and not
+   decoded to plus, then encoded to space.
+*/
+static CURLcode normalize_query(const char *string, size_t len,
+                                struct dynbuf *db)
 {
-  size_t i;
-  for(i = 0; i < len; i++) {
-    CURLcode result = CURLE_OK;
-    unsigned char this_char = component[i];
+  CURLcode result = CURLE_OK;
 
-    if(is_reserved_char(this_char))
+  while(len && !result) {
+    unsigned char in = (unsigned char)*string;
+    if(('%' == in) && (len > 2) &&
+       ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
+      /* this is two hexadecimal digits following a '%' */
+      in = (unsigned char)((curlx_hexval(string[1]) << 4) |
+                           curlx_hexval(string[2]));
+      string += 3;
+      len -= 3;
+      if(in == '+') {
+        /* decodes to plus, so leave this encoded */
+        result = curlx_dyn_addn(db, "%2B", 3);
+        continue;
+      }
+    }
+    else {
+      string++;
+      len--;
+    }
+
+    if(is_reserved_char(in))
       /* Escape unreserved chars from RFC 3986 */
-      result = curlx_dyn_addn(db, &this_char, 1);
-    else if(this_char == '+')
+      result = curlx_dyn_addn(db, &in, 1);
+    else if(in == '+')
       /* Encode '+' as space */
       result = curlx_dyn_add(db, "%20");
     else
-      result = curlx_dyn_addf(db, "%%%02X", this_char);
-    if(result)
-      return result;
+      result = curlx_dyn_addf(db, "%%%02X", in);
   }
 
-  return CURLE_OK;
-}
-
-/*
- * Populates a dynbuf containing url_encode(url_decode(in))
- */
-static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-                                       struct dynbuf *out)
-{
-  char *out_s;
-  size_t out_s_len;
-  CURLcode result =
-    Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
-
-  if(!result) {
-    result = encode_query_component(out_s, out_s_len, out);
-    Curl_safefree(out_s);
-  }
   return result;
 }
 
@@ -750,8 +750,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
     counted_query_components++;
 
     /* Decode/encode the key */
-    result = http_aws_decode_encode(in_key, in_key_len,
-                                    &encoded_query_array[index].key);
+    result = normalize_query(in_key, in_key_len,
+                             &encoded_query_array[index].key);
     if(result) {
       goto fail;
     }
@@ -761,8 +761,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
       size_t in_value_len;
       const char *in_value = offset + 1;
       in_value_len = query_part + query_part_len - (offset + 1);
-      result = http_aws_decode_encode(in_value, in_value_len,
-                                      &encoded_query_array[index].value);
+      result = normalize_query(in_value, in_value_len,
+                               &encoded_query_array[index].value);
       if(result) {
         goto fail;
       }

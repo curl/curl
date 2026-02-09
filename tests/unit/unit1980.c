@@ -79,6 +79,11 @@ static CURLcode test_unit1980(const char *arg)
       "p3= &p1=+&p2=%20",
       "p1=%20&p2=%20&p3=%20"
     },
+    {
+      "2b-incoming",
+      "p3=%2b&p1=+",
+      "p1=%20&p3=%2B"
+    },
   };
 
   size_t i;
