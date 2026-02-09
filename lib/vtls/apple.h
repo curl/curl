@@ -29,6 +29,7 @@
 struct Curl_cfilter;
 struct Curl_easy;
 struct ssl_peer;
+struct ssl_primary_config;
 
 /* Get the DER encoded i-th certificate in the server handshake */
 typedef CURLcode Curl_vtls_get_cert_der(struct Curl_cfilter *cf,
@@ -44,6 +45,7 @@ typedef CURLcode Curl_vtls_get_cert_der(struct Curl_cfilter *cf,
 CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 struct ssl_peer *peer,
+                                struct ssl_primary_config *config,
                                 size_t num_certs,
                                 Curl_vtls_get_cert_der *der_cb,
                                 void *cb_user_data,

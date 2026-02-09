@@ -53,6 +53,7 @@
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
+                             struct ssl_primary_config *config,
                              struct ssl_peer *peer,
                              const struct alpn_spec *alpns,
                              Curl_vquic_tls_ctx_setup *cb_setup,
@@ -62,6 +63,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   char tls_id[80];
   CURLcode result;
 
+  ctx->config = config;
 #ifdef USE_OPENSSL
   Curl_ossl_version(tls_id, sizeof(tls_id));
 #elif defined(USE_GNUTLS)
@@ -72,22 +74,23 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;
 #endif
+
   (void)session_reuse_cb;
-  result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
+  result = Curl_ssl_peer_init(peer, cf, config, tls_id, TRNSPRT_QUIC);
   if(result)
     return result;
 
 #ifdef USE_OPENSSL
   (void)result;
-  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, alpns,
+  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, alpns, config,
                             cb_setup, cb_user_data, NULL, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_GNUTLS)
-  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer, alpns,
+  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer, alpns, config,
                             cb_setup, cb_user_data, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_WOLFSSL)
-  return Curl_wssl_ctx_init(&ctx->wssl, cf, data, peer, alpns,
+  return Curl_wssl_ctx_init(&ctx->wssl, cf, data, peer, alpns, config,
                             cb_setup, cb_user_data,
                             ssl_user_data, session_reuse_cb);
 #else
@@ -152,25 +155,22 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer)
 {
-  struct ssl_primary_config *conn_config;
+  struct ssl_primary_config *config;
   CURLcode result = CURLE_OK;
 
-  conn_config = Curl_ssl_cf_get_primary_config(cf);
-  if(!conn_config)
-    return CURLE_FAILED_INIT;
-
 #ifdef USE_OPENSSL
-  (void)conn_config;
+  config = ctx->ossl.config;
   result = Curl_ossl_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
-  result = Curl_gtls_verifyserver(cf, data, ctx->gtls.session,
-                                  conn_config, &data->set.ssl, peer,
+  config = ctx->gtls.config;
+  result = Curl_gtls_verifyserver(cf, data, &ctx->gtls, &data->set.ssl, peer,
                                   data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
   if(result)
     return result;
 #elif defined(USE_WOLFSSL)
   (void)data;
-  if(conn_config->verifyhost) {
+  config = ctx->wssl.config;
+  if(config->verifyhost) {
     WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
     if(!cert)
       result = CURLE_OUT_OF_MEMORY;
@@ -189,7 +189,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 #endif
   /* on error, remove any session we might have in the pool */
   if(result)
-    Curl_ssl_scache_remove_all(cf, data, peer->scache_key);
+    Curl_ssl_scache_remove_all(cf, data, config, peer->scache_key);
   return result;
 }
 

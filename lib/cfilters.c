@@ -629,37 +629,46 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-static bool cf_is_ssl(struct Curl_cfilter *cf)
+static struct Curl_cfilter *
+cf_get_first_cf(struct connectdata *conn, int sockindex,
+                int type_mask, int type_match, int type_abort)
 {
-  for(; cf; cf = cf->next) {
-    if(cf->cft->flags & CF_TYPE_SSL)
-      return TRUE;
-    if(cf->cft->flags & CF_TYPE_IP_CONNECT)
-      return FALSE;
+  struct Curl_cfilter *cf;
+
+  if(!conn || !CONN_SOCK_IDX_VALID(sockindex))
+    return NULL;
+  for(cf = conn->cfilter[sockindex]; cf; cf = cf->next) {
+    if((cf->cft->flags & type_mask) == type_match)
+      return cf;
+    if(cf->cft->flags & type_abort)
+      return NULL;
   }
-  return FALSE;
+  return NULL;
 }
+
+struct Curl_cfilter *Curl_conn_get_cf_ssl(struct connectdata *conn,
+                                          int sockindex)
+{
+  return cf_get_first_cf(conn, sockindex,
+                         (CF_TYPE_SSL|CF_TYPE_PROXY), /* mask */
+                         CF_TYPE_SSL,                 /* match */
+                         CF_TYPE_IP_CONNECT);         /* abort on */
+}
+
+#ifndef CURL_DISABLE_PROXY
+struct Curl_cfilter *Curl_conn_get_cf_proxy_ssl(struct connectdata *conn,
+                                                int sockindex)
+{
+  return cf_get_first_cf(conn, sockindex,
+                         (CF_TYPE_SSL|CF_TYPE_PROXY), /* mask */
+                         (CF_TYPE_SSL|CF_TYPE_PROXY), /* match */
+                         CF_TYPE_IP_CONNECT);         /* abort on */
+}
+#endif /* !CURL_DISABLE_PROXY */
 
 bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
 {
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return FALSE;
-  return conn ? cf_is_ssl(conn->cfilter[sockindex]) : FALSE;
-}
-
-bool Curl_conn_get_ssl_info(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex,
-                            struct curl_tlssessioninfo *info)
-{
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return FALSE;
-  if(Curl_conn_is_ssl(conn, sockindex)) {
-    struct Curl_cfilter *cf = conn->cfilter[sockindex];
-    CURLcode result = cf ? cf->cft->query(cf, data, CF_QUERY_SSL_INFO,
-                               NULL, (void *)info) : CURLE_UNKNOWN_OPTION;
-    return !result;
-  }
-  return FALSE;
+  return !!Curl_conn_get_cf_ssl(conn, sockindex);
 }
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
@@ -675,19 +684,10 @@ CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
 
 bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
 {
-  struct Curl_cfilter *cf;
-
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return FALSE;
-  cf = conn ? conn->cfilter[sockindex] : NULL;
-
-  for(; cf; cf = cf->next) {
-    if(cf->cft->flags & CF_TYPE_MULTIPLEX)
-      return TRUE;
-    if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))
-      return FALSE;
-  }
-  return FALSE;
+  return !!cf_get_first_cf(conn, sockindex,
+                           CF_TYPE_MULTIPLEX, /* mask */
+                           CF_TYPE_MULTIPLEX, /* match */
+                           (CF_TYPE_IP_CONNECT|CF_TYPE_SSL)); /* abort on */
 }
 
 unsigned char Curl_conn_get_transport(struct Curl_easy *data,

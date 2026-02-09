@@ -70,6 +70,7 @@ struct ossl_ctx {
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
   BIO_METHOD *bio_method;
+  struct ssl_primary_config *config; /* relevant SSL config */
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */
   int      blocked_ssl_write_len;
@@ -101,6 +102,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
                             const struct alpn_spec *alpns,
+                            struct ssl_primary_config *config,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             Curl_ossl_new_session_cb *cb_new_session,
@@ -131,6 +133,7 @@ CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
  */
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
+                               struct ssl_primary_config *config,
                                const char *ssl_peer_key,
                                SSL_SESSION *ssl_sessionid,
                                int ietf_tls_id,

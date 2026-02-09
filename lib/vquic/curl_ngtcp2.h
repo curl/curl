@@ -53,7 +53,8 @@ void Curl_ngtcp2_ver(char *p, size_t len);
 CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai);
+                               const struct Curl_addrinfo *ai,
+                               struct ssl_primary_config *config);
 #endif
 
 #endif /* HEADER_CURL_VQUIC_CURL_NGTCP2_H */
