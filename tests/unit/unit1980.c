@@ -74,6 +74,11 @@ static CURLcode test_unit1980(const char *arg)
       "Param-3=Value3&Param=Value2&%E1%88%B4=Value1",
       "%E1%88%B4=Value1&Param=Value2&Param-3=Value3"
     },
+    {
+      "space-plus",
+      "p3= &p1=+&p2=%20",
+      "p1=%20&p2=%20&p3=%20"
+    },
   };
 
   size_t i;
