@@ -50,14 +50,11 @@ than the transfer itself in the multi/share handle's connection cache.
 
 # NOTES ON IDLE CONNECTIONS
 
-The close socket callback is invoked when libcurl closes a socket it owns.
-The callback and CURLOPT_CLOSESOCKETDATA(3) are copied from the *first* easy
-handle that creates the connection; changing this option on a subsequent
-easy handle that reuses the same connection has no effect for that
-connection. The callback is not guaranteed to be called for every socket
-that leaves use, for example when connections are kept alive in the
-connection cache and reused. Applications must not assume the callback is
-called for every socket lifecycle.
+When using the multi interface, the close socket callback is invoked when
+libcurl closes a socket it owns. The callback and CURLOPT_CLOSESOCKETDATA(3)
+are copied from the *first* easy handle that creates the connection;
+changing this option on a subsequent easy handle that reuses the same
+connection has no effect for that connection.
 
 # DEFAULT
 
