@@ -286,16 +286,36 @@
  * When HTTP is disabled, disable HTTP-only features
  */
 #ifdef CURL_DISABLE_HTTP
+#  ifndef CURL_DISABLE_ALTSVC
 #  define CURL_DISABLE_ALTSVC
+#  endif
+#  ifndef CURL_DISABLE_COOKIES
 #  define CURL_DISABLE_COOKIES
+#  endif
+#  ifndef CURL_DISABLE_BASIC_AUTH
 #  define CURL_DISABLE_BASIC_AUTH
+#  endif
+#  ifndef CURL_DISABLE_BEARER_AUTH
 #  define CURL_DISABLE_BEARER_AUTH
+#  endif
+#  ifndef CURL_DISABLE_AWS
 #  define CURL_DISABLE_AWS
+#  endif
+#  ifndef CURL_DISABLE_DOH
 #  define CURL_DISABLE_DOH
+#  endif
+#  ifndef CURL_DISABLE_FORM_API
 #  define CURL_DISABLE_FORM_API
+#  endif
+#  ifndef CURL_DISABLE_HEADERS_API
 #  define CURL_DISABLE_HEADERS_API
+#  endif
+#  ifndef CURL_DISABLE_HSTS
 #  define CURL_DISABLE_HSTS
+#  endif
+#  ifndef CURL_DISABLE_HTTP_AUTH
 #  define CURL_DISABLE_HTTP_AUTH
+#  endif
 #  ifndef CURL_DISABLE_WEBSOCKETS
 #  define CURL_DISABLE_WEBSOCKETS /* no WebSockets without HTTP present */
 #  endif
