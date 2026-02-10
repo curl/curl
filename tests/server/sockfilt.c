@@ -601,7 +601,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   struct select_ws_data *data;
   WSANETWORKEVENTS wsaevents;
   curl_socket_t wsasock;
-  int error, ret, fd;
+  int ret, fd;
   WSAEVENT wsaevent;
 
   /* check if the input value is valid */
@@ -710,8 +710,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           if(wsaevents.lNetworkEvents & FD_WRITE) {
             swrite(wsasock, NULL, 0); /* reset FD_WRITE */
           }
-          error = WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents);
-          if(error != SOCKET_ERROR) {
+          if(WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents) == 0) {
             handles[nfd] = (HANDLE)wsaevent;
             data[nws].wsasock = wsasock;
             data[nws].wsaevent = wsaevent;
@@ -799,8 +798,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       else {
         /* try to handle the event with the Winsock2 functions */
         wsaevents.lNetworkEvents = 0;
-        error = WSAEnumNetworkEvents(wsasock, handle, &wsaevents);
-        if(error != SOCKET_ERROR) {
+        if(WSAEnumNetworkEvents(wsasock, handle, &wsaevents) == 0) {
           /* merge result from pre-check using select */
           wsaevents.lNetworkEvents |= data[i].wsastate;
 
