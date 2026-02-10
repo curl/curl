@@ -54,7 +54,10 @@ When using the multi interface, the close socket callback is invoked when
 libcurl closes a socket it owns. The callback and CURLOPT_CLOSESOCKETDATA(3)
 are copied from the *first* easy handle that creates the connection;
 changing this option on a subsequent easy handle that reuses the same
-connection has no effect for that connection.
+connection has no effect for that connection. The callback is stored with
+the connection because the connection may outlive the easy handle that
+created it, so that libcurl can still invoke it when the connection is
+closed even after that handle has been cleaned up.
 
 # DEFAULT
 
