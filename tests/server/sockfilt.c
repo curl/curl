@@ -597,7 +597,6 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 {
   DWORD timeout_ms, wait, nfd, nth, nws, i;
   HANDLE abort, signal, handle, *handles;
-  fd_set readsock, writesock, exceptsock;
   struct select_ws_data *data;
   WSANETWORKEVENTS wsaevents;
   curl_socket_t wsasock;
@@ -652,6 +651,8 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   nth = 0; /* number of internal waiting threads */
   nws = 0; /* number of handled Winsock sockets */
   for(fd = 0; fd < nfds; fd++) {
+    fd_set readsock, writesock, exceptsock;
+
     wsasock = (curl_socket_t)fd;
     wsaevents.lNetworkEvents = 0;
     handles[nfd] = 0;
