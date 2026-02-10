@@ -97,7 +97,7 @@ active transfer. It might soon be added again. After libcurl signals
 CURL_POLL_REMOVE, the application must stop monitoring that socket on
 libcurl's behalf. libcurl does not track idle connections. The pointer
 previously assigned to the socket with curl_multi_assign(3) is forgotten by
-libcurl. Applications must not rely on *socketp* to track idle connections.
+libcurl.
 
 # DEFAULT
 
