@@ -380,7 +380,6 @@ Details via CMake
 - `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
 - `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification. Default: `OFF`
 - `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
-- `USE_LIBRTMP`:                            Enable librtmp from rtmpdump. Default: `OFF`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
@@ -431,8 +430,6 @@ Details via CMake
 - `LIBIDN2_LIBRARY`:                        Absolute path to `libidn2` library.
 - `LIBPSL_INCLUDE_DIR`:                     Absolute path to libpsl include directory.
 - `LIBPSL_LIBRARY`:                         Absolute path to `libpsl` library.
-- `LIBRTMP_INCLUDE_DIR`:                    Absolute path to librtmp include directory.
-- `LIBRTMP_LIBRARY`:                        Absolute path to `librtmp` library.
 - `LIBSSH_INCLUDE_DIR`:                     Absolute path to libssh include directory.
 - `LIBSSH_LIBRARY`:                         Absolute path to `libssh` library.
 - `LIBSSH_USE_STATIC_LIBS`:                 Configure for static libssh libraries. (experimental)

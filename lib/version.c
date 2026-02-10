@@ -46,11 +46,6 @@
 #include <libpsl.h>
 #endif
 
-#ifdef USE_LIBRTMP
-#include <librtmp/rtmp.h>
-#include "curl_rtmp.h"
-#endif
-
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
@@ -178,9 +173,6 @@ char *curl_version(void)
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   char h3_version[30];
 #endif
-#ifdef USE_LIBRTMP
-  char rtmp_version[30];
-#endif
 #ifdef USE_GSASL
   char gsasl_buf[30];
 #endif
@@ -243,10 +235,6 @@ char *curl_version(void)
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   Curl_quic_ver(h3_version, sizeof(h3_version));
   src[i++] = h3_version;
-#endif
-#ifdef USE_LIBRTMP
-  Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
-  src[i++] = rtmp_version;
 #endif
 #ifdef USE_GSASL
   curl_msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
@@ -349,14 +337,6 @@ static const char * const supported_protocols[] = {
 #endif
 #if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
   "pop3s",
-#endif
-#ifdef USE_LIBRTMP
-  "rtmp",
-  "rtmpe",
-  "rtmps",
-  "rtmpt",
-  "rtmpte",
-  "rtmpts",
 #endif
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
@@ -693,14 +673,6 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;
-
-#ifdef USE_LIBRTMP
-  {
-    static char rtmp_version[30];
-    Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
-    version_info.rtmp_version = rtmp_version;
-  }
-#endif
 
   return &version_info;
 }

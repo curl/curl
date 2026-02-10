@@ -1334,12 +1334,6 @@ if(CURL_USE_LIBUV)
   set(HAVE_UV_H ON)
 endif()
 
-option(USE_LIBRTMP "Enable librtmp from rtmpdump" OFF)
-if(USE_LIBRTMP)
-  find_package(Librtmp REQUIRED)
-  list(APPEND CURL_LIBS CURL::librtmp)
-endif()
-
 option(ENABLE_UNIX_SOCKETS "Enable Unix domain sockets support" ON)
 if(ENABLE_UNIX_SOCKETS)
   if(WIN32 OR DOS)
@@ -1982,7 +1976,6 @@ curl_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH)
 curl_add_if("IPFS"          NOT CURL_DISABLE_IPFS)
 curl_add_if("IPNS"          NOT CURL_DISABLE_IPFS)
 curl_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
-curl_add_if("RTMP"          USE_LIBRTMP)
 curl_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
 curl_add_if("MQTTS"         NOT CURL_DISABLE_MQTT AND _ssl_enabled)
 curl_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
@@ -2368,7 +2361,6 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_GNUTLS
   #   USE_GSASL
   #   USE_LIBPSL
-  #   USE_LIBRTMP
   #   USE_LIBSSH
   #   USE_LIBSSH2
   #   USE_LIBUV
@@ -2405,7 +2397,6 @@ if(NOT CURL_DISABLE_INSTALL)
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibrtmp.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibuv.cmake"

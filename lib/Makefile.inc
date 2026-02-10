@@ -171,7 +171,6 @@ LIB_CFILES =         \
   curl_memrchr.c     \
   curl_ntlm_core.c   \
   curl_range.c       \
-  curl_rtmp.c        \
   curl_sasl.c        \
   curl_sha512_256.c  \
   curl_share.c       \
@@ -303,7 +302,6 @@ LIB_HFILES =         \
   curl_ntlm_core.h   \
   curl_printf.h      \
   curl_range.h       \
-  curl_rtmp.h        \
   curl_sasl.h        \
   curl_setup.h       \
   curl_sha256.h      \
