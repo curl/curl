@@ -206,7 +206,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #define infof(data, ...) \
   do {                   \
-    (void)data;          \
+    (void)(data);        \
   } while(0)
 #define CURL_TRC_M(data, ...) \
   do {                        \
