@@ -602,7 +602,6 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   WSANETWORKEVENTS wsaevents;
   curl_socket_t wsasock;
   int ret, fd;
-  WSAEVENT wsaevent;
 
   /* check if the input value is valid */
   if(nfds < 0) {
@@ -705,6 +704,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
         nfd++;
       }
       else {
+        WSAEVENT wsaevent;
         wsaevent = WSACreateEvent();
         if(wsaevent != WSA_INVALID_EVENT) {
           if(wsaevents.lNetworkEvents & FD_WRITE) {
