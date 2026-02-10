@@ -30,9 +30,6 @@ supported (yet).
 ## POP3(S)
 Downloading from a pop3 server means getting an email. With or without using
 TLS.
-## RTMP(S)
-The **Realtime Messaging Protocol** is primarily used to serve streaming media
-and curl can download it.
 ## RTSP
 curl supports RTSP 1.0 downloads.
 ## SCP

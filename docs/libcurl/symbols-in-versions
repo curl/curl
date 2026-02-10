@@ -971,12 +971,12 @@ CURLPROTO_MQTT                  7.71.0
 CURLPROTO_MQTTS                 8.19.0
 CURLPROTO_POP3                  7.20.0
 CURLPROTO_POP3S                 7.20.0
-CURLPROTO_RTMP                  7.21.0
-CURLPROTO_RTMPE                 7.21.0
-CURLPROTO_RTMPS                 7.21.0
-CURLPROTO_RTMPT                 7.21.0
-CURLPROTO_RTMPTE                7.21.0
-CURLPROTO_RTMPTS                7.21.0
+CURLPROTO_RTMP                  7.21.0        8.20.0
+CURLPROTO_RTMPE                 7.21.0        8.20.0
+CURLPROTO_RTMPS                 7.21.0        8.20.0
+CURLPROTO_RTMPT                 7.21.0        8.20.0
+CURLPROTO_RTMPTE                7.21.0        8.20.0
+CURLPROTO_RTMPTS                7.21.0        8.20.0
 CURLPROTO_RTSP                  7.20.0
 CURLPROTO_SCP                   7.19.4
 CURLPROTO_SFTP                  7.19.4
