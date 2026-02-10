@@ -43,7 +43,7 @@ env:
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver:^3.0.0 registryUrl=https://github.com
   MBEDTLS_VERSION_PREV: 3.6.4
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 1.66.2
+  AWSLC_VERSION: 1.67.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20260204.0
   # handled in renovate.json
