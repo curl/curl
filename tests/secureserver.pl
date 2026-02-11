@@ -205,7 +205,7 @@ $certfile = abs_path($certfile);
 
 my $ssltext = uc($proto) ." SSL/TLS:";
 
-my $host_ip = ($ipvnum == 6)? '::1' : '127.0.0.1';
+my $host_ip = ($ipvnum == 6) ? '::1' : '127.0.0.1';
 
 #***************************************************************************
 # Find out version info for the given stunnel binary

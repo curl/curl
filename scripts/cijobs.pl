@@ -98,7 +98,7 @@ sub githubactions {
                     # matrix job
                     #print "name: $1\n";
                     $job{'name'} = $1;
-                    $j += ($m?$m:1);
+                    $j += ($m ? $m : 1);
                 }
                 elsif($_ =~ /install: (.*)/) {
                     $job{'install'} = $1;
