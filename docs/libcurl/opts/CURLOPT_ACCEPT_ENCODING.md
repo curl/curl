@@ -76,7 +76,7 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones.
 
-**WARNING**: when decompressing data, even tiny transfers might be expanded
+**WARNING:** when decompressing data, even tiny transfers might be expanded
 and generate a huge amount of bytes.
 
 # HISTORY

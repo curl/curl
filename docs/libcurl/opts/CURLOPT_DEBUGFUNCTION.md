@@ -56,7 +56,7 @@ specified in the *type* argument. This function must return 0. The *data*
 pointed to by the char * passed to this function is not null-terminated, but
 is exactly of the *size* as told by the *size* argument.
 
-**WARNING** this callback may receive sensitive contents from headers and
+**WARNING:** this callback may receive sensitive contents from headers and
 data, including information sent as **CURLINFO_TEXT**.
 
 The *clientp* argument is the pointer set with CURLOPT_DEBUGDATA(3).
@@ -96,8 +96,8 @@ The data is SSL/TLS (binary) data received from the peer.
 
 ##
 
-WARNING: This callback may be called with the curl *handle* set to an internal
-handle. (Added in 8.4.0)
+**WARNING:** This callback may be called with the curl *handle* set to an
+internal handle. (Added in 8.4.0)
 
 If you need to distinguish your curl *handle* from internal handles then set
 CURLOPT_PRIVATE(3) on your handle.

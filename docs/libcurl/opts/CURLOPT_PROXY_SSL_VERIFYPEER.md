@@ -57,7 +57,7 @@ talking to. Use CURLOPT_PROXY_SSL_VERIFYHOST(3) for that. The check that the
 hostname in the certificate is valid for the hostname you are connecting to is
 done independently of the CURLOPT_PROXY_SSL_VERIFYPEER(3) option.
 
-WARNING: disabling verification of the certificate allows bad guys to
+**WARNING:** disabling verification of the certificate allows bad guys to
 man-in-the-middle the communication without you knowing it. Disabling
 verification makes the communication insecure. Just having encryption on a
 transfer is not enough as you cannot be sure that you are communicating with
