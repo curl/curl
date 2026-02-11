@@ -50,19 +50,6 @@ if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   cmake_pop_check_state()
 endif()
 
-if(NOT WIN32)
-  set(_source_epilogue "#undef inline")
-  curl_add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
-  check_c_source_compiles("${_source_epilogue}
-    #include <sys/socket.h>
-    int main(void)
-    {
-      int flag = MSG_NOSIGNAL;
-      (void)flag;
-      return 0;
-    }" HAVE_MSG_NOSIGNAL)
-endif()
-
 set(_source_epilogue "#undef inline")
 check_c_source_compiles("${_source_epilogue}
   #ifdef _MSC_VER

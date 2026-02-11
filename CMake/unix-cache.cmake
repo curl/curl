@@ -179,7 +179,6 @@ if(APPLE OR
 else()
   set(HAVE_MEMRCHR 1)
 endif()
-set(HAVE_MSG_NOSIGNAL 1)
 set(HAVE_NETDB_H 1)
 if(ANDROID)
   set(HAVE_NETINET_IN6_H 1)

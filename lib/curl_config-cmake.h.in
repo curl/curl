@@ -400,9 +400,6 @@
 /* Define to 1 if you have the 'suseconds_t' data type. */
 #cmakedefine HAVE_SUSECONDS_T 1
 
-/* Define to 1 if you have the MSG_NOSIGNAL flag. */
-#cmakedefine HAVE_MSG_NOSIGNAL 1
-
 /* Define to 1 if you have the <netdb.h> header file. */
 #cmakedefine HAVE_NETDB_H 1
 
