@@ -28,14 +28,7 @@
 
 #ifdef USE_SCHANNEL
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4201)
-#endif
 #include <subauth.h>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 /* Wincrypt must be included before anything that could include OpenSSL. */
 #ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
