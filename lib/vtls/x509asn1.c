@@ -556,7 +556,7 @@ static CURLcode GTime2str(struct dynbuf *store,
                         "%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
                         beg, beg + 4, beg + 6,
                         beg + 8, beg + 10, sec1, sec2,
-                        fracl ? ".": "", (int)fracl, fracp,
+                        fracl ? "." : "", (int)fracl, fracp,
                         sep, (int)tzl, tzp);
 }
 

@@ -121,7 +121,7 @@ for my $e (sort {$where{$b} <=> $where{$a}} keys %where) {
         $showncutoff = 1;
     }
     printf "%-5d %s%s\n", $where{$e}, $e,
-        $perm{$e} ? " [ALLOWED]": "";
+        $perm{$e} ? " [ALLOWED]" : "";
     if(!--$top) {
         last;
     }

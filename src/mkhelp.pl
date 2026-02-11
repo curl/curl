@@ -220,7 +220,7 @@ for my $n (@out) {
     }
     else {
         $n =~ s/        /\\t/g;
-        printf("  \"%s%s\",\n", $blank?"\\n":"", $n);
+        printf("  \"%s%s\",\n", $blank ? "\\n" : "", $n);
         $blank = 0;
     }
 }

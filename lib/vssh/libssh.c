@@ -749,13 +749,13 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
   if(sshc->auth_methods)
     infof(data, "SSH authentication methods available: %s%s%s%s",
           sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY ?
-          "public key, ": "",
+          "public key, " : "",
           sshc->auth_methods & SSH_AUTH_METHOD_GSSAPI_MIC ?
           "GSSAPI, " : "",
           sshc->auth_methods & SSH_AUTH_METHOD_INTERACTIVE ?
           "keyboard-interactive, " : "",
           sshc->auth_methods & SSH_AUTH_METHOD_PASSWORD ?
-          "password": "");
+          "password" : "");
   /* For public key auth we need either the private key or
      CURLSSH_AUTH_AGENT. */
   if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&

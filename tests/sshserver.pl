@@ -223,7 +223,7 @@ $logfile = "$logdir/sshserver.log";  # used by logmsg
 #***************************************************************************
 # Logging level for ssh server and client
 #
-my $loglevel = $debugprotocol?'DEBUG3':'DEBUG2';
+my $loglevel = $debugprotocol ? 'DEBUG3' : 'DEBUG2';
 
 #***************************************************************************
 # Validate username
@@ -1193,7 +1193,7 @@ if($rc == -1) {
 }
 elsif($rc & 127) {
     logmsg sprintf("\"$sshd\" died with signal %d, and %s coredump\n",
-                   ($rc & 127), ($rc & 128)?'a':'no');
+                   ($rc & 127), ($rc & 128) ? 'a' : 'no');
 }
 elsif($verbose && ($rc >> 8)) {
     logmsg sprintf("\"$sshd\" exited with %d\n", $rc >> 8);

@@ -666,7 +666,7 @@ sub singletest_setenv {
         if($s =~ /([^=]*)(.*)/) {
             my ($var, $content) = ($1, $2);
             # remember current setting, to restore it once test runs
-            $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
+            $oldenv{$var} = ($ENV{$var}) ? "$ENV{$var}" : 'notset';
 
             if($content =~ /^=(.*)/) {
                 # assign it
