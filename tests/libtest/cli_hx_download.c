@@ -42,6 +42,11 @@
 #ifdef USE_RUSTLS
 #include <rustls.h>
 #endif
+#ifdef USE_SCHANNEL
+#include <sspi.h>  /* for CtxtHandle, QueryContextAttributes() */
+#include <schannel.h>  /* for SecPkgContext_ConnectionInfo,
+                          SECPKG_ATTR_CONNECTION_INFO */
+#endif
 
 static int verbose_d = 1;
 
@@ -133,7 +138,8 @@ static int my_progress_d_cb(void *userdata,
   }
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL) || defined(USE_WOLFSSL) || \
-  defined(USE_GNUTLS) || defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+  defined(USE_GNUTLS) || defined(USE_MBEDTLS) || defined(USE_RUSTLS) || \
+  defined(USE_SCHANNEL)
   if(!t->checked_ssl && dlnow > 0) {
     struct curl_tlssessioninfo *tls;
     CURLcode result;
@@ -194,6 +200,21 @@ static int my_progress_d_cb(void *userdata,
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info rustls TLS version 0x%x\n",
                       t->idx, v);
+        break;
+      }
+#endif
+#ifdef USE_SCHANNEL
+      case CURLSSLBACKEND_SCHANNEL: {
+        CtxtHandle *ctxt_handle = (CtxtHandle *)tls->internals;
+        SecPkgContext_ConnectionInfo info;
+        SECURITY_STATUS sspi_status;
+        sspi_status = QueryContextAttributes(ctxt_handle,
+                                             SECPKG_ATTR_CONNECTION_INFO,
+                                             &info);
+        assert(sspi_status == SEC_E_OK);
+        (void)sspi_status;
+        curl_mfprintf(stderr, "[t-%zu] info Schannel TLS version 0x%08lx\n",
+                      t->idx, info.dwProtocol);
         break;
       }
 #endif
