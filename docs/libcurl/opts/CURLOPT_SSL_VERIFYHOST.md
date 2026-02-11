@@ -53,7 +53,7 @@ This option controls checking the server's certificate's claimed identity. The
 separate CURLOPT_SSL_VERIFYPEER(3) options enables/disables verification that
 the certificate is signed by a trusted Certificate Authority.
 
-WARNING: disabling verification of the certificate allows bad guys to
+**WARNING:** disabling verification of the certificate allows bad guys to
 man-in-the-middle the communication without you knowing it. Disabling
 verification makes the communication insecure. Just having encryption on a
 transfer is not enough as you cannot be sure that you are communicating with

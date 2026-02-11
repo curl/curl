@@ -40,9 +40,10 @@ Tells libcurl to not attempt to use any workarounds for a security flaw in the
 SSL3 and TLS1.0 protocols. If this option is not used or this bit is set to 0,
 the SSL layer libcurl uses may use a work-around for this flaw although it
 might cause interoperability problems with some (older) SSL implementations.
-WARNING: avoiding this work-around lessens the security, and by setting this
-option to 1 you ask for exactly that. This option is only supported for Secure
-Transport and OpenSSL.
+
+**WARNING:** avoiding this work-around lessens the security, and by setting
+this option to 1 you ask for exactly that. This option is only supported for
+Secure Transport and OpenSSL.
 
 ## CURLSSLOPT_NO_REVOKE
 

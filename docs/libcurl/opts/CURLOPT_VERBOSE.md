@@ -39,7 +39,7 @@ this used when you debug/report problems.
 To also get all the protocol data sent and received, consider using the
 CURLOPT_DEBUGFUNCTION(3).
 
-**WARNING** this may show sensitive contents from headers and data.
+**WARNING:** this may show sensitive contents from headers and data.
 
 # DEFAULT
 
