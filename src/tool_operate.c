@@ -589,43 +589,9 @@ static CURLcode retrycheck(struct OperationConfig *config,
   return result;
 }
 
-/*
- * Call this after a transfer has completed.
- */
-static CURLcode post_per_transfer(struct per_transfer *per,
-                                  CURLcode result,
-                                  bool *retryp,
-                                  long *delay) /* milliseconds! */
+static CURLcode post_check_result(struct per_transfer *per, CURLcode result)
 {
-  struct OutStruct *outs = &per->outs;
-  CURL *curl = per->curl;
   struct OperationConfig *config = per->config;
-  int rc;
-
-  *retryp = FALSE;
-  *delay = 0; /* for no retry, keep it zero */
-
-  if(!curl || !config)
-    return result;
-
-#ifdef _WIN32
-  if(per->uploadfile) {
-    if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
-#ifndef CURL_WINDOWS_UWP
-      sclose(per->infd);
-#else
-      warnf("Closing per->infd != 0: FD == %d. "
-            "This behavior is only supported on desktop Windows", per->infd);
-#endif
-    }
-  }
-  else
-#endif
-    if(per->infdopen)
-      curlx_close(per->infd);
-
-  if(per->skip)
-    goto skip;
 
 #ifdef __VMS
   if(is_vms_shell()) {
@@ -645,15 +611,31 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   else if(config->fail == FAIL_WITH_BODY) {
     /* if HTTP response >= 400, return error */
     long code = 0;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+    curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &code);
     if(code >= 400) {
       if(!global->silent || global->showerror)
         curl_mfprintf(tool_stderr,
                       "curl: (%d) The requested URL returned error: %ld\n",
                       CURLE_HTTP_RETURNED_ERROR, code);
-      result = CURLE_HTTP_RETURNED_ERROR;
+      return CURLE_HTTP_RETURNED_ERROR;
     }
   }
+  return result;
+}
+
+static CURLcode post_output_handling(struct per_transfer *per,
+                                     CURLcode result)
+{
+  struct OutStruct *outs = &per->outs;
+  struct OperationConfig *config = per->config;
+  CURL *curl = per->curl;
+  int rc;
+
+#ifdef _WIN32
+  /* Discard incomplete UTF-8 sequence buffered from body */
+  memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
+#endif
+
   /* Set file extended attributes */
   if(!result && config->xattr && outs->fopened && outs->stream) {
     rc = fwrite_xattr(curl, per->url, fileno(outs->stream));
@@ -673,7 +655,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
        data because of unmet condition */
     curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
     if(!cond_unmet && !tool_create_output_file(outs, config))
-      result = CURLE_WRITE_ERROR;
+      return CURLE_WRITE_ERROR;
   }
 
   if(!outs->regular_file && outs->stream) {
@@ -681,33 +663,20 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     rc = fflush(outs->stream);
     if(!result && rc) {
       /* something went wrong in the writing process */
-      result = CURLE_WRITE_ERROR;
       errorf("Failed writing body");
+      return CURLE_WRITE_ERROR;
     }
   }
 
-#ifdef _WIN32
-  /* Discard incomplete UTF-8 sequence buffered from body */
-  if(outs->utf8seq[0])
-    memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
-#endif
+  return result;
+}
 
-  /* if retry-max-time is non-zero, make sure we have not exceeded the
-     time */
-  if(per->retry_remaining &&
-     (!config->retry_maxtime_ms ||
-      (curlx_timediff_ms(curlx_now(), per->retrystart) <
-       config->retry_maxtime_ms))) {
-    result = retrycheck(config, per, result, retryp, delay);
-    if(!result && *retryp)
-      return CURLE_OK; /* retry! */
-  }
-
-  if((global->progressmode == CURL_PROGRESS_BAR) &&
-     per->progressbar.calls)
-    /* if the custom progress bar has been displayed, we output a
-       newline here */
-    fputs("\n", per->progressbar.out);
+static CURLcode post_close_output(struct per_transfer *per,
+                                  CURLcode result)
+{
+  struct OutStruct *outs = &per->outs;
+  struct OperationConfig *config = per->config;
+  int rc;
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
@@ -734,11 +703,68 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   if(!result && config->remote_time && outs->regular_file && outs->filename) {
     /* Ask libcurl if we got a remote file time */
     curl_off_t filetime = -1;
-    curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
+    curl_easy_getinfo(per->curl, CURLINFO_FILETIME_T, &filetime);
     if(filetime != -1)
       setfiletime(filetime, outs->filename);
   }
-skip:
+  return result;
+}
+/*
+ * Call this after a transfer has completed.
+ */
+static CURLcode post_per_transfer(struct per_transfer *per,
+                                  CURLcode result,
+                                  bool *retryp,
+                                  long *delay) /* milliseconds! */
+{
+  struct OutStruct *outs = &per->outs;
+  struct OperationConfig *config = per->config;
+
+  *retryp = FALSE;
+  *delay = 0; /* for no retry, keep it zero */
+
+  if(!per->curl || !config)
+    return result;
+
+#ifdef _WIN32
+  if(per->uploadfile) {
+    if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+#ifndef CURL_WINDOWS_UWP
+      sclose(per->infd);
+#else
+      warnf("Closing per->infd != 0: FD == %d. "
+            "This behavior is only supported on desktop Windows", per->infd);
+#endif
+    }
+  }
+  else
+#endif
+    if(per->infdopen)
+      curlx_close(per->infd);
+
+  if(!per->skip) {
+    result = post_check_result(per, result);
+    result = post_output_handling(per, result);
+
+    /* if retry-max-time is non-zero, make sure we have not exceeded the
+       time */
+    if(per->retry_remaining &&
+       (!config->retry_maxtime_ms ||
+        (curlx_timediff_ms(curlx_now(), per->retrystart) <
+         config->retry_maxtime_ms))) {
+      result = retrycheck(config, per, result, retryp, delay);
+      if(!result && *retryp)
+        return CURLE_OK; /* retry! */
+    }
+
+    if((global->progressmode == CURL_PROGRESS_BAR) &&
+       per->progressbar.calls)
+      /* if the custom progress bar has been displayed, we output a
+         newline here */
+      fputs("\n", per->progressbar.out);
+
+    result = post_close_output(per, result);
+  }
   /* Write the --write-out data before cleanup but after result is final */
   if(config->writeout)
     ourWriteOut(config, per, result);
