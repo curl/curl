@@ -28,7 +28,6 @@
 #ifdef USE_WINDOWS_SSPI
 
 #include <sspi.h>
-#include <rpc.h>
 
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
