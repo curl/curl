@@ -56,14 +56,6 @@
 #endif
 
 #ifdef USE_WIN32_LDAP           /* Use Windows LDAP implementation. */
-# ifdef _MSC_VER
-#  pragma warning(push)
-#  pragma warning(disable:4201)
-# endif
-# include <subauth.h>  /* for [P]UNICODE_STRING */
-# ifdef _MSC_VER
-#  pragma warning(pop)
-# endif
 # include <winldap.h>
 # include <winber.h>
 #else

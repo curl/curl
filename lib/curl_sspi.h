@@ -27,17 +27,7 @@
 
 #ifdef USE_WINDOWS_SSPI
 
-/*
- * When including the following three headers, it is mandatory to define either
- * SECURITY_WIN32 or SECURITY_KERNEL, indicating who is compiling the code.
- */
-
-#undef SECURITY_WIN32
-#undef SECURITY_KERNEL
-#define SECURITY_WIN32 1
-#include <security.h>
 #include <sspi.h>
-#include <rpc.h>
 
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
@@ -56,7 +46,7 @@ void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 /* Forward-declaration of global variables defined in curl_sspi.c */
 extern PSecurityFunctionTable Curl_pSecFn;
 
-/* Provide some definitions missing in old headers */
+/* Provide Service Principal names as macros */
 #define SP_NAME_DIGEST              "WDigest"
 #define SP_NAME_NTLM                "NTLM"
 #define SP_NAME_NEGOTIATE           "Negotiate"
