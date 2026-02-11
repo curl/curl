@@ -631,6 +631,11 @@ static CURLcode post_output_handling(struct per_transfer *per,
   CURL *curl = per->curl;
   int rc;
 
+#ifdef _WIN32
+  /* Discard incomplete UTF-8 sequence buffered from body */
+  memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
+#endif
+
   /* Set file extended attributes */
   if(!result && config->xattr && outs->fopened && outs->stream) {
     rc = fwrite_xattr(curl, per->url, fileno(outs->stream));
@@ -662,12 +667,6 @@ static CURLcode post_output_handling(struct per_transfer *per,
       return CURLE_WRITE_ERROR;
     }
   }
-
-#ifdef _WIN32
-  /* Discard incomplete UTF-8 sequence buffered from body */
-  if(outs->utf8seq[0])
-    memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
-#endif
 
   return result;
 }
