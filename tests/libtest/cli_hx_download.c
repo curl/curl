@@ -44,7 +44,6 @@
 #endif
 #ifdef USE_SCHANNEL
 #include "vtls/schannel.h"
-#include "strerror.h"
 #endif
 
 static int verbose_d = 1;
@@ -207,16 +206,14 @@ static int my_progress_d_cb(void *userdata,
         CtxtHandle *ctxt_handle = (CtxtHandle *)tls->internals;
         SecPkgContext_ConnectionInfo info;
         SECURITY_STATUS sspi_status;
-        char buffer[STRERROR_LEN];
         memset(&info, 0, sizeof(info));
         sspi_status = QueryContextAttributes(ctxt_handle,
                                              SECPKG_ATTR_CONNECTION_INFO,
                                              &info);
         assert(sspi_status == SEC_E_OK);
-        curl_mfprintf(stderr,
-                      "[t-%zu] info Schannel TLS version 0x%08lx (%s)\n",
-                      t->idx, info.dwProtocol,
-                      Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+        curl_mfprintf(stderr, "[t-%zu] info Schannel TLS version 0x%08lx "
+                      "(status 0x%08lx)\n",
+                      t->idx, info.dwProtocol, sspi_status);
         break;
       }
 #endif
