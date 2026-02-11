@@ -56,7 +56,6 @@
 #endif
 
 #ifdef USE_WIN32_LDAP           /* Use Windows LDAP implementation. */
-# include <subauth.h>  /* for [P]UNICODE_STRING in SCH_CREDENTIALS */
 # include <winldap.h>
 # include <winber.h>
 #else

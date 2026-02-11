@@ -845,6 +845,7 @@
 /* Must set this before <schannel.h> is included directly or indirectly by
    another Windows header. */
 #  define SCHANNEL_USE_BLACKLISTS  /* for SCH_CREDENTIALS */
+#  include <subauth.h>  /* for [P]UNICODE_STRING in SCH_CREDENTIALS */
 #endif
 
 #ifdef __hpux
