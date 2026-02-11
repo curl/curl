@@ -43,9 +43,11 @@
 #include <rustls.h>
 #endif
 #ifdef USE_SCHANNEL
-#define SECURITY_WIN32
-#include <sspi.h>
-#include <schannel.h>
+#include <subauth.h>  /* for [P]UNICODE_STRING */
+#define SECURITY_WIN32  /* for sspi.h */
+#include <sspi.h>  /* for CtxtHandle, QueryContextAttributes() */
+#include <schannel.h>  /* SecPkgContext_ConnectionInfo,
+                          SECPKG_ATTR_CONNECTION_INFO */
 #endif
 
 static int verbose_d = 1;
