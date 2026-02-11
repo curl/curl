@@ -844,7 +844,7 @@
 #ifdef USE_SCHANNEL
 /* Must set this before <schannel.h> is included directly or indirectly by
    another Windows header. */
-#  define SCHANNEL_USE_BLACKLISTS 1
+#  define SCHANNEL_USE_BLACKLISTS  /* for SCH_CREDENTIALS */
 #endif
 
 #ifdef __hpux
