@@ -41,14 +41,13 @@
 #undef OCSP_RESPONSE
 #endif
 
-#include <schnlsp.h>
 #include <schannel.h>
 #include "../curl_sspi.h"
 
 #include "../cfilters.h"
 #include "../urldata.h"
 
-/* <wincrypt.h> has been included via the above <schnlsp.h>.
+/* <wincrypt.h> has been included via the above <schannel.h>.
  * Or in case of ldap.c, it was included via <winldap.h>.
  * And since <wincrypt.h> has this:
  *   #define X509_NAME  ((LPCSTR)7)
