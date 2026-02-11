@@ -104,17 +104,19 @@ struct Curl_schannel_ctxt {
   CtxtHandle ctxt_handle;
 };
 
+/* handle encoding/decoding buffers */
+struct sbuffer {
+  size_t length;
+  size_t offset;
+  unsigned char *buffer;
+};
+
 struct schannel_ssl_backend_data {
+  struct sbuffer encdata;
+  struct sbuffer decdata;
   struct Curl_schannel_cred *cred;
   struct Curl_schannel_ctxt *ctxt;
   SecPkgContext_StreamSizes stream_sizes;
-  size_t encdata_length, decdata_length;
-  size_t encdata_offset, decdata_offset;
-  unsigned char *encdata_buffer, *decdata_buffer;
-  /* encdata_is_incomplete: if encdata contains only a partial record that
-     cannot be decrypted without another recv() (that is, status is
-     SEC_E_INCOMPLETE_MESSAGE) then set this true. after an recv() adds
-     more bytes into encdata then set this back to false. */
   unsigned long req_flags, ret_flags;
   CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
   struct schannel_renegotiate_state {
@@ -128,6 +130,10 @@ struct schannel_ssl_backend_data {
   BIT(use_alpn); /* true if ALPN is used for this connection */
   BIT(use_manual_cred_validation); /* true if manual cred validation is used */
   BIT(sent_shutdown);
+  /* encdata_is_incomplete: if encdata contains only a partial record that
+     cannot be decrypted without another recv() (that is, status is
+     SEC_E_INCOMPLETE_MESSAGE) then set this true. after recv() adds more
+     bytes into encdata then set this back to false. */
   BIT(encdata_is_incomplete);
 };
 
