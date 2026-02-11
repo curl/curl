@@ -1070,8 +1070,8 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
 
     sspi_status =
       Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
-                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                       &pCertContextServer);
+                                          SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                          &pCertContextServer);
 
     if((sspi_status != SEC_E_OK) || !pCertContextServer) {
       char buffer[STRERROR_LEN];
@@ -1527,8 +1527,8 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   if(backend->use_alpn) {
     sspi_status =
       Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
-                                       SECPKG_ATTR_APPLICATION_PROTOCOL,
-                                       &alpn_result);
+                                          SECPKG_ATTR_APPLICATION_PROTOCOL,
+                                          &alpn_result);
 
     if(sspi_status != SEC_E_OK) {
       failf(data, "schannel: failed to retrieve ALPN result");
@@ -1573,8 +1573,8 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
     int certs_count = 0;
     sspi_status =
       Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
-                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                       &ccert_context);
+                                          SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                          &ccert_context);
 
     if((sspi_status != SEC_E_OK) || !ccert_context) {
       failf(data, "schannel: failed to retrieve remote cert context");
@@ -2389,7 +2389,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     InitSecBufferDesc(&BuffDesc, &Buffer, 1);
 
     sspi_status = Curl_pSecFn->ApplyControlToken(&backend->ctxt->ctxt_handle,
-                                              &BuffDesc);
+                                                 &BuffDesc);
 
     if(sspi_status != SEC_E_OK) {
       char buffer[STRERROR_LEN];
