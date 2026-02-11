@@ -43,7 +43,9 @@
 #include <rustls.h>
 #endif
 #ifdef USE_SCHANNEL
-#include "vtls/schannel.h"
+#define SECURITY_WIN32
+#include <sspi.h>
+#include <schannel.h>
 #endif
 
 static int verbose_d = 1;
