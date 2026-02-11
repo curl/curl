@@ -27,7 +27,6 @@
 
 #ifdef USE_WINDOWS_SSPI
 
-#include <security.h>
 #include <sspi.h>
 #include <rpc.h>
 
@@ -48,7 +47,7 @@ void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 /* Forward-declaration of global variables defined in curl_sspi.c */
 extern PSecurityFunctionTable Curl_pSecFn;
 
-/* Provide some definitions missing in old headers */
+/* Provide some service principal names as macros */
 #define SP_NAME_DIGEST              "WDigest"
 #define SP_NAME_NTLM                "NTLM"
 #define SP_NAME_NEGOTIATE           "Negotiate"
