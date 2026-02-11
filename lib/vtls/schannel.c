@@ -200,7 +200,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   return CURLE_OK;
 }
 
-#define CIPHEROPTION(x) {#x, x}
+#define CIPHEROPTION(x) { #x, x }
 
 struct algo {
   const char *name;
@@ -261,7 +261,7 @@ static const struct algo algs[] = {
 #ifdef CALG_ECDH_EPHEM
   CIPHEROPTION(CALG_ECDH_EPHEM),
 #endif
-  {NULL, 0},
+  { NULL, 0 },
 };
 
 static int get_alg_id_by_name(const char *name)
@@ -501,8 +501,8 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     if(fInCert || blob) {
       /* Reading a .P12 or .pfx file, like the example at bottom of
-         https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
-      */
+       * https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
+       */
       CRYPT_DATA_BLOB datablob;
       WCHAR *pszPassword;
       size_t pwd_len = 0;
@@ -525,8 +525,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
         if(continue_reading && (certsize < CURL_MAX_INPUT_LENGTH))
           certdata = curlx_malloc(certsize + 1);
-        if((!certdata) ||
-           ((int) fread(certdata, certsize, 1, fInCert) != 1))
+        if(!certdata || ((int)fread(certdata, certsize, 1, fInCert) != 1))
           continue_reading = FALSE;
         curlx_fclose(fInCert);
         if(!continue_reading) {
@@ -1677,9 +1676,9 @@ enum schannel_renegotiate_caller_t {
    incomplete. In that case, we remain in the renegotiation (connecting) stage
    and future calls to schannel_recv and schannel_send must call this function
    first to complete the renegotiation. */
-static CURLcode
-schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          enum schannel_renegotiate_caller_t caller)
+static CURLcode schannel_recv_renegotiate(
+  struct Curl_cfilter *cf, struct Curl_easy *data,
+  enum schannel_renegotiate_caller_t caller)
 {
   CURLcode result;
   curl_socket_t sockfd;
@@ -2100,9 +2099,9 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     /* read encrypted data from socket */
     result = Curl_conn_cf_recv(cf->next, data,
-                             (char *)(backend->encdata_buffer +
-                                      backend->encdata_offset),
-                             size, &nread);
+                               (char *)(backend->encdata_buffer +
+                                        backend->encdata_offset),
+                               size, &nread);
     if(result) {
       if(result == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
