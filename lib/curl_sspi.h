@@ -27,14 +27,6 @@
 
 #ifdef USE_WINDOWS_SSPI
 
-/*
- * When including the following three headers, it is mandatory to define either
- * SECURITY_WIN32 or SECURITY_KERNEL, indicating who is compiling the code.
- */
-
-#undef SECURITY_WIN32
-#undef SECURITY_KERNEL
-#define SECURITY_WIN32 1
 #include <security.h>
 #include <sspi.h>
 #include <rpc.h>

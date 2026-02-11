@@ -106,6 +106,7 @@
 #  ifndef NOGDI
 #  define NOGDI
 #  endif
+
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
 #  if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
@@ -116,6 +117,12 @@
 #      define CURL_WINDOWS_UWP
 #    endif
 #  endif
+
+/* Mandatory to define SECURITY_WIN32 or SECURITY_KERNEL to indicating who is
+   compiling the code. */
+#undef SECURITY_KERNEL
+#undef SECURITY_WIN32
+#define SECURITY_WIN32  /* for sspi.h and security.h Windows headers */
 #endif
 
 /* Compatibility */
