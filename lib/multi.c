@@ -1852,7 +1852,7 @@ static void set_in_callback(struct Curl_multi *multi, bool value)
  */
 static void multi_posttransfer(struct Curl_easy *data)
 {
-#if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(HAVE_MSG_NOSIGNAL)
+#if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(MSG_NOSIGNAL)
   /* restore the signal handler for SIGPIPE before we get back */
   if(!data->set.no_signal)
     signal(SIGPIPE, data->state.prev_signal);

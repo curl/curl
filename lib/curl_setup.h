@@ -852,7 +852,7 @@
 #endif
 
 #ifndef _WIN32
-#include <sys/socket.h>
+#include <sys/socket.h>  /* also for MSG_NOSIGNAL */
 #endif
 
 #include "functypes.h"
@@ -880,7 +880,7 @@ struct timeval {
  * If we have the MSG_NOSIGNAL define, make sure we use
  * it as the fourth argument of function send()
  */
-#ifdef HAVE_MSG_NOSIGNAL
+#ifdef MSG_NOSIGNAL
 #define SEND_4TH_ARG MSG_NOSIGNAL
 #else
 #define SEND_4TH_ARG 0

@@ -703,45 +703,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   fi
 ])
 
-dnl CURL_CHECK_MSG_NOSIGNAL
-dnl -------------------------------------------------
-dnl Check for MSG_NOSIGNAL
-
-AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
-  AC_CHECK_HEADERS(sys/types.h)
-  AC_CACHE_CHECK([for MSG_NOSIGNAL], [curl_cv_msg_nosignal], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #undef inline
-        #ifdef _WIN32
-        #ifndef WIN32_LEAN_AND_MEAN
-        #define WIN32_LEAN_AND_MEAN
-        #endif
-        #include <winsock2.h>
-        #else
-        #ifdef HAVE_SYS_TYPES_H
-        #include <sys/types.h>
-        #endif
-        #include <sys/socket.h>
-        #endif
-      ]],[[
-        int flag = MSG_NOSIGNAL;
-        (void)flag;
-      ]])
-    ],[
-      curl_cv_msg_nosignal="yes"
-    ],[
-      curl_cv_msg_nosignal="no"
-    ])
-  ])
-  case "$curl_cv_msg_nosignal" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_MSG_NOSIGNAL, 1,
-        [Define to 1 if you have the MSG_NOSIGNAL flag.])
-      ;;
-  esac
-])
-
 
 dnl CURL_CHECK_STRUCT_TIMEVAL
 dnl -------------------------------------------------

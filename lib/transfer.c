@@ -535,7 +535,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
      * different ports! */
     data->state.allow_port = TRUE;
 
-#if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(HAVE_MSG_NOSIGNAL)
+#if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(MSG_NOSIGNAL)
     /*************************************************************
      * Tell signal handler to ignore SIGPIPE
      *************************************************************/
