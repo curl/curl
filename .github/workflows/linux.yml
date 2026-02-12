@@ -45,7 +45,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.67.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260204.0
+  BORINGSSL_VERSION: 0.20260211.0
   # handled in renovate.json
   OPENSSL_VERSION: 3.6.1
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com

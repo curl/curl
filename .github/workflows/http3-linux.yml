@@ -42,7 +42,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.67.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260204.0
+  BORINGSSL_VERSION: 0.20260211.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver registryUrl=https://github.com
   NETTLE_VERSION: 3.10.2
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver extractVersion=^nettle_?(?<version>.+)_release_.+$ registryUrl=https://github.com
