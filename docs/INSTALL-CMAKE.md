@@ -406,6 +406,7 @@ Details via CMake
 - `AMISSL_INCLUDE_DIR`:                     Absolute path to AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Absolute path to `amisslstubs` library.
 - `AMISSL_AUTO_LIBRARY`:                    Absolute path to `amisslauto` library.
+- `BORINGSSL_VERSION`:                      Set BoringSSL version for `curl -V`/`curl --version` output.
 - `BROTLI_INCLUDE_DIR`:                     Absolute path to brotli include directory.
 - `BROTLICOMMON_LIBRARY`:                   Absolute path to `brotlicommon` library.
 - `BROTLIDEC_LIBRARY`:                      Absolute path to `brotlidec` library.

@@ -327,6 +327,9 @@
 /* MIT Kerberos version */
 #cmakedefine CURL_KRB5_VERSION ${CURL_KRB5_VERSION}
 
+/* BoringSSL version */
+#cmakedefine CURL_BORINGSSL_VERSION ${CURL_BORINGSSL_VERSION}
+
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #cmakedefine HAVE_IFADDRS_H 1
 
