@@ -924,7 +924,7 @@ jobs:
               # VS2022). Since it integrates badly with CI steps and shell scripts,
               # reproduce the necessary build configuration manually, without envs.
               MSVC_EDITION='2022/Enterprise/vc/tools/msvc'
-              [[ "${MATRIX_IMAGE}" = *'vs2026'* ]] && MSVC_EDITION='2026/Enterprise/vc/tools/msvc'
+              [[ "${MATRIX_IMAGE}" = *'vs2026'* ]] && MSVC_EDITION='18/Enterprise/vc/tools/msvc'
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
               MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
               MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
