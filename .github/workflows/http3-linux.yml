@@ -397,18 +397,16 @@ jobs:
 
           - name: 'boringssl'
             install_steps: skipall
+            CPPFLAGS: '-DCURL_BORINGSSL_VERSION=\\\"${{ env.BORINGSSL_VERSION }}\\\"'
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2 --enable-ssls-export
-              CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
 
           - name: 'boringssl'
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1790'
-            generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DBORINGSSL_VERSION=${BORINGSSL_VERSION} -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
-              -DCMAKE_UNITY_BUILD=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DBORINGSSL_VERSION=${{ env.BORINGSSL_VERSION }} -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=ON
 
           - name: 'gnutls'
             install_packages: libp11-kit-dev libssh-dev
@@ -633,6 +631,7 @@ jobs:
 
       - name: 'configure'
         env:
+          CPPFLAGS: '${{ matrix.build.CPPFLAGS }}'
           LDFLAGS: '${{ matrix.build.LDFLAGS }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
