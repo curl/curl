@@ -87,8 +87,11 @@ jobs:
       - uses: cygwin/cygwin-install-action@f2009323764960f80959895c7bc3bb30210afe4d # v6
         with:
           platform: ${{ matrix.platform }}
-          site: https://mirrors.kernel.org/sourceware/cygwin/
           work-vol: 'D:'
+          # https://cygwin.com/mirrors.html
+          # Main mirror status: https://archlinux.org/mirrors/kernel.org/
+          # site: https://mirrors.kernel.org/sourceware/cygwin/
+          site: https://cygwin.mirror.gtcomm.net/
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
             ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
