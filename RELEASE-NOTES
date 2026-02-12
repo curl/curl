@@ -4,7 +4,7 @@ curl and libcurl 8.19.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3597
+ Contributors:                 3599
 
 This release includes the following changes:
 
@@ -21,6 +21,7 @@ This release includes the following bugfixes:
 
  o altsvc: only accept 17 byte dates from files [22]
  o asyn-ares: abort with OOM error when Curl_dnscache_mk_entry fails [107]
+ o build: check `MSG_NOSIGNAL` directly, drop detection and interim macro [26]
  o build: constify `memchr()`/`strchr()`/etc result variables (cont.) [85]
  o build: detect and include `inttypes.h` again [13]
  o build: drop duplicate C includes [54]
@@ -54,6 +55,7 @@ This release includes the following bugfixes:
  o curl_get_line: drop single-use macro [93]
  o curl_multi_perform.md: resolve inconsistency [143]
  o curl_setup.h: drop extra header guard for internal include [91]
+ o curl_setup.h: merge back single-use internal header `curl_setup_once.h` [78]
  o curl_setup.h: simplify curl memory macro mappings [163]
  o curl_setup_once: allow CURL_DEBUGASSERT for customization [125]
  o CURLINFO_CONTENT_LENGTH_DOWNLOAD_T.md: fix available protocols [97]
@@ -61,6 +63,7 @@ This release includes the following bugfixes:
  o digest: escape double quotes and backslashes in realm and nonce [83]
  o digest: handle quotes in the path [50]
  o docs/INSTALL: update configure details [45]
+ o docs/libcurl: unify WARNING use [89]
  o docs: add LibreELEC to DISTROS.md
  o docs: document the need for a 64-bit type and stdint.h [118]
  o docs: explicitly call out Slowloris as not a security flaw [6]
@@ -69,11 +72,13 @@ This release includes the following bugfixes:
  o fopen.h: simplify curl memory macro mappings [160]
  o ftp: replace a `curlx_free()` with `curlx_dyn_free()` [86]
  o GOVERNANCE.md: Post-Daniel BDFL [31]
+ o gss: exclude verbose error logic from non-verbose builds [122]
  o h2+h3: align stream close handling [131]
  o hostip.c: fix leak of addrinfo [11]
  o hostip6: remove debug-only code [24]
  o hostip: fix unreachable code in rare build configuration [74]
  o http/3: add description for known server error codes [15]
+ o http_aws_sigv4: fix query normalization of %2b [117]
  o imap: add a check for Curl_meta_get() [157]
  o imap: check `imap_sendf()` printf masks at compile-time [67]
  o imap: skip literals inside quoted strings [30]
@@ -155,6 +160,7 @@ This release includes the following bugfixes:
  o verbose.md: explain the { and } prefixes [96]
  o vquic: handle SOCKEMSGSIZE correctly [129]
  o vtls: dedupe common on-session-reuse logic [98]
+ o vtls: use ALPN http/1.0 & http/1.1 for HTTP/1.0 requests [123]
  o VULN-DISCLOSURE-POLICY.md: push reports to the web form [154]
  o winapi: use FormatMessageA instead of FormatMessageW [115]
  o windows: `USE_WINSOCK` to guard winsock2 code (where missing) [133]
@@ -185,11 +191,12 @@ advice from friends like these:
   Daniil Gentili, dEajL3kA, dependabot[bot], Frank Buss, gudyuu on hackerone,
   Itay Bookstein, Jacek Migacz, James Fuller, Jan Macku, jhauga,
   Joshua Vandaële, Juan Belon, Kai Pastor, Maksim Ściepanienka,
-  Megamouse on github, Michał Antoniak, Patrick Monnerat, Ray Satiro,
-  renovate[bot], Rudi Heitbaum, Sascha Frinken, Spenser Black, Stefan Eissing,
-  Tenant HellTower, Thibault de Villèle, Tomáš Malý, tommy, Viktor Szakats,
-  Wyuer on github, z2_, Zhicheng Chen, Йоте
-  (44 contributors)
+  Megamouse on github, Michał Antoniak, Nuno Goncalves, Patrick Monnerat,
+  programmerlexi on github, Ray Satiro, renovate[bot], Rudi Heitbaum,
+  Sascha Frinken, Spenser Black, Stefan Eissing, Tenant HellTower,
+  Thibault de Villèle, Tomáš Malý, tommy, Viktor Szakats, Wyuer on github, z2_,
+  Zhicheng Chen, Йоте
+  (46 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -218,6 +225,7 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=20312
  [24] = https://curl.se/bug/?i=20334
  [25] = https://curl.se/bug/?i=20333
+ [26] = https://curl.se/bug/?i=20559
  [27] = https://curl.se/bug/?i=20250
  [28] = https://curl.se/bug/?i=20369
  [29] = https://curl.se/bug/?i=20319
@@ -269,6 +277,7 @@ References to bug reports and discussions on issues:
  [75] = https://curl.se/bug/?i=20276
  [76] = https://curl.se/bug/?i=20275
  [77] = https://curl.se/bug/?i=20274
+ [78] = https://curl.se/bug/?i=20555
  [79] = https://curl.se/bug/?i=20266
  [80] = https://curl.se/bug/?i=20226
  [81] = https://curl.se/bug/?i=19418
@@ -279,6 +288,7 @@ References to bug reports and discussions on issues:
  [86] = https://curl.se/bug/?i=20494
  [87] = https://curl.se/bug/?i=20547
  [88] = https://curl.se/bug/?i=20425
+ [89] = https://curl.se/bug/?i=20561
  [90] = https://curl.se/bug/?i=20419
  [91] = https://curl.se/bug/?i=20544
  [92] = https://curl.se/bug/?i=20414
@@ -303,10 +313,13 @@ References to bug reports and discussions on issues:
  [114] = https://curl.se/bug/?i=20383
  [115] = https://curl.se/bug/?i=20261
  [116] = https://curl.se/bug/?i=20463
+ [117] = https://curl.se/bug/?i=20543
  [118] = https://curl.se/bug/?i=20384
  [119] = https://curl.se/bug/?i=20531
  [120] = https://curl.se/bug/?i=20375
  [121] = https://curl.se/bug/?i=20347
+ [122] = https://curl.se/bug/?i=20551
+ [123] = https://curl.se/bug/?i=20487
  [124] = https://curl.se/bug/?i=20370
  [125] = https://curl.se/bug/?i=19744
  [127] = https://curl.se/bug/?i=20458
