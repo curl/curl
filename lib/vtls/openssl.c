@@ -1530,7 +1530,7 @@ static CURLcode client_cert(struct Curl_easy *data,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
-    if((!key_file) && (!key_blob)) {
+    if(!key_file && !key_blob) {
       key_file = cert_file;
       key_blob = cert_blob;
     }

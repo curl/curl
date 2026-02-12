@@ -912,7 +912,7 @@ CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data)
   struct in_addr a4;
   const char *local_ip4 = data->set.str[STRING_DNS_LOCAL_IP4];
 
-  if((!local_ip4) || (local_ip4[0] == 0)) {
+  if(!local_ip4 || (local_ip4[0] == 0)) {
     a4.s_addr = 0; /* disabled: do not bind to a specific address */
   }
   else {
@@ -941,7 +941,7 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data)
   unsigned char a6[INET6_ADDRSTRLEN];
   const char *local_ip6 = data->set.str[STRING_DNS_LOCAL_IP6];
 
-  if((!local_ip6) || (local_ip6[0] == 0)) {
+  if(!local_ip6 || (local_ip6[0] == 0)) {
     /* disabled: do not bind to a specific address */
     memset(a6, 0, sizeof(a6));
   }

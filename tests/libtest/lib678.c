@@ -43,7 +43,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
         continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
       if(continue_reading)
         data = curlx_malloc(datasize + 1);
-      if((!data) || ((int)fread(data, datasize, 1, fInCert) != 1))
+      if(!data || ((int)fread(data, datasize, 1, fInCert) != 1))
         continue_reading = FALSE;
       curlx_fclose(fInCert);
       if(!continue_reading) {
