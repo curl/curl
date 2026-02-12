@@ -129,9 +129,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
   (void)curlx_nonblock(sock, FALSE);
 
   for(;;) {
-    TCHAR *sname;
-
-    sname = curlx_convert_UTF8_to_tchar(service_name);
+    TCHAR *sname = curlx_convert_UTF8_to_tchar(service_name);
     if(!sname)
       return CURLE_OUT_OF_MEMORY;
 
