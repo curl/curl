@@ -56,7 +56,7 @@ env:
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.68.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
-  QUICHE_VERSION: 0.24.7
+  QUICHE_VERSION: 0.25.0
 
 jobs:
   build-cache:
