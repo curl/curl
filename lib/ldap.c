@@ -54,7 +54,7 @@
 #  undef OCSP_RESPONSE
 #  include <winber.h>
 #else
-#  define LDAP_DEPRECATED 1      /* Be sure ldap_init() is defined. */
+#  define LDAP_DEPRECATED 1     /* Be sure ldap_init() is defined. */
 #  ifdef HAVE_LBER_H
 #    include <lber.h>
 #  endif
