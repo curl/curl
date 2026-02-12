@@ -161,12 +161,12 @@ jobs:
 
           - name: 'awslc'
             install_steps: awslc pytest
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
+            configure: CPPFLAGS=-DCURL_PATCHSTAMP=test-patch LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
 
           - name: 'awslc'
             install_packages: libidn2-dev
             install_steps: awslc
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch
 
           - name: 'boringssl'
             install_steps: boringssl pytest
