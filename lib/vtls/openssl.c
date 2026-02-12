@@ -39,6 +39,7 @@
  *  typedef struct X509_name_st X509_NAME;
  *  etc.
  * OpenSSL has the same, but only in <openssl/ssl.h> and <openssl/x509*.h>.
+ * LibreSSL automatically undefines these symbols.
  *
  * this C-preprocessed symbols break these OpenSSL headers.
  * The workaround is to undefine those defines here (and only here).
