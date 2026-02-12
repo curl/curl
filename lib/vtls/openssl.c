@@ -43,16 +43,16 @@
  * <wincrypt.h>.
  * The workaround is to undefine those defines here (and only here).
  *
+ * For unity builds it may need to be repeated elsewhere too, e.g. in ldap.c,
+ * to apply to other sources using OpenSSL includes. Each compilation unit
+ * needs undefine them between the first <wincrypt.h> include and the first
+ * OpenSSL include.
+ *
  * OpenSSL does this in <openssl/ssl.h> and <openssl/x509v3.h>, but it
  * also does the #undef by including <openssl/ossl_typ.h> (or its
  * successor <openssl/types.h>). 3.0.x only does it on the first include.
  *
  * LibreSSL automatically undefines these symbols before using them.
- *
- * For unity builds it may need to be repeated elsewhere too, e.g. in ldap.c,
- * to apply to other sources using OpenSSL includes. Each compilation unit
- * needs undefine them between the first <wincrypt.h> include and the first
- * OpenSSL include.
  */
 #undef X509_NAME
 #undef X509_EXTENSIONS
