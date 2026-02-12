@@ -137,16 +137,15 @@ jobs:
         env:
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
-          MATRIX_GENERATOR: '${{ matrix.build.generator }}'
+          CMAKE_GENERATOR: '${{ matrix.build.generator }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
-            [ -n "${MATRIX_GENERATOR}" ] && options="-G ${MATRIX_GENERATOR}"
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
-              ${MATRIX_GENERATE} ${options}
+              ${MATRIX_GENERATE}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking --enable-option-checking=fatal \
