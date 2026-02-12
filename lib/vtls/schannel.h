@@ -28,10 +28,6 @@
 
 #ifdef USE_SCHANNEL
 
-#ifdef USE_WIN32_CRYPTO
-#include <wincrypt.h>
-#endif
-
 #include <schannel.h>
 #include "../curl_sspi.h"
 
