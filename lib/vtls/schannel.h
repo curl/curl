@@ -31,6 +31,13 @@
 /* Wincrypt must be included before anything that could include OpenSSL. */
 #ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
+/* Undefine wincrypt conflicting symbols for BoringSSL. */
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef PKCS7_SIGNER_INFO
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
 #endif
 
 #include <schannel.h>
@@ -38,6 +45,25 @@
 
 #include "../cfilters.h"
 #include "../urldata.h"
+
+/* <wincrypt.h> has been included via the above <schannel.h>.
+ * Or in case of ldap.c, it was included via <winldap.h>.
+ * And since <wincrypt.h> has this:
+ *   #define X509_NAME  ((LPCSTR)7)
+ *
+ * And in BoringSSL's <openssl/base.h> there is:
+ *  typedef struct X509_name_st X509_NAME;
+ *  etc.
+ *
+ * this will cause all kinds of C-preprocessing paste errors in
+ * BoringSSL's <openssl/x509.h>: So just undefine those defines here
+ * (and only here).
+ */
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#undef X509_NAME
+#undef X509_CERT_PAIR
+#undef X509_EXTENSIONS
+#endif
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
