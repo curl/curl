@@ -2323,11 +2323,111 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   return mresult;
 }
 
+/* returns the possibly updated result */
+static CURLcode is_finished(struct Curl_multi *multi,
+                            struct Curl_easy *data,
+                            bool stream_error,
+                            CURLcode result)
+{
+  if(data->mstate < MSTATE_COMPLETED) {
+    if(result) {
+      /*
+       * If an error was returned, and we are not in completed state now,
+       * then we go to completed and consider this transfer aborted.
+       */
+
+      /* No attempt to disconnect connections must be made before this -
+         connection detach and termination happens only here */
+
+      /* Check if we can move pending requests to send pipe */
+      process_pending_handles(multi); /* connection */
+
+      if(data->conn) {
+        if(stream_error) {
+          /* Do not attempt to send data over a connection that timed out */
+          bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
+          struct connectdata *conn = data->conn;
+
+          /* This is where we make sure that the conn pointer is reset.
+             We do not have to do this in every case block above where a
+             failure is detected */
+          Curl_detach_connection(data);
+          Curl_conn_terminate(data, conn, dead_connection);
+        }
+      }
+      else if(data->mstate == MSTATE_CONNECT) {
+        /* Curl_connect() failed */
+        multi_posttransfer(data);
+        Curl_pgrsUpdate_nometer(data);
+      }
+
+      multistate(data, MSTATE_COMPLETED);
+      return result;
+    }
+    /* if there is still a connection to use, call the progress function */
+    else if(data->conn) {
+      result = Curl_pgrsUpdate(data);
+      if(result) {
+        /* aborted due to progress callback return code must close the
+           connection */
+        streamclose(data->conn, "Aborted by callback");
+
+        /* if not yet in DONE state, go there, otherwise COMPLETED */
+        multistate(data, (data->mstate < MSTATE_DONE) ?
+                   MSTATE_DONE : MSTATE_COMPLETED);
+        return result;
+      }
+    }
+  }
+  return result;
+}
+
+static void handle_completed(struct Curl_multi *multi,
+                             struct Curl_easy *data,
+                             CURLcode result)
+{
+  if(data->master_mid != UINT32_MAX) {
+    /* A sub transfer, not for msgsent to application */
+    struct Curl_easy *mdata;
+
+    CURL_TRC_M(data, "sub xfer done for master %u", data->master_mid);
+    mdata = Curl_multi_get_easy(multi, data->master_mid);
+    if(mdata) {
+      if(mdata->sub_xfer_done)
+        mdata->sub_xfer_done(mdata, data, result);
+      else
+        CURL_TRC_M(data, "master easy %u without sub_xfer_done callback.",
+                   data->master_mid);
+    }
+    else {
+      CURL_TRC_M(data, "master easy %u already gone.", data->master_mid);
+    }
+  }
+  else {
+    /* now fill in the Curl_message with this info */
+    struct Curl_message *msg = &data->msg;
+
+    msg->extmsg.msg = CURLMSG_DONE;
+    msg->extmsg.easy_handle = data;
+    msg->extmsg.data.result = result;
+
+    multi_addmsg(multi, msg);
+    DEBUGASSERT(!data->conn);
+  }
+  multistate(data, MSTATE_MSGSENT);
+
+  /* remove from the other sets, add to msgsent */
+  Curl_uint32_bset_remove(&multi->process, data->mid);
+  Curl_uint32_bset_remove(&multi->dirty, data->mid);
+  Curl_uint32_bset_remove(&multi->pending, data->mid);
+  Curl_uint32_bset_add(&multi->msgsent, data->mid);
+  --multi->xfers_alive;
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct Curl_sigpipe_ctx *sigpipe_ctx)
 {
-  struct Curl_message *msg = NULL;
   bool connected;
   bool protocol_connected = FALSE;
   bool dophase_done = FALSE;
@@ -2629,94 +2729,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
 statemachine_end:
 
-    if(data->mstate < MSTATE_COMPLETED) {
-      if(result) {
-        /*
-         * If an error was returned, and we are not in completed state now,
-         * then we go to completed and consider this transfer aborted.
-         */
-
-        /* NOTE: no attempt to disconnect connections must be made
-           in the case blocks above - cleanup happens only here */
-
-        /* Check if we can move pending requests to send pipe */
-        process_pending_handles(multi); /* connection */
-
-        if(data->conn) {
-          if(stream_error) {
-            /* Do not attempt to send data over a connection that timed out */
-            bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
-            struct connectdata *conn = data->conn;
-
-            /* This is where we make sure that the conn pointer is reset.
-               We do not have to do this in every case block above where a
-               failure is detected */
-            Curl_detach_connection(data);
-            Curl_conn_terminate(data, conn, dead_connection);
-          }
-        }
-        else if(data->mstate == MSTATE_CONNECT) {
-          /* Curl_connect() failed */
-          multi_posttransfer(data);
-          Curl_pgrsUpdate_nometer(data);
-        }
-
-        multistate(data, MSTATE_COMPLETED);
-        mresult = CURLM_CALL_MULTI_PERFORM;
-      }
-      /* if there is still a connection to use, call the progress function */
-      else if(data->conn) {
-        result = Curl_pgrsUpdate(data);
-        if(result) {
-          /* aborted due to progress callback return code must close the
-             connection */
-          streamclose(data->conn, "Aborted by callback");
-
-          /* if not yet in DONE state, go there, otherwise COMPLETED */
-          multistate(data, (data->mstate < MSTATE_DONE) ?
-                     MSTATE_DONE : MSTATE_COMPLETED);
-          mresult = CURLM_CALL_MULTI_PERFORM;
-        }
-      }
-    }
+    result = is_finished(multi, data, stream_error, result);
+    if(result)
+      mresult = CURLM_CALL_MULTI_PERFORM;
 
     if(MSTATE_COMPLETED == data->mstate) {
-      if(data->master_mid != UINT32_MAX) {
-        /* A sub transfer, not for msgsent to application */
-        struct Curl_easy *mdata;
-
-        CURL_TRC_M(data, "sub xfer done for master %u", data->master_mid);
-        mdata = Curl_multi_get_easy(multi, data->master_mid);
-        if(mdata) {
-          if(mdata->sub_xfer_done)
-            mdata->sub_xfer_done(mdata, data, result);
-          else
-            CURL_TRC_M(data, "master easy %u without sub_xfer_done callback.",
-                       data->master_mid);
-        }
-        else {
-          CURL_TRC_M(data, "master easy %u already gone.", data->master_mid);
-        }
-      }
-      else {
-        /* now fill in the Curl_message with this info */
-        msg = &data->msg;
-
-        msg->extmsg.msg = CURLMSG_DONE;
-        msg->extmsg.easy_handle = data;
-        msg->extmsg.data.result = result;
-
-        multi_addmsg(multi, msg);
-        DEBUGASSERT(!data->conn);
-      }
-      multistate(data, MSTATE_MSGSENT);
-
-      /* remove from the other sets, add to msgsent */
-      Curl_uint32_bset_remove(&multi->process, data->mid);
-      Curl_uint32_bset_remove(&multi->dirty, data->mid);
-      Curl_uint32_bset_remove(&multi->pending, data->mid);
-      Curl_uint32_bset_add(&multi->msgsent, data->mid);
-      --multi->xfers_alive;
+      handle_completed(multi, data, result);
       return CURLM_OK;
     }
   } while((mresult == CURLM_CALL_MULTI_PERFORM) ||
