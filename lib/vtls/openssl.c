@@ -29,6 +29,19 @@
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 
+/* If <wincrypt.h> is included directly, or indirectly via <schannel.h>,
+ * or in case of ldap.c, via <winldap.h>, <wincrypt.h> does this:
+ *   #define X509_NAME  ((LPCSTR)7)
+ *
+ * And in BoringSSL/AWC-LC's <openssl/base.h> there is:
+ *  typedef struct X509_name_st X509_NAME;
+ *  etc.
+ * OpenSSL has the same, but only in <openssl/ssl.h> and <openssl/x509*.h>.
+ *
+ * this C-preprocessed symbols break these OpenSSL headers.
+ * The workaround is to undefine those defines here (and only here).
+ */
+
 /* Wincrypt must be included before anything that could include OpenSSL. */
 #ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
