@@ -808,6 +808,7 @@ jobs:
             env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
+            image: 'windows-2025-vs2026'
             chkprefill: '_chkprefill'
             config: >-
               -DENABLE_DEBUG=ON
@@ -910,9 +911,11 @@ jobs:
               # Officially this requires the vcvarsall.bat MS-DOS batch file (as of
               # VS2022). Since it integrates badly with CI steps and shell scripts,
               # reproduce the necessary build configuration manually, without envs.
+              MSVC_EDITION='2022/Enterprise/vc/tools/msvc'
+              [[ "${MATRIX_IMAGE}" = *'vs2026'* ]] && MSVC_EDITION='18/Enterprise/vc/tools/msvc'
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
               MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
-              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/2022/Enterprise/vc/tools/msvc")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
+              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
               MSVC_ROOTW="$(cygpath --mixed "$MSVC_ROOTU")"
               MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
               MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
@@ -938,6 +941,8 @@ jobs:
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
               options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
               export CMAKE_GENERATOR='Ninja Multi-Config'  # pass it via env to avoid space issues
+              echo "Using MSVC: ${MSVC_ROOTW}"
+              echo "Using Windows SDK: ${MSDK_VER}"
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
@@ -1009,7 +1014,7 @@ jobs:
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
-            if [ "${MATRIX_IMAGE}" != 'windows-2025' ]; then
+            if [[ "${MATRIX_IMAGE}" = *'windows-2025'* ]]; then
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
