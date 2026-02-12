@@ -1141,7 +1141,7 @@ static CURLcode imap_state_auth_resp(struct Curl_easy *data,
       imap_state(data, imapc, IMAP_STOP);  /* Authenticated */
       break;
     case SASL_IDLE:            /* No mechanism left after cancellation */
-      if((!imapc->login_disabled) && (imapc->preftype & IMAP_TYPE_CLEARTEXT))
+      if(!imapc->login_disabled && (imapc->preftype & IMAP_TYPE_CLEARTEXT))
         /* Perform clear text authentication */
         result = imap_perform_login(data, imapc, data->conn);
       else {

@@ -4062,7 +4062,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     goto out;
 
   if(k->httpcode >= 300) {
-    if((!data->req.authneg) && !conn->bits.close &&
+    if(!data->req.authneg && !conn->bits.close &&
        !Curl_creader_will_rewind(data)) {
       /*
        * General treatment of errors when about to send data. Including :

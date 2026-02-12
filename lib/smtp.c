@@ -834,7 +834,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
        whether the hostname is encoded using IDN ACE */
     bool utf8 = FALSE;
 
-    if((!smtp->custom) || (!smtp->custom[0])) {
+    if(!smtp->custom || !smtp->custom[0]) {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
       const char *suffix = "";
