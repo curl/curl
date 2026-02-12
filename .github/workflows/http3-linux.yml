@@ -401,13 +401,12 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2 --enable-ssls-export
-              CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
 
           - name: 'boringssl'
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1790'
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DBORINGSSL_VERSION=${BORINGSSL_VERSION} -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'gnutls'
@@ -640,14 +639,16 @@ jobs:
         run: |
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            [[ "${MATRIX_GENERATE}" = *'boringssl'* ]] && options=" -DBORINGSSL_VERSION=${BORINGSSL_VERSION}"
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DCURL_USE_LIBUV=ON \
               -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
-              ${MATRIX_GENERATE}
+              ${MATRIX_GENERATE} ${options}
           else
+            [[ "${MATRIX_CONFIGURE}" = *'boringssl'* ]] && CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libuv \
