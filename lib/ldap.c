@@ -45,14 +45,14 @@
 
 #ifdef USE_WIN32_LDAP           /* Use Windows LDAP implementation. */
 # include <winldap.h>
-# include <winber.h>
-/* Undefine indirect wincrypt.h symbols conflicting with BoringSSL. */
+/* Undefine indirect <wincrypt.h> symbols conflicting with BoringSSL. */
 #undef X509_NAME
 #undef X509_EXTENSIONS
 #undef PKCS7_ISSUER_AND_SERIAL
 #undef PKCS7_SIGNER_INFO
 #undef OCSP_REQUEST
 #undef OCSP_RESPONSE
+# include <winber.h>
 #else
 # define LDAP_DEPRECATED 1      /* Be sure ldap_init() is defined. */
 # ifdef HAVE_LBER_H
