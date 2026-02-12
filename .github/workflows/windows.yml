@@ -1012,7 +1012,7 @@ jobs:
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
-            if [ "${MATRIX_IMAGE}" != 'windows-2025' ]; then
+            if [[ "${MATRIX_IMAGE}" = *'windows-2025'* ]]; then
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
