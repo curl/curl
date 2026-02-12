@@ -161,7 +161,7 @@ jobs:
 
           - name: 'awslc'
             install_steps: awslc pytest
-            configure: CPPFLAGS=-DCURL_PATCHSTAMP="\\\"test-patch\\\"" LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
 
           - name: 'awslc'
             install_packages: libidn2-dev
