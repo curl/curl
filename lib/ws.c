@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 #include "urldata.h"
+#include "ws.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
@@ -35,7 +36,6 @@
 #include "sendf.h"
 #include "curl_trc.h"
 #include "multiif.h"
-#include "ws.h"
 #include "easyif.h"
 #include "transfer.h"
 #include "select.h"
