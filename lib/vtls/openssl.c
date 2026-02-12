@@ -38,12 +38,13 @@
  * And in BoringSSL/AWC-LC's <openssl/base.h> there is:
  *  typedef struct X509_name_st X509_NAME;
  *  etc.
- * OpenSSL has the same, but only in <openssl/ssl.h> and <openssl/x509*.h>.
+ * OpenSSL has the same, but only in <openssl/ssl.h> and <openssl/x509v3.h>.
  * LibreSSL automatically undefines these symbols.
  *
- * this C-preprocessed symbols break these OpenSSL headers.
+ * the redefined symbols break these OpenSSL headers when included after
+ * <wincrypt.h>.
  * The workaround is to undefine those defines here (and only here).
- * For unity builds it may need to be repeated elsewhere too.
+ * For unity builds it may need to be repeated elsewhere too (e.g. in ldap.c).
  */
 #undef X509_NAME
 #undef X509_EXTENSIONS
