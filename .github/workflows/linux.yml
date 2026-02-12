@@ -170,7 +170,7 @@ jobs:
 
           - name: 'boringssl'
             install_steps: boringssl pytest
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DBORINGSSL_VERSION=${{ env.BORINGSSL_VERSION }} -DUSE_ECH=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON
 
           - name: 'openssl default'
             install_steps: pytest
