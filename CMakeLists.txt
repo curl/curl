@@ -149,6 +149,10 @@ else()
   set(CURL_OS "\"${CMAKE_SYSTEM_NAME}\"")
 endif()
 
+if(CURL_PATCHSTAMP)
+  set(CURL_PATCHSTAMP "\"${CURL_PATCHSTAMP}\"")
+endif()
+
 set(LIB_NAME "libcurl")
 set(EXE_NAME "curl")
 
