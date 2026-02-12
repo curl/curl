@@ -29,8 +29,8 @@
 #ifdef USE_SCHANNEL
 
 #include <schannel.h>
-#include "../curl_sspi.h"
 
+#include "../curl_sspi.h"
 #include "../cfilters.h"
 #include "../urldata.h"
 
