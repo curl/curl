@@ -3472,14 +3472,14 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
 
   if(data->set.tls_ech & CURLECH_GREASE) {
     infof(data, "ECH: will GREASE ClientHello");
-# ifdef HAVE_BORINGSSL_LIKE
+#ifdef HAVE_BORINGSSL_LIKE
     SSL_set_enable_ech_grease(octx->ssl, 1);
-# else
+#else
     SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
-# endif
+#endif
   }
   else if(data->set.tls_ech & CURLECH_CLA_CFG) {
-# ifdef HAVE_BORINGSSL_LIKE
+#ifdef HAVE_BORINGSSL_LIKE
     /* have to do base64 decode here for BoringSSL */
     const char *b64 = data->set.str[STRING_ECH_CONFIG];
 
@@ -3503,7 +3503,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     }
     curlx_free(ech_config);
     trying_ech_now = 1;
-# else
+#else
     ech_config = (unsigned char *)data->set.str[STRING_ECH_CONFIG];
     if(!ech_config) {
       infof(data, "ECH: ECHConfig from command line empty");
@@ -3517,7 +3517,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     }
     else
       trying_ech_now = 1;
-# endif
+#endif /* HAVE_BORINGSSL_LIKE */
     infof(data, "ECH: ECHConfig from command line");
   }
   else {
@@ -3558,12 +3558,12 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
       Curl_resolv_unlink(data, &dns);
     }
   }
-# ifdef HAVE_BORINGSSL_LIKE
+#ifdef HAVE_BORINGSSL_LIKE
   if(trying_ech_now && outername) {
     infof(data, "ECH: setting public_name not supported with BoringSSL");
     return CURLE_SSL_CONNECT_ERROR;
   }
-# else
+#else
   if(trying_ech_now && outername) {
     infof(data, "ECH: inner: '%s', outer: '%s'",
           peer->hostname ? peer->hostname : "NULL", outername);
@@ -3575,7 +3575,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-# endif /* HAVE_BORINGSSL_LIKE */
+#endif /* HAVE_BORINGSSL_LIKE */
   if(trying_ech_now &&
      SSL_set_min_proto_version(octx->ssl, TLS1_3_VERSION) != 1) {
     infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
@@ -4085,27 +4085,27 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   CURLcode result = CURLE_OK;
   size_t rcl = 0;
   int rv = 1;
-# ifndef HAVE_BORINGSSL_LIKE
+#ifndef HAVE_BORINGSSL_LIKE
   char *inner = NULL;
   uint8_t *rcs = NULL;
   char *outer = NULL;
-# else
+#else
   const char *inner = NULL;
   const uint8_t *rcs = NULL;
   const char *outer = NULL;
   size_t out_name_len = 0;
   int servername_type = 0;
-# endif
+#endif
 
   /* nothing to trace if not doing ECH */
   if(!ECH_ENABLED(data))
     return;
-# ifndef HAVE_BORINGSSL_LIKE
+#ifndef HAVE_BORINGSSL_LIKE
   rv = SSL_ech_get1_retry_config(ssl, &rcs, &rcl);
-# else
+#else
   SSL_get0_ech_retry_configs(ssl, &rcs, &rcl);
   rv = (int)rcl;
-# endif
+#endif
 
   if(rv && rcs) {
     char *b64str = NULL;
@@ -4131,9 +4131,9 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   }
   else
     infof(data, "ECH: no retry_configs (rv = %d)", rv);
-# ifndef HAVE_BORINGSSL_LIKE
+#ifndef HAVE_BORINGSSL_LIKE
   OPENSSL_free((void *)rcs);
-# endif
+#endif
   return;
 }
 
@@ -4250,11 +4250,11 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 #endif
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
       else if((lib == ERR_LIB_SSL) &&
-# ifndef HAVE_BORINGSSL_LIKE
+#ifndef HAVE_BORINGSSL_LIKE
               (reason == SSL_R_ECH_REQUIRED)) {
-# else
+#else
               (reason == SSL_R_ECH_REJECTED)) {
-# endif
+#endif /* HAVE_BORINGSSL_LIKE */
 
         /* trace retry_configs if we got some */
         ossl_trace_ech_retry_configs(data, octx->ssl, reason);

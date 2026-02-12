@@ -1415,7 +1415,7 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) ||       \
   !defined(CURL_DISABLE_IMAP)
-# ifndef CURL_DISABLE_MIME
+#ifndef CURL_DISABLE_MIME
 static CURLcode setopt_mimepost(struct Curl_easy *data, curl_mime *mimep)
 {
   /*
@@ -1469,7 +1469,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 #endif /* !CURL_DISABLE_HTTP */
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) ||       \
   !defined(CURL_DISABLE_IMAP)
-# ifndef CURL_DISABLE_MIME
+#ifndef CURL_DISABLE_MIME
   case CURLOPT_MIMEPOST:
     result = setopt_mimepost(data, va_arg(param, curl_mime *));
     break;

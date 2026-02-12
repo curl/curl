@@ -33,7 +33,7 @@
 #define MAX_SEGMENTS   128 /* number of output segments */
 
 #ifdef __AMIGA__
-# undef FORMAT_INT
+#undef FORMAT_INT
 #endif
 
 /* Lower-case digits.  */

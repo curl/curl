@@ -884,13 +884,13 @@ static void doh_show(struct Curl_easy *data,
   }
 #ifdef USE_HTTPSRR
   for(i = 0; i < d->numhttps_rrs; i++) {
-# if defined(DEBUGBUILD) && defined(CURLVERBOSE)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
     doh_print_buf(data, "DoH HTTPS", d->https_rrs[i].val, d->https_rrs[i].len);
-# else
+#else
     infof(data, "DoH HTTPS RR: length %d", d->https_rrs[i].len);
-# endif
-  }
 #endif
+  }
+#endif /* USE_HTTPSRR */
   for(i = 0; i < d->numcname; i++) {
     infof(data, "CNAME: %s", curlx_dyn_ptr(&d->cname[i]));
   }
@@ -1268,12 +1268,12 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
             goto error;
           }
           infof(data, "Some HTTPS RR to process");
-# if defined(DEBUGBUILD) && defined(CURLVERBOSE)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
           doh_print_httpsrr(data, hrr);
-# endif
+#endif
           dns->hinfo = hrr;
         }
-#endif
+#endif /* USE_HTTPSRR */
         /* and add the entry to the cache */
         data->state.async.dns = dns;
         result = Curl_dnscache_add(data, dns);
