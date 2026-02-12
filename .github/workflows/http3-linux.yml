@@ -401,7 +401,7 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2 --enable-ssls-export
-              CFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${{ env.BORINGSSL_VERSION }}\\\""
+              CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${{ env.BORINGSSL_VERSION }}\\\""
 
           - name: 'boringssl'
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
