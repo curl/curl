@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 #include "urldata.h"
+#include "tftp.h"
 
 #ifndef CURL_DISABLE_TFTP
 
@@ -51,7 +52,6 @@
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
-#include "tftp.h"
 #include "progress.h"
 #include "connect.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
