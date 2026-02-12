@@ -198,7 +198,6 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
     if(result || (actualread != 4)) {
       failf(data, "Failed to receive SSPI authentication response.");
       return result ? result : CURLE_COULDNT_CONNECT;
-
     }
 
     if(socksreq[1] == 255) {
@@ -451,7 +450,7 @@ static CURLcode socks5_sspi_encryption(struct Curl_cfilter *cf,
   curlx_free(sspi_w_token[0].pvBuffer);
 
   infof(data, "SOCKS5 access with%s protection granted BUT NOT USED.",
-        (socksreq[0] == 0) ? "out GSS-API data":
+        (socksreq[0] == 0) ? "out GSS-API data" :
         ((socksreq[0] == 1) ? " GSS-API integrity" :
          " GSS-API confidentiality"));
 
