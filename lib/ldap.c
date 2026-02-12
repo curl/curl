@@ -80,7 +80,7 @@
 #define FREE_ON_WINLDAP(x) curlx_free(x)
 #define curl_ldap_num_t    ULONG
 #else
-#define FREE_ON_WINLDAP(x)
+#define FREE_ON_WINLDAP(x) do {} while(0)
 #define curl_ldap_num_t    int
 #endif
 
