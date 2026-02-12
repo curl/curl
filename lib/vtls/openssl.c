@@ -39,7 +39,7 @@
  *  typedef struct X509_name_st X509_NAME;
  *  etc.
  * OpenSSL has the same, but only in <openssl/ssl.h> and <openssl/x509v3.h>.
- * LibreSSL automatically undefines these symbols.
+ * LibreSSL headers automatically undefines these symbols before using them.
  *
  * The redefined symbols break these OpenSSL headers when included after
  * <wincrypt.h>.
