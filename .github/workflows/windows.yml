@@ -89,8 +89,9 @@ jobs:
           platform: ${{ matrix.platform }}
           work-vol: 'D:'
           # https://cygwin.com/mirrors.html
+          # Main mirror status: https://archlinux.org/mirrors/kernel.org/
           site: |
-            https://mirrors.kernel.org/sourceware/cygwin/  # Status: https://archlinux.org/mirrors/kernel.org/
+            https://mirrors.kernel.org/sourceware/cygwin/
             https://ftp.funet.fi/pub/mirrors/sourceware.org/pub/cygwin/
             https://mirrors.dotsrc.org/cygwin/
 
