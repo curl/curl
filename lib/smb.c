@@ -28,8 +28,9 @@
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
 #ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
+#include <arpa/inet.h>  /* for htons() */
 #endif
+
 #include "smb.h"
 #include "url.h"
 #include "sendf.h"
