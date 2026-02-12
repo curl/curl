@@ -29,6 +29,8 @@
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 
+#ifdef USE_WIN32_CRYPTO
+#include <wincrypt.h>
 /* If <wincrypt.h> is included directly, or indirectly via <schannel.h>,
  * or in case of ldap.c, via <winldap.h>, <wincrypt.h> does this:
  *   #define X509_NAME  ((LPCSTR)7)
@@ -40,12 +42,8 @@
  *
  * this C-preprocessed symbols break these OpenSSL headers.
  * The workaround is to undefine those defines here (and only here).
+ * For unity builds it may need to be repeated elsewhere too.
  */
-
-/* Wincrypt must be included before anything that could include OpenSSL. */
-#ifdef USE_WIN32_CRYPTO
-#include <wincrypt.h>
-/* Undefine wincrypt conflicting symbols for BoringSSL. */
 #undef X509_NAME
 #undef X509_EXTENSIONS
 #undef PKCS7_ISSUER_AND_SERIAL
