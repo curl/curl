@@ -327,7 +327,7 @@ static CURLcode socks5_sspi_encryption(struct Curl_cfilter *cf,
                                          KERB_WRAP_NO_ENCRYPT,
                                          &wrap_desc, 0);
     if(check_sspi_err(data, status, "EncryptMessage"))
-      return socks5_free(sspi_w_token, CURLE_OUT_OF_MEMORY);
+      return socks5_free(sspi_w_token, CURLE_COULDNT_CONNECT);
 
     etbuf_size = sspi_w_token[0].cbBuffer + sspi_w_token[1].cbBuffer +
       sspi_w_token[2].cbBuffer;
