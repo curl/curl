@@ -2323,11 +2323,11 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   return mresult;
 }
 
-/* returns TRUE if it changed state */
-static bool is_finished(struct Curl_multi *multi,
-                        struct Curl_easy *data,
-                        bool stream_error,
-                        CURLcode result)
+/* returns error if it changed state */
+static CURLcode is_finished(struct Curl_multi *multi,
+                            struct Curl_easy *data,
+                            bool stream_error,
+                            CURLcode result)
 {
   if(data->mstate < MSTATE_COMPLETED) {
     if(result) {
@@ -2362,7 +2362,7 @@ static bool is_finished(struct Curl_multi *multi,
       }
 
       multistate(data, MSTATE_COMPLETED);
-      return TRUE;
+      return result;
     }
     /* if there is still a connection to use, call the progress function */
     else if(data->conn) {
@@ -2375,11 +2375,11 @@ static bool is_finished(struct Curl_multi *multi,
         /* if not yet in DONE state, go there, otherwise COMPLETED */
         multistate(data, (data->mstate < MSTATE_DONE) ?
                    MSTATE_DONE : MSTATE_COMPLETED);
-        return TRUE;
+        return result;
       }
     }
   }
-  return FALSE;
+  return result;
 }
 
 static void handle_completed(struct Curl_multi *multi,
@@ -2729,7 +2729,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
 statemachine_end:
 
-    if(is_finished(multi, data, stream_error, result))
+    result = is_finished(multi, data, stream_error, result);
+    if(result)
       mresult = CURLM_CALL_MULTI_PERFORM;
 
     if(MSTATE_COMPLETED == data->mstate) {
