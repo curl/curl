@@ -2323,7 +2323,7 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   return mresult;
 }
 
-/* returns error if it changed state */
+/* returns the possibly updated result */
 static CURLcode is_finished(struct Curl_multi *multi,
                             struct Curl_easy *data,
                             bool stream_error,
