@@ -856,23 +856,10 @@ jobs:
       - name: 'explore the disk, find out where the LLM decided to put the new VS version'
         shell: bash
         run: |
-          MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
-          echo '---------------------------------'
-          /usr/bin/find $MSVC_ROOTD -type d
-          echo '---------------------------------'
-          MSDK_ROOTW="$(cygpath --mixed --short-name "$(printenv 'ProgramFiles(x86)')/Windows Kits")/10"
+          MSDK_ROOTW="$(cygpath --mixed --short-name "$(printenv 'ProgramFiles(x86)')/Windows Kits")"
           echo '---------------------------------'
           /usr/bin/find $MSDK_ROOTW -type d
           echo '---------------------------------'
-
-      - name: 'cache test prereqs (stunnel)'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        id: cache-stunnel
-        with:
-          path: C:\my-stunnel
-          key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          fail-on-cache-miss: true
 
       - uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
         with:
