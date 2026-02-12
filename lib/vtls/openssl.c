@@ -49,8 +49,8 @@
  * OpenSSL include.
  *
  * OpenSSL does this in <openssl/ssl.h> and <openssl/x509v3.h>, but it
- * also does the #undef by including <openssl/ossl_typ.h> (or its
- * successor <openssl/types.h>). 3.0.x only does it on the first include.
+ * also does the #undef by including <openssl/ossl_typ.h>. <3.1.0 only does
+ * it on the first include.
  *
  * LibreSSL automatically undefines these symbols before using them.
  */
