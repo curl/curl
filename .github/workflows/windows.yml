@@ -906,8 +906,8 @@ jobs:
               options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
               unset CMAKE_GENERATOR
             else
-              MSVC_YEAR='2022'
-              [[ "${MATRIX_IMAGE}" = *'vs2026'* ]] && MSVC_YEAR='2026'
+              MSVC_EDITION='2022/Enterprise/vc/tools/msvc'
+              [[ "${MATRIX_IMAGE}" = *'vs2026'* ]] && MSVC_EDITION='2026/Enterprise/vc/tools/msvc'
               # Use Ninja when running tests to avoid MSBuild heuristics picking
               # up "error messages" in the test log output and making the job fail.
               # Officially this requires the vcvarsall.bat MS-DOS batch file (as of
@@ -915,7 +915,7 @@ jobs:
               # reproduce the necessary build configuration manually, without envs.
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
               MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
-              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_YEAR/Enterprise/vc/tools/msvc")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
+              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
               MSVC_ROOTW="$(cygpath --mixed "$MSVC_ROOTU")"
               MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
               MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
