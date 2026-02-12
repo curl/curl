@@ -32,7 +32,7 @@
 #ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
 /* If <wincrypt.h> is included directly, or indirectly via <schannel.h>,
- * or in case of ldap.c, via <winldap.h>, <wincrypt.h> does this:
+ * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
  *   #define X509_NAME  ((LPCSTR)7)
  *
  * And in BoringSSL/AWC-LC's <openssl/base.h> there is:
@@ -41,7 +41,7 @@
  * OpenSSL has the same, but only in <openssl/ssl.h> and <openssl/x509v3.h>.
  * LibreSSL automatically undefines these symbols.
  *
- * the redefined symbols break these OpenSSL headers when included after
+ * The redefined symbols break these OpenSSL headers when included after
  * <wincrypt.h>.
  * The workaround is to undefine those defines here (and only here).
  * For unity builds it may need to be repeated elsewhere too (e.g. in ldap.c).
