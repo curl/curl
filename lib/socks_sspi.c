@@ -261,7 +261,7 @@ static CURLcode socks5_sspi_encryption(struct Curl_cfilter *cf,
   unsigned long qop;
   unsigned char socksreq[4];
   uint8_t *etbuf = NULL;
-  size_t etbuf_size;
+  size_t etbuf_size = 0;
   size_t actualread;
   size_t written;
 
