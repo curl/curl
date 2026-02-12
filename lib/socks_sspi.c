@@ -90,6 +90,14 @@ static CURLcode socks5_sspi_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static CURLcode socks5_free_token(SecBuffer *send_token,
+                                  CURLcode result)
+{
+  Curl_pSecFn->FreeContextBuffer(send_token->pvBuffer);
+  send_token->pvBuffer = NULL;
+  return result;
+}
+
 static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  CredHandle *cred_handle,
@@ -131,7 +139,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
   for(;;) {
     TCHAR *sname = curlx_convert_UTF8_to_tchar(service_name);
     if(!sname)
-      return CURLE_OUT_OF_MEMORY;
+      return socks5_free_token(&sspi_send_token, CURLE_OUT_OF_MEMORY);
 
     status =
       Curl_pSecFn->InitializeSecurityContext(cred_handle, context_handle,
@@ -152,7 +160,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
 
     if(check_sspi_err(data, status, "InitializeSecurityContext")) {
       failf(data, "Failed to initialise security context.");
-      return CURLE_COULDNT_CONNECT;
+      return socks5_free_token(&sspi_send_token, CURLE_COULDNT_CONNECT);
     }
 
     if(sspi_send_token.cbBuffer) {
@@ -160,7 +168,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
       socksreq[1] = 1; /* authentication message type */
       if(sspi_send_token.cbBuffer > 0xffff) {
         /* needs to fit in an unsigned 16-bit field */
-        return CURLE_COULDNT_CONNECT;
+        return socks5_free_token(&sspi_send_token, CURLE_COULDNT_CONNECT);
       }
       us_length = htons((unsigned short)sspi_send_token.cbBuffer);
       memcpy(socksreq + 2, &us_length, sizeof(short));
@@ -168,7 +176,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
       code = Curl_conn_cf_send(cf->next, data, socksreq, 4, FALSE, &written);
       if(code || (written != 4)) {
         failf(data, "Failed to send SSPI authentication request.");
-        return CURLE_COULDNT_CONNECT;
+        return socks5_free_token(&sspi_send_token, CURLE_COULDNT_CONNECT);
       }
 
       code = Curl_conn_cf_send(cf->next, data,
@@ -176,14 +184,12 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
                                sspi_send_token.cbBuffer, FALSE, &written);
       if(code || (sspi_send_token.cbBuffer != written)) {
         failf(data, "Failed to send SSPI authentication token.");
-        return CURLE_COULDNT_CONNECT;
+        return socks5_free_token(&sspi_send_token, CURLE_COULDNT_CONNECT);
       }
     }
 
-    if(sspi_send_token.pvBuffer) {
-      Curl_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
-      sspi_send_token.pvBuffer = NULL;
-    }
+    if(sspi_send_token.pvBuffer)
+      socks5_free_token(&sspi_send_token, CURLE_OK);
     sspi_send_token.cbBuffer = 0;
 
     Curl_safefree(sspi_recv_token.pvBuffer);
