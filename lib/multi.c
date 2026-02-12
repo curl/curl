@@ -2336,8 +2336,8 @@ static CURLcode is_finished(struct Curl_multi *multi,
        * then we go to completed and consider this transfer aborted.
        */
 
-      /* NOTE: no attempt to disconnect connections must be made
-         in the case blocks above - cleanup happens only here */
+      /* No attempt to disconnect connections must be made before this -
+         connection detach and termination happens only here */
 
       /* Check if we can move pending requests to send pipe */
       process_pending_handles(multi); /* connection */
