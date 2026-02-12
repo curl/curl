@@ -808,6 +808,7 @@ jobs:
             env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
+            image: 'windows-2025-vs2026'
             chkprefill: '_chkprefill'
             config: >-
               -DENABLE_DEBUG=ON
