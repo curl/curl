@@ -416,7 +416,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
     }
 
     if(fInCert || blob) {
-      /* Reading a .P12 or .pfx file, like the example at bottom of
+      /* Reading a .p12 or .pfx file, like the example at bottom of
          https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
       */
       CRYPT_DATA_BLOB datablob;
