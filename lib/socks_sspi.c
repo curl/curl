@@ -239,9 +239,9 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
 static CURLcode socks5_free(SecBuffer *sspi_w_token,
                             CURLcode result)
 {
-  curlx_safefree(sspi_w_token[0].pvBuffer);
-  curlx_safefree(sspi_w_token[1].pvBuffer);
-  curlx_safefree(sspi_w_token[2].pvBuffer);
+  Curl_safefree(sspi_w_token[0].pvBuffer);
+  Curl_safefree(sspi_w_token[1].pvBuffer);
+  Curl_safefree(sspi_w_token[2].pvBuffer);
   return result;
 }
 
@@ -361,7 +361,7 @@ static CURLcode socks5_sspi_encryption(struct Curl_cfilter *cf,
     memcpy(socksreq, &gss_enc, 1);
     code = Curl_conn_cf_send(cf->next, data, socksreq, 1, FALSE, &written);
     if(code || (written != 1)) {
-      curlx_failf(data, "Failed to send SSPI encryption type.");
+      failf(data, "Failed to send SSPI encryption type.");
       return CURLE_COULDNT_CONNECT;
     }
   }
