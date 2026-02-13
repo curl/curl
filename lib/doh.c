@@ -1217,7 +1217,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
     int slot;
 
     /* Clear any result the might still be there */
-    Curl_resolv_unlink(data, &data->state.async.dns);
+    Curl_dns_entry_unlink(data, &data->state.async.dns);
 
     memset(rc, 0, sizeof(rc));
     /* remove DoH handles from multi handle and close them */
@@ -1253,8 +1253,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         goto error;
 
       /* we got a response, create a dns entry. */
-      dns = Curl_dnscache_mk_entry(data, &ai, dohp->host, 0,
-                                   dohp->port, FALSE);
+      dns = Curl_dns_entry_create(data, &ai, dohp->host, 0,
+                                  dohp->port, FALSE);
       if(dns) {
         /* Now add and HTTPSRR information if we have */
 #ifdef USE_HTTPSRR
@@ -1264,7 +1264,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                                            de.https_rrs->len, &hrr);
           if(result) {
             infof(data, "Failed to decode HTTPS RR");
-            Curl_resolv_unlink(data, &dns);
+            Curl_dns_entry_unlink(data, &dns);
             goto error;
           }
           infof(data, "Some HTTPS RR to process");
