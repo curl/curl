@@ -2335,8 +2335,7 @@ if(NOT CURL_DISABLE_INSTALL)
     FILES_MATCHING PATTERN "*.h")
 
   include(CMakePackageConfigHelpers)
-  write_basic_package_version_file(
-    "${_version_config}"
+  write_basic_package_version_file("${_version_config}"
     VERSION ${_curl_version}
     COMPATIBILITY SameMajorVersion)
   file(READ "${_version_config}" _generated_version_config)
