@@ -50,8 +50,6 @@
 
 #include <Security/Security.h>
 
-#define SSL_SYSTEM_VERIFIER
-
 #if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
      MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
   (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
