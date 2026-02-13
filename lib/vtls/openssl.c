@@ -4496,8 +4496,6 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
           key_bits, key_sec_bits, cert_algorithm);
   }
 }
-#else
-#define infof_certstack(data, ssl)
 #endif
 
 static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
