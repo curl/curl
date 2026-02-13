@@ -51,7 +51,7 @@
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
-#define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
+#define MAX_CAFILE_SIZE (1024 * 1024) /* 1 MiB */
 #define BEGIN_CERT      "-----BEGIN CERTIFICATE-----"
 #define END_CERT        "\n-----END CERTIFICATE-----"
 
