@@ -201,7 +201,7 @@ if(WIN32)
 
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
-    if(CURL_TARGET_WINDOWS_VERSION MATCHES "^0x[0-9a-fA-F]+$")
+    if(CURL_TARGET_WINDOWS_VERSION MATCHES "^0[xX][0-9a-fA-F]+$")
       set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
       list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
     else()
@@ -212,9 +212,9 @@ if(WIN32)
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
   curl_internal_test(HAVE_WIN32_WINNT)
   if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH "_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX MATCH "_WIN32_WINNT=0[xX][0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
     string(REGEX REPLACE "_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE "0x([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}") # pad to 4 digits
+    string(REGEX REPLACE "0[xX]([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4
     string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
     message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
   endif()
