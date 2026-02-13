@@ -25,10 +25,10 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
+#ifdef USE_SSL
+
 #include "../cfilters.h"
 #include "../urldata.h"
-
-#ifdef USE_SSL
 
 struct Curl_cfilter;
 struct Curl_easy;
