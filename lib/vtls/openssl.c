@@ -4427,7 +4427,6 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509 *cert,
 #if !(defined(LIBRESSL_VERSION_NUMBER) && \
   LIBRESSL_VERSION_NUMBER < 0x3060000fL) && \
   !defined(HAVE_BORINGSSL_LIKE) && defined(CURLVERBOSE)
-#define HAVE_INFOF_CERTSTACK
 static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 {
   STACK_OF(X509) *certstack;
@@ -4497,6 +4496,8 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
           key_bits, key_sec_bits, cert_algorithm);
   }
 }
+#else
+#define infof_certstack(data, ssl)
 #endif
 
 static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
@@ -4767,9 +4768,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   result = ossl_infof_cert(cf, data, server_cert);
   if(result)
     goto out;
-#ifdef HAVE_INFOF_CERTSTACK
   infof_certstack(data, octx->ssl);
-#endif
 #endif
 
   if(conn_config->verifyhost) {
