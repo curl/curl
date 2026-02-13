@@ -27,6 +27,8 @@
 
 #ifndef CURL_DISABLE_DOH
 
+struct Curl_resolv_async;
+
 typedef enum {
   DOH_OK,
   DOH_DNS_BAD_LABEL,    /* 1 */
@@ -111,9 +113,7 @@ struct doh_probes {
  */
 
 CURLcode Curl_doh(struct Curl_easy *data,
-                  const char *hostname,
-                  uint16_t port,
-                  uint8_t ip_version);
+                  struct Curl_resolv_async *async);
 
 CURLcode Curl_doh_take_result(struct Curl_easy *data,
                               struct Curl_dns_entry **dns);
@@ -158,7 +158,8 @@ struct dohentry {
 };
 
 void Curl_doh_close(struct Curl_easy *data);
-void Curl_doh_cleanup(struct Curl_easy *data);
+void Curl_doh_cleanup(struct Curl_easy *data,
+                      struct Curl_resolv_async *async);
 #define Curl_doh_wanted(d)  (!!(d)->set.doh)
 
 
@@ -178,7 +179,7 @@ UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
 #else /* CURL_DISABLE_DOH */
-#define Curl_doh(a, b, c, d, e)    NULL
+#define Curl_doh(a, b)             NULL
 #define Curl_doh_take_result(x, y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_doh_wanted(d)         FALSE
 #endif /* !CURL_DISABLE_DOH */
