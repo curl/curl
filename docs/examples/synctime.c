@@ -182,8 +182,7 @@ static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
 }
 
-static CURLcode SyncTime_CURL_FetchHead(CURL *curl, const char *URL_Str,
-                                        const char *OutFileName)
+static CURLcode SyncTime_CURL_FetchHead(CURL *curl, const char *URL_Str)
 {
   CURLcode result;
 
@@ -309,7 +308,7 @@ int main(int argc, const char *argv[])
     fprintf(stderr, "Before HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
 
     /* HTTP HEAD command to the Webserver */
-    SyncTime_CURL_FetchHead(curl, conf.timeserver, "index.htm");
+    SyncTime_CURL_FetchHead(curl, conf.timeserver);
 
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     GetLocalTime(&LOCALTime);
