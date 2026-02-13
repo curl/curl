@@ -46,7 +46,6 @@
 #endif
 
 #ifdef USE_GNUTLS
-
 #include <nettle/md5.h>
 
 typedef struct md5_ctx my_md5_ctx;
@@ -71,7 +70,6 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 #elif (defined(USE_OPENSSL) && \
   !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)) || \
   (defined(USE_WOLFSSL) && !defined(NO_MD5) && !defined(OPENSSL_COEXIST))
-
 #ifdef USE_OPENSSL
 #include <openssl/md5.h>
 #else
@@ -100,7 +98,6 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD5)
-
 #include <wolfssl/openssl/md5.h>
 
 typedef WOLFSSL_MD5_CTX my_md5_ctx;
@@ -126,7 +123,6 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
 #elif defined(USE_MBEDTLS) && \
   defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
-
 #include <psa/crypto.h>
 
 typedef psa_hash_operation_t my_md5_ctx;
@@ -159,7 +155,6 @@ static void my_md5_final(unsigned char *digest, void *ctx)
               (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
        defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
               (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
-
 #include <CommonCrypto/CommonDigest.h>
 
 /* For Apple operating systems: CommonCrypto has the functions we need.
@@ -190,7 +185,6 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_WIN32_CRYPTO)
-
 #include <wincrypt.h>
 
 struct md5_ctx {
