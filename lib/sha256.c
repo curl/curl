@@ -50,7 +50,6 @@
  */
 
 #ifdef USE_OPENSSL
-
 #include <openssl/evp.h>
 
 struct ossl_sha256_ctx {
@@ -88,7 +87,6 @@ static void my_sha256_final(unsigned char *digest, void *in)
 }
 
 #elif defined(USE_GNUTLS)
-
 #include <nettle/sha.h>
 
 typedef struct sha256_ctx my_sha256_ctx;
@@ -113,7 +111,6 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
 
 #elif defined(USE_MBEDTLS) && \
   defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
-
 #include <psa/crypto.h>
 
 typedef psa_hash_operation_t my_sha256_ctx;
@@ -144,7 +141,6 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
               (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
-
 #include <CommonCrypto/CommonDigest.h>
 
 typedef CC_SHA256_CTX my_sha256_ctx;
@@ -168,7 +164,6 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_WIN32_CRYPTO)
-
 #include <wincrypt.h>
 
 struct sha256_ctx {
