@@ -22,9 +22,9 @@
  *
  ***************************************************************************/
 #include "../curl_setup.h"
-
 #include "../urldata.h"
 #include "vquic.h"
+
 #include "../curl_trc.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
