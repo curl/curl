@@ -311,7 +311,7 @@ sub serverfortest {
             push @lprotocols, "dns";
 
             if(! grep /^\Q$server\E$/, @lprotocols) {
-                if(substr($server,0,5) ne "socks") {
+                if(substr($server, 0, 5) ne "socks") {
                     if($tlsext) {
                         return ("curl lacks $tlsext support", 4);
                     }
