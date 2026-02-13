@@ -888,7 +888,6 @@ static void h2_xfer_write_resp_hd(struct Curl_cfilter *cf,
                                   struct h2_stream_ctx *stream,
                                   const char *buf, size_t blen, bool eos)
 {
-
   /* If we already encountered an error, skip further writes */
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
@@ -905,7 +904,6 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
                                struct h2_stream_ctx *stream,
                                const char *buf, size_t blen, bool eos)
 {
-
   /* If we already encountered an error, skip further writes */
   if(!stream->xfer_result)
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);

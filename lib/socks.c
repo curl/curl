@@ -1339,7 +1339,6 @@ static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
 static void socks_proxy_cf_close(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
-
   DEBUGASSERT(cf->next);
   cf->connected = FALSE;
   socks_proxy_cf_free(cf);
