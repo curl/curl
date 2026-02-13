@@ -131,9 +131,9 @@ struct asprintf {
 };
 
 /* the provided input number is 1-based but this returns the number 0-based.
-
-   returns -1 if no valid number was provided.
-*/
+ *
+ * returns -1 if no valid number was provided.
+ */
 static int dollarstring(const char *p, const char **end)
 {
   curl_off_t num;
