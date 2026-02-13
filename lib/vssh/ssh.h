@@ -34,8 +34,6 @@ extern const struct Curl_scheme Curl_scheme_scp;
 
 #ifdef USE_SSH
 
-#include "../curlx/dynbuf.h"
-
 #ifdef USE_LIBSSH2
 #include <libssh2.h>
 #include <libssh2_sftp.h>
