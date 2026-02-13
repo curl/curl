@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 #include "../curl_setup.h"
-
 #include "../urldata.h"
 
 extern const struct Curl_protocol Curl_protocol_sftp;
