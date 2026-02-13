@@ -53,6 +53,8 @@
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
 #define CURL_H3_NO_ERROR  0x0100
 
+#define MAX_PKT_BURST          10
+
 #define QUIC_MAX_STREAMS       100
 
 #define H3_STREAM_WINDOW_SIZE  (1024 * 128)
