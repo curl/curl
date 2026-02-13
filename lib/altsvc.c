@@ -229,7 +229,6 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 /*
  * Write this single altsvc entry to a single output line
  */
-
 static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
 {
   struct tm stamp;
