@@ -177,8 +177,9 @@ static CURLcode async_rr_start(struct Curl_easy *data,
   char *rrname = NULL;
 
   DEBUGASSERT(!thrdd->rr.channel);
-  if(port != 443) {
-    rrname = curl_maprintf("_%d_.https.%s", port, data->conn->host.name);
+  if(async->port != 443) {
+    rrname = curl_maprintf("_%d_.https.%s",
+                           async->port, data->conn->host.name);
     if(!rrname)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -448,7 +449,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
   }
 
 #ifdef USE_HTTPSRR_ARES
-  DEBUGASSERT(!thrdd->rr.channel);
+  DEBUGASSERT(!async->thrdd.rr.channel);
   if(async_rr_start(data, async))
     infof(data, "Failed HTTPS RR operation");
 #endif
