@@ -40,13 +40,14 @@
 
 #include "../curl_setup.h"
 
+#ifdef USE_APPLE_SECTRUST
+
 #include "../urldata.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "vtls.h"
 #include "apple.h"
 
-#ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
 
 #define SSL_SYSTEM_VERIFIER
