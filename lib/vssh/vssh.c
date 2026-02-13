@@ -24,6 +24,7 @@
 #include "../curl_setup.h"
 
 #include "ssh.h"
+#include "../urldata.h"
 
 #ifdef USE_SSH
 
