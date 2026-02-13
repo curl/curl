@@ -24,12 +24,15 @@
  *
  ***************************************************************************/
 #include "../curl_setup.h"
+#include "../urldata.h"
 
 extern const struct Curl_protocol Curl_protocol_sftp;
 extern const struct Curl_protocol Curl_protocol_scp;
 
 extern const struct Curl_scheme Curl_scheme_sftp;
 extern const struct Curl_scheme Curl_scheme_scp;
+
+#ifdef USE_SSH
 
 #ifdef USE_LIBSSH2
 #include <libssh2.h>
@@ -236,8 +239,6 @@ struct ssh_conn {
 
 #endif /* USE_LIBSSH2 */
 
-#ifdef USE_SSH
-
 #ifdef CURLVERBOSE
 const char *Curl_ssh_statename(sshstate state);
 #else
@@ -255,11 +256,10 @@ void Curl_ssh_cleanup(void);
 void Curl_ssh_version(char *buffer, size_t buflen);
 void Curl_ssh_attach(struct Curl_easy *data,
                      struct connectdata *conn);
-#else
-/* for non-SSH builds */
+#else /* !USE_SSH */
 #define Curl_ssh_cleanup()
 #define Curl_ssh_attach(x, y)
 #define Curl_ssh_init() 0
-#endif
+#endif /* USE_SSH */
 
 #endif /* HEADER_CURL_SSH_H */
