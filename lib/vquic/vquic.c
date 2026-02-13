@@ -25,6 +25,7 @@
 
 #include "../urldata.h"
 #include "vquic.h"
+#include "../curl_trc.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
 
@@ -40,7 +41,6 @@
 #include "../curlx/dynbuf.h"
 #include "../curlx/fopen.h"
 #include "../cfilters.h"
-#include "../curl_trc.h"
 #include "curl_ngtcp2.h"
 #include "curl_quiche.h"
 #include "../multiif.h"
