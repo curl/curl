@@ -432,8 +432,10 @@ error:
  * a 'Curl_addrinfo *' with the address information.
  */
 
-CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
-                  int port, int ip_version)
+CURLcode Curl_doh(struct Curl_easy *data,
+                  const char *hostname,
+                  uint16_t port,
+                  uint8_t ip_version)
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp = NULL;
@@ -446,7 +448,6 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
   if(data->state.async.doh)
     Curl_doh_cleanup(data);
 
-  data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
   data->state.async.hostname = curlx_strdup(hostname);
@@ -1196,13 +1197,14 @@ UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
 # endif
 #endif
 
-CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dnsp)
+CURLcode Curl_doh_take_result(struct Curl_easy *data,
+                              struct Curl_dns_entry **pdns)
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp = data->state.async.doh;
   struct dohentry de;
-  *dnsp = NULL; /* defaults to no response */
+
+  *pdns = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1215,9 +1217,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   else if(!dohp->pending) {
     DOHcode rc[DOH_SLOT_COUNT];
     int slot;
-
-    /* Clear any result the might still be there */
-    Curl_dns_entry_unlink(data, &data->state.async.dns);
 
     memset(rc, 0, sizeof(rc));
     /* remove DoH handles from multi handle and close them */
@@ -1275,18 +1274,15 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         }
 #endif /* USE_HTTPSRR */
         /* and add the entry to the cache */
-        data->state.async.dns = dns;
         result = Curl_dnscache_add(data, dns);
-        *dnsp = data->state.async.dns;
+        *pdns = dns;
       }
     } /* address processing done */
 
-    /* All done */
-    data->state.async.done = TRUE;
   } /* !dohp->pending */
   else
     /* wait for pending DoH transactions to complete */
-    return CURLE_OK;
+    return CURLE_AGAIN;
 
 error:
   de_cleanup(&de);

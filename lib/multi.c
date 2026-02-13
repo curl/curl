@@ -2291,12 +2291,13 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
                                  CURLcode *resultp)
 {
   struct Curl_dns_entry *dns = NULL;
-  CURLcode result;
   CURLMcode mresult = CURLM_OK;
+  CURLcode result;
 
-  result = Curl_resolv_check(data, &dns);
-  CURL_TRC_DNS(data, "Curl_resolv_check() -> %d, %s",
+  result = Curl_resolv_take_result(data, &dns);
+  CURL_TRC_DNS(data, "Curl_resolv_take_result() -> %d, %s",
                result, dns ? "found" : "missing");
+
   /* Update sockets here, because the socket(s) may have been closed and the
      application thus needs to be told, even if it is likely that the same
      socket(s) will again be used further down. If the name has not yet been
@@ -2310,23 +2311,21 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
     bool connected;
     /* Perform the next step in the connection phase, and then move on to the
        WAITCONNECT state */
-    result = Curl_once_resolved(data, dns, &connected);
-
-    if(result)
-      /* if Curl_once_resolved() returns failure, the connection struct is
-         already freed and gone */
-      data->conn = NULL; /* no more connection */
-    else {
-      /* call again please so that we get the next socket setup */
-      mresult = CURLM_CALL_MULTI_PERFORM;
-      if(connected)
-        multistate(data, MSTATE_PROTOCONNECT);
-      else {
-        multistate(data, MSTATE_CONNECTING);
-      }
+    result = Curl_setup_conn(data, dns, &connected);
+    if(result) {
+      /* setup failed, terminate connection */
+      struct connectdata *conn = data->conn;
+      Curl_detach_connection(data);
+      Curl_conn_terminate(data, conn, TRUE);
+      goto out;
     }
+
+    /* call again please so that we get the next socket setup */
+    mresult = CURLM_CALL_MULTI_PERFORM;
+    multistate(data, connected ? MSTATE_PROTOCONNECT : MSTATE_CONNECTING);
   }
 
+out:
   if(result)
     /* failure detected */
     *stream_errorp = TRUE;
