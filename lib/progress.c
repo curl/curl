@@ -30,9 +30,6 @@
 #include "transfer.h"
 #include "curlx/strcopy.h"
 
-/* check rate limits within this many recent milliseconds, at minimum. */
-#define MIN_RATE_LIMIT_PERIOD 3000
-
 #ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 7 letters long (plus the zero byte).
 
