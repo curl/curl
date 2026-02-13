@@ -1616,30 +1616,6 @@ static CURLcode client_cert(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifdef CURLVERBOSE
-/* returns non-zero on failure */
-static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
-{
-  BIO *bio_out = BIO_new(BIO_s_mem());
-  BUF_MEM *biomem;
-  int rc;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-
-  if(bio_out) {
-    unsigned long flags = XN_FLAG_SEP_SPLUS_SPC |
-      (XN_FLAG_ONELINE & ~ASN1_STRFLGS_ESC_MSB & ~XN_FLAG_SPC_EQ);
-    curlx_dyn_reset(d);
-    rc = X509_NAME_print_ex(bio_out, a, 0, flags);
-    if(rc != -1) {
-      BIO_get_mem_ptr(bio_out, &biomem);
-      result = curlx_dyn_addn(d, biomem->data, biomem->length);
-    }
-    BIO_free(bio_out);
-  }
-  return result;
-}
-#endif
-
 /**
  * Global SSL init
  *
@@ -4496,6 +4472,28 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
           get_group_name == 0 ? "" : group_name_final,
           key_bits, key_sec_bits, cert_algorithm);
   }
+}
+
+/* returns non-zero on failure */
+static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
+{
+  BIO *bio_out = BIO_new(BIO_s_mem());
+  BUF_MEM *biomem;
+  int rc;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  if(bio_out) {
+    unsigned long flags = XN_FLAG_SEP_SPLUS_SPC |
+      (XN_FLAG_ONELINE & ~ASN1_STRFLGS_ESC_MSB & ~XN_FLAG_SPC_EQ);
+    curlx_dyn_reset(d);
+    rc = X509_NAME_print_ex(bio_out, a, 0, flags);
+    if(rc != -1) {
+      BIO_get_mem_ptr(bio_out, &biomem);
+      result = curlx_dyn_addn(d, biomem->data, biomem->length);
+    }
+    BIO_free(bio_out);
+  }
+  return result;
 }
 
 #define MAX_CERT_NAME_LENGTH 2048
