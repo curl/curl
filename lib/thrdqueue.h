@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
 struct curl_thrdq;
 
@@ -102,6 +102,6 @@ void Curl_thrdq_clear(struct curl_thrdq *tqueue,
 CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
                                uint32_t timeout_ms);
 
-#endif /* USE_THREADS */
+#endif /* USE_THREADS && CURLRES_THREADED */
 
 #endif /* HEADER_CURL_THRDQUEUE_H */

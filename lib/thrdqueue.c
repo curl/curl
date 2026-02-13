@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
@@ -327,4 +327,4 @@ CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
   return Curl_thrdpool_await_idle(tqueue->tpool, timeout_ms);
 }
 
-#endif /* USE_THREADS */
+#endif /* USE_THREADS && CURLRES_THREADED */

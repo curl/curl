@@ -391,6 +391,7 @@ static CURLcode hostip_async_new(struct Curl_easy *data,
   async->ip_version = ip_version;
   if(hostlen)
     memcpy(async->hostname, hostname, hostlen);
+  async->start = *Curl_pgrs_now(data);
 
   data->state.async = async;
   return CURLE_OK;
