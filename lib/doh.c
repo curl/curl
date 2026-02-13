@@ -1236,7 +1236,6 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       }
     } /* next slot */
 
-    result = CURLE_COULDNT_RESOLVE_HOST; /* until we know better */
     if(!rc[DOH_SLOT_IPV4] || !rc[DOH_SLOT_IPV6]) {
       /* we have an address, of one kind or other */
       struct Curl_dns_entry *dns;
