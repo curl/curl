@@ -2324,7 +2324,6 @@ static const struct Curl_protocol Curl_protocol_imap = {
 
 #endif /* CURL_DISABLE_IMAP */
 
-
 /*
  * IMAP protocol handler.
  */

@@ -1249,7 +1249,7 @@ const struct Curl_scheme Curl_scheme_smb = {
  */
 const struct Curl_scheme Curl_scheme_smbs = {
   "smbs",                               /* scheme */
-#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE) ||        \
+#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE) || \
   !defined(USE_SSL)
   ZERO_NULL,
 #else
