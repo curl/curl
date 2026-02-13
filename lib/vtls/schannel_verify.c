@@ -30,6 +30,7 @@
 #include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
+
 #ifndef USE_WINDOWS_SSPI
 #error "cannot compile Schannel support without SSPI."
 #endif
