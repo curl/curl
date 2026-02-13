@@ -1616,6 +1616,30 @@ static CURLcode client_cert(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifdef CURLVERBOSE
+/* returns non-zero on failure */
+static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
+{
+  BIO *bio_out = BIO_new(BIO_s_mem());
+  BUF_MEM *biomem;
+  int rc;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  if(bio_out) {
+    unsigned long flags = XN_FLAG_SEP_SPLUS_SPC |
+      (XN_FLAG_ONELINE & ~ASN1_STRFLGS_ESC_MSB & ~XN_FLAG_SPC_EQ);
+    curlx_dyn_reset(d);
+    rc = X509_NAME_print_ex(bio_out, a, 0, flags);
+    if(rc != -1) {
+      BIO_get_mem_ptr(bio_out, &biomem);
+      result = curlx_dyn_addn(d, biomem->data, biomem->length);
+    }
+    BIO_free(bio_out);
+  }
+  return result;
+}
+#endif
+
 /**
  * Global SSL init
  *
@@ -4403,7 +4427,6 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509 *cert,
 #if !(defined(LIBRESSL_VERSION_NUMBER) && \
   LIBRESSL_VERSION_NUMBER < 0x3060000fL) && \
   !defined(HAVE_BORINGSSL_LIKE) && defined(CURLVERBOSE)
-#define HAVE_INFOF_CERTSTACK_CURLVERBOSE
 static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 {
   STACK_OF(X509) *certstack;
@@ -4473,80 +4496,9 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
           key_bits, key_sec_bits, cert_algorithm);
   }
 }
-
-/* returns non-zero on failure */
-static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
-{
-  BIO *bio_out = BIO_new(BIO_s_mem());
-  BUF_MEM *biomem;
-  int rc;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-
-  if(bio_out) {
-    unsigned long flags = XN_FLAG_SEP_SPLUS_SPC |
-      (XN_FLAG_ONELINE & ~ASN1_STRFLGS_ESC_MSB & ~XN_FLAG_SPC_EQ);
-    curlx_dyn_reset(d);
-    rc = X509_NAME_print_ex(bio_out, a, 0, flags);
-    if(rc != -1) {
-      BIO_get_mem_ptr(bio_out, &biomem);
-      result = curlx_dyn_addn(d, biomem->data, biomem->length);
-    }
-    BIO_free(bio_out);
-  }
-  return result;
-}
-
-#define MAX_CERT_NAME_LENGTH 2048
-static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                X509 *server_cert)
-{
-  BIO *mem = NULL;
-  struct dynbuf dname;
-  char err_buf[256] = "";
-  char *buf;
-  long len;
-  CURLcode result = CURLE_OK;
-
-  if(!Curl_trc_is_verbose(data))
-    return CURLE_OK;
-
-  curlx_dyn_init(&dname, MAX_CERT_NAME_LENGTH);
-  mem = BIO_new(BIO_s_mem());
-  if(!mem) {
-    failf(data, "BIO_new return NULL, " OSSL_PACKAGE " error %s",
-          ossl_strerror(ERR_get_error(), err_buf, sizeof(err_buf)));
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
-
-  infof(data, "%s certificate:", Curl_ssl_cf_is_proxy(cf) ?
-        "Proxy" : "Server");
-
-  result = x509_name_oneline(X509_get_subject_name(server_cert), &dname);
-  infof(data, "  subject: %s", result ? "[NONE]" : curlx_dyn_ptr(&dname));
-
-  ASN1_TIME_print(mem, X509_get0_notBefore(server_cert));
-  len = BIO_get_mem_data(mem, (char **)&buf);
-  infof(data, "  start date: %.*s", (int)len, buf);
-  (void)BIO_reset(mem);
-
-  ASN1_TIME_print(mem, X509_get0_notAfter(server_cert));
-  len = BIO_get_mem_data(mem, (char **)&buf);
-  infof(data, "  expire date: %.*s", (int)len, buf);
-  (void)BIO_reset(mem);
-
-  result = x509_name_oneline(X509_get_issuer_name(server_cert), &dname);
-  if(result) /* should be only fatal stuff like OOM */
-    goto out;
-  infof(data, "  issuer: %s", curlx_dyn_ptr(&dname));
-
-out:
-  BIO_free(mem);
-  curlx_dyn_free(&dname);
-  return result;
-}
-#endif /* HAVE_INFOF_CERTSTACK_CURLVERBOSE */
+#else
+#define infof_certstack(data, ssl)
+#endif
 
 static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
@@ -4640,6 +4592,59 @@ static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
   }
   return result;
 }
+
+#ifdef CURLVERBOSE
+#define MAX_CERT_NAME_LENGTH 2048
+static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                X509 *server_cert)
+{
+  BIO *mem = NULL;
+  struct dynbuf dname;
+  char err_buf[256] = "";
+  char *buf;
+  long len;
+  CURLcode result = CURLE_OK;
+
+  if(!Curl_trc_is_verbose(data))
+    return CURLE_OK;
+
+  curlx_dyn_init(&dname, MAX_CERT_NAME_LENGTH);
+  mem = BIO_new(BIO_s_mem());
+  if(!mem) {
+    failf(data, "BIO_new return NULL, " OSSL_PACKAGE " error %s",
+          ossl_strerror(ERR_get_error(), err_buf, sizeof(err_buf)));
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  infof(data, "%s certificate:", Curl_ssl_cf_is_proxy(cf) ?
+        "Proxy" : "Server");
+
+  result = x509_name_oneline(X509_get_subject_name(server_cert), &dname);
+  infof(data, "  subject: %s", result ? "[NONE]" : curlx_dyn_ptr(&dname));
+
+  ASN1_TIME_print(mem, X509_get0_notBefore(server_cert));
+  len = BIO_get_mem_data(mem, (char **)&buf);
+  infof(data, "  start date: %.*s", (int)len, buf);
+  (void)BIO_reset(mem);
+
+  ASN1_TIME_print(mem, X509_get0_notAfter(server_cert));
+  len = BIO_get_mem_data(mem, (char **)&buf);
+  infof(data, "  expire date: %.*s", (int)len, buf);
+  (void)BIO_reset(mem);
+
+  result = x509_name_oneline(X509_get_issuer_name(server_cert), &dname);
+  if(result) /* should be only fatal stuff like OOM */
+    goto out;
+  infof(data, "  issuer: %s", curlx_dyn_ptr(&dname));
+
+out:
+  BIO_free(mem);
+  curlx_dyn_free(&dname);
+  return result;
+}
+#endif /* CURLVERBOSE */
 
 #ifdef USE_APPLE_SECTRUST
 struct ossl_certs_ctx {
@@ -4759,7 +4764,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     goto out;
   }
 
-#ifdef HAVE_INFOF_CERTSTACK_CURLVERBOSE
+#ifdef CURLVERBOSE
   result = ossl_infof_cert(cf, data, server_cert);
   if(result)
     goto out;
