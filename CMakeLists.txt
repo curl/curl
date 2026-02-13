@@ -214,7 +214,7 @@ if(WIN32)
   if(HAVE_WIN32_WINNT)
     string(REGEX MATCH "_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
     string(REGEX REPLACE "_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
+    string(REGEX REPLACE "0x([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}") # pad to 4 digits
     string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
     message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
   endif()
