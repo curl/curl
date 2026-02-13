@@ -195,6 +195,7 @@ struct Curl_multi {
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif
+  BIT(admin_wakeup_started);  /* admin handle registered on wakeup socket */
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

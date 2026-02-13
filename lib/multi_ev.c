@@ -484,6 +484,7 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
   if(!multi || !multi->socket_cb)
     return CURLM_OK;
 
+  CURL_TRC_M(data, "mev_assess");
   Curl_pollset_init(&ps);
   if(conn) {
     CURLcode r = Curl_conn_adjust_pollset(data, conn, &ps);
