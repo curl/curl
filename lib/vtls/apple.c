@@ -48,10 +48,7 @@
 
 #ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
-#endif
 
-
-#ifdef USE_APPLE_SECTRUST
 #define SSL_SYSTEM_VERIFIER
 
 #if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
