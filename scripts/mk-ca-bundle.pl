@@ -311,6 +311,34 @@ report "SHA256 of old file: $oldhash";
 
 if(!$opt_n) {
     report "Using URL: $url";
+
+    my $sha = '';
+    if($opt_d ne 'ref') {
+        report "Determining latest commit for the remote file ...";
+
+        my $out = '';
+        # https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt
+        if($url =~ /^https:\/\/raw.githubusercontent.com\/([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+)\/(refs\/heads\/[a-z]+)(\/.+)$/) {
+            my $slug = $1;
+            my $refs = "&sha=$2";
+            my $path = $3;
+            if(open(my $fh, '-|', 'curl', '--user-agent', 'curl',
+                                          '--fail', '--silent', '--show-error',
+                                          '--connect-timeout', '15', '--max-time', '60',
+                                          '--retry', '6', '--retry-connrefused',
+                                          '--header', 'X-GitHub-Api-Version: 2022-11-28',
+                                          "https://api.github.com/repos/mozilla-firefox/firefox/commits?path=$path$refs")) {
+                $out = do { local $/; <$fh> };
+                close $fh;
+            }
+            if($out) {
+                use JSON::PP;
+                my $json = decode_json($out);
+                $sha = $json->[0]->{sha};
+            }
+        }
+    }
+
     report "Downloading $txt ...";
 
     # If we have an HTTPS URL then use curl
