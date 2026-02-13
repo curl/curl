@@ -645,7 +645,6 @@ fail:
 
 static int compare_func(const void *a, const void *b)
 {
-
   const struct pair *aa = a;
   const struct pair *bb = b;
   const size_t aa_key_len = curlx_dyn_len(&aa->key);

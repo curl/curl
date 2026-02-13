@@ -367,20 +367,20 @@
 #define CURL_PULL_SYS_POLL_H
 #endif
 
-/* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
-/* sys/types.h is required here to properly make type definitions below. */
+/* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file
+   sys/types.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
 
-/* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
-/* sys/socket.h is required here to properly make type definitions below. */
+/* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file
+   sys/socket.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_SOCKET_H
 #  include <sys/socket.h>
 #endif
 
-/* CURL_PULL_SYS_POLL_H is defined above when inclusion of header file    */
-/* sys/poll.h is required here to properly make type definitions below.   */
+/* CURL_PULL_SYS_POLL_H is defined above when inclusion of header file
+   sys/poll.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_POLL_H
 #  include <sys/poll.h>
 #endif

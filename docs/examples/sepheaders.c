@@ -64,7 +64,7 @@ int main(void)
     /* no progress meter please */
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* open the header file */

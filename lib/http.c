@@ -684,11 +684,12 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
     /* Basic */
     if(
 #ifndef CURL_DISABLE_PROXY
-      (proxy && conn->bits.proxy_user_passwd &&
-       !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-authorization"))) ||
+       (proxy && conn->bits.proxy_user_passwd &&
+        !Curl_checkProxyheaders(data, conn,
+                                STRCONST("Proxy-authorization"))) ||
 #endif
-      (!proxy && data->state.aptr.user &&
-       !Curl_checkheaders(data, STRCONST("Authorization")))) {
+       (!proxy && data->state.aptr.user &&
+        !Curl_checkheaders(data, STRCONST("Authorization")))) {
       auth = "Basic";
       result = http_output_basic(data, proxy);
       if(result)
@@ -703,8 +704,8 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
 #ifndef CURL_DISABLE_BEARER_AUTH
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
-    if((!proxy && data->set.str[STRING_BEARER] &&
-        !Curl_checkheaders(data, STRCONST("Authorization")))) {
+    if(!proxy && data->set.str[STRING_BEARER] &&
+       !Curl_checkheaders(data, STRCONST("Authorization"))) {
       auth = "Bearer";
       result = http_output_bearer(data);
       if(result)
@@ -2625,7 +2626,6 @@ static CURLcode http_range(struct Curl_easy *data,
         data->state.aptr.rangeline =
           curl_maprintf("Content-Range: bytes 0-%" FMT_OFF_T "/"
                         "%" FMT_OFF_T "\r\n", req_clen - 1, req_clen);
-
       }
       else if(data->state.resume_from) {
         /* This is because "resume" was selected */
@@ -3776,7 +3776,7 @@ static CURLcode http_statusline(struct Curl_easy *data,
     /* (quote from RFC2616, section 10.3.5): The 304 response
      * MUST NOT contain a message-body, and thus is always
      * terminated by the first empty line after the header
-     * fields.  */
+     * fields. */
     if(data->set.timecondition)
       data->info.timecond = TRUE;
     FALLTHROUGH();
@@ -4345,7 +4345,7 @@ void Curl_http_to_fold(struct dynbuf *bf)
     len--;
   if(len && (hd[len - 1] == '\r'))
     len--;
-  while(len && (ISBLANK(hd[len - 1]))) /* strip off trailing whitespace */
+  while(len && ISBLANK(hd[len - 1])) /* strip off trailing whitespace */
     len--;
   curlx_dyn_setlen(bf, len);
 }

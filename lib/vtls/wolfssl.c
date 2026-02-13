@@ -1424,7 +1424,6 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-
   }
 #endif /* HAVE_WOLFSSL_CTX_GENERATEECHCONFIG */
 

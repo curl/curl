@@ -151,7 +151,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
       }
 
       if(!*tok || (*tok == '\n'))
-        /* end of line  */
+        /* end of line */
         break;
 
       /* leading double-quote means quoted string */

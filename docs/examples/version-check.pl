@@ -58,7 +58,6 @@ while(<S>) {
             $rem{$sym}=$a[2];
         }
     }
-
 }
 
 close(S);

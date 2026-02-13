@@ -109,7 +109,7 @@ int main(void)
 
   CURL *curl = curl_easy_init();
   if(curl) {
-    /* pass struct to callback  */
+    /* pass struct to callback */
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &data);
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
 

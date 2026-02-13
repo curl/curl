@@ -217,7 +217,7 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
  * us early warning on things only discovered by valgrind otherwise. */
 #define GOOD_EASY_HANDLE(x) \
   (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER)) ? TRUE : \
-  (DEBUGASSERT(!(x)), FALSE))
+   (DEBUGASSERT(!(x)), FALSE))
 #else
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
@@ -1303,7 +1303,7 @@ struct UserDefined {
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
   curl_read_callback fread_func_set; /* function that reads the input */
-  curl_progress_callback fprogress; /* OLD and deprecated progress callback  */
+  curl_progress_callback fprogress; /* OLD and deprecated progress callback */
   curl_xferinfo_callback fxferinfo; /* progress callback */
   curl_debug_callback fdebug;      /* function that write informational data */
   curl_ioctl_callback ioctl_func;  /* function for I/O control */
@@ -1373,7 +1373,7 @@ struct UserDefined {
   curl_off_t max_filesize; /* Maximum file size to download */
 #ifndef CURL_DISABLE_FTP
   timediff_t accepttimeout;   /* in milliseconds, 0 means no timeout */
-  uint8_t ftp_filemethod; /* how to get to a file: curl_ftpfile  */
+  uint8_t ftp_filemethod; /* how to get to a file: curl_ftpfile */
   uint8_t ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
   uint8_t ftp_ccc;   /* FTP CCC options: curl_ftpccc */
 #endif
@@ -1443,7 +1443,7 @@ struct UserDefined {
 #endif
   uint32_t maxconnects; /* Max idle connections in the connection cache */
 #ifdef USE_ECH
-  int tls_ech;      /* TLS ECH configuration  */
+  int tls_ech;      /* TLS ECH configuration */
 #endif
   short maxredirs;    /* maximum no. of http(s) redirects to follow,
                          set to -1 for infinity */
@@ -1460,7 +1460,7 @@ struct UserDefined {
   uint16_t tftp_blksize;    /* in bytes, 0 means use default */
 #endif
 #ifndef CURL_DISABLE_NETRC
-  uint8_t use_netrc;        /* enum CURL_NETRC_OPTION values  */
+  uint8_t use_netrc;        /* enum CURL_NETRC_OPTION values */
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
@@ -1543,7 +1543,7 @@ struct UserDefined {
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
   BIT(verbose);        /* output verbosity */
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
-  BIT(reuse_fresh);    /* do not reuse an existing connection  */
+  BIT(reuse_fresh);    /* do not reuse an existing connection */
   BIT(no_signal);      /* do not use any signal/alarm handler */
   BIT(tcp_nodelay);    /* whether to enable TCP_NODELAY or not */
   BIT(ignorecl);       /* ignore content length */

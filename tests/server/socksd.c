@@ -519,7 +519,6 @@ static curl_socket_t sockit(curl_socket_t fd)
     rep = s_config.connectrep;
   }
 
-  /* */
   response[SOCKS5_VERSION] = s_config.responseversion;
 
   /*

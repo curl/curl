@@ -637,7 +637,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
    * the OpenSSL read() does not grok that properly.
    *
    * Alas, read as much as possible, split up into lines, use the ending
-   * line in a response or continue reading.  */
+   * line in a response or continue reading. */
 
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
@@ -1801,7 +1801,7 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
     }
     else {
       /* We got a file size report, so we check that there actually is a
-         part of the file left to get, or else we go home.  */
+         part of the file left to get, or else we go home. */
       if(data->state.resume_from < 0) {
         /* We are supposed to download the last abs(from) bytes */
         if(filesize < -data->state.resume_from) {

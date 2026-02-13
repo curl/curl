@@ -232,8 +232,8 @@ static void my_sha256_final(unsigned char *digest, void *in)
     (a)[3] = (unsigned char) (((unsigned long)(val)) & 0xff);        \
   } while(0)
 
-#define WPA_PUT_BE64(a, val)                                      \
-  do {                                                            \
+#define WPA_PUT_BE64(a, val)                            \
+  do {                                                  \
     (a)[0] = (unsigned char)(((uint64_t)(val)) >> 56);  \
     (a)[1] = (unsigned char)(((uint64_t)(val)) >> 48);  \
     (a)[2] = (unsigned char)(((uint64_t)(val)) >> 40);  \

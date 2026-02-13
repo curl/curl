@@ -97,7 +97,7 @@ struct ssl_peer {
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
                                    const curl_ssl_backend ***avail);
 
-#define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1 MiB */
+#define MAX_PINNED_PUBKEY_SIZE (1024 * 1024) /* 1 MiB */
 
 curl_sslbackend Curl_ssl_backend(void);
 

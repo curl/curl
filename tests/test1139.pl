@@ -279,7 +279,6 @@ while(<$r>) {
             push @toolhelp, $combo;
             $opts{$combo} |= 4;
         }
-
     }
 }
 close($r);

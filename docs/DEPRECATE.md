@@ -34,7 +34,7 @@ We remove support for CMake <3.18 in April 2026.
 
 CMake 3.18 was released on 2020-07-15.
 
-## TLS SRP Authentication
+## TLS-SRP Authentication
 
 Transport Layer Security Secure Remote Password is a TLS feature that does not
 work with TLS 1.3 or QUIC and is virtually unused by curl users and in

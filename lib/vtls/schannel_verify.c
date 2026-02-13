@@ -38,20 +38,20 @@
 #include "vtls/schannel.h"
 #include "vtls/schannel_int.h"
 
-#include "curlx/fopen.h"
-#include "curlx/inet_pton.h"
+#include "vtls/hostcheck.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
 #include "curl_trc.h"
 #include "strerror.h"
-#include "curlx/winapi.h"
+#include "curlx/fopen.h"
+#include "curlx/inet_pton.h"
 #include "curlx/multibyte.h"
-#include "vtls/hostcheck.h"
 #include "curlx/version_win32.h"
+#include "curlx/winapi.h"
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
-#define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
+#define MAX_CAFILE_SIZE (1024 * 1024) /* 1 MiB */
 #define BEGIN_CERT      "-----BEGIN CERTIFICATE-----"
 #define END_CERT        "\n-----END CERTIFICATE-----"
 
@@ -438,10 +438,8 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 
 static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
 {
-  struct in_addr ia;
-  struct in6_addr ia6;
   bool result = FALSE;
-
+  struct in_addr ia;
   int res = curlx_inet_pton(AF_INET, hostname, &ia);
   if(res) {
     ip_blob->size = sizeof(struct in_addr);
@@ -449,6 +447,7 @@ static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
     result = TRUE;
   }
   else {
+    struct in6_addr ia6;
     res = curlx_inet_pton(AF_INET6, hostname, &ia6);
     if(res) {
       ip_blob->size = sizeof(struct in6_addr);

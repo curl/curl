@@ -117,7 +117,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  */
 /*      data event                            arg1       arg2     return */
 #define CF_CTRL_DATA_SETUP              4  /* 0          NULL     first fail */
-/* unused now                           5  */
+/* unused now                           5 */
 #define CF_CTRL_DATA_PAUSE              6  /* on/off     NULL     first fail */
 #define CF_CTRL_DATA_DONE               7  /* premature  NULL     ignored */
 #define CF_CTRL_DATA_DONE_SEND          8  /* 0          NULL     ignored */
@@ -170,7 +170,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
-#define CF_QUERY_HTTP_VERSION       9  /* number (10/11/20/30)   -  */
+#define CF_QUERY_HTTP_VERSION       9  /* number (10/11/20/30)   - */
 /* pass in a `const struct Curl_sockaddr_ex **` as `pres2`. Gets set
  * to NULL when not connected. */
 #define CF_QUERY_REMOTE_ADDR       10  /* -          `Curl_sockaddr_ex *` */

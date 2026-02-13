@@ -59,7 +59,7 @@
 #define CURL_IGNORE_DEPRECATION(statements)     statements
 #endif
 
-#include "curlver.h"         /* libcurl version defines   */
+#include "curlver.h"         /* libcurl version defines */
 #include "system.h"          /* determine things runtime */
 
 #include <stdio.h>
@@ -1358,7 +1358,7 @@ typedef enum {
 
   /* Set the krb4/5 security level, this also enables krb4/5 awareness. This
    * is a string, 'clear', 'safe', 'confidential' or 'private'. If the string
-   * is set but does not match one of these, 'private' will be used.  */
+   * is set but does not match one of these, 'private' will be used. */
   CURLOPTDEPRECATED(CURLOPT_KRBLEVEL, CURLOPTTYPE_STRINGPOINT, 63,
                     8.17.0, "removed"),
 
@@ -2203,7 +2203,7 @@ typedef enum {
   CURLOPT(CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256, CURLOPTTYPE_STRINGPOINT, 311),
 
   /* Function that will be called immediately before the initial request
-     is made on a connection (after any protocol negotiation step).  */
+     is made on a connection (after any protocol negotiation step). */
   CURLOPT(CURLOPT_PREREQFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 312),
 
   /* Data passed to the CURLOPT_PREREQFUNCTION callback */
@@ -2283,7 +2283,6 @@ typedef enum {
 #define CURLOPT_SSLCERTPASSWD CURLOPT_KEYPASSWD
 #define CURLOPT_KRB4LEVEL CURLOPT_KRBLEVEL
 
-/* */
 #define CURLOPT_FTP_RESPONSE_TIMEOUT CURLOPT_SERVER_RESPONSE_TIMEOUT
 
 /* Added in 8.2.0 */
@@ -3310,7 +3309,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 #endif
 
 /* unfortunately, the easy.h and multi.h include files need options and info
-  stuff before they can be included! */
+   stuff before they can be included! */
 #include "easy.h" /* nothing in curl is fun without the easy stuff */
 #include "multi.h"
 #include "urlapi.h"
@@ -3330,7 +3329,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 /* This preprocessor magic that replaces a call with the exact same call is
    only done to make sure application authors pass exactly three arguments
    to these functions. Use recursive macros to allow using these symbols via
-   the C++ global namespace '::' or reuse them as method names. */
+   the C++ global namespace '::' or reusing them as method names. */
 #define curl_easy_setopt(handle, opt, param) \
   curl_easy_setopt(handle, opt, param)
 #define curl_easy_getinfo(handle, info, arg) \

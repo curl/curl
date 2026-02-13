@@ -31,7 +31,7 @@ extern "C" {
 struct curl_header {
   char *name;    /* this might not use the same case */
   char *value;
-  size_t amount; /* number of headers using this name  */
+  size_t amount; /* number of headers using this name */
   size_t index;  /* ... of this instance, 0 or higher */
   unsigned int origin; /* see bits below */
   void *anchor; /* handle privately used by libcurl */

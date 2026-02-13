@@ -154,7 +154,6 @@ sub memanalyze {
 
                     $sizeataddr{$addr}=-1; # set -1 to mark as freed
                     $getmem{$addr}="$source:$linenum";
-
                 }
             }
             elsif($function =~ /malloc\((\d*)\) = 0x([0-9a-f]*)/) {
@@ -380,7 +379,6 @@ sub memanalyze {
                     push @res, "FREEADDRINFO ($source:$linenum)\n";
                 }
             }
-
         }
         else {
             push @res, "Not recognized prefix line: $line\n";

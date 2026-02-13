@@ -56,7 +56,7 @@ int main(void)
      * this can contain a message sequence set and a number of search criteria
      * keywords including flags such as ANSWERED, DELETED, DRAFT, FLAGGED, NEW,
      * RECENT and SEEN. For more information about the search criteria please
-     * see RFC-3501 section 6.4.4.   */
+     * see RFC-3501 section 6.4.4. */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "SEARCH NEW");
 
     /* Perform the custom request */

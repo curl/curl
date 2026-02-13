@@ -65,7 +65,7 @@
 #define H2_NW_RECV_CHUNKS       (H2_CONN_WINDOW_SIZE / H2_CHUNK_SIZE)
 /* on send into TLS, we just want to accumulate small frames */
 #define H2_NW_SEND_CHUNKS       1
-/* this is how much we want "in flight" for a stream, unthrottled  */
+/* this is how much we want "in flight" for a stream, unthrottled */
 #define H2_STREAM_WINDOW_SIZE_MAX   (10 * 1024 * 1024)
 /* this is how much we want "in flight" for a stream, initially, IFF
  * nghttp2 allows us to tweak the local window size. */
@@ -888,7 +888,6 @@ static void h2_xfer_write_resp_hd(struct Curl_cfilter *cf,
                                   struct h2_stream_ctx *stream,
                                   const char *buf, size_t blen, bool eos)
 {
-
   /* If we already encountered an error, skip further writes */
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
@@ -905,7 +904,6 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
                                struct h2_stream_ctx *stream,
                                const char *buf, size_t blen, bool eos)
 {
-
   /* If we already encountered an error, skip further writes */
   if(!stream->xfer_result)
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);

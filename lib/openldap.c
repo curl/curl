@@ -114,7 +114,6 @@ struct ldapreqinfo {
 /* meta key for storing ldapconninfo at connection */
 #define CURL_META_LDAP_CONN   "meta:proto:ldap:conn"
 
-
 /*
  * oldap_state()
  *

@@ -1844,7 +1844,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
 #ifdef USE_IPV6
   if(data->set.scope_id)
-    /* Override any scope that was set above.  */
+    /* Override any scope that was set above. */
     conn->scope_id = data->set.scope_id;
 #endif
 
@@ -2538,7 +2538,6 @@ error:
 static CURLcode parse_remote_port(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
-
   if(data->set.use_port && data->state.allow_port) {
     /* if set, we use this instead of the port possibly given in the URL */
     char portbuf[16];

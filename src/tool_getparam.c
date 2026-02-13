@@ -456,7 +456,7 @@ UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
 #ifdef _WIN32
       if((param_place == &cert_parameter[1]) &&
          (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&
-         (ISALPHA(cert_parameter[0]))) {
+         ISALPHA(cert_parameter[0])) {
         /* colon in the second column, followed by a backslash, and the
            first character is an alphabetic letter:
 
@@ -559,7 +559,7 @@ static const struct sizeunit *getunit(char unit)
    We support P, T, G, M and K (case insensitive) suffixes.
 
    Unit test 1623
-  */
+ */
 UNITTEST ParameterError GetSizeParameter(const char *arg, curl_off_t *out)
 {
   const char *unit = arg;
@@ -1016,7 +1016,7 @@ static ParameterError set_rate(const char *nextarg)
      /m == per minute
      /h == per hour (default)
      /d == per day (24 hours)
-  */
+   */
   ParameterError err = PARAM_OK;
   const char *p = nextarg;
   curl_off_t denominator;
@@ -1256,7 +1256,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
         warnf("Could not read file \"%s\" "
               "specified for \"--ech ecl:\" option",
               nextarg);
-        return PARAM_BAD_USE; /*  */
+        return PARAM_BAD_USE;
       }
       err = file2string(&tmpcfg, file);
       if(file != stdin)
@@ -2791,7 +2791,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     /* use <eth0> or <192.168.10.10> style addresses. Anything except
        this will make us try to get the "default" address.
        NOTE: this is a changed behavior since the released 4.1!
-    */
+     */
     err = getstr(&config->ftpport, nextarg, DENY_BLANK);
     break;
   case C_FTP_SSL_CCC_MODE: /* --ftp-ssl-ccc-mode */
@@ -2809,11 +2809,11 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = add2list(&config->telnet_options, nextarg);
     break;
   case C_USER: /* --user */
-    /* user:password  */
+    /* user:password */
     err = getstr(&config->userpwd, nextarg, ALLOW_BLANK);
     break;
   case C_PROXY_USER: /* --proxy-user */
-    /* Proxy user:password  */
+    /* Proxy user:password */
     err = getstr(&config->proxyuserpwd, nextarg, ALLOW_BLANK);
     break;
   case C_WRITE_OUT: /* --write-out */

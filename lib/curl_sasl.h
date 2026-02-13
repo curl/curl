@@ -147,11 +147,11 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 /* Check if we have enough auth data and capabilities to authenticate */
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data);
 
-/* Calculate the required login details for SASL authentication  */
+/* Calculate the required login details for SASL authentication */
 CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
                          bool force_ir, saslprogress *progress);
 
-/* Continue an SASL authentication  */
+/* Continue an SASL authentication */
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
                             int code, saslprogress *progress);
 

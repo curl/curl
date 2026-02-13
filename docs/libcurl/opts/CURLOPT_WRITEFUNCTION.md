@@ -110,7 +110,7 @@ int main(void)
   CURLcode result;
   CURL *curl = curl_easy_init();
   if(curl) {
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);
 
     /* we pass our 'chunk' struct to the callback function */

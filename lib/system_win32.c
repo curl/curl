@@ -45,7 +45,7 @@ CURLcode Curl_win32_init(long flags)
 
     if(res)
       /* Tell the user that we could not find a usable */
-      /* winsock.dll.     */
+      /* winsock.dll. */
       return CURLE_FAILED_INIT;
 
     /* Confirm that the Windows Sockets DLL supports what we need.*/

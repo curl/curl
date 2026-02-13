@@ -1061,9 +1061,9 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
                          "MAIL FROM:%s%s%s%s%s%s",
                          from,                 /* Mandatory                 */
                          auth ? " AUTH=" : "", /* Optional on AUTH support  */
-                         auth ? auth : "",     /*                           */
+                         auth ? auth : "",
                          size ? " SIZE=" : "", /* Optional on SIZE support  */
-                         size ? size : "",     /*                           */
+                         size ? size : "",
                          utf8 ? " SMTPUTF8"    /* Internationalised mailbox */
                                : "");          /* included in our envelope  */
 

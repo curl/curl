@@ -111,7 +111,6 @@ for my $l (@output) {
         $alllines += $len;
         $allscore += ($len * $score);
     }
-
 }
 
 my $showncutoff;

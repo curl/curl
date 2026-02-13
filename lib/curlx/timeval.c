@@ -194,7 +194,6 @@ timediff_t curlx_ptimediff_ms(const struct curltime *newer,
   return (diff * 1000) + ((newer->tv_usec - older->tv_usec) / 1000);
 }
 
-
 timediff_t curlx_timediff_ms(struct curltime newer, struct curltime older)
 {
   return curlx_ptimediff_ms(&newer, &older);

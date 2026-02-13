@@ -146,7 +146,7 @@ elsif($ARGV[0] eq "postprocess") {
         }
         close(IN);
 
-        @canondir = sort {substr($a,57) cmp substr($b,57)} @canondir;
+        @canondir = sort {substr($a, 57) cmp substr($b, 57)} @canondir;
         my $newfile = $logfile . ".new";
         open(OUT, ">$newfile") || die "$!";
         print OUT join('', @canondir);

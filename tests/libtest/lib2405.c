@@ -322,7 +322,7 @@ static CURLcode empty_multi_test(void)
 
   multi_init(multi);
 
-  /* calling curl_multi_waitfds() on an empty multi handle.  */
+  /* calling curl_multi_waitfds() on an empty multi handle. */
   mresult = curl_multi_waitfds(multi, ufds, 10, &fd_count);
 
   if(mresult != CURLM_OK) {

@@ -35,7 +35,7 @@
 
 #include <curl/curl.h>
 
-/* curl write callback, to fill tidy's input buffer...  */
+/* curl write callback, to fill tidy's input buffer... */
 static uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 {
   uint r;

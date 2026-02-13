@@ -281,7 +281,7 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.",
         (gss_enc == 0) ? "no" :
-        ((gss_enc == 1) ? "integrity" : "confidentiality") );
+        ((gss_enc == 1) ? "integrity" : "confidentiality"));
 
   sspi_w_token[0].pvBuffer =
     sspi_w_token[1].pvBuffer =

@@ -416,7 +416,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
     }
 
     if(fInCert || blob) {
-      /* Reading a .P12 or .pfx file, like the example at bottom of
+      /* Reading a .p12 or .pfx file, like the example at bottom of
          https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
       */
       CRYPT_DATA_BLOB datablob;
@@ -2030,8 +2030,8 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       timediff_t timeout_ms = Curl_timeleft_ms(data);
       if(timeout_ms < 0) {
         /* we already got the timeout */
-        failf(data, "schannel: timed out sending data "
-              "(bytes sent: %zu)", *pnwritten);
+        failf(data, "schannel: timed out sending data (bytes sent: %zu)",
+              *pnwritten);
         result = CURLE_OPERATION_TIMEDOUT;
         break;
       }
@@ -2045,8 +2045,8 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         break;
       }
       else if(what == 0) {
-        failf(data, "schannel: timed out sending data "
-              "(bytes sent: %zu)", *pnwritten);
+        failf(data, "schannel: timed out sending data (bytes sent: %zu)",
+              *pnwritten);
         result = CURLE_OPERATION_TIMEDOUT;
         break;
       }

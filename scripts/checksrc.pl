@@ -1230,7 +1230,6 @@ sub scanfile {
     checksrc_endoffile($file);
 
     close($R);
-
 }
 
 if($errors || $warnings || $verbose) {

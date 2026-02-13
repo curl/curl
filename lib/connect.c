@@ -61,7 +61,7 @@
 #include "multiif.h"
 #include "curlx/inet_ntop.h"
 #include "curlx/strparse.h"
-#include "vtls/vtls.h" /* for vtsl cfilters */
+#include "vtls/vtls.h" /* for vtls cfilters */
 #include "progress.h"
 #include "conncache.h"
 #include "multihandle.h"

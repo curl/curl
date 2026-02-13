@@ -172,7 +172,7 @@ int main(int argc, const char *argv[])
     /* specify URL to get */
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* some servers do not like requests that are made without a user-agent

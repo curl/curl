@@ -74,7 +74,7 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.org/");
 
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* we pass our 'chunk' struct to the callback function */

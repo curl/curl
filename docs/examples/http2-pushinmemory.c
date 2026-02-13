@@ -77,7 +77,7 @@ static void setup(CURL *curl)
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  /* write data to a struct  */
+  /* write data to a struct */
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
   init_memory(&files[0]);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &files[0]);

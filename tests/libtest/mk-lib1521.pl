@@ -330,15 +330,15 @@ static bool bad_long(CURLcode res, int check)
 static bool bad_neg(int check)
 {
   switch(check) {
-    case CURLOPT_DNS_CACHE_TIMEOUT:
-    case CURLOPT_INFILESIZE:
-    case CURLOPT_INFILESIZE_LARGE:
-    case CURLOPT_MAXREDIRS:
-    case CURLOPT_POSTFIELDSIZE:
-    case CURLOPT_POSTFIELDSIZE_LARGE:
-    case CURLOPT_RESUME_FROM:
-    case CURLOPT_RESUME_FROM_LARGE:
-      return TRUE;
+  case CURLOPT_DNS_CACHE_TIMEOUT:
+  case CURLOPT_INFILESIZE:
+  case CURLOPT_INFILESIZE_LARGE:
+  case CURLOPT_MAXREDIRS:
+  case CURLOPT_POSTFIELDSIZE:
+  case CURLOPT_POSTFIELDSIZE_LARGE:
+  case CURLOPT_RESUME_FROM:
+  case CURLOPT_RESUME_FROM_LARGE:
+    return TRUE;
   }
   return FALSE;
 }

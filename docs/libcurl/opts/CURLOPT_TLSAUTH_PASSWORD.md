@@ -41,7 +41,7 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
-This feature relies on TLS SRP which does not work with TLS 1.3.
+This feature relies on TLS-SRP which does not work with TLS 1.3.
 
 # DEFAULT
 
