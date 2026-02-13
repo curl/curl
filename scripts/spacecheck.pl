@@ -180,6 +180,26 @@ while(my $filename = <$git_ls_files>) {
         $linepos += $line;
     }
 
+    $search = $content;
+    $linepos = 0;
+    while($search =~ /\n\n *}\n/) {
+        my $part = substr($search, 0, $+[0] - 1);
+        $search = substr($search, $+[0]);
+        my $line = ($part =~ tr/\n//);
+        push @err, sprintf("line %d: '}' preceded by empty line", $linepos + $line);
+        $linepos += $line + 1;
+    }
+
+    $search = $content;
+    $linepos = 0;
+    while($search =~ /\n\{\n\n/) {
+        my $part = substr($search, 0, $+[0]);
+        $search = substr($search, $+[0]);
+        my $line = ($part =~ tr/\n//);
+        push @err, sprintf("line %d: top-level '{' followed by empty line", $linepos + $line);
+        $linepos += $line;
+    }
+
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
         push @err, "content: has binary contents";
     }
