@@ -31,16 +31,10 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslconf.h>
-#if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-#define USE_OPENSSL_MD5
-#endif
 #endif
 
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
-#ifndef NO_MD5
-#define USE_WOLFSSL_MD5
-#endif
 #endif
 
 #ifdef USE_MBEDTLS
@@ -49,18 +43,17 @@
 #error "mbedTLS 3.2.0 or later required"
 #endif
 #include <psa/crypto_config.h>
-#if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
-#define USE_MBEDTLS_MD5
-#endif
 #endif
 
 #ifdef USE_GNUTLS
 #include <nettle/md5.h>
-#elif defined(USE_OPENSSL_MD5)
+#elif defined(USE_OPENSSL) && \
+  !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
 #include <openssl/md5.h>
-#elif defined(USE_WOLFSSL_MD5)
+#elif defined(USE_WOLFSSL) && !defined(NO_MD5)
 #include <wolfssl/openssl/md5.h>
-#elif defined(USE_MBEDTLS_MD5)
+#elif defined(USE_MBEDTLS) && \
+  defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
 #include <psa/crypto.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
@@ -97,8 +90,9 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   md5_digest(ctx, 16, digest);
 }
 
-#elif defined(USE_OPENSSL_MD5) || \
-  (defined(USE_WOLFSSL_MD5) && !defined(OPENSSL_COEXIST))
+#elif (defined(USE_OPENSSL) && \
+  !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)) || \
+  (defined(USE_WOLFSSL) && !defined(NO_MD5) && !defined(OPENSSL_COEXIST))
 
 typedef MD5_CTX my_md5_ctx;
 
@@ -121,7 +115,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_WOLFSSL_MD5)
+#elif defined(USE_WOLFSSL) && !defined(NO_MD5)
 
 typedef WOLFSSL_MD5_CTX my_md5_ctx;
 
@@ -144,7 +138,8 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)wolfSSL_MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_MBEDTLS_MD5)
+#elif defined(USE_MBEDTLS) && \
+  defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
 
 typedef psa_hash_operation_t my_md5_ctx;
 
