@@ -38,16 +38,16 @@
 #include "vtls/schannel.h"
 #include "vtls/schannel_int.h"
 
-#include "curlx/fopen.h"
-#include "curlx/inet_pton.h"
+#include "vtls/hostcheck.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
 #include "curl_trc.h"
 #include "strerror.h"
-#include "curlx/winapi.h"
+#include "curlx/fopen.h"
+#include "curlx/inet_pton.h"
 #include "curlx/multibyte.h"
-#include "vtls/hostcheck.h"
 #include "curlx/version_win32.h"
+#include "curlx/winapi.h"
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
