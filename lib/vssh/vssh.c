@@ -23,9 +23,11 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
-#include "vssh.h"
 #include "ssh.h"
+
 #ifdef USE_SSH
+
+#include "vssh.h"
 #include "../curlx/strparse.h"
 #include "../curl_trc.h"
 #include "../escape.h"
