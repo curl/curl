@@ -188,8 +188,10 @@ static CURLcode setstropt_interface(char *option, char **devp,
   return CURLE_OK;
 }
 
+#ifdef USE_SSL
 #define C_SSLVERSION_VALUE(x)     (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) ((unsigned long)x & 0xffff0000)
+#endif
 
 static CURLcode protocol2num(const char *str, curl_prot_t *val)
 {
