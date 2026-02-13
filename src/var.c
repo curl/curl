@@ -369,8 +369,6 @@ static ParameterError addvariable(const char *name,
   return PARAM_NO_MEM;
 }
 
-#define MAX_FILENAME 10000
-
 ParameterError setvariable(const char *input)
 {
   const char *name;
