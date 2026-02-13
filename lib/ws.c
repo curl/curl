@@ -63,7 +63,9 @@
 #define WSBIT_OPCODE_CLOSE 0x8
 #define WSBIT_OPCODE_PING  0x9
 #define WSBIT_OPCODE_PONG  0xa
+#ifdef CURLVERBOSE
 #define WSBIT_OPCODE_MASK  0xf
+#endif
 
 #define WSBIT_MASK 0x80
 
