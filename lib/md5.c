@@ -72,7 +72,11 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)) || \
   (defined(USE_WOLFSSL) && !defined(NO_MD5) && !defined(OPENSSL_COEXIST))
 
+#ifdef USE_OPENSSL
 #include <openssl/md5.h>
+#else
+#include <wolfssl/openssl/md5.h>
+#endif
 
 typedef MD5_CTX my_md5_ctx;
 
