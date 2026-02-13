@@ -109,7 +109,6 @@ static const char *MthStr[] = {
 #endif
 
 #define HTTP_COMMAND_HEAD 0
-#define HTTP_COMMAND_GET  1
 
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
