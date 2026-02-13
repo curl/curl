@@ -391,7 +391,6 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
     if(data && data->conn && data->state.async &&
        (data->conn->connection_id == item->conn_id)) {
       struct Curl_resolv_async *async = data->state.async;
-      CURLcode result = CURLE_OK;
 
       CURL_TRC_DNS(data, "resolved %s:%d, result=%d, dns=%sfound",
                    item->hostname, item->port, result,
