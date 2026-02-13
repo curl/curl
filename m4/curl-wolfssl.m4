@@ -83,6 +83,7 @@ if test "$OPT_WOLFSSL" != "no"; then
     fi
 
     if test "$USE_WOLFSSL" != "yes"; then
+      CPPFLAGS="$CPPFLAGS -DWOLFSSL_OPTIONS_IGNORE_SYS"
 
       LDFLAGS="$LDFLAGS $addld"
       LDFLAGSPC="$LDFLAGSPC $addld"

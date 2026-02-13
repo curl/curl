@@ -30,7 +30,6 @@
 
 #ifdef USE_WOLFSSL
 
-#define WOLFSSL_OPTIONS_IGNORE_SYS
 #include <wolfssl/options.h>
 #include <wolfssl/version.h>
 
