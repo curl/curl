@@ -3231,7 +3231,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     memset(&multi->last_expire_ts, 0, sizeof(multi->last_expire_ts));
 
     /* Applications may set `socket_cb` *after* having added transfers
-     * first. And *then* kick off processing with a
+     * first. *Then* kick off processing with a
      * curl_multi_socket_action(TIMEOUT) afterwards. Make sure our
      * admin handle registers its pollset with the callbacks present. */
     if(!multi->admin_wakeup_started) {
