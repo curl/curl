@@ -63,11 +63,6 @@
 #include <ares_version.h> /* really old c-ares did not include this by
                              itself */
 
-#if ARES_VERSION >= 0x010601
-/* IPv6 supported since 1.6.1 */
-#define HAVE_CARES_IPV6 1
-#endif
-
 #if ARES_VERSION >= 0x010704
 #define HAVE_CARES_SERVERS_CSV 1
 #define HAVE_CARES_LOCAL_DEV 1
@@ -783,7 +778,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
   }
 #else
 
-#ifdef HAVE_CARES_IPV6
+#if ARES_VERSION >= 0x010601  /* IPv6 supported since 1.6.1 */
   if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* The stack seems to be IPv6-enabled */
     /* areschannel is already setup in the Curl_open() function */

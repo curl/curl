@@ -225,10 +225,12 @@ out:
   return result;
 }
 
+#ifdef CURLVERBOSE
 #ifdef HAVE_SENDMSG
 #define VQUIC_SEND_METHOD   "sendmsg"
 #else
 #define VQUIC_SEND_METHOD   "send"
+#endif
 #endif
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,

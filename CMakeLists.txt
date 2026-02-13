@@ -879,6 +879,8 @@ if(CURL_USE_WOLFSSL)
     set(_valid_default_ssl_backend TRUE)
   endif()
   set(_curl_ca_bundle_supported TRUE)
+
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "WOLFSSL_OPTIONS_IGNORE_SYS")
 endif()
 
 if(CURL_USE_GNUTLS)
@@ -979,6 +981,7 @@ macro(curl_openssl_check_exists)
   endif()
   if(USE_WOLFSSL)
     list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::wolfssl)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWOLFSSL_OPTIONS_IGNORE_SYS")
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)  # Public wolfSSL headers also require zlib headers
     endif()

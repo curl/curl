@@ -83,9 +83,7 @@
 /* macro to check for the last line in an FTP server response */
 #define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
 
-#ifndef CURLVERBOSE
-#define FTP_CSTATE(c)  ((void)(c), "")
-#else
+#ifdef CURLVERBOSE
 /* for tracing purposes */
 static const char * const ftp_state_names[] = {
   "STOP",

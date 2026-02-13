@@ -31,16 +31,10 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslconf.h>
-#if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-#define USE_OPENSSL_MD5
-#endif
 #endif
 
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
-#ifndef NO_MD5
-#define USE_WOLFSSL_MD5
-#endif
 #endif
 
 #ifdef USE_MBEDTLS
@@ -49,34 +43,10 @@
 #error "mbedTLS 3.2.0 or later required"
 #endif
 #include <psa/crypto_config.h>
-#if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
-#define USE_MBEDTLS_MD5
-#endif
 #endif
 
 #ifdef USE_GNUTLS
 #include <nettle/md5.h>
-#elif defined(USE_OPENSSL_MD5)
-#include <openssl/md5.h>
-#elif defined(USE_WOLFSSL_MD5)
-#include <wolfssl/openssl/md5.h>
-#elif defined(USE_MBEDTLS_MD5)
-#include <psa/crypto.h>
-#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
-       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
-              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
-      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
-       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
-#define AN_APPLE_OS
-#include <CommonCrypto/CommonDigest.h>
-#elif defined(USE_WIN32_CRYPTO)
-#include <wincrypt.h>
-#endif
-
-#ifdef USE_GNUTLS
 
 typedef struct md5_ctx my_md5_ctx;
 
@@ -97,8 +67,14 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   md5_digest(ctx, 16, digest);
 }
 
-#elif defined(USE_OPENSSL_MD5) || \
-  (defined(USE_WOLFSSL_MD5) && !defined(OPENSSL_COEXIST))
+#elif (defined(USE_OPENSSL) && \
+  !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)) || \
+  (defined(USE_WOLFSSL) && !defined(NO_MD5) && !defined(OPENSSL_COEXIST))
+#ifdef USE_OPENSSL
+#include <openssl/md5.h>
+#else
+#include <wolfssl/openssl/md5.h>
+#endif
 
 typedef MD5_CTX my_md5_ctx;
 
@@ -121,7 +97,8 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_WOLFSSL_MD5)
+#elif defined(USE_WOLFSSL) && !defined(NO_MD5)
+#include <wolfssl/openssl/md5.h>
 
 typedef WOLFSSL_MD5_CTX my_md5_ctx;
 
@@ -144,7 +121,9 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)wolfSSL_MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_MBEDTLS_MD5)
+#elif defined(USE_MBEDTLS) && \
+  defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+#include <psa/crypto.h>
 
 typedef psa_hash_operation_t my_md5_ctx;
 
@@ -168,7 +147,15 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)psa_hash_finish(ctx, digest, 16, &actual_length);
 }
 
-#elif defined(AN_APPLE_OS)
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
+       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
+      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
+       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
+#include <CommonCrypto/CommonDigest.h>
 
 /* For Apple operating systems: CommonCrypto has the functions we need.
    These functions are available on Tiger and later, as well as iOS 2.0
@@ -198,6 +185,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_WIN32_CRYPTO)
+#include <wincrypt.h>
 
 struct md5_ctx {
   HCRYPTPROV hCryptProv;
