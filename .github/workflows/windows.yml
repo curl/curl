@@ -943,9 +943,8 @@ jobs:
               options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
               options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
+              options+=" -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${MSDK_VER}"  # for display
               export CMAKE_GENERATOR='Ninja Multi-Config'  # pass it via env to avoid space issues
-              echo "Using MSVC: ${MSVC_ROOTW}"
-              echo "Using Windows SDK: ${MSDK_VER}"
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
