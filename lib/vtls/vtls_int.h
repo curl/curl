@@ -25,12 +25,12 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
+#ifdef USE_SSL
+
 #include "../cfilters.h"
 #include "../select.h"
 #include "../urldata.h"
 #include "vtls.h"
-
-#ifdef USE_SSL
 
 struct Curl_ssl;
 struct ssl_connect_data;
