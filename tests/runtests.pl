@@ -1447,7 +1447,6 @@ sub singletest_check {
         }
 
         $ok .= "p";
-
     }
     else {
         $ok .= "-"; # protocol not checked
@@ -1609,7 +1608,6 @@ sub singletest_check {
         }
 
         $ok .= "P";
-
     }
     else {
         $ok .= "-"; # proxy not checked

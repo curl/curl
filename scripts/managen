@@ -529,7 +529,6 @@ sub render {
         my $qstr = $quote ? "q" : "";
         push @desc, "[".(1 + $level)."$qstr]$d" if(!$manpage);
         $header = 0;
-
     }
     if($finalblank) {
         print STDERR "$f:$line:1:ERROR: trailing blank line\n";

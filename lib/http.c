@@ -2625,7 +2625,6 @@ static CURLcode http_range(struct Curl_easy *data,
         data->state.aptr.rangeline =
           curl_maprintf("Content-Range: bytes 0-%" FMT_OFF_T "/"
                         "%" FMT_OFF_T "\r\n", req_clen - 1, req_clen);
-
       }
       else if(data->state.resume_from) {
         /* This is because "resume" was selected */
