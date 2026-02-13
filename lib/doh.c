@@ -1254,30 +1254,37 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       /* we got a response, create a dns entry. */
       dns = Curl_dns_entry_create(data, &ai, dohp->host, 0,
                                   dohp->port, FALSE);
-      if(dns) {
-        /* Now add and HTTPSRR information if we have */
-#ifdef USE_HTTPSRR
-        if(de.numhttps_rrs > 0 && result == CURLE_OK) {
-          struct Curl_https_rrinfo *hrr = NULL;
-          result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
-                                           de.https_rrs->len, &hrr);
-          if(result) {
-            infof(data, "Failed to decode HTTPS RR");
-            Curl_dns_entry_unlink(data, &dns);
-            goto error;
-          }
-          infof(data, "Some HTTPS RR to process");
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-          doh_print_httpsrr(data, hrr);
-#endif
-          dns->hinfo = hrr;
-        }
-#endif /* USE_HTTPSRR */
-        /* and add the entry to the cache */
-        result = Curl_dnscache_add(data, dns);
-        *pdns = dns;
+      if(!dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
       }
-    } /* address processing done */
+
+      /* Now add and HTTPSRR information if we have */
+#ifdef USE_HTTPSRR
+      if(de.numhttps_rrs > 0 && result == CURLE_OK) {
+        struct Curl_https_rrinfo *hrr = NULL;
+        result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
+                                         de.https_rrs->len, &hrr);
+        if(result) {
+          infof(data, "Failed to decode HTTPS RR");
+          Curl_dns_entry_unlink(data, &dns);
+          goto error;
+        }
+        infof(data, "Some HTTPS RR to process");
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
+        doh_print_httpsrr(data, hrr);
+#endif
+        dns->hinfo = hrr;
+      }
+#endif /* USE_HTTPSRR */
+      /* and add the entry to the cache */
+      result = Curl_dnscache_add(data, dns);
+      *pdns = dns;
+    }
+    else {
+      result = CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
+        CURLE_COULDNT_RESOLVE_HOST;
+    }
 
   } /* !dohp->pending */
   else
