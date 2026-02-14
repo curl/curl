@@ -21,15 +21,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
 
-#include "../urldata.h"
-#include "../curl_trc.h"
-#include "vtls_scache.h"
-#include "vtls_spack.h"
-#include "../curlx/strdup.h"
+#include "urldata.h"
+#include "curl_trc.h"
+#include "vtls/vtls_scache.h"
+#include "vtls/vtls_spack.h"
+#include "curlx/strdup.h"
 
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff

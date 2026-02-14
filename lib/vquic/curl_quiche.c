@@ -21,34 +21,35 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_QUICHE)
 #include <quiche.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
-#include "../bufq.h"
-#include "../uint-hash.h"
-#include "../urldata.h"
-#include "../cfilters.h"
-#include "../cf-socket.h"
-#include "../curl_trc.h"
-#include "../rand.h"
-#include "../multiif.h"
-#include "../connect.h"
-#include "../progress.h"
-#include "../select.h"
-#include "../http1.h"
-#include "vquic.h"
-#include "vquic_int.h"
-#include "vquic-tls.h"
-#include "curl_quiche.h"
-#include "../transfer.h"
-#include "../url.h"
-#include "../bufref.h"
-#include "../vtls/openssl.h"
-#include "../vtls/keylog.h"
-#include "../vtls/vtls.h"
+
+#include "bufq.h"
+#include "uint-hash.h"
+#include "urldata.h"
+#include "cfilters.h"
+#include "cf-socket.h"
+#include "curl_trc.h"
+#include "rand.h"
+#include "multiif.h"
+#include "connect.h"
+#include "progress.h"
+#include "select.h"
+#include "http1.h"
+#include "vquic/vquic.h"
+#include "vquic/vquic_int.h"
+#include "vquic/vquic-tls.h"
+#include "vquic/curl_quiche.h"
+#include "transfer.h"
+#include "url.h"
+#include "bufref.h"
+#include "vtls/openssl.h"
+#include "vtls/keylog.h"
+#include "vtls/vtls.h"
 
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
 #define CURL_H3_NO_ERROR  0x0100

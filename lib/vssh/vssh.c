@@ -21,15 +21,15 @@
  * SPDX-License-Identifier: curl AND ISC
  *
  ***************************************************************************/
-#include "../curl_setup.h"
-#include "ssh.h"
+#include "curl_setup.h"
+#include "vssh/ssh.h"
 
 #ifdef USE_SSH
 
-#include "vssh.h"
-#include "../curlx/strparse.h"
-#include "../curl_trc.h"
-#include "../escape.h"
+#include "vssh/vssh.h"
+#include "curlx/strparse.h"
+#include "curl_trc.h"
+#include "escape.h"
 
 #ifdef CURLVERBOSE
 const char *Curl_ssh_statename(sshstate state)

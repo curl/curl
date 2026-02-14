@@ -24,9 +24,9 @@
 
 /* Base64 encoding/decoding */
 
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "base64.h"
+#include "curlx/base64.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
 const char curlx_base64encdec[] =

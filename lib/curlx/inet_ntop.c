@@ -16,7 +16,7 @@
  *
  * SPDX-License-Identifier: ISC
  */
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_INET_NTOP
 
@@ -30,9 +30,9 @@
 #include <arpa/inet.h>
 #endif
 
-#include "inet_ntop.h"
-#include "snprintf.h"
-#include "strcopy.h"
+#include "curlx/inet_ntop.h"
+#include "curlx/snprintf.h"
+#include "curlx/strcopy.h"
 
 #define IN6ADDRSZ       16
 /* #define INADDRSZ         4 */

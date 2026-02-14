@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(_WIN32) && defined(UNICODE)
 
-#include "multibyte.h"
+#include "curlx/multibyte.h"
 
 /*
  * MultiByte conversions using Windows kernel32 library.

@@ -24,7 +24,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_LIBSSH
 
@@ -42,21 +42,21 @@
 #include <inet.h>
 #endif
 
-#include "../urldata.h"
-#include "../sendf.h"
-#include "../curl_trc.h"
-#include "../hostip.h"
-#include "../progress.h"
-#include "../transfer.h"
-#include "ssh.h"
-#include "../url.h"
-#include "../cfilters.h"
-#include "../connect.h"
-#include "../parsedate.h"          /* for the week day and month names */
-#include "../curlx/strparse.h"
-#include "../multiif.h"
-#include "../select.h"
-#include "vssh.h"
+#include "urldata.h"
+#include "sendf.h"
+#include "curl_trc.h"
+#include "hostip.h"
+#include "progress.h"
+#include "transfer.h"
+#include "vssh/ssh.h"
+#include "url.h"
+#include "cfilters.h"
+#include "connect.h"
+#include "parsedate.h"          /* for the week day and month names */
+#include "curlx/strparse.h"
+#include "multiif.h"
+#include "select.h"
+#include "vssh/vssh.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

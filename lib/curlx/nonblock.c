@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -35,7 +35,7 @@
 #include <inet.h>
 #endif
 
-#include "nonblock.h"
+#include "curlx/nonblock.h"
 
 /*
  * curlx_nonblock() set the given socket to either blocking or non-blocking

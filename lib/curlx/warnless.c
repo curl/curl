@@ -21,9 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 

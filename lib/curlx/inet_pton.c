@@ -17,7 +17,7 @@
  *
  * SPDX-License-Identifier: ISC
  */
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_INET_PTON
 
@@ -31,8 +31,8 @@
 #include <arpa/inet.h>
 #endif
 
-#include "inet_pton.h"
-#include "strparse.h"
+#include "curlx/inet_pton.h"
+#include "curlx/strparse.h"
 
 #define IN6ADDRSZ       16
 #define INADDRSZ         4

@@ -24,12 +24,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
-#include "vtls.h"
-#include "../curl_sha256.h"
+#include "vtls/vtls.h"
+#include "curl_sha256.h"
 
 #if defined(_MSC_VER) && (_MSC_VER < 1700)
 /* Workaround for warning:

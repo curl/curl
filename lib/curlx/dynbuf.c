@@ -21,10 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "dynbuf.h"
-#include "../curl_printf.h"
+#include "curlx/dynbuf.h"
+#include "curl_printf.h"
 
 #define MIN_FIRST_ALLOC 32
 

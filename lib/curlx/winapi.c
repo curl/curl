@@ -21,16 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 /*
  * curlx_winapi_strerror:
  * Variant of curlx_strerror if the error code is definitely Windows API.
  */
 #ifdef _WIN32
-#include "winapi.h"
-#include "snprintf.h"
-#include "strcopy.h"
+#include "curlx/winapi.h"
+#include "curlx/snprintf.h"
+#include "curlx/strcopy.h"
 
 /* This is a helper function for curlx_strerror that converts Windows API error
  * codes (GetLastError) to error messages.

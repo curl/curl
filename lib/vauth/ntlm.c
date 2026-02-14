@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
 
@@ -34,12 +34,12 @@
 
 #define DEBUG_ME 0
 
-#include "vauth.h"
-#include "../curl_trc.h"
-#include "../curl_ntlm_core.h"
-#include "../rand.h"
-#include "../curlx/strdup.h"
-#include "../curl_endian.h"
+#include "vauth/vauth.h"
+#include "curl_trc.h"
+#include "curl_ntlm_core.h"
+#include "rand.h"
+#include "curlx/strdup.h"
+#include "curl_endian.h"
 
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"

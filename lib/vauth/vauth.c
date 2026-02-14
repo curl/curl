@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "vauth.h"
-#include "../curlx/multibyte.h"
-#include "../url.h"
+#include "vauth/vauth.h"
+#include "curlx/multibyte.h"
+#include "url.h"
 
 /*
  * Curl_auth_build_spn()

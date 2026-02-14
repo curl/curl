@@ -21,9 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "fopen.h"
+#include "curlx/fopen.h"
 
 int curlx_fseek(void *stream, curl_off_t offset, int whence)
 {
@@ -42,8 +42,8 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #include <share.h>  /* for _SH_DENYNO */
 
-#include "multibyte.h"
-#include "timeval.h"
+#include "curlx/multibyte.h"
+#include "curlx/timeval.h"
 
 #ifdef CURL_MEMDEBUG
 /*

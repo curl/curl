@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_BASENAME
 
-#include "basename.h"
+#include "curlx/basename.h"
 
 /*
   (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004

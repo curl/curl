@@ -24,17 +24,17 @@
  * RFC2831 DIGEST-MD5 authentication
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
-#include "vauth.h"
-#include "digest.h"
-#include "../curlx/multibyte.h"
-#include "../curl_trc.h"
-#include "../curlx/strdup.h"
-#include "../strcase.h"
-#include "../strerror.h"
+#include "vauth/vauth.h"
+#include "vauth/digest.h"
+#include "curlx/multibyte.h"
+#include "curl_trc.h"
+#include "curlx/strdup.h"
+#include "strcase.h"
+#include "strerror.h"
 
 /*
  * Curl_auth_is_digest_supported()

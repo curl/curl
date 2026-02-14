@@ -23,11 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SSH
 
-#include "../urldata.h"
+#include "urldata.h"
 
 CURLcode Curl_getworkingpath(struct Curl_easy *data,
                              const char *homedir,

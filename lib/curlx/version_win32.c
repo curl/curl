@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef _WIN32
 
-#include "version_win32.h"
+#include "curlx/version_win32.h"
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
    and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */
