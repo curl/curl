@@ -251,22 +251,8 @@ if(NOT DOS AND NOT AMIGA)
   option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup" ${_enable_threaded_resolver_default})
 endif()
 
-include(PickyWarnings)
-
-if(CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "GNU")
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_GNU_SOURCE")  # Required for accept4(), pipe2(), sendmmsg()
-  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")  # Apply to all feature checks
-endif()
-
-option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
-if(ENABLE_DEBUG)
-  message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
-endif()
-
-set(CURL_DEBUG_MACROS "")
-if(ENABLE_DEBUG)
-  list(APPEND CURL_DEBUG_MACROS "DEBUGBUILD")
-endif()
+option(CURL_DISABLE_TYPECHECK "Disable curl_easy_setopt()/curl_easy_getinfo() type checking" OFF)
+mark_as_advanced(CURL_DISABLE_TYPECHECK)
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
@@ -287,6 +273,23 @@ if(CURL_CLANG_TIDY)
   if(CURL_CLANG_TIDYFLAGS)
     list(APPEND CMAKE_C_CLANG_TIDY ${CURL_CLANG_TIDYFLAGS})
   endif()
+endif()
+
+include(PickyWarnings)
+
+if(CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "GNU")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_GNU_SOURCE")  # Required for accept4(), pipe2(), sendmmsg()
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")  # Apply to all feature checks
+endif()
+
+option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
+if(ENABLE_DEBUG)
+  message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
+endif()
+
+set(CURL_DEBUG_MACROS "")
+if(ENABLE_DEBUG)
+  list(APPEND CURL_DEBUG_MACROS "DEBUGBUILD")
 endif()
 
 option(CURL_CODE_COVERAGE "Enable code coverage build options" OFF)
@@ -500,8 +503,6 @@ option(CURL_DISABLE_TELNET "Disable Telnet" OFF)
 mark_as_advanced(CURL_DISABLE_TELNET)
 option(CURL_DISABLE_TFTP "Disable TFTP" OFF)
 mark_as_advanced(CURL_DISABLE_TFTP)
-option(CURL_DISABLE_TYPECHECK "Disable curl_easy_setopt()/curl_easy_getinfo() type checking" OFF)
-mark_as_advanced(CURL_DISABLE_TYPECHECK)
 option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 
