@@ -376,6 +376,17 @@ bool Curl_is_connecting(struct Curl_easy *data)
   return data->mstate < MSTATE_DO;
 }
 
+static CURLMcode multi_assess_wakeup(struct Curl_multi *multi)
+{
+#ifdef ENABLE_WAKEUP
+  if(multi->socket_cb)
+    return Curl_multi_ev_assess_xfer(multi, multi->admin);
+#else
+  (void)multi;
+#endif
+  return CURLM_OK;
+}
+
 static CURLMcode multi_xfers_add(struct Curl_multi *multi,
                                  struct Curl_easy *data)
 {
@@ -541,8 +552,12 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   multi->admin->set.server_response_timeout =
     data->set.server_response_timeout;
   multi->admin->set.no_signal = data->set.no_signal;
-  if(multi->xfers_alive == 1)
-    Curl_multi_ev_assess_xfer(multi, multi->admin);
+
+  mresult = multi_assess_wakeup(multi);
+  if(mresult) {
+    failf(data, "error enabling wakeup listening: %d", mresult);
+    return mresult;
+  }
 
   CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
              data->mid, Curl_multi_xfers_running(multi),
@@ -833,8 +848,6 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
   if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid)) {
     --multi->xfers_alive;
-    if(!multi->xfers_alive)
-      Curl_multi_ev_assess_xfer(multi, multi->admin);
   }
 
   Curl_wildcard_dtor(&data->wildcard);
@@ -907,6 +920,12 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   mresult = Curl_update_timer(multi);
   if(mresult)
     return mresult;
+
+  mresult = multi_assess_wakeup(multi);
+  if(mresult) {
+    failf(data, "error enabling wakeup listening: %d", mresult);
+    return mresult;
+  }
 
   CURL_TRC_M(data, "removed from multi, mid=%u, running=%u, total=%u",
              mid, Curl_multi_xfers_running(multi),
@@ -2498,8 +2517,6 @@ static void handle_completed(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->pending, data->mid);
   Curl_uint32_bset_add(&multi->msgsent, data->mid);
   --multi->xfers_alive;
-  if(!multi->xfers_alive)
-    Curl_multi_ev_assess_xfer(multi, multi->admin);
 }
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
@@ -3234,10 +3251,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
      * first. *Then* kick off processing with a
      * curl_multi_socket_action(TIMEOUT) afterwards. Make sure our
      * admin handle registers its pollset with the callbacks present. */
-    if(!multi->admin_wakeup_started) {
-      multi->admin_wakeup_started = TRUE;
-      Curl_multi_ev_assess_xfer(multi, multi->admin);
-    }
+    mresult = multi_assess_wakeup(multi);
+    if(mresult)
+      goto out;
   }
 
   multi_mark_expired_as_dirty(multi, multi_now(multi));

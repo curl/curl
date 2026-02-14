@@ -236,10 +236,6 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
     goto out;
   tpool->refcount = 1;
 
-  tpool->name = curlx_strdup(name);
-  if(!tpool->name)
-    goto out;
-
   Curl_mutex_init(&tpool->lock);
   Curl_cond_init(&tpool->await);
   Curl_llist_init(&tpool->slots, NULL);
@@ -251,6 +247,10 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
   tpool->fn_process = fn_process;
   tpool->fn_return = fn_return;
   tpool->fn_user_data = user_data;
+
+  tpool->name = curlx_strdup(name);
+  if(!tpool->name)
+    goto out;
 
   if(tpool->min_threads)
     result = Curl_thrdpool_signal(tpool, tpool->min_threads);
