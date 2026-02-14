@@ -36,14 +36,6 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # The rest of the build
 
-if(USE_OPENSSL AND HAVE_OPENSSL3)
-  # OpenSSL 3 marks these functions deprecated but we have no replacements (yet)
-  # so tell the compiler to not warn for them:
-  #   DES_* (for NTLM), SSL_CTX_set_srp_* (for TLS-SRP)
-  #   EVP_PKEY_get1_RSA, MD5_*, RSA_flags, RSA_free (auto-skipped for OpenSSL built with no-deprecated)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "OPENSSL_SUPPRESS_DEPRECATED")
-endif()
-
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
 )
