@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Use an in-memory user certificate and RSA key and retrieve an HTTPS page.
+ * Use in-memory user certificate and private key and retrieve an HTTPS page.
  * </DESC>
  */
 /* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c.
@@ -32,10 +32,6 @@
  */
 
 /* Requires: USE_OPENSSL */
-
-#ifndef OPENSSL_SUPPRESS_DEPRECATED
-#define OPENSSL_SUPPRESS_DEPRECATED
-#endif
 
 #include <openssl/ssl.h>
 
@@ -47,7 +43,7 @@
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
-static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, (FILE *)stream);
   return nmemb * size;
@@ -58,7 +54,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   X509 *cert = NULL;
   BIO *bio = NULL;
   BIO *kbio = NULL;
-  RSA *rsa = NULL;
+  EVP_PKEY *pkey;
   int ret;
 
   const char *mypem =
@@ -74,26 +70,13 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END CERTIFICATE-----\n";
 
-  /* replace the XXX with the actual RSA key */
+  /* replace the XXX with the actual private key */
   const char *mykey =
-    "-----BEGIN RSA PRIVATE KEY-----\n"
+    "-----BEGIN PRIVATE KEY-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-    "-----END RSA PRIVATE KEY-----\n";
+    "-----END PRIVATE KEY-----\n";
 
   (void)curl;
   (void)pointer;
@@ -119,20 +102,19 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     printf("Use certificate failed\n");
   }
 
-  /* create a bio for the RSA key */
+  /* create a bio for the private key */
   kbio = BIO_new_mem_buf(mykey, -1);
   if(!kbio) {
     printf("BIO_new_mem_buf failed\n");
   }
 
-  /* read the key bio into an RSA object */
-  rsa = PEM_read_bio_RSAPrivateKey(kbio, NULL, 0, NULL);
-  if(!rsa) {
-    printf("Failed to create key bio\n");
+  pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
+  if(!pkey) {
+    printf("Failed EVP_PKEY_new()\n");
   }
 
-  /* tell SSL to use the RSA key from memory */
-  ret = SSL_CTX_use_RSAPrivateKey((SSL_CTX *)sslctx, rsa);
+  /* tell SSL to use the private key from memory */
+  ret = SSL_CTX_use_PrivateKey((SSL_CTX *)sslctx, pkey);
   if(ret != 1) {
     printf("Use Key failed\n");
   }
@@ -144,8 +126,8 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   if(kbio)
     BIO_free(kbio);
 
-  if(rsa)
-    RSA_free(rsa);
+  if(pkey)
+    EVP_PKEY_free(pkey);
 
   if(cert)
     X509_free(cert);
@@ -168,9 +150,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunction);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, writefunction);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, stderr);
     curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 
