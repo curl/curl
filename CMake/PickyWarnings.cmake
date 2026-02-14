@@ -147,7 +147,7 @@ if(PICKY_COMPILER)
       list(APPEND _picky_enable
         ${_picky_common_old}
         -Wconditional-uninitialized        # clang  3.0
-        -Wno-used-but-marked-unused        # clang  3.0                         # Triggered by typecheck-gcc.h (with clang 14+)
+        -Wno-used-but-marked-unused        # clang  3.0            # Triggered by typecheck-gcc.h with clang 14+, dependency headers
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
         -Wformat=2                         # clang  3.0  gcc  4.8
@@ -161,7 +161,7 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
         list(APPEND _picky_enable
           -Wno-covered-switch-default      # clang  3.1            appleclang  3.1  # Annoying to fix or silence
-          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # Triggered by typecheck-gcc.h (with clang 14+)
+          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # Triggered by standard headers
         )
         if(MSVC)
           list(APPEND _picky_enable

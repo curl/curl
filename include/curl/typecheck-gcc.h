@@ -156,7 +156,7 @@
               Wcurl_easy_setopt_err_CURLSH();                           \
           )                                                             \
           }                                                             \
-      curl_easy_setopt(handle, option, value);                          \
+      (curl_easy_setopt)(handle, option, value);                        \
     })
 
 /* wraps curl_easy_getinfo() with type checking */
@@ -190,7 +190,7 @@
               Wcurl_easy_getinfo_err_curl_off_t();                      \
           )                                                             \
           }                                                             \
-      curl_easy_getinfo(handle, info, arg);                             \
+      (curl_easy_getinfo)(handle, info, arg);                           \
     })
 
 #define curl_multi_setopt(handle, option, value)                        \
@@ -221,7 +221,7 @@
           if(!curlcheck_multitimer_cb(value))                           \
             Wcurl_multi_setopt_err_timercb();                           \
       }                                                                 \
-      curl_multi_setopt(handle, option, value);                         \
+      (curl_multi_setopt)(handle, option, value);                       \
     })
 
 /* evaluates to true if the option takes a data argument to pass to a
@@ -262,7 +262,8 @@
 /*
  * For now, just make sure that the functions are called with three arguments
  */
-#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
+#define curl_share_setopt(share, opt, param) \
+  (curl_share_setopt)(share, opt, param)
 
 /* the actual warnings, triggered by calling the Wcurl_easy_setopt_err*
  * functions */
