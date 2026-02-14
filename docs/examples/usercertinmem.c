@@ -39,6 +39,14 @@
 
 #include <openssl/ssl.h>
 
+#ifdef OPENSSL_NO_DEPRECATED_3_0
+int main(void)
+{
+  printf("OpenSSL 3 built with no-deprecated option not supported.\n");
+  return 1;
+}
+#else
+
 #include <stdio.h>
 
 #include <curl/curl.h>
@@ -205,3 +213,4 @@ int main(void)
   curl_global_cleanup();
   return (int)result;
 }
+#endif
