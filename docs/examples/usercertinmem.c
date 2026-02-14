@@ -59,6 +59,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   BIO *bio = NULL;
   BIO *kbio = NULL;
   RSA *rsa = NULL;
+  EVP_PKEY *pkey;
   int ret;
 
   const char *mypem =
@@ -131,8 +132,17 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     printf("Failed to create key bio\n");
   }
 
-  /* tell SSL to use the RSA key from memory */
-  ret = SSL_CTX_use_RSAPrivateKey((SSL_CTX *)sslctx, rsa);
+  pkey = EVP_PKEY_new();
+  if(!pkey) {
+    printf("Failed EVP_PKEY_new()\n");
+  }
+
+  if(EVP_PKEY_assign_RSA(pkey, rsa) <= 0) {
+    printf("EVP_PKEY_assign_RSA()\n");
+  }
+
+  /* tell SSL to use the private key from memory */
+  ret = SSL_CTX_use_PrivateKey((SSL_CTX *)sslctx, pkey);
   if(ret != 1) {
     printf("Use Key failed\n");
   }
@@ -143,6 +153,9 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 
   if(kbio)
     BIO_free(kbio);
+
+  if(pkey)
+    EVP_PKEY_free(pkey);
 
   if(rsa)
     RSA_free(rsa);
