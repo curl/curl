@@ -603,10 +603,8 @@ void Curl_multi_ev_xfer_done(struct Curl_multi *multi,
                              struct Curl_easy *data)
 {
   DEBUGASSERT(!data->conn); /* transfer should have been detached */
-  if(data != multi->admin) {
-    (void)mev_assess(multi, data, NULL);
-    Curl_meta_remove(data, CURL_META_MEV_POLLSET);
-  }
+  (void)mev_assess(multi, data, NULL);
+  Curl_meta_remove(data, CURL_META_MEV_POLLSET);
 }
 
 void Curl_multi_ev_conn_done(struct Curl_multi *multi,
