@@ -43,7 +43,7 @@
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
-static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, (FILE *)stream);
   return nmemb * size;
@@ -150,9 +150,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunction);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, writefunction);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, stderr);
     curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 
