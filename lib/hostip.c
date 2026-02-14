@@ -875,16 +875,16 @@ CURLcode Curl_resolv_pollset(struct Curl_easy *data,
 CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail)
 {
   struct connectdata *conn = data->conn;
-  const char *host_or_proxy = "host";
-  const char *name = conn->host.dispname;
   CURLcode result = CURLE_COULDNT_RESOLVE_HOST;
+  VERBOSE(const char *host_or_proxy = "host");
+  VERBOSE(const char *name = conn->host.dispname);
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy) {
-    host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
-    name = conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
-      conn->http_proxy.host.dispname;
+    VERBOSE(host_or_proxy = "proxy");
+    VERBOSE(name = conn->socks_proxy.host.name ?
+      conn->socks_proxy.host.dispname : conn->http_proxy.host.dispname);
   }
 #endif
 
