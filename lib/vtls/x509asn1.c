@@ -51,7 +51,6 @@
 #define CURL_ASN1_MAX                   ((size_t)0x40000)      /* 256K */
 
 #ifdef WANT_EXTRACT_CERTINFO
-
 /* ASN.1 classes. */
 /* #define CURL_ASN1_UNIVERSAL             0 */
 /* #define CURL_ASN1_APPLICATION           1 */
