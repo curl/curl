@@ -92,7 +92,6 @@
 #    define DESKEY(x) &x
 #  endif
 #endif
-#define DESKEYARG(x) *x
 
 #elif defined(USE_GNUTLS)
 
@@ -179,8 +178,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
  * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
  */
-static void setup_des_key(const unsigned char *key_56,
-                          DES_key_schedule DESKEYARG(ks))
+static void setup_des_key(const unsigned char *key_56, DES_key_schedule *ks)
 {
   DES_cblock key;
 
