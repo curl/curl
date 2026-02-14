@@ -32,10 +32,6 @@
 #define MAX_PARAMETERS 128 /* number of input arguments */
 #define MAX_SEGMENTS   128 /* number of output segments */
 
-#ifdef __AMIGA__
-#undef FORMAT_INT
-#endif
-
 /* Lower-case digits.  */
 const unsigned char Curl_ldigits[] = "0123456789abcdef";
 
@@ -51,19 +47,19 @@ const unsigned char Curl_udigits[] = "0123456789ABCDEF";
 
 /* Data type to read from the arglist */
 typedef enum {
-  FORMAT_STRING,
-  FORMAT_PTR,
-  FORMAT_INTPTR,
-  FORMAT_INT,
-  FORMAT_LONG,
-  FORMAT_LONGLONG,
-  FORMAT_INTU,
-  FORMAT_LONGU,
-  FORMAT_LONGLONGU,
-  FORMAT_DOUBLE,
-  FORMAT_LONGDOUBLE,
-  FORMAT_WIDTH,
-  FORMAT_PRECISION
+  MTYPE_STRING,
+  MTYPE_PTR,
+  MTYPE_INTPTR,
+  MTYPE_INT,
+  MTYPE_LONG,
+  MTYPE_LONGLONG,
+  MTYPE_INTU,
+  MTYPE_LONGU,
+  MTYPE_LONGLONGU,
+  MTYPE_DOUBLE,
+  MTYPE_LONGDOUBLE,
+  MTYPE_WIDTH,
+  MTYPE_PRECISION
 } FormatType;
 
 /* conversion and display flags */
@@ -382,80 +378,80 @@ static int parsefmt(const char *format,
         flags |= FLAGS_ALT;
         FALLTHROUGH();
       case 's':
-        type = FORMAT_STRING;
+        type = MTYPE_STRING;
         break;
       case 'n':
-        type = FORMAT_INTPTR;
+        type = MTYPE_INTPTR;
         break;
       case 'p':
-        type = FORMAT_PTR;
+        type = MTYPE_PTR;
         break;
       case 'd':
       case 'i':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONG;
+          type = MTYPE_LONGLONG;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONG;
+          type = MTYPE_LONG;
         else
-          type = FORMAT_INT;
+          type = MTYPE_INT;
         break;
       case 'u':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_UNSIGNED;
         break;
       case 'o':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
         break;
       case 'x':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_HEX | FLAGS_UNSIGNED;
         break;
       case 'X':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONGU;
+          type = MTYPE_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONGU;
+          type = MTYPE_LONGU;
         else
-          type = FORMAT_INTU;
+          type = MTYPE_INTU;
         flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
         break;
       case 'c':
-        type = FORMAT_INT;
+        type = MTYPE_INT;
         flags |= FLAGS_CHAR;
         break;
       case 'f':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         break;
       case 'e':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATE;
         break;
       case 'E':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATE | FLAGS_UPPER;
         break;
       case 'g':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATG;
         break;
       case 'G':
-        type = FORMAT_DOUBLE;
+        type = MTYPE_DOUBLE;
         flags |= FLAGS_FLOATG | FLAGS_UPPER;
         break;
       default:
@@ -476,7 +472,7 @@ static int parsefmt(const char *format,
         if(width >= max_param)
           max_param = width;
 
-        in[width].type = FORMAT_WIDTH;
+        in[width].type = MTYPE_WIDTH;
         /* mark as used */
         mark_arg_used(usedinput, width);
       }
@@ -494,7 +490,7 @@ static int parsefmt(const char *format,
         if(precision >= max_param)
           max_param = precision;
 
-        in[precision].type = FORMAT_PRECISION;
+        in[precision].type = MTYPE_PRECISION;
         mark_arg_used(usedinput, precision);
       }
 
@@ -549,42 +545,42 @@ static int parsefmt(const char *format,
 
     /* based on the type, read the correct argument */
     switch(iptr->type) {
-    case FORMAT_STRING:
+    case MTYPE_STRING:
       iptr->val.str = va_arg(arglist, const char *);
       break;
 
-    case FORMAT_INTPTR:
-    case FORMAT_PTR:
+    case MTYPE_INTPTR:
+    case MTYPE_PTR:
       iptr->val.ptr = va_arg(arglist, void *);
       break;
 
-    case FORMAT_LONGLONGU:
+    case MTYPE_LONGLONGU:
       iptr->val.numu = va_arg(arglist, uint64_t);
       break;
 
-    case FORMAT_LONGLONG:
+    case MTYPE_LONGLONG:
       iptr->val.nums = va_arg(arglist, int64_t);
       break;
 
-    case FORMAT_LONGU:
+    case MTYPE_LONGU:
       iptr->val.numu = va_arg(arglist, unsigned long);
       break;
 
-    case FORMAT_LONG:
+    case MTYPE_LONG:
       iptr->val.nums = va_arg(arglist, long);
       break;
 
-    case FORMAT_INTU:
+    case MTYPE_INTU:
       iptr->val.numu = va_arg(arglist, unsigned int);
       break;
 
-    case FORMAT_INT:
-    case FORMAT_WIDTH:
-    case FORMAT_PRECISION:
+    case MTYPE_INT:
+    case MTYPE_WIDTH:
+    case MTYPE_PRECISION:
       iptr->val.nums = va_arg(arglist, int);
       break;
 
-    case FORMAT_DOUBLE:
+    case MTYPE_DOUBLE:
       iptr->val.dnum = va_arg(arglist, double);
       break;
 
@@ -1014,38 +1010,38 @@ static int formatf(void *userp, /* untouched by format(), just sent to the
       p.prec = -1;
 
     switch(iptr->type) {
-    case FORMAT_INTU:
-    case FORMAT_LONGU:
-    case FORMAT_LONGLONGU:
+    case MTYPE_INTU:
+    case MTYPE_LONGU:
+    case MTYPE_LONGLONGU:
       p.flags |= FLAGS_UNSIGNED;
       if(out_number(userp, stream, &p, iptr->val.numu, 0, work, &done))
         return done;
       break;
 
-    case FORMAT_INT:
-    case FORMAT_LONG:
-    case FORMAT_LONGLONG:
+    case MTYPE_INT:
+    case MTYPE_LONG:
+    case MTYPE_LONGLONG:
       if(out_number(userp, stream, &p, iptr->val.numu,
                     iptr->val.nums, work, &done))
         return done;
       break;
 
-    case FORMAT_STRING:
+    case MTYPE_STRING:
       if(out_string(userp, stream, &p, iptr->val.str, &done))
         return done;
       break;
 
-    case FORMAT_PTR:
+    case MTYPE_PTR:
       if(out_pointer(userp, stream, &p, iptr->val.ptr, work, &done))
         return done;
       break;
 
-    case FORMAT_DOUBLE:
+    case MTYPE_DOUBLE:
       if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
         return done;
       break;
 
-    case FORMAT_INTPTR:
+    case MTYPE_INTPTR:
       /* Answer the count of characters written.  */
       if(p.flags & FLAGS_LONGLONG)
         *(int64_t *)iptr->val.ptr = (int64_t)done;
