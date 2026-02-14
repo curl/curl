@@ -302,7 +302,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   return TRUE;
 }
 
-#endif /* USE_WIN32_CRYPTO */
+#endif /* crypto backends */
 
 /*
  * takes a 21 byte array and treats it as 3 56-bit DES keys. The
