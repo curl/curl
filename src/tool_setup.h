@@ -98,4 +98,8 @@ int tool_ftruncate64(int fd, curl_off_t where);
 #endif /* !HAVE_FTRUNCATE */
 #endif /* _WIN32 */
 
+#ifdef CURL_CA_EMBED
+extern const unsigned char curl_ca_embed[];
+#endif
+
 #endif /* HEADER_CURL_TOOL_SETUP_H */
