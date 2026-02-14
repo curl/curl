@@ -84,4 +84,8 @@ void single_transfer_cleanup(void);
 
 extern struct per_transfer *transfers; /* first node */
 
+#ifdef CURL_CA_EMBED
+extern const unsigned char curl_ca_embed[];
+#endif
+
 #endif /* HEADER_CURL_TOOL_OPERATE_H */

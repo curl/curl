@@ -27,9 +27,15 @@ use strict;
 use warnings;
 
 my $varname = "var";
+my $header = "tool_operate.h";
+
 if(@ARGV && $ARGV[0] eq "--var") {
     shift;
     $varname = shift @ARGV;
+}
+if(@ARGV &&$ARGV[0] eq "--header") {
+    shift;
+    $header = shift @ARGV;
 }
 
 my $varname_upper = uc($varname);
@@ -39,10 +45,8 @@ print <<HEAD
  * NEVER EVER edit this manually, fix the mk-file-embed.pl script instead!
  */
 /* !checksrc! disable COPYRIGHT all */
-#ifndef CURL_DECLARED_${varname_upper}
-#define CURL_DECLARED_${varname_upper}
-extern const unsigned char ${varname}[];
-#endif
+#include "$header"
+
 const unsigned char ${varname}[] = {
 HEAD
     ;
