@@ -111,7 +111,7 @@ struct async_thrdd_item {
   uint16_t port;
   uint8_t ip_version;
 #ifdef DEBUGBUILD
-  uint32_t delay_ms;
+  uint32_t delay_fail_ms;
 #endif
   char hostname[1];
 };
@@ -143,11 +143,11 @@ async_thrdd_item_create(const char *hostname,
 
 #ifdef DEBUGBUILD
   {
-    const char *p = getenv("CURL_DBG_RESOLV_DELAY");
+    const char *p = getenv("CURL_DBG_RESOLV_FAIL_DELAY");
     if(p) {
       curl_off_t l;
       if(!curlx_str_number(&p, &l, UINT32_MAX))
-        item->delay_ms = (uint32_t)l;
+        item->delay_fail_ms = (uint32_t)l;
     }
   }
 #endif
@@ -308,8 +308,10 @@ static void async_thrdd_item_process(void *arg)
   int rc;
 
 #ifdef DEBUGBUILD
-    if(item->delay_ms)
-      curlx_wait_ms(item->delay_ms);
+    if(item->delay_fail_ms) {
+      curlx_wait_ms(item->delay_fail_ms);
+      return;
+    }
 #endif
   curl_msnprintf(service, sizeof(service), "%d", item->port);
 
@@ -333,8 +335,10 @@ static void async_thrdd_item_process(void *item)
   struct async_thrdd_item *item = arg;
 
 #ifdef DEBUGBUILD
-    if(item->delay_ms)
-      curlx_wait_ms(item->delay_ms);
+    if(item->delay_fail_ms) {
+      curlx_wait_ms(item->delay_fail_ms);
+      return;
+    }
 #endif
   item->res = Curl_ipv4_resolve_r(item->hostname, item->port);
   if(!item->res) {

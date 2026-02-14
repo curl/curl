@@ -34,34 +34,42 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
 class TestResolv:
 
     # use .invalid host name that should never resolv
     def test_21_01_resolv_invalid_one(self, env: Env, httpd, nghttpx):
         count = 1
-        curl = CurlClient(env=env, force_resolv=False)
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = '5'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         url = f'https://test-{count}.http.curl.invalid/'
         r = curl.http_download(urls=[url], with_stats=True)
+        r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
 
     # use .invalid host name, one after the other
-    def test_21_02_resolv_invalid_serial(self, env: Env, httpd, nghttpx):
-        count = 20
-        curl = CurlClient(env=env, force_resolv=False)
+    @pytest.mark.parametrize("delay_ms", [1, 50])
+    def test_21_02_resolv_invalid_serial(self, env: Env, delay_ms, httpd, nghttpx):
+        count = 10
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = '5'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
         r = curl.http_download(urls=urls, with_stats=True)
+        r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
 
     # use .invalid host name, parallel
-    @pytest.mark.parametrize("delay_ms", [0, 50])
+    @pytest.mark.parametrize("delay_ms", [1, 50])
     def test_21_03_resolv_invalid_parallel(self, env: Env, delay_ms, httpd, nghttpx):
         count = 20
         run_env = os.environ.copy()
-        if delay_ms > 0:
-            run_env['CURL_DBG_RESOLV_DELAY'] = str(delay_ms)
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = '5'
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
         r = curl.http_download(urls=urls, with_stats=True, extra_args=[
             '--parallel'
         ])
+        r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
