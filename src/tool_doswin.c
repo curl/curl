@@ -27,8 +27,6 @@
 
 #ifdef _WIN32
 #  include <tlhelp32.h>
-#  undef  PATH_MAX
-#  define PATH_MAX MAX_PATH
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define CURL_USE_LFN(f) 0  /* long filenames never available */
 #elif defined(__DJGPP__)
@@ -552,12 +550,12 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 {
   CURLcode result = CURLE_OK;
   DWORD res_len;
-  TCHAR buf[PATH_MAX];
+  TCHAR buf[MAX_PATH];
   TCHAR *ptr = NULL;
 
   buf[0] = TEXT('\0');
 
-  res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
+  res_len = SearchPath(NULL, bundle_file, NULL, MAX_PATH, buf, &ptr);
   if(res_len > 0) {
     curlx_free(config->cacert);
     config->cacert = curlx_convert_tchar_to_UTF8(buf);
