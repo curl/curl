@@ -33,10 +33,6 @@
 
 /* Requires: USE_OPENSSL */
 
-#ifndef OPENSSL_SUPPRESS_DEPRECATED
-#define OPENSSL_SUPPRESS_DEPRECATED
-#endif
-
 #include <openssl/ssl.h>
 
 #include <stdio.h>
