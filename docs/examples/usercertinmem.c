@@ -58,7 +58,6 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   X509 *cert = NULL;
   BIO *bio = NULL;
   BIO *kbio = NULL;
-  RSA *rsa = NULL;
   EVP_PKEY *pkey;
   int ret;
 
@@ -126,19 +125,9 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     printf("BIO_new_mem_buf failed\n");
   }
 
-  /* read the key bio into an RSA object */
-  rsa = PEM_read_bio_RSAPrivateKey(kbio, NULL, 0, NULL);
-  if(!rsa) {
-    printf("Failed to create key bio\n");
-  }
-
-  pkey = EVP_PKEY_new();
+  pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
   if(!pkey) {
     printf("Failed EVP_PKEY_new()\n");
-  }
-
-  if(EVP_PKEY_assign_RSA(pkey, rsa) <= 0) {
-    printf("EVP_PKEY_assign_RSA()\n");
   }
 
   /* tell SSL to use the private key from memory */
@@ -156,9 +145,6 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 
   if(pkey)
     EVP_PKEY_free(pkey);
-
-  if(rsa)
-    RSA_free(rsa);
 
   if(cert)
     X509_free(cert);
