@@ -296,8 +296,6 @@ if test "x$OPT_OPENSSL" != "xno"; then
       ],[],[
         AC_MSG_ERROR([OpenSSL 3.0.0 or upper required.])
       ])
-
-      CPPFLAGS="$CPPFLAGS -DOPENSSL_SUPPRESS_DEPRECATED"
     fi
   fi
 
@@ -347,6 +345,9 @@ if test "$OPENSSL_ENABLED" = "1"; then
   AC_MSG_CHECKING([for DES support in OpenSSL])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
+      #ifndef OPENSSL_SUPPRESS_DEPRECATED
+      #define OPENSSL_SUPPRESS_DEPRECATED
+      #endif
       #include <openssl/des.h>
     ]],[[
       DES_ecb_encrypt(0, 0, 0, DES_ENCRYPT);
@@ -365,6 +366,9 @@ if test "$OPENSSL_ENABLED" = "1"; then
   AC_MSG_CHECKING([for SRP support in OpenSSL])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
+      #ifndef OPENSSL_SUPPRESS_DEPRECATED
+      #define OPENSSL_SUPPRESS_DEPRECATED
+      #endif
       #include <openssl/ssl.h>
     ]],[[
       SSL_CTX_set_srp_username(NULL, NULL);
