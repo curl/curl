@@ -2328,8 +2328,6 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   CURLcode result;
 
   result = Curl_resolv_take_result(data, &dns);
-  CURL_TRC_DNS(data, "Curl_resolv_take_result() -> %d, %s",
-               result, dns ? "found" : "missing");
 
   /* Update sockets here, because the socket(s) may have been closed and the
      application thus needs to be told, even if it is likely that the same

@@ -61,6 +61,7 @@
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
+#include "curlx/strparse.h"
 #include "curlx/wait.h"
 
 #ifdef USE_ARES
@@ -109,6 +110,9 @@ struct async_thrdd_item {
   uint32_t mid;
   uint16_t port;
   uint8_t ip_version;
+#ifdef DEBUGBUILD
+  uint32_t delay_ms;
+#endif
   char hostname[1];
 };
 
@@ -136,6 +140,17 @@ async_thrdd_item_create(const char *hostname,
     memcpy(item->hostname, hostname, hostlen);
   item->port = port;
   item->ip_version = ip_version;
+
+#ifdef DEBUGBUILD
+  {
+    const char *p = getenv("CURL_DBG_RESOLV_DELAY");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, UINT32_MAX))
+        item->delay_ms = (uint32_t)l;
+    }
+  }
+#endif
 
   return item;
 }
@@ -276,6 +291,8 @@ CURLcode Curl_async_await(struct Curl_easy *data,
       milli = 50;
     else
       milli = 200;
+    CURL_TRC_DNS(data, "resolve await, waiting %" FMT_TIMEDIFF_T "ms",
+                 milli);
     curlx_wait_ms(milli);
   }
   return Curl_async_take_result(data, async, pdns);
@@ -290,6 +307,10 @@ static void async_thrdd_item_process(void *arg)
   char service[12];
   int rc;
 
+#ifdef DEBUGBUILD
+    if(item->delay_ms)
+      curlx_wait_ms(item->delay_ms);
+#endif
   curl_msnprintf(service, sizeof(service), "%d", item->port);
 
   rc = Curl_getaddrinfo_ex(item->hostname, service,
@@ -311,6 +332,10 @@ static void async_thrdd_item_process(void *item)
 {
   struct async_thrdd_item *item = arg;
 
+#ifdef DEBUGBUILD
+    if(item->delay_ms)
+      curlx_wait_ms(item->delay_ms);
+#endif
   item->res = Curl_ipv4_resolve_r(item->hostname, item->port);
   if(!item->res) {
     item->sock_error = SOCKERRNO;
@@ -377,13 +402,14 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
   struct Curl_easy *data;
   void *qitem;
 
-  CURL_TRC_DNS(multi->admin, "async-dns recv");
   while(!Curl_thrdq_recv(multi->resolv_thrdq, &qitem)) {
     /* dispatch resolve result */
     struct async_thrdd_item *item = qitem;
 
-    CURL_TRC_DNS(multi->admin, "async-dns received item for xfer mid=%u "
-                 "connection=%" FMT_OFF_T, item->mid, item->conn_id);
+    CURL_TRC_DNS(multi->admin, "received resolv result for xfer mid=%u "
+                 "connection=%" FMT_OFF_T ", %s:%u %sfound",
+                 item->mid, item->conn_id, item->hostname, item->port,
+                 item->res ? "" : "not ");
 
     data = Curl_multi_get_easy(multi, item->mid);
     /* there is a chance the `mid` gets reused after a while, but the
@@ -392,8 +418,6 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
        (data->conn->connection_id == item->conn_id)) {
       struct Curl_resolv_async *async = data->state.async;
 
-      CURL_TRC_DNS(data, "resolved %s:%d, dns=%sfound",
-                   item->hostname, item->port, item->res ? "" : "not ");
       async->thrdd.resolved = item;
       async->thrdd.done = TRUE;
       item = NULL;
@@ -486,7 +510,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
     timediff_t milli;
     timediff_t ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
     if(ms < 3)
-      milli = 0;
+      milli = 1;
     else if(ms <= 50)
       milli = ms / 3;
     else if(ms <= 250)
@@ -525,26 +549,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
 #endif
 
   if(!thrdd->done) {
-    /* poll for name lookup done with exponential backoff up to 250ms */
-    /* should be fine even if this converts to 32-bit */
-    timediff_t elapsed = curlx_ptimediff_ms(Curl_pgrs_now(data),
-                                            &data->progress.t_startsingle);
-    if(elapsed < 0)
-      elapsed = 0;
-
-    if(async->poll_interval == 0)
-      /* Start at 1ms poll interval */
-      async->poll_interval = 1;
-    else if(elapsed >= async->interval_end)
-      /* Back-off exponentially if last interval expired */
-      async->poll_interval *= 2;
-
-    if(async->poll_interval > 250)
-      async->poll_interval = 250;
-
-    async->interval_end = elapsed + async->poll_interval;
-    Curl_expire(data, async->poll_interval, EXPIRE_ASYNC_NAME);
-    CURL_TRC_DNS(data, "async_take %s:%d: waiting",
+    CURL_TRC_DNS(data, "async_take %s:%d: EAGAIN",
                  async->hostname, async->port);
     return CURLE_AGAIN;
   }

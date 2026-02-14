@@ -815,7 +815,7 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data,
   }
   else if(result) {
     result = Curl_resolver_error(data, NULL);
-    return result;
+    goto out;
   }
 
 #ifndef CURL_DISABLE_DOH
@@ -832,11 +832,18 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data,
   else
     DEBUGASSERT(*pdns);
 
+out:
   if(*pdns)
     show_resolve_info(data, *pdns);
-  if((result == CURLE_COULDNT_RESOLVE_HOST) ||
-     (result == CURLE_COULDNT_RESOLVE_PROXY))
+  else if((result == CURLE_COULDNT_RESOLVE_HOST) ||
+          (result == CURLE_COULDNT_RESOLVE_PROXY)) {
     Curl_dnscache_add_negative(data, async->hostname, async->port);
+    failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
+  }
+  else if(result) {
+    failf(data, "Error %d resolving %s:%u",
+          result, async->hostname, async->port);
+  }
   return result;
 }
 #endif
@@ -881,8 +888,8 @@ CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail)
   }
 #endif
 
-  failf(data, "Could not resolve %s: %s%s%s%s", host_or_proxy, name,
-        detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
+  if(detail)
+    infof(data, "error resolving %s: %s (%s)", host_or_proxy, name, detail);
   return result;
 }
 #endif /* USE_CURL_ASYNC */
