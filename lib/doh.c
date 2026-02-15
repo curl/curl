@@ -266,7 +266,7 @@ static void doh_probe_dtor(void *key, size_t klen, void *e)
   }
 }
 
-/* Use '(curl_easy_setopt)' to avoid -Wdisabled-macro-expansion warning */
+/* Use '(curl_easy_setopt)' to avoid nested macro expansion */
 #define ERROR_CHECK_SETOPT(x, y)                        \
   do {                                                  \
     result = (curl_easy_setopt)((CURL *)doh, x, y);     \
