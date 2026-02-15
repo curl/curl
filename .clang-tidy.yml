@@ -1,0 +1,16 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+---
+# https://clang.llvm.org/extra/clang-tidy/checks/list.html
+
+# -clang-analyzer-security.insecureAPI.bzero: for FD_ZERO() (seen on macOS)
+# -clang-analyzer-security.ArrayBound: due to false positives with clang-tidy v21.1.0
+Checks: >-
+  -clang-analyzer-security.insecureAPI.bzero,
+  -clang-analyzer-optin.performance.Padding,
+  -clang-analyzer-security.ArrayBound,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  -clang-diagnostic-nullability-extension,
+  misc-const-correctness,
+  portability-*

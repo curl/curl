@@ -251,8 +251,6 @@ if(NOT DOS AND NOT AMIGA)
   option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup" ${_enable_threaded_resolver_default})
 endif()
 
-include(PickyWarnings)
-
 if(CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "GNU")
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_GNU_SOURCE")  # Required for accept4(), pipe2(), sendmmsg()
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")  # Apply to all feature checks
@@ -270,22 +268,21 @@ endif()
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
+  find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
+  if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(PICKY_COMPILER OFF)  # Do a best effort and skip passing non-clang warning options to clang-tidy.
+    # This lets through warning options enabled via CURL_WERROR=ON, affecting lib and src.
+  endif()
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
-  set(_tidy_checks "")
-  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.bzero")  # for FD_ZERO() (seen on macOS)
-  list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
-  list(APPEND _tidy_checks "-clang-analyzer-security.ArrayBound")  # false positives with clang-tidy v21.1.0
-  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")
-  string(REPLACE ";" "," _tidy_checks "${_tidy_checks}")
-  find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
-  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "-checks=${_tidy_checks}" "-quiet")
-  unset(_tidy_checks)
+  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}")
+  list(APPEND CMAKE_C_CLANG_TIDY "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy.yml")
   if(CURL_WERROR)
     list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
   endif()
   if(CURL_CLANG_TIDYFLAGS)
-    list(APPEND CMAKE_C_CLANG_TIDY ${CURL_CLANG_TIDYFLAGS})
+    string(REPLACE " " ";" _tidy_flags_list "${CURL_CLANG_TIDYFLAGS}")
+    list(APPEND CMAKE_C_CLANG_TIDY ${_tidy_flags_list})
   endif()
 endif()
 
@@ -308,6 +305,8 @@ if(CURL_CODE_COVERAGE)
     set(CURL_CODE_COVERAGE OFF)
   endif()
 endif()
+
+include(PickyWarnings)
 
 set(CURL_CFLAGS "")  # C flags set for libcurl and curl tool (aka public binaries) only
 

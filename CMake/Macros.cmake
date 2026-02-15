@@ -115,6 +115,10 @@ macro(curl_collect_target_options _target)
   if(_val)
     list(APPEND _definitions ${_val})
   endif()
+  get_target_property(_val ${_target} COMPILE_OPTIONS)
+  if(_val)
+    list(APPEND _options ${_val})
+  endif()
   get_target_property(_val ${_target} LINK_LIBRARIES)
   if(_val)
     foreach(_lib IN LISTS _val)
@@ -132,6 +136,7 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
 
     set(_includes "")
     set(_definitions "")
+    set(_options "")
 
     # Collect header directories and macro definitions applying to the directory
     get_directory_property(_val INCLUDE_DIRECTORIES)
@@ -142,19 +147,36 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     if(_val)
       list(APPEND _definitions ${_val})
     endif()
+    get_directory_property(_val COMPILE_OPTIONS)
+    if(_val)
+      list(APPEND _options ${_val})
+    endif()
     unset(_val)
 
     # Collect header directories and macro definitions from lib dependencies
     curl_collect_target_options(${_target})
 
-    list(REMOVE_ITEM _includes "")
-    string(REPLACE ";" ";-I" _includes ";${_includes}")
+    set(_includes_tmp ${_includes})
+    set(_includes)
+    foreach(_inc IN LISTS _includes_tmp)
+      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter also
+      # evaluates to an empty path in this context.
+      if(_inc AND NOT _inc MATCHES "INSTALL_INTERFACE:")
+        list(APPEND _includes "-I${_inc}")
+      endif()
+    endforeach()
     list(REMOVE_DUPLICATES _includes)
 
     list(REMOVE_ITEM _definitions "")
     string(REPLACE ";" ";-D" _definitions ";${_definitions}")
     list(REMOVE_DUPLICATES _definitions)
     list(SORT _definitions)  # Sort like CMake does
+
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+      list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
+    else()
+      set(_options)
+    endif()
 
     # Assemble source list
     set(_sources "")
@@ -165,14 +187,18 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       list(APPEND _sources "${_source}")
     endforeach()
 
+    # Pass -clang-diagnostic-unused-function to disable -Wunused-function implied by -Wunused
     add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-      COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions}
+      COMMAND ${CMAKE_C_CLANG_TIDY}
+        "--checks=-clang-diagnostic-unused-function"
+        ${_sources} -- ${_includes} ${_definitions} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
 
     unset(_includes)
     unset(_definitions)
+    unset(_options)
     unset(_sources)
   endif()
 endmacro()

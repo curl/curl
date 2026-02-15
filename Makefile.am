@@ -64,7 +64,7 @@ CMAKE_DIST =                                     \
   tests/cmake/test.c                             \
   tests/cmake/test.sh
 
-EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig $(CMAKE_DIST)
+EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .clang-tidy.yml .editorconfig $(CMAKE_DIST)
 
 DISTCLEANFILES = buildinfo.txt
 
