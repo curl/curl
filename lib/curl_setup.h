@@ -1232,7 +1232,7 @@ typedef unsigned int curl_bit;
 #elif defined(_WIN32) || defined(__CYGWIN__)
 #define CURL_BINMODE(stream) (void)_setmode(fileno(stream), CURL_O_BINARY)
 #else
-#define CURL_BINMODE(stream) (void)stream
+#define CURL_BINMODE(stream) (void)(stream)
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
