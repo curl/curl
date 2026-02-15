@@ -161,8 +161,13 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
         list(APPEND _picky_enable
           -Wno-covered-switch-default      # clang  3.1            appleclang  3.1  # Annoying to fix or silence
-          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # Triggered by typecheck-gcc.h (with clang 14+)
         )
+        if(NOT CURL_DISABLE_TYPECHECK AND
+           (CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0))
+          list(APPEND _picky_enable
+            -Wno-disabled-macro-expansion  # clang  3.1            appleclang  3.1  # Triggered by typecheck-gcc.h (with clang 14+)
+          )
+        endif()
         if(MSVC)
           list(APPEND _picky_enable
             -Wno-format-non-iso            # clang  3.1            appleclang  3.1  # 'q' length modifier is not supported by ISO C
