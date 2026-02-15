@@ -862,7 +862,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conditional-uninitialized])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
             tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"    # Triggered by typecheck-gcc.h (with clang 14+)
           fi
           dnl Only clang 3.1 or later
           if test "$compiler_num" -ge "301"; then
@@ -933,7 +932,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           fi
           dnl clang 14 or later
           if test "$compiler_num" -ge "1400"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  # Triggered by typecheck-gcc.h with clang 14+
+            if test "$curl_cv_disable_typecheck" = "no" ; then
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  # Triggered by typecheck-gcc.h with clang 14+
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"    # Triggered by typecheck-gcc.h with clang 14+
+            fi
           fi
           dnl clang 16 or later
           if test "$compiler_num" -ge "1600"; then

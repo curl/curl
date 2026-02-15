@@ -595,6 +595,28 @@ if test "$curl_cv_native_windows" = "yes"; then
   ])
 fi
 
+dnl ************************************************************
+dnl disable curl_easy_setopt()/curl_easy_getinfo() type checking
+dnl
+curl_cv_disable_typecheck=no
+AC_MSG_CHECKING([whether to enable curl_easy_setopt()/curl_easy_getinfo() type checking])
+AC_ARG_ENABLE(typecheck,
+AS_HELP_STRING([--enable-typecheck],[Enable type checking (default)])
+AS_HELP_STRING([--disable-typecheck],[Disable type checking]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
+    curl_typecheck_msg="no"
+    curl_cv_disable_typecheck=yes
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(yes)
+)
+
 CURL_SET_COMPILER_BASIC_OPTS
 CURL_SET_COMPILER_DEBUG_OPTS
 CURL_SET_COMPILER_OPTIMIZE_OPTS
@@ -4320,26 +4342,6 @@ AC_CHECK_HEADER(dirent.h,
 )
 
 CURL_CONVERT_INCLUDE_TO_ISYSTEM
-
-dnl ************************************************************
-dnl disable curl_easy_setopt()/curl_easy_getinfo() type checking
-dnl
-AC_MSG_CHECKING([whether to enable curl_easy_setopt()/curl_easy_getinfo() type checking])
-AC_ARG_ENABLE(typecheck,
-AS_HELP_STRING([--enable-typecheck],[Enable type checking (default)])
-AS_HELP_STRING([--disable-typecheck],[Disable type checking]),
-[ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
-    curl_typecheck_msg="no"
-    ;;
-  *)
-    AC_MSG_RESULT(yes)
-    ;;
-  esac ],
-    AC_MSG_RESULT(yes)
-)
 
 dnl ************************************************************
 dnl disable verbose text strings
