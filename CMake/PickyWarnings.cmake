@@ -223,7 +223,8 @@ if(PICKY_COMPILER)
             -Wno-reserved-macro-identifier # clang 13.0            appleclang 13.1  # External macros have to be set sometimes
         )
       endif()
-      if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0)
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0))
         if(NOT CURL_DISABLE_TYPECHECK)
           list(APPEND _picky_enable
             -Wno-disabled-macro-expansion  # clang  3.1            appleclang  3.1  # Triggered by typecheck-gcc.h with clang 14+
