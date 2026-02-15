@@ -796,10 +796,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
       CLANG|APPLECLANG)
         #
         if test "$want_warnings" = "yes"; then
-          typecheck_active=0
-          if test "$curl_cv_disable_typecheck" = "no" && test "$compiler_num" -ge "1400"; then
-            typecheck_active=1
-          fi
           if test "$compiler_num" -ge "302"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pedantic])
           else

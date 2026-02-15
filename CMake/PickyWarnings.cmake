@@ -144,13 +144,6 @@ if(PICKY_COMPILER)
     )
 
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-      unset(_typecheck_active)
-      if(NOT CURL_DISABLE_TYPECHECK AND
-         ((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0) OR
-          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0)))
-        set(_typecheck_active 1)
-      endif()
-
       list(APPEND _picky_enable
         ${_picky_common_old}
         -Wconditional-uninitialized        # clang  3.0
