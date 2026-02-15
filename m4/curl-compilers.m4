@@ -874,13 +874,9 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           fi
           dnl Only clang 3.1 or later
           if test "$compiler_num" -ge "301"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [disabled-macro-expansion])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-non-iso])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-covered-switch-default"    # Annoying to fix or silence
-            if test "$typecheck_active" = "1"; then
-              tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"
-            else
-              CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [disabled-macro-expansion])
-            fi
           fi
           #
           dnl Only clang 3.2 or later
