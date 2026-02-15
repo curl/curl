@@ -176,9 +176,10 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       list(APPEND _sources "${_source}")
     endforeach()
 
+    # Pass -clang-diagnostic-unused-function to disable -Wunused-function implied by -Wunused
     add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-      COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions} ${_options}
+      COMMAND ${CMAKE_C_CLANG_TIDY} "--checks=-clang-diagnostic-unused-function" ${_sources} -- ${_includes} ${_definitions} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
 
