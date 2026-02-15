@@ -741,11 +741,11 @@ typedef size_t (*Wcurl_read_callback6)(void *, size_t, size_t, FILE *);
    curlcheck_cb_compatible((expr), Wcurl_write_callback6))
 typedef size_t (*Wcurl_write_callback1)(const char *, size_t, size_t, void *);
 typedef size_t (*Wcurl_write_callback2)(const char *, size_t, size_t,
-                                       const void *);
+                                        const void *);
 typedef size_t (*Wcurl_write_callback3)(const char *, size_t, size_t, FILE *);
 typedef size_t (*Wcurl_write_callback4)(const void *, size_t, size_t, void *);
 typedef size_t (*Wcurl_write_callback5)(const void *, size_t, size_t,
-                                       const void *);
+                                        const void *);
 typedef size_t (*Wcurl_write_callback6)(const void *, size_t, size_t, FILE *);
 
 /* evaluates to true if expr is of type curl_ioctl_callback or "similar" */
@@ -769,7 +769,7 @@ typedef curlioerr (*Wcurl_ioctl_callback4)(CURL *, curliocmd, const void *);
    curlcheck_cb_compatible((expr), Wcurl_sockopt_callback2))
 typedef int (*Wcurl_sockopt_callback1)(void *, curl_socket_t, curlsocktype);
 typedef int (*Wcurl_sockopt_callback2)(const void *, curl_socket_t,
-                                      curlsocktype);
+                                       curlsocktype);
 
 /* evaluates to true if expr is of type curl_opensocket_callback or
    "similar" */
