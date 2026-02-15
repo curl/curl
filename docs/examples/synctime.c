@@ -108,9 +108,6 @@ static const char *MthStr[] = {
 };
 #endif
 
-#define HTTP_COMMAND_HEAD 0
-#define HTTP_COMMAND_GET  1
-
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
@@ -185,24 +182,15 @@ static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
 }
 
-static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
-                                    const char *OutFileName, int HttpGetBody)
+static CURLcode SyncTime_CURL_FetchHead(CURL *curl, const char *URL_Str)
 {
-  FILE *outfile;
   CURLcode result;
 
-  outfile = NULL;
-  if(HttpGetBody == HTTP_COMMAND_HEAD)
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
-  else {
-    outfile = fopen(OutFileName, "wb");
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
-  }
-
+  curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
   curl_easy_setopt(curl, CURLOPT_URL, URL_Str);
+
   result = curl_easy_perform(curl);
-  if(outfile)
-    fclose(outfile);
+
   return result; /* CURLE_OK */
 }
 
@@ -320,7 +308,7 @@ int main(int argc, const char *argv[])
     fprintf(stderr, "Before HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
 
     /* HTTP HEAD command to the Webserver */
-    SyncTime_CURL_Fetch(curl, conf.timeserver, "index.htm", HTTP_COMMAND_HEAD);
+    SyncTime_CURL_FetchHead(curl, conf.timeserver);
 
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     GetLocalTime(&LOCALTime);

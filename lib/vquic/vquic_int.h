@@ -29,7 +29,6 @@
 
 #include "../bufq.h"
 
-#define MAX_PKT_BURST         10
 #define MAX_UDP_PAYLOAD_SIZE  1452
 
 /* definitions from RFC 9114, ch 8.1 */

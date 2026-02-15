@@ -47,8 +47,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
 #define unlink _unlink
 #else
 #include <strings.h>

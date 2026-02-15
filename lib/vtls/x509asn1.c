@@ -50,6 +50,7 @@
 /* Largest supported ASN.1 structure. */
 #define CURL_ASN1_MAX                   ((size_t)0x40000)      /* 256K */
 
+#ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 classes. */
 /* #define CURL_ASN1_UNIVERSAL             0 */
 /* #define CURL_ASN1_APPLICATION           1 */
@@ -86,7 +87,6 @@
 /* #define CURL_ASN1_CHARACTER_STRING      29 */
 #define CURL_ASN1_BMP_STRING            30
 
-#ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
 struct Curl_OID {
   const char *numoid;  /* Dotted-numeric OID. */

@@ -86,13 +86,6 @@
 CURL_EXTERN CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
-#ifdef CURL_CA_EMBED
-#ifndef CURL_DECLARED_CURL_CA_EMBED
-#define CURL_DECLARED_CURL_CA_EMBED
-extern const unsigned char curl_ca_embed[];
-#endif
-#endif
-
 #define CURL_CA_CERT_ERRORMSG                                              \
   "More details here: https://curl.se/docs/sslcerts.html\n\n"              \
   "curl failed to verify the legitimacy of the server and therefore "      \

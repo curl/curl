@@ -222,13 +222,6 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
   return CURLE_OK; /* ignore if SHA256 did not work */
 }
 
-#ifdef CURL_CA_EMBED
-#ifndef CURL_DECLARED_CURL_CA_EMBED
-#define CURL_DECLARED_CURL_CA_EMBED
-extern const unsigned char curl_ca_embed[];
-#endif
-#endif
-
 static long tlsversion(unsigned char mintls,
                        unsigned char maxtls)
 {

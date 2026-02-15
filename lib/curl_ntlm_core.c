@@ -92,7 +92,6 @@
 #    define DESKEY(x) &x
 #  endif
 #endif
-#define DESKEYARG(x) *x
 
 #elif defined(USE_GNUTLS)
 
@@ -179,8 +178,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
  * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
  */
-static void setup_des_key(const unsigned char *key_56,
-                          DES_key_schedule DESKEYARG(ks))
+static void setup_des_key(const unsigned char *key_56, DES_key_schedule *ks)
 {
   DES_cblock key;
 
@@ -304,7 +302,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   return TRUE;
 }
 
-#endif /* USE_WIN32_CRYPTO */
+#endif /* crypto backends */
 
 /*
  * takes a 21 byte array and treats it as 3 56-bit DES keys. The
@@ -405,20 +403,6 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
   }
 }
 
-#ifndef USE_WINDOWS_SSPI
-
-static void ascii_uppercase_to_unicode_le(unsigned char *dest,
-                                          const char *src, size_t srclen)
-{
-  size_t i;
-  for(i = 0; i < srclen; i++) {
-    dest[2 * i] = (unsigned char)(Curl_raw_toupper(src[i]));
-    dest[2 * i + 1] = '\0';
-  }
-}
-
-#endif /* !USE_WINDOWS_SSPI */
-
 /*
  * Set up nt hashed passwords
  * @unittest: 1600
@@ -500,6 +484,16 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
   } while(i);
   ft->dwHighDateTime &= 0xFFFFFFFF;
 #endif
+}
+
+static void ascii_uppercase_to_unicode_le(unsigned char *dest,
+                                          const char *src, size_t srclen)
+{
+  size_t i;
+  for(i = 0; i < srclen; i++) {
+    dest[2 * i] = (unsigned char)(Curl_raw_toupper(src[i]));
+    dest[2 * i + 1] = '\0';
+  }
 }
 
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode

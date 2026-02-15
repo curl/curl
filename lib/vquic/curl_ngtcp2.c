@@ -376,10 +376,6 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-/* ngtcp2 default congestion controller does not perform pacing. Limit
-   the maximum packet burst to MAX_PKT_BURST packets. */
-#define MAX_PKT_BURST 10
-
 struct pkt_io_ctx {
   struct Curl_cfilter *cf;
   struct Curl_easy *data;

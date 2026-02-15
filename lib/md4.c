@@ -40,34 +40,13 @@
 
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
-#define VOID_MD4_INIT
-#ifdef NO_MD4
-#define WOLFSSL_NO_MD4
-#endif
 #endif
 
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
-#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
-#include <wolfssl/openssl/md4.h>
-#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
-#include <openssl/md4.h>
-#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
-       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
-              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
-      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
-       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
-#define AN_APPLE_OS
-#include <CommonCrypto/CommonDigest.h>
-#elif defined(USE_WIN32_CRYPTO)
-#include <wincrypt.h>
-#elif defined(USE_GNUTLS)
-#include <nettle/md4.h>
-#endif
 
-#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+#if defined(USE_WOLFSSL) && !defined(NO_MD4)
+#include <wolfssl/openssl/md4.h>
+#define VOID_MD4_INIT
 
 #ifdef OPENSSL_COEXIST
 #  define MD4_CTX    WOLFSSL_MD4_CTX
@@ -77,8 +56,18 @@
 #endif
 
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
+#include <openssl/md4.h>
 
-#elif defined(AN_APPLE_OS)
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
+       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
+      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
+       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
+#include <CommonCrypto/CommonDigest.h>
+
 typedef CC_MD4_CTX MD4_CTX;
 
 static int MD4_Init(MD4_CTX *ctx)
@@ -97,6 +86,7 @@ static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 }
 
 #elif defined(USE_WIN32_CRYPTO)
+#include <wincrypt.h>
 
 struct md4_ctx {
   HCRYPTPROV hCryptProv;
@@ -143,6 +133,7 @@ static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 }
 
 #elif defined(USE_GNUTLS)
+#include <nettle/md4.h>
 
 typedef struct md4_ctx MD4_CTX;
 
