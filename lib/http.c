@@ -164,9 +164,6 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 
   return NULL;
 }
-#else
-/* disabled */
-#define Curl_checkProxyheaders(x, y, z, a) NULL
 #endif
 
 static bool http_header_is_empty(const char *header)
