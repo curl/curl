@@ -3254,10 +3254,10 @@ CURL_EXTERN const char *curl_share_strerror(CURLSHcode error);
 CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 
 #define CURLPAUSE_RECV      (1 << 0)
-#define CURLPAUSE_RECV_CONT (0)
+#define CURLPAUSE_RECV_CONT 0
 
 #define CURLPAUSE_SEND      (1 << 2)
-#define CURLPAUSE_SEND_CONT (0)
+#define CURLPAUSE_SEND_CONT 0
 
 #define CURLPAUSE_ALL       (CURLPAUSE_RECV | CURLPAUSE_SEND)
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT | CURLPAUSE_SEND_CONT)

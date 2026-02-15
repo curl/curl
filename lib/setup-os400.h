@@ -39,7 +39,7 @@
 
 #include <stdio.h>      /* Be sure it is loaded. */
 #undef puts
-#define puts(s) (fputs((s), stdout) == EOF ? EOF : putchar('\n'))
+#define puts(s) (fputs(s, stdout) == EOF ? EOF : putchar('\n'))
 
 /* System API wrapper prototypes & definitions to support ASCII parameters. */
 

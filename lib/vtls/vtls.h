@@ -257,7 +257,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_random(x, y, z) ((void)x, CURLE_NOT_BUILT_IN)
+#define Curl_ssl_random(x, y, z) ((void)(x), CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_supports(a, b) FALSE
 #define Curl_ssl_cfilter_add(a, b, c) CURLE_NOT_BUILT_IN
