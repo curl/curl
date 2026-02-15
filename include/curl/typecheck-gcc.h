@@ -271,7 +271,7 @@
 /* To define a new warning, use _CURL_WARNING(identifier, "message") */
 #define CURLWARNING(id, message)                                        \
   static void __attribute__((__warning__(message)))                     \
-  __attribute__((__unused__)) __attribute__((__noinline__))             \
+  __attribute__((__noinline__))                                         \
   id(void) { __asm__(""); }
 
 CURLWARNING(Wcurl_multi_setopt_err_long,
