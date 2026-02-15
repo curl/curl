@@ -266,10 +266,9 @@ static void doh_probe_dtor(void *key, size_t klen, void *e)
   }
 }
 
-/* Use '(curl_easy_setopt)' to avoid nested macro expansion */
 #define ERROR_CHECK_SETOPT(x, y)                        \
   do {                                                  \
-    result = (curl_easy_setopt)((CURL *)doh, x, y);     \
+    result = curl_easy_setopt((CURL *)doh, x, y);       \
     if(result &&                                        \
        result != CURLE_NOT_BUILT_IN &&                  \
        result != CURLE_UNKNOWN_OPTION)                  \
