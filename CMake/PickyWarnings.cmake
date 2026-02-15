@@ -147,7 +147,7 @@ if(PICKY_COMPILER)
       list(APPEND _picky_enable
         ${_picky_common_old}
         -Wconditional-uninitialized        # clang  3.0
-        -Wno-used-but-marked-unused        # clang  3.0            # Triggered by typecheck-gcc.h with clang 14+, 3rd-party headers
+        -Wno-used-but-marked-unused        # clang  3.0            # Triggered by typecheck-gcc.h with clang 14+, dependency headers
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
         -Wformat=2                         # clang  3.0  gcc  4.8

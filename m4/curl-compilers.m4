@@ -862,7 +862,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conditional-uninitialized])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
             tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"    # Triggered by typecheck-gcc.h with clang 14+, 3rd-party headers
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"    # Triggered by typecheck-gcc.h with clang 14+, dependency headers
           fi
           dnl Only clang 3.1 or later
           if test "$compiler_num" -ge "301"; then
