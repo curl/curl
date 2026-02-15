@@ -573,11 +573,13 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
 
 /* true if info expects a pointer to struct curl_slist * argument */
 #define curlcheck_slist_info(info)                                      \
-  (((info) == CURLINFO_SSL_ENGINES) || ((info) == CURLINFO_COOKIELIST))
+  (((info) == CURLINFO_SSL_ENGINES) ||                                  \
+   ((info) == CURLINFO_COOKIELIST))
 
 /* true if info expects a pointer to struct curl_tlssessioninfo * argument */
 #define curlcheck_tlssessioninfo_info(info)                             \
-  (((info) == CURLINFO_TLS_SSL_PTR) || ((info) == CURLINFO_TLS_SESSION))
+  (((info) == CURLINFO_TLS_SSL_PTR) ||                                  \
+   ((info) == CURLINFO_TLS_SESSION))
 
 /* true if info expects a pointer to struct curl_certinfo * argument */
 #define curlcheck_certinfo_info(info) ((info) == CURLINFO_CERTINFO)
