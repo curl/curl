@@ -796,10 +796,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
       CLANG|APPLECLANG)
         #
         if test "$want_warnings" = "yes"; then
-          typecheck_active=0
-          if test "$curl_cv_disable_typecheck" = "no" && test "$compiler_num" -ge "1400"; then
-            typecheck_active=1
-          fi
           if test "$compiler_num" -ge "302"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pedantic])
           else
@@ -866,7 +862,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conditional-uninitialized])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
             tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
-            if test "$typecheck_active" = "1"; then
+            if test "$curl_cv_disable_typecheck" = "no" && test "$compiler_num" -ge "1400"; then
               tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"
             else
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [used-but-marked-unused])
@@ -876,11 +872,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "301"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-non-iso])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-covered-switch-default"    # Annoying to fix or silence
-            if test "$typecheck_active" = "1"; then
-              tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"
-            else
-              CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [disabled-macro-expansion])
-            fi
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  # Triggered by typecheck-gcc.h with clang 14+, Fil-C <signal.h>, ERROR_CHECK_SETOPT()
           fi
           #
           dnl Only clang 3.2 or later
