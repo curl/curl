@@ -115,6 +115,10 @@ macro(curl_collect_target_options _target)
   if(_val)
     list(APPEND _definitions ${_val})
   endif()
+  get_target_property(_val ${_target} COMPILE_OPTIONS)
+  if(_val)
+    list(APPEND _options ${_val})
+  endif()
   get_target_property(_val ${_target} LINK_LIBRARIES)
   if(_val)
     foreach(_lib IN LISTS _val)
@@ -132,6 +136,7 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
 
     set(_includes "")
     set(_definitions "")
+    set(_options "")
 
     # Collect header directories and macro definitions applying to the directory
     get_directory_property(_val INCLUDE_DIRECTORIES)
@@ -141,6 +146,10 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     get_directory_property(_val COMPILE_DEFINITIONS)
     if(_val)
       list(APPEND _definitions ${_val})
+    endif()
+    get_directory_property(_val COMPILE_OPTIONS)
+    if(_val)
+      list(APPEND _options ${_val})
     endif()
     unset(_val)
 
@@ -156,6 +165,8 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     list(REMOVE_DUPLICATES _definitions)
     list(SORT _definitions)  # Sort like CMake does
 
+    list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
+
     # Assemble source list
     set(_sources "")
     foreach(_source IN ITEMS ${ARGN})
@@ -167,12 +178,13 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
 
     add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-      COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions}
+      COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
 
     unset(_includes)
     unset(_definitions)
+    unset(_options)
     unset(_sources)
   endif()
 endmacro()
