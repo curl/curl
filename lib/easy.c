@@ -849,7 +849,6 @@ void curl_easy_cleanup(CURL *ptr)
  * curl_easy_getinfo() is an external interface that allows an app to retrieve
  * information from a performed transfer and similar.
  */
-#undef curl_easy_getinfo
 CURLcode curl_easy_getinfo(CURL *easy, CURLINFO info, ...)
 {
   struct Curl_easy *data = easy;

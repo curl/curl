@@ -2951,8 +2951,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
  * NOTE: This is one of few API functions that are allowed to be called from
  * within a callback.
  */
-
-#undef curl_easy_setopt
 CURLcode curl_easy_setopt(CURL *d, CURLoption tag, ...)
 {
   va_list arg;

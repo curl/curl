@@ -3182,7 +3182,6 @@ out:
   return mresult;
 }
 
-#undef curl_multi_setopt
 CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
 {
   CURLMcode mresult = CURLM_OK;
