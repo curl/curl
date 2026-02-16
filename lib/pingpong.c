@@ -33,6 +33,7 @@
 #include "urldata.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "multiif.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "select.h"
