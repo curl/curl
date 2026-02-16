@@ -30,6 +30,11 @@
 #define USE_PINGPONG
 #endif
 
+#include "curlx/dynbuf.h"
+#include "curlx/timeval.h"
+
+struct Curl_easy;
+
 /* forward-declaration, this is defined in urldata.h */
 struct connectdata;
 
