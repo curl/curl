@@ -33,7 +33,7 @@ env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   CURL_TEST_MIN: 1600
-  CURL_CLANG_TIDYFLAGS: '--checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.ArrayBound,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-clang-analyzer-valist.Uninitialized'
+  CURL_CLANG_TIDYFLAGS: '--checks=-clang-analyzer-valist.Uninitialized'
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com

@@ -215,17 +215,15 @@ all-local: checksrc
 endif
 endif
 
-# disable the tests that are mostly causing false positives
-TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.ArrayBound,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+TIDY := clang-tidy
+TIDYFLAGS =
 if CURL_WERROR
 TIDYFLAGS += -warnings-as-errors=*
 endif
 
-TIDY := clang-tidy
-
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
 	(_curl_cfiles=`echo ' $(CURL_CFILES)' | sed -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
-	$(TIDY) $$_curl_cfiles $(curl_cfiles_gen) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H)
+	$(TIDY) --config-file=$(top_srcdir)/.clang-tidy $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_curl_cfiles $(curl_cfiles_gen) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H)
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)

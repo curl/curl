@@ -273,14 +273,7 @@ if(CURL_CLANG_TIDY)
   find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
-  set(_tidy_checks "")
-  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.bzero")  # for FD_ZERO() (seen on macOS)
-  list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
-  list(APPEND _tidy_checks "-clang-analyzer-security.ArrayBound")  # false positives with clang-tidy v21.1.0
-  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")
-  string(REPLACE ";" "," _tidy_checks "${_tidy_checks}")
-  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "--checks=${_tidy_checks}" "--quiet")
-  unset(_tidy_checks)
+  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy" "--quiet")
   if(CURL_WERROR)
     list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
   endif()

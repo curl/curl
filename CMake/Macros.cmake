@@ -180,7 +180,7 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMAND ${CMAKE_C_CLANG_TIDY}
-        "-checks=-clang-diagnostic-unused-function"
+        "--checks=-clang-diagnostic-unused-function"
         ${_sources} -- ${_includes} ${_definitions} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
