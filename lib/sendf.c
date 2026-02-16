@@ -42,7 +42,6 @@
 #include "cw-out.h"
 #include "cw-pause.h"
 #include "multiif.h"
-#include "strerror.h"
 #include "progress.h"
 
 static void cl_reset_writer(struct Curl_easy *data)

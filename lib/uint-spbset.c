@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "uint-bset.h"
 #include "uint-spbset.h"
 
 #ifdef DEBUGBUILD

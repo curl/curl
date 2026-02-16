@@ -65,9 +65,7 @@
 #include <iphlpapi.h>
 #endif
 
-#include "doh.h"
 #include "urldata.h"
-#include "formdata.h"
 #include "mime.h"
 #include "bufref.h"
 #include "vtls/vtls.h"

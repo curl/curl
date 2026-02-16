@@ -24,7 +24,6 @@
 #include "curl_setup.h"
 
 #include "socketpair.h"
-#include "urldata.h"
 #include "rand.h"
 #include "curlx/nonblock.h"
 

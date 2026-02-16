@@ -38,7 +38,6 @@
 #include "parsedate.h"
 #include "curlx/strdup.h"
 #include "llist.h"
-#include "bufref.h"
 #include "curlx/strparse.h"
 
 /* number of seconds in 400 days */

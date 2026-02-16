@@ -34,9 +34,6 @@
 #include "conncache.h"
 #include "curl_share.h"
 #include "sigpipe.h"
-#include "connect.h"
-#include "select.h"
-#include "curlx/strparse.h"
 
 
 #define CPOOL_IS_LOCKED(c)    ((c) && (c)->locked)

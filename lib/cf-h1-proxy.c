@@ -31,7 +31,6 @@
 #include "http.h"
 #include "http1.h"
 #include "http_proxy.h"
-#include "url.h"
 #include "select.h"
 #include "progress.h"
 #include "cfilters.h"
@@ -39,7 +38,6 @@
 #include "connect.h"
 #include "curl_trc.h"
 #include "strcase.h"
-#include "transfer.h"
 #include "curlx/strparse.h"
 
 

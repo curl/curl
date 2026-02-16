@@ -49,7 +49,6 @@
 #include "transfer.h"
 #include "escape.h"
 #include "ftp.h"
-#include "fileinfo.h"
 #include "ftplistparser.h"
 #include "curl_range.h"
 #include "strcase.h"

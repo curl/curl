@@ -26,17 +26,17 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#include "pingpong.h"
+
+#ifdef USE_PINGPONG
+
 #include "urldata.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "multiif.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "select.h"
 #include "progress.h"
-#include "pingpong.h"
-
-#ifdef USE_PINGPONG
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
