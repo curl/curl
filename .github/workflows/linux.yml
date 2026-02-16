@@ -301,6 +301,20 @@ jobs:
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
 
+          - name: 'clang-tidy clang 20'
+            install_packages: clang clang-tidy-20 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
+            install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
+            install_steps_brew: gsasl
+            make-custom-target: tidy
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
+            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
+            CC: clang
+            configure: >-
+              CLANG_TIDY=clang-tidy-20
+              --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
+              --with-librtmp --with-libssh2 --with-libidn2
+              --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
+
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
