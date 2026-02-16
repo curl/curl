@@ -120,6 +120,11 @@ AC_SUBST([AR])
 
 AC_SUBST(libext)
 
+if test -z "$CLANG_TIDY"; then
+  CLANG_TIDY=clang-tidy
+fi
+AC_SUBST(CLANG_TIDY)
+
 dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`
 XC_CHECK_PROG_CC
