@@ -273,13 +273,13 @@ if(CURL_CLANG_TIDY)
   find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
-  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "-quiet")
-  list(APPEND CMAKE_C_CLANG_TIDY "-checks=-clang-analyzer-security.insecureAPI.bzero")  # for FD_ZERO() (seen on macOS)
-  list(APPEND CMAKE_C_CLANG_TIDY "-checks=-clang-analyzer-optin.performance.Padding")
-  list(APPEND CMAKE_C_CLANG_TIDY "-checks=-clang-analyzer-security.ArrayBound")  # false positives with clang-tidy v21.1.0
-  list(APPEND CMAKE_C_CLANG_TIDY "-checks=-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")
+  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "--quiet")
+  list(APPEND CMAKE_C_CLANG_TIDY "--checks=-clang-analyzer-security.insecureAPI.bzero")  # for FD_ZERO() (seen on macOS)
+  list(APPEND CMAKE_C_CLANG_TIDY "--checks=-clang-analyzer-optin.performance.Padding")
+  list(APPEND CMAKE_C_CLANG_TIDY "--checks=-clang-analyzer-security.ArrayBound")  # false positives with clang-tidy v21.1.0
+  list(APPEND CMAKE_C_CLANG_TIDY "--checks=-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")
   if(CURL_WERROR)
-    list(APPEND CMAKE_C_CLANG_TIDY "-warnings-as-errors=*")
+    list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
   endif()
   if(CURL_CLANG_TIDYFLAGS)
     list(APPEND CMAKE_C_CLANG_TIDY ${CURL_CLANG_TIDYFLAGS})
