@@ -35,6 +35,7 @@
 #include "connect.h"
 #include "curlx/strdup.h"
 #include "curlx/dynbuf.h"
+#include "escape.h"  /* for Curl_hexencode() */
 #include "urlapi-int.h"
 
 #define DNS_CLASS_IN 0x01
