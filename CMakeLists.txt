@@ -881,6 +881,8 @@ if(CURL_USE_WOLFSSL)
     set(_valid_default_ssl_backend TRUE)
   endif()
   set(_curl_ca_bundle_supported TRUE)
+
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "WOLFSSL_OPTIONS_IGNORE_SYS")
 endif()
 
 if(CURL_USE_GNUTLS)

@@ -83,6 +83,8 @@ if test "$OPT_WOLFSSL" != "no"; then
     fi
 
     if test "$USE_WOLFSSL" != "yes"; then
+      CPPFLAGS="$CPPFLAGS -DWOLFSSL_OPTIONS_IGNORE_SYS"
+
       LDFLAGS="$LDFLAGS $addld"
       LDFLAGSPC="$LDFLAGSPC $addld"
       AC_MSG_NOTICE([Add $addld to LDFLAGS])
@@ -98,9 +100,6 @@ if test "$OPT_WOLFSSL" != "no"; then
       AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-          #ifndef WOLFSSL_OPTIONS_IGNORE_SYS
-          #define WOLFSSL_OPTIONS_IGNORE_SYS
-          #endif
           #include <wolfssl/options.h>
           #include <wolfssl/ssl.h>
         ]],[[
