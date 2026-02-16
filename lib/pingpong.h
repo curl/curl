@@ -34,6 +34,7 @@
 #include "curlx/timeval.h"
 
 struct Curl_easy;
+struct easy_pollset;
 
 /* forward-declaration, this is defined in urldata.h */
 struct connectdata;
