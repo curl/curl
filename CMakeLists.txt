@@ -279,7 +279,7 @@ if(CURL_CLANG_TIDY)
   list(APPEND _tidy_checks "-clang-analyzer-security.ArrayBound")  # false positives with clang-tidy v21.1.0
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")
   string(REPLACE ";" "," _tidy_checks "${_tidy_checks}")
-  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "-checks=${_tidy_checks}" "-quiet")
+  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "--checks=${_tidy_checks}" "--quiet")
   unset(_tidy_checks)
   if(CURL_WERROR)
     list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
