@@ -24,8 +24,6 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
-#include "curl_trc.h"
-#include "progress.h"
 #include "ratelimit.h"
 
 #define CURL_US_PER_SEC         1000000

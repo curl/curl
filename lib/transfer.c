@@ -68,7 +68,6 @@
 #include "getinfo.h"
 #include "multiif.h"
 #include "connect.h"
-#include "mime.h"
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"

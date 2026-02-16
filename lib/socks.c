@@ -41,7 +41,6 @@
 #include "connect.h"
 #include "socks.h"
 #include "curlx/inet_pton.h"
-#include "url.h"
 
 /* for the (SOCKS) connect state machine */
 enum socks_state_t {

@@ -51,7 +51,6 @@
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
-#include "connect.h"
 #include "progress.h"
 #include "arpa_telnet.h"
 #include "select.h"
