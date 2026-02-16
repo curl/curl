@@ -165,7 +165,7 @@ $(UNITPROTOS): $(CSOURCES)
 
 TIDYFLAGS := --quiet
 if CURL_WERROR
-TIDYFLAGS += --warnings-as-errors=*
+TIDYFLAGS += '--warnings-as-errors=*'
 endif
 
 tidy:
