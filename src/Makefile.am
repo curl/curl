@@ -215,7 +215,7 @@ all-local: checksrc
 endif
 endif
 
-TIDYFLAGS =
+TIDYFLAGS = --quiet
 if CURL_WERROR
 TIDYFLAGS += --warnings-as-errors=*
 endif

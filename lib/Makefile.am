@@ -163,7 +163,7 @@ UNITV_ = $(UNITV_0)
 $(UNITPROTOS): $(CSOURCES)
 	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
 
-TIDYFLAGS :=
+TIDYFLAGS := --quiet
 if CURL_WERROR
 TIDYFLAGS += --warnings-as-errors=*
 endif
