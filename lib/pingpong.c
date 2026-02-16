@@ -25,12 +25,12 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "urldata.h"
 
 #include "pingpong.h"
 
 #ifdef USE_PINGPONG
 
-#include "urldata.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "multiif.h"
