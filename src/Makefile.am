@@ -222,8 +222,6 @@ TIDYFLAGS += '--warnings-as-errors=*'
 endif
 if CLANG
 _tidy_cflags += $(CFLAGS)
-else
-TIDYFLAGS += '--checks=clang-diagnostic-*'
 endif
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
