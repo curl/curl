@@ -251,8 +251,6 @@ if(NOT DOS AND NOT AMIGA)
   option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup" ${_enable_threaded_resolver_default})
 endif()
 
-include(PickyWarnings)
-
 if(CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "GNU")
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_GNU_SOURCE")  # Required for accept4(), pipe2(), sendmmsg()
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")  # Apply to all feature checks
@@ -270,9 +268,9 @@ endif()
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
-#  if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
-#    message(FATAL_ERROR "clang-tidy requires llvm/clang compiler")
-#  endif()
+  if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(PICKY_COMPILER OFF)  # Do a best effort and skip passing non-clang warning options to clang-tidy.
+  endif()
   find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
@@ -304,6 +302,8 @@ if(CURL_CODE_COVERAGE)
     set(CURL_CODE_COVERAGE OFF)
   endif()
 endif()
+
+include(PickyWarnings)
 
 set(CURL_CFLAGS "")  # C flags set for libcurl and curl tool (aka public binaries) only
 
