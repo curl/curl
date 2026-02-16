@@ -733,6 +733,10 @@
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+#ifdef USE_WOLFSSL
+#define WOLFSSL_OPTIONS_IGNORE_SYS
+#endif
+
 #if defined(USE_OPENSSL) && defined(USE_WOLFSSL)
 #  include <wolfssl/version.h>
 #  if LIBWOLFSSL_VERSION_HEX >= 0x05007006
