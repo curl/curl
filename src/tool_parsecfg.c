@@ -253,6 +253,8 @@ ParameterError parseconfig(const char *filename, int max_recursive,
     curlx_dyn_free(&pbuf);
     if(file != stdin)
       curlx_fclose(file);
+    /* Silence false positive about failing to close stdin.
+       NOLINTNEXTLINE(clang-analyzer-unix.Stream) */
     if(fileerror)
       err = PARAM_READ_ERROR;
   }
