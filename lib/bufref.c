@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#include "urldata.h"
 #include "bufref.h"
 #include "curlx/strdup.h"
 
