@@ -215,14 +215,20 @@ all-local: checksrc
 endif
 endif
 
+_tidy_cflags :=
 TIDYFLAGS = --quiet
 if CURL_WERROR
 TIDYFLAGS += '--warnings-as-errors=*'
 endif
+if CLANG
+_tidy_cflags += $(CFLAGS)
+else
+TIDYFLAGS += '--checks=clang-diagnostic-*'
+endif
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
 	(_curl_cfiles=`echo ' $(CURL_CFILES)' | sed -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
-	@CLANG_TIDY@ --config-file=$(top_srcdir)/.clang-tidy $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_curl_cfiles $(curl_cfiles_gen) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H $(CFLAGS))
+	@CLANG_TIDY@ --config-file=$(top_srcdir)/.clang-tidy $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_curl_cfiles $(curl_cfiles_gen) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H $(_tidy_cflags))
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)

@@ -686,6 +686,8 @@ case $host_os in
     ;;
 esac
 
+AM_CONDITIONAL(CLANG, test "$compiler_id" = "APPLECLANG" || test "$compiler_id" = "CLANG")
+
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************

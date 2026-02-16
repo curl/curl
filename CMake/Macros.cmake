@@ -165,7 +165,13 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     list(REMOVE_DUPLICATES _definitions)
     list(SORT _definitions)  # Sort like CMake does
 
-    list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+      list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
+      set(_more_checks)
+    else()
+      set(_options)
+      set(_more_checks ",clang-diagnostic-*")
+    endif()
 
     # Assemble source list
     set(_sources "")
@@ -180,7 +186,7 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMAND ${CMAKE_C_CLANG_TIDY}
-        "--checks=-clang-diagnostic-unused-function,portability-*"
+        "--checks=-clang-diagnostic-unused-function${_more_checks}"
         ${_sources} -- ${_includes} ${_definitions} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})

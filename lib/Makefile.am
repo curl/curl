@@ -163,14 +163,20 @@ UNITV_ = $(UNITV_0)
 $(UNITPROTOS): $(CSOURCES)
 	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
 
+_tidy_cflags :=
 TIDYFLAGS := --quiet
 if CURL_WERROR
 TIDYFLAGS += '--warnings-as-errors=*'
 endif
+if CLANG
+_tidy_cflags += $(CFLAGS)
+else
+TIDYFLAGS += '--checks=clang-diagnostic-*'
+endif
 
 tidy:
 	(_csources=`echo ' $(CSOURCES)' | sed -E -e 's/ +$$//' -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
-	@CLANG_TIDY@ --config-file=$(top_srcdir)/.clang-tidy $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_csources -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H $(CFLAGS))
+	@CLANG_TIDY@ --config-file=$(top_srcdir)/.clang-tidy $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_csources -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H $(_tidy_cflags))
 
 optiontable:
 	@PERL@ $(srcdir)/optiontable.pl < $(top_srcdir)/include/curl/curl.h > $(srcdir)/easyoptions.c
