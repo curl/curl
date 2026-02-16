@@ -25,8 +25,8 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-#include "urldata.h"
 
+#include "urldata.h"
 #include "pingpong.h"
 
 #ifdef USE_PINGPONG
