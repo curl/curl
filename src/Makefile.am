@@ -218,7 +218,7 @@ endif
 TIDY := clang-tidy
 TIDYFLAGS =
 if CURL_WERROR
-TIDYFLAGS += -warnings-as-errors=*
+TIDYFLAGS += --warnings-as-errors=*
 endif
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
