@@ -23,6 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+struct Curl_easy;
+
 CURLcode Curl_rand_bytes(struct Curl_easy *data,
 #ifdef DEBUGBUILD
                          bool allow_env_override,
