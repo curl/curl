@@ -270,9 +270,9 @@ endif()
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
-  if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
-    message(FATAL_ERROR "clang-tidy requires llvm/clang compiler")
-  endif()
+#  if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
+#    message(FATAL_ERROR "clang-tidy requires llvm/clang compiler")
+#  endif()
   find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
