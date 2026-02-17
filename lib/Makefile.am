@@ -164,7 +164,7 @@ $(UNITPROTOS): $(CSOURCES)
 	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
 
 _tidy_cflags :=
-TIDYFLAGS := --quiet
+TIDYFLAGS :=
 if CURL_WERROR
 TIDYFLAGS += '--warnings-as-errors=*'
 endif
