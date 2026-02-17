@@ -56,7 +56,7 @@
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
  * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
  */
-#if !defined(LIBRESSL_VERSION_NUMBER) && !defined(HAVE_KEYLOG_BUILTIN)
+#ifndef LIBRESSL_VERSION_NUMBER
 #define HAVE_KEYLOG_CALLBACK
 #endif
 
@@ -79,7 +79,7 @@ struct ossl_ctx {
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */
   int      blocked_ssl_write_len;
-#if !defined(HAVE_KEYLOG_CALLBACK) && !defined(HAVE_KEYLOG_BUILTIN)
+#if !defined(HAVE_KEYLOG_BUILTIN) && !defined(HAVE_KEYLOG_CALLBACK)
   /* Set to true once a valid keylog entry has been created to avoid dupes.
      This is a bool and not a bitfield because it is passed by address. */
   bool keylog_done;

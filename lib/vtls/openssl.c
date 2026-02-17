@@ -3947,7 +3947,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_verify(octx->ssl_ctx, SSL_VERIFY_NONE, NULL);
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
-#ifdef HAVE_KEYLOG_CALLBACK
+#if !defined(HAVE_KEYLOG_BUILTIN) && defined(HAVE_KEYLOG_CALLBACK)
   if(Curl_tls_keylog_enabled()) {
     SSL_CTX_set_keylog_callback(octx->ssl_ctx, ossl_keylog_callback);
   }
@@ -4169,7 +4169,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     octx->x509_store_setup = TRUE;
   }
 
-#if !defined(HAVE_KEYLOG_CALLBACK) && !defined(HAVE_KEYLOG_BUILTIN)
+#if !defined(HAVE_KEYLOG_BUILTIN) && !defined(HAVE_KEYLOG_CALLBACK)
   /* If key logging is enabled, wait for the handshake to complete and then
    * proceed with logging secrets (for TLS 1.2 or older).
    */
