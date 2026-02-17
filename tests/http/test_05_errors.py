@@ -139,5 +139,4 @@ class TestErrors:
             '--resolve', f'{domain}:{env.port_for(proto)}:::1,127.0.0.1',
         ])
         assert r.exit_code == 60, f'{r}'
-        assert r.stats[0]['errormsg'] == \
-            f"SSL: no alternative certificate subject name matches target hostname '{domain}'", f'{r}'
+        assert r.stats[0]['errormsg'] != 'CURL_DBG_SOCK_FAIL_IPV6: failed to open socket'

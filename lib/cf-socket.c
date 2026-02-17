@@ -334,8 +334,7 @@ static CURLcode socket_open(struct Curl_easy *data,
     /* opensocket callback not set, so simply create the socket now */
 #ifdef DEBUGBUILD
     if((addr->family == AF_INET6) && getenv("CURL_DBG_SOCK_FAIL_IPV6")) {
-      failf(data, "failed to open socket: %s",
-            curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+      failf(data, "CURL_DBG_SOCK_FAIL_IPV6: failed to open socket");
       return CURLE_COULDNT_CONNECT;
     }
 #endif
