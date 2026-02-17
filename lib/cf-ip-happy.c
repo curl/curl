@@ -427,6 +427,10 @@ evaluate:
       addr = cf_ai_iter_next(&bs->addr_iter);
       ai_family = bs->addr_iter.ai_family;
     }
+    /* We are (re-)starting attempts. We are not interested in
+     * keeping old failure information. The new attempt will either
+     * succeed or persist new failure. */
+    Curl_reset_fail(data);
 
     if(addr) {  /* try another address */
       result = cf_ip_attempt_new(&a, cf, data, addr, ai_family,
@@ -793,6 +797,8 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
       ctx->ballers.winner->cf = NULL;
       cf_ip_happy_ctx_clear(cf, data);
       Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
+      /* whatever errors where reported by ballers, clear our errorbuf */
+      Curl_reset_fail(data);
 
       if(cf->conn->scheme->protocol & PROTO_FAMILY_SSH)
         Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */

@@ -222,6 +222,8 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   /* install the winning filter below this one. */
   cf->next = winner->cf;
   winner->cf = NULL;
+  /* whatever errors where reported by ballers, clear our errorbuf */
+  Curl_reset_fail(data);
 
 #ifdef USE_NGHTTP2
   {

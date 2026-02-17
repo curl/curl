@@ -58,6 +58,10 @@ only send 800.
 The percentage of send() calls that should be answered with EAGAIN at random.
 QUIC only.
 
+## `CURL_DBG_SOCK_FAIL_IPV6`
+
+Fail opening of sockets for the IPv6 address family.
+
 ## `CURL_DEBUG`
 
 Trace logging behavior as an alternative to calling curl_global_trace(3).

@@ -194,6 +194,13 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
+void Curl_reset_fail(struct Curl_easy *data)
+{
+  if(data->set.errorbuffer)
+    data->set.errorbuffer[0] = 0;
+  data->state.errorbuf = FALSE;
+}
+
 #ifdef CURLVERBOSE
 struct curl_trc_feat Curl_trc_feat_multi = {
   "MULTI",
