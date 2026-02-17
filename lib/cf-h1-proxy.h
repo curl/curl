@@ -27,7 +27,7 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
-CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf,
+CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
                                        struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_h1_proxy;

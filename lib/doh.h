@@ -114,7 +114,7 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
                   int port, int ip_version);
 
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dns);
+                              struct Curl_dns_entry **dnsp);
 
 #define DOH_MAX_ADDR  24
 #define DOH_MAX_CNAME 4

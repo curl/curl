@@ -69,6 +69,6 @@ bool curlx_sotouz_fits(curl_off_t sonum, size_t *puznum);
 
 /* Convert a long to size_t, return FALSE if negative or too large
  * and set 0 */
-bool curlx_sltouz(long sznum, size_t *puznum);
+bool curlx_sltouz(long slnum, size_t *puznum);
 
 #endif /* HEADER_CURL_WARNLESS_H */

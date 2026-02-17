@@ -47,7 +47,7 @@ void Curl_uint32_tbl_init(struct uint32_tbl *tbl,
 
 /* Resize the table to change capacity `nmax`. When `nmax` is reduced,
  * all present entries with key equal or larger to `nmax` are removed. */
-CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nmax);
+CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows);
 
 /* Destroy the table, freeing all entries. */
 void Curl_uint32_tbl_destroy(struct uint32_tbl *tbl);

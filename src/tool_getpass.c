@@ -162,7 +162,7 @@ static bool ttyecho(bool enable, int fd)
 }
 
 char *getpass_r(const char *prompt, /* prompt to display */
-                char *password,     /* buffer to store password in */
+                char *buffer,       /* buffer to store password in */
                 size_t buflen)      /* size of buffer to store password in */
 {
   ssize_t nread;
@@ -174,11 +174,11 @@ char *getpass_r(const char *prompt, /* prompt to display */
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */
 
   fputs(prompt, tool_stderr);
-  nread = read(fd, password, buflen);
+  nread = read(fd, buffer, buflen);
   if(nread > 0)
-    password[--nread] = '\0'; /* null-terminate where enter is stored */
+    buffer[--nread] = '\0'; /* null-terminate where enter is stored */
   else
-    password[0] = '\0'; /* got nothing */
+    buffer[0] = '\0'; /* got nothing */
 
   if(disabled) {
     /* if echo actually was disabled, add a newline */
@@ -189,7 +189,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
   if(STDIN_FILENO != fd)
     curlx_close(fd);
 
-  return password; /* return pointer to buffer */
+  return buffer; /* return pointer to buffer */
 }
 
 #endif /* DONE */

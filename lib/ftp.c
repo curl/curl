@@ -168,8 +168,8 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
                             struct ftp_conn *ftpc,
                             struct FTP *ftp,
                             bool ascii, ftpstate newstate);
-static CURLcode getftpresponse(struct Curl_easy *data, size_t *nread,
-                               int *ftpcode);
+static CURLcode getftpresponse(struct Curl_easy *data, size_t *nreadp,
+                               int *ftpcodep);
 
 static void freedirs(struct ftp_conn *ftpc)
 {
@@ -629,7 +629,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
  */
 static CURLcode getftpresponse(struct Curl_easy *data,
                                size_t *nreadp, /* return number of bytes
-                                                   read */
+                                                  read */
                                int *ftpcodep) /* return the ftp-code */
 {
   /*

@@ -917,10 +917,9 @@ static bool is_pkcs11_uri(const char *string)
 
 #endif
 
-static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine);
+static CURLcode ossl_set_engine(struct Curl_easy *data, const char *name);
 #ifdef OPENSSL_HAS_PROVIDERS
-static CURLcode ossl_set_provider(struct Curl_easy *data,
-                                  const char *provider);
+static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname);
 #endif
 
 static int use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,

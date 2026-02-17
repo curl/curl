@@ -37,7 +37,7 @@ CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data);
 
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void);
 
-void Curl_ftp_parselist_data_free(struct ftp_parselist_data **pl_data);
+void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp);
 
 /* list of wildcard process states */
 typedef enum {

@@ -312,8 +312,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
  * Remove and destroy all filters at chain `sockindex` on connection `conn`.
  */
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex);
+                              struct connectdata *conn, int sockindex);
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -608,15 +607,14 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
  * Will return CURLE_AGAIN iff blocked on receiving.
  */
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
-                        char *buf, size_t buffersize,
-                        size_t *pnread);
+                        char *buf, size_t len, size_t *pnread);
 
 /*
  * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
  * Will return CURLE_AGAIN iff blocked on sending.
  */
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
-                        const void *buf, size_t blen, bool eos,
+                        const void *buf, size_t len, bool eos,
                         size_t *pnwritten);
 
 /**

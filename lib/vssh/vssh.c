@@ -285,19 +285,19 @@ fail:
 }
 
 CURLcode Curl_ssh_range(struct Curl_easy *data,
-                        const char *p, curl_off_t filesize,
+                        const char *range, curl_off_t filesize,
                         curl_off_t *startp, curl_off_t *sizep)
 {
   curl_off_t from, to;
   int to_t;
-  int from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
+  int from_t = curlx_str_number(&range, &from, CURL_OFF_T_MAX);
   if(from_t == STRE_OVERFLOW)
     return CURLE_RANGE_ERROR;
-  curlx_str_passblanks(&p);
-  (void)curlx_str_single(&p, '-');
+  curlx_str_passblanks(&range);
+  (void)curlx_str_single(&range, '-');
 
-  to_t = curlx_str_numblanks(&p, &to);
-  if((to_t == STRE_OVERFLOW) || (to_t && from_t) || *p)
+  to_t = curlx_str_numblanks(&range, &to);
+  if((to_t == STRE_OVERFLOW) || (to_t && from_t) || *range)
     return CURLE_RANGE_ERROR;
 
   if(from_t) {

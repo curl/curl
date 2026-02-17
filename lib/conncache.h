@@ -68,7 +68,7 @@ void Curl_cpool_init(struct cpool *cpool,
                      size_t size);
 
 /* Destroy all connections and free all members */
-void Curl_cpool_destroy(struct cpool *connc);
+void Curl_cpool_destroy(struct cpool *cpool);
 
 /* Init the transfer to be used within its connection pool.
  * Assigns `data->id`. */

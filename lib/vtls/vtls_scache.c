@@ -914,7 +914,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  void *sobj,
-                                 Curl_ssl_scache_obj_dtor *sobj_free)
+                                 Curl_ssl_scache_obj_dtor *sobj_dtor_cb)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -922,7 +922,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
   CURLcode result;
 
   DEBUGASSERT(sobj);
-  DEBUGASSERT(sobj_free);
+  DEBUGASSERT(sobj_dtor_cb);
 
   if(!scache) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -935,12 +935,12 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
     goto out;
   }
 
-  cf_ssl_scache_peer_set_obj(peer, sobj, sobj_free);
+  cf_ssl_scache_peer_set_obj(peer, sobj, sobj_dtor_cb);
   sobj = NULL;  /* peer took ownership */
 
 out:
-  if(sobj && sobj_free)
-    sobj_free(sobj);
+  if(sobj && sobj_dtor_cb)
+    sobj_dtor_cb(sobj);
   return result;
 }
 

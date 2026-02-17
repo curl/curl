@@ -32,7 +32,7 @@ struct ip_quadruple;
 struct Curl_str;
 
 enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len);
-enum alpnid Curl_str2alpnid(const struct Curl_str *str);
+enum alpnid Curl_str2alpnid(const struct Curl_str *cstr);
 
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
@@ -76,7 +76,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, uint16_t *port);
 
 /*
- * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'
+ * Curl_conncontrol() marks the end of a connection/stream. The 'ctrl'
  * argument specifies if it is the end of a connection or a stream.
  *
  * For stream-based protocols (such as HTTP/2), a stream close will not cause
@@ -92,7 +92,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #define CONNCTRL_STREAM 2
 
 void Curl_conncontrol(struct connectdata *conn,
-                      int closeit
+                      int ctrl
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
                       , const char *reason
 #endif

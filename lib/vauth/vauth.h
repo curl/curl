@@ -110,7 +110,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
-                                              const unsigned char *uri,
+                                              const unsigned char *uripath,
                                               struct digestdata *digest,
                                               char **outptr, size_t *outlen);
 
@@ -150,7 +150,7 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
                                struct bufref *out);
 
 /* This is used to clean up the gsasl specific data */
-void Curl_auth_gsasl_cleanup(struct gsasldata *digest);
+void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl);
 #endif
 
 #ifdef USE_NTLM
@@ -199,13 +199,13 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              const char *service,
-                                             const char *host,
+                                             const char *hostname,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out);
 
 /* This is used to decode a base64 encoded NTLM type-2 message */
 CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
-                                             const struct bufref *type2,
+                                             const struct bufref *type2ref,
                                              struct ntlmdata *ntlm);
 
 /* This is used to generate a base64 encoded NTLM type-3 message */

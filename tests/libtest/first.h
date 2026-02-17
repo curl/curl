@@ -82,7 +82,7 @@ int cgetopt(int argc, const char * const argv[], const char *optstring);
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
 
-extern char *hexdump(const unsigned char *buffer, size_t len);
+extern char *hexdump(const unsigned char *buf, size_t len);
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 CURLcode ws_send_ping(CURL *curl, const char *send_payload);

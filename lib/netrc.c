@@ -464,14 +464,14 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
   return retcode;
 }
 
-void Curl_netrc_init(struct store_netrc *s)
+void Curl_netrc_init(struct store_netrc *store)
 {
-  curlx_dyn_init(&s->filebuf, MAX_NETRC_FILE);
-  s->loaded = FALSE;
+  curlx_dyn_init(&store->filebuf, MAX_NETRC_FILE);
+  store->loaded = FALSE;
 }
-void Curl_netrc_cleanup(struct store_netrc *s)
+void Curl_netrc_cleanup(struct store_netrc *store)
 {
-  curlx_dyn_free(&s->filebuf);
-  s->loaded = FALSE;
+  curlx_dyn_free(&store->filebuf);
+  store->loaded = FALSE;
 }
 #endif

@@ -404,19 +404,19 @@ static CURLcode ip2addr(struct Curl_addrinfo **addrp, int af,
  * Given an IPv4 or IPv6 dotted string address, this converts it to a proper
  * allocated Curl_addrinfo struct and returns it.
  */
-CURLcode Curl_str2addr(const char *address, int port,
+CURLcode Curl_str2addr(const char *dotted, int port,
                        struct Curl_addrinfo **addrp)
 {
   struct in_addr in;
-  if(curlx_inet_pton(AF_INET, address, &in) > 0)
+  if(curlx_inet_pton(AF_INET, dotted, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return ip2addr(addrp, AF_INET, &in, address, port);
+    return ip2addr(addrp, AF_INET, &in, dotted, port);
 #ifdef USE_IPV6
   {
     struct in6_addr in6;
-    if(curlx_inet_pton(AF_INET6, address, &in6) > 0)
+    if(curlx_inet_pton(AF_INET6, dotted, &in6) > 0)
       /* This is a dotted IPv6 address ::1-style */
-      return ip2addr(addrp, AF_INET6, &in6, address, port);
+      return ip2addr(addrp, AF_INET6, &in6, dotted, port);
   }
 #endif
   return CURLE_BAD_FUNCTION_ARGUMENT; /* bad input format */

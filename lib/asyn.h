@@ -70,7 +70,7 @@ void Curl_async_global_cleanup(void);
  * Get the resolver implementation instance (c-ares channel) or NULL
  * for passing to application callback.
  */
-CURLcode Curl_async_get_impl(struct Curl_easy *easy, void **impl);
+CURLcode Curl_async_get_impl(struct Curl_easy *data, void **impl);
 
 /* Curl_async_pollset()
  *
@@ -106,7 +106,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
 CURLcode Curl_async_await(struct Curl_easy *data,
-                          struct Curl_dns_entry **dnsentry);
+                          struct Curl_dns_entry **dns);
 
 /*
  * Curl_async_getaddrinfo() - when using this resolver

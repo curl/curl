@@ -136,22 +136,22 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
 }
 
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn, int index)
+                              struct connectdata *conn, int sockindex)
 {
-  Curl_conn_cf_discard_chain(&conn->cfilter[index], data);
+  Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
 }
 
-void Curl_conn_close(struct Curl_easy *data, int index)
+void Curl_conn_close(struct Curl_easy *data, int sockindex)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data->conn);
   /* it is valid to call that without filters being present */
-  cf = data->conn->cfilter[index];
+  cf = data->conn->cfilter[sockindex];
   if(cf) {
     cf->cft->do_close(cf, data);
   }
-  Curl_shutdown_clear(data, index);
+  Curl_shutdown_clear(data, sockindex);
 }
 
 CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
@@ -209,14 +209,14 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   return result;
 }
 
-CURLcode Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
+CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
                       size_t len, size_t *pnread)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  cf = data->conn->cfilter[num];
+  cf = data->conn->cfilter[sockindex];
   while(cf && !cf->connected)
     cf = cf->next;
   if(cf)
@@ -227,19 +227,19 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
   return CURLE_FAILED_INIT;
 }
 
-CURLcode Curl_cf_send(struct Curl_easy *data, int num,
-                      const uint8_t *mem, size_t len, bool eos,
+CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
+                      const uint8_t *buf, size_t len, bool eos,
                       size_t *pnwritten)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  cf = data->conn->cfilter[num];
+  cf = data->conn->cfilter[sockindex];
   while(cf && !cf->connected)
     cf = cf->next;
   if(cf) {
-    return cf->cft->do_send(cf, data, mem, len, eos, pnwritten);
+    return cf->cft->do_send(cf, data, buf, len, eos, pnwritten);
   }
   failf(data, "send: no filter connected");
   DEBUGASSERT(0);
@@ -328,17 +328,17 @@ out:
 
 void Curl_conn_cf_add(struct Curl_easy *data,
                       struct connectdata *conn,
-                      int index,
+                      int sockindex,
                       struct Curl_cfilter *cf)
 {
   DEBUGASSERT(conn);
   DEBUGASSERT(!cf->conn);
   DEBUGASSERT(!cf->next);
 
-  cf->next = conn->cfilter[index];
+  cf->next = conn->cfilter[sockindex];
   cf->conn = conn;
-  cf->sockindex = index;
-  conn->cfilter[index] = cf;
+  cf->sockindex = sockindex;
+  conn->cfilter[sockindex] = cf;
   CURL_TRC_CF(data, cf, "added");
 }
 
@@ -1060,23 +1060,23 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
 }
 
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
-                        char *buf, size_t blen, size_t *pnread)
+                        char *buf, size_t len, size_t *pnread)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(data && data->conn && data->conn->recv[sockindex])
-    return data->conn->recv[sockindex](data, sockindex, buf, blen, pnread);
+    return data->conn->recv[sockindex](data, sockindex, buf, len, pnread);
   *pnread = 0;
   return CURLE_FAILED_INIT;
 }
 
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
-                        const void *buf, size_t blen, bool eos,
+                        const void *buf, size_t len, bool eos,
                         size_t *pnwritten)
 {
-  size_t write_len = blen;
+  size_t write_len = len;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
@@ -1094,7 +1094,7 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     }
   }
 #endif
-  if(write_len != blen)
+  if(write_len != len)
     eos = FALSE;
   if(data && data->conn && data->conn->send[sockindex])
     return data->conn->send[sockindex](data, sockindex, buf, write_len, eos,
