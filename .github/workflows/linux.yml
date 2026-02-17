@@ -288,7 +288,7 @@ jobs:
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
 
-          - name: 'clang-tidy clang'
+          - name: 'clang-tidy *'
             install_packages: clang clang-tidy-19 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
@@ -329,7 +329,7 @@ jobs:
               -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_CLANG_TIDY=ON
 
-          - name: 'clang-tidy clang'
+          - name: 'clang-tidy *'
             install_packages: clang clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
