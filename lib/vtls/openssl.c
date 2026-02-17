@@ -682,6 +682,7 @@ static void ossl_bio_cf_method_free(BIO_METHOD *m)
     BIO_meth_free(m);
 }
 
+#ifndef HAVE_KEYLOG_UPSTREAM
 #ifdef HAVE_KEYLOG_CALLBACK
 static void ossl_keylog_callback(const SSL *ssl, const char *line)
 {
@@ -727,6 +728,7 @@ static void ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
                         master_key, master_key_length);
 }
 #endif /* !HAVE_KEYLOG_CALLBACK */
+#endif /* HAVE_KEYLOG_UPSTREAM */
 
 static const char *SSL_ERROR_to_str(int err)
 {
@@ -1661,7 +1663,9 @@ static int ossl_init(void)
     0;
   OPENSSL_init_ssl(flags, NULL);
 
+#ifndef HAVE_KEYLOG_UPSTREAM
   Curl_tls_keylog_open();
+#endif
 
   return 1;
 }
@@ -1669,7 +1673,9 @@ static int ossl_init(void)
 /* Global cleanup */
 static void ossl_cleanup(void)
 {
+#ifndef HAVE_KEYLOG_UPSTREAM
   Curl_tls_keylog_close();
+#endif
 }
 
 /* Selects an OpenSSL crypto engine or provider.
@@ -3941,7 +3947,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_verify(octx->ssl_ctx, SSL_VERIFY_NONE, NULL);
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
-#ifdef HAVE_KEYLOG_CALLBACK
+#if !defined(HAVE_KEYLOG_UPSTREAM) && defined(HAVE_KEYLOG_CALLBACK)
   if(Curl_tls_keylog_enabled()) {
     SSL_CTX_set_keylog_callback(octx->ssl_ctx, ossl_keylog_callback);
   }
@@ -4163,7 +4169,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     octx->x509_store_setup = TRUE;
   }
 
-#ifndef HAVE_KEYLOG_CALLBACK
+#if !defined(HAVE_KEYLOG_UPSTREAM) && !defined(HAVE_KEYLOG_CALLBACK)
   /* If key logging is enabled, wait for the handshake to complete and then
    * proceed with logging secrets (for TLS 1.2 or older).
    */
