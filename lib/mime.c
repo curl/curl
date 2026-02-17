@@ -1270,18 +1270,18 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
 }
 
 /* Set mime part content from memory data. */
-CURLcode curl_mime_data(curl_mimepart *part, const char *ptr, size_t datasize)
+CURLcode curl_mime_data(curl_mimepart *part, const char *data, size_t datasize)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   cleanup_part_content(part);
 
-  if(ptr) {
+  if(data) {
     if(datasize == CURL_ZERO_TERMINATED)
-      datasize = strlen(ptr);
+      datasize = strlen(data);
 
-    part->data = curlx_memdup0(ptr, datasize);
+    part->data = curlx_memdup0(data, datasize);
     if(!part->data)
       return CURLE_OUT_OF_MEMORY;
 

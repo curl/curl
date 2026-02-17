@@ -99,11 +99,11 @@ fail:
 }
 
 int Curl_HMAC_update(struct HMAC_context *ctxt,
-                     const unsigned char *ptr,
+                     const unsigned char *data,
                      unsigned int len)
 {
   /* Update first hash calculation. */
-  ctxt->hash->hupdate(ctxt->hashctxt1, ptr, len);
+  ctxt->hash->hupdate(ctxt->hashctxt1, data, len);
   return 0;
 }
 
@@ -143,7 +143,7 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
  */
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const unsigned char *key, const size_t keylen,
-                     const unsigned char *buf, const size_t buflen,
+                     const unsigned char *data, const size_t datalen,
                      unsigned char *output)
 {
   struct HMAC_context *ctxt =
@@ -153,7 +153,7 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  Curl_HMAC_update(ctxt, buf, curlx_uztoui(buflen));
+  Curl_HMAC_update(ctxt, data, curlx_uztoui(datalen));
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, output);

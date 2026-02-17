@@ -55,10 +55,10 @@ CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file);
 CURLcode Curl_altsvc_save(struct Curl_easy *data,
                           struct altsvcinfo *asi, const char *file);
 CURLcode Curl_altsvc_ctrl(struct Curl_easy *data, const long ctrl);
-void Curl_altsvc_cleanup(struct altsvcinfo **altsvc);
+void Curl_altsvc_cleanup(struct altsvcinfo **asi);
 CURLcode Curl_altsvc_parse(struct Curl_easy *data,
-                           struct altsvcinfo *altsvc, const char *value,
-                           enum alpnid srcalpn, const char *srchost,
+                           struct altsvcinfo *asi, const char *value,
+                           enum alpnid srcalpnid, const char *srchost,
                            unsigned short srcport);
 bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,

@@ -37,7 +37,7 @@ extern const struct HMAC_params Curl_HMAC_SHA256;
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
 
-CURLcode Curl_sha256it(unsigned char *outbuffer, const unsigned char *input,
+CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
                        const size_t len);
 
 #endif

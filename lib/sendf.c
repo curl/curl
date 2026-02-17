@@ -373,7 +373,7 @@ static CURLcode do_init_writer_stack(struct Curl_easy *data)
    The defines are in sendf.h of course.
  */
 CURLcode Curl_client_write(struct Curl_easy *data,
-                           int type, const char *buf, size_t blen)
+                           int type, const char *buf, size_t len)
 {
   CURLcode result;
 
@@ -394,9 +394,9 @@ CURLcode Curl_client_write(struct Curl_easy *data,
     DEBUGASSERT(data->req.writer_stack);
   }
 
-  result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
+  result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, len);
   CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
-                 type, blen, result);
+                 type, len, result);
   return result;
 }
 

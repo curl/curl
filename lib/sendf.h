@@ -58,7 +58,7 @@ struct Curl_easy;
  * Write `len` bytes at `prt` to the client. `type` indicates what
  * kind of data is being written.
  */
-CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
+CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
                            size_t len) WARN_UNUSED_RESULT;
 
 /**
@@ -140,7 +140,7 @@ struct Curl_cwriter {
  */
 CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
                              struct Curl_easy *data,
-                             const struct Curl_cwtype *ce_handler,
+                             const struct Curl_cwtype *cwt,
                              Curl_cwriter_phase phase);
 
 /**
@@ -298,7 +298,7 @@ void Curl_creader_clear_eos(struct Curl_easy *data,
  */
 CURLcode Curl_creader_create(struct Curl_creader **preader,
                              struct Curl_easy *data,
-                             const struct Curl_crtype *cr_handler,
+                             const struct Curl_crtype *crt,
                              Curl_creader_phase phase);
 
 /**

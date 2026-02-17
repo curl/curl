@@ -86,18 +86,18 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      int port,
                      int ip_version,
                      bool allowDOH,
-                     struct Curl_dns_entry **dnsentry);
+                     struct Curl_dns_entry **entry);
 
 CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               const char *hostname,
                               int port,
                               int ip_version,
-                              struct Curl_dns_entry **dnsentry);
+                              struct Curl_dns_entry **entry);
 
 CURLcode Curl_resolv_timeout(struct Curl_easy *data,
                              const char *hostname, int port,
                              int ip_version,
-                             struct Curl_dns_entry **dnsentry,
+                             struct Curl_dns_entry **entry,
                              timediff_t timeoutms);
 
 #ifdef USE_IPV6
@@ -118,7 +118,7 @@ void Curl_resolv_unlink(struct Curl_easy *data,
                         struct Curl_dns_entry **pdns);
 
 /* init a new dns cache */
-void Curl_dnscache_init(struct Curl_dnscache *dns, size_t hashsize);
+void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size);
 
 void Curl_dnscache_destroy(struct Curl_dnscache *dns);
 
@@ -133,14 +133,14 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
 CURLcode Curl_once_resolved(struct Curl_easy *data,
                             struct Curl_dns_entry *dns,
-                            bool *protocol_connect);
+                            bool *protocol_done);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
  * given in the 'ip' argument. The result will be stored in the buf that is
  * bufsize bytes big.
  */
-void Curl_printable_address(const struct Curl_addrinfo *ip,
+void Curl_printable_address(const struct Curl_addrinfo *ai,
                             char *buf, size_t bufsize);
 
 /*

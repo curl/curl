@@ -552,11 +552,11 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data)
  * This is the version for resolves-in-a-thread.
  */
 CURLcode Curl_async_await(struct Curl_easy *data,
-                          struct Curl_dns_entry **entry)
+                          struct Curl_dns_entry **dns)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
   if(thrdd->addr)
-    return asyn_thrdd_await(data, thrdd->addr, entry);
+    return asyn_thrdd_await(data, thrdd->addr, dns);
   return CURLE_FAILED_INIT;
 }
 

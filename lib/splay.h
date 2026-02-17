@@ -42,7 +42,7 @@ struct Curl_tree *Curl_splay(const struct curltime *pkey,
 
 struct Curl_tree *Curl_splayinsert(const struct curltime *pkey,
                                    struct Curl_tree *t,
-                                   struct Curl_tree *newnode);
+                                   struct Curl_tree *node);
 
 struct Curl_tree *Curl_splaygetbest(const struct curltime *pkey,
                                     struct Curl_tree *t,

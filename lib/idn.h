@@ -30,7 +30,7 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host);
 #define USE_IDN
 void Curl_free_idnconverted_hostname(struct hostname *host);
 CURLcode Curl_idn_decode(const char *input, char **output);
-CURLcode Curl_idn_encode(const char *input, char **output);
+CURLcode Curl_idn_encode(const char *puny, char **output);
 #else
 #define Curl_free_idnconverted_hostname(x)
 #define Curl_idn_decode(x) NULL

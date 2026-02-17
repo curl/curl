@@ -558,11 +558,11 @@ static int parsedate(const char *date, time_t *output)
 }
 #endif
 
-time_t curl_getdate(const char *p, const time_t *now)
+time_t curl_getdate(const char *p, const time_t *unused)
 {
   time_t parsed = -1;
   int rc = parsedate(p, &parsed);
-  (void)now; /* legacy argument from the past that we ignore */
+  (void)unused; /* legacy argument from the past that we ignore */
 
   if(rc == PARSEDATE_OK) {
     if(parsed == (time_t)-1)

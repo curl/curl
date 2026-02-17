@@ -81,14 +81,14 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
  *
  * Parameters:
  *
- * valuep  [in]     - The username or user's password.
+ * value   [in]     - The username or user's password.
  * out     [out]    - The result storage.
  *
  * Returns void.
  */
-void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
+void Curl_auth_create_login_message(const char *value, struct bufref *out)
 {
-  Curl_bufref_set(out, valuep, strlen(valuep), NULL);
+  Curl_bufref_set(out, value, strlen(value), NULL);
 }
 
 /*

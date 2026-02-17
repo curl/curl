@@ -41,12 +41,12 @@ void Curl_cshutdn_run_once(struct Curl_easy *data,
                            bool *done);
 
 /* Terminates the connection, e.g. closes and destroys it.
- * If `run_shutdown` is TRUE, the shutdown will be run once before
+ * If `do_shutdown` is TRUE, the shutdown will be run once before
  * terminating it.
  * Takes ownership of `conn`. */
 void Curl_cshutdn_terminate(struct Curl_easy *data,
                             struct connectdata *conn,
-                            bool run_shutdown);
+                            bool do_shutdown);
 
 /* A `cshutdown` is always owned by a multi handle to maintain
  * the connections to be shut down. It registers timers and

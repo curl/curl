@@ -30,6 +30,6 @@ extern const char * const Curl_month[12];
    TIME_T_MAX in case the parsed time value was too big, instead of an
    error. */
 
-int Curl_getdate_capped(const char *p, time_t *store);
+int Curl_getdate_capped(const char *p, time_t *tp);
 
 #endif /* HEADER_CURL_PARSEDATE_H */

@@ -36,14 +36,16 @@ void Curl_init_userdefined(struct Curl_easy *data);
 void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of Curl_open() */
-CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
+CURLcode Curl_connect(struct Curl_easy *data,
+                      bool *asyncp,
+                      bool *protocol_done);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          struct Curl_dns_entry *dns,
                          bool *protocol_done);
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
-                                  char **userptr, char **passwdptr,
-                                  char **optionsptr);
+                                  char **userp, char **passwdp,
+                                  char **optionsp);
 
 /* Attach/Clear/Get meta data for an easy handle. Needs to provide
  * a destructor, will be automatically called when the easy handle

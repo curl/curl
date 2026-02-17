@@ -622,7 +622,7 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
                             size_t buflen,
                             curl_off_t fragsize,
                             unsigned int flags,
-                            size_t *sent);
+                            size_t *pnsent);
 static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                                    struct websocket *ws);
 

@@ -178,7 +178,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
  * @param httpversion version used in request (09, 10, 11, etc.)
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
-CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf,
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
                        unsigned char httpversion);
 
 /**
