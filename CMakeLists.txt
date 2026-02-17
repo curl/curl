@@ -271,17 +271,15 @@ if(CURL_CLANG_TIDY)
   find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
   if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(PICKY_COMPILER OFF)  # Do a best effort and skip passing non-clang warning options to clang-tidy.
-    # This lets through those warning options enabled via CURL_WERROR=ON, affecting lib and src.
+    # This lets through warning options enabled via CURL_WERROR=ON, affecting lib and src.
   endif()
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
-  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy")
-
-  list(APPEND CMAKE_C_CLANG_TIDY "--enable-check-profile")
-  list(APPEND CMAKE_C_CLANG_TIDY "--enable-module-headers-parsing")
-
+  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}")
+  list(APPEND CMAKE_C_CLANG_TIDY "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy")
+# list(APPEND CMAKE_C_CLANG_TIDY "--list-checks")
   if(CURL_WERROR)
-    list(APPEND CMAKE_C_CLANG_TIDY "'--warnings-as-errors=*'")
+    list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
   endif()
   if(CURL_CLANG_TIDYFLAGS)
     list(APPEND CMAKE_C_CLANG_TIDY ${CURL_CLANG_TIDYFLAGS})
