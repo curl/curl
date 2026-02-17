@@ -192,7 +192,7 @@ behind a firewall. Applications can mitigate against this by using the
 CURLOPT_FTP_SKIP_PASV_IP(3) option or CURLOPT_FTPPORT(3).
 
 Local servers sometimes assume local access comes from friends and trusted
-users. An application that expects https://example.com/file_to_read that and
+users. An application that expects https://example.com/file_to_read and
 instead gets http://192.168.0.1/my_router_config might print a file that would
 otherwise be protected by the firewall.
 
@@ -334,7 +334,10 @@ libcurl programs can use CURLOPT_PROTOCOLS_STR(3) to limit what URL schemes it a
 ## consider not allowing the user to set the full URL
 
 Maybe just let the user provide data for parts of it? Or maybe filter input to
-only allow specific choices?
+only allow specific choices? Remember that the naive approach of appending a
+user-specified string to a base URL could still allow unexpected results
+through use of characters like ../ or ? or Unicode characters or hiding
+characters using various escaping means.
 
 # RFC 3986 vs WHATWG URL
 
@@ -387,8 +390,8 @@ hard to avoid.
 # Active FTP passes on the local IP address
 
 If you use curl/libcurl to do *active* FTP transfers, curl passes on the
-address of your local IP to the remote server - even when for example using a
-SOCKS or HTTP proxy in between curl and the target server.
+address of your local IP interface to the remote server - even when for example
+using a SOCKS or HTTP proxy in between curl and the target server.
 
 # Denial of Service
 
