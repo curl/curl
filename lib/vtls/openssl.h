@@ -44,13 +44,19 @@
 #define HAVE_BORINGSSL_LIKE
 #endif
 
+/* OpenSSL 3.5.0+ has built-in `SSLKEYLOGFILE` support if built with
+   `enable-sslkeylog` */
+#if OPENSSL_VERSION_NUMBER >= 0x30500000L && !defined(OPENSSL_NO_SSLKEYLOG)
+#define HAVE_KEYLOG_BUILTIN
+#endif
+
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
  * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
  */
-#ifndef LIBRESSL_VERSION_NUMBER
+#if !defined(LIBRESSL_VERSION_NUMBER) && !defined(HAVE_KEYLOG_BUILTIN)
 #define HAVE_KEYLOG_CALLBACK
 #endif
 
@@ -73,7 +79,7 @@ struct ossl_ctx {
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */
   int      blocked_ssl_write_len;
-#ifndef HAVE_KEYLOG_CALLBACK
+#if !defined(HAVE_KEYLOG_CALLBACK) && !defined(HAVE_KEYLOG_BUILTIN)
   /* Set to true once a valid keylog entry has been created to avoid dupes.
      This is a bool and not a bitfield because it is passed by address. */
   bool keylog_done;
