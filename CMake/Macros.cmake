@@ -156,8 +156,13 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     # Collect header directories and macro definitions from lib dependencies
     curl_collect_target_options(${_target})
 
-    list(REMOVE_ITEM _includes "")
-    string(REPLACE ";" ";-I" _includes ";${_includes}")
+    set(_includes_tmp ${_includes})
+    set(_includes)
+    foreach(_inc IN LISTS _includes_tmp)
+      if(_inc AND NOT _inc MATCHES "INSTALL_INTERFACE:")  # avoid empty items
+        list(APPEND _includes "-I${_inc}")
+      endif()
+    endforeach()
     list(REMOVE_DUPLICATES _includes)
 
     list(REMOVE_ITEM _definitions "")
