@@ -123,3 +123,13 @@ class TestErrors:
         else:
             r.check_exit_code(0)
             r.check_response(http_status=200, count=count)
+
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    def test_05_05_failed_peer(self, env: Env, proto, httpd, nghttpx):
+        curl = CurlClient(env=env)
+        domain = f'invalid.{env.tld}'
+        url = f'https://{domain}:{env.port_for(proto)}/'
+        r = curl.http_download(urls=[url], alpn_proto=proto)
+        assert r.exit_code == 60, f'{r}'
+        assert r.stats[0]['errormsg'] == \
+            f"SSL: no alternative certificate subject name matches target hostname '{domain}'", f'{r}'
