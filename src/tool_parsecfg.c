@@ -209,7 +209,8 @@ ParameterError parseconfig(const char *filename, int max_recursive,
       }
 
 #ifdef DEBUG_CONFIG
-      curl_mfprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
+      curl_mfprintf(tool_stderr, "PARAM: \"%s\"\n",
+                    (param ? param : "(null)"));
 #endif
       res = getparameter(option, param, &usedarg, config, max_recursive);
       config = global->last;
