@@ -684,11 +684,12 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
     /* Basic */
     if(
 #ifndef CURL_DISABLE_PROXY
-      (proxy && conn->bits.proxy_user_passwd &&
-       !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-authorization"))) ||
+       (proxy && conn->bits.proxy_user_passwd &&
+        !Curl_checkProxyheaders(data, conn,
+                                STRCONST("Proxy-authorization"))) ||
 #endif
-      (!proxy && data->state.aptr.user &&
-       !Curl_checkheaders(data, STRCONST("Authorization")))) {
+       (!proxy && data->state.aptr.user &&
+        !Curl_checkheaders(data, STRCONST("Authorization")))) {
       auth = "Basic";
       result = http_output_basic(data, proxy);
       if(result)
