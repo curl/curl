@@ -101,8 +101,8 @@ void Curl_async_global_cleanup(void)
 #endif
 }
 
-static void async_thrdd_destroy(struct Curl_easy *);
-static void async_thrdd_shutdown(struct Curl_easy *);
+static void async_thrdd_destroy(struct Curl_easy *data);
+static void async_thrdd_shutdown(struct Curl_easy *data);
 
 CURLcode Curl_async_get_impl(struct Curl_easy *data, void **impl)
 {
