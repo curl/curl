@@ -878,7 +878,6 @@ abort:
     curlx_close(test->ofile);
     test->ofile = 0;
   }
-  return;
 }
 
 /*
