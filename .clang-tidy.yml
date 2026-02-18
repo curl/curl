@@ -15,4 +15,5 @@ Checks: >-
   bugprone-suspicious-realloc-usage,
   misc-const-correctness,
   portability-*,
-  readability-named-parameter
+  readability-named-parameter,
+  readability-redundant-control-flow

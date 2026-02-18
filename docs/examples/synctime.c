@@ -211,7 +211,6 @@ static void showUsage(void)
           " port.\n");
   fprintf(stderr, " --help                    Print this help.\n");
   fprintf(stderr, "\n");
-  return;
 }
 
 int main(int argc, const char *argv[])
