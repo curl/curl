@@ -267,8 +267,8 @@ static CURLproxycode socks4_req_add_hd(struct socks_state *sx,
   (void)data;
   buf[0] = 4; /* version (SOCKS4) */
   buf[1] = 1; /* connect */
-  buf[2] = (unsigned char)((sx->remote_port >> 8) & 0xffu); /* MSB */
-  buf[3] = (unsigned char)(sx->remote_port & 0xffu);        /* LSB */
+  buf[2] = (unsigned char)((sx->remote_port >> 8) & 0xffU); /* MSB */
+  buf[3] = (unsigned char)(sx->remote_port & 0xffU);        /* LSB */
 
   result = Curl_bufq_write(&sx->iobuf, buf, 4, &nwritten);
   if(result || (nwritten != 4))
@@ -929,8 +929,8 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     goto out;
   }
   /* PORT MSB+LSB */
-  req[0] = (unsigned char)((sx->remote_port >> 8) & 0xffu);
-  req[1] = (unsigned char)(sx->remote_port & 0xffu);
+  req[0] = (unsigned char)((sx->remote_port >> 8) & 0xffU);
+  req[1] = (unsigned char)(sx->remote_port & 0xffU);
   result = Curl_bufq_write(&sx->iobuf, req, 2, &nwritten);
   if(result || (nwritten != 2)) {
     presult = CURLPX_SEND_REQUEST;
