@@ -357,6 +357,7 @@ typedef enum {
   PARAM_EXPAND_ERROR, /* --expand problem */
   PARAM_BLANK_STRING,
   PARAM_VAR_SYNTAX, /* --variable syntax error */
+  PARAM_CONFIG_PARSE, /* specific error while parsing --config content */
   PARAM_RECURSION,
   PARAM_LAST
 } ParameterError;

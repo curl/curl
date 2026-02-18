@@ -2250,6 +2250,17 @@ static ParameterError opt_file(struct OperationConfig *config,
     }
     else {
       err = parseconfig(nextarg, max_recursive, NULL);
+      if(err &&
+         err != PARAM_HELP_REQUESTED &&
+         err != PARAM_MANUAL_REQUESTED &&
+         err != PARAM_VERSION_INFO_REQUESTED &&
+         err != PARAM_ENGINES_REQUESTED &&
+         err != PARAM_CA_EMBED_REQUESTED &&
+         err != PARAM_READ_ERROR)
+        /* parseconfig() already reports file and line details.
+           Return a dedicated code so the top-level error summary
+           is not misleading (for example, saying --config is unknown). */
+        err = PARAM_CONFIG_PARSE;
     }
     break;
   case C_CRLFILE: /* --crlfile */

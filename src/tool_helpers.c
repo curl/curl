@@ -67,6 +67,8 @@ const char *param2text(ParameterError error)
     return "blank argument where content is expected";
   case PARAM_VAR_SYNTAX:
     return "syntax error in --variable argument";
+  case PARAM_CONFIG_PARSE:
+    return "has a parse error in the config file";
   default:
     return "unknown error";
   }
