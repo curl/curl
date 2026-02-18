@@ -3740,12 +3740,12 @@ static CURLcode http_statusline(struct Curl_easy *data,
 
   data->info.httpcode = k->httpcode;
   data->info.httpversion = k->httpversion;
-  conn->httpversion_seen = (unsigned char)k->httpversion;
+  conn->httpversion_seen = k->httpversion;
 
   if(!data->state.http_neg.rcvd_min ||
      data->state.http_neg.rcvd_min > k->httpversion)
     /* store the lowest server version we encounter */
-    data->state.http_neg.rcvd_min = (unsigned char)k->httpversion;
+    data->state.http_neg.rcvd_min = k->httpversion;
 
   /*
    * This code executes as part of processing the header. As a

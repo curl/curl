@@ -85,7 +85,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
     return 0;
   }
   t->recv_size += (curl_off_t)nwritten;
-  return (size_t)nwritten;
+  return nwritten;
 }
 
 static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
@@ -122,7 +122,7 @@ static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
                   "%" CURL_FORMAT_CURL_OFF_T " bytes\n", t->idx, t->send_size);
     return CURL_READFUNC_ABORT;
   }
-  return (size_t)nread;
+  return nread;
 }
 
 static int my_progress_u_cb(void *userdata,

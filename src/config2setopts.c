@@ -48,7 +48,7 @@ static int get_address_family(curl_socket_t sockfd)
   struct sockaddr addr;
   curl_socklen_t addrlen = sizeof(addr);
   memset(&addr, 0, sizeof(addr));
-  if(getsockname(sockfd, (struct sockaddr *)&addr, &addrlen) == 0)
+  if(getsockname(sockfd, &addr, &addrlen) == 0)
     return addr.sa_family;
   return AF_UNSPEC;
 }

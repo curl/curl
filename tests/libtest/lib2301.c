@@ -51,7 +51,7 @@ static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
   curl_mfprintf(stderr, "Called CURLOPT_WRITEFUNCTION with %zu bytes: ",
                 nitems);
   for(i = 0; i < nitems; i++)
-    curl_mfprintf(stderr, "%02x ", (unsigned char)buffer[i]);
+    curl_mfprintf(stderr, "%02x ", buffer[i]);
   curl_mfprintf(stderr, "\n");
   (void)size;
   if(buffer[0] == 0x89) {

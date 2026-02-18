@@ -93,7 +93,7 @@ static CURLcode test_unit1661(const char *arg)
   abort_unless(result == CURLE_OK, curl_easy_strerror(result));
   fail_unless(freecount == 1, "Destructor not called");
   fail_unless((const char *)bufref.ptr != buffer, "Returned pointer not set");
-  buffer = (const char *)Curl_bufref_ptr(&bufref);
+  buffer = Curl_bufref_ptr(&bufref);
   fail_unless(buffer, "Allocated pointer is NULL");
   fail_unless(bufref.len == 3, "Wrong data size stored");
   if(buffer) {

@@ -80,7 +80,7 @@ static void parse_success(const struct tcase *t)
       curl_mfprintf(stderr, "got result %d parsing: '%s'\n", result, buf);
       fail("error consuming");
     }
-    in_consumed += (size_t)nread;
+    in_consumed += nread;
     if(nread != buflen) {
       if(!p.done) {
         curl_mfprintf(stderr, "only %zd/%zu consumed for: '%s'\n",

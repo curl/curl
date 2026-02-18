@@ -177,7 +177,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
       /* existing key entry, overwrite by clearing old pointer */
       hash_elem_clear_ptr(h, he);
-      he->ptr = (void *)p;
+      he->ptr = p;
       he->dtor = dtor;
       return p;
     }

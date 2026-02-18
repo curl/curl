@@ -980,7 +980,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       addr = (void *)ai->ai_addr; /* storage area for this info */
       DEBUGASSERT(sizeof(struct in_addr) == sizeof(de->addr[i].ip.v4));
       memcpy(&addr->sin_addr, &de->addr[i].ip.v4, sizeof(struct in_addr));
-      addr->sin_family = (CURL_SA_FAMILY_T)addrtype;
+      addr->sin_family = addrtype;
       addr->sin_port = htons((unsigned short)port);
       break;
 
@@ -989,7 +989,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
       DEBUGASSERT(sizeof(struct in6_addr) == sizeof(de->addr[i].ip.v6));
       memcpy(&addr6->sin6_addr, &de->addr[i].ip.v6, sizeof(struct in6_addr));
-      addr6->sin6_family = (CURL_SA_FAMILY_T)addrtype;
+      addr6->sin6_family = addrtype;
       addr6->sin6_port = htons((unsigned short)port);
       break;
 #endif

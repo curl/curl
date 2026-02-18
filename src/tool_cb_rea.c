@@ -49,7 +49,7 @@ static bool waitfd(int waitms, int fd)
   set.fd = fd;
   set.events = POLLIN;
   set.revents = 0;
-  if(poll(&set, 1, (int)waitms))
+  if(poll(&set, 1, waitms))
     return TRUE; /* timeout */
   return FALSE;
 #else

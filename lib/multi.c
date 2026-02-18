@@ -2495,7 +2495,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* after init, go SETUP */
       multistate(data, MSTATE_SETUP);
-      (void)Curl_pgrsTime(data, TIMER_STARTOP);
+      Curl_pgrsTime(data, TIMER_STARTOP);
       FALLTHROUGH();
 
     case MSTATE_SETUP:
