@@ -11,10 +11,22 @@ Checks:
   - -clang-analyzer-security.insecureAPI.bzero  # for FD_ZERO() (seen on macOS)
   - -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
   - -clang-diagnostic-nullability-extension
+  - bugprone-assert-side-effect
+  - bugprone-chained-comparison
+  - bugprone-dynamic-static-initializers
   - bugprone-macro-parentheses
+  - bugprone-macro-repeated-side-effects
+  - bugprone-misplaced-operator-in-strlen-in-alloc
+  - bugprone-misplaced-pointer-arithmetic-in-alloc
+  - bugprone-not-null-terminated-result
+  - bugprone-posix-return
   - bugprone-redundant-branch-condition
   - bugprone-signed-char-misuse
+  - bugprone-suspicious-enum-usage
+  - bugprone-suspicious-memset-usage
+  - bugprone-suspicious-missing-comma
   - bugprone-suspicious-realloc-usage
+  - bugprone-suspicious-semicolon
   - misc-const-correctness
   - misc-header-include-cycle
   - portability-*
@@ -22,6 +34,9 @@ Checks:
   - readability-math-missing-parentheses
   - readability-named-parameter
   - readability-redundant-control-flow
+  - readability-redundant-declaration
+  - readability-redundant-function-ptr-dereference
+  - readability-redundant-parentheses
   - readability-redundant-preprocessor
   - readability-uppercase-literal-suffix
 
