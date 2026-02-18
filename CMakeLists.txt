@@ -277,8 +277,6 @@ if(CURL_CLANG_TIDY)
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
   set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}")
   list(APPEND CMAKE_C_CLANG_TIDY "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy")
-# list(APPEND CMAKE_C_CLANG_TIDY "--list-checks")
-# list(APPEND CMAKE_C_CLANG_TIDY "--fix" "--fix-errors")
   if(CURL_WERROR)
     list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
   endif()
