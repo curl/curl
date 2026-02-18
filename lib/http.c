@@ -539,7 +539,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   bool pickhost = FALSE;
   bool pickproxy = FALSE;
   CURLcode result = CURLE_OK;
-  unsigned long authmask = ~0ul;
+  unsigned long authmask = ~0UL;
 
   if(!data->set.str[STRING_BEARER])
     authmask &= (unsigned long)~CURLAUTH_BEARER;
