@@ -3451,7 +3451,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
       failf(data, "Error determining ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    if(SSL_set_alpn_protos(octx->ssl, proto.data, (int)proto.len)) {
+    if(SSL_set_alpn_protos(octx->ssl, proto.data, proto.len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -5157,7 +5157,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
     *pnread = (size_t)nread;
   else {
     /* failed SSL_read */
-    int err = SSL_get_error(octx->ssl, (int)nread);
+    int err = SSL_get_error(octx->ssl, nread);
 
     switch(err) {
     case SSL_ERROR_NONE: /* this is not an error */

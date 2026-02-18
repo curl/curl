@@ -1049,7 +1049,7 @@ static int formatf(void *userp, /* untouched by format(), just sent to the
         if(p.flags & FLAGS_LONG)
           *(long *)iptr->val.ptr = (long)done;
       else if(!(p.flags & FLAGS_SHORT))
-        *(int *)iptr->val.ptr = (int)done;
+        *(int *)iptr->val.ptr = done;
       else
         *(short *)iptr->val.ptr = (short)done;
       break;

@@ -652,7 +652,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #endif
 
 #ifdef HAVE_ZSTD
-  version_info.zstd_ver_num = (unsigned int)ZSTD_versionNumber();
+  version_info.zstd_ver_num = ZSTD_versionNumber();
   zstd_version(zstd_buffer, sizeof(zstd_buffer));
   version_info.zstd_version = zstd_buffer;
 #endif

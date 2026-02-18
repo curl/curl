@@ -113,7 +113,7 @@ static void update_width(struct ProgressData *bar)
   if(cols > MAX_BARLENGTH)
     bar->width = MAX_BARLENGTH;
   else if(cols > MIN_BARLENGTH)
-    bar->width = (int)cols;
+    bar->width = cols;
   else
     bar->width = MIN_BARLENGTH;
 }

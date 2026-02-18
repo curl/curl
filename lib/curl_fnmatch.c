@@ -251,8 +251,8 @@ fail:
 static int loop(const unsigned char *pattern, const unsigned char *string,
                 int maxstars)
 {
-  const unsigned char *p = (const unsigned char *)pattern;
-  const unsigned char *s = (const unsigned char *)string;
+  const unsigned char *p = pattern;
+  const unsigned char *s = string;
   unsigned char charset[CURLFNM_CHSET_SIZE] = { 0 };
 
   for(;;) {

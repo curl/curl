@@ -3218,7 +3218,7 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
     return -1; /* generic error */
-  Curl_debug(data, CURLINFO_DATA_IN, (const char *)buffer, (size_t)nread);
+  Curl_debug(data, CURLINFO_DATA_IN, (const char *)buffer, nread);
   return (ssize_t)nread;
 }
 
@@ -3791,7 +3791,7 @@ CURLcode Curl_ssh_init(void)
 
 void Curl_ssh_cleanup(void)
 {
-  (void)libssh2_exit();
+  libssh2_exit();
 }
 
 void Curl_ssh_version(char *buffer, size_t buflen)

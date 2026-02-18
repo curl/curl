@@ -3023,7 +3023,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       }
     }
     else if(hit) {
-      char *hostd = curlx_strdup((char *)as->dst.host);
+      char *hostd = curlx_strdup(as->dst.host);
       if(!hostd)
         return CURLE_OUT_OF_MEMORY;
       conn->conn_to_host.rawalloc = hostd;

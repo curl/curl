@@ -120,7 +120,7 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
     return CURL_WRITEFUNC_ERROR;
   }
 
-  return (size_t)nwritten;
+  return nwritten;
 }
 
 static int my_progress_d_cb(void *userdata,
@@ -220,7 +220,7 @@ static int my_progress_d_cb(void *userdata,
 #endif
       default:
         curl_mfprintf(stderr, "[t-%zu] info SSL_PTR backend=%d, ptr=%p\n",
-                      t->idx, tls->backend, (void *)tls->internals);
+                      t->idx, tls->backend, tls->internals);
         break;
       }
     }

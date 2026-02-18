@@ -610,8 +610,7 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
     credentials.dwVersion = SCH_CREDENTIALS_VERSION;
     credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
 
-    credentials.pTlsParameters->grbitDisabledProtocols =
-      (DWORD)~enabled_protocols;
+    credentials.pTlsParameters->grbitDisabledProtocols = ~enabled_protocols;
 
     if(client_certs[0]) {
       credentials.cCreds = 1;

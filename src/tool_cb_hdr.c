@@ -432,7 +432,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   struct OutStruct *etag_save = &per->etag_save;
   const char *str = ptr;
   const size_t cb = size * nmemb;
-  const char *end = (char *)ptr + cb;
+  const char *end = ptr + cb;
   const char *scheme = NULL;
 
   if(!per->config)

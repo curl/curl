@@ -416,7 +416,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
   Curl_pgrsReset(data);
   rc = ldap_search_s(server, ludp->lud_dn,
-                     (curl_ldap_num_t)ludp->lud_scope,
+                     ludp->lud_scope,
                      ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
 
   if(rc != LDAP_SUCCESS && rc != LDAP_SIZELIMIT_EXCEEDED) {
