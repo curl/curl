@@ -108,7 +108,7 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
     return CURL_WRITEFUNC_PAUSE;
   }
 
-  nwritten = fwrite(buf, nitems, buflen, t->out);
+  nwritten = fwrite(buf, buflen, nitems, t->out);
   if(nwritten < blen) {
     curl_mfprintf(stderr, "[t-%zu] write failure\n", t->idx);
     return 0;

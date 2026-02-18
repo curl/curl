@@ -79,7 +79,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
       return 0;
   }
 
-  nwritten = fwrite(buf, nitems, buflen, t->out);
+  nwritten = fwrite(buf, buflen, nitems, t->out);
   if(nwritten < blen) {
     curl_mfprintf(stderr, "[t-%zu] write failure\n", t->idx);
     return 0;
