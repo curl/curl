@@ -23,14 +23,14 @@
  * RFC4178 Simple and Protected GSS-API Negotiation Mechanism
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && defined(USE_SPNEGO)
 
-#include "vauth.h"
-#include "../curlx/base64.h"
-#include "../curl_trc.h"
-#include "../strerror.h"
+#include "vauth/vauth.h"
+#include "curlx/base64.h"
+#include "curl_trc.h"
+#include "strerror.h"
 
 /*
  * Curl_auth_is_spnego_supported()

@@ -21,34 +21,34 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
-#include "../vtls/openssl.h"
+#include "vtls/openssl.h"
 #elif defined(USE_GNUTLS)
 #include <gnutls/abstract.h>
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 #include <gnutls/crypto.h>
 #include <nettle/sha2.h>
-#include "../vtls/gtls.h"
+#include "vtls/gtls.h"
 #elif defined(USE_WOLFSSL)
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/quic.h>
-#include "../vtls/wolfssl.h"
+#include "vtls/wolfssl.h"
 #endif
 
-#include "../urldata.h"
-#include "../cfilters.h"
-#include "../vtls/keylog.h"
-#include "../vtls/vtls.h"
-#include "../vtls/vtls_scache.h"
-#include "vquic-tls.h"
+#include "urldata.h"
+#include "cfilters.h"
+#include "vtls/keylog.h"
+#include "vtls/vtls.h"
+#include "vtls/vtls_scache.h"
+#include "vquic/vquic-tls.h"
 
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,

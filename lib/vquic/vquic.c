@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
-#include "../urldata.h"
-#include "vquic.h"
+#include "curl_setup.h"
+#include "urldata.h"
+#include "vquic/vquic.h"
 
-#include "../curl_trc.h"
+#include "curl_trc.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
 
@@ -37,18 +37,18 @@
 #include <nghttp3/nghttp3.h>
 #endif
 
-#include "../bufq.h"
-#include "../curlx/dynbuf.h"
-#include "../curlx/fopen.h"
-#include "../cfilters.h"
-#include "curl_ngtcp2.h"
-#include "curl_quiche.h"
-#include "../multiif.h"
-#include "../progress.h"
-#include "../rand.h"
-#include "vquic_int.h"
-#include "../curlx/strerr.h"
-#include "../curlx/strparse.h"
+#include "bufq.h"
+#include "curlx/dynbuf.h"
+#include "curlx/fopen.h"
+#include "cfilters.h"
+#include "vquic/curl_ngtcp2.h"
+#include "vquic/curl_quiche.h"
+#include "multiif.h"
+#include "progress.h"
+#include "rand.h"
+#include "vquic/vquic_int.h"
+#include "curlx/strerr.h"
+#include "curlx/strparse.h"
 
 
 #define NW_CHUNK_SIZE     (64 * 1024)

@@ -23,11 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "../bufref.h"
-#include "../curlx/dynbuf.h"
-#include "../urldata.h"
+#include "bufref.h"
+#include "curlx/dynbuf.h"
+#include "urldata.h"
 
 struct Curl_easy;
 struct connectdata;
@@ -49,7 +49,7 @@ struct gsasldata;
 #endif
 
 #ifdef USE_WINDOWS_SSPI
-#include "../curl_sspi.h"
+#include "curl_sspi.h"
 #define GSS_ERROR(status) ((status) & 0x80000000)
 #endif
 

@@ -27,7 +27,7 @@
  * Source file for Schannel-specific certificate verification. This code should
  * only be invoked by code in schannel.c.
  */
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
@@ -35,19 +35,19 @@
 #error "cannot compile Schannel support without SSPI."
 #endif
 
-#include "schannel.h"
-#include "schannel_int.h"
+#include "vtls/schannel.h"
+#include "vtls/schannel_int.h"
 
-#include "../curlx/fopen.h"
-#include "../curlx/inet_pton.h"
-#include "vtls.h"
-#include "vtls_int.h"
-#include "../curl_trc.h"
-#include "../strerror.h"
-#include "../curlx/winapi.h"
-#include "../curlx/multibyte.h"
-#include "hostcheck.h"
-#include "../curlx/version_win32.h"
+#include "curlx/fopen.h"
+#include "curlx/inet_pton.h"
+#include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
+#include "curl_trc.h"
+#include "strerror.h"
+#include "curlx/winapi.h"
+#include "curlx/multibyte.h"
+#include "vtls/hostcheck.h"
+#include "curlx/version_win32.h"
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 

@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_STRERROR_R
 #  if (!defined(HAVE_POSIX_STRERROR_R) && \
@@ -31,10 +31,10 @@
 #  endif
 #endif
 
-#include "winapi.h"
-#include "snprintf.h"
-#include "strerr.h"
-#include "strcopy.h"
+#include "curlx/winapi.h"
+#include "curlx/snprintf.h"
+#include "curlx/strerr.h"
+#include "curlx/strcopy.h"
 
 #ifdef USE_WINSOCK
 /* This is a helper function for curlx_strerror that converts Winsock error

@@ -24,15 +24,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
 #include <schannel.h>
 
-#include "../curl_sspi.h"
-#include "../cfilters.h"
-#include "../urldata.h"
+#include "curl_sspi.h"
+#include "cfilters.h"
+#include "urldata.h"
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 

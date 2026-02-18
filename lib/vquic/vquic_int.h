@@ -23,11 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_HTTP3
 
-#include "../bufq.h"
+#include "bufq.h"
 
 #define MAX_UDP_PAYLOAD_SIZE  1452
 

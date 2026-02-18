@@ -21,9 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "strcopy.h"
+#include "curlx/strcopy.h"
 
 /*
  * curlx_strcopy() is a replacement for strcpy.

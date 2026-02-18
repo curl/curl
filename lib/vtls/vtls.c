@@ -38,40 +38,40 @@
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
 */
 
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
-#include "../urldata.h"
-#include "../cfilters.h"
+#include "urldata.h"
+#include "cfilters.h"
 
-#include "vtls.h" /* generic SSL protos etc */
-#include "vtls_int.h"
-#include "vtls_scache.h"
+#include "vtls/vtls.h" /* generic SSL protos etc */
+#include "vtls/vtls_int.h"
+#include "vtls/vtls_scache.h"
 
-#include "openssl.h"        /* OpenSSL versions */
-#include "gtls.h"           /* GnuTLS versions */
-#include "wolfssl.h"        /* wolfSSL versions */
-#include "schannel.h"       /* Schannel SSPI version */
-#include "mbedtls.h"        /* mbedTLS versions */
-#include "rustls.h"         /* Rustls versions */
+#include "vtls/openssl.h"        /* OpenSSL versions */
+#include "vtls/gtls.h"           /* GnuTLS versions */
+#include "vtls/wolfssl.h"        /* wolfSSL versions */
+#include "vtls/schannel.h"       /* Schannel SSPI version */
+#include "vtls/mbedtls.h"        /* mbedTLS versions */
+#include "vtls/rustls.h"         /* Rustls versions */
 
-#include "../slist.h"
-#include "../curl_trc.h"
-#include "../strcase.h"
-#include "../url.h"
-#include "../progress.h"
-#include "../curlx/fopen.h"
-#include "../curl_sha256.h"
-#include "../curlx/base64.h"
-#include "../curlx/inet_pton.h"
-#include "../connect.h"
-#include "../select.h"
-#include "../setopt.h"
-#include "../curlx/strdup.h"
-#include "../curlx/strcopy.h"
+#include "slist.h"
+#include "curl_trc.h"
+#include "strcase.h"
+#include "url.h"
+#include "progress.h"
+#include "curlx/fopen.h"
+#include "curl_sha256.h"
+#include "curlx/base64.h"
+#include "curlx/inet_pton.h"
+#include "connect.h"
+#include "select.h"
+#include "setopt.h"
+#include "curlx/strdup.h"
+#include "curlx/strcopy.h"
 
 #ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>

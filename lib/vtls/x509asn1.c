@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
   defined(USE_MBEDTLS) || defined(USE_RUSTLS)
@@ -36,12 +36,12 @@
 #define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
 #endif
 
-#include "../urldata.h"
-#include "vtls.h"
-#include "../curl_trc.h"
-#include "../curlx/base64.h"
-#include "x509asn1.h"
-#include "../curlx/dynbuf.h"
+#include "urldata.h"
+#include "vtls/vtls.h"
+#include "curl_trc.h"
+#include "curlx/base64.h"
+#include "vtls/x509asn1.h"
+#include "curlx/dynbuf.h"
 
 /*
  * Constants.

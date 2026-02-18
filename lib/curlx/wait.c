@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_SELECT
 #error "We cannot compile without select() support."
@@ -37,8 +37,8 @@
 #include <dos.h>  /* delay() */
 #endif
 
-#include "timediff.h"
-#include "wait.h"
+#include "curlx/timediff.h"
+#include "curlx/wait.h"
 
 /*
  * Internal function used for waiting a specific amount of ms in

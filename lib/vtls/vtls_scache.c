@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SSL
 
@@ -29,21 +29,21 @@
 #include <sys/types.h>
 #endif
 
-#include "../urldata.h"
-#include "../cfilters.h"
+#include "urldata.h"
+#include "cfilters.h"
 
-#include "vtls.h" /* generic SSL protos etc */
-#include "vtls_int.h"
-#include "vtls_scache.h"
-#include "vtls_spack.h"
+#include "vtls/vtls.h" /* generic SSL protos etc */
+#include "vtls/vtls_int.h"
+#include "vtls/vtls_scache.h"
+#include "vtls/vtls_spack.h"
 
-#include "../strcase.h"
-#include "../url.h"
-#include "../llist.h"
-#include "../curl_share.h"
-#include "../curl_trc.h"
-#include "../curl_sha256.h"
-#include "../rand.h"
+#include "strcase.h"
+#include "url.h"
+#include "llist.h"
+#include "curl_share.h"
+#include "curl_trc.h"
+#include "curl_sha256.h"
+#include "rand.h"
 
 
 /* a peer+tls-config we cache sessions for */
