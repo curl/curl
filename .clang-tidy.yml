@@ -13,6 +13,5 @@ Checks: >-
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   clang-diagnostic-*,
   -clang-diagnostic-nullability-extension,
-  bugprone-suspicious-realloc-usage,
   misc-const-correctness,
   portability-*
