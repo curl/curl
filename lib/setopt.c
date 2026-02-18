@@ -223,7 +223,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
 
       *val |= h->protocol;
     }
-  } while(str && str++);
+  } while(str++);
 
   if(!*val)
     /* no protocol listed */
