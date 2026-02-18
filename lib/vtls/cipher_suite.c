@@ -159,13 +159,11 @@ struct cs_entry {
 /* !checksrc! disable COMMANOSPACE all */
 static const struct cs_entry cs_list[] = {
   /* TLS 1.3 ciphers */
-#if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
   CS_ENTRY(0x1301, TLS,AES,128,GCM,SHA256,,,),
   CS_ENTRY(0x1302, TLS,AES,256,GCM,SHA384,,,),
   CS_ENTRY(0x1303, TLS,CHACHA20,POLY1305,SHA256,,,,),
   CS_ENTRY(0x1304, TLS,AES,128,CCM,SHA256,,,),
   CS_ENTRY(0x1305, TLS,AES,128,CCM,8,SHA256,,),
-#endif
   /* TLS 1.2 ciphers */
   CS_ENTRY(0xC02B, TLS,ECDHE,ECDSA,WITH,AES,128,GCM,SHA256),
   CS_ENTRY(0xC02B, ECDHE,ECDSA,AES128,GCM,SHA256,,,),
@@ -232,8 +230,6 @@ static const struct cs_entry cs_list[] = {
   CS_ENTRY(0xC031, ECDH,RSA,AES128,GCM,SHA256,,,),
   CS_ENTRY(0xC032, TLS,ECDH,RSA,WITH,AES,256,GCM,SHA384),
   CS_ENTRY(0xC032, ECDH,RSA,AES256,GCM,SHA384,,,),
-#endif
-#ifdef USE_MBEDTLS
   CS_ENTRY(0x0001, TLS,RSA,WITH,NULL,MD5,,,),
   CS_ENTRY(0x0001, NULL,MD5,,,,,,),
   CS_ENTRY(0x0002, TLS,RSA,WITH,NULL,SHA,,,),
@@ -320,8 +316,6 @@ static const struct cs_entry cs_list[] = {
   CS_ENTRY(0xC036, ECDHE,PSK,AES256,CBC,SHA,,,),
   CS_ENTRY(0xCCAB, TLS,PSK,WITH,CHACHA20,POLY1305,SHA256,,),
   CS_ENTRY(0xCCAB, PSK,CHACHA20,POLY1305,,,,,),
-#endif
-#ifdef USE_MBEDTLS
   CS_ENTRY(0xC09C, TLS,RSA,WITH,AES,128,CCM,,),
   CS_ENTRY(0xC09C, AES128,CCM,,,,,,),
   CS_ENTRY(0xC09D, TLS,RSA,WITH,AES,256,CCM,,),
@@ -338,8 +332,6 @@ static const struct cs_entry cs_list[] = {
   CS_ENTRY(0xC0AE, ECDHE,ECDSA,AES128,CCM8,,,,),
   CS_ENTRY(0xC0AF, TLS,ECDHE,ECDSA,WITH,AES,256,CCM,8),
   CS_ENTRY(0xC0AF, ECDHE,ECDSA,AES256,CCM8,,,,),
-#endif
-#ifdef USE_MBEDTLS
   /* entries marked ns are "non-standard", they are not in OpenSSL */
   CS_ENTRY(0x0041, TLS,RSA,WITH,CAMELLIA,128,CBC,SHA,),
   CS_ENTRY(0x0041, CAMELLIA128,SHA,,,,,,),
