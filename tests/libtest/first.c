@@ -83,7 +83,7 @@ int cgetopt(int argc, const char * const argv[], const char *optstring)
   }
   else {
     const char *opt = strchr(optstring, arg[optpos]);
-    coptopt = arg[optpos];
+    coptopt = (unsigned char)arg[optpos];
     if(!opt) {
       if(!arg[++optpos]) {
         coptind++;

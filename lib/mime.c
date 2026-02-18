@@ -464,7 +464,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
   while(st->bufbeg < st->bufend) {
     size_t len = 1;
     size_t consumed = 1;
-    int i = st->buf[st->bufbeg];
+    int i = (unsigned char)st->buf[st->bufbeg];
     buf[0] = (char)i;
     buf[1] = aschex[(i >> 4) & 0xF];
     buf[2] = aschex[i & 0xF];

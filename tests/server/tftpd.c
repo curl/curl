@@ -359,7 +359,7 @@ static void read_ahead(struct testcase *test,
     }
     else {
       if(test->rcount) {
-        c = test->rptr[0];
+        c = (unsigned char)test->rptr[0];
         test->rptr++;
         test->rcount--;
       }
@@ -451,7 +451,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
   p = writebuf;
   ct = count;
   while(ct--) {                   /* loop over the buffer */
-    c = *p++;                     /* pick up a character */
+    c = (unsigned char)*p++;      /* pick up a character */
     if(prevchar == '\r') {        /* if prev char was cr */
       if(c == '\n')               /* if have cr,lf then just */
         curl_lseek(test->ofile, -1, SEEK_CUR); /* smash lf on top of the cr */
