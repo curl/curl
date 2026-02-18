@@ -155,7 +155,7 @@ static CURLcode test_cli_upload_pausing(const char *URL)
     result = (CURLcode)1;
     goto cleanup;
   }
-  memset(&resolve, 0, sizeof(resolve));
+
   curl_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1",
                  host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
