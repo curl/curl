@@ -12,8 +12,12 @@ Checks:
   - -clang-diagnostic-nullability-extension
   - bugprone-suspicious-realloc-usage
   - misc-const-correctness
+  - misc-header-include-cycle
   - portability-*
   - readability-named-parameter
   - readability-redundant-control-flow
   - readability-redundant-preprocessor
   - readability-uppercase-literal-suffix
+
+CheckOptions:
+  misc-header-include-cycle.IgnoredFilesList: 'openssl/ssl.h'

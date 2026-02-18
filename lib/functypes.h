@@ -23,8 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-
 /* defaults:
 
    ssize_t recv(int, void *, size_t, int);

@@ -128,10 +128,4 @@ typedef enum {
   SANITIZE_ERR_LAST /* never use! */
 } SANITIZEcode;
 
-/*
- * Complete struct declarations which have OperationConfig struct members,
- * just in case this header is directly included in some source file.
- */
-#include "tool_cfgable.h"
-
 #endif /* HEADER_CURL_TOOL_SDECLS_H */
