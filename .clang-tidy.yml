@@ -11,7 +11,6 @@ Checks: >-
   -clang-analyzer-optin.performance.Padding,
   -clang-analyzer-security.ArrayBound,
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
-  clang-diagnostic-*,
   -clang-diagnostic-nullability-extension,
   misc-const-correctness,
   portability-*
