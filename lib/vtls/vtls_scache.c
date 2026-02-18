@@ -312,7 +312,7 @@ static struct Curl_ssl_scache *cf_ssl_scache_get(struct Curl_easy *data)
     scache = data->share->ssl_scache;
   else if(data->multi && data->multi->ssl_scache)
     scache = data->multi->ssl_scache;
-  if(scache && !GOOD_SCACHE(scache)) {
+  if(scache && (scache->magic != CURL_SCACHE_MAGIC)) {
     failf(data, "transfer would use an invalid scache at %p, denied",
           (void *)scache);
     DEBUGASSERT(0);
@@ -561,7 +561,7 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
 
 void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
 {
-  if(scache && GOOD_SCACHE(scache)) {
+  if(GOOD_SCACHE(scache)) {
     size_t i;
     scache->magic = 0;
     for(i = 0; i < scache->peer_count; ++i) {
