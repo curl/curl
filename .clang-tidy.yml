@@ -13,6 +13,7 @@ Checks:
   - -clang-diagnostic-nullability-extension
   - bugprone-macro-parentheses
   - bugprone-redundant-branch-condition
+  - bugprone-signed-char-misuse
   - bugprone-suspicious-realloc-usage
   - misc-const-correctness
   - misc-header-include-cycle

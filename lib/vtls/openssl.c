@@ -2592,18 +2592,20 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 
     if(content_type == SSL3_RT_CHANGE_CIPHER_SPEC) {
       if(len) {
-        msg_type = *(const char *)buf;
+        msg_type = *(const unsigned char *)buf;
         msg_name = "Change cipher spec";
       }
     }
     else if(content_type == SSL3_RT_ALERT) {
       if(len >= 2) {
-        msg_type = (((const char *)buf)[0] << 8) + ((const char *)buf)[1];
+        msg_type =
+          (((const unsigned char *)buf)[0] << 8) +
+           ((const unsigned char *)buf)[1];
         msg_name = SSL_alert_desc_string_long(msg_type);
       }
     }
     else if(len) {
-      msg_type = *(const char *)buf;
+      msg_type = *(const unsigned char *)buf;
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
 

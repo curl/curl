@@ -269,8 +269,8 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
 
     /* if there was a ":[num]" thing, use that as step or else use 1 */
     pat->c.ascii.step = step;
-    pat->c.ascii.letter = pat->c.ascii.min = min_c;
-    pat->c.ascii.max = max_c;
+    pat->c.ascii.letter = pat->c.ascii.min = (unsigned char)min_c;
+    pat->c.ascii.max = (unsigned char)max_c;
 
     if(multiply(amount, (((pat->c.ascii.max - pat->c.ascii.min) /
                          pat->c.ascii.step) + 1)))
