@@ -39,7 +39,7 @@ extern int easysrc_mime_count;  /* Number of curl_mime variables */
 extern int easysrc_slist_count; /* Number of curl_slist variables */
 
 extern CURLcode easysrc_init(void);
-extern CURLcode easysrc_add(struct slist_wc **plist, const char *bupf);
+extern CURLcode easysrc_add(struct slist_wc **plist, const char *line);
 extern CURLcode easysrc_addf(struct slist_wc **plist,
                              const char *fmt, ...) CURL_PRINTF(2, 3);
 extern CURLcode easysrc_perform(void);

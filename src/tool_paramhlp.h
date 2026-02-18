@@ -44,7 +44,7 @@ ParameterError str2unum(long *val, const char *str);
 ParameterError oct2nummax(long *val, const char *str, long max);
 ParameterError str2unummax(long *val, const char *str, long max);
 ParameterError secs2ms(long *val, const char *str);
-ParameterError proto2num(const char * const *val, char **obuf,
+ParameterError proto2num(const char * const *val, char **ostr,
                          const char *str);
 ParameterError check_protocol(const char *str);
 ParameterError str2offset(curl_off_t *val, const char *str);
