@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 #ifdef _WIN32
 
-#include "../system_win32.h"
+#include "system_win32.h"
 
 LARGE_INTEGER Curl_freq;
 

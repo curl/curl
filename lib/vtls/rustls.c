@@ -23,23 +23,23 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_RUSTLS
 
 #include <rustls.h>
 
-#include "../curlx/fopen.h"
-#include "../curlx/strerr.h"
-#include "../urldata.h"
-#include "../curl_trc.h"
-#include "../httpsrr.h"
-#include "vtls.h"
-#include "vtls_int.h"
-#include "rustls.h"
-#include "keylog.h"
-#include "cipher_suite.h"
-#include "x509asn1.h"
+#include "curlx/fopen.h"
+#include "curlx/strerr.h"
+#include "urldata.h"
+#include "curl_trc.h"
+#include "httpsrr.h"
+#include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
+#include "vtls/rustls.h"
+#include "vtls/keylog.h"
+#include "vtls/cipher_suite.h"
+#include "vtls/x509asn1.h"
 
 struct rustls_ssl_backend_data {
   const struct rustls_client_config *config;

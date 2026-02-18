@@ -38,6 +38,7 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"
 )
 
 if(CURL_BUILD_TESTING)
