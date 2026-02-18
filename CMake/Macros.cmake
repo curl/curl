@@ -159,7 +159,9 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     set(_includes_tmp ${_includes})
     set(_includes)
     foreach(_inc IN LISTS _includes_tmp)
-      if(_inc AND NOT _inc MATCHES "INSTALL_INTERFACE:")  # avoid empty items
+      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter also
+      # evaluates to an empty path in this context.
+      if(_inc AND NOT _inc MATCHES "INSTALL_INTERFACE:")
         list(APPEND _includes "-I${_inc}")
       endif()
     endforeach()
