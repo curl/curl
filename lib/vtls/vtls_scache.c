@@ -561,7 +561,7 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
 
 void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
 {
-  if(scache && GOOD_SCACHE(scache)) {
+  if(GOOD_SCACHE(scache)) {
     size_t i;
     scache->magic = 0;
     for(i = 0; i < scache->peer_count; ++i) {
