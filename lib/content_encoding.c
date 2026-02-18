@@ -600,9 +600,7 @@ static const struct Curl_cwtype * const general_unencoders[] = {
 
 /* supported content decoders only for transfer encodings */
 static const struct Curl_cwtype * const transfer_unencoders[] = {
-#ifndef CURL_DISABLE_HTTP
   &Curl_httpchunk_unencoder,
-#endif
   NULL
 };
 
