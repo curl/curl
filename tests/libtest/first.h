@@ -150,7 +150,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 #define exe_easy_init(A, Y, Z)                                        \
   do {                                                                \
     A = curl_easy_init();                                             \
-    if((A) == NULL) {                                                 \
+    if(!(A)) {                                                        \
       curl_mfprintf(stderr, "%s:%d curl_easy_init() failed\n", Y, Z); \
       result = TEST_ERR_EASY_INIT;                                    \
     }                                                                 \
@@ -174,7 +174,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 #define exe_multi_init(A, Y, Z)                                        \
   do {                                                                 \
     A = curl_multi_init();                                             \
-    if((A) == NULL) {                                                  \
+    if(!(A)) {                                                         \
       curl_mfprintf(stderr, "%s:%d curl_multi_init() failed\n", Y, Z); \
       result = TEST_ERR_MULTI;                                         \
     }                                                                  \
