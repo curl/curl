@@ -37,16 +37,14 @@ static CURLcode test_unit1654(const char *arg)
   struct altsvcinfo *asi = Curl_altsvc_init();
   abort_if(!asi, "Curl_altsvc_i");
   result = Curl_altsvc_load(asi, arg);
-  if(result) {
-    fail_if(result, "Curl_altsvc_load");
+  fail_if(result, "Curl_altsvc_load");
+  if(result)
     goto fail;
-  }
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
-  if(!curl) {
-    fail_if(!curl, "curl_easy_init");
+  fail_if(!curl, "curl_easy_init");
+  if(!curl)
     goto fail;
-  }
   fail_unless(Curl_llist_count(&asi->list) == 4, "wrong number of entries");
   curl_msnprintf(outname, sizeof(outname), "%s-out", arg);
 
