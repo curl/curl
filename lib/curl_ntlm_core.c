@@ -405,20 +405,6 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
   }
 }
 
-#ifndef USE_WINDOWS_SSPI
-
-static void ascii_uppercase_to_unicode_le(unsigned char *dest,
-                                          const char *src, size_t srclen)
-{
-  size_t i;
-  for(i = 0; i < srclen; i++) {
-    dest[2 * i] = (unsigned char)(Curl_raw_toupper(src[i]));
-    dest[2 * i + 1] = '\0';
-  }
-}
-
-#endif /* !USE_WINDOWS_SSPI */
-
 /*
  * Set up nt hashed passwords
  * @unittest: 1600
@@ -500,6 +486,16 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
   } while(i);
   ft->dwHighDateTime &= 0xFFFFFFFF;
 #endif
+}
+
+static void ascii_uppercase_to_unicode_le(unsigned char *dest,
+                                          const char *src, size_t srclen)
+{
+  size_t i;
+  for(i = 0; i < srclen; i++) {
+    dest[2 * i] = (unsigned char)(Curl_raw_toupper(src[i]));
+    dest[2 * i + 1] = '\0';
+  }
 }
 
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
