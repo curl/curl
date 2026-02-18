@@ -58,6 +58,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
               -I$(top_builddir)/lib     \
+              -I$(top_srcdir)/lib       \
               -I$(srcdir)
 
 # Prevent LIBS from being used for all link targets
