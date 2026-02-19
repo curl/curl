@@ -187,15 +187,26 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       list(APPEND _sources "${_source}")
     endforeach()
 
+    set(_cc "${CMAKE_C_COMPILER}")
+    if(CMAKE_C_COMPILER_TARGET AND CMAKE_C_COMPILE_OPTIONS_TARGET)
+      list(APPEND _cc "${CMAKE_C_COMPILE_OPTIONS_TARGET}${CMAKE_C_COMPILER_TARGET}")
+    endif()
+    if(APPLE AND CMAKE_OSX_SYSROOT)
+      list(APPEND _cc "-isysroot" "${CMAKE_OSX_SYSROOT}")
+    elseif(CMAKE_SYSROOT AND CMAKE_C_COMPILE_OPTIONS_SYSROOT)
+      list(APPEND _cc "${CMAKE_C_COMPILE_OPTIONS_SYSROOT}${CMAKE_SYSROOT}")
+    endif()
+
     # Pass -clang-diagnostic-unused-function to disable -Wunused-function implied by -Wunused
     add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMAND ${CMAKE_C_CLANG_TIDY}
         "--checks=-clang-diagnostic-unused-function"
-        ${_sources} -- ${_definitions} ${_includes} ${_options}
+        ${_sources} -- ${_cc} ${_definitions} ${_includes} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
 
+    unset(_cc)
     unset(_definitions)
     unset(_includes)
     unset(_options)
