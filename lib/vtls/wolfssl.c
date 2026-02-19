@@ -65,6 +65,7 @@
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
+
 #include "vtls/wolfssl.h"
 
 /* KEEP_PEER_CERT is a product of the presence of build time symbol
