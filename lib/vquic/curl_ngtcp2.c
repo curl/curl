@@ -2732,7 +2732,7 @@ out:
       default:
         if(cerr->error_code >= NGTCP2_CRYPTO_ERROR) {
           CURL_TRC_CF(data, cf, "crypto error, tls alert=%u",
-                      (unsigned int)(cerr->error_code & 0xffu));
+                      (unsigned int)(cerr->error_code & 0xffU));
         }
         else if(cerr->error_code == NGTCP2_CONNECTION_REFUSED) {
           CURL_TRC_CF(data, cf, "connection refused by server");
