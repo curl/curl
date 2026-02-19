@@ -161,12 +161,6 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     list(REMOVE_DUPLICATES _definitions)
     list(SORT _definitions)  # Sort like CMake does
 
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-      list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
-    else()
-      set(_options)
-    endif()
-
     set(_includes_tmp ${_includes})
     set(_includes)
     foreach(_inc IN LISTS _includes_tmp)
@@ -177,6 +171,12 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       endif()
     endforeach()
     list(REMOVE_DUPLICATES _includes)
+
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+      list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
+    else()
+      set(_options)
+    endif()
 
     # Assemble source list
     set(_sources "")
