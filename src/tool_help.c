@@ -281,13 +281,11 @@ void tool_help(const char *category)
         curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    --no-%s", a->lname);
       else
         curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    %s", category);
-#ifdef USE_MANUAL
       if(a->cmd == C_XATTR)
         /* this is the last option, which then ends when FILES starts */
         showhelp("\nALL OPTIONS\n", cmdbuf, "\nFILES");
       else
         showhelp("\nALL OPTIONS\n", cmdbuf, "\n    -");
-#endif
     }
 #else
     curl_mfprintf(tool_stderr, "Cannot comply. "
