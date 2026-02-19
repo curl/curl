@@ -13,4 +13,5 @@ Checks: >-
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   -clang-diagnostic-nullability-extension,
   misc-const-correctness,
-  portability-*
+  portability-*,
+  readability-named-parameter
