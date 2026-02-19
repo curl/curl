@@ -16,7 +16,7 @@ Checks: >-
   misc-const-correctness,
   portability-*,
   readability-named-parameter,
-  readability-redundant-control-flow
+  readability-redundant-control-flow,
   readability-redundant-casting
 
 CheckOptions:
