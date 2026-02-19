@@ -730,7 +730,7 @@ jobs:
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
             make -C bld
           fi
@@ -741,7 +741,7 @@ jobs:
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
+        if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
