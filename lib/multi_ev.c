@@ -248,10 +248,6 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
   else if(cur_action & CURL_POLL_OUT)
     entry->writers++;
 
-  DEBUGASSERT(entry->readers <= mev_sh_entry_user_count(entry));
-  DEBUGASSERT(entry->writers <= mev_sh_entry_user_count(entry));
-  DEBUGASSERT(entry->writers + entry->readers);
-
   CURL_TRC_M(data, "ev update fd=%" FMT_SOCKET_T ", action '%s%s' -> '%s%s'"
              " (%d/%d r/w)", s,
              (last_action & CURL_POLL_IN) ? "IN" : "",
@@ -259,6 +255,10 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
              (cur_action & CURL_POLL_IN) ? "IN" : "",
              (cur_action & CURL_POLL_OUT) ? "OUT" : "",
              entry->readers, entry->writers);
+
+  DEBUGASSERT(entry->readers <= mev_sh_entry_user_count(entry));
+  DEBUGASSERT(entry->writers <= mev_sh_entry_user_count(entry));
+  DEBUGASSERT(entry->writers + entry->readers);
 
   comboaction = (entry->writers ? CURL_POLL_OUT : 0) |
                 (entry->readers ? CURL_POLL_IN : 0);
@@ -484,6 +484,7 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
   if(!multi || !multi->socket_cb)
     return CURLM_OK;
 
+  CURL_TRC_M(data, "mev_assess");
   Curl_pollset_init(&ps);
   if(conn) {
     CURLcode r = Curl_conn_adjust_pollset(data, conn, &ps);
@@ -495,8 +496,9 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
   }
   else
     Curl_multi_pollset(data, &ps);
-  last_ps = mev_get_last_pollset(data, conn);
 
+  CURL_TRC_M(data, "mev_assess 2");
+  last_ps = mev_get_last_pollset(data, conn);
   if(!last_ps && ps.n) {
     if(conn)
       last_ps = mev_add_new_conn_pollset(conn);
@@ -508,12 +510,14 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
     }
   }
 
+  CURL_TRC_M(data, "mev_assess 3");
   if(last_ps)
     mresult = mev_pollset_diff(multi, data, conn, &ps, last_ps);
   else
     DEBUGASSERT(!ps.n);
 out:
   Curl_pollset_cleanup(&ps);
+  CURL_TRC_M(data, "mev_assess 4 -> %d", mresult);
   return mresult;
 }
 

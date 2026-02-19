@@ -52,6 +52,7 @@
 #include "url.h"
 #include "multiif.h"
 #include "doh.h"
+#include "progress.h"
 #include "select.h"
 #include "strcase.h"
 #include "easy_lock.h"
@@ -390,6 +391,7 @@ static CURLcode hostip_async_new(struct Curl_easy *data,
   async->ip_version = ip_version;
   if(hostlen)
     memcpy(async->hostname, hostname, hostlen);
+  async->start = *Curl_pgrs_now(data);
 
   data->state.async = async;
   return CURLE_OK;
@@ -813,7 +815,7 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data,
   }
   else if(result) {
     result = Curl_resolver_error(data, NULL);
-    return result;
+    goto out;
   }
 
 #ifndef CURL_DISABLE_DOH
@@ -830,11 +832,18 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data,
   else
     DEBUGASSERT(*pdns);
 
+out:
   if(*pdns)
     show_resolve_info(data, *pdns);
-  if((result == CURLE_COULDNT_RESOLVE_HOST) ||
-     (result == CURLE_COULDNT_RESOLVE_PROXY))
+  else if((result == CURLE_COULDNT_RESOLVE_HOST) ||
+          (result == CURLE_COULDNT_RESOLVE_PROXY)) {
     Curl_dnscache_add_negative(data, async->hostname, async->port);
+    failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
+  }
+  else if(result) {
+    failf(data, "Error %d resolving %s:%u",
+          result, async->hostname, async->port);
+  }
   return result;
 }
 #endif
@@ -866,21 +875,21 @@ CURLcode Curl_resolv_pollset(struct Curl_easy *data,
 CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail)
 {
   struct connectdata *conn = data->conn;
-  const char *host_or_proxy = "host";
-  const char *name = conn->host.dispname;
   CURLcode result = CURLE_COULDNT_RESOLVE_HOST;
+  VERBOSE(const char *host_or_proxy = "host");
+  VERBOSE(const char *name = conn->host.dispname);
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy) {
-    host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
-    name = conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
-      conn->http_proxy.host.dispname;
+    VERBOSE(host_or_proxy = "proxy");
+    VERBOSE(name = conn->socks_proxy.host.name ?
+      conn->socks_proxy.host.dispname : conn->http_proxy.host.dispname);
   }
 #endif
 
-  failf(data, "Could not resolve %s: %s%s%s%s", host_or_proxy, name,
-        detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
+  if(detail)
+    infof(data, "error resolving %s: %s (%s)", host_or_proxy, name, detail);
   return result;
 }
 #endif /* USE_CURL_ASYNC */

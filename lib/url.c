@@ -1904,7 +1904,6 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
     if(result)
       return result;
   }
-  DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
 
   /* Now create the destination name */
 #ifndef CURL_DISABLE_PROXY

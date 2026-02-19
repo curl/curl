@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
@@ -33,6 +33,10 @@
 #include "curl_threads.h"
 #include "thrdpool.h"
 #include "thrdqueue.h"
+#ifdef CURLVERBOSE
+#include "curl_trc.h"
+#include "urldata.h"
+#endif
 
 
 struct curl_thrdq {
@@ -57,10 +61,12 @@ struct thrdq_item {
   Curl_thrdq_item_free_cb *fn_free;
   Curl_thrdq_item_process_cb *fn_process;
   void *item;
+  const char *description;
 };
 
 static struct thrdq_item *thrdq_item_create(struct curl_thrdq *tqueue,
-                                            void *item)
+                                            void *item,
+                                            const char *description)
 {
   struct thrdq_item *qitem;
 
@@ -68,6 +74,7 @@ static struct thrdq_item *thrdq_item_create(struct curl_thrdq *tqueue,
   if(!qitem)
     return NULL;
   qitem->item = item;
+  qitem->description = description;
   qitem->fn_free = tqueue->fn_free;
   qitem->fn_process = tqueue->fn_process;
   return qitem;
@@ -86,17 +93,19 @@ static void thrdq_item_list_dtor(void *user_data, void *elem)
   thrdq_item_destroy(elem);
 }
 
-static void *thrdq_tpool_take(void *user_data)
+static void *thrdq_tpool_take(void *user_data, const char **pdescription)
 {
   struct curl_thrdq *tqueue = user_data;
   struct thrdq_item *qitem = NULL;
   struct Curl_llist_node *e;
 
   Curl_mutex_acquire(&tqueue->lock);
+  *pdescription = NULL;
   if(!tqueue->aborted) {
     e = Curl_llist_head(&tqueue->sendq);
     if(e) {
       qitem = Curl_node_take_elem(e);
+      *pdescription = qitem->description;
     }
   }
   Curl_mutex_release(&tqueue->lock);
@@ -178,10 +187,6 @@ CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
   if(!tqueue)
     goto out;
 
-  tqueue->name = curlx_strdup(name);
-  if(!tqueue->name)
-    goto out;
-
   Curl_mutex_init(&tqueue->lock);
   Curl_cond_init(&tqueue->await);
   Curl_llist_init(&tqueue->sendq, thrdq_item_list_dtor);
@@ -191,6 +196,10 @@ CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
   tqueue->fn_event = fn_event;
   tqueue->fn_user_data = user_data;
   tqueue->send_max_len = max_len;
+
+  tqueue->name = curlx_strdup(name);
+  if(!tqueue->name)
+    goto out;
 
   result = Curl_thrdpool_create(&tqueue->tpool, name,
                                 min_threads, max_threads, idle_time_ms,
@@ -236,7 +245,8 @@ void Curl_thrdq_stat(struct curl_thrdq *tqueue,
   Curl_mutex_release(&tqueue->lock);
 }
 
-CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item)
+CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
+                         const char *description)
 {
   CURLcode result = CURLE_AGAIN;
 
@@ -249,7 +259,7 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item)
 
   if(!tqueue->send_max_len ||
      (Curl_llist_count(&tqueue->sendq) < tqueue->send_max_len)) {
-    struct thrdq_item *qitem = thrdq_item_create(tqueue, item);
+    struct thrdq_item *qitem = thrdq_item_create(tqueue, item, description);
     if(!qitem) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -327,4 +337,34 @@ CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
   return Curl_thrdpool_await_idle(tqueue->tpool, timeout_ms);
 }
 
-#endif /* USE_THREADS */
+#ifdef CURLVERBOSE
+void Curl_thrdq_trace(struct curl_thrdq *tqueue,
+                      struct Curl_easy *data,
+                      struct curl_trc_feat *feat)
+{
+  if(Curl_trc_ft_is_verbose(data, feat)) {
+    struct Curl_llist_node *e;
+    struct thrdq_item *qitem;
+
+    Curl_thrdpool_trace(tqueue->tpool, data, feat);
+    Curl_mutex_acquire(&tqueue->lock);
+    if(!Curl_llist_count(&tqueue->sendq) &&
+       !Curl_llist_count(&tqueue->recvq)) {
+      Curl_trc_feat_infof(data, feat, "[%s] [QUEUE] empty", tqueue->name);
+    }
+    for(e = Curl_llist_head(&tqueue->sendq); e; e = Curl_node_next(e)) {
+      qitem = Curl_node_elem(e);
+      Curl_trc_feat_infof(data, feat, "[%s] [QUEUE] in: %s",
+                          tqueue->name, qitem->description);
+    }
+    for(e = Curl_llist_head(&tqueue->recvq); e; e = Curl_node_next(e)) {
+      qitem = Curl_node_elem(e);
+      Curl_trc_feat_infof(data, feat, "[%s] [QUEUE] out: %s",
+                          tqueue->name, qitem->description);
+    }
+    Curl_mutex_release(&tqueue->lock);
+  }
+}
+#endif
+
+#endif /* USE_THREADS && CURLRES_THREADED */
