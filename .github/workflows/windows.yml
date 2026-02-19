@@ -678,7 +678,7 @@ jobs:
         include:
           - { build: 'autotools', compiler: 'gcc' }
           - { build: 'cmake'    , compiler: 'gcc' }
-          - { build: 'cmake'    , compiler: 'clang-tidy', install: 'clang-20 clang-tidy-20' }
+          - { build: 'cmake'    , compiler: 'clang-tidy', install: 'clang-19 clang-tidy-19' }
     steps:
       - name: 'install packages'
         run: sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32 ${MATRIX_INSTALL}
@@ -697,9 +697,9 @@ jobs:
             if [ "${MATRIX_COMPILER}" = 'clang-tidy' ]; then
               options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
               options+=' -DCURL_CLANG_TIDY=ON'
-              options+=" -DCLANG_TIDY=$(command -v clang-tidy-20)"
-              options+=' -DCMAKE_C_COMPILER=clang-20'
-              options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang-20 -dumpversion | cut -d '.' -f 1)"
+              options+=" -DCLANG_TIDY=$(command -v clang-tidy-19)"
+              options+=' -DCMAKE_C_COMPILER=clang-19'
+              options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang-19 -dumpversion | cut -d '.' -f 1)"
             else
               options+=" -DCMAKE_C_COMPILER=${TRIPLET}-gcc"
             fi
