@@ -19,8 +19,6 @@
  */
 #include "../curl_setup.h"
 
-#include "strparse.h"
-
 #ifndef HAVE_INET_PTON
 
 #ifdef HAVE_SYS_PARAM_H
@@ -34,6 +32,7 @@
 #endif
 
 #include "inet_pton.h"
+#include "strparse.h"
 
 #define IN6ADDRSZ       16
 #define INADDRSZ         4
