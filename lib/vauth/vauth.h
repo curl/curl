@@ -150,7 +150,7 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
                                struct bufref *out);
 
 /* This is used to clean up the gsasl specific data */
-void Curl_auth_gsasl_cleanup(struct gsasldata *digest);
+void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl);
 #endif
 
 #ifdef USE_NTLM
