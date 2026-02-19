@@ -63,7 +63,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
      so we only return the size we would have saved ... */
   (void)ptr;
   (void)data;
-  return (size_t)(size * nmemb);
+  return size * nmemb;
 }
 
 int main(int argc, const char *argv[])
