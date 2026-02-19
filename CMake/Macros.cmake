@@ -103,6 +103,10 @@ endmacro()
 # Internal: Recurse into target libraries and collect their include directories
 # and macro definitions.
 macro(curl_collect_target_options _target)
+  get_target_property(_val ${_target} COMPILE_DEFINITIONS)
+  if(_val)
+    list(APPEND _definitions ${_val})
+  endif()
   get_target_property(_val ${_target} INTERFACE_INCLUDE_DIRECTORIES)
   if(_val)
     list(APPEND _includes ${_val})
@@ -110,10 +114,6 @@ macro(curl_collect_target_options _target)
   get_target_property(_val ${_target} INCLUDE_DIRECTORIES)
   if(_val)
     list(APPEND _includes ${_val})
-  endif()
-  get_target_property(_val ${_target} COMPILE_DEFINITIONS)
-  if(_val)
-    list(APPEND _definitions ${_val})
   endif()
   get_target_property(_val ${_target} COMPILE_OPTIONS)
   if(_val)
@@ -134,18 +134,18 @@ endmacro()
 macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
   if(CURL_CLANG_TIDY)
 
-    set(_includes "")
     set(_definitions "")
+    set(_includes "")
     set(_options "")
 
-    # Collect header directories and macro definitions applying to the directory
-    get_directory_property(_val INCLUDE_DIRECTORIES)
-    if(_val)
-      list(APPEND _includes ${_val})
-    endif()
+    # Collect macro definitions and header directories applying to the directory
     get_directory_property(_val COMPILE_DEFINITIONS)
     if(_val)
       list(APPEND _definitions ${_val})
+    endif()
+    get_directory_property(_val INCLUDE_DIRECTORIES)
+    if(_val)
+      list(APPEND _includes ${_val})
     endif()
     get_directory_property(_val COMPILE_OPTIONS)
     if(_val)
@@ -155,17 +155,6 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
 
     # Collect header directories and macro definitions from lib dependencies
     curl_collect_target_options(${_target})
-
-    set(_includes_tmp ${_includes})
-    set(_includes)
-    foreach(_inc IN LISTS _includes_tmp)
-      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter also
-      # evaluates to an empty path in this context.
-      if(_inc AND NOT _inc MATCHES "INSTALL_INTERFACE:")
-        list(APPEND _includes "-I${_inc}")
-      endif()
-    endforeach()
-    list(REMOVE_DUPLICATES _includes)
 
     list(REMOVE_ITEM _definitions "")
     string(REPLACE ";" ";-D" _definitions ";${_definitions}")
@@ -177,6 +166,17 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     else()
       set(_options)
     endif()
+
+    set(_includes_tmp ${_includes})
+    set(_includes)
+    foreach(_inc IN LISTS _includes_tmp)
+      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter also
+      # evaluates to an empty path in this context.
+      if(_inc AND NOT _inc MATCHES "INSTALL_INTERFACE:")
+        list(APPEND _includes "-I${_inc}")
+      endif()
+    endforeach()
+    list(REMOVE_DUPLICATES _includes)
 
     # Assemble source list
     set(_sources "")
@@ -192,12 +192,12 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMAND ${CMAKE_C_CLANG_TIDY}
         "--checks=-clang-diagnostic-unused-function"
-        ${_sources} -- ${_includes} ${_definitions} ${_options}
+        ${_sources} -- ${_definitions} ${_includes} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
 
-    unset(_includes)
     unset(_definitions)
+    unset(_includes)
     unset(_options)
     unset(_sources)
   endif()
