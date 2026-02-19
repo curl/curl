@@ -717,8 +717,10 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             data[nws].wsasock = wsasock;
             data[nws].wsaevent = wsaevent;
             data[nfd].wsastate = 0;
-            tv->tv_sec = 0;
-            tv->tv_usec = 0;
+            if(tv) {
+              tv->tv_sec = 0;
+              tv->tv_usec = 0;
+            }
             /* check if the socket is already ready */
             if(select(fd + 1, &readsock, &writesock, &exceptsock, tv) == 1) {
               logmsg("[select_ws] socket %d is ready", fd);
