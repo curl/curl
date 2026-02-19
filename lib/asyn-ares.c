@@ -332,8 +332,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     if(ares->ares_status == ARES_SUCCESS && !result) {
       struct Curl_dns_entry *dns =
         Curl_dns_entry_create(data, &ares->temp_ai,
-                              async->hostname, 0,
-                              async->port, FALSE);
+                              async->hostname, async->port, async->ip_version);
       if(!dns) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;

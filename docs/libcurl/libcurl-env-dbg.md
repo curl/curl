@@ -178,3 +178,7 @@ gives the shutdown timeout in milliseconds.
 
 With a threaded resolver, delay each lookup by the given milliseconds
 and give a negative answer.
+
+## `CURL_DBG_RESOLV_FAIL_IPV6`
+
+Make libcurl fail a resolve for IPv6 only.

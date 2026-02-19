@@ -561,6 +561,12 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
     return mresult;
   }
 
+  mresult = multi_assess_wakeup(multi);
+  if(mresult) {
+    failf(data, "error enabling wakeup listening: %d", mresult);
+    return mresult;
+  }
+
   CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
              data->mid, Curl_multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
