@@ -539,7 +539,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   else {
     if(sspi_w_token[0].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%lu).",
-            (unsigned long)sspi_w_token[0].cbBuffer);
+            sspi_w_token[0].cbBuffer);
       result = CURLE_COULDNT_CONNECT;
       goto error;
     }
