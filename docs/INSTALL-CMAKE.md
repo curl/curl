@@ -399,8 +399,8 @@ Details via CMake
 
 ## Dependency options (tools)
 
-- `CLANG_TIDY`:                             `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: `clang-tidy`
-- `PERL_EXECUTABLE`:                        Perl binary used throughout the build and tests.
+- `CLANG_TIDY`:                             Absolute path to `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: search for `clang-tidy`
+- `PERL_EXECUTABLE`:                        Absolute path to Perl binary used throughout the build and tests. Default: auto-detect
 
 ## Dependency options (libraries)
 
@@ -501,15 +501,15 @@ Examples:
 
 ## Test tools
 
-- `APXS`:                                   Default: `apxs`
-- `CADDY`:                                  Default: `caddy`
-- `HTTPD_NGHTTPX`:                          Default: `nghttpx`
-- `HTTPD`:                                  Default: `apache2`
-- `DANTED`:                                 Default: `danted`
-- `TEST_NGHTTPX`:                           Default: `nghttpx`
-- `VSFTPD`:                                 Default: `vsftps`
-- `SSHD`:                                   Default: `sshd`
-- `SFTPD`:                                  Default: `sftp-server`
+- `APXS`:                                   Absolute path. Default: search for `apxs`
+- `CADDY`:                                  Absolute path. Default: search for `caddy`
+- `HTTPD_NGHTTPX`:                          Absolute path. Default: search for `nghttpx`
+- `HTTPD`:                                  Absolute path. Default: search for `apache2`
+- `DANTED`:                                 Absolute path. Default: search for `danted`
+- `TEST_NGHTTPX`:                           Absolute path. Default: search for `nghttpx`
+- `VSFTPD`:                                 Absolute path. Default: search for `vsftps`
+- `SSHD`:                                   Absolute path. Default: search for `sshd`
+- `SFTPD`:                                  Absolute path. Default: search for `sftp-server`
 
 ## Feature detection variables
 
