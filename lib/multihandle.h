@@ -27,7 +27,7 @@
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
-#include "hostip.h"
+#include "dnscache.h"
 #include "multi_ev.h"
 #include "multi_ntfy.h"
 #include "psl.h"
