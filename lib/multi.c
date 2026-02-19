@@ -552,20 +552,6 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   multi->admin->set.server_response_timeout =
     data->set.server_response_timeout;
   multi->admin->set.no_signal = data->set.no_signal;
-  if(multi->xfers_alive == 1)
-    Curl_multi_ev_assess_xfer(multi, multi->admin);
-
-  mresult = multi_assess_wakeup(multi);
-  if(mresult) {
-    failf(data, "error enabling wakeup listening: %d", mresult);
-    return mresult;
-  }
-
-  mresult = multi_assess_wakeup(multi);
-  if(mresult) {
-    failf(data, "error enabling wakeup listening: %d", mresult);
-    return mresult;
-  }
 
   mresult = multi_assess_wakeup(multi);
   if(mresult) {
