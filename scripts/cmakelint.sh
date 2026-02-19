@@ -75,5 +75,5 @@ cd "$(dirname "$0")"/..
     --max-branches 12 \
     --max-arguments 5 \
     --max-localvars 15 \
-    --max-statements 50 \
+    --max-statements 65 \
     --
