@@ -165,6 +165,9 @@ $(UNITPROTOS): $(CSOURCES)
 
 _tidy_cflags :=
 TIDYFLAGS :=
+if CURL_WERROR
+TIDYFLAGS += '--warnings-as-errors=*'
+endif
 if CLANG
 _tidy_cflags += $(CFLAGS)
 endif
