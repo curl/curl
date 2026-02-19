@@ -49,7 +49,7 @@ When writing code (mostly for generating stuff included in release tarballs)
 we use a few "build tools" and we make sure that we remain functional with
 these versions:
 
-- clang-tidy     14.0.0 (2022-03-23), recommended: 19.1.0 or later (2024-09-17)
+- clang-tidy     17.0.0 (2023-09-19), recommended: 19.1.0 or later (2024-09-17)
 - cmake          3.7 (2016-11-11)
 - GNU autoconf   2.59 (2003-11-06)
 - GNU automake   1.7 (2002-09-25)
