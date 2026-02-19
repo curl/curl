@@ -470,6 +470,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                     struct Curl_dns_entry **pdns)
 {
   struct Curl_addrinfo *addr = NULL;
+  size_t hostname_len;
   CURLcode result = CURLE_OK;
 
   *pdns = NULL;
@@ -478,6 +479,26 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   result = hostip_resolv_announce(data, hostname, port, ip_version);
   if(result)
     goto out;
+
+  /* Check for "known" things to resolve ourselves. */
+#ifndef USE_RESOLVE_ON_IPS
+  if(Curl_is_ipaddr(hostname)) {
+    /* shortcut literal IP addresses, if we are not told to resolve them. */
+    result = Curl_str2addr(hostname, port, &addr);
+    goto out;
+  }
+#endif
+
+  hostname_len = strlen(hostname);
+  if(curl_strequal(hostname, "localhost") ||
+     curl_strequal(hostname, "localhost.") ||
+     tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
+     tailmatch(hostname, hostname_len, STRCONST(".localhost."))) {
+    addr = get_localhost(port, hostname);
+    if(!addr)
+      result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
 #ifndef CURL_DISABLE_DOH
   if(!Curl_is_ipaddr(hostname) && allowDOH && data->set.doh) {
@@ -489,6 +510,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
     result = Curl_doh(data, data->state.async);
     goto out;
   }
+#else
+  (void)allowDOH;
 #endif
 
   /* Can we provide the requested IP specifics in resolving? */
@@ -549,7 +572,6 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
                               bool allowDOH,
                               struct Curl_dns_entry **pdns)
 {
-  struct Curl_addrinfo *addr = NULL;
   size_t hostname_len;
   CURLcode result = CURLE_OK;
   bool cache_dns = FALSE;
@@ -586,35 +608,6 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     goto out;
   }
 #endif
-
-  /* Check for "known" things to resolve ourselves. */
-#ifndef USE_RESOLVE_ON_IPS
-  if(Curl_is_ipaddr(hostname)) {
-    /* shortcut literal IP addresses, if we are not told to resolve them. */
-    result = Curl_str2addr(hostname, port, &addr);
-    if(result)
-      goto out;
-  }
-#endif
-
-  if(!addr &&
-     (curl_strequal(hostname, "localhost") ||
-      curl_strequal(hostname, "localhost.") ||
-      tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
-      tailmatch(hostname, hostname_len, STRCONST(".localhost.")))) {
-    addr = get_localhost(port, hostname);
-    if(!addr) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-  }
-
-  if(addr) {
-    *pdns = Curl_dns_entry_create(data, &addr, hostname, port, ip_version);
-    if(!*pdns)
-      result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
 
   /* Let's check our DNS cache next */
   result = Curl_dnscache_get(data, hostname, port, ip_version, pdns);
