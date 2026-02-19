@@ -171,14 +171,19 @@ static struct Curl_dnscache *dnscache_get(struct Curl_easy *data)
 static void dnscache_lock(struct Curl_easy *data,
                           struct Curl_dnscache *dnscache)
 {
-  if(data->share && dnscache == &data->share->dnscache)
+  /* This is not completely sane. Due to the flexibility of easy handle
+   * having shares, different shares or none, we can run into situations
+   * where we update `Curl_dns_entry`s that once originated from a shared
+   * cache into multiple threads but we no longer have a way to use
+   * a common lock again. */
+  if(data->share && ((dnscache == &data->share->dnscache) || !dnscache))
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 }
 
 static void dnscache_unlock(struct Curl_easy *data,
                             struct Curl_dnscache *dnscache)
 {
-  if(data->share && dnscache == &data->share->dnscache)
+  if(data->share && ((dnscache == &data->share->dnscache) || !dnscache))
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
@@ -345,16 +350,17 @@ CURLcode Curl_dnscache_get(struct Curl_easy *data,
   struct Curl_dns_entry *dns = NULL;
   CURLcode result = CURLE_OK;
 
-  dnscache_lock(data, dnscache);
-  result = fetch_addr(data, dnscache, hostname, port, ip_version, &dns);
-  if(!result && dns)
-    dns->refcount++; /* we pass out a reference */
-  else if(result) {
-    DEBUGASSERT(!dns);
-    dns = NULL;
+  if(dnscache) {
+    dnscache_lock(data, dnscache);
+    result = fetch_addr(data, dnscache, hostname, port, ip_version, &dns);
+    if(!result && dns)
+      dns->refcount++; /* we pass out a reference */
+    else if(result) {
+      DEBUGASSERT(!dns);
+      dns = NULL;
+    }
+    dnscache_unlock(data, dnscache);
   }
-  dnscache_unlock(data, dnscache);
-
   *pentry = dns;
   return result;
 }
@@ -443,6 +449,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 
 static struct Curl_dns_entry *
 dnscache_entry_create(struct Curl_easy *data,
+                      struct Curl_dnscache *cache,
                       struct Curl_addrinfo **paddr,
                       const char *hostname,
                       size_t hostlen, /* length or zero */
@@ -470,6 +477,7 @@ dnscache_entry_create(struct Curl_easy *data,
   if(!dns)
     goto out;
 
+  dns->cache = cache;
   dns->refcount = 1; /* the cache has the first reference */
   dns->addr = paddr ? *paddr : NULL; /* this is the address(es) */
   if(permanent) {
@@ -500,7 +508,7 @@ Curl_dns_entry_create(struct Curl_easy *data,
                       uint16_t port,
                       uint8_t ip_version)
 {
-  return dnscache_entry_create(data, paddr, hostname, 0,
+  return dnscache_entry_create(data, NULL, paddr, hostname, 0,
                                port, ip_version, FALSE);
 }
 
@@ -519,7 +527,7 @@ dnscache_add_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
-  dns = dnscache_entry_create(data, paddr, hostname, hlen, port,
+  dns = dnscache_entry_create(data, dnscache, paddr, hostname, hlen, port,
                               ip_version, permanent);
   if(!dns)
     return NULL;
@@ -550,6 +558,11 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
 
   if(!dnscache)
     return CURLE_FAILED_INIT;
+  /* If entry is from another cache, do not add here. This would
+   * only be asking for trouble. Ignore add instead. */
+  if(entry->cache && (entry->cache != dnscache))
+    return CURLE_OK;
+
   /* Create an entry id, based upon the hostname and port */
   idlen = create_dnscache_id(entry->hostname, 0, entry->port, id, sizeof(id));
 
@@ -560,6 +573,8 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
   entry->refcount++;
+  if(!entry->cache)
+    entry->cache = dnscache; /* now owned in this cache */
   dnscache_unlock(data, dnscache);
   return CURLE_OK;
 }
@@ -589,6 +604,19 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
   return CURLE_OUT_OF_MEMORY;
 }
 
+struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
+                                           struct Curl_dns_entry *dns)
+{
+  if(!dns)
+    return NULL;
+  else {
+    dnscache_lock(data, dns->cache);
+    dns->refcount++;
+    dnscache_unlock(data, dns->cache);
+    return dns;
+  }
+}
+
 /*
  * Curl_dns_entry_unlink() releases a reference to the given cached DNS entry.
  * When the reference count reaches 0, the entry is destroyed. It is important
@@ -600,8 +628,8 @@ void Curl_dns_entry_unlink(struct Curl_easy *data,
                            struct Curl_dns_entry **pdns)
 {
   if(*pdns) {
-    struct Curl_dnscache *dnscache = dnscache_get(data);
     struct Curl_dns_entry *dns = *pdns;
+    struct Curl_dnscache *dnscache = dns ? dns->cache : NULL;
     *pdns = NULL;
     dnscache_lock(data, dnscache);
     dns->refcount--;
@@ -611,6 +639,7 @@ void Curl_dns_entry_unlink(struct Curl_easy *data,
   }
 }
 
+/* Destructor called from the hash when it removes elements */
 static void dnscache_entry_dtor(void *entry)
 {
   struct Curl_dns_entry *dns = (struct Curl_dns_entry *)entry;
@@ -618,14 +647,17 @@ static void dnscache_entry_dtor(void *entry)
   dns->refcount--;
   if(dns->refcount == 0)
     dnscache_entry_free(dns);
+  else { /* entry is linked to in other places, connections most likely */
+    dns->cache = NULL;
+  }
 }
 
 /*
  * Curl_dnscache_init() inits a new DNS cache.
  */
-void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size)
+void Curl_dnscache_init(struct Curl_dnscache *cache, size_t size)
 {
-  Curl_hash_init(&dns->entries, size, Curl_hash_str, curlx_str_key_compare,
+  Curl_hash_init(&cache->entries, size, Curl_hash_str, curlx_str_key_compare,
                  dnscache_entry_dtor);
 }
 

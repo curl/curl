@@ -34,12 +34,14 @@ struct connectdata;
 struct easy_pollset;
 struct Curl_https_rrinfo;
 struct Curl_multi;
+struct Curl_dnscache;
 
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo *hinfo;
 #endif
+  struct Curl_dnscache *cache; /* NULL or owning dns cache */
   /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
   struct curltime timestamp;
   /* reference counter, entry is freed on reaching 0 */
@@ -65,6 +67,11 @@ Curl_dns_entry_create(struct Curl_easy *data,
                       struct Curl_addrinfo **paddr,
                       const char *hostname,
                       uint16_t port, uint8_t ip_version);
+
+/* Increase the ref counter and return it for storing in another place.
+ * May be called with NULL, in which case it returns NULL. */
+struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
+                                           struct Curl_dns_entry *dns);
 
 /* unlink a dns entry, frees all resources if it was the last reference.
  * Always clears `*pdns`` */
