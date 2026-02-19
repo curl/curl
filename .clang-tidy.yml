@@ -16,8 +16,4 @@ Checks: >-
   misc-const-correctness,
   portability-*,
   readability-named-parameter,
-  readability-redundant-control-flow,
-  readability-redundant-casting
-
-CheckOptions:
-  readability-redundant-casting.IgnoreTypeAliases: true
+  readability-redundant-control-flow
