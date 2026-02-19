@@ -152,7 +152,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     }
 
     for(i = 0; i < 16; i++)
-      curl_msnprintf(&md5buffer[i * 2], 3, "%02x", (unsigned char)hash[i]);
+      curl_msnprintf(&md5buffer[i * 2], 3, "%02x", hash[i]);
 
     infof(data, "SSH MD5 fingerprint: %s", md5buffer);
 
@@ -1168,7 +1168,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
   if(data->state.resume_from) {
     if(data->state.resume_from < 0) {
       /* We are supposed to download the last abs(from) bytes */
-      if((curl_off_t)size < -data->state.resume_from) {
+      if(size < -data->state.resume_from) {
         failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
               FMT_OFF_T ")", data->state.resume_from, size);
         return myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
@@ -1177,7 +1177,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
       data->state.resume_from += size;
     }
     else {
-      if((curl_off_t)size < data->state.resume_from) {
+      if(size < data->state.resume_from) {
         failf(data, "Offset (%" FMT_OFF_T
               ") was beyond file size (%" FMT_OFF_T ")",
               data->state.resume_from, size);
@@ -1732,7 +1732,7 @@ static int myssh_SSH_SCP_DOWNLOAD(struct Curl_easy *data,
 
   /* download data */
   bytecount = ssh_scp_request_get_size(sshc->scp_session);
-  data->req.maxdownload = (curl_off_t)bytecount;
+  data->req.maxdownload = bytecount;
   Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
