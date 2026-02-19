@@ -2931,7 +2931,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
           enhkey_usage_size = req_size;
         }
 
-        if(req_size) {  /* We have EKU data */
+        if(req_size) {  /* Cert has EKU data */
           if(CertGetEnhancedKeyUsage(pContext, 0, enhkey_usage, &req_size)) {
             if(!enhkey_usage->cUsageIdentifier) {
               /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate
