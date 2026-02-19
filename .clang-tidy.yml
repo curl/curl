@@ -14,8 +14,4 @@ Checks: >-
   -clang-diagnostic-nullability-extension,
   misc-const-correctness,
   portability-*,
-  readability-inconsistent-declaration-parameter-name,
   readability-named-parameter
-
-CheckOptions:
-  readability-inconsistent-declaration-parameter-name.Strict: false
