@@ -47,7 +47,9 @@ sub scanconf {
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym)=($1);
-            $disable{$sym} = 1;
+            if(not $sym =~ /^(CURL_DISABLE_TYPECHECK)$/) {
+                $disable{$sym} = 1;
+            }
         }
     }
     close S;
@@ -70,7 +72,7 @@ sub scanconf_cmake {
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym)=($1);
-            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_SRP)$/) {
+            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_SRP|CURL_DISABLE_TYPECHECK)$/) {
                 $hashr->{$sym} = 1;
             }
         }
@@ -86,7 +88,10 @@ sub scan_cmake_config_h {
     scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config-cmake.h.in");
 }
 
-my %whitelisted = ('CURL_DISABLE_DEPRECATION' => 1);
+my %whitelisted = (
+  'CURL_DISABLE_DEPRECATION' => 1,
+  'CURL_DISABLE_TYPECHECK' => 1,
+);
 
 sub scan_file {
     my ($source)=@_;
@@ -128,7 +133,9 @@ sub scan_docs {
         $line++;
         if(/^## `(CURL_DISABLE_[A-Z0-9_]+)`/g) {
             my ($sym)=($1);
-            $docs{$sym} = $line;
+            if(not $sym =~ /^(CURL_DISABLE_TYPECHECK)$/) {
+                $docs{$sym} = $line;
+            }
         }
     }
     close F;

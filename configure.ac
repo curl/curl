@@ -4338,7 +4338,8 @@ AS_HELP_STRING([--disable-typecheck],[Disable type checking]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
+    dnl Set it via the command-line to make it apply to examples also.
+    CPPFLAGS="$CPPFLAGS -DCURL_DISABLE_TYPECHECK"
     curl_typecheck_msg="no"
     ;;
   *)

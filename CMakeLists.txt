@@ -504,6 +504,11 @@ mark_as_advanced(CURL_DISABLE_TYPECHECK)
 option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 
+if(CURL_DISABLE_TYPECHECK)
+  # Set it via the command-line to make it apply to examples also.
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DISABLE_TYPECHECK")
+endif()
+
 if(CURL_DISABLE_HTTP)
   set(CURL_DISABLE_ALTSVC ON)
   set(CURL_DISABLE_HSTS ON)
