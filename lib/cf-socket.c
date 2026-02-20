@@ -105,7 +105,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
    (defined(_WIN32) && !defined(TCP_KEEPIDLE))
 /* Solaris < 11.4, DragonFlyBSD < 500702 and Windows < 10.0.16299
  * use millisecond units. */
-#define KEEPALIVE_FACTOR(x) (x *= 1000)
+#define KEEPALIVE_FACTOR(x) ((x) *= 1000)
 #else
 #define KEEPALIVE_FACTOR(x)
 #endif
