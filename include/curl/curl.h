@@ -1117,10 +1117,9 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 /* *STRINGPOINT is an alias for OBJECTPOINT to allow tools to extract the
    string options from the header file */
 
-#define CURLOPT(na, t, nu) \
-  na = ((t) + (nu))
-#define CURLOPTDEPRECATED(na, t, nu, v, m) \
-  na CURL_DEPRECATED(v, m) = ((t) + (nu))
+#define CURLOPT(na, t, nu) na = ((t) + (nu))
+#define CURLOPTDEPRECATED(na, t, nu, v, m) na CURL_DEPRECATED(v, m) \
+  = ((t) + (nu))
 
 /* CURLOPT aliases that make no runtime difference */
 
