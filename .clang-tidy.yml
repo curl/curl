@@ -14,7 +14,6 @@ Checks:
   - bugprone-suspicious-realloc-usage
   - misc-const-correctness
   - misc-header-include-cycle
-  - misc-redundant-expression
   - portability-*
   - readability-named-parameter
   - readability-redundant-control-flow
