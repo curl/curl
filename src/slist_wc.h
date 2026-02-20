@@ -41,7 +41,7 @@ struct slist_wc {
  * Appends a string to a linked list. If no list exists, it will be created
  * first. Returns the new list, after appending.
  */
-struct slist_wc *slist_wc_append(struct slist_wc *, const char *);
+struct slist_wc *slist_wc_append(struct slist_wc *list, const char *data);
 
 /*
  * NAME curl_slist_free_all()
@@ -50,7 +50,7 @@ struct slist_wc *slist_wc_append(struct slist_wc *, const char *);
  *
  * free a previously built curl_slist_wc.
  */
-void slist_wc_free_all(struct slist_wc *);
+void slist_wc_free_all(struct slist_wc *list);
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 

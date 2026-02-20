@@ -269,7 +269,7 @@ CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
  *
  * Returns: A pointer to a null-terminated error message.
  */
-CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
+CURL_EXTERN const char *curl_multi_strerror(CURLMcode error);
 
 /*
  * Name:    curl_multi_socket() and
