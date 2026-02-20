@@ -40,7 +40,7 @@ const unsigned char Curl_udigits[] = "0123456789ABCDEF";
 
 #define OUTCHAR(x)                                       \
   do {                                                   \
-    if(stream((unsigned char)x, userp))                  \
+    if(stream((unsigned char)(x), userp))                \
       return TRUE;                                       \
     (*donep)++;                                          \
   } while(0)
@@ -145,7 +145,7 @@ static int dollarstring(const char *p, const char **end)
 }
 
 #define is_arg_used(x, y)   ((x)[(y) / 8] & (1 << ((y) & 7)))
-#define mark_arg_used(x, y) ((x)[y / 8] |= (unsigned char)(1 << ((y) & 7)))
+#define mark_arg_used(x, y) ((x)[(y) / 8] |= (unsigned char)(1 << ((y) & 7)))
 
 /*
  * Parse the format string.

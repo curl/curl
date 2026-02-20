@@ -474,7 +474,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  * Returns the host type.
  */
 
-#define HOST_ERROR   -1 /* out of memory */
+#define HOST_ERROR   (-1) /* out of memory */
 
 #define HOST_NAME    1
 #define HOST_IPV4    2
@@ -1300,9 +1300,9 @@ void curl_url_cleanup(CURLU *u)
 
 #define DUP(dest, src, name)                    \
   do {                                          \
-    if(src->name) {                             \
-      dest->name = curlx_strdup(src->name);     \
-      if(!dest->name)                           \
+    if((src)->name) {                           \
+      (dest)->name = curlx_strdup((src)->name); \
+      if(!(dest)->name)                         \
         goto fail;                              \
     }                                           \
   } while(0)

@@ -38,16 +38,16 @@
 
 #include <time.h>
 
-#define HMAC_SHA256(k, kl, d, dl, o)                \
-  do {                                              \
-    result = Curl_hmacit(&Curl_HMAC_SHA256,         \
-                         (const unsigned char *)k,  \
-                         kl,                        \
-                         (const unsigned char *)d,  \
-                         dl, o);                    \
-    if(result) {                                    \
-      goto fail;                                    \
-    }                                               \
+#define HMAC_SHA256(k, kl, d, dl, o)                 \
+  do {                                               \
+    result = Curl_hmacit(&Curl_HMAC_SHA256,          \
+                         (const unsigned char *)(k), \
+                         kl,                         \
+                         (const unsigned char *)(d), \
+                         dl, o);                     \
+    if(result) {                                     \
+      goto fail;                                     \
+    }                                                \
   } while(0)
 
 #define TIMESTAMP_SIZE 17

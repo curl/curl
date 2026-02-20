@@ -214,9 +214,9 @@ struct t1521_testdata {
 
 #define LO $minlong
 #define HI $maxlong
-#define OFF_LO (curl_off_t) LO
-#define OFF_HI (curl_off_t) $maxofft
-#define OFF_NO (curl_off_t) 0
+#define OFF_LO ((curl_off_t)(LO))
+#define OFF_HI ((curl_off_t)($maxofft))
+#define OFF_NO ((curl_off_t)0)
 
 static size_t writecb(char *buffer, size_t size, size_t nitems,
                       void *outstream)
@@ -345,7 +345,9 @@ static bool bad_neg(int check)
 
 /* macro to check the first setopt of an option which then is allowed to get a
    non-existing function return code back */
-#define present(x) ((x != CURLE_NOT_BUILT_IN) && (x != CURLE_UNKNOWN_OPTION))
+#define present(x)                \\
+  (((x) != CURLE_NOT_BUILT_IN) && \\
+   ((x) != CURLE_UNKNOWN_OPTION))
 
 static CURLcode test_lib1521(const char *URL)
 {

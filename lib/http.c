@@ -3181,17 +3181,19 @@ static statusline checkprotoprefix(struct Curl_easy *data,
 }
 
 /* HTTP header has field name `n` (a string constant) */
-#define HD_IS(hd, hdlen, n) \
-  (((hdlen) >= (sizeof(n) - 1)) && curl_strnequal((n), (hd), (sizeof(n) - 1)))
+#define HD_IS(hd, hdlen, n)                    \
+  (((hdlen) >= (sizeof(n) - 1)) &&             \
+   curl_strnequal((n), (hd), (sizeof(n) - 1)))
 
-#define HD_VAL(hd, hdlen, n) \
-  ((((hdlen) >= (sizeof(n) - 1)) && \
-    curl_strnequal((n), (hd), (sizeof(n) - 1)))? (hd + (sizeof(n) - 1)) : NULL)
+#define HD_VAL(hd, hdlen, n)                                               \
+  ((((hdlen) >= (sizeof(n) - 1)) &&                                        \
+    curl_strnequal((n), (hd), (sizeof(n) - 1))) ? ((hd) + (sizeof(n) - 1)) \
+                                                : NULL)
 
 /* HTTP header has field name `n` (a string constant) and contains `v`
  * (a string constant) in its value(s) */
-#define HD_IS_AND_SAYS(hd, hdlen, n, v) \
-  (HD_IS(hd, hdlen, n) && \
+#define HD_IS_AND_SAYS(hd, hdlen, n, v)               \
+  (HD_IS(hd, hdlen, n) &&                             \
    ((hdlen) > ((sizeof(n) - 1) + (sizeof(v) - 1))) && \
    Curl_compareheader(hd, STRCONST(n), STRCONST(v)))
 

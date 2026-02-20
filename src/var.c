@@ -59,7 +59,7 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
 
 #define ENDOFFUNC(x) (((x) == '}') || ((x) == ':'))
 #define FUNCMATCH(ptr, name, len)                   \
-  (!strncmp(ptr, name, len) && ENDOFFUNC(ptr[len]))
+  (!strncmp(ptr, name, len) && ENDOFFUNC((ptr)[len]))
 
 #define FUNC_TRIM      "trim"
 #define FUNC_TRIM_LEN  (sizeof(FUNC_TRIM) - 1)

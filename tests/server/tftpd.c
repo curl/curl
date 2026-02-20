@@ -146,8 +146,8 @@ struct bf {
   tftphdr_storage_t buf;  /* room for data packet */
 };
 
-#define BF_ALLOC -3       /* allocated but not yet filled */
-#define BF_FREE  -2       /* free */
+#define BF_ALLOC (-3)       /* allocated but not yet filled */
+#define BF_FREE  (-2)       /* free */
 
 #define opcode_RRQ   1
 #define opcode_WRQ   2

@@ -46,7 +46,7 @@
     curl_mfprintf(stderr, "test failed with code: %d\n", result);            \
     goto test_cleanup;                                                       \
   }                                                                          \
-  else if(fd_count != expected_fds) {                                        \
+  else if(fd_count != (expected_fds)) {                                      \
     curl_mfprintf(stderr, "Max number of waitfds: %u not as expected: %u\n", \
                   fd_count, expected_fds);                                   \
     result = TEST_ERR_FAILURE;                                               \
