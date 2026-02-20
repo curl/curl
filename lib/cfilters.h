@@ -348,7 +348,7 @@ unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
 const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
                                              struct Curl_easy *data);
 
-#define CURL_CF_SSL_DEFAULT  -1
+#define CURL_CF_SSL_DEFAULT  (-1)
 #define CURL_CF_SSL_DISABLE  0
 #define CURL_CF_SSL_ENABLE   1
 

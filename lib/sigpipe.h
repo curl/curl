@@ -88,10 +88,10 @@ static CURL_INLINE void sigpipe_apply(struct Curl_easy *data,
 
 #else /* !HAVE_SIGACTION || USE_SO_NOSIGPIPE */
 /* for systems without sigaction or where SO_NOSIGPIPE is used. */
-#define sigpipe_ignore(x, y) do { (void)x; (void)y; } while(0)
-#define sigpipe_apply(x, y)  do { (void)x; (void)y; } while(0)
-#define sigpipe_init(x)      do { (void)x; } while(0)
-#define sigpipe_restore(x)   do { (void)x; } while(0)
+#define sigpipe_ignore(x, y) do { (void)(x); (void)(y); } while(0)
+#define sigpipe_apply(x, y)  do { (void)(x); (void)(y); } while(0)
+#define sigpipe_init(x)      do { (void)(x); } while(0)
+#define sigpipe_restore(x)   do { (void)(x); } while(0)
 
 struct Curl_sigpipe_ctx {
   bool dummy;
