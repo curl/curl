@@ -100,13 +100,14 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
 void Curl_http_to_fold(struct dynbuf *bf);
 
 void Curl_http_method(struct Curl_easy *data,
-                      const char **method, Curl_HttpReq *);
+                      const char **method, Curl_HttpReq *reqp);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
-CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
+CURLcode Curl_http_done(struct Curl_easy *data,
+                        CURLcode status, bool premature);
 CURLcode Curl_http_doing_pollset(struct Curl_easy *data,
                                  struct easy_pollset *ps);
 CURLcode Curl_http_perform_pollset(struct Curl_easy *data,

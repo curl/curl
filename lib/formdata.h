@@ -47,7 +47,7 @@ struct FormInfo {
 };
 
 CURLcode Curl_getformdata(CURL *data,
-                          curl_mimepart *,
+                          curl_mimepart *finalform,
                           struct curl_httppost *post,
                           curl_read_callback fread_func);
 #endif /* CURL_DISABLE_FORM_API */
