@@ -93,7 +93,7 @@ const char * const Curl_month[] = {
 #endif
 
 #define PARSEDATE_OK     0
-#define PARSEDATE_FAIL   -1
+#define PARSEDATE_FAIL   (-1)
 
 #ifndef CURL_DISABLE_PARSEDATE
 
@@ -113,84 +113,84 @@ struct tzinfo {
 
 /* Here's a bunch of frequently used time zone names. These were supported
    by the old getdate parser. */
-#define tDAYZONE -60       /* offset for daylight savings time */
+#define tDAYZONE (-60)         /* offset for daylight savings time */
 static const struct tzinfo tz[] = {
-  { "GMT",     0 },          /* Greenwich Mean */
-  { "UT",      0 },          /* Universal Time */
-  { "UTC",     0 },          /* Universal (Coordinated) */
-  { "WET",     0 },          /* Western European */
-  { "BST",     0 tDAYZONE }, /* British Summer */
-  { "WAT",    60 },          /* West Africa */
-  { "AST",   240 },          /* Atlantic Standard */
-  { "ADT",   240 tDAYZONE }, /* Atlantic Daylight */
-  { "EST",   300 },          /* Eastern Standard */
-  { "EDT",   300 tDAYZONE }, /* Eastern Daylight */
-  { "CST",   360 },          /* Central Standard */
-  { "CDT",   360 tDAYZONE }, /* Central Daylight */
-  { "MST",   420 },          /* Mountain Standard */
-  { "MDT",   420 tDAYZONE }, /* Mountain Daylight */
-  { "PST",   480 },          /* Pacific Standard */
-  { "PDT",   480 tDAYZONE }, /* Pacific Daylight */
-  { "YST",   540 },          /* Yukon Standard */
-  { "YDT",   540 tDAYZONE }, /* Yukon Daylight */
-  { "HST",   600 },          /* Hawaii Standard */
-  { "HDT",   600 tDAYZONE }, /* Hawaii Daylight */
-  { "CAT",   600 },          /* Central Alaska */
-  { "AHST",  600 },          /* Alaska-Hawaii Standard */
-  { "NT",    660 },          /* Nome */ /* spellchecker:disable-line */
-  { "IDLW",  720 },          /* International Date Line West */
-  { "CET",   -60 },          /* Central European */
-  { "MET",   -60 },          /* Middle European */
-  { "MEWT",  -60 },          /* Middle European Winter */
-  { "MEST",  -60 tDAYZONE }, /* Middle European Summer */
-  { "CEST",  -60 tDAYZONE }, /* Central European Summer */
-  { "MESZ",  -60 tDAYZONE }, /* Middle European Summer */
-  { "FWT",   -60 },          /* French Winter */
-  { "FST",   -60 tDAYZONE }, /* French Summer */
-  { "EET",  -120 },          /* Eastern Europe, USSR Zone 1 */
+  { "GMT",     0 },            /* Greenwich Mean */
+  { "UT",      0 },            /* Universal Time */
+  { "UTC",     0 },            /* Universal (Coordinated) */
+  { "WET",     0 },            /* Western European */
+  { "BST",     0 + tDAYZONE }, /* British Summer */
+  { "WAT",    60 },            /* West Africa */
+  { "AST",   240 },            /* Atlantic Standard */
+  { "ADT",   240 + tDAYZONE }, /* Atlantic Daylight */
+  { "EST",   300 },            /* Eastern Standard */
+  { "EDT",   300 + tDAYZONE }, /* Eastern Daylight */
+  { "CST",   360 },            /* Central Standard */
+  { "CDT",   360 + tDAYZONE }, /* Central Daylight */
+  { "MST",   420 },            /* Mountain Standard */
+  { "MDT",   420 + tDAYZONE }, /* Mountain Daylight */
+  { "PST",   480 },            /* Pacific Standard */
+  { "PDT",   480 + tDAYZONE }, /* Pacific Daylight */
+  { "YST",   540 },            /* Yukon Standard */
+  { "YDT",   540 + tDAYZONE }, /* Yukon Daylight */
+  { "HST",   600 },            /* Hawaii Standard */
+  { "HDT",   600 + tDAYZONE }, /* Hawaii Daylight */
+  { "CAT",   600 },            /* Central Alaska */
+  { "AHST",  600 },            /* Alaska-Hawaii Standard */
+  { "NT",    660 },            /* Nome */ /* spellchecker:disable-line */
+  { "IDLW",  720 },            /* International Date Line West */
+  { "CET",   -60 },            /* Central European */
+  { "MET",   -60 },            /* Middle European */
+  { "MEWT",  -60 },            /* Middle European Winter */
+  { "MEST",  -60 + tDAYZONE }, /* Middle European Summer */
+  { "CEST",  -60 + tDAYZONE }, /* Central European Summer */
+  { "MESZ",  -60 + tDAYZONE }, /* Middle European Summer */
+  { "FWT",   -60 },            /* French Winter */
+  { "FST",   -60 + tDAYZONE }, /* French Summer */
+  { "EET",  -120 },            /* Eastern Europe, USSR Zone 1 */
   { "WAST", -420 }, /* spellchecker:disable-line */
-                             /* West Australian Standard */
-  { "WADT", -420 tDAYZONE }, /* West Australian Daylight */
-  { "CCT",  -480 },          /* China Coast, USSR Zone 7 */
-  { "JST",  -540 },          /* Japan Standard, USSR Zone 8 */
-  { "EAST", -600 },          /* Eastern Australian Standard */
-  { "EADT", -600 tDAYZONE }, /* Eastern Australian Daylight */
-  { "GST",  -600 },          /* Guam Standard, USSR Zone 9 */
-  { "NZT",  -720 },          /* New Zealand */
-  { "NZST", -720 },          /* New Zealand Standard */
-  { "NZDT", -720 tDAYZONE }, /* New Zealand Daylight */
-  { "IDLE", -720 },          /* International Date Line East */
+                               /* West Australian Standard */
+  { "WADT", -420 + tDAYZONE }, /* West Australian Daylight */
+  { "CCT",  -480 },            /* China Coast, USSR Zone 7 */
+  { "JST",  -540 },            /* Japan Standard, USSR Zone 8 */
+  { "EAST", -600 },            /* Eastern Australian Standard */
+  { "EADT", -600 + tDAYZONE }, /* Eastern Australian Daylight */
+  { "GST",  -600 },            /* Guam Standard, USSR Zone 9 */
+  { "NZT",  -720 },            /* New Zealand */
+  { "NZST", -720 },            /* New Zealand Standard */
+  { "NZDT", -720 + tDAYZONE }, /* New Zealand Daylight */
+  { "IDLE", -720 },            /* International Date Line East */
   /* Next up: Military timezone names. RFC822 allowed these, but (as noted in
      RFC 1123) had their signs wrong. Here we use the correct signs to match
      actual military usage.
    */
-  { "A",   1 * 60 },         /* Alpha */
-  { "B",   2 * 60 },         /* Bravo */
-  { "C",   3 * 60 },         /* Charlie */
-  { "D",   4 * 60 },         /* Delta */
-  { "E",   5 * 60 },         /* Echo */
-  { "F",   6 * 60 },         /* Foxtrot */
-  { "G",   7 * 60 },         /* Golf */
-  { "H",   8 * 60 },         /* Hotel */
-  { "I",   9 * 60 },         /* India */
+  { "A",   1 * 60 },           /* Alpha */
+  { "B",   2 * 60 },           /* Bravo */
+  { "C",   3 * 60 },           /* Charlie */
+  { "D",   4 * 60 },           /* Delta */
+  { "E",   5 * 60 },           /* Echo */
+  { "F",   6 * 60 },           /* Foxtrot */
+  { "G",   7 * 60 },           /* Golf */
+  { "H",   8 * 60 },           /* Hotel */
+  { "I",   9 * 60 },           /* India */
   /* "J", Juliet is not used as a timezone, to indicate the observer's local
      time */
-  { "K",  10 * 60 },         /* Kilo */
-  { "L",  11 * 60 },         /* Lima */
-  { "M",  12 * 60 },         /* Mike */
-  { "N",  -1 * 60 },         /* November */
-  { "O",  -2 * 60 },         /* Oscar */
-  { "P",  -3 * 60 },         /* Papa */
-  { "Q",  -4 * 60 },         /* Quebec */
-  { "R",  -5 * 60 },         /* Romeo */
-  { "S",  -6 * 60 },         /* Sierra */
-  { "T",  -7 * 60 },         /* Tango */
-  { "U",  -8 * 60 },         /* Uniform */
-  { "V",  -9 * 60 },         /* Victor */
-  { "W", -10 * 60 },         /* Whiskey */
-  { "X", -11 * 60 },         /* X-ray */
-  { "Y", -12 * 60 },         /* Yankee */
-  { "Z", 0 },                /* Zulu, zero meridian, a.k.a. UTC */
+  { "K",  10 * 60 },           /* Kilo */
+  { "L",  11 * 60 },           /* Lima */
+  { "M",  12 * 60 },           /* Mike */
+  { "N",  -1 * 60 },           /* November */
+  { "O",  -2 * 60 },           /* Oscar */
+  { "P",  -3 * 60 },           /* Papa */
+  { "Q",  -4 * 60 },           /* Quebec */
+  { "R",  -5 * 60 },           /* Romeo */
+  { "S",  -6 * 60 },           /* Sierra */
+  { "T",  -7 * 60 },           /* Tango */
+  { "U",  -8 * 60 },           /* Uniform */
+  { "V",  -9 * 60 },           /* Victor */
+  { "W", -10 * 60 },           /* Whiskey */
+  { "X", -11 * 60 },           /* X-ray */
+  { "Y", -12 * 60 },           /* Yankee */
+  { "Z", 0 },                  /* Zulu, zero meridian, a.k.a. UTC */
 };
 
 /* returns:

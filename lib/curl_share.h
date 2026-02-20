@@ -70,8 +70,8 @@ CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,
 CURLSHcode Curl_share_unlock(struct Curl_easy *, curl_lock_data);
 
 /* convenience macro to check if this handle is using a shared SSL spool */
-#define CURL_SHARE_ssl_scache(data) (data->share &&                     \
-                                    (data->share->specifier &           \
+#define CURL_SHARE_ssl_scache(data) ((data)->share &&                    \
+                                    ((data)->share->specifier &          \
                                      (1 << CURL_LOCK_DATA_SSL_SESSION)))
 
 #endif /* HEADER_CURL_SHARE_H */

@@ -134,7 +134,7 @@ CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 #define my_setopt_slist(x, y, z)      curl_easy_setopt(x, y, z)
 #define my_setopt_SSLVERSION(x, y, z) curl_easy_setopt(x, y, z)
 #define my_setopt_enum(x, y, z)       curl_easy_setopt(x, y, z)
-#define my_setopt_bitmask(x, y, z)    curl_easy_setopt(x, y, (long)z)
+#define my_setopt_bitmask(x, y, z)    curl_easy_setopt(x, y, (long)(z))
 
 #define MY_SETOPT_STR(x, y, z)          \
   do {                                  \

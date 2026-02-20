@@ -379,7 +379,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   return CURLE_OK;
 }
 
-#define DOUBLE_SECS(x) (double)(x) / 1000000
+#define DOUBLE_SECS(x) ((double)(x) / 1000000)
 
 static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
                              curl_off_t *param_offt)

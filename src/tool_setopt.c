@@ -175,7 +175,7 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 
 /* Escape string to C string syntax. Return NULL if out of memory. */
 #define MAX_STRING_LENGTH_OUTPUT 2000
-#define ZERO_TERMINATED          -1
+#define ZERO_TERMINATED          (-1)
 
 static char *c_escape(const char *str, curl_off_t len)
 {

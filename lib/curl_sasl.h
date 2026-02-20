@@ -129,7 +129,7 @@ struct SASL {
 
 /* This is used to test whether the line starts with the given mechanism */
 #define sasl_mech_equal(line, wordlen, mech) \
-  (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
+  ((wordlen) == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
 
 /* Convert a mechanism name to a token */

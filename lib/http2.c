@@ -260,9 +260,9 @@ static CURLcode cf_h2_update_settings(struct cf_h2_ctx *ctx,
   return CURLE_OK;
 }
 
-#define H2_STREAM_CTX(ctx, data)                                        \
-  ((struct h2_stream_ctx *)(                                            \
-    data? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL))
+#define H2_STREAM_CTX(ctx, data)                                         \
+  ((struct h2_stream_ctx *)(                                             \
+    (data) ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
 {

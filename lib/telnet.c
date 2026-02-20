@@ -58,20 +58,20 @@
 
 #define SUBBUFSIZE 512
 
-#define CURL_SB_CLEAR(x) x->subpointer = x->subbuffer
-#define CURL_SB_TERM(x)        \
-  do {                         \
-    x->subend = x->subpointer; \
-    CURL_SB_CLEAR(x);          \
+#define CURL_SB_CLEAR(x) x->subpointer = (x)->subbuffer
+#define CURL_SB_TERM(x)            \
+  do {                             \
+    (x)->subend = (x)->subpointer; \
+    CURL_SB_CLEAR(x);              \
   } while(0)
-#define CURL_SB_ACCUM(x, c)                                   \
-  do {                                                        \
-    if(x->subpointer < (x->subbuffer + sizeof(x->subbuffer))) \
-      *x->subpointer++ = (c);                                 \
+#define CURL_SB_ACCUM(x, c)                                         \
+  do {                                                              \
+    if((x)->subpointer < ((x)->subbuffer + sizeof((x)->subbuffer))) \
+      *(x)->subpointer++ = (c);                                     \
   } while(0)
 
-#define CURL_SB_GET(x) ((*x->subpointer++) & 0xff)
-#define CURL_SB_LEN(x) (x->subend - x->subpointer)
+#define CURL_SB_GET(x) ((*(x)->subpointer++) & 0xff)
+#define CURL_SB_LEN(x) ((x)->subend - (x)->subpointer)
 
 /* For posterity:
 #define  CURL_SB_PEEK(x) ((*x->subpointer)&0xff)

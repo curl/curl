@@ -1322,7 +1322,7 @@ static int test_weird_arguments(void)
 }
 
 /* DBL_MAX value from Linux */
-#define MAXIMIZE -1.7976931348623157081452E+308
+#define MAXIMIZE (-1.7976931348623157081452E+308)
 
 static int test_float_formatting(void)
 {

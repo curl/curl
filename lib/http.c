@@ -3182,11 +3182,11 @@ static statusline checkprotoprefix(struct Curl_easy *data,
 
 /* HTTP header has field name `n` (a string constant) */
 #define HD_IS(hd, hdlen, n) \
-  (((hdlen) >= (sizeof(n) - 1)) && curl_strnequal((n), (hd), (sizeof(n) - 1)))
+  (((hdlen) >= (sizeof(n) - 1)) && curl_strnequal(n, hd, sizeof(n) - 1))
 
 #define HD_VAL(hd, hdlen, n) \
   ((((hdlen) >= (sizeof(n) - 1)) && \
-    curl_strnequal((n), (hd), (sizeof(n) - 1)))? (hd + (sizeof(n) - 1)) : NULL)
+    curl_strnequal(n, hd, sizeof(n) - 1)) ? ((hd) + (sizeof(n) - 1)) : NULL)
 
 /* HTTP header has field name `n` (a string constant) and contains `v`
  * (a string constant) in its value(s) */

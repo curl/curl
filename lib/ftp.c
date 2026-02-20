@@ -78,10 +78,10 @@
 /* macro to check for a three-digit ftp status code at the start of the
    given string */
 #define STATUSCODE(line) \
-  (ISDIGIT(line[0]) && ISDIGIT(line[1]) && ISDIGIT(line[2]))
+  (ISDIGIT((line)[0]) && ISDIGIT((line)[1]) && ISDIGIT((line)[2]))
 
 /* macro to check for the last line in an FTP server response */
-#define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
+#define LASTLINE(line) (STATUSCODE(line) && (' ' == (line)[3]))
 
 #ifdef CURLVERBOSE
 /* for tracing purposes */

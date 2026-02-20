@@ -33,7 +33,7 @@
 
 /* only acknowledge colon or equals as separators if the option was not
    specified with an initial dash! */
-#define ISSEP(x, dash) (!dash && (((x) == '=') || ((x) == ':')))
+#define ISSEP(x, dash) (!(dash) && (((x) == '=') || ((x) == ':')))
 
 /*
  * Copies the string from line to the param dynbuf, unquoting backslash-quoted

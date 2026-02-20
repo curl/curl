@@ -11,6 +11,7 @@ Checks:
   - -clang-analyzer-security.insecureAPI.bzero  # for FD_ZERO() (seen on macOS)
   - -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
   - -clang-diagnostic-nullability-extension
+  - bugprone-macro-parentheses
   - bugprone-redundant-branch-condition
   - bugprone-suspicious-realloc-usage
   - misc-const-correctness

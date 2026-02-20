@@ -44,12 +44,12 @@
 
 #define verify_memory(dynamic, check, len)                                  \
   do {                                                                      \
-    if(dynamic && memcmp(dynamic, check, len)) {                            \
+    if((dynamic) && memcmp(dynamic, check, len)) {                          \
       curl_mfprintf(stderr, "%s:%d Memory buffer FAILED match size %d. "    \
                     "'%s' is not\n", __FILE__, __LINE__, len,               \
-                    hexdump((const unsigned char *)check, len));            \
+                    hexdump((const unsigned char *)(check), len));          \
       curl_mfprintf(stderr, "%s:%d the same as '%s'\n", __FILE__, __LINE__, \
-                    hexdump((const unsigned char *)dynamic, len));          \
+                    hexdump((const unsigned char *)(dynamic), len));        \
       unitfail++;                                                           \
     }                                                                       \
   } while(0)
@@ -116,5 +116,5 @@ unit_test_abort:                                \
     goto unit_test_abort; /* avoid warning */   \
   }                                             \
 unit_test_abort:                                \
-  stopfunc;                                     \
+  (stopfunc);                                   \
   return (CURLcode)unitfail;

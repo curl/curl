@@ -37,7 +37,7 @@
   idn2_lookup_u8((const uint8_t *)name, (uint8_t **)host, flags)
 #else
 #define IDN2_LOOKUP(name, host, flags)                          \
-  idn2_lookup_ul((const char *)name, (char **)host, flags)
+  idn2_lookup_ul((const char *)(name), (char **)(host), flags)
 #endif
 #endif /* USE_LIBIDN2 */
 
