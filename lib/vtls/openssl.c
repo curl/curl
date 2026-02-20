@@ -2564,9 +2564,11 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
      && content_type != SSL3_RT_INNER_CONTENT_TYPE
 #endif
     ) {
-    const char *msg_name, *tls_rt_name;
+    const char *msg_name = "Truncated message";
+    const char *tls_rt_name;
     char ssl_buf[1024];
-    int msg_type, txt_len;
+    int msg_type = 0;
+    int txt_len;
 
     /* the info given when the version is zero is not that useful for us */
 
@@ -2582,14 +2584,18 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
       tls_rt_name = "";
 
     if(content_type == SSL3_RT_CHANGE_CIPHER_SPEC) {
-      msg_type = *(const char *)buf;
-      msg_name = "Change cipher spec";
+      if(len) {
+        msg_type = *(const char *)buf;
+        msg_name = "Change cipher spec";
+      }
     }
     else if(content_type == SSL3_RT_ALERT) {
-      msg_type = (((const char *)buf)[0] << 8) + ((const char *)buf)[1];
-      msg_name = SSL_alert_desc_string_long(msg_type);
+      if(len >= 2) {
+        msg_type = (((const char *)buf)[0] << 8) + ((const char *)buf)[1];
+        msg_name = SSL_alert_desc_string_long(msg_type);
+      }
     }
-    else {
+    else if(len) {
       msg_type = *(const char *)buf;
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
