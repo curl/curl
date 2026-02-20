@@ -217,7 +217,7 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
  * us early warning on things only discovered by valgrind otherwise. */
 #define GOOD_EASY_HANDLE(x) \
   (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER)) ? TRUE : \
-  (DEBUGASSERT(!(x)), FALSE))
+   (DEBUGASSERT(!(x)), FALSE))
 #else
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
