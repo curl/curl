@@ -142,7 +142,7 @@ typedef SOCKET curl_socket_t;
 #define CURL_SOCKET_BAD INVALID_SOCKET
 #else
 typedef int curl_socket_t;
-#define CURL_SOCKET_BAD -1
+#define CURL_SOCKET_BAD (-1)
 #endif
 #define curl_socket_typedef
 #endif /* curl_socket_typedef */
