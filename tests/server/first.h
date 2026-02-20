@@ -112,8 +112,8 @@ typedef union {
 } srvr_sockaddr_union_t;
 
 /* getpart */
-#define GPE_NO_BUFFER_SPACE -2
-#define GPE_OUT_OF_MEMORY   -1
+#define GPE_NO_BUFFER_SPACE  (-2)
+#define GPE_OUT_OF_MEMORY    (-1)
 #define GPE_OK               0
 #define GPE_END_OF_FILE      1
 
