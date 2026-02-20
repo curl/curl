@@ -505,6 +505,7 @@ option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 
 if(CURL_DISABLE_TYPECHECK)
+  # Set it via the command-line to make it apply to examples also.
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DISABLE_TYPECHECK")
 endif()
 
