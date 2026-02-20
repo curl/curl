@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: curl
 ---
-# https://clang.llvm.org/extra/clang-tidy/checks/list.html
+# https://clang.llvm.org/extra/clang-tidy/
 
+# https://clang.llvm.org/extra/clang-tidy/checks/list.html
 Checks:
   - -clang-analyzer-optin.performance.Padding
   - -clang-analyzer-security.ArrayBound  # due to false positives with clang-tidy v21.1.0
