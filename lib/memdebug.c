@@ -32,7 +32,7 @@
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
 
 #ifdef USE_BACKTRACE
-#include "backtrace.h"
+#include <backtrace.h>
 #endif
 
 struct memdebug {
