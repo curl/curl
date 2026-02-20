@@ -730,7 +730,7 @@ jobs:
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose
+            cmake --build bld
           else
             make -C bld
           fi
