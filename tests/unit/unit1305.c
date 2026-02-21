@@ -35,7 +35,7 @@
 
 #include "curl_addrinfo.h"
 #include "hash.h"
-#include "hostip.h"
+#include "dnscache.h"
 
 static struct Curl_dnscache hp;
 static char *data_key;

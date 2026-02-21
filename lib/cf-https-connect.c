@@ -110,6 +110,7 @@ static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
 
 struct cf_hc_ctx {
   cf_hc_state state;
+  struct Curl_dns_entry *dns;
   struct curltime started;  /* when connect started */
   CURLcode result;          /* overall result */
   struct cf_hc_baller ballers[2];
@@ -117,6 +118,30 @@ struct cf_hc_ctx {
   timediff_t soft_eyeballs_timeout_ms;
   timediff_t hard_eyeballs_timeout_ms;
 };
+
+static void cf_hc_ctx_reset(struct Curl_easy *data,
+                            struct cf_hc_ctx *ctx)
+{
+  if(ctx) {
+    size_t i;
+    for(i = 0; i < ctx->baller_count; ++i)
+      cf_hc_baller_reset(&ctx->ballers[i], data);
+    ctx->state = CF_HC_INIT;
+    ctx->result = CURLE_OK;
+    ctx->hard_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout;
+    ctx->soft_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout / 4;
+  }
+}
+
+static void cf_hc_ctx_destroy(struct Curl_easy *data,
+                              struct cf_hc_ctx *ctx)
+{
+  if(ctx) {
+    cf_hc_ctx_reset(data, ctx);
+    Curl_dns_entry_unlink(data, &ctx->dns);
+    curlx_free(ctx);
+  }
+}
 
 static void cf_hc_baller_assign(struct cf_hc_baller *b,
                                 enum alpnid alpn_id,
@@ -146,6 +171,7 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
                               struct Curl_easy *data,
                               uint8_t transport)
 {
+  struct cf_hc_ctx *ctx = cf->ctx;
   struct Curl_cfilter *save = cf->next;
 
   cf->next = NULL;
@@ -159,7 +185,7 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   }
 
   if(!b->result)
-    b->result = Curl_cf_setup_insert_after(cf, data, transport,
+    b->result = Curl_cf_setup_insert_after(cf, data, transport, ctx->dns,
                                            CURL_CF_SSL_ENABLE);
   b->cf = cf->next;
   cf->next = save;
@@ -177,21 +203,6 @@ static CURLcode cf_hc_baller_connect(struct cf_hc_baller *b,
   b->cf = cf->next; /* it might mutate */
   cf->next = save;
   return b->result;
-}
-
-static void cf_hc_reset(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_hc_ctx *ctx = cf->ctx;
-  size_t i;
-
-  if(ctx) {
-    for(i = 0; i < ctx->baller_count; ++i)
-      cf_hc_baller_reset(&ctx->ballers[i], data);
-    ctx->state = CF_HC_INIT;
-    ctx->result = CURLE_OK;
-    ctx->hard_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout;
-    ctx->soft_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout / 4;
-  }
 }
 
 static CURLcode baller_connected(struct Curl_cfilter *cf,
@@ -529,6 +540,12 @@ static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
     }
     result = CURLE_OK;
   }
+  switch(event) {
+  case CF_CTRL_CONN_INFO_UPDATE:
+    /* Connection fully established */
+    Curl_dns_entry_unlink(data, &ctx->dns);
+    break;
+  }
 out:
   return result;
 }
@@ -536,7 +553,7 @@ out:
 static void cf_hc_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   CURL_TRC_CF(data, cf, "close");
-  cf_hc_reset(cf, data);
+  cf_hc_ctx_reset(data, cf->ctx);
   cf->connected = FALSE;
 
   if(cf->next) {
@@ -550,8 +567,7 @@ static void cf_hc_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_hc_ctx *ctx = cf->ctx;
 
   CURL_TRC_CF(data, cf, "destroy");
-  cf_hc_reset(cf, data);
-  Curl_safefree(ctx);
+  cf_hc_ctx_destroy(data, ctx);
 }
 
 struct Curl_cftype Curl_cft_http_connect = {
@@ -575,18 +591,24 @@ struct Curl_cftype Curl_cft_http_connect = {
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              enum alpnid *alpnids, size_t alpn_count,
-                             uint8_t def_transport)
+                             uint8_t def_transport,
+                             struct Curl_dns_entry *dns)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_hc_ctx *ctx;
   CURLcode result = CURLE_OK;
   size_t i;
 
+  if(!dns)
+    return CURLE_FAILED_INIT;
+
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+
+  ctx->dns = Curl_dns_entry_link(data, dns);
 
   DEBUGASSERT(alpnids);
   DEBUGASSERT(alpn_count);
@@ -608,11 +630,11 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
   if(result)
     goto out;
   ctx = NULL;
-  cf_hc_reset(cf, data);
+  cf_hc_ctx_reset(data, ctx);
 
 out:
   *pcf = result ? NULL : cf;
-  curlx_free(ctx);
+  cf_hc_ctx_destroy(data, ctx);
   return result;
 }
 
@@ -620,13 +642,14 @@ static CURLcode cf_http_connect_add(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
                                     enum alpnid *alpn_ids, size_t alpn_count,
-                                    uint8_t def_transport)
+                                    uint8_t def_transport,
+                                    struct Curl_dns_entry *dns)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  result = cf_hc_create(&cf, data, alpn_ids, alpn_count, def_transport);
+  result = cf_hc_create(&cf, data, alpn_ids, alpn_count, def_transport, dns);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -647,7 +670,8 @@ static bool cf_https_alpns_contain(enum alpnid id,
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
-                             int sockindex)
+                             int sockindex,
+                             struct Curl_dns_entry *dns)
 {
   enum alpnid alpn_ids[2];
   size_t alpn_count = 0;
@@ -666,7 +690,6 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
      * We are here after having selected a connection to a host+port and
      * can no longer change that. Any HTTPSRR advice for other hosts and ports
      * we need to ignore. */
-    struct Curl_dns_entry *dns = data->state.dns[sockindex];
     struct Curl_https_rrinfo *rr = dns ? dns->hinfo : NULL;
     if(rr && !rr->no_def_alpn &&  /* ALPNs are defaults */
        (!rr->target ||      /* for same host */
@@ -764,7 +787,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   if(alpn_count) {
     result = cf_http_connect_add(data, conn, sockindex,
                                  alpn_ids, alpn_count,
-                                 conn->transport_wanted);
+                                 conn->transport_wanted, dns);
   }
 
 out:

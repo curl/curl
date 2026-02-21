@@ -111,6 +111,7 @@ void Curl_conncontrol(struct connectdata *conn,
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
                                     uint8_t transport,
+                                    struct Curl_dns_entry *dns,
                                     int ssl_mode);
 
 /**
