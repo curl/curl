@@ -599,14 +599,14 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     CURLcode result = CURLE_OK;
 
     data->state.async.done = TRUE;
-    Curl_resolv_unlink(data, &data->state.async.dns);
+    Curl_dns_entry_unlink(data, &data->state.async.dns);
     Curl_expire_done(data, EXPIRE_ASYNC_NAME);
 
     if(thrdd->addr->res) {
       data->state.async.dns =
-        Curl_dnscache_mk_entry(data, &thrdd->addr->res,
-                               data->state.async.hostname, 0,
-                               data->state.async.port, FALSE);
+        Curl_dns_entry_create(data, &thrdd->addr->res,
+                              data->state.async.hostname, 0,
+                              data->state.async.port, FALSE);
       if(!data->state.async.dns)
         result = CURLE_OUT_OF_MEMORY;
 
@@ -630,7 +630,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     if(!result && !data->state.async.dns)
       result = Curl_resolver_error(data, NULL);
     if(result)
-      Curl_resolv_unlink(data, &data->state.async.dns);
+      Curl_dns_entry_unlink(data, &data->state.async.dns);
     *dns = data->state.async.dns;
     CURL_TRC_DNS(data, "is_resolved() result=%d, dns=%sfound",
                  result, *dns ? "" : "not ");
