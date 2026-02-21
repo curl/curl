@@ -39,12 +39,16 @@ add_custom_command(OUTPUT "lib1521.c"
 
 list(APPEND TESTS_C "lib1521.c")
 
+if(CURL_TESTS_EMBED)
+  set(_mk_unity_extra "--embed" "-I${CMAKE_CURRENT_SOURCE_DIR}")
+endif()
+
 add_custom_command(OUTPUT "${BUNDLE}.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" ${_mk_unity_extra}
     --include ${UTILS_C} ${CURLX_C} ${TOOLX_C} --test ${TESTS_C} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRST_C} ${UTILS_C} ${CURLX_C} ${TOOLX_C} ${TESTS_C}
+    ${FIRST_C} ${FIRST_H} ${UTILS_C} ${CURLX_C} ${TOOLX_C} ${TESTS_C}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
@@ -57,6 +61,9 @@ target_include_directories(${BUNDLE} PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
 target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS})
-set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
+set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
 
-curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
+if(NOT CURL_TESTS_EMBED)
+  set_target_properties(${BUNDLE} PROPERTIES C_CLANG_TIDY "")
+  curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
+endif()
