@@ -258,6 +258,8 @@ LIB_CFILES =         \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
+  thrdpool.c         \
+  thrdqueue.c        \
   transfer.c         \
   uint-bset.c        \
   uint-hash.c        \
@@ -385,6 +387,8 @@ LIB_HFILES =         \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
+  thrdpool.h         \
+  thrdqueue.h        \
   transfer.h         \
   uint-bset.h        \
   uint-hash.h        \
