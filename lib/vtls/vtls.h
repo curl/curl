@@ -90,8 +90,8 @@ struct ssl_peer {
   char *sni;             /* SNI version of hostname or NULL if not usable */
   char *scache_key;      /* for lookups in session cache */
   ssl_peer_type type;    /* type of the peer information */
-  int port;              /* port we are talking to */
-  int transport;         /* one of TRNSPRT_* defines */
+  uint16_t port;         /* port we are talking to */
+  uint8_t transport;     /* one of TRNSPRT_* defines */
 };
 
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
@@ -144,7 +144,7 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
 CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
                             struct Curl_cfilter *cf,
                             const char *tls_id,
-                            int transport);
+                            uint8_t transport);
 /**
  * Free all allocated data and reset peer information.
  */

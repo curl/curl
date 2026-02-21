@@ -27,7 +27,7 @@
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
-#include "hostip.h"
+#include "dnscache.h"
 #include "multi_ev.h"
 #include "multi_ntfy.h"
 #include "psl.h"
@@ -71,7 +71,7 @@ typedef enum {
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#ifndef CURL_DISABLE_SOCKETPAIR
+#if !defined(CURL_DISABLE_SOCKETPAIR) && !defined(USE_WINSOCK)
 #define ENABLE_WAKEUP
 #endif
 
@@ -160,12 +160,11 @@ struct Curl_multi {
 
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* Winsock event used for waits */
-#else
+#endif
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for
                                    wakeup 0 is used for read, 1 is used
                                    for write */
-#endif
 #endif
   unsigned int max_concurrent_streams;
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
