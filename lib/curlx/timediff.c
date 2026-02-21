@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "timediff.h"
+#include "curlx/timediff.h"
 
 /*
  * Converts number of milliseconds into a timeval structure.

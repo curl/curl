@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_OPENSSL
 /*
@@ -34,7 +34,7 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
 
-#include "../urldata.h"
+#include "urldata.h"
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */

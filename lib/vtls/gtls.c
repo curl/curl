@@ -28,7 +28,7 @@
  * Note: do not use the GnuTLS' *_t variable type names in this source code,
  * since they were not present in 1.0.X.
  */
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_GNUTLS
 
@@ -38,21 +38,21 @@
 #include <gnutls/crypto.h>
 #include <nettle/sha2.h>
 
-#include "../urldata.h"
-#include "../curl_trc.h"
-#include "keylog.h"
-#include "gtls.h"
-#include "vtls.h"
-#include "vtls_int.h"
-#include "vtls_scache.h"
-#include "apple.h"
-#include "../vauth/vauth.h"
-#include "../parsedate.h"
-#include "../connect.h" /* for the connect timeout */
-#include "../progress.h"
-#include "../curlx/strdup.h"
-#include "../curlx/fopen.h"
-#include "x509asn1.h"
+#include "urldata.h"
+#include "curl_trc.h"
+#include "vtls/keylog.h"
+#include "vtls/gtls.h"
+#include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
+#include "vtls/vtls_scache.h"
+#include "vtls/apple.h"
+#include "vauth/vauth.h"
+#include "parsedate.h"
+#include "connect.h" /* for the connect timeout */
+#include "progress.h"
+#include "curlx/strdup.h"
+#include "curlx/fopen.h"
+#include "vtls/x509asn1.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 #if 0

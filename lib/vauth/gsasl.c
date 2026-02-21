@@ -23,12 +23,12 @@
  * RFC5802 SCRAM-SHA-1 authentication
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_GSASL
 
-#include "vauth.h"
-#include "../curl_trc.h"
+#include "vauth/vauth.h"
+#include "curl_trc.h"
 
 #include <gsasl.h>
 

@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_time.h"
+#include "toolx/tool_time.h"
 
 #if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 3)
 #include <sec_api/time_s.h>  /* for _localtime32_s(), _localtime64_s() */

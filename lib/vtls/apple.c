@@ -38,15 +38,15 @@
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
 */
 
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_APPLE_SECTRUST
 
-#include "../urldata.h"
-#include "../cfilters.h"
-#include "../curl_trc.h"
-#include "vtls.h"
-#include "apple.h"
+#include "urldata.h"
+#include "cfilters.h"
+#include "curl_trc.h"
+#include "vtls/vtls.h"
+#include "vtls/apple.h"
 
 #include <Security/Security.h>
 

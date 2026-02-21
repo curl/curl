@@ -23,13 +23,13 @@
  * RFC6749 OAuth 2.0 Authorization Framework
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_POP3) ||                                  \
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include "vauth.h"
+#include "vauth/vauth.h"
 
 /*
  * Curl_auth_create_oauth_bearer_message()

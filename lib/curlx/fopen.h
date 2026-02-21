@@ -23,9 +23,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#include "multibyte.h"
+#include "curlx/multibyte.h"
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>  /* for open() and attributes */
