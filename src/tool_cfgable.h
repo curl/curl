@@ -364,6 +364,7 @@ struct GlobalConfig {
   BIT(noprogress);                /* do not show progress bar */
   BIT(isatty);                    /* Updated internally if output is a tty */
   BIT(trace_set);                 /* --trace-config has been used */
+  BIT(errorf_called);
 };
 
 struct OperationConfig *config_alloc(void);

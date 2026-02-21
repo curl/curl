@@ -593,7 +593,7 @@ static CURLcode post_check_result(struct per_transfer *per, CURLcode result)
       vms_show = VMSSTS_HIDE;
   }
 #endif
-  if(!config->synthetic_error && result &&
+  if(!config->synthetic_error && result && !global->errorf_called &&
      (!global->silent || global->showerror)) {
     const char *msg = per->errorbuffer;
     curl_mfprintf(tool_stderr, "curl: (%d) %s\n", result,

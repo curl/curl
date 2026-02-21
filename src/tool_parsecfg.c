@@ -192,7 +192,7 @@ ParameterError parseconfig(const char *filename, int max_recursive,
           case '#': /* comment */
             break;
           default:
-            warnf("%s:%d: warning: '%s' uses unquoted whitespace. "
+            warnf("%s:%d Option '%s' uses argument with unquoted whitespace. "
                   "This may cause side-effects. Consider double quotes.",
                   filename, lineno, option);
           }
@@ -241,10 +241,11 @@ ParameterError parseconfig(const char *filename, int max_recursive,
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
           /* only show error in the first level config call */
-          if(max_recursive == CONFIG_MAX_LEVELS) {
-            const char *reason = param2text(res);
-            errorf("%s:%d: '%s' %s", filename, lineno, option, reason);
-          }
+
+          const char *reason = param2text(res);
+          errorf("%s:%d config file option '%s' %s",
+                 filename, lineno, option, reason);
+
           err = res;
         }
       }
