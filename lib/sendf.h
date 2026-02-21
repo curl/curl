@@ -55,7 +55,7 @@ struct Curl_cwriter;
 struct Curl_easy;
 
 /**
- * Write `len` bytes at `prt` to the client. `type` indicates what
+ * Write `len` bytes at `buf` to the client. `type` indicates what
  * kind of data is being written.
  */
 CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
