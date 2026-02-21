@@ -1217,7 +1217,7 @@ static bool url_match_auth_nego(struct connectdata *conn,
     return FALSE;
   }
 #endif
-  if(m->want_ntlm_http || m->want_proxy_ntlm_http) {
+  if(m->want_nego_http || m->want_proxy_nego_http) {
     /* Credentials are already checked, we may use this connection. We MUST
      * use a connection where it has already been fully negotiated. If it has
      * not, we keep on looking for a better one. */
