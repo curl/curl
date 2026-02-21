@@ -74,7 +74,7 @@ int main(int argc, const char *argv[])
     /* disable progress meter, set to 0L to enable it */
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* open the file */

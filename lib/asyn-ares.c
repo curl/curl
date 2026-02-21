@@ -600,8 +600,8 @@ async_ares_node2addr(struct ares_addrinfo_node *node)
   for(ai = node; ai != NULL; ai = ai->ai_next) {
     size_t ss_size;
     struct Curl_addrinfo *ca;
-    /* ignore elements with unsupported address family, */
-    /* settle family-specific sockaddr structure size.  */
+    /* ignore elements with unsupported address family,
+       settle family-specific sockaddr structure size. */
     if(ai->ai_family == AF_INET)
       ss_size = sizeof(struct sockaddr_in);
 #ifdef USE_IPV6
@@ -625,8 +625,8 @@ async_ares_node2addr(struct ares_addrinfo_node *node)
       break;
     }
 
-    /* copy each structure member individually, member ordering, */
-    /* size, or padding might be different for each platform.    */
+    /* copy each structure member individually, member ordering,
+       size, or padding might be different for each platform. */
 
     ca->ai_flags     = ai->ai_flags;
     ca->ai_family    = ai->ai_family;

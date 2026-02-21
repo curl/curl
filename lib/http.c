@@ -3776,7 +3776,7 @@ static CURLcode http_statusline(struct Curl_easy *data,
     /* (quote from RFC2616, section 10.3.5): The 304 response
      * MUST NOT contain a message-body, and thus is always
      * terminated by the first empty line after the header
-     * fields.  */
+     * fields. */
     if(data->set.timecondition)
       data->info.timecond = TRUE;
     FALLTHROUGH();

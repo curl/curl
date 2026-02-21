@@ -185,12 +185,12 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
          and a filename cannot have more than a single dot. We leave the
          first non-leading dot alone, unless it comes too close to the
          beginning of the name: we want sh.lex.c to become sh_lex.c, not
-         sh.lex-c.  */
+         sh.lex-c. */
       else if(*s == '.') {
         if((flags & SANITIZE_ALLOW_PATH) && idx == 0 &&
            (s[1] == '/' || s[1] == '\\' ||
             (s[1] == '.' && (s[2] == '/' || s[2] == '\\')))) {
-          /* Copy "./" and "../" verbatim.  */
+          /* Copy "./" and "../" verbatim. */
           *d++ = *s++;
           if(d == dlimit)
             break;
@@ -225,7 +225,7 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
           *d = 'x';
         }
         else {
-          /* libg++ etc.  */
+          /* libg++ etc. */
           if(dlimit - d < 4) {
             *d++ = 'x';
             if(d == dlimit)
@@ -326,7 +326,7 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
      Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
      https://web.archive.org/web/20160314141551/support.microsoft.com/en-us/kb/74496
      https://learn.microsoft.com/windows/win32/fileio/naming-a-file
-     */
+   */
   for(p = buffer; p; p = (p == buffer && buffer != base ? base : NULL)) {
     size_t p_len;
     int x = (curl_strnequal(p, "CON", 3) ||

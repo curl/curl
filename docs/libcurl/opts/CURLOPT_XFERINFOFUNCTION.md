@@ -105,7 +105,7 @@ int main(void)
   if(curl) {
     struct progress data;
 
-    /* pass struct to callback  */
+    /* pass struct to callback */
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &data);
 
     /* enable progress callback getting called */

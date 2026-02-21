@@ -5382,7 +5382,7 @@ static CURLcode ossl_random(struct Curl_easy *data,
     if(!rand_enough())
       return CURLE_FAILED_INIT;
   }
-  /* RAND_bytes() returns 1 on success, 0 otherwise.  */
+  /* RAND_bytes() returns 1 on success, 0 otherwise. */
   rc = RAND_bytes(entropy, (ossl_valsize_t)curlx_uztosi(length));
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }

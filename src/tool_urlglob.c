@@ -93,7 +93,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
 {
   /* processes a set expression with the point behind the opening '{'
      ','-separated elements are collected until the next closing '}'
-  */
+   */
   struct URLPattern *pat;
   bool done = FALSE;
   const char *pattern = *patternp;
@@ -217,7 +217,7 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
      - num range: e.g. "0-9]", "17-2000]"
      - num range with leading zeros: e.g. "001-999]"
      expression is checked for well-formedness and collected until the next ']'
-  */
+   */
   struct URLPattern *pat;
   const char *pattern = *patternp;
   const char *c;
@@ -460,7 +460,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
       curlx_dyn_reset(&glob->buf);
     }
     else {
-      if(!*pattern) /* done  */
+      if(!*pattern) /* done */
         break;
       else if(*pattern == '{') {
         /* process set pattern */

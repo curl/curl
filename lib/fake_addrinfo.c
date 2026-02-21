@@ -67,8 +67,8 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
   for(ai = aihead->nodes; ai != NULL; ai = ai->ai_next) {
     size_t ss_size;
     size_t namelen = name ? strlen(name) + 1 : 0;
-    /* ignore elements with unsupported address family, */
-    /* settle family-specific sockaddr structure size.  */
+    /* ignore elements with unsupported address family,
+       settle family-specific sockaddr structure size. */
     if(ai->ai_family == AF_INET)
       ss_size = sizeof(struct sockaddr_in);
     else if(ai->ai_family == AF_INET6)
@@ -90,8 +90,8 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
       return NULL;
     }
 
-    /* copy each structure member individually, member ordering, */
-    /* size, or padding might be different for each platform.    */
+    /* copy each structure member individually, member ordering,
+       size, or padding might be different for each platform. */
 
     ca->ai_flags     = ai->ai_flags;
     ca->ai_family    = ai->ai_family;

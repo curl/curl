@@ -1227,7 +1227,7 @@ static int myssh_in_SFTP_CLOSE(struct Curl_easy *data,
 
   /* Check if nextstate is set and move .nextstate could be POSTQUOTE_INIT
      After nextstate is executed, the control should come back to
-     SSH_SFTP_CLOSE to pass the correct result back  */
+     SSH_SFTP_CLOSE to pass the correct result back */
   if(sshc->nextstate != SSH_NO_STATE &&
      sshc->nextstate != SSH_SFTP_CLOSE) {
     myssh_to(data, sshc, sshc->nextstate);

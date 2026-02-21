@@ -97,7 +97,7 @@ void vms_special_exit(int code, int vms_show)
 #endif
 
   if(code > CURL_LAST) {   /* If CURL_LAST exceeded then */
-    vms_code = CURL_LAST;  /* curlmsg.h is out of sync.  */
+    vms_code = CURL_LAST;  /* curlmsg.h is out of sync. */
   }
   else {
     vms_code = vms_cond[code] | vms_show;

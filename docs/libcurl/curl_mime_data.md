@@ -68,7 +68,7 @@ int main(void)
     /* add a part */
     part = curl_mime_addpart(mime);
 
-    /* add data to the part  */
+    /* add data to the part */
     curl_mime_data(part, "raw contents to send", CURL_ZERO_TERMINATED);
   }
 }

@@ -59,7 +59,7 @@
 #define CURL_IGNORE_DEPRECATION(statements)     statements
 #endif
 
-#include "curlver.h"         /* libcurl version defines   */
+#include "curlver.h"         /* libcurl version defines */
 #include "system.h"          /* determine things runtime */
 
 #include <stdio.h>
@@ -1358,7 +1358,7 @@ typedef enum {
 
   /* Set the krb4/5 security level, this also enables krb4/5 awareness. This
    * is a string, 'clear', 'safe', 'confidential' or 'private'. If the string
-   * is set but does not match one of these, 'private' will be used.  */
+   * is set but does not match one of these, 'private' will be used. */
   CURLOPTDEPRECATED(CURLOPT_KRBLEVEL, CURLOPTTYPE_STRINGPOINT, 63,
                     8.17.0, "removed"),
 
@@ -2203,7 +2203,7 @@ typedef enum {
   CURLOPT(CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256, CURLOPTTYPE_STRINGPOINT, 311),
 
   /* Function that will be called immediately before the initial request
-     is made on a connection (after any protocol negotiation step).  */
+     is made on a connection (after any protocol negotiation step). */
   CURLOPT(CURLOPT_PREREQFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 312),
 
   /* Data passed to the CURLOPT_PREREQFUNCTION callback */

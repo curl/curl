@@ -725,13 +725,13 @@ ${SIZEOF_TIME_T_CODE}
    automatically */
 #cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
 
-/* to enable NGHTTP2  */
+/* to enable NGHTTP2 */
 #cmakedefine USE_NGHTTP2 1
 
 /* to enable NGTCP2 */
 #cmakedefine USE_NGTCP2 1
 
-/* to enable NGHTTP3  */
+/* to enable NGHTTP3 */
 #cmakedefine USE_NGHTTP3 1
 
 /* to enable quiche */
@@ -743,13 +743,13 @@ ${SIZEOF_TIME_T_CODE}
 /* Define to 1 if you have the quiche_conn_set_qlog_fd function. */
 #cmakedefine HAVE_QUICHE_CONN_SET_QLOG_FD 1
 
-/* if Unix domain sockets are enabled  */
+/* if Unix domain sockets are enabled */
 #cmakedefine USE_UNIX_SOCKETS 1
 
 /* to enable SSPI support */
 #cmakedefine USE_WINDOWS_SSPI 1
 
-/* to enable Windows SSL  */
+/* to enable Windows SSL */
 #cmakedefine USE_SCHANNEL 1
 
 /* if Watt-32 is in use */

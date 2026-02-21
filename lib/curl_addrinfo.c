@@ -115,8 +115,8 @@ int Curl_getaddrinfo_ex(const char *nodename,
 
   for(ai = aihead; ai != NULL; ai = ai->ai_next) {
     size_t namelen = ai->ai_canonname ? strlen(ai->ai_canonname) + 1 : 0;
-    /* ignore elements with unsupported address family, */
-    /* settle family-specific sockaddr structure size.  */
+    /* ignore elements with unsupported address family,
+       settle family-specific sockaddr structure size. */
     if(ai->ai_family == AF_INET)
       ss_size = sizeof(struct sockaddr_in);
 #ifdef USE_IPV6
@@ -140,8 +140,8 @@ int Curl_getaddrinfo_ex(const char *nodename,
       break;
     }
 
-    /* copy each structure member individually, member ordering, */
-    /* size, or padding might be different for each platform.    */
+    /* copy each structure member individually, member ordering,
+       size, or padding might be different for each platform. */
 
     ca->ai_flags     = ai->ai_flags;
     ca->ai_family    = ai->ai_family;

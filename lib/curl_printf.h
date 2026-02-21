@@ -28,10 +28,10 @@
 #define MERR_MEM       1
 #define MERR_TOO_LARGE 2
 
-/* Lower-case digits.  */
+/* Lower-case digits. */
 extern const unsigned char Curl_ldigits[];
 
-/* Upper-case digits.  */
+/* Upper-case digits. */
 extern const unsigned char Curl_udigits[];
 
 #endif /* HEADER_CURL_PRINTF_H */

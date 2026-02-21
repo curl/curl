@@ -100,7 +100,7 @@ int main(void)
 {
   CURL *curl;
   CURLcode result;
-  struct sockaddr_in servaddr;  /*  socket address structure  */
+  struct sockaddr_in servaddr;  /* socket address structure */
   curl_socket_t sockfd;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
@@ -141,7 +141,7 @@ int main(void)
     /* no progress meter please */
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* call this function to get a socket */

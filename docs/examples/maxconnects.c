@@ -47,7 +47,7 @@ int main(void)
     };
     int i = 0;
 
-    /* Change the maximum number of persistent connection   */
+    /* Change the maximum number of persistent connection */
     curl_easy_setopt(curl, CURLOPT_MAXCONNECTS, 1L);
 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
