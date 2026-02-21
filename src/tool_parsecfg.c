@@ -172,6 +172,11 @@ ParameterError parseconfig(const char *filename, int max_recursive,
         param = curlx_dyn_len(&pbuf) ? curlx_dyn_ptr(&pbuf) : CURL_UNCONST("");
       }
       else {
+        if(*line == '\'') {
+          warnf("%s:%d Option '%s' uses argument with leading single quote. "
+                "It probably is a mistake. Consider double quotes.",
+                filename, lineno, option);
+        }
         param = line; /* parameter starts here */
         while(*line && !ISSPACE(*line)) /* stop also on CRLF */
           line++;
