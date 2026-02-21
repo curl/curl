@@ -31,10 +31,10 @@ Funny-head: yesyes
 http
 </server>
 <name>
-config file with argument using whitespace missing quotes
+config file with argument using single quotes
 </name>
 <file name="%LOGDIR/config">
-data = arg with space
+data = 'arg-with-quote'
 </file>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --config %LOGDIR/config --silent
@@ -48,14 +48,14 @@ POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 3
+Content-Length: 16
 Content-Type: application/x-www-form-urlencoded
 
-arg
+'arg-with-quote'
 </protocol>
-<stderr mode="text">
-Warning: %LOGDIR/config:1 Option 'data' uses argument with unquoted whitespace.%SP
-Warning: This may cause side-effects. Consider double quotes.
+<stderr mode="warn">
+Warning: %LOGDIR/config:1 Option 'data' uses argument with leading single quote.%SP
+It is probably a mistake. Consider double quotes.
 </stderr>
 </verify>
 </testcase>

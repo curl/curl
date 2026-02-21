@@ -1346,6 +1346,22 @@ sub singletest_check {
             normalize_text(\@validstderr);
             normalize_text(\@actual);
         }
+        if($filemode && ($filemode eq "warn")) {
+            for(@validstderr) {
+                s/Warning: //;
+                s/\r//;
+                s/\n/ /;
+            }
+            for(@actual) {
+                s/Warning: //;
+                s/\r//;
+                s/\n/ /;
+            }
+            my $v = join(@validstderr, "");
+            my $a = join(@actual, "");
+            @validstderr = $v;
+            @actual = $a;
+        }
 
         if($hash{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line

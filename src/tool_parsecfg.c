@@ -172,6 +172,11 @@ ParameterError parseconfig(const char *filename, int max_recursive,
         param = curlx_dyn_len(&pbuf) ? curlx_dyn_ptr(&pbuf) : CURL_UNCONST("");
       }
       else {
+        if(*line == '\'') {
+          warnf("%s:%d Option '%s' uses argument with leading single quote. "
+                "It is probably a mistake. Consider double quotes.",
+                filename, lineno, option);
+        }
         param = line; /* parameter starts here */
         while(*line && !ISSPACE(*line)) /* stop also on CRLF */
           line++;
@@ -192,7 +197,7 @@ ParameterError parseconfig(const char *filename, int max_recursive,
           case '#': /* comment */
             break;
           default:
-            warnf("%s:%d: warning: '%s' uses unquoted whitespace. "
+            warnf("%s:%d Option '%s' uses argument with unquoted whitespace. "
                   "This may cause side-effects. Consider double quotes.",
                   filename, lineno, option);
           }
@@ -240,11 +245,11 @@ ParameterError parseconfig(const char *filename, int max_recursive,
            res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
-          /* only show error in the first level config call */
-          if(max_recursive == CONFIG_MAX_LEVELS) {
-            const char *reason = param2text(res);
-            errorf("%s:%d: '%s' %s", filename, lineno, option, reason);
-          }
+          const char *reason = param2text(res);
+          errorf("%s:%d config file option '%s' %s",
+                 filename, lineno, option, reason);
+          if(res == PARAM_OPTION_UNKNOWN)
+            res = PARAM_CONFIG_OPTION_UNKNOWN;
           err = res;
         }
       }
