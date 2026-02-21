@@ -149,7 +149,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #define exe_easy_init(A, Y, Z)                                        \
   do {                                                                \
-    A = curl_easy_init();                                             \
+    (A) = curl_easy_init();                                           \
     if(!(A)) {                                                        \
       curl_mfprintf(stderr, "%s:%d curl_easy_init() failed\n", Y, Z); \
       result = TEST_ERR_EASY_INIT;                                    \
@@ -173,7 +173,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #define exe_multi_init(A, Y, Z)                                        \
   do {                                                                 \
-    A = curl_multi_init();                                             \
+    (A) = curl_multi_init();                                           \
     if(!(A)) {                                                         \
       curl_mfprintf(stderr, "%s:%d curl_multi_init() failed\n", Y, Z); \
       result = TEST_ERR_MULTI;                                         \
@@ -499,7 +499,7 @@ void ws_close(CURL *curl);  /* just close the connection */
     tv_test_start = curlx_now(); \
   } while(0)
 
-#define TEST_HANG_TIMEOUT 60 * 1000  /* global default */
+#define TEST_HANG_TIMEOUT (60 * 1000)  /* global default */
 
 #define exe_test_timedout(T, Y, Z)                                        \
   do {                                                                    \
@@ -508,7 +508,7 @@ void ws_close(CURL *curl);  /* just close the connection */
       curl_mfprintf(stderr,                                               \
                     "%s:%d ABORTING TEST, since it seems "                \
                     "that it would have run forever (%ld ms > %ld ms)\n", \
-                    Y, Z, (long)timediff, (long)(TEST_HANG_TIMEOUT));     \
+                    Y, Z, (long)timediff, (long)TEST_HANG_TIMEOUT);       \
       result = TEST_ERR_RUNS_FOREVER;                                     \
     }                                                                     \
   } while(0)
