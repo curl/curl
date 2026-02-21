@@ -12,6 +12,7 @@ Checks:
   - -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
   - -clang-diagnostic-nullability-extension
   - bugprone-redundant-branch-condition
+  - bugprone-signed-char-misuse
   - bugprone-suspicious-realloc-usage
   - misc-const-correctness
   - misc-header-include-cycle
