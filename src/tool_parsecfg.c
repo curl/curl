@@ -174,7 +174,7 @@ ParameterError parseconfig(const char *filename, int max_recursive,
       else {
         if(*line == '\'') {
           warnf("%s:%d Option '%s' uses argument with leading single quote. "
-                "It probably is a mistake. Consider double quotes.",
+                "It is probably a mistake. Consider double quotes.",
                 filename, lineno, option);
         }
         param = line; /* parameter starts here */
