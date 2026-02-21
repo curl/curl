@@ -245,12 +245,9 @@ ParameterError parseconfig(const char *filename, int max_recursive,
            res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
-          /* only show error in the first level config call */
-
           const char *reason = param2text(res);
           errorf("%s:%d config file option '%s' %s",
                  filename, lineno, option, reason);
-
           err = res;
         }
       }
