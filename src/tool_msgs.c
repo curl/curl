@@ -123,15 +123,16 @@ void helpf(const char *fmt, ...)
 }
 
 /*
- * Emit error message on error stream if not muted. When errors are not tied
- * to command line arguments, use helpf() for such errors.
+ * Emit (this single) error message on error stream if not muted. When errors
+ * are not tied to command line arguments, use helpf() for such errors.
  */
 void errorf(const char *fmt, ...)
 {
-  if(!global->silent || global->showerror) {
+  if((!global->silent || global->showerror) && !global->errorf_called) {
     va_list ap;
     va_start(ap, fmt);
     voutf(ERROR_PREFIX, fmt, ap);
     va_end(ap);
   }
+  global->errorf_called = TRUE;
 }

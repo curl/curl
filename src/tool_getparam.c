@@ -3135,7 +3135,8 @@ ParameterError parse_args(int argc, argv_item_t argv[])
      err != PARAM_MANUAL_REQUESTED &&
      err != PARAM_VERSION_INFO_REQUESTED &&
      err != PARAM_ENGINES_REQUESTED &&
-     err != PARAM_CA_EMBED_REQUESTED) {
+     err != PARAM_CA_EMBED_REQUESTED &&
+     !global->errorf_called) {
     const char *reason = param2text(err);
 
     if(orig_opt && strcmp(":", orig_opt))
