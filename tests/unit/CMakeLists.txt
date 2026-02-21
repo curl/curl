@@ -26,12 +26,16 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+if(_CURL_TESTS_CONCAT)
+  set(_mk_unity_extra "--concat" "-I${CMAKE_CURRENT_SOURCE_DIR}" "-I${PROJECT_SOURCE_DIR}/tests/libtest")
+endif()
+
 add_custom_command(OUTPUT "${BUNDLE}.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" ${_mk_unity_extra}
     --test ${TESTS_C} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRST_C} ${TESTS_C}
+    ${FIRST_C} ${FIRST_H} ${TESTS_C}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
@@ -46,9 +50,12 @@ target_include_directories(${BUNDLE} PRIVATE
 )
 # unit tests are small pretend-libcurl-programs, pass BUILDING_LIBCURL to reflect that
 target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS} "BUILDING_LIBCURL")
-set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
+set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
 
-curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${TESTS_C})
-if(TARGET "${BUNDLE}-clang-tidy")
-  add_dependencies("${BUNDLE}-clang-tidy" curlu-unitprotos)
+if(NOT _CURL_TESTS_CONCAT)
+  set_target_properties(${BUNDLE} PROPERTIES C_CLANG_TIDY "")
+  curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${TESTS_C})
+  if(TARGET "${BUNDLE}-clang-tidy")
+    add_dependencies("${BUNDLE}-clang-tidy" curlu-unitprotos)
+  endif()
 endif()

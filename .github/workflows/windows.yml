@@ -704,7 +704,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
               -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -D_CURL_TESTS_CONCAT=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
               -DCURL_USE_LIBPSL=OFF \
@@ -741,7 +741,7 @@ jobs:
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
+        if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
