@@ -117,7 +117,7 @@ if(PICKY_COMPILER)
       -Waddress                            # clang  2.7  gcc  4.3
       -Wattributes                         # clang  2.7  gcc  4.1
       -Wcast-align                         # clang  1.0  gcc  4.2
-      -Wcast-qual                          # clang  3.0  gcc  3.4.6
+      -Wcast-qual                          # clang  2.7  gcc  3.4.6
       -Wdeclaration-after-statement        # clang  1.0  gcc  3.4
       -Wdiv-by-zero                        # clang  2.7  gcc  4.1
       -Wempty-body                         # clang  2.7  gcc  4.3
@@ -147,10 +147,10 @@ if(PICKY_COMPILER)
       list(APPEND _picky_enable
         ${_picky_common_old}
         -Wconditional-uninitialized        # clang  3.0
-        -Wno-used-but-marked-unused        # clang  3.0            # Triggered by typecheck-gcc.h with clang 14+, dependency headers
+        -Wno-used-but-marked-unused        # clang  2.9            # Triggered by typecheck-gcc.h with clang 14+, dependency headers
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
-        -Wformat=2                         # clang  3.0  gcc  4.8
+        -Wformat=2                         # clang  2.7  gcc  4.8
       )
       if(NOT MSVC)
         list(APPEND _picky_enable
@@ -294,23 +294,23 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
         list(APPEND _picky_enable
           -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.1
-          -Wformat=2                       # clang  3.0  gcc  4.8
+          -Wformat=2                       # clang  2.7  gcc  4.8
           -Wtrampolines                    #             gcc  4.6
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
         list(APPEND _picky_enable
-          -Warray-bounds=2                 # clang  3.0  gcc  5.0 (clang default: -Warray-bounds)
+          -Warray-bounds=2                 # clang  2.9  gcc  5.0 (clang default: -Warray-bounds)
           -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
         list(APPEND _picky_enable
           -Wduplicated-cond                #             gcc  6.0
-          -Wnull-dereference               # clang  3.0  gcc  6.0 (clang default)
+          -Wnull-dereference               # clang  2.9  gcc  6.0 (clang default)
             -fdelete-null-pointer-checks
           -Wshift-negative-value           # clang  3.7  gcc  6.0 (clang default)
-          -Wshift-overflow=2               # clang  3.0  gcc  6.0 (clang default: -Wshift-overflow)
+          -Wshift-overflow=2               # clang  2.9  gcc  6.0 (clang default: -Wshift-overflow)
           -Wunused-const-variable          # clang  3.4  gcc  6.0  appleclang  5.1
         )
       endif()

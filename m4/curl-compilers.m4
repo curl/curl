@@ -828,9 +828,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [address])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [attributes])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [bad-function-cast])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-qual])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [div-by-zero format-security])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [empty-body])
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-default"
@@ -853,16 +855,14 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "209"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
             tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         # Not used because we cannot change public structs
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"         # Triggered by typecheck-gcc.h with clang 14+, dependency headers
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
           fi
           #
           dnl Only clang 3.0 or later
           if test "$compiler_num" -ge "300"; then
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-qual])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conditional-uninitialized])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
-            tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"    # Triggered by typecheck-gcc.h with clang 14+, dependency headers
           fi
           dnl Only clang 3.1 or later
           if test "$compiler_num" -ge "301"; then
