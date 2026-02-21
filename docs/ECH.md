@@ -235,7 +235,7 @@ function in a new field in the ``dohentry`` structure.
 The qname for the DoH query is modified if the port number is not 443, as
 defined in the SVCB specification.
 
-When the DoH process has worked, ``Curl_doh_is_resolved()`` now also returns
+When the DoH process has worked, ``Curl_doh_take_result()`` now also returns
 the relevant HTTPS RR value data in the ``Curl_dns_entry`` structure.
 That is later accessed when the TLS session is being established, if ECH is
 enabled (from ``lib/vtls/openssl.c`` as described above).
