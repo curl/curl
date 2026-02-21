@@ -174,7 +174,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
  * they will be buffered. Use `Curl_req_flush()` to make sure
  * bytes are really send.
  * @param data      the transfer making the request
- * @param buf       the complete header bytes, no body
+ * @param req       the complete header bytes, no body
  * @param httpversion version used in request (09, 10, 11, etc.)
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
