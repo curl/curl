@@ -39,6 +39,8 @@ const char *param2text(ParameterError error)
     return "had unsupported trailing garbage";
   case PARAM_OPTION_UNKNOWN:
     return "is unknown";
+  case PARAM_CONFIG_OPTION_UNKNOWN:
+    return "found an unknown config option";
   case PARAM_REQUIRES_PARAMETER:
     return "requires parameter";
   case PARAM_BAD_USE:

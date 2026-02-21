@@ -229,7 +229,7 @@ test1670 test1671 \
 test1680 test1681 test1682 test1683 \
 \
 test1700 test1701 test1702 test1703 test1704 test1705 test1706 test1707 \
-test1708 test1709 test1710 test1711 \
+test1708 test1709 test1710 test1711 test1712 \
 \
 test1800 test1801 test1802 test1847 test1848 \
 \
