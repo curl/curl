@@ -718,10 +718,9 @@ This verifies that this data was passed to stderr.
 Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 
-Use the mode="warn" attribute if the output curl warning output, as it then
-makes the check without newlines and the prefix to better handle that the
-lines may wrap at different points depending on the lengths of the lines and
-terminal width.
+Use the mode="warn" attribute for curl warning output, as it then makes the
+check without newlines and the prefix to better handle that the lines may wrap
+at different points depending on the lengths of the lines and terminal width.
 
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
