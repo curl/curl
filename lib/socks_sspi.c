@@ -232,6 +232,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
 
     if(result || (actualread != us_length)) {
       failf(data, "Failed to receive SSPI authentication token.");
+      curlx_free(sspi_recv_token.pvBuffer);
       return result ? result : CURLE_COULDNT_CONNECT;
     }
 
