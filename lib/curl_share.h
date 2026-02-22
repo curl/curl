@@ -65,9 +65,9 @@ struct Curl_share {
 #endif
 };
 
-CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,
-                           curl_lock_access);
-CURLSHcode Curl_share_unlock(struct Curl_easy *, curl_lock_data);
+CURLSHcode Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
+                           curl_lock_access accesstype);
+CURLSHcode Curl_share_unlock(struct Curl_easy *data, curl_lock_data type);
 
 /* convenience macro to check if this handle is using a shared SSL spool */
 #define CURL_SHARE_ssl_scache(data) ((data)->share &&                    \
