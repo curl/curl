@@ -234,26 +234,20 @@ Protocols currently implemented on OS/400:
 _ DICT
 _ FILE
 _ FTP
-_ FTPS
-_ FTP with secure transmission
 _ GOPHER
 _ HTTP
-_ HTTPS
 _ IMAP
-_ IMAPS
-_ IMAP with secure transmission
 _ LDAP
+_ MQTT
 _ POP3
-_ POP3S
-_ POP3 with secure transmission
 _ RTSP
 _ SCP if libssh2 is enabled
 _ SFTP if libssh2 is enabled
+_ SMB
 _ SMTP
-_ SMTPS
-_ SMTP with secure transmission
 _ TELNET
 _ TFTP
+_ WS
 
 
 Compiling on OS/400:
