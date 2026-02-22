@@ -4232,7 +4232,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
               k->httpversion = (unsigned char)(10 + (p[1] - '0'));
               p += 3;
               if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                k->httpcode = ((p[0] - '0') * 100) + ((p[1] - '0') * 10) +
                   (p[2] - '0');
                 /* RFC 9112 requires a single space following the status code,
                    but the browsers do not so let's not insist */
@@ -4252,7 +4252,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
           k->httpversion = (unsigned char)((*p - '0') * 10);
           p += 2;
           if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-            k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+            k->httpcode = ((p[0] - '0') * 100) + ((p[1] - '0') * 10) +
               (p[2] - '0');
             p += 3;
             if(!ISBLANK(*p))

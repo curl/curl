@@ -40,7 +40,7 @@ static CURLcode test_lib666(const char *URL)
     if(i % 77 == 76)
       testbuf[i] = '\n';
     else
-      testbuf[i] = (char)(0x41 + i % 26); /* A...Z */
+      testbuf[i] = (char)(0x41 + (i % 26)); /* A...Z */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

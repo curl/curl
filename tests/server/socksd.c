@@ -293,8 +293,8 @@ static curl_socket_t socks4(curl_socket_t fd,
 
 static curl_socket_t sockit(curl_socket_t fd)
 {
-  unsigned char buffer[2 * 256 + 16];
-  unsigned char response[2 * 256 + 16];
+  unsigned char buffer[(2 * 256) + 16];
+  unsigned char response[(2 * 256) + 16];
   ssize_t rc;
   unsigned char len;
   unsigned char type;

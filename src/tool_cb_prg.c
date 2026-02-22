@@ -78,13 +78,13 @@ static void fly(struct ProgressData *bar, bool moved)
 
   memcpy(&buf[bar->bar + 1], "-=O=-", 5);
 
-  pos = sinus[bar->tick % 200] / (1000000 / check) + 1;
+  pos = (sinus[bar->tick % 200] / (1000000 / check)) + 1;
   buf[pos] = '#';
-  pos = sinus[(bar->tick + 5) % 200] / (1000000 / check) + 1;
+  pos = (sinus[(bar->tick + 5) % 200] / (1000000 / check)) + 1;
   buf[pos] = '#';
-  pos = sinus[(bar->tick + 10) % 200] / (1000000 / check) + 1;
+  pos = (sinus[(bar->tick + 10) % 200] / (1000000 / check)) + 1;
   buf[pos] = '#';
-  pos = sinus[(bar->tick + 15) % 200] / (1000000 / check) + 1;
+  pos = (sinus[(bar->tick + 15) % 200] / (1000000 / check)) + 1;
   buf[pos] = '#';
 
   fputs(buf, bar->out);

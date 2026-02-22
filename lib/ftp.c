@@ -2496,7 +2496,7 @@ static CURLcode ftp_state_port_resp(struct Curl_easy *data,
 
 static int twodigit(const char *p)
 {
-  return (p[0] - '0') * 10 + (p[1] - '0');
+  return ((p[0] - '0') * 10) + (p[1] - '0');
 }
 
 static bool ftp_213_date(const char *p, int *year, int *month, int *day,
@@ -2505,7 +2505,7 @@ static bool ftp_213_date(const char *p, int *year, int *month, int *day,
   size_t len = strlen(p);
   if(len < 14)
     return FALSE;
-  *year = twodigit(&p[0]) * 100 + twodigit(&p[2]);
+  *year = (twodigit(&p[0]) * 100) + twodigit(&p[2]);
   *month = twodigit(&p[4]);
   *day = twodigit(&p[6]);
   *hour = twodigit(&p[8]);

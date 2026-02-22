@@ -391,8 +391,8 @@ static void pktx_update_time(struct Curl_easy *data,
   const struct curltime *pnow = Curl_pgrs_now(data);
 
   vquic_ctx_update_time(&ctx->q, pnow);
-  pktx->ts = (ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS +
-             (ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS;
+  pktx->ts = ((ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS) +
+             ((ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS);
 }
 
 static void pktx_init(struct pkt_io_ctx *pktx,
@@ -406,8 +406,8 @@ static void pktx_init(struct pkt_io_ctx *pktx,
   pktx->data = data;
   ngtcp2_path_storage_zero(&pktx->ps);
   vquic_ctx_set_time(&ctx->q, pnow);
-  pktx->ts = (ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS +
-             (ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS;
+  pktx->ts = ((ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS) +
+             ((ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS);
 }
 
 static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,

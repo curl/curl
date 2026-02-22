@@ -52,7 +52,7 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   unsigned char b;
 
   /* Create HMAC context. */
-  i = sizeof(*ctxt) + 2 * hashparams->ctxtsize + hashparams->resultlen;
+  i = sizeof(*ctxt) + (2 * hashparams->ctxtsize) + hashparams->resultlen;
   ctxt = curlx_malloc(i);
 
   if(!ctxt)

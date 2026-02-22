@@ -98,7 +98,7 @@ static CURLcode test_lib597(const char *URL)
       interval.tv_usec = (itimeout % 1000) * 1000;
     }
     else {
-      interval.tv_sec = TEST_HANG_TIMEOUT / 1000 - 1;
+      interval.tv_sec = (TEST_HANG_TIMEOUT / 1000) - 1;
       interval.tv_usec = 0;
     }
 

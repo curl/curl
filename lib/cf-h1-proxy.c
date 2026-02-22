@@ -340,8 +340,8 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
           ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
           !ISDIGIT(header[12])) {
     /* store the HTTP code from the proxy */
-    data->info.httpproxycode = k->httpcode = (header[9] - '0') * 100 +
-      (header[10] - '0') * 10 + (header[11] - '0');
+    data->info.httpproxycode = k->httpcode = ((header[9] - '0') * 100) +
+      ((header[10] - '0') * 10) + (header[11] - '0');
   }
   return result;
 }

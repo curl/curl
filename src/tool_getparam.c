@@ -618,7 +618,7 @@ UNITTEST ParameterError GetSizeParameter(const char *arg, curl_off_t *out)
   if(value > ((CURL_OFF_T_MAX - add) / mul))
     return PARAM_NUMBER_TOO_LARGE;
 
-  *out = value * mul + add;
+  *out = (value * mul) + add;
   return PARAM_OK;
 }
 

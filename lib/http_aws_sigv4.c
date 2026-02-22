@@ -53,7 +53,7 @@
 #define TIMESTAMP_SIZE 17
 
 /* hex-encoded with trailing null */
-#define SHA256_HEX_LENGTH (2 * CURL_SHA256_DIGEST_LENGTH + 1)
+#define SHA256_HEX_LENGTH ((2 * CURL_SHA256_DIGEST_LENGTH) + 1)
 
 #define MAX_QUERY_COMPONENTS 128
 
@@ -745,8 +745,10 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
       in_key_len = offset - in_key;
     }
 
-    curlx_dyn_init(&encoded_query_array[index].key, query_part_len * 3 + 1);
-    curlx_dyn_init(&encoded_query_array[index].value, query_part_len * 3 + 1);
+    curlx_dyn_init(&encoded_query_array[index].key,
+      (query_part_len * 3) + 1);
+    curlx_dyn_init(&encoded_query_array[index].value,
+      (query_part_len * 3) + 1);
     counted_query_components++;
 
     /* Decode/encode the key */

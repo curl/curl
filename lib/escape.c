@@ -63,7 +63,7 @@ char *curl_easy_escape(CURL *data, const char *string, int inlength)
   if(length > SIZE_MAX / 16)
     return NULL;
 
-  curlx_dyn_init(&d, length * 3 + 1);
+  curlx_dyn_init(&d, (length * 3) + 1);
 
   while(length--) {
     /* treat the characters unsigned */

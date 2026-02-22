@@ -218,12 +218,12 @@ typedef struct md4_ctx MD4_CTX;
 #define MD4_SET(n) (*(const uint32_t *)(const void *)&ptr[(n) * 4])
 #define MD4_GET(n) MD4_SET(n)
 #else
-#define MD4_SET(n) (ctx->block[(n)] = \
-   (uint32_t)ptr[(n) * 4] | \
-  ((uint32_t)ptr[(n) * 4 + 1] <<  8) | \
-  ((uint32_t)ptr[(n) * 4 + 2] << 16) | \
-  ((uint32_t)ptr[(n) * 4 + 3] << 24))
-#define MD4_GET(n) (ctx->block[(n)])
+#define MD4_SET(n) (ctx->block[n] =      \
+   (uint32_t)ptr[(n) * 4]              | \
+  ((uint32_t)ptr[((n) * 4) + 1] <<  8) | \
+  ((uint32_t)ptr[((n) * 4) + 2] << 16) | \
+  ((uint32_t)ptr[((n) * 4) + 3] << 24))
+#define MD4_GET(n) ctx->block[n]
 #endif
 
 /*
