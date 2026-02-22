@@ -659,7 +659,14 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   int error;
   char errbuf[STRERROR_LEN];
   int rc;
-  size_t len = strlen(unix_socket);
+  size_t len;
+
+  if(!unix_socket) {
+    logmsg("Unix socket domain path not specified.");
+    return -1;
+  }
+
+  len = strlen(unix_socket);
 
   memset(sau, 0, sizeof(struct sockaddr_un));
   sau->sun_family = AF_UNIX;
