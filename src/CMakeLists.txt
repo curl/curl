@@ -79,10 +79,6 @@ source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
 source_group("curlx source files" FILES ${CURLX_CFILES})
 source_group("curlx header files" FILES ${CURLX_HFILES})
 
-if(WIN32)
-  list(APPEND CURL_CFILES ${CURL_RCFILES})
-endif()
-
 set(_curlx_cfiles_lib ${CURLX_CFILES})
 set(_curlx_hfiles_lib ${CURLX_HFILES})
 if(LIB_SELECTED STREQUAL LIB_STATIC)
@@ -106,6 +102,9 @@ add_executable(${EXE_NAME} ${CURL_CFILES} ${CURL_HFILES} ${_curl_cfiles_gen} ${_
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_OPTIONS "${CURL_CFLAGS}")
+if(WIN32)
+  set_property(TARGET ${EXE_NAME} APPEND PROPERTY SOURCES ${CURL_RCFILES})
+endif()
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
