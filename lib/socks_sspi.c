@@ -318,6 +318,7 @@ static CURLcode socks5_sspi_encryption(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
 
     sspi_w_token[1].cbBuffer = 1;
+    sspi_w_token[1].BufferType = SECBUFFER_DATA;
     sspi_w_token[1].pvBuffer = curlx_malloc(1);
     if(!sspi_w_token[1].pvBuffer)
       return socks5_free(sspi_w_token, CURLE_OUT_OF_MEMORY);
