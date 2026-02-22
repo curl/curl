@@ -254,12 +254,11 @@ static CURLcode socks5_free(SecBuffer *sspi_w_token,
 static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     CtxtHandle *sspi_context,
-                                    unsigned long *sspi_ret_flagsp)
+                                    unsigned long sspi_ret_flags)
 {
   CURLcode result = CURLE_OK;
   CURLcode code;
   SECURITY_STATUS status;
-  SecPkgContext_Flags sspi_flags;
   unsigned char gss_enc;
   SecBuffer sspi_w_token[3];
   SecBufferDesc wrap_desc;
@@ -273,9 +272,9 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
   size_t written;
 
   gss_enc = 0;
-  if(*sspi_ret_flagsp & ISC_REQ_CONFIDENTIALITY)
+  if(sspi_ret_flags & ISC_REQ_CONFIDENTIALITY)
     gss_enc = 2;
-  else if(*sspi_ret_flagsp & ISC_REQ_INTEGRITY)
+  else if(sspi_ret_flags & ISC_REQ_INTEGRITY)
     gss_enc = 1;
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.",
