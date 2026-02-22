@@ -53,7 +53,7 @@ Content-Type: application/x-www-form-urlencoded
 
 'arg-with-quote'
 </protocol>
-<stderr mode="text">
+<stderr mode="warn">
 Warning: %LOGDIR/config:1 Option 'data' uses argument with leading single quote.%SP
 Warning: It is probably a mistake. Consider double quotes.
 </stderr>
