@@ -104,14 +104,14 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  CredHandle *cred_handle,
                                  CtxtHandle *sspi_context,
-                                 char *service_name)
+                                 char *service_name,
+                                 unsigned long *sspi_ret_flagsp)
 {
   struct connectdata *conn = cf->conn;
   curl_socket_t sock = conn->sock[cf->sockindex];
   CURLcode result = CURLE_OK;
   CURLcode code;
   SECURITY_STATUS status;
-  unsigned long sspi_ret_flags = 0;
   SecBuffer sspi_send_token, sspi_recv_token;
   SecBufferDesc input_desc, output_desc;
   PCtxtHandle context_handle = NULL;
@@ -154,7 +154,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
                                              &input_desc, 0,
                                              sspi_context,
                                              &output_desc,
-                                             &sspi_ret_flags, NULL);
+                                             sspi_ret_flagsp, NULL);
 
     curlx_free(sname);
     Curl_safefree(sspi_recv_token.pvBuffer);
@@ -251,9 +251,10 @@ static CURLcode socks5_free(SecBuffer *sspi_w_token,
   return result;
 }
 
-static CURLcode socks5_sspi_encryption(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       CtxtHandle *sspi_context)
+static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    CtxtHandle *sspi_context,
+                                    unsigned long *sspi_ret_flagsp)
 {
   CURLcode result = CURLE_OK;
   CURLcode code;
@@ -271,17 +272,10 @@ static CURLcode socks5_sspi_encryption(struct Curl_cfilter *cf,
   size_t actualread;
   size_t written;
 
-  sspi_flags.Flags = 0;
-  status = Curl_pSecFn->QueryContextAttributes(sspi_context,
-                                               SECPKG_ATTR_FLAGS,
-                                               &sspi_flags);
-  if(check_sspi_err(data, status, "QueryContextAttributes"))
-    return CURLE_COULDNT_CONNECT;
-
   gss_enc = 0;
-  if(sspi_flags.Flags & ISC_REQ_CONFIDENTIALITY)
+  if(*sspi_ret_flagsp & ISC_REQ_CONFIDENTIALITY)
     gss_enc = 2;
-  else if(sspi_flags.Flags & ISC_REQ_INTEGRITY)
+  else if(*sspi_ret_flagsp & ISC_REQ_INTEGRITY)
     gss_enc = 1;
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.",
@@ -476,6 +470,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   CtxtHandle sspi_context;
   SecPkgCredentials_Names names;
   char *service_name = NULL;
+  unsigned long sspi_ret_flags = 0;
 
   memset(&cred_handle, 0, sizeof(cred_handle));
   memset(&sspi_context, 0, sizeof(sspi_context));
@@ -486,7 +481,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     goto error;
 
   result = socks5_sspi_loop(cf, data, &cred_handle, &sspi_context,
-                            service_name);
+                            service_name, &sspi_ret_flags);
   if(result)
     goto error;
 
@@ -509,7 +504,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     names.sUserName = NULL;
   }
 
-  result = socks5_sspi_encryption(cf, data, &sspi_context);
+  result = socks5_sspi_encrypt(cf, data, &sspi_context, sspi_ret_flags);
   if(result)
     goto error;
 
