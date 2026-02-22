@@ -230,7 +230,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
                                             Set `NOEXAMPLES` to not build examples.
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
                                             If enabled, it implies `CURL_DISABLE_TYPECHECK=ON` and force-disables unity mode
-                                            for the libcurl and curl tool targets.
+                                            for libcurl and the curl tool.
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
 - `CURL_CODE_COVERAGE`:                     Enable code coverage build options. Default: `OFF`
 - `CURL_COMPLETION_FISH`:                   Install fish completions. Default: `OFF`
