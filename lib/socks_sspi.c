@@ -140,8 +140,10 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
 
   for(;;) {
     TCHAR *sname = curlx_convert_UTF8_to_tchar(service_name);
-    if(!sname)
+    if(!sname) {
+      curlx_free(sspi_recv_token.pvBuffer);
       return socks5_free_token(&sspi_send_token, CURLE_OUT_OF_MEMORY);
+    }
 
     status =
       Curl_pSecFn->InitializeSecurityContext(cred_handle, context_handle,
