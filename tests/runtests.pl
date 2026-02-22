@@ -1347,12 +1347,20 @@ sub singletest_check {
             normalize_text(\@actual);
         }
         if($filemode && ($filemode eq "warn")) {
-            map { 's/Warning: //' } (@validstderr);
-            map { 's/\r//' } (@validstderr);
-            map { 's/\n/ /' } (@validstderr);
-            map { 's/Warning: //' } (@actual);
-            map { 's/\r//' } (@actual);
-            map { 's/\n/ /' } (@actual);
+            for(@validstderr) {
+                s/Warning: //;
+                s/\r//;
+                s/\n/ /;
+            }
+            for(@actual) {
+                s/Warning: //;
+                s/\r//;
+                s/\n/ /;
+            }
+            my $v = join(@validstderr, "");
+            my $a = join(@actual, "");
+            @validstderr = $v;
+            @actual = $a;
         }
 
         if($hash{'nonewline'}) {

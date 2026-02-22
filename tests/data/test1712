@@ -55,7 +55,7 @@ Content-Type: application/x-www-form-urlencoded
 </protocol>
 <stderr mode="warn">
 Warning: %LOGDIR/config:1 Option 'data' uses argument with leading single quote.%SP
-Warning: It is probably a mistake. Consider double quotes.
+It is probably a mistake. Consider double quotes.
 </stderr>
 </verify>
 </testcase>
