@@ -47,7 +47,7 @@ if(CURL_BUILD_TESTING)
   target_link_libraries(curlu PUBLIC ${CURL_LIBS})
   # There is plenty of parallelism when building the testdeps target.
   # Override the curlu batch size with the maximum to optimize performance.
-  set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0 C_CLANG_TIDY "")
+  set_target_properties(curlu PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 0 C_CLANG_TIDY "")
 
   add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/unitprotos.h"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
