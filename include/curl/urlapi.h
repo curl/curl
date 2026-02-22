@@ -146,7 +146,7 @@ CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
  * readable error string. This is useful for printing meaningful error
  * messages.
  */
-CURL_EXTERN const char *curl_url_strerror(CURLUcode);
+CURL_EXTERN const char *curl_url_strerror(CURLUcode error);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

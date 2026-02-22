@@ -23,11 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_WOLFSSL
 
-#include "../urldata.h"
+#include "urldata.h"
 
 struct alpn_spec;
 struct ssl_peer;

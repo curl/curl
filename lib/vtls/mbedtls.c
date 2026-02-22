@@ -27,7 +27,7 @@
  * but vtls.c should ever call or use these functions.
  *
  */
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_MBEDTLS
 
@@ -56,17 +56,18 @@
 #ifdef MBEDTLS_DEBUG
 #include <mbedtls/debug.h>
 #endif
-#include "cipher_suite.h"
-#include "../urldata.h"
-#include "../curl_trc.h"
-#include "mbedtls.h"
-#include "vtls.h"
-#include "vtls_int.h"
-#include "vtls_scache.h"
-#include "x509asn1.h"
-#include "../connect.h" /* for the connect timeout */
-#include "../curlx/strdup.h"
-#include "../curl_sha256.h"
+
+#include "vtls/cipher_suite.h"
+#include "urldata.h"
+#include "curl_trc.h"
+#include "vtls/mbedtls.h"
+#include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
+#include "vtls/vtls_scache.h"
+#include "vtls/x509asn1.h"
+#include "connect.h" /* for the connect timeout */
+#include "curlx/strdup.h"
+#include "curl_sha256.h"
 
 /* ALPN for http2 */
 #if defined(USE_HTTP2) && defined(MBEDTLS_SSL_ALPN)

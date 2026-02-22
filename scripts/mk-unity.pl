@@ -31,15 +31,23 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--test <tests>] [--include <include-c-sources>]\n";
+    die "Usage: $0 [--embed [-I<incdir>]] [--test <tests>] [--include <include-c-sources>]\n";
 }
 
 my @src;
 my %include;
 my $in_include = 0;
 my $any_test = 0;
+my $embed = 0;
+my @incpath;
 foreach my $src (@ARGV) {
-    if($src eq "--test") {
+    if($src eq "--embed") {
+        $embed = 1;
+    }
+    elsif($src =~ "^-I") {
+        push @incpath, substr($src, 2);
+    }
+    elsif($src eq "--test") {
         $in_include = 0;
     }
     elsif($src eq "--include") {
@@ -55,9 +63,32 @@ foreach my $src (@ARGV) {
     }
 }
 
+sub include($@) {
+    my $filename = shift;
+    if($embed) {
+        if(! -f $filename) {
+            foreach my $path (@incpath) {
+                my $fullfn = $path . "/" . $filename;
+                if(-f $fullfn) {
+                    $filename = $fullfn;
+                    last;
+                }
+            }
+        }
+        open(my $fh, '<', $filename) or die "Cannot open '$filename': $!";
+        my $content = do { local $/; <$fh> };
+        close $fh;
+        print "#line 1 \"$filename\"\n$content\n";
+    }
+    else {
+        print "#include \"$filename\"\n";
+    }
+}
+
 print "/* !checksrc! disable COPYRIGHT all */\n\n";
 if($any_test) {
-    print "#include \"first.h\"\n\n";
+    include("first.h");
+    print "\n";
 }
 
 my $tlist = "";
@@ -65,7 +96,7 @@ my $tlist = "";
 foreach my $src (@src) {
     if($src =~ /([a-z0-9_]+)\.c$/) {
         my $name = $1;
-        print "#include \"$src\"\n";
+        include($src);
         if(not exists $include{$src}) {  # register test entry function
             $tlist .= "  {\"$name\", test_$name},\n";
         }
@@ -73,6 +104,6 @@ foreach my $src (@src) {
 }
 
 if($any_test) {
-    print "\nconst struct entry_s s_entries[] = {\n$tlist  {NULL, NULL}\n};\n";
-    print "\n#include \"first.c\"\n";
+    print "\nconst struct entry_s s_entries[] = {\n$tlist  {NULL, NULL}\n};\n\n";
+    include("first.c");
 }

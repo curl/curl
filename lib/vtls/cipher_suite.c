@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 
-#include "cipher_suite.h"
+#include "vtls/cipher_suite.h"
 
 /*
  * To support the CURLOPT_SSL_CIPHER_LIST option on SSL backends
