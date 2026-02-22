@@ -300,8 +300,10 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
     status = Curl_pSecFn->QueryContextAttributes(sspi_context,
                                                  SECPKG_ATTR_SIZES,
                                                  &sspi_sizes);
-    if(check_sspi_err(data, status, "QueryContextAttributes"))
+    if(check_sspi_err(data, status, "QueryContextAttributes")) {
+      failf(data, "Failed to query security context attributes.");
       return CURLE_COULDNT_CONNECT;
+    }
 
     sspi_w_token[0].cbBuffer = sspi_sizes.cbSecurityTrailer;
     sspi_w_token[0].BufferType = SECBUFFER_TOKEN;
