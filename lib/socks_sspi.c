@@ -93,8 +93,10 @@ static CURLcode socks5_sspi_setup(struct Curl_cfilter *cf,
 static CURLcode socks5_free_token(SecBuffer *send_token,
                                   CURLcode result)
 {
-  Curl_pSecFn->FreeContextBuffer(send_token->pvBuffer);
-  send_token->pvBuffer = NULL;
+  if(send_token->pvBuffer) {
+    Curl_pSecFn->FreeContextBuffer(send_token->pvBuffer);
+    send_token->pvBuffer = NULL;
+  }
   return result;
 }
 
