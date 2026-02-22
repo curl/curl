@@ -730,7 +730,7 @@ jobs:
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
             make -C bld
           fi
@@ -744,7 +744,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --target testdeps --verbose
           else
             make -C bld -C tests
           fi
