@@ -38,6 +38,8 @@ if(CURL_BUILD_EVERYTHING)
 endif()
 
 if(CURL_CLANG_TIDY)
+  set(_save_clang_tidy_options "${CMAKE_C_CLANG_TIDY}")
+  list(APPEND CMAKE_C_CLANG_TIDY "--checks=-readability-duplicate-include")  # side-effect: overrides custom --checks= option
   add_custom_target(tests-clang-tidy)
   add_dependencies(testdeps tests-clang-tidy)
 endif()
@@ -48,6 +50,10 @@ add_subdirectory(libtest)
 add_subdirectory(tunit)
 add_subdirectory(unit)
 add_subdirectory(certs)
+
+if(CURL_CLANG_TIDY)
+  set(CMAKE_C_CLANG_TIDY "${_save_clang_tidy_options}")
+endif()
 
 # Add a runtests target with customized flags
 function(curl_add_runtests _targetname _test_flags)
