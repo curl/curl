@@ -26,7 +26,7 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(CURL_TESTS_EMBED)
+if(CURL_TESTS_CONCAT)
   set(_mk_unity_extra "--concat" "-I${CMAKE_CURRENT_SOURCE_DIR}" "-I${PROJECT_SOURCE_DIR}/tests/libtest")
 endif()
 
@@ -52,7 +52,7 @@ target_include_directories(${BUNDLE} PRIVATE
 target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS} "BUILDING_LIBCURL")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
 
-if(NOT CURL_TESTS_EMBED)
+if(NOT CURL_TESTS_CONCAT)
   set_target_properties(${BUNDLE} PROPERTIES C_CLANG_TIDY "")
   curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${TESTS_C})
   if(TARGET "${BUNDLE}-clang-tidy")
