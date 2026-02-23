@@ -326,7 +326,7 @@ ParameterError secs2ms(long *valp, const char *str)
     ms = ((long)fracs * 100) / digs[len - 1];
   }
 
-  *valp = (long)secs * 1000 + ms;
+  *valp = ((long)secs * 1000) + ms;
   return PARAM_OK;
 }
 

@@ -272,8 +272,8 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
     pat->c.ascii.letter = pat->c.ascii.min = min_c;
     pat->c.ascii.max = max_c;
 
-    if(multiply(amount, ((pat->c.ascii.max - pat->c.ascii.min) /
-                         pat->c.ascii.step + 1)))
+    if(multiply(amount, (((pat->c.ascii.max - pat->c.ascii.min) /
+                         pat->c.ascii.step) + 1)))
       return globerror(glob, "range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else if(ISDIGIT(*pattern)) {
@@ -328,8 +328,8 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
     pat->c.num.max = max_n;
     pat->c.num.step = step_n;
 
-    if(multiply(amount, ((pat->c.num.max - pat->c.num.min) /
-                         pat->c.num.step + 1)))
+    if(multiply(amount, (((pat->c.num.max - pat->c.num.min) /
+                         pat->c.num.step) + 1)))
       return globerror(glob, "range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else

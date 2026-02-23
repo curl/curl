@@ -184,7 +184,7 @@ static char *c_escape(const char *str, curl_off_t len)
   CURLcode result;
   struct dynbuf escaped;
 
-  curlx_dyn_init(&escaped, 4 * MAX_STRING_LENGTH_OUTPUT + 3);
+  curlx_dyn_init(&escaped, (4 * MAX_STRING_LENGTH_OUTPUT) + 3);
 
   if(len == ZERO_TERMINATED)
     len = strlen(str);
@@ -211,7 +211,7 @@ static char *c_escape(const char *str, curl_off_t len)
 
     if(!result) {
       if(p && *p)
-        result = curlx_dyn_addn(&escaped, to + 2 * (p - from), 2);
+        result = curlx_dyn_addn(&escaped, to + (2 * (p - from)), 2);
       else {
         result = curlx_dyn_addf(&escaped,
                                 /* Octal escape to avoid >2 digit hex. */

@@ -107,8 +107,9 @@ bool Curl_tls_keylog_write(const char *label,
                          const unsigned char *secret, size_t secretlen)
 {
   size_t pos, i;
-  unsigned char line[KEYLOG_LABEL_MAXLEN + 1 + 2 * CLIENT_RANDOM_SIZE + 1 +
-                     2 * SECRET_MAXLEN + 1 + 1];
+  unsigned char line[KEYLOG_LABEL_MAXLEN + 1 +
+                     (2 * CLIENT_RANDOM_SIZE) + 1 +
+                     (2 * SECRET_MAXLEN) + 1 + 1];
 
   if(!keylog_file_fp) {
     return FALSE;

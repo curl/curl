@@ -279,9 +279,10 @@ static time_t time2epoch(int sec, int min, int hour,
   int leap_days = year - (mon <= 1);
   leap_days = ((leap_days / 4) - (leap_days / 100) + (leap_days / 400)
                - (1969 / 4) + (1969 / 100) - (1969 / 400));
-  return ((((time_t)(year - 1970) * 365
-            + leap_days + month_days_cumulative[mon] + mday - 1) * 24
-           + hour) * 60 + min) * 60 + sec;
+  return ((((((((time_t)(year - 1970) * 365)
+    + leap_days + month_days_cumulative[mon] + mday - 1) * 24)
+    + hour) * 60)
+    + min) * 60) + sec;
 }
 
 /* Returns the value of a single-digit or two-digit decimal number, return
@@ -292,7 +293,7 @@ static int oneortwodigit(const char *date, const char **endp)
   int num = date[0] - '0';
   if(ISDIGIT(date[1])) {
     *endp = &date[2];
-    return num * 10 + (date[1] - '0');
+    return (num * 10) + (date[1] - '0');
   }
   *endp = &date[1];
   return num;
@@ -445,7 +446,7 @@ static int parsedate(const char *date, time_t *output)
           /* 8 digits, no year, month or day yet. This is YYYYMMDD */
           found = TRUE;
           yearnum = val / 10000;
-          monnum = (val % 10000) / 100 - 1; /* month is 0 - 11 */
+          monnum = ((val % 10000) / 100) - 1; /* month is 0 - 11 */
           mdaynum = val % 100;
         }
 

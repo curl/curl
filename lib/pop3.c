@@ -557,7 +557,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   size_t i;
   struct MD5_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
-  char secret[2 * MD5_DIGEST_LEN + 1];
+  char secret[(2 * MD5_DIGEST_LEN) + 1];
 
   if(!pop3c)
     return CURLE_FAILED_INIT;

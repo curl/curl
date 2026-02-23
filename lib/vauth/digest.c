@@ -341,9 +341,9 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   struct MD5_context *ctxt;
   char *response = NULL;
   unsigned char digest[MD5_DIGEST_LEN];
-  char HA1_hex[2 * MD5_DIGEST_LEN + 1];
-  char HA2_hex[2 * MD5_DIGEST_LEN + 1];
-  char resp_hash_hex[2 * MD5_DIGEST_LEN + 1];
+  char HA1_hex[(2 * MD5_DIGEST_LEN) + 1];
+  char HA2_hex[(2 * MD5_DIGEST_LEN) + 1];
+  char resp_hash_hex[(2 * MD5_DIGEST_LEN) + 1];
   char nonce[64];
   char realm[128];
   char algorithm[64];

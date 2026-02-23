@@ -1877,7 +1877,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   {
     const char *newp;
     struct dynbuf enc;
-    curlx_dyn_init(&enc, nalloc * 3 + 1 + leadingslash);
+    curlx_dyn_init(&enc, (nalloc * 3) + 1 + leadingslash);
 
     if(leadingslash && (part[0] != '/')) {
       CURLcode result = curlx_dyn_addn(&enc, "/", 1);
