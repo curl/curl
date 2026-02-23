@@ -37,20 +37,6 @@
 
 #include "curlmsg.h"
 
-/*
-#define   FAC_CURL      0xC01
-#define   FAC_SYSTEM    0
-#define   MSG_NORMAL    0
-*/
-
-/*
-#define   SEV_WARNING   0
-#define   SEV_SUCCESS   1
-#define   SEV_ERROR     2
-#define   SEV_INFO      3
-#define   SEV_FATAL     4
-*/
-
 static const long vms_cond[] =
 {
   CURL_OK,
