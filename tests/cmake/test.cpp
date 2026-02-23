@@ -26,7 +26,7 @@
 
 class CurlClass {
 public:
-  void curl_easy_setopt(void *, int a, long b) {
+  void curl_multi_setopt(void *, int a, long b) {
     std::cout << curl_version() << std::endl;
   }
 };
@@ -37,7 +37,8 @@ int main(int argc, const char **argv)
   std::cout << "libcurl C++ test:" << std::endl;
   std::cout << argv[0] << std::endl;
   CurlClass mycurl;
-  mycurl.curl_easy_setopt(NULL, 0, 0);
+  mycurl.curl_multi_setopt(nullptr, 0, 0);
+  ::curl_easy_setopt(nullptr, CURLOPT_URL, "https://example.com/");
   std::cout << "---" << std::endl;
   return 0;
 }
