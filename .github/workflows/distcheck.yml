@@ -316,6 +316,9 @@ jobs:
         run: ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via find_package'
         run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+      - name: 'via find_package (C++)'
+        if: ${{ contains(matrix.image, 'ubuntu') }}
+        run: TEST_CMAKE_FLAGS=-DTEST_CPP=ON ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
       - name: 'via ExternalProject (old cmake)'
         if: ${{ contains(matrix.image, 'ubuntu') }}
