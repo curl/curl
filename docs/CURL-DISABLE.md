@@ -120,10 +120,6 @@ Disable MQTT support.
 
 Disable the netrc parser.
 
-## `CURL_DISABLE_NTLM`
-
-Disable support for NTLM.
-
 ## `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG`
 
 Disable the auto load config support in the OpenSSL backend.

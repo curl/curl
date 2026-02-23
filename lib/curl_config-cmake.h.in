@@ -118,8 +118,8 @@
 /* disables netrc parser */
 #cmakedefine CURL_DISABLE_NETRC 1
 
-/* disables NTLM support */
-#cmakedefine CURL_DISABLE_NTLM 1
+/* enables NTLM support */
+#cmakedefine CURL_ENABLE_NTLM 1
 
 /* disables date parsing */
 #cmakedefine CURL_DISABLE_PARSEDATE 1
