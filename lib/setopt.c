@@ -1832,6 +1832,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 }
 #endif
 
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
 /*
  * A string with POST data. Makes curl HTTP POST. Even if it is NULL. If
  * needed, CURLOPT_POSTFIELDSIZE must have been set prior to
@@ -1869,6 +1870,7 @@ static CURLcode setopt_copypostfields(char *ptr, struct UserDefined *s)
   s->method = HTTPREQ_POST;
   return result;
 }
+#endif
 
 static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             char *ptr)
