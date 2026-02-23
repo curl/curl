@@ -2918,7 +2918,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
        * CertGetEnhancedKeyUsage doc.
        */
       if(CertGetEnhancedKeyUsage(pContext, 0, NULL, &req_size) && req_size) {
-        if(req_size && req_size > enhkey_usage_size) {
+        if(req_size > enhkey_usage_size) {
           void *tmp = curlx_realloc(enhkey_usage, req_size);
 
           if(!tmp) {
