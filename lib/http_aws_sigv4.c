@@ -53,7 +53,7 @@
 #define TIMESTAMP_SIZE 17
 
 /* hex-encoded with trailing null */
-#define SHA256_HEX_LENGTH (2 * CURL_SHA256_DIGEST_LENGTH + 1)
+#define SHA256_HEX_LENGTH ((2 * CURL_SHA256_DIGEST_LENGTH) + 1)
 
 #define MAX_QUERY_COMPONENTS 128
 
