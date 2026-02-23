@@ -24,11 +24,10 @@
  *
  ***************************************************************************/
 
-/*                                                                         */
-/* JEM, 12/30/12, VMS now generates config.h, so only define wrappers for  */
-/*                getenv(), getpwuid() and provide is_vms_shell()          */
-/*                Also need upper case symbols for system services, and    */
-/*                OpenSSL, and some Kerberos image                         */
+/* JEM, 2012-12-30, VMS now generates config.h, so only define wrappers for */
+/*                  getenv(), getpwuid() and provide is_vms_shell()         */
+/*                  Also need upper case symbols for system services, and   */
+/*                  OpenSSL, and some Kerberos image                        */
 
 #ifdef __DECC
 #pragma message save
