@@ -1852,9 +1852,8 @@ static CURLcode setopt_copypostfields(char *ptr, struct UserDefined *s)
       return CURLE_OUT_OF_MEMORY;
     else {
       /* Allocate even when size == 0. This satisfies the need of possible
-         later address compare to detect the COPYPOSTFIELDS mode, and to
-         mark that postfields is used rather than read function or form
-         data.
+         later address compare to detect the COPYPOSTFIELDS mode, and to mark
+         that postfields is used rather than read function or form data.
       */
       char *p = curlx_memdup0(ptr, pflen);
       if(!p)
