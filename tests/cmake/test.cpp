@@ -26,7 +26,7 @@
 
 class CurlClass {
 public:
-  void curl_multi_setopt(void *, int a, long b) {
+  void curl_multi_setopt(void *a, int b, long c) {
     std::cout << curl_version() << std::endl;
   }
 };
