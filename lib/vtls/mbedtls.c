@@ -748,10 +748,9 @@ static CURLcode mbed_load_crl(struct Curl_cfilter *cf,
   mbedtls_x509_crl_init(&backend->crl);
 
   if(ssl_crlfile) {
-    int ret;
     char errorbuf[128];
 #ifdef MBEDTLS_FS_IO
-    ret = mbedtls_x509_crl_parse_file(&backend->crl, ssl_crlfile);
+    int ret = mbedtls_x509_crl_parse_file(&backend->crl, ssl_crlfile);
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -761,7 +760,6 @@ static CURLcode mbed_load_crl(struct Curl_cfilter *cf,
       return CURLE_SSL_CRL_BADFILE;
     }
 #else
-    (void)ret;
     (void)errorbuf;
     failf(data, "mbedTLS: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
