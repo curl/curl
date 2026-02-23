@@ -180,7 +180,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       return 1;
     }
 
-    req->prot_version = prot_major * 10 + prot_minor;
+    req->prot_version = (prot_major * 10) + prot_minor;
 
     /* find the last slash */
     ptr = strrchr(doc, '/');

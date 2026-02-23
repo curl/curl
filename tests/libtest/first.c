@@ -147,7 +147,7 @@ static void memory_tracking_init(void)
 /* returns a hexdump in a static memory area */
 char *hexdump(const unsigned char *buf, size_t len)
 {
-  static char dump[200 * 3 + 1];
+  static char dump[(200 * 3) + 1];
   char *p = dump;
   size_t i;
   if(len > 200)

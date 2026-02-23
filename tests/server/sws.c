@@ -386,7 +386,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     if(fine) {
       const char *ptr;
 
-      req->prot_version = prot_major * 10 + prot_minor;
+      req->prot_version = (prot_major * 10) + prot_minor;
 
       /* find the last slash */
       ptr = &httppath[npath];

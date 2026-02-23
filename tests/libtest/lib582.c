@@ -164,7 +164,7 @@ static ssize_t t582_getMicroSecondTimeout(struct curltime *timeout)
   struct curltime now;
   ssize_t result;
   now = curlx_now();
-  result = (ssize_t)((timeout->tv_sec - now.tv_sec) * 1000000 +
+  result = (ssize_t)(((timeout->tv_sec - now.tv_sec) * 1000000) +
     timeout->tv_usec - now.tv_usec);
   if(result < 0)
     result = 0;

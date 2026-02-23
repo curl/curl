@@ -109,9 +109,9 @@ static CURLcode test_unit1309(const char *arg)
 
     /* add some nodes with the same key */
     for(j = 0; j <= i % 3; j++) {
-      storage[i * 3 + j] = key.tv_usec * 10 + j;
-      Curl_splayset(&nodes[i * 3 + j], &storage[i * 3 + j]);
-      root = Curl_splayinsert(&key, root, &nodes[i * 3 + j]);
+      storage[(i * 3) + j] = (key.tv_usec * 10) + j;
+      Curl_splayset(&nodes[(i * 3) + j], &storage[(i * 3) + j]);
+      root = Curl_splayinsert(&key, root, &nodes[(i * 3) + j]);
     }
   }
 
