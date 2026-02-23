@@ -1782,15 +1782,16 @@ static CURLcode check_finished(struct parastate *s)
                        "in another transfer");
       }
       tres = post_per_transfer(ended, tres, &retry, &delay);
-      progress_finalize(ended); /* before it goes away */
       all_added--; /* one fewer added */
       checkmore = TRUE;
       if(retry) {
+        progress_reset_retry(ended);
         ended->added = FALSE; /* add it again */
         /* we delay retries in full integer seconds only */
         ended->startat = delay ? time(NULL) + delay / 1000 : 0;
       }
       else {
+        progress_finalize(ended); /* before it goes away */
         /* result receives this transfer's error unless the transfer was
            marked for abort due to a critical error in another transfer */
         if(tres && (!ended->abort || !result))
@@ -1906,6 +1907,18 @@ static CURLcode parallel_transfers(CURLSH *share)
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
       if(!s->mcode)
         s->mcode = curl_multi_perform(s->multi, &s->still_running);
+
+      /* When no transfers are active but sleeping retries remain,
+         periodically check if any are ready to be re-added */
+      if(!s->still_running && s->more_transfers && !s->wrapitup) {
+        CURLcode tres = add_parallel_transfers(s->multi, s->share,
+                                               &s->more_transfers,
+                                               &s->added_transfers);
+        if(tres && !s->result)
+          s->result = tres;
+        if(s->added_transfers)
+          s->still_running = 1;
+      }
 
       progress_meter(s->multi, &s->start, FALSE);
     }
