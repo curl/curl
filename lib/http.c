@@ -4345,7 +4345,7 @@ void Curl_http_to_fold(struct dynbuf *bf)
     len--;
   if(len && (hd[len - 1] == '\r'))
     len--;
-  while(len && (ISBLANK(hd[len - 1]))) /* strip off trailing whitespace */
+  while(len && ISBLANK(hd[len - 1])) /* strip off trailing whitespace */
     len--;
   curlx_dyn_setlen(bf, len);
 }
