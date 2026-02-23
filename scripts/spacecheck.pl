@@ -170,6 +170,16 @@ while(my $filename = <$git_ls_files>) {
         }
     }
 
+    my $search = $content;
+    my $linepos = 0;
+    while($search =~ / "\n *" /) {
+        my $part = substr($search, 0, $+[0]);
+        $search = substr($search, $+[0]);
+        my $line = ($part =~ tr/\n//);
+        push @err, sprintf("line %d: double spaces in folded string", $linepos + $line);
+        $linepos += $line;
+    }
+
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
         push @err, "content: has binary contents";
     }

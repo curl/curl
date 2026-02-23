@@ -451,7 +451,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
     /* Increment the retry counter and log the timeout */
     state->retries++;
     infof(data, "Timeout waiting for block %d ACK. "
-          " Retries = %d", NEXT_BLOCKNUM(state->block), state->retries);
+          "Retries = %d", NEXT_BLOCKNUM(state->block), state->retries);
     /* Decide if we have had enough */
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
