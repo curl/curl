@@ -13,7 +13,7 @@ body:
 
         Only file bugs here! Ask questions on the mailing lists https://curl.se/mail/
 
-        **SECURITY RELATED?** Submit here: https://github.com/curl/curl/security/advisories
+        **SECURITY RELATED?** Submit here: https://hackerone.com/curl
 
   - type: textarea
     id: reproducer
