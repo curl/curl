@@ -25,7 +25,15 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
-project(test-consumer C)
+option(TEST_CPP "Test C++" OFF)
+
+if(TEST_CPP)
+  project(test-CPP-consumer CXX)
+  set(_source "test.cpp")
+else()
+  project(test-C-consumer C)
+  set(_source "test.c")
+endif()
 
 option(TEST_INTEGRATION_MODE "Integration mode" "find_package")
 
@@ -93,7 +101,7 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
       ${CURL_TEST_OPTS}
     BUILD_BYPRODUCTS "${_curl_static_lib}")
 
-  add_executable(test-consumer-static-fetch "test.c")
+  add_executable(test-consumer-static-fetch "${_source}")
   add_dependencies(test-consumer-static-fetch curl-external)
   if(WIN32)
     target_compile_definitions(test-consumer-static-fetch PRIVATE "CURL_STATICLIB")
@@ -107,26 +115,26 @@ if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
    TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
    TEST_INTEGRATION_MODE STREQUAL "FetchContent")
 
-  add_executable(test-consumer-static-ns "test.c")
+  add_executable(test-consumer-static-ns "${_source}")
   target_link_libraries(test-consumer-static-ns PRIVATE "CURL::libcurl_static")
 
-  add_executable(test-consumer-shared-ns "test.c")
+  add_executable(test-consumer-shared-ns "${_source}")
   target_link_libraries(test-consumer-shared-ns PRIVATE "CURL::libcurl_shared")
 
   # Alias for either shared or static library
-  add_executable(test-consumer-selected-ns "test.c")
+  add_executable(test-consumer-selected-ns "${_source}")
   target_link_libraries(test-consumer-selected-ns PRIVATE "CURL::libcurl")
 endif()
 
 if(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
    TEST_INTEGRATION_MODE STREQUAL "FetchContent")
 
-  add_executable(test-consumer-static-bare "test.c")
+  add_executable(test-consumer-static-bare "${_source}")
   target_link_libraries(test-consumer-static-bare PRIVATE "libcurl_static")
 
-  add_executable(test-consumer-shared-bare "test.c")
+  add_executable(test-consumer-shared-bare "${_source}")
   target_link_libraries(test-consumer-shared-bare PRIVATE "libcurl_shared")
 
-  add_executable(test-consumer-selected-bare "test.c")
+  add_executable(test-consumer-selected-bare "${_source}")
   target_link_libraries(test-consumer-selected-bare PRIVATE "libcurl")
 endif()

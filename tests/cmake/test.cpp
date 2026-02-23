@@ -22,14 +22,22 @@
  *
  ***************************************************************************/
 #include <curl/curl.h>
-#include <stdio.h>
+#include <iostream>
+
+class CurlClass {
+public:
+  void curl_easy_setopt(void *, int a, long b) {
+    std::cout << curl_version() << std::endl;
+  }
+};
 
 int main(int argc, const char **argv)
 {
   (void)argc;
-  puts("libcurl C test:");
-  puts(argv[0]);
-  puts(curl_version());
-  puts("---");
+  std::cout << "libcurl C++ test:" << std::endl;
+  std::cout << argv[0] << std::endl;
+  CurlClass mycurl;
+  mycurl.curl_easy_setopt(NULL, 0, 0);
+  std::cout << "---" << std::endl;
   return 0;
 }
