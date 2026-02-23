@@ -161,7 +161,7 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
         list(APPEND _picky_enable
           -Wno-covered-switch-default      # clang  3.1            appleclang  3.1  # Annoying to fix or silence
-          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # Triggered by standard headers
+          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # Triggered by curl/curl.h, standard headers
         )
         if(MSVC)
           list(APPEND _picky_enable
