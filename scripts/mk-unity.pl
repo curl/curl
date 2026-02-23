@@ -87,6 +87,9 @@ sub include($@) {
 
 print "/* !checksrc! disable COPYRIGHT all */\n\n";
 if($any_test) {
+    if($concat) {
+        print "/* NOLINTBEGIN(readability-duplicate-include) */\n\n";
+    }
     include("first.h");
     print "\n";
 }
@@ -106,4 +109,7 @@ foreach my $src (@src) {
 if($any_test) {
     print "\nconst struct entry_s s_entries[] = {\n$tlist  {NULL, NULL}\n};\n\n";
     include("first.c");
+    if($concat) {
+        print "/* NOLINTEND(readability-duplicate-include) */\n";
+    }
 }
