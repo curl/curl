@@ -1702,7 +1702,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
   }
   else if(!stream->bodystarted) {
     failf(data, "HTTP/2 stream %d was closed cleanly, but before getting "
-          " all response header fields, treated as error", stream->id);
+          "all response header fields, treated as error", stream->id);
     return CURLE_HTTP2_STREAM;
   }
 

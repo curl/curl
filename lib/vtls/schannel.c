@@ -407,7 +407,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
     if((fInCert || blob) && data->set.ssl.cert_type &&
        !curl_strequal(data->set.ssl.cert_type, "P12")) {
       failf(data, "schannel: certificate format compatibility error "
-            " for %s",
+            "for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
       curlx_free(cert_store_path);
       if(fInCert)
