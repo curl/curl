@@ -745,8 +745,10 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
       in_key_len = offset - in_key;
     }
 
-    curlx_dyn_init(&encoded_query_array[index].key, (query_part_len * 3) + 1);
-    curlx_dyn_init(&encoded_query_array[index].value, (query_part_len * 3) + 1);
+    curlx_dyn_init(&encoded_query_array[index].key,
+      (query_part_len * 3) + 1);
+    curlx_dyn_init(&encoded_query_array[index].value,
+      (query_part_len * 3) + 1);
     counted_query_components++;
 
     /* Decode/encode the key */
