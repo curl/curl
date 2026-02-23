@@ -564,6 +564,7 @@ Note: These variables are internal and subject to change.
                             where <name> is the .c filename without extension.
 - `curl-examples-build`:    Build examples quickly but without the ability to run them. (for build tests)
 - `curl-man`:               Build man pages. (built by default unless disabled)
+- `curl`:                   Build curl tool.
 - `curl_uninstall`:         Uninstall curl.
 - `curl-completion-fish`:   Build shell completions for fish. (built by default if enabled)
 - `curl-completion-zsh`:    Build shell completions for zsh. (built by default if enabled)
