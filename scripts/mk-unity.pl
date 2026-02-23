@@ -31,18 +31,18 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--embed [-I<incdir>]] [--test <tests>] [--include <include-c-sources>]\n";
+    die "Usage: $0 [--concat [-I<incdir>]] [--test <tests>] [--include <include-c-sources>]\n";
 }
 
 my @src;
 my %include;
 my $in_include = 0;
 my $any_test = 0;
-my $embed = 0;
+my $concat = 0;
 my @incpath;
 foreach my $src (@ARGV) {
-    if($src eq "--embed") {
-        $embed = 1;
+    if($src eq "--concat") {
+        $concat = 1;
     }
     elsif($src =~ "^-I") {
         push @incpath, substr($src, 2);
@@ -65,7 +65,7 @@ foreach my $src (@ARGV) {
 
 sub include($@) {
     my $filename = shift;
-    if($embed) {
+    if($concat) {
         if(! -f $filename) {
             foreach my $path (@incpath) {
                 my $fullfn = $path . "/" . $filename;

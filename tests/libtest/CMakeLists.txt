@@ -40,7 +40,7 @@ add_custom_command(OUTPUT "lib1521.c"
 list(APPEND TESTS_C "lib1521.c")
 
 if(CURL_TESTS_EMBED)
-  set(_mk_unity_extra "--embed" "-I${CMAKE_CURRENT_SOURCE_DIR}")
+  set(_mk_unity_extra "--concat" "-I${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 add_custom_command(OUTPUT "${BUNDLE}.c"

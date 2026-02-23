@@ -27,7 +27,7 @@ curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(CURL_TESTS_EMBED)
-  set(_mk_unity_extra "--embed" "-I${CMAKE_CURRENT_SOURCE_DIR}" "-I${PROJECT_SOURCE_DIR}/tests/libtest")
+  set(_mk_unity_extra "--concat" "-I${CMAKE_CURRENT_SOURCE_DIR}" "-I${PROJECT_SOURCE_DIR}/tests/libtest")
 endif()
 
 add_custom_command(OUTPUT "${BUNDLE}.c"
