@@ -128,7 +128,8 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
   return CURLE_OK;
 }
 
-static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
+static CURLcode setstropt_userpwd(const char *option, char **userp,
+                                  char **passwdp)
 {
   char *user = NULL;
   char *passwd = NULL;
@@ -1664,7 +1665,7 @@ static CURLcode cookiefile(struct Curl_easy *data, const char *ptr)
 
 #ifndef CURL_DISABLE_PROXY
 static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
-                                  char *ptr)
+                                  const char *ptr)
 {
   CURLcode result = CURLE_OK;
   struct UserDefined *s = &data->set;
@@ -1838,7 +1839,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
  * needed, CURLOPT_POSTFIELDSIZE must have been set prior to
  * CURLOPT_COPYPOSTFIELDS and not altered later.
  */
-static CURLcode setopt_copypostfields(char *ptr, struct UserDefined *s)
+static CURLcode setopt_copypostfields(const char *ptr, struct UserDefined *s)
 {
   CURLcode result = CURLE_OK;
   if(!ptr || s->postfieldsize == -1)
