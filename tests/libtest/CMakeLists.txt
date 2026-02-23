@@ -39,7 +39,7 @@ add_custom_command(OUTPUT "lib1521.c"
 
 list(APPEND TESTS_C "lib1521.c")
 
-if(CURL_TESTS_CONCAT)
+if(_CURL_TESTS_CONCAT)
   set(_mk_unity_extra "--concat" "-I${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
@@ -63,7 +63,7 @@ target_include_directories(${BUNDLE} PRIVATE
 target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS})
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
 
-if(NOT CURL_TESTS_CONCAT)
+if(NOT _CURL_TESTS_CONCAT)
   set_target_properties(${BUNDLE} PROPERTIES C_CLANG_TIDY "")
   curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
 endif()

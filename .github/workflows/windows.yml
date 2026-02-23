@@ -704,7 +704,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
               -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TESTS_CONCAT=ON \
+              -DCMAKE_UNITY_BUILD=ON -D_CURL_TESTS_CONCAT=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
               -DCURL_USE_LIBPSL=OFF \
