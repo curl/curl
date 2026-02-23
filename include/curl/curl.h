@@ -3310,7 +3310,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 #endif
 
 /* unfortunately, the easy.h and multi.h include files need options and info
-  stuff before they can be included! */
+   stuff before they can be included! */
 #include "easy.h" /* nothing in curl is fun without the easy stuff */
 #include "multi.h"
 #include "urlapi.h"
