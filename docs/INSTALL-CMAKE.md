@@ -272,6 +272,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 
 ## Enabling features
 
+- `CURL_ENABLE_NTLM`:                       Enable NTLM support. Default: `OFF`
 - `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
 - `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
 - `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON` if target supports IPv6.
@@ -314,7 +315,6 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_MQTT`:                      Disable MQTT. Default: `OFF`
 - `CURL_DISABLE_NEGOTIATE_AUTH`:            Disable negotiate authentication. Default: `OFF`
 - `CURL_DISABLE_NETRC`:                     Disable netrc parser. Default: `OFF`
-- `CURL_DISABLE_NTLM`:                      Disable NTLM support. Default: `OFF`
 - `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG`:  Disable automatic loading of OpenSSL configuration. Default: `OFF`
 - `CURL_DISABLE_PARSEDATE`:                 Disable date parsing. Default: `OFF`
 - `CURL_DISABLE_POP3`:                      Disable POP3. Default: `OFF`

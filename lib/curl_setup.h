@@ -762,7 +762,7 @@
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#ifndef CURL_DISABLE_NTLM
+#ifdef CURL_ENABLE_NTLM
 #  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||        \
   defined(USE_GNUTLS) ||                                                \
   (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) ||      \
