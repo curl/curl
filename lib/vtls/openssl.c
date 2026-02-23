@@ -2917,7 +2917,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
        * depending on what is found. For more details see
        * CertGetEnhancedKeyUsage doc.
        */
-      if(CertGetEnhancedKeyUsage(pContext, 0, NULL, &req_size)) {
+      if(CertGetEnhancedKeyUsage(pContext, 0, NULL, &req_size) && req_size) {
         if(req_size && req_size > enhkey_usage_size) {
           void *tmp = curlx_realloc(enhkey_usage, req_size);
 
@@ -2931,34 +2931,32 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
           enhkey_usage_size = req_size;
         }
 
-        if(req_size) {  /* Cert has EKU data */
-          if(CertGetEnhancedKeyUsage(pContext, 0, enhkey_usage, &req_size)) {
-            if(!enhkey_usage->cUsageIdentifier) {
-              /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate
-                 is good for all uses. If it returns zero, the certificate
-                 has no valid uses." */
-              if((HRESULT)GetLastError() != CRYPT_E_NOT_FOUND)
-                continue;
-            }
-            else {
-              DWORD i;
-              bool found = FALSE;
-
-              for(i = 0; i < enhkey_usage->cUsageIdentifier; ++i) {
-                if(!strcmp("1.3.6.1.5.5.7.3.1" /* OID server auth */,
-                           enhkey_usage->rgpszUsageIdentifier[i])) {
-                  found = TRUE;
-                  break;
-                }
-              }
-
-              if(!found)
-                continue;
-            }
+        if(CertGetEnhancedKeyUsage(pContext, 0, enhkey_usage, &req_size)) {
+          if(!enhkey_usage->cUsageIdentifier) {
+            /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate
+               is good for all uses. If it returns zero, the certificate
+               has no valid uses." */
+            if((HRESULT)GetLastError() != CRYPT_E_NOT_FOUND)
+              continue;
           }
-          else
-            continue;
+          else {
+            DWORD i;
+            bool found = FALSE;
+
+            for(i = 0; i < enhkey_usage->cUsageIdentifier; ++i) {
+              if(!strcmp("1.3.6.1.5.5.7.3.1" /* OID server auth */,
+                         enhkey_usage->rgpszUsageIdentifier[i])) {
+                found = TRUE;
+                break;
+              }
+            }
+
+            if(!found)
+              continue;
+          }
         }
+        else
+          continue;
       }
       else
         continue;
