@@ -389,6 +389,13 @@ static CURLcode get_pkey_dh(struct Curl_easy *data,
   return result;
 }
 
+#ifdef HAVE_OPENSSL3
+/* from OpenSSL commit fc756e594ed5a27af378 */
+typedef const X509_PUBKEY pubkeytype_t;
+#else
+typedef X509_PUBKEY pubkeytype_t;
+#endif
+
 static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 {
   CURLcode result;
@@ -453,7 +460,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
     {
       const X509_ALGOR *sigalg = NULL;
-      X509_PUBKEY *xpubkey = NULL;
+      pubkeytype_t *xpubkey = NULL;
       ASN1_OBJECT *pubkeyoid = NULL;
 
       X509_get0_signature(&psig, &sigalg, x);
