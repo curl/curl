@@ -639,8 +639,7 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "mbedTLS: error reading client "
-            "cert data %s: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading client cert data %s: (-0x%04X) %s",
             ssl_config->key, -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
