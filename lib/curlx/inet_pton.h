@@ -43,7 +43,7 @@
   inet_pton(x, y, z)
 #endif
 #else
-int curlx_inet_pton(int, const char *, void *);
+int curlx_inet_pton(int af, const char *src, void *dst);
 #endif /* HAVE_INET_PTON */
 
 #endif /* HEADER_CURL_INET_PTON_H */
