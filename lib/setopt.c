@@ -1832,6 +1832,45 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 }
 #endif
 
+/*
+ * A string with POST data. Makes curl HTTP POST. Even if it is NULL. If
+ * needed, CURLOPT_POSTFIELDSIZE must have been set prior to
+ * CURLOPT_COPYPOSTFIELDS and not altered later.
+ */
+static CURLcode setopt_copypostfields(char *ptr, struct UserDefined *s)
+{
+  CURLcode result = CURLE_OK;
+  if(!ptr || s->postfieldsize == -1)
+    result = Curl_setstropt(&s->str[STRING_COPYPOSTFIELDS], ptr);
+  else {
+    size_t pflen;
+
+    if(s->postfieldsize < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    pflen = curlx_sotouz_range(s->postfieldsize, 0, SIZE_MAX);
+    if(pflen == SIZE_MAX)
+      return CURLE_OUT_OF_MEMORY;
+    else {
+      /* Allocate even when size == 0. This satisfies the need of possible
+         later address compare to detect the COPYPOSTFIELDS mode, and to
+         mark that postfields is used rather than read function or form
+         data.
+      */
+      char *p = curlx_memdup0(ptr, pflen);
+      if(!p)
+        return CURLE_OUT_OF_MEMORY;
+      else {
+        curlx_free(s->str[STRING_COPYPOSTFIELDS]);
+        s->str[STRING_COPYPOSTFIELDS] = p;
+      }
+    }
+  }
+
+  s->postfields = s->str[STRING_COPYPOSTFIELDS];
+  s->method = HTTPREQ_POST;
+  return result;
+}
+
 static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             char *ptr)
 {
@@ -1901,40 +1940,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   case CURLOPT_COPYPOSTFIELDS:
-    /*
-     * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
-     * If needed, CURLOPT_POSTFIELDSIZE must have been set prior to
-     * CURLOPT_COPYPOSTFIELDS and not altered later.
-     */
-    if(!ptr || s->postfieldsize == -1)
-      result = Curl_setstropt(&s->str[STRING_COPYPOSTFIELDS], ptr);
-    else {
-      size_t pflen;
-
-      if(s->postfieldsize < 0)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-      pflen = curlx_sotouz_range(s->postfieldsize, 0, SIZE_MAX);
-      if(pflen == SIZE_MAX)
-        return CURLE_OUT_OF_MEMORY;
-      else {
-        /* Allocate even when size == 0. This satisfies the need of possible
-           later address compare to detect the COPYPOSTFIELDS mode, and to
-           mark that postfields is used rather than read function or form
-           data.
-        */
-        char *p = curlx_memdup0(ptr, pflen);
-        if(!p)
-          return CURLE_OUT_OF_MEMORY;
-        else {
-          curlx_free(s->str[STRING_COPYPOSTFIELDS]);
-          s->str[STRING_COPYPOSTFIELDS] = p;
-        }
-      }
-    }
-
-    s->postfields = s->str[STRING_COPYPOSTFIELDS];
-    s->method = HTTPREQ_POST;
-    break;
+    return setopt_copypostfields(ptr, s);
 
   case CURLOPT_POSTFIELDS:
     /*
