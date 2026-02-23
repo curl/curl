@@ -3330,7 +3330,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 /* This preprocessor magic that replaces a call with the exact same call is
    only done to make sure application authors pass exactly three arguments
    to these functions. Use recursive macros to allow using these symbols via
-   the C++ global namespace '::' or reuse them as method names. */
+   the C++ global namespace '::' or reusing them as method names. */
 #define curl_easy_setopt(handle, opt, param) \
   curl_easy_setopt(handle, opt, param)
 #define curl_easy_getinfo(handle, info, arg) \
