@@ -300,7 +300,7 @@ typedef struct md5_ctx my_md5_ctx;
 #define MD5_GET(n) MD5_SET(n)
 #else
 #define MD5_SET(n) (ctx->block[n] =      \
-   (uint32_t)ptr[ (n) * 4]             | \
+   (uint32_t)ptr[(n) * 4]              | \
   ((uint32_t)ptr[((n) * 4) + 1] <<  8) | \
   ((uint32_t)ptr[((n) * 4) + 2] << 16) | \
   ((uint32_t)ptr[((n) * 4) + 3] << 24))
