@@ -891,10 +891,9 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   /* Check if there is a cached ID we can/should use here! */
   if(Curl_ssl_scache_use(cf, data)) {
     struct Curl_ssl_session *sc_session = NULL;
-
-    result = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
-                                  &sc_session);
-    if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {
+    CURLcode sresult = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
+                                            &sc_session);
+    if(!sresult && sc_session && sc_session->sdata && sc_session->sdata_len) {
       mbedtls_ssl_session session;
 
       mbedtls_ssl_session_init(&session);
