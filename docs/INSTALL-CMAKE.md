@@ -554,7 +554,7 @@ Note: These variables are internal and subject to change.
 
 - `testdeps`:               Build test dependencies (servers, tools, test certificates).
                             Individual targets: `curlinfo`, `libtests`, `servers`, `tunits`, `units`
-                            Test certificates: `build-certs`, `clean-certs`
+                            Test certificates: `build-certs`
 - `tests`:                  Run tests (`runtests.pl`). Customize via the `TFLAGS` environment variable, e.g. `TFLAGS=1621`.
                             Other flavors: `test-am`, `test-ci`, `test-event`, `test-full`, `test-nonflaky`, `test-quiet`, `test-torture`
 - `build-certs`:            Build test certs.
