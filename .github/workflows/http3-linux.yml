@@ -643,7 +643,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
-              -DCURL_USE_LIBUV=ON \
+              -DCURL_USE_LIBUV=ON -DCURL_ENABLE_NTLM=ON \
               -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_GENERATE} ${options}
@@ -651,7 +651,7 @@ jobs:
             [[ "${MATRIX_CONFIGURE}" = *'boringssl'* ]] && export CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              --with-libuv \
+              --with-libuv --enable-ntlm \
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_CONFIGURE}
           fi
