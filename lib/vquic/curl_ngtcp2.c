@@ -2341,6 +2341,7 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 
 #ifdef USE_GNUTLS
 
+#ifdef CURLVERBOSE
 static const char *gtls_hs_msg_name(int mtype)
 {
   switch(mtype) {
@@ -2367,6 +2368,7 @@ static const char *gtls_hs_msg_name(int mtype)
   }
   return "Unknown";
 }
+#endif
 
 static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
                                   unsigned when, unsigned int incoming,
