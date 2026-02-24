@@ -5,13 +5,17 @@
 
 # List new configuration settings added since the tag passed as argument, e.g.:
 #
-# $ ./config-since.sh curl-8_16_0
+# $ ./config-since.sh curl-8_16_0 [--with-removals]
 
 set -eu
 
 cd "$(dirname "$0")"/..
 
 prevtag="${1:-curl-8_18_0}"
+
+shift
+filter='+'
+[ "${1:-}" = '--with-removals' ] && filter='[+-]'
 
 fnew='lib/curl_config-cmake.h.in'
 fold="_config-at-${prevtag}"
@@ -31,7 +35,7 @@ grep -E '(cmakedefine|{SIZEOF)' "${fold}" | sed -E -e 's/cmake//g' -e 's/ +1//g'
 grep -E '(cmakedefine|{SIZEOF)' "${fnew}" | sed -E -e 's/cmake//g' -e 's/ +1//g' | sort > "${fnewd}"
 
 echo "New settings at current Git commit since ${prevtag}:"
-diff -u "${foldd}" "${fnewd}" | tail -n +3 | grep '^+' || true
+diff -u "${foldd}" "${fnewd}" | tail -n +3 | grep "^${filter}" || true
 echo '---'
 
 rm -rf "${foldd:?}" "${fnewd:?}" "${fold:?}"
