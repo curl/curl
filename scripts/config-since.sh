@@ -5,9 +5,9 @@
 
 # List new configuration settings added since the tag passed as argument, e.g.:
 #
-# $ ./config-since.sh curl-8_16_0 [--obsolete]
+# $ ./config-since.sh curl-8_16_0 [--dropped]
 #
-# --obsolete  Also list dropped settings.
+# --dropped  Also list dropped settings.
 
 set -eu
 
@@ -17,7 +17,7 @@ prevtag="${1:-curl-8_18_0}"
 
 shift
 filter='+'
-[ "${1:-}" = '--obsolete' ] && filter='[+-]'
+[ "${1:-}" = '--dropped' ] && filter='[+-]'
 
 fnew='lib/curl_config-cmake.h.in'
 fold="_config-at-${prevtag}"
