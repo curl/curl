@@ -109,7 +109,7 @@ fresh version of the man page. Both cmake and configure builds invoke
 *managen* automatically.
 
 Only if you need something custom and special you need to care about invoking
-the managen tool manually, but then you use it like this:
+the *managen* tool manually, but then you use it like this:
 
 `managen mainpage [list of markdown option file names]`
 
