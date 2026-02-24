@@ -146,12 +146,12 @@ variable if set). The date defaults to the current date unless
 From the `docs/cmdline-opts` directory, run:
 
     cd docs/cmdline-opts
-    perl ../../scripts/managen -d . -I ../../include mainpage *.md > curl.1
+    perl ../../scripts/managen -I ../../include mainpage ./*.md > curl.1
 
 This produces the complete `curl.1` nroff man page. To produce a plain-text
 version instead, replace `mainpage` with `ascii`:
 
-    perl ../../scripts/managen -d . -I ../../include ascii *.md > curl.txt
+    perl ../../scripts/managen -I ../../include ascii ./*.md > curl.txt
 
 The `-d` flag specifies the directory containing `mainpage.idx` and the
 `.md` option files. The `-I` flag specifies the include directory root
