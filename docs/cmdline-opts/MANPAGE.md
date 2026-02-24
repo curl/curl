@@ -7,7 +7,8 @@
 # curl man page generator
 
 `managen` is the curl man page generator. It generates a single nroff man page
-output from the set of sources files in this directory.
+output from the set of sources files in this directory. It also generates the
+ASCII version of the man page that is normally built into curl itself.
 
 The `mainpage.idx` file lists all files that are rendered in that order to
 produce the output. The magic `%options` keyword inserts all command line
@@ -21,9 +22,9 @@ to markdown which is why it uses `.md` file extensions.
 
 ## Option files
 
-Each command line option is described in a file named `<long name>.d`, where
+Each command line option is described in a file named `<long name>.md`, where
 option name is written without any prefixing dashes. Like the filename for the
-`-v, --verbose` option is named `verbose.d`.
+`-v, --verbose` option is named `verbose.md`.
 
 Each file has a set of meta-data in the top of the file, followed by a body of
 text.
@@ -102,6 +103,13 @@ output. They need to be written within backticks in the source file (to escape
 getting spellchecked by CI jobs): `%DATE`, `%VERSION` and `%GLOBALS`.
 
 ## Generate
+
+For most use cases, just doing a normal curl build is enough to generate a
+fresh version of the man page. Both cmake and configure builds invoke
+*managen* automatically.
+
+Only if you need something custom and special you need to care about invoking
+the managen tool manually, but then you use it like this:
 
 `managen mainpage [list of markdown option file names]`
 
