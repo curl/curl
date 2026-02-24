@@ -78,8 +78,8 @@ my %whitelist = (
 
     );
 
-# functions with complexity above this level causes the function to return error
-my $cutoff = 70;
+# complexity above this level causes the function to return error
+my $cutoff = 60;
 
 # show this many from the top
 my $top = $ARGV[0] ? $ARGV[0] : 25;
