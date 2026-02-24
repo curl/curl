@@ -101,6 +101,17 @@ There are three different "variables" that can be used when creating the
 output. They need to be written within backticks in the source file (to escape
 getting spellchecked by CI jobs): `%DATE`, `%VERSION` and `%GLOBALS`.
 
+During rendering, the generator expands them as follows:
+
+- `%VERSION` -- replaced with the curl version string read from
+  `include/curl/curlver.h` (e.g. `8.12.0`). Can be overridden by setting
+  the `CURL_MAKETGZ_VERSION` environment variable.
+- `%DATE` -- replaced with the current date in `YYYY-MM-DD` format, or
+  the date derived from `SOURCE_DATE_EPOCH` if that environment variable
+  is set (for reproducible builds).
+- `%GLOBALS` -- replaced with a comma-separated list of all command line
+  options that have `Scope: global` in their meta-data.
+
 ## Generate
 
 `managen mainpage [list of markdown option file names]`
@@ -116,3 +127,40 @@ curl man page in text format, used to build `tool_hugehelp.c`.
 `managen listhelp`
 
 Generates a full `curl --help` output for all known command line options.
+
+## Generating the man page
+
+The `curl.1` man page is generated from the source files in this directory
+using the `managen` Perl script located in `scripts/managen`. The build
+system runs this automatically, but it can also be invoked manually.
+
+### Prerequisites
+
+The generator requires Perl. The version string is read from
+`include/curl/curlver.h` (or from the `CURL_MAKETGZ_VERSION` environment
+variable if set). The date defaults to the current date unless
+`SOURCE_DATE_EPOCH` is set.
+
+### Manual invocation
+
+From the `docs/cmdline-opts` directory, run:
+
+    cd docs/cmdline-opts
+    perl ../../scripts/managen -I ../../include mainpage ./*.md > curl.1
+
+This produces the complete `curl.1` nroff man page. To produce a plain-text
+version instead, replace `mainpage` with `ascii`:
+
+    perl ../../scripts/managen -I ../../include ascii ./*.md > curl.txt
+
+The `-d` flag specifies the directory containing `mainpage.idx` and the
+`.md` option files. The `-I` flag specifies the include directory root
+used to locate `curl/curlver.h` for the version string.
+
+### How it works
+
+The generator reads `mainpage.idx`, which lists the documentation source
+files in their intended order. Each line names one `.md` file to render.
+When the generator encounters the `%options` keyword in `mainpage.idx`,
+it inserts the documentation for every command line option (one `.md` file
+per option), sorted alphabetically by long option name.
