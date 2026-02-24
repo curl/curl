@@ -78,7 +78,7 @@ my %whitelist = (
 
     );
 
-# complexity above this level causes the function to return error
+# complexity above this level is treated as an error and contributes to the script's exit code
 my $cutoff = 60;
 
 # show this many from the top
