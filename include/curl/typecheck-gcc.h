@@ -709,7 +709,7 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
 
 /* evaluates to true if expr is of type curl_resolver_start_callback */
 #define curlcheck_resolver_start_callback(expr)                         \
-  (curlcheck_NULL(expr) || \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_resolver_start_callback))
 
 /* evaluates to true if expr is of type curl_read_callback or "similar" */
