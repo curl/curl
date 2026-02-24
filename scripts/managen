@@ -225,7 +225,7 @@ sub seealso {
         return sprintf
             ".SH \"SEE ALSO\"\n$data\n";
     }
-    else {
+    elsif($data) {
         return "See also $data. ";
     }
 }
@@ -581,10 +581,10 @@ sub single {
     my $magic; # cmdline special option
     my $line;
     my $dline;
-    my $multi;
+    my $multi = "";
     my $scope;
     my $experimental;
-    my $start;
+    my $start = 0;
     my $list; # identifies the list, 1 example, 2 see-also
     while(<$fh>) {
         $line++;
@@ -819,7 +819,7 @@ sub single {
                     "when you use several URLs in a command line.\n",
                     manpageify($long, $manpage));
     }
-    else {
+    elsif($multi) {
         print STDERR "$f:$line:1:ERROR: unrecognized Multi: '$multi'\n";
         return 2;
     }
