@@ -557,6 +557,8 @@ Note: These variables are internal and subject to change.
                             Test certificates: `build-certs`, `clean-certs`
 - `tests`:                  Run tests (`runtests.pl`). Customize via the `TFLAGS` environment variable, e.g. `TFLAGS=1621`.
                             Other flavors: `test-am`, `test-ci`, `test-event`, `test-full`, `test-nonflaky`, `test-quiet`, `test-torture`
+- `build-certs`:            Build test certs.
+- `clean-certs`:            Clean test certs.
 - `curl-pytest`:            Run tests (pytest).
                             Other flavor: `curl-test-ci`
 - `curl-examples`:          Build examples
