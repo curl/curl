@@ -48,7 +48,7 @@ By submitting a patch to the curl project, you are assumed to have the right
 to the code and to be allowed by your employer or whatever to hand over that
 patch/code to us. We credit you for your changes as far as possible, to give
 credit but also to keep a trace back to who made what changes. Please always
-provide us with your full real name when contributing,
+provide us with your full real name when contributing.
 
 ## What To Read
 

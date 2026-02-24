@@ -47,7 +47,7 @@ Subject Alternate Name field in the certificate matches the hostname in the
 URL to which you told curl to connect.
 
 When the *verify* value is 0, the connection succeeds regardless of the names
-in the certificate. Use that ability with caution,
+in the certificate. Use that ability with caution.
 
 This option controls checking the server's certificate's claimed identity. The
 separate CURLOPT_SSL_VERIFYPEER(3) options enables/disables verification that
