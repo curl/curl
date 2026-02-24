@@ -56,7 +56,7 @@ CURLcode Curl_headers_cleanup(struct Curl_easy *data);
 #else
 #define Curl_headers_init(x)          CURLE_OK
 #define Curl_headers_push(x, y, z, a) CURLE_OK
-#define Curl_headers_cleanup(x)       Curl_nop_stmt
+#define Curl_headers_cleanup(x)       do { (void)(x); } while(0)
 #endif
 
 #endif /* HEADER_CURL_HEADER_H */
