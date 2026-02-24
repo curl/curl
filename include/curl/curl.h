@@ -3326,9 +3326,10 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 #include "typecheck-gcc.h"
 #else
 #if defined(__STDC__) && (__STDC__ >= 1)
-/* This preprocessor magic that replaces a call with the exact same call is
-   only done to make sure application authors pass exactly three arguments
-   to these functions. */
+/* This preprocessor magic ensures that application authors pass exactly three
+   arguments to these functions. For compatibility with C++ global namespace
+   '::' and reusing these symbols as method names, while also avoiding
+   recursive macros, use a two-stage solution. */
 #define curl_exactly_three_arguments(a, b, c) (a, b, c)
 #define curl_easy_setopt(handle, opt, param) \
   curl_easy_setopt curl_exactly_three_arguments(handle, opt, param)
