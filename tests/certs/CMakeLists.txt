@@ -31,11 +31,7 @@ add_custom_command(OUTPUT ${GENERATEDCERTS}
   VERBATIM
 )
 add_custom_target(build-certs DEPENDS ${GENERATEDCERTS})
-
-option(_CURL_SKIP_BUILD_CERTS "Skip building certs with testdeps" OFF)  # Internal option to increase perf for build tests
-if(NOT _CURL_SKIP_BUILD_CERTS)
-  add_dependencies(testdeps build-certs)
-endif()
+add_dependencies(testdeps build-certs)
 
 add_custom_target(clean-certs
   COMMAND ${CMAKE_COMMAND} -E remove ${GENERATEDCERTS}
