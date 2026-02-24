@@ -40,7 +40,7 @@ Transport Layer Security Secure Remote Password is a TLS feature that does not
 work with TLS 1.3 or QUIC and is virtually unused by curl users and in
 general.
 
-TLS SRP support gets removed in August 2026.
+TLS-SRP support gets removed in August 2026.
 
 ## Past removals
 
