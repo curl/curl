@@ -225,7 +225,7 @@ sub seealso {
         return sprintf
             ".SH \"SEE ALSO\"\n$data\n";
     }
-    elsif($data) {
+    else {
         return "See also $data. ";
     }
 }
