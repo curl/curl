@@ -42,3 +42,5 @@ Checks:
 
 CheckOptions:
   misc-header-include-cycle.IgnoredFilesList: 'curl/curl.h'
+
+HeaderFilterRegex: '.*'
