@@ -170,12 +170,12 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     list(REMOVE_DUPLICATES _incsys_tmp)
     set(_incsys "")
     foreach(_inc IN LISTS _incsys_tmp)
-      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter also
-      # evaluates to an empty path in this context.
-      # Also skip '$<BUILD_INTERFACE:curl-include>', which is a duplicate.
+      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter
+      # evaluates to an empty path in this context. Also skip
+      # '$<BUILD_INTERFACE:curl-include>', as already present in '_includes'.
       if(_inc AND
-         NOT _inc MATCHES "INSTALL_INTERFACE:" AND
-         NOT _inc MATCHES "BUILD_INTERFACE:")
+         NOT _inc MATCHES "BUILD_INTERFACE:" AND
+         NOT _inc MATCHES "INSTALL_INTERFACE:")
         list(APPEND _incsys "-isystem" "${_inc}")
       endif()
     endforeach()
