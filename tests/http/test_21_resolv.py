@@ -28,7 +28,7 @@ import logging
 import os
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, CurlClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -36,6 +36,11 @@ log = logging.getLogger(__name__)
 
 @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
 class TestResolv:
+
+    @pytest.fixture(autouse=True, scope='class')
+    def _class_scope(self, env, httpd):
+        indir = httpd.docs_dir
+        env.make_data_file(indir=indir, fname="data-0k", fsize=0)
 
     # use .invalid host name that should never resolv
     def test_21_01_resolv_invalid_one(self, env: Env, httpd, nghttpx):
@@ -73,3 +78,28 @@ class TestResolv:
         ])
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
+
+    # resolve first url with ipv6 only and fail that, resolve second
+    # with ipv*, should succeed.
+    def test_21_04_resolv_inv_v6(self, env: Env, httpd):
+        count = 2
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_RESOLV_FAIL_IPV6'] = '1'
+        url = f'https://localhost:{env.https_port}/'
+        client = LocalClient(name='cli_hx_download', env=env, run_env=run_env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        dfiles = [client.download_file(i) for i in range(count)]
+        self._clean_files(dfiles)
+        # let the first URL resolve via ipv6 only, which we force to fail
+        r = client.run(args=[
+            '-n', f'{count}', '-6', '-C', env.ca.cert_file, url
+        ])
+        r.check_exit_code(6)
+        assert not os.path.exists(dfiles[0])
+        assert os.path.exists(dfiles[1])
+
+    def _clean_files(self, files):
+        for file in files:
+            if os.path.exists(file):
+                os.remove(file)
