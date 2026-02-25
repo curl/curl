@@ -107,13 +107,13 @@ macro(curl_collect_target_options _target)
   if(_val)
     list(APPEND _definitions ${_val})
   endif()
-  get_target_property(_val ${_target} INTERFACE_INCLUDE_DIRECTORIES)
-  if(_val)
-    list(APPEND _includes ${_val})
-  endif()
   get_target_property(_val ${_target} INCLUDE_DIRECTORIES)
   if(_val)
     list(APPEND _includes ${_val})
+  endif()
+  get_target_property(_val ${_target} INTERFACE_INCLUDE_DIRECTORIES)
+  if(_val)
+    list(APPEND _incsys ${_val})
   endif()
   get_target_property(_val ${_target} COMPILE_OPTIONS)
   if(_val)
@@ -136,6 +136,7 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
 
     set(_definitions "")
     set(_includes "")
+    set(_incsys "")
     set(_options "")
 
     # Collect macro definitions and header directories applying to the directory
@@ -161,16 +162,23 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     list(REMOVE_DUPLICATES _definitions)
     list(SORT _definitions)  # Sort like CMake does
 
-    set(_includes_tmp ${_includes})
-    set(_includes)
-    foreach(_inc IN LISTS _includes_tmp)
-      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter also
-      # evaluates to an empty path in this context.
-      if(_inc AND NOT _inc MATCHES "INSTALL_INTERFACE:")
-        list(APPEND _includes "-I${_inc}")
+    list(REMOVE_ITEM _includes "")
+    string(REPLACE ";" ";-I" _includes ";${_includes}")
+    list(REMOVE_DUPLICATES _includes)
+
+    set(_incsys_tmp ${_incsys})
+    list(REMOVE_DUPLICATES _incsys_tmp)
+    set(_incsys "")
+    foreach(_inc IN LISTS _incsys_tmp)
+      # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter
+      # evaluates to an empty path in this context. Also skip
+      # '$<BUILD_INTERFACE:curl-include>', as already present in '_includes'.
+      if(_inc AND
+         NOT _inc MATCHES "INSTALL_INTERFACE:" AND
+         NOT _inc MATCHES "BUILD_INTERFACE:")
+        list(APPEND _incsys "-isystem" "${_inc}")
       endif()
     endforeach()
-    list(REMOVE_DUPLICATES _includes)
 
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
       list(REMOVE_DUPLICATES _options)  # Keep the first of duplicates to imitate CMake
@@ -202,13 +210,15 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMAND ${CMAKE_C_CLANG_TIDY}
         "--checks=-clang-diagnostic-unused-function"
-        ${_sources} -- ${_cc} ${_definitions} ${_includes} ${_options}
+        ${_sources} -- ${_cc} ${_definitions} ${_includes} ${_incsys} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
 
     unset(_cc)
     unset(_definitions)
     unset(_includes)
+    unset(_incsys)
+    unset(_incsys_tmp)
     unset(_options)
     unset(_sources)
   endif()

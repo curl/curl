@@ -41,4 +41,4 @@ Checks:
   - readability-uppercase-literal-suffix
 
 CheckOptions:
-  misc-header-include-cycle.IgnoredFilesList: 'curl/curl.h;openssl/ssl.h'
+  misc-header-include-cycle.IgnoredFilesList: 'curl/curl.h'
