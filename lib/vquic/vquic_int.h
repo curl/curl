@@ -78,7 +78,7 @@ struct cf_quic_ctx {
 };
 
 #define H3_STREAM_CTX(ctx, data)                                        \
-  (data ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL)
+  ((data) ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL)
 
 CURLcode vquic_ctx_init(struct Curl_easy *data,
                         struct cf_quic_ctx *qctx);
