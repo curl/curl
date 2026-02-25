@@ -562,6 +562,11 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
    * only be asking for trouble. Ignore add instead. */
   if(entry->cache && (entry->cache != dnscache))
     return CURLE_OK;
+  /* Already in this cache? */
+  if(entry->cache == dnscache) {
+    DEBUGASSERT(entry->refcount > 1);
+    return CURLE_OK;
+  }
 
   /* Create an entry id, based upon the hostname and port */
   idlen = create_dnscache_id(entry->hostname, 0, entry->port, id, sizeof(id));

@@ -346,10 +346,8 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
           dns->hinfo = lhrr;
       }
 #endif
-      if(!result) {
-        result = Curl_dnscache_add(data, dns);
+      if(!result)
         *pdns = dns;
-      }
     }
     /* if we have not found anything, report the proper
      * CURLE_COULDNT_RESOLVE_* code */

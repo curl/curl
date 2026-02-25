@@ -1270,8 +1270,6 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         dns->hinfo = hrr;
       }
 #endif /* USE_HTTPSRR */
-      /* and add the entry to the cache */
-      result = Curl_dnscache_add(data, dns);
       *pdns = dns;
     }
     else {
