@@ -245,8 +245,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   /* release any resolve information this transfer kept */
   Curl_async_destroy(data);
-  Curl_dns_entry_unlink(data, &data->state.dns[0]); /* done with this */
-  Curl_dns_entry_unlink(data, &data->state.dns[1]);
 
   data->set.verbose = FALSE; /* no more calls to DEBUGFUNCTION */
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
@@ -3718,6 +3716,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
            connection, in which case DNS was unnecessary, or because DNS
            really did finish already (synch resolver/fast async resolve) */
         result = Curl_setup_conn(data, dns, protocol_done);
+        Curl_dns_entry_unlink(data, &dns);
       }
       else if(result == CURLE_AGAIN) {
         *asyncp = TRUE;

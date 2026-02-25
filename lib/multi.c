@@ -325,8 +325,8 @@ error:
 #endif
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
-  Curl_dnscache_destroy(&multi->dnscache);
   Curl_cpool_destroy(&multi->cpool);
+  Curl_dnscache_destroy(&multi->dnscache);
   Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
 #ifdef USE_SSL
   Curl_ssl_scache_destroy(multi->ssl_scache);
@@ -661,8 +661,6 @@ static void multi_done_locked(struct connectdata *conn,
   data->state.done = TRUE; /* called just now! */
   data->state.recent_conn_id = conn->connection_id;
 
-  Curl_dns_entry_unlink(data, &data->state.dns[0]); /* done with this */
-  Curl_dns_entry_unlink(data, &data->state.dns[1]);
   Curl_dnscache_prune(data);
 
   if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {
@@ -2357,6 +2355,7 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   }
 
 out:
+  Curl_dns_entry_unlink(data, &dns);
   if(result)
     /* failure detected */
     *stream_errorp = TRUE;
