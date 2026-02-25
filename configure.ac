@@ -2042,12 +2042,6 @@ CURL_WITH_WOLFSSL
 CURL_WITH_RUSTLS
 CURL_WITH_APPLE_SECTRUST
 
-if test "$OPENSSL_ENABLED" = "1" && test "$WOLFSSL_ENABLED" = "1"; then
-  dnl set macro to configure wolfSSL headers to coexist with OpenSSL (or fork)
-  dnl Requires woldSSL v5.7.6 or newer.
-  CPPFLAGS="$CPPFLAGS -DOPENSSL_COEXIST"
-fi
-
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "$USE_WIN32_CRYPTO" = "1" || test "$SCHANNEL_ENABLED" = "1"; then
   LIBS="-ladvapi32 -lcrypt32 $LIBS"
