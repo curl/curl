@@ -884,6 +884,12 @@ if(CURL_USE_WOLFSSL)
   set(_curl_ca_bundle_supported TRUE)
 
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "WOLFSSL_OPTIONS_IGNORE_SYS")
+  if(USE_OPENSSL)
+    if(WOLFSSL_VERSION VERSION_LESS 5.7.6)
+      message(FATAL_ERROR "wolfSSL v5.7.6 or newer is required to coexist with OpenSSL (or fork).")
+    endif()
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "OPENSSL_COEXIST")
+  endif()
 endif()
 
 if(CURL_USE_GNUTLS)
