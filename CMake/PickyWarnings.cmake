@@ -255,6 +255,7 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Warray-compare                  # clang 20.1  gcc 12.0  appleclang ?
           -Wc++-hidden-decl                # clang 21.1            appleclang ?
+          -Wjump-misses-init               # clang 21.1  gcc  4.5  appleclang ?
           -Wno-implicit-void-ptr-cast      # clang 21.1            appleclang ?
           -Wtentative-definition-compat    # clang 21.1            appleclang ?
         )
@@ -283,7 +284,7 @@ if(PICKY_COMPILER)
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.5)
         list(APPEND _picky_enable
-          -Wjump-misses-init               #             gcc  4.5
+          -Wjump-misses-init               # clang 21.1  gcc  4.5  appleclang ?
         )
         if(MINGW)
           list(APPEND _picky_enable

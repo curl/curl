@@ -951,6 +951,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl clang 21 or later
           if test "$compiler_num" -ge "2101"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [c++-hidden-decl])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [jump-misses-init])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-implicit-void-ptr-cast"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [tentative-definition-compat])
             if test "$curl_cv_native_windows" = "yes"; then
