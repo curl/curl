@@ -46,10 +46,12 @@ static void unit3217_ctx_init(struct unit3217_ctx *ctx,
   unit3217_delay_ms = delay_ms;
 }
 
-static void *unit3217_take(void *user_data, const char **pdescription)
+static void *unit3217_take(void *user_data, const char **pdescription,
+                           timediff_t *ptimeout_ms)
 {
   struct unit3217_ctx *ctx = user_data;
   *pdescription = NULL;
+  *ptimeout_ms = 0;
   if(ctx->taken < ctx->total) {
     ctx->taken++;
     return &unit3217_item;

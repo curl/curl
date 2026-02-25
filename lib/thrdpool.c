@@ -44,7 +44,9 @@ struct thrdslot {
   struct curl_thrdpool *tpool;
   curl_thread_t thread;
   curl_cond_t await;
+  struct curltime starttime;
   const char *work_description;
+  timediff_t work_timeout_ms;
   uint32_t id;
   BIT(running);
   BIT(idle);
@@ -103,10 +105,12 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
   for(;;) {
     while(!tpool->aborted) {
       tslot->work_description = NULL;
-      item = tpool->fn_take(tpool->fn_user_data, &tslot->work_description);
+      tslot->work_timeout_ms = 0;
+      item = tpool->fn_take(tpool->fn_user_data, &tslot->work_description,
+                            &tslot->work_timeout_ms);
       if(!item)
         break;
-
+      tslot->starttime = curlx_now();
       Curl_mutex_release(&tpool->lock);
 
       tpool->fn_process(item);
@@ -120,6 +124,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
       goto out;
 
     tslot->idle = TRUE;
+    tslot->starttime = curlx_now();
     thrdpool_join_zombies(tpool);
     Curl_cond_signal(&tpool->await);
     /* Only wait with idle timeout when we are above the minimum
@@ -130,8 +135,9 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
       CURLcode r = Curl_cond_timedwait(&tslot->await, &tpool->lock,
                                        tpool->idle_time_ms);
       if((r == CURLE_OPERATION_TIMEDOUT) &&
-         (Curl_llist_count(&tpool->slots) > tpool->min_threads))
+         (Curl_llist_count(&tpool->slots) > tpool->min_threads)) {
         goto out;
+      }
     }
     else {
       Curl_cond_wait(&tslot->await, &tpool->lock);
@@ -406,6 +412,7 @@ void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
 {
   if(Curl_trc_ft_is_verbose(data, feat)) {
     struct Curl_llist_node *e;
+    struct curltime now = curlx_now();
 
     Curl_mutex_acquire(&tpool->lock);
     if(!Curl_llist_count(&tpool->slots)) {
@@ -414,10 +421,21 @@ void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
     }
     for(e = Curl_llist_head(&tpool->slots); e; e = Curl_node_next(e)) {
       struct thrdslot *tslot = Curl_node_elem(e);
-      Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: %s%s",
-                          tpool->name, tslot->id,
-                          tslot->idle ? "idle" : "working ",
-                          tslot->idle ? "" : tslot->work_description);
+      timediff_t elapsed_ms = curlx_ptimediff_ms(&now, &tslot->starttime);
+      if(tslot->idle) {
+        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: idle for %"
+                            FMT_TIMEDIFF_T "ms",
+                            tpool->name, tslot->id, elapsed_ms);
+      }
+      else {
+        timediff_t remain_ms = tslot->work_timeout_ms ?
+          (tslot->work_timeout_ms - elapsed_ms) : 0;
+        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: busy %"
+                            FMT_TIMEDIFF_T "ms, timeout in %" FMT_TIMEDIFF_T
+                            "ms: %s",
+                            tpool->name, tslot->id, elapsed_ms, remain_ms,
+                            tslot->work_description);
+      }
     }
     Curl_mutex_release(&tpool->lock);
   }

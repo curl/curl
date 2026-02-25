@@ -311,7 +311,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
       goto error;
   }
   else { /* real multi handle */
-    if(Curl_async_thrdd_multi_init(multi, 0, 6, 500))
+    if(Curl_async_thrdd_multi_init(multi, 0, 20, 2000))
       goto error;
   }
 #endif

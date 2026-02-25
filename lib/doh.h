@@ -92,8 +92,9 @@ struct doh_request {
 };
 
 struct doh_response {
-  uint32_t probe_mid;
   struct dynbuf body;
+  timediff_t timeout_ms;
+  uint32_t probe_mid;
   DNStype dnstype;
   CURLcode result;
 };

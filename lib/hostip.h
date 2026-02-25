@@ -90,7 +90,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
                      uint16_t port,
                      uint8_t ip_version,
-                     timediff_t timeoutms,
+                     timediff_t timeout_ms,
                      struct Curl_dns_entry **dnsentry);
 
 #ifdef USE_CURL_ASYNC

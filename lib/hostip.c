@@ -376,7 +376,8 @@ static bool can_resolve_ip_version(struct Curl_easy *data, int ip_version)
 static CURLcode hostip_async_new(struct Curl_easy *data,
                                  const char *hostname,
                                  uint16_t port,
-                                 uint8_t ip_version)
+                                 uint8_t ip_version,
+                                 timediff_t timeout_ms)
 {
   struct Curl_resolv_async *async;
   size_t hostlen = strlen(hostname);
@@ -389,9 +390,10 @@ static CURLcode hostip_async_new(struct Curl_easy *data,
 
   async->port = port;
   async->ip_version = ip_version;
+  async->start = *Curl_pgrs_now(data);
+  async->timeout_ms = timeout_ms;
   if(hostlen)
     memcpy(async->hostname, hostname, hostlen);
-  async->start = *Curl_pgrs_now(data);
 
   data->state.async = async;
   return CURLE_OK;
@@ -430,7 +432,8 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
 static CURLcode hostip_resolv_announce(struct Curl_easy *data,
                                        const char *hostname,
                                        uint16_t port,
-                                       uint8_t ip_version)
+                                       uint8_t ip_version,
+                                       timediff_t timeout_ms)
 {
   if(data->set.resolver_start) {
     void *resolver = NULL;
@@ -438,7 +441,7 @@ static CURLcode hostip_resolv_announce(struct Curl_easy *data,
 #ifdef CURLRES_ASYNCH
     CURLcode result;
     if(!data->state.async) {
-      result = hostip_async_new(data, hostname, port, ip_version);
+      result = hostip_async_new(data, hostname, port, ip_version, timeout_ms);
       if(result)
         return result;
     }
@@ -450,6 +453,7 @@ static CURLcode hostip_resolv_announce(struct Curl_easy *data,
     (void)hostname;
     (void)port;
     (void)ip_version;
+    (void)timeout_ms;
 #endif
     Curl_set_in_callback(data, TRUE);
     st = data->set.resolver_start(resolver, NULL,
@@ -466,6 +470,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                     const char *hostname,
                                     uint16_t port,
                                     uint8_t ip_version,
+                                    timediff_t timeout_ms,
                                     bool allowDOH,
                                     struct Curl_dns_entry **pdns)
 {
@@ -476,7 +481,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   *pdns = NULL;
 
   /* really need to start a resolve operation */
-  result = hostip_resolv_announce(data, hostname, port, ip_version);
+  result = hostip_resolv_announce(data, hostname, port, ip_version,
+                                  timeout_ms);
   if(result)
     goto out;
 
@@ -503,7 +509,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 #ifndef CURL_DISABLE_DOH
   if(!Curl_is_ipaddr(hostname) && allowDOH && data->set.doh) {
     if(!data->state.async) {
-      result = hostip_async_new(data, hostname, port, ip_version);
+      result = hostip_async_new(data, hostname, port, ip_version, timeout_ms);
       if(result)
         goto out;
     }
@@ -523,7 +529,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 #ifdef CURLRES_ASYNCH
   (void)addr;
   if(!data->state.async) {
-    result = hostip_async_new(data, hostname, port, ip_version);
+    result = hostip_async_new(data, hostname, port, ip_version, timeout_ms);
     if(result)
       goto out;
   }
@@ -569,6 +575,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
                               const char *hostname,
                               uint16_t port,
                               uint8_t ip_version,
+                              timediff_t timeout_ms,
                               bool allowDOH,
                               struct Curl_dns_entry **pdns)
 {
@@ -623,7 +630,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     /* No luck, we need to start resolving. */
     cache_dns = TRUE;
     result = hostip_resolv_start(data, hostname, port, ip_version,
-                                 allowDOH, pdns);
+                                 timeout_ms, allowDOH, pdns);
   }
 
 out:
@@ -648,8 +655,9 @@ out:
       show_resolve_info(data, *pdns);
   }
 
-  CURL_TRC_DNS(data, "hostip_resolv(%s:%u, ip=%x) -> %d, dns %sfound",
-               hostname, port, ip_version, result,
+  CURL_TRC_DNS(data, "hostip_resolv(%s:%u, ip=%x, timeout_ms=%" FMT_TIMEDIFF_T
+               ") -> %d, dns %sfound",
+               hostname, port, ip_version, timeout_ms, result,
                *pdns ? "" : "not ");
   return result;
 }
@@ -664,7 +672,7 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
   DEBUGASSERT(hostname && *hostname);
   *pdns = NULL;
   /* We cannot do a blocking resolve using DoH currently */
-  result = hostip_resolv(data, hostname, port, ip_version, FALSE, pdns);
+  result = hostip_resolv(data, hostname, port, ip_version, 0, FALSE, pdns);
   switch(result) {
   case CURLE_OK:
     DEBUGASSERT(*pdns);
@@ -700,7 +708,7 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
                                      const char *hostname,
                                      uint16_t port,
                                      uint8_t ip_version,
-                                     timediff_t timeoutms,
+                                     timediff_t timeout_ms,
                                      struct Curl_dns_entry **entry)
 {
 #ifdef HAVE_SIGACTION
@@ -717,14 +725,14 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(hostname && *hostname);
-  DEBUGASSERT(timeoutms > 0);
+  DEBUGASSERT(timeout_ms > 0);
   DEBUGASSERT(data->set.no_signal);
 #ifndef CURL_DISABLE_DOH
   DEBUGASSERT(!data->set.doh);
 #endif
 
   *entry = NULL;
-  timeout = (timeoutms > LONG_MAX) ? LONG_MAX : (long)timeoutms;
+  timeout = (timeout_ms > LONG_MAX) ? LONG_MAX : (long)timeout_ms;
   if(timeout < 1000) {
     /* The alarm() function only provides integer second resolution, so if
        we want to wait less than one second we must bail out already now. */
@@ -777,7 +785,8 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
 
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long. */
-  result = hostip_resolv(data, hostname, port, ip_version, TRUE, entry);
+  result = hostip_resolv(data, hostname, port, ip_version, timeout_ms,
+                         TRUE, entry);
 
 clean_up:
   if(!prev_alarm)
@@ -853,33 +862,34 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
                      uint16_t port,
                      uint8_t ip_version,
-                     timediff_t timeoutms,
+                     timediff_t timeout_ms,
                      struct Curl_dns_entry **entry)
 {
   DEBUGASSERT(hostname && *hostname);
   *entry = NULL;
 
-  if(timeoutms < 0)
+  if(timeout_ms < 0)
     /* got an already expired timeout */
     return CURLE_OPERATION_TIMEDOUT;
 
 #ifdef USE_ALARM_TIMEOUT
-  if(timeoutms && !data->set.no_signal) {
+  if(timeout_ms && !data->set.no_signal) {
     /* Cannot use ALARM when signals are disabled */
-    timeoutms = 0;
+    timeout_ms = 0;
   }
-  if(timeoutms && !Curl_doh_wanted(data)) {
+  if(timeout_ms && !Curl_doh_wanted(data)) {
     return resolv_alarm_timeout(data, hostname, port, ip_version,
-                                timeoutms, entry);
+                                timeout_ms, entry);
   }
 #endif /* !USE_ALARM_TIMEOUT */
 
 #ifndef CURLRES_ASYNCH
-  if(timeoutms)
+  if(timeout_ms)
     infof(data, "timeout on name lookup is not supported");
 #endif
 
-  return hostip_resolv(data, hostname, port, ip_version, TRUE, entry);
+  return hostip_resolv(data, hostname, port, ip_version, timeout_ms,
+                       TRUE, entry);
 }
 
 

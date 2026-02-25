@@ -33,6 +33,7 @@
 #include "curl_threads.h"
 #include "thrdpool.h"
 #include "thrdqueue.h"
+#include "curlx/timeval.h"
 #ifdef CURLVERBOSE
 #include "curl_trc.h"
 #include "urldata.h"
@@ -61,12 +62,15 @@ struct thrdq_item {
   Curl_thrdq_item_free_cb *fn_free;
   Curl_thrdq_item_process_cb *fn_process;
   void *item;
+  struct curltime start;
+  timediff_t timeout_ms;
   const char *description;
 };
 
 static struct thrdq_item *thrdq_item_create(struct curl_thrdq *tqueue,
                                             void *item,
-                                            const char *description)
+                                            const char *description,
+                                            timediff_t timeout_ms)
 {
   struct thrdq_item *qitem;
 
@@ -77,6 +81,10 @@ static struct thrdq_item *thrdq_item_create(struct curl_thrdq *tqueue,
   qitem->description = description;
   qitem->fn_free = tqueue->fn_free;
   qitem->fn_process = tqueue->fn_process;
+  if(timeout_ms) {
+    qitem->start = curlx_now();
+    qitem->timeout_ms = timeout_ms;
+  }
   return qitem;
 }
 
@@ -93,22 +101,48 @@ static void thrdq_item_list_dtor(void *user_data, void *elem)
   thrdq_item_destroy(elem);
 }
 
-static void *thrdq_tpool_take(void *user_data, const char **pdescription)
+static void *thrdq_tpool_take(void *user_data, const char **pdescription,
+                              timediff_t *ptimeout_ms)
 {
   struct curl_thrdq *tqueue = user_data;
   struct thrdq_item *qitem = NULL;
   struct Curl_llist_node *e;
+  Curl_thrdq_ev_cb *fn_event = NULL;
+  void *fn_user_data = NULL;
 
   Curl_mutex_acquire(&tqueue->lock);
   *pdescription = NULL;
   if(!tqueue->aborted) {
     e = Curl_llist_head(&tqueue->sendq);
     if(e) {
-      qitem = Curl_node_take_elem(e);
-      *pdescription = qitem->description;
+      struct curltime now = curlx_now();
+      timediff_t timeout_ms;
+      while(e) {
+        qitem = Curl_node_take_elem(e);
+        timeout_ms = (!qitem->timeout_ms) ? 0 :
+          (qitem->timeout_ms - curlx_ptimediff_ms(&now, &qitem->start));
+        if(timeout_ms < 0) {
+          /* timed out while queued, place on receive queue */
+          Curl_llist_append(&tqueue->recvq, qitem, &qitem->node);
+          tqueue->nprocessed++;
+          fn_event = tqueue->fn_event;
+          fn_user_data = tqueue->fn_user_data;
+          qitem = NULL;
+          e = Curl_llist_head(&tqueue->sendq);
+          continue;
+        }
+        else {
+          *pdescription = qitem->description;
+          *ptimeout_ms = timeout_ms;
+          break;
+        }
+      }
     }
   }
   Curl_mutex_release(&tqueue->lock);
+  /* avoiding deadlocks */
+  if(fn_event)
+    fn_event(tqueue, CURL_THRDQ_EV_ITEM_DONE, fn_user_data);
   return qitem;
 }
 
@@ -126,7 +160,7 @@ static void thrdq_tpool_return(void *item, void *user_data)
 
   Curl_mutex_acquire(&tqueue->lock);
   if(tqueue->aborted) {
-    thrdq_item_destroy(item);
+    thrdq_item_destroy(qitem);
   }
   else {
     DEBUGASSERT(!Curl_node_llist(&qitem->node));
@@ -246,7 +280,7 @@ void Curl_thrdq_stat(struct curl_thrdq *tqueue,
 }
 
 CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
-                         const char *description)
+                         const char *description, timediff_t timeout_ms)
 {
   CURLcode result = CURLE_AGAIN;
 
@@ -256,10 +290,15 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
     result = CURLE_SEND_ERROR;
     goto out;
   }
+  if(timeout_ms < 0) {
+    result = CURLE_OPERATION_TIMEDOUT;
+    goto out;
+  }
 
   if(!tqueue->send_max_len ||
      (Curl_llist_count(&tqueue->sendq) < tqueue->send_max_len)) {
-    struct thrdq_item *qitem = thrdq_item_create(tqueue, item, description);
+    struct thrdq_item *qitem = thrdq_item_create(tqueue, item, description,
+                                                 timeout_ms);
     if(!qitem) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -267,6 +306,7 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
     Curl_llist_append(&tqueue->sendq, qitem, &qitem->node);
     result = CURLE_OK;
   }
+
 out:
   Curl_mutex_release(&tqueue->lock);
   /* Signal thread pool unlocked to void deadlocks */
