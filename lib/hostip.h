@@ -84,12 +84,14 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               const char *hostname,
                               uint16_t port,
                               uint8_t ip_version,
+                              uint8_t transport,
                               struct Curl_dns_entry **dnsentry);
 
 CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
                      uint16_t port,
                      uint8_t ip_version,
+                     uint8_t transport,
                      timediff_t timeout_ms,
                      struct Curl_dns_entry **dnsentry);
 
@@ -114,8 +116,16 @@ CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
 struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
                                             const char *hostname,
                                             uint16_t port,
-                                            uint8_t ip_version);
+                                            uint8_t ip_version,
+                                            uint8_t transport);
 
+#endif
+
+#ifdef USE_UNIX_SOCKETS
+CURLcode Curl_resolv_unix(struct Curl_easy *data,
+                          const char *unix_path,
+                          bool abstract_path,
+                          struct Curl_dns_entry **pdns);
 #endif
 
 #endif /* HEADER_CURL_HOSTIP_H */

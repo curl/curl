@@ -444,31 +444,28 @@ bool Curl_is_ipaddr(const char *address)
  * struct initialized with this path.
  * Set '*longpath' to TRUE if the error is a too long path.
  */
-struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
-                                     bool abstract)
+CURLcode Curl_unix2addr(const char *path, bool abstract,
+                        struct Curl_addrinfo **paddr)
 {
   struct Curl_addrinfo *ai;
   struct sockaddr_un *sa_un;
   size_t path_len;
 
-  *longpath = FALSE;
+  *paddr = NULL;
+
+  /* sun_path must be able to store the null-terminated path */
+  path_len = strlen(path) + 1;
+  if(path_len > sizeof(sa_un->sun_path))
+    return CURLE_TOO_LARGE;
 
   ai = curlx_calloc(1,
                     sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_un));
   if(!ai)
-    return NULL;
-  ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+    return CURLE_OUT_OF_MEMORY;
 
+  ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
   sa_un = (void *)ai->ai_addr;
   sa_un->sun_family = AF_UNIX;
-
-  /* sun_path must be able to store the null-terminated path */
-  path_len = strlen(path) + 1;
-  if(path_len > sizeof(sa_un->sun_path)) {
-    curlx_free(ai);
-    *longpath = TRUE;
-    return NULL;
-  }
 
   ai->ai_family = AF_UNIX;
   ai->ai_socktype = SOCK_STREAM; /* assume reliable transport for HTTP */
@@ -481,7 +478,8 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
   else
     memcpy(sa_un->sun_path, path, path_len); /* copy NUL byte */
 
-  return ai;
+  *paddr = ai;
+  return CURLE_OK;
 }
 #endif
 

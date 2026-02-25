@@ -240,6 +240,7 @@ struct Curl_resolv_async {
    /* what is being resolved */
   uint16_t port;
   uint8_t ip_version;
+  uint8_t transport;
   char hostname[1];
 };
 

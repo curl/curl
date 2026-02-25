@@ -766,9 +766,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
                  (pf == PF_UNSPEC) ? "A+AAAA" :
                  ((pf == PF_INET) ? "A" : "AAAA"));
     hints.ai_family = pf;
-    hints.ai_socktype =
-      (Curl_conn_get_transport(data, data->conn) == TRNSPRT_TCP) ?
-      SOCK_STREAM : SOCK_DGRAM;
+    hints.ai_socktype = Curl_socktype_for_transport(async->transport);
     /* Since the service is a numerical one, set the hint flags
      * accordingly to save a call to getservbyname in inside C-Ares
      */

@@ -76,8 +76,8 @@ CURLcode Curl_str2addr(const char *dotted, uint16_t port,
                        struct Curl_addrinfo **addrp);
 
 #ifdef USE_UNIX_SOCKETS
-struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
-                                     bool abstract);
+CURLcode Curl_unix2addr(const char *path, bool abstract,
+                        struct Curl_addrinfo **paddr);
 #endif
 
 #if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO) && \

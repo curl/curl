@@ -90,21 +90,24 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns)
   curlx_free(dns);
 }
 
+struct dnscache_key {
+  char data[MAX_HOSTCACHE_LEN];
+  size_t dlen;
+};
+
 /*
- * Create a hostcache id string for the provided host + port, to be used by
- * the DNS caching. Without alloc. Return length of the id string.
+ * Fill a dnscache id string for the provided host + port, to be used by
+ * the DNS caching. Without alloc.
  */
-static size_t create_dnscache_id(const char *name,
-                                 size_t nlen, /* 0 or actual name length */
-                                 uint16_t port, char *ptr, size_t buflen)
+static void dnscache_mk_key(struct dnscache_key *key,
+                            const char *name, size_t len, uint16_t port)
 {
-  size_t len = nlen ? nlen : strlen(name);
-  DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
-  if(len > (buflen - 7))
-    len = buflen - 7;
+  if(len > (sizeof(key->data) - 7))
+    len = sizeof(key->data) - 7;
   /* store and lower case the name */
-  Curl_strntolower(ptr, name, len);
-  return curl_msnprintf(&ptr[len], 7, ":%u", port) + len;
+  Curl_strntolower(key->data, name, len);
+  /* key includes the terminating NUL */
+  key->dlen = curl_msnprintf(&key->data[len], 7, ":%u", port) + len + 1;
 }
 
 struct dnscache_prune_data {
@@ -240,8 +243,7 @@ static CURLcode fetch_addr(struct Curl_easy *data,
                            struct Curl_dns_entry **pdns)
 {
   struct Curl_dns_entry *dns = NULL;
-  char entry_id[MAX_HOSTCACHE_LEN];
-  size_t entry_len;
+  struct dnscache_key key;
   CURLcode result = CURLE_OK;
 
   *pdns = NULL;
@@ -249,18 +251,17 @@ static CURLcode fetch_addr(struct Curl_easy *data,
     return CURLE_OK;
 
   /* Create an entry id, based upon the hostname and port */
-  entry_len = create_dnscache_id(hostname, 0, port,
-                                 entry_id, sizeof(entry_id));
+  dnscache_mk_key(&key, hostname, strlen(hostname), port);
 
   /* See if it is already in our dns cache */
-  dns = Curl_hash_pick(&dnscache->entries, entry_id, entry_len + 1);
+  dns = Curl_hash_pick(&dnscache->entries, key.data, key.dlen);
 
   /* No entry found in cache, check if we might have a wildcard entry */
   if(!dns && data->state.wildcard_resolve) {
-    entry_len = create_dnscache_id("*", 1, port, entry_id, sizeof(entry_id));
+    dnscache_mk_key(&key, "*", 1, port);
 
     /* See if it is already in our dns cache */
-    dns = Curl_hash_pick(&dnscache->entries, entry_id, entry_len + 1);
+    dns = Curl_hash_pick(&dnscache->entries, key.data, key.dlen);
   }
 
   if(dns && (data->set.dns_cache_timeout_ms != -1)) {
@@ -274,7 +275,7 @@ static CURLcode fetch_addr(struct Curl_easy *data,
     if(dnscache_entry_is_stale(&user, dns)) {
       infof(data, "Hostname in DNS cache was stale, zapped");
       dns = NULL; /* the memory deallocation is being handled by the hash */
-      Curl_hash_delete(&dnscache->entries, entry_id, entry_len + 1);
+      Curl_hash_delete(&dnscache->entries, key.data, key.dlen);
     }
   }
 
@@ -452,7 +453,7 @@ dnscache_entry_create(struct Curl_easy *data,
                       struct Curl_dnscache *cache,
                       struct Curl_addrinfo **paddr,
                       const char *hostname,
-                      size_t hostlen, /* length or zero */
+                      size_t hostlen,
                       uint16_t port,
                       uint8_t ip_version,
                       bool permanent)
@@ -469,10 +470,8 @@ dnscache_entry_create(struct Curl_easy *data,
 #else
   (void)data;
 #endif
-  if(!hostlen)
-    hostlen = strlen(hostname);
 
-  /* Create a new cache entry */
+  /* Create a new cache entry, struct already has the hostname NUL */
   dns = curlx_calloc(1, sizeof(struct Curl_dns_entry) + hostlen);
   if(!dns)
     goto out;
@@ -508,7 +507,8 @@ Curl_dns_entry_create(struct Curl_easy *data,
                       uint16_t port,
                       uint8_t ip_version)
 {
-  return dnscache_entry_create(data, NULL, paddr, hostname, 0,
+  return dnscache_entry_create(data, NULL, paddr, hostname,
+                               hostname ? strlen(hostname) : 0,
                                port, ip_version, FALSE);
 }
 
@@ -517,13 +517,12 @@ dnscache_add_addr(struct Curl_easy *data,
                   struct Curl_dnscache *dnscache,
                   struct Curl_addrinfo **paddr,
                   const char *hostname,
-                  size_t hlen, /* length or zero */
+                  size_t hlen,
                   uint16_t port,
                   uint8_t ip_version,
                   bool permanent)
 {
-  char entry_id[MAX_HOSTCACHE_LEN];
-  size_t entry_len;
+  struct dnscache_key key;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
@@ -533,12 +532,10 @@ dnscache_add_addr(struct Curl_easy *data,
     return NULL;
 
   /* Create an entry id, based upon the hostname and port */
-  entry_len = create_dnscache_id(hostname, hlen, port,
-                                 entry_id, sizeof(entry_id));
+  dnscache_mk_key(&key, hostname, hlen, port);
 
   /* Store the resolved data in our DNS cache. */
-  dns2 = Curl_hash_add(&dnscache->entries, entry_id, entry_len + 1,
-                       (void *)dns);
+  dns2 = Curl_hash_add(&dnscache->entries, key.data, key.dlen, (void *)dns);
   if(!dns2) {
     dnscache_entry_free(dns);
     return NULL;
@@ -553,8 +550,7 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
                            struct Curl_dns_entry *entry)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
-  char id[MAX_HOSTCACHE_LEN];
-  size_t idlen;
+  struct dnscache_key key;
 
   if(!dnscache)
     return CURLE_FAILED_INIT;
@@ -562,6 +558,10 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
    * only be asking for trouble. Ignore add instead. */
   if(entry->cache && (entry->cache != dnscache))
     return CURLE_OK;
+  /* entries with empty hostname can not be cached. */
+  if(!entry->hostname[0])
+    return CURLE_OK;
+
   /* Already in this cache? */
   if(entry->cache == dnscache) {
     DEBUGASSERT(entry->refcount > 1);
@@ -569,11 +569,12 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
   }
 
   /* Create an entry id, based upon the hostname and port */
-  idlen = create_dnscache_id(entry->hostname, 0, entry->port, id, sizeof(id));
+  dnscache_mk_key(&key, entry->hostname, strlen(entry->hostname),
+                  entry->port);
 
   /* Store the resolved data in our DNS cache and up ref count */
   dnscache_lock(data, dnscache);
-  if(!Curl_hash_add(&dnscache->entries, id, idlen + 1, (void *)entry)) {
+  if(!Curl_hash_add(&dnscache->entries, key.data, key.dlen, (void *)entry)) {
     dnscache_unlock(data, dnscache);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -594,9 +595,11 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
   DEBUGASSERT(dnscache);
   if(!dnscache)
     return CURLE_FAILED_INIT;
-
+  /* empty hostnames can not be cached */
+  if(!host || !host[0])
+    return CURLE_OK;
   /* put this new host in the cache */
-  dns = dnscache_add_addr(data, dnscache, NULL, host, 0,
+  dns = dnscache_add_addr(data, dnscache, NULL, host, strlen(host),
                           port, ip_version, FALSE);
   if(dns) {
     /* release the returned reference; the cache itself will keep the
@@ -683,14 +686,13 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   data->state.wildcard_resolve = FALSE;
 
   for(hostp = data->state.resolve; hostp; hostp = hostp->next) {
-    char entry_id[MAX_HOSTCACHE_LEN];
+    struct dnscache_key key;
     const char *host = hostp->data;
     struct Curl_str source;
     if(!host)
       continue;
     if(*host == '-') {
       curl_off_t num = 0;
-      size_t entry_len;
       host++;
       if(!curlx_str_single(&host, '[')) {
         if(curlx_str_until(&host, &source, MAX_IPADR_LEN, ']') ||
@@ -707,19 +709,17 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
       if(!curlx_str_number(&host, &num, 0xffff)) {
         /* Create an entry id, based upon the hostname and port */
-        entry_len = create_dnscache_id(curlx_str(&source),
-                                       curlx_strlen(&source), (uint16_t)num,
-                                       entry_id, sizeof(entry_id));
+        dnscache_mk_key(&key, curlx_str(&source), curlx_strlen(&source),
+                        (uint16_t)num);
         dnscache_lock(data, dnscache);
         /* delete entry, ignore if it did not exist */
-        Curl_hash_delete(&dnscache->entries, entry_id, entry_len + 1);
+        Curl_hash_delete(&dnscache->entries, key.data, key.dlen);
         dnscache_unlock(data, dnscache);
       }
     }
     else {
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *head = NULL, *tail = NULL;
-      size_t entry_len;
       char address[64];
       curl_off_t tmpofft = 0;
       uint16_t port = 0;
@@ -812,30 +812,23 @@ err:
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_len = create_dnscache_id(curlx_str(&source), curlx_strlen(&source),
-                                     port, entry_id, sizeof(entry_id));
+      dnscache_mk_key(&key, curlx_str(&source), curlx_strlen(&source), port);
 
       dnscache_lock(data, dnscache);
 
-      /* See if it is already in our dns cache */
-      dns = Curl_hash_pick(&dnscache->entries, entry_id, entry_len + 1);
-
-      if(dns) {
+      /* delete old entry, there are two reasons for this
+       1. old entry may have different addresses.
+       2. even if entry with correct addresses is already in the cache,
+          but if it is close to expire, then by the time next http
+          request is made, it can get expired and pruned because old
+          entry is not necessarily marked as permanent.
+       3. when adding a non-permanent entry, we want it to remove and
+          replace an existing permanent entry.
+       4. when adding a non-permanent entry, we want it to get a "fresh"
+          timeout that starts _now_. */
+      if(!Curl_hash_delete(&dnscache->entries, key.data, key.dlen)) {
         infof(data, "RESOLVE %.*s:%u - old addresses discarded",
-              (int)curlx_strlen(&source),
-              curlx_str(&source), port);
-        /* delete old entry, there are two reasons for this
-         1. old entry may have different addresses.
-         2. even if entry with correct addresses is already in the cache,
-            but if it is close to expire, then by the time next http
-            request is made, it can get expired and pruned because old
-            entry is not necessarily marked as permanent.
-         3. when adding a non-permanent entry, we want it to remove and
-            replace an existing permanent entry.
-         4. when adding a non-permanent entry, we want it to get a "fresh"
-            timeout that starts _now_. */
-
-        Curl_hash_delete(&dnscache->entries, entry_id, entry_len + 1);
+              (int)curlx_strlen(&source), curlx_str(&source), port);
       }
 
       /* put this new host in the cache */
