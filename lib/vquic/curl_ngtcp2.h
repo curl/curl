@@ -27,6 +27,8 @@
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
 
+#include <ngtcp2/ngtcp2.h>
+
 struct Curl_cfilter;
 
 #include "urldata.h"
