@@ -4,7 +4,7 @@ curl and libcurl 8.19.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3601
+ Contributors:                 3607
 
 This release includes the following changes:
 
@@ -21,12 +21,14 @@ This release includes the following bugfixes:
 
  o altsvc: only accept 17 byte dates from files [22]
  o asyn-ares: abort with OOM error when Curl_dnscache_mk_entry fails [107]
+ o build: adjust minimum version for some clang picky warnings [211]
  o build: check `MSG_NOSIGNAL` directly, drop detection and interim macro [26]
  o build: constify `memchr()`/`strchr()`/etc result variables (cont.) [85]
  o build: detect and include `inttypes.h` again [13]
  o build: drop duplicate C includes [54]
  o build: drop global suppression of `-Wformat-nonliteral`, fix fallouts [19]
  o build: fix `-Wunused-macros` warnings, and related tidy-ups [176]
+ o build: fix building rare combinations [109]
  o build: fully omit verbose strings and code when disabled [113]
  o build: globally suppress DJGPP warnings in `FD_SET()` [56]
  o build: merge TrackMemory (`CURLDEBUG`) into debug-enabled option [46]
@@ -38,12 +40,16 @@ This release includes the following bugfixes:
  o checksrc-all.pl: skip non-repository files [144]
  o checksrc: do not apply `BANNEDFUNC` to struct member functions [35]
  o checksrc: warn for leading spaces before the preprocessor hash [72]
+ o clang-tidy: check `bugprone-macro-parentheses`, fix fallouts [212]
+ o clang-tidy: drop redundant conditions reported by `misc-redundant-expression` [217]
  o cmake/FindMbedTLS: add workaround for missing static MSVC `mbedcrypto.lib` 4.0.0 [174]
  o cmake: add `CURL_DROP_UNUSED` option to reduce binary sizes [105]
+ o cmake: always build curlu and curltool test libs in unity mode [190]
  o cmake: always define `CURL::win32_winsock` on Windows in `curl-config.cmake` [104]
  o cmake: enable binutils ld workaround for all toolchains at build-time [57]
  o cmake: fix logic for openssl/zlib binutils ld workaround [71]
  o cmake: normalize uppercase hex winver (for display) [191]
+ o cmake: omit `curl.rc` from curltool lib [209]
  o cmake: reference OpenSSL and ZLIB imported targets only when enabled [41]
  o cmake: silence silly Apple clang warnings in C89 mode, test in CI [14]
  o cmake: silence useless compiler warnings triggered by the FASTBuild generator [43]
@@ -70,16 +76,20 @@ This release includes the following bugfixes:
  o docs/INSTALL: update configure details [45]
  o docs/libcurl: unify WARNING use [89]
  o docs: add LibreELEC to DISTROS.md
+ o docs: add reproducible example for generating man page [95]
  o docs: clarify --ipv4 and --ipv6 [149]
  o docs: document the need for a 64-bit type and stdint.h [118]
  o docs: explicitly call out Slowloris as not a security flaw [6]
  o docs: fix grammar nitpicks [128]
  o docs: reword explanation of --variable option [150]
+ o docs: use dot instead of comma at end of sentences [168]
  o easy: reset errorbuf on eyeballing success [179]
+ o easy: reset pausing when resetting request [218]
  o examples/usercertinmem: use modern OpenSSL API, drop mentions of RSA [188]
  o examples: omit forward declarations, apply misc fixes [60]
  o fopen.h: simplify curl memory macro mappings [160]
  o ftp: replace a `curlx_free()` with `curlx_dyn_free()` [86]
+ o ftp: split ftp_state_use_port into sub functions [172]
  o GOVERNANCE.md: Post-Daniel BDFL [31]
  o gss: exclude verbose error logic from non-verbose builds [122]
  o h2+h3: align stream close handling [131]
@@ -113,8 +123,10 @@ This release includes the following bugfixes:
  o libtests: drop two redundant `memset()`s [110]
  o Makefile.am: delete RPM targets referencing non-existent files [9]
  o Makefile.am: drop stray VC project files from dist [5]
+ o managen: silence Perl warnings [141]
  o mbedtls: no pinnedpubkey wo MBEDTLS_SSL_KEEP_PEER_CERTIFICATE [29]
  o mbedtls: remove newline from failf() call [25]
+ o mbedtls: split mbed_connect_step1 into sub functions [166]
  o md4, md5: drop redundant forward declarations [64]
  o md4, md5: replace custom types with `uint32_t` [111]
  o memdebug: include `backtrace.h` as system header [148]
@@ -136,17 +148,23 @@ This release includes the following bugfixes:
  o openldap: avoid forward declarations in ldaps code [62]
  o OpenSSL: check reuse of sessions for verify status [142]
  o openssl: disable local keylog feature if built-in upstream [178]
+ o openssl: fix compiler warning with OpenSSL master [193]
+ o openssl: fix potential NULL dereference when loading certs (Windows) [165]
+ o openssl: fix potential OOB read in debug/verbose logging [216]
  o plan9: drop special build and orphaned references [33]
  o pytest: remove 03_02 [127]
  o ratelimit: download finetune [16]
+ o request.h: rename parameter 'buf' to 'req' in Curl_req_send [219]
  o REUSE: drop broken reference to `MAIL-ETIQUETTE` [59]
  o rtspd: fix to check `realloc()` result [173]
  o runtests: pass config filename to stunnel in native format (Windows) [94]
  o schannel: refactor: reduce variable scopes, fix comment, fix indent [196]
  o send: drop `CURL_UNCONST()` from buffer argument on most platforms [116]
  o setopt: fix checking range for CURLOPT_MAXCONNECTS [92]
+ o setopt: refuse blobs with zero length [167]
  o setup-os400.h: drop no longer used custom type `u_int32_t` [112]
  o sigpipe: unset SA_SIGINFO since it is using sa_handler [40]
+ o silent.md: also mention it shuts off warning messages [213]
  o smb: include arpa/inet.h for NonStop [195]
  o socket: check result of SO_NOSIGPIPE [124]
  o socketpair: set SO_NOSIGPIPE where possible [103]
@@ -162,6 +180,7 @@ This release includes the following bugfixes:
  o tls: add new SSLSUPP flags for several options [32]
  o tls: remove checks for DEFAULT [136]
  o tool: enable header separation for HTTPS proxies [106]
+ o tool: improve config error messaging [208]
  o tool: improve error/warning messages when output filename sanitization fails [36]
  o tool: rename curl handle and result variable in `--libcurl`-generated code [146]
  o tool: return code variable consistency [84]
@@ -174,6 +193,7 @@ This release includes the following bugfixes:
  o tool_getparam: avoid `-Wcomma` with Apple clang in C89 mode [38]
  o tool_operate: remove 'else' for VMS [3]
  o typos: silence false positives found in C code [164]
+ o URL-SYNTAX.md: fix port number mistakes for IMAP and LDAP [200]
  o url.c: code/comment cleanup around conn creation [132]
  o url.h: fix `-Wdocumentation` [61]
  o url: fix reuse of connections using HTTP Negotiate [100]
@@ -205,26 +225,29 @@ Planned upcoming removals include:
  o RTMP support
  o Support for c-ares versions before 1.16.0
  o Support for Windows XP/2003
+ o TLS-SRP support
 
  See https://curl.se/dev/deprecate.html
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrew Kvalheim, Anna Liberty, Arnav Purushotam, Arnav-Purushotam-CUBoulder,
-  Billy O'Neal, calm329, Christian Schmitz, Christian Schmitza,
-  cooldadpresident on github, Dag Haavi Finstad, Dan Fandrich,
-  Daniel Gustafsson, Daniel Lublin, Daniel Stenberg, Daniil Gentili, dEajL3kA,
-  dependabot[bot], Frank Buss, gudyuu on hackerone, Itay Bookstein,
-  Jacek Migacz, James Fuller, Jan Macku, jhauga, Joshua Vandaële, Juan Belon,
-  Kai Pastor, Maksim Ściepanienka, Marcel Raad, Megamouse on github,
-  Michał Antoniak, nono303 on github, Nuno Goncalves, Patrick Monnerat,
-  Paul Howarth, programmerlexi on github, Randall S. Becker, Ray Satiro,
-  renovate[bot], Rudi Heitbaum, Sascha Frinken, Spenser Black, Stefan Eissing,
-  tawmoto on github, Tenant HellTower, Thibault de Villèle,
+  aisle-research-bot, Andrew Kvalheim, Anna Liberty, Arnav Purushotam,
+  Arnav-Purushotam-CUBoulder, Augment code, Billy O'Neal, calm329,
+  Christian Schmitz, Christian Schmitza, cooldadpresident on github,
+  Dag Haavi Finstad, dahmono on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Lublin, Daniel Stenberg, Daniil Gentili, dEajL3kA, dependabot[bot],
+  Diogo Correia, Frank Buss, gudyuu on hackerone, Hamza Bensliman,
+  Itay Bookstein, Jacek Migacz, James Fuller, Jan Macku, jhauga,
+  Joshua Vandaële, Juan Belon, Kai Pastor, Maksim Ściepanienka, Marcel Raad,
+  Megamouse on github, Michał Antoniak, Natris on github, nono303 on github,
+  Nuno Goncalves, Patrick Monnerat, Paul Howarth, programmerlexi on github,
+  Randall S. Becker, Ray Satiro, renovate[bot], Rudi Heitbaum,
+  sammydono on github, Samuel Henrique, Sascha Frinken, Spenser Black,
+  Stefan Eissing, tawmoto on github, Tenant HellTower, Thibault de Villèle,
   Tim Friedrich Brüggemann, Tomáš Malý, tommy, Viktor Szakats, Wyuer on github,
   z2_, Zhicheng Chen, Йоте
-  (54 contributors)
+  (62 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -322,6 +345,7 @@ References to bug reports and discussions on issues:
  [92] = https://curl.se/bug/?i=20414
  [93] = https://curl.se/bug/?i=20542
  [94] = https://curl.se/bug/?i=20413
+ [95] = https://curl.se/bug/?i=20699
  [96] = https://curl.se/bug/?i=20386
  [97] = https://curl.se/mail/lib-2026-01/0033.html
  [98] = https://curl.se/bug/?i=20475
@@ -335,6 +359,7 @@ References to bug reports and discussions on issues:
  [106] = https://curl.se/bug/?i=20398
  [107] = https://curl.se/bug/?i=20385
  [108] = https://curl.se/bug/?i=20387
+ [109] = https://curl.se/bug/?i=20712
  [110] = https://curl.se/bug/?i=20649
  [111] = https://curl.se/bug/?i=20469
  [112] = https://curl.se/bug/?i=20470
@@ -365,6 +390,7 @@ References to bug reports and discussions on issues:
  [138] = https://curl.se/bug/?i=20527
  [139] = https://curl.se/bug/?i=20452
  [140] = https://curl.se/bug/?i=20526
+ [141] = https://curl.se/bug/?i=20707
  [142] = https://curl.se/bug/?i=20435
  [143] = https://curl.se/bug/?i=20444
  [144] = https://curl.se/bug/?i=20439
@@ -385,6 +411,11 @@ References to bug reports and discussions on issues:
  [162] = https://curl.se/bug/?i=20497
  [163] = https://curl.se/bug/?i=20499
  [164] = https://curl.se/bug/?i=20500
+ [165] = https://curl.se/bug/?i=20634
+ [166] = https://curl.se/bug/?i=20689
+ [167] = https://curl.se/bug/?i=20705
+ [168] = https://curl.se/bug/?i=20700
+ [172] = https://curl.se/bug/?i=20685
  [173] = https://curl.se/bug/?i=20621
  [174] = https://curl.se/bug/?i=20616
  [176] = https://curl.se/bug/?i=20593
@@ -397,11 +428,23 @@ References to bug reports and discussions on issues:
  [185] = https://curl.se/bug/?i=20601
  [188] = https://curl.se/bug/?i=20595
  [189] = https://curl.se/bug/?i=20587
+ [190] = https://curl.se/bug/?i=20677
  [191] = https://curl.se/bug/?i=20586
  [192] = https://curl.se/bug/?i=20582
+ [193] = https://curl.se/bug/?i=20681
  [194] = https://curl.se/bug/?i=20568
  [195] = https://curl.se/bug/?i=20579
  [196] = https://curl.se/bug/?i=20569
  [197] = https://curl.se/bug/?i=20573
  [198] = https://curl.se/bug/?i=20577
+ [200] = https://curl.se/bug/?i=20679
  [203] = https://curl.se/bug/?i=20567
+ [208] = https://curl.se/bug/?i=20598
+ [209] = https://curl.se/bug/?i=20671
+ [211] = https://curl.se/bug/?i=20665
+ [212] = https://curl.se/bug/?i=20647
+ [213] = https://curl.se/bug/?i=20664
+ [216] = https://curl.se/bug/?i=20654
+ [217] = https://curl.se/bug/?i=20644
+ [218] = https://curl.se/bug/?i=20641
+ [219] = https://curl.se/bug/?i=20660
