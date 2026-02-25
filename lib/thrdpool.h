@@ -25,13 +25,19 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
 struct curl_thrdpool;
+struct Curl_easy;
+struct curl_trc_feat;
 
 /* Invoked under thread pool lock to get an "item" to work on. Must
- * return NULL if there is nothing to do. */
-typedef void *Curl_thrdpool_take_item_cb(void *user_data);
+ * return NULL if there is nothing to do.
+ * Caller might return a descriptive string about the "item", where
+ * available. The string needs to have the same lifetime as the
+ * item itself. */
+typedef void *Curl_thrdpool_take_item_cb(void *user_data,
+                                         const char **pdescription);
 
 /* Invoked outside thread pool lock to process the item taken. */
 typedef void Curl_thrdpool_process_item_cb(void *item);
@@ -83,6 +89,12 @@ CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads);
 CURLcode Curl_thrdpool_await_idle(struct curl_thrdpool *tpool,
                                   uint32_t timeout_ms);
 
-#endif /* USE_THREADS */
+#ifdef CURLVERBOSE
+void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
+                         struct Curl_easy *data,
+                         struct curl_trc_feat *feat);
+#endif
+
+#endif /* USE_THREADS && CURLRES_THREADED */
 
 #endif /* HEADER_CURL_THRDPOOL_H */

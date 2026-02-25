@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
@@ -33,12 +33,19 @@
 #include "curl_threads.h"
 #include "curlx/timeval.h"
 #include "thrdpool.h"
+#ifdef CURLVERBOSE
+#include "curl_trc.h"
+#include "urldata.h"
+#endif
+
 
 struct thrdslot {
   struct Curl_llist_node node;
   struct curl_thrdpool *tpool;
   curl_thread_t thread;
   curl_cond_t await;
+  const char *work_description;
+  uint32_t id;
   BIT(running);
   BIT(idle);
 };
@@ -58,6 +65,7 @@ struct curl_thrdpool {
   uint32_t min_threads;
   uint32_t max_threads;
   uint32_t idle_time_ms;
+  uint32_t next_id;
   BIT(aborted);
   BIT(detached);
 };
@@ -94,7 +102,8 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
   DEBUGASSERT(Curl_node_llist(&tslot->node) == &tpool->slots);
   for(;;) {
     while(!tpool->aborted) {
-      item = tpool->fn_take(tpool->fn_user_data);
+      tslot->work_description = NULL;
+      item = tpool->fn_take(tpool->fn_user_data, &tslot->work_description);
       if(!item)
         break;
 
@@ -103,6 +112,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
       tpool->fn_process(item);
 
       Curl_mutex_acquire(&tpool->lock);
+      tslot->work_description = NULL;
       tpool->fn_return(item, tpool->aborted ? NULL : tpool->fn_user_data);
     }
 
@@ -146,6 +156,7 @@ static CURLcode thrdslot_start(struct curl_thrdpool *tpool)
   tslot = curlx_calloc(1, sizeof(*tslot));
   if(!tslot)
     goto out;
+  tslot->id = tpool->next_id++;
   tslot->tpool = tpool;
   tslot->thread = curl_thread_t_null;
   Curl_cond_init(&tslot->await);
@@ -236,10 +247,6 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
     goto out;
   tpool->refcount = 1;
 
-  tpool->name = curlx_strdup(name);
-  if(!tpool->name)
-    goto out;
-
   Curl_mutex_init(&tpool->lock);
   Curl_cond_init(&tpool->await);
   Curl_llist_init(&tpool->slots, NULL);
@@ -251,6 +258,10 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
   tpool->fn_process = fn_process;
   tpool->fn_return = fn_return;
   tpool->fn_user_data = user_data;
+
+  tpool->name = curlx_strdup(name);
+  if(!tpool->name)
+    goto out;
 
   if(tpool->min_threads)
     result = Curl_thrdpool_signal(tpool, tpool->min_threads);
@@ -388,4 +399,29 @@ out:
   return result;
 }
 
-#endif /* USE_THREADS */
+#ifdef CURLVERBOSE
+void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
+                         struct Curl_easy *data,
+                         struct curl_trc_feat *feat)
+{
+  if(Curl_trc_ft_is_verbose(data, feat)) {
+    struct Curl_llist_node *e;
+
+    Curl_mutex_acquire(&tpool->lock);
+    if(!Curl_llist_count(&tpool->slots)) {
+      Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] no threads running",
+                          tpool->name);
+    }
+    for(e = Curl_llist_head(&tpool->slots); e; e = Curl_node_next(e)) {
+      struct thrdslot *tslot = Curl_node_elem(e);
+      Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: %s%s",
+                          tpool->name, tslot->id,
+                          tslot->idle ? "idle" : "working ",
+                          tslot->idle ? "" : tslot->work_description);
+    }
+    Curl_mutex_release(&tpool->lock);
+  }
+}
+#endif
+
+#endif /* USE_THREADS && CURLRES_THREADED */
