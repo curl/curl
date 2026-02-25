@@ -39,6 +39,10 @@
 #endif /* USE_OPENSSL */
 
 #ifdef USE_WOLFSSL
+#include <wolfssl/version.h>
+#if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
+#error "wolfSSL v5.7.6 or upper required for OpenSSL coexist support"
+#endif
 #include <wolfssl/options.h>
 #endif
 
