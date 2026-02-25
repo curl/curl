@@ -50,8 +50,8 @@ struct dynbuf;
 
 #ifdef USE_ECH
 #include "curlx/base64.h"
-#define ECH_ENABLED(__data__) \
-  (__data__->set.tls_ech && !(__data__->set.tls_ech & CURLECH_DISABLE))
+#define ECH_ENABLED(data) \
+  ((data)->set.tls_ech && !((data)->set.tls_ech & CURLECH_DISABLE))
 #endif /* USE_ECH */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
