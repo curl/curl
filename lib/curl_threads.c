@@ -115,12 +115,32 @@ void Curl_cond_wait(pthread_cond_t *c, pthread_mutex_t *m)
 CURLcode Curl_cond_timedwait(pthread_cond_t *c, pthread_mutex_t *m,
                              uint32_t timeout_ms)
 {
-  struct curltime now = curlx_now();
+  struct curltime now;
   struct timespec ts;
+  timediff_t usec;
   int rc;
 
+  /* POSIX expects an "absolute" time until the condition wait ends.
+   * We cannot use `curlx_now()` here that may run on some monotonic clock
+   * that will be most likely in the past, as far as POSIX abstime is
+   * concerned. */
+#ifdef HAVE_GETTIMEOFDAY
+    struct timeval tv;
+    (void)gettimeofday(&tv, NULL);
+    now.tv_sec = tv.tv_sec;
+    now.tv_usec = (int)tv.tv_usec;
+#else
+    now.tv_sec = time(NULL);
+    now.tv_usec = 0;
+#endif
+
   ts.tv_sec = now.tv_sec + (timeout_ms / 1000);
-  ts.tv_nsec = (now.tv_usec + ((timeout_ms % 1000) * 1000)) * 1000;
+  usec = now.tv_usec + ((timeout_ms % 1000) * 1000);
+  if(usec > 1000000) {
+    ++ts.tv_sec;
+    usec %= 1000000;
+  }
+  ts.tv_nsec = usec * 1000;
 
   rc = pthread_cond_timedwait(c, m, &ts);
   if(rc == SOCKETIMEDOUT)

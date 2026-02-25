@@ -107,7 +107,7 @@ static CURLcode test_unit3218(const char *arg)
   for(i = 0; i < count; ++i) {
     struct unit3218_item *uitem = unit3218_item_create(i);
     fail_unless(uitem, "queue-b item create");
-    r = Curl_thrdq_send(tqueue, uitem);
+    r = Curl_thrdq_send(tqueue, uitem, NULL);
     fail_unless(!r, "queue-b send");
   }
 

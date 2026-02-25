@@ -305,10 +305,24 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(Curl_probeipv6(multi))
     goto error;
 
+#ifdef CURLRES_THREADED
+  if(xfer_table_size < CURL_XFER_TABLE_SIZE) { /* easy multi */
+    if(Curl_async_thrdd_multi_init(multi, 0, 2, 10))
+      goto error;
+  }
+  else { /* real multi handle */
+    if(Curl_async_thrdd_multi_init(multi, 0, 6, 500))
+      goto error;
+  }
+#endif
+
   return multi;
 
 error:
 
+#ifdef CURLRES_THREADED
+  Curl_async_thrdd_multi_destroy(multi, TRUE);
+#endif
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
   Curl_dnscache_destroy(&multi->dnscache);
@@ -360,6 +374,17 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 bool Curl_is_connecting(struct Curl_easy *data)
 {
   return data->mstate < MSTATE_DO;
+}
+
+static CURLMcode multi_assess_wakeup(struct Curl_multi *multi)
+{
+#ifdef ENABLE_WAKEUP
+  if(multi->socket_cb)
+    return Curl_multi_ev_assess_xfer(multi, multi->admin);
+#else
+  (void)multi;
+#endif
+  return CURLM_OK;
 }
 
 static CURLMcode multi_xfers_add(struct Curl_multi *multi,
@@ -527,8 +552,12 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   multi->admin->set.server_response_timeout =
     data->set.server_response_timeout;
   multi->admin->set.no_signal = data->set.no_signal;
-  if(multi->xfers_alive == 1)
-    Curl_multi_ev_assess_xfer(multi, multi->admin);
+
+  mresult = multi_assess_wakeup(multi);
+  if(mresult) {
+    failf(data, "error enabling wakeup listening: %d", mresult);
+    return mresult;
+  }
 
   CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
              data->mid, Curl_multi_xfers_running(multi),
@@ -819,8 +848,6 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
   if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid)) {
     --multi->xfers_alive;
-    if(!multi->xfers_alive)
-      Curl_multi_ev_assess_xfer(multi, multi->admin);
   }
 
   Curl_wildcard_dtor(&data->wildcard);
@@ -893,6 +920,12 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   mresult = Curl_update_timer(multi);
   if(mresult)
     return mresult;
+
+  mresult = multi_assess_wakeup(multi);
+  if(mresult) {
+    failf(data, "error enabling wakeup listening: %d", mresult);
+    return mresult;
+  }
 
   CURL_TRC_M(data, "removed from multi, mid=%u, running=%u, total=%u",
              mid, Curl_multi_xfers_running(multi),
@@ -2295,8 +2328,6 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   CURLcode result;
 
   result = Curl_resolv_take_result(data, &dns);
-  CURL_TRC_DNS(data, "Curl_resolv_take_result() -> %d, %s",
-               result, dns ? "found" : "missing");
 
   /* Update sockets here, because the socket(s) may have been closed and the
      application thus needs to be told, even if it is likely that the same
@@ -2518,6 +2549,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
+#ifdef CURLRES_THREADED
+    Curl_async_thrdd_multi_process(multi);
+#endif
     Curl_cshutdn_perform(&multi->cshutdn, multi->admin, sigpipe_ctx);
     return CURLM_OK;
   }
@@ -2947,6 +2981,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       } while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry));
     }
 
+#ifdef CURLRES_THREADED
+    Curl_async_thrdd_multi_destroy(multi, TRUE);
+#endif
     Curl_cpool_destroy(&multi->cpool);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {
@@ -3209,6 +3246,14 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
        handles the case when the application asks libcurl to run the timeout
        prematurely. */
     memset(&multi->last_expire_ts, 0, sizeof(multi->last_expire_ts));
+
+    /* Applications may set `socket_cb` *after* having added transfers
+     * first. *Then* kick off processing with a
+     * curl_multi_socket_action(TIMEOUT) afterwards. Make sure our
+     * admin handle registers its pollset with the callbacks present. */
+    mresult = multi_assess_wakeup(multi);
+    if(mresult)
+      goto out;
   }
 
   multi_mark_expired_as_dirty(multi, multi_now(multi));
@@ -3264,9 +3309,11 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
   switch(option) {
   case CURLMOPT_SOCKETFUNCTION:
     multi->socket_cb = va_arg(param, curl_socket_callback);
+    multi->admin_wakeup_started = FALSE; /* trigger re-assessment */
     break;
   case CURLMOPT_SOCKETDATA:
     multi->socket_userp = va_arg(param, void *);
+    multi->admin_wakeup_started = FALSE; /* trigger re-assessment */
     break;
   case CURLMOPT_PUSHFUNCTION:
     multi->push_cb = va_arg(param, curl_push_callback);

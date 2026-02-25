@@ -198,7 +198,6 @@ void Curl_async_shutdown(struct Curl_easy *data)
 void Curl_async_destroy(struct Curl_easy *data)
 {
   if(data->state.async) {
-    CURL_TRC_DNS(data, "destroy async");
 #ifdef CURLRES_ARES
     Curl_async_ares_destroy(data, data->state.async);
 #endif

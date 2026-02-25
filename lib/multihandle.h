@@ -38,6 +38,9 @@
 
 struct connectdata;
 struct Curl_easy;
+#ifdef CURLRES_THREADED
+struct curl_thrdq;
+#endif
 
 struct Curl_message {
   struct Curl_llist_node list;
@@ -109,6 +112,9 @@ struct Curl_multi {
 
   struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
+#ifdef CURLRES_THREADED
+  struct curl_thrdq *resolv_thrdq;
+#endif
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
@@ -189,6 +195,7 @@ struct Curl_multi {
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif
+  BIT(admin_wakeup_started);  /* admin handle registered on wakeup socket */
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

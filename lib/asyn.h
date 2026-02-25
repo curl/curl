@@ -32,6 +32,7 @@
 struct Curl_easy;
 struct Curl_dns_entry;
 struct Curl_resolv_async;
+struct Curl_multi;
 
 #ifdef CURLRES_ASYNCH
 
@@ -171,39 +172,12 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data);
 #endif /* CURLRES_ARES */
 
 #ifdef CURLRES_THREADED
-/* async resolving implementation using POSIX threads */
-#include "curl_threads.h"
 
-/* Context for threaded address resolver */
-struct async_thrdd_addr_ctx {
-  curl_thread_t thread_hnd;
-  char *hostname;        /* hostname to resolve, Curl_async.hostname
-                            duplicate */
-  curl_mutex_t mutx;
-#ifndef CURL_DISABLE_SOCKETPAIR
-  curl_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
-#endif
-  struct Curl_addrinfo *res;
-#ifdef HAVE_GETADDRINFO
-  struct addrinfo hints;
-#endif
-  struct curltime start;
-  timediff_t interval_end;
-  unsigned int poll_interval;
-  int port;
-  int sock_error;
-  int ref_count;
-  BIT(thrd_done);
-  BIT(do_abort);
-};
+struct async_thrdd_item;
 
 /* Context for threaded resolver */
 struct async_thrdd_ctx {
-  /* `addr` is a pointer since this memory is shared with a started
-   * thread. Since threads cannot be killed, we use reference counting
-   * so that we can "release" our pointer to this memory while the
-   * thread is still running. */
-  struct async_thrdd_addr_ctx *addr;
+  struct async_thrdd_item *resolved;
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;
@@ -212,12 +186,21 @@ struct async_thrdd_ctx {
     BIT(done);
   } rr;
 #endif
+  BIT(queued);
+  BIT(done);
 };
 
 void Curl_async_thrdd_shutdown(struct Curl_easy *data,
                                struct Curl_resolv_async *async);
 void Curl_async_thrdd_destroy(struct Curl_easy *data,
                               struct Curl_resolv_async *async);
+
+CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
+                                     uint32_t min_threads,
+                                     uint32_t max_threads,
+                                     uint32_t idle_time_ms);
+void Curl_async_thrdd_multi_destroy(struct Curl_multi *multi, bool join);
+void Curl_async_thrdd_multi_process(struct Curl_multi *multi);
 
 #endif /* CURLRES_THREADED */
 
@@ -250,6 +233,9 @@ struct Curl_resolv_async {
 #ifndef CURL_DISABLE_DOH
   struct doh_probes *doh; /* DoH specific data for this request */
 #endif
+  struct curltime start;
+  timediff_t interval_end;
+  uint32_t poll_interval;
    /* what is being resolved */
   uint16_t port;
   uint8_t ip_version;

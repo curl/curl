@@ -25,8 +25,10 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
+struct Curl_easy;
+struct curl_trc_feat;
 struct curl_thrdq;
 
 typedef enum {
@@ -77,9 +79,12 @@ void Curl_thrdq_stat(struct curl_thrdq *tqueue,
 
 /* Send "item" onto the queue. The caller needs to clear any reference
  * to "item" on success, e.g. the queue takes ownership.
+ * `description` is an optional string describing the item for tracing
+ * purposes. It needs to have the same lifetime as `item`.
  * Returns CURLE_AGAIN when the queue has already been full.
  */
-CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item);
+CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
+                         const char *description);
 
 /* Receive the oldest, processed item from the queue again, if there is one.
  * The caller takes ownership of the item received, e.g. the queue
@@ -102,6 +107,12 @@ void Curl_thrdq_clear(struct curl_thrdq *tqueue,
 CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
                                uint32_t timeout_ms);
 
-#endif /* USE_THREADS */
+#ifdef CURLVERBOSE
+void Curl_thrdq_trace(struct curl_thrdq *tqueue,
+                      struct Curl_easy *data,
+                      struct curl_trc_feat *feat);
+#endif
+
+#endif /* USE_THREADS && CURLRES_THREADED */
 
 #endif /* HEADER_CURL_THRDQUEUE_H */
