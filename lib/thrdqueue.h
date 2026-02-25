@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "curlx/timediff.h"
 
 #if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
@@ -36,7 +37,7 @@ typedef enum {
 } Curl_thrdq_event;
 
 /* Notification callback when "events" happen in the queue. May be
- * call from any thread, tqueue is not locked. */
+ * call from any thread, queue is not locked. */
 typedef void Curl_thrdq_ev_cb(const struct curl_thrdq *tqueue,
                               Curl_thrdq_event ev,
                               void *user_data);
@@ -82,9 +83,11 @@ void Curl_thrdq_stat(struct curl_thrdq *tqueue,
  * `description` is an optional string describing the item for tracing
  * purposes. It needs to have the same lifetime as `item`.
  * Returns CURLE_AGAIN when the queue has already been full.
+ *
+ * With`timeout_ms` != 0, items
  */
 CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
-                         const char *description);
+                         const char *description, timediff_t timeout_ms);
 
 /* Receive the oldest, processed item from the queue again, if there is one.
  * The caller takes ownership of the item received, e.g. the queue

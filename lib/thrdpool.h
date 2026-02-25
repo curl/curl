@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "curlx/timediff.h"
 
 #if defined(USE_THREADS) && defined(CURLRES_THREADED)
 
@@ -37,7 +38,8 @@ struct curl_trc_feat;
  * available. The string needs to have the same lifetime as the
  * item itself. */
 typedef void *Curl_thrdpool_take_item_cb(void *user_data,
-                                         const char **pdescription);
+                                         const char **pdescription,
+                                         timediff_t *ptimeout_ms);
 
 /* Invoked outside thread pool lock to process the item taken. */
 typedef void Curl_thrdpool_process_item_cb(void *item);

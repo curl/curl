@@ -235,6 +235,7 @@ struct Curl_resolv_async {
 #endif
   struct curltime start;
   timediff_t interval_end;
+  timediff_t timeout_ms;
   uint32_t poll_interval;
    /* what is being resolved */
   uint16_t port;

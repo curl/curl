@@ -279,12 +279,13 @@ static void doh_probe_dtor(void *key, size_t klen, void *e)
 static CURLcode doh_probe_run(struct Curl_easy *data,
                               DNStype dnstype,
                               const char *host,
-                              const char *url, CURLM *multi,
+                              const char *url,
+                              timediff_t timeout_ms,
+                              CURLM *multi,
                               uint32_t *pmid)
 {
   struct Curl_easy *doh = NULL;
   CURLcode result = CURLE_OK;
-  timediff_t timeout_ms;
   struct doh_request *doh_req;
   DOHcode d;
 
@@ -305,7 +306,6 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     goto error;
   }
 
-  timeout_ms = Curl_timeleft_ms(data);
   if(timeout_ms < 0) {
     result = CURLE_OPERATION_TIMEDOUT;
     goto error;
@@ -344,7 +344,8 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   /* in debug mode, also allow http */
   ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 #endif
-  ERROR_CHECK_SETOPT(CURLOPT_TIMEOUT_MS, (long)timeout_ms);
+  if(timeout_ms)
+    ERROR_CHECK_SETOPT(CURLOPT_TIMEOUT_MS, (long)timeout_ms);
   ERROR_CHECK_SETOPT(CURLOPT_SHARE, (CURLSH *)data->share);
   if(data->set.err && data->set.err != stderr)
     ERROR_CHECK_SETOPT(CURLOPT_STDERR, data->set.err);
@@ -467,7 +468,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
   /* create IPv4 DoH request */
   result = doh_probe_run(data, CURL_DNS_TYPE_A,
                          async->hostname, data->set.str[STRING_DOH],
-                         data->multi,
+                         async->timeout_ms, data->multi,
                          &dohp->probe_resp[DOH_SLOT_IPV4].probe_mid);
   if(result)
     goto error;
@@ -478,7 +479,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
     /* create IPv6 DoH request */
     result = doh_probe_run(data, CURL_DNS_TYPE_AAAA,
                            async->hostname, data->set.str[STRING_DOH],
-                           data->multi,
+                           async->timeout_ms, data->multi,
                            &dohp->probe_resp[DOH_SLOT_IPV6].probe_mid);
     if(result)
       goto error;
@@ -497,7 +498,8 @@ CURLcode Curl_doh(struct Curl_easy *data,
     }
     result = doh_probe_run(data, CURL_DNS_TYPE_HTTPS,
                            qname ? qname : async->hostname,
-                           data->set.str[STRING_DOH], data->multi,
+                           data->set.str[STRING_DOH],
+                           async->timeout_ms, data->multi,
                            &dohp->probe_resp[DOH_SLOT_HTTPS_RR].probe_mid);
     curlx_free(qname);
     if(result)

@@ -115,7 +115,6 @@ struct async_thrdd_item {
 #ifdef CURLVERBOSE
   char description[CURL_ASYN_ITEM_DESC_LEN];
 #endif
-  struct curltime start;
   int sock_error;
   curl_off_t conn_id;
   uint32_t mid;
@@ -498,7 +497,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 
   CURL_TRC_DNS(data, "[async] queueing %s", item->description);
   result = Curl_thrdq_send(data->multi->resolv_thrdq, item,
-                           async_item_description(item));
+                           async_item_description(item), async->timeout_ms);
   if(!result) {
     item = NULL;
     async->thrdd.queued = TRUE;
