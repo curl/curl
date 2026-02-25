@@ -29,7 +29,7 @@
 #include "first.h"
 
 static const char t547_uploadthis[] = "this is the blurb we want to upload\n";
-#define T547_DATALEN (sizeof(t547_uploadthis) - 1)
+static size_t const t547_datalen = sizeof(t547_uploadthis) - 1;
 
 static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
@@ -42,10 +42,10 @@ static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
   }
   (*counter)++; /* bump */
 
-  if(size * nmemb >= T547_DATALEN) {
+  if(size * nmemb >= t547_datalen) {
     curl_mfprintf(stderr, "READ!\n");
-    memcpy(ptr, t547_uploadthis, T547_DATALEN);
-    return T547_DATALEN;
+    memcpy(ptr, t547_uploadthis, t547_datalen);
+    return t547_datalen;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
@@ -96,7 +96,7 @@ static CURLcode test_lib547(const char *URL)
     test_setopt(curl, CURLOPT_READDATA, &counter);
     /* We CANNOT do the POST fine without setting the size (or choose
        chunked)! */
-    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)T547_DATALEN);
+    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)t547_datalen);
   }
   test_setopt(curl, CURLOPT_POST, 1L);
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);

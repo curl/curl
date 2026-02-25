@@ -29,17 +29,18 @@
 
 #include "first.h"
 
-static const char t1527_testdata[] = "Hello Cloud!\n";
+static const char t1527_data[] = "Hello Cloud!\n";
+static size_t const t1527_datalen = sizeof(t1527_data) - 1;
 
 static size_t t1527_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t amount = nmemb * size; /* Total bytes curl wants */
-  if(amount < strlen(t1527_testdata)) {
-    return strlen(t1527_testdata);
+  if(amount < t1527_datalen) {
+    return t1527_datalen;
   }
   (void)stream;
-  memcpy(ptr, t1527_testdata, strlen(t1527_testdata));
-  return strlen(t1527_testdata);
+  memcpy(ptr, t1527_data, t1527_datalen);
+  return t1527_datalen;
 }
 
 static CURLcode test_lib1527(const char *URL)
@@ -82,7 +83,7 @@ static CURLcode test_lib1527(const char *URL)
   test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
   test_setopt(curl, CURLOPT_READFUNCTION, t1527_read_cb);
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1527_testdata));
+  test_setopt(curl, CURLOPT_INFILESIZE, (long)t1527_datalen);
   test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED);
 
   result = curl_easy_perform(curl);

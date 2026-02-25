@@ -54,7 +54,7 @@ static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
   if(data) {
     size_t len = strlen(data);
-    memcpy(ptr, data, len);
+    memcpy(ptr, data, len); /* NOLINT(bugprone-not-null-terminated-result) */
     upload_ctx->lines_read++;
 
     return len;

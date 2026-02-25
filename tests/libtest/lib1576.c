@@ -23,17 +23,18 @@
  ***************************************************************************/
 #include "first.h"
 
-static char t1576_testdata[] = "request indicates that the client, which made";
+static char t1576_data[] = "request indicates that the client, which made";
+static size_t const t1576_datalen = sizeof(t1576_data) - 1;
 
 static size_t t1576_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t amount = nmemb * size; /* Total bytes curl wants */
-  if(amount < strlen(t1576_testdata)) {
-    return strlen(t1576_testdata);
+  if(amount < t1576_datalen) {
+    return t1576_datalen;
   }
   (void)stream;
-  memcpy(ptr, t1576_testdata, strlen(t1576_testdata));
-  return strlen(t1576_testdata);
+  memcpy(ptr, t1576_data, t1576_datalen);
+  return t1576_datalen;
 }
 
 static int t1576_seek_callback(void *ptr, curl_off_t offset, int origin)
@@ -69,7 +70,7 @@ static CURLcode test_lib1576(const char *URL)
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_READFUNCTION, t1576_read_cb);
   test_setopt(curl, CURLOPT_SEEKFUNCTION, t1576_seek_callback);
-  test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1576_testdata));
+  test_setopt(curl, CURLOPT_INFILESIZE, (long)t1576_datalen);
 
   test_setopt(curl, CURLOPT_CUSTOMREQUEST, "CURL");
   if(testnum == 1578 || testnum == 1580) {

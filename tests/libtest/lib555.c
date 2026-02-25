@@ -33,7 +33,7 @@
 #include "first.h"
 
 static const char t555_uploadthis[] = "this is the blurb we want to upload\n";
-#define T555_DATALEN (sizeof(t555_uploadthis) - 1)
+static size_t const t555_datalen = sizeof(t555_uploadthis) - 1;
 
 static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
@@ -46,10 +46,10 @@ static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
   }
   (*counter)++; /* bump */
 
-  if(size * nmemb >= T555_DATALEN) {
+  if(size * nmemb >= t555_datalen) {
     curl_mfprintf(stderr, "READ!\n");
-    memcpy(ptr, t555_uploadthis, T555_DATALEN);
-    return T555_DATALEN;
+    memcpy(ptr, t555_uploadthis, t555_datalen);
+    return t555_datalen;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
@@ -92,7 +92,7 @@ static CURLcode test_lib555(const char *URL)
   easy_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
      chunked)! */
-  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)T555_DATALEN);
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)t555_datalen);
 
   easy_setopt(curl, CURLOPT_POST, 1L);
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);

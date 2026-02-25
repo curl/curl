@@ -31,15 +31,15 @@ static size_t write_757(char *ptr, size_t size, size_t nmemb, void *userdata)
   return size * nmemb;
 }
 
-#define DATA757 "<title>fun-times</title>"
-#define DATALEN (sizeof(DATA757) - 1)
+static const char t757_data[] = "<title>fun-times</title>";
+static size_t const t757_datalen = sizeof(t757_data) - 1;
 
 static size_t read_757(char *buffer, size_t size, size_t nitems, void *arg)
 {
   (void)arg;
-  if((size * nitems) >= DATALEN) {
-    memcpy(buffer, DATA757, DATALEN);
-    return DATALEN;
+  if((size * nitems) >= t757_datalen) {
+    memcpy(buffer, t757_data, t757_datalen);
+    return t757_datalen;
   }
   return 0;
 }
@@ -83,7 +83,7 @@ static CURLcode test_lib757(const char *URL)
   /* Build the first mime structure. */
   mime1 = curl_mime_init(curl);
   part = curl_mime_addpart(mime1);
-  curl_mime_data_cb(part, DATALEN, read_757, seek_757, NULL, NULL);
+  curl_mime_data_cb(part, t757_datalen, read_757, seek_757, NULL, NULL);
   curl_mime_type(part, "text/html");
   curl_mime_name(part, "data");
 

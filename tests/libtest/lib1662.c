@@ -30,17 +30,17 @@ struct t1662_WriteThis {
 static size_t t1662_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   static const char testdata[] = "mooaaa";
+  static size_t const testdatalen = sizeof(testdata) - 1;
 
   struct t1662_WriteThis *pooh = (struct t1662_WriteThis *)userp;
-  size_t len = strlen(testdata);
 
-  if(size * nmemb < len)
+  if(size * nmemb < testdatalen)
     return 0;
 
   if(pooh->sizeleft) {
-    memcpy(ptr, testdata, strlen(testdata));
+    memcpy(ptr, testdata, testdatalen);
     pooh->sizeleft = 0;
-    return len;
+    return testdatalen;
   }
 
   return 0;                         /* no more data left to deliver */
