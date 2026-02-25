@@ -27,23 +27,6 @@
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
 
-#ifdef HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
-#endif
-
-#include <ngtcp2/ngtcp2_crypto.h>
-#ifdef OPENSSL_QUIC_API2
-#include <ngtcp2/ngtcp2_crypto_ossl.h>
-#endif
-#include <nghttp3/nghttp3.h>
-#ifdef USE_OPENSSL
-#include <openssl/ssl.h>
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/options.h>
-#include <wolfssl/ssl.h>
-#include <wolfssl/quic.h>
-#endif
-
 struct Curl_cfilter;
 
 #include "urldata.h"

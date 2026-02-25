@@ -45,6 +45,27 @@
 #include "vtls/wolfssl.h"
 #endif
 
+#ifdef HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+
+#include <ngtcp2/ngtcp2_crypto.h>
+#ifdef OPENSSL_QUIC_API2
+#include <ngtcp2/ngtcp2_crypto_ossl.h>
+#endif
+#include <nghttp3/nghttp3.h>
+#ifdef USE_OPENSSL
+#include <openssl/ssl.h>
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/version.h>
+#if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
+#  error "OpenSSL can only coexist with wolfSSL v5.7.6 or upper"
+#endif
+#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
+#include <wolfssl/quic.h>
+#endif
+
 #include "urldata.h"
 #include "url.h"
 #include "uint-hash.h"
