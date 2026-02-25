@@ -77,7 +77,7 @@ jobs:
               -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
               -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
               -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
-              -DCURL_USE_LIBPSL=OFF
+              -DCURL_USE_LIBPSL=OFF -DCURL_ENABLE_NTLM=ON
 
     steps:
       - name: 'brew install'
@@ -235,7 +235,7 @@ jobs:
             generate: >-
               -DENABLE_DEBUG=ON -DENABLE_ARES=ON
               -DCURL_ENABLE_SSL=OFF -DHTTP_ONLY=ON
-              -DCURL_DISABLE_NTLM=ON -DCURL_DISABLE_ALTSVC=ON -DENABLE_UNIX_SOCKETS=OFF
+              -DCURL_DISABLE_ALTSVC=ON -DENABLE_UNIX_SOCKETS=OFF
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_NGHTTP2=OFF
               -DCURL_USE_GSSAPI=OFF -DUSE_LIBIDN2=OFF -DCURL_USE_LIBPSL=OFF -DUSE_LIBRTMP=OFF
               -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF
@@ -246,26 +246,26 @@ jobs:
             compiler: clang
             install: libressl
             install_steps: pytest
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_ENABLE_NTLM=ON
           - name: 'OpenSSL 10.15 C89'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCMAKE_C_STANDARD=90
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON
             macos-version-min: '10.15'
           - name: 'OpenSSL SecTrust'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm
           - name: 'OpenSSL event-based'
             compiler: clang
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_ENABLE_NTLM=ON
             tflags: '--test-event --min=1300'
           - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
             compiler: clang
             install: libnghttp3 libngtcp2 gsasl rtmpdump
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON -DCURL_ENABLE_NTLM=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
             install: llvm gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
@@ -279,6 +279,7 @@ jobs:
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
+              -DCURL_ENABLE_NTLM=ON
 
           - name: 'HTTP/3 clang-tidy'
             compiler: clang
@@ -290,6 +291,7 @@ jobs:
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
+              -DCURL_ENABLE_NTLM=ON
 
           - name: 'LibreSSL openldap krb5 c-ares +examples'
             compiler: clang
@@ -299,16 +301,16 @@ jobs:
             compiler: clang
             install: brotli wolfssl zstd
             install_steps: pytest
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
           - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
             compiler: llvm@18
             install: brotli mbedtls zstd
             install_steps: codeset-test
-            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DUSE_APPLE_IDN=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_NTLM=ON
           - name: 'GnuTLS !ldap krb5 +examples'
             compiler: clang
             install: gnutls nettle krb5
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON -DCURL_ENABLE_NTLM=ON
           - name: 'aws-lc'
             compiler: gcc-13
             install: aws-lc
@@ -316,25 +318,25 @@ jobs:
           - name: 'Rustls'
             compiler: clang
             install: rustls-ffi
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DCURL_ENABLE_NTLM=ON
             tflags: '--min=1650'
           - name: 'OpenSSL torture 1'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_ENABLE_NTLM=ON
             tflags: '-t --shallow=25 --min=480 1 to 500'
           - name: 'OpenSSL torture 2'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_ENABLE_NTLM=ON
             tflags: '-t --shallow=25 --min=730 501 to 1250'
           - name: 'OpenSSL torture 3'
             compiler: clang
             install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_ENABLE_NTLM=ON
             tflags: '-t --shallow=25 --min=628 1251 to 9999'
 
     steps:
