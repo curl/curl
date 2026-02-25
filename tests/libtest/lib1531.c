@@ -25,8 +25,8 @@
 
 static CURLcode test_lib1531(const char *URL)
 {
-  static char const testData[] = ".abc\0xyz";
-  static curl_off_t const testDataSize = sizeof(testData) - 1;
+  static char const testdata[] = ".abc\0xyz";
+  static curl_off_t const testdatalen = sizeof(testdata) - 1;
 
   CURL *curl;
   CURLM *multi;
@@ -50,8 +50,8 @@ static CURLcode test_lib1531(const char *URL)
 
   /* set the options (I left out a few, you get the point anyway) */
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, testDataSize);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, testData);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, testdatalen);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, testdata);
 
   /* we start some action by calling perform right away */
   curl_multi_perform(multi, &still_running);

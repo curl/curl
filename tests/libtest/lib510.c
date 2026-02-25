@@ -51,7 +51,7 @@ static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
       curl_mfprintf(stderr, "read buffer is too small to run test\n");
       return 0;
     }
-    memcpy(ptr, data, len);
+    memcpy(ptr, data, len); /* NOLINT(bugprone-not-null-terminated-result) */
     pooh->counter++; /* advance pointer */
     return len;
   }

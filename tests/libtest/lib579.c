@@ -91,7 +91,7 @@ static size_t t579_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
   if(data) {
     size_t len = strlen(data);
-    memcpy(ptr, data, len);
+    memcpy(ptr, data, len); /* NOLINT(bugprone-not-null-terminated-result) */
     pooh->counter++; /* advance pointer */
     return len;
   }
