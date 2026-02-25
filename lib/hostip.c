@@ -458,6 +458,7 @@ static CURLcode hostip_resolv_announce(struct Curl_easy *data,
     (void)port;
     (void)ip_version;
     (void)timeout_ms;
+    (void)transport;
 #endif
     Curl_set_in_callback(data, TRUE);
     st = data->set.resolver_start(resolver, NULL,
@@ -718,6 +719,7 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
                                      const char *hostname,
                                      uint16_t port,
                                      uint8_t ip_version,
+                                     uint8_t transport,
                                      timediff_t timeout_ms,
                                      struct Curl_dns_entry **entry)
 {
@@ -795,8 +797,8 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
 
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long. */
-  result = hostip_resolv(data, hostname, port, ip_version, timeout_ms,
-                         TRUE, entry);
+  result = hostip_resolv(data, hostname, port, ip_version, transport,
+                         timeout_ms, TRUE, entry);
 
 clean_up:
   if(!prev_alarm)
@@ -889,7 +891,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     timeout_ms = 0;
   }
   if(timeout_ms && !Curl_doh_wanted(data)) {
-    return resolv_alarm_timeout(data, hostname, port, ip_version,
+    return resolv_alarm_timeout(data, hostname, port, ip_version, transport,
                                 timeout_ms, entry);
   }
 #endif /* !USE_ALARM_TIMEOUT */
