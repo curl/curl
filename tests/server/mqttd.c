@@ -351,6 +351,7 @@ static int publish(FILE *dump,
 
   packet[1 + encodedlen] = (unsigned char)(topiclen >> 8);
   packet[2 + encodedlen] = (unsigned char)(topiclen & 0xff);
+  /* NOLINTNEXTLINE(bugprone-not-null-terminated-result) */
   memcpy(&packet[3 + encodedlen], topic, topiclen);
 
   payloadindex = 3 + topiclen + encodedlen;

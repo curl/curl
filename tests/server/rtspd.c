@@ -317,6 +317,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 
                 /* Fill it with junk data */
                 for(i = 0; i < rtp_size; i += RTP_DATA_SIZE) {
+                  /* NOLINTNEXTLINE(bugprone-not-null-terminated-result) */
                   memcpy(rtp_scratch + 4 + i, RTP_DATA, RTP_DATA_SIZE);
                 }
 
