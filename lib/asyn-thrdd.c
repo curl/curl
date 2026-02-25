@@ -613,7 +613,6 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     if(!result && dns) {
       CURL_TRC_DNS(data, "[async] resolved: %s",
                    thrdd->resolved->description);
-      result = Curl_dnscache_add(data, dns);
       *pdns = dns;
       dns = NULL;
     }
