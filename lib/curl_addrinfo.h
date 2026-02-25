@@ -72,7 +72,7 @@ struct Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port);
 #endif
 
 bool Curl_is_ipaddr(const char *address);
-CURLcode Curl_str2addr(const char *dotted, int port,
+CURLcode Curl_str2addr(const char *dotted, uint16_t port,
                        struct Curl_addrinfo **addrp);
 
 #ifdef USE_UNIX_SOCKETS

@@ -70,7 +70,7 @@ bool Curl_ipv6works(struct Curl_easy *data);
 #endif
 
 /* IPv4 thread-safe resolve function used for synch and asynch builds */
-struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
+struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, uint16_t port);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
@@ -80,42 +80,26 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 void Curl_printable_address(const struct Curl_addrinfo *ip,
                             char *buf, size_t bufsize);
 
-/*
- * Curl_resolv() returns an entry with the info for the specified host
- * and port.
- *
- * The returned data *MUST* be "released" with Curl_dns_entry_unlink() after
- * use, or we will leak memory!
- */
-CURLcode Curl_resolv(struct Curl_easy *data,
-                     const char *hostname,
-                     int port,
-                     int ip_version,
-                     bool allowDOH,
-                     struct Curl_dns_entry **entry);
-
 CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               const char *hostname,
-                              int port,
-                              int ip_version,
-                              struct Curl_dns_entry **entry);
+                              uint16_t port,
+                              uint8_t ip_version,
+                              struct Curl_dns_entry **dnsentry);
 
-CURLcode Curl_resolv_timeout(struct Curl_easy *data,
-                             const char *hostname, int port,
-                             int ip_version,
-                             struct Curl_dns_entry **entry,
-                             timediff_t timeoutms);
-
-CURLcode Curl_once_resolved(struct Curl_easy *data,
-                            struct Curl_dns_entry *dns,
-                            bool *protocol_done);
+CURLcode Curl_resolv(struct Curl_easy *data,
+                     const char *hostname,
+                     uint16_t port,
+                     uint8_t ip_version,
+                     timediff_t timeoutms,
+                     struct Curl_dns_entry **dnsentry);
 
 #ifdef USE_CURL_ASYNC
-CURLcode Curl_resolv_check(struct Curl_easy *data,
-                           struct Curl_dns_entry **dns);
+CURLcode Curl_resolv_take_result(struct Curl_easy *data,
+                                 struct Curl_dns_entry **dns);
 #else
-#define Curl_resolv_check(x, y) CURLE_NOT_BUILT_IN
+#define Curl_resolv_take_result(x, y) CURLE_NOT_BUILT_IN
 #endif
+
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 
@@ -129,8 +113,8 @@ CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
  */
 struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
                                             const char *hostname,
-                                            int port,
-                                            int ip_version);
+                                            uint16_t port,
+                                            uint8_t ip_version);
 
 #endif
 

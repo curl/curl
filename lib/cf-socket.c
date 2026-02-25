@@ -641,8 +641,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * of the connection. The resolve functions should really be changed
        * to take a type parameter instead.
        */
-      int ip_version = (af == AF_INET) ?
-                       CURL_IPRESOLVE_V4 : CURL_IPRESOLVE_WHATEVER;
+      uint8_t ip_version = (af == AF_INET) ?
+                           CURL_IPRESOLVE_V4 : CURL_IPRESOLVE_WHATEVER;
 #ifdef USE_IPV6
       if(af == AF_INET6)
         ip_version = CURL_IPRESOLVE_V6;

@@ -404,7 +404,7 @@ static CURLcode ip2addr(struct Curl_addrinfo **addrp, int af,
  * Given an IPv4 or IPv6 dotted string address, this converts it to a proper
  * allocated Curl_addrinfo struct and returns it.
  */
-CURLcode Curl_str2addr(const char *dotted, int port,
+CURLcode Curl_str2addr(const char *dotted, uint16_t port,
                        struct Curl_addrinfo **addrp)
 {
   struct in_addr in;

@@ -705,8 +705,8 @@ struct connectdata {
 #endif
   /* The field below gets set in connect.c:connecthost() */
   int remote_port; /* the remote port, not the proxy port! */
-  int conn_to_port; /* the remote port to connect to. valid only if
-                       bits.conn_to_port is set */
+  uint16_t conn_to_port; /* the remote port to connect to. valid only if
+                            bits.conn_to_port is set */
 
   uint32_t attached_xfers; /* # of attached easy handles */
 
