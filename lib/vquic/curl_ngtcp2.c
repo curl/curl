@@ -29,7 +29,6 @@
 #include <netinet/udp.h>
 #endif
 
-#include <ngtcp2/ngtcp2_crypto.h>
 #include <nghttp3/nghttp3.h>
 
 #ifdef USE_OPENSSL

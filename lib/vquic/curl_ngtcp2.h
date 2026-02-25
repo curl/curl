@@ -28,6 +28,7 @@
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
 
 #include <ngtcp2/ngtcp2.h>
+#include <ngtcp2/ngtcp2_crypto.h>
 
 struct Curl_cfilter;
 
