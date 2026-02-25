@@ -174,8 +174,8 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
       # evaluates to an empty path in this context. Also skip
       # '$<BUILD_INTERFACE:curl-include>', as already present in '_includes'.
       if(_inc AND
-         NOT _inc MATCHES "BUILD_INTERFACE:" AND
-         NOT _inc MATCHES "INSTALL_INTERFACE:")
+         NOT _inc MATCHES "INSTALL_INTERFACE:" AND
+         NOT _inc MATCHES "BUILD_INTERFACE:")
         list(APPEND _incsys "-isystem" "${_inc}")
       endif()
     endforeach()
