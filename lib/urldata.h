@@ -969,7 +969,6 @@ struct UrlState {
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
 
-  struct Curl_dns_entry *dns[2]; /* DNS to connect FIRST/SECONDARY */
 #ifdef USE_CURL_ASYNC
   struct Curl_resolv_async *async;  /* asynchronous name resolver data */
 #endif

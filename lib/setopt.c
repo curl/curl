@@ -1507,10 +1507,6 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
       if(data->psl == &data->share->psl)
         data->psl = data->multi ? &data->multi->psl : NULL;
 #endif
-      if(data->share->specifier & (1 << CURL_LOCK_DATA_DNS)) {
-        Curl_dns_entry_unlink(data, &data->state.dns[0]);
-        Curl_dns_entry_unlink(data, &data->state.dns[1]);
-      }
 
       data->share->dirty--;
 
