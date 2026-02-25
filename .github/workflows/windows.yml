@@ -240,7 +240,7 @@ jobs:
           # MSYS
           - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1550', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy --enable-ntlm', install: 'openssl-devel libssh2-devel', name: '!proxy' }
           - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun'   , config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-ntlm', install: 'openssl-devel libssh2-devel', name: 'default' }
-          - { build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'openssl-devel libssh2-devel', name: 'default' }
+          - { build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON', install: 'openssl-devel libssh2-devel', name: 'default' }
           - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '--with-openssl --enable-ntlm', install: 'openssl-devel libssh2-devel', name: 'default R' }
           # MinGW
           - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default' }
