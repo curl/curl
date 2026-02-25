@@ -620,7 +620,6 @@ struct connectdata {
   struct Curl_hash meta_hash;
 
   struct hostname host;
-  char *hostname_resolve; /* hostname to resolve to address, allocated */
   char *secondaryhostname; /* secondary socket hostname (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
