@@ -233,7 +233,7 @@ jobs:
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
-              --without-librtmp --disable-rtsp
+              --disable-rtsp
               --without-libssh2 --without-libssh
               --disable-tftp --disable-ftp --disable-file --disable-smb
 
@@ -250,14 +250,14 @@ jobs:
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
 
           - name: 'openssl i686'
-            install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
+            install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
             configure: >-
               PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
               CC=i686-linux-gnu-gcc-14
               CPPFLAGS=-I/usr/include/i386-linux-gnu
               LDFLAGS=-L/usr/lib/i386-linux-gnu
               --host=i686-linux-gnu
-              --with-openssl --with-librtmp --with-libssh2 --with-libidn2 --enable-ares --enable-debug
+              --with-openssl --with-libssh2 --with-libidn2 --enable-ares --enable-debug
 
           - name: '!ssl !http !smtp !imap'
             image: ubuntu-24.04-arm
@@ -276,7 +276,7 @@ jobs:
               -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
 
           - name: 'clang-tidy'
-            install_packages: clang-19 clang-tidy-19 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
+            install_packages: clang-19 clang-tidy-19 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
             install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
             make-custom-target: tidy
@@ -286,11 +286,11 @@ jobs:
             configure: >-
               CLANG_TIDY=clang-tidy-19
               --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
-              --with-librtmp --with-libssh2 --with-libidn2
+              --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
 
           - name: 'scan-build'
-            install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
+            install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev libgnutls28-dev
             install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
             CC: clang
@@ -300,7 +300,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/wolfssl-opensslextra/lib/pkgconfig:/home/runner/mbedtls/lib/pkgconfig:/home/runner/rustls/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
             generate: >-
               -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
-              -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
+              -DCURL_USE_GSASL=ON
               -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
               -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
 

@@ -53,7 +53,6 @@ my %remove = (
     '#define HAVE_LDAP_SSL 1' => 1,
     '#define HAVE_LIBBROTLIDEC 1' => 1,
     '#define HAVE_LIBPSL_H 1' => 1,
-    '#define HAVE_LIBRTMP_RTMP_H 1' => 1,
     '#define HAVE_LIBSOCKET 1' => 1,
     '#define HAVE_LIBSSH' => 1,
     '#define HAVE_LIBSSH2 1' => 1,

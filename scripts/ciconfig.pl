@@ -100,7 +100,6 @@ my %defaulton = (
     'ca-path' => 1,
     'libssh2' => 1,
     'nghttp2' => 1,
-    'librtmp' => 1,
     'libidn2' => 1,
     'sysroot' => 1,
     'lber-lib' => 1,

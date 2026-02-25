@@ -619,7 +619,6 @@ disabling support for some features (run `./configure --help` to see them all):
 - `--without-ngtcp2` (HTTP/2 using ngtcp2)
 - `--without-zstd` (Zstd on-the-fly decompression)
 - `--without-libidn2` (internationalized domain names)
-- `--without-librtmp` (RTMP)
 - `--without-ssl` (SSL/TLS)
 - `--without-zlib` (gzip/deflate on-the-fly decompression)
 

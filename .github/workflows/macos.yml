@@ -237,7 +237,7 @@ jobs:
               -DCURL_ENABLE_SSL=OFF -DHTTP_ONLY=ON
               -DCURL_DISABLE_NTLM=ON -DCURL_DISABLE_ALTSVC=ON -DENABLE_UNIX_SOCKETS=OFF
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_NGHTTP2=OFF
-              -DCURL_USE_GSSAPI=OFF -DUSE_LIBIDN2=OFF -DCURL_USE_LIBPSL=OFF -DUSE_LIBRTMP=OFF
+              -DCURL_USE_GSSAPI=OFF -DUSE_LIBIDN2=OFF -DCURL_USE_LIBPSL=OFF
               -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
 
@@ -262,18 +262,18 @@ jobs:
             compiler: clang
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
             tflags: '--test-event --min=1300'
-          - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
+          - name: 'OpenSSL gsasl AppleIDN SecTrust +examples'
             compiler: clang
-            install: libnghttp3 libngtcp2 gsasl rtmpdump
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
+            install: libnghttp3 libngtcp2 gsasl
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
-            install: llvm gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
+            install: llvm gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi libssh fish
             install_steps: clang-tidy skiprun
             chkprefill: _chkprefill
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DEFAULT_SSL_BACKEND=openssl
-              -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
+              -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON

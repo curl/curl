@@ -141,9 +141,8 @@ curl supports the following schemes on URLs specified to transfer. They are
 matched case insensitively:
 
 `dict`, `file`, `ftp`, `ftps`, `gopher`, `gophers`, `http`, `https`, `imap`,
-`imaps`, `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtmp`, `rtmpe`, `rtmps`,
-`rtmpt`, `rtmpte`, `rtmpts`, `rtsp`, `smb`, `smbs`, `smtp`, `smtps`, `telnet`,
-`tftp`
+`imaps`, `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtsp`, `smb`, `smbs`,
+`smtp`, `smtps`, `telnet`, `tftp`
 
 When the URL is specified to identify a proxy, curl recognizes the following
 schemes:
@@ -209,10 +208,9 @@ only if the URL starts with a scheme.
 If the port number is not specified in the URL, curl uses a default port
 number based on the provide scheme:
 
-DICT 2628, FTP 21, FTPS 990, GOPHER 70, GOPHERS 70, HTTP 80, HTTPS 443,
-IMAP 143, IMAPS 993, LDAP 389, LDAPS 636, MQTT 1883, POP3 110, POP3S 995,
-RTMP 1935, RTMPS 443, RTMPT 80, RTSP 554, SCP 22, SFTP 22, SMB 445, SMBS 445,
-SMTP 25, SMTPS 465, TELNET 23, TFTP 69
+DICT 2628, FTP 21, FTPS 990, GOPHER 70, GOPHERS 70, HTTP 80, HTTPS 443, IMAP
+143, IMAPS 993, LDAP 389, LDAPS 636, MQTT 1883, POP3 110, POP3S 995, RTSP 554,
+SCP 22, SFTP 22, SMB 445, SMBS 445, SMTP 25, SMTPS 465, TELNET 23, TFTP 69
 
 # Scheme specific behaviors
 
@@ -381,15 +379,3 @@ machine's fully qualified domain name, which you might have obtained from an
 external function such as gethostname or getaddrinfo.
 
 The default smtp port is 25. Some servers use port 587 as an alternative.
-
-## RTMP
-
-There is no official URL spec for RTMP so libcurl uses the URL syntax supported
-by the underlying librtmp library. It has a syntax where it wants a
-traditional URL, followed by a space and a series of space-separated
-`name=value` pairs.
-
-While space is not typically a "legal" letter, libcurl accepts them. When a
-user wants to pass in a `#` (hash) character it is treated as a fragment and
-it gets cut off by libcurl if provided literally. You have to escape it by
-providing it as backslash and its ASCII value in hexadecimal: `\23`.
