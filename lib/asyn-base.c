@@ -43,6 +43,7 @@
 #endif
 
 #include "urldata.h"
+#include "curl_trc.h"
 #include "hostip.h"
 #include "multiif.h"
 #include "select.h"
@@ -180,30 +181,35 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms)
 
 void Curl_async_shutdown(struct Curl_easy *data)
 {
+  if(data->state.async) {
+    CURL_TRC_DNS(data, "shutdown async");
 #ifdef CURLRES_ARES
-  Curl_async_ares_shutdown(data);
+    Curl_async_ares_shutdown(data, data->state.async);
 #endif
 #ifdef CURLRES_THREADED
-  Curl_async_thrdd_shutdown(data);
+    Curl_async_thrdd_shutdown(data, data->state.async);
 #endif
 #ifndef CURL_DISABLE_DOH
-  Curl_doh_cleanup(data);
+    Curl_doh_cleanup(data, data->state.async);
 #endif
-  Curl_safefree(data->state.async.hostname);
+  }
 }
 
 void Curl_async_destroy(struct Curl_easy *data)
 {
+  if(data->state.async) {
+    CURL_TRC_DNS(data, "destroy async");
 #ifdef CURLRES_ARES
-  Curl_async_ares_destroy(data);
+    Curl_async_ares_destroy(data, data->state.async);
 #endif
 #ifdef CURLRES_THREADED
-  Curl_async_thrdd_destroy(data);
+    Curl_async_thrdd_destroy(data, data->state.async);
 #endif
 #ifndef CURL_DISABLE_DOH
-  Curl_doh_cleanup(data);
+    Curl_doh_cleanup(data, data->state.async);
 #endif
-  Curl_safefree(data->state.async.hostname);
+    Curl_safefree(data->state.async);
+  }
 }
 
 #endif /* USE_CURL_ASYNC */

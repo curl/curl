@@ -101,12 +101,15 @@ void Curl_async_global_cleanup(void)
 #endif
 }
 
-static void async_thrdd_destroy(struct Curl_easy *data);
-static void async_thrdd_shutdown(struct Curl_easy *data);
+static void async_thrdd_shutdown(struct Curl_easy *data,
+                                 struct Curl_resolv_async *async);
 
-CURLcode Curl_async_get_impl(struct Curl_easy *data, void **impl)
+CURLcode Curl_async_get_impl(struct Curl_easy *data,
+                             struct Curl_resolv_async *async,
+                             void **impl)
 {
   (void)data;
+  (void)async;
   *impl = NULL;
   return CURLE_OK;
 }
@@ -144,7 +147,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
 /* Initialize context for threaded resolver */
 static struct async_thrdd_addr_ctx *
 addr_ctx_create(struct Curl_easy *data,
-                const char *hostname, int port,
+                struct Curl_resolv_async *async,
                 const struct addrinfo *hints)
 {
   struct async_thrdd_addr_ctx *addr_ctx = curlx_calloc(1, sizeof(*addr_ctx));
@@ -152,7 +155,7 @@ addr_ctx_create(struct Curl_easy *data,
     return NULL;
 
   addr_ctx->thread_hnd = curl_thread_t_null;
-  addr_ctx->port = port;
+  addr_ctx->port = async->port;
   addr_ctx->ref_count = 1;
 
 #ifdef HAVE_GETADDRINFO
@@ -177,7 +180,7 @@ addr_ctx_create(struct Curl_easy *data,
   /* Copying hostname string because original can be destroyed by parent
    * thread during gethostbyname execution.
    */
-  addr_ctx->hostname = curlx_strdup(hostname);
+  addr_ctx->hostname = curlx_strdup(async->hostname);
   if(!addr_ctx->hostname)
     goto err_exit;
 
@@ -287,9 +290,10 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 /*
  * async_thrdd_destroy() cleans up async resolver data and thread handle.
  */
-static void async_thrdd_destroy(struct Curl_easy *data)
+static void async_thrdd_destroy(struct Curl_easy *data,
+                                struct Curl_resolv_async *async)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
   struct async_thrdd_addr_ctx *addr = thrdd->addr;
 
 #ifdef USE_HTTPSRR_ARES
@@ -333,7 +337,7 @@ static void async_thrdd_rr_done(void *user_data, ares_status_t status,
                                 const ares_dns_record_t *dnsrec)
 {
   struct Curl_easy *data = user_data;
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
+  struct async_thrdd_ctx *thrdd = &data->state.async->thrdd;
 
   (void)timeouts;
   thrdd->rr.done = TRUE;
@@ -344,7 +348,7 @@ static void async_thrdd_rr_done(void *user_data, ares_status_t status,
 
 static CURLcode async_rr_start(struct Curl_easy *data, int port)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
+  struct async_thrdd_ctx *thrdd = &data->state.async->thrdd;
   int status;
   char *rrname = NULL;
 
@@ -390,37 +394,21 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
  * Returns FALSE in case of failure, otherwise TRUE.
  */
 static bool async_thrdd_init(struct Curl_easy *data,
-                             const char *hostname,
-                             uint16_t port, uint8_t ip_version,
+                             struct Curl_resolv_async *async,
                              const struct addrinfo *hints)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
   struct async_thrdd_addr_ctx *addr_ctx;
 
   /* !checksrc! disable ERRNOVAR 1 */
   int err = ENOMEM;
 
-  if(thrdd->addr
+  DEBUGASSERT(!thrdd->addr);
 #ifdef USE_HTTPSRR_ARES
-     || thrdd->rr.channel
+  DEBUGASSERT(!thrdd->rr.channel);
 #endif
-     ) {
-    CURL_TRC_DNS(data, "starting new resolve, with previous not cleaned up");
-    async_thrdd_destroy(data);
-    DEBUGASSERT(!thrdd->addr);
-#ifdef USE_HTTPSRR_ARES
-    DEBUGASSERT(!thrdd->rr.channel);
-#endif
-  }
 
-  data->state.async.port = port;
-  data->state.async.ip_version = ip_version;
-  curlx_free(data->state.async.hostname);
-  data->state.async.hostname = curlx_strdup(hostname);
-  if(!data->state.async.hostname)
-    goto err_exit;
-
-  addr_ctx = addr_ctx_create(data, hostname, port, hints);
+  addr_ctx = addr_ctx_create(data, async, hints);
   if(!addr_ctx)
     goto err_exit;
   thrdd->addr = addr_ctx;
@@ -444,22 +432,24 @@ static bool async_thrdd_init(struct Curl_easy *data,
   }
 
 #ifdef USE_HTTPSRR_ARES
-  if(async_rr_start(data, port))
+  if(async_rr_start(data, async->port))
     infof(data, "Failed HTTPS RR operation");
 #endif
-  CURL_TRC_DNS(data, "resolve thread started for of %s:%d", hostname, port);
+  CURL_TRC_DNS(data, "resolve thread started for of %s:%d",
+               async->hostname, async->port);
   return TRUE;
 
 err_exit:
   CURL_TRC_DNS(data, "resolve thread failed init: %d", err);
-  async_thrdd_destroy(data);
+  async_thrdd_destroy(data, async);
   errno = err;
   return FALSE;
 }
 
-static void async_thrdd_shutdown(struct Curl_easy *data)
+static void async_thrdd_shutdown(struct Curl_easy *data,
+                                 struct Curl_resolv_async *async)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
   struct async_thrdd_addr_ctx *addr_ctx = thrdd->addr;
   curl_bit done;
 
@@ -490,15 +480,16 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
  * 'entry' may be NULL and then no data is returned
  */
 static CURLcode asyn_thrdd_await(struct Curl_easy *data,
-                                 struct async_thrdd_addr_ctx *addr_ctx,
+                                 struct Curl_resolv_async *async,
                                  struct Curl_dns_entry **entry)
 {
+  struct async_thrdd_addr_ctx *addr_ctx = async->thrdd.addr;
   CURLcode result = CURLE_OK;
 
-  if(addr_ctx->thread_hnd != curl_thread_t_null) {
+  if(addr_ctx && (addr_ctx->thread_hnd != curl_thread_t_null)) {
     /* not interested in result? cancel, if still running... */
     if(!entry)
-      async_thrdd_shutdown(data);
+      async_thrdd_shutdown(data, async);
 
     if(addr_ctx->thread_hnd != curl_thread_t_null) {
       CURL_TRC_DNS(data, "resolve, wait for thread to finish");
@@ -508,7 +499,7 @@ static CURLcode asyn_thrdd_await(struct Curl_easy *data,
     }
 
     if(entry) {
-      result = Curl_async_take_result(data, entry);
+      result = Curl_async_take_result(data, async, entry);
       if(result == CURLE_AGAIN)
         result = CURLE_OK;
     }
@@ -521,19 +512,19 @@ static CURLcode asyn_thrdd_await(struct Curl_easy *data,
  * Until we gain a way to signal the resolver threads to stop early, we must
  * simply wait for them and ignore their results.
  */
-void Curl_async_thrdd_shutdown(struct Curl_easy *data)
+void Curl_async_thrdd_shutdown(struct Curl_easy *data,
+                              struct Curl_resolv_async *async)
 {
-  async_thrdd_shutdown(data);
+  async_thrdd_shutdown(data, async);
 }
 
-void Curl_async_thrdd_destroy(struct Curl_easy *data)
+void Curl_async_thrdd_destroy(struct Curl_easy *data,
+                              struct Curl_resolv_async *async)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
-
-  if(thrdd->addr && !data->set.quick_exit) {
-    (void)asyn_thrdd_await(data, thrdd->addr, NULL);
+  if(!data->set.quick_exit) {
+    (void)asyn_thrdd_await(data, async, NULL);
   }
-  async_thrdd_destroy(data);
+  async_thrdd_destroy(data, async);
 }
 
 /*
@@ -550,12 +541,10 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data)
  * This is the version for resolves-in-a-thread.
  */
 CURLcode Curl_async_await(struct Curl_easy *data,
-                          struct Curl_dns_entry **dns)
+                          struct Curl_resolv_async *async,
+                          struct Curl_dns_entry **entry)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
-  if(thrdd->addr)
-    return asyn_thrdd_await(data, thrdd->addr, dns);
-  return CURLE_FAILED_INIT;
+  return asyn_thrdd_await(data, async, entry);
 }
 
 /*
@@ -564,9 +553,10 @@ CURLcode Curl_async_await(struct Curl_easy *data,
  * the operation seems to take too long.
  */
 CURLcode Curl_async_take_result(struct Curl_easy *data,
+                                struct Curl_resolv_async *async,
                                 struct Curl_dns_entry **pdns)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
   curl_bit done = FALSE;
 
   DEBUGASSERT(pdns);
@@ -594,8 +584,8 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     if(thrdd->addr->res) {
       struct Curl_dns_entry *dns =
         Curl_dns_entry_create(data, &thrdd->addr->res,
-                              data->state.async.hostname, 0,
-                              data->state.async.port, FALSE);
+                              async->hostname, 0,
+                              async->port, FALSE);
       if(!dns)
         result = CURLE_OUT_OF_MEMORY;
 
@@ -622,7 +612,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
       result = Curl_resolver_error(data, NULL);
     CURL_TRC_DNS(data, "is_resolved() result=%d, dns=%sfound",
                  result, *pdns ? "" : "not ");
-    async_thrdd_shutdown(data);
+    async_thrdd_shutdown(data, async);
     return result;
   }
   else {
@@ -651,7 +641,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
 
 CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
-  struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
+  struct async_thrdd_ctx *thrdd = &data->state.async->thrdd;
   CURLcode result = CURLE_OK;
   curl_bit thrd_done;
 
@@ -700,14 +690,12 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
  * Curl_async_getaddrinfo() - for platforms without getaddrinfo
  */
 CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
-                                const char *hostname,
-                                uint16_t port,
-                                uint8_t ip_version)
+                                struct Curl_resolv_async *async)
 {
   (void)ip_version;
 
   /* fire up a new resolver thread! */
-  if(async_thrdd_init(data, hostname, port, ip_version, NULL)) {
+  if(async_thrdd_init(data, async, NULL)) {
     return CURLE_OK;
   }
 
@@ -721,24 +709,21 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
  * Curl_async_getaddrinfo() - for getaddrinfo
  */
 CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
-                                const char *hostname,
-                                uint16_t port,
-                                uint8_t ip_version)
+                                struct Curl_resolv_async *async)
 {
   struct addrinfo hints;
   int pf = PF_INET;
 
-  CURL_TRC_DNS(data, "init threaded resolve of %s:%d", hostname, port);
+  CURL_TRC_DNS(data, "init threaded resolve of %s:%d",
+               async->hostname, async->port);
 #ifdef CURLRES_IPV6
-  if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
+  if((async->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* The stack seems to be IPv6-enabled */
-    if(ip_version == CURL_IPRESOLVE_V6)
+    if(async->ip_version == CURL_IPRESOLVE_V6)
       pf = PF_INET6;
     else
       pf = PF_UNSPEC;
   }
-#else
-  (void)ip_version;
 #endif /* CURLRES_IPV6 */
 
   memset(&hints, 0, sizeof(hints));
@@ -748,7 +733,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     SOCK_STREAM : SOCK_DGRAM;
 
   /* fire up a new resolver thread! */
-  if(async_thrdd_init(data, hostname, port, ip_version, &hints))
+  if(async_thrdd_init(data, async, &hints))
     return CURLE_OK;
 
   failf(data, "getaddrinfo() thread failed to start");
