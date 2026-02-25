@@ -245,8 +245,8 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   /* release any resolve information this transfer kept */
   Curl_async_destroy(data);
-  Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
-  Curl_resolv_unlink(data, &data->state.dns[1]);
+  Curl_dns_entry_unlink(data, &data->state.dns[0]); /* done with this */
+  Curl_dns_entry_unlink(data, &data->state.dns[1]);
 
   data->set.verbose = FALSE; /* no more calls to DEBUGFUNCTION */
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from

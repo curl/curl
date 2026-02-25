@@ -655,7 +655,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
         Curl_printable_address(h->addr, myhost, sizeof(myhost));
         infof(data, "Name '%s' family %i resolved to '%s' family %i",
               host, af, myhost, h_af);
-        Curl_resolv_unlink(data, &h); /* this will NULL, potential free h */
+        Curl_dns_entry_unlink(data, &h); /* this will NULL, potential free h */
         if(af != h_af) {
           /* bad IP version combo, signal the caller to try another address
              family if available */

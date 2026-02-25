@@ -3483,7 +3483,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   size_t ech_config_len = 0;
   char *outername = data->set.str[STRING_ECH_PUBLIC];
   int trying_ech_now = 0;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   if(!ECH_ENABLED(data))
     return CURLE_OK;
@@ -3542,9 +3542,14 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     struct Curl_dns_entry *dns = NULL;
 
     if(peer->hostname)
-      dns = Curl_dnscache_get(data, peer->hostname, peer->port,
-                              cf->conn->ip_version);
+      result = Curl_dnscache_get(data, peer->hostname, peer->port,
+                                 cf->conn->ip_version, &dns);
     if(!dns) {
+      if(result) {
+        failf(data, "ECH: could not resolve %s:%d",
+              peer->hostname, peer->port);
+        return result;
+      }
       infof(data, "ECH: requested but no DNS info available");
       if(data->set.tls_ech & CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
@@ -3573,7 +3578,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
         if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
-      Curl_resolv_unlink(data, &dns);
+      Curl_dns_entry_unlink(data, &dns);
     }
   }
 #ifdef HAVE_BORINGSSL_LIKE

@@ -181,6 +181,7 @@ LIB_CFILES =         \
   cw-out.c           \
   cw-pause.c         \
   dict.c             \
+  dnscache.c         \
   doh.c              \
   dynhds.c           \
   easy.c             \
@@ -317,6 +318,7 @@ LIB_HFILES =         \
   cw-out.h           \
   cw-pause.h         \
   dict.h             \
+  dnscache.h         \
   doh.h              \
   dynhds.h           \
   easy_lock.h        \

@@ -366,7 +366,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
                              (unsigned char *)&saddr_in->sin_addr.s_addr, 4,
                              &nwritten);
 
-    Curl_resolv_unlink(data, &dns); /* not used anymore from now on */
+    Curl_dns_entry_unlink(data, &dns); /* not used anymore from now on */
     if(result || (nwritten != 4))
       return CURLPX_SEND_REQUEST;
   }
@@ -939,7 +939,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
 
 out:
   if(dns)
-    Curl_resolv_unlink(data, &dns);
+    Curl_dns_entry_unlink(data, &dns);
   *done = (presult == CURLPX_OK);
   return presult;
 }
