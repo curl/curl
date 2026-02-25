@@ -734,8 +734,8 @@
 #endif
 
 #ifdef USE_WOLFSSL
-#if defined(USE_OPENSSL) && defined(OPENSSL_COEXIST)
-#define USE_COEXIST
+#if defined(USE_OPENSSL) && !defined(OPENSSL_COEXIST)
+#define OPENSSL_COEXIST
 #endif
 #ifdef USE_GNUTLS
 /* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
