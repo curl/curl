@@ -583,16 +583,6 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     Curl_async_destroy(data);
 #endif
 
-#ifdef USE_CURL_ASYNC
-  if(data->state.async)
-    Curl_async_destroy(data);
-#endif
-
-#ifdef USE_CURL_ASYNC
-  if(data->state.async)
-    Curl_async_destroy(data);
-#endif
-
 #ifndef CURL_DISABLE_DOH
   data->conn->bits.doh = FALSE; /* default is not */
 #else
