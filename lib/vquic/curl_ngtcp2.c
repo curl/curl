@@ -24,7 +24,13 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+
+#ifdef HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+
 #include <ngtcp2/ngtcp2.h>
+#include <ngtcp2/ngtcp2_crypto.h>
 #include <nghttp3/nghttp3.h>
 
 #ifdef USE_OPENSSL
@@ -42,28 +48,10 @@
 #include "vtls/gtls.h"
 #elif defined(USE_WOLFSSL)
 #include <ngtcp2/ngtcp2_crypto_wolfssl.h>
-#include "vtls/wolfssl.h"
-#endif
-
-#ifdef HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
-#endif
-
-#include <ngtcp2/ngtcp2_crypto.h>
-#ifdef OPENSSL_QUIC_API2
-#include <ngtcp2/ngtcp2_crypto_ossl.h>
-#endif
-#include <nghttp3/nghttp3.h>
-#ifdef USE_OPENSSL
-#include <openssl/ssl.h>
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/version.h>
-#if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
-#  error "OpenSSL can only coexist with wolfSSL v5.7.6 or upper"
-#endif
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/quic.h>
+#include "vtls/wolfssl.h"
 #endif
 
 #include "urldata.h"
