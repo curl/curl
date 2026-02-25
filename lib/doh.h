@@ -104,8 +104,6 @@ struct doh_response {
 struct doh_probes {
   struct doh_response probe_resp[DOH_SLOT_COUNT];
   unsigned int pending; /* still outstanding probes */
-  uint16_t port;
-  const char *host;
 };
 
 /*

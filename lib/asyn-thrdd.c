@@ -120,6 +120,7 @@ struct async_thrdd_item {
   uint32_t mid;
   uint16_t port;
   uint8_t ip_version;
+  uint8_t transport;
 #ifdef DEBUGBUILD
   uint32_t delay_fail_ms;
 #endif
@@ -140,7 +141,7 @@ static void async_thrdd_item_destroy(struct async_thrdd_item *item)
 static struct async_thrdd_item *
 async_thrdd_item_create(struct Curl_easy *data,
                         const char *hostname, uint16_t port,
-                        uint8_t ip_version)
+                        uint8_t ip_version, uint8_t transport)
 {
   size_t hostlen = strlen(hostname);
   struct async_thrdd_item *item;
@@ -154,6 +155,7 @@ async_thrdd_item_create(struct Curl_easy *data,
     memcpy(item->hostname, hostname, hostlen);
   item->port = port;
   item->ip_version = ip_version;
+  item->transport = transport;
   item->mid = data->mid;
   item->conn_id = data->conn ? data->conn->connection_id : -1;
 
@@ -170,9 +172,7 @@ async_thrdd_item_create(struct Curl_easy *data,
     }
 #endif /* CURLRES_IPV6 */
     item->hints.ai_family = pf;
-    item->hints.ai_socktype =
-      (Curl_conn_get_transport(data, data->conn) == TRNSPRT_TCP) ?
-      SOCK_STREAM : SOCK_DGRAM;
+    item->hints.ai_socktype = Curl_socktype_for_transport(transport);
 #ifdef CURLVERBOSE
     qtype = (pf == PF_INET6) ? "AAAA" : "A+AAAA";
 #endif
@@ -489,7 +489,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   item = async_thrdd_item_create(data, async->hostname, async->port,
-                                 async->ip_version);
+                                 async->ip_version, async->transport);
   if(!item) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

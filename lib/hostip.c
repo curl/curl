@@ -377,6 +377,7 @@ static CURLcode hostip_async_new(struct Curl_easy *data,
                                  const char *hostname,
                                  uint16_t port,
                                  uint8_t ip_version,
+                                 uint8_t transport,
                                  timediff_t timeout_ms)
 {
   struct Curl_resolv_async *async;
@@ -390,6 +391,7 @@ static CURLcode hostip_async_new(struct Curl_easy *data,
 
   async->port = port;
   async->ip_version = ip_version;
+  async->transport = transport;
   async->start = *Curl_pgrs_now(data);
   async->timeout_ms = timeout_ms;
   if(hostlen)
@@ -433,6 +435,7 @@ static CURLcode hostip_resolv_announce(struct Curl_easy *data,
                                        const char *hostname,
                                        uint16_t port,
                                        uint8_t ip_version,
+                                       uint8_t transport,
                                        timediff_t timeout_ms)
 {
   if(data->set.resolver_start) {
@@ -441,7 +444,8 @@ static CURLcode hostip_resolv_announce(struct Curl_easy *data,
 #ifdef CURLRES_ASYNCH
     CURLcode result;
     if(!data->state.async) {
-      result = hostip_async_new(data, hostname, port, ip_version, timeout_ms);
+      result = hostip_async_new(data, hostname, port, ip_version,
+                                transport, timeout_ms);
       if(result)
         return result;
     }
@@ -470,6 +474,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                     const char *hostname,
                                     uint16_t port,
                                     uint8_t ip_version,
+                                    uint8_t transport,
                                     timediff_t timeout_ms,
                                     bool allowDOH,
                                     struct Curl_dns_entry **pdns)
@@ -482,7 +487,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 
   /* really need to start a resolve operation */
   result = hostip_resolv_announce(data, hostname, port, ip_version,
-                                  timeout_ms);
+                                  transport, timeout_ms);
   if(result)
     goto out;
 
@@ -509,7 +514,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 #ifndef CURL_DISABLE_DOH
   if(!Curl_is_ipaddr(hostname) && allowDOH && data->set.doh) {
     if(!data->state.async) {
-      result = hostip_async_new(data, hostname, port, ip_version, timeout_ms);
+      result = hostip_async_new(data, hostname, port, ip_version,
+                                transport, timeout_ms);
       if(result)
         goto out;
     }
@@ -529,7 +535,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 #ifdef CURLRES_ASYNCH
   (void)addr;
   if(!data->state.async) {
-    result = hostip_async_new(data, hostname, port, ip_version, timeout_ms);
+    result = hostip_async_new(data, hostname, port, ip_version,
+                              transport, timeout_ms);
     if(result)
       goto out;
   }
@@ -543,7 +550,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
       result = CURLE_OK;
   }
 #else
-  addr = Curl_sync_getaddrinfo(data, hostname, port, ip_version);
+  addr = Curl_sync_getaddrinfo(data, hostname, port, ip_version, transport);
   if(!addr)
     result = CURLE_COULDNT_RESOLVE_HOST;
 #endif
@@ -575,6 +582,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
                               const char *hostname,
                               uint16_t port,
                               uint8_t ip_version,
+                              uint8_t transport,
                               timediff_t timeout_ms,
                               bool allowDOH,
                               struct Curl_dns_entry **pdns)
@@ -630,7 +638,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     /* No luck, we need to start resolving. */
     cache_dns = TRUE;
     result = hostip_resolv_start(data, hostname, port, ip_version,
-                                 timeout_ms, allowDOH, pdns);
+                                 transport, timeout_ms, allowDOH, pdns);
   }
 
 out:
@@ -666,13 +674,15 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               const char *hostname,
                               uint16_t port,
                               uint8_t ip_version,
+                              uint8_t transport,
                               struct Curl_dns_entry **pdns)
 {
   CURLcode result;
   DEBUGASSERT(hostname && *hostname);
   *pdns = NULL;
   /* We cannot do a blocking resolve using DoH currently */
-  result = hostip_resolv(data, hostname, port, ip_version, 0, FALSE, pdns);
+  result = hostip_resolv(data, hostname, port, ip_version,
+                         transport, 0, FALSE, pdns);
   switch(result) {
   case CURLE_OK:
     DEBUGASSERT(*pdns);
@@ -862,6 +872,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
                      uint16_t port,
                      uint8_t ip_version,
+                     uint8_t transport,
                      timediff_t timeout_ms,
                      struct Curl_dns_entry **entry)
 {
@@ -888,8 +899,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     infof(data, "timeout on name lookup is not supported");
 #endif
 
-  return hostip_resolv(data, hostname, port, ip_version, timeout_ms,
-                       TRUE, entry);
+  return hostip_resolv(data, hostname, port, ip_version, transport,
+                       timeout_ms, TRUE, entry);
 }
 
 
@@ -988,3 +999,30 @@ CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail)
   return result;
 }
 #endif /* USE_CURL_ASYNC */
+
+#ifdef USE_UNIX_SOCKETS
+CURLcode Curl_resolv_unix(struct Curl_easy *data,
+                          const char *unix_path,
+                          bool abstract_path,
+                          struct Curl_dns_entry **pdns)
+{
+  struct Curl_addrinfo *addr;
+  CURLcode result;
+
+  DEBUGASSERT(unix_path);
+  *pdns = NULL;
+
+  result = Curl_unix2addr(unix_path, abstract_path, &addr);
+  if(result) {
+    if(result == CURLE_TOO_LARGE) {
+      /* Long paths are not supported for now */
+      failf(data, "Unix socket path too long: '%s'", unix_path);
+      result = CURLE_COULDNT_RESOLVE_HOST;
+    }
+    return result;
+  }
+
+  *pdns = Curl_dns_entry_create(data, &addr, NULL, 0, 0);
+  return *pdns ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+}
+#endif

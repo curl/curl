@@ -27,6 +27,7 @@
 
 #include "urldata.h"
 #include "curl_addrinfo.h"
+#include "cfilters.h"
 #include "doh.h"
 #include "curl_trc.h"
 #include "httpsrr.h"
@@ -459,8 +460,6 @@ CURLcode Curl_doh(struct Curl_easy *data,
   }
 
   conn->bits.doh = TRUE;
-  dohp->host = async->hostname;
-  dohp->port = async->port;
   /* We are making sub easy handles and want to be called back when
    * one is done. */
   data->sub_xfer_done = doh_probe_done;
@@ -909,7 +908,8 @@ static void doh_show(struct Curl_easy *data,
  */
 
 static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
-                       int port, struct Curl_addrinfo **aip)
+                       uint16_t port, uint8_t transport,
+                       struct Curl_addrinfo **aip)
 {
   struct Curl_addrinfo *ai;
   struct Curl_addrinfo *prevai = NULL;
@@ -962,11 +962,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       prevai->ai_next = ai;
 
     ai->ai_family = addrtype;
-
-    /* we return all names as STREAM, so when using this address for TFTP
-       the type must be ignored and conn->socktype be used instead! */
-    ai->ai_socktype = SOCK_STREAM;
-
+    ai->ai_socktype = Curl_socktype_for_transport(transport);
     ai->ai_addrlen = (curl_socklen_t)ss_size;
 
     /* leave the rest of the struct filled with zero */
@@ -1203,10 +1199,11 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
   *pdns = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
+  DEBUGASSERT(async);
 
   if(dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
      dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT32_MAX) {
-    failf(data, "Could not DoH-resolve: %s", dohp->host);
+    failf(data, "Could not DoH-resolve: %s", async->hostname);
     return CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
       CURLE_COULDNT_RESOLVE_HOST;
   }
@@ -1228,7 +1225,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
                                  p->dnstype, &de);
       if(rc[slot]) {
         CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
-                     doh_type2name(p->dnstype), dohp->host);
+                     doh_type2name(p->dnstype), async->hostname);
       }
     } /* next slot */
 
@@ -1238,16 +1235,17 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       struct Curl_addrinfo *ai;
 
       if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
-        CURL_TRC_DNS(data, "hostname: %s", dohp->host);
+        CURL_TRC_DNS(data, "hostname: %s", async->hostname);
         doh_show(data, &de);
       }
 
-      result = doh2ai(&de, dohp->host, dohp->port, &ai);
+      result = doh2ai(&de, async->hostname, async->port, async->transport,
+                      &ai);
       if(result)
         goto error;
 
       /* we got a response, create a dns entry. */
-      dns = Curl_dns_entry_create(data, &ai, dohp->host, dohp->port,
+      dns = Curl_dns_entry_create(data, &ai, async->hostname, async->port,
                                   async->ip_version);
       if(!dns) {
         result = CURLE_OUT_OF_MEMORY;

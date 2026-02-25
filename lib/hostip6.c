@@ -65,7 +65,8 @@
 struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
                                             const char *hostname,
                                             uint16_t port,
-                                            uint8_t ip_version)
+                                            uint8_t ip_version,
+                                            uint8_t transport)
 {
   struct addrinfo hints;
   struct Curl_addrinfo *res;
@@ -83,9 +84,7 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype =
-    (Curl_conn_get_transport(data, data->conn) == TRNSPRT_TCP) ?
-    SOCK_STREAM : SOCK_DGRAM;
+  hints.ai_socktype = Curl_socktype_for_transport(transport);
 
 #ifndef USE_RESOLVE_ON_IPS
   /*

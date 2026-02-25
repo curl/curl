@@ -416,6 +416,10 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data,
 unsigned char Curl_conn_get_transport(struct Curl_easy *data,
                                       struct connectdata *conn);
 
+/* Get the `socktype/protocol` (addrinfo, sockaddr) for a transport type */
+int Curl_socktype_for_transport(uint8_t transport);
+int Curl_protocol_for_transport(uint8_t transport);
+
 /* Get the negotiated ALPN protocol or NULL if none in play */
 const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
                                           struct connectdata *conn);

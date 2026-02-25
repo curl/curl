@@ -324,7 +324,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
     DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
-                         cf->conn->ip_version, 0, &dns);
+                         cf->conn->ip_version, SOCK_STREAM, 0, &dns);
     if(result == CURLE_AGAIN) {
       CURL_TRC_CF(data, cf, "SOCKS4 non-blocking resolve of %s", sx->hostname);
       return CURLPX_OK;
@@ -850,7 +850,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
-                         cf->conn->ip_version, 0, &dns);
+                         cf->conn->ip_version, SOCK_STREAM, 0, &dns);
     if(result == CURLE_AGAIN) {
       CURL_TRC_CF(data, cf, "SOCKS5 non-blocking resolve of %s", sx->hostname);
       return CURLPX_OK;

@@ -3056,41 +3056,6 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
   return result;
 }
 
-#ifdef USE_UNIX_SOCKETS
-static CURLcode resolve_unix(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             const char *unix_path,
-                             struct Curl_dns_entry **pdns)
-{
-  struct Curl_dns_entry *hostaddr;
-  bool longpath = FALSE;
-
-  DEBUGASSERT(unix_path);
-  *pdns = NULL;
-
-  /* Unix domain sockets are local. The host gets ignored, just use the
-   * specified domain socket address. Do not cache "DNS entries". There is
-   * no DNS involved and we already have the file system path available. */
-  hostaddr = curlx_calloc(1, sizeof(struct Curl_dns_entry));
-  if(!hostaddr)
-    return CURLE_OUT_OF_MEMORY;
-
-  hostaddr->addr = Curl_unix2addr(unix_path, &longpath,
-                                  (bool)conn->bits.abstract_unix_socket);
-  if(!hostaddr->addr) {
-    if(longpath)
-      /* Long paths are not supported for now */
-      failf(data, "Unix socket path too long: '%s'", unix_path);
-    curlx_free(hostaddr);
-    return longpath ? CURLE_COULDNT_RESOLVE_HOST : CURLE_OUT_OF_MEMORY;
-  }
-
-  hostaddr->refcount = 1; /* connection is the only one holding this */
-  *pdns = hostaddr;
-  return CURLE_OK;
-}
-#endif
-
 /*************************************************************
  * Resolve the address of the server or proxy
  *************************************************************/
@@ -3120,7 +3085,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
     if(unix_path) {
       /* This only works if previous transport is TRNSPRT_TCP. Check it? */
       conn->transport_wanted = TRNSPRT_UNIX;
-      return resolve_unix(data, conn, unix_path, pdns);
+      return Curl_resolv_unix(data, unix_path,
+                              (bool)conn->bits.abstract_unix_socket, pdns);
     }
   }
 #endif
@@ -3145,7 +3111,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 
   /* Resolve target host right on */
   result = Curl_resolv(data, ehost->name, eport, conn->ip_version,
-                       timeout_ms, pdns);
+                       SOCK_STREAM, timeout_ms, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
     DEBUGASSERT(*pdns);
