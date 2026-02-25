@@ -133,7 +133,7 @@ static void show_resolve_info(struct Curl_easy *data,
   a = dns->addr;
 
   infof(data, "Host %s:%d was resolved.",
-        (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport);
+        (dns->hostname[0] ? dns->hostname : "(none)"), dns->port);
 
   curlx_dyn_init(&out[0], 1024);
 #ifdef CURLRES_IPV6
@@ -434,6 +434,16 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     goto error;
   }
 
+#ifdef DEBUGBUILD
+  CURL_TRC_DNS(data, "hostip_resolv(%s:%u, ip=%x)",
+               hostname, port, ip_version);
+  if((ip_version == CURL_IPRESOLVE_V6) &&
+     getenv("CURL_DBG_RESOLV_FAIL_IPV6")) {
+    infof(data, "DEBUG fail ipv6 resolve");
+    result = Curl_resolver_error(data, NULL);
+    goto error;
+  }
+#endif
   /* Let's check our DNS cache first */
   r2 = Curl_dnscache_get(data, hostname, port, ip_version, &dns);
   if(dns) {
@@ -534,7 +544,7 @@ out:
   }
   else if(addr) {
     /* we got a response, create a dns entry, add to cache, return */
-    dns = Curl_dns_entry_create(data, &addr, hostname, 0, port, FALSE);
+    dns = Curl_dns_entry_create(data, &addr, hostname, port, ip_version);
     if(!dns || Curl_dnscache_add(data, dns)) {
       /* this is OOM or similar, do not store such negative resolves */
       result = CURLE_OUT_OF_MEMORY;
@@ -559,7 +569,7 @@ error:
     Curl_dns_entry_unlink(data, &dns);
   Curl_async_shutdown(data);
   if(result == CURLE_COULDNT_RESOLVE_HOST)
-    Curl_dnscache_add_negative(data, hostname, port);
+    Curl_dnscache_add_negative(data, hostname, port, ip_version);
   DEBUGASSERT(result);
   return result;
 }
@@ -837,7 +847,8 @@ out:
     show_resolve_info(data, *pdns);
   else if((result == CURLE_COULDNT_RESOLVE_HOST) ||
           (result == CURLE_COULDNT_RESOLVE_PROXY)) {
-    Curl_dnscache_add_negative(data, async->hostname, async->port);
+    Curl_dnscache_add_negative(data, async->hostname,
+                               async->port, async->ip_version);
     failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
   }
   else if(result) {

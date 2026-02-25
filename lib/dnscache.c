@@ -59,6 +59,24 @@
 
 #define MAX_DNS_CACHE_SIZE 29999
 
+#ifdef CURLVERBOSE
+static const char *dnscache_ipv_str(uint8_t ip_version)
+{
+  switch(ip_version) {
+  case CURL_IPRESOLVE_WHATEVER:
+    return "A+AAAA";
+  case CURL_IPRESOLVE_V4:
+    return "A";
+#ifdef PF_INET6
+  case CURL_IPRESOLVE_V6:
+    return "AAAA";
+#endif
+  default:
+    DEBUGASSERT(0);
+    return "???";
+  }
+}
+#endif
 
 static void dnscache_entry_free(struct Curl_dns_entry *dns)
 {
@@ -209,18 +227,21 @@ void Curl_dnscache_clear(struct Curl_easy *data)
 }
 
 /* lookup address, returns entry if found and not stale */
-static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
-                                         struct Curl_dnscache *dnscache,
-                                         const char *hostname,
-                                         uint16_t port,
-                                         uint8_t ip_version)
+static CURLcode fetch_addr(struct Curl_easy *data,
+                           struct Curl_dnscache *dnscache,
+                           const char *hostname,
+                           uint16_t port,
+                           uint8_t ip_version,
+                           struct Curl_dns_entry **pdns)
 {
   struct Curl_dns_entry *dns = NULL;
   char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;
+  CURLcode result = CURLE_OK;
 
+  *pdns = NULL;
   if(!dnscache)
-    return NULL;
+    return CURLE_OK;
 
   /* Create an entry id, based upon the hostname and port */
   entry_len = create_dnscache_id(hostname, 0, port,
@@ -252,32 +273,52 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     }
   }
 
-  /* See if the returned entry matches the required resolve mode */
-  if(dns && ip_version != CURL_IPRESOLVE_WHATEVER) {
-    int pf = PF_INET;
-    bool found = FALSE;
-    struct Curl_addrinfo *addr = dns->addr;
+  if(dns && dns->ip_version != ip_version) {
+    switch(dns->ip_version) {
+    case CURL_IPRESOLVE_WHATEVER: {
+      /* Do we have addresses that match the requested ip version? */
+      int pf = PF_INET;
+      bool found = FALSE;
+      struct Curl_addrinfo *addr = dns->addr;
 
 #ifdef PF_INET6
-    if(ip_version == CURL_IPRESOLVE_V6)
-      pf = PF_INET6;
+      if(ip_version == CURL_IPRESOLVE_V6)
+        pf = PF_INET6;
 #endif
 
-    while(addr) {
-      if(addr->ai_family == pf) {
-        found = TRUE;
-        break;
+      while(addr) {
+        if(addr->ai_family == pf) {
+          found = TRUE;
+          break;
+        }
+        addr = addr->ai_next;
       }
-      addr = addr->ai_next;
-    }
 
-    if(!found) {
-      infof(data, "Hostname in DNS cache does not have needed family, zapped");
-      dns = NULL; /* the memory deallocation is being handled by the hash */
-      Curl_hash_delete(&dnscache->entries, entry_id, entry_len + 1);
+      if(!found) {
+        /* We assume that CURL_IPRESOLVE_WHATEVER means we tried to
+         * get addresses for all supported types, but there are none
+         * for the ip version we need. This is a negative resolve. */
+        CURL_TRC_DNS(data, "cache entry does not have type=%s addresses",
+                     dnscache_ipv_str(ip_version));
+        dns = NULL;
+        result = CURLE_COULDNT_RESOLVE_HOST;
+      }
+      break;
+    }
+    default:
+      /* different families, we return NULL + OK, so a new resolve
+       * attempt may get started. */
+      dns = NULL;
+      break;
     }
   }
-  return dns;
+
+  if(dns && !dns->addr) { /* negative entry */
+    dns = NULL;
+    result = CURLE_COULDNT_RESOLVE_HOST;
+  }
+  *pdns = dns;
+  return result;
 }
 
 /*
@@ -305,14 +346,12 @@ CURLcode Curl_dnscache_get(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   dnscache_lock(data, dnscache);
-  dns = fetch_addr(data, dnscache, hostname, port, ip_version);
-  if(dns) {
-    if(!dns->addr) {
-      dns = NULL;
-      result = CURLE_COULDNT_RESOLVE_HOST;
-    }
-    else
-      dns->refcount++; /* we pass out a reference */
+  result = fetch_addr(data, dnscache, hostname, port, ip_version, &dns);
+  if(!result && dns)
+    dns->refcount++; /* we pass out a reference */
+  else if(result) {
+    DEBUGASSERT(!dns);
+    dns = NULL;
   }
   dnscache_unlock(data, dnscache);
 
@@ -356,7 +395,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 
   if(num_addrs > 1) {
     struct Curl_addrinfo **nodes;
-    infof(data, "Shuffling %i addresses", num_addrs);
+    CURL_TRC_DNS(data, "Shuffling %i addresses", num_addrs);
 
     nodes = curlx_malloc(num_addrs * sizeof(*nodes));
     if(nodes) {
@@ -402,12 +441,13 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 }
 #endif
 
-struct Curl_dns_entry *
-Curl_dns_entry_create(struct Curl_easy *data,
+static struct Curl_dns_entry *
+dnscache_entry_create(struct Curl_easy *data,
                       struct Curl_addrinfo **paddr,
                       const char *hostname,
                       size_t hostlen, /* length or zero */
                       uint16_t port,
+                      uint8_t ip_version,
                       bool permanent)
 {
   struct Curl_dns_entry *dns = NULL;
@@ -439,7 +479,8 @@ Curl_dns_entry_create(struct Curl_easy *data,
   else {
     dns->timestamp = *Curl_pgrs_now(data);
   }
-  dns->hostport = port;
+  dns->port = port;
+  dns->ip_version = ip_version;
   if(hostlen)
     memcpy(dns->hostname, hostname, hostlen);
 
@@ -452,6 +493,17 @@ out:
   return dns;
 }
 
+struct Curl_dns_entry *
+Curl_dns_entry_create(struct Curl_easy *data,
+                      struct Curl_addrinfo **paddr,
+                      const char *hostname,
+                      uint16_t port,
+                      uint8_t ip_version)
+{
+  return dnscache_entry_create(data, paddr, hostname, 0,
+                               port, ip_version, FALSE);
+}
+
 static struct Curl_dns_entry *
 dnscache_add_addr(struct Curl_easy *data,
                   struct Curl_dnscache *dnscache,
@@ -459,6 +511,7 @@ dnscache_add_addr(struct Curl_easy *data,
                   const char *hostname,
                   size_t hlen, /* length or zero */
                   uint16_t port,
+                  uint8_t ip_version,
                   bool permanent)
 {
   char entry_id[MAX_HOSTCACHE_LEN];
@@ -466,7 +519,8 @@ dnscache_add_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
-  dns = Curl_dns_entry_create(data, paddr, hostname, hlen, port, permanent);
+  dns = dnscache_entry_create(data, paddr, hostname, hlen, port,
+                              ip_version, permanent);
   if(!dns)
     return NULL;
 
@@ -497,8 +551,7 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
   if(!dnscache)
     return CURLE_FAILED_INIT;
   /* Create an entry id, based upon the hostname and port */
-  idlen = create_dnscache_id(entry->hostname, 0, entry->hostport,
-                             id, sizeof(id));
+  idlen = create_dnscache_id(entry->hostname, 0, entry->port, id, sizeof(id));
 
   /* Store the resolved data in our DNS cache and up ref count */
   dnscache_lock(data, dnscache);
@@ -513,7 +566,8 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
 
 CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
                                     const char *host,
-                                    uint16_t port)
+                                    uint16_t port,
+                                    uint8_t ip_version)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
   struct Curl_dns_entry *dns;
@@ -522,12 +576,14 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   /* put this new host in the cache */
-  dns = dnscache_add_addr(data, dnscache, NULL, host, 0, port, FALSE);
+  dns = dnscache_add_addr(data, dnscache, NULL, host, 0,
+                          port, ip_version, FALSE);
   if(dns) {
     /* release the returned reference; the cache itself will keep the
      * entry alive: */
     dns->refcount--;
-    infof(data, "Store negative name resolve for %s:%d", host, port);
+    CURL_TRC_DNS(data, "cache negative name resolve for %s:%d type=%s",
+                 host, port, dnscache_ipv_str(ip_version));
     return CURLE_OK;
   }
   return CURLE_OUT_OF_MEMORY;
@@ -747,7 +803,8 @@ err:
 
       /* put this new host in the cache */
       dns = dnscache_add_addr(data, dnscache, &head, curlx_str(&source),
-                              curlx_strlen(&source), port, permanent);
+                              curlx_strlen(&source), port,
+                              CURL_IPRESOLVE_WHATEVER, permanent);
       if(dns)
         /* release the returned reference; the cache itself will keep the
          * entry alive: */

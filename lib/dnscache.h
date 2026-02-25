@@ -43,9 +43,10 @@ struct Curl_dns_entry {
   /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
   struct curltime timestamp;
   /* reference counter, entry is freed on reaching 0 */
-  size_t refcount;
+  uint32_t refcount;
   /* hostname port number that resolved to addr. */
-  uint16_t hostport;
+  uint16_t port;
+  uint8_t ip_version;
   /* hostname that resolved to addr. may be NULL (Unix domain sockets). */
   char hostname[1];
 };
@@ -63,9 +64,7 @@ struct Curl_dns_entry *
 Curl_dns_entry_create(struct Curl_easy *data,
                       struct Curl_addrinfo **paddr,
                       const char *hostname,
-                      size_t hostlen, /* length or zero */
-                      uint16_t port,
-                      bool permanent);
+                      uint16_t port, uint8_t ip_version);
 
 /* unlink a dns entry, frees all resources if it was the last reference.
  * Always clears `*pdns`` */
@@ -115,7 +114,8 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
  * it could not be resolved. */
 CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
                                     const char *host,
-                                    uint16_t port);
+                                    uint16_t port,
+                                    uint8_t ip_version);
 
 /*
  * Populate the cache with specified entries from CURLOPT_RESOLVE.

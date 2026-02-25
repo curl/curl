@@ -592,8 +592,8 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
   if(thrdd->resolved && thrdd->resolved->res) {
     struct Curl_dns_entry *dns =
-      Curl_dns_entry_create(data, &thrdd->resolved->res, async->hostname, 0,
-                            async->port, FALSE);
+      Curl_dns_entry_create(data, &thrdd->resolved->res,
+                            async->hostname, async->port, async->ip_version);
     if(!dns)
       result = CURLE_OUT_OF_MEMORY;
 
