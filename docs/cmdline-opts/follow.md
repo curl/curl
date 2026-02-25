@@ -13,7 +13,8 @@ See-also:
   - proto-redir
   - max-redirs
 Example:
-  - -X POST --follow $URL
+  - -X DELETE --follow $URL
+  - --follow $URL
 ---
 
 # `--follow`
