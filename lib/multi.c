@@ -632,8 +632,8 @@ static void multi_done_locked(struct connectdata *conn,
   data->state.done = TRUE; /* called just now! */
   data->state.recent_conn_id = conn->connection_id;
 
-  Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
-  Curl_resolv_unlink(data, &data->state.dns[1]);
+  Curl_dns_entry_unlink(data, &data->state.dns[0]); /* done with this */
+  Curl_dns_entry_unlink(data, &data->state.dns[1]);
   Curl_dnscache_prune(data);
 
   if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {
@@ -1115,8 +1115,8 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
 #ifdef ENABLE_WAKEUP
   /* The admin handle always listens on the wakeup socket when there
    * are transfers alive. */
-  if(data->multi && (data == data->multi->admin) &&
-     data->multi->xfers_alive &&
+  if(data->multi && data->multi->xfers_alive &&
+     (data == data->multi->admin) &&
      (data->multi->wakeup_pair[0] != CURL_SOCKET_BAD)) {
     result = Curl_pollset_add_in(data, ps, data->multi->wakeup_pair[0]);
   }
