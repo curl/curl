@@ -46,7 +46,6 @@
 #include "urldata.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "connect.h"
 #include "dnscache.h"
 #include "hostip.h"
 #include "httpsrr.h"
@@ -56,7 +55,6 @@
 #include "select.h"
 #include "strcase.h"
 #include "easy_lock.h"
-#include "progress.h"
 #include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strcopy.h"
@@ -222,7 +220,7 @@ static curl_simple_lock curl_jmpenv_lock;
 
 #ifdef USE_IPV6
 /* return a static IPv6 ::1 for the name */
-static struct Curl_addrinfo *get_localhost6(int port, const char *name)
+static struct Curl_addrinfo *get_localhost6(uint16_t port, const char *name)
 {
   struct Curl_addrinfo *ca;
   const size_t ss_size = sizeof(struct sockaddr_in6);
@@ -261,7 +259,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
 #endif
 
 /* return a static IPv4 127.0.0.1 for the given name */
-static struct Curl_addrinfo *get_localhost(int port, const char *name)
+static struct Curl_addrinfo *get_localhost(uint16_t port, const char *name)
 {
   struct Curl_addrinfo *ca;
   struct Curl_addrinfo *ca6;
@@ -373,28 +371,12 @@ static bool can_resolve_ip_version(struct Curl_easy *data, int ip_version)
   return TRUE;
 }
 
-/*
- * Curl_resolv() is the main name resolve function within libcurl. It resolves
- * a name and returns a pointer to the entry in the 'entry' argument. This
- * function might return immediately if we are using asynch resolves. See the
- * return codes.
- *
- * The cache entry we return will get its 'inuse' counter increased when this
- * function is used. You MUST call Curl_dns_entry_unlink() later (when you are
- * done using this struct) to decrease the reference counter again.
- *
- * Return codes:
- * CURLE_OK = success, *entry set to non-NULL
- * CURLE_AGAIN = resolving in progress, *entry == NULL
- * CURLE_COULDNT_RESOLVE_HOST = error, *entry == NULL
- * CURLE_OPERATION_TIMEDOUT = timeout expired, *entry == NULL
- */
-CURLcode Curl_resolv(struct Curl_easy *data,
-                     const char *hostname,
-                     int port,
-                     int ip_version,
-                     bool allowDOH,
-                     struct Curl_dns_entry **entry)
+static CURLcode hostip_resolv(struct Curl_easy *data,
+                              const char *hostname,
+                              uint16_t port,
+                              uint8_t ip_version,
+                              bool allowDOH,
+                              struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
   struct Curl_addrinfo *addr = NULL;
@@ -517,7 +499,8 @@ out:
   }
   else if(respwait) {
 #ifdef USE_CURL_ASYNC
-    if(!Curl_resolv_check(data, &dns)) {
+    result = Curl_resolv_take_result(data, &dns);
+    if(!result) {
       *entry = dns;
       return dns ? CURLE_OK : CURLE_AGAIN;
     }
@@ -536,27 +519,22 @@ error:
 
 CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               const char *hostname,
-                              int port,
-                              int ip_version,
-                              struct Curl_dns_entry **entry)
+                              uint16_t port,
+                              uint8_t ip_version,
+                              struct Curl_dns_entry **dnsentry)
 {
   CURLcode result;
   DEBUGASSERT(hostname && *hostname);
-  *entry = NULL;
-  result = Curl_resolv(data, hostname, port, ip_version, FALSE, entry);
+  *dnsentry = NULL;
+  /* We cannot do a blocking resolve using DoH currently */
+  result = hostip_resolv(data, hostname, port, ip_version, FALSE, dnsentry);
   switch(result) {
   case CURLE_OK:
-    DEBUGASSERT(*entry);
+    DEBUGASSERT(*dnsentry);
     return CURLE_OK;
   case CURLE_AGAIN:
-    DEBUGASSERT(!*entry);
-    result = Curl_async_await(data, entry);
-    if(result || !*entry) {
-      /* close the connection, since we cannot return failure here without
-         cleaning up this connection properly. */
-      connclose(data->conn, "async resolve failed");
-    }
-    return result;
+    DEBUGASSERT(!*dnsentry);
+    return Curl_async_await(data, dnsentry);
   default:
     return result;
   }
@@ -575,35 +553,15 @@ CURL_NORETURN static void alarmfunc(int sig)
 }
 #endif /* USE_ALARM_TIMEOUT */
 
-/*
- * Curl_resolv_timeout() is the same as Curl_resolv() but specifies a
- * timeout. This function might return immediately if we are using asynch
- * resolves. See the return codes.
- *
- * The cache entry we return will get its 'inuse' counter increased when this
- * function is used. You MUST call Curl_dns_entry_unlink() later (when you are
- * done using this struct) to decrease the reference counter again.
- *
- * If built with a synchronous resolver and use of signals is not
- * disabled by the application, then a nonzero timeout will cause a
- * timeout after the specified number of milliseconds. Otherwise, timeout
- * is ignored.
- *
- * Return codes:
- * CURLE_OK = success, *entry set to non-NULL
- * CURLE_AGAIN = resolving in progress, *entry == NULL
- * CURLE_COULDNT_RESOLVE_HOST = error, *entry == NULL
- * CURLE_OPERATION_TIMEDOUT = timeout expired, *entry == NULL
- */
-
-CURLcode Curl_resolv_timeout(struct Curl_easy *data,
-                             const char *hostname,
-                             int port,
-                             int ip_version,
-                             struct Curl_dns_entry **entry,
-                             timediff_t timeoutms)
-{
 #ifdef USE_ALARM_TIMEOUT
+
+static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
+                                     const char *hostname,
+                                     uint16_t port,
+                                     uint8_t ip_version,
+                                     timediff_t timeoutms,
+                                     struct Curl_dns_entry **entry)
+{
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact; /* store the old struct here */
   volatile bool keep_copysig = FALSE; /* whether old sigact has been saved */
@@ -615,32 +573,17 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
   volatile unsigned int prev_alarm = 0;
-#endif /* USE_ALARM_TIMEOUT */
   CURLcode result;
 
   DEBUGASSERT(hostname && *hostname);
-  *entry = NULL;
-
-  if(timeoutms < 0)
-    /* got an already expired timeout */
-    return CURLE_OPERATION_TIMEDOUT;
-
-#ifdef USE_ALARM_TIMEOUT
-  if(data->set.no_signal)
-    /* Ignore the timeout when signals are disabled */
-    timeout = 0;
-  else
-    timeout = (timeoutms > LONG_MAX) ? LONG_MAX : (long)timeoutms;
-
-  if(!timeout
+  DEBUGASSERT(timeoutms > 0);
+  DEBUGASSERT(data->set.no_signal);
 #ifndef CURL_DISABLE_DOH
-     || data->set.doh
+  DEBUGASSERT(!data->set.doh);
 #endif
-    )
-    /* USE_ALARM_TIMEOUT defined, but no timeout actually requested or resolve
-       done using DoH */
-    return Curl_resolv(data, hostname, port, ip_version, TRUE, entry);
 
+  *entry = NULL;
+  timeout = (timeoutms > LONG_MAX) ? LONG_MAX : (long)timeoutms;
   if(timeout < 1000) {
     /* The alarm() function only provides integer second resolution, so if
        we want to wait less than one second we must bail out already now. */
@@ -691,23 +634,11 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
     prev_alarm = alarm(curlx_sltoui(timeout / 1000L));
   }
 
-#else /* !USE_ALARM_TIMEOUT */
-#ifndef CURLRES_ASYNCH
-  if(timeoutms)
-    infof(data, "timeout on name lookup is not supported");
-#else
-  (void)timeoutms;
-#endif
-#endif /* USE_ALARM_TIMEOUT */
-
   /* Perform the actual name resolution. This might be interrupted by an
-   * alarm if it takes too long.
-   */
-  result = Curl_resolv(data, hostname, port, ip_version, TRUE, entry);
+   * alarm if it takes too long. */
+  result = hostip_resolv(data, hostname, port, ip_version, TRUE, entry);
 
-#ifdef USE_ALARM_TIMEOUT
 clean_up:
-
   if(!prev_alarm)
     /* deactivate a possibly active alarm before uninstalling the handler */
     alarm(0);
@@ -750,14 +681,70 @@ clean_up:
     else
       alarm((unsigned int)alarm_set);
   }
-#endif /* USE_ALARM_TIMEOUT */
 
   return result;
 }
 
+#endif /* USE_ALARM_TIMEOUT */
+
+/*
+ * Curl_resolv() is the main name resolve function within libcurl. It resolves
+ * a name and returns a pointer to the entry in the 'entry' argument. This
+ * function might return immediately if we are using asynch resolves. See the
+ * return codes.
+ *
+ * The cache entry we return will get its 'inuse' counter increased when this
+ * function is used. You MUST call Curl_dns_entry_unlink() later (when you are
+ * done using this struct) to decrease the reference counter again.
+ *
+ * If built with a synchronous resolver and use of signals is not
+ * disabled by the application, then a nonzero timeout will cause a
+ * timeout after the specified number of milliseconds. Otherwise, timeout
+ * is ignored.
+ *
+ * Return codes:
+ * CURLE_OK = success, *entry set to non-NULL
+ * CURLE_AGAIN = resolving in progress, *entry == NULL
+ * CURLE_COULDNT_RESOLVE_HOST = error, *entry == NULL
+ * CURLE_OPERATION_TIMEDOUT = timeout expired, *entry == NULL
+ */
+CURLcode Curl_resolv(struct Curl_easy *data,
+                     const char *hostname,
+                     uint16_t port,
+                     uint8_t ip_version,
+                     timediff_t timeoutms,
+                     struct Curl_dns_entry **entry)
+{
+  DEBUGASSERT(hostname && *hostname);
+  *entry = NULL;
+
+  if(timeoutms < 0)
+    /* got an already expired timeout */
+    return CURLE_OPERATION_TIMEDOUT;
+
+#ifdef USE_ALARM_TIMEOUT
+  if(timeoutms && !data->set.no_signal) {
+    /* Cannot use ALARM when signals are disabled */
+    timeoutms = 0;
+  }
+  if(timeoutms && !Curl_doh_wanted(data)) {
+    return resolv_alarm_timeout(data, hostname, port, ip_version,
+                                timeoutms, entry);
+  }
+#endif /* !USE_ALARM_TIMEOUT */
+
+#ifndef CURLRES_ASYNCH
+  if(timeoutms)
+    infof(data, "timeout on name lookup is not supported");
+#endif
+
+  return hostip_resolv(data, hostname, port, ip_version, TRUE, entry);
+}
+
+
 #ifdef USE_CURL_ASYNC
-CURLcode Curl_resolv_check(struct Curl_easy *data,
-                           struct Curl_dns_entry **pdns)
+CURLcode Curl_resolv_take_result(struct Curl_easy *data,
+                                 struct Curl_dns_entry **pdns)
 {
   CURLcode result;
 
@@ -775,8 +762,6 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
     infof(data, "Hostname '%s' was found in DNS cache",
           data->state.async.hostname);
     Curl_async_shutdown(data);
-    data->state.async.dns = *pdns;
-    data->state.async.done = TRUE;
     return CURLE_OK;
   }
   else if(result) {
@@ -785,14 +770,19 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_DOH
-  if(data->conn->bits.doh) {
-    result = Curl_doh_is_resolved(data, pdns);
-    if(result)
-      Curl_resolver_error(data, NULL);
-  }
+  if(data->conn->bits.doh)
+    result = Curl_doh_take_result(data, pdns);
   else
 #endif
-  result = Curl_async_is_resolved(data, pdns);
+  result = Curl_async_take_result(data, pdns);
+
+  if(result == CURLE_AGAIN)
+    result = CURLE_OK;
+  else if(result)
+    Curl_resolver_error(data, NULL);
+  else
+    DEBUGASSERT(*pdns);
+
   if(*pdns)
     show_resolve_info(data, *pdns);
   if((result == CURLE_COULDNT_RESOLVE_HOST) ||
@@ -819,34 +809,6 @@ CURLcode Curl_resolv_pollset(struct Curl_easy *data,
   (void)ps;
   return CURLE_OK;
 #endif
-}
-
-/* Call this function after Curl_connect() has returned async=TRUE and
-   then a successful name resolve has been received.
-
-   Note: this function disconnects and frees the conn data in case of
-   resolve failure */
-CURLcode Curl_once_resolved(struct Curl_easy *data,
-                            struct Curl_dns_entry *dns,
-                            bool *protocol_done)
-{
-  CURLcode result;
-  struct connectdata *conn = data->conn;
-
-#ifdef USE_CURL_ASYNC
-  if(data->state.async.dns) {
-    DEBUGASSERT(data->state.async.dns == dns);
-    data->state.async.dns = NULL;
-  }
-#endif
-
-  result = Curl_setup_conn(data, dns, protocol_done);
-
-  if(result) {
-    Curl_detach_connection(data);
-    Curl_conn_terminate(data, conn, TRUE);
-  }
-  return result;
 }
 
 /*

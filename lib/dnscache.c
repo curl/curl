@@ -78,7 +78,7 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns)
  */
 static size_t create_dnscache_id(const char *name,
                                  size_t nlen, /* 0 or actual name length */
-                                 int port, char *ptr, size_t buflen)
+                                 uint16_t port, char *ptr, size_t buflen)
 {
   size_t len = nlen ? nlen : strlen(name);
   DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
@@ -212,8 +212,8 @@ void Curl_dnscache_clear(struct Curl_easy *data)
 static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
                                          struct Curl_dnscache *dnscache,
                                          const char *hostname,
-                                         int port,
-                                         int ip_version)
+                                         uint16_t port,
+                                         uint8_t ip_version)
 {
   struct Curl_dns_entry *dns = NULL;
   char entry_id[MAX_HOSTCACHE_LEN];
@@ -295,8 +295,9 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
  * use, or we will leak memory!
  */
 CURLcode Curl_dnscache_get(struct Curl_easy *data,
-                           const char *hostname, int port,
-                           int ip_version,
+                           const char *hostname,
+                           uint16_t port,
+                           uint8_t ip_version,
                            struct Curl_dns_entry **pentry)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
@@ -406,7 +407,7 @@ Curl_dns_entry_create(struct Curl_easy *data,
                       struct Curl_addrinfo **paddr,
                       const char *hostname,
                       size_t hostlen, /* length or zero */
-                      int port,
+                      uint16_t port,
                       bool permanent)
 {
   struct Curl_dns_entry *dns = NULL;
@@ -457,7 +458,7 @@ dnscache_add_addr(struct Curl_easy *data,
                   struct Curl_addrinfo **paddr,
                   const char *hostname,
                   size_t hlen, /* length or zero */
-                  int port,
+                  uint16_t port,
                   bool permanent)
 {
   char entry_id[MAX_HOSTCACHE_LEN];
@@ -512,7 +513,7 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
 
 CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
                                     const char *host,
-                                    int port)
+                                    uint16_t port)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
   struct Curl_dns_entry *dns;
@@ -614,7 +615,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       if(!curlx_str_number(&host, &num, 0xffff)) {
         /* Create an entry id, based upon the hostname and port */
         entry_len = create_dnscache_id(curlx_str(&source),
-                                       curlx_strlen(&source), (int)num,
+                                       curlx_strlen(&source), (uint16_t)num,
                                        entry_id, sizeof(entry_id));
         dnscache_lock(data, dnscache);
         /* delete entry, ignore if it did not exist */
@@ -627,7 +628,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       struct Curl_addrinfo *head = NULL, *tail = NULL;
       size_t entry_len;
       char address[64];
-      curl_off_t port = 0;
+      curl_off_t tmpofft = 0;
+      uint16_t port = 0;
       bool permanent = TRUE;
       bool error = TRUE;
       VERBOSE(const char *addresses = NULL);
@@ -646,9 +648,10 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
           continue;
       }
       if(curlx_str_single(&host, ':') ||
-         curlx_str_number(&host, &port, 0xffff) ||
+         curlx_str_number(&host, &tmpofft, 0xffff) ||
          curlx_str_single(&host, ':'))
         goto err;
+      port = (uint16_t)tmpofft;
 
       VERBOSE(addresses = host);
 
@@ -687,7 +690,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         memcpy(address, curlx_str(&target), curlx_strlen(&target));
         address[curlx_strlen(&target)] = '\0';
 
-        result = Curl_str2addr(address, (int)port, &ai);
+        result = Curl_str2addr(address, port, &ai);
         if(result) {
           infof(data, "Resolve address '%s' found illegal", address);
           goto err;
@@ -717,8 +720,7 @@ err:
 
       /* Create an entry id, based upon the hostname and port */
       entry_len = create_dnscache_id(curlx_str(&source), curlx_strlen(&source),
-                                     (int)port,
-                                     entry_id, sizeof(entry_id));
+                                     port, entry_id, sizeof(entry_id));
 
       dnscache_lock(data, dnscache);
 
@@ -726,8 +728,8 @@ err:
       dns = Curl_hash_pick(&dnscache->entries, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %.*s:%" CURL_FORMAT_CURL_OFF_T
-              " - old addresses discarded", (int)curlx_strlen(&source),
+        infof(data, "RESOLVE %.*s:%u - old addresses discarded",
+              (int)curlx_strlen(&source),
               curlx_str(&source), port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
@@ -745,7 +747,7 @@ err:
 
       /* put this new host in the cache */
       dns = dnscache_add_addr(data, dnscache, &head, curlx_str(&source),
-                              curlx_strlen(&source), (int)port, permanent);
+                              curlx_strlen(&source), port, permanent);
       if(dns)
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
@@ -756,14 +758,13 @@ err:
       if(!dns)
         return CURLE_OUT_OF_MEMORY;
 
-      infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
+      infof(data, "Added %.*s:%u:%s to DNS cache%s",
             (int)curlx_strlen(&source), curlx_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
 
       /* Wildcard hostname */
       if(curlx_str_casecompare(&source, "*")) {
-        infof(data, "RESOLVE *:%" CURL_FORMAT_CURL_OFF_T " using wildcard",
-              port);
+        infof(data, "RESOLVE *:%u using wildcard", port);
         data->state.wildcard_resolve = TRUE;
       }
     }
