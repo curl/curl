@@ -36,8 +36,8 @@
 #if LIBWOLFSSL_VERSION_HEX < 0x03004006 /* wolfSSL 3.4.6 (2015) */
 #error "wolfSSL version should be at least 3.4.6"
 #endif
-#if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
-#error "wolfSSL v5.7.6 or upper required for OpenSSL coexist support"
+#if defined(USE_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
+#error "wolfSSL v5.7.6 or upper required for OpenSSL coexist"
 #endif
 
 /* To determine what functions are available we rely on one or both of:

@@ -733,9 +733,14 @@
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
-#if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
+#ifdef USE_WOLFSSL
+#if defined(USE_OPENSSL) && defined(OPENSSL_COEXIST)
+#define USE_COEXIST
+#endif
+#ifdef USE_GNUTLS
 /* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
 #define NO_OLD_WC_NAMES
+#endif
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */
