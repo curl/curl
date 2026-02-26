@@ -74,7 +74,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
     size_t len = strlen(data);
     if(room < len)
       len = room;
-    memcpy(ptr, data, len);
+    memcpy(ptr, data, len); /* NOLINT(bugprone-not-null-terminated-result) */
     upload_ctx->bytes_read += len;
 
     return len;
