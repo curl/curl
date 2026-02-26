@@ -5265,8 +5265,8 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
 {
   X509 *cert;
   int algo_nid;
-  const EVP_MD *algo_type;
-  const char *algo_name;
+  const EVP_MD *algo_type = NULL;
+  const char *algo_name = NULL;
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 #ifdef HAVE_OPENSSL3
