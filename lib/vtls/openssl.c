@@ -5311,6 +5311,10 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     algo_type = algo_ref = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
     if(!algo_type)
       infof(data, "Could not find digest algorithm '%s'", algo_txt);
+    else if(EVP_MD_is_a(algo_type, "SHA1") || EVP_MD_is_a(algo_type, "MD5")) {
+      /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
+      algo_type = EVP_sha256();
+    }
   }
 #endif /* HAVE_OPENSSL3 */
 
