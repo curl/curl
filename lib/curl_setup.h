@@ -90,7 +90,8 @@
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), tests: sscanf() */
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), getenv(),
+                                    tests: sscanf() */
 #endif
 #endif /* _MSC_VER */
 
