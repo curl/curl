@@ -505,6 +505,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
   cf = data->conn->cfilter[sockindex];
   if(!cf) {
     *done = FALSE;
@@ -526,8 +531,6 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     }
 
     result = cf->cft->do_connect(cf, data, done);
-    CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
-                blocking, result, *done);
     if(!result && *done) {
       /* Now that the complete filter chain is connected, let all filters
        * persist information at the connection. E.g. cf-socket sets the

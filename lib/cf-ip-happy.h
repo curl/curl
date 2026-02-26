@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-struct Curl_dns_entry;
-
 /**
  * Create a cfilter for making an "ip" connection to the
  * given address, using parameters from `conn`. The "ip" connection
@@ -46,8 +44,7 @@ typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  uint8_t transport,
-                                  struct Curl_dns_entry *dns);
+                                  uint8_t transport);
 
 extern struct Curl_cftype Curl_cft_ip_happy;
 

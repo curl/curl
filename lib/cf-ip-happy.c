@@ -49,12 +49,14 @@
 #include "urldata.h"
 #include "connect.h"
 #include "cfilters.h"
+#include "cf-resolv.h"
 #include "cf-ip-happy.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
+#include "url.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
 
@@ -617,6 +619,7 @@ static int cf_ip_ballers_min_reply_ms(struct cf_ip_ballers *bs,
 }
 
 typedef enum {
+  SCFST_RESOLVE,
   SCFST_INIT,
   SCFST_WAITING,
   SCFST_DONE
@@ -692,12 +695,8 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   return result;
 }
 
-/*
- * Connect to the given host with timeout, proxy or remote does not matter.
- * There might be more than one IP address to try out.
- */
-static CURLcode start_connect(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+static CURLcode cf_ip_happy_init(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
 {
   struct cf_ip_happy_ctx *ctx = cf->ctx;
 
@@ -784,10 +783,18 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   switch(ctx->state) {
+  case SCFST_RESOLVE:
+    if(!ctx->dns) {
+      ctx->dns = Curl_dns_entry_link(
+        data, Curl_cf_resolv_get_dns(cf->conn, cf->sockindex));
+      if(!ctx->dns)
+        goto out;
+    }
+    FALLTHROUGH();
   case SCFST_INIT:
     DEBUGASSERT(CURL_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
     DEBUGASSERT(!cf->connected);
-    result = start_connect(cf, data);
+    result = cf_ip_happy_init(cf, data);
     if(result)
       goto out;
     ctx->state = SCFST_WAITING;
@@ -843,7 +850,7 @@ static void cf_ip_happy_close(struct Curl_cfilter *cf,
   CURL_TRC_CF(data, cf, "close");
   cf_ip_happy_ctx_clear(cf, data);
   cf->connected = FALSE;
-  ctx->state = SCFST_INIT;
+  ctx->state = SCFST_RESOLVE;
 
   if(cf->next) {
     cf->next->cft->do_close(cf->next, data);
@@ -959,8 +966,7 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
                                    struct Curl_easy *data,
                                    struct connectdata *conn,
                                    cf_ip_connect_create *cf_create,
-                                   uint8_t transport,
-                                   struct Curl_dns_entry *dns)
+                                   uint8_t transport)
 {
   struct cf_ip_happy_ctx *ctx = NULL;
   CURLcode result;
@@ -973,7 +979,6 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  ctx->dns = Curl_dns_entry_link(data, dns);
   ctx->transport = transport;
   ctx->cf_create = cf_create;
 
@@ -989,8 +994,7 @@ out:
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  uint8_t transport,
-                                  struct Curl_dns_entry *dns)
+                                  uint8_t transport)
 {
   cf_ip_connect_create *cf_create;
   struct Curl_cfilter *cf;
@@ -1003,8 +1007,7 @@ CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
     CURL_TRC_CF(data, cf_at, "unsupported transport type %u", transport);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
-  result = cf_ip_happy_create(&cf, data, cf_at->conn, cf_create,
-                              transport, dns);
+  result = cf_ip_happy_create(&cf, data, cf_at->conn, cf_create, transport);
   if(result)
     return result;
 

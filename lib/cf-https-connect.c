@@ -28,6 +28,7 @@
 #include "urldata.h"
 #include "curl_trc.h"
 #include "cfilters.h"
+#include "cf-resolv.h"
 #include "connect.h"
 #include "hostip.h"
 #include "httpsrr.h"
@@ -39,6 +40,7 @@
 #include "vquic/vquic.h"
 
 typedef enum {
+  CF_HC_RESOLV,
   CF_HC_INIT,
   CF_HC_CONNECT,
   CF_HC_SUCCESS,
@@ -117,6 +119,7 @@ struct cf_hc_ctx {
   size_t baller_count;
   timediff_t soft_eyeballs_timeout_ms;
   timediff_t hard_eyeballs_timeout_ms;
+  uint8_t def_transport;
 };
 
 static void cf_hc_ctx_reset(struct Curl_easy *data,
@@ -126,7 +129,7 @@ static void cf_hc_ctx_reset(struct Curl_easy *data,
     size_t i;
     for(i = 0; i < ctx->baller_count; ++i)
       cf_hc_baller_reset(&ctx->ballers[i], data);
-    ctx->state = CF_HC_INIT;
+    ctx->state = CF_HC_RESOLV;
     ctx->result = CURLE_OK;
     ctx->hard_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout;
     ctx->soft_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout / 4;
@@ -160,6 +163,9 @@ static void cf_hc_baller_assign(struct cf_hc_baller *b,
   case ALPN_h1:
     b->name = "h1";
     break;
+  case ALPN_none:
+    b->name = "no-alpn";
+    break;
   default:
     b->result = CURLE_FAILED_INIT;
     break;
@@ -171,7 +177,6 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
                               struct Curl_easy *data,
                               uint8_t transport)
 {
-  struct cf_hc_ctx *ctx = cf->ctx;
   struct Curl_cfilter *save = cf->next;
 
   cf->next = NULL;
@@ -185,7 +190,7 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   }
 
   if(!b->result)
-    b->result = Curl_cf_setup_insert_after(cf, data, transport, ctx->dns,
+    b->result = Curl_cf_setup_insert_after(cf, data, transport,
                                            CURL_CF_SSL_ENABLE);
   b->cf = cf->next;
   cf->next = save;
@@ -301,6 +306,152 @@ static bool time_to_start_next(struct Curl_cfilter *cf,
   return FALSE;
 }
 
+static bool cf_https_alpns_contain(enum alpnid id,
+                                   enum alpnid *list, size_t len)
+{
+  size_t i;
+  for(i = 0; i < len; ++i) {
+    if(id == list[i])
+      return TRUE;
+  }
+  return FALSE;
+}
+
+static CURLcode cf_hc_resolv(struct Curl_cfilter *cf,
+                             struct Curl_easy *data)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  struct Curl_dns_entry *dns;
+  enum alpnid alpn_ids[2];
+  size_t alpn_count = 0, i;
+  CURLcode result = CURLE_OK;
+
+  dns = Curl_cf_resolv_get_dns(cf->conn, cf->sockindex);
+  if(!dns)
+    return CURLE_AGAIN;
+
+  if(cf->conn->bits.tls_enable_alpn) {
+#ifdef USE_HTTPSRR
+    /* Is there an HTTPSRR use its ALPNs here.
+     * We are here after having selected a connection to a host+port and
+     * can no longer change that. Any HTTPSRR advice for other hosts and ports
+     * we need to ignore. */
+    struct Curl_https_rrinfo *rr = dns ? dns->hinfo : NULL;
+    if(rr && !rr->no_def_alpn &&  /* ALPNs are defaults */
+       (!rr->target ||      /* for same host */
+        !rr->target[0] ||
+        (rr->target[0] == '.' &&
+         !rr->target[1])) &&
+       (rr->port < 0 ||    /* for same port */
+        rr->port == cf->conn->remote_port)) {
+      size_t i;
+      for(i = 0; i < CURL_ARRAYSIZE(rr->alpns) &&
+                 alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
+        enum alpnid alpn = rr->alpns[i];
+        if(cf_https_alpns_contain(alpn, alpn_ids, alpn_count))
+          continue;
+        switch(alpn) {
+        case ALPN_h3:
+          if(Curl_conn_may_http3(data, cf->conn, ctx->def_transport))
+            break;  /* not possible */
+          if(data->state.http_neg.allowed & CURL_HTTP_V3x) {
+            CURL_TRC_CF(data, cf, "adding h3 via HTTPS-RR");
+            alpn_ids[alpn_count++] = alpn;
+          }
+          break;
+        case ALPN_h2:
+          if(data->state.http_neg.allowed & CURL_HTTP_V2x) {
+            CURL_TRC_CF(data, cf, "adding h2 via HTTPS-RR");
+            alpn_ids[alpn_count++] = alpn;
+          }
+          break;
+        case ALPN_h1:
+          if(data->state.http_neg.allowed & CURL_HTTP_V1x) {
+            CURL_TRC_CF(data, cf, "adding h1 via HTTPS-RR");
+            alpn_ids[alpn_count++] = alpn;
+          }
+          break;
+        default: /* ignore */
+          break;
+        }
+      }
+    }
+#endif
+
+    /* Add preferred HTTP version ALPN first */
+    if(data->state.http_neg.preferred &&
+       (alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
+       (data->state.http_neg.preferred & data->state.http_neg.allowed)) {
+      enum alpnid alpn_pref = ALPN_none;
+      switch(data->state.http_neg.preferred) {
+      case CURL_HTTP_V3x:
+        if(!Curl_conn_may_http3(data, cf->conn, ctx->def_transport))
+          alpn_pref = ALPN_h3;
+        break;
+      case CURL_HTTP_V2x:
+        alpn_pref = ALPN_h2;
+        break;
+      case CURL_HTTP_V1x:
+        alpn_pref = ALPN_h1;
+        break;
+      default:
+        break;
+      }
+      if(alpn_pref &&
+         !cf_https_alpns_contain(alpn_pref, alpn_ids, alpn_count)) {
+        alpn_ids[alpn_count++] = alpn_pref;
+      }
+    }
+
+    if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
+       (data->state.http_neg.wanted & CURL_HTTP_V3x) &&
+       !cf_https_alpns_contain(ALPN_h3, alpn_ids, alpn_count)) {
+      result = Curl_conn_may_http3(data, cf->conn, ctx->def_transport);
+      if(!result) {
+        CURL_TRC_CF(data, cf, "adding wanted h3");
+        alpn_ids[alpn_count++] = ALPN_h3;
+      }
+      else if(data->state.http_neg.wanted == CURL_HTTP_V3x)
+        goto out; /* only h3 allowed, not possible, error out */
+    }
+    if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
+       (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
+       !cf_https_alpns_contain(ALPN_h2, alpn_ids, alpn_count)) {
+      CURL_TRC_CF(data, cf, "adding wanted h2");
+      alpn_ids[alpn_count++] = ALPN_h2;
+    }
+    else if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
+            (data->state.http_neg.wanted & CURL_HTTP_V1x) &&
+            !cf_https_alpns_contain(ALPN_h1, alpn_ids, alpn_count)) {
+      CURL_TRC_CF(data, cf, "adding wanted h1");
+      alpn_ids[alpn_count++] = ALPN_h1;
+    }
+  }
+
+  if(!alpn_count) {
+    alpn_ids[0] = ALPN_none;
+    alpn_count = 1;
+  }
+
+  /* Install ballers for the ALPNs we selected. */
+  DEBUGASSERT(alpn_count <= CURL_ARRAYSIZE(ctx->ballers));
+  if(!alpn_count || (alpn_count > CURL_ARRAYSIZE(ctx->ballers))) {
+    failf(data, "https-connect filter create with unsupported %zu ALPN ids",
+          alpn_count);
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+
+  for(i = 0; i < alpn_count; ++i)
+    cf_hc_baller_assign(&ctx->ballers[i], alpn_ids[i], ctx->def_transport);
+  for(; i < CURL_ARRAYSIZE(ctx->ballers); ++i)
+    ctx->ballers[i].alpn_id = ALPN_none;
+  ctx->baller_count = alpn_count;
+
+out:
+  return result;
+}
+
 static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool *done)
@@ -316,6 +467,17 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   switch(ctx->state) {
+  case CF_HC_RESOLV:
+    result = cf_hc_resolv(cf, data);
+    if(result) {
+      if(result == CURLE_AGAIN)
+        result = CURLE_OK;
+      goto out;
+    }
+    DEBUGASSERT(ctx->baller_count);
+    ctx->state = CF_HC_INIT;
+    FALLTHROUGH();
+
   case CF_HC_INIT:
     DEBUGASSERT(!cf->next);
     for(i = 0; i < ctx->baller_count; i++)
@@ -540,12 +702,6 @@ static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
     }
     result = CURLE_OK;
   }
-  switch(event) {
-  case CF_CTRL_CONN_INFO_UPDATE:
-    /* Connection fully established */
-    Curl_dns_entry_unlink(data, &ctx->dns);
-    break;
-  }
 out:
   return result;
 }
@@ -590,47 +746,23 @@ struct Curl_cftype Curl_cft_http_connect = {
 
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
-                             enum alpnid *alpnids, size_t alpn_count,
-                             uint8_t def_transport,
-                             struct Curl_dns_entry *dns)
+                             uint8_t def_transport)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_hc_ctx *ctx;
   CURLcode result = CURLE_OK;
-  size_t i;
-
-  if(!dns)
-    return CURLE_FAILED_INIT;
 
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-
-  ctx->dns = Curl_dns_entry_link(data, dns);
-
-  DEBUGASSERT(alpnids);
-  DEBUGASSERT(alpn_count);
-  DEBUGASSERT(alpn_count <= CURL_ARRAYSIZE(ctx->ballers));
-  if(!alpn_count || (alpn_count > CURL_ARRAYSIZE(ctx->ballers))) {
-    failf(data, "https-connect filter create with unsupported %zu ALPN ids",
-          alpn_count);
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
-
-  for(i = 0; i < alpn_count; ++i)
-    cf_hc_baller_assign(&ctx->ballers[i], alpnids[i], def_transport);
-  for(; i < CURL_ARRAYSIZE(ctx->ballers); ++i)
-    ctx->ballers[i].alpn_id = ALPN_none;
-  ctx->baller_count = alpn_count;
+  ctx->def_transport = def_transport;
 
   result = Curl_cf_create(&cf, &Curl_cft_http_connect, ctx);
   if(result)
     goto out;
   ctx = NULL;
-  cf_hc_ctx_reset(data, ctx);
 
 out:
   *pcf = result ? NULL : cf;
@@ -638,18 +770,16 @@ out:
   return result;
 }
 
-static CURLcode cf_http_connect_add(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    int sockindex,
-                                    enum alpnid *alpn_ids, size_t alpn_count,
-                                    uint8_t def_transport,
-                                    struct Curl_dns_entry *dns)
+static CURLcode cf_hc_add(struct Curl_easy *data,
+                          struct connectdata *conn,
+                          int sockindex,
+                          uint8_t def_transport)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  result = cf_hc_create(&cf, data, alpn_ids, alpn_count, def_transport, dns);
+  result = cf_hc_create(&cf, data, def_transport);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -657,138 +787,19 @@ out:
   return result;
 }
 
-static bool cf_https_alpns_contain(enum alpnid id,
-                                   enum alpnid *list, size_t len)
-{
-  size_t i;
-  for(i = 0; i < len; ++i) {
-    if(id == list[i])
-      return TRUE;
-  }
-  return FALSE;
-}
-
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
-                             int sockindex,
-                             struct Curl_dns_entry *dns)
+                             int sockindex)
 {
-  enum alpnid alpn_ids[2];
-  size_t alpn_count = 0;
   CURLcode result = CURLE_OK;
-  struct Curl_cfilter cf_fake, *cf = NULL;
 
-  (void)sockindex;
-  /* we want to log for the filter before we create it, fake it. */
-  memset(&cf_fake, 0, sizeof(cf_fake));
-  cf_fake.cft = &Curl_cft_http_connect;
-  cf = &cf_fake;
+  DEBUGASSERT(conn->scheme->protocol == CURLPROTO_HTTPS);
 
-  if(conn->bits.tls_enable_alpn) {
-#ifdef USE_HTTPSRR
-    /* Is there an HTTPSRR use its ALPNs here.
-     * We are here after having selected a connection to a host+port and
-     * can no longer change that. Any HTTPSRR advice for other hosts and ports
-     * we need to ignore. */
-    struct Curl_https_rrinfo *rr = dns ? dns->hinfo : NULL;
-    if(rr && !rr->no_def_alpn &&  /* ALPNs are defaults */
-       (!rr->target ||      /* for same host */
-        !rr->target[0] ||
-        (rr->target[0] == '.' &&
-         !rr->target[1])) &&
-       (rr->port < 0 ||    /* for same port */
-        rr->port == conn->remote_port)) {
-      size_t i;
-      for(i = 0; i < CURL_ARRAYSIZE(rr->alpns) &&
-                 alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
-        enum alpnid alpn = rr->alpns[i];
-        if(cf_https_alpns_contain(alpn, alpn_ids, alpn_count))
-          continue;
-        switch(alpn) {
-        case ALPN_h3:
-          if(Curl_conn_may_http3(data, conn, conn->transport_wanted))
-            break;  /* not possible */
-          if(data->state.http_neg.allowed & CURL_HTTP_V3x) {
-            CURL_TRC_CF(data, cf, "adding h3 via HTTPS-RR");
-            alpn_ids[alpn_count++] = alpn;
-          }
-          break;
-        case ALPN_h2:
-          if(data->state.http_neg.allowed & CURL_HTTP_V2x) {
-            CURL_TRC_CF(data, cf, "adding h2 via HTTPS-RR");
-            alpn_ids[alpn_count++] = alpn;
-          }
-          break;
-        case ALPN_h1:
-          if(data->state.http_neg.allowed & CURL_HTTP_V1x) {
-            CURL_TRC_CF(data, cf, "adding h1 via HTTPS-RR");
-            alpn_ids[alpn_count++] = alpn;
-          }
-          break;
-        default: /* ignore */
-          break;
-        }
-      }
-    }
-#endif
+  if((conn->scheme->protocol != CURLPROTO_HTTPS) ||
+     !conn->bits.tls_enable_alpn)
+     goto out;
 
-    /* Add preferred HTTP version ALPN first */
-    if(data->state.http_neg.preferred &&
-       (alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
-       (data->state.http_neg.preferred & data->state.http_neg.allowed)) {
-      enum alpnid alpn_pref = ALPN_none;
-      switch(data->state.http_neg.preferred) {
-      case CURL_HTTP_V3x:
-        if(!Curl_conn_may_http3(data, conn, conn->transport_wanted))
-          alpn_pref = ALPN_h3;
-        break;
-      case CURL_HTTP_V2x:
-        alpn_pref = ALPN_h2;
-        break;
-      case CURL_HTTP_V1x:
-        alpn_pref = ALPN_h1;
-        break;
-      default:
-        break;
-      }
-      if(alpn_pref &&
-         !cf_https_alpns_contain(alpn_pref, alpn_ids, alpn_count)) {
-        alpn_ids[alpn_count++] = alpn_pref;
-      }
-    }
-
-    if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
-       (data->state.http_neg.wanted & CURL_HTTP_V3x) &&
-       !cf_https_alpns_contain(ALPN_h3, alpn_ids, alpn_count)) {
-      result = Curl_conn_may_http3(data, conn, conn->transport_wanted);
-      if(!result) {
-        CURL_TRC_CF(data, cf, "adding wanted h3");
-        alpn_ids[alpn_count++] = ALPN_h3;
-      }
-      else if(data->state.http_neg.wanted == CURL_HTTP_V3x)
-        goto out; /* only h3 allowed, not possible, error out */
-    }
-    if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
-       (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
-       !cf_https_alpns_contain(ALPN_h2, alpn_ids, alpn_count)) {
-      CURL_TRC_CF(data, cf, "adding wanted h2");
-      alpn_ids[alpn_count++] = ALPN_h2;
-    }
-    else if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
-            (data->state.http_neg.wanted & CURL_HTTP_V1x) &&
-            !cf_https_alpns_contain(ALPN_h1, alpn_ids, alpn_count)) {
-      CURL_TRC_CF(data, cf, "adding wanted h1");
-      alpn_ids[alpn_count++] = ALPN_h1;
-    }
-  }
-
-  /* If we identified ALPNs to use, install our filter. Otherwise,
-   * install nothing, so our call will use a default connect setup. */
-  if(alpn_count) {
-    result = cf_http_connect_add(data, conn, sockindex,
-                                 alpn_ids, alpn_count,
-                                 conn->transport_wanted, dns);
-  }
+  result = cf_hc_add(data, conn, sockindex, conn->transport_wanted);
 
 out:
   return result;

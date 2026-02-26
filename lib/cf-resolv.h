@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CF_HTTP_H
-#define HEADER_CURL_CF_HTTP_H
+#ifndef HEADER_CURL_CF_RESOLV_H
+#define HEADER_CURL_CF_RESOLV_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,23 +25,19 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_HTTP
-
-struct Curl_cfilter;
 struct Curl_easy;
 struct connectdata;
-struct Curl_cftype;
+struct Curl_dns_entry;
 
-extern struct Curl_cftype Curl_cft_http_connect;
+CURLcode Curl_cf_resolv_add(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            int sockindex,
+                            uint8_t transport,
+                            struct Curl_dns_entry *dns);
 
-CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int sockindex,
-                                  bool try_h3, bool try_h21);
+struct Curl_dns_entry *
+Curl_cf_resolv_get_dns(struct connectdata *conn, int sockindex);
 
-CURLcode Curl_cf_https_setup(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             int sockindex);
+extern struct Curl_cftype Curl_cft_resolv;
 
-#endif /* !CURL_DISABLE_HTTP */
-#endif /* HEADER_CURL_CF_HTTP_H */
+#endif /* HEADER_CURL_CF_RESOLV_H */

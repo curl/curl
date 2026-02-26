@@ -37,6 +37,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "cf-resolv.h"
 #include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
@@ -349,7 +350,6 @@ static const char * const Curl_trc_mstate_names[] = {
   "PENDING",
   "SETUP",
   "CONNECT",
-  "RESOLVING",
   "CONNECTING",
   "PROTOCONNECT",
   "PROTOCONNECTING",
@@ -553,6 +553,7 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_unix,           TRC_CT_NETWORK },
   { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
   { &Curl_cft_ip_happy,       TRC_CT_NETWORK },
+  { &Curl_cft_resolv,         TRC_CT_NETWORK },
   { &Curl_cft_setup,          TRC_CT_PROTOCOL },
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },

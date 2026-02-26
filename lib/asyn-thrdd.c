@@ -524,7 +524,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
   struct async_thrdd_ctx *thrdd = async ? &async->thrdd : NULL;
 
   if(!thrdd)
-    return CURLE_FAILED_INIT;
+    return CURLE_OK;
 #ifdef USE_HTTPSRR_ARES
   if(thrdd->rr.channel) {
     CURLcode result = Curl_ares_pollset(data, thrdd->rr.channel, ps);

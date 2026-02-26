@@ -1,0 +1,269 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+#include "curl_setup.h"
+
+#include "urldata.h"
+#include "cfilters.h"
+#include "connect.h"
+#include "dnscache.h"
+#include "curl_trc.h"
+#include "progress.h"
+#include "url.h"
+#include "cf-resolv.h"
+
+
+struct cf_resolv_ctx {
+  struct Curl_dns_entry *dns;
+  CURLcode resolv_result;
+  uint8_t transport;
+  BIT(started);
+  BIT(announced);
+};
+
+/*************************************************************
+ * Resolve the address of the server or proxy
+ *************************************************************/
+static CURLcode cf_resolv_start(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                struct Curl_dns_entry **pdns)
+{
+  struct connectdata *conn = cf->conn;
+  struct hostname *ehost;
+  uint16_t eport;
+  timediff_t timeout_ms = Curl_timeleft_ms(data);
+  const char *peertype = "host";
+  CURLcode result;
+
+  *pdns = NULL;
+
+#ifdef USE_UNIX_SOCKETS
+  {
+    const char *unix_path = Curl_conn_get_unix_path(cf->conn);
+    if(unix_path) {
+      DEBUGASSERT(conn->transport_wanted == TRNSPRT_UNIX);
+      CURL_TRC_CF(data, cf, "resolve unix socket %s", unix_path);
+      return Curl_resolv_unix(data, unix_path,
+                              (bool)conn->bits.abstract_unix_socket, pdns);
+    }
+  }
+#endif
+
+#ifndef CURL_DISABLE_PROXY
+  if(CONN_IS_PROXIED(conn)) {
+    ehost = conn->bits.socksproxy ? &conn->socks_proxy.host :
+      &conn->http_proxy.host;
+    eport = conn->bits.socksproxy ? conn->socks_proxy.port :
+      conn->http_proxy.port;
+    peertype = "proxy";
+  }
+  else
+#endif
+  {
+    ehost = conn->bits.conn_to_host ? &conn->conn_to_host : &conn->host;
+    /* If not connecting via a proxy, extract the port from the URL, if it is
+     * there, thus overriding any defaults that might have been set above. */
+    eport = conn->bits.conn_to_port ?
+            conn->conn_to_port : (uint16_t)conn->remote_port;
+  }
+
+  /* Resolve target host right on */
+  CURL_TRC_CF(data, cf, "resolve host %s:%u", ehost->name, eport);
+  result = Curl_resolv(data, ehost->name, eport, conn->ip_version,
+                       SOCK_STREAM, timeout_ms, pdns);
+  DEBUGASSERT(!result || !*pdns);
+  if(!result) { /* resolved right away, either sync or from dnscache */
+    DEBUGASSERT(*pdns);
+    return CURLE_OK;
+  }
+  else if(result == CURLE_AGAIN) { /* async resolv in progress */
+    return CURLE_OK;
+  }
+  else if(result == CURLE_OPERATION_TIMEDOUT) { /* took too long */
+    failf(data, "Failed to resolve %s '%s' with timeout after %"
+          FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
+          curlx_ptimediff_ms(Curl_pgrs_now(data),
+                             &data->progress.t_startsingle));
+    return CURLE_OPERATION_TIMEDOUT;
+  }
+  else {
+    DEBUGASSERT(result);
+    failf(data, "Could not resolve %s: %s", peertype, ehost->dispname);
+    return result;
+  }
+}
+
+static CURLcode cf_resolv_connect(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  bool *done)
+{
+  struct cf_resolv_ctx *ctx = cf->ctx;
+
+  if(!cf->connected) {
+    *done = FALSE;
+
+    if(!ctx->started) {
+      ctx->started = TRUE;
+      ctx->resolv_result = cf_resolv_start(cf, data, &ctx->dns);
+    }
+
+    if(!ctx->dns && !ctx->resolv_result) {
+      ctx->resolv_result = Curl_resolv_take_result(data, &ctx->dns);
+      if(!ctx->dns && !ctx->resolv_result)
+        CURL_TRC_CF(data, cf, "waiting for DNS resolution");
+    }
+
+    if(ctx->resolv_result) {
+      CURL_TRC_CF(data, cf, "error resolving: %d", ctx->resolv_result);
+      return ctx->resolv_result;
+    }
+
+    if(ctx->dns && !ctx->announced) {
+      ctx->announced = TRUE;
+      if(cf->sockindex == FIRSTSOCKET) {
+        cf->conn->bits.dns_resolved = TRUE;
+        Curl_pgrsTime(data, TIMER_NAMELOOKUP);
+      }
+      CURL_TRC_CF(data, cf, "DNS resolved and propagated");
+    }
+
+    if(cf->next && !cf->next->connected) {
+      CURLcode result = Curl_conn_cf_connect(cf->next, data, done);
+      if(result || !*done)
+        return result;
+    }
+  }
+
+  *done = TRUE;
+  cf->connected = TRUE;
+  return CURLE_OK;
+}
+
+static void cf_resolv_ctx_destroy(struct Curl_easy *data,
+                                  struct cf_resolv_ctx *ctx)
+{
+  if(ctx) {
+    Curl_dns_entry_unlink(data, &ctx->dns);
+    curlx_free(ctx);
+  }
+}
+
+static void cf_resolv_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct cf_resolv_ctx *ctx = cf->ctx;
+
+  CURL_TRC_CF(data, cf, "destroy");
+  cf_resolv_ctx_destroy(data, ctx);
+}
+
+static void cf_resolv_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  cf->connected = FALSE;
+  if(cf->next)
+    cf->next->cft->do_close(cf->next, data);
+}
+
+struct Curl_cftype Curl_cft_resolv = {
+  "RESOLVE",
+  0,
+  CURL_LOG_LVL_NONE,
+  cf_resolv_destroy,
+  cf_resolv_connect,
+  cf_resolv_close,
+  Curl_cf_def_shutdown,
+  Curl_cf_def_adjust_pollset,
+  Curl_cf_def_data_pending,
+  Curl_cf_def_send,
+  Curl_cf_def_recv,
+  Curl_cf_def_cntrl,
+  Curl_cf_def_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  Curl_cf_def_query,
+};
+
+static CURLcode cf_resolv_create(struct Curl_cfilter **pcf,
+                                 struct Curl_easy *data,
+                                 uint8_t transport,
+                                 struct Curl_dns_entry *dns)
+{
+  struct Curl_cfilter *cf = NULL;
+  struct cf_resolv_ctx *ctx;
+  CURLcode result = CURLE_OK;
+
+  /* if(!dns)
+    return CURLE_FAILED_INIT; */
+
+  (void)data;
+  ctx = curlx_calloc(1, sizeof(*ctx));
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  ctx->transport = transport;
+  ctx->dns = Curl_dns_entry_link(data, dns);
+  ctx->started = !!ctx->dns;
+
+  result = Curl_cf_create(&cf, &Curl_cft_resolv, ctx);
+
+out:
+  *pcf = result ? NULL : cf;
+  if(result)
+    cf_resolv_ctx_destroy(data, ctx);
+  return result;
+}
+
+CURLcode Curl_cf_resolv_add(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            int sockindex,
+                            uint8_t transport,
+                            struct Curl_dns_entry *dns)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  result = cf_resolv_create(&cf, data, transport, dns);
+  if(result)
+    goto out;
+  Curl_conn_cf_add(data, conn, sockindex, cf);
+out:
+  return result;
+}
+
+/* Get the DNS entry from the lowest `resolv` filter in the
+ * filter chain at sockindex or NULL. */
+struct Curl_dns_entry *
+Curl_cf_resolv_get_dns(struct connectdata *conn, int sockindex)
+{
+  struct Curl_cfilter *cf_resolv = NULL, *cf = conn->cfilter[sockindex];
+
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &Curl_cft_resolv)
+      cf_resolv = cf;
+  }
+  if(cf_resolv) {
+    struct cf_resolv_ctx *ctx = cf_resolv->ctx;
+    return ctx->dns;
+  }
+  return NULL;
+}
