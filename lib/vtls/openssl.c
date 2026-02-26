@@ -5255,13 +5255,15 @@ out:
   return result;
 }
 
-static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
+static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
+                                         int sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;
-  int algo_nid;
-  const EVP_MD *algo_type;
-  const char *algo_name;
+  int mdnid;
+  bool no_digest_acceptable = FALSE;
+  const EVP_MD *algo_type = NULL;
+  const char *algo_name = NULL;
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
@@ -5293,43 +5295,108 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     /* No server certificate, do not do channel binding */
     return CURLE_OK;
 
-  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
+#ifdef HAVE_OPENSSL3
+  {
+    int pknid, secbits;
+    uint32_t flags;
+    EVP_PKEY *pkey = X509_get0_pubkey(cert);
+
+    if(!X509_get_signature_info(cert, &mdnid, &pknid, &secbits, &flags)) {
+      failf(data, "certificate signature algorithm not recognized");
+      result = CURLE_SSL_INVALIDCERTSTATUS;
+      goto out;
+    }
+
+    if(mdnid != NID_undef) {
+      if(mdnid == NID_md5 || mdnid == NID_sha1) {
+        algo_type = EVP_sha256();
+      }
+      else
+        algo_type = EVP_get_digestbynid(mdnid);
+    }
+    else if(pkey && !EVP_PKEY_is_a(pkey, OBJ_nid2sn(pknid))) {
+      /* The cert's pkey is different from the algorithm used to sign
+       * the certificate. Since the reported `mdnid` is undefined, there
+       * is no digest algorithm available here. This happens in PQC
+       * and is accepted, resulting in no addition to the binding. */
+      no_digest_acceptable = TRUE;
+    }
+    else if(pkey) {
+      /* cert's pkey type is the same as the cert signer (or same family).
+       * Ask for the mandatory/advisory digest algorithm for the pkey.
+       */
+      char mdname[128] = "";
+      int rc = EVP_PKEY_get_default_digest_name(pkey, mdname, sizeof(mdname));
+      bool md_is_undef = !strcmp(mdname, "UNDEF");
+
+      if(rc == 2 && md_is_undef) {
+        /* OpenSSL declares "undef" the *mandatory* digest for this key.
+         * This is some PQC shit, accept it, no addition to binding. */
+        no_digest_acceptable = TRUE;
+      }
+      else if(rc > 0 && mdname[0] != '\0' && !md_is_undef) {
+        infof(data, "Digest algorithm : %s%s (derived from public key)"
+              ", but unavailable",
+              mdname, rc == 2 ? " [mandatory]" : " [advisory]");
+      }
+    }
+  }
+#else /* HAVE_OPENSSL3 */
+
+  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &mdnid, NULL)) {
     failf(data,
           "Unable to find digest NID for certificate signature algorithm");
     result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
+    goto out;
   }
 
   /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
-  if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
+  if(mdnid == NID_md5 || mdnid == NID_sha1) {
     algo_type = EVP_sha256();
   }
   else {
-    algo_type = EVP_get_digestbynid(algo_nid);
+    algo_type = EVP_get_digestbynid(mdnid);
     if(!algo_type) {
-      algo_name = OBJ_nid2sn(algo_nid);
+      algo_name = OBJ_nid2sn(mdnid);
       failf(data, "Could not find digest algorithm %s (NID %d)",
-            algo_name ? algo_name : "(null)", algo_nid);
+            algo_name ? algo_name : "(null)", mdnid);
       result = CURLE_SSL_INVALIDCERTSTATUS;
-      goto error;
+      goto out;
     }
   }
 
-  if(!X509_digest(cert, algo_type, buf, &length)) {
-    failf(data, "X509_digest() failed");
+#endif /* HAVE_OPENSSL3, else */
+
+  if(!algo_type) {
+    if(no_digest_acceptable) {
+      infof(data, "certificate exposes no signing digest algorithm, "
+            "nothing to add to channel binding");
+      result = CURLE_OK;
+      goto out;
+    }
+    /* unacceptable, something is wrong, fail */
+    algo_name = OBJ_nid2sn(mdnid);
+    failf(data, "Unable to find digest algorithm %s (NID %d) "
+          "for channel binding", algo_name ? algo_name : "(null)", mdnid);
     result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
+    goto out;
+  }
+
+  if(!X509_digest(cert, algo_type, buf, &length)) {
+    failf(data, "X509_digest() failed for channel binding");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
   }
 
   /* Append "tls-server-end-point:" */
   result = curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1);
   if(result)
-    goto error;
+    goto out;
 
   /* Append digest */
   result = curlx_dyn_addn(binding, buf, length);
 
-error:
+out:
   X509_free(cert);
   return result;
 }
