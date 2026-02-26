@@ -14,7 +14,7 @@ to and read from. It manages read and write positions and has a maximum size.
 Its basic read/write functions have a similar signature and return code
 handling as many internal curl read and write ones.
 
-```
+```c
 ssize_t Curl_bufq_write(struct bufq *q, const unsigned char *buf, size_t len, CURLcode *err);
 
 - returns the length written into `q` or -1 on error.
@@ -29,7 +29,7 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len, CURLcode 
 
 To pass data into a `bufq` without an extra copy, read callbacks can be used.
 
-```
+```c
 typedef ssize_t Curl_bufq_reader(void *reader_ctx, unsigned char *buf, size_t len,
                                  CURLcode *err);
 
@@ -45,7 +45,7 @@ once or only read in a maximum amount of bytes.
 
 The analog mechanism for write out buffer data is:
 
-```
+```c
 typedef ssize_t Curl_bufq_writer(void *writer_ctx, const unsigned char *buf, size_t len,
                                  CURLcode *err);
 
@@ -60,7 +60,7 @@ remove the amount that `writer` reports.
 
 It is possible to get access to the memory of data stored in a `bufq` with:
 
-```
+```c
 bool Curl_bufq_peek(const struct bufq *q, const unsigned char **pbuf, size_t *plen);
 ```
 
@@ -69,7 +69,7 @@ may read. This is only valid until another operation on `bufq` is performed.
 
 Instead of reading `bufq` data, one may simply skip it:
 
-```
+```c
 void Curl_bufq_skip(struct bufq *q, size_t amount);
 ```
 
@@ -80,7 +80,7 @@ This removes `amount` number of bytes from the `bufq`.
 `bufq` is initialized and freed similar to the `dynbuf` module. Code using
 `bufq` holds a `struct bufq` somewhere. Before it uses it, it invokes:
 
-```
+```c
 void Curl_bufq_init(struct bufq *q, size_t chunk_size, size_t max_chunks);
 ```
 
@@ -91,12 +91,13 @@ about memory management.
 
 The user of the `bufq` has the responsibility to call:
 
-```
+```c
 void Curl_bufq_free(struct bufq *q);
 ```
+
 to free all resources held by `q`. It is possible to reset a `bufq` to empty via:
 
-```
+```c
 void Curl_bufq_reset(struct bufq *q);
 ```
 
@@ -154,7 +155,7 @@ the `bufq` from growing ever larger and larger.
 A `struct bufc_pool` may be used to create chunks for a `bufq` and keep spare
 ones around. It is initialized and used via:
 
-```
+```c
 void Curl_bufcp_init(struct bufc_pool *pool, size_t chunk_size, size_t spare_max);
 
 void Curl_bufq_initp(struct bufq *q, struct bufc_pool *pool, size_t max_chunks, int opts);

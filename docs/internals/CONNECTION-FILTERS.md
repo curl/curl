@@ -76,7 +76,7 @@ etc.
 
 Each filter does in principle the following:
 
-```
+```c
 static CURLcode myfilter_cf_connect(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     bool *done)
@@ -109,7 +109,7 @@ transfers.
 
 The memory footprint of a filter is relatively small:
 
-```
+```c
 struct Curl_cfilter {
   const struct Curl_cftype *cft; /* the type providing implementation */
   struct Curl_cfilter *next;     /* next filter in chain */
@@ -138,13 +138,14 @@ zero cost *if the filter does not transform the data*. An http proxy or socks
 filter, once it is connected, just passes the calls through. Those filters
 implementations look like this:
 
-```
+```c
 ssize_t Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                          const void *buf, size_t len, CURLcode *err)
 {
   return cf->next->cft->do_send(cf->next, data, buf, len, err);
 }
 ```
+
 The `recv` implementation is equivalent.
 
 ## Filter Types
@@ -231,7 +232,7 @@ Users of `curl` may activate them by adding the name of the filter type to the
 `--trace-config` argument. For example, in order to get more detailed tracing
 of an HTTP/2 request, invoke curl with:
 
-```
+```sh
 > curl -v --trace-config ids,time,http/2 https://curl.se/
 ```
 

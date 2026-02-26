@@ -28,7 +28,7 @@ The transfer loop that sends and receives, is using `Curl_client_read()` to get
 more data to send for a transfer. If no specific reader has been installed yet,
 the default one that uses `CURLOPT_READFUNCTION` is added. The prototype is
 
-```
+```c
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
                           size_t *nread, bool *eos);
 ```
@@ -44,7 +44,7 @@ The chain of readers allows processing of the data to send.
 
 The definition of a reader is:
 
-```
+```c
 struct Curl_crtype {
   const char *name;        /* writer name. */
   CURLcode (*do_init)(struct Curl_easy *data, struct Curl_creader *writer);
@@ -78,7 +78,7 @@ the order in which they are called is relevant for the outcome. When a reader
 is created, it gets the `phase` property in which it operates. Reader phases
 are defined like:
 
-```
+```c
 typedef enum {
   CURL_CR_NET,  /* data send to the network (connection filters) */
   CURL_CR_TRANSFER_ENCODE, /* add transfer-encodings */

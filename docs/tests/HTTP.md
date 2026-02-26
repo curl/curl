@@ -16,7 +16,7 @@ The test cases and necessary files are in `tests/http`. You can invoke
 `pytest` from there or from the top level curl checkout and it finds all
 tests.
 
-```
+```sh
 curl> pytest test/http
 platform darwin -- Python 3.9.15, pytest-6.2.0, py-1.10.0, pluggy-0.13.1
 rootdir: /Users/sei/projects/curl
@@ -30,7 +30,7 @@ times. `-k <expr>` can be used to run only matching test cases. The `expr` can
 be something resembling a python test or just a string that needs to match
 test cases in their names.
 
-```
+```sh
 curl/tests/http> pytest -vv -k test_01_02
 ```
 
@@ -76,21 +76,21 @@ Several test cases are parameterized, for example with the HTTP version to
 use. If you want to run a test with a particular protocol only, use a command
 line like:
 
-```
+```sh
 curl/tests/http> pytest -k "test_02_06 and h2"
 ```
 
 Test cases can be repeated, with the `pytest-repeat` module (`pip install
 pytest-repeat`). Like in:
 
-```
+```sh
 curl/tests/http> pytest -k "test_02_06 and h2" --count=100
 ```
 
 which then runs this test case a hundred times. In case of flaky tests, you
 can make pytest stop on the first one with:
 
-```
+```sh
 curl/tests/http> pytest -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 
@@ -99,7 +99,7 @@ of log files, the verbosity of pytest is also used to collect curl trace
 output. If you specify `-v` three times, the `curl` command is started with
 `--trace`:
 
-```
+```sh
 curl/tests/http> pytest -vvv -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 

@@ -29,13 +29,13 @@ All code in `libcurl` that handles response data is ultimately expected to
 forward this data via `Curl_client_write()` to the application. The exact
 prototype of this function is:
 
-```
+```c
 CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf, size_t blen);
 ```
 
 The `type` argument specifies what the bytes in `buf` actually are.
 The following bits are defined:
-```
+```c
 #define CLIENTWRITE_BODY    (1 << 0) /* non-meta information, BODY */
 #define CLIENTWRITE_INFO    (1 << 1) /* meta information, not a HEADER */
 #define CLIENTWRITE_HEADER  (1 << 2) /* meta information, HEADER */
@@ -56,7 +56,7 @@ application callbacks. This is similar to the design of connection filters:
 client writers can be chained to process the bytes written through them. The
 definition is:
 
-```
+```c
 struct Curl_cwtype {
   const char *name;
   CURLcode (*do_init)(struct Curl_easy *data,
@@ -87,7 +87,7 @@ in which the are called is relevant for the outcome. When a writer is created,
 one property it gets is the `phase` in which it operates. Writer phases are
 defined like:
 
-```
+```c
 typedef enum {
   CURL_CW_RAW,  /* raw data written, before any decoding */
   CURL_CW_TRANSFER_DECODE, /* remove transfer-encodings */

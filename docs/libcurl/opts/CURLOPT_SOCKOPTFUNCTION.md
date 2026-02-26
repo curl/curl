@@ -22,7 +22,7 @@ CURLOPT_SOCKOPTFUNCTION - callback for setting socket options
 ~~~c
 #include <curl/curl.h>
 
-typedef enum  {
+typedef enum {
   CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
   CURLSOCKTYPE_ACCEPT, /* socket created by accept() call */
   CURLSOCKTYPE_LAST    /* never use */

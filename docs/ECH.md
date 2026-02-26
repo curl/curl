@@ -370,7 +370,7 @@ make
 There are some known issues with the ECH implementation in wolfSSL:
 
 - The main issue is that the client currently handles HelloRetryRequest
-  incorrectly.  [HRR issue](https://github.com/wolfSSL/wolfssl/issues/6802).)
+  incorrectly. [HRR issue](https://github.com/wolfSSL/wolfssl/issues/6802).)
   The HRR issue means that the client does not work for
   [this ECH test web site](https://tls-ech.dev/) and any other similarly
   configured sites.
@@ -461,7 +461,7 @@ In another window:
 
 ```sh
 cd $HOME/code/curl/
-./src/curl -vvv --insecure  --connect-to foo.example.com:8443:localhost:8443  --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
+./src/curl -vvv --insecure --connect-to foo.example.com:8443:localhost:8443  --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
 ```
 
 ### Automated use of ``retry_configs`` not supported so far...
