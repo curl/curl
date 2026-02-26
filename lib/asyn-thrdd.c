@@ -390,7 +390,8 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
  * Returns FALSE in case of failure, otherwise TRUE.
  */
 static bool async_thrdd_init(struct Curl_easy *data,
-                             const char *hostname, int port, int ip_version,
+                             const char *hostname,
+                             uint16_t port, uint8_t ip_version,
                              const struct addrinfo *hints)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
@@ -412,8 +413,6 @@ static bool async_thrdd_init(struct Curl_easy *data,
 #endif
   }
 
-  data->state.async.dns = NULL;
-  data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
   curlx_free(data->state.async.hostname);
@@ -508,13 +507,12 @@ static CURLcode asyn_thrdd_await(struct Curl_easy *data,
       }
     }
 
-    if(entry)
-      result = Curl_async_is_resolved(data, entry);
+    if(entry) {
+      result = Curl_async_take_result(data, entry);
+      if(result == CURLE_AGAIN)
+        result = CURLE_OK;
+    }
   }
-
-  data->state.async.done = TRUE;
-  if(entry)
-    *entry = data->state.async.dns;
 
   return result;
 }
@@ -561,25 +559,18 @@ CURLcode Curl_async_await(struct Curl_easy *data,
 }
 
 /*
- * Curl_async_is_resolved() is called repeatedly to check if a previous
+ * Curl_async_take_result() is called repeatedly to check if a previous
  * name resolve request has completed. It should also make sure to time-out if
  * the operation seems to take too long.
  */
-CURLcode Curl_async_is_resolved(struct Curl_easy *data,
-                                struct Curl_dns_entry **dns)
+CURLcode Curl_async_take_result(struct Curl_easy *data,
+                                struct Curl_dns_entry **pdns)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
   curl_bit done = FALSE;
 
-  DEBUGASSERT(dns);
-  *dns = NULL;
-
-  if(data->state.async.done) {
-    *dns = data->state.async.dns;
-    CURL_TRC_DNS(data, "threaded: is_resolved(), already done, dns=%sfound",
-                 *dns ? "" : "not ");
-    return CURLE_OK;
-  }
+  DEBUGASSERT(pdns);
+  *pdns = NULL;
 
 #ifdef USE_HTTPSRR_ARES
   /* best effort, ignore errors */
@@ -598,16 +589,14 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   if(done) {
     CURLcode result = CURLE_OK;
 
-    data->state.async.done = TRUE;
-    Curl_resolv_unlink(data, &data->state.async.dns);
     Curl_expire_done(data, EXPIRE_ASYNC_NAME);
 
     if(thrdd->addr->res) {
-      data->state.async.dns =
-        Curl_dnscache_mk_entry(data, &thrdd->addr->res,
-                               data->state.async.hostname, 0,
-                               data->state.async.port, FALSE);
-      if(!data->state.async.dns)
+      struct Curl_dns_entry *dns =
+        Curl_dns_entry_create(data, &thrdd->addr->res,
+                              data->state.async.hostname, 0,
+                              data->state.async.port, FALSE);
+      if(!dns)
         result = CURLE_OUT_OF_MEMORY;
 
 #ifdef USE_HTTPSRR_ARES
@@ -619,21 +608,20 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
           if(!lhrr)
             result = CURLE_OUT_OF_MEMORY;
           else
-            data->state.async.dns->hinfo = lhrr;
+            dns->hinfo = lhrr;
         }
       }
 #endif
-      if(!result && data->state.async.dns)
-        result = Curl_dnscache_add(data, data->state.async.dns);
+      if(!result && dns) {
+        result = Curl_dnscache_add(data, dns);
+        *pdns = dns;
+      }
     }
 
-    if(!result && !data->state.async.dns)
+    if(!result && !*pdns)
       result = Curl_resolver_error(data, NULL);
-    if(result)
-      Curl_resolv_unlink(data, &data->state.async.dns);
-    *dns = data->state.async.dns;
     CURL_TRC_DNS(data, "is_resolved() result=%d, dns=%sfound",
-                 result, *dns ? "" : "not ");
+                 result, *pdns ? "" : "not ");
     async_thrdd_shutdown(data);
     return result;
   }
@@ -657,7 +645,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
 
     thrdd->addr->interval_end = elapsed + thrdd->addr->poll_interval;
     Curl_expire(data, thrdd->addr->poll_interval, EXPIRE_ASYNC_NAME);
-    return CURLE_OK;
+    return CURLE_AGAIN;
   }
 }
 
@@ -711,8 +699,10 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 /*
  * Curl_async_getaddrinfo() - for platforms without getaddrinfo
  */
-CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
-                                int port, int ip_version)
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
+                                const char *hostname,
+                                uint16_t port,
+                                uint8_t ip_version)
 {
   (void)ip_version;
 
@@ -730,8 +720,10 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
 /*
  * Curl_async_getaddrinfo() - for getaddrinfo
  */
-CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
-                                int port, int ip_version)
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
+                                const char *hostname,
+                                uint16_t port,
+                                uint8_t ip_version)
 {
   struct addrinfo hints;
   int pf = PF_INET;

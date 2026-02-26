@@ -432,8 +432,10 @@ error:
  * a 'Curl_addrinfo *' with the address information.
  */
 
-CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
-                  int port, int ip_version)
+CURLcode Curl_doh(struct Curl_easy *data,
+                  const char *hostname,
+                  uint16_t port,
+                  uint8_t ip_version)
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp = NULL;
@@ -446,7 +448,6 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
   if(data->state.async.doh)
     Curl_doh_cleanup(data);
 
-  data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
   data->state.async.hostname = curlx_strdup(hostname);
@@ -1196,13 +1197,14 @@ UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
 # endif
 #endif
 
-CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dnsp)
+CURLcode Curl_doh_take_result(struct Curl_easy *data,
+                              struct Curl_dns_entry **pdns)
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp = data->state.async.doh;
   struct dohentry de;
-  *dnsp = NULL; /* defaults to no response */
+
+  *pdns = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1215,9 +1217,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   else if(!dohp->pending) {
     DOHcode rc[DOH_SLOT_COUNT];
     int slot;
-
-    /* Clear any result the might still be there */
-    Curl_resolv_unlink(data, &data->state.async.dns);
 
     memset(rc, 0, sizeof(rc));
     /* remove DoH handles from multi handle and close them */
@@ -1237,7 +1236,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       }
     } /* next slot */
 
-    result = CURLE_COULDNT_RESOLVE_HOST; /* until we know better */
     if(!rc[DOH_SLOT_IPV4] || !rc[DOH_SLOT_IPV6]) {
       /* we have an address, of one kind or other */
       struct Curl_dns_entry *dns;
@@ -1253,40 +1251,44 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         goto error;
 
       /* we got a response, create a dns entry. */
-      dns = Curl_dnscache_mk_entry(data, &ai, dohp->host, 0,
-                                   dohp->port, FALSE);
-      if(dns) {
-        /* Now add and HTTPSRR information if we have */
-#ifdef USE_HTTPSRR
-        if(de.numhttps_rrs > 0 && result == CURLE_OK) {
-          struct Curl_https_rrinfo *hrr = NULL;
-          result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
-                                           de.https_rrs->len, &hrr);
-          if(result) {
-            infof(data, "Failed to decode HTTPS RR");
-            Curl_resolv_unlink(data, &dns);
-            goto error;
-          }
-          infof(data, "Some HTTPS RR to process");
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-          doh_print_httpsrr(data, hrr);
-#endif
-          dns->hinfo = hrr;
-        }
-#endif /* USE_HTTPSRR */
-        /* and add the entry to the cache */
-        data->state.async.dns = dns;
-        result = Curl_dnscache_add(data, dns);
-        *dnsp = data->state.async.dns;
+      dns = Curl_dns_entry_create(data, &ai, dohp->host, 0,
+                                  dohp->port, FALSE);
+      if(!dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
       }
-    } /* address processing done */
 
-    /* All done */
-    data->state.async.done = TRUE;
+      /* Now add and HTTPSRR information if we have */
+#ifdef USE_HTTPSRR
+      if(de.numhttps_rrs > 0 && result == CURLE_OK) {
+        struct Curl_https_rrinfo *hrr = NULL;
+        result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
+                                         de.https_rrs->len, &hrr);
+        if(result) {
+          infof(data, "Failed to decode HTTPS RR");
+          Curl_dns_entry_unlink(data, &dns);
+          goto error;
+        }
+        infof(data, "Some HTTPS RR to process");
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
+        doh_print_httpsrr(data, hrr);
+#endif
+        dns->hinfo = hrr;
+      }
+#endif /* USE_HTTPSRR */
+      /* and add the entry to the cache */
+      result = Curl_dnscache_add(data, dns);
+      *pdns = dns;
+    }
+    else {
+      result = CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
+        CURLE_COULDNT_RESOLVE_HOST;
+    }
+
   } /* !dohp->pending */
   else
     /* wait for pending DoH transactions to complete */
-    return CURLE_OK;
+    return CURLE_AGAIN;
 
 error:
   de_cleanup(&de);

@@ -404,11 +404,11 @@ static CURLcode test_lib530(const char *URL)
   if(!result)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
 
-  result = testone(URL, 0, 1); /* fail 1st call to socket callback */
+  result = testone(URL, 0, 2); /* fail 2nd call to socket callback */
   if(!result)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
 
-  result = testone(URL, 0, 2); /* fail 2nd call to socket callback */
+  result = testone(URL, 0, 3); /* fail 3rd call to socket callback */
   if(!result)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
 
