@@ -271,8 +271,8 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             image: macos-26
-            compiler: llvm@20
-            install: gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
+            compiler: llvm
+            install: llvm gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
             install_steps: skiprun
             chkprefill: _chkprefill
             generate: >-
@@ -281,20 +281,20 @@ jobs:
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON
-              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm@20/bin/clang-tidy
+              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'HTTP/3 clang-tidy'
             image: macos-26
-            compiler: llvm@20
-            install: libnghttp3 libngtcp2 openldap krb5
+            compiler: llvm
+            install: llvm libnghttp3 libngtcp2 openldap krb5
             install_steps: skipall
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
               -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON
-              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm@20/bin/clang-tidy
+              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
 
           - name: 'LibreSSL openldap krb5 c-ares +examples'
             compiler: clang
