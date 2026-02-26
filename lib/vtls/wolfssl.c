@@ -1379,9 +1379,15 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
       struct ssl_connect_data *connssl = cf->ctx;
       struct Curl_dns_entry *dns = NULL;
 
-      dns = Curl_dnscache_get(data, connssl->peer.hostname, connssl->peer.port,
-                              cf->conn->ip_version);
+      result = Curl_dnscache_get(data, connssl->peer.hostname,
+                                 connssl->peer.port,
+                                 cf->conn->ip_version, &dns);
       if(!dns) {
+        if(result) {
+          failf(data, "ECH: could not resolve %s:%d",
+                connssl->peer.hostname, connssl->peer.port);
+          goto out;
+        }
         infof(data, "ECH: requested but no DNS info available");
         if(data->set.tls_ech & CURLECH_HARD) {
           result = CURLE_SSL_CONNECT_ERROR;
@@ -1417,7 +1423,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
             goto out;
           }
         }
-        Curl_resolv_unlink(data, &dns);
+        Curl_dns_entry_unlink(data, &dns);
       }
     }
 

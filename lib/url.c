@@ -245,8 +245,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   /* release any resolve information this transfer kept */
   Curl_async_destroy(data);
-  Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
-  Curl_resolv_unlink(data, &data->state.dns[1]);
 
   data->set.verbose = FALSE; /* no more calls to DEBUGFUNCTION */
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
@@ -545,7 +543,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->oauth_bearer);
   Curl_safefree(conn->host.rawalloc); /* hostname buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* hostname buffer */
-  Curl_safefree(conn->hostname_resolve);
   Curl_safefree(conn->secondaryhostname);
   Curl_safefree(conn->localdev);
   Curl_ssl_conn_config_cleanup(conn);
@@ -1904,7 +1901,6 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
     if(result)
       return result;
   }
-  DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
 
   /* Now create the destination name */
 #ifndef CURL_DISABLE_PROXY
@@ -2927,9 +2923,9 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     }
 
     if(port >= 0) {
-      conn->conn_to_port = port;
+      conn->conn_to_port = (uint16_t)port;
       conn->bits.conn_to_port = TRUE;
-      infof(data, "Connecting to port: %d", port);
+      infof(data, "Connecting to port: %u", conn->conn_to_port);
     }
     else {
       /* no "connect to port" */
@@ -3099,11 +3095,10 @@ static CURLcode resolve_unix(struct Curl_easy *data,
  *************************************************************/
 static CURLcode resolve_server(struct Curl_easy *data,
                                struct connectdata *conn,
-                               bool *async,
                                struct Curl_dns_entry **pdns)
 {
   struct hostname *ehost;
-  int eport;
+  uint16_t eport;
   timediff_t timeout_ms = Curl_timeleft_ms(data);
   const char *peertype = "host";
   CURLcode result;
@@ -3143,35 +3138,33 @@ static CURLcode resolve_server(struct Curl_easy *data,
     ehost = conn->bits.conn_to_host ? &conn->conn_to_host : &conn->host;
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
-    eport = conn->bits.conn_to_port ? conn->conn_to_port : conn->remote_port;
+    eport = conn->bits.conn_to_port ?
+            conn->conn_to_port : (uint16_t)conn->remote_port;
   }
 
   /* Resolve target host right on */
-  conn->hostname_resolve = curlx_strdup(ehost->name);
-  if(!conn->hostname_resolve)
-    return CURLE_OUT_OF_MEMORY;
-
-  result = Curl_resolv_timeout(data, conn->hostname_resolve,
-                               eport, conn->ip_version,
-                               pdns, timeout_ms);
+  result = Curl_resolv(data, ehost->name, eport, conn->ip_version,
+                       timeout_ms, pdns);
   DEBUGASSERT(!result || !*pdns);
-  if(result == CURLE_AGAIN) {
-    *async = TRUE;
+  if(!result) { /* resolved right away, either sync or from dnscache */
+    DEBUGASSERT(*pdns);
     return CURLE_OK;
   }
-  else if(result == CURLE_OPERATION_TIMEDOUT) {
+  else if(result == CURLE_AGAIN) { /* async resolv in progress */
+    return CURLE_AGAIN;
+  }
+  else if(result == CURLE_OPERATION_TIMEDOUT) { /* took too long */
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
           curlx_ptimediff_ms(Curl_pgrs_now(data),
                              &data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
-  else if(result) {
+  else {
+    DEBUGASSERT(result);
     failf(data, "Could not resolve %s: %s", peertype, ehost->dispname);
     return result;
   }
-  DEBUGASSERT(*pdns);
-  return CURLE_OK;
 }
 
 static void url_move_hostname(struct hostname *dest, struct hostname *src)
@@ -3237,9 +3230,6 @@ static void url_conn_reuse_adjust(struct Curl_easy *data,
 
   conn->conn_to_port = needle->conn_to_port;
   conn->remote_port = needle->remote_port;
-  curlx_free(conn->hostname_resolve);
-  conn->hostname_resolve = needle->hostname_resolve;
-  needle->hostname_resolve = NULL;
 }
 
 static void conn_meta_freeentry(void *p)
@@ -3710,14 +3700,18 @@ CURLcode Curl_connect(struct Curl_easy *data,
        * Resolve the address of the server or proxy
        *************************************************************/
       struct Curl_dns_entry *dns;
-      result = resolve_server(data, conn, asyncp, &dns);
+      result = resolve_server(data, conn, &dns);
       if(!result) {
-        *asyncp = !dns;
-        if(dns)
-          /* DNS resolution is done: that is either because this is a reused
-             connection, in which case DNS was unnecessary, or because DNS
-             really did finish already (synch resolver/fast async resolve) */
-          result = Curl_setup_conn(data, dns, protocol_done);
+        DEBUGASSERT(dns);
+        /* DNS resolution is done: that is either because this is a reused
+           connection, in which case DNS was unnecessary, or because DNS
+           really did finish already (synch resolver/fast async resolve) */
+        result = Curl_setup_conn(data, dns, protocol_done);
+        Curl_dns_entry_unlink(data, &dns);
+      }
+      else if(result == CURLE_AGAIN) {
+        *asyncp = TRUE;
+        result = CURLE_OK;
       }
     }
   }

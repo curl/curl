@@ -1223,7 +1223,7 @@ static ssl_peer_type get_peer_type(const char *hostname)
 CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
                             struct Curl_cfilter *cf,
                             const char *tls_id,
-                            int transport)
+                            uint8_t transport)
 {
   const char *ehostname, *edispname;
   CURLcode result = CURLE_OUT_OF_MEMORY;
@@ -1250,7 +1250,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
   {
     ehostname = cf->conn->host.name;
     edispname = cf->conn->host.dispname;
-    peer->port = cf->conn->remote_port;
+    peer->port = (uint16_t)cf->conn->remote_port;
   }
 
   /* hostname MUST exist and not be empty */
