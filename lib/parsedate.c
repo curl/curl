@@ -422,7 +422,7 @@ static int parsedate(const char *date, time_t *output)
            (num_digits == 4) &&
            (val <= 1400) &&
            (indate < date) &&
-           ((date[-1] == '+' || date[-1] == '-'))) {
+           (date[-1] == '+' || date[-1] == '-')) {
           /* four digits and a value less than or equal to 1400 (to take into
              account all sorts of funny time zone diffs) and it is preceded
              with a plus or minus. This is a time zone indication. 1400 is
@@ -432,7 +432,7 @@ static int parsedate(const char *date, time_t *output)
              anyone has a more authoritative source for the exact maximum time
              zone offsets, please speak up! */
           found = TRUE;
-          tzoff = (val / 100 * 60 + val % 100) * 60;
+          tzoff = ((val / 100 * 60) + (val % 100)) * 60;
 
           /* the + and - prefix indicates the local time compared to GMT,
              this we need their reversed math to get what we want */

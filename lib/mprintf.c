@@ -676,9 +676,10 @@ static bool out_double(void *userp,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
+  /* !checksrc! disable BANNEDFUNC 1 */
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
-  (snprintf)(work, BUFFSIZE, formatbuf, dnum);
+  snprintf(work, BUFFSIZE, formatbuf, dnum);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif

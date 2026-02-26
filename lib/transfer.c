@@ -870,8 +870,8 @@ CURLcode Curl_xfer_send_close(struct Curl_easy *data)
 
 bool Curl_xfer_is_blocked(struct Curl_easy *data)
 {
-  bool want_send = ((data)->req.keepon & KEEP_SEND);
-  bool want_recv = ((data)->req.keepon & KEEP_RECV);
+  bool want_send = (data->req.keepon & KEEP_SEND);
+  bool want_recv = (data->req.keepon & KEEP_RECV);
   if(!want_send)
     return want_recv && Curl_xfer_recv_is_paused(data);
   else if(!want_recv)
