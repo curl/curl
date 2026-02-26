@@ -1167,6 +1167,7 @@ static int test_tftpd(int argc, const char **argv)
        port we actually got and update the listener port value with it. */
     curl_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
+    memset(&localaddr, 0, sizeof(localaddr));
 #ifdef USE_IPV6
     if(!use_ipv6)
 #endif
@@ -1175,7 +1176,6 @@ static int test_tftpd(int argc, const char **argv)
     else
       la_size = sizeof(localaddr.sa6);
 #endif
-    memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
