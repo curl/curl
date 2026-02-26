@@ -5267,11 +5267,13 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   int algo_nid;
   const EVP_MD *algo_type;
   const char *algo_name;
-  char algo_txt[128];
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
+#ifdef HAVE_OPENSSL3
   const X509_ALGOR *sig_algo;
   const ASN1_OBJECT *digest_oid;
+  char algo_txt[128];
+#endif
 
   const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
@@ -5301,12 +5303,14 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     /* No server certificate, do not do channel binding */
     return CURLE_OK;
 
+#ifdef HAVE_OPENSSL3
   X509_get0_signature(NULL, &sig_algo, cert);
   X509_ALGOR_get0(&digest_oid, NULL, NULL, sig_algo);
   OBJ_obj2txt(algo_txt, sizeof(algo_txt), digest_oid, 0);
   algo_type = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
   if(algo_type)
     algo_name = algo_txt;
+#endif /* HAVE_OPENSSL3 */
 
   if(!algo_type) {
     if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
