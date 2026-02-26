@@ -5265,6 +5265,9 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
 {
   X509 *cert;
   const EVP_MD *algo_type = NULL;
+#ifdef HAVE_OPENSSL3
+  EVP_MD *algo_ref = NULL;
+#endif
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
@@ -5305,7 +5308,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     X509_get0_signature(NULL, &sig_algo, cert);
     X509_ALGOR_get0(&digest_oid, NULL, NULL, sig_algo);
     OBJ_obj2txt(algo_txt, sizeof(algo_txt), digest_oid, 0);
-    algo_type = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
+    algo_type = algo_ref = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
     if(!algo_type)
       infof(data, "Could not find digest algorithm '%s'", algo_txt);
   }
@@ -5351,6 +5354,9 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   result = curlx_dyn_addn(binding, buf, length);
 
 error:
+#ifdef HAVE_OPENSSL3
+  EVP_MD_free(algo_ref);
+#endif
   X509_free(cert);
   return result;
 }
