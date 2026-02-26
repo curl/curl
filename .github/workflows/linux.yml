@@ -279,7 +279,6 @@ jobs:
             install_packages: clang-20 clang-tidy-20 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
-            make-custom-target: tidy
             CC: clang-20
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/runner/mbedtls/lib -Wl,-rpath,/home/runner/rustls/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
             PKG_CONFIG_PATH: /home/runner/wolfssl-opensslextra/lib/pkgconfig:/home/runner/mbedtls/lib/pkgconfig:/home/runner/rustls/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
@@ -828,13 +827,11 @@ jobs:
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
       - name: 'build'
-        env:
-          MATRIX_MAKE_CUSTOM_TARGET: '${{ matrix.build.make-custom-target }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose
           else
-            ${MATRIX_MAKE_PREFIX} make -C bld V=1 ${MATRIX_MAKE_CUSTOM_TARGET}
+            ${MATRIX_MAKE_PREFIX} make -C bld V=1
           fi
 
       - name: 'single-use function check'
@@ -849,7 +846,6 @@ jobs:
           ./scripts/singleuse.pl --unit "${libcurla}"
 
       - name: 'curl -V'
-        if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: |
           find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
           find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
