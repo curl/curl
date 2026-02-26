@@ -344,7 +344,6 @@ static CURLcode cf_hc_resolv(struct Curl_cfilter *cf,
          !rr->target[1])) &&
        (rr->port < 0 ||    /* for same port */
         rr->port == cf->conn->remote_port)) {
-      size_t i;
       for(i = 0; i < CURL_ARRAYSIZE(rr->alpns) &&
                  alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
         enum alpnid alpn = rr->alpns[i];
