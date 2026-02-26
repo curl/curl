@@ -5301,6 +5301,11 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
 
 #ifdef HAVE_OPENSSL3
   {
+    /* OpenSSL 3 has ciphers where it does not know the "NID" for.
+     * This may happen when ciphers com from the new "providers"
+     * and has happened for PQT algorithms. Try to get the "digest"
+     * cipher from the cert without using NIDs first. Fallback to
+     * the original, non-openssl3 way of doing this. */
     const X509_ALGOR *sig_algo;
     const ASN1_OBJECT *digest_oid;
     char algo_txt[128];
