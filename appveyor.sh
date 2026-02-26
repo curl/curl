@@ -88,8 +88,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
       -DCURL_STATIC_CRT=ON \
       -DCURL_DROP_UNUSED=ON \
       -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
-      ${CMAKE_GENERATE:-} \
       ${options} \
+      ${CMAKE_GENERATE:-} \
       || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
   done
