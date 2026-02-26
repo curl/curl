@@ -328,7 +328,7 @@ fail:
 
 #endif
 
-/* pickoneauth() selects the most favourable authentication method from the
+/* pickoneauth() selects the most favorable authentication method from the
  * ones available and the ones we want.
  *
  * return TRUE if one was picked

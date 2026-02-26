@@ -5,6 +5,7 @@ SPDX-License-Identifier: curl
 -->
 
 # IPFS
+
 For an overview about IPFS, visit the [IPFS project site](https://ipfs.tech/).
 
 In IPFS there are two protocols. IPFS and IPNS (their workings are explained
@@ -64,12 +65,12 @@ in this link:
 The IPFS integration in curl hides this gateway logic for you. Instead of
 providing a full URL to a file on IPFS like this:
 
-```
+```sh
 curl http://127.0.0.1:8080/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 ```
 
 You can provide it with the IPFS protocol instead:
-```
+```sh
 curl ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 ```
 

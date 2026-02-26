@@ -91,3 +91,4 @@ file names\b:filenames
 ---Curl Corporation
 \bmanpages[^./;=&{:-]:man pages
 \bmanpage[^si./;=&{:-]:man page
+favour:favor

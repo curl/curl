@@ -22,7 +22,7 @@ CURLOPT_OPENSOCKETFUNCTION - callback for opening socket
 ~~~c
 #include <curl/curl.h>
 
-typedef enum  {
+typedef enum {
   CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
 } curlsocktype;
 
