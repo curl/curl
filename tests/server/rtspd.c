@@ -619,7 +619,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     pipereq_length = req->offset - req->checkindex;
   }
 
-  /*** Init the httprequest structure properly for the upcoming request ***/
+  /* Init the httprequest structure properly for the upcoming request */
 
   req->checkindex = 0;
   req->offset = 0;
@@ -640,7 +640,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
   req->rtp_buffer = NULL;
   req->rtp_buffersize = 0;
 
-  /*** end of httprequest init ***/
+  /* end of httprequest init */
 
   while(!done_processing && (req->offset < sizeof(req->reqbuf) - 1)) {
     if(pipereq_length && pipereq) {
@@ -1212,9 +1212,9 @@ static int test_rtspd(int argc, const char *argv[])
   }
 
   /*
-  ** As soon as this server writes its pid file the test harness will
-  ** attempt to connect to this server and initiate its verification.
-  */
+   * As soon as this server writes its pid file the test harness will
+   * attempt to connect to this server and initiate its verification.
+   */
 
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile)
@@ -1239,10 +1239,10 @@ static int test_rtspd(int argc, const char *argv[])
     }
 
     /*
-    ** As soon as this server accepts a connection from the test harness it
-    ** must set the server logs advisor read lock to indicate that server
-    ** logs should not be read until this lock is removed by this server.
-    */
+     * As soon as this server accepts a connection from the test harness it
+     * must set the server logs advisor read lock to indicate that server
+     * logs should not be read until this lock is removed by this server.
+     */
 
     set_advisor_read_lock(loglockfile);
     serverlogslocked = 1;

@@ -21,7 +21,7 @@ curl_easy_pause - pause and unpause a connection
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_pause(CURL *handle, int bitmask );
+CURLcode curl_easy_pause(CURL *handle, int bitmask);
 ~~~
 
 # DESCRIPTION

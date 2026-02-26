@@ -81,12 +81,12 @@ the time it is called.
 
 ~~~c
 struct curl_header {
-   char *name;
-   char *value;
-   size_t amount;
-   size_t index;
-   unsigned int origin;
-   void *anchor;
+  char *name;
+  char *value;
+  size_t amount;
+  size_t index;
+  unsigned int origin;
+  void *anchor;
 };
 ~~~
 

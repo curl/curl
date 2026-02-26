@@ -1281,7 +1281,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     set_local_ip(cf, data);
     CURL_TRC_CF(data, cf, "local address %s port %d...",
                 ctx->ip.local_ip, ctx->ip.local_port);
-    if(-1 == rc) {
+    if(rc == -1) {
       result = socket_connect_result(data, ctx->ip.remote_ip, error);
       goto out;
     }
@@ -1801,7 +1801,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
      NOLINTNEXTLINE(clang-analyzer-unix.StdCLibraryFunctions) */
   rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,
                (curl_socklen_t)ctx->addr.addrlen);
-  if(-1 == rc) {
+  if(rc == -1) {
     return socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);
   }
   ctx->sock_connected = TRUE;

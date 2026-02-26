@@ -200,11 +200,11 @@ static int decodedata(char **buf,  /* dest buffer */
 
   if(!src_len) {
     /*
-    ** currently there is no way to tell apart an OOM condition in
-    ** curlx_base64_decode() from zero length decoded data. For now,
-    ** let's just assume it is an OOM condition, currently we have
-    ** no input for this function that decodes to zero length data.
-    */
+     * currently there is no way to tell apart an OOM condition in
+     * curlx_base64_decode() from zero length decoded data. For now,
+     * let's just assume it is an OOM condition, currently we have
+     * no input for this function that decodes to zero length data.
+     */
     free(buf64);
 
     return GPE_OUT_OF_MEMORY;
@@ -300,8 +300,8 @@ int getpart(char **outbuf, size_t *outlen,
 
     if('/' == *ptr) {
       /*
-      ** closing section tag
-      */
+       * closing section tag
+       */
 
       ptr++;
       end = ptr;
@@ -356,8 +356,8 @@ int getpart(char **outbuf, size_t *outlen,
     }
     else if(!in_wanted_part) {
       /*
-      ** opening section tag
-      */
+       * opening section tag
+       */
 
       /* get potential tag */
       end = ptr;

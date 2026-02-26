@@ -216,7 +216,7 @@ endif
 endif
 
 _tidy_cflags :=
-TIDYFLAGS =
+TIDYFLAGS :=
 if CURL_WERROR
 TIDYFLAGS += '--warnings-as-errors=*'
 endif

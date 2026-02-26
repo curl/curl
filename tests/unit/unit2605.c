@@ -88,12 +88,12 @@ static CURLcode test_unit2605(const char *arg)
       }
       if(!result) {
         if(start != list[i].start) {
-          curl_mprintf("... start (%" FMT_OFF_T ") was not %" FMT_OFF_T " \n",
+          curl_mprintf("... start (%" FMT_OFF_T ") was not %" FMT_OFF_T "\n",
                        start, list[i].start);
           unitfail++;
         }
         if(size != list[i].size) {
-          curl_mprintf("... size (%" FMT_OFF_T ") was not %" FMT_OFF_T " \n",
+          curl_mprintf("... size (%" FMT_OFF_T ") was not %" FMT_OFF_T "\n",
                        size, list[i].size);
           unitfail++;
         }

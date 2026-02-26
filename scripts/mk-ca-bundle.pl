@@ -382,7 +382,7 @@ if(!$filedate) {
 }
 
 # get the hash from the download file
-my $newhash= sha256($txt);
+my $newhash = sha256($txt);
 
 if(!$opt_f && $oldhash eq $newhash) {
     report "Downloaded file identical to previous run\'s source file. Exiting";
@@ -426,7 +426,7 @@ print CRT <<EOT;
 
 EOT
 
-report "Processing  '$txt' ...";
+report "Processing '$txt' ...";
 my $caname;
 my $certnum = 0;
 my $skipnum = 0;

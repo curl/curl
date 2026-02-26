@@ -283,7 +283,7 @@ typedef struct md5_ctx my_md5_ctx;
  * The MD5 transformation for all four rounds.
  */
 #define MD5_STEP(f, a, b, c, d, x, t, s) \
-  (a) += f((b), (c), (d)) + (x) + (t); \
+  (a) += f(b, c, d) + (x) + (t); \
   (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
   (a) += (b);
 

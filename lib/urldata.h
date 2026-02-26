@@ -74,7 +74,7 @@
 #define CURLPROTO_WSS    0L
 #endif
 
-#define CURLPROTO_MQTTS   (1LL << 32)
+#define CURLPROTO_MQTTS  (1LL << 32)
 
 #define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)
 
@@ -87,7 +87,7 @@ typedef curl_off_t curl_prot_t;
 /* This mask is for all the old protocols that are provided and defined in the
    public header and shall exclude protocols added since which are not exposed
    in the API */
-#define CURLPROTO_MASK   (0x3ffffff)
+#define CURLPROTO_MASK   0x3ffffff
 
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
