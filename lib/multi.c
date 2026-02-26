@@ -3725,7 +3725,7 @@ CURL **curl_multi_get_handles(CURLM *m)
 {
   struct Curl_multi *multi = m;
   void *entry;
-  unsigned int count = Curl_uint32_tbl_count(&multi->xfers);
+  size_t count = Curl_uint32_tbl_count(&multi->xfers);
   CURL **a = curlx_malloc(sizeof(struct Curl_easy *) * (count + 1));
   if(a) {
     unsigned int i = 0;
