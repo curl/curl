@@ -678,7 +678,7 @@ static bool out_double(void *userp,
 #endif
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
-  (snprintf)(work, BUFFSIZE, formatbuf, dnum);
+  snprintf(work, BUFFSIZE, formatbuf, dnum);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
