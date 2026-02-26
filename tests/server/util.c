@@ -841,13 +841,13 @@ curl_socket_t sockdaemon(curl_socket_t sock,
        port we actually got and update the listener port value with it. */
     curl_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
+    memset(&localaddr, 0, sizeof(localaddr));
 #ifdef USE_IPV6
     if(socket_domain == AF_INET6)
       la_size = sizeof(localaddr.sa6);
     else
 #endif
       la_size = sizeof(localaddr.sa4);
-    memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
