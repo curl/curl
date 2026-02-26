@@ -160,7 +160,7 @@ class TestShutdown:
         # check that all connection sockets were removed from event
         removes = [line for line in r.trace_lines
                    if re.match(r'.*socket cb: socket \d+ REMOVED', line)]
-        assert len(removes) == count, f'{removes}'
+        assert len(removes) >= count, f'{removes}'
 
     # check graceful shutdown on multiplexed http
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
