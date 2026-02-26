@@ -73,12 +73,9 @@
 #  endif
 #  define DESKEY(x) &x
 #else
-#  include <wolfssl/version.h>
-#  if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
-#  error "wolfSSL v5.7.6 or upper required for OpenSSL coexist"
-#  endif
 #  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
+#  include <wolfssl/version.h>
 #  ifdef OPENSSL_COEXIST
 #    define DES_key_schedule      WOLFSSL_DES_key_schedule
 #    define DES_cblock            WOLFSSL_DES_cblock
