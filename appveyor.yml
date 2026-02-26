@@ -142,3 +142,5 @@ skip_commits:
 #    name: curl
 #  - path: '**/*.dll'
 #    name: libcurl dll
+#  - path: '**/*.lib'
+#    name: libcurl lib
