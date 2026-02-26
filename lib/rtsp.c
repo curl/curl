@@ -774,6 +774,18 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         break;
       rtp_buf = curlx_dyn_ptr(&rtspc->buf);
       rtspc->rtp_len = RTP_PKT_LENGTH(rtp_buf) + 4;
+      if(rtspc->rtp_len == 4) {
+        /* zero-length payload, the 4-byte header is the complete RTP
+           message. Dispatch immediately without entering RTP_PARSE_DATA. */
+        DEBUGF(infof(data, "RTP write channel %d rtp_len %zu (no payload)",
+                     rtspc->rtp_channel, rtspc->rtp_len));
+        result = rtp_client_write(data, rtp_buf, rtspc->rtp_len);
+        curlx_dyn_free(&rtspc->buf);
+        rtspc->state = RTP_PARSE_SKIP;
+        if(result)
+          goto out;
+        break;
+      }
       rtspc->state = RTP_PARSE_DATA;
       break;
     }
