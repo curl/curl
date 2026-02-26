@@ -75,7 +75,13 @@ GENERATEDCERTS = \
   test-client-cert.key \
   test-client-cert.pem \
   test-client-cert.pub.der \
-  test-client-cert.pub.pem
+  test-client-cert.pub.pem \
+  test-client-eku-only.crl \
+  test-client-eku-only.crt \
+  test-client-eku-only.key \
+  test-client-eku-only.pem \
+  test-client-eku-only.pub.der \
+  test-client-eku-only.pub.pem
 
 SRPFILES = \
   srp-verifier-conf \
