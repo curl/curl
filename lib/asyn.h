@@ -31,6 +31,8 @@
 
 struct Curl_easy;
 struct Curl_dns_entry;
+struct Curl_resolv_async;
+struct Curl_multi;
 
 #ifdef CURLRES_ASYNCH
 
@@ -70,7 +72,9 @@ void Curl_async_global_cleanup(void);
  * Get the resolver implementation instance (c-ares channel) or NULL
  * for passing to application callback.
  */
-CURLcode Curl_async_get_impl(struct Curl_easy *data, void **impl);
+CURLcode Curl_async_get_impl(struct Curl_easy *easy,
+                             struct Curl_resolv_async *async,
+                             void **impl);
 
 /* Curl_async_pollset()
  *
@@ -83,16 +87,13 @@ CURLcode Curl_async_get_impl(struct Curl_easy *data, void **impl);
 CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps);
 
 /*
- * Curl_async_is_resolved()
- *
- * Called repeatedly to check if a previous name resolve request has
- * completed. It should also make sure to time-out if the operation seems to
- * take too long.
- *
- * Returns normal CURLcode errors.
+ * Take the result of an async resolve operation.
+ * Returns CURLE_OK with `*pdns` != NULL, CURLE_AGAIN while still
+ * ongoing or an error code for a failed resolve.
  */
-CURLcode Curl_async_is_resolved(struct Curl_easy *data,
-                                struct Curl_dns_entry **dns);
+CURLcode Curl_async_take_result(struct Curl_easy *data,
+                                struct Curl_resolv_async *async,
+                                struct Curl_dns_entry **pdns);
 
 /*
  * Curl_async_await()
@@ -106,7 +107,8 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
 CURLcode Curl_async_await(struct Curl_easy *data,
-                          struct Curl_dns_entry **dns);
+                          struct Curl_resolv_async *async,
+                          struct Curl_dns_entry **pdns);
 
 /*
  * Curl_async_getaddrinfo() - when using this resolver
@@ -119,8 +121,8 @@ CURLcode Curl_async_await(struct Curl_easy *data,
  * Each resolver backend must of course make sure to return data in the
  * correct format to comply with this.
  */
-CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
-                                int port, int ip_version);
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
+                                struct Curl_resolv_async *async);
 
 #ifdef USE_ARES
 /* common functions for c-ares and threaded resolver with HTTPSRR */
@@ -150,8 +152,10 @@ struct async_ares_ctx {
 #endif
 };
 
-void Curl_async_ares_shutdown(struct Curl_easy *data);
-void Curl_async_ares_destroy(struct Curl_easy *data);
+void Curl_async_ares_shutdown(struct Curl_easy *data,
+                             struct Curl_resolv_async *async);
+void Curl_async_ares_destroy(struct Curl_easy *data,
+                             struct Curl_resolv_async *async);
 
 /* Set the DNS server to use by ares, from `data` settings. */
 CURLcode Curl_async_ares_set_dns_servers(struct Curl_easy *data);
@@ -168,39 +172,12 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data);
 #endif /* CURLRES_ARES */
 
 #ifdef CURLRES_THREADED
-/* async resolving implementation using POSIX threads */
-#include "curl_threads.h"
 
-/* Context for threaded address resolver */
-struct async_thrdd_addr_ctx {
-  curl_thread_t thread_hnd;
-  char *hostname;        /* hostname to resolve, Curl_async.hostname
-                            duplicate */
-  curl_mutex_t mutx;
-#ifndef CURL_DISABLE_SOCKETPAIR
-  curl_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
-#endif
-  struct Curl_addrinfo *res;
-#ifdef HAVE_GETADDRINFO
-  struct addrinfo hints;
-#endif
-  struct curltime start;
-  timediff_t interval_end;
-  unsigned int poll_interval;
-  int port;
-  int sock_error;
-  int ref_count;
-  BIT(thrd_done);
-  BIT(do_abort);
-};
+struct async_thrdd_item;
 
 /* Context for threaded resolver */
 struct async_thrdd_ctx {
-  /* `addr` is a pointer since this memory is shared with a started
-   * thread. Since threads cannot be killed, we use reference counting
-   * so that we can "release" our pointer to this memory while the
-   * thread is still running. */
-  struct async_thrdd_addr_ctx *addr;
+  struct async_thrdd_item *resolved;
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;
@@ -209,10 +186,21 @@ struct async_thrdd_ctx {
     BIT(done);
   } rr;
 #endif
+  BIT(queued);
+  BIT(done);
 };
 
-void Curl_async_thrdd_shutdown(struct Curl_easy *data);
-void Curl_async_thrdd_destroy(struct Curl_easy *data);
+void Curl_async_thrdd_shutdown(struct Curl_easy *data,
+                               struct Curl_resolv_async *async);
+void Curl_async_thrdd_destroy(struct Curl_easy *data,
+                              struct Curl_resolv_async *async);
+
+CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
+                                     uint32_t min_threads,
+                                     uint32_t max_threads,
+                                     uint32_t idle_time_ms);
+void Curl_async_thrdd_multi_destroy(struct Curl_multi *multi, bool join);
+void Curl_async_thrdd_multi_process(struct Curl_multi *multi);
 
 #endif /* CURLRES_THREADED */
 
@@ -223,11 +211,11 @@ struct doh_probes;
 #else /* CURLRES_ASYNCH */
 
 /* convert these functions if an asynch resolver is not used */
-#define Curl_async_get_impl(x, y)    (*(y) = NULL, CURLE_OK)
-#define Curl_async_is_resolved(x, y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_async_await(x, y)       CURLE_COULDNT_RESOLVE_HOST
-#define Curl_async_global_init()     CURLE_OK
-#define Curl_async_global_cleanup()  Curl_nop_stmt
+#define Curl_async_get_impl(x, y, z)    (*(z) = NULL, CURLE_OK)
+#define Curl_async_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_async_await(x, y, z)       CURLE_COULDNT_RESOLVE_HOST
+#define Curl_async_global_init()        CURLE_OK
+#define Curl_async_global_cleanup()     Curl_nop_stmt
 
 #endif /* !CURLRES_ASYNCH */
 
@@ -236,7 +224,7 @@ struct doh_probes;
 #endif
 
 #ifdef USE_CURL_ASYNC
-struct Curl_async {
+struct Curl_resolv_async {
 #ifdef CURLRES_ARES
   struct async_ares_ctx ares;
 #elif defined(CURLRES_THREADED)
@@ -245,11 +233,13 @@ struct Curl_async {
 #ifndef CURL_DISABLE_DOH
   struct doh_probes *doh; /* DoH specific data for this request */
 #endif
-  struct Curl_dns_entry *dns; /* result of resolving on success */
-  char *hostname; /* copy of the params resolv started with */
-  int port;
-  int ip_version;
-  BIT(done);
+  struct curltime start;
+  timediff_t interval_end;
+  uint32_t poll_interval;
+   /* what is being resolved */
+  uint16_t port;
+  uint8_t ip_version;
+  char hostname[1];
 };
 
 /*
