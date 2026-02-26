@@ -5304,7 +5304,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   X509_get0_signature(NULL, &sig_algo, cert);
   X509_ALGOR_get0(&digest_oid, NULL, NULL, sig_algo);
   OBJ_obj2txt(algo_txt, sizeof(algo_txt), digest_oid, 0);
-  algo_type = EVP_MD_fetch(data->state.libctx, algo_name, NULL);
+  algo_type = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
   if(algo_type)
     algo_name = algo_txt;
 
