@@ -5264,16 +5264,9 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;
-  int algo_nid;
   const EVP_MD *algo_type = NULL;
-  const char *algo_name = NULL;
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
-#ifdef HAVE_OPENSSL3
-  const X509_ALGOR *sig_algo;
-  const ASN1_OBJECT *digest_oid;
-  char algo_txt[128];
-#endif
 
   const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
@@ -5304,15 +5297,22 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     return CURLE_OK;
 
 #ifdef HAVE_OPENSSL3
-  X509_get0_signature(NULL, &sig_algo, cert);
-  X509_ALGOR_get0(&digest_oid, NULL, NULL, sig_algo);
-  OBJ_obj2txt(algo_txt, sizeof(algo_txt), digest_oid, 0);
-  algo_type = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
-  if(algo_type)
-    algo_name = algo_txt;
+  {
+    const X509_ALGOR *sig_algo;
+    const ASN1_OBJECT *digest_oid;
+    char algo_txt[128];
+
+    X509_get0_signature(NULL, &sig_algo, cert);
+    X509_ALGOR_get0(&digest_oid, NULL, NULL, sig_algo);
+    OBJ_obj2txt(algo_txt, sizeof(algo_txt), digest_oid, 0);
+    algo_type = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
+    if(!algo_type)
+      infof(data, "Could not find digest algorithm '%s'", algo_txt);
+  }
 #endif /* HAVE_OPENSSL3 */
 
   if(!algo_type) {
+    int algo_nid;
     if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
       failf(data,
             "Unable to find digest NID for certificate signature algorithm");
@@ -5327,7 +5327,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     else {
       algo_type = EVP_get_digestbynid(algo_nid);
       if(!algo_type) {
-        algo_name = OBJ_nid2sn(algo_nid);
+        const char *algo_name = OBJ_nid2sn(algo_nid);
         failf(data, "Could not find digest algorithm %s (NID %d)",
               algo_name ? algo_name : "(null)", algo_nid);
         result = CURLE_SSL_INVALIDCERTSTATUS;
