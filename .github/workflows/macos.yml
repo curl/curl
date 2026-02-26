@@ -31,12 +31,15 @@ concurrency:
 
 permissions: {}
 
-# Deprecated Apple APIs and the macos-version-min value required to avoid
-# deprecation warnings with llvm/clang:
+# Apple APIs and the macos-version-min value required to avoid deprecation
+# warnings with llvm/clang, and/or the feature getting enabled at build-time
+# or runtime:
 #
-# - 10.7  Lion (2011)          - GSS
-# - 10.9  Mavericks (2013)     - LDAP
-#
+# - 10.7   Lion (2011)          - GSS (build-time, deprecated MIT Kerberos shim)
+# - 10.9   Mavericks (2013)     - LDAP (build-time, deprecated), OCSP (runtime)
+# - 10.11  El Capitan (2015)    - connectx() (runtime)
+# - 10.12  Sierra (2016)        - clock_gettime() (build-time, runtime)
+# - 10.14  Mojave (2018)        - SecTrustEvaluateWithError() (runtime)
 
 env:
   CURL_CI: github
