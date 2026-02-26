@@ -688,6 +688,9 @@ static bool out_double(void *userp,
      buffer if it reaches the max size so we do that here. */
   work[BUFFSIZE - 1] = 0;
 #endif
+#elif defined(_MSC_VER) && (_MSC_VER < 1900)
+  _snprintf(work, BUFFSIZE, formatbuf, dnum);
+  work[BUFFSIZE - 1] = 0;
 #else
   /* float and double outputs do not work without snprintf support */
   work[0] = 0;
