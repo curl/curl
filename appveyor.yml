@@ -34,22 +34,22 @@ environment:
   matrix:
     # CMake Visual Studio builds
 
-    - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
+    - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
 
-    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD, Build-tests'
+    - job_name: 'CM VS2022, Release, arm64, Schannel, Static, !DEBUGBUILD'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A ARM64 -DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF'
 
-    - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
+    - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64 -DCMAKE_UNITY_BUILD=OFF'
 
-    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
+    - job_name: 'CM VS2012, Release, x86, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32 -DCMAKE_UNITY_BUILD=OFF'
@@ -75,28 +75,28 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 15 2017'
       CMAKE_GENERATE: '-A x64'
 
-    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
+    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       CMAKE_GENERATOR: 'Visual Studio 16 2019'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
 
-    - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
+    - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
 
-    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD, Build-tests'
+    - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, !DEBUGBUILD'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       ENABLE_UNICODE: 'ON'
       CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=OFF'
 
-    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, Build-tests'
+    - job_name: 'CM VS2022, Debug, x64, !ssl, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
 
-    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, HTTP-only, Build-tests'
+    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, HTTP-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON'
