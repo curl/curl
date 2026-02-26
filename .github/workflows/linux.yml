@@ -290,7 +290,7 @@ jobs:
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
 
           - name: 'scan-build'
-            install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
+            install_packages: clang clang-tools libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
             CC: clang
@@ -305,7 +305,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
 
           - name: 'scan-build H3 c-ares !examples'
-            install_packages: clang-tools clang libidn2-dev libssh-dev libnghttp2-dev
+            install_packages: clang clang-tools libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skipall
             install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
             CC: clang
@@ -320,38 +320,38 @@ jobs:
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
 
           - name: 'address-sanitizer'
-            install_packages: clang libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
+            install_packages: clang-20 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
-            CC: clang
+            CC: clang-20
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'address-sanitizer H3 c-ares'
-            install_packages: clang libubsan1 libasan8 libtsan2
+            install_packages: clang-20 libubsan1 libasan8 libtsan2
             install_steps: pytest
             install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
-            CC: clang
+            CC: clang-20
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
-            install_packages: clang libtsan2
+            install_packages: clang-20 libtsan2
             install_steps: pytest openssl-tsan
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
-            CC: clang
+            CC: clang-20
             generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON
 
           - name: 'memory-sanitizer'
-            install_packages: clang
+            install_packages: clang-20
             install_steps: randcurl
             CFLAGS: -fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=memory
             LIBS: -ldl
-            configure: CC=clang --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
+            configure: CC=clang-20 --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
             tflags: '--min=1480'
 
           - name: 'event-based'
