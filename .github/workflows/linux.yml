@@ -290,12 +290,12 @@ jobs:
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
 
           - name: 'scan-build'
-            install_packages: clang-20 clang-tools-20 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
+            install_packages: clang clang-tools libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
-            CC: clang-20
-            configure-prefix: scan-build-20
-            make-prefix: scan-build-20 --status-bugs
+            CC: clang
+            configure-prefix: scan-build
+            make-prefix: scan-build --status-bugs
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/runner/mbedtls/lib -Wl,-rpath,/home/runner/rustls/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
             PKG_CONFIG_PATH: /home/runner/wolfssl-opensslextra/lib/pkgconfig:/home/runner/mbedtls/lib/pkgconfig:/home/runner/rustls/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
             generate: >-
@@ -305,12 +305,12 @@ jobs:
               -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
 
           - name: 'scan-build H3 c-ares !examples'
-            install_packages: clang-20 clang-tools-20 libidn2-dev libssh-dev libnghttp2-dev
+            install_packages: clang clang-tools libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skipall
             install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
-            CC: clang-20
-            configure-prefix: scan-build-20
-            make-prefix: scan-build-20 --status-bugs
+            CC: clang
+            configure-prefix: scan-build
+            make-prefix: scan-build --status-bugs
             LDFLAGS: -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
             generate: >-
