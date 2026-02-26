@@ -396,7 +396,7 @@ struct ConnectBits {
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
   BIT(in_cpool);     /* connection is kept in a connection pool */
-  BIT(dns_resolved); /* DNS records for connnection were resolved */
+  BIT(dns_resolved); /* DNS records for connection were resolved */
 };
 
 struct hostname {
