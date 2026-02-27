@@ -5318,7 +5318,13 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
       infof(data, "Could not find digest algorithm '%s'", algo_txt);
     else if(EVP_MD_is_a(algo_type, "SHA1") || EVP_MD_is_a(algo_type, "MD5")) {
       /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
-      algo_type = EVP_sha256();
+      EVP_MD_free(algo_ref);
+      algo_type = algo_ref = EVP_MD_fetch(data->state.libctx, "SHA-256", NULL);
+      if(!algo_type) {
+        infof(data, "Could not fetch SHA-256 algorithm");
+        result = CURLE_SSL_INVALIDCERTSTATUS;
+        goto error;
+      }
     }
   }
 #endif /* HAVE_OPENSSL3 */
