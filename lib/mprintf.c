@@ -671,7 +671,6 @@ static bool out_double(void *userp,
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
   _snprintf(work, BUFFSIZE, formatbuf, dnum);
-  work[BUFFSIZE - 1] = 0;
 #else
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
@@ -686,12 +685,13 @@ static bool out_double(void *userp,
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
+#endif
 #ifdef _WIN32
   /* Old versions of the Windows CRT do not terminate the snprintf output
      buffer if it reaches the max size so we do that here. */
   work[BUFFSIZE - 1] = 0;
 #endif
-#endif
+
   DEBUGASSERT(strlen(work) < BUFFSIZE);
   while(*work) {
     if(stream(*work++, userp))
