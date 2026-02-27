@@ -131,7 +131,7 @@ macro(curl_collect_target_options _target)
 endmacro()
 
 # Create a clang-tidy target for test targets
-macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
+function(curl_add_clang_tidy_test_target _target_clang_tidy _target)
   if(CURL_CLANG_TIDY)
 
     set(_definitions "")
@@ -233,14 +233,5 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
         ${_sources} -- ${_cc} ${_definitions} ${_includes} ${_incsys} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
-
-    unset(_sys_incdirs)
-    unset(_cc)
-    unset(_definitions)
-    unset(_includes)
-    unset(_incsys)
-    unset(_incsys_tmp)
-    unset(_options)
-    unset(_sources)
   endif()
-endmacro()
+endfunction()
