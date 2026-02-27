@@ -27,10 +27,13 @@
 
 /* Raw snprintf() for curlx */
 
-#ifdef WITHOUT_LIBCURL /* when built for the test servers */
 #ifdef _WIN32
 void curlx_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
   CURL_PRINTF(3, 4);
+#endif
+
+#ifdef WITHOUT_LIBCURL /* when built for the test servers */
+#ifdef _WIN32
 #define SNPRINTF curlx_snprintf
 #else
 #define SNPRINTF snprintf

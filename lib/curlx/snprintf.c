@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curlx/snprintf.h"
 
-#if defined(WITHOUT_LIBCURL) && defined(_WIN32) /* building for test servers */
+#ifdef _WIN32
 #include <stdarg.h>
 
 /* Wrapper for the Windows platform which uses the correct symbol and ensures
@@ -52,4 +52,4 @@ void curlx_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
     va_end(ap);
   }
 }
-#endif /* WITHOUT_LIBCURL && _WIN32 */
+#endif /* _WIN32 */
