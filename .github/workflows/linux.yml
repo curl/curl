@@ -289,7 +289,7 @@ jobs:
 
           - name: 'clang-tidy H3 c-ares !examples'
             install_packages: clang-20 clang-tidy-20 libidn2-dev libssh-dev libnghttp2-dev
-            install_steps: skipall
+            install_steps: skiprun
             install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
             CC: clang-20
             LDFLAGS: -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
