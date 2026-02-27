@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curlx/snprintf.h"
 
-#if defined(WITHOUT_LIBCURL) && defined(_WIN32) /* when built for the test servers */
+#if defined(WITHOUT_LIBCURL) && defined(_WIN32) /* building for test servers */
 #include <stdarg.h>
 
 /* Wrapper for the Windows platform which uses the correct symbol and ensures
