@@ -41,6 +41,65 @@ struct cf_resolv_ctx {
   BIT(announced);
 };
 
+#ifdef CURLVERBOSE
+
+static void cf_resolv_report_addr(struct Curl_easy *data,
+                                  const char *label,
+                                  int ai_family,
+                                  const struct Curl_addrinfo *ai)
+{
+  struct dynbuf out;
+  char buf[MAX_IPADR_LEN];
+  const char *sep = "";
+  CURLcode result;
+
+  curlx_dyn_init(&out, 1024);
+  for(; ai; ai = ai->ai_next) {
+    if(ai->ai_family == ai_family) {
+      Curl_printable_address(ai, buf, sizeof(buf));
+      result = curlx_dyn_addf(&out, "%s%s", sep, buf);
+      if(result) {
+        infof(data, "too many IP, cannot show");
+        goto out;
+      }
+    }
+  }
+
+  infof(data, "%s%s", label,
+        (curlx_dyn_len(&out) ? curlx_dyn_ptr(&out) : "(none)"));
+out:
+  curlx_dyn_free(&out);
+}
+
+static void cf_resolv_report(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             struct Curl_dns_entry *dns)
+{
+  struct cf_resolv_ctx *ctx = cf->ctx;
+
+  if(!Curl_trc_is_verbose(data) ||
+     /* ignore no name or numerical IP addresses */
+     !dns->hostname[0] || Curl_host_is_ipnum(dns->hostname))
+    return;
+
+  switch(ctx->transport) {
+  case TRNSPRT_UNIX:
+    infof(data, "Host %s:%d resolved to UDS %s",
+          dns->hostname, dns->port, Curl_conn_get_unix_path(data->conn));
+    break;
+  default:
+    infof(data, "Host %s:%d was resolved.", dns->hostname, dns->port);
+#ifdef CURLRES_IPV6
+    cf_resolv_report_addr(data, "IPv6: ", AF_INET6, dns->addr);
+#endif
+    cf_resolv_report_addr(data, "IPv4: ", AF_INET, dns->addr);
+    break;
+  }
+}
+#else
+#define cf_resolv_report(x, y, z) Curl_nop_stmt
+#endif
+
 /*************************************************************
  * Resolve the address of the server or proxy
  *************************************************************/
@@ -145,6 +204,7 @@ static CURLcode cf_resolv_connect(struct Curl_cfilter *cf,
         Curl_pgrsTime(data, TIMER_NAMELOOKUP);
       }
       CURL_TRC_CF(data, cf, "DNS resolved and propagated");
+      cf_resolv_report(cf, data, ctx->dns);
     }
 
     if(cf->next && !cf->next->connected) {
