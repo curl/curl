@@ -152,7 +152,6 @@ static CURLcode cf_resolv_start(struct Curl_cfilter *cf,
                                 struct Curl_dns_entry **pdns)
 {
   struct cf_resolv_ctx *ctx = cf->ctx;
-  struct connectdata *conn = cf->conn;
   timediff_t timeout_ms = Curl_timeleft_ms(data);
   CURLcode result;
 
@@ -162,7 +161,7 @@ static CURLcode cf_resolv_start(struct Curl_cfilter *cf,
   if(ctx->transport == TRNSPRT_UNIX) {
     CURL_TRC_CF(data, cf, "resolve unix socket %s", ctx->hostname);
     return Curl_resolv_unix(data, ctx->hostname,
-                            (bool)conn->bits.abstract_unix_socket, pdns);
+                            (bool)cf->conn->bits.abstract_unix_socket, pdns);
   }
 #endif
 
