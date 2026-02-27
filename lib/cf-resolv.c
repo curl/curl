@@ -229,8 +229,9 @@ static CURLcode cf_resolv_connect(struct Curl_cfilter *cf,
   }
 
   if(cf->next && !cf->next->connected) {
-    CURLcode result = Curl_conn_cf_connect(cf->next, data, done);
-    if(result || !*done)
+    bool sub_done = FALSE;
+    CURLcode result = Curl_conn_cf_connect(cf->next, data, &sub_done);
+    if(result || !sub_done)
       return result;
   }
 
