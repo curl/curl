@@ -333,20 +333,18 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
 
   /* Connect the cf-resolv filter and ask it for the DNS entry */
   result = cf->next->cft->do_connect(cf->next, data, done);
-  if(!result && !*done) {
-    CURL_TRC_CF(data, cf, "SOCKS4 non-blocking resolve of %s", sx->hostname);
-    return CURLPX_OK;
+  if(!result) {
+    if(!*done) {
+      CURL_TRC_CF(data, cf, "SOCKS4 non-blocking resolve of %s", sx->hostname);
+      return CURLPX_OK;
+    }
+    dns = Curl_cf_resolv_get_dns(cf);
   }
-  else if(result)
-    return CURLPX_RESOLVE_HOST;
 
-  DEBUGASSERT(!result && done);
-  /* Connected without error, we now MUST have a DNS entry */
-  dns = Curl_cf_resolv_get_dns(cf);
-
-  DEBUGASSERT(dns);
-  if(!dns)
+  if(result || !dns) {
+    failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.", sx->hostname);
     return CURLPX_RESOLVE_HOST;
+  }
 
   /* scan for the first IPv4 address */
   hp = dns->addr;
