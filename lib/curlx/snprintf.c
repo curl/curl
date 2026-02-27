@@ -28,18 +28,19 @@
 
 /* Wrapper for the Windows platform to use the correct symbol and ensure to add
    a null-terminator */
-void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
+int curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 {
   va_list ap;
+  int n;
   if(!maxlen)
-    return;
+    return 0;
   va_start(ap, fmt);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
   /* !checksrc! disable BANNEDFUNC 1 */
-  (void)vsnprintf(buf, maxlen, fmt, ap);
+  n = vsnprintf(buf, maxlen, fmt, ap);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
@@ -47,5 +48,6 @@ void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
      buffer if it reaches the max size so we do that here. */
   buf[maxlen - 1] = 0;
   va_end(ap);
+  return (n < (int)maxlen) ? n : (int)(maxlen - 1);
 }
 #endif /* _WIN32 */
