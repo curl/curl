@@ -1,5 +1,3 @@
-#ifndef HEADER_CURLX_SNPRINTF_H
-#define HEADER_CURLX_SNPRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,20 +21,27 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#if defined(WITHOUT_LIBCURL) && defined(_WIN32) /* when built for the test servers */
+#include "curlx/snprintf.h"
 
-/* Raw snprintf() for curlx */
+#include <stdarg.h>
 
-#ifdef WITHOUT_LIBCURL /* when built for the test servers */
-#ifdef _WIN32
-#include "curl_setup.h"
+/* Wrapper for the Windows platform which uses the correct symbol and ensures
+   to add a null-terminator */
 void curlx_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
-  CURL_PRINTF(3, 4);
-#define SNPRINTF curlx_snprintf
+{
+  if(maxlen) {
+    va_list ap;
+    va_start(ap, fmt);
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+    (void)_snprintf(buf, maxlen, fmt, ap);
 #else
-#define SNPRINTF snprintf
+    (void)snprintf(buf, maxlen, fmt, ap);
 #endif
-#else /* !WITHOUT_LIBCURL */
-#include <curl/mprintf.h>
-#define SNPRINTF curl_msnprintf
-#endif /* WITHOUT_LIBCURL */
-#endif /* HEADER_CURLX_SNPRINTF_H */
+    /* Old versions of the Windows CRT do not terminate the snprintf output
+       buffer if it reaches the max size so we do that here. */
+    buf[maxlen - 1] = 0;
+    va_end(ap);
+  }
+}
+#endif /* WITHOUT_LIBCURL && _WIN32 */
