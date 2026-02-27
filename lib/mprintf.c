@@ -677,7 +677,7 @@ static bool out_double(void *userp,
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 #ifdef _WIN32
-  curlx_snprintf(work, BUFFSIZE, formatbuf, dnum);
+  curlx_win32_snprintf(work, BUFFSIZE, formatbuf, dnum);
 #elif defined(HAVE_SNPRINTF)
   /* !checksrc! disable BANNEDFUNC 1 */
   /* !checksrc! disable LONGLINE */

@@ -28,7 +28,7 @@
 
 /* Wrapper for the Windows platform which uses the correct symbol and ensures
    to add a null-terminator */
-void curlx_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
+void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 {
   if(maxlen) {
     va_list ap;
