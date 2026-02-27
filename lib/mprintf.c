@@ -26,6 +26,7 @@
 #include "curlx/dynbuf.h"
 #include "curl_printf.h"
 #include "curlx/strparse.h"
+#include "curlx/snprintf.h"  /* for curlx_win32_snprintf() */
 
 #define BUFFSIZE 326 /* buffer for long-to-str and float-to-str calcs, should
                         fit negative DBL_MAX (317 letters) */
@@ -671,29 +672,23 @@ static bool out_double(void *userp,
 
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
-#ifdef HAVE_SNPRINTF
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
+#ifdef _WIN32
+  curlx_win32_snprintf(work, BUFFSIZE, formatbuf, dnum);
+#elif defined(HAVE_SNPRINTF)
   /* !checksrc! disable BANNEDFUNC 1 */
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
   snprintf(work, BUFFSIZE, formatbuf, dnum);
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-#ifdef _WIN32
-  /* Old versions of the Windows CRT do not terminate the snprintf output
-     buffer if it reaches the max size so we do that here. */
-  work[BUFFSIZE - 1] = 0;
-#endif
-#elif defined(_MSC_VER) && (_MSC_VER < 1900)
-  _snprintf(work, BUFFSIZE, formatbuf, dnum);
-  work[BUFFSIZE - 1] = 0;
 #else
   /* float and double outputs do not work without snprintf support */
   work[0] = 0;
+#endif
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);
   while(*work) {

@@ -1,5 +1,3 @@
-#ifndef HEADER_CURLX_SNPRINTF_H
-#define HEADER_CURLX_SNPRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,23 +21,29 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-
-/* Raw snprintf() for curlx */
+#include "curlx/snprintf.h"
 
 #ifdef _WIN32
+#include <stdarg.h>
+
+/* Simplified wrapper for the Windows platform to use the correct symbol and
+   ensuring null-termination. Omit returning a length to keep it simple. */
 void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
-  CURL_PRINTF(3, 4);
+{
+  va_list ap;
+  if(!maxlen)
+    return;
+  va_start(ap, fmt);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
-
-#ifdef WITHOUT_LIBCURL /* when built for the test servers */
-#ifdef _WIN32
-#define SNPRINTF curlx_win32_snprintf
-#else
-#define SNPRINTF snprintf
+  /* !checksrc! disable BANNEDFUNC 1 */
+  (void)vsnprintf(buf, maxlen, fmt, ap);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
 #endif
-#else /* !WITHOUT_LIBCURL */
-#include <curl/mprintf.h>
-#define SNPRINTF curl_msnprintf
-#endif /* WITHOUT_LIBCURL */
-#endif /* HEADER_CURLX_SNPRINTF_H */
+  buf[maxlen - 1] = 0;
+  va_end(ap);
+}
+#endif /* _WIN32 */

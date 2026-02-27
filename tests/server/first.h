@@ -64,9 +64,9 @@ extern const struct entry_s s_entries[];
 
 #include <curlx/curlx.h>
 
-/* adjust for old MSVC */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#  define snprintf _snprintf
+#ifdef _WIN32
+#include <curlx/snprintf.h>
+#define snprintf curlx_win32_snprintf
 #endif
 
 #ifdef _WIN32
