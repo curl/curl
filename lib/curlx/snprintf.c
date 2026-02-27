@@ -34,9 +34,6 @@ void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
   if(!maxlen)
     return;
   va_start(ap, fmt);
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-  (void)_vsnprintf(buf, maxlen, fmt, ap);
-#else
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
@@ -45,7 +42,6 @@ void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
   (void)vsnprintf(buf, maxlen, fmt, ap);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
-#endif
 #endif
   /* Old versions of the Windows CRT do not terminate the snprintf output
      buffer if it reaches the max size so we do that here. */
