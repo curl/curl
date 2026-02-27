@@ -814,6 +814,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
 #endif
 
 #if defined(MBEDTLS_SSL_SESSION_TICKETS) && \
+  defined(MBEDTLS_SSL_PROTO_TLS1_3) &&      \
   MBEDTLS_VERSION_NUMBER >= 0x03060100 &&   \
   MBEDTLS_VERSION_NUMBER < 0x04000000
   /* New in mbedTLS 3.6.1, need to enable, default is now disabled. 4.0.0
