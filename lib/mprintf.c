@@ -669,9 +669,12 @@ static bool out_double(void *userp,
 
   *fptr = 0; /* and a final null-termination */
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+  _snprintf(work, BUFFSIZE, formatbuf, dnum);
+  work[BUFFSIZE - 1] = 0;
+#else
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
-#ifdef HAVE_SNPRINTF
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
@@ -688,12 +691,6 @@ static bool out_double(void *userp,
      buffer if it reaches the max size so we do that here. */
   work[BUFFSIZE - 1] = 0;
 #endif
-#elif defined(_MSC_VER) && (_MSC_VER < 1900)
-  _snprintf(work, BUFFSIZE, formatbuf, dnum);
-  work[BUFFSIZE - 1] = 0;
-#else
-  /* float and double outputs do not work without snprintf support */
-  work[0] = 0;
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);
   while(*work) {
