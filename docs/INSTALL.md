@@ -426,7 +426,7 @@ another SSL backend such as OpenSSL.
 
 # Android
 
-When building curl for Android you can use CMake or curl's `configure` script.
+When building curl for Android you can either use CMake or configure.
 
 Before you can build curl for Android, you need to install the Android NDK
 first. This can be done using the SDK Manager that is part of Android Studio.
