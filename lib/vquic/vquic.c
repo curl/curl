@@ -395,7 +395,10 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   struct mmsghdr mmsg[MMSG_NUM];
   uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
   struct sockaddr_storage remote_addr[MMSG_NUM];
-  size_t total_nread = 0, pkts = 0, calls = 0;
+  size_t total_nread = 0, pkts = 0;
+#ifdef CURLVERBOSE
+  size_t calls = 0;
+#endif
   int mcount, i, n;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
@@ -448,7 +451,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       goto out;
     }
 
-    ++calls;
+    VERBOSE(++calls);
     for(i = 0; i < mcount; ++i) {
       /* A zero-length UDP packet is no QUIC packet. Ignore. */
       if(!mmsg[i].msg_len)
