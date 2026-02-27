@@ -139,6 +139,18 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     set(_incsys "")
     set(_options "")
 
+    # Make a list of known system include directories
+    set(_sys_incdirs "${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
+    foreach(_inc IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
+      if(NOT _inc MATCHES "/$")
+        string(APPEND _inc "/")
+      endif()
+      string(APPEND _inc "include")
+      if(NOT _inc IN_LIST _sys_incdirs AND IS_DIRECTORY "${_inc}")
+        list(APPEND _sys_incdirs "${_inc}")
+      endif()
+    endforeach()
+
     # Collect macro definitions and header directories applying to the directory
     get_directory_property(_val COMPILE_DEFINITIONS)
     if(_val)
@@ -169,7 +181,12 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
     set(_incsys_tmp ${_incsys})
     list(REMOVE_DUPLICATES _incsys_tmp)
     set(_incsys "")
+    set(_incsystop "")
     foreach(_inc IN LISTS _incsys_tmp)
+      if(_inc IN_LIST _sys_incdirs)
+        list(APPEND _incsystop "${_inc}")  # Save system prefixes to re-add them later to the end of list
+        continue()
+      endif()
       # Avoid empty and '$<INSTALL_INTERFACE:include>' items. The latter
       # evaluates to an empty path in this context. Also skip
       # '$<BUILD_INTERFACE:curl-include>', as already present in '_includes'.
@@ -178,6 +195,9 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
          NOT _inc MATCHES "BUILD_INTERFACE:")
         list(APPEND _incsys "-isystem" "${_inc}")
       endif()
+    endforeach()
+    foreach(_inc IN LISTS _incsystop)
+      list(APPEND _incsys "-isystem" "${_inc}")
     endforeach()
 
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -213,13 +233,5 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
         ${_sources} -- ${_cc} ${_definitions} ${_includes} ${_incsys} ${_options}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy ${_target_clang_tidy})
-
-    unset(_cc)
-    unset(_definitions)
-    unset(_includes)
-    unset(_incsys)
-    unset(_incsys_tmp)
-    unset(_options)
-    unset(_sources)
   endif()
 endmacro()

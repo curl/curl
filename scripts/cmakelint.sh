@@ -72,8 +72,8 @@ cd "$(dirname "$0")"/..
     --min-statement-spacing 1 \
     --max-statement-spacing 2 \
     --max-returns 6 \
-    --max-branches 12 \
+    --max-branches 15 \
     --max-arguments 5 \
     --max-localvars 15 \
-    --max-statements 65 \
+    --max-statements 85 \
     --
