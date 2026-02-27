@@ -933,7 +933,6 @@ static CURLcode ftp_port_parse_string(struct Curl_easy *data,
 #ifdef USE_IPV6
         if(curlx_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
           /* ipv6 */
-          port_min = port_max = 0;
           addrlen = strlen(string_ftpport);
           ip_end = NULL; /* this got no port ! */
         }
@@ -959,8 +958,6 @@ static CURLcode ftp_port_parse_string(struct Curl_easy *data,
         else
           port_max = port_min;
       }
-      else
-        port_max = port_min;
     }
   }
 
