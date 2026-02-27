@@ -26,30 +26,30 @@
 #ifdef _WIN32
 #include <stdarg.h>
 
-/* Wrapper for the Windows platform which uses the correct symbol and ensures
-   to add a null-terminator */
+/* Wrapper for the Windows platform to use the correct symbol and ensure to add
+   a null-terminator */
 void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 {
-  if(maxlen) {
-    va_list ap;
-    va_start(ap, fmt);
+  va_list ap;
+  if(!maxlen)
+    return;
+  va_start(ap, fmt);
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
-    (void)_snprintf(buf, maxlen, fmt, ap);
+  (void)_snprintf(buf, maxlen, fmt, ap);
 #else
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
-    /* !checksrc! disable BANNEDFUNC 1 */
-    (void)snprintf(buf, maxlen, fmt, ap);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  (void)snprintf(buf, maxlen, fmt, ap);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 #endif
-    /* Old versions of the Windows CRT do not terminate the snprintf output
-       buffer if it reaches the max size so we do that here. */
-    buf[maxlen - 1] = 0;
-    va_end(ap);
-  }
+  /* Old versions of the Windows CRT do not terminate the snprintf output
+     buffer if it reaches the max size so we do that here. */
+  buf[maxlen - 1] = 0;
+  va_end(ap);
 }
 #endif /* _WIN32 */
