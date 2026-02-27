@@ -419,4 +419,3 @@ Curl_conn_resolv_get_dns(struct connectdata *conn, int sockindex)
 {
   return Curl_cf_resolv_get_dns(conn->cfilter[sockindex]);
 }
-
