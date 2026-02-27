@@ -84,8 +84,12 @@ static void cf_resolv_report(struct Curl_cfilter *cf,
 
   switch(ctx->transport) {
   case TRNSPRT_UNIX:
+#ifdef USE_UNIX_SOCKETS
     infof(data, "Host %s:%d resolved to UDS %s",
           dns->hostname, dns->port, Curl_conn_get_unix_path(data->conn));
+#else
+    DEBUGASSERT(0);
+#endif
     break;
   default:
     infof(data, "Host %s:%d was resolved.", dns->hostname, dns->port);
