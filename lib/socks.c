@@ -38,6 +38,7 @@
 #include "curl_trc.h"
 #include "select.h"
 #include "cfilters.h"
+#include "cf-resolv.h"
 #include "connect.h"
 #include "socks.h"
 #include "curlx/inet_pton.h"
@@ -319,35 +320,34 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
 
   *done = FALSE;
   if(sx->start_resolving) {
-    /* need to resolve hostname to add destination address */
-    sx->start_resolving = FALSE;
+    /* need to resolve hostname to add destination address.
+     * Insert a cf-resolv filter below us and connect it. */
     DEBUGASSERT(sx->hostname && *sx->hostname);
-
-    result = Curl_resolv(data, sx->hostname, sx->remote_port,
-                         cf->conn->ip_version, SOCK_STREAM, 0, &dns);
-    if(result == CURLE_AGAIN) {
-      CURL_TRC_CF(data, cf, "SOCKS4 non-blocking resolve of %s", sx->hostname);
-      return CURLPX_OK;
-    }
-    else if(result)
-      return CURLPX_RESOLVE_HOST;
-  }
-  else {
-    /* check if we have the name resolved by now */
-    result = Curl_resolv_take_result(data, &dns);
-    if(!result && !dns)
-      return CURLPX_OK;
+    result = Curl_cf_resolv_insert_after(cf, data,
+                                         sx->hostname, sx->remote_port,
+                                         CURL_IPRESOLVE_V4, TRNSPRT_TCP);
+    if(result)
+      return CURLPX_UNKNOWN_FAIL;
+    sx->start_resolving = FALSE;
   }
 
-  if(result || !dns) {
-    failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.", sx->hostname);
+  /* Connect the cf-resolv filter and ask it for the DNS entry */
+  result = cf->next->cft->do_connect(cf->next, data, done);
+  if(!result && !*done) {
+    CURL_TRC_CF(data, cf, "SOCKS4 non-blocking resolve of %s", sx->hostname);
+    return CURLPX_OK;
+  }
+  else if(result)
     return CURLPX_RESOLVE_HOST;
-  }
 
-  /*
-   * We cannot use 'hostent' as a struct that Curl_resolv() returns. It
-   * returns a Curl_addrinfo pointer that may not always look the same.
-   */
+  DEBUGASSERT(!result && done);
+  /* Connected without error, we now MUST have a DNS entry */
+  dns = Curl_cf_resolv_get_dns(cf);
+
+  DEBUGASSERT(dns);
+  if(!dns)
+    return CURLPX_RESOLVE_HOST;
+
   /* scan for the first IPv4 address */
   hp = dns->addr;
   while(hp && (hp->ai_family != AF_INET))
@@ -366,7 +366,6 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
                              (unsigned char *)&saddr_in->sin_addr.s_addr, 4,
                              &nwritten);
 
-    Curl_dns_entry_unlink(data, &dns); /* not used anymore from now on */
     if(result || (nwritten != 4))
       return CURLPX_SEND_REQUEST;
   }
@@ -845,24 +844,25 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
 
   *done = FALSE;
   if(sx->start_resolving) {
-    /* need to resolve hostname to add destination address */
-    sx->start_resolving = FALSE;
+    /* need to resolve hostname to add destination address.
+     * Insert a cf-resolv filter below us and connect it. */
     DEBUGASSERT(sx->hostname && *sx->hostname);
+    result = Curl_cf_resolv_insert_after(cf, data,
+                                         sx->hostname, sx->remote_port,
+                                         cf->conn->ip_version, TRNSPRT_TCP);
+    if(result)
+      return CURLPX_UNKNOWN_FAIL;
+    sx->start_resolving = FALSE;
+  }
 
-    result = Curl_resolv(data, sx->hostname, sx->remote_port,
-                         cf->conn->ip_version, SOCK_STREAM, 0, &dns);
-    if(result == CURLE_AGAIN) {
+  /* Connect the cf-resolv filter and ask it for the DNS entry */
+  result = cf->next->cft->do_connect(cf->next, data, done);
+  if(!result) {
+    if(!*done) {
       CURL_TRC_CF(data, cf, "SOCKS5 non-blocking resolve of %s", sx->hostname);
       return CURLPX_OK;
     }
-    else if(result)
-      return CURLPX_RESOLVE_HOST;
-  }
-  else {
-    /* check if we have the name resolved by now */
-    result = Curl_resolv_take_result(data, &dns);
-    if(!result && !dns)
-      return CURLPX_OK;
+    dns = Curl_cf_resolv_get_dns(cf);
   }
 
   if(result || !dns) {
@@ -938,8 +938,6 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
   }
 
 out:
-  if(dns)
-    Curl_dns_entry_unlink(data, &dns);
   *done = (presult == CURLPX_OK);
   return presult;
 }

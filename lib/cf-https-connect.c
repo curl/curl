@@ -326,7 +326,7 @@ static CURLcode cf_hc_resolv(struct Curl_cfilter *cf,
   size_t alpn_count = 0, i;
   CURLcode result = CURLE_OK;
 
-  dns = Curl_cf_resolv_get_dns(cf->conn, cf->sockindex);
+  dns = Curl_conn_resolv_get_dns(cf->conn, cf->sockindex);
   if(!dns)
     return CURLE_AGAIN;
 

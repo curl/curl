@@ -786,7 +786,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   case SCFST_RESOLVE:
     if(!ctx->dns) {
       ctx->dns = Curl_dns_entry_link(
-        data, Curl_cf_resolv_get_dns(cf->conn, cf->sockindex));
+        data, Curl_conn_resolv_get_dns(cf->conn, cf->sockindex));
       if(!ctx->dns)
         goto out;
     }

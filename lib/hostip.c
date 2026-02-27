@@ -684,9 +684,9 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
   /* This allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here.
      This technique has problems (see alarmfunc).
-     This should be the last thing we do before calling Curl_resolv(),
+     This should be the last thing we do before calling hostip_resolv(),
      as otherwise we would have to worry about variables that get modified
-     before we invoke Curl_resolv() (and thus use "volatile"). */
+     before we invoke hostip_resolv() (and thus use "volatile"). */
   curl_simple_lock_lock(&curl_jmpenv_lock);
 
   if(sigsetjmp(curl_jmpenv, 1)) {

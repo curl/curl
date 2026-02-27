@@ -35,8 +35,20 @@ CURLcode Curl_cf_resolv_add(struct Curl_easy *data,
                             uint8_t transport,
                             struct Curl_dns_entry *dns);
 
+CURLcode Curl_cf_resolv_insert_after(struct Curl_cfilter *cf_at,
+                                     struct Curl_easy *data,
+                                     const char *hostname,
+                                     uint16_t port,
+                                     uint8_t ip_version,
+                                     uint8_t transport);
+
+
 struct Curl_dns_entry *
-Curl_cf_resolv_get_dns(struct connectdata *conn, int sockindex);
+Curl_conn_resolv_get_dns(struct connectdata *conn, int sockindex);
+
+struct Curl_dns_entry *
+Curl_cf_resolv_get_dns(struct Curl_cfilter *cf);
+
 
 extern struct Curl_cftype Curl_cft_resolv;
 
