@@ -197,44 +197,48 @@ static CURLcode cf_resolv_connect(struct Curl_cfilter *cf,
 {
   struct cf_resolv_ctx *ctx = cf->ctx;
 
-  if(!cf->connected) {
-    *done = FALSE;
-
-    if(!ctx->started) {
-      ctx->started = TRUE;
-      ctx->resolv_result = cf_resolv_start(cf, data, &ctx->dns);
-    }
-
-    if(!ctx->dns && !ctx->resolv_result) {
-      ctx->resolv_result = Curl_resolv_take_result(data, &ctx->dns);
-      if(!ctx->dns && !ctx->resolv_result)
-        CURL_TRC_CF(data, cf, "waiting for DNS resolution");
-    }
-
-    if(ctx->resolv_result) {
-      CURL_TRC_CF(data, cf, "error resolving: %d", ctx->resolv_result);
-      return ctx->resolv_result;
-    }
-
-    if(ctx->dns && !ctx->announced) {
-      ctx->announced = TRUE;
-      if(cf->sockindex == FIRSTSOCKET) {
-        cf->conn->bits.dns_resolved = TRUE;
-        Curl_pgrsTime(data, TIMER_NAMELOOKUP);
-      }
-      cf_resolv_report(cf, data, ctx->dns);
-    }
-
-    if(cf->next && !cf->next->connected) {
-      CURLcode result = Curl_conn_cf_connect(cf->next, data, done);
-      if(result || !*done)
-        return result;
-    }
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
   }
 
-  *done = TRUE;
-  cf->connected = TRUE;
-  return CURLE_OK;
+  *done = FALSE;
+  if(!ctx->started) {
+    ctx->started = TRUE;
+    ctx->resolv_result = cf_resolv_start(cf, data, &ctx->dns);
+  }
+
+  if(!ctx->dns && !ctx->resolv_result) {
+    ctx->resolv_result = Curl_resolv_take_result(data, &ctx->dns);
+    if(!ctx->dns && !ctx->resolv_result)
+      CURL_TRC_CF(data, cf, "waiting for DNS resolution");
+  }
+
+  if(ctx->resolv_result) {
+    CURL_TRC_CF(data, cf, "error resolving: %d", ctx->resolv_result);
+    return ctx->resolv_result;
+  }
+
+  if(ctx->dns && !ctx->announced) {
+    ctx->announced = TRUE;
+    if(cf->sockindex == FIRSTSOCKET) {
+      cf->conn->bits.dns_resolved = TRUE;
+      Curl_pgrsTime(data, TIMER_NAMELOOKUP);
+    }
+    cf_resolv_report(cf, data, ctx->dns);
+  }
+
+  if(cf->next && !cf->next->connected) {
+    CURLcode result = Curl_conn_cf_connect(cf->next, data, done);
+    if(result || !*done)
+      return result;
+  }
+
+  if(ctx->dns) {
+    *done = TRUE;
+    cf->connected = TRUE;
+  }
+  return ctx->resolv_result;
 }
 
 static void cf_resolv_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
