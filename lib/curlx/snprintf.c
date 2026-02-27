@@ -36,6 +36,7 @@ void curlx_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
     (void)_snprintf(buf, maxlen, fmt, ap);
 #else
+    /* !checksrc! disable BANNEDFUNC 1 */
     (void)snprintf(buf, maxlen, fmt, ap);
 #endif
     /* Old versions of the Windows CRT do not terminate the snprintf output
