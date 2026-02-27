@@ -26,7 +26,7 @@
 #include "curlx/dynbuf.h"
 #include "curl_printf.h"
 #include "curlx/strparse.h"
-#include "curlx/snprintf.h"
+#include "curlx/snprintf.h"  /* for curlx_win32_snprintf() */
 
 #define BUFFSIZE 326 /* buffer for long-to-str and float-to-str calcs, should
                         fit negative DBL_MAX (317 letters) */
