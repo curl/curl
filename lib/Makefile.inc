@@ -181,6 +181,7 @@ LIB_CFILES =         \
   cw-out.c           \
   cw-pause.c         \
   dict.c             \
+  dnscache.c         \
   doh.c              \
   dynhds.c           \
   easy.c             \
@@ -258,6 +259,8 @@ LIB_CFILES =         \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
+  thrdpool.c         \
+  thrdqueue.c        \
   transfer.c         \
   uint-bset.c        \
   uint-hash.c        \
@@ -315,6 +318,7 @@ LIB_HFILES =         \
   cw-out.h           \
   cw-pause.h         \
   dict.h             \
+  dnscache.h         \
   doh.h              \
   dynhds.h           \
   easy_lock.h        \
@@ -385,6 +389,8 @@ LIB_HFILES =         \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
+  thrdpool.h         \
+  thrdqueue.h        \
   transfer.h         \
   uint-bset.h        \
   uint-hash.h        \

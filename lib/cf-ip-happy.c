@@ -623,6 +623,7 @@ typedef enum {
 } cf_connect_state;
 
 struct cf_ip_happy_ctx {
+  struct Curl_dns_entry *dns;
   uint8_t transport;
   cf_ip_connect_create *cf_create;
   cf_connect_state state;
@@ -699,9 +700,8 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   struct cf_ip_happy_ctx *ctx = cf->ctx;
-  struct Curl_dns_entry *dns = data->state.dns[cf->sockindex];
 
-  if(!dns)
+  if(!ctx->dns)
     return CURLE_FAILED_INIT;
 
   if(Curl_timeleft_ms(data) < 0) {
@@ -713,7 +713,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   CURL_TRC_CF(data, cf, "init ip ballers for transport %u", ctx->transport);
   ctx->started = *Curl_pgrs_now(data);
   return cf_ip_ballers_init(&ctx->ballers, cf->conn->ip_version,
-                            dns->addr, ctx->cf_create, ctx->transport,
+                            ctx->dns->addr, ctx->cf_create, ctx->transport,
                             data->set.happy_eyeballs_timeout);
 }
 
@@ -725,6 +725,15 @@ static void cf_ip_happy_ctx_clear(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx);
   DEBUGASSERT(data);
   cf_ip_ballers_clear(cf, data, &ctx->ballers);
+}
+
+static void cf_ip_happy_ctx_destroy(struct Curl_easy *data,
+                                    struct cf_ip_happy_ctx *ctx)
+{
+  if(ctx) {
+    Curl_dns_entry_unlink(data, &ctx->dns);
+    curlx_free(ctx);
+  }
 }
 
 static CURLcode cf_ip_happy_shutdown(struct Curl_cfilter *cf,
@@ -780,7 +789,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
     DEBUGASSERT(!cf->connected);
     result = start_connect(cf, data);
     if(result)
-      return result;
+      goto out;
     ctx->state = SCFST_WAITING;
     FALLTHROUGH();
   case SCFST_WAITING:
@@ -822,6 +831,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
     *done = TRUE;
     break;
   }
+out:
   return result;
 }
 
@@ -887,6 +897,24 @@ static CURLcode cf_ip_happy_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static CURLcode cf_ip_happy_cntrl(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int event, int arg1, void *arg2)
+{
+  struct cf_ip_happy_ctx *ctx = cf->ctx;
+
+  (void)arg1;
+  (void)arg2;
+  (void)data;
+  switch(event) {
+  case CF_CTRL_CONN_INFO_UPDATE:
+    /* Connection fully established */
+    Curl_dns_entry_unlink(data, &ctx->dns);
+    break;
+  }
+  return CURLE_OK;
+}
+
 static void cf_ip_happy_destroy(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
@@ -895,9 +923,8 @@ static void cf_ip_happy_destroy(struct Curl_cfilter *cf,
   CURL_TRC_CF(data, cf, "destroy");
   if(ctx) {
     cf_ip_happy_ctx_clear(cf, data);
+    cf_ip_happy_ctx_destroy(data, ctx);
   }
-  /* release any resources held in state */
-  Curl_safefree(ctx);
 }
 
 struct Curl_cftype Curl_cft_ip_happy = {
@@ -912,7 +939,7 @@ struct Curl_cftype Curl_cft_ip_happy = {
   cf_ip_happy_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
+  cf_ip_happy_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_ip_happy_query,
@@ -932,7 +959,8 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
                                    struct Curl_easy *data,
                                    struct connectdata *conn,
                                    cf_ip_connect_create *cf_create,
-                                   uint8_t transport)
+                                   uint8_t transport,
+                                   struct Curl_dns_entry *dns)
 {
   struct cf_ip_happy_ctx *ctx = NULL;
   CURLcode result;
@@ -945,6 +973,7 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  ctx->dns = Curl_dns_entry_link(data, dns);
   ctx->transport = transport;
   ctx->cf_create = cf_create;
 
@@ -953,14 +982,15 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
 out:
   if(result) {
     Curl_safefree(*pcf);
-    curlx_free(ctx);
+    cf_ip_happy_ctx_destroy(data, ctx);
   }
   return result;
 }
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  uint8_t transport)
+                                  uint8_t transport,
+                                  struct Curl_dns_entry *dns)
 {
   cf_ip_connect_create *cf_create;
   struct Curl_cfilter *cf;
@@ -973,7 +1003,8 @@ CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
     CURL_TRC_CF(data, cf_at, "unsupported transport type %u", transport);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
-  result = cf_ip_happy_create(&cf, data, cf_at->conn, cf_create, transport);
+  result = cf_ip_happy_create(&cf, data, cf_at->conn, cf_create,
+                              transport, dns);
   if(result)
     return result;
 

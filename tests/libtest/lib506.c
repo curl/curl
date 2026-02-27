@@ -35,7 +35,9 @@ struct t506_Tdata {
 
 struct t506_userdata {
   const char *text;
-  int counter;
+  int share_counter;
+  int dns_counter;
+  int cookie_counter;
 };
 
 static int locks[3];
@@ -46,7 +48,7 @@ static void t506_test_lock(CURL *curl, curl_lock_data data,
 {
   const char *what;
   struct t506_userdata *user = (struct t506_userdata *)useptr;
-  int locknum;
+  int locknum, *pcounter;
 
   (void)curl;
   (void)laccess;
@@ -55,14 +57,17 @@ static void t506_test_lock(CURL *curl, curl_lock_data data,
   case CURL_LOCK_DATA_SHARE:
     what = "share";
     locknum = 0;
+    pcounter = &user->share_counter;
     break;
   case CURL_LOCK_DATA_DNS:
     what = "dns";
     locknum = 1;
+    pcounter = &user->dns_counter;
     break;
   case CURL_LOCK_DATA_COOKIE:
     what = "cookie";
     locknum = 2;
+    pcounter = &user->cookie_counter;
     break;
   default:
     curl_mfprintf(stderr, "lock: no such data: %d\n", data);
@@ -76,8 +81,8 @@ static void t506_test_lock(CURL *curl, curl_lock_data data,
   }
   locks[locknum]++;
 
-  curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
-  user->counter++;
+  curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, *pcounter);
+  (*pcounter)++;
 }
 
 /* unlock callback */
@@ -85,19 +90,22 @@ static void t506_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
   const char *what;
   struct t506_userdata *user = (struct t506_userdata *)useptr;
-  int locknum;
+  int locknum, *pcounter;
   (void)curl;
   switch(data) {
   case CURL_LOCK_DATA_SHARE:
     what = "share";
     locknum = 0;
+    pcounter = &user->share_counter;
     break;
   case CURL_LOCK_DATA_DNS:
     what = "dns";
     locknum = 1;
+    pcounter = &user->dns_counter;
     break;
   case CURL_LOCK_DATA_COOKIE:
     what = "cookie";
+    pcounter = &user->cookie_counter;
     locknum = 2;
     break;
   default:
@@ -112,8 +120,8 @@ static void t506_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
   }
   locks[locknum]--;
 
-  curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
-  user->counter++;
+  curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, *pcounter);
+  (*pcounter)++;
 }
 
 /* build host entry */
@@ -178,8 +186,8 @@ static CURLcode test_lib506(const char *URL)
 
   const char *jar = libtest_arg2;
 
+  memset(&user, 0, sizeof(user));
   user.text = "Pigs in space";
-  user.counter = 0;
 
   curl_mprintf("GLOBAL_INIT\n");
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
