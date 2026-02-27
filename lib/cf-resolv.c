@@ -44,31 +44,30 @@ struct cf_resolv_ctx {
 #ifdef CURLVERBOSE
 
 static void cf_resolv_report_addr(struct Curl_easy *data,
+                                  struct dynbuf *tmp,
                                   const char *label,
                                   int ai_family,
                                   const struct Curl_addrinfo *ai)
 {
-  struct dynbuf out;
   char buf[MAX_IPADR_LEN];
   const char *sep = "";
   CURLcode result;
 
-  curlx_dyn_init(&out, 1024);
+  curlx_dyn_reset(tmp);
   for(; ai; ai = ai->ai_next) {
     if(ai->ai_family == ai_family) {
       Curl_printable_address(ai, buf, sizeof(buf));
-      result = curlx_dyn_addf(&out, "%s%s", sep, buf);
+      result = curlx_dyn_addf(tmp, "%s%s", sep, buf);
       if(result) {
         infof(data, "too many IP, cannot show");
-        goto out;
+        return;
       }
+      sep = ", ";
     }
   }
 
   infof(data, "%s%s", label,
-        (curlx_dyn_len(&out) ? curlx_dyn_ptr(&out) : "(none)"));
-out:
-  curlx_dyn_free(&out);
+        (curlx_dyn_len(tmp) ? curlx_dyn_ptr(tmp) : "(none)"));
 }
 
 static void cf_resolv_report(struct Curl_cfilter *cf,
@@ -76,6 +75,7 @@ static void cf_resolv_report(struct Curl_cfilter *cf,
                              struct Curl_dns_entry *dns)
 {
   struct cf_resolv_ctx *ctx = cf->ctx;
+  struct dynbuf tmp;
 
   if(!Curl_trc_is_verbose(data) ||
      /* ignore no name or numerical IP addresses */
@@ -92,11 +92,13 @@ static void cf_resolv_report(struct Curl_cfilter *cf,
 #endif
     break;
   default:
+    curlx_dyn_init(&tmp, 1024);
     infof(data, "Host %s:%d was resolved.", dns->hostname, dns->port);
 #ifdef CURLRES_IPV6
-    cf_resolv_report_addr(data, "IPv6: ", AF_INET6, dns->addr);
+    cf_resolv_report_addr(data, &tmp, "IPv6: ", AF_INET6, dns->addr);
 #endif
-    cf_resolv_report_addr(data, "IPv4: ", AF_INET, dns->addr);
+    cf_resolv_report_addr(data, &tmp, "IPv4: ", AF_INET, dns->addr);
+    curlx_dyn_free(&tmp);
     break;
   }
 }
