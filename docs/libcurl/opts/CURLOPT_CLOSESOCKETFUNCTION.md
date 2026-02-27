@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_CLOSESOCKETDATA (3)
   - CURLOPT_OPENSOCKETFUNCTION (3)
+  - CURLMOPT_SOCKETFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.21.7
@@ -46,6 +47,17 @@ Note that when using multi/share handles, your callback may get invoked even
 after the easy handle has been cleaned up. The callback and data is
 inherited by a new connection and that connection may live longer
 than the transfer itself in the multi/share handle's connection cache.
+
+# NOTES ON IDLE CONNECTIONS
+
+When using the multi interface, the close socket callback is invoked when
+libcurl closes a socket it owns. The callback and CURLOPT_CLOSESOCKETDATA(3)
+are copied from the *first* easy handle that creates the connection;
+changing this option on a subsequent easy handle that reuses the same
+connection has no effect for that connection. The callback is stored with
+the connection because the connection may outlive the easy handle that
+created it, so that libcurl can still invoke it when the connection is
+closed even after that handle has been cleaned up.
 
 # DEFAULT
 
