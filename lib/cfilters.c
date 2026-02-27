@@ -1089,13 +1089,14 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     const char *p = getenv("CURL_SMALLSENDS");
     if(p) {
       curl_off_t altsize;
-      if(!curlx_str_number(&p, &altsize, write_len))
+      if(!curlx_str_number(&p, &altsize, write_len)) {
         write_len = (size_t)altsize;
+        if(write_len != len)
+          eos = FALSE;
+      }
     }
   }
 #endif
-  if(write_len != len)
-    eos = FALSE;
   if(data && data->conn && data->conn->send[sockindex])
     return data->conn->send[sockindex](data, sockindex, buf, write_len, eos,
                                        pnwritten);
