@@ -35,14 +35,14 @@ void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
     return;
   va_start(ap, fmt);
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
-  (void)_snprintf(buf, maxlen, fmt, ap);
+  (void)_vsnprintf(buf, maxlen, fmt, ap);
 #else
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
   /* !checksrc! disable BANNEDFUNC 1 */
-  (void)snprintf(buf, maxlen, fmt, ap);
+  (void)vsnprintf(buf, maxlen, fmt, ap);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
