@@ -37,14 +37,19 @@
 
 set(_nghttp2_pc_requires "libnghttp2")
 
+message(STATUS "TRACE-0a: |${NGHTTP2_INCLUDE_DIR}|")
+message(STATUS "TRACE-0b: |${NGHTTP2_LIBRARY}|")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP2_INCLUDE_DIR AND
    NOT DEFINED NGHTTP2_LIBRARY)
+  message(STATUS "TRACE-1: FIND_PACKAGE")
   find_package(PkgConfig QUIET)
   pkg_check_modules(_nghttp2 ${_nghttp2_pc_requires})
 endif()
 
 if(_nghttp2_FOUND)
+  message(STATUS "TRACE-2: FOUND VIA FIND_PACKAGE")
   set(NGHTTP2_FOUND TRUE)
   set(NGHTTP2_VERSION ${_nghttp2_VERSION})
   if(NGHTTP2_USE_STATIC_LIBS)
@@ -55,7 +60,9 @@ if(_nghttp2_FOUND)
   endif()
   message(STATUS "Found NGHTTP2 (via pkg-config): ${_nghttp2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
 else()
+  message(STATUS "TRACE-3: TRY FIND_PATH")
   find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h")
+  message(STATUS "TRACE-4: TRY FIND_LIBRARY")
   if(NGHTTP2_USE_STATIC_LIBS)
     set(_nghttp2_CFLAGS "-DNGHTTP2_STATICLIB")
     find_library(NGHTTP2_LIBRARY NAMES "nghttp2_static" "nghttp2")
