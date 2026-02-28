@@ -1178,7 +1178,7 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
   return TRUE;
 }
 #else
-#define url_match_auth_ntlm(c, m) ((void)c, (void)m, TRUE)
+#define url_match_auth_ntlm(c, m) ((void)(c), (void)(m), TRUE)
 #endif
 
 #ifdef USE_SPNEGO
