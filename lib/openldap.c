@@ -1247,7 +1247,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
     unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
     unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
     unsigned int minor =
-      (((unsigned int)api.ldapai_vendor_version - major * 10000)
+      (((unsigned int)api.ldapai_vendor_version - (major * 10000))
        - patch) / 100;
     curl_msnprintf(buf, bufsz, "%s/%u.%u.%u",
                    api.ldapai_vendor_name, major, minor, patch);
