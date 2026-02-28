@@ -136,7 +136,6 @@ static const struct alpn_spec ALPN_SPEC_H11 = {
 static const struct alpn_spec ALPN_SPEC_H10_H11 = {
   { ALPN_HTTP_1_0, ALPN_HTTP_1_1 }, 2
 };
-#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
 #ifdef USE_HTTP2
 static const struct alpn_spec ALPN_SPEC_H2 = {
   { ALPN_H2 }, 1
@@ -149,7 +148,6 @@ static const struct alpn_spec ALPN_SPEC_H11_H2 = {
 };
 #endif /* USE_HTTP2 */
 
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
 static const struct alpn_spec *alpn_get_spec(http_majors wanted,
                                              http_majors preferred,
                                              bool only_http_10,
