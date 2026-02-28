@@ -26,33 +26,23 @@
 #ifdef _WIN32
 #include <stdarg.h>
 
-/* Wrapper for the Windows platform to use the correct symbol and ensure to add
-   a null-terminator */
-int curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
+/* Simplified wrapper for the Windows platform to use the correct symbol and
+   ensure to add a null-terminator. Omit the length to keep it simple. */
+void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 {
   va_list ap;
-  int n;
   if(!maxlen)
-    return 0;
+    return;
   va_start(ap, fmt);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
   /* !checksrc! disable BANNEDFUNC 1 */
-  n = vsnprintf(buf, maxlen, fmt, ap);
+  (void)vsnprintf(buf, maxlen, fmt, ap);
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
   va_end(ap);
-  /* Old versions of the Windows CRT do not terminate the snprintf output
-     buffer if it reaches the max size so we do that here. */
-  if(n < 0) {
-    buf[maxlen - 1] = 0;
-    va_start(ap, fmt);
-    n = _vscprintf(fmt, ap);
-    va_end(ap);
-  }
-  return n;
 }
 #endif /* _WIN32 */

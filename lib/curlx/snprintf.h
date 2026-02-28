@@ -28,7 +28,7 @@
 /* Raw snprintf() for curlx */
 
 #ifdef _WIN32
-int curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
+void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
   CURL_PRINTF(3, 4);
 #endif
 
