@@ -46,6 +46,7 @@
 #include "cf-ip-happy.h"
 #include "multiif.h"
 #include "select.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 
 static CURLcode t2600_setup(CURL **easy)

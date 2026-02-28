@@ -452,14 +452,14 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
 
   /* Four 'Sigma' macro functions.
      See FIPS PUB 180-4 formulae 4.10, 4.11, 4.12, 4.13. */
-#define SIG0(x)                                                         \
-  (Curl_rotr64((x), 28) ^ Curl_rotr64((x), 34) ^ Curl_rotr64((x), 39))
-#define SIG1(x)                                                         \
-  (Curl_rotr64((x), 14) ^ Curl_rotr64((x), 18) ^ Curl_rotr64((x), 41))
-#define sig0(x)                                               \
-  (Curl_rotr64((x),  1) ^ Curl_rotr64((x),  8) ^ ((x) >> 7))
-#define sig1(x)                                               \
-  (Curl_rotr64((x), 19) ^ Curl_rotr64((x), 61) ^ ((x) >> 6))
+#define SIG0(x)                                                  \
+  (Curl_rotr64(x, 28) ^ Curl_rotr64(x, 34) ^ Curl_rotr64(x, 39))
+#define SIG1(x)                                                  \
+  (Curl_rotr64(x, 14) ^ Curl_rotr64(x, 18) ^ Curl_rotr64(x, 41))
+#define sig0(x)                                                  \
+  (Curl_rotr64(x,  1) ^ Curl_rotr64(x,  8) ^ ((x) >> 7))
+#define sig1(x)                                                  \
+  (Curl_rotr64(x, 19) ^ Curl_rotr64(x, 61) ^ ((x) >> 6))
 
   if(1) {
     unsigned int t;
@@ -520,8 +520,8 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        used. */
 #define SHA2STEP64(vA, vB, vC, vD, vE, vF, vG, vH, kt, wt)                    \
   do {                                                                        \
-    (vD) += ((vH) += SIG1((vE)) + Sha512_Ch((vE), (vF), (vG)) + (kt) + (wt)); \
-    (vH) += SIG0((vA)) + Sha512_Maj((vA), (vB), (vC));                        \
+    (vD) += ((vH) += SIG1(vE) + Sha512_Ch(vE, vF, vG) + (kt) + (wt));         \
+    (vH) += SIG0(vA) + Sha512_Maj(vA, vB, vC);                                \
   } while(0)
 
     /* One step of SHA-512/256 computation with working variables rotation,
@@ -530,7 +530,7 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
 #define SHA2STEP64RV(vA, vB, vC, vD, vE, vF, vG, vH, kt, wt)                  \
   do {                                                                        \
     uint64_t tmp_h_ = (vH);                                                   \
-    SHA2STEP64((vA), (vB), (vC), (vD), (vE), (vF), (vG), tmp_h_, (kt), (wt)); \
+    SHA2STEP64(vA, vB, vC, vD, vE, vF, vG, tmp_h_, kt, wt);                   \
     (vH) = (vG);                                                              \
     (vG) = (vF);                                                              \
     (vF) = (vE);                                                              \
@@ -546,7 +546,7 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        Input data must be read in big-endian bytes order,
        see FIPS PUB 180-4 section 3.1.2. */
 #define SHA512_GET_W_FROM_DATA(buf, t) \
-  CURL_GET_64BIT_BE(((const uint8_t *)(buf)) + (t) * SHA512_256_BYTES_IN_WORD)
+  CURL_GET_64BIT_BE((const uint8_t *)(buf) + ((t) * SHA512_256_BYTES_IN_WORD))
 
     /* During first 16 steps, before making any calculation on each step, the
        W element is read from the input data buffer as a big-endian value and

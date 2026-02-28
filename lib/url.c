@@ -953,7 +953,7 @@ static bool url_match_proxy_use(struct connectdata *conn,
   return TRUE;
 }
 #else
-#define url_match_proxy_use(c, m) ((void)c, (void)m, TRUE)
+#define url_match_proxy_use(c, m) ((void)(c), (void)(m), TRUE)
 #endif
 
 #ifndef CURL_DISABLE_HTTP
@@ -1009,8 +1009,8 @@ static bool url_match_http_version(struct connectdata *conn,
   return TRUE;
 }
 #else
-#define url_match_http_multiplex(c, m) ((void)c, (void)m, TRUE)
-#define url_match_http_version(c, m)   ((void)c, (void)m, TRUE)
+#define url_match_http_multiplex(c, m) ((void)(c), (void)(m), TRUE)
+#define url_match_http_version(c, m)   ((void)(c), (void)(m), TRUE)
 #endif
 
 static bool url_match_proto_config(struct connectdata *conn,
@@ -1178,7 +1178,7 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
   return TRUE;
 }
 #else
-#define url_match_auth_ntlm(c, m) ((void)c, (void)m, TRUE)
+#define url_match_auth_ntlm(c, m) ((void)(c), (void)(m), TRUE)
 #endif
 
 #ifdef USE_SPNEGO
