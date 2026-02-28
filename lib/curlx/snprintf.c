@@ -27,7 +27,7 @@
 #include <stdarg.h>
 
 /* Simplified wrapper for the Windows platform to use the correct symbol and
-   ensure to add a null-terminator. Omit the length to keep it simple. */
+   ensuring null-termination. Omit returning a length to keep it simple. */
 void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 {
   va_list ap;
