@@ -677,10 +677,12 @@ jobs:
         include:
           - { build: 'autotools', compiler: 'gcc' }
           - { build: 'cmake'    , compiler: 'gcc' }
-          - { build: 'cmake'    , compiler: 'clang-tidy' }
+          - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-20 clang-tidy-20' }
     steps:
       - name: 'install packages'
-        run: sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
+        env:
+          MATRIX_INSTALL_PACKAGES: '${{ matrix.install_packages }}'
+        run: sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32 ${MATRIX_INSTALL_PACKAGES}
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -694,10 +696,10 @@ jobs:
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             if [ "${MATRIX_COMPILER}" = 'clang-tidy' ]; then
-              options+=' -DCURL_CLANG_TIDY=ON'
+              options+=' -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20'
               options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
-              options+=' -DCMAKE_C_COMPILER=clang'
-              options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang -dumpversion | cut -d '.' -f 1)"
+              options+=' -DCMAKE_C_COMPILER=clang-20'
+              options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang-20 -dumpversion | cut -d '.' -f 1)"
             else
               options+=" -DCMAKE_C_COMPILER=${TRIPLET}-gcc"
             fi
