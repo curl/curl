@@ -315,6 +315,7 @@ jobs:
           mkdir -p my-nghttp2/lib
           cd my-nghttp2
           mv C:/msys64/mingw64/include/nghttp2 include
+          mv C:/msys64/mingw64/lib/libnghttp2.a lib
           mv C:/msys64/mingw64/lib/libnghttp2.dll.a lib
           echo '-----------------'
           find .
