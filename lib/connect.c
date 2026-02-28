@@ -57,6 +57,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "cf-resolv.h"
 #include "cf-socket.h"
 #include "multiif.h"
 #include "curlx/inet_ntop.h"
@@ -343,17 +344,15 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
 {
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  struct Curl_dns_entry *dns = data->state.dns[cf->sockindex];
 
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
   }
 
+  CURL_TRC_CF(data, cf, "connect");
   /* connect current sub-chain */
 connect_sub_chain:
-  if(!dns)
-    return CURLE_FAILED_INIT;
 
   if(cf->next && !cf->next->connected) {
     result = Curl_conn_cf_connect(cf->next, data, done);
@@ -459,12 +458,19 @@ static void cf_setup_close(struct Curl_cfilter *cf,
   }
 }
 
+static void cf_setup_ctx_destroy(struct cf_setup_ctx *ctx)
+{
+  if(ctx) {
+    curlx_free(ctx);
+  }
+}
+
 static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
 
   CURL_TRC_CF(data, cf, "destroy");
-  Curl_safefree(ctx);
+  cf_setup_ctx_destroy(ctx);
 }
 
 struct Curl_cftype Curl_cft_setup = {
@@ -494,6 +500,9 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   struct cf_setup_ctx *ctx;
   CURLcode result = CURLE_OK;
 
+  /* if(!dns)
+    return CURLE_FAILED_INIT; */
+
   (void)data;
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
@@ -505,15 +514,11 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   ctx->transport = transport;
 
   result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
-  if(result)
-    goto out;
-  ctx = NULL;
 
 out:
   *pcf = result ? NULL : cf;
-  if(ctx) {
-    curlx_free(ctx);
-  }
+  if(result)
+    cf_setup_ctx_destroy(ctx);
   return result;
 }
 
@@ -562,10 +567,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->scheme);
-  DEBUGASSERT(dns);
-
-  Curl_resolv_unlink(data, &data->state.dns[sockindex]);
-  data->state.dns[sockindex] = dns;
+  DEBUGASSERT(!conn->cfilter[sockindex]);
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
@@ -585,12 +587,28 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
       goto out;
   }
 
+  result = Curl_cf_resolv_add(data, conn, sockindex,
+                              conn->transport_wanted, dns);
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
-  if(result)
-    Curl_resolv_unlink(data, &data->state.dns[sockindex]);
   return result;
 }
+
+#ifdef USE_UNIX_SOCKETS
+const char *Curl_conn_get_unix_path(struct connectdata *conn)
+{
+  const char *unix_path = conn->unix_domain_socket;
+
+#ifndef CURL_DISABLE_PROXY
+  if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
+     !strncmp(UNIX_SOCKET_PREFIX "/",
+              conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
+    unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
+#endif
+
+  return unix_path;
+}
+#endif
 
 void Curl_conn_set_multiplex(struct connectdata *conn)
 {

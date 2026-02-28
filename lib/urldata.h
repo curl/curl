@@ -396,6 +396,7 @@ struct ConnectBits {
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
   BIT(in_cpool);     /* connection is kept in a connection pool */
+  BIT(dns_resolved); /* DNS records for connection were resolved */
 };
 
 struct hostname {
@@ -620,7 +621,6 @@ struct connectdata {
   struct Curl_hash meta_hash;
 
   struct hostname host;
-  char *hostname_resolve; /* hostname to resolve to address, allocated */
   char *secondaryhostname; /* secondary socket hostname (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
@@ -705,8 +705,8 @@ struct connectdata {
 #endif
   /* The field below gets set in connect.c:connecthost() */
   int remote_port; /* the remote port, not the proxy port! */
-  int conn_to_port; /* the remote port to connect to. valid only if
-                       bits.conn_to_port is set */
+  uint16_t conn_to_port; /* the remote port to connect to. valid only if
+                            bits.conn_to_port is set */
 
   uint32_t attached_xfers; /* # of attached easy handles */
 
@@ -969,9 +969,8 @@ struct UrlState {
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
 
-  struct Curl_dns_entry *dns[2]; /* DNS to connect FIRST/SECONDARY */
 #ifdef USE_CURL_ASYNC
-  struct Curl_async async;  /* asynchronous name resolver data */
+  struct Curl_resolv_async *async;  /* asynchronous name resolver data */
 #endif
 
 #ifdef USE_OPENSSL

@@ -74,15 +74,14 @@ static CURLcode test_unit1620(const char *arg)
   struct Curl_easy *empty;
   enum dupstring i;
 
-  bool async = FALSE;
-  bool protocol_connect = FALSE;
+  bool connected = FALSE;
 
   result = Curl_open(&empty);
   if(result)
     goto unit_test_abort;
   fail_unless(result == CURLE_OK, "Curl_open() failed");
 
-  result = Curl_connect(empty, &async, &protocol_connect);
+  result = Curl_connect(empty, &connected);
   fail_unless(result == CURLE_URL_MALFORMAT,
               "Curl_connect() failed to return CURLE_URL_MALFORMAT");
 
@@ -90,7 +89,7 @@ static CURLcode test_unit1620(const char *arg)
               "empty->magic should be equal to CURLEASY_MAGIC_NUMBER");
 
   /* double invoke to ensure no dependency on internal state */
-  result = Curl_connect(empty, &async, &protocol_connect);
+  result = Curl_connect(empty, &connected);
   fail_unless(result == CURLE_URL_MALFORMAT,
               "Curl_connect() failed to return CURLE_URL_MALFORMAT");
 
