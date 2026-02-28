@@ -122,6 +122,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     make install
     cd ..
   fi
+  echo '::group::curl-config.cmake'; cat "${prefix}/lib/cmake/CURL/CURL"* || true; echo '::endgroup::'
   bldc='bld-find_package'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
