@@ -1555,7 +1555,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
   case CURLUPART_SCHEME:
     ptr = u->scheme;
     ifmissing = CURLUE_NO_SCHEME;
-    flags &= ~CURLU_URLDECODE; /* never for schemes */
+    flags &= ~(unsigned int)CURLU_URLDECODE; /* never for schemes */
     if((flags & CURLU_NO_GUESS_SCHEME) && u->guessed_scheme)
       return CURLUE_NO_SCHEME;
     break;
@@ -1582,7 +1582,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
   case CURLUPART_PORT:
     ptr = u->port;
     ifmissing = CURLUE_NO_PORT;
-    flags &= ~CURLU_URLDECODE; /* never for port */
+    flags &= ~(unsigned int)CURLU_URLDECODE; /* never for port */
     if(!ptr && (flags & CURLU_DEFAULT_PORT) && u->scheme) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
