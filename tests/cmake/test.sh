@@ -106,7 +106,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
   if [ -n "${cmake_provider_modern:-}" ]; then  # 3.15+
-    "${cmake_provider}" -B "${bldp}" -S "${src}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
+    "${cmake_provider}" -B "${bldp}" -S "${src}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_PROVIDER:-} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
@@ -114,7 +114,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     "${cmake_provider}" --install "${bldp}"
   else
     mkdir "${bldp}"; cd "${bldp}"
-    "${cmake_provider}" "${src}" -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} "$@" \
+    "${cmake_provider}" "${src}" -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_PROVIDER:-} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
