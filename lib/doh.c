@@ -201,7 +201,6 @@ static void doh_print_buf(struct Curl_easy *data,
     infof(data, "%s: len=%d, val=%s", prefix, (int)len, hexstr);
   else
     infof(data, "%s: len=%d (truncated)val=%s", prefix, (int)len, hexstr);
-  return;
 }
 #endif
 
@@ -1191,7 +1190,6 @@ UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
   }
   else
     infof(data, "HTTPS RR: no ipv6hints");
-  return;
 }
 # endif
 #endif
