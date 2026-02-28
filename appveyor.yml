@@ -49,19 +49,19 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64'
 
-    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
+    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32'
 
-    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
+    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.18.4
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 12 2013'
       CMAKE_GENERATE: '-A x64'
 
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static'
+    - job_name: 'CM VS2015, Debug, x64, Schannel, Static & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.19.8
       CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
