@@ -40,7 +40,7 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
 add_dependencies(${BUNDLE} curlu-unitprotos)
-add_dependencies(testbins ${BUNDLE})
+add_dependencies(tt ${BUNDLE})
 target_link_libraries(${BUNDLE} curlu)
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h", "unitprotos.h"
