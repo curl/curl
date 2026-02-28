@@ -25,6 +25,7 @@
 
 #include "urldata.h"
 #include "connect.h"
+#include "curl_addrinfo.h"
 
 static CURLcode t1609_setup(void)
 {
