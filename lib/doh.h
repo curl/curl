@@ -27,6 +27,8 @@
 
 #ifndef CURL_DISABLE_DOH
 
+struct Curl_resolv_async;
+
 typedef enum {
   DOH_OK,
   DOH_DNS_BAD_LABEL,    /* 1 */
@@ -90,8 +92,9 @@ struct doh_request {
 };
 
 struct doh_response {
-  uint32_t probe_mid;
   struct dynbuf body;
+  timediff_t timeout_ms;
+  uint32_t probe_mid;
   DNStype dnstype;
   CURLcode result;
 };
@@ -101,8 +104,6 @@ struct doh_response {
 struct doh_probes {
   struct doh_response probe_resp[DOH_SLOT_COUNT];
   unsigned int pending; /* still outstanding probes */
-  int port;
-  const char *host;
 };
 
 /*
@@ -110,11 +111,11 @@ struct doh_probes {
  * name and returns a 'Curl_addrinfo *' with the address information.
  */
 
-CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
-                  int port, int ip_version);
+CURLcode Curl_doh(struct Curl_easy *data,
+                  struct Curl_resolv_async *async);
 
-CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dnsp);
+CURLcode Curl_doh_take_result(struct Curl_easy *data,
+                              struct Curl_dns_entry **dns);
 
 #define DOH_MAX_ADDR  24
 #define DOH_MAX_CNAME 4
@@ -156,7 +157,10 @@ struct dohentry {
 };
 
 void Curl_doh_close(struct Curl_easy *data);
-void Curl_doh_cleanup(struct Curl_easy *data);
+void Curl_doh_cleanup(struct Curl_easy *data,
+                      struct Curl_resolv_async *async);
+#define Curl_doh_wanted(d)  (!!(d)->set.doh)
+
 
 #ifdef UNITTESTS
 UNITTEST DOHcode doh_req_encode(const char *host,
@@ -174,8 +178,9 @@ UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
 #else /* CURL_DISABLE_DOH */
-#define Curl_doh(a, b, c, d, e)    NULL
-#define Curl_doh_is_resolved(x, y) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_doh(a, b)             NULL
+#define Curl_doh_take_result(x, y) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_doh_wanted(d)         FALSE
 #endif /* !CURL_DISABLE_DOH */
 
 #endif /* HEADER_CURL_DOH_H */

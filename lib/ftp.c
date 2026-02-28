@@ -1061,6 +1061,7 @@ static CURLcode ftp_port_resolve_host(struct Curl_easy *data,
 
   *resp = NULL;
   result = Curl_resolv_blocking(data, host, 0, conn->ip_version,
+                                 Curl_conn_get_transport(data, conn),
                                 dns_entryp);
   if(result)
     failf(data, "failed to resolve the address provided to PORT: %s", host);
@@ -1385,7 +1386,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* cleanup */
 
   if(dns_entry)
-    Curl_resolv_unlink(data, &dns_entry);
+    Curl_dns_entry_unlink(data, &dns_entry);
   if(result) {
     ftp_state(data, ftpc, FTP_STOP);
   }
@@ -2082,14 +2083,15 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
         newport = (unsigned short)num;
         result = ftp_control_addr_dup(data, &newhost);
         if(result)
-          return result;
+          goto out;
       }
       else
         ptr = NULL;
     }
     if(!ptr) {
       failf(data, "Weirdly formatted EPSV reply");
-      return CURLE_FTP_WEIRD_PASV_REPLY;
+      result = CURLE_FTP_WEIRD_PASV_REPLY;
+      goto out;
     }
   }
   else if((ftpc->count1 == 1) &&
@@ -2114,7 +2116,8 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     if(!*str) {
       failf(data, "Could not interpret the 227-response");
-      return CURLE_FTP_WEIRD_227_FORMAT;
+      result = CURLE_FTP_WEIRD_227_FORMAT;
+      goto out;
     }
 
     /* we got OK from server */
@@ -2125,23 +2128,27 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
             ip[0], ip[1], ip[2], ip[3], conn->host.name);
       result = ftp_control_addr_dup(data, &newhost);
       if(result)
-        return result;
+        goto out;
     }
     else
       newhost = curl_maprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 
-    if(!newhost)
-      return CURLE_OUT_OF_MEMORY;
+    if(!newhost) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
 
     newport = (unsigned short)(((ip[4] << 8) + ip[5]) & 0xffff);
   }
   else if(ftpc->count1 == 0) {
     /* EPSV failed, move on to PASV */
-    return ftp_epsv_disable(data, ftpc, conn);
+    result = ftp_epsv_disable(data, ftpc, conn);
+    goto out;
   }
   else {
     failf(data, "Bad PASV/EPSV response: %03d", ftpcode);
-    return CURLE_FTP_WEIRD_PASV_REPLY;
+    result = CURLE_FTP_WEIRD_PASV_REPLY;
+    goto out;
   }
 
 #ifndef CURL_DISABLE_PROXY
@@ -2157,10 +2164,11 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     result = Curl_conn_get_ip_info(data, data->conn, FIRSTSOCKET,
                                    &is_ipv6, &ipquad);
     if(result)
-      goto error;
+      goto out;
 
     (void)Curl_resolv_blocking(data, host_name, ipquad.remote_port,
                                is_ipv6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_V4,
+                               Curl_conn_get_transport(data, conn),
                                &dns);
     /* we connect to the proxy's port */
     connectport = (unsigned short)ipquad.remote_port;
@@ -2168,7 +2176,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     if(!dns) {
       failf(data, "cannot resolve proxy host %s:%hu", host_name, connectport);
       result = CURLE_COULDNT_RESOLVE_PROXY;
-      goto error;
+      goto out;
     }
   }
   else
@@ -2182,16 +2190,18 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       curlx_free(newhost);
       result = ftp_control_addr_dup(data, &newhost);
       if(result)
-        goto error;
+        goto out;
     }
 
-    (void)Curl_resolv_blocking(data, newhost, newport, conn->ip_version, &dns);
+    (void)Curl_resolv_blocking(data, newhost, newport, conn->ip_version,
+                               Curl_conn_get_transport(data, conn),
+                               &dns);
     connectport = newport; /* we connect to the remote port */
 
     if(!dns) {
       failf(data, "cannot resolve new host %s:%hu", newhost, connectport);
       result = CURLE_FTP_CANT_GET_HOST;
-      goto error;
+      goto out;
     }
   }
 
@@ -2202,11 +2212,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   if(result) {
     if((result != CURLE_OUT_OF_MEMORY) &&
        (ftpc->count1 == 0) && (ftpcode == 229)) {
-      curlx_free(newhost);
-      return ftp_epsv_disable(data, ftpc, conn);
+      result = ftp_epsv_disable(data, ftpc, conn);
     }
-
-    goto error;
+    goto out;
   }
 
   /*
@@ -2231,13 +2239,14 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   conn->secondaryhostname = curlx_strdup(newhost);
   if(!conn->secondaryhostname) {
     result = CURLE_OUT_OF_MEMORY;
-    goto error;
+    goto out;
   }
 
   conn->bits.do_more = TRUE;
   ftp_state(data, ftpc, FTP_STOP); /* this phase is completed */
 
-error:
+out:
+  Curl_dns_entry_unlink(data, &dns);
   curlx_free(newhost);
   return result;
 }
