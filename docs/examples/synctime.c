@@ -58,8 +58,8 @@
  */
 #ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS /* for _snprintf(), fopen(), gmtime(),
-                                   localtime(), sscanf() */
+#define _CRT_SECURE_NO_WARNINGS /* for fopen(), gmtime(), localtime(),
+                                       sscanf() */
 #endif
 #endif
 
@@ -79,10 +79,6 @@
 #  endif
 #include <windows.h>
 #endif
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
 #endif
 
 #define SYNCTIME_UA "synctime/1.0"

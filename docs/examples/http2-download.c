@@ -27,7 +27,7 @@
  */
 #ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), strerror() */
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), strerror() */
 #endif
 #endif
 
@@ -43,10 +43,6 @@
    old enough to not have this symbol. It is _not_ defined to zero in a recent
    libcurl header. */
 #define CURLPIPE_MULTIPLEX 0L
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
 #endif
 
 struct transfer {

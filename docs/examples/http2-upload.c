@@ -27,8 +27,7 @@
  */
 #ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), localtime(),
-                                    strerror() */
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), localtime(), strerror() */
 #endif
 #endif
 
@@ -60,10 +59,6 @@
 #undef fstat
 #define fstat _fstati64
 #define fileno _fileno
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
 #endif
 
 #ifdef _MSC_VER
