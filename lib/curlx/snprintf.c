@@ -44,10 +44,15 @@ int curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
+  va_end(ap);
   /* Old versions of the Windows CRT do not terminate the snprintf output
      buffer if it reaches the max size so we do that here. */
-  buf[maxlen - 1] = 0;
-  va_end(ap);
-  return (n < (int)maxlen) ? n : (int)(maxlen - 1);
+  if(n < 0) {
+    buf[maxlen - 1] = 0;
+    va_start(ap, fmt);
+    n = _vscprintf(fmt, ap);
+    va_end(ap);
+  }
+  return n;
 }
 #endif /* _WIN32 */
