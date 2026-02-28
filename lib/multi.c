@@ -301,8 +301,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   }
 #endif
 
+#ifdef USE_IPV6
   if(Curl_probeipv6(multi))
     goto error;
+#endif
 
   return multi;
 
