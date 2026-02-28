@@ -320,7 +320,7 @@ jobs:
           find .
           echo '-----------------'
           popd
-          export TEST_CMAKE_FLAGS_PROVIDER='-DNGHTTP2_INCLUDE_DIR=~/my-nghttp2/include -DNGHTTP2_LIBRARY=~/my-nghttp2/lib/libnghttp2.dll.a'
+          export TEST_CMAKE_FLAGS_PROVIDER="-DNGHTTP2_INCLUDE_DIR=$HOME/my-nghttp2/include -DNGHTTP2_LIBRARY=$HOME/my-nghttp2/lib/libnghttp2.dll.a"
           ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
       - name: 'via find_package (custom)'
