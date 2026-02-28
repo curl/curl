@@ -967,11 +967,11 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
             sftp_libssh2_strerror(sftperr));
       return sftp_libssh2_error_to_CURLE(sftperr);
     }
-    if(((sftperr == LIBSSH2_FX_NO_SUCH_FILE) ||
-        (sftperr == LIBSSH2_FX_FAILURE) ||
-        (sftperr == LIBSSH2_FX_NO_SUCH_PATH)) &&
-       (data->set.ftp_create_missing_dirs &&
-        (strlen(sshp->path) > 1))) {
+    if((sftperr == LIBSSH2_FX_NO_SUCH_FILE ||
+        sftperr == LIBSSH2_FX_FAILURE ||
+        sftperr == LIBSSH2_FX_NO_SUCH_PATH) &&
+       data->set.ftp_create_missing_dirs &&
+       (strlen(sshp->path) > 1)) {
       /* try to create the path remotely */
       sshc->secondCreateDirs = 1;
       myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS_INIT);
