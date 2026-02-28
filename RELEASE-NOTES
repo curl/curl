@@ -63,7 +63,7 @@ This release includes the following bugfixes:
  o cmake: normalize uppercase hex winver (for display) [191]
  o cmake: omit `curl.rc` from curltool lib [209]
  o cmake: reference OpenSSL and ZLIB imported targets only when enabled [41]
- o cmake: replace internal option with a new `testbins` target [220]
+ o cmake: replace internal option with a new `tt` (test tools) target [220]
  o cmake: silence potential unused var warnings in C++ test snippet [201]
  o cmake: silence silly Apple clang warnings in C89 mode, test in CI [14]
  o cmake: silence useless compiler warnings triggered by the FASTBuild generator [43]

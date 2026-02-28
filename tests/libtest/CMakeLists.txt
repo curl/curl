@@ -52,7 +52,7 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
-add_dependencies(testbins ${BUNDLE})
+add_dependencies(tt ${BUNDLE})
 target_link_libraries(${BUNDLE} ${LIB_SELECTED} ${CURL_LIBS})
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"

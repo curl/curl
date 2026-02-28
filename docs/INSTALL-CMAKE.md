@@ -552,7 +552,7 @@ Note: These variables are internal and subject to change.
 
 ## Useful build targets
 
-- `testbins`:               Build test binaries (servers, tools).
+- `tt`:                     Build test binaries (servers, tools).
                             Individual targets: `curlinfo`, `libtests`, `servers`, `tunits`, `units`
 - `testdeps`:               Build test dependencies (test binaries, test certificates).
                             Test certificates: `build-certs` (clean with `clean-certs`)
