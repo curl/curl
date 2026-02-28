@@ -37,4 +37,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
                                    bool has_scheme);
 #endif
 
+#define U_CURLU_URLDECODE (unsigned int)CURLU_URLDECODE
+#define U_CURLU_PATH_AS_IS (unsigned int)CURLU_PATH_AS_IS
+
 #endif /* HEADER_CURL_URLAPI_INT_H */
