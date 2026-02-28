@@ -40,6 +40,10 @@
 #include "tool_helpers.h"
 #include "tool_version.h"
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h> /* IPPROTO_IPV6 */
+#endif
+
 #define BUFFER_SIZE 102400L
 
 #ifdef IP_TOS
