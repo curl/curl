@@ -268,6 +268,9 @@ CURLcode Curl_h1_req_parse_read(struct h1_req_parser *parser,
   CURLcode result = CURLE_OK;
   size_t nread;
 
+  if(!buf)
+    goto out;
+
   *pnread = 0;
   while(!parser->done) {
     result = next_line(parser, buf, buflen, options, &nread);
