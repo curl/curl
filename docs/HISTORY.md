@@ -318,6 +318,8 @@ December: Public Suffix List
 
 January: the curl tool defaults to HTTP/2 for HTTPS URLs
 
+June 26: Rafael Sagula, author of the original httpget tool in 1996 died.
+
 December: curl 7.52.0 introduced support for HTTPS-proxy
 
 First TLS 1.3 support
