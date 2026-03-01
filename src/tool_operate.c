@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#include "curlx/nonblock.h" /* for curlx_nonblock() */
+
 #ifdef HAVE_LOCALE_H
 #  include <locale.h>
 #endif

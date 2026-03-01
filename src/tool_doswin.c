@@ -25,6 +25,9 @@
 
 #if defined(_WIN32) || defined(MSDOS)
 
+#include "curlx/basename.h" /* for curlx_basename() */
+#include "curlx/version_win32.h" /* for curlx_verify_windows_version() */
+
 #ifdef _WIN32
 #  include <tlhelp32.h>
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
