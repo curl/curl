@@ -1274,7 +1274,7 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
   if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
      !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
     uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
-                              flags & ~CURLU_PATH_AS_IS);
+                              flags & ~(unsigned int)CURLU_PATH_AS_IS);
   }
   else
     uc = CURLUE_OUT_OF_MEMORY;
