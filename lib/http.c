@@ -3244,6 +3244,8 @@ static CURLcode http_header_c(struct Curl_easy *data,
      list also is fine and then we should accept them all as long as they are
      the same value. Different values trigger error.
    */
+  /* The single caller references hd[0], hd cannot be NULL.
+     NOLINTNEXTLINE(clang-analyzer-core.NullPointerArithm) */
   v = (!k->http_bodyless && !data->set.ignorecl) ?
     HD_VAL(hd, hdlen, "Content-Length:") : NULL;
   if(v) {
