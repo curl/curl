@@ -2063,8 +2063,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
         pktcnt = 0;
       }
       else if(nread < gsolen) {
-        /* Reached MAX_PKT_BURST *or*
-         * the capacity of our buffer *or*
+        /* Reached capacity of our buffer *or*
          * last add was shorter than the previous ones, flush */
         break;
       }
