@@ -307,6 +307,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'via find_package (custom)'
+        if: ${{ contains(matrix.image, 'windows') }}
+        run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+
       - name: 'via find_package (custom) alt old'
         if: ${{ contains(matrix.image, 'windows') }}
         run: |
@@ -324,7 +328,7 @@ jobs:
           export TEST_CMAKE_PROVIDER; TEST_CMAKE_PROVIDER="$(cat ~/old-cmake-path.txt)"
           export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           export TEST_CMAKE_FLAGS_PROVIDER="-DNGHTTP2_INCLUDE_DIR=$HOME/my-nghttp2/include -DNGHTTP2_LIBRARY=$HOME/my-nghttp2/lib/libnghttp2.dll.a"
-          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_ENABLE_SSL=OFF
 
       - name: 'via find_package (custom) alt'
         if: ${{ contains(matrix.image, 'windows') }}
@@ -343,9 +347,6 @@ jobs:
           export TEST_CMAKE_FLAGS_PROVIDER="-DNGHTTP2_INCLUDE_DIR=$HOME/my-nghttp2/include -DNGHTTP2_LIBRARY=$HOME/my-nghttp2/lib/libnghttp2.dll.a"
           ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
-      - name: 'via find_package (custom)'
-        if: ${{ contains(matrix.image, 'windows') }}
-        run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a
       - name: 'via ExternalProject'
         if: ${{ !contains(matrix.image, 'ubuntu') }}
         run: ./tests/cmake/test.sh ExternalProject ${TESTOPTS}
