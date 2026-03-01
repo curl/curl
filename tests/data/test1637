@@ -11,7 +11,7 @@ HTTP
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
-HTTP/1.1 502 OK
+HTTP/1.1 502 Not OK
 Content-Length: 6
 Content-Type: text/html
 
