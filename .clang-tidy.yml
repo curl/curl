@@ -38,6 +38,7 @@ Checks:
   - readability-redundant-function-ptr-dereference
   - readability-redundant-parentheses
   - readability-redundant-preprocessor
+  - readability-suspicious-call-argument
   - readability-uppercase-literal-suffix
 
 CheckOptions:
