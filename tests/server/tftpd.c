@@ -606,8 +606,9 @@ static int validate_access(struct testcase *test,
 
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
-    size_t count = snprintf(weare, sizeof(weare), "WE ROOLZ: %ld\r\n",
-                            (long)our_getpid());
+    size_t count;
+    snprintf(weare, sizeof(weare), "WE ROOLZ: %ld\r\n", (long)our_getpid());
+    count = strlen(weare);
 
     logmsg("Are-we-friendly question received");
     test->buffer = curlx_strdup(weare);
