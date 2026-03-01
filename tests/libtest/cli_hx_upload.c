@@ -64,10 +64,10 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
                             void *userdata)
 {
   struct transfer_u *t = userdata;
-  size_t blen = (nitems * buflen);
+  curl_off_t blen = nitems * buflen;
   size_t nwritten;
 
-  curl_mfprintf(stderr, "[t-%zu] RECV %zu bytes, "
+  curl_mfprintf(stderr, "[t-%zu] RECV %" CURL_FORMAT_CURL_OFF_T " bytes, "
                 "total=%" CURL_FORMAT_CURL_OFF_T ", "
                 "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
                 t->idx, blen, t->recv_size, t->pause_at);
@@ -80,11 +80,11 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
   }
 
   nwritten = fwrite(buf, buflen, nitems, t->out);
-  if(nwritten < blen) {
+  if(nwritten < nitems) {
     curl_mfprintf(stderr, "[t-%zu] write failure\n", t->idx);
     return 0;
   }
-  t->recv_size += (curl_off_t)nwritten;
+  t->recv_size += blen;
   return nwritten;
 }
 
