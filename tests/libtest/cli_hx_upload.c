@@ -85,7 +85,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
     return 0;
   }
   t->recv_size += blen;
-  return nwritten;
+  return (size_t)blen;
 }
 
 static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,

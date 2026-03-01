@@ -120,7 +120,7 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
     return CURL_WRITEFUNC_ERROR;
   }
 
-  return nwritten;
+  return (size_t)blen;
 }
 
 static int my_progress_d_cb(void *userdata,
