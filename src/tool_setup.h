@@ -45,7 +45,17 @@ extern FILE *tool_stderr;
  * curl tool certainly uses libcurl's external interface.
  */
 
-#include <curlx/curlx.h>
+#include "curlx/base64.h" /* for curlx_base64* */
+#include "curlx/dynbuf.h" /* for curlx_dyn_*() */
+#include "curlx/fopen.h" /* for curlx_f*() */
+#include "curlx/multibyte.h" /* for curlx_convert_*() */
+#include "curlx/strcopy.h" /* for curlx_strcopy() */
+#include "curlx/strdup.h" /* for curlx_memdup*() */
+#include "curlx/strerr.h" /* for curlx_strerror() */
+#include "curlx/strparse.h" /* for curlx_str_* parsing functions */
+#include "curlx/timediff.h" /* for timediff_t type and related functions */
+#include "curlx/timeval.h" /* for curlx_now type and related functions */
+#include "curlx/wait.h" /* for curlx_wait_ms() */
 
 /*
  * Platform specific stuff.
