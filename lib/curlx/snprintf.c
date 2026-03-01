@@ -43,6 +43,7 @@ void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
+  buf[maxlen - 1] = 0;
   va_end(ap);
 }
 #endif /* _WIN32 */
