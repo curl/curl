@@ -309,7 +309,9 @@ jobs:
 
       - name: 'via find_package (custom)'
         if: ${{ contains(matrix.image, 'windows') }}
-        run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+        run: |
+          export TEST_CMAKE_FLAGS_CONSUMER=-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON
+          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a
 
       - name: 'via find_package (custom) alt old'
         if: ${{ contains(matrix.image, 'windows') }}
