@@ -25,8 +25,6 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
-set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)  # TEST TEST TEST TEST TEST
-
 # Collect command-line arguments for buildinfo.txt.
 # Must reside at the top of the script to work as expected.
 set(_cmake_args "")
