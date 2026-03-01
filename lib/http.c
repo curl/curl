@@ -3185,7 +3185,7 @@ static statusline checkprotoprefix(struct Curl_easy *data,
   (((hdlen) >= (sizeof(n) - 1)) && curl_strnequal(n, hd, sizeof(n) - 1))
 
 #define HD_VAL(hd, hdlen, n) \
-  ((((hdlen) >= (sizeof(n) - 1)) && \
+  ((((hdlen) >= (sizeof(n) - 1)) && (hd) && \
     curl_strnequal(n, hd, sizeof(n) - 1)) ? ((hd) + (sizeof(n) - 1)) : NULL)
 
 /* HTTP header has field name `n` (a string constant) and contains `v`
