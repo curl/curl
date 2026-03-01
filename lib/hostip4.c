@@ -69,8 +69,8 @@
  */
 struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
                                             const char *hostname,
-                                            int port,
-                                            int ip_version)
+                                            uint16_t port,
+                                            uint8_t ip_version)
 {
   struct Curl_addrinfo *ai = NULL;
 
@@ -95,7 +95,7 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
  *
  */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
-                                          int port)
+                                          uint16_t port)
 {
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE)) && \
   defined(HAVE_GETHOSTBYNAME_R_3)

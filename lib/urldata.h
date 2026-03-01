@@ -705,8 +705,8 @@ struct connectdata {
 #endif
   /* The field below gets set in connect.c:connecthost() */
   int remote_port; /* the remote port, not the proxy port! */
-  int conn_to_port; /* the remote port to connect to. valid only if
-                       bits.conn_to_port is set */
+  uint16_t conn_to_port; /* the remote port to connect to. valid only if
+                            bits.conn_to_port is set */
 
   uint32_t attached_xfers; /* # of attached easy handles */
 
@@ -971,7 +971,7 @@ struct UrlState {
 
   struct Curl_dns_entry *dns[2]; /* DNS to connect FIRST/SECONDARY */
 #ifdef USE_CURL_ASYNC
-  struct Curl_async async;  /* asynchronous name resolver data */
+  struct Curl_resolv_async *async;  /* asynchronous name resolver data */
 #endif
 
 #ifdef USE_OPENSSL
