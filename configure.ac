@@ -4190,7 +4190,6 @@ AC_CHECK_FUNCS([\
   sendmsg \
   setlocale \
   setrlimit \
-  snprintf \
   utime \
   utimes \
 ])
