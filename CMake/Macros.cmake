@@ -70,10 +70,16 @@ macro(curl_dependency_option _option_name _find_name _desc_name)
   set(${_option_name} "AUTO" CACHE STRING "Build curl with ${_desc_name} support (AUTO, ON or OFF)")
   set_property(CACHE ${_option_name} PROPERTY STRINGS "AUTO" "ON" "OFF")
 
+  if(_find_name STREQUAL "ZLIB")
+    set(_module_option "")
+  else()
+    set(_module_option "MODULE")
+  endif()
+
   if(${_option_name} STREQUAL "AUTO")
-    find_package(${_find_name} MODULE)
+    find_package(${_find_name} ${_module_option})
   elseif(${_option_name})
-    find_package(${_find_name} MODULE REQUIRED)
+    find_package(${_find_name} ${_module_option} REQUIRED)
   else()
     string(TOUPPER "${_find_name}" _find_name_upper)
     set(${_find_name}_FOUND OFF)  # cmake-lint: disable=C0103
