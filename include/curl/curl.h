@@ -3326,18 +3326,19 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 #include "typecheck-gcc.h"
 #else
 #if defined(__STDC__) && (__STDC__ >= 1)
-/* This preprocessor magic that replaces a call with the exact same call is
-   only done to make sure application authors pass exactly three arguments
-   to these functions. Use recursive macros to allow using these symbols via
-   the C++ global namespace '::' or reusing them as method names. */
+/* This preprocessor magic ensures that application authors pass exactly three
+   arguments to these functions. For compatibility with C++ global namespace
+   '::' and reusing these symbols as method names, while also avoiding
+   recursive macros, use a two-stage solution. */
+#define curl_exactly_three_arguments(a, b, c) (a, b, c)
 #define curl_easy_setopt(handle, opt, param) \
-  curl_easy_setopt(handle, opt, param)
+  curl_easy_setopt curl_exactly_three_arguments(handle, opt, param)
 #define curl_easy_getinfo(handle, info, arg) \
-  curl_easy_getinfo(handle, info, arg)
+  curl_easy_getinfo curl_exactly_three_arguments(handle, info, arg)
 #define curl_share_setopt(share, opt, param) \
-  curl_share_setopt(share, opt, param)
+  curl_share_setopt curl_exactly_three_arguments(share, opt, param)
 #define curl_multi_setopt(handle, opt, param) \
-  curl_multi_setopt(handle, opt, param)
+  curl_multi_setopt curl_exactly_three_arguments(handle, opt, param)
 #endif /* __STDC__ >= 1 */
 #endif /* gcc >= 4.3 && !__cplusplus && !CURL_DISABLE_TYPECHECK */
 
