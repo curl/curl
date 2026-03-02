@@ -306,7 +306,7 @@ jobs:
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
             CC: clang-20
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_BUILD_UNITY=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang-20 libubsan1 libasan8 libtsan2
@@ -316,7 +316,7 @@ jobs:
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
             CC: clang-20
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON -DCMAKE_BUILD_UNITY=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'thread-sanitizer'
             install_packages: clang-20 libtsan2
@@ -324,7 +324,7 @@ jobs:
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
             CC: clang-20
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON -DCMAKE_BUILD_UNITY=OFF
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'memory-sanitizer'
             install_packages: clang-20
