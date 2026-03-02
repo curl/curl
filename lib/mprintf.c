@@ -608,9 +608,9 @@ static bool out_double(void *userp,
                        double dnum,
                        char *work, int *donep)
 {
-  char formatbuf[32] = "%";
-  char *fptr = &formatbuf[1];
-  size_t left = sizeof(formatbuf) - strlen(formatbuf);
+  char fmt[32] = "%";
+  char *fptr = &fmt[1];
+  size_t left = sizeof(fmt) - strlen(fmt);
   int flags = p->flags;
   int width = p->width;
   int prec = p->prec;
@@ -677,12 +677,12 @@ static bool out_double(void *userp,
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 #ifdef _WIN32
-  curlx_win32_snprintf(work, BUFFSIZE, formatbuf, dnum);
+  curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
 #elif defined(HAVE_SNPRINTF)
   /* !checksrc! disable BANNEDFUNC 1 */
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
-  snprintf(work, BUFFSIZE, formatbuf, dnum);
+  snprintf(work, BUFFSIZE, fmt, dnum);
 #else
   /* float and double outputs do not work without snprintf support */
   work[0] = 0;
