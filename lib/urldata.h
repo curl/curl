@@ -796,6 +796,7 @@ struct Progress {
                       force redraw at next call */
   struct pgrs_dir ul;
   struct pgrs_dir dl;
+  curl_off_t deliver; /* amount of data delivered to application */
 
   curl_off_t current_speed; /* uses the currently fastest transfer */
   curl_off_t earlydata_sent;

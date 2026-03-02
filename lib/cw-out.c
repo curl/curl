@@ -31,7 +31,7 @@
 #include "transfer.h"
 #include "cw-out.h"
 #include "cw-pause.h"
-
+#include "progress.h"
 
 /**
  * OVERALL DESIGN of this client writer
@@ -228,8 +228,8 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   curl_write_callback wcb = NULL;
   void *wcb_data;
   size_t max_write, min_write;
-  size_t wlen, nwritten;
-  CURLcode result;
+  size_t wlen, nwritten = 0;
+  CURLcode result = CURLE_OK;
 
   /* If we errored once, we do not invoke the client callback again */
   if(ctx->errored)
@@ -253,10 +253,15 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       if(!flush_all && blen < min_write)
         break;
       wlen = max_write ? CURLMIN(blen, max_write) : blen;
-      result = cw_out_cb_write(ctx, data, wcb, wcb_data, otype,
-                               buf, wlen, &nwritten);
+      if(otype == CW_OUT_BODY)
+        result = Curl_pgrs_deliver_check(data, wlen);
+      if(!result)
+        result = cw_out_cb_write(ctx, data, wcb, wcb_data, otype,
+                                 buf, wlen, &nwritten);
       if(result)
         return result;
+      if(otype == CW_OUT_BODY)
+        Curl_pgrs_deliver_inc(data, nwritten);
       *pconsumed += nwritten;
       blen -= nwritten;
       buf += nwritten;
