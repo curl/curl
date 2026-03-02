@@ -461,6 +461,8 @@ static const struct writeoutvar variables[] = {
   { "remote_port", VAR_PRIMARY_PORT, CURLINFO_PRIMARY_PORT, writeLong },
   { "response_code", VAR_HTTP_CODE, CURLINFO_RESPONSE_CODE, writeLong },
   { "scheme", VAR_SCHEME, CURLINFO_SCHEME, writeString },
+  { "size_delivered", VAR_SIZE_DELIVERED, CURLINFO_SIZE_DELIVERED,
+    writeOffset },
   { "size_download", VAR_SIZE_DOWNLOAD, CURLINFO_SIZE_DOWNLOAD_T,
     writeOffset },
   { "size_header", VAR_HEADER_SIZE, CURLINFO_HEADER_SIZE, writeLong },

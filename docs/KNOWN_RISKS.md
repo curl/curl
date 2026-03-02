@@ -144,3 +144,6 @@ and secure algorithms.
 When asking curl or libcurl to automatically decompress data on arrival, there
 is a risk that the size of the output from the decompression process ends up
 many times larger than the input data size.
+
+Since curl 8.20.0, users can mitigate this risk by setting the max filesize
+option that also covers the decompressed size.

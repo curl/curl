@@ -415,6 +415,9 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_FILETIME_T:
     *param_offt = (curl_off_t)data->info.filetime;
     break;
+  case CURLINFO_SIZE_DELIVERED:
+    *param_offt = data->progress.deliver;
+    break;
   case CURLINFO_SIZE_UPLOAD_T:
     *param_offt = data->progress.ul.cur_size;
     break;
