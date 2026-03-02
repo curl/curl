@@ -658,7 +658,7 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
         return CURLE_SSL_CACERT_BADFILE;
       }
       else {
-        /* Just continue with a warning if no strict certificate
+        /* continue with a warning if no strict certificate
            verification is required. */
         infof(data, "error setting certificate verify locations,"
                     " continuing anyway:");
@@ -1612,7 +1612,7 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
       int err = wolfSSL_get_error(wssl->ssl, rc);
       char error_buffer[256];
       switch(err) {
-      case WOLFSSL_ERROR_NONE: /* just did not get anything */
+      case WOLFSSL_ERROR_NONE: /* did not get anything */
       case WOLFSSL_ERROR_WANT_READ:
       case WOLFSSL_ERROR_WANT_WRITE:
         return CURLE_AGAIN;
@@ -1741,7 +1741,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
         failf(data, " CA signer not available for verification");
         return CURLE_SSL_CACERT_BADFILE;
       }
-      /* Just continue with a warning if no strict certificate
+      /* Continue with a warning if no strict certificate
          verification is required. */
       infof(data, "CA signer not available for verification, "
                   "continuing anyway");
@@ -1941,7 +1941,7 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "SSL shutdown received");
     *done = TRUE;
     break;
-  case WOLFSSL_ERROR_NONE: /* just did not get anything */
+  case WOLFSSL_ERROR_NONE: /* did not get anything */
   case WOLFSSL_ERROR_WANT_READ:
     /* wolfSSL has send its notify and now wants to read the reply
      * from the server. We are not really interested in that. */

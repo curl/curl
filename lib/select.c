@@ -66,7 +66,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
   if((!fds_read || fds_read->fd_count == 0) &&
      (!fds_write || fds_write->fd_count == 0) &&
      (!fds_err || fds_err->fd_count == 0)) {
-    /* no sockets, just wait */
+    /* no sockets, wait */
     return curlx_wait_ms(timeout_ms);
   }
 #endif
@@ -82,9 +82,9 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
     given as null. At least one must be non-null, and any non-null
     descriptor set must contain at least one handle to a socket.
 
-    It is unclear why Winsock does not just handle this for us instead of
+    It is unclear why Winsock does not handle this for us instead of
     calling this an error. Luckily, with Winsock, we can _also_ ask how
-    many bits are set on an fd_set. So, let's just check it beforehand.
+    many bits are set on an fd_set. So, let's check it beforehand.
   */
   return select((int)maxfd + 1,
                 fds_read && fds_read->fd_count ? fds_read : NULL,
@@ -128,7 +128,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
-    /* no sockets, just wait */
+    /* no sockets, wait */
     return curlx_wait_ms(timeout_ms);
   }
 
@@ -223,7 +223,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     }
   }
   if(fds_none) {
-    /* no sockets, just wait */
+    /* no sockets, wait */
     return curlx_wait_ms(timeout_ms);
   }
 

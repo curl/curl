@@ -92,9 +92,9 @@ The people behind libcurl have put a considerable effort to make libcurl work
 on a large amount of different operating systems and environments.
 
 You program libcurl the same way on all platforms that libcurl runs on. There
-are only a few minor details that differ. If you just make sure to write your
-code portable enough, you can create a portable program. libcurl should not
-stop you from that.
+are only a few minor details that differ. If you make sure to write your code
+portable enough, you can create a portable program. libcurl should not stop
+you from that.
 
 # Global Preparation
 
@@ -171,7 +171,7 @@ Get an easy handle with
     handle = curl_easy_init();
 ~~~
 It returns an easy handle. Using that you proceed to the next step: setting
-up your preferred actions. A handle is just a logic entity for the upcoming
+up your preferred actions. A handle is a logic entity for the upcoming
 transfer or series of transfers.
 
 You set properties and options for this handle using
@@ -311,8 +311,8 @@ uploading to a remote FTP site is similar to uploading data to an HTTP server
 with a PUT request.
 
 Of course, first you either create an easy handle or you reuse one existing
-one. Then you set the URL to operate on just like before. This is the remote
-URL, that we now upload.
+one. Then you set the URL to operate on like before. This is the remote URL,
+that we now upload.
 
 Since we write an application, we most likely want libcurl to get the upload
 data by asking us for it. To make it do that, we set the read callback and the
@@ -620,15 +620,17 @@ handle:
 ~~~
 
 Since all options on an easy handle are "sticky", they remain the same until
-changed even if you do call curl_easy_perform(3), you may need to tell
-curl to go back to a plain GET request if you intend to do one as your next
-request. You force an easy handle to go back to GET by using the
-CURLOPT_HTTPGET(3) option:
+changed even if you do call curl_easy_perform(3), you may need to tell curl to
+go back to a plain GET request if you intend to do one as your next request.
+You force an easy handle to go back to GET by using the CURLOPT_HTTPGET(3)
+option:
+
 ~~~c
     curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
 ~~~
-Just setting CURLOPT_POSTFIELDS(3) to "" or NULL does *not* stop libcurl
-from doing a POST. It just makes it POST without any data to send!
+
+Setting CURLOPT_POSTFIELDS(3) to "" or NULL does *not* stop libcurl from doing
+a POST. It makes it POST without any data to send!
 
 # Converting from deprecated form API to MIME API
 
@@ -956,10 +958,10 @@ Mozilla JavaScript engine in the past.
 Re-cycling the same easy handle several times when doing multiple requests is
 the way to go.
 
-After each single curl_easy_perform(3) operation, libcurl keeps the
-connection alive and open. A subsequent request using the same easy handle to
-the same host might just be able to use the already open connection! This
-reduces network impact a lot.
+After each single curl_easy_perform(3) operation, libcurl keeps the connection
+alive and open. A subsequent request using the same easy handle to the same
+host might be able to reuse the already open connection! This reduces network
+impact a lot.
 
 Even if the connection is dropped, all connections involving SSL to the same
 host again, benefit from libcurl's session ID cache that drastically reduces
@@ -978,9 +980,9 @@ may also be added in the future.
 
 Each easy handle attempts to keep the last few connections alive for a while
 in case they are to be used again. You can set the size of this "cache" with
-the CURLOPT_MAXCONNECTS(3) option. Default is 5. There is rarely any
-point in changing this value, and if you think of changing this it is often
-just a matter of thinking again.
+the CURLOPT_MAXCONNECTS(3) option. Default is 5. There is rarely any point in
+changing this value, and if you think of changing this it is often a reason to
+think again.
 
 To force your upcoming request to not use an already existing connection, you
 can do that by setting CURLOPT_FRESH_CONNECT(3) to 1. In a similar
@@ -1025,9 +1027,9 @@ libcurl is your friend here too.
 
 ## CURLOPT_CUSTOMREQUEST
 
-If just changing the actual HTTP request keyword is what you want, like when
-GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST(3)
-is there for you. It is simple to use:
+If changing the actual HTTP request keyword is what you want, like when GET,
+HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST(3) is there for
+you. It is simple to use:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
@@ -1152,8 +1154,8 @@ content transfer is performed.
 ## FTP Custom CURLOPT_CUSTOMREQUEST
 
 If you do want to list the contents of an FTP directory using your own defined
-FTP command, CURLOPT_CUSTOMREQUEST(3) does just that. "NLST" is the default
-one for listing directories but you are free to pass in your idea of a good
+FTP command, CURLOPT_CUSTOMREQUEST(3) does that. "NLST" is the default one for
+listing directories but you are free to pass in your idea of a good
 alternative.
 
 # Cookies Without Chocolate Chips
@@ -1170,8 +1172,8 @@ update them. Server use cookies to "track" users and to keep "sessions".
 Cookies are sent from server to clients with the header Set-Cookie: and
 they are sent from clients to servers with the Cookie: header.
 
-To just send whatever cookie you want to a server, you can use
-CURLOPT_COOKIE(3) to set a cookie string like this:
+To send whatever cookie you want to a server, you can use CURLOPT_COOKIE(3) to
+set a cookie string like this:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
@@ -1186,16 +1188,15 @@ when you make a request, you tell libcurl to read the previous headers to
 figure out which cookies to use. Set the header file to read cookies from with
 CURLOPT_COOKIEFILE(3).
 
-The CURLOPT_COOKIEFILE(3) option also automatically enables the cookie
-parser in libcurl. Until the cookie parser is enabled, libcurl does not parse
-or understand incoming cookies and they are just be ignored. However, when the
+The CURLOPT_COOKIEFILE(3) option also automatically enables the cookie parser
+in libcurl. Until the cookie parser is enabled, libcurl does not parse or
+understand incoming cookies and they are instead ignored. However, when the
 parser is enabled the cookies are understood and the cookies are kept in
-memory and used properly in subsequent requests when the same handle is
-used. Many times this is enough, and you may not have to save the cookies to
-disk at all. Note that the file you specify to CURLOPT_COOKIEFILE(3)
-does not have to exist to enable the parser, so a common way to just enable
-the parser and not read any cookies is to use the name of a file you know does
-not exist.
+memory and used properly in subsequent requests when the same handle is used.
+Many times this is enough, and you may not have to save the cookies to disk at
+all. Note that the file you specify to CURLOPT_COOKIEFILE(3) does not have to
+exist to enable the parser, so a common way to enable the parser and not read
+any cookies is to use the name of a file you know does not exist.
 
 If you would rather use existing cookies that you have previously received
 with your Netscape or Mozilla browsers, you can make libcurl use that cookie
@@ -1370,9 +1371,9 @@ multiple transfers at the same time by adding up multiple easy handles into
 a "multi stack".
 
 You create the easy handles you want, one for each concurrent transfer, and
-you set all the options just like you learned above, and then you create a
-multi handle with curl_multi_init(3) and add all those easy handles to
-that multi handle with curl_multi_add_handle(3).
+you set all the options like you learned above, and then you create a multi
+handle with curl_multi_init(3) and add all those easy handles to that multi
+handle with curl_multi_add_handle(3).
 
 When you have added the handles you have for the moment (you can still add new
 ones at any time), you start the transfers by calling

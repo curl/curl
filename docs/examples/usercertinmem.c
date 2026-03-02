@@ -172,8 +172,8 @@ int main(void)
       printf("*** transfer failed ***\n");
 
     /* second try: retrieve page using user certificate and key -> succeeds to
-     * load the certificate and key by installing a function doing
-     * the necessary "modifications" to the SSL CONTEXT just before link init
+     * load the certificate and key by installing a function doing the
+     * necessary "modifications" to the SSL CONTEXT before link init
      */
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
     result = curl_easy_perform(curl);

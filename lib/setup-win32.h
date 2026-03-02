@@ -64,12 +64,12 @@
 #endif
 
 /*
- * Include header files for Windows builds before redefining anything.
- * Use this preprocessor block only to include or exclude windows.h,
- * winsock2.h or ws2tcpip.h. Any other Windows thing belongs
- * to any other further and independent block. Under Cygwin things work
- * just as under Linux (e.g. <sys/socket.h>) and the Winsock headers should
- * never be included when __CYGWIN__ is defined.
+ * Include header files for Windows builds before redefining anything. Use
+ * this preprocessor block only to include or exclude windows.h, winsock2.h or
+ * ws2tcpip.h. Any other Windows thing belongs to any other further and
+ * independent block. Under Cygwin things work as under Linux (e.g.
+ * <sys/socket.h>) and the Winsock headers should never be included when
+ * __CYGWIN__ is defined.
  */
 #ifdef _WIN32
 #  if defined(UNICODE) && !defined(_UNICODE)

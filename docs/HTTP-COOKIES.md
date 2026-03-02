@@ -98,8 +98,8 @@ Field number, what type and example data and the meaning of it:
 
 ## Cookies with curl the command line tool
 
-curl has a full cookie "engine" built in. If you just activate it, you can
-have curl receive and send cookies exactly as mandated in the specs.
+curl has a full cookie "engine" built in. If you activate it, you can have
+curl receive and send cookies exactly as mandated in the specs.
 
 Command line options:
 

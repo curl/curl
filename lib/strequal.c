@@ -42,7 +42,7 @@ static int casecompare(const char *first, const char *second)
     second++;
   }
   /* If we are here either the strings are the same or the length is different.
-     We can just test if the "current" character is non-zero for one and zero
+     We can test if the "current" character is non-zero for one and zero
      for the other. Note that the characters may not be exactly the same even
      if they match, we only want to compare zero-ness. */
   return !*first == !*second;

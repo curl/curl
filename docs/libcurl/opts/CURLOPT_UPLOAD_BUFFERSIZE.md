@@ -33,7 +33,7 @@ the next layer in the stack to get sent off. In some setups and for some
 protocols, there is a huge performance benefit of having a larger upload
 buffer.
 
-This is just treated as a request, not an order. You cannot be guaranteed to
+This is treated as a request, not an order. You cannot be guaranteed to
 actually get the given size.
 
 The upload buffer size is by default 64 kilobytes. The maximum buffer size

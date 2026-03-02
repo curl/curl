@@ -38,7 +38,7 @@
  *       when compiling with -Wlogical-op.
  *
  * To add an option that uses the same type as an existing option, you will
- * just need to extend the appropriate _curl_*_option macro
+ * need to extend the appropriate _curl_*_option macro
  */
 
 #define curl_easy_setopt(handle, option, value)                         \
@@ -260,7 +260,7 @@
    curlcheck_cb_compatible((expr), curl_notify_callback))
 
 /*
- * For now, just make sure that the functions are called with three arguments
+ * Make sure that the functions are called with three arguments
  */
 #define curl_share_setopt(share, opt, param) \
   (curl_share_setopt)(share, opt, param)

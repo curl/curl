@@ -161,7 +161,7 @@ string.
 int curlx_str_number(char **linep, curl_size_t *nump, size_t max);
 ~~~
 
-Get an unsigned decimal number not larger than `max`. Leading zeroes are just
+Get an unsigned decimal number not larger than `max`. Leading zeroes are
 swallowed. Return non-zero on error. Returns error if there was not a single
 digit.
 
@@ -181,8 +181,8 @@ int curlx_str_hex(char **linep, curl_size_t *nump, size_t max);
 ~~~
 
 Get an unsigned hexadecimal number not larger than `max`. Leading zeroes are
-just swallowed. Return non-zero on error. Returns error if there was not a
-single digit. Does *not* handled `0x` prefix.
+swallowed. Return non-zero on error. Returns error if there was not a single
+digit. Does *not* handled `0x` prefix.
 
 ## `curlx_str_octal`
 
@@ -190,7 +190,7 @@ single digit. Does *not* handled `0x` prefix.
 int curlx_str_octal(char **linep, curl_size_t *nump, size_t max);
 ~~~
 
-Get an unsigned octal number not larger than `max`. Leading zeroes are just
+Get an unsigned octal number not larger than `max`. Leading zeroes are
 swallowed. Return non-zero on error. Returns error if there was not a single
 digit.
 

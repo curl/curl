@@ -554,17 +554,17 @@ static CURLcode retrycheck(struct OperationConfig *config,
         /* truncate file at the position where we started appending */
 #if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
-          /* when truncate fails, we cannot just append as then we will
+          /* when truncate fails, we cannot append as then we will
              create something strange, bail out */
           errorf("Failed to truncate file");
           return CURLE_WRITE_ERROR;
         }
         /* now seek to the end of the file, the position where we
-           just truncated the file in a large file-safe way */
+           truncated the file in a large file-safe way */
         rc = fseek(outs->stream, 0, SEEK_END);
 #else
-        /* ftruncate is not available, so just reposition the file
-           to the location we would have truncated it. */
+        /* ftruncate is not available, so reposition the file to the location
+           we would have truncated it. */
         rc = curlx_fseek(outs->stream, outs->init, SEEK_SET);
 #endif
         if(rc) {
@@ -951,7 +951,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
      * Since every transfer has its own file handle for dumping
      * the headers, we need to open it in append mode, since transfers
      * might finish in any order.
-     * The first transfer just clears the file.
+     * The first transfer clears the file.
      *
      * Consider placing the file handle inside the OperationConfig, so
      * that it does not need to be opened/closed for every transfer.
@@ -1995,7 +1995,7 @@ static CURLcode serial_transfers(CURLSH *share)
       bailout = TRUE;
     else {
       do {
-        /* setup the next one just before we delete this */
+        /* setup the next one before we delete this */
         result = create_transfer(share, &added, &skipped);
         if(result) {
           returncode = result;

@@ -361,8 +361,8 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     size_t keep = portptr - hostname;
 
     /* Browser behavior adaptation. If there is a colon with no digits after,
-       just cut off the name there which makes us ignore the colon and just
-       use the default port. Firefox, Chrome and Safari all do that.
+       cut off the name there which makes us ignore the colon and use the
+       default port. Firefox, Chrome and Safari all do that.
 
        Do not do it if the URL has no scheme, to make something that looks like
        a scheme not work!
@@ -1078,7 +1078,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
   }
 
   if(pathlen <= 1) {
-    /* there is no path left or just the slash, unset */
+    /* there is no path left or the slash, unset */
     path = NULL;
   }
   else {
@@ -1089,7 +1089,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
       path = u->path;
     }
     else if(flags & CURLU_URLENCODE)
-      /* it might have encoded more than just the path so cut it */
+      /* it might have encoded more than the path so cut it */
       u->path[pathlen] = 0;
 
     if(!(flags & CURLU_PATH_AS_IS)) {

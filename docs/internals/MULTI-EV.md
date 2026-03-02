@@ -117,10 +117,10 @@ those).
 
 ### And Come Again
 
-While transfer and connection identifier are practically unique in a
-libcurl application, sockets are not. Operating systems are keen on reusing
-their resources, and the next socket may get the same identifier as
-one just having been closed with high likelihood.
+While transfer and connection identifiers are practically unique in a libcurl
+application, sockets are not. Operating systems are keen on reusing their
+resources, and the next socket may get the same identifier as a recently
+closed one with high likelihood.
 
 This means that multi event handling needs to be informed *before* a close,
 clean up all its tracking and be ready to see that same socket identifier

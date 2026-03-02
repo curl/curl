@@ -54,7 +54,7 @@ CURLcode Curl_range(struct Curl_easy *data)
     else if(!first_num) {
       /* -Y */
       if(!to)
-        /* "-0" is just wrong */
+        /* "-0" is wrong */
         return CURLE_RANGE_ERROR;
 
       data->req.maxdownload = to;

@@ -369,7 +369,7 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(type == CURL_ASN1_UTF8_STRING) {
-    /* Just copy. */
+    /* copy. */
     if(inlength)
       result = curlx_dyn_addn(to, from, inlength);
   }

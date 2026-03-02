@@ -164,7 +164,7 @@ int main(void)
 
     /* second try: retrieve page using cacerts' certificate -> succeeds to
      * load the certificate by installing a function doing the necessary
-     * "modifications" to the SSL CONTEXT just before link init
+     * "modifications" to the SSL CONTEXT before link init
      */
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
     result = curl_easy_perform(curl);

@@ -708,7 +708,7 @@
 #elif defined(USE_ARES)
 #  define CURLRES_ASYNCH
 #  define CURLRES_ARES
-/* now undef the stock libc functions just to avoid them being used */
+/* now undef the stock libc functions to avoid them being used */
 #  undef HAVE_GETADDRINFO
 #  undef HAVE_FREEADDRINFO
 #else

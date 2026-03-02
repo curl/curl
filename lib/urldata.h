@@ -671,7 +671,7 @@ struct connectdata {
    * for concurrency reasons. That multi might run in another thread.
    * `attached_multi` is set by the first transfer attached and cleared
    * when the last one is detached.
-   * NEVER call anything on this multi, just check for equality. */
+   * NEVER call anything on this multi, check for equality. */
   struct Curl_multi *attached_multi;
 
   /*************** Request - specific items ************/
@@ -1268,7 +1268,7 @@ enum dupstring {
 
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
 
-  STRING_LAST /* not used, just an end-of-list marker */
+  STRING_LAST /* not used, an end-of-list marker */
 };
 
 enum dupblob {

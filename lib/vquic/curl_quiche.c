@@ -60,7 +60,7 @@
 
 #define H3_STREAM_WINDOW_SIZE  (1024 * 128)
 #define H3_STREAM_CHUNK_SIZE   (1024 * 16)
-/* Receive and Send max number of chunks just follows from the
+/* Receive and Send max number of chunks follows from the
  * chunk size and window size */
 #define H3_STREAM_RECV_CHUNKS \
   (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
@@ -126,7 +126,7 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
 static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
-    /* quiche just freed it */
+    /* quiche freed it */
     ctx->tls.ossl.ssl = NULL;
     Curl_vquic_tls_cleanup(&ctx->tls);
     Curl_ssl_peer_cleanup(&ctx->peer);
@@ -1124,7 +1124,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        * server. If the server has send us a final response, we should
        * silently discard the send data.
        * This happens for example on redirects where the server, instead
-       * of reading the full request body just closed the stream after
+       * of reading the full request body closed the stream after
        * sending the 30x response.
        * This is sort of a race: had the transfer loop called recv first,
        * it would see the response and stop/discard sending on its own- */

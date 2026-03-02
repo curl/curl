@@ -52,7 +52,7 @@ to the function is encoded correctly.
 # URLs
 
 URLs are by definition *URL encoded*. To create a proper URL from a set of
-components that may not be URL encoded already, you cannot just URL encode the
+components that may not be URL encoded already, you cannot URL encode the
 entire URL string with curl_easy_escape(3), because it then also converts
 colons, slashes and other symbols that you probably want untouched.
 

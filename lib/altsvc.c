@@ -175,7 +175,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
                        (size_t)srcport, (size_t)dstport);
     if(as) {
       as->expires = expires;
-      as->prio = 0; /* not supported to just set zero */
+      as->prio = 0; /* not supported, set zero */
       as->persist = persist ? 1 : 0;
       Curl_llist_append(&asi->list, as, &as->node);
     }

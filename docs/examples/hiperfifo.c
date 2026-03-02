@@ -153,7 +153,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
   /*
-   * if timeout_ms is -1, just delete the timer
+   * if timeout_ms is -1, delete the timer
    *
    * For all other values of timeout_ms, this should set or *update* the timer
    * to the new value

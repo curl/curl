@@ -107,8 +107,8 @@ struct FTP {
   char *path;    /* points to the urlpieces struct field */
   char *pathalloc; /* if non-NULL a pointer to an allocated path */
 
-  /* transfer a file/body or not, done as a typedefed enum just to make
-     debuggers display the full symbol and not just the numerical value */
+  /* transfer a file/body or not, done as a typedefed enum to make debuggers
+     display the full symbol and not the numerical value */
   curl_pp_transfer transfer;
   curl_off_t downloadsize;
 };
@@ -151,7 +151,7 @@ struct ftp_conn {
   BIT(ftp_trying_alternative);
   BIT(dont_check);  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
-                       read the line, just ignore the result. */
+                       read the line, ignore the result. */
   BIT(ctl_valid);   /* Tells Curl_ftp_quit() whether or not to do anything. If
                        the connection has timed out or been closed, this
                        should be FALSE when it gets to Curl_ftp_quit() */

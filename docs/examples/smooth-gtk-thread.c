@@ -46,7 +46,7 @@
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static int j = 0;
-static gint num_urls = 9; /* Just make sure this is less than urls[] */
+static gint num_urls = 9; /* make sure this is less than urls[] */
 static const char * const urls[] = {
   "90022",
   "90023",

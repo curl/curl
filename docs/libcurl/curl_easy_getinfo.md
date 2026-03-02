@@ -196,16 +196,15 @@ In microseconds. (Added in 8.10.0) See CURLINFO_POSTTRANSFER_TIME_T(3)
 
 ## CURLINFO_PRETRANSFER_TIME
 
-The time it took from the start until the file transfer is just about to
-begin. This includes all pre-transfer commands and negotiations that are
-specific to the particular protocol(s) involved. See
-CURLINFO_PRETRANSFER_TIME(3)
+The time it took from the start until the file transfer is about to begin.
+This includes all pre-transfer commands and negotiations that are specific to
+the particular protocol(s) involved. See CURLINFO_PRETRANSFER_TIME(3)
 
 ## CURLINFO_PRETRANSFER_TIME_T
 
-The time it took from the start until the file transfer is just about to
-begin. This includes all pre-transfer commands and negotiations that are
-specific to the particular protocol(s) involved. In microseconds. See
+The time it took from the start until the file transfer is about to begin.
+This includes all pre-transfer commands and negotiations that are specific to
+the particular protocol(s) involved. In microseconds. See
 CURLINFO_PRETRANSFER_TIME_T(3)
 
 ## CURLINFO_PRIMARY_IP

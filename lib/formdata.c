@@ -168,10 +168,9 @@ static void free_formlist(struct FormInfo *ptr)
  *
  * Stores a formpost parameter and builds the appropriate linked list.
  *
- * Has two principal functionalities: using files and byte arrays as
- * post parts. Byte arrays are either copied or just the pointer is stored
- * (as the user requests) while for files only the filename and not the
- * content is stored.
+ * Has two principal functionalities: using files and byte arrays as post
+ * parts. Byte arrays are either copied or the pointer is stored (as the user
+ * requests) while for files only the filename and not the content is stored.
  *
  * While you may have only one byte array for each name, multiple filenames
  * are allowed (and because of this feature CURLFORM_END is needed after
@@ -667,7 +666,7 @@ void curl_formfree(struct curl_httppost *form)
   struct curl_httppost *next;
 
   if(!form)
-    /* no form to free, just get out of this */
+    /* no form to free, get out of this */
     return;
 
   do {
@@ -710,8 +709,8 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
  * mime part at '*finalform'.
  *
  * This function will not do a failf() for the potential memory failures but
- * should for all other errors it spots. Just note that this function MAY get
- * a NULL pointer in the 'data' argument.
+ * should for all other errors it spots. Note that this function MAY get a
+ * NULL pointer in the 'data' argument.
  */
 
 CURLcode Curl_getformdata(CURL *data,

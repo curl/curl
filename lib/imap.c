@@ -1322,12 +1322,12 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
         imap_state(data, imapc, IMAP_STOP);
       }
       else {
-        /* Failed to parse literal, just write the line */
+        /* Failed to parse literal, write the line */
         result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
       }
     }
     else {
-      /* No literal, just write the line as-is */
+      /* No literal, write the line as-is */
       result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
     }
   }
@@ -1455,7 +1455,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       infof(data, "Written %zu bytes, %" FMT_OFF_TU
             " bytes are left for transfer", chunk, size - chunk);
 
-      /* Have we used the entire overflow or just part of it?*/
+      /* Have we used the entire overflow or part of it?*/
       if(pp->overflow > chunk) {
         /* remember the remaining trailing overflow data */
         pp->overflow -= chunk;

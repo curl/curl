@@ -206,9 +206,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   int http_minor;
   CURLcode result;
 
-  /* This only happens if we have looped here due to authentication
-     reasons, and we do not really use the newly cloned URL here
-     then. Just free it. */
+  /* This only happens if we have looped here due to authentication reasons,
+     and we do not really use the newly cloned URL here then. Free it. */
   Curl_safefree(data->req.newurl);
 
   result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);

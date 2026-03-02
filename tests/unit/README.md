@@ -13,8 +13,8 @@ big and complicated, we should split them into smaller and testable ones.
 
 `./configure --enable-debug` is required for the unit tests to build. To
 enable unit tests, there is a separate static libcurl built that is used
-exclusively for linking unit test programs. Just build everything as normal,
-and then you can run the unit test cases as well.
+exclusively for linking unit test programs. Build everything as normal, and
+then you can run the unit test cases as well.
 
 ## Run Unit Tests
 

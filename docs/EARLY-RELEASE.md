@@ -27,7 +27,7 @@ in the git master branch.
 An early patch release means that we ship a new, complete and full release
 called `major.minor.patch` where the `patch` part is increased by one since
 the previous release. A curl release is a curl release. There is no small or
-big and we never release just a patch. There is only "release".
+big and we never ship stand-alone separate patches. There is only "release".
 
 ## Questions to ask
 

@@ -201,7 +201,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     if(!strcmp("*", no_proxy))
       return TRUE;
 
-    /* NO_PROXY was specified and it was not just an asterisk */
+    /* NO_PROXY was specified and it was not only an asterisk */
 
     /* Check if name is an IP address; if not, assume it being a hostname. */
     namelen = strlen(name);
@@ -251,7 +251,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       while(*p == ',')
         p++;
     } /* while(*p) */
-  } /* NO_PROXY was specified and it was not just an asterisk */
+  } /* NO_PROXY was specified and it was not only an asterisk */
 
   return FALSE;
 }

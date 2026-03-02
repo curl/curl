@@ -64,8 +64,8 @@ plain text anywhere.
 
 Many of the protocols libcurl supports send name and password unencrypted as
 clear text (HTTP Basic authentication, FTP, TELNET etc). It is easy for anyone
-on your network or a network nearby yours to just fire up a network analyzer
-tool and eavesdrop on your passwords. Do not let the fact that HTTP Basic uses
+on your network or a network nearby yours to fire up a network analyzer tool
+and eavesdrop on your passwords. Do not let the fact that HTTP Basic uses
 base64 encoded passwords fool you. They may not look readable at a first
 glance, but they are easily "deciphered" by anyone within seconds.
 
@@ -118,11 +118,11 @@ transfers require a new connection with validation performed again.
 
 # Redirects
 
-The CURLOPT_FOLLOWLOCATION(3) option automatically follows HTTP
-redirects sent by a remote server. These redirects can refer to any kind of
-URL, not just HTTP. libcurl restricts the protocols allowed to be used in
-redirects for security reasons: only HTTP, HTTPS, FTP and FTPS are
-enabled by default. Applications may opt to restrict that set further.
+The CURLOPT_FOLLOWLOCATION(3) option automatically follows HTTP redirects sent
+by a remote server. These redirects can refer to any kind of URL, not only
+HTTP. libcurl restricts the protocols allowed to be used in redirects for
+security reasons: only HTTP, HTTPS, FTP and FTPS are enabled by default.
+Applications may opt to restrict that set further.
 
 A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
 files from the local file system. If the application returns the data back to
@@ -131,8 +131,8 @@ leverage this to read otherwise forbidden data (e.g.
 **file://localhost/etc/passwd**).
 
 If authentication credentials are stored in the ~/.netrc file, or Kerberos is
-in use, any other URL type (not just file:) that requires authentication is
-also at risk. A redirect such as **ftp://some-internal-server/private-file** would
+in use, any other URL type (except file:) that requires authentication is also
+at risk. A redirect such as **ftp://some-internal-server/private-file** would
 then return data even when the server is password protected.
 
 In the same way, if an unencrypted SSH private key has been configured for the
@@ -178,7 +178,7 @@ of a server behind a firewall, such as 127.0.0.1 or 10.1.2.3. Applications can
 mitigate against this by setting a CURLOPT_OPENSOCKETFUNCTION(3) or
 CURLOPT_PREREQFUNCTION(3) and checking the address before a connection.
 
-All the malicious scenarios regarding redirected URLs apply just as well to
+All the malicious scenarios regarding redirected URLs apply equally to
 non-redirected URLs, if the user is allowed to specify an arbitrary URL that
 could point to a private resource. For example, a web app providing a
 translation service might happily translate **file://localhost/etc/passwd**
@@ -211,15 +211,15 @@ or a mix of decimal, octal or hexadecimal encoding.
 
 # IPv6 Addresses
 
-libcurl handles IPv6 addresses transparently and just as easily as IPv4
-addresses. That means that a sanitizing function that filters out addresses
-like 127.0.0.1 is not sufficient - the equivalent IPv6 addresses **::1**,
-**::**, **0:00::0:1**, **::127.0.0.1** and **::ffff:7f00:1** supplied
-somehow by an attacker would all bypass a naive filter and could allow access
-to undesired local resources. IPv6 also has special address blocks like
-link-local and site-local that generally should not be accessed by a
-server-side libcurl-using application. A poorly configured firewall installed
-in a data center, organization or server may also be configured to limit IPv4
+libcurl handles IPv6 addresses transparently and as easily as IPv4 addresses.
+That means that a sanitizing function that filters out addresses like
+127.0.0.1 is not sufficient - the equivalent IPv6 addresses **::1**, **::**,
+**0:00::0:1**, **::127.0.0.1** and **::ffff:7f00:1** supplied somehow by an
+attacker would all bypass a naive filter and could allow access to undesired
+local resources. IPv6 also has special address blocks like link-local and
+site-local that generally should not be accessed by a server-side
+libcurl-using application. A poorly configured firewall installed in a data
+center, organization or server may also be configured to limit IPv4
 connections but leave IPv6 connections wide open. In some cases, setting
 CURLOPT_IPRESOLVE(3) to CURL_IPRESOLVE_V4 can be used to limit resolved
 addresses to IPv4 only and bypass these issues.
@@ -294,7 +294,7 @@ system.
 
 The conclusion we have come to is that this is a weakness or feature in the
 Windows operating system itself, that we as an application cannot safely
-protect users against. It would just be a whack-a-mole race we do not want to
+protect users against. It would make a whack-a-mole race we do not want to
 participate in. There are too many ways to do it and there is no knob we can
 use to turn off the practice.
 
@@ -333,8 +333,8 @@ libcurl programs can use CURLOPT_PROTOCOLS_STR(3) to limit what URL schemes it a
 
 ## consider not allowing the user to set the full URL
 
-Maybe just let the user provide data for parts of it? Or maybe filter input to
-only allow specific choices? Remember that the naive approach of appending a
+Maybe let the user provide data for parts of it? Or maybe filter input to only
+allow specific choices? Remember that the naive approach of appending a
 user-specified string to a base URL could still allow unexpected results
 through use of characters like ../ or ? or Unicode characters or hiding
 characters using various escaping means.
@@ -396,10 +396,10 @@ using a SOCKS or HTTP proxy in between curl and the target server.
 # Denial of Service
 
 A malicious server could cause libcurl to effectively hang by sending data
-slowly, or even no data at all but just keeping the TCP connection open. This
-could effectively result in a denial-of-service attack. The
-CURLOPT_TIMEOUT(3) and/or CURLOPT_LOW_SPEED_LIMIT(3) options can
-be used to mitigate against this.
+slowly, or even no data at all but keeping the TCP connection open. This could
+effectively result in a denial-of-service attack. The CURLOPT_TIMEOUT(3)
+and/or CURLOPT_LOW_SPEED_LIMIT(3) options can be used to mitigate against
+this.
 
 A malicious server could cause libcurl to download an infinite amount of data,
 potentially causing system resources to be exhausted resulting in a system or
@@ -455,8 +455,8 @@ passwords, things like URLs, cookies or even filenames could also hold
 sensitive data.
 
 To avoid this problem, you must of course use your common sense. Often, you
-can just edit out the sensitive data or just search/replace your true
-information with faked data.
+can edit out the sensitive data or search/replace your true information with
+faked data.
 
 # setuid applications using libcurl
 
@@ -515,6 +515,6 @@ cookies.
 
 # Report Security Problems
 
-Should you detect or just suspect a security problem in libcurl or curl,
-contact the project curl security team immediately. See
+Should you detect or suspect a security problem in libcurl or curl, contact
+the project curl security team immediately. See
 https://curl.se/dev/secprocess.html for details.

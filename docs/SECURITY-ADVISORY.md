@@ -50,9 +50,9 @@ generated automatically using those files.
 
 ## Document format
 
-The easy way is to start with a recent previously published advisory and just
-blank out old texts and save it using a new name. Save the subtitles and
-general layout.
+The easy way is to start with a recent previously published advisory and blank
+out old texts and save it using a new name. Save the subtitles and general
+layout.
 
 Some details and metadata are extracted from this document so it is important
 to stick to the existing format.

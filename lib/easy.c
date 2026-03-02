@@ -724,7 +724,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
  * easy handle, destroys the multi handle and returns the easy handle's return
  * code.
  *
- * REALITY: it cannot just create and destroy the multi handle that easily. It
+ * REALITY: it cannot create and destroy the multi handle that easily. It
  * needs to keep it around since if this easy handle is used again by this
  * function, the same multi handle must be reused so that the same pools and
  * caches can be used.

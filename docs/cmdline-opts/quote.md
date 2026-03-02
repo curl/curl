@@ -18,13 +18,13 @@ Example:
 # `--quote`
 
 Send an arbitrary command to the remote FTP or SFTP server. Quote commands are
-sent BEFORE the transfer takes place (just after the initial **PWD** command
-in an FTP transfer, to be exact). To make commands take place after a
+sent BEFORE the transfer takes place (immediately after the initial **PWD**
+command in an FTP transfer, to be exact). To make commands take place after a
 successful transfer, prefix them with a dash '-'.
 
 (FTP only) To make commands be sent after curl has changed the working
-directory, just before the file transfer command(s), prefix the command with a
-'+'.
+directory, immediately before the file transfer command(s), prefix the command
+with a '+'.
 
 You may specify any number of commands.
 

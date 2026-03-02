@@ -249,7 +249,7 @@ static long tlsversion(unsigned char mintls,
     tlsver = CURL_SSLVERSION_TLSv1_2;
     break;
   case 4:
-  default: /* just in case */
+  default: /* in case */
     tlsver = CURL_SSLVERSION_TLSv1_3;
     break;
   }
@@ -266,7 +266,7 @@ static long tlsversion(unsigned char mintls,
     tlsver |= CURL_SSLVERSION_MAX_TLSv1_2;
     break;
   case 4:
-  default: /* just in case */
+  default: /* in case */
     tlsver |= CURL_SSLVERSION_MAX_TLSv1_3;
     break;
   }

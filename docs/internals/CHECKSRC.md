@@ -172,8 +172,8 @@ This ignores the warning for overly long lines until it is re-enabled with:
 If the enabling is not performed before the end of the file, it is enabled
 again automatically for the next file.
 
-You can also opt to ignore just N violations so that if you have a single long
-line you just cannot shorten and is agreed to be fine anyway:
+You can also opt to ignore N violations so that if you have a single long line
+you cannot shorten and is agreed to be fine anyway:
 
     /* !checksrc! disable LONGLINE 1 */
 

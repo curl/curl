@@ -50,10 +50,10 @@ the `threadsafe` feature set (added in 7.84.0).
 
 If this is not thread-safe (the bit mentioned above is not set), you must not
 call this function when any other thread in the program (i.e. a thread sharing
-the same memory) is running. This does not just mean no other thread that is
-using libcurl. Because curl_global_init(3) calls functions of other libraries
-that are similarly thread-unsafe, it could conflict with any other thread that
-uses these other libraries.
+the same memory) is running. This does not only mean other threads that use
+libcurl. Because curl_global_init(3) calls functions of other libraries that
+are similarly thread-unsafe, it could conflict with any other thread that uses
+these other libraries.
 
 If you are initializing libcurl from a Windows DLL you should not initialize
 it from *DllMain* or a static initializer because Windows holds the loader

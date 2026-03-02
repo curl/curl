@@ -75,7 +75,7 @@ curl ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 ```
 
 With the IPFS protocol way of asking a file, curl still needs to know the
-gateway. curl essentially just rewrites the IPFS based URL to a gateway URL.
+gateway. curl essentially rewrites the IPFS based URL to a gateway URL.
 
 ### IPFS_GATEWAY environment variable
 

@@ -784,7 +784,7 @@ static void cb_rand(uint8_t *dest, size_t destlen,
   result = Curl_rand(NULL, dest, destlen);
   if(result) {
     /* cb_rand is only used for non-cryptographic context. If Curl_rand
-       failed, just fill 0 and call it *random*. */
+       failed, fill 0 and call it *random*. */
     memset(dest, 0, destlen);
   }
 }
@@ -2048,8 +2048,8 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
       }
       else if(nread > gsolen ||
               (gsolen > path_max_payload_size && nread != gsolen)) {
-        /* The just added packet is a PMTUD *or* the one(s) before the
-         * just added were PMTUD and the last one is smaller.
+        /* The added packet is a PMTUD *or* the one(s) before the
+         * added were PMTUD and the last one is smaller.
          * Flush the buffer before the last add. */
         curlcode = vquic_send_tail_split(cf, data, &ctx->q,
                                          gsolen, nread, nread);

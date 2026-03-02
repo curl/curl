@@ -410,9 +410,9 @@ for ECH when DoH is not used by curl - if a system stub resolver supports DoT
 or DoH, then, considering only ECH and the network threat model, it would make
 sense for curl to support ECH without curl itself using DoH. The author for
 example uses a combination of stubby+unbound as the system resolver listening
-on localhost:53, so would fit this use-case. That said, it is unclear if
-this is a niche that is worth trying to address. (The author is just as happy to
-let curl use DoH to talk to the same public recursive that stubby might use:-)
+on localhost:53, so would fit this use-case. That said, it is unclear if this
+is a niche that is worth trying to address. (The author is happy to let curl
+use DoH to talk to the same public recursive that stubby might use:-)
 
 Assuming for the moment this is a use-case we would like to support, then if
 DoH is not being used by curl, it is not clear at this time how to provide
@@ -431,14 +431,6 @@ downstream releases of curl.
 Our current conclusion is that doing the above is likely best left until we
 have some experience with the "using DoH" approach, so we are going to punt on
 this for now.
-
-### Debugging
-
-Just a note to self as remembering this is a nuisance:
-
-```sh
-LD_LIBRARY_PATH=$HOME/code/openssl:./lib/.libs gdb ./src/.libs/curl
-```
 
 ### Localhost testing
 
@@ -467,9 +459,9 @@ cd $HOME/code/curl/
 ### Automated use of ``retry_configs`` not supported so far...
 
 As of now we have not added support for using ``retry_config`` handling in the
-application - for a command line tool, one can just use ``dig`` (or ``kdig``)
-to get the HTTPS RR and pass the ECHConfigList from that on the command line,
-if needed, or one can access the value from command line output in verbose more
+application - for a command line tool, one can use ``dig`` (or ``kdig``) to
+get the HTTPS RR and pass the ECHConfigList from that on the command line, if
+needed, or one can access the value from command line output in verbose more
 and then reuse that in another invocation.
 
 Both our OpenSSL fork and BoringSSL/AWS-LC have APIs for both controlling GREASE
