@@ -319,7 +319,8 @@ jobs:
             install_packages: libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
-            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
+            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer
+            LIBS: -ldl -lubsan
             configure: --enable-debug --with-libssh --disable-unity
 
           - name: 'address-sanitizer H3 c-ares'
