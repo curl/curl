@@ -213,6 +213,7 @@ void Curl_pgrsReset(struct Curl_easy *data)
   Curl_pgrsSetUploadSize(data, -1);
   Curl_pgrsSetDownloadSize(data, -1);
   data->progress.speeder_c = 0; /* reset speed records */
+  data->progress.deliver = 0;
   pgrs_speedinit(data);
 }
 
@@ -340,6 +341,26 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   p->dl_size_known = FALSE;
   p->ul_size_known = FALSE;
 }
+
+/* check that the 'delta' amount of bytes are okay to deliver to the
+   application, or return error if not. */
+CURLcode Curl_pgrs_deliver_check(struct Curl_easy *data, size_t delta)
+{
+  if(data->set.max_filesize &&
+     ((curl_off_t)delta > data->set.max_filesize - data->progress.deliver)) {
+    failf(data, "Would have exceeded max file size");
+    return CURLE_FILESIZE_EXCEEDED;
+  }
+  return CURLE_OK;
+}
+
+/* this counts how much data is delivered to the application, which
+   in compressed cases may differ from downloaded amount */
+void Curl_pgrs_deliver_inc(struct Curl_easy *data, size_t delta)
+{
+  data->progress.deliver += delta;
+}
+
 
 void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta)
 {

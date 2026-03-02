@@ -83,6 +83,7 @@ man_MANS =                                      \
   CURLINFO_RTSP_SERVER_CSEQ.3                   \
   CURLINFO_RTSP_SESSION_ID.3                    \
   CURLINFO_SCHEME.3                             \
+  CURLINFO_SIZE_DELIVERED.3                     \
   CURLINFO_SIZE_DOWNLOAD.3                      \
   CURLINFO_SIZE_DOWNLOAD_T.3                    \
   CURLINFO_SIZE_UPLOAD.3                        \
