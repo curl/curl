@@ -318,7 +318,7 @@ jobs:
         run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via find_package (PREFER_CONFIG=ON)'
         if: ${{ contains(matrix.image, 'windows') }}
-        run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a
+        run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON -DCURL_USE_OPENSSL=ON -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a
       - name: 'via find_package (C++)'
         if: ${{ contains(matrix.image, 'ubuntu') }}
         run: TEST_CMAKE_FLAGS=-DTEST_CPP=ON ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
