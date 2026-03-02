@@ -5264,9 +5264,10 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;
-  int algo_nid;
-  const EVP_MD *algo_type;
-  const char *algo_name;
+  const EVP_MD *algo_type = NULL;
+#ifdef HAVE_OPENSSL3
+  EVP_MD *algo_ref = NULL;
+#endif
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
@@ -5298,25 +5299,58 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     /* No server certificate, do not do channel binding */
     return CURLE_OK;
 
-  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
-    failf(data,
-          "Unable to find digest NID for certificate signature algorithm");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
-  }
+#ifdef HAVE_OPENSSL3
+  {
+    /* OpenSSL 3 has ciphers where it does not know the "NID" for.
+     * This may happen when ciphers com from the new "providers"
+     * and has happened for PQC algorithms. Try to get the "digest"
+     * cipher from the cert without using NIDs first. Fallback to
+     * the original, non-openssl3 way of doing this. */
+    const X509_ALGOR *sig_algo;
+    const ASN1_OBJECT *digest_oid;
+    char algo_txt[128];
 
-  /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
-  if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
-    algo_type = EVP_sha256();
+    X509_get0_signature(NULL, &sig_algo, cert);
+    X509_ALGOR_get0(&digest_oid, NULL, NULL, sig_algo);
+    OBJ_obj2txt(algo_txt, sizeof(algo_txt), digest_oid, 0);
+    algo_type = algo_ref = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
+    if(!algo_type)
+      infof(data, "Could not find digest algorithm '%s'", algo_txt);
+    else if(EVP_MD_is_a(algo_type, "SHA1") || EVP_MD_is_a(algo_type, "MD5")) {
+      /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
+      EVP_MD_free(algo_ref);
+      algo_type = algo_ref = EVP_MD_fetch(data->state.libctx, "SHA-256", NULL);
+      if(!algo_type) {
+        infof(data, "Could not fetch SHA-256 algorithm");
+        result = CURLE_SSL_INVALIDCERTSTATUS;
+        goto error;
+      }
+    }
   }
-  else {
-    algo_type = EVP_get_digestbynid(algo_nid);
-    if(!algo_type) {
-      algo_name = OBJ_nid2sn(algo_nid);
-      failf(data, "Could not find digest algorithm %s (NID %d)",
-            algo_name ? algo_name : "(null)", algo_nid);
+#endif /* HAVE_OPENSSL3 */
+
+  if(!algo_type) {
+    int algo_nid;
+    if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
+      failf(data,
+            "Unable to find digest NID for certificate signature algorithm");
       result = CURLE_SSL_INVALIDCERTSTATUS;
       goto error;
+    }
+
+    /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
+    if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
+      algo_type = EVP_sha256();
+    }
+    else {
+      algo_type = EVP_get_digestbynid(algo_nid);
+      if(!algo_type) {
+        const char *algo_name = OBJ_nid2sn(algo_nid);
+        failf(data, "Could not find digest algorithm %s (NID %d)",
+              algo_name ? algo_name : "(null)", algo_nid);
+        result = CURLE_SSL_INVALIDCERTSTATUS;
+        goto error;
+      }
     }
   }
 
@@ -5335,6 +5369,9 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   result = curlx_dyn_addn(binding, buf, length);
 
 error:
+#ifdef HAVE_OPENSSL3
+  EVP_MD_free(algo_ref);
+#endif
   X509_free(cert);
   return result;
 }
