@@ -306,14 +306,14 @@ jobs:
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
             CC: clang-20
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF -DPICKY_COMPILER=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug -DPICKY_COMPILER=OFF
 
           - name: 'address-sanitizer (gcc CM)'
             install_packages: libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined -ldl -lubsan
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug
 
           - name: 'address-sanitizer (gcc AM)'
             install_packages: libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
@@ -331,7 +331,7 @@ jobs:
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
             CC: clang-20
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON -DCMAKE_UNITY_BUILD=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON -DCMAKE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug
 
           - name: 'thread-sanitizer'
             install_packages: clang-20 libtsan2
