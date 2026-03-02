@@ -61,8 +61,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
 
 set(_curl_libs "")
 
-message(STATUS "TRACE-config-1")
-
 if("@HAVE_BROTLI@")
   find_dependency(Brotli)
   list(APPEND _curl_libs CURL::brotli)
@@ -151,8 +149,6 @@ if("@HAVE_ZSTD@")
 endif()
 
 set(CMAKE_MODULE_PATH ${_curl_cmake_module_path_save})
-
-message(STATUS "TRACE-config-2")
 
 # Define lib duplicate to fixup lib order for GCC binutils ld in static builds
 if(WIN32 AND NOT TARGET CURL::win32_winsock)
