@@ -434,93 +434,103 @@ void tool_list_engines(void)
   curl_easy_cleanup(curl);
 }
 
-/* Output table from category. */
+/* Output table from category in markdown-style bordered format. */
 void tool_table(unsigned int category, unsigned int cols)
 {
-  size_t i, c, j, found, opt_idx, current, lng_spc, count = 0;
-  size_t max_len = 0;
-  const char *e_sp;
+  size_t i, d;
+  size_t max_opt = 0;
+  size_t max_desc = 0;
+  size_t opt_col, desc_col;
+  size_t count = 0;
+  (void)cols;
 
-  /* Count options in category. */
+  /* Find the longest option and description strings in this category. */
   for(i = 0; helptext[i].opt; ++i) {
+    size_t olen, dlen;
     if(!(helptext[i].categories & category))
       continue;
-
-    if(helptext[i].categories & category) {
-      /* Use length of longest description or option to set col width. */
-      if(max_len < strlen(helptext[i].desc) ||
-         max_len < strlen(helptext[i].opt)) {
-        max_len = (strlen(helptext[i].desc) > strlen(helptext[i].opt)) ?
-          strlen(helptext[i].desc) : strlen(helptext[i].opt);
-      }
-      count++;
-    }
+    olen = strlen(helptext[i].opt);
+    dlen = strlen(helptext[i].desc);
+    if(olen > max_opt)
+      max_opt = olen;
+    if(dlen > max_desc)
+      max_desc = dlen;
+    count++;
   }
 
-  /* Set j based on longest description or option length. */
-  j = cols/(max_len + 1);
-  if(j > 8)
-    j = 8;
-  else if(j == 0)
-    j = 1;
+  if(!count)
+    return;
 
-  /* Print option and description in table format. */
-  current = 0;
+  /* Column widths include padding:
+     opt_col  = 1 leading space + longest opt  + 2 trailing spaces (min)
+     desc_col = 1 leading space + longest desc + 1 trailing space  (min) */
+  opt_col  = max_opt  + 3;
+  desc_col = max_desc + 2;
+
+  /* Top border: space + dashes(opt_col) + | + dashes(desc_col) */
+  putchar(' ');
+  for(d = 0; d < opt_col; d++)
+    putchar('-');
+  putchar('|');
+  for(d = 0; d < desc_col; d++)
+    putchar('-');
+  putchar('\n');
+
+  /* Header row: opt header uses "    Option" so 4-space indent matches
+     long-only option entries; desc header uses " Description". */
+  curl_mprintf("|%-*s| %-*s|\n",
+               (int)opt_col,      "    Option",
+               (int)(desc_col-1), "Description");
+
+  /* Separator between header and first data row. */
+  putchar('|');
+  for(d = 0; d < opt_col; d++)
+    putchar('-');
+  putchar('|');
+  for(d = 0; d < desc_col; d++)
+    putchar('-');
+  puts("|");
+
+  /* Data rows, each followed by an inner separator except the last,
+     which is followed by the bottom border instead. */
+  count = 0;
   for(i = 0; helptext[i].opt; ++i) {
+    size_t remaining;
     if(!(helptext[i].categories & category))
       continue;
+    count++;
 
-    if(current % j == 0) {
-      /* Empty line to distinguish table head and data. */
-      if(current > 0)
-        puts("");
+    /* Data row: one leading space before the raw opt string. */
+    curl_mprintf("| %-*s| %-*s|\n",
+                 (int)(opt_col  - 1), helptext[i].opt,
+                 (int)(desc_col - 1), helptext[i].desc);
 
-      /* Option row. */
-      for(c = 0; c < j && (current + c) < count; c++) {
-        /* Print option as table head. */
-        found = 0;
-        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
-          if(helptext[opt_idx].categories & category) {
-            if(found == current + c) {
-              /* Equate option space to left align. */
-              e_sp = helptext[opt_idx].opt +
-                strspn(helptext[opt_idx].opt, " ");
-              /* Use space before long or short option to align. */
-              lng_spc = (int)(e_sp - helptext[opt_idx].opt);
-              /* Output, left aligning option name. */
-              curl_mprintf("%-*s ", (int)(max_len),
-                     helptext[opt_idx].opt + lng_spc);
-              break;
-            }
-            found++;
-          }
-      }
-      puts("");
-
-      /* Print separator. */
-      for(c = 0; c < j && (current + c) < count; c++) {
-        for(opt_idx = 0; opt_idx < max_len; opt_idx++)
-          putchar('-');
-        putchar(' ');
-      }
-      puts("");
-
-      /* Description row. */
-      for(c = 0; c < j && (current + c) < count; c++) {
-        /* Print description as table data. */
-        found = 0;
-        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
-          if(helptext[opt_idx].categories & category) {
-            if(found == current + c) {
-              /* Output description. */
-              curl_mprintf("%-*s ", (int)(max_len), helptext[opt_idx].desc);
-              break;
-            }
-            found++;
-          }
-      }
-      puts("");
+    /* Count remaining entries to detect the last one. */
+    remaining = 0;
+    {
+      size_t k;
+      for(k = i + 1; helptext[k].opt; ++k)
+        if(helptext[k].categories & category)
+          remaining++;
     }
-    current++;
+
+    if(remaining) {
+      /* Inner separator between data rows. */
+      putchar('|');
+      for(d = 0; d < opt_col; d++)
+        putchar('-');
+      putchar('|');
+      for(d = 0; d < desc_col; d++)
+        putchar('-');
+      puts("|");
+    }
+    else {
+      /* Bottom border: space + dashes spanning full inner width + newline.
+         The outer | positions become spaces; the middle | becomes a dash. */
+      putchar(' ');
+      for(d = 0; d < opt_col + 1 + desc_col; d++)
+        putchar('-');
+      putchar('\n');
+    }
   }
 }
