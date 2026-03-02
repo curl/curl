@@ -1633,6 +1633,7 @@ if(NOT WIN32)
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
+  check_function_exists("snprintf"        HAVE_SNPRINTF)  # to match detection method in ./configure
   check_symbol_exists("strcasecmp"        "string.h" HAVE_STRCASECMP)
   check_symbol_exists("stricmp"           "string.h" HAVE_STRICMP)
   check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
@@ -1646,11 +1647,6 @@ if(NOT _ssl_enabled)
   check_symbol_exists("arc4random" "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
 endif()
 
-if(NOT MSVC)
-  check_function_exists("snprintf" HAVE_SNPRINTF)  # to match detection method in ./configure
-elseif(MSVC_VERSION GREATER_EQUAL 1900)  # Earlier MSVC compilers had faulty snprintf implementations
-  check_symbol_exists("snprintf" "stdio.h" HAVE_SNPRINTF)  # snprintf may be a compatibility macro, not an exported function
-endif()
 if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 endif()
