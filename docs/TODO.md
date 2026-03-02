@@ -331,14 +331,6 @@ line.
 
 Additionally this should be implemented for proxy base URLs as well.
 
-## alt-svc should fallback if alt-svc does not work
-
-The `alt-svc:` header provides a set of alternative services for curl to use
-instead of the original. If the first attempted one fails, it should try the
-next etc and if all alternatives fail go back to the original.
-
-See [curl issue 4908](https://github.com/curl/curl/issues/4908)
-
 ## Require HTTP version X or higher
 
 curl and libcurl provide options for trying higher HTTP versions (for example
