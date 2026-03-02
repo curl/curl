@@ -44,7 +44,7 @@ runresults() {
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   (cd "${src}"; git archive --format=tar HEAD) | gzip > source.tar.gz
   src="${PWD}/source.tar.gz"
-  sha="$(openssl dgst -sha256 "${src}" | grep -a -i -o -E '[0-9a-f]{64}$')"
+  sha="$(sha256sum "${src}" | grep -a -i -o -w -E '[0-9a-f]{64}')"
   bldc='bld-externalproject'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
