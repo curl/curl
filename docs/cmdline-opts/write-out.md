@@ -193,6 +193,10 @@ known as "http_code"). (Added in 7.18.2)
 ## `scheme`
 The URL scheme (sometimes called protocol) that was effectively used. (Added in 7.52.0)
 
+## `size_delivered`
+The total amount of data that were saved or written to stdout. When
+--compressed is used, this is likely different than `size_download`.
+
 ## `size_download`
 The total amount of bytes that were downloaded. This is the size of the
 body/data that was transferred, excluding headers.

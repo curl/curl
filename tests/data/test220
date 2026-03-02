@@ -50,7 +50,7 @@ http
 HTTP GET gzip compressed content
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed -s -w '%{stderr}%{size_delivered}\n'
 </command>
 </client>
 
@@ -67,5 +67,8 @@ Accept: */*
 Accept-Encoding: xxx
 
 </protocol>
+<stderr>
+24
+</stderr>
 </verify>
 </testcase>
