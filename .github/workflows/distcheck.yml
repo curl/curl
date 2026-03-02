@@ -307,6 +307,30 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'via find_package (custom)'
+        if: ${{ contains(matrix.image, 'windows') }}
+        run: |
+          export TEST_CMAKE_FLAGS_PROVIDER='-DCURL_USE_OPENSSL=ON -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a'
+          export TEST_CMAKE_FLAGS_CONSUMER='-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a'
+          ./tests/cmake/test.sh find_package ${TESTOPTS}
+
+      - name: 'via find_package (custom) alt'
+        if: ${{ contains(matrix.image, 'windows') }}
+        run: |
+          pushd ~
+          mkdir -p my-nghttp2/include
+          mkdir -p my-nghttp2/lib
+          cd my-nghttp2
+          mv C:/msys64/mingw64/include/nghttp2 include
+          mv C:/msys64/mingw64/lib/libnghttp2.a lib
+          mv C:/msys64/mingw64/lib/libnghttp2.dll.a lib
+          echo '-----------------'
+          find .
+          echo '-----------------'
+          popd
+          export TEST_CMAKE_FLAGS_PROVIDER="-DNGHTTP2_INCLUDE_DIR=$HOME/my-nghttp2/include -DNGHTTP2_LIBRARY=$HOME/my-nghttp2/lib/libnghttp2.dll.a"
+          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+
       - name: 'via ExternalProject'
         if: ${{ !contains(matrix.image, 'ubuntu') }}
         run: ./tests/cmake/test.sh ExternalProject ${TESTOPTS}

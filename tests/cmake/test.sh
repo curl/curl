@@ -44,7 +44,7 @@ runresults() {
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   (cd "${src}"; git archive --format=tar HEAD) | gzip > source.tar.gz
   src="${PWD}/source.tar.gz"
-  sha="$(openssl dgst -sha256 "${src}" | grep -a -i -o -E '[0-9a-f]{64}$')"
+  sha="$(sha256sum "${src}" | grep -a -i -o -w -E '[0-9a-f]{64}')"
   bldc='bld-externalproject'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
@@ -106,7 +106,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
   if [ -n "${cmake_provider_modern:-}" ]; then  # 3.15+
-    "${cmake_provider}" -B "${bldp}" -S "${src}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
+    "${cmake_provider}" -B "${bldp}" -S "${src}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_PROVIDER:-} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
@@ -114,7 +114,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     "${cmake_provider}" --install "${bldp}"
   else
     mkdir "${bldp}"; cd "${bldp}"
-    "${cmake_provider}" "${src}" -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} "$@" \
+    "${cmake_provider}" "${src}" -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_PROVIDER:-} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
@@ -122,16 +122,17 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     make install
     cd ..
   fi
+  echo '::group::curl-config.cmake'; cat "${prefix}/lib/cmake/CURL/CURL"* || true; echo '::endgroup::'
   bldc='bld-find_package'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} \
+    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_CONSUMER:-} \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
-    "${cmake_consumer}" .. -G "${gen}" ${TEST_CMAKE_FLAGS:-} \
+    "${cmake_consumer}" .. -G "${gen}" ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_CONSUMER:-} \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
     VERBOSE=1 "${cmake_consumer}" --build .
