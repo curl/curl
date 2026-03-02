@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 # Collect command-line arguments for buildinfo.txt.
@@ -45,7 +45,7 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
   endforeach()
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(Utilities)
 include(Macros)
 include(CMakeDependentOption)
@@ -312,18 +312,10 @@ set(CURL_CFLAGS "")  # C flags set for libcurl and curl tool (aka public binarie
 option(CURL_DROP_UNUSED "Drop unused code and data from built binaries" OFF)
 if(CURL_DROP_UNUSED)
   if(APPLE)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,-dead_strip")
-    else()
-      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,-dead_strip")
-    endif()
+    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,-dead_strip")
   elseif(MSVC)  # Options below are toolchain defaults in Release configurations.
     # This option does not seem to have an effect with VS2010:
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
-    else()
-      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-OPT:REF")
-    endif()
+    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-Gy")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -331,11 +323,7 @@ if(CURL_DROP_UNUSED)
       # To make -Wl,--gc-sections work on Windows: https://sourceware.org/bugzilla/show_bug.cgi?id=11539
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-fno-asynchronous-unwind-tables")
     endif()
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,--gc-sections")
-    else()
-      set_property(DIRECTORY APPEND PROPERTY LINK_FLAGS "-Wl,--gc-sections")
-    endif()
+    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-Wl,--gc-sections")
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-ffunction-sections" "-fdata-sections")
   endif()
@@ -663,7 +651,7 @@ elseif(AMIGA)
 elseif(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
-    set(CURL_NETWORK_AND_TIME_LIBS "socket" ${CURL_NETWORK_AND_TIME_LIBS})
+    list(PREPEND CURL_NETWORK_AND_TIME_LIBS "socket")
   endif()
 endif()
 
@@ -1179,7 +1167,7 @@ if(NOT CURL_DISABLE_LDAP)
     find_package(LDAP)
     if(LDAP_FOUND)
       set(HAVE_LBER_H 1)
-      set(CURL_LIBS CURL::ldap ${CURL_LIBS})
+      list(PREPEND CURL_LIBS CURL::ldap)
 
       # LDAP feature checks
 
@@ -1246,7 +1234,7 @@ set(HAVE_LIBIDN2 OFF)
 if(USE_LIBIDN2 AND NOT USE_APPLE_IDN AND NOT USE_WIN32_IDN)
   find_package(Libidn2)
   if(LIBIDN2_FOUND)
-    set(CURL_LIBS CURL::libidn2 ${CURL_LIBS})
+    list(PREPEND CURL_LIBS CURL::libidn2)
     set(HAVE_IDN2_H 1)
     set(HAVE_LIBIDN2 1)
   endif()
@@ -1269,7 +1257,7 @@ set(USE_LIBSSH2 OFF)
 if(CURL_USE_LIBSSH2)
   find_package(Libssh2)
   if(LIBSSH2_FOUND)
-    set(CURL_LIBS CURL::libssh2 ${CURL_LIBS})  # keep it before TLS-crypto, compression
+    list(PREPEND CURL_LIBS CURL::libssh2)  # keep it before TLS-crypto, compression
     set(USE_LIBSSH2 ON)
   endif()
 endif()
@@ -1279,7 +1267,7 @@ option(CURL_USE_LIBSSH "Use libssh" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
 if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(Libssh REQUIRED)
-  set(CURL_LIBS CURL::libssh ${CURL_LIBS})  # keep it before TLS-crypto, compression
+  list(PREPEND CURL_LIBS CURL::libssh)  # keep it before TLS-crypto, compression
   set(USE_LIBSSH ON)
 endif()
 
@@ -1861,12 +1849,6 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
 endif()
 
 if(CURL_LTO)
-  if(CMAKE_VERSION VERSION_LESS 3.9)
-    message(FATAL_ERROR "LTO has been requested, but your cmake version ${CMAKE_VERSION} is to old. You need at least 3.9")
-  endif()
-
-  cmake_policy(SET CMP0069 NEW)
-
   include(CheckIPOSupported)
   check_ipo_supported(RESULT CURL_HAS_LTO OUTPUT _lto_error LANGUAGES C)
   if(CURL_HAS_LTO)
@@ -2042,11 +2024,7 @@ curl_add_if("SSLS-EXPORT"   _ssl_enabled AND USE_SSLS_EXPORT)
 curl_add_if("AppleSecTrust" USE_APPLE_SECTRUST AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS))
 curl_add_if("NativeCA"      NOT USE_APPLE_SECTRUST AND _ssl_enabled AND CURL_CA_NATIVE)
 if(_items)
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-    list(SORT _items CASE INSENSITIVE)
-  else()
-    list(SORT _items)
-  endif()
+  list(SORT _items CASE INSENSITIVE)
 endif()
 set(CURL_SUPPORTED_FEATURES_LIST "${_items}")
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
@@ -2062,11 +2040,7 @@ curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
 curl_add_if("Rustls"           _ssl_enabled AND USE_RUSTLS)
 
 if(_items)
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-    list(SORT _items CASE INSENSITIVE)
-  else()
-    list(SORT _items)
-  endif()
+  list(SORT _items CASE INSENSITIVE)
 endif()
 string(REPLACE ";" " " SSL_BACKENDS "${_items}")
 message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")

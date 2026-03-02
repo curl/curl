@@ -70,28 +70,17 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
     [[ "${CMAKE_GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
     [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
-    if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
-      mkdir "_bld${_chkprefill}"
-      cd "_bld${_chkprefill}"
-      options+=' ..'
-      root='..'
-    else
-      options+=" -B _bld${_chkprefill}"
-      options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-      options+=' -DCMAKE_UNITY_BUILD=ON'
-      root='.'
-    fi
-    # CMAKE_GENERATOR env requires CMake 3.15+, pass it manually to make it work with older versions.
     # shellcheck disable=SC2086
-    time cmake -G "${CMAKE_GENERATOR}" \
-      -DENABLE_DEBUG=ON -DCURL_WERROR=ON \
+    time cmake -B "_bld${_chkprefill}" \
+      -DENABLE_DEBUG=ON \
+      -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+      -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
       -DCURL_STATIC_CRT=ON \
       -DCURL_DROP_UNUSED=ON \
       -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
-      ${options} \
       ${CMAKE_GENERATE:-} \
-      || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
-    [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
+      ${options} \
+      || { cat _bld/CMakeFiles/CMake* 2>/dev/null; false; }
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
     cat _bld_chkprefill/CMakeFiles/CMake* 2>/dev/null || true
