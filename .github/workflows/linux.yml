@@ -312,14 +312,14 @@ jobs:
             install_packages: libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
-            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
+            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined -ldl -lubsan
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'address-sanitizer (gcc AM)'
             install_packages: libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
-            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer
+            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined
             LIBS: -ldl -lubsan
             configure: --enable-debug --with-libssh --disable-unity
 
