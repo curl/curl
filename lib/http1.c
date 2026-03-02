@@ -270,10 +270,11 @@ CURLcode Curl_h1_req_parse_read(struct h1_req_parser *parser,
 
   DEBUGASSERT(buf);
 
+  *pnread = 0;
+
   if(!buf)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  *pnread = 0;
   while(!parser->done) {
     result = next_line(parser, buf, buflen, options, &nread);
     if(result) {
