@@ -411,7 +411,6 @@ if(PICKY_COMPILER)
     # volatile access of '<expression>' is subject to /volatile:<iso|ms> setting;
     #   consider using __iso_volatile_load/store intrinsic functions (ARM64)
     list(APPEND _picky "-wd4746")
-  # list(APPEND _picky "-wd4774")  # 'snprintf': format string expected in argument 3 is not a string literal
     list(APPEND _picky "-wd4820")  # 'A': 'N' bytes padding added after data member 'B'
     if(MSVC_VERSION GREATER_EQUAL 1900)
       list(APPEND _picky "-wd5045")  # Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
