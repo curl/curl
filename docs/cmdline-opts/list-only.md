@@ -29,7 +29,7 @@ include subdirectories and symbolic links.
 When listing an SFTP directory, this switch forces a name-only view, one per
 line. This is especially useful if the user wants to machine-parse the
 contents of an SFTP directory since the normal directory view provides more
-information than just filenames.
+information than filenames.
 
 When retrieving a specific email from POP3, this switch forces a LIST command
 to be performed instead of RETR. This is particularly useful if the user wants

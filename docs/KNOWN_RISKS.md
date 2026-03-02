@@ -26,8 +26,8 @@ to you from untrusted sources.
 curl can do a lot of things, and you should only ask it do things you want and
 deem correct.
 
-Even just accepting just the URL part without careful vetting might make curl
-do things you do not like. Like accessing internal hosts, like connecting to
+Even accepting only the URL part without careful vetting might make curl do
+things you do not like. Like accessing internal hosts, like connecting to
 rogue servers that redirect to even weirder places, like using ports or
 protocols that play tricks on you.
 

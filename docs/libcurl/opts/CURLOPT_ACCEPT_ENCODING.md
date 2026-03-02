@@ -52,8 +52,8 @@ Set CURLOPT_ACCEPT_ENCODING(3) to NULL to explicitly disable it, which makes
 libcurl not send an Accept-Encoding: header and not decompress received
 contents automatically.
 
-You can also opt to just include the Accept-Encoding: header in your request
-with CURLOPT_HTTPHEADER(3) but then there is no automatic decompressing when
+You can also opt to include the `Accept-Encoding:` header in your request with
+CURLOPT_HTTPHEADER(3) but then there is no automatic decompressing when
 receiving data.
 
 Setting this option is a request, not an order; the server may or may not do

@@ -165,7 +165,7 @@ Available substitute variables include:
 - `%FTP6PORT` - IPv6 port number of the FTP server
 - `%FTPPORT` - Port number of the FTP server
 - `%FTPSPORT` - Port number of the FTPS server
-- `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a
+- `%FTPTIME2` - Timeout in seconds that should be sufficient to receive a
   response from the test FTP server
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
@@ -401,7 +401,7 @@ issue.
 - `auth_required` if this is set and a POST/PUT is made without auth, the
   server does NOT wait for the full request body to get sent
 - `delay: [msecs]` - delay this amount after connection
-- `idle` - do nothing after receiving the request, just "sit idle"
+- `idle` - do nothing after receiving the request, "sit idle"
 - `stream` - continuously send data to the client, never-ending
 - `writedelay: [msecs]` delay this amount between reply packets
 - `skip: [num]` - instructs the server to ignore reading this many bytes from
@@ -587,8 +587,7 @@ Set the given environment variables to the specified value before the actual
 command is run. They are restored back to their former values again after the
 command has been run.
 
-If the variable name has no assignment, no `=`, then that variable is just
-deleted.
+If the variable name has no assignment, no `=`, then that variable is deleted.
 
 ### `<command [option="no-q/no-output/no-include/no-memdebug/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.

@@ -56,7 +56,7 @@ Source code, the man pages, the [INTERNALS
 document](https://curl.se/dev/internals.html),
 [TODO](https://curl.se/docs/todo.html),
 [KNOWN_BUGS](https://curl.se/docs/knownbugs.html) and the [most recent
-changes](https://curl.se/dev/sourceactivity.html) in git. Just lurking on the
+changes](https://curl.se/dev/sourceactivity.html) in git. Lurking on the
 [curl-library mailing list](https://curl.se/mail/list.cgi?list=curl-library)
 gives you a lot of insights on what's going on right now. Asking there is a
 good idea too.
@@ -145,8 +145,8 @@ then come on GitHub.
 
 Your changes be reviewed and discussed and you are expected to correct flaws
 pointed out and update accordingly, or the change risks stalling and
-eventually just getting deleted without action. As a submitter of a change,
-you are the owner of that change until it has been merged.
+eventually getting deleted without action. As a submitter of a change, you are
+the owner of that change until it has been merged.
 
 Respond on the list or on GitHub about the change and answer questions and/or
 fix nits/flaws. This is important. We take lack of replies as a sign that you
@@ -169,8 +169,8 @@ ways. [See the CI document for more
 information](https://github.com/curl/curl/blob/master/docs/tests/CI.md).
 
 Sometimes the tests fail due to a dependency service temporarily being offline
-or otherwise unavailable, e.g. package downloads. In this case you can just
-try to update your pull requests to rerun the tests later as described below.
+or otherwise unavailable, e.g. package downloads. In this case you can try to
+update your pull requests to rerun the tests later as described below.
 
 You can update your pull requests by pushing new commits or force-pushing
 changes to existing commits. Force-pushing an amended commit without any
@@ -285,8 +285,9 @@ If you are a frequent contributor, you may be given push access to the git
 repository and then you are able to push your changes straight into the git
 repository instead of sending changes as pull requests or by mail as patches.
 
-Just ask if this is what you would want. You are required to have posted
-several high quality patches first, before you can be granted push access.
+Feel free to ask for this, if this is what you want. You are required to have
+posted several high quality patches first, before you can be granted push
+access.
 
 ## Useful resources
 
@@ -320,13 +321,13 @@ You must also double-check the findings carefully before reporting them to us
 to validate that the issues are indeed existing and working exactly as the AI
 says. AI-based tools frequently generate inaccurate or fabricated results.
 
-Further: it is *rarely* a good idea to just copy and paste an AI generated
-report to the project. Those generated reports typically are too wordy and
-rarely to the point (in addition to the common fabricated details). If you
-actually find a problem with an AI and you have verified it yourself to be
-true: write the report yourself and explain the problem as you have learned
-it. This makes sure the AI-generated inaccuracies and invented issues are
-filtered out early before they waste more people's time.
+Further: it is *rarely* a good idea to copy and paste an AI generated report
+to the project. Those generated reports typically are too wordy and rarely to
+the point (in addition to the common fabricated details). If you actually find
+a problem with an AI and you have verified it yourself to be true: write the
+report yourself and explain the problem as you have learned it. This makes
+sure the AI-generated inaccuracies and invented issues are filtered out early
+before they waste more people's time.
 
 As we take security reports seriously, we investigate each report with
 priority. This work is both time and energy consuming and pulls us away from

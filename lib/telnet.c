@@ -211,8 +211,8 @@ static CURLcode init_telnet(struct Curl_easy *data)
   */
   tn->him_preferred[CURL_TELOPT_ECHO] = CURL_YES;
 
-  /* Set the subnegotiation fields to send information
-    just after negotiation passed (do/will)
+  /* Set the subnegotiation fields to send information after negotiation
+     passed (do/will)
 
      Default values are (0,0) initialized by calloc.
      According to the RFC1013 it is valid:
@@ -961,7 +961,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
 /* if the option contains an IAC code, it should be escaped in the output, but
    as we cannot think of any legit way to send that as part of the content we
-   rather just ban its use instead */
+   rather ban its use instead */
 static bool bad_option(const char *data)
 {
   return !data || !!strchr(data, CURL_IAC);
@@ -1293,7 +1293,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   /* If stdin_handle is a pipe, use PeekNamedPipe() method to check it,
      else use the old WaitForMultipleObjects() way */
   if(GetFileType(stdin_handle) == FILE_TYPE_PIPE || data->set.is_fread_set) {
-    /* Do not wait for stdin_handle, just wait for event_handle */
+    /* Do not wait for stdin_handle, wait for event_handle */
     obj_count = 1;
     /* Check stdin_handle per 100 milliseconds */
     wait_timeout = 100;

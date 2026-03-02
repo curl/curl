@@ -689,10 +689,10 @@ static DOHcode doh_rdata(const unsigned char *doh,
       return rc;
     break;
   case CURL_DNS_TYPE_DNAME:
-    /* explicit for clarity; just skip; rely on synthesized CNAME */
+    /* explicit for clarity; skip; rely on synthesized CNAME */
     break;
   default:
-    /* unsupported type, just skip it */
+    /* unsupported type, skip it */
     break;
   }
   return DOH_OK;
@@ -1048,9 +1048,9 @@ UNITTEST void de_cleanup(struct dohentry *d)
  * The encoding here is defined in
  * https://datatracker.ietf.org/doc/html/rfc1035#section-3.1
  *
- * The input buffer pointer will be modified so it points to
- * just after the end of the DNS name encoding on output. (And
- * that is why it is an "unsigned char **" :-)
+ * The input buffer pointer will be modified so it points to after the end of
+ * the DNS name encoding on output. (And that is why it is an "unsigned char
+ * **" :-)
  */
 static CURLcode doh_decode_rdata_name(const unsigned char **buf,
                                       size_t *remaining, char **dnsname)

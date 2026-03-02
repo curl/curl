@@ -89,9 +89,8 @@ int main(int argc, const char **argv)
   file = argv[1];
   url = argv[2];
 
-  /* get a FILE * of the same file, could also be made with
-     fdopen() from the previous descriptor, but hey this is just
-     an example! */
+  /* get a FILE * of the same file, could also be made with fdopen() from the
+     previous descriptor, but hey this is an example! */
   hd_src = fopen(file, "rb");
   if(!hd_src)
     return 2;

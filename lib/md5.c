@@ -270,7 +270,7 @@ typedef struct md5_ctx my_md5_ctx;
  * The basic MD5 functions.
  *
  * F and G are optimized compared to their RFC 1321 definitions for
- * architectures that lack an AND-NOT instruction, just like in Colin Plumb's
+ * architectures that lack an AND-NOT instruction, like in Colin Plumb's
  * implementation.
  */
 #define MD5_F(x, y, z)                  ((z) ^ ((x) & ((y) ^ (z))))
@@ -291,9 +291,8 @@ typedef struct md5_ctx my_md5_ctx;
  * SET reads 4 input bytes in little-endian byte order and stores them
  * in a properly aligned word in host byte order.
  *
- * The check for little-endian architectures that tolerate unaligned
- * memory accesses is just an optimization. Nothing will break if it
- * does not work.
+ * The check for little-endian architectures that tolerate unaligned memory
+ * accesses is an optimization. Nothing will break if it does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD5_SET(n) (*(const uint32_t *)(const void *)&ptr[(n) * 4])

@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIELIST,
 
 Pass a char pointer to a *cookie* string.
 
-Such a cookie can be either a single line in Netscape / Mozilla format or just
+Such a cookie can be either a single line in Netscape / Mozilla format or
 regular HTTP-style header (`Set-Cookie:`) format. This option also enables the
 cookie engine. This adds that single cookie to the internal cookie store.
 

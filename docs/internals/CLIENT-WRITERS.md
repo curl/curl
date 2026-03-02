@@ -100,7 +100,7 @@ typedef enum {
 If a writer for phase `PROTOCOL` is added to the chain, it is always added
 *after* any `RAW` or `TRANSFER_DECODE` and *before* any `CONTENT_DECODE` and
 `CLIENT` phase writer. If there is already a writer for the same phase
-present, the new writer is inserted just before that one.
+present, the new writer is inserted before that one.
 
 All transfers have a chain of 3 writers by default. A specific protocol
 handler may alter that by adding additional writers. The 3 standard writers

@@ -96,8 +96,8 @@ or specify them with the `-u` flag like
 
 ### FTPS
 
-It is just like for FTP, but you may also want to specify and use SSL-specific
-options for certificates etc.
+It is like FTP, but you may also want to specify and use SSL-specific options
+for certificates etc.
 
 Note that using `FTPS://` as prefix is the *implicit* way as described in the
 standards while the recommended *explicit* way is done by using `FTP://` and
@@ -660,7 +660,7 @@ incoming connections.
     curl ftp.example.com
 
 If the server, for example, is behind a firewall that does not allow
-connections on ports other than 21 (or if it just does not support the `PASV`
+connections on ports other than 21 (or if it does not support the `PASV`
 command), the other way to do it is to use the `PORT` command and instruct the
 server to connect to the client on the given IP number and port (as parameters
 to the PORT command).
@@ -855,8 +855,8 @@ therefore most Unix programs do not read this file unless it is only readable
 by yourself (curl does not care though).
 
 curl supports `.netrc` files if told to (using the `-n`/`--netrc` and
-`--netrc-optional` options). This is not restricted to just FTP, so curl can
-use it for all protocols where authentication is used.
+`--netrc-optional` options). This is not restricted to FTP, so curl can use it
+for all protocols where authentication is used.
 
 A simple `.netrc` file could look something like:
 
@@ -936,8 +936,8 @@ are persistent.
 
 As is mentioned above, you can download multiple files with one command line
 by simply adding more URLs. If you want those to get saved to a local file
-instead of just printed to stdout, you need to add one save option for each
-URL you specify. Note that this also goes for the `-O` option (but not
+instead of printed to stdout, you need to add one save option for each URL you
+specify. Note that this also goes for the `-O` option (but not
 `--remote-name-all`).
 
 For example: get two files and use `-O` for the first and a custom file

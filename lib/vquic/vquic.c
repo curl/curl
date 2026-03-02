@@ -170,7 +170,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 #endif
       return CURLE_AGAIN;
     case SOCKEMSGSIZE:
-      /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
+      /* UDP datagram is too large; caused by PMTUD. Let it be lost. */
       *psent = pktlen;
       break;
     case EIO:
@@ -214,7 +214,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
         result = CURLE_SEND_ERROR;
         goto out;
       }
-      /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
+      /* UDP datagram is too large; caused by PMTUD. Let it be lost. */
       *psent = pktlen;
     }
   }

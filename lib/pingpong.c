@@ -94,7 +94,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   if(Curl_conn_data_pending(data, FIRSTSOCKET))
     rc = 1;
   else if(pp->overflow)
-    /* We are receiving and there is data in the cache so just read it */
+    /* We are receiving and there is data in the cache so read it */
     rc = 1;
   else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */

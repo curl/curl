@@ -394,7 +394,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
   VERBOSE(const char *ongoing_auth = NULL);
 
   /* We need a rewind before uploading client read data again. The
-   * checks below just influence of the upload is to be continued
+   * checks below influence of the upload is to be continued
    * or aborted early.
    * This depends on how much remains to be sent and in what state
    * the authentication is. Some auth schemes such as NTLM do not work
@@ -1195,7 +1195,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     }
 
     /* the URL could not be parsed for some reason, but since this is FAKE
-       mode, just duplicate the field as-is */
+       mode, duplicate the field as-is */
     follow_url = curlx_strdup(newurl);
     if(!follow_url)
       return CURLE_OUT_OF_MEMORY;
@@ -2418,7 +2418,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
     return CURLE_OK;
 
   /* For really small puts we do not use Expect: headers at all, and for
-     the somewhat bigger ones we allow the app to disable it. Just make
+     the somewhat bigger ones we allow the app to disable it. Make
      sure that the expect100header is always set to the preferred value
      here. */
   ptr = Curl_checkheaders(data, STRCONST("Expect"));
@@ -2641,8 +2641,8 @@ static CURLcode http_range(struct Curl_easy *data,
                         data->state.range, total_len - 1, total_len);
       }
       else {
-        /* Range was selected and then we just pass the incoming range and
-           append total size */
+        /* Range was selected and then we pass the incoming range and append
+           total size */
         data->state.aptr.rangeline =
           curl_maprintf("Content-Range: bytes %s/%" FMT_OFF_T "\r\n",
                         data->state.range, req_clen);
@@ -3278,7 +3278,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
             return CURLE_OK;
           }
         }
-        /* negative, different value or just rubbish - bad HTTP */
+        /* negative, different value or rubbish - bad HTTP */
         failf(data, "Invalid Content-Length: value");
         return CURLE_WEIRD_SERVER_REPLY;
       }
@@ -3757,8 +3757,8 @@ static CURLcode http_statusline(struct Curl_easy *data,
    */
   if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
      k->httpcode == 416) {
-    /* "Requested Range Not Satisfiable", just proceed and
-       pretend this is no error */
+    /* "Requested Range Not Satisfiable", proceed and pretend this is no
+       error */
     k->ignorebody = TRUE; /* Avoid appending error msg to good data. */
   }
 

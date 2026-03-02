@@ -493,7 +493,7 @@ static CURLcode mbed_load_cacert(struct Curl_cfilter *cf,
 
   if(ca_info_blob && verifypeer) {
 #ifdef MBEDTLS_PEM_PARSE_C
-    /* if DER or a null-terminated PEM just process using
+    /* if DER or a null-terminated PEM process using
        mbedtls_x509_crt_parse(). */
     if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER")) ||
        ((char *)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0') {
@@ -605,7 +605,7 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
 
   if(ssl_cert_blob) {
 #ifdef MBEDTLS_PEM_PARSE_C
-    /* if DER or a null-terminated PEM just process using
+    /* if DER or a null-terminated PEM process using
        mbedtls_x509_crt_parse(). */
     if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER")) ||
        ((char *)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0') {

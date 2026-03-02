@@ -52,8 +52,8 @@ Examples:
    same as the previous, except it is configured to use TLSv1.2 as
    min and max versions.
 
-Different configurations produce different keys which is just what
-curl needs when handling SSL session tickets.
+Different configurations produce different keys which is what curl needs when
+handling SSL session tickets.
 
 One important thing: peer keys do not contain confidential information. If you
 configure a client certificate or SRP authentication with username/password,
@@ -121,8 +121,8 @@ concurrent connections do not reuse the same ticket.
 #### Privacy and Security
 
 As mentioned above, ssl peer keys are not intended for storage in a file
-system. They clearly show which hosts the user talked to. This maybe "just"
-privacy relevant, but has security implications as an attacker might find
+system. They clearly show which hosts the user talked to. This is not only
+privacy relevant, but also has security implications as an attacker might find
 worthy targets among your peer keys.
 
 Also, we do not recommend to persist TLSv1.2 tickets.
@@ -138,11 +138,11 @@ The salt is generated randomly for each peer key on export. The SHA256 makes
 sure that the peer key cannot be reversed and that a slightly different key
 still produces a different result.
 
-This means an attacker cannot just "grep" a session file for a particular
-entry, e.g. if they want to know if you accessed a specific host. They *can*
-however compute the SHA256 hashes for all salts in the file and find a
-specific entry. They *cannot* find a hostname they do not know. They would
-have to brute force by guessing.
+This means an attacker cannot "grep" a session file for a particular entry,
+e.g. if they want to know if you accessed a specific host. They *can* however
+compute the SHA256 hashes for all salts in the file and find a specific entry.
+They *cannot* find a hostname they do not know. They would have to brute force
+by guessing.
 
 #### Import
 

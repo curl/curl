@@ -1955,7 +1955,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "SSL shutdown not received, but closed");
     *done = TRUE;
     break;
-  case SSL_ERROR_NONE: /* just did not get anything */
+  case SSL_ERROR_NONE: /* did not get anything */
   case SSL_ERROR_WANT_READ:
     /* SSL has send its notify and now wants to read the reply
      * from the server. We are not really interested in that. */
@@ -2791,7 +2791,7 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
   BIO *cbio = NULL;
   STACK_OF(X509_INFO) *inf = NULL;
 
-  /* everything else is just a reference */
+  /* everything else is a reference */
   int i, count = 0;
   X509_INFO *itmp = NULL;
 
@@ -3400,7 +3400,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
       SSL_SESSION *ssl_session = NULL;
 
       /* If OpenSSL does not accept the session from the cache, this
-       * is not an error. We just continue without it. */
+       * is not an error. We continue without it. */
       ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
                                     (long)der_sessionid_size);
       if(ssl_session) {
@@ -3778,8 +3778,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
      The enabled extension concerns the session management. I wonder how often
      libcurl stops a connection and then resumes a TLS session. Also, sending
-     the session data is some overhead. I suggest that you just use your
-     proposed patch (which explicitly disables TICKET).
+     the session data is some overhead. I suggest that you use your proposed
+     patch (which explicitly disables TICKET).
 
      If someone writes an application with libcurl and OpenSSL who wants to
      enable the feature, one can do this in the SSL callback.

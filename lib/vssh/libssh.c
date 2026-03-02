@@ -1129,7 +1129,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
      (attrs->size == 0)) {
     /*
      * sftp_fstat did not return an error, so maybe the server
-     * just does not support stat()
+     * does not support stat()
      * OR the server does not return a file size with a stat()
      * OR file size is 0
      */

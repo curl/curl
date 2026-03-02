@@ -283,8 +283,8 @@ See [curl issue 1508](https://github.com/curl/curl/issues/1508)
 ## Provide the error body from a CONNECT response
 
 When curl receives a body response from a CONNECT request to a proxy, it
-always just reads and ignores it. It would make some users happy if curl
-instead optionally would be able to make that responsible available. Via a new
+always reads and ignores it. It would make some users happy if curl instead
+optionally would be able to make that responsible available. Via a new
 callback? Through some other means?
 
 See [curl issue 9513](https://github.com/curl/curl/issues/9513)
@@ -454,7 +454,7 @@ Currently the SMB authentication uses NTLMv1.
 ## Create remote directories
 
 Support for creating remote directories when uploading a file to a directory
-that does not exist on the server, just like `--ftp-create-dirs`.
+that does not exist on the server, like `--ftp-create-dirs`.
 
 # FILE
 
@@ -662,8 +662,8 @@ the new transfer to the existing one.
 The SFTP code in libcurl checks the file size *before* a transfer starts and
 then proceeds to transfer exactly that amount of data. If the remote file
 grows while the transfer is in progress libcurl does not notice and does not
-adapt. The OpenSSH SFTP command line tool does and libcurl could also just
-attempt to download more to see if there is more to get...
+adapt. The OpenSSH SFTP command line tool does and libcurl could also attempt
+to download more to see if there is more to get...
 
 [curl issue 4344](https://github.com/curl/curl/issues/4344)
 
@@ -958,8 +958,8 @@ test tools built with either OpenSSL or GnuTLS
 
 ## more protocols supported
 
-Extend the test suite to include more protocols. The telnet could just do FTP
-or http operations (for which we have test servers).
+Extend the test suite to include more protocols. The telnet could do FTP or
+http operations (for which we have test servers).
 
 ## more platforms supported
 

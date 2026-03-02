@@ -619,7 +619,7 @@ static void separator(const char *sep, size_t seplen, FILE *stream)
       case '\0':
         break;
       default:
-        /* unknown, just output this */
+        /* unknown, output this */
         fputc(sep[0], stream);
         fputc(sep[1], stream);
         break;
@@ -834,7 +834,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             fputs("%output{", stream);
         }
         else {
-          /* illegal syntax, then just output the characters that are used */
+          /* illegal syntax, then output the characters that are used */
           fputc('%', stream);
           fputc(ptr[1], stream);
           ptr += 2;
@@ -853,7 +853,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
         fputc('\t', stream);
         break;
       default:
-        /* unknown, just output this */
+        /* unknown, output this */
         fputc(*ptr, stream);
         fputc(ptr[1], stream);
         break;

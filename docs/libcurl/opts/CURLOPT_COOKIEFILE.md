@@ -29,7 +29,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
 
 Pass a pointer to a null-terminated string as parameter. It should point to
 the filename of your file holding cookie data to read. The cookie data can be
-in either the old Netscape / Mozilla cookie data format or just regular HTTP
+in either the old Netscape / Mozilla cookie data format or regular HTTP
 headers (Set-Cookie style) dumped to a file.
 
 It also enables the cookie engine, making libcurl parse and send cookies on
@@ -37,7 +37,7 @@ subsequent requests with this handle.
 
 By passing the empty string ("") to this option, you enable the cookie engine
 without reading any initial cookies. If you tell libcurl the filename is "-"
-(just a single minus sign), libcurl instead reads from stdin.
+(a single minus sign), libcurl instead reads from stdin.
 
 This option only **reads** cookies. To make libcurl write cookies to file,
 see CURLOPT_COOKIEJAR(3).

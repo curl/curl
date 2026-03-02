@@ -374,7 +374,7 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
 
   if(capacity < max_capacity) {
     /* We want `multi->xfers` to have "sufficient" free rows, so that we do
-     * have to reuse the `mid` from a just removed easy right away.
+     * have to reuse the `mid` from a removed easy right away.
      * Since uint_tbl and uint_bset are quite memory efficient,
      * regard less than 25% free as insufficient.
      * (for low capacities, e.g. multi_easy, 4 or less). */
@@ -627,7 +627,7 @@ static void multi_done_locked(struct connectdata *conn,
     return;
   }
 
-  data->state.done = TRUE; /* called just now! */
+  data->state.done = TRUE; /* called now! */
   data->state.recent_conn_id = conn->connection_id;
 
   Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
@@ -1461,7 +1461,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #endif
     int pollrc;
 #ifdef USE_WINSOCK
-    if(cpfds.n)         /* just pre-check with Winsock */
+    if(cpfds.n)         /* pre-check with Winsock */
       pollrc = Curl_poll(cpfds.pfds, cpfds.n, 0);
     else
       pollrc = 0;
@@ -2015,7 +2015,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
     if(data->req.newurl || retry) {
       followtype follow = FOLLOW_NONE;
       if(!retry) {
-        /* if the URL is a follow-location and not just a retried request then
+        /* if the URL is a follow-location and not a retried request then
            figure out the URL here */
         curlx_free(newurl);
         newurl = data->req.newurl;
@@ -2985,7 +2985,7 @@ void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s)
  * add_next_timeout()
  *
  * Each Curl_easy has a list of timeouts. The add_next_timeout() is called
- * when it has just been removed from the splay tree because the timeout has
+ * when it has been removed from the splay tree because the timeout has
  * expired. This function is then to advance in the list to pick the next
  * timeout to use (skip the already expired ones) and add this node back to
  * the splay tree again.
@@ -3551,7 +3551,7 @@ void Curl_expire_ex(struct Curl_easy *data,
     set.tv_usec -= 1000000;
   }
 
-  /* Remove any timer with the same id just in case. */
+  /* Remove any timer with the same id */
   multi_deltimeout(data, id);
 
   /* Add it to the timer list. It must stay in the list until it has expired

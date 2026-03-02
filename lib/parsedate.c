@@ -387,7 +387,7 @@ static int parsedate(const char *date, time_t *output)
         }
 
         if(!found && (tzoff == -1)) {
-          /* this just must be a time zone string */
+          /* this must be a time zone string */
           tzoff = checktz(date, len);
           if(tzoff != -1)
             found = TRUE;

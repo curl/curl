@@ -580,7 +580,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * This binds the local socket to a particular interface. This will
        * force even requests to other local interfaces to go out the external
        * interface. Only bind to the interface when specified as interface,
-       * not just as a hostname or ip address.
+       * not as a hostname or ip address.
        *
        * The interface might be a VRF, eg: vrf-blue, which means it cannot be
        * converted to an IP address and would fail Curl_if2ip. Simply try to
@@ -798,7 +798,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    *
    *    "I do not have Rational Quantify, but the hint from his post was
    *    ntdll::NtRemoveIoCompletion(). I would assume the SleepEx (or maybe
-   *    just Sleep(0) would be enough?) would release whatever
+   *    Sleep(0) would be enough?) would release whatever
    *    mutex/critical-section the ntdll call is waiting on.
    *
    *    Someone got to verify this on Win-NT 4.0, 2000."
@@ -1445,7 +1445,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       (SOCKEINPROGRESS == sockerr)
 #endif
       ) {
-      /* this is just a case of EWOULDBLOCK */
+      /* EWOULDBLOCK */
       result = CURLE_AGAIN;
     }
     else {
@@ -1510,7 +1510,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       (EAGAIN == sockerr) || (SOCKEINTR == sockerr)
 #endif
       ) {
-      /* this is just a case of EWOULDBLOCK */
+      /* EWOULDBLOCK */
       result = CURLE_AGAIN;
     }
     else {

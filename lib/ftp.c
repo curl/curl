@@ -361,7 +361,7 @@ static void close_secondarysocket(struct Curl_easy *data,
 /*
  * Lineend Conversions
  * On ASCII transfers, e.g. directory listings, we might get lines
- * ending in '\r\n' and we prefer just '\n'.
+ * ending in '\r\n' and we prefer '\n'.
  * We might also get a lonely '\r' which we convert into a '\n'.
  */
 struct ftp_cw_lc_ctx {
@@ -399,8 +399,8 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
         if(result)
           return result;
       }
-      /* either we just wrote the newline or it is part of the next
-       * chunk of bytes we write. */
+      /* either we wrote the newline or it is part of the next chunk of bytes
+       * we write. */
       ctx->newline_pending = FALSE;
     }
 
@@ -633,8 +633,8 @@ static CURLcode getftpresponse(struct Curl_easy *data,
                                int *ftpcodep) /* return the ftp-code */
 {
   /*
-   * We cannot read just one byte per read() and then go back to select() as
-   * the OpenSSL read() does not grok that properly.
+   * We cannot read one byte per read() and then go back to select() as the
+   * OpenSSL read() does not grok that properly.
    *
    * Alas, read as much as possible, split up into lines, use the ending
    * line in a response or continue reading. */
@@ -676,10 +676,10 @@ static CURLcode getftpresponse(struct Curl_easy *data,
      *
      * A caution here is that the ftp_readresp() function has a cache that may
      * contain pieces of a response from the previous invoke and we need to
-     * make sure we do not just wait for input while there is unhandled data in
+     * make sure we do not wait for input while there is unhandled data in
      * that cache. But also, if the cache is there, we call ftp_readresp() and
-     * the cache was not good enough to continue we must not just busy-loop
-     * around this function.
+     * the cache was not good enough to continue we must not busy-loop around
+     * this function.
      *
      */
 
@@ -702,7 +702,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
       }
       else if(ev == 0) {
         result = Curl_pgrsUpdate(data);
-        continue; /* just continue in our loop for the timeout duration */
+        continue; /* continue in our loop for the timeout duration */
       }
     }
 
@@ -782,8 +782,8 @@ static CURLcode ftp_domore_pollset(struct Curl_easy *data,
     return CURLE_OK;
 
   /* When in DO_MORE state, we could be either waiting for us to connect to a
-   * remote site, or we could wait for that site to connect to us. Or just
-   * handle ordinary commands.
+   * remote site, or we could wait for that site to connect to us. Or handle
+   * ordinary commands.
    */
   CURL_TRC_FTP(data, "[%s] ftp_domore_pollset()", FTP_CSTATE(ftpc));
 
@@ -1552,7 +1552,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
      Whether the server will support this, is uncertain.
 
      The other ftp_filemethods will CWD into dir/dir/ first and
-     then just do LIST (in that case: nothing to do here)
+     then do LIST (in that case: nothing to do here)
   */
   const char *lstArg = NULL;
   int lstArglen = 0;
@@ -1688,9 +1688,9 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
        which may not exist in the server!  The SIZE command is not in
        RFC959. */
 
-    /* 2. This used to set REST. But since we can do append, we
-       do not another ftp command. We just skip the source file
-       offset and then we APPEND the rest on the file instead */
+    /* 2. This used to set REST. But since we can do append, we issue no
+       another ftp command. Skip the source file offset and APPEND the rest on
+       the file instead */
 
     /* 3. pass file-size number of bytes in the source file */
     /* 4. lower the infilesize counter */
@@ -1791,10 +1791,10 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
        this even when not doing resumes. */
     if(filesize == -1) {
       infof(data, "ftp server does not support SIZE");
-      /* We could not get the size and therefore we cannot know if there really
-         is a part of the file left to get, although the server will just
-         close the connection when we start the connection so it will not cause
-         us any harm, just not make us exit as nicely. */
+      /* We could not get the size and therefore we cannot know if there
+         really is a part of the file left to get, although the server will
+         close the connection when we start the connection so it will not
+         cause us any harm, not make us exit as nicely. */
     }
     else {
       /* We got a file size report, so we check that there actually is a
@@ -2392,7 +2392,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
           if(result)
             return result;
         }
-        /* otherwise just fall through */
+        /* otherwise fall through */
       }
       else {
         if(data->set.prequote && !ftpc->file) {
@@ -2971,7 +2971,7 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  /* some need password anyway, and others just return 2xx ignored */
+  /* some need password anyway, and others return 2xx ignored */
   if((ftpcode == 331) && (ftpc->state == FTP_USER)) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
@@ -3742,9 +3742,9 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   if(!result && (ftp->transfer == PPTRANSFER_BODY) && ftpc->ctl_valid &&
      pp->pending_resp && !premature) {
     /*
-     * Let's see what the server says about the transfer we just performed,
-     * but lower the timeout as sometimes this connection has died while the
-     * data has been transferred. This happens when doing through NATs etc that
+     * Let's see what the server says about the transfer we performed, but
+     * lower the timeout as sometimes this connection has died while the data
+     * has been transferred. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
     pp->response = *Curl_pgrs_now(data); /* timeout relative now */
@@ -3760,7 +3760,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       return result;
 
     if(ftpc->dont_check && data->req.maxdownload > 0) {
-      /* we have just sent ABOR and there is no reliable way to check if it was
+      /* we have sent ABOR and there is no reliable way to check if it was
        * successful or not; we have to close the connection now */
       infof(data, "partial download completed, closing connection");
       connclose(conn, "Partial download with no ability to check");
@@ -4303,7 +4303,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to.
 
      ftp_quit() will check the state of ftp->ctl_valid. If it is ok it
-     will try to send the QUIT command, otherwise it will just return.
+     will try to send the QUIT command, otherwise it will return.
   */
   ftpc->shutdown = TRUE;
   if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))

@@ -31,8 +31,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOBODY, long opt);
 
 A long parameter set to 1 tells libcurl to not include the body-part in the
 output when doing what would otherwise be a download. For HTTP(S), this makes
-libcurl do a HEAD request. For most other protocols it means just not asking
-to transfer the body data.
+libcurl do a HEAD request. For most other protocols it means not asking to
+transfer the body data.
 
 For HTTP operations when CURLOPT_NOBODY(3) has been set, disabling this
 option (with 0) makes it a GET again - only if the method is still set to be

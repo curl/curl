@@ -25,9 +25,8 @@ from stdin you write "@-".
 
 The variables present in the output format are substituted by the value or
 text that curl thinks fit, as described below. All variables are specified as
-%{variable_name} and to output a normal % you just write them as %%. You can
-output a newline by using \n, a carriage return with \r and a tab space with
-\t.
+%{variable_name} and to output a normal % you write them as %%. You can output
+a newline by using \n, a carriage return with \r and a tab space with \t.
 
 The output is by default written to standard output, but can be changed with
 %{stderr} and %output{}.
@@ -249,9 +248,9 @@ The time, in seconds, it took from the start until the last byte is sent
 by libcurl. (Added in 8.10.0)
 
 ## `time_pretransfer`
-The time, in seconds, it took from the start until the file transfer was just
-about to begin. This includes all pre-transfer commands and negotiations that
-are specific to the particular protocol(s) involved.
+The time, in seconds, it took from the start until immediately before the file
+transfer was about to begin. This includes all pre-transfer commands and
+negotiations that are specific to the particular protocol(s) involved.
 
 ## `time_queue`
 The time, in seconds, the transfer was queued during its run. This adds

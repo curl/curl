@@ -41,11 +41,6 @@ libcurl only keeps one single pointer associated with a socket, so calling
 this function several times for the same socket makes the last set pointer get
 used.
 
-The idea here being that this association (socket to private pointer) is
-something that just about every application that uses this API needs and then
-libcurl can just as well do it since it already has the necessary
-functionality.
-
 It is acceptable to call this function from your multi callback functions.
 
 # %PROTOCOLS%

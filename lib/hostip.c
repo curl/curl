@@ -1366,7 +1366,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
           if(curlx_str_until(&host, &target, 4096, ',')) {
             if(curlx_str_single(&host, ','))
               goto err;
-            /* survive nothing but just a comma */
+            /* survive nothing but a comma */
             continue;
           }
         }

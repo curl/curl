@@ -366,8 +366,7 @@ static bool invalid_octets(const char *ptr, size_t len)
 
 /* The maximum length we accept a date string for the 'expire' keyword. The
    standard date formats are within the 30 bytes range. This adds an extra
-   margin just to make sure it realistically works with what is used out
-   there.
+   margin to make sure it realistically works with what is used out there.
 */
 #define MAX_DATE_LENGTH 80
 
@@ -1314,8 +1313,8 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   if(matches) {
     /*
      * Now we need to make sure that if there is a name appearing more than
-     * once, the longest specified path version comes first. To make this
-     * the swiftest way, we just sort them all based on path length.
+     * once, the longest specified path version comes first. To make this the
+     * swiftest way, we sort them all based on path length.
      */
     struct Cookie **array;
     size_t i;

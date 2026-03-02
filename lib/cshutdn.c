@@ -331,7 +331,7 @@ void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
 {
   if(cshutdn->initialised && data) {
     int timeout_ms = 0;
-    /* Just for testing, run graceful shutdown */
+    /* for testing, run graceful shutdown */
 #ifdef DEBUGBUILD
     {
       const char *p = getenv("CURL_GRACEFUL_SHUTDOWN");

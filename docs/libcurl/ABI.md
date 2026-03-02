@@ -15,7 +15,7 @@ sizes/defines and more.
 ## Upgrades
 
 A libcurl upgrade does not break the ABI or change established and documented
-behavior. Your application can remain using libcurl just as before, only with
+behavior. Your application can remain using libcurl like before, only with
 fewer bugs and possibly with added new features.
 
 ## Version Numbers

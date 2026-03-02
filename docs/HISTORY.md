@@ -8,9 +8,9 @@ SPDX-License-Identifier: curl
 
 Towards the end of 1996, Daniel Stenberg was spending time writing an IRC bot
 for an Amiga related channel on EFnet. He then came up with the idea to make
-currency-exchange calculations available to Internet Relay Chat (IRC)
-users. All the necessary data were published on the Web; he just needed to
-automate their retrieval.
+currency-exchange calculations available to Internet Relay Chat (IRC) users.
+All the necessary data were published on the Web; he only needed to automate
+their retrieval.
 
 ## 1996
 
@@ -18,9 +18,9 @@ On November 11, 1996 the Brazilian developer Rafael Sagula wrote and released
 HttpGet version 0.1.
 
 Daniel extended this existing command-line open-source tool. After a few minor
-adjustments, it did just what he needed. The first release with Daniel's
-additions was 0.2, released on December 17, 1996. Daniel quickly became the
-new maintainer of the project.
+adjustments, it did what he needed. The first release with Daniel's additions
+was 0.2, released on December 17, 1996. Daniel quickly became the new
+maintainer of the project.
 
 ## 1997
 
@@ -309,7 +309,7 @@ June: support for multiplexing with HTTP/2
 August: support for HTTP/2 server push
 
 September: started "everything curl". A separate stand-alone book documenting
-curl and related info in perhaps a more tutorial style rather than just a
+curl and related info in perhaps a more tutorial style rather than a
 reference,
 
 December: Public Suffix List

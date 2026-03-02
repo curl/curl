@@ -105,8 +105,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/Sent");
 
     /* In this case, we are using a callback function to specify the data. You
-     * could just use the CURLOPT_READDATA option to specify a FILE pointer to
-     * read from. */
+     * could use the CURLOPT_READDATA option to specify a FILE pointer to read
+     * from. */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

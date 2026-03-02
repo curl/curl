@@ -197,9 +197,8 @@ bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
                        const uint8_t **pbuf, size_t *plen);
 
 /**
- * Tell the buffer queue to discard `amount` buf bytes at the head
- * of the queue. Skipping more buf than is currently buffered will
- * just empty the queue.
+ * Tell the buffer queue to discard `amount` buf bytes at the head of the
+ * queue. Skipping more buf than is currently buffered will empty the queue.
  */
 void Curl_bufq_skip(struct bufq *q, size_t amount);
 

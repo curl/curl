@@ -425,8 +425,8 @@ about bindings on the curl-library list too, but be prepared that people on
 that list may not know anything about bindings.
 
 In December 2025 there were around **60** different [interfaces
-available](https://curl.se/libcurl/bindings.html) for just about all the
-languages you can imagine.
+available](https://curl.se/libcurl/bindings.html) for almost any language you
+can imagine.
 
 ## What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
@@ -435,8 +435,8 @@ protocol that is built on top of HTTP. Protocols such as SOAP, WebDAV and
 XML-RPC are all such ones. You can use `-X` to set custom requests and -H to
 set custom headers (or replace internally generated ones).
 
-Using libcurl is of course just as good and you would just use the proper
-library options to do the same.
+Using libcurl of course also works and you would use the proper library
+options to do the same.
 
 ## How do I POST with a different Content-Type?
 
@@ -488,14 +488,13 @@ individuals have ever tried.
 ## Does curl support JavaScript or PAC (automated proxy config)?
 
 Many webpages do magic stuff using embedded JavaScript. curl and libcurl have
-no built-in support for that, so it will be treated just like any other
-contents.
+no built-in support for that, so it is treated like any other contents.
 
 `.pac` files are a Netscape invention and are sometimes used by organizations
-to allow them to differentiate which proxies to use. The `.pac` contents is
-just a JavaScript program that gets invoked by the browser and that returns
-the name of the proxy to connect to. Since curl does not support JavaScript,
-it cannot support .pac proxy configuration either.
+to allow them to differentiate which proxies to use. The `.pac` contents is a
+JavaScript program that gets invoked by the browser and that returns the name
+of the proxy to connect to. Since curl does not support JavaScript, it cannot
+support .pac proxy configuration either.
 
 Some workarounds usually suggested to overcome this JavaScript dependency:
 
@@ -601,7 +600,7 @@ URL syntax which for SFTP might look similar to:
 
     curl -O -u user:password sftp://example.com/~/file.txt
 
-and for SCP it is just a different protocol prefix:
+and for SCP it is a different protocol prefix:
 
     curl -O -u user:password scp://example.com/~/file.txt
 
@@ -624,7 +623,7 @@ the protocol part with a space as in `" https://example.com/"`.
 In normal circumstances, `-X` should hardly ever be used.
 
 By default you use curl without explicitly saying which request method to use
-when the URL identifies an HTTP transfer. If you just pass in a URL like `curl
+when the URL identifies an HTTP transfer. If you pass in a URL like `curl
 https://example.com` it will use GET. If you use `-d` or `-F`, curl will use
 POST, `-I` will cause a HEAD and `-T` will make it a PUT.
 
@@ -929,7 +928,7 @@ In either case, curl should now be looking for the correct file.
 
 Unplugging a cable is not an error situation. The TCP/IP protocol stack was
 designed to be fault tolerant, so even though there may be a physical break
-somewhere the connection should not be affected, just possibly delayed.
+somewhere the connection should not be affected, but possibly delayed.
 Eventually, the physical break will be fixed or the data will be re-routed
 around the physical problem through another path.
 
@@ -1033,7 +1032,7 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 
 ## How do I fetch multiple files with libcurl?
 
-libcurl has excellent support for transferring multiple files. You should just
+libcurl has excellent support for transferring multiple files. You should
 repeatedly set new URLs with `curl_easy_setopt()` and then transfer it with
 `curl_easy_perform()`. The handle you get from curl_easy_init() is not only
 reusable, but you are even encouraged to reuse it if you can, as that will
@@ -1274,8 +1273,8 @@ never exposed to the outside.
 # License
 
 curl and libcurl are released under an MIT/X derivative license. The license
-is liberal and should not impose a problem for your project. This section is
-just a brief summary for the cases we get the most questions.
+is liberal and should not impose a problem for your project. This section is a
+brief summary for the cases we get the most questions.
 
 We are not lawyers and this is not legal advice. You should probably consult
 one if you want true and accurate legal insights without our prejudice. Note
@@ -1384,8 +1383,8 @@ PHP/CURL was initially written by Sterling Hughes.
 
 Yes.
 
-After a transfer, you just set new options in the handle and make another
-transfer. This will make libcurl reuse the same connection if it can.
+After a transfer, you set new options in the handle and make another transfer.
+This will make libcurl reuse the same connection if it can.
 
 ## Does PHP/CURL have dependencies?
 

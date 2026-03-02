@@ -38,8 +38,8 @@ still running easy handles within the multi handle. When this number reaches
 zero, all transfers are complete/done.
 
 Force libcurl to (re-)check all its internal sockets and transfers instead of
-just a single one by calling curl_multi_socket_all(3). Note that there should
-not be any reason to use this function.
+a single one by calling curl_multi_socket_all(3). Note that there should not
+be any reason to use this function.
 
 # %PROTOCOLS%
 

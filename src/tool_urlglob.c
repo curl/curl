@@ -492,8 +492,8 @@ CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
                   FILE *error)
 {
   /*
-   * We can deal with any-size, just make a buffer with the same length
-   * as the specified URL!
+   * We can deal with any-size, make a buffer with the same length as the
+   * specified URL!
    */
   curl_off_t amount = 0;
   CURLcode result;

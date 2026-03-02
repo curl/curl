@@ -187,8 +187,8 @@ If the hostname is a numeric IPv6 address, this field might also be set.
 
 ## CURLUPART_PORT
 
-A port cannot be URL decoded on get. This number is returned in a string just
-like all other parts. That string is guaranteed to hold a valid port number in
+A port cannot be URL decoded on get. This number is returned in a string like
+all other parts. That string is guaranteed to hold a valid port number in
 ASCII using base 10.
 
 ## CURLUPART_PATH

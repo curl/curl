@@ -27,8 +27,8 @@ tests/http/test_01_basic.py .....
 
 Pytest takes arguments. `-v` increases its verbosity and can be used several
 times. `-k <expr>` can be used to run only matching test cases. The `expr` can
-be something resembling a python test or just a string that needs to match
-test cases in their names.
+be something resembling a python test or a string that needs to match test
+cases in their names.
 
 ```sh
 curl/tests/http> pytest -vv -k test_01_02
@@ -138,8 +138,8 @@ left behind.
 
 Tests making use of these fixtures have them in their parameter list. This
 tells pytest that a particular test needs them, so it has to create them.
-Since one can invoke pytest for just a single test, it is important that a
-test references the ones it needs.
+Since one can invoke pytest for a single test, it is important that a test
+references the ones it needs.
 
 All test cases start with `test_` in their name. We use a double number scheme
 to group them. This makes it ease to run only specific tests and also give a

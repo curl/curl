@@ -20,8 +20,8 @@ of `llist.c`). Use the functions.
 initialized with a call to `Curl_llist_init()` before it can be used
 
 To clean up a list, call `Curl_llist_destroy()`. Since the linked lists
-themselves do not allocate memory, it can also be fine to just *not* clean up
-the list.
+themselves do not allocate memory, it can also be fine to *not* clean up the
+list.
 
 ## Add a node
 

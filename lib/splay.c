@@ -241,7 +241,7 @@ int Curl_splayremove(struct Curl_tree *t,
      to remove, as otherwise we might be trying to remove a node that
      is not actually in the tree.
 
-     We cannot just compare the keys here as a double remove in quick
+     We cannot compare the keys here as a double remove in quick
      succession of a node with key != SPLAY_SUBNODE && same != NULL
      could return the same key but a different node. */
   DEBUGASSERT(t == removenode);
@@ -252,7 +252,7 @@ int Curl_splayremove(struct Curl_tree *t,
      remove the root node of a list of nodes with identical keys. */
   x = t->samen;
   if(x != t) {
-    /* 'x' is the new root node, we just make it use the root node's
+    /* 'x' is the new root node, we make it use the root node's
        smaller/larger links */
 
     x->key = t->key;

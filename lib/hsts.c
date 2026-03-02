@@ -206,7 +206,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   /* check if it already exists */
   sts = Curl_hsts(h, hostname, hlen, FALSE);
   if(sts) {
-    /* just update these fields */
+    /* update these fields */
     sts->expires = expires;
     sts->includeSubDomains = subdomains;
   }
@@ -456,7 +456,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
       e.namelen = sizeof(buffer) - 1;
       e.includeSubDomains = FALSE; /* default */
       e.expire[0] = 0;
-      e.name[0] = 0; /* just to make it clean */
+      e.name[0] = 0; /* to make it clean */
       sc = data->set.hsts_read(data, &e, data->set.hsts_read_userp);
       if(sc == CURLSTS_OK) {
         time_t expires = 0;

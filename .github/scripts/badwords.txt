@@ -82,6 +82,7 @@ file names\b:filenames
 \b([02-9]|[1-9][0-9]+) bit\b: NN-bit
 [0-9]+-bits:NN bits or NN-bit
 \bvery\b:rephrase using an alternative word
+\bjust\b:rephrase using an alternative word
 \bCurl\b=curl
 \bcURL\b=curl
 \bLibcurl\b=libcurl

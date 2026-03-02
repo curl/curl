@@ -421,7 +421,7 @@ UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
     memcpy(certname_place, param_place, span);
     param_place += span;
     certname_place += span;
-    /* we just ate all the non-special chars. now we are on either a special
+    /* we ate all the non-special chars. now we are on either a special
      * char or the end of the string. */
     switch(*param_place) {
     case '\0':
@@ -1270,7 +1270,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
     } /* file done */
   }
   else {
-    /* Simple case: just a string, with a keyword */
+    /* Simple case: a string, with a keyword */
     err = getstr(&config->ech, nextarg, DENY_BLANK);
   }
   return err;
@@ -1415,7 +1415,7 @@ static ParameterError parse_quote(struct OperationConfig *config,
     err = add2list(&config->postquote, nextarg);
     break;
   case '+':
-    /* prefixed with a plus makes it a just-before-transfer one */
+    /* prefixed with a plus makes it an immediately-before-transfer one */
     nextarg++;
     err = add2list(&config->prequote, nextarg);
     break;
@@ -3115,7 +3115,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
     else {
       bool used;
 
-      /* Just add the URL please */
+      /* add the URL please */
       err = getparameter("--url", orig_opt, &used, config, 0);
     }
 

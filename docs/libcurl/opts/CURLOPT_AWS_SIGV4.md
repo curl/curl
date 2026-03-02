@@ -62,8 +62,8 @@ Example with "Test:Try", when curl uses the algorithm, it generates
 for "date", **"test4_request"** for "request type",
 **"SignedHeaders=content-type;host;x-try-date"** for "signed headers"
 
-If you use just "test", instead of "test:try", test is used for every
-generated string.
+If you use "test", instead of "test:try", test is used for every generated
+string.
 
 Setting CURLOPT_HTTPAUTH(3) with the CURLAUTH_AWS_SIGV4 bit set is the same as
 setting this option with a **"aws:amz"** parameter.

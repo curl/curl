@@ -193,7 +193,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       done = FALSE;
       break;
     case Z_BUF_ERROR:
-      /* No more data to flush: just exit loop. */
+      /* No more data to flush: exit loop. */
       break;
     case Z_STREAM_END:
       result = process_trailer(data, zp);

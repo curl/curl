@@ -224,7 +224,7 @@ static int parsefmt(const char *format,
             /* illegal combo */
             return PFMT_DOLLAR;
 
-          /* we got no positional, just get the next arg */
+          /* we got no positional, get the next arg */
           param = -1;
           use_dollar = DOLLAR_NOPE;
         }
@@ -938,7 +938,7 @@ static bool out_pointer(void *userp,
  * All output is sent to the 'stream()' callback, one byte at a time.
  */
 
-static int formatf(void *userp, /* untouched by format(), just sent to the
+static int formatf(void *userp, /* untouched by format(), sent to the
                                    stream() function in the second argument */
                    /* function pointer called for each output character */
                    int (*stream)(unsigned char, void *),
@@ -972,7 +972,7 @@ static int formatf(void *userp, /* untouched by format(), just sent to the
         done++;
       }
       if(optr->flags & FLAGS_SUBSTR)
-        /* this is just a substring */
+        /* this is a substring */
         continue;
     }
 

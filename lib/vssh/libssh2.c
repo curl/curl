@@ -1289,7 +1289,7 @@ static CURLcode sftp_download_stat(struct Curl_easy *data,
      (attrs.filesize == 0)) {
     /*
      * libssh2_sftp_open() did not return an error, so maybe the server
-     * just does not support stat()
+     * does not support stat()
      * OR the server does not return a file size with a stat()
      * OR file size is 0
      */

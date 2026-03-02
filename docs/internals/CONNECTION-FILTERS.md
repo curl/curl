@@ -41,8 +41,7 @@ Curl_write(data, buffer)
 
 While connection filters all do different things, they look the same from the
 "outside". The code in `data` and `conn` does not really know **which**
-filters are installed. `conn` just writes into the first filter, whatever that
-is.
+filters are installed. `conn` writes into the first filter, whatever that is.
 
 Same is true for filters. Each filter has a pointer to the `next` filter. When
 SSL has encrypted the data, it does not write to a socket, it writes to the
@@ -135,7 +134,7 @@ do *not* use an http proxy, or socks, or https is lower.
 
 As to transfer efficiency, writing and reading through a filter comes at near
 zero cost *if the filter does not transform the data*. An http proxy or socks
-filter, once it is connected, just passes the calls through. Those filters
+filter, once it is connected, passes the calls through. Those filters
 implementations look like this:
 
 ```c
@@ -277,7 +276,7 @@ connect (in time), it is torn down and another one is created for the next
 address. This keeps the `TCP` filter simple.
 
 The `HAPPY-EYEBALLS` on the other hand stays focused on its side of the
-problem. We can use it also to make other type of connection by just giving it
+problem. We can use it also to make other type of connection by giving it
 another filter type to try to have happy eyeballing for QUIC:
 
 ```

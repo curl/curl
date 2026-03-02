@@ -254,10 +254,10 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 #if 0
       DEBUGF(infof(data, "dl_rlimit, available=%" FMT_OFF_T, dl_avail));
 #endif
-      /* In case of rate limited downloads: if this loop already got
-       * data and less than 16k is left in the limit, break out.
-       * We want to stutter a bit to keep in the limit, but too small
-       * receives will just cost cpu unnecessarily. */
+      /* In case of rate limited downloads: if this loop already got data and
+       * less than 16k is left in the limit, break out. We want to stutter a
+       * bit to keep in the limit, but too small receives will cost cpu
+       * unnecessarily. */
       if(dl_avail <= 0) {
         rate_limited = TRUE;
         break;
@@ -406,7 +406,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
   }
   else {
     /*
-     * The transfer has been performed. Just make some general checks before
+     * The transfer has been performed. Make some general checks before
      * returning.
      */
     if(!(data->req.no_body) && (k->size != -1) &&
@@ -666,11 +666,10 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
       return CURLE_OUT_OF_MEMORY;
 
     connclose(conn, "retry"); /* close this connection */
-    conn->bits.retry = TRUE; /* mark this as a connection we are about
-                                to retry. Marking it this way should
-                                prevent i.e HTTP transfers to return
-                                error just because nothing has been
-                                transferred! */
+    conn->bits.retry = TRUE; /* mark this as a connection we are about to
+                                retry. Marking it this way should prevent i.e
+                                HTTP transfers to return error because nothing
+                                has been transferred! */
     Curl_creader_set_rewind(data, TRUE);
   }
   return CURLE_OK;
@@ -704,9 +703,9 @@ static void xfer_setup(
   k->shutdown = FALSE;
   k->shutdown_err_ignore = FALSE;
 
-  /* The code sequence below is placed in this function just because all
-     necessary input is not always known in do_complete() as this function may
-     be called after that */
+  /* The code sequence below is placed in this function because all necessary
+     input is not always known in do_complete() as this function may be called
+     after that */
   if(!k->header && (recv_size > 0))
     Curl_pgrsSetDownloadSize(data, recv_size);
 

@@ -210,9 +210,8 @@ typedef struct md4_ctx MD4_CTX;
  * SET reads 4 input bytes in little-endian byte order and stores them
  * in a properly aligned word in host byte order.
  *
- * The check for little-endian architectures that tolerate unaligned
- * memory accesses is just an optimization. Nothing will break if it
- * does not work.
+ * The check for little-endian architectures that tolerate unaligned memory
+ * accesses is an optimization. Nothing will break if it does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD4_SET(n) (*(const uint32_t *)(const void *)&ptr[(n) * 4])

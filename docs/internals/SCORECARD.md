@@ -43,7 +43,7 @@ curl> python3 tests/http/scorecard.py -h
 
 Apart from `-d/--downloads` there is `-u/--uploads` and `-r/--requests`. These
 are run with a variation of resource sizes and parallelism by default. You can
-specify these in some way if you are just interested in a particular case.
+specify these in some way if you are interested in a particular case.
 
 For example, to run downloads of a 1 MB resource only, 100 times with at max 6
 parallel transfers, use:

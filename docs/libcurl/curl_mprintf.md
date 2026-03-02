@@ -159,14 +159,14 @@ An optional precision in the form of a period ('.') followed by an optional
 decimal digit string. Instead of a decimal digit string one may write "*" or
 "*m$" (for some decimal integer m) to specify that the precision is given in
 the next argument, or in the *m-th* argument, respectively, which must be of
-type int. If the precision is given as just '.', the precision is taken to be
-zero. A negative precision is taken as if the precision were omitted. This
-gives the minimum number of digits to appear for **d**, **i**, **o**,
-**u**, **x**, and **X** conversions, the number of digits to appear
-after the radix character for **a**, **A**, **e**, **E**, **f**, and
-**F** conversions, the maximum number of significant digits for **g** and
-**G** conversions, or the maximum number of characters to be printed from a
-string for **s** and **S** conversions.
+type int. If the precision is given as a single '.', the precision is taken to
+be zero. A negative precision is taken as if the precision were omitted. This
+gives the minimum number of digits to appear for **d**, **i**, **o**, **u**,
+**x**, and **X** conversions, the number of digits to appear after the radix
+character for **a**, **A**, **e**, **E**, **f**, and **F** conversions, the
+maximum number of significant digits for **g** and **G** conversions, or the
+maximum number of characters to be printed from a string for **s** and **S**
+conversions.
 
 # Length modifier
 

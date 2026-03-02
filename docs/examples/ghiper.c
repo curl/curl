@@ -177,7 +177,7 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
           timeout_ms, timeout.tv_sec, timeout.tv_usec);
 
   /*
-   * if timeout_ms is -1, just delete the timer
+   * if timeout_ms is -1, delete the timer
    *
    * For other values of timeout_ms, this should set or *update* the timer to
    * the new value

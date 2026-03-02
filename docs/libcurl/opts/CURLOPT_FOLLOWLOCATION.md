@@ -59,9 +59,9 @@ request the same way as the previous one; including the request body if one
 was provided.
 
 For users who think the existing location following is too naive, too simple
-or just lacks features, it is easy to instead implement your own redirect
-follow logic with the use of curl_easy_getinfo(3)'s CURLINFO_REDIRECT_URL(3)
-option instead of using CURLOPT_FOLLOWLOCATION(3).
+or lacking features, it is easy to instead implement your own redirect follow
+logic with the use of curl_easy_getinfo(3)'s CURLINFO_REDIRECT_URL(3) option
+instead of using CURLOPT_FOLLOWLOCATION(3).
 
 By default, libcurl only sends `Authorization:` or explicitly set `Cookie:`
 headers to the initial host given in the original URL, to avoid leaking
@@ -77,9 +77,9 @@ Pick one of the following modes:
 
 ## CURLFOLLOW_ALL (1)
 
-Before 8.13.0 this bit had no name and 1L was just the value to enable this
-option. This makes a set custom method be used in all HTTP requests, even
-after redirects.
+Before 8.13.0 this bit had no name and 1L was the value to enable this option.
+This makes a set custom method be used in all HTTP requests, even after
+redirects.
 
 ## CURLFOLLOW_OBEYCODE (2)
 

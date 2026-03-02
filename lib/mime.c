@@ -310,7 +310,7 @@ static curl_off_t encoder_nop_size(curl_mimepart *part)
   return part->datasize;
 }
 
-/* 7-bit encoder: the encoder is just a data validity check. */
+/* 7-bit encoder: the encoder is a data validity check. */
 static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part)
 {

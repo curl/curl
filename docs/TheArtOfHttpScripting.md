@@ -61,9 +61,9 @@ receives. Use it like this:
 
 ## See the Timing
 
-Many times you may wonder what exactly is taking all the time, or you just
-want to know the amount of milliseconds between two points in a transfer. For
-those, and other similar situations, the
+Many times you may wonder what exactly is taking all the time, or you want to
+know the amount of milliseconds between two points in a transfer. For those,
+and other similar situations, the
 [`--trace-time`](https://curl.se/docs/manpage.html#--trace-time) option is
 what you need. It prepends the time to each trace output line:
 
@@ -145,9 +145,9 @@ to use forms and cookies instead.
 
 ## Path part
 
-The path part is just sent off to the server to request that it sends back
-the associated response. The path is what is to the right side of the slash
-that follows the hostname and possibly port number.
+The path part is sent off to the server to request that it sends back the
+associated response. The path is what is to the right side of the slash that
+follows the hostname and possibly port number.
 
 # Fetch a page
 
@@ -182,9 +182,8 @@ actual body in the HEAD response.
 ## Multiple URLs in a single command line
 
 A single curl command line may involve one or many URLs. The most common case
-is probably to just use one, but you can specify any amount of URLs. Yes any.
-No limits. You then get requests repeated over and over for all the given
-URLs.
+is probably to use one, but you can specify any amount of URLs. Yes any. No
+limits. You then get requests repeated over and over for all the given URLs.
 
 Example, send two GET requests:
 
@@ -232,7 +231,7 @@ entered address on a map or using the info as a login-prompt verifying that
 the user is allowed to see what it is about to see.
 
 Of course there has to be some kind of program on the server end to receive
-the data you send. You cannot just invent something out of the air.
+the data you send. You cannot invent something out of the air.
 
 ## GET
 
@@ -257,8 +256,7 @@ the second page you get becomes
 
 Most search engines work this way.
 
-To make curl do the GET form post for you, just enter the expected created
-URL:
+To make curl do the GET form post for you, enter the expected created URL:
 
     curl "https://www.example.com/when/junk.cgi?birthyear=1905&press=OK"
 
@@ -328,8 +326,8 @@ To post to a form like this with curl, you enter a command line like:
 
 A common way for HTML based applications to pass state information between
 pages is to add hidden fields to the forms. Hidden fields are already filled
-in, they are not displayed to the user and they get passed along just as all
-the other fields.
+in, they are not displayed to the user and they get passed along as all the
+other fields.
 
 A similar example form with one visible field, one hidden field and one
 submit button could look like:
@@ -498,11 +496,11 @@ JavaScript to do it.
 
 ## Cookie Basics
 
-The way the web browsers do "client side state control" is by using
-cookies. Cookies are just names with associated contents. The cookies are
-sent to the client by the server. The server tells the client for what path
-and hostname it wants the cookie sent back, and it also sends an expiration
-date and a few more properties.
+The way the web browsers do "client side state control" is by using cookies.
+Cookies are names with associated contents. The cookies are sent to the client
+by the server. The server tells the client for what path and hostname it wants
+the cookie sent back, and it also sends an expiration date and a few more
+properties.
 
 When a client communicates with a server with a name and path as previously
 specified in a received cookie, the client sends back the cookies and their
@@ -646,9 +644,9 @@ body etc.
 
 ## Some login tricks
 
-While not strictly just HTTP related, it still causes a lot of people
-problems so here's the executive run-down of how the vast majority of all
-login forms work and how to login to them using curl.
+While not strictly HTTP related, it still causes a lot of people problems so
+here's the executive run-down of how the vast majority of all login forms work
+and how to login to them using curl.
 
 It can also be noted that to do this properly in an automated fashion, you
 most certainly need to script things and do multiple curl invokes etc.

@@ -112,7 +112,7 @@ add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
 target_link_libraries(curlinfo PRIVATE ${CURL_LIBS})
 set_target_properties(curlinfo PROPERTIES UNITY_BUILD OFF)
 
-# special libcurltool library just for unittests
+# special libcurltool library for unittests
 add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES} ${_curlx_cfiles_lib} ${_curlx_hfiles_lib})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PUBLIC ${CURL_LIBS})
