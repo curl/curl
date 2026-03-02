@@ -702,15 +702,15 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai,
+                             struct Curl_sockaddr_ex *addr,
                              uint8_t transport)
 {
   (void)transport;
   DEBUGASSERT(transport == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
+  return Curl_cf_ngtcp2_create(pcf, data, conn, addr);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_create(pcf, data, conn, ai);
+  return Curl_cf_quiche_create(pcf, data, conn, addr);
 #else
   *pcf = NULL;
   (void)data;

@@ -1,0 +1,69 @@
+#ifndef HEADER_CURL_CF_RESOLV_H
+#define HEADER_CURL_CF_RESOLV_H
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+#include "curl_setup.h"
+
+struct Curl_easy;
+struct connectdata;
+struct Curl_dns_entry;
+struct Curl_addrinfo;
+
+CURLcode Curl_cf_resolv_add(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            int sockindex,
+                            uint8_t transport,
+                            struct Curl_dns_entry *dns);
+
+CURLcode Curl_cf_resolv_insert_after(struct Curl_cfilter *cf_at,
+                                     struct Curl_easy *data,
+                                     const char *hostname,
+                                     uint16_t port,
+                                     uint8_t ip_version,
+                                     uint8_t transport);
+
+CURLcode Curl_conn_resolv_result(struct connectdata *conn, int sockindex);
+CURLcode Curl_cf_resolv_result(struct Curl_cfilter *cf);
+
+
+const struct Curl_addrinfo *
+Curl_conn_resolv_get_ai(struct connectdata *conn,
+                        int sockindex,
+                        int family,
+                        unsigned int index);
+
+const struct Curl_addrinfo *
+Curl_cf_resolv_get_ai(struct Curl_cfilter *cf,
+                      int family,
+                      unsigned int index);
+
+#ifdef USE_HTTPSRR
+const struct Curl_https_rrinfo *
+Curl_conn_resolv_get_https(struct connectdata *conn, int sockindex);
+#endif
+
+
+extern struct Curl_cftype Curl_cft_resolv;
+
+#endif /* HEADER_CURL_CF_RESOLV_H */

@@ -111,7 +111,6 @@ void Curl_conncontrol(struct connectdata *conn,
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
                                     uint8_t transport,
-                                    struct Curl_dns_entry *dns,
                                     int ssl_mode);
 
 /**
@@ -127,6 +126,15 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 /* Set conn to allow multiplexing. */
 void Curl_conn_set_multiplex(struct connectdata *conn);
+
+#ifdef USE_UNIX_SOCKETS
+#ifndef CURL_DISABLE_PROXY
+#define UNIX_SOCKET_PREFIX "localhost"
+#endif
+const char *Curl_conn_get_unix_path(struct connectdata *conn);
+#else
+#define Curl_conn_get_unix_path(c)      NULL
+#endif
 
 extern struct Curl_cftype Curl_cft_setup;
 

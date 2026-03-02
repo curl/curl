@@ -60,6 +60,10 @@ struct Curl_sockaddr_ex {
 CURLcode Curl_parse_interface(const char *input,
                               char **dev, char **iface, char **host);
 
+CURLcode Curl_socket_addr_from_ai(struct Curl_sockaddr_ex *addr,
+                                  const struct Curl_addrinfo *ai,
+                                  uint8_t transport);
+
 /*
  * Create a socket based on info from 'conn' and 'ai'.
  *
@@ -91,7 +95,7 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
 CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai,
+                            struct Curl_sockaddr_ex *addr,
                             uint8_t transport);
 
 /**
@@ -104,7 +108,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
 CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai,
+                            struct Curl_sockaddr_ex *addr,
                             uint8_t transport);
 
 /**
@@ -117,7 +121,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
 CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai,
+                             struct Curl_sockaddr_ex *addr,
                              uint8_t transport);
 
 /**

@@ -133,10 +133,6 @@ static void data_priority_cleanup(struct Curl_easy *data);
 # error READBUFFER_SIZE is too small
 #endif
 
-#if !defined(CURL_DISABLE_PROXY) && defined(USE_UNIX_SOCKETS)
-#define UNIX_SOCKET_PREFIX "localhost"
-#endif
-
 /* Reject URLs exceeding this length */
 #define MAX_URL_LEN 0xffff
 
@@ -3055,84 +3051,6 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
   return result;
 }
 
-/*************************************************************
- * Resolve the address of the server or proxy
- *************************************************************/
-static CURLcode resolve_server(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               struct Curl_dns_entry **pdns)
-{
-  struct hostname *ehost;
-  uint16_t eport;
-  timediff_t timeout_ms = Curl_timeleft_ms(data);
-  const char *peertype = "host";
-  CURLcode result;
-
-  *pdns = NULL;
-
-#ifdef USE_UNIX_SOCKETS
-  {
-    const char *unix_path = conn->unix_domain_socket;
-
-#ifndef CURL_DISABLE_PROXY
-    if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
-       !strncmp(UNIX_SOCKET_PREFIX "/",
-                conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
-      unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
-#endif
-
-    if(unix_path) {
-      /* This only works if previous transport is TRNSPRT_TCP. Check it? */
-      conn->transport_wanted = TRNSPRT_UNIX;
-      return Curl_resolv_unix(data, unix_path,
-                              (bool)conn->bits.abstract_unix_socket, pdns);
-    }
-  }
-#endif
-
-#ifndef CURL_DISABLE_PROXY
-  if(CONN_IS_PROXIED(conn)) {
-    ehost = conn->bits.socksproxy ? &conn->socks_proxy.host :
-      &conn->http_proxy.host;
-    eport = conn->bits.socksproxy ? conn->socks_proxy.port :
-      conn->http_proxy.port;
-    peertype = "proxy";
-  }
-  else
-#endif
-  {
-    ehost = conn->bits.conn_to_host ? &conn->conn_to_host : &conn->host;
-    /* If not connecting via a proxy, extract the port from the URL, if it is
-     * there, thus overriding any defaults that might have been set above. */
-    eport = conn->bits.conn_to_port ?
-            conn->conn_to_port : (uint16_t)conn->remote_port;
-  }
-
-  /* Resolve target host right on */
-  result = Curl_resolv(data, ehost->name, eport, conn->ip_version,
-                       SOCK_STREAM, timeout_ms, pdns);
-  DEBUGASSERT(!result || !*pdns);
-  if(!result) { /* resolved right away, either sync or from dnscache */
-    DEBUGASSERT(*pdns);
-    return CURLE_OK;
-  }
-  else if(result == CURLE_AGAIN) { /* async resolv in progress */
-    return CURLE_AGAIN;
-  }
-  else if(result == CURLE_OPERATION_TIMEDOUT) { /* took too long */
-    failf(data, "Failed to resolve %s '%s' with timeout after %"
-          FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
-          curlx_ptimediff_ms(Curl_pgrs_now(data),
-                             &data->progress.t_startsingle));
-    return CURLE_OPERATION_TIMEDOUT;
-  }
-  else {
-    DEBUGASSERT(result);
-    failf(data, "Could not resolve %s: %s", peertype, ehost->dispname);
-    return result;
-  }
-}
-
 static void url_move_hostname(struct hostname *dest, struct hostname *src)
 {
   Curl_safefree(dest->rawalloc);
@@ -3378,6 +3296,10 @@ static CURLcode url_create_needle(struct Curl_easy *data,
     needle->recv[SECONDARYSOCKET] = Curl_cf_recv;
     needle->send[SECONDARYSOCKET] = Curl_cf_send;
     needle->bits.tcp_fastopen = data->set.tcp_fastopen;
+#ifdef USE_UNIX_SOCKETS
+    if(Curl_conn_get_unix_path(needle))
+      needle->transport_wanted = TRNSPRT_UNIX;
+#endif
   }
 
 out:
@@ -3600,41 +3522,13 @@ out:
   return result;
 }
 
-/* Curl_setup_conn() is called after the name resolve initiated in
- * create_conn() is all done.
- *
- * Curl_setup_conn() also handles reused connections
- */
-CURLcode Curl_setup_conn(struct Curl_easy *data,
-                         struct Curl_dns_entry *dns,
-                         bool *protocol_done)
-{
-  CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
-
-  DEBUGASSERT(dns);
-  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
-
-  if(!conn->bits.reuse)
-    result = Curl_conn_setup(data, conn, FIRSTSOCKET, dns,
-                             CURL_CF_SSL_DEFAULT);
-  if(!result)
-    result = Curl_headers_init(data);
-
-  /* not sure we need this flag to be passed around any more */
-  *protocol_done = FALSE;
-  return result;
-}
-
 CURLcode Curl_connect(struct Curl_easy *data,
-                      bool *asyncp,
-                      bool *protocol_done)
+                      bool *pconnected)
 {
   CURLcode result;
   struct connectdata *conn;
 
-  *asyncp = FALSE; /* assume synchronous resolves by default */
-  *protocol_done = FALSE;
+  *pconnected = FALSE;
 
   /* Set the request to virgin state based on transfer settings */
   Curl_req_hard_reset(&data->req, data);
@@ -3643,44 +3537,31 @@ CURLcode Curl_connect(struct Curl_easy *data,
   result = url_find_or_create_conn(data);
   conn = data->conn;
 
-  if(result == CURLE_NO_CONNECTION_AVAILABLE) {
-    DEBUGASSERT(!conn);
-    return result;
+  if(result)
+    goto out;
+
+  DEBUGASSERT(conn);
+  Curl_pgrsTime(data, TIMER_POSTQUEUE);
+  if(conn->bits.reuse) {
+    if(conn->attached_xfers > 1)
+      /* multiplexed */
+      *pconnected = TRUE;
+  }
+  else if(conn->scheme->flags & PROTOPT_NONETWORK) {
+    Curl_pgrsTime(data, TIMER_NAMELOOKUP);
+    *pconnected = TRUE;
+  }
+  else {
+    result = Curl_conn_setup(data, conn, FIRSTSOCKET, NULL,
+                             CURL_CF_SSL_DEFAULT);
+    if(!result)
+      result = Curl_headers_init(data);
+    CURL_TRC_M(data, "Curl_setup_conn() -> %d", result);
   }
 
-  if(!result) {
-    DEBUGASSERT(conn);
-    Curl_pgrsTime(data, TIMER_POSTQUEUE);
-    if(conn->bits.reuse) {
-      if(conn->attached_xfers > 1)
-        /* multiplexed */
-        *protocol_done = TRUE;
-    }
-    else if(conn->scheme->flags & PROTOPT_NONETWORK) {
-      *asyncp = FALSE;
-      Curl_pgrsTime(data, TIMER_NAMELOOKUP);
-      *protocol_done = TRUE;
-    }
-    else {
-      /*************************************************************
-       * Resolve the address of the server or proxy
-       *************************************************************/
-      struct Curl_dns_entry *dns;
-      result = resolve_server(data, conn, &dns);
-      if(!result) {
-        DEBUGASSERT(dns);
-        /* DNS resolution is done: that is either because this is a reused
-           connection, in which case DNS was unnecessary, or because DNS
-           really did finish already (synch resolver/fast async resolve) */
-        result = Curl_setup_conn(data, dns, protocol_done);
-        Curl_dns_entry_unlink(data, &dns);
-      }
-      else if(result == CURLE_AGAIN) {
-        *asyncp = TRUE;
-        result = CURLE_OK;
-      }
-    }
-  }
+out:
+  if(result == CURLE_NO_CONNECTION_AVAILABLE)
+    DEBUGASSERT(!conn);
 
   if(result && conn) {
     /* We are not allowed to return failure with memory left allocated in the

@@ -27,6 +27,7 @@
 #include "transfer.h"
 #include "url.h"
 #include "cfilters.h"
+#include "cf-resolv.h"
 #include "connect.h"
 #include "progress.h"
 #include "curl_share.h"
@@ -140,7 +141,6 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     NULL,              /* PENDING */
     NULL,              /* SETUP */
     Curl_init_CONNECT, /* CONNECT */
-    NULL,              /* RESOLVING */
     NULL,              /* CONNECTING */
     NULL,              /* PROTOCONNECT */
     NULL,              /* PROTOCONNECTING */
@@ -1164,12 +1164,11 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
       /* nothing to poll for yet */
       break;
 
-    case MSTATE_RESOLVING:
-      result = Curl_resolv_pollset(data, ps);
-      break;
-
     case MSTATE_CONNECTING:
-      result = mstate_connecting_pollset(data, ps);
+      if(data->conn && !data->conn->bits.dns_resolved)
+        result = Curl_resolv_pollset(data, ps);
+      if(!result)
+        result = mstate_connecting_pollset(data, ps);
       break;
 
     case MSTATE_PROTOCONNECT:
@@ -1824,13 +1823,9 @@ static bool multi_handle_timeout(struct Curl_easy *data,
       since = data->progress.t_startsingle;
     else
       since = data->progress.t_startop;
-    if(data->mstate == MSTATE_RESOLVING)
-      failf(data, "Resolving timed out after %" FMT_TIMEDIFF_T
-            " milliseconds",
-            curlx_ptimediff_ms(Curl_pgrs_now(data), &since));
-    else if(data->mstate == MSTATE_CONNECTING)
-      failf(data, "Connection timed out after %" FMT_TIMEDIFF_T
-            " milliseconds",
+    if(data->mstate == MSTATE_CONNECTING)
+      failf(data, "%s timed out after %" FMT_TIMEDIFF_T " milliseconds",
+            data->conn->bits.dns_resolved ? "Connection" : "Resolving",
             curlx_ptimediff_ms(Curl_pgrs_now(data), &since));
     else {
       struct SingleRequest *k = &data->req;
@@ -2316,54 +2311,6 @@ static CURLMcode state_ratelimiting(struct Curl_easy *data,
   return mresult;
 }
 
-static CURLMcode state_resolving(struct Curl_multi *multi,
-                                 struct Curl_easy *data,
-                                 bool *stream_errorp,
-                                 CURLcode *resultp)
-{
-  struct Curl_dns_entry *dns = NULL;
-  CURLMcode mresult = CURLM_OK;
-  CURLcode result;
-
-  result = Curl_resolv_take_result(data, &dns);
-
-  /* Update sockets here, because the socket(s) may have been closed and the
-     application thus needs to be told, even if it is likely that the same
-     socket(s) will again be used further down. If the name has not yet been
-     resolved, it is likely that new sockets have been opened in an attempt to
-     contact another resolver. */
-  mresult = Curl_multi_ev_assess_xfer(multi, data);
-  if(mresult)
-    return mresult;
-
-  if(dns) {
-    bool connected;
-    /* Perform the next step in the connection phase, and then move on to the
-       WAITCONNECT state */
-    result = Curl_setup_conn(data, dns, &connected);
-    if(result) {
-      /* setup failed, terminate connection */
-      struct connectdata *conn = data->conn;
-      Curl_detach_connection(data);
-      Curl_conn_terminate(data, conn, TRUE);
-      goto out;
-    }
-
-    /* call again please so that we get the next socket setup */
-    mresult = CURLM_CALL_MULTI_PERFORM;
-    multistate(data, connected ? MSTATE_PROTOCONNECT : MSTATE_CONNECTING);
-  }
-
-out:
-  Curl_dns_entry_unlink(data, &dns);
-  if(result)
-    /* failure detected */
-    *stream_errorp = TRUE;
-
-  *resultp = result;
-  return mresult;
-}
-
 static CURLMcode state_connect(struct Curl_multi *multi,
                                struct Curl_easy *data,
                                CURLcode *resultp)
@@ -2371,9 +2318,8 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   /* Connect. We want to get a connection identifier filled in. This state can
      be entered from SETUP and from PENDING. */
   bool connected;
-  bool async;
   CURLMcode mresult = CURLM_OK;
-  CURLcode result = Curl_connect(data, &async, &connected);
+  CURLcode result = Curl_connect(data, &connected);
   if(result == CURLE_NO_CONNECTION_AVAILABLE) {
     /* There was no connection available. We will go to the pending state and
        wait for an available connection. */
@@ -2389,26 +2335,21 @@ static CURLMcode state_connect(struct Curl_multi *multi,
     process_pending_handles(data->multi);
 
   if(!result) {
-    if(async)
-      /* We are now waiting for an asynchronous name lookup */
-      multistate(data, MSTATE_RESOLVING);
-    else {
-      /* after the connect has been sent off, go WAITCONNECT unless the
-         protocol connect is already done and we can go directly to WAITDO or
-         DO! */
-      mresult = CURLM_CALL_MULTI_PERFORM;
+    /* after the connect has been sent off, go WAITCONNECT unless the
+       protocol connect is already done and we can go directly to WAITDO or
+       DO! */
+    mresult = CURLM_CALL_MULTI_PERFORM;
 
-      if(connected) {
-        if(!data->conn->bits.reuse &&
-           Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
-          /* new connection, can multiplex, wake pending handles */
-          process_pending_handles(data->multi);
-        }
-        multistate(data, MSTATE_PROTOCONNECT);
+    if(connected) {
+      if(!data->conn->bits.reuse &&
+         Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
+        /* new connection, can multiplex, wake pending handles */
+        process_pending_handles(data->multi);
       }
-      else {
-        multistate(data, MSTATE_CONNECTING);
-      }
+      multistate(data, MSTATE_PROTOCONNECT);
+    }
+    else {
+      multistate(data, MSTATE_CONNECTING);
     }
   }
   *resultp = result;
@@ -2457,7 +2398,7 @@ static CURLcode is_finished(struct Curl_multi *multi,
       return result;
     }
     /* if there is still a connection to use, call the progress function */
-    else if(data->conn) {
+    else if(data->conn && Curl_conn_is_connected(data->conn, FIRSTSOCKET)) {
       result = Curl_pgrsUpdate(data);
       if(result) {
         /* aborted due to progress callback return code must close the
@@ -2614,11 +2555,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       mresult = state_connect(multi, data, &result);
       break;
 
-    case MSTATE_RESOLVING:
-      /* awaiting an asynch name resolve to complete */
-      mresult = state_resolving(multi, data, &stream_error, &result);
-      break;
-
     case MSTATE_CONNECTING:
       /* awaiting a completion of an asynch TCP connect */
       DEBUGASSERT(data->conn);
@@ -2635,8 +2571,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
         else if(result) {
           /* failure detected */
-          multi_posttransfer(data);
-          multi_done(data, result, TRUE);
+          if(data->conn && data->conn->bits.dns_resolved) {
+            multi_posttransfer(data);
+            multi_done(data, result, TRUE);
+          }
           stream_error = TRUE;
           break;
         }

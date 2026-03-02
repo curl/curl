@@ -258,12 +258,12 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
 }
 
 /**
- * Assign the address `ai` to the Curl_sockaddr_ex `dest` and
- * set the transport used.
+ * Assign the addrinfo `ai` to the Curl_sockaddr_ex `addr` with
+ * transport determining socktype and protocol.
  */
-static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
-                                 const struct Curl_addrinfo *ai,
-                                 uint8_t transport)
+CURLcode Curl_socket_addr_from_ai(struct Curl_sockaddr_ex *addr,
+                                  const struct Curl_addrinfo *ai,
+                                  uint8_t transport)
 {
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -272,16 +272,16 @@ static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
    * will be used to pass / receive data to/from the fopensocket callback
    * if this has been set, before that, it is initialized from parameters.
    */
-  dest->family = ai->ai_family;
-  dest->socktype = Curl_socktype_for_transport(transport);
-  dest->protocol = Curl_protocol_for_transport(transport);
-  dest->addrlen = (unsigned int)ai->ai_addrlen;
+  addr->family = ai->ai_family;
+  addr->socktype = Curl_socktype_for_transport(transport);
+  addr->protocol = Curl_protocol_for_transport(transport);
+  addr->addrlen = (unsigned int)ai->ai_addrlen;
 
-  DEBUGASSERT(dest->addrlen <= sizeof(dest->curl_sa_addrbuf));
-  if(dest->addrlen > sizeof(dest->curl_sa_addrbuf))
+  DEBUGASSERT(addr->addrlen <= sizeof(addr->curl_sa_addrbuf));
+  if(addr->addrlen > sizeof(addr->curl_sa_addrbuf))
     return CURLE_TOO_LARGE;
 
-  memcpy(&dest->curl_sa_addrbuf, ai->ai_addr, dest->addrlen);
+  memcpy(&addr->curl_sa_addrbuf, ai->ai_addr, addr->addrlen);
   return CURLE_OK;
 }
 
@@ -393,7 +393,7 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
     /* if the caller does not want info back, use a local temp copy */
     addr = &dummy;
 
-  result = sock_assign_addr(addr, ai, transport);
+  result = Curl_socket_addr_from_ai(addr, ai, transport);
   if(result)
     return result;
 
@@ -881,18 +881,13 @@ struct cf_socket_ctx {
 };
 
 static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
-                                   const struct Curl_addrinfo *ai,
+                                   struct Curl_sockaddr_ex *addr,
                                    uint8_t transport)
 {
-  CURLcode result;
-
   memset(ctx, 0, sizeof(*ctx));
   ctx->sock = CURL_SOCKET_BAD;
   ctx->transport = transport;
-
-  result = sock_assign_addr(&ctx->addr, ai, transport);
-  if(result)
-    return result;
+  ctx->addr = *addr;
 
 #ifdef DEBUGBUILD
   {
@@ -923,7 +918,7 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   }
 #endif
 
-  return result;
+  return CURLE_OK;
 }
 
 static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -1690,7 +1685,7 @@ struct Curl_cftype Curl_cft_tcp = {
 CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai,
+                            struct Curl_sockaddr_ex *addr,
                             uint8_t transport)
 {
   struct cf_socket_ctx *ctx = NULL;
@@ -1700,7 +1695,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_TCP);
-  if(!ai) {
+  if(!addr) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
@@ -1711,7 +1706,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, ai, transport);
+  result = cf_socket_ctx_init(ctx, addr, transport);
   if(result)
     goto out;
 
@@ -1856,7 +1851,7 @@ struct Curl_cftype Curl_cft_udp = {
 CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai,
+                            struct Curl_sockaddr_ex *addr,
                             uint8_t transport)
 {
   struct cf_socket_ctx *ctx = NULL;
@@ -1872,7 +1867,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, ai, transport);
+  result = cf_socket_ctx_init(ctx, addr, transport);
   if(result)
     goto out;
 
@@ -1910,7 +1905,7 @@ struct Curl_cftype Curl_cft_unix = {
 CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai,
+                             struct Curl_sockaddr_ex *addr,
                              uint8_t transport)
 {
   struct cf_socket_ctx *ctx = NULL;
@@ -1926,7 +1921,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, ai, transport);
+  result = cf_socket_ctx_init(ctx, addr, transport);
   if(result)
     goto out;
 

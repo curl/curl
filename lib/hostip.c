@@ -111,73 +111,6 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-#ifdef CURLVERBOSE
-static void show_resolve_info(struct Curl_easy *data,
-                              struct Curl_dns_entry *dns)
-{
-  const struct Curl_addrinfo *a;
-  CURLcode result = CURLE_OK;
-#ifdef CURLRES_IPV6
-  struct dynbuf out[2];
-#else
-  struct dynbuf out[1];
-#endif
-  DEBUGASSERT(data);
-  DEBUGASSERT(dns);
-
-  if(!data->set.verbose ||
-     /* ignore no name or numerical IP addresses */
-     !dns->hostname[0] || Curl_host_is_ipnum(dns->hostname))
-    return;
-
-  a = dns->addr;
-
-  infof(data, "Host %s:%d was resolved.",
-        (dns->hostname[0] ? dns->hostname : "(none)"), dns->port);
-
-  curlx_dyn_init(&out[0], 1024);
-#ifdef CURLRES_IPV6
-  curlx_dyn_init(&out[1], 1024);
-#endif
-
-  while(a) {
-    if(
-#ifdef CURLRES_IPV6
-       a->ai_family == PF_INET6 ||
-#endif
-       a->ai_family == PF_INET) {
-      char buf[MAX_IPADR_LEN];
-      struct dynbuf *d = &out[(a->ai_family != PF_INET)];
-      Curl_printable_address(a, buf, sizeof(buf));
-      if(curlx_dyn_len(d))
-        result = curlx_dyn_addn(d, ", ", 2);
-      if(!result)
-        result = curlx_dyn_add(d, buf);
-      if(result) {
-        infof(data, "too many IP, cannot show");
-        goto fail;
-      }
-    }
-    a = a->ai_next;
-  }
-
-#ifdef CURLRES_IPV6
-  infof(data, "IPv6: %s",
-        (curlx_dyn_len(&out[1]) ? curlx_dyn_ptr(&out[1]) : "(none)"));
-#endif
-  infof(data, "IPv4: %s",
-        (curlx_dyn_len(&out[0]) ? curlx_dyn_ptr(&out[0]) : "(none)"));
-
-fail:
-  curlx_dyn_free(&out[0]);
-#ifdef CURLRES_IPV6
-  curlx_dyn_free(&out[1]);
-#endif
-}
-#else
-#define show_resolve_info(x, y) Curl_nop_stmt
-#endif
-
 /*
  * Curl_printable_address() stores a printable version of the 1st address
  * given in the 'ai' argument. The result will be stored in the buf that is
@@ -567,9 +500,6 @@ out:
     }
     else if(!*pdns)
       result = CURLE_AGAIN;
-
-    if(*pdns)
-      show_resolve_info(data, *pdns);
   }
   else if(*pdns)
     Curl_dns_entry_unlink(data, pdns);
@@ -660,8 +590,6 @@ out:
     result = Curl_dnscache_add(data, *pdns);
     if(result)
       Curl_dns_entry_unlink(data, pdns);
-    else
-      show_resolve_info(data, *pdns);
   }
 
   CURL_TRC_DNS(data, "hostip_resolv(%s:%u, ip=%x, timeout_ms=%" FMT_TIMEDIFF_T
@@ -756,9 +684,9 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
   /* This allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here.
      This technique has problems (see alarmfunc).
-     This should be the last thing we do before calling Curl_resolv(),
+     This should be the last thing we do before calling hostip_resolv(),
      as otherwise we would have to worry about variables that get modified
-     before we invoke Curl_resolv() (and thus use "volatile"). */
+     before we invoke hostip_resolv() (and thus use "volatile"). */
   curl_simple_lock_lock(&curl_jmpenv_lock);
 
   if(sigsetjmp(curl_jmpenv, 1)) {
@@ -939,8 +867,6 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data,
     result = Curl_dnscache_add(data, *pdns);
     if(result)
       Curl_dns_entry_unlink(data, pdns);
-    else
-      show_resolve_info(data, *pdns);
   }
   else if((result == CURLE_COULDNT_RESOLVE_HOST) ||
           (result == CURLE_COULDNT_RESOLVE_PROXY)) {

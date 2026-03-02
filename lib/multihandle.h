@@ -56,7 +56,6 @@ typedef enum {
   MSTATE_PENDING,      /* no connections, waiting for one */
   MSTATE_SETUP,        /* start a new transfer */
   MSTATE_CONNECT,      /* resolve/connect has been sent off */
-  MSTATE_RESOLVING,    /* awaiting the resolve to finalize */
   MSTATE_CONNECTING,   /* awaiting the TCP connect to finalize */
   MSTATE_PROTOCONNECT, /* initiate protocol connect procedure */
   MSTATE_PROTOCONNECTING, /* completing the protocol-specific connect phase */

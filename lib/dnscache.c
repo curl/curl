@@ -327,15 +327,7 @@ static CURLcode fetch_addr(struct Curl_easy *data,
   return result;
 }
 
-/*
- * Curl_dnscache_get() fetches a 'Curl_dns_entry' already in the DNS cache.
- *
- * Curl_resolv() checks initially and multi_runsingle() checks each time
- * it discovers the handle in the state WAITRESOLVE whether the hostname
- * has already been resolved and the address has already been stored in
- * the DNS cache. This short circuits waiting for a lot of pending
- * lookups for the same hostname requested by different handles.
- *
+/* Curl_dnscache_get() fetches a 'Curl_dns_entry' already in the DNS cache.
  * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
  *
  * The returned data *MUST* be "released" with Curl_dns_entry_unlink() after
@@ -625,10 +617,8 @@ struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
   }
 }
 
-/*
- * Curl_dns_entry_unlink() releases a reference to the given cached DNS entry.
- * When the reference count reaches 0, the entry is destroyed. It is important
- * that only one unlink is made for each Curl_resolv() call.
+/* Curl_dns_entry_unlink() releases a reference to the given cached DNS entry.
+ * When the reference count reaches 0, the entry is destroyed.
  *
  * May be called with 'data' == NULL for global cache.
  */

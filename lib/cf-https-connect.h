@@ -31,7 +31,6 @@ struct Curl_cfilter;
 struct Curl_easy;
 struct connectdata;
 struct Curl_cftype;
-struct Curl_dns_entry;
 
 extern struct Curl_cftype Curl_cft_http_connect;
 
@@ -42,8 +41,7 @@ CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
-                             int sockindex,
-                             struct Curl_dns_entry *dns);
+                             int sockindex);
 
 #endif /* !CURL_DISABLE_HTTP */
 #endif /* HEADER_CURL_CF_HTTP_H */
