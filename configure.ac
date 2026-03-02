@@ -485,7 +485,7 @@ Select from these:
   --with-amissl
   --with-gnutls
   --with-mbedtls
-  --with-openssl (also works for BoringSSL and LibreSSL)
+  --with-openssl (also works for AWS-LC, BoringSSL and LibreSSL)
   --with-rustls
   --with-schannel
   --with-wolfssl
