@@ -4190,7 +4190,6 @@ AC_CHECK_FUNCS([\
   sendmsg \
   setlocale \
   setrlimit \
-  snprintf \
   utime \
   utimes \
 ])
@@ -4200,6 +4199,7 @@ if test "$curl_cv_native_windows" != "yes"; then
     if_nametoindex \
     realpath \
     sched_yield \
+    snprintf \
   ])
   CURL_CHECK_FUNC_INET_NTOP
   CURL_CHECK_FUNC_INET_PTON
