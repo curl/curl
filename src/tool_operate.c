@@ -1359,8 +1359,8 @@ static CURLcode create_single(struct OperationConfig *config,
       global->isatty = orig_isatty;
     }
 
-    if(state->httpgetfields) {
-      result = append2query(config, per, state->httpgetfields);
+    if(config->httpgetfields) {
+      result = append2query(config, per, config->httpgetfields);
       if(result)
         return result;
     }
@@ -1406,17 +1406,15 @@ static CURLcode single_transfer(struct OperationConfig *config,
 {
   CURLcode result = CURLE_OK;
   struct State *state = &global->state;
-  char *httpgetfields = NULL;
+  char *httpgetfields = config->httpgetfields;
 
   *skipped = *added = FALSE; /* not yet */
-
-  state->httpgetfields = NULL;
 
   if(config->postfields) {
     if(config->use_httpget) {
       if(!httpgetfields) {
         /* Use the postfields data for an HTTP get */
-        httpgetfields = state->httpgetfields = config->postfields;
+        httpgetfields = config->httpgetfields = config->postfields;
         config->postfields = NULL;
         if(SetHTTPrequest((config->no_body ? TOOL_HTTPREQ_HEAD :
                            TOOL_HTTPREQ_GET), &config->httpreq))
@@ -1427,7 +1425,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       return CURLE_FAILED_INIT;
   }
   if(!httpgetfields)
-    state->httpgetfields = config->query;
+    config->httpgetfields = config->query;
 
   result = set_cert_types(config);
   if(result)
