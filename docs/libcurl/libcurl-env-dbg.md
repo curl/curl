@@ -176,7 +176,7 @@ gives the shutdown timeout in milliseconds.
 
 ## `CURL_DBG_RESOLV_MAX_THREADS`
 
-Overrides the maximum number of threads for resolvers.
+Overrides the maximum number of threads for resolver.
 
 ## `CURL_DBG_RESOLV_DELAY`
 

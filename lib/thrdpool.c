@@ -169,7 +169,6 @@ static CURLcode thrdslot_start(struct curl_thrdpool *tpool)
 
   tpool->refcount++;
   tslot->running = TRUE;
-  tslot->idle = TRUE;
   tslot->thread = Curl_thread_create(thrdslot_run, tslot);
   if(tslot->thread == curl_thread_t_null) { /* never started */
     tslot->running = FALSE;
