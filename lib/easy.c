@@ -825,9 +825,9 @@ CURLcode curl_easy_perform(CURL *curl)
  * curl_easy_perform_ev() is the external interface that performs a blocking
  * transfer using the event-based API internally.
  */
-CURLcode curl_easy_perform_ev(struct Curl_easy *data)
+CURLcode curl_easy_perform_ev(struct Curl_easy *easy)
 {
-  return easy_perform(data, TRUE);
+  return easy_perform(easy, TRUE);
 }
 #endif
 
