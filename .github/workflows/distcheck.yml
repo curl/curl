@@ -319,13 +319,6 @@ jobs:
       - name: 'via find_package (C++)'
         if: ${{ contains(matrix.image, 'ubuntu') }}
         run: TEST_CMAKE_FLAGS=-DTEST_CPP=ON ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
-      - name: 'via find_package (spec)'
-        if: ${{ contains(matrix.image, 'windows') }}
-        run: |
-          export TEST_CMAKE_FLAGS_PROVIDER='-DCURL_ZSTD=OFF'
-          export TEST_CMAKE_FLAGS_CONSUMER="${TEST_CMAKE_FLAGS_PROVIDER}"
-          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
-
       - name: 'via find_package (PREFER_CONFIG=ON)'
         if: ${{ contains(matrix.image, 'windows') }}
         run: |
