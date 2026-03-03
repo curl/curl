@@ -51,14 +51,8 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
-  X509 *cert = NULL;
-  BIO *bio = NULL;
-  BIO *kbio = NULL;
-  EVP_PKEY *pkey;
-  int ret;
-
-  const char *mypem =
-    /* replace the XXX with the actual CA certificate */
+  /* replace the XXX with the actual CA certificate */
+  static const char *mypem =
     "-----BEGIN CERTIFICATE-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
@@ -71,12 +65,19 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "-----END CERTIFICATE-----\n";
 
   /* replace the XXX with the actual private key */
-  const char *mykey =
+  static const char *mykey =
     "-----BEGIN PRIVATE KEY-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END PRIVATE KEY-----\n";
+
+  CURLcode result = CURLE_OK;
+  X509 *cert = NULL;
+  BIO *bio = NULL;
+  BIO *kbio = NULL;
+  EVP_PKEY *pkey;
+  int ret;
 
   (void)curl;
   (void)pointer;
@@ -85,38 +86,38 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   bio = BIO_new_mem_buf(mypem, -1);
 
   if(!bio) {
-    printf("BIO_new_mem_buf failed\n");
+    printf("BIO_new_mem_buf() failed\n");
   }
 
   /* use it to read the PEM formatted certificate from memory into an X509
-   * structure that SSL can use
-   */
+     structure that SSL can use. */
   cert = PEM_read_bio_X509(bio, NULL, 0, NULL);
   if(!cert) {
-    printf("PEM_read_bio_X509 failed...\n");
+    printf("PEM_read_bio_X509() failed\n");
   }
 
   /* tell SSL to use the X509 certificate */
   ret = SSL_CTX_use_certificate((SSL_CTX *)sslctx, cert);
   if(ret != 1) {
-    printf("Use certificate failed\n");
+    printf("SSL_CTX_use_certificate() failed\n");
   }
 
   /* create a bio for the private key */
   kbio = BIO_new_mem_buf(mykey, -1);
   if(!kbio) {
-    printf("BIO_new_mem_buf failed\n");
+    printf("BIO_new_mem_buf() failed\n");
   }
 
   pkey = PEM_read_bio_PrivateKey(kbio, NULL, NULL, NULL);
   if(!pkey) {
-    printf("Failed EVP_PKEY_new()\n");
+    printf("PEM_read_bio_PrivateKey() failed\n");
   }
 
   /* tell SSL to use the private key from memory */
   ret = SSL_CTX_use_PrivateKey((SSL_CTX *)sslctx, pkey);
   if(ret != 1) {
-    printf("Use Key failed\n");
+    printf("SSL_CTX_use_PrivateKey() failed\n");
+    result = CURLE_ABORTED_BY_CALLBACK;
   }
 
   /* free resources that have been allocated by OpenSSL functions */
@@ -133,7 +134,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     X509_free(cert);
 
   /* all set to go */
-  return CURLE_OK;
+  return result;
 }
 
 int main(void)

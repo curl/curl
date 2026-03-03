@@ -59,7 +59,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
   /** This example uses two (fake) certificates **/
   /* replace the XXX with the actual CA certificates */
-  static const char mypem[] =
+  static const char *mypem =
     "-----BEGIN CERTIFICATE-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
@@ -79,39 +79,50 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END CERTIFICATE-----\n";
 
-  BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
-  X509_STORE *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
-  ossl_valsize_t i;
+  CURLcode result = CURLE_OK;
+  X509_STORE *cts;
+  BIO *cbio;
   STACK_OF(X509_INFO) * inf;
 
   (void)curl;
   (void)pointer;
 
-  if(!cts || !cbio) {
+  cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  if(!cts) {
+    printf("SSL_CTX_get_cert_store() failed\n");
     return CURLE_ABORTED_BY_CALLBACK;
+  }
+
+  cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
+  if(!cbio) {
+    printf("BIO_new_mem_buf() failed\n");
   }
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
+  if(inf) {
+    ossl_valsize_t i;
 
-  if(!inf) {
+    for(i = 0; i < sk_X509_INFO_num(inf); i++) {
+      X509_INFO *itmp = sk_X509_INFO_value(inf, i);
+      if(itmp->x509) {
+        X509_STORE_add_cert(cts, itmp->x509);
+      }
+      if(itmp->crl) {
+        X509_STORE_add_crl(cts, itmp->crl);
+      }
+    }
+
+    sk_X509_INFO_pop_free(inf, X509_INFO_free);
+  }
+  else {
+    printf("PEM_X509_INFO_read_bio() failed\n");
+    result = CURLE_ABORTED_BY_CALLBACK;
+  }
+
+  if(cbio)
     BIO_free(cbio);
-    return CURLE_ABORTED_BY_CALLBACK;
-  }
 
-  for(i = 0; i < sk_X509_INFO_num(inf); i++) {
-    X509_INFO *itmp = sk_X509_INFO_value(inf, i);
-    if(itmp->x509) {
-      X509_STORE_add_cert(cts, itmp->x509);
-    }
-    if(itmp->crl) {
-      X509_STORE_add_crl(cts, itmp->crl);
-    }
-  }
-
-  sk_X509_INFO_pop_free(inf, X509_INFO_free);
-  BIO_free(cbio);
-
-  return CURLE_OK;
+  return result;
 }
 
 int main(void)
