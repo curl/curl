@@ -1333,18 +1333,18 @@ CURLcode curl_easy_upkeep(CURL *d)
   return Curl_cpool_upkeep(data);
 }
 
-CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
+CURLcode curl_easy_ssls_import(CURL *curl, const char *session_key,
                                const unsigned char *shmac, size_t shmac_len,
                                const unsigned char *sdata, size_t sdata_len)
 {
 #if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return Curl_ssl_session_import(data, session_key,
                                  shmac, shmac_len, sdata, sdata_len);
 #else
-  (void)d;
+  (void)curl;
   (void)session_key;
   (void)shmac;
   (void)shmac_len;
@@ -1354,17 +1354,17 @@ CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
 #endif
 }
 
-CURLcode curl_easy_ssls_export(CURL *d,
+CURLcode curl_easy_ssls_export(CURL *curl,
                                curl_ssls_export_cb *export_fn,
                                void *userptr)
 {
 #if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return Curl_ssl_session_export(data, export_fn, userptr);
 #else
-  (void)d;
+  (void)curl;
   (void)export_fn;
   (void)userptr;
   return CURLE_NOT_BUILT_IN;
