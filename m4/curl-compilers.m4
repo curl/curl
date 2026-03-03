@@ -851,7 +851,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
 
           dnl Only clang 2.9 or later
           if test "$compiler_num" -ge "209"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-conversion])
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=sign-conversion"
             tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         # Not used because we cannot change public structs
             tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"         # for typecheck-gcc.h with clang 14+, dependency headers
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
@@ -1099,7 +1100,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-parameter-type empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [clobbered ignored-qualifiers])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-conversion])
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=sign-conversion"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [vla])
             dnl required for -Warray-bounds, included in -Wall
             tmp_CFLAGS="$tmp_CFLAGS -ftree-vrp"
@@ -1159,6 +1161,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 10 or later
           if test "$compiler_num" -ge "1000"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [arith-conversion])
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=arith-conversion"  # extra hits with -Wsign-conversion
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [enum-conversion])
           fi
 
