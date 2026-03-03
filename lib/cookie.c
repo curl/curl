@@ -396,7 +396,7 @@ static CURLcode storecookie(struct Cookie *co, struct Curl_str *cp,
       /* No path was given in the header line, set the default */
       const char *endslash = strrchr(path, '/');
       if(endslash)
-        plen = (endslash - path + 1); /* include end slash */
+        plen = endslash - path + 1; /* include end slash */
       else
         plen = strlen(path);
     }
