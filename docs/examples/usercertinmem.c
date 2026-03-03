@@ -108,7 +108,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     printf("BIO_new_mem_buf failed\n");
   }
 
-  pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
+  pkey = PEM_read_bio_PrivateKey(kbio, NULL, NULL, NULL);
   if(!pkey) {
     printf("Failed EVP_PKEY_new()\n");
   }
