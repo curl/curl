@@ -311,6 +311,7 @@ static CURLcode ssl_ca_setopts(struct OperationConfig *config, CURL *curl)
     if(result == CURLE_NOT_BUILT_IN) {
       warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
+      result = CURLE_OK;
     }
   }
   if(!config->proxy_cacert && !config->proxy_capath) {
@@ -323,6 +324,7 @@ static CURLcode ssl_ca_setopts(struct OperationConfig *config, CURL *curl)
     if(result == CURLE_NOT_BUILT_IN) {
       warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
+      result = CURLE_OK;
     }
   }
 #endif
