@@ -13,8 +13,10 @@ Checks:
   - -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
   - -clang-diagnostic-nullability-extension
   - bugprone-assert-side-effect
+# - bugprone-assignment-in-if-condition
   - bugprone-chained-comparison
   - bugprone-dynamic-static-initializers
+  - bugprone-invalid-enum-default-initialization
   - bugprone-macro-parentheses
   - bugprone-macro-repeated-side-effects
   - bugprone-misplaced-operator-in-strlen-in-alloc
@@ -23,17 +25,26 @@ Checks:
   - bugprone-posix-return
   - bugprone-redundant-branch-condition
   - bugprone-signed-char-misuse
+  - bugprone-sizeof-expression
   - bugprone-suspicious-enum-usage
   - bugprone-suspicious-memset-usage
   - bugprone-suspicious-missing-comma
   - bugprone-suspicious-realloc-usage
   - bugprone-suspicious-semicolon
+# - bugprone-unchecked-string-to-number-conversion  # needs converting sscanf to strtol or curlx_str_*
   - misc-const-correctness
   - misc-header-include-cycle
+  - misc-redundant-expression
   - portability-*
   - readability-duplicate-include
+# - readability-else-after-return
+# - readability-enum-initial-value
+# - readability-function-cognitive-complexity
+  - readability-inconsistent-declaration-parameter-name
   - readability-math-missing-parentheses
+# - readability-misleading-indentation  # too many false positives and oddball/conditional source
   - readability-named-parameter
+# - readability-redundant-casting  # false positives in types that change from platform to platform, even with IgnoreTypeAliases: true
   - readability-redundant-control-flow
   - readability-redundant-declaration
   - readability-redundant-function-ptr-dereference
@@ -44,5 +55,6 @@ Checks:
 
 CheckOptions:
   misc-header-include-cycle.IgnoredFilesList: 'curl/curl.h'
+  readability-inconsistent-declaration-parameter-name.Strict: false
 
 HeaderFilterRegex: '.*'  # Default in v22.1.0+
