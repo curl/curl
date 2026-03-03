@@ -385,6 +385,14 @@ if(WIN32)
   endif()
 endif()
 
+# Override to force-disable or force-enable the use of CMake Configs.
+if(MSVC AND NOT VCPKG_TOOLCHAIN AND NOT CMAKE_CROSSCOMPILING)
+  set(_curl_use_cmakeconfig_default ON)
+else()
+  set(_curl_use_cmakeconfig_default OFF)
+endif()
+option(CURL_USE_CMAKECONFIG "Enable detecting dependencies via CMake Config" ${_curl_use_cmakeconfig_default})
+
 # Override to force-disable or force-enable the use of pkg-config.
 if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")) OR
    VCPKG_TOOLCHAIN OR
@@ -2325,6 +2333,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   TARGETS_EXPORT_NAME
   #   CURL_SUPPORTED_FEATURES_LIST
   #   CURL_SUPPORTED_PROTOCOLS_LIST
+  #   CURL_USE_CMAKECONFIG
   #   CURL_USE_PKGCONFIG
   #   HAVE_BROTLI
   #   HAVE_GSSAPI
