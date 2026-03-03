@@ -311,15 +311,15 @@ jobs:
           - name: 'address-sanitizer (gcc CM)'
             install_packages: libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
-            CFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=undefined -Wformat -Werror=format-security -Werror=array-bounds -g
-            LDFLAGS: -fsanitize=address,undefined,bounds -fno-sanitize-recover=undefined -ldl -lubsan
+            CFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow
+            LDFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow -ldl -lubsan
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug
 
           - name: 'address-sanitizer (gcc AM)'
             install_packages: libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
-            CFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=undefined -Wformat -Werror=format-security -Werror=array-bounds -g
-            LDFLAGS: -fsanitize=address,undefined,bounds -fno-sanitize-recover=undefined
+            CFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow
+            LDFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow
             LIBS: -ldl -lubsan
             configure: --enable-debug --with-openssl --with-libssh --disable-unity
 
