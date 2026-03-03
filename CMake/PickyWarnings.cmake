@@ -128,13 +128,13 @@ if(PICKY_COMPILER)
       -Wmissing-field-initializers         # clang  2.7  gcc  4.1
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
       -Wno-padded                          # clang  2.9  gcc  4.1               # Not used: We cannot change public structs
-      -Wsign-conversion                    # clang  2.9  gcc  4.3
-        -Wno-error=sign-conversion
       -Wno-switch-default                  # clang  2.7  gcc  4.1               # Not used: Annoying to fix or silence
       -Wno-switch-enum                     # clang  2.7  gcc  4.1               # Not used: It basically disallows default case
       -Wno-system-headers                  # clang  1.0  gcc  3.0
       -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wredundant-decls                    # clang  2.7  gcc  4.1
+      -Wsign-conversion                    # clang  2.9  gcc  4.3
+        -Wno-error=sign-conversion
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
       -Wtype-limits                        # clang  2.7  gcc  4.3
       -Wunreachable-code                   # clang  2.7  gcc  4.1
