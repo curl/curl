@@ -199,6 +199,15 @@ async_thrdd_item_create(struct Curl_easy *data,
         item->delay_ms = (uint32_t)l;
       }
     }
+    if(!item->delay_ms && (ip_version == CURL_IPRESOLVE_V6)) {
+      p = getenv("CURL_DBG_RESOLV_DELAY_IPV6");
+      if(p) {
+        curl_off_t l;
+        if(!curlx_str_number(&p, &l, UINT32_MAX)) {
+          item->delay_ms = (uint32_t)l;
+        }
+      }
+    }
     p = getenv("CURL_DBG_RESOLV_FAIL_DELAY");
     if(p) {
       curl_off_t l;
@@ -476,6 +485,39 @@ void Curl_async_thrdd_multi_destroy(struct Curl_multi *multi, bool join)
   }
 }
 
+#ifdef CURLVERBOSE
+static void async_thrdd_report_item(struct Curl_easy *data,
+                                    struct async_thrdd_item *item)
+{
+  char buf[MAX_IPADR_LEN];
+  struct dynbuf tmp;
+  const char *sep = "";
+  const struct Curl_addrinfo *ai = item->res;
+  int ai_family = (item->ip_version == CURL_IPRESOLVE_V6) ? AF_INET6 : AF_INET;
+  CURLcode result;
+
+  curlx_dyn_init(&tmp, 1024);
+  for(; ai; ai = ai->ai_next) {
+    if(ai->ai_family == ai_family) {
+      Curl_printable_address(ai, buf, sizeof(buf));
+      result = curlx_dyn_addf(&tmp, "%s%s", sep, buf);
+      if(result) {
+        CURL_TRC_DNS(data, "too many IP, cannot show");
+        goto out;
+      }
+      sep = ", ";
+    }
+  }
+
+  infof(data, "Host %s:%u resolved IPv%c: %s",
+               item->hostname, item->port,
+               (item->ip_version == CURL_IPRESOLVE_V6) ? '6' : '4',
+               (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
+out:
+  curlx_dyn_free(&tmp);
+}
+#endif /* CURLVERBOSE */
+
 /* Process the receiving end of the thread queue, dispatching
  * processed items to their transfer when it can still be found
  * and has an `async` state present. Otherwise, destroy the item. */
@@ -487,9 +529,6 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
   while(!Curl_thrdq_recv(multi->resolv_thrdq, &qitem)) {
     /* dispatch resolve result */
     struct async_thrdd_item *item = qitem;
-
-    CURL_TRC_DNS(multi->admin, "[async] got %s'%s'",
-                 item->res ? "" : "negative for ", item->description);
 
     data = Curl_multi_get_easy(multi, item->mid);
     /* there is a chance the `mid` gets reused after a while, but the
@@ -507,6 +546,7 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
         pdest = &async->thrdd.res_AAAA;
 #endif
       if(!*pdest) {
+        VERBOSE(async_thrdd_report_item(data, item));
         *pdest = item;
         item = NULL;
       }
@@ -664,11 +704,8 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     (void)Curl_ares_perform(thrdd->rr.channel, 0);
 #endif
 
-  if(!thrdd->done) {
-    CURL_TRC_DNS(data, "[async] take %s:%d -> EAGAIN",
-                 async->hostname, async->port);
+  if(!thrdd->done)
     return CURLE_AGAIN;
-  }
 
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
   if((thrdd->res_A && thrdd->res_A->res) ||
@@ -695,8 +732,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     }
 #endif
     if(!result && dns) {
-      CURL_TRC_DNS(data, "[async] resolved: %s",
-                   thrdd->res_A->description);
+      CURL_TRC_DNS(data, "[async] resolving complete");
       *pdns = dns;
       dns = NULL;
     }
@@ -716,6 +752,44 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
                  async->hostname, async->port, result);
   }
   return result;
+}
+
+static const struct Curl_addrinfo *
+async_thrdd_get_ai(const struct Curl_addrinfo *ai,
+                   int ai_family, unsigned int index)
+{
+  unsigned int i = 0;
+  for(i = 0; ai; ai = ai->ai_next) {
+    if(ai->ai_family == ai_family) {
+      if(i == index)
+        return ai;
+      ++i;
+    }
+  }
+  return NULL;
+}
+
+const struct Curl_addrinfo *
+Curl_async_get_ai(struct Curl_easy *data,
+                  struct Curl_resolv_async *async,
+                  int ai_family, unsigned int index)
+{
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
+
+  (void)data;
+  switch(ai_family) {
+  case AF_INET:
+    if(thrdd->res_A)
+      return async_thrdd_get_ai(thrdd->res_A->res, ai_family, index);
+    break;
+  case AF_INET6:
+    if(thrdd->res_AAAA)
+      return async_thrdd_get_ai(thrdd->res_AAAA->res, ai_family, index);
+    break;
+  default:
+    break;
+  }
+  return NULL;
 }
 
 #endif /* CURLRES_THREADED */

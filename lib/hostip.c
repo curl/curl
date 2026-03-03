@@ -362,6 +362,17 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
 
   return result;
 }
+
+const struct Curl_addrinfo *
+Curl_resolv_get_ai(struct Curl_easy *data, int ai_family,
+                   unsigned int index)
+{
+  struct Curl_resolv_async *async = data->state.async;
+  if(async)
+    return Curl_async_get_ai(data, async, ai_family, index);
+  return NULL;
+}
+
 #endif
 
 static CURLcode hostip_resolv_announce(struct Curl_easy *data,

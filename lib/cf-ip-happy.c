@@ -122,24 +122,27 @@ static void cf_ai_iter_init(struct cf_ai_iter *iter,
   iter->n = 0;
 }
 
-static const struct Curl_addrinfo *cf_ai_iter_next(struct cf_ai_iter *iter)
+static const struct Curl_addrinfo *
+cf_ai_iter_next(struct cf_ai_iter *iter,
+                struct Curl_easy *data)
 {
   const struct Curl_addrinfo *addr;
 
   if(!iter->cf)
     return NULL;
 
-  addr = Curl_conn_resolv_get_ai(iter->cf->conn, iter->cf->sockindex,
+  addr = Curl_conn_resolv_get_ai(data, iter->cf->sockindex,
                                  iter->ai_family, iter->n);
   if(addr)
     iter->n++;
   return addr;
 }
 
-static bool cf_ai_iter_has_more(struct cf_ai_iter *iter)
+static bool cf_ai_iter_has_more(struct cf_ai_iter *iter,
+                                struct Curl_easy *data)
 {
   return (iter->cf &&
-          !!Curl_conn_resolv_get_ai(iter->cf->conn, iter->cf->sockindex,
+          !!Curl_conn_resolv_get_ai(data, iter->cf->sockindex,
                                     iter->ai_family, iter->n));
 }
 
@@ -332,6 +335,7 @@ static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs, int ip_version,
 static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
                                   struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  bool dns_resolved,
                                   bool *connected)
 {
   CURLcode result = CURLE_OK;
@@ -385,10 +389,10 @@ evaluate:
     do_more = TRUE;
   }
   else {
-    bool more_possible = cf_ai_iter_has_more(&bs->addr_iter);
+    bool more_possible = cf_ai_iter_has_more(&bs->addr_iter, data);
 #ifdef USE_IPV6
     if(!more_possible)
-      more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
+      more_possible = cf_ai_iter_has_more(&bs->ipv6_iter, data);
 #endif
     do_more = more_possible &&
       (curlx_ptimediff_ms(Curl_pgrs_now(data), &bs->last_attempt_started) >=
@@ -403,16 +407,21 @@ evaluate:
      * Alternate between address families when possible. */
     const struct Curl_addrinfo *ai = NULL;
     int ai_family = 0;
+    CURL_TRC_CF(data, cf, "want to do more");
 #ifdef USE_IPV6
     if((bs->last_attempt_ai_family == AF_INET) ||
-       !cf_ai_iter_has_more(&bs->addr_iter)) {
-      ai = cf_ai_iter_next(&bs->ipv6_iter);
+       !cf_ai_iter_has_more(&bs->addr_iter, data)) {
+      ai = cf_ai_iter_next(&bs->ipv6_iter, data);
       ai_family = bs->ipv6_iter.ai_family;
+      CURL_TRC_CF(data, cf, "check for next AAAA address: %s",
+                  ai ? "found" : "none");
     }
 #endif
     if(!ai) {
-      ai = cf_ai_iter_next(&bs->addr_iter);
+      ai = cf_ai_iter_next(&bs->addr_iter, data);
       ai_family = bs->addr_iter.ai_family;
+      CURL_TRC_CF(data, cf, "check for next A address: %s",
+                  ai ? "found" : "none");
     }
     /* We are (re-)starting attempts. We are not interested in
      * keeping old failure information. The new attempt will either
@@ -475,7 +484,7 @@ evaluate:
       /* attempt timeout for restart has not expired yet */
       goto out;
     }
-    else if(!ongoing) {
+    else if(!ongoing && dns_resolved) {
       /* no more addresses, no inconclusive attempts */
       CURL_TRC_CF(data, cf, "no more attempts to try");
       result = CURLE_COULDNT_CONNECT;
@@ -501,10 +510,10 @@ out:
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    more_possible = cf_ai_iter_has_more(&bs->addr_iter);
+    more_possible = cf_ai_iter_has_more(&bs->addr_iter, data);
 #ifdef USE_IPV6
     if(!more_possible)
-      more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
+      more_possible = cf_ai_iter_has_more(&bs->ipv6_iter, data);
 #endif
     if(more_possible) {
       timediff_t expire_ms, elapsed_ms;
@@ -609,7 +618,6 @@ static int cf_ip_ballers_min_reply_ms(struct cf_ip_ballers *bs,
 }
 
 typedef enum {
-  SCFST_RESOLVE,
   SCFST_INIT,
   SCFST_WAITING,
   SCFST_DONE
@@ -632,7 +640,8 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   struct connectdata *conn = cf->conn;
   CURLcode result;
 
-  result = cf_ip_ballers_run(&ctx->ballers, cf, data, connected);
+  result = cf_ip_ballers_run(&ctx->ballers, cf, data,
+                             ctx->dns_resolved, connected);
 
   if(!result)
     return CURLE_OK;
@@ -766,19 +775,17 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx);
   *done = FALSE;
 
+  if(!ctx->dns_resolved) {
+    result = Curl_conn_resolv_result(cf->conn, cf->sockindex);
+    if(!result)
+      ctx->dns_resolved = TRUE;
+    else if(result == CURLE_AGAIN) /* not complete yet */
+      result = CURLE_OK;
+    else /* real error */
+      goto out;
+  }
+
   switch(ctx->state) {
-  case SCFST_RESOLVE:
-    if(!ctx->dns_resolved) {
-      result = Curl_conn_resolv_result(cf->conn, cf->sockindex);
-      if(!result)
-        ctx->dns_resolved = TRUE;
-      else {
-        if(result == CURLE_AGAIN) /* still waiting */
-          result = CURLE_OK;
-        goto out;
-      }
-    }
-    FALLTHROUGH();
   case SCFST_INIT:
     DEBUGASSERT(CURL_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
     DEBUGASSERT(!cf->connected);
@@ -838,7 +845,7 @@ static void cf_ip_happy_close(struct Curl_cfilter *cf,
   CURL_TRC_CF(data, cf, "close");
   cf_ip_happy_ctx_clear(cf, data);
   cf->connected = FALSE;
-  ctx->state = SCFST_RESOLVE;
+  ctx->state = SCFST_INIT;
 
   if(cf->next) {
     cf->next->cft->do_close(cf->next, data);

@@ -230,15 +230,17 @@ static CURLcode cf_resolv_connect(struct Curl_cfilter *cf,
   }
 
   if(cf->next && !cf->next->connected) {
-    bool sub_done = FALSE;
-    CURLcode result = Curl_conn_cf_connect(cf->next, data, &sub_done);
-    if(result || !sub_done)
+    CURLcode result = Curl_conn_cf_connect(cf->next, data, done);
+    if(result || !*done)
       return result;
+    /* sub filter chain is connected */
+    cf->connected = TRUE;
   }
 
-  if(ctx->dns) {
+  if(ctx->dns || *done) {
     *done = TRUE;
     cf->connected = TRUE;
+    Curl_async_shutdown(data);
   }
   return ctx->resolv_result;
 }
@@ -456,30 +458,40 @@ CURLcode Curl_conn_resolv_result(struct connectdata *conn, int sockindex)
   return Curl_cf_resolv_result(conn->cfilter[sockindex]);
 }
 
+static const struct Curl_addrinfo *
+cf_resolv_get_nth_ai(const struct Curl_addrinfo *ai,
+                     int ai_family, unsigned int index)
+{
+  unsigned int i = 0;
+  for(i = 0; ai; ai = ai->ai_next) {
+    if(ai->ai_family == ai_family) {
+      if(i == index)
+        return ai;
+      ++i;
+    }
+  }
+  return NULL;
+}
+
 /* Return the addrinfo at `index` for the given `family` from the
  * first "resolve" filter underneath `cf`. If the DNS resolving is
  * not done yet or if no address for the family exists, returns NULL.
  */
 const struct Curl_addrinfo *
 Curl_cf_resolv_get_ai(struct Curl_cfilter *cf,
-                      int family,
+                      struct Curl_easy *data,
+                      int ai_family,
                       unsigned int index)
 {
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_resolv) {
       struct cf_resolv_ctx *ctx = cf->ctx;
-      if(ctx->dns && ctx->dns->addr) {
-        const struct Curl_addrinfo *ai;
-        unsigned int i = 0;
-        for(ai = ctx->dns->addr; ai; ai = ai->ai_next) {
-          if(ai->ai_family == family) {
-            if(i == index)
-              return ai;
-            ++i;
-          }
-        }
-      }
-      break;
+      if(ctx->resolv_result)
+        return NULL;
+      else if(ctx->dns)
+        return cf_resolv_get_nth_ai(ctx->dns->addr, ai_family, index);
+      else
+        return Curl_resolv_get_ai(data, ai_family, index);
     }
   }
   return NULL;
@@ -490,12 +502,14 @@ Curl_cf_resolv_get_ai(struct Curl_cfilter *cf,
  * not done yet or if no address for the family exists, returns NULL.
  */
 const struct Curl_addrinfo *
-Curl_conn_resolv_get_ai(struct connectdata *conn,
+Curl_conn_resolv_get_ai(struct Curl_easy *data,
                         int sockindex,
-                        int family,
+                        int ai_family,
                         unsigned int index)
 {
-  return Curl_cf_resolv_get_ai(conn->cfilter[sockindex], family, index);
+  struct connectdata *conn = data->conn;
+  return Curl_cf_resolv_get_ai(conn->cfilter[sockindex], data,
+                               ai_family, index);
 }
 
 #ifdef USE_HTTPSRR
@@ -504,9 +518,9 @@ Curl_conn_resolv_get_ai(struct connectdata *conn,
  * is not HTTPS-RR info, returns NULL.
  */
 const struct Curl_https_rrinfo *
-Curl_conn_resolv_get_https(struct connectdata *conn, int sockindex)
+Curl_conn_resolv_get_https(struct Curl_easy *data, int sockindex)
 {
-  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_resolv) {
       struct cf_resolv_ctx *ctx = cf->ctx;

@@ -98,8 +98,12 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_take_result(struct Curl_easy *data,
                                  struct Curl_dns_entry **dns);
+const struct Curl_addrinfo *
+Curl_resolv_get_ai(struct Curl_easy *data, int ai_family,
+                   unsigned int index);
 #else
 #define Curl_resolv_take_result(x, y) CURLE_NOT_BUILT_IN
+#define Curl_resolv_get_ai(x,y,z)     NULL
 #endif
 
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,

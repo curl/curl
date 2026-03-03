@@ -338,7 +338,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
       return CURLPX_OK;
     }
     /* Get the first ipv4 address, if there is one. */
-    hp = Curl_cf_resolv_get_ai(cf, AF_INET, 0);
+    hp = Curl_cf_resolv_get_ai(cf, data, AF_INET, 0);
   }
 
   if(result) {
@@ -856,15 +856,15 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
 #ifdef USE_IPV6
     if(cf->conn->ip_version != CURL_IPRESOLVE_WHATEVER) {
       hp = Curl_cf_resolv_get_ai(
-        cf, (cf->conn->ip_version == CURL_IPRESOLVE_V4) ?
+        cf, data, (cf->conn->ip_version == CURL_IPRESOLVE_V4) ?
         AF_INET : AF_INET6, 0);
     }
     else
-      hp = Curl_cf_resolv_get_ai(cf, AF_INET6, 0);
+      hp = Curl_cf_resolv_get_ai(cf, data, AF_INET6, 0);
 #endif
     if(!hp && ((cf->conn->ip_version == CURL_IPRESOLVE_WHATEVER) ||
                (cf->conn->ip_version == CURL_IPRESOLVE_V4))) {
-      hp = Curl_cf_resolv_get_ai(cf, AF_INET, 0);
+      hp = Curl_cf_resolv_get_ai(cf, data, AF_INET, 0);
     }
   }
 

@@ -370,6 +370,19 @@ out:
   return result;
 }
 
+const struct Curl_addrinfo *
+Curl_async_get_ai(struct Curl_easy *data,
+                  struct Curl_resolv_async *async
+                  int ai_family, unsigned int index)
+{
+  /* Not supported by our implementation yet. */
+  (void)data;
+  (void)async;
+  (void)ai_family;
+  (void)index;
+  return NULL;
+}
+
 /*
  * Curl_async_await()
  *

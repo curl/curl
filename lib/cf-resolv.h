@@ -48,19 +48,20 @@ CURLcode Curl_cf_resolv_result(struct Curl_cfilter *cf);
 
 
 const struct Curl_addrinfo *
-Curl_conn_resolv_get_ai(struct connectdata *conn,
+Curl_conn_resolv_get_ai(struct Curl_easy *data,
                         int sockindex,
-                        int family,
+                        int ai_family,
                         unsigned int index);
 
 const struct Curl_addrinfo *
 Curl_cf_resolv_get_ai(struct Curl_cfilter *cf,
-                      int family,
+                      struct Curl_easy *data,
+                      int ai_family,
                       unsigned int index);
 
 #ifdef USE_HTTPSRR
 const struct Curl_https_rrinfo *
-Curl_conn_resolv_get_https(struct connectdata *conn, int sockindex);
+Curl_conn_resolv_get_https(struct Curl_easy *data, int sockindex);
 #endif
 
 

@@ -182,6 +182,10 @@ Overrides the maximum number of threads for resolver.
 
 Makes ever threaded resolve experience an initial delay in milliseconds.
 
+## `CURL_DBG_RESOLV_DELAY_IPV6`
+
+Makes ever threaded IPv6 resolve experience an initial delay in milliseconds.
+
 ## `CURL_DBG_RESOLV_FAIL_DELAY`
 
 With a threaded resolver, delay each lookup by the given milliseconds
