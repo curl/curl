@@ -914,10 +914,10 @@ clean_up:
  * is ignored.
  *
  * Return codes:
- * CURLE_OK = success, *entry set to non-NULL
- * CURLE_AGAIN = resolving in progress, *entry == NULL
- * CURLE_COULDNT_RESOLVE_HOST = error, *entry == NULL
- * CURLE_OPERATION_TIMEDOUT = timeout expired, *entry == NULL
+ * CURLE_OK = success, *pdns set to non-NULL
+ * CURLE_AGAIN = resolving in progress, *pdns == NULL
+ * CURLE_COULDNT_RESOLVE_HOST = error, *pdns == NULL
+ * CURLE_OPERATION_TIMEDOUT = timeout expired, *pdns == NULL
  */
 CURLcode Curl_resolv(struct Curl_easy *data,
                      uint8_t dns_queries,
@@ -926,11 +926,11 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      uint8_t transport,
                      timediff_t timeout_ms,
                      uint32_t *presolv_id,
-                     struct Curl_dns_entry **entry)
+                     struct Curl_dns_entry **pdns)
 {
   DEBUGASSERT(hostname && *hostname);
   *presolv_id = 0;
-  *entry = NULL;
+  *pdns = NULL;
 
   if(timeout_ms < 0)
     /* got an already expired timeout */
@@ -945,7 +945,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   }
   if(timeout_ms && !Curl_doh_wanted(data)) {
     return resolv_alarm_timeout(data, dns_queries, hostname, port, transport,
-                                timeout_ms, presolv_id, entry);
+                                timeout_ms, presolv_id, pdns);
   }
 #endif /* !USE_ALARM_TIMEOUT */
 
@@ -955,7 +955,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 #endif
 
   return hostip_resolv(data, dns_queries, hostname, port, transport,
-                       timeout_ms, TRUE, presolv_id, entry);
+                       timeout_ms, TRUE, presolv_id, pdns);
 }
 
 #ifdef USE_CURL_ASYNC

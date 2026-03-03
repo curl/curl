@@ -26,7 +26,7 @@ curl_easy_header - get an HTTP header
 
 CURLHcode curl_easy_header(CURL *easy,
                            const char *name,
-                           size_t index,
+                           size_t nameindex,
                            unsigned int origin,
                            int request,
                            struct curl_header **hout);
@@ -38,10 +38,10 @@ curl_easy_header(3) returns a pointer to a "curl_header" struct in **hout**
 with data for the HTTP response header *name*. The case insensitive
 null-terminated header name should be specified without colon.
 
-*index* 0 means asking for the first instance of the header. If the returned
-header struct has **amount** set larger than 1, it means there are more
-instances of the same header name available to get. Asking for a too big index
-makes **CURLHE_BADINDEX** get returned.
+*nameindex* 0 means asking for the first instance of the header. If the
+returned header struct has **amount** set larger than 1, it means there are
+more instances of the same header name available to get. Asking for a too big
+index makes **CURLHE_BADINDEX** get returned.
 
 The *origin* argument is for specifying which headers to receive, as a single
 HTTP transfer might provide headers from several different places and they may

@@ -199,7 +199,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              const char *service,
-                                             const char *hostname,
+                                             const char *host,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out);
 
@@ -263,7 +263,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               const char *passwdp,
                                               const char *service,
                                               const char *host,
-                                              const bool mutual,
+                                              const bool mutual_auth,
                                               const struct bufref *chlg,
                                               struct kerberos5data *krb5,
                                               struct bufref *out);

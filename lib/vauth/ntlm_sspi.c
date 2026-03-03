@@ -191,21 +191,21 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
-                                             const struct bufref *type2,
+                                             const struct bufref *type2ref,
                                              struct ntlmdata *ntlm)
 {
   /* Ensure we have a valid type-2 message */
-  if(!Curl_bufref_len(type2)) {
+  if(!Curl_bufref_len(type2ref)) {
     infof(data, "NTLM handshake failure (empty type-2 message)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Store the challenge for later use */
-  ntlm->input_token = curlx_memdup0(Curl_bufref_ptr(type2),
-                                    Curl_bufref_len(type2));
+  ntlm->input_token = curlx_memdup0(Curl_bufref_ptr(type2ref),
+                                    Curl_bufref_len(type2ref));
   if(!ntlm->input_token)
     return CURLE_OUT_OF_MEMORY;
-  ntlm->input_token_len = Curl_bufref_len(type2);
+  ntlm->input_token_len = Curl_bufref_len(type2ref);
 
   return CURLE_OK;
 }
