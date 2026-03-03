@@ -1130,12 +1130,12 @@ void curl_easy_reset(CURL *d)
  * NOTE: This is one of few API functions that are allowed to be called from
  * within a callback.
  */
-CURLcode curl_easy_pause(CURL *d, int action)
+CURLcode curl_easy_pause(CURL *curl, int action)
 {
   CURLcode result = CURLE_OK;
   bool recursive = FALSE;
   bool changed = FALSE;
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
   bool recv_paused, recv_paused_new;
   bool send_paused, send_paused_new;
 
