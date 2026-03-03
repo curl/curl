@@ -371,6 +371,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
     DWORD cert_store_name = 0;
     TCHAR *cert_store_path = NULL;
     TCHAR *cert_thumbprint_str = NULL;
+    TCHAR cert_thumbprint_buf[CERT_THUMBPRINT_STR_LEN + 1];
     CRYPT_HASH_BLOB cert_thumbprint;
     BYTE cert_thumbprint_data[CERT_THUMBPRINT_DATA_LEN];
     HCERTSTORE cert_store = NULL;
@@ -391,6 +392,15 @@ static CURLcode get_client_cert(struct Curl_easy *data,
 
       result = get_cert_location(cert_path, &cert_store_name,
                                  &cert_store_path, &cert_thumbprint_str);
+
+      /* 'cert_thumbprint_str' points in to the allocated 'cert_path', copy
+         the data. The string is verified to be CERT_THUMBPRINT_STR_LEN bytes
+         long within the get_cert_location() function. */
+      if(!result && cert_thumbprint_str) {
+        memcpy(cert_thumbprint_buf, cert_thumbprint_str,
+               sizeof(cert_thumbprint_buf));
+        cert_thumbprint_str = cert_thumbprint_buf;
+      }
 
       curlx_free(cert_path);
       if(result && (data->set.ssl.primary.clientcert[0] != '\0'))
