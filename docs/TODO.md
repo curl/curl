@@ -932,7 +932,7 @@ When compiling curl on OpenBSD with `--enable-debug` it gives linking errors
 when you use GNU libtool. This can be fixed by using the libtool provided by
 OpenBSD itself. However for this the user always needs to invoke make with
 `LIBTOOL=/usr/bin/libtool`. It would be nice if the script could have some
-magic to detect if this system is an OpenBSD host and then use the OpenBSD
+logic to detect if this system is an OpenBSD host and then use the OpenBSD
 libtool instead.
 
 See [curl issue 5862](https://github.com/curl/curl/issues/5862)

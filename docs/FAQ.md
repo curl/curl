@@ -101,8 +101,8 @@ well at the side. curl's output can be piped into another program or
 redirected to another file for the next program to interpret.
 
 We focus on protocol related issues and improvements. If you want to do more
-magic with the supported protocols than curl currently does, chances are good
-we will agree. If you want to add more protocols, we may agree.
+with the supported protocols than curl currently does, chances are good we
+will agree. If you want to add more protocols, we may agree.
 
 If you want someone else to do all the work while you wait for us to implement
 it for you, that is not a friendly attitude. We spend a considerable time
@@ -487,7 +487,7 @@ individuals have ever tried.
 
 ## Does curl support JavaScript or PAC (automated proxy config)?
 
-Many webpages do magic stuff using embedded JavaScript. curl and libcurl have
+Many webpages do stuff using embedded JavaScript. curl and libcurl have
 no built-in support for that, so it is treated like any other contents.
 
 `.pac` files are a Netscape invention and are sometimes used by organizations
