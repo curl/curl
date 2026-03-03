@@ -81,8 +81,9 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 
   CURLcode result = CURLE_ABORTED_BY_CALLBACK;
   X509_STORE *cts;
-  BIO *cbio;
+  BIO *cbio = NULL;
   STACK_OF(X509_INFO) * inf;
+  ossl_valsize_t i;
 
   (void)curl;
   (void)pointer;
@@ -90,36 +91,36 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
   if(!cts) {
     printf("SSL_CTX_get_cert_store() failed\n");
-    return result;
+    goto out;
   }
 
   cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
   if(!cbio) {
     printf("BIO_new_mem_buf() failed\n");
-    return result;
+    goto out;
   }
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
-  if(inf) {
-    ossl_valsize_t i;
-
-    for(i = 0; i < sk_X509_INFO_num(inf); i++) {
-      X509_INFO *itmp = sk_X509_INFO_value(inf, i);
-      if(itmp->x509) {
-        X509_STORE_add_cert(cts, itmp->x509);
-      }
-      if(itmp->crl) {
-        X509_STORE_add_crl(cts, itmp->crl);
-      }
-    }
-
-    sk_X509_INFO_pop_free(inf, X509_INFO_free);
-
-    result = CURLE_OK;
-  }
-  else {
+  if(!inf) {
     printf("PEM_X509_INFO_read_bio() failed\n");
+    goto out;
   }
+
+  for(i = 0; i < sk_X509_INFO_num(inf); i++) {
+    X509_INFO *itmp = sk_X509_INFO_value(inf, i);
+    if(itmp->x509) {
+      X509_STORE_add_cert(cts, itmp->x509);
+    }
+    if(itmp->crl) {
+      X509_STORE_add_crl(cts, itmp->crl);
+    }
+  }
+
+  sk_X509_INFO_pop_free(inf, X509_INFO_free);
+
+  result = CURLE_OK;
+
+out:
 
   if(cbio)
     BIO_free(cbio);

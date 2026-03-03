@@ -76,7 +76,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   X509 *cert = NULL;
   BIO *bio = NULL;
   BIO *kbio = NULL;
-  EVP_PKEY *pkey;
+  EVP_PKEY *pkey = NULL;
   int ret;
 
   (void)curl;
@@ -86,6 +86,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   bio = BIO_new_mem_buf(mypem, sizeof(mypem));
   if(!bio) {
     printf("BIO_new_mem_buf() failed\n");
+    goto out;
   }
 
   /* use it to read the PEM formatted certificate from memory into an X509
@@ -93,38 +94,47 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   cert = PEM_read_bio_X509(bio, NULL, 0, NULL);
   if(!cert) {
     printf("PEM_read_bio_X509() failed\n");
+    goto out;
   }
 
   /* tell SSL to use the X509 certificate */
   ret = SSL_CTX_use_certificate((SSL_CTX *)sslctx, cert);
   if(ret != 1) {
     printf("SSL_CTX_use_certificate() failed\n");
+    goto out;
   }
 
   /* create a bio for the private key */
   kbio = BIO_new_mem_buf(mykey, sizeof(mykey));
-  if(kbio) {
-    pkey = PEM_read_bio_PrivateKey(kbio, NULL, NULL, NULL);
-    if(pkey) {
-      /* tell SSL to use the private key from memory */
-      ret = SSL_CTX_use_PrivateKey((SSL_CTX *)sslctx, pkey);
-      if(ret == 1) {
-        result = CURLE_OK;
-      }
-      else
-        printf("SSL_CTX_use_PrivateKey() failed\n");
-
-      EVP_PKEY_free(pkey);
-    }
-    else
-      printf("PEM_read_bio_PrivateKey() failed\n");
-
-    BIO_free(kbio);
-  }
-  else
+  if(!kbio) {
     printf("BIO_new_mem_buf() failed\n");
+    goto out;
+  }
 
+  pkey = PEM_read_bio_PrivateKey(kbio, NULL, NULL, NULL);
+  if(!pkey) {
+    printf("PEM_read_bio_PrivateKey() failed\n");
+    goto out;
+  }
+
+  /* tell SSL to use the private key from memory */
+  ret = SSL_CTX_use_PrivateKey((SSL_CTX *)sslctx, pkey);
+  if(ret != 1) {
+    printf("SSL_CTX_use_PrivateKey() failed\n");
+    goto out;
+  }
+
+  result = CURLE_OK;
+
+out:
   /* free resources that have been allocated by OpenSSL functions */
+
+  if(pkey)
+    EVP_PKEY_free(pkey);
+
+  if(kbio)
+    BIO_free(kbio);
+
   if(bio)
     BIO_free(bio);
 
