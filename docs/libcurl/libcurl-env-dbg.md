@@ -174,6 +174,14 @@ a multi handle is destroyed. This implicitly triggers for easy handles
 that are run via easy_perform. The value of the environment variable
 gives the shutdown timeout in milliseconds.
 
+## `CURL_DBG_RESOLV_MAX_THREADS`
+
+Overrides the maximum number of threads for resolvers.
+
+## `CURL_DBG_RESOLV_DELAY`
+
+Makes ever threaded resolve experience an initial delay in milliseconds.
+
 ## `CURL_DBG_RESOLV_FAIL_DELAY`
 
 With a threaded resolver, delay each lookup by the given milliseconds

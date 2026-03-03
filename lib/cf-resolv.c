@@ -268,7 +268,7 @@ static CURLcode cf_resolv_adjust_pollset(struct Curl_cfilter *cf,
 }
 
 struct Curl_cftype Curl_cft_resolv = {
-  "RESOLVE",
+  "CF-DNS",
   0,
   CURL_LOG_LVL_NONE,
   cf_resolv_destroy,

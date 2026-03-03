@@ -28,6 +28,7 @@
  **********************************************************************/
 #ifdef CURLRES_THREADED
 
+#include "multihandle.h"
 #include "socketpair.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -122,6 +123,7 @@ struct async_thrdd_item {
   uint8_t ip_version;
   uint8_t transport;
 #ifdef DEBUGBUILD
+  uint32_t delay_ms;
   uint32_t delay_fail_ms;
 #endif
   char hostname[1];
@@ -187,7 +189,14 @@ async_thrdd_item_create(struct Curl_easy *data,
 
 #ifdef DEBUGBUILD
   {
-    const char *p = getenv("CURL_DBG_RESOLV_FAIL_DELAY");
+    const char *p = getenv("CURL_DBG_RESOLV_DELAY");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, UINT32_MAX)) {
+        item->delay_ms = (uint32_t)l;
+      }
+    }
+    p = getenv("CURL_DBG_RESOLV_FAIL_DELAY");
     if(p) {
       curl_off_t l;
       if(!curlx_str_number(&p, &l, UINT32_MAX)) {
@@ -355,6 +364,9 @@ static void async_thrdd_item_process(void *arg)
   int rc;
 
 #ifdef DEBUGBUILD
+    if(item->delay_ms) {
+      curlx_wait_ms(item->delay_ms);
+    }
     if(item->delay_fail_ms) {
       curlx_wait_ms(item->delay_fail_ms);
       return;
@@ -382,6 +394,9 @@ static void async_thrdd_item_process(void *item)
   struct async_thrdd_item *item = arg;
 
 #ifdef DEBUGBUILD
+    if(item->delay_ms) {
+      curlx_wait_ms(item->delay_ms);
+    }
     if(item->delay_fail_ms) {
       curlx_wait_ms(item->delay_fail_ms);
       return;
@@ -428,6 +443,17 @@ CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
                                      uint32_t idle_time_ms)
 {
   DEBUGASSERT(!multi->resolv_thrdq);
+#ifdef DEBUGBUILD
+  {
+    const char *p = getenv("CURL_DBG_RESOLV_MAX_THREADS");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, UINT32_MAX)) {
+        max_threads = (uint32_t)l;
+      }
+    }
+  }
+#endif
   return Curl_thrdq_create(&multi->resolv_thrdq, "async", 0,
                            min_threads, max_threads, idle_time_ms,
                            async_thrdd_item_free,
@@ -502,6 +528,9 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     item = NULL;
     async->thrdd.queued = TRUE;
   }
+#ifdef CURLVERBOSE
+  Curl_thrdq_trace(data->multi->resolv_thrdq, data, &Curl_trc_feat_dns);
+#endif
 
 #ifdef USE_HTTPSRR_ARES
   DEBUGASSERT(!async->thrdd.rr.channel);
@@ -618,6 +647,9 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     Curl_dns_entry_unlink(data, &dns);
   }
 
+#ifdef CURLVERBOSE
+  Curl_thrdq_trace(data->multi->resolv_thrdq, data, &Curl_trc_feat_dns);
+#endif
   if(!result && !*pdns)
     result = Curl_resolver_error(data, NULL);
   Curl_async_thrdd_shutdown(data, async);

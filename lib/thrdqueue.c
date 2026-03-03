@@ -283,6 +283,7 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
                          const char *description, timediff_t timeout_ms)
 {
   CURLcode result = CURLE_AGAIN;
+  size_t signals = 0;
 
   Curl_mutex_acquire(&tqueue->lock);
   if(tqueue->aborted) {
@@ -305,13 +306,14 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
     }
     Curl_llist_append(&tqueue->sendq, qitem, &qitem->node);
     result = CURLE_OK;
+    signals = Curl_llist_count(&tqueue->sendq);
   }
 
 out:
   Curl_mutex_release(&tqueue->lock);
   /* Signal thread pool unlocked to void deadlocks */
-  if(!result)
-    result = Curl_thrdpool_signal(tqueue->tpool, 1);
+  if(!result && signals)
+    result = Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
   return result;
 }
 

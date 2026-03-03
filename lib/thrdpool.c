@@ -111,6 +111,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
       if(!item)
         break;
       tslot->starttime = curlx_now();
+      tslot->idle = FALSE;
       Curl_mutex_release(&tpool->lock);
 
       tpool->fn_process(item);
@@ -142,7 +143,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
     else {
       Curl_cond_wait(&tslot->await, &tpool->lock);
     }
-    tslot->idle = FALSE;
   }
 
 out:
@@ -169,6 +169,7 @@ static CURLcode thrdslot_start(struct curl_thrdpool *tpool)
 
   tpool->refcount++;
   tslot->running = TRUE;
+  tslot->idle = TRUE;
   tslot->thread = Curl_thread_create(thrdslot_run, tslot);
   if(tslot->thread == curl_thread_t_null) { /* never started */
     tslot->running = FALSE;
@@ -422,7 +423,15 @@ void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
     for(e = Curl_llist_head(&tpool->slots); e; e = Curl_node_next(e)) {
       struct thrdslot *tslot = Curl_node_elem(e);
       timediff_t elapsed_ms = curlx_ptimediff_ms(&now, &tslot->starttime);
-      if(tslot->idle) {
+      if(!tslot->running) {
+        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: not running",
+                            tpool->name, tslot->id);
+      }
+      else if(!tslot->starttime.tv_sec && !tslot->starttime.tv_usec) {
+        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: starting...",
+                            tpool->name, tslot->id);
+      }
+      else if(tslot->idle) {
         Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: idle for %"
                             FMT_TIMEDIFF_T "ms",
                             tpool->name, tslot->id, elapsed_ms);
