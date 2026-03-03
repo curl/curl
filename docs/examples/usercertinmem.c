@@ -84,7 +84,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   (void)pointer;
 
   /* get a BIO */
-  bio = BIO_new_mem_buf(mypem, sizeof(mypem));
+  bio = BIO_new_mem_buf(mypem, sizeof(mypem) - 1);
   if(!bio) {
     printf("BIO_new_mem_buf() failed\n");
     goto out;
@@ -106,7 +106,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   }
 
   /* create a bio for the private key */
-  kbio = BIO_new_mem_buf(mykey, sizeof(mykey));
+  kbio = BIO_new_mem_buf(mykey, sizeof(mykey) - 1);
   if(!kbio) {
     printf("BIO_new_mem_buf() failed\n");
     goto out;

@@ -94,7 +94,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     goto out;
   }
 
-  cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
+  cbio = BIO_new_mem_buf(mypem, sizeof(mypem) - 1);
   if(!cbio) {
     printf("BIO_new_mem_buf() failed\n");
     goto out;
