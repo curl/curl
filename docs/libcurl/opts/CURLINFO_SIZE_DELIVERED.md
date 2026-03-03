@@ -34,7 +34,7 @@ Pass a pointer to a *curl_off_t* to receive the total amount of bytes that
 were passed on to the write callback in the download. The amount is only for
 the latest transfer and gets reset again for each new transfer. This counts
 actual payload data, what's also commonly called body. All meta and header
-data is excluded from this amount.
+data is excluded from this amount (unless CURLOPT_HEADER(3) is set).
 
 The delivered size may differ from the size retrieved with
 CURLINFO_SIZE_DOWNLOAD_T(3) when CURLOPT_ACCEPT_ENCODING(3) is used for
