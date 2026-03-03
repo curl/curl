@@ -59,7 +59,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
   /** This example uses two (fake) certificates **/
   /* replace the XXX with the actual CA certificates */
-  static const char *mypem =
+  static const char mypem[] =
     "-----BEGIN CERTIFICATE-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
@@ -79,7 +79,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END CERTIFICATE-----\n";
 
-  CURLcode result = CURLE_OK;
+  CURLcode result = CURLE_ABORTED_BY_CALLBACK;
   X509_STORE *cts;
   BIO *cbio;
   STACK_OF(X509_INFO) * inf;
@@ -90,12 +90,13 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
   if(!cts) {
     printf("SSL_CTX_get_cert_store() failed\n");
-    return CURLE_ABORTED_BY_CALLBACK;
+    return result;
   }
 
   cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
   if(!cbio) {
     printf("BIO_new_mem_buf() failed\n");
+    return result;
   }
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
@@ -113,10 +114,11 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     }
 
     sk_X509_INFO_pop_free(inf, X509_INFO_free);
+
+    result = CURLE_OK;
   }
   else {
     printf("PEM_X509_INFO_read_bio() failed\n");
-    result = CURLE_ABORTED_BY_CALLBACK;
   }
 
   if(cbio)
