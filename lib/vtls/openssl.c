@@ -264,7 +264,7 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
     return result;
 
   for(i = 0; i < (int)sk_X509_EXTENSION_num(exts); i++) {
-    ASN1_OBJECT *obj;
+    const ASN1_OBJECT *obj;
     X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, (ossl_valsize_t)i);
     BUF_MEM *biomem;
     char namebuf[128];
@@ -280,7 +280,8 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
       namebuf[sizeof(namebuf) - 1] = 0;
 
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
-      ASN1_STRING_print(bio_out, (ASN1_STRING *)X509_EXTENSION_get_data(ext));
+      ASN1_STRING_print(bio_out,
+                        (const ASN1_STRING *)X509_EXTENSION_get_data(ext));
 
     BIO_get_mem_ptr(bio_out, &biomem);
     result = Curl_ssl_push_certinfo_len(data, certnum, namebuf, biomem->data,
@@ -1626,7 +1627,7 @@ static CURLcode client_cert(struct Curl_easy *data,
 
 #ifdef CURLVERBOSE
 /* returns non-zero on failure */
-static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
+static CURLcode x509_name_oneline(const X509_NAME *a, struct dynbuf *d)
 {
   BIO *bio_out = BIO_new(BIO_s_mem());
   BUF_MEM *biomem;
@@ -2190,7 +2191,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     bool free_cn = FALSE;
 
     /* The following is done because of a bug in 0.9.6b */
-    X509_NAME *name = X509_get_subject_name(server_cert);
+    const X509_NAME *name = X509_get_subject_name(server_cert);
     if(name) {
       int j;
       while((j = X509_NAME_get_index_by_NID(name, NID_commonName, i)) >= 0)
@@ -2202,7 +2203,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
        UTF8, etc. */
 
     if(i >= 0) {
-      ASN1_STRING *tmp =
+      const ASN1_STRING *tmp =
         X509_NAME_ENTRY_get_data(X509_NAME_get_entry(name, i));
 
       /* In OpenSSL 0.9.7d and earlier, ASN1_STRING_to_UTF8 fails if the input
