@@ -3245,10 +3245,10 @@ CURL_EXTERN const char *curl_share_strerror(CURLSHcode error);
  * DESCRIPTION
  *
  * The curl_easy_pause function pauses or unpauses transfers. Select the new
- * state by setting the bitmask, use the convenience defines below.
+ * state by setting the action bitmask, use the convenience defines below.
  *
  */
-CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
+CURL_EXTERN CURLcode curl_easy_pause(CURL *curl, int action);
 
 #define CURLPAUSE_RECV      (1 << 0)
 #define CURLPAUSE_RECV_CONT 0
