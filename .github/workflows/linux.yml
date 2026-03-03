@@ -306,7 +306,7 @@ jobs:
             CFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow,integer -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow,integer
             LDFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow,integer -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow,integer -ldl -lubsan
             CC: clang-20
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_BUILD_TYPE=Debug
 
           - name: 'address-sanitizer (gcc CM)'
             install_packages: gcc-14 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
@@ -314,7 +314,7 @@ jobs:
             CFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow
             LDFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow -ldl -lubsan
             CC: gcc-14
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_BUILD_TYPE=Debug
 
           - name: 'address-sanitizer (gcc AM)'
             install_packages: gcc-14 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
@@ -323,7 +323,7 @@ jobs:
             LDFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow
             LIBS: -ldl -lubsan
             CC: gcc-14
-            configure: --enable-debug --with-openssl --with-libssh --disable-unity
+            configure: --enable-debug --with-openssl --with-libssh
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang-20 libubsan1 libasan8 libtsan2
@@ -333,7 +333,7 @@ jobs:
             LDFLAGS: -fsanitize=address,undefined,bounds,signed-integer-overflow,integer -fno-sanitize-recover=address,undefined,bounds,signed-integer-overflow,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
             CC: clang-20
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON -DCMAKE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
             install_packages: clang-20 libtsan2
