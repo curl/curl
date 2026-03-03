@@ -82,8 +82,8 @@ builds a linked list. See curl_slist_append(3)
 ## Sharing data between transfers
 
 You can have multiple easy handles share certain data, even if they are used
-in different threads. This magic is setup using the share interface, as
-described in the libcurl-share(3) man page.
+in different threads. Set that up using the share interface, as described in
+the libcurl-share(3) man page.
 
 ## URL Parsing
 

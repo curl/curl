@@ -299,7 +299,7 @@ participate in. There are too many ways to do it and there is no knob we can
 use to turn off the practice.
 
 If you use curl or libcurl on Windows (any version), disable the use of the
-FILE protocol in curl or be prepared that accesses to a range of "magic paths"
+FILE protocol in curl or be prepared that accesses to a set of special paths
 potentially make your system access other hosts on your network. curl cannot
 protect you against this.
 

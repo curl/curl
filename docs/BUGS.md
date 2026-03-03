@@ -107,8 +107,8 @@ it out of an ambition to keep curl and libcurl excellent products and out of
 pride.
 
 Please do not assume that you can just lump over something to us and it then
-magically gets fixed after some given time. Most often we need feedback and
-help to understand what you have experienced and how to repeat a problem.
+automatically gets fixed after some given time. Most often we need feedback
+and help to understand what you have experienced and how to repeat a problem.
 Then we may only be able to assist YOU to debug the problem and to track down
 the proper fix.
 
