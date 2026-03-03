@@ -2695,7 +2695,7 @@ CURL_EXTERN char *curl_version(void);
  * %XX versions). This function returns a new allocated string or NULL if an
  * error occurred.
  */
-CURL_EXTERN char *curl_easy_escape(CURL *handle,
+CURL_EXTERN char *curl_easy_escape(CURL *curl,
                                    const char *string,
                                    int length);
 
@@ -2714,9 +2714,9 @@ CURL_EXTERN char *curl_escape(const char *string,
  * Conversion Note: On non-ASCII platforms the ASCII %XX codes are
  * converted into the host encoding.
  */
-CURL_EXTERN char *curl_easy_unescape(CURL *handle,
+CURL_EXTERN char *curl_easy_unescape(CURL *curl,
                                      const char *string,
-                                     int length,
+                                     int inlength,
                                      int *outlength);
 
 /* the previous version */
