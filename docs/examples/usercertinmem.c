@@ -52,7 +52,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
   /** This example uses a (fake) certificate and private key **/
-  /* replace the XXX with the actual CA certificate */
+  /* replace the XXX with the actual client/user certificate */
   static const char mypem[] =
     "-----BEGIN CERTIFICATE-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
