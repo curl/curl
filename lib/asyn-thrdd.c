@@ -567,6 +567,10 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     break;
   default:
 #ifdef CURL_IPRESOLVE_V6
+    /* When resolving IP addresses, some resolvers (e.g. macOS) will
+     * happily "embed" an IPv4 address into the IPv6 equivalent.
+     * This will then confuse FTP that has been told an IPv4 for
+     * DATA, but suddenly sees IPv6. */
     if(Curl_ipv6works(data) &&  !Curl_is_ipv4addr(async->hostname)) {
       result = async_thrdd_query(data, async, CURL_IPRESOLVE_V6);
       if(result)
