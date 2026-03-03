@@ -20,7 +20,7 @@ curl_easy_getinfo - extract information from a curl handle
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
 ~~~
 
 # DESCRIPTION
