@@ -394,6 +394,7 @@ else()
   set(_curl_use_pkgconfig_default OFF)
 endif()
 option(CURL_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_curl_use_pkgconfig_default})
+option(CURL_USE_CMAKECONFIG "Enable detecting dependencies via CMake Config" ON)
 
 # Initialize variables collecting system and dependency libs.
 set(CURL_NETWORK_AND_TIME_LIBS "")
@@ -2325,6 +2326,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   TARGETS_EXPORT_NAME
   #   CURL_SUPPORTED_FEATURES_LIST
   #   CURL_SUPPORTED_PROTOCOLS_LIST
+  #   CURL_USE_CMAKECONFIG
   #   CURL_USE_PKGCONFIG
   #   HAVE_BROTLI
   #   HAVE_GSSAPI

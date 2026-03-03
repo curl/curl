@@ -23,6 +23,8 @@
 ###########################################################################
 @PACKAGE_INIT@
 
+option(CURL_USE_CMAKECONFIG "Enable detecting @PROJECT_NAME@ dependencies via CMake Config. Default: @CURL_USE_CMAKECONFIG@"
+  "@CURL_USE_CMAKECONFIG@")
 option(CURL_USE_PKGCONFIG "Enable pkg-config to detect @PROJECT_NAME@ dependencies. Default: @CURL_USE_PKGCONFIG@"
   "@CURL_USE_PKGCONFIG@")
 
