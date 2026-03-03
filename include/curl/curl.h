@@ -3268,7 +3268,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *curl, int action);
  * The curl_easy_ssls_import function adds a previously exported SSL session
  * to the SSL session cache of the easy handle (or the underlying share).
  */
-CURL_EXTERN CURLcode curl_easy_ssls_import(CURL *handle,
+CURL_EXTERN CURLcode curl_easy_ssls_import(CURL *curl,
                                            const char *session_key,
                                            const unsigned char *shmac,
                                            size_t shmac_len,
@@ -3277,7 +3277,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_import(CURL *handle,
 
 /* This is the curl_ssls_export_cb callback prototype. It
  * is passed to curl_easy_ssls_export() to extract SSL sessions/tickets. */
-typedef CURLcode curl_ssls_export_cb(CURL *handle,
+typedef CURLcode curl_ssls_export_cb(CURL *curl,
                                      void *userptr,
                                      const char *session_key,
                                      const unsigned char *shmac,
@@ -3299,7 +3299,7 @@ typedef CURLcode curl_ssls_export_cb(CURL *handle,
  * callback.
  *
  */
-CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
+CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *curl,
                                            curl_ssls_export_cb *export_fn,
                                            void *userptr);
 
