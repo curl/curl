@@ -308,9 +308,10 @@ static CURLcode ssl_ca_setopts(struct OperationConfig *config, CURL *curl)
     blob.flags = CURL_BLOB_NOCOPY;
     notef("Using embedded CA bundle (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-    if(result == CURLE_NOT_BUILT_IN) {
+    if((result == CURLE_NOT_BUILT_IN) || (result == CURLE_UNKNOWN_OPTION)) {
       warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
+      result = CURLE_OK;
     }
   }
   if(!config->proxy_cacert && !config->proxy_capath) {
@@ -320,9 +321,10 @@ static CURLcode ssl_ca_setopts(struct OperationConfig *config, CURL *curl)
     blob.flags = CURL_BLOB_NOCOPY;
     notef("Using embedded CA bundle, for proxies (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
-    if(result == CURLE_NOT_BUILT_IN) {
+    if((result == CURLE_NOT_BUILT_IN) || (result == CURLE_UNKNOWN_OPTION)) {
       warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
+      result = CURLE_OK;
     }
   }
 #endif
