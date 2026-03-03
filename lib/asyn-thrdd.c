@@ -660,7 +660,9 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   if((thrdd->res_A && thrdd->res_A->res) ||
      (thrdd->res_AAAA && thrdd->res_AAAA->res)) {
     struct Curl_dns_entry *dns =
-      Curl_dns_entry_create2(data, &thrdd->res_A->res, &thrdd->res_AAAA->res,
+      Curl_dns_entry_create2(data,
+                             thrdd->res_A ? &thrdd->res_A->res : NULL,
+                             thrdd->res_AAAA ? &thrdd->res_AAAA->res : NULL,
                              async->hostname, async->port, async->ip_version);
     if(!dns)
       result = CURLE_OUT_OF_MEMORY;
