@@ -1406,9 +1406,11 @@ static CURLcode single_transfer(struct OperationConfig *config,
 {
   CURLcode result = CURLE_OK;
   struct State *state = &global->state;
-  char *httpgetfields = state->httpgetfields;
+  char *httpgetfields = NULL;
 
   *skipped = *added = FALSE; /* not yet */
+
+  state->httpgetfields = NULL;
 
   if(config->postfields) {
     if(config->use_httpget) {
