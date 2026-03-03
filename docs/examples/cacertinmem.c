@@ -80,10 +80,10 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "-----END CERTIFICATE-----\n";
 
   CURLcode result = CURLE_ABORTED_BY_CALLBACK;
-  X509_STORE *cts;
   BIO *cbio = NULL;
-  STACK_OF(X509_INFO) * inf;
+  X509_STORE *cts;
   ossl_valsize_t i;
+  STACK_OF(X509_INFO) * inf;
 
   (void)curl;
   (void)pointer;
