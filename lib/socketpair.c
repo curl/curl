@@ -317,6 +317,7 @@ int Curl_wakeup_signal(curl_socket_t socks[2])
 #endif
 
   while(1) {
+    err = 0;
     if(wakeup_write(socks[1], buf, sizeof(buf)) < 0) {
       err = SOCKERRNO;
 #ifdef USE_WINSOCK
