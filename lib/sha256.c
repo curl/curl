@@ -416,7 +416,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
    */
   if(md->curlen > 56) {
     while(md->curlen < 64) {
-      md->buf[md->curlen++] = (unsigned char)0;
+      md->buf[md->curlen++] = 0;
     }
     sha256_compress(md, md->buf);
     md->curlen = 0;
@@ -424,7 +424,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
 
   /* Pad up to 56 bytes of zeroes */
   while(md->curlen < 56) {
-    md->buf[md->curlen++] = (unsigned char)0;
+    md->buf[md->curlen++] = 0;
   }
 
   /* Store length */
