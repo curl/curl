@@ -129,15 +129,14 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 
 out:
   /* free resources that have been allocated by OpenSSL functions */
-
-  if(pkey)
-    EVP_PKEY_free(pkey);
+  if(bio)
+    BIO_free(bio);
 
   if(kbio)
     BIO_free(kbio);
 
-  if(bio)
-    BIO_free(bio);
+  if(pkey)
+    EVP_PKEY_free(pkey);
 
   if(cert)
     X509_free(cert);
