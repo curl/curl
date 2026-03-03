@@ -274,7 +274,7 @@ int main(int argc, const char *argv[])
     time_t tt_gmt;
     double tzonediffFloat;
     int tzonediffWord;
-    char timeBuf[61];
+    char timeBuf[61] = "";
     char tzoneBuf[16];
 
     SyncTime_CURL_Init(curl, conf.http_proxy, conf.proxy_user);
