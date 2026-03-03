@@ -248,9 +248,9 @@ The time, in seconds, it took from the start until the last byte is sent
 by libcurl. (Added in 8.10.0)
 
 ## `time_pretransfer`
-The time, in seconds, it took from the start until the file transfer was about
-to begin. This includes all pre-transfer commands and negotiations that are
-specific to the particular protocol(s) involved.
+The time, in seconds, it took from the start until immediately before the file
+transfer was about to begin. This includes all pre-transfer commands and
+negotiations that are specific to the particular protocol(s) involved.
 
 ## `time_queue`
 The time, in seconds, the transfer was queued during its run. This adds
