@@ -622,6 +622,9 @@ char *Curl_get_content_encodings(void)
         result = curlx_dyn_add(&enc, ce->name);
     }
   }
+  if(!result && !curlx_dyn_len(&enc))
+    result = curlx_dyn_add(&enc, CONTENT_ENCODING_DEFAULT);
+
   if(!result)
     return curlx_dyn_ptr(&enc);
   return NULL;
