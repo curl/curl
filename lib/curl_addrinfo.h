@@ -71,6 +71,7 @@ int Curl_getaddrinfo_ex(const char *nodename,
 struct Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port);
 #endif
 
+bool Curl_is_ipv4addr(const char *address);
 bool Curl_is_ipaddr(const char *address);
 CURLcode Curl_str2addr(const char *dotted, uint16_t port,
                        struct Curl_addrinfo **addrp);

@@ -175,7 +175,7 @@ async_thrdd_item_create(struct Curl_easy *data,
     break;
   default:
 #ifdef CURLRES_IPV6
-    if(Curl_ipv6works(data)) {
+    if(Curl_ipv6works(data) && !Curl_is_ipv4addr(hostname)) {
       item->hints.ai_family = PF_UNSPEC;
       VERBOSE(qtype = "A+AAAA");
     }
@@ -556,18 +556,28 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
   if(async->thrdd.queued || async->thrdd.done)
     return CURLE_FAILED_INIT;
 
+  switch(async->ip_version) {
 #ifdef CURL_IPRESOLVE_V6
-  if((async->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
+  case CURL_IPRESOLVE_V6:
     result = async_thrdd_query(data, async, CURL_IPRESOLVE_V6);
-    if(result)
-      goto out;
-  }
+    break;
 #endif
-  if((async->ip_version != CURL_IPRESOLVE_V6)) {
+  case CURL_IPRESOLVE_V4:
     result = async_thrdd_query(data, async, CURL_IPRESOLVE_V4);
-    if(result)
-      goto out;
+    break;
+  default:
+#ifdef CURL_IPRESOLVE_V6
+    if(Curl_ipv6works(data) &&  !Curl_is_ipv4addr(async->hostname)) {
+      result = async_thrdd_query(data, async, CURL_IPRESOLVE_V6);
+      if(result)
+        goto out;
+    }
+#endif
+    result = async_thrdd_query(data, async, CURL_IPRESOLVE_V4);
+    break;
   }
+  if(result)
+    goto out;
 
 #ifdef CURLVERBOSE
   Curl_thrdq_trace(data->multi->resolv_thrdq, data, &Curl_trc_feat_dns);

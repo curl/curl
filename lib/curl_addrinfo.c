@@ -422,6 +422,12 @@ CURLcode Curl_str2addr(const char *dotted, uint16_t port,
   return CURLE_BAD_FUNCTION_ARGUMENT; /* bad input format */
 }
 
+bool Curl_is_ipv4addr(const char *address)
+{
+  struct in_addr in;
+  return (curlx_inet_pton(AF_INET, address, &in) > 0);
+}
+
 bool Curl_is_ipaddr(const char *address)
 {
   struct in_addr in;
