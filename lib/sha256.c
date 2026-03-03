@@ -275,7 +275,7 @@ static const unsigned long K[64] = {
 
 #define Sha256_Ch(x, y, z)  (z ^ (x & (y ^ z)))
 #define Sha256_Maj(x, y, z) (((x | y) & z) | (x & y))
-#define Sha256_S(x, n)      RORc((x), (n))
+#define Sha256_S(x, n)      RORc(x, n)
 #define Sha256_R(x, n)      (((x) & 0xFFFFFFFFUL) >> (n))
 
 #define Sigma0(x)         (Sha256_S(x, 2) ^ Sha256_S(x, 13) ^ Sha256_S(x, 22))
