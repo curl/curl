@@ -67,7 +67,7 @@ Accept: */*
 Accept-Encoding: xxx
 
 </protocol>
-<stderr>
+<stderr mode="text">
 24
 </stderr>
 </verify>
