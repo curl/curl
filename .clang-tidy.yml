@@ -34,7 +34,7 @@ Checks:
 # - bugprone-unchecked-string-to-number-conversion  # needs converting sscanf to strtol or curlx_str_*
   - misc-const-correctness
   - misc-header-include-cycle
-  - misc-redundant-expression
+# - misc-redundant-expression  # undesired hits due to system macros, e.g. due to POLLIN == POLLRDNORM | POLLRDBAND, then or-ing all three
   - portability-*
   - readability-duplicate-include
 # - readability-else-after-return
