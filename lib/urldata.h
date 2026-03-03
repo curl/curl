@@ -76,6 +76,8 @@
 
 #define CURLPROTO_MQTTS   (1LL << 32)
 
+#define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)
+
 /* the default protocols accepting a redirect to */
 #define CURLPROTO_REDIR (CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP | \
                          CURLPROTO_FTPS)

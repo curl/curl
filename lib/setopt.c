@@ -2365,7 +2365,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     else
       /* make a NULL argument reset to default */
-      s->allowed_protocols = (curl_prot_t)CURLPROTO_ALL;
+      s->allowed_protocols = (curl_prot_t)CURLPROTO_64ALL;
     break;
   case CURLOPT_REDIR_PROTOCOLS_STR:
     if(ptr) {
