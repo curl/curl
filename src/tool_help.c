@@ -341,10 +341,7 @@ void tool_version_info(void)
 #endif /* !CURL_DISABLE_IPFS */
     curl_mprintf("Protocols:");
     for(builtin = built_in_protos; *builtin; ++builtin) {
-      /* Special case: do not list rtmp?* protocols.
-         They may only appear together with "rtmp" */
-      if(!curl_strnequal(*builtin, "rtmp", 4) || !builtin[0][4])
-        curl_mprintf(" %s", *builtin);
+      curl_mprintf(" %s", *builtin);
 #ifndef CURL_DISABLE_IPFS
       if(insert && insert == *builtin) {
         curl_mprintf(" ipfs ipns");

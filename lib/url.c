@@ -112,7 +112,6 @@
 #include "imap.h"
 #include "url.h"
 #include "connect.h"
-#include "curl_rtmp.h"
 #include "gopher.h"
 #include "mqtt.h"
 #include "rtsp.h"
@@ -1485,55 +1484,49 @@ const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len)
      6. make sure this function uses the same hash function that worked for
      schemetable.c
      */
-  static const struct Curl_scheme * const all_schemes[67] = {
-    &Curl_scheme_file,
-    &Curl_scheme_mqtts, NULL,
-    &Curl_scheme_gophers, NULL,
-    &Curl_scheme_rtmpe,
-    &Curl_scheme_smtp,
-    &Curl_scheme_sftp,
-    &Curl_scheme_smb,
-    &Curl_scheme_smtps,
-    &Curl_scheme_telnet,
-    &Curl_scheme_gopher,
-    &Curl_scheme_tftp, NULL, NULL, NULL,
-    &Curl_scheme_ftps,
-    &Curl_scheme_http,
-    &Curl_scheme_imap,
-    &Curl_scheme_rtmps,
-    &Curl_scheme_rtmpt, NULL, NULL, NULL,
-    &Curl_scheme_ldaps,
-    &Curl_scheme_wss,
-    &Curl_scheme_https, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    &Curl_scheme_rtsp,
-    &Curl_scheme_smbs,
-    &Curl_scheme_scp, NULL, NULL, NULL,
-    &Curl_scheme_pop3, NULL, NULL,
-    &Curl_scheme_rtmp, NULL, NULL, NULL,
-    &Curl_scheme_rtmpte, NULL, NULL, NULL,
-    &Curl_scheme_dict, NULL, NULL, NULL,
+  static const struct Curl_scheme * const all_schemes[47] = {
     &Curl_scheme_mqtt,
+    &Curl_scheme_smtp,
+    &Curl_scheme_tftp,
+    &Curl_scheme_imap, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    &Curl_scheme_ldaps,
+    &Curl_scheme_dict, NULL,
+    &Curl_scheme_file, NULL,
     &Curl_scheme_pop3s,
-    &Curl_scheme_imaps, NULL,
-    &Curl_scheme_ws, NULL,
-    &Curl_scheme_rtmpts,
-    &Curl_scheme_ldap, NULL, NULL,
     &Curl_scheme_ftp,
+    &Curl_scheme_scp,
+    &Curl_scheme_mqtts,
+    &Curl_scheme_imaps,
+    &Curl_scheme_ldap,
+    &Curl_scheme_http,
+    &Curl_scheme_smb, NULL, NULL,
+    &Curl_scheme_telnet,
+    &Curl_scheme_https,
+    &Curl_scheme_gopher,
+    &Curl_scheme_rtsp, NULL, NULL,
+    &Curl_scheme_wss, NULL,
+    &Curl_scheme_gophers,
+    &Curl_scheme_smtps,
+    &Curl_scheme_pop3,
+    &Curl_scheme_ws, NULL, NULL,
+    &Curl_scheme_sftp,
+    &Curl_scheme_ftps, NULL,
+    &Curl_scheme_smbs, NULL,
   };
 
   if(len && (len <= 7)) {
     const char *s = scheme;
     size_t l = len;
     const struct Curl_scheme *h;
-    unsigned int c = 978;
+    unsigned int c = 792;
     while(l) {
-      c <<= 5;
+      c <<= 4;
       c += (unsigned int)Curl_raw_tolower(*s);
       s++;
       l--;
     }
 
-    h = all_schemes[c % 67];
+    h = all_schemes[c % 47];
     if(h && curl_strnequal(scheme, h->name, len) && !h->name[len])
       return h;
   }

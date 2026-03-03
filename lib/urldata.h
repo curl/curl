@@ -45,9 +45,6 @@
 #define PORT_SMTP   25
 #define PORT_SMTPS  465 /* sometimes called SSMTP */
 #define PORT_RTSP   554
-#define PORT_RTMP   1935
-#define PORT_RTMPT  PORT_HTTP
-#define PORT_RTMPS  PORT_HTTPS
 #define PORT_GOPHER 70
 #define PORT_MQTT   1883
 #define PORT_MQTTS  8883
