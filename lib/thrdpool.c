@@ -331,6 +331,10 @@ CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads)
       Curl_cond_signal(&tslot->await);
       --nthreads;
     }
+    else if(!tslot->starttime.tv_sec && !tslot->starttime.tv_usec) {
+      /* starting thread, queries for work soon. */
+      --nthreads;
+    }
   }
 
   while(nthreads && !result &&

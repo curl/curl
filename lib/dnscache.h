@@ -68,6 +68,13 @@ Curl_dns_entry_create(struct Curl_easy *data,
                       const char *hostname,
                       uint16_t port, uint8_t ip_version);
 
+struct Curl_dns_entry *
+Curl_dns_entry_create2(struct Curl_easy *data,
+                       struct Curl_addrinfo **paddr1,
+                       struct Curl_addrinfo **paddr2,
+                       const char *hostname,
+                       uint16_t port, uint8_t ip_version);
+
 /* Increase the ref counter and return it for storing in another place.
  * May be called with NULL, in which case it returns NULL. */
 struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,

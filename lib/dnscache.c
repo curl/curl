@@ -443,7 +443,8 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 static struct Curl_dns_entry *
 dnscache_entry_create(struct Curl_easy *data,
                       struct Curl_dnscache *cache,
-                      struct Curl_addrinfo **paddr,
+                      struct Curl_addrinfo **paddr1,
+                      struct Curl_addrinfo **paddr2,
                       const char *hostname,
                       size_t hostlen,
                       uint16_t port,
@@ -452,17 +453,6 @@ dnscache_entry_create(struct Curl_easy *data,
 {
   struct Curl_dns_entry *dns = NULL;
 
-#ifndef CURL_DISABLE_SHUFFLE_DNS
-  /* shuffle addresses if requested */
-  if(data->set.dns_shuffle_addresses && paddr) {
-    CURLcode result = Curl_shuffle_addr(data, paddr);
-    if(result)
-      goto out;
-  }
-#else
-  (void)data;
-#endif
-
   /* Create a new cache entry, struct already has the hostname NUL */
   dns = curlx_calloc(1, sizeof(struct Curl_dns_entry) + hostlen);
   if(!dns)
@@ -470,7 +460,6 @@ dnscache_entry_create(struct Curl_easy *data,
 
   dns->cache = cache;
   dns->refcount = 1; /* the cache has the first reference */
-  dns->addr = paddr ? *paddr : NULL; /* this is the address(es) */
   if(permanent) {
     dns->timestamp.tv_sec = 0; /* an entry that never goes stale */
     dns->timestamp.tv_usec = 0; /* an entry that never goes stale */
@@ -483,11 +472,38 @@ dnscache_entry_create(struct Curl_easy *data,
   if(hostlen)
     memcpy(dns->hostname, hostname, hostlen);
 
+  /* Take the given address lists into the entry */
+  if(paddr1 && *paddr1) {
+    dns->addr = *paddr1;
+    *paddr1 = NULL;
+  }
+  if(paddr2 && *paddr2) {
+    struct Curl_addrinfo **phead = &dns->addr;
+    while(*phead)
+      phead = &(*phead)->ai_next;
+    *phead = *paddr2;
+    *paddr2 = NULL;
+  }
+
+#ifndef CURL_DISABLE_SHUFFLE_DNS
+  /* shuffle addresses if requested */
+  if(data->set.dns_shuffle_addresses && dns->addr) {
+    CURLcode result = Curl_shuffle_addr(data, &dns->addr);
+    if(result)
+      goto out;
+  }
+#else
+  (void)data;
+#endif
+
 out:
-  if(paddr) {
-    if(!dns)
-      Curl_freeaddrinfo(*paddr);
-    *paddr = NULL;
+  if(paddr1 && *paddr1) {
+    Curl_freeaddrinfo(*paddr1);
+    *paddr1 = NULL;
+  }
+  if(paddr2 && *paddr2) {
+    Curl_freeaddrinfo(*paddr2);
+    *paddr2 = NULL;
   }
   return dns;
 }
@@ -499,10 +515,23 @@ Curl_dns_entry_create(struct Curl_easy *data,
                       uint16_t port,
                       uint8_t ip_version)
 {
-  return dnscache_entry_create(data, NULL, paddr, hostname,
+  return dnscache_entry_create(data, NULL, paddr, NULL, hostname,
                                hostname ? strlen(hostname) : 0,
                                port, ip_version, FALSE);
 }
+
+struct Curl_dns_entry *
+Curl_dns_entry_create2(struct Curl_easy *data,
+                       struct Curl_addrinfo **paddr1,
+                       struct Curl_addrinfo **paddr2,
+                       const char *hostname,
+                       uint16_t port, uint8_t ip_version)
+{
+  return dnscache_entry_create(data, NULL, paddr1, paddr2, hostname,
+                               hostname ? strlen(hostname) : 0,
+                               port, ip_version, FALSE);
+}
+
 
 static struct Curl_dns_entry *
 dnscache_add_addr(struct Curl_easy *data,
@@ -518,7 +547,8 @@ dnscache_add_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
-  dns = dnscache_entry_create(data, dnscache, paddr, hostname, hlen, port,
+  dns = dnscache_entry_create(data, dnscache, paddr, NULL,
+                              hostname, hlen, port,
                               ip_version, permanent);
   if(!dns)
     return NULL;

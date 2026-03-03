@@ -162,22 +162,25 @@ async_thrdd_item_create(struct Curl_easy *data,
   item->conn_id = data->conn ? data->conn->connection_id : -1;
 
 #ifdef HAVE_GETADDRINFO
-  {
-    int pf = PF_INET;
+  item->hints.ai_family = PF_INET;
+  item->hints.ai_socktype = Curl_socktype_for_transport(transport);
+  switch(ip_version) {
 #ifdef CURLRES_IPV6
-    if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
-      /* The stack seems to be IPv6-enabled */
-      if(ip_version == CURL_IPRESOLVE_V6)
-        pf = PF_INET6;
-      else
-        pf = PF_UNSPEC;
-    }
-#endif /* CURLRES_IPV6 */
-    item->hints.ai_family = pf;
-    item->hints.ai_socktype = Curl_socktype_for_transport(transport);
-#ifdef CURLVERBOSE
-    qtype = (pf == PF_INET6) ? "AAAA" : "A+AAAA";
+  case CURL_IPRESOLVE_V6:
+    item->hints.ai_family = PF_INET6;
+    VERBOSE(qtype = "AAAA");
+    break;
 #endif
+  case CURL_IPRESOLVE_V4:
+    break;
+  default:
+#ifdef CURLRES_IPV6
+    if(Curl_ipv6works(data)) {
+      item->hints.ai_family = PF_UNSPEC;
+      VERBOSE(qtype = "A+AAAA");
+    }
+#endif
+    break;
   }
 #endif /* HAVE_GETADDRINFO */
 
@@ -317,8 +320,10 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data,
   }
   Curl_httpsrr_cleanup(&async->thrdd.rr.hinfo);
 #endif
-  async_thrdd_item_destroy(async->thrdd.resolved);
-  async->thrdd.resolved = NULL;
+  async_thrdd_item_destroy(async->thrdd.res_A);
+  async->thrdd.res_A = NULL;
+  async_thrdd_item_destroy(async->thrdd.res_AAAA);
+  async->thrdd.res_AAAA = NULL;
 }
 
 /*
@@ -492,10 +497,21 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
     if(data && data->conn && data->state.async &&
        (data->conn->connection_id == item->conn_id)) {
       struct Curl_resolv_async *async = data->state.async;
+      struct async_thrdd_item **pdest = &async->thrdd.res_A;
 
-      async->thrdd.resolved = item;
-      async->thrdd.done = TRUE;
-      item = NULL;
+      --async->thrdd.queued;
+      async->thrdd.done = !async->thrdd.queued;
+
+#ifdef CURLRES_IPV6
+      if(item->ip_version == CURL_IPRESOLVE_V6)
+        pdest = &async->thrdd.res_AAAA;
+#endif
+      if(!*pdest) {
+        *pdest = item;
+        item = NULL;
+      }
+      else
+        DEBUGASSERT(0); /* should not receive duplicates here */
       Curl_multi_mark_dirty(data);
     }
     async_thrdd_item_free(item);
@@ -505,29 +521,54 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
 #endif
 }
 
-CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
-                                struct Curl_resolv_async *async)
+static CURLcode async_thrdd_query(struct Curl_easy *data,
+                                  struct Curl_resolv_async *async,
+                                  uint8_t query_version)
 {
   struct async_thrdd_item *item;
   CURLcode result;
 
-  if(async->thrdd.queued || async->thrdd.done || async->thrdd.resolved)
-    return CURLE_FAILED_INIT;
-
   item = async_thrdd_item_create(data, async->hostname, async->port,
-                                 async->ip_version, async->transport);
+                                 query_version, async->transport);
   if(!item) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-
   CURL_TRC_DNS(data, "[async] queueing %s", item->description);
   result = Curl_thrdq_send(data->multi->resolv_thrdq, item,
                            async_item_description(item), async->timeout_ms);
-  if(!result) {
-    item = NULL;
-    async->thrdd.queued = TRUE;
+  if(result)
+    goto out;
+  item = NULL;
+  async->thrdd.queued++;
+
+out:
+  if(item)
+    async_thrdd_item_free(item);
+  return result;
+}
+
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
+                                struct Curl_resolv_async *async)
+{
+  CURLcode result = CURLE_FAILED_INIT;
+
+  if(async->thrdd.queued || async->thrdd.done)
+    return CURLE_FAILED_INIT;
+
+#ifdef CURL_IPRESOLVE_V6
+  if((async->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
+    result = async_thrdd_query(data, async, CURL_IPRESOLVE_V6);
+    if(result)
+      goto out;
   }
+#endif
+  if((async->ip_version != CURL_IPRESOLVE_V6)) {
+    result = async_thrdd_query(data, async, CURL_IPRESOLVE_V4);
+    if(result)
+      goto out;
+  }
+
 #ifdef CURLVERBOSE
   Curl_thrdq_trace(data->multi->resolv_thrdq, data, &Curl_trc_feat_dns);
 #endif
@@ -539,8 +580,6 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 #endif
 
 out:
-  if(item)
-    async_thrdd_item_free(item);
   if(result)
     CURL_TRC_DNS(data, "[async] error queueing %s:%d -> %d",
                  async->hostname, async->port, result);
@@ -600,7 +639,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
 
   DEBUGASSERT(pdns);
   *pdns = NULL;
-  if(!thrdd->queued) {
+  if(!thrdd->queued && !thrdd->done) {
     DEBUGASSERT(0);
     return CURLE_FAILED_INIT;
   }
@@ -618,10 +657,11 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   }
 
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
-  if(thrdd->resolved && thrdd->resolved->res) {
+  if((thrdd->res_A && thrdd->res_A->res) ||
+     (thrdd->res_AAAA && thrdd->res_AAAA->res)) {
     struct Curl_dns_entry *dns =
-      Curl_dns_entry_create(data, &thrdd->resolved->res,
-                            async->hostname, async->port, async->ip_version);
+      Curl_dns_entry_create2(data, &thrdd->res_A->res, &thrdd->res_AAAA->res,
+                             async->hostname, async->port, async->ip_version);
     if(!dns)
       result = CURLE_OUT_OF_MEMORY;
 
@@ -640,7 +680,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
 #endif
     if(!result && dns) {
       CURL_TRC_DNS(data, "[async] resolved: %s",
-                   thrdd->resolved->description);
+                   thrdd->res_A->description);
       *pdns = dns;
       dns = NULL;
     }
