@@ -400,7 +400,7 @@ void Curl_init_userdefined(struct Curl_easy *data)
 #endif
 
   set->new_file_perms = 0644;    /* Default permissions */
-  set->allowed_protocols = (curl_prot_t) CURLPROTO_ALL;
+  set->allowed_protocols = (curl_prot_t) CURLPROTO_64ALL;
   set->redir_protocols = CURLPROTO_REDIR;
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)

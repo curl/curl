@@ -74,18 +74,15 @@
 #define CURLPROTO_WSS    0L
 #endif
 
+#define CURLPROTO_MQTTS   (1LL << 32)
+
+#define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)
+
 /* the default protocols accepting a redirect to */
 #define CURLPROTO_REDIR (CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP | \
                          CURLPROTO_FTPS)
 
-/* This should be undefined once we need bit 32 or higher */
-#define PROTO_TYPE_SMALL
-
-#ifndef PROTO_TYPE_SMALL
 typedef curl_off_t curl_prot_t;
-#else
-typedef uint32_t curl_prot_t;
-#endif
 
 /* This mask is for all the old protocols that are provided and defined in the
    public header and shall exclude protocols added since which are not exposed
