@@ -81,8 +81,13 @@ if(NOT DEFINED NGTCP2_INCLUDE_DIR AND
     pkg_check_modules(_ngtcp2 ${_ngtcp2_pc_requires})
     set(_tried_pkgconfig TRUE)
   endif()
-  if(NOT _ngtcp2_FOUND AND CURL_USE_CMAKECONFIG AND _ngtcp2_crypto_backend STREQUAL "ossl")
+  if(NOT _ngtcp2_FOUND AND CURL_USE_CMAKECONFIG)
     find_package(ngtcp2 CONFIG QUIET)
+    # Skip using it if the crypto library target is not available
+    if(ngtcp2_CONFIG AND
+       NOT(ngtcp2_VERSION GREATER_EQUAL 1.19.0 AND _ngtcp2_crypto_backend STREQUAL "ossl"))
+      unset(ngtcp2_CONFIG)
+    endif()
   endif()
 endif()
 
