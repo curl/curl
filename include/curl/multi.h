@@ -132,8 +132,8 @@ CURL_EXTERN CURLM *curl_multi_init(void);
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
-                                            CURL *curl_handle);
+CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi,
+                                            CURL *curl);
 
 /*
  * Name:    curl_multi_remove_handle()
@@ -142,8 +142,8 @@ CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
-                                               CURL *curl_handle);
+CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi,
+                                               CURL *curl);
 
 /*
  * Name:    curl_multi_fdset()
@@ -154,7 +154,7 @@ CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi,
                                        fd_set *read_fd_set,
                                        fd_set *write_fd_set,
                                        fd_set *exc_fd_set,
@@ -168,7 +168,7 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
  *
  * Returns:  CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi,
                                       struct curl_waitfd extra_fds[],
                                       unsigned int extra_nfds,
                                       int timeout_ms,
@@ -182,7 +182,7 @@ CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
  *
  * Returns:  CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi,
                                       struct curl_waitfd extra_fds[],
                                       unsigned int extra_nfds,
                                       int timeout_ms,
@@ -195,7 +195,7 @@ CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi_handle,
  *
  * Returns:  CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *multi_handle);
+CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *multi);
 
 /*
  * Name:    curl_multi_perform()
@@ -213,7 +213,7 @@ CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *multi_handle);
  *          still have occurred problems on individual transfers even when
  *          this returns OK.
  */
-CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi,
                                          int *running_handles);
 
 /*
@@ -226,7 +226,7 @@ CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
+CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi);
 
 /*
  * Name:    curl_multi_info_read()
@@ -256,7 +256,7 @@ CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
  *          queue (after this read) in the integer the second argument points
  *          to.
  */
-CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
+CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi,
                                           int *msgs_in_queue);
 
 /*
