@@ -85,7 +85,8 @@ if(NOT DEFINED NGTCP2_INCLUDE_DIR AND
     find_package(ngtcp2 CONFIG QUIET)
     # Skip using it if the crypto library target is not available
     if(ngtcp2_CONFIG AND
-       NOT(ngtcp2_VERSION GREATER_EQUAL 1.19.0 AND _ngtcp2_crypto_backend STREQUAL "ossl"))
+       NOT TARGET ngtcp2::${_crypto_library_lower} AND
+       NOT TARGET ngtcp2::${_crypto_library_lower}_static)
       unset(ngtcp2_CONFIG)
     endif()
   endif()
