@@ -45,13 +45,17 @@ endif()
 
 set(_mbedtls_pc_requires "mbedtls" "mbedx509" "mbedcrypto")
 
-if(CURL_USE_PKGCONFIG AND
-   NOT DEFINED MBEDTLS_INCLUDE_DIR AND
+if(NOT DEFINED MBEDTLS_INCLUDE_DIR AND
    NOT DEFINED MBEDTLS_LIBRARY AND
    NOT DEFINED MBEDX509_LIBRARY AND
    NOT DEFINED MBEDCRYPTO_LIBRARY)
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(_mbedtls ${_mbedtls_pc_requires})
+  if(CURL_USE_PKGCONFIG AND FALSE)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_mbedtls ${_mbedtls_pc_requires})
+  endif()
+  if(NOT _mbedtls_FOUND AND CURL_USE_CMAKECONFIG)
+    find_package(MbedTLS CONFIG QUIET)
+  endif()
 endif()
 
 if(_mbedtls_FOUND)
@@ -65,6 +69,18 @@ if(_mbedtls_FOUND)
     set(_mbedtls_LIBRARIES    "${_mbedtls_STATIC_LIBRARIES}")
   endif()
   message(STATUS "Found MbedTLS (via pkg-config): ${_mbedtls_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
+elseif(MbedTLS_CONFIG)
+  set(MbedTLS_FOUND TRUE)
+  set(MBEDTLS_FOUND TRUE)
+  set(MBEDTLS_VERSION ${MbedTLS_VERSION})
+  if(MBEDTLS_VERSION GREATER_EQUAL 4.0.0)
+    set(_curl_use_target MbedTLS::tfpsacrypto)
+  else()
+    set(_curl_use_target MbedTLS::mbedcrypto)
+  endif()
+  list(APPEND _curl_use_target MbedTLS::mbedx509 MbedTLS::mbedtls)
+  add_library(CURL::mbedtls ALIAS ${_curl_use_target})
+  message(STATUS "Found MbedTLS (via CMake Config): ${MbedTLS_CONFIG} (found version \"${NGHTTP2_VERSION}\")")
 else()
   set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
