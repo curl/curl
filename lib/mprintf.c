@@ -1071,7 +1071,7 @@ static int addbyter(unsigned char outc, void *f)
 }
 
 int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
-                    va_list ap_save)
+                    va_list args)
 {
   int retcode;
   struct nsprintf info;
@@ -1080,7 +1080,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   info.length = 0;
   info.max = maxlength;
 
-  retcode = formatf(&info, addbyter, format, ap_save);
+  retcode = formatf(&info, addbyter, format, args);
   if(info.max) {
     /* we terminate this with a zero byte */
     if(info.max == info.length) {
@@ -1098,10 +1098,10 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
 int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 {
   int retcode;
-  va_list ap_save; /* argument pointer */
-  va_start(ap_save, format);
-  retcode = curl_mvsnprintf(buffer, maxlength, format, ap_save);
-  va_end(ap_save);
+  va_list args; /* argument pointer */
+  va_start(args, format);
+  retcode = curl_mvsnprintf(buffer, maxlength, format, args);
+  va_end(args);
   return retcode;
 }
 
@@ -1118,13 +1118,13 @@ static int alloc_addbyter(unsigned char outc, void *f)
 }
 
 /* appends the formatted string, returns MERR error code */
-int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
+int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list args)
 {
   struct asprintf info;
   info.b = dyn;
   info.merr = MERR_OK;
 
-  (void)formatf(&info, alloc_addbyter, format, ap_save);
+  (void)formatf(&info, alloc_addbyter, format, args);
   if(info.merr) {
     curlx_dyn_free(info.b);
     return info.merr;
@@ -1132,7 +1132,7 @@ int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
   return 0;
 }
 
-char *curl_mvaprintf(const char *format, va_list ap_save)
+char *curl_mvaprintf(const char *format, va_list args)
 {
   struct asprintf info;
   struct dynbuf dyn;
@@ -1140,7 +1140,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   curlx_dyn_init(info.b, DYN_APRINTF);
   info.merr = MERR_OK;
 
-  (void)formatf(&info, alloc_addbyter, format, ap_save);
+  (void)formatf(&info, alloc_addbyter, format, args);
   if(info.merr) {
     curlx_dyn_free(info.b);
     return NULL;
@@ -1152,11 +1152,11 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
 
 char *curl_maprintf(const char *format, ...)
 {
-  va_list ap_save;
+  va_list args;
   char *s;
-  va_start(ap_save, format);
-  s = curl_mvaprintf(format, ap_save);
-  va_end(ap_save);
+  va_start(args, format);
+  s = curl_mvaprintf(format, args);
+  va_end(args);
   return s;
 }
 
@@ -1170,11 +1170,11 @@ static int storebuffer(unsigned char outc, void *f)
 
 int curl_msprintf(char *buffer, const char *format, ...)
 {
-  va_list ap_save; /* argument pointer */
+  va_list args; /* argument pointer */
   int retcode;
-  va_start(ap_save, format);
-  retcode = formatf(&buffer, storebuffer, format, ap_save);
-  va_end(ap_save);
+  va_start(args, format);
+  retcode = formatf(&buffer, storebuffer, format, args);
+  va_end(args);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
@@ -1190,36 +1190,36 @@ static int fputc_wrapper(unsigned char outc, void *f)
 int curl_mprintf(const char *format, ...)
 {
   int retcode;
-  va_list ap_save; /* argument pointer */
-  va_start(ap_save, format);
-  retcode = formatf(stdout, fputc_wrapper, format, ap_save);
-  va_end(ap_save);
+  va_list args; /* argument pointer */
+  va_start(args, format);
+  retcode = formatf(stdout, fputc_wrapper, format, args);
+  va_end(args);
   return retcode;
 }
 
-int curl_mfprintf(FILE *whereto, const char *format, ...)
+int curl_mfprintf(FILE *fd, const char *format, ...)
 {
   int retcode;
-  va_list ap_save; /* argument pointer */
-  va_start(ap_save, format);
-  retcode = formatf(whereto, fputc_wrapper, format, ap_save);
-  va_end(ap_save);
+  va_list args; /* argument pointer */
+  va_start(args, format);
+  retcode = formatf(fd, fputc_wrapper, format, args);
+  va_end(args);
   return retcode;
 }
 
-int curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
+int curl_mvsprintf(char *buffer, const char *format, va_list args)
 {
-  int retcode = formatf(&buffer, storebuffer, format, ap_save);
+  int retcode = formatf(&buffer, storebuffer, format, args);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 
-int curl_mvprintf(const char *format, va_list ap_save)
+int curl_mvprintf(const char *format, va_list args)
 {
-  return formatf(stdout, fputc_wrapper, format, ap_save);
+  return formatf(stdout, fputc_wrapper, format, args);
 }
 
-int curl_mvfprintf(FILE *whereto, const char *format, va_list ap_save)
+int curl_mvfprintf(FILE *fd, const char *format, va_list args)
 {
-  return formatf(whereto, fputc_wrapper, format, ap_save);
+  return formatf(fd, fputc_wrapper, format, args);
 }

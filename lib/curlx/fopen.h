@@ -47,7 +47,7 @@ HANDLE curlx_CreateFile(const char *filename,
 #define curlx_fstat             _fstati64
 #define curlx_struct_stat       struct _stati64
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
-FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fh);
+FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp);
 int curlx_win32_stat(const char *path, curlx_struct_stat *buffer);
 int curlx_win32_open(const char *filename, int oflag, ...);
 int curlx_win32_rename(const char *oldpath, const char *newpath);
