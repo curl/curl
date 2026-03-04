@@ -1528,7 +1528,7 @@ static CURLcode nw_in_recv(void *reader_ctx,
 }
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer,
-                      size_t buflen, size_t *nread,
+                      size_t buflen, size_t *recv,
                       const struct curl_ws_frame **metap)
 {
   struct Curl_easy *data = curl;
@@ -1536,7 +1536,7 @@ CURLcode curl_ws_recv(CURL *curl, void *buffer,
   struct websocket *ws;
   struct ws_collect ctx;
 
-  *nread = 0;
+  *recv = 0;
   *metap = NULL;
   if(!GOOD_EASY_HANDLE(data) || (buflen && !buffer))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1609,10 +1609,10 @@ CURLcode curl_ws_recv(CURL *curl, void *buffer,
   update_meta(ws, ctx.frame_age, ctx.frame_flags, ctx.payload_offset,
               ctx.payload_len, ctx.bufidx);
   *metap = &ws->recvframe;
-  *nread = ws->recvframe.len;
+  *recv = ws->recvframe.len;
   CURL_TRC_WS(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
               FMT_OFF_T ", %" FMT_OFF_T " left)",
-              buflen, *nread, ws->recvframe.offset,
+              buflen, *recv, ws->recvframe.offset,
               ws->recvframe.bytesleft);
   /* all's well, try to send any pending control. we do not know
    * when the application will call `curl_ws_send()` again. */
@@ -1941,13 +1941,13 @@ const struct Curl_protocol Curl_protocol_ws = {
 #else
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                      size_t *nread,
+                      size_t *recv,
                       const struct curl_ws_frame **metap)
 {
   (void)curl;
   (void)buffer;
   (void)buflen;
-  (void)nread;
+  (void)recv;
   (void)metap;
   return CURLE_NOT_BUILT_IN;
 }

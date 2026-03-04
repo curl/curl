@@ -3724,13 +3724,13 @@ void Curl_expire_clear(struct Curl_easy *data)
 }
 
 CURLMcode curl_multi_assign(CURLM *m, curl_socket_t s,
-                            void *hashp)
+                            void *sockp)
 {
   struct Curl_multi *multi = m;
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-  return Curl_multi_ev_assign(multi, s, hashp);
+  return Curl_multi_ev_assign(multi, s, sockp);
 }
 
 static void move_pending_to_connect(struct Curl_multi *multi,
