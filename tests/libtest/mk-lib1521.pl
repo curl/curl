@@ -288,7 +288,7 @@ static void t1521_geterr(const char *name, CURLcode val, int lineno)
 
 static curl_progress_callback progresscb;
 static curl_write_callback headercb;
-static curl_write_callback_ex headerfunction_extended_cb;
+static curl_write_callback_ex headerfunction_extendedcb;
 static curl_debug_callback debugcb;
 static curl_trailer_callback trailercb;
 static curl_ssl_ctx_callback ssl_ctx_cb;
@@ -560,9 +560,8 @@ MOO
             print $fh "${pref} NULL);\n$nullcheck";
         }
         elsif($type eq "CURLOPTTYPE_FUNCTIONPOINT") {
-            if($name =~ /([^ ]*)FUNCTION/) {
+            if($name =~ /CURLOPT_(.*)/) {
                 my $l=lc($1);
-                $l =~ s/^curlopt_//;
                 print $fh "${fpref}\n$i${l}cb);\n$fcheck";
             }
             else {
