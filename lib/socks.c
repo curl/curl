@@ -341,6 +341,8 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
 
   if(result || !dns) {
     failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.", sx->hostname);
+    if(dns)
+      Curl_resolv_unlink(data, &dns);
     return CURLPX_RESOLVE_HOST;
   }
 
@@ -371,6 +373,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
       return CURLPX_SEND_REQUEST;
   }
   else {
+    Curl_resolv_unlink(data, &dns);
     failf(data, "SOCKS4 connection to %s not supported", sx->hostname);
     return CURLPX_RESOLVE_HOST;
   }
