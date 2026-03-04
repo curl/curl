@@ -199,13 +199,13 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              const char *service,
-                                             const char *hostname,
+                                             const char *host,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out);
 
 /* This is used to decode a base64 encoded NTLM type-2 message */
 CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
-                                             const struct bufref *type2ref,
+                                             const struct bufref *type2,
                                              struct ntlmdata *ntlm);
 
 /* This is used to generate a base64 encoded NTLM type-3 message */
@@ -263,7 +263,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               const char *passwdp,
                                               const char *service,
                                               const char *host,
-                                              const bool mutual,
+                                              const bool mutual_auth,
                                               const struct bufref *chlg,
                                               struct kerberos5data *krb5,
                                               struct bufref *out);

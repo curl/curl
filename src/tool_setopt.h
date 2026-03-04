@@ -78,7 +78,7 @@ extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 /* Intercept setopt calls for --libcurl */
 
 CURLcode tool_setopt_enum(CURL *curl, const char *name, CURLoption tag,
-                          const struct NameValue *nv, long lval);
+                          const struct NameValue *nvlist, long lval);
 CURLcode tool_setopt_SSLVERSION(CURL *curl, const char *name, CURLoption tag,
                                 long lval);
 CURLcode tool_setopt_flags(CURL *curl, struct OperationConfig *config,
@@ -86,7 +86,8 @@ CURLcode tool_setopt_flags(CURL *curl, struct OperationConfig *config,
                            const struct NameValue *nv, long lval);
 CURLcode tool_setopt_bitmask(CURL *curl,
                              const char *name, CURLoption tag,
-                             const struct NameValueUnsigned *nv, long lval);
+                             const struct NameValueUnsigned *nvlist,
+                             long lval);
 CURLcode tool_setopt_mimepost(CURL *curl, struct OperationConfig *config,
                               const char *name, CURLoption tag,
                               curl_mime *mimepost);

@@ -25,7 +25,7 @@
  ***************************************************************************/
 CURLcode Curl_rand_bytes(struct Curl_easy *data,
 #ifdef DEBUGBUILD
-                         bool allow_env_override,
+                         bool env_override,
 #endif
                          unsigned char *rnd, size_t num);
 
