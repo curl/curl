@@ -38,7 +38,7 @@ Checks:
   - portability-*
   - readability-duplicate-include
 # - readability-else-after-return
-# - readability-enum-initial-value
+  - readability-enum-initial-value
 # - readability-function-cognitive-complexity
   - readability-inconsistent-declaration-parameter-name
 # - readability-misleading-indentation  # too many false positives and oddball/conditional source
