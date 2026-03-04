@@ -1527,11 +1527,11 @@ static CURLcode nw_in_recv(void *reader_ctx,
   return curl_easy_recv(data, buf, buflen, pnread);
 }
 
-CURLcode curl_ws_recv(CURL *d, void *buffer,
+CURLcode curl_ws_recv(CURL *curl, void *buffer,
                       size_t buflen, size_t *nread,
                       const struct curl_ws_frame **metap)
 {
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
   struct connectdata *conn;
   struct websocket *ws;
   struct ws_collect ctx;
@@ -1760,7 +1760,7 @@ static CURLcode ws_send_raw(struct Curl_easy *data, const void *buffer,
   return result;
 }
 
-CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
+CURLcode curl_ws_send(CURL *curl, const void *buffer_arg,
                       size_t buflen, size_t *sent,
                       curl_off_t fragsize,
                       unsigned int flags)
@@ -1768,7 +1768,7 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
   struct websocket *ws;
   const uint8_t *buffer = buffer_arg;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
   size_t ndummy;
   size_t *pnsent = sent ? sent : &ndummy;
 
@@ -1848,11 +1848,11 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
   return Curl_http_setup_conn(data, conn);
 }
 
-const struct curl_ws_frame *curl_ws_meta(CURL *d)
+const struct curl_ws_frame *curl_ws_meta(CURL *curl)
 {
   /* we only return something for websocket, called from within the callback
      when not using raw mode */
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
   if(GOOD_EASY_HANDLE(data) && Curl_is_in_callback(data) &&
      data->conn && !data->set.ws_raw_mode) {
     struct websocket *ws;
@@ -1863,13 +1863,13 @@ const struct curl_ws_frame *curl_ws_meta(CURL *d)
   return NULL;
 }
 
-CURL_EXTERN CURLcode curl_ws_start_frame(CURL *d,
+CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
                                          unsigned int flags,
                                          curl_off_t frame_len)
 {
   struct websocket *ws;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
