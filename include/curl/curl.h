@@ -3076,9 +3076,8 @@ typedef enum {
 } CURLSHoption;
 
 CURL_EXTERN CURLSH *curl_share_init(void);
-CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option,
-                                         ...);
-CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *share);
+CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...);
+CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *sh);
 
 /****************************************************************************
  * Structures for querying information about the curl library at runtime.

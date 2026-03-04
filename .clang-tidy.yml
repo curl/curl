@@ -54,6 +54,6 @@ Checks:
 
 CheckOptions:
   misc-header-include-cycle.IgnoredFilesList: 'curl/curl.h'
-  readability-inconsistent-declaration-parameter-name.Strict: false
+  readability-inconsistent-declaration-parameter-name.Strict: true
 
 HeaderFilterRegex: '.*'  # Default in v22.1.0+
