@@ -80,7 +80,7 @@ signal that it already is connected.
 
 The equivalent of this:
 ~~~c
-   return socket(addr->family, addr->socktype, addr->protocol);
+  return socket(addr->family, addr->socktype, addr->protocol);
 ~~~
 
 # %PROTOCOLS%
