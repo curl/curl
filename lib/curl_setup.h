@@ -1385,7 +1385,8 @@ CURL_EXTERN void curl_dbg_mark_sclose(curl_socket_t sockfd,
                                       int line, const char *source);
 CURL_EXTERN int curl_dbg_sclose(curl_socket_t sockfd,
                                 int line, const char *source);
-CURL_EXTERN curl_socket_t curl_dbg_accept(curl_socket_t s, void *a, void *alen,
+CURL_EXTERN curl_socket_t curl_dbg_accept(curl_socket_t s,
+                                          void *saddr, void *saddrlen,
                                           int line, const char *source);
 #ifdef HAVE_ACCEPT4
 CURL_EXTERN curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr,
