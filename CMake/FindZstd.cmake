@@ -53,7 +53,7 @@ if(NOT DEFINED ZSTD_INCLUDE_DIR AND
     pkg_check_modules(_zstd ${_zstd_pc_requires})
   endif()
   if(NOT _zstd_FOUND AND CURL_USE_CMAKECONFIG)
-    find_package(Zstd CONFIG)
+    find_package(Zstd CONFIG QUIET)
   endif()
 endif()
 
