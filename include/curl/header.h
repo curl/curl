@@ -57,7 +57,7 @@ typedef enum {
 
 CURL_EXTERN CURLHcode curl_easy_header(CURL *curl,
                                        const char *name,
-                                       size_t index,
+                                       size_t nameindex,
                                        unsigned int origin,
                                        int request,
                                        struct curl_header **hout);

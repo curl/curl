@@ -25,6 +25,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-CURLcode create_dir_hierarchy(const char *outfileo);
+CURLcode create_dir_hierarchy(const char *outfile);
 
 #endif /* HEADER_CURL_TOOL_DIRHIE_H */
