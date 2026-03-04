@@ -435,7 +435,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
       timediff_t elapsed_ms =
-        curlx_ptimediff_ms(&iter_start, Curl_pgrs_now(data));
+        curlx_ptimediff_ms(Curl_pgrs_now(data), &iter_start);
       if(elapsed_ms <= 0)
         timeout_ms -= 1; /* always deduct at least 1 */
       else if(elapsed_ms > timeout_ms)
