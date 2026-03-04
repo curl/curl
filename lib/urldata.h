@@ -1298,6 +1298,8 @@ struct UserDefined {
                                (contain zero bytes) */
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
+  curl_write_callback_ex fwrite_header_ex; /* extended header callback with
+                                              origin info */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
   curl_read_callback fread_func_set; /* function that reads the input */
   curl_progress_callback fprogress; /* OLD and deprecated progress callback */

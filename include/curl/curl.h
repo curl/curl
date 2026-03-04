@@ -285,6 +285,15 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t nitems,
                                       void *outstream);
 
+/* Extended header callback that provides header origin/type information.
+ * The 'origin' parameter indicates the type of header using CURLH_* bits.
+ */
+typedef size_t (*curl_write_callback_ex)(char *buffer,
+                                          size_t size,
+                                          size_t nitems,
+                                          unsigned int origin,
+                                          void *outstream);
+
 /* This callback will be called when a new resolver request is made */
 typedef int (*curl_resolver_start_callback)(void *resolver_state,
                                             void *reserved, void *userdata);
@@ -2257,6 +2266,13 @@ typedef enum {
 
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
+
+  /* Function that will be called to store headers with type information.
+   * Similar to CURLOPT_HEADERFUNCTION but the callback receives an
+   * additional 'origin' parameter indicating the header type
+   * (CURLH_HEADER, CURLH_TRAILER, CURLH_1XX, CURLH_CONNECT,
+   * or CURLH_PSEUDO). */
+  CURLOPT(CURLOPT_HEADERFUNCTION_EXTENDED, CURLOPTTYPE_FUNCTIONPOINT, 329),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

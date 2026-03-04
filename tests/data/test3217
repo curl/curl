@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+CURLOPT_HEADERFUNCTION_EXTENDED
+libtest
+</keywords>
+</info>
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Custom-Header: test
+
+-foo-
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+CURLOPT_HEADERFUNCTION_EXTENDED with origin parameter
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+Test 1: Extended callback with origin
+HEADER: HTTP/1.1 200 OK
+HEADER: Date: Tue, 09 Nov 2010 14:49:00 GMT
+HEADER: Server: test-server/fake
+HEADER: Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+HEADER: ETag: "21025-dc7-39462498"
+HEADER: Accept-Ranges: bytes
+HEADER: Content-Length: 6
+HEADER: Connection: close
+HEADER: Content-Type: text/html
+HEADER: Custom-Header: test
+HEADER:
+Test 1 passed: Received 11 headers with valid origin
+
+Test 2: Extended callback precedence
+HEADER: HTTP/1.1 200 OK
+HEADER: Date: Tue, 09 Nov 2010 14:49:00 GMT
+HEADER: Server: test-server/fake
+HEADER: Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+HEADER: ETag: "21025-dc7-39462498"
+HEADER: Accept-Ranges: bytes
+HEADER: Content-Length: 6
+HEADER: Connection: close
+HEADER: Content-Type: text/html
+HEADER: Custom-Header: test
+HEADER:
+Test 2 passed: Extended callback took precedence
+</stdout>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

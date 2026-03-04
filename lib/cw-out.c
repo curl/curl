@@ -31,6 +31,7 @@
 #include "transfer.h"
 #include "cw-out.h"
 #include "cw-pause.h"
+#include "curl/header.h"
 
 
 /**
@@ -74,6 +75,7 @@ struct cw_out_buf {
   struct cw_out_buf *next;
   struct dynbuf b;
   cw_out_type type;
+  unsigned int origin; /* for CW_OUT_HDS, the CURLH_* origin bits */
 };
 
 static struct cw_out_buf *cw_out_buf_create(cw_out_type otype)
@@ -139,6 +141,20 @@ static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 }
 
 /**
+ * Extract CURLH_* origin bits from CLIENTWRITE_* type flags
+ */
+static unsigned int cw_get_header_origin(int type)
+{
+  if(type & CLIENTWRITE_CONNECT)
+    return CURLH_CONNECT;
+  if(type & CLIENTWRITE_1XX)
+    return CURLH_1XX;
+  if(type & CLIENTWRITE_TRAILER)
+    return CURLH_TRAILER;
+  return CURLH_HEADER;
+}
+
+/**
  * Return the current curl_write_callback and user_data for the buf type
  */
 static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
@@ -176,6 +192,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
                                 curl_write_callback wcb,
                                 void *wcb_data,
                                 cw_out_type otype,
+                                unsigned int origin,
                                 const char *buf, size_t blen,
                                 size_t *pnwritten)
 {
@@ -187,7 +204,12 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
   DEBUGASSERT(data->conn);
   *pnwritten = 0;
   Curl_set_in_callback(data, TRUE);
-  nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
+  /* use extended callback if set, otherwise fallback to regular callback */
+  if(otype == CW_OUT_HDS && data->set.fwrite_header_ex)
+    nwritten = data->set.fwrite_header_ex((char *)CURL_UNCONST(buf), 1, blen,
+                                          origin, wcb_data);
+  else
+    nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
   Curl_set_in_callback(data, FALSE);
   CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes -> %zu",
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
@@ -221,6 +243,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
 static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
                                  struct Curl_easy *data,
                                  cw_out_type otype,
+                                 unsigned int origin,
                                  bool flush_all,
                                  const char *buf, size_t blen,
                                  size_t *pconsumed)
@@ -245,7 +268,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   *pconsumed = 0;
   if(otype == CW_OUT_BODY_0LEN) {
     DEBUGASSERT(!blen);
-    return cw_out_cb_write(ctx, data, wcb, wcb_data, otype,
+    return cw_out_cb_write(ctx, data, wcb, wcb_data, otype, origin,
                            buf, blen, &nwritten);
   }
   else {
@@ -253,7 +276,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       if(!flush_all && blen < min_write)
         break;
       wlen = max_write ? CURLMIN(blen, max_write) : blen;
-      result = cw_out_cb_write(ctx, data, wcb, wcb_data, otype,
+      result = cw_out_cb_write(ctx, data, wcb, wcb_data, otype, origin,
                                buf, wlen, &nwritten);
       if(result)
         return result;
@@ -275,7 +298,8 @@ static CURLcode cw_out_buf_flush(struct cw_out_ctx *ctx,
   if(curlx_dyn_len(&cwbuf->b) || (cwbuf->type == CW_OUT_BODY_0LEN)) {
     size_t consumed;
 
-    result = cw_out_ptr_flush(ctx, data, cwbuf->type, flush_all,
+    result = cw_out_ptr_flush(ctx, data, cwbuf->type, cwbuf->origin,
+                              flush_all,
                               curlx_dyn_ptr(&cwbuf->b),
                               curlx_dyn_len(&cwbuf->b),
                               &consumed);
@@ -340,6 +364,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
 static CURLcode cw_out_append(struct cw_out_ctx *ctx,
                               struct Curl_easy *data,
                               cw_out_type otype,
+                              unsigned int origin,
                               const char *buf, size_t blen)
 {
   CURL_TRC_WRITE(data, "[OUT] paused, buffering %zu more bytes (%zu/%d)",
@@ -356,6 +381,7 @@ static CURLcode cw_out_append(struct cw_out_ctx *ctx,
     struct cw_out_buf *cwbuf = cw_out_buf_create(otype);
     if(!cwbuf)
       return CURLE_OUT_OF_MEMORY;
+    cwbuf->origin = origin;
     cwbuf->next = ctx->buf;
     ctx->buf = cwbuf;
   }
@@ -366,6 +392,7 @@ static CURLcode cw_out_append(struct cw_out_ctx *ctx,
 static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
                                 struct Curl_easy *data,
                                 cw_out_type otype,
+                                unsigned int origin,
                                 bool flush_all,
                                 const char *buf, size_t blen)
 {
@@ -381,7 +408,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
 
   if(ctx->buf) {
     /* still have buffered data, append and flush */
-    result = cw_out_append(ctx, data, otype, buf, blen);
+    result = cw_out_append(ctx, data, otype, origin, buf, blen);
     if(result)
       goto out;
     result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
@@ -391,14 +418,14 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
   else {
     /* nothing buffered, try direct write */
     size_t consumed;
-    result = cw_out_ptr_flush(ctx, data, otype, flush_all,
+    result = cw_out_ptr_flush(ctx, data, otype, origin, flush_all,
                               buf, blen, &consumed);
     if(result && (result != CURLE_AGAIN))
       return result;
     result = CURLE_OK;
     if(consumed < blen) {
       /* did not write all, append the rest */
-      result = cw_out_append(ctx, data, otype,
+      result = cw_out_append(ctx, data, otype, origin,
                              buf + consumed, blen - consumed);
       if(result)
         goto out;
@@ -422,18 +449,22 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   struct cw_out_ctx *ctx = writer->ctx;
   CURLcode result;
   bool flush_all = !!(type & CLIENTWRITE_EOS);
+  unsigned int origin = 0;
 
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
     cw_out_type otype = (!blen && (type & CLIENTWRITE_0LEN)) ?
                         CW_OUT_BODY_0LEN : CW_OUT_BODY;
-    result = cw_out_do_write(ctx, data, otype, flush_all, buf, blen);
+    result = cw_out_do_write(ctx, data, otype, origin, flush_all, buf, blen);
     if(result)
       return result;
   }
 
   if(type & (CLIENTWRITE_HEADER | CLIENTWRITE_INFO)) {
-    result = cw_out_do_write(ctx, data, CW_OUT_HDS, flush_all, buf, blen);
+    /* Extract header origin information for extended callback */
+    origin = cw_get_header_origin(type);
+    result = cw_out_do_write(ctx, data, CW_OUT_HDS, origin, flush_all,
+                             buf, blen);
     if(result)
       return result;
   }
