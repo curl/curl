@@ -21,9 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "memdebug.h"
+#include "first.h"
 
 #include <curl/header.h>
 
@@ -70,7 +68,7 @@ static size_t header_callback_regular(char *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib3217(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode result = CURLE_OK;
