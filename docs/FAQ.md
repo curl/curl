@@ -262,7 +262,7 @@ documents.
 
 Here's a rough step-by-step:
 
-1. copy a suitable lib/config-*.h file as a start to `lib/config-[youros].h`
+1. copy a suitable `lib/config-*.h` file as a start to `lib/config-[youros].h`
 2. edit `lib/config-[youros].h` to match your OS and setup
 3. edit `lib/curl_setup.h` to include `config-[youros].h` when your OS is
    detected by the preprocessor, in the style others already exist
