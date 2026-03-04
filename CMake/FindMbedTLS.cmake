@@ -49,7 +49,7 @@ if(NOT DEFINED MBEDTLS_INCLUDE_DIR AND
    NOT DEFINED MBEDTLS_LIBRARY AND
    NOT DEFINED MBEDX509_LIBRARY AND
    NOT DEFINED MBEDCRYPTO_LIBRARY)
-  if(CURL_USE_PKGCONFIG AND FALSE)
+  if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_check_modules(_mbedtls ${_mbedtls_pc_requires})
   endif()

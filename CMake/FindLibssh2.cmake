@@ -39,7 +39,7 @@ set(_libssh2_pc_requires "libssh2")
 
 if(NOT DEFINED LIBSSH2_INCLUDE_DIR AND
    NOT DEFINED LIBSSH2_LIBRARY)
-  if(CURL_USE_PKGCONFIG AND FALSE)
+  if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_check_modules(_libssh2 ${_libssh2_pc_requires})
   endif()

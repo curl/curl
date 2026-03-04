@@ -76,7 +76,7 @@ endif()
 set(_tried_pkgconfig FALSE)
 if(NOT DEFINED NGTCP2_INCLUDE_DIR AND
    NOT DEFINED NGTCP2_LIBRARY)
-  if(CURL_USE_PKGCONFIG AND FALSE)
+  if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_check_modules(_ngtcp2 ${_ngtcp2_pc_requires})
     set(_tried_pkgconfig TRUE)
