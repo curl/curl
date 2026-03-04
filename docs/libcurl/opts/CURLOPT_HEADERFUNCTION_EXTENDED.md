@@ -99,7 +99,7 @@ CURLOPT_WRITEFUNCTION(3), or if it is not specified or NULL - the
 default, stream-writing function.
 
 It is important to note that the callback is invoked for the headers of all
-responses received after initiating a request and not just the final response.
+responses received after initiating a request and not only the final response.
 This includes all responses which occur during authentication negotiation. The
 *origin* parameter can help distinguish between different types of headers
 (e.g., 1xx informational responses vs. the final response).
