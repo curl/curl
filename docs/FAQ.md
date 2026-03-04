@@ -1109,7 +1109,7 @@ They are usually:
 * Adjust the system's config to check for libs in the directory where you have
   put the library (like Linux's `/etc/ld.so.conf`)
 
-`man ld.so` and`'man ld` will tell you more details
+`man ld.so` and `man ld` will tell you more details
 
 ## How does libcurl resolve hostnames?
 
