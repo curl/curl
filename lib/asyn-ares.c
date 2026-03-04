@@ -401,6 +401,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
   /* Wait for the name resolve query to complete. */
   while(!result) {
     struct timeval *real_timeout, time_buf, max_timeout;
+    struct curltime iter_start = *Curl_pgrs_now(data);
     int itimeout_ms;
     timediff_t call_timeout_ms;
 
@@ -433,8 +434,8 @@ CURLcode Curl_async_await(struct Curl_easy *data,
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
-      struct curltime now = curlx_now(); /* update in loop */
-      timediff_t elapsed_ms = curlx_ptimediff_ms(&now, Curl_pgrs_now(data));
+      timediff_t elapsed_ms =
+        curlx_ptimediff_ms(&iter_start, Curl_pgrs_now(data));
       if(elapsed_ms <= 0)
         timeout_ms -= 1; /* always deduct at least 1 */
       else if(elapsed_ms > timeout_ms)
