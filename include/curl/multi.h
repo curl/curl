@@ -341,7 +341,7 @@ curl_multi_socket_all(CURLM *multi_handle, int *running_handles);
  * Returns: CURLM error code.
  */
 CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *multi_handle,
-                                         long *milliseconds);
+                                         long *timeout_ms);
 
 typedef enum {
   /* This is the socket callback function pointer */
