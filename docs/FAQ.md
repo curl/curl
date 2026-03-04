@@ -121,7 +121,8 @@ important and crucial. Anyone can contribute and post their changes and
 improvements and have them inserted in the main sources (of course on the
 condition that developers agree that the fixes are good).
 
-The full list of all contributors is found in the docs/THANKS file.
+The full list of all contributors is found in the
+[docs/THANKS](https://curl.se/docs/thanks.html) file.
 
 curl is developed by a community, with Daniel at the wheel.
 
