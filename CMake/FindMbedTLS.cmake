@@ -79,8 +79,9 @@ elseif(MbedTLS_CONFIG)
     set(_curl_use_target MbedTLS::mbedcrypto)
   endif()
   list(APPEND _curl_use_target MbedTLS::mbedx509 MbedTLS::mbedtls)
-  add_library(CURL::mbedtls ALIAS ${_curl_use_target})
-  message(STATUS "Found MbedTLS (via CMake Config): ${MbedTLS_CONFIG} (found version \"${NGHTTP2_VERSION}\")")
+  add_library(CURL::mbedtls INTERFACE IMPORTED)
+  set_target_properties(CURL::mbedtls PROPERTIES INTERFACE_LINK_LIBRARIES "${_curl_use_target}")
+  message(STATUS "Found MbedTLS (via CMake Config): ${MbedTLS_CONFIG} (found version \"${MBEDTLS_VERSION}\")")
 else()
   set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
