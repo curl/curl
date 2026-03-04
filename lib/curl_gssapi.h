@@ -44,7 +44,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
                                     OM_uint32 *ret_flags);
 
 OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
-                                      gss_ctx_id_t *context_handle,
+                                      gss_ctx_id_t *context,
                                       gss_buffer_t output_token);
 
 #ifdef CURLVERBOSE
