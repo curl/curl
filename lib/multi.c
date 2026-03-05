@@ -2788,7 +2788,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
     returncode = Curl_mntfy_dispatch_all(multi);
 
   /*
-   * Simply remove all expired timers from the splay since handles are dealt
+   * Remove all expired timers from the splay since handles are dealt
    * with unconditionally by this function and curl_multi_timeout() requires
    * that already passed/handled expire times are removed from the splay.
    *
