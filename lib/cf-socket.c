@@ -583,7 +583,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * not as a hostname or ip address.
        *
        * The interface might be a VRF, eg: vrf-blue, which means it cannot be
-       * converted to an IP address and would fail Curl_if2ip. Simply try to
+       * converted to an IP address and would fail Curl_if2ip. Try to
        * use it straight away.
        */
       if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
