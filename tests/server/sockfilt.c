@@ -585,7 +585,7 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 
 struct select_ws_data {
   int fd;                /* provided file descriptor  (indexed by nfd) */
-  long wsastate;         /* internal pre-select state (indexed by nfd) */
+  long wsastate;         /* internal preselect state  (indexed by nfd) */
   curl_socket_t wsasock; /* internal socket handle    (indexed by nws) */
   WSAEVENT wsaevent;     /* internal select event     (indexed by nws) */
   HANDLE signal;         /* internal thread signal    (indexed by nth) */
