@@ -21,7 +21,7 @@ Example:
 Accept an HTTP version 0.9 response.
 
 HTTP/0.9 is a response without headers and therefore you can also connect with
-this to non-HTTP servers and still get a response since curl simply
+this to non-HTTP servers and still get a response since curl
 transparently downgrades - if allowed.
 
 HTTP/0.9 is disabled by default (added in 7.66.0)

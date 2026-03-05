@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-/* Test servers simply are standalone programs that do not use libcurl
+/* Test servers are standalone programs that do not use libcurl
  * library.  For convenience and to ease portability of these servers,
  * some source code files from the libcurl subdirectory are also used
  * to build the servers.  In order to achieve proper linkage of these

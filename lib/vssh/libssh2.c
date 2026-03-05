@@ -1127,7 +1127,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
     /*
      * Unless the user explicitly specifies a public key file, let
      * libssh2 extract the public key from the private key file.
-     * This is done by simply passing sshc->rsa_pub = NULL.
+     * This is done by passing sshc->rsa_pub = NULL.
      */
     if(!out_of_memory && data->set.str[STRING_SSH_PUBLIC_KEY] &&
        /* treat empty string the same way as NULL */

@@ -935,7 +935,7 @@ are persistent.
 ## Multiple Transfers With A Single Command Line
 
 As is mentioned above, you can download multiple files with one command line
-by simply adding more URLs. If you want those to get saved to a local file
+by adding more URLs. If you want those to get saved to a local file
 instead of printed to stdout, you need to add one save option for each URL you
 specify. Note that this also goes for the `-O` option (but not
 `--remote-name-all`).

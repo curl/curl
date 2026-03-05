@@ -104,7 +104,7 @@ then configures its TLS backend and *returns* the ticket to the cache.
 
 The cache needs to treat tickets from TLSv1.2 and 1.3 differently. 1.2 tickets
 should be reused, but 1.3 tickets SHOULD NOT (RFC 8446). The session cache
-simply drops 1.3 tickets when they are returned after use, but keeps a 1.2
+drops 1.3 tickets when they are returned after use, but keeps a 1.2
 ticket.
 
 When a ticket is *put* into the cache, there is also a difference. There

@@ -33,7 +33,7 @@ name with this option also enables HSTS for this handle (the equivalent of
 setting *CURLHSTS_ENABLE* with CURLOPT_HSTS_CTRL(3)).
 
 If the given file does not exist or contains no HSTS entries at startup, the
-HSTS cache simply starts empty. Setting the filename to NULL allows HSTS
+HSTS cache starts empty. Setting the filename to NULL allows HSTS
 without reading from or writing to any file. NULL also makes libcurl clear the
 list of files to read HSTS data from, if any such were previously set.
 

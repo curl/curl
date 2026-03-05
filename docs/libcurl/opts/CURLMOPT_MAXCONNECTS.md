@@ -45,7 +45,7 @@ connections.
 
 Changing this value when there are transfers in progress is possible, and the
 new value is then used the next time checks are performed. Lowering the value
-does not close down any active transfers, it simply does not allow new ones to
+does not close down any active transfers, it does not allow new ones to
 get made.
 
 # DEFAULT

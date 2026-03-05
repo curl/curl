@@ -467,7 +467,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       /* This means we are currently ignoring a response-body */
 
       if(ts->cl) {
-        /* A Content-Length based body: simply count down the counter
+        /* A Content-Length based body: count down the counter
            and make sure to break out of the loop when we are done! */
         ts->cl--;
         if(ts->cl <= 0) {

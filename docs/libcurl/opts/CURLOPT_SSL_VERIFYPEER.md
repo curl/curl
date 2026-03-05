@@ -50,7 +50,7 @@ When CURLOPT_SSL_VERIFYPEER(3) is enabled, and the verification fails to
 prove that the certificate is signed by a CA, the connection fails.
 
 When this option is disabled (set to zero), the CA certificates are not loaded
-and the peer certificate verification is simply skipped.
+and the peer certificate verification is skipped.
 
 Authenticating the certificate is not enough to be sure about the server. You
 typically also want to ensure that the server is the server you mean to be
