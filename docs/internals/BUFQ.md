@@ -67,7 +67,7 @@ bool Curl_bufq_peek(const struct bufq *q, const unsigned char **pbuf, size_t *pl
 On returning TRUE, `pbuf` points to internal memory with `plen` bytes that one
 may read. This is only valid until another operation on `bufq` is performed.
 
-Instead of reading `bufq` data, one may simply skip it:
+Instead of reading `bufq` data, one may skip it:
 
 ```c
 void Curl_bufq_skip(struct bufq *q, size_t amount);

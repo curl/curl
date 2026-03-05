@@ -61,7 +61,7 @@
  * enough for the purpose of this program.
  *
  * For the above reason and the specific needs of this program signals SIGHUP,
- * SIGPIPE and SIGALRM will be simply ignored on systems where this can be
+ * SIGPIPE and SIGALRM will be ignored on systems where this can be
  * done.  If possible, signals SIGINT and SIGTERM will be handled by this
  * program as an indication to cleanup and finish execution as soon as
  * possible.  This will be achieved with a single signal handler

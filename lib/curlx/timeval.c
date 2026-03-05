@@ -98,7 +98,7 @@ void curlx_pnow(struct curltime *pnow)
   /*
    * Even when the configure process has truly detected monotonic clock
    * availability, it might happen that it is not actually available at
-   * runtime. When this occurs simply fallback to other time source.
+   * runtime. When this occurs, fall back to other time source.
    */
 #ifdef HAVE_GETTIMEOFDAY
   else {

@@ -261,7 +261,7 @@ if($stunnel_version < 400) {
     if($stunnel_version >= 319) {
         $socketopt = "-O a:SO_REUSEADDR=1";
     }
-    # TODO: we do not use $host_ip in this old version. I simply find
+    # TODO: we do not use $host_ip in this old version. I find
     # no documentation how to. But maybe ipv6 is not available anyway?
     $cmd  = "\"$stunnel\" -p $certfile -P $pidfile ";
     $cmd .= "-d $accept_port -r $target_port -f -D $loglevel ";

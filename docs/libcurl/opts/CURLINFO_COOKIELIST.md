@@ -31,7 +31,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_COOKIELIST,
 Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
 cookies curl knows (expired ones, too). Do not forget to call
 curl_slist_free_all(3) on the list after it has been used. If there are no
-cookies (cookies for the handle have not been enabled or simply none have been
+cookies (cookies for the handle have not been enabled or none have been
 received) the 'struct curl_slist *' is made a NULL pointer.
 
 Cookies that were imported in the Set-Cookie format without a domain name are

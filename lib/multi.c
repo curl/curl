@@ -801,7 +801,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
     /* multi_done() clears the association between the easy handle and the
        connection.
 
-       Note that this ignores the return code simply because there is
+       Note that this ignores the return code because there is
        nothing really useful to do with it anyway! */
     (void)multi_done(data, data->result, premature);
   }

@@ -48,7 +48,7 @@ All curl mailing lists require that you are subscribed to allow a mail to go
 through to all the subscribers.
 
 If you post without being subscribed (or from a different mail address than
-the one you are subscribed with), your mail is simply silently discarded. You
+the one you are subscribed with), your mail is silently discarded. You
 have to subscribe first, then post.
 
 The reason for this unfortunate and strict subscription policy is of course to

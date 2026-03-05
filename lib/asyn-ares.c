@@ -560,10 +560,10 @@ static void async_ares_hostbyname_cb(void *user_data,
        the first place. Without modifying c-ares, we cannot know exactly
        where in its retry cycle we are. We could guess based on how much
        time has gone by, but it does not really matter. Happy Eyeballs tells
-       us that, given usable information in hand, we simply do not want to
+       us that, given usable information in hand, we do not want to
        wait "too much longer" after we get a result.
 
-       We simply wait an additional amount of time equal to the default c-ares
+       We wait an additional amount of time equal to the default c-ares
        query timeout. That is enough time for a typical parallel response to
        arrive without being "too long". Even on a network where one of the two
        types of queries is failing or timing out constantly, this will usually
