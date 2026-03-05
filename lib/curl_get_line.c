@@ -59,6 +59,8 @@ CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof)
     if(*eof)
       /* append a newline */
       return curlx_dyn_addn(buf, "\n", 1);
+    else if(ferror(input))
+      return CURLE_READ_ERROR;
     /* otherwise get next line to append */
   }
   /* UNREACHABLE */
