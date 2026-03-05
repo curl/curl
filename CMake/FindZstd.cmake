@@ -48,7 +48,7 @@ set(_zstd_pc_requires "libzstd")
 
 if(NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
-  if(CURL_USE_PKGCONFIG AND FALSE)
+  if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_check_modules(_zstd ${_zstd_pc_requires})
   endif()
