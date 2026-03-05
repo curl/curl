@@ -4348,9 +4348,18 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       case SSL_ECH_STATUS_BAD_CALL:
         status = "bad call (unexpected)";
         break;
-      case SSL_ECH_STATUS_BAD_NAME:
-        status = "bad name (unexpected)";
+      case SSL_ECH_STATUS_BAD_NAME: {
+        struct ssl_primary_config *conn_config =
+          Curl_ssl_cf_get_primary_config(cf);
+        if(!conn_config->verifypeer && !conn_config->verifyhost &&
+           inner && !strcmp(inner, connssl->peer.hostname)) {
+          status = "bad name (tolerated without peer verification)";
+          rv = SSL_ECH_STATUS_SUCCESS;
+        }
+        else
+          status = "bad name (unexpected)";
         break;
+      }
       default:
         status = "unexpected status";
         infof(data, "ECH: unexpected status %d", rv);
