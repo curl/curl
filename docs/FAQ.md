@@ -107,8 +107,8 @@ will agree. If you want to add more protocols, we may agree.
 If you want someone else to do all the work while you wait for us to implement
 it for you, that is not a friendly attitude. We spend a considerable time
 already on maintaining and developing curl. In order to get more out of us,
-you should consider trading in some of your time and effort in return. Simply
-go to the [GitHub repository](https://github.com/curl/curl), fork the project,
+you should consider trading in some of your time and effort in return. Go to
+the [GitHub repository](https://github.com/curl/curl), fork the project,
 and create pull requests with your proposed changes.
 
 If you write the code, chances are better that it will get into curl faster.

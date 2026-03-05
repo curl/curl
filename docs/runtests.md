@@ -136,14 +136,14 @@ Force the test to run even if mentioned in DISABLED.
 
 Run the given test(s) with gdb. This is best used on a single test case and
 curl built --disable-shared. This then fires up gdb with command line set to
-run the specified test case. Simply (set a break-point and) type 'run' to
+run the specified test case. Set a break-point if needed and type 'run' to
 start.
 
 ## `-gl`
 
 Run the given test(s) with lldb. This is best used on a single test case and
 curl built --disable-shared. This then fires up lldb with command line set to
-run the specified test case. Simply (set a break-point and) type 'run' to
+run the specified test case. Set a break-point if needed and type 'run' to
 start.
 
 ## `-gw`
