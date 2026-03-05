@@ -288,10 +288,10 @@ typedef size_t (*curl_write_callback)(char *buffer,
 /* Extended header write callback with origin information.
  * The origin parameter uses the CURLH_* flags defined in header.h */
 typedef size_t (*curl_write_callback_ex)(char *buffer,
-                                          size_t size,
-                                          size_t nitems,
-                                          unsigned int origin,
-                                          void *outstream);
+                                         size_t size,
+                                         size_t nitems,
+                                         unsigned int origin,
+                                         void *outstream);
 
 /* This callback will be called when a new resolver request is made */
 typedef int (*curl_resolver_start_callback)(void *resolver_state,
