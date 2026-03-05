@@ -54,6 +54,12 @@ if(NOT DEFINED ZSTD_INCLUDE_DIR AND
   endif()
   if(NOT _zstd_FOUND AND CURL_USE_CMAKECONFIG)
     find_package(Zstd CONFIG QUIET)
+    # Skip using if older than v1.4.5
+    if(Zstd_CONFIG AND
+       NOT TARGET zstd::libzstd_static AND
+       NOT TARGET zstd::libzstd_shared)
+      unset(Zstd_CONFIG)
+    endif()
   endif()
 endif()
 
@@ -73,8 +79,10 @@ elseif(Zstd_CONFIG)
   set(ZSTD_VERSION ${Zstd_VERSION})
   if(ZSTD_USE_STATIC_LIBS)
     set(_zstd_LIBRARIES zstd::libzstd_static)
+  elseif(TARGET zstd::libzstd)
+    set(_zstd_LIBRARIES zstd::libzstd)  # v1.5.6+
   else()
-    set(_zstd_LIBRARIES zstd::libzstd)
+    set(_zstd_LIBRARIES zstd::libzstd_shared)
   endif()
   message(STATUS "Found Zstd (via CMake Config): ${Zstd_CONFIG} (found version \"${ZSTD_VERSION}\")")
 else()
