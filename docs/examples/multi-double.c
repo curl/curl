@@ -31,7 +31,7 @@
 #include <curl/curl.h>
 
 /*
- * Simply download two HTTP files!
+ * Download two HTTP files!
  */
 int main(void)
 {

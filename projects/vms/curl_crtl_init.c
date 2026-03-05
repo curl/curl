@@ -99,7 +99,7 @@ int SYS$CRELNM(const unsigned long *attr,
                const unsigned char *acmode,
                const struct itmlst_3 *item_list);
 
-/* Take all the fun out of simply looking up a logical name */
+/* Take all the fun out of looking up a logical name */
 static int sys_trnlnm(const char *logname, char *value, int value_len)
 {
   const $DESCRIPTOR(table_dsc, "LNM$FILE_DEV");
@@ -134,7 +134,7 @@ static int sys_trnlnm(const char *logname, char *value, int value_len)
   return status;
 }
 
-/* How to simply create a logical name */
+/* How to create a logical name */
 static int sys_crelnm(const char *logname, const char *value)
 {
   int ret_val;

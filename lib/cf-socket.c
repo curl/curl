@@ -335,7 +335,7 @@ static CURLcode socket_open(struct Curl_easy *data,
     Curl_set_in_callback(data, FALSE);
   }
   else {
-    /* opensocket callback not set, so simply create the socket now */
+    /* opensocket callback not set, so create the socket now */
 #ifdef DEBUGBUILD
     if((addr->family == AF_INET6) && getenv("CURL_DBG_SOCK_FAIL_IPV6")) {
       failf(data, "CURL_DBG_SOCK_FAIL_IPV6: failed to open socket");
@@ -583,7 +583,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * not as a hostname or ip address.
        *
        * The interface might be a VRF, eg: vrf-blue, which means it cannot be
-       * converted to an IP address and would fail Curl_if2ip. Simply try to
+       * converted to an IP address and would fail Curl_if2ip. Try to
        * use it straight away.
        */
       if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,

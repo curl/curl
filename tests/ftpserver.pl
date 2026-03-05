@@ -202,7 +202,7 @@ my $POP3_TIMESTAMP = "<1972.987654321\@curl>";
 #
 sub exit_signal_handler {
     my $signame = shift;
-    # For now, simply mimic old behavior.
+    # For now, mimic old behavior.
     killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
     unlink($pidfile);
     unlink($portfile);

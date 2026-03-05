@@ -31,7 +31,7 @@ Added-in: n/a
 **wcurl** is a simple curl wrapper which lets you use curl to download files
 without having to remember any parameters.
 
-Simply call **wcurl** with a list of URLs you want to download and **wcurl**
+Call **wcurl** with a list of URLs you want to download and **wcurl**
 picks sane defaults.
 
 If you need anything more complex, you can provide any of curl's supported

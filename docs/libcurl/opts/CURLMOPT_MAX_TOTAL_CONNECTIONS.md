@@ -45,12 +45,12 @@ making a new connection is permitted.
 
 Changing this value while there are transfers in progress is possible. The new
 value is then used the next time checks are performed. Lowering the value does
-not close down any active transfers, it simply does not allow new ones to get
+not close down any active transfers, it prevents new ones from being
 made.
 
 # DEFAULT
 
-0, which means that there is no limit. It is then simply controlled by the
+0, which means that there is no limit. It is then controlled by the
 number of easy handles added concurrently and how much multiplexing is being
 done.
 

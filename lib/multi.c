@@ -801,7 +801,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
     /* multi_done() clears the association between the easy handle and the
        connection.
 
-       Note that this ignores the return code simply because there is
+       Note that this ignores the return code because there is
        nothing really useful to do with it anyway! */
     (void)multi_done(data, data->result, premature);
   }
@@ -2788,7 +2788,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
     returncode = Curl_mntfy_dispatch_all(multi);
 
   /*
-   * Simply remove all expired timers from the splay since handles are dealt
+   * Remove all expired timers from the splay since handles are dealt
    * with unconditionally by this function and curl_multi_timeout() requires
    * that already passed/handled expire times are removed from the splay.
    *

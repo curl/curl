@@ -19,7 +19,7 @@ Our C code has a few style rules. Most of them are verified and upheld by the
 by the build system when built after `./configure --enable-debug` has been
 used.
 
-It is normally not a problem for anyone to follow the guidelines, simply copy
+It is normally not a problem for anyone to follow the guidelines, copy
 the style already used in the source code and there are no particularly
 unusual rules in our set of rules.
 

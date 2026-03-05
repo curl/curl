@@ -106,7 +106,7 @@ link with the particular version of libcurl you have installed. See the
 *curl-config(1)* man page for further details.
 
 Unix-like operating system that ship libcurl as part of their distributions
-often do not provide the curl-config tool, but simply install the library and
+often do not provide the curl-config tool, but only install the library and
 headers in the common path for this purpose.
 
 Many Linux and similar systems use pkg-config to provide build and link

@@ -1189,7 +1189,7 @@ sub scanfile {
         # which are tracked in the Git repo and edited in the workdir, or
         # committed locally on the branch without being in upstream master.
         #
-        # The simple and naive test is to simply check for the current year,
+        # The simple and naive test is to check for the current year,
         # but updating the year even without an edit is against project policy
         # (and it would fail every file on January 1st).
         #

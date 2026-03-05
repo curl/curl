@@ -410,7 +410,7 @@ else
     xc_tst_auto_separator=':'
   fi
   if test -z "$PATH_SEPARATOR"; then
-    # Simply use the auto-detected one when not already set.
+    # Use the auto-detected one when not already set.
     PATH_SEPARATOR=$xc_tst_auto_separator
   elif test "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
     echo "$xc_msg_warn 'PATH_SEPARATOR' does not match auto-detected one." >&2

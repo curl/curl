@@ -50,7 +50,7 @@
  * The fifo buffer is handled almost instantly, so you can even add more URL's
  * while the previous requests are still being downloaded.
  *
- * This is purely a demo app, all retrieved data is simply discarded by
+ * This is purely a demo app, all retrieved data is discarded by
  * the write callback.
  *
  */

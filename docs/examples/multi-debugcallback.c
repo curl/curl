@@ -111,7 +111,7 @@ static int my_trace(CURL *curl, curl_infotype type,
 }
 
 /*
- * Simply download an HTTP file.
+ * Download an HTTP file.
  */
 int main(void)
 {

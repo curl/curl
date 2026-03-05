@@ -150,7 +150,7 @@ the owner of that change until it has been merged.
 
 Respond on the list or on GitHub about the change and answer questions and/or
 fix nits/flaws. This is important. We take lack of replies as a sign that you
-are not anxious to get your patch accepted and we tend to simply drop such
+are not anxious to get your patch accepted and we tend to drop such
 changes.
 
 ## About pull requests
@@ -195,7 +195,7 @@ Once your pull request has been approved it can be merged by a maintainer.
 For new features, or changes, we require that the *feature window* is open for
 the pull request to be merged. This is typically a three week period that
 starts ten days after a previous release. New features submitted as pull
-requests while the window is closed simply have to wait until it opens to get
+requests while the window is closed have to wait until it opens to get
 merged.
 
 If time passes without your approved pull request gets merged: feel free to
