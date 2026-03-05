@@ -48,26 +48,19 @@ set(_zstd_pc_requires "libzstd")
 
 if(NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
-  foreach(_detmet IN LISTS CURL_DETMET)
-    if(_detmet STREQUAL "pkgconfig")
-      find_package(PkgConfig QUIET)
-      pkg_check_modules(_zstd ${_zstd_pc_requires})
-      if(_zstd_FOUND)
-        break()
-      endif()
+  if(CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_zstd ${_zstd_pc_requires})
+  endif()
+  if(NOT _zstd_FOUND AND CURL_USE_CMAKECONFIG)
+    find_package(Zstd CONFIG QUIET)
+    # Skip using if older than v1.4.5
+    if(Zstd_CONFIG AND
+       NOT TARGET zstd::libzstd_static AND
+       NOT TARGET zstd::libzstd_shared)
+      unset(Zstd_CONFIG)
     endif()
-    elseif(_detmet STREQUAL "cmakeconfig")
-      find_package(Zstd CONFIG QUIET)
-      # Requires v1.4.5+
-      if(Zstd_CONFIG AND
-         (TARGET zstd::libzstd_static OR
-          TARGET zstd::libzstd_shared))
-        break()
-      else()
-        unset(Zstd_CONFIG)
-      endif()
-    endif()
-  endforeach()
+  endif()
 endif()
 
 if(_zstd_FOUND)
