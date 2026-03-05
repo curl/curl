@@ -1049,7 +1049,7 @@ Yes, but you cannot open a FILE * and pass the pointer to a DLL and have that
 DLL use the FILE * (as the DLL and the client application cannot access each
 others' variable memory areas). If you set `CURLOPT_WRITEDATA` you must also use
 `CURLOPT_WRITEFUNCTION` as well to set a function that writes the file, even if
-that writes the data to the specified FILE *. Similarly, if you use
+all it does is write the data to the specified FILE *. Similarly, if you use
 `CURLOPT_READDATA` you must also specify `CURLOPT_READFUNCTION`.
 
 ## What about Keep-Alive or persistent connections?
