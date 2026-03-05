@@ -263,7 +263,7 @@ macro(curl_collect_target_link_options _target)
   endif()
   # This is empty for 'CURL::*' targets and safe to ignore.
   # Explicitly skip this query to avoid CMake v3.18 and older erroring out.
-  if(NOT _target MATCHES "CURL::")
+  if(NOT "${_target}" MATCHES "CURL::")
     get_target_property(_imported ${_target} IMPORTED)
     if(_imported)
       get_target_property(_val ${_target} LOCATION)
