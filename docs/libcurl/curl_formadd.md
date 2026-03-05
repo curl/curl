@@ -116,7 +116,7 @@ you must make sure strlen() on the data pointer returns zero.
 
 followed by a filename, causes that file to be read and its contents used
 as data in this part. This part does *not* automatically become a file
-upload part because its data was read from a file.
+upload part due to its data being read from a file.
 
 The specified file needs to kept around until the associated transfer is done.
 

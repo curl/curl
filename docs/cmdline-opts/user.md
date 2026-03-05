@@ -37,8 +37,8 @@ Windows domain name in the username, in order for the server to successfully
 obtain a Kerberos Ticket. If you do not, then the initial authentication
 handshake may fail.
 
-When using NTLM, the username can be specified as the username, without
-the domain, if there is a single domain and forest in your setup for example.
+When using NTLM, the username can be specified without the domain, if
+there is a single domain and forest in your setup for example.
 
 To specify the domain name use either Down-Level Logon Name or UPN (User
 Principal Name) formats. For example, EXAMPLE\user and user@example.com
