@@ -194,7 +194,7 @@ ensure that the memory log file is properly written even if curl crashes.
 
 If a test case fails, you can conveniently get the script to invoke the
 debugger (gdb) for you with the server running and the same command line
-parameters that failed. Simply invoke `runtests.pl <test number> -g` and then
+parameters that failed. Invoke `runtests.pl <test number> -g` and then
 type 'run' in the debugger to perform the command through the debugger.
 
 ### Logs
