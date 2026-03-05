@@ -2611,6 +2611,12 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      */
     s->fwrite_header = va_arg(param, curl_write_callback);
     break;
+  case CURLOPT_HEADERFUNCTION_EXTENDED:
+    /*
+     * Set extended header write callback with origin information
+     */
+    s->fwrite_header_ex = va_arg(param, curl_write_callback_ex);
+    break;
   case CURLOPT_WRITEFUNCTION:
     /*
      * Set data write callback
