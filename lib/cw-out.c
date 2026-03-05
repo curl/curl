@@ -32,10 +32,6 @@
 #include "cw-out.h"
 #include "cw-pause.h"
 
-/* The following must be included last */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /**
  * OVERALL DESIGN of this client writer
