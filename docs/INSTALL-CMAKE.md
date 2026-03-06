@@ -386,7 +386,7 @@ Details via CMake
 - `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
 - `<PackageName>_DIR`:                      Absolute path to `<PackageName>` CMake Config directory. Used when `CURL_USE_CMAKECONFIG` is enabled.
                                             Where `<PackageName>` may be:
-                                            `Libssh2`, `MbedTLS`, `NGHTTP2`, `NGHTTP3`,
+                                            `Libssh2` 1.11.0+, `MbedTLS`, `NGHTTP2`, `NGHTTP3`,
                                             `NGTCP2` 1.19.0+ (with non-fork OpenSSL only),
                                             `Zstd` 1.4.5+.
 
