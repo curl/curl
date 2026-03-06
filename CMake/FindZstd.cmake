@@ -48,18 +48,17 @@ set(_zstd_pc_requires "libzstd")
 
 if(NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
-  if(CURL_USE_PKGCONFIG)
-    find_package(PkgConfig QUIET)
-    pkg_check_modules(_zstd ${_zstd_pc_requires})
-  endif()
-  if(NOT _zstd_FOUND AND CURL_USE_CMAKECONFIG)
+  if(CURL_USE_CMAKECONFIG)
     find_package(Zstd CONFIG QUIET)
-    # Skip using if older than v1.4.5
     if(Zstd_CONFIG AND
        NOT TARGET zstd::libzstd_static AND
-       NOT TARGET zstd::libzstd_shared)
+       NOT TARGET zstd::libzstd_shared)  # Skip using if older than v1.4.5
       unset(Zstd_CONFIG)
     endif()
+  endif()
+  if(NOT Zstd_CONFIG AND CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_zstd ${_zstd_pc_requires})
   endif()
 endif()
 
