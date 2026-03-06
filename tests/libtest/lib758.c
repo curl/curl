@@ -386,7 +386,8 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
 
     if(t758_ctx.fake_async_cert_verification_pending &&
        !t758_ctx.fake_async_cert_verification_finished) {
-      if(sockets.read.count || sockets.write.count) {
+      /* the wakeup socket will be monitored */
+      if((sockets.read.count > 1) || sockets.write.count) {
         t758_msg("during verification there should be no sockets scheduled");
         result = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
