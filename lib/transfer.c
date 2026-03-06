@@ -59,6 +59,7 @@
 #include "hostip.h"
 #include "cfilters.h"
 #include "cw-out.h"
+#include "dnscache.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
