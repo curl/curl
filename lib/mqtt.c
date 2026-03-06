@@ -379,6 +379,8 @@ static CURLcode mqtt_recv_atleast(struct Curl_easy *data, size_t nbytes)
     result = Curl_xfer_recv(data, (char *)readbuf, nbytes - rlen, &nread);
     if(result)
       return result;
+    if(!nread) /* EOF */
+       return CURLE_RECV_ERROR;
     if(curlx_dyn_addn(&mq->recvbuf, readbuf, nread))
       return CURLE_OUT_OF_MEMORY;
     rlen = curlx_dyn_len(&mq->recvbuf);
