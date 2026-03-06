@@ -1889,10 +1889,9 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   while(!ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
     stream = H2_STREAM_CTX(ctx, data);
     if(stream && (stream->closed || !data_max_bytes)) {
-      /* We would like to abort here and stop processing, so that
-       * the transfer loop can handle the data/close here. However,
-       * this may leave data in underlying buffers that will not
-       * be consumed. */
+      /* We would like to abort here and stop processing, so that the transfer
+       * loop can handle the data/close here. This may leave data in
+       * underlying buffers that will not be consumed. */
       if(!cf->next || !cf->next->cft->has_data_pending(cf->next, data))
         Curl_multi_mark_dirty(data);
       break;

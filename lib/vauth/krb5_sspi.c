@@ -318,8 +318,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
   /* Process the maximum message size the server can receive */
   if(max_size > 0) {
-    /* The server has told us it supports a maximum receive buffer, however, as
-       we do not require one unless we are encrypting data, we tell the server
+    /* The server has told us it supports a maximum receive buffer, but as we
+       do not require one unless we are encrypting data, we tell the server
        our receive buffer is zero. */
     max_size = 0;
   }

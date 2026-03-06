@@ -772,10 +772,10 @@ terminal.
 Switch on the progress meter by, oddly enough, setting
 CURLOPT_NOPROGRESS(3) to zero. This option is set to 1 by default.
 
-For most applications however, the built-in progress meter is useless and what
-instead is interesting is the ability to specify a progress callback. The
-function pointer you pass to libcurl is then called on irregular intervals
-with information about the current transfer.
+For most applications, the built-in progress meter is useless and what instead
+is interesting is the ability to specify a progress callback. The function
+pointer you pass to libcurl is then called on irregular intervals with
+information about the current transfer.
 
 Set the progress callback by using CURLOPT_PROGRESSFUNCTION(3). Pass a pointer
 to a function that matches this prototype:
@@ -1190,13 +1190,13 @@ CURLOPT_COOKIEFILE(3).
 
 The CURLOPT_COOKIEFILE(3) option also automatically enables the cookie parser
 in libcurl. Until the cookie parser is enabled, libcurl does not parse or
-understand incoming cookies and they are instead ignored. However, when the
-parser is enabled the cookies are understood and the cookies are kept in
-memory and used properly in subsequent requests when the same handle is used.
-Many times this is enough, and you may not have to save the cookies to disk at
-all. Note that the file you specify to CURLOPT_COOKIEFILE(3) does not have to
-exist to enable the parser, so a common way to enable the parser and not read
-any cookies is to use the name of a file you know does not exist.
+understand incoming cookies and they are instead ignored. When the parser is
+enabled the cookies are understood and the cookies are kept in memory and used
+properly in subsequent requests when the same handle is used. Many times this
+is enough, and you may not have to save the cookies to disk at all. Note that
+the file you specify to CURLOPT_COOKIEFILE(3) does not have to exist to enable
+the parser, so a common way to enable the parser and not read any cookies is
+to use the name of a file you know does not exist.
 
 If you would rather use existing cookies that you have previously received
 with your Netscape or Mozilla browsers, you can make libcurl use that cookie
@@ -1446,9 +1446,8 @@ size.
 
 ## [2]
 
-This happens on Windows machines when libcurl is built and used as a
-DLL. However, you can still do this on Windows if you link with a static
-library.
+This happens on Windows machines when libcurl is built and used as a DLL. You
+can still do this on Windows if you link with a static library.
 
 ## [3]
 

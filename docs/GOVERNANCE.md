@@ -61,7 +61,7 @@ they can be mentioned on the Sponsors page on the curl website.
 The curl project does not do or offer commercial support. It only hosts
 mailing lists, runs bug trackers etc to facilitate communication and work.
 
-However, Daniel works for wolfSSL and we offer commercial curl support there.
+Daniel works for wolfSSL, which offers commercial curl support.
 
 # Key roles
 

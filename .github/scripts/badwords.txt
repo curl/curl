@@ -93,3 +93,4 @@ file names\b:filenames
 \bmanpages[^./;=&{:-]:man pages
 \bmanpage[^si./;=&{:-]:man page
 favour:favor
+However,:rephrase?

@@ -36,8 +36,8 @@ libcurl does not copy the list, it needs to be kept around until after the
 transfer has completed.
 
 When performing a mail transfer, each recipient should be specified within a
-pair of angled brackets (\<\>), however, should you not use an angled bracket
-as the first character libcurl assumes you provided a single email address and
+pair of angled brackets (\<\>). Should you not use an angled bracket as the
+first character, libcurl assumes you provided a single email address and
 encloses that address within brackets for you.
 
 In order to specify DSN parameters (as per RFC 3461), the address has to be

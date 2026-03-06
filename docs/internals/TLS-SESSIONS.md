@@ -59,9 +59,8 @@ One important thing: peer keys do not contain confidential information. If you
 configure a client certificate or SRP authentication with username/password,
 these are not part of the peer key.
 
-However, peer keys carry the hostnames you use curl for. They *do*
-leak the privacy of your communication. We recommend to *not* persist
-peer keys for this reason.
+Peer keys carry the hostnames you use curl for. They *do* leak the privacy of
+your communication. We recommend to *not* persist peer keys for this reason.
 
 **Caveat**: The key may contain filenames or paths. It does not reflect the
 *contents* in the file system. If you change `/etc/ssl/cert.pem` and reuse

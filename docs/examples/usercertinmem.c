@@ -25,10 +25,11 @@
  * Use in-memory user certificate and private key and retrieve an HTTPS page.
  * </DESC>
  */
-/* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c.
- * Note that to maintain simplicity this example does not use a CA certificate
- * for peer verification.  However, some form of peer verification
- * must be used in real circumstances when a secure connection is required.
+
+/* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c. Note that
+ * to maintain simplicity this example does not use a CA certificate for peer
+ * verification. Some form of peer verification must be used in real
+ * circumstances when a secure connection is required.
  */
 
 /* Requires: USE_OPENSSL */

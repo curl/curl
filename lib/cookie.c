@@ -287,10 +287,10 @@ static void remove_expired(struct CookieInfo *ci)
   /*
    * If the earliest expiration timestamp in the jar is in the future we can
    * skip scanning the whole jar and instead exit early as there will not be
-   * any cookies to evict. If we need to evict however, reset the
-   * next_expiration counter in order to track the next one. In case the
-   * recorded first expiration is the max offset, then perform the safe
-   * fallback of checking all cookies.
+   * any cookies to evict. If we need to evict, reset the next_expiration
+   * counter in order to track the next one. In case the recorded first
+   * expiration is the max offset, then perform the safe fallback of checking
+   * all cookies.
    */
   if(now < ci->next_expiration &&
      ci->next_expiration != CURL_OFF_T_MAX)

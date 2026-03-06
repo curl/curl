@@ -872,9 +872,9 @@ request body) use the `Expect: 100-continue` header. This header allows the
 server to deny the operation early so that libcurl can bail out before having
 to send any data. This is useful in authentication cases and others.
 
-However, many servers do not implement the `Expect:` stuff properly and if the
-server does not respond (positively) within 1 second libcurl will continue and
-send off the data anyway.
+Many servers do not implement the `Expect:` stuff properly and if the server
+does not respond (positively) within 1 second libcurl will continue and send
+off the data anyway.
 
 You can disable libcurl's use of the `Expect:` header the same way you disable
 any header, using `-H` / `CURLOPT_HTTPHEADER`, or by forcing it to use HTTP
