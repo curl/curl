@@ -111,7 +111,6 @@ endmacro()
 # Internal: Recurse into target libraries and collect their include directories
 # and macro definitions.
 macro(curl_collect_target_compile_options _target)
-curl_dumptargetprops(${_target})
   get_target_property(_val ${_target} INTERFACE_COMPILE_DEFINITIONS)
   if(_val)
     list(APPEND _definitions ${_val})
