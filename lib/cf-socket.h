@@ -35,8 +35,8 @@ struct Curl_sockaddr_ex;
 struct ip_quadruple;
 
 /*
- * The Curl_sockaddr_ex structure is basically libcurl's external API
- * curl_sockaddr structure with enough space available to directly hold any
+ * The Curl_sockaddr_ex structure is libcurl's external API curl_sockaddr
+ * structure with enough space available to directly hold any
  * protocol-specific address structures. The variable declared here will be
  * used to pass / receive data to/from the fopensocket callback if this has
  * been set, before that, it is initialized from parameters.

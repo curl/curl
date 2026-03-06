@@ -514,8 +514,8 @@ struct Curl_scheme {
   const struct Curl_protocol *run; /* implementation */
   curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
                              specific protocol bit */
-  curl_prot_t family;     /* single bit for protocol family; basically the
-                             non-TLS name of the protocol this is */
+  curl_prot_t family;     /* single bit for protocol family; the non-TLS name
+                             of the protocol this is */
   uint32_t flags;         /* Extra particular characteristics, see PROTOPT_* */
   uint16_t defport;       /* Default port. */
 };

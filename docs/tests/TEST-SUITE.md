@@ -275,10 +275,10 @@ New tests are added by finding a free number in `tests/data/Makefile.am`.
 
 ## Write tests
 
-Here's a quick description on writing test cases. We basically have three
-kinds of tests: the ones that test the curl tool, the ones that build small
-applications and test libcurl directly and the unit tests that test
-individual (possibly internal) functions.
+Here's a quick description on writing test cases. We have three kinds of
+tests: the ones that test the curl tool, the ones that build small
+applications and test libcurl directly and the unit tests that test individual
+(possibly internal) functions.
 
 ### test data
 

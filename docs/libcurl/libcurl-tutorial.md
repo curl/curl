@@ -162,9 +162,9 @@ understanding.
 # Handle the Easy libcurl
 
 To use the easy interface, you must first create yourself an easy handle. You
-need one handle for each easy session you want to perform. Basically, you
-should use one handle for every thread you plan to use for transferring. You
-must never share the same handle in multiple threads.
+need one handle for each easy session you want to perform. You should use one
+handle for every thread you plan to use for transferring. You must never share
+the same handle in multiple threads.
 
 Get an easy handle with
 ~~~c
@@ -794,8 +794,8 @@ CURLOPT_PROGRESSDATA(3). libcurl does not touch it.
 
 # libcurl with C++
 
-There is basically only one thing to keep in mind when using C++ instead of C
-when interfacing libcurl:
+There is only one thing to keep in mind when using C++ instead of C when
+interfacing libcurl:
 
 The callbacks CANNOT be non-static class member functions
 
@@ -931,8 +931,8 @@ for such innovative actions either!
 
 ## Proxy Auto-Config
 
-Netscape first came up with this. It is basically a webpage (usually using a
-.pac extension) with a JavaScript that when executed by the browser with the
+Netscape first came up with this. It is a webpage (usually using a .pac
+extension) with a JavaScript that when executed by the browser with the
 requested URL as input, returns information to the browser on how to connect
 to the URL. The returned information might be "DIRECT" (which means no proxy
 should be used), "PROXY host:port" (to tell the browser where the proxy for

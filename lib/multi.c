@@ -693,10 +693,10 @@ static CURLcode multi_done(struct Curl_easy *data,
   case CURLE_ABORTED_BY_CALLBACK:
   case CURLE_READ_ERROR:
   case CURLE_WRITE_ERROR:
-    /* When we are aborted due to a callback return code it basically have to
-       be counted as premature as there is trouble ahead if we do not. We have
-       many callbacks and protocols work differently, we could potentially do
-       this more fine-grained in the future. */
+    /* When we are aborted due to a callback return code it has to be counted
+       as premature as there is trouble ahead if we do not. We have many
+       callbacks and protocols work differently, we could potentially do this
+       more fine-grained in the future. */
     premature = TRUE;
     FALLTHROUGH();
   default:
@@ -1694,9 +1694,9 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
 }
 
 /*
- * multi_do_more() is called during the DO_MORE multi state. It is basically a
- * second stage DO state which (wrongly) was introduced to support FTP's
- * second connection.
+ * multi_do_more() is called during the DO_MORE multi state. It is a second
+ * stage DO state which (wrongly) was introduced to support FTP's second
+ * connection.
  *
  * 'complete' can return 0 for incomplete, 1 for done and -1 for go back to
  * DOING state there is more work to do!

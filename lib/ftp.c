@@ -2264,8 +2264,7 @@ static CURLcode ftp_statemach(struct Curl_easy *data,
  * connected.
  *
  * 'complete' can return 0 for incomplete, 1 for done and -1 for go back
- * (which basically is only for when PASV is being sent to retry a failed
- * EPSV).
+ * (which is for when PASV is being sent to retry a failed EPSV).
  */
 static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 {
