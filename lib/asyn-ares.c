@@ -559,7 +559,7 @@ static void async_ares_hostbyname_cb(void *user_data,
        request came back quickly, that need not be the case. It might be that
        this completing request did not get a result from the first DNS
        server or even the first round of the whole DNS server pool. So it
-       could already be quite some time after we issued the DNS queries in
+       could already be a long time after we issued the DNS queries in
        the first place. Without modifying c-ares, we cannot know exactly
        where in its retry cycle we are. We could guess based on how much
        time has gone by, but it does not really matter. Happy Eyeballs tells

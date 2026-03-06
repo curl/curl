@@ -102,7 +102,7 @@ and regression in the future.
 Please try to get the latest available sources to make your patches against.
 It makes the lives of the developers so much easier. The best is if you get
 the most up-to-date sources from the git repository, but the latest release
-archive is quite OK as well.
+archive is OK as well.
 
 ### Documentation
 
