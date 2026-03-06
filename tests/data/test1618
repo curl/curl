@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+compressed
+brotli
+</keywords>
+</info>
+
+<reply>
+
+<data crlf="headers" nonewline="yes">
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Vary: Accept-Encoding
+Content-Encoding: br
+Content-Length: 14
+
+%hex[%81%fa%7f%0c%fc%13%00%f1%58%20%90%7b%18%00]hex%
+</data>
+
+<datacheck crlf="headers">
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Vary: Accept-Encoding
+Content-Encoding: br
+Content-Length: 14
+
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<features>
+brotli
+</features>
+<server>
+http
+</server>
+<name>
+HTTP GET brotli compression bomb
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed --max-filesize=1000
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+<errorcode>
+63
+</errorcode>
+</verify>
+</testcase>

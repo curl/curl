@@ -304,6 +304,10 @@ RTSP session ID. See CURLINFO_RTSP_SESSION_ID(3)
 
 The scheme used for the connection. See CURLINFO_SCHEME(3)
 
+## CURLINFO_SIZE_DELIVERED
+
+Number of bytes passed to the write callback. See CURLINFO_SIZE_DELIVERED(3)
+
 ## CURLINFO_SIZE_DOWNLOAD
 
 (**Deprecated**) Number of bytes downloaded. See CURLINFO_SIZE_DOWNLOAD(3)

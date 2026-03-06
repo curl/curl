@@ -41,6 +41,9 @@ If you want a limit above 2GB, use CURLOPT_MAXFILESIZE_LARGE(3).
 Since 8.4.0, this option also stops ongoing transfers if they reach this
 threshold.
 
+Since 8.20.0, this option also stops ongoing transfers that would reach this
+threshold due to automatic decompression using CURLOPT_ACCEPT_ENCODING(3).
+
 # DEFAULT
 
 0, meaning disabled.
