@@ -67,10 +67,10 @@ does not have `res_init()` or an alternative.
 ## c-ares and CURLOPT_OPENSOCKETFUNCTION
 
 curl creates most sockets via the CURLOPT_OPENSOCKETFUNCTION callback and
-close them with the CURLOPT_CLOSESOCKETFUNCTION callback. However, c-ares does
-not use those functions and instead opens and closes the sockets itself. This
-means that when curl passes the c-ares socket to the CURLMOPT_SOCKETFUNCTION
-it is not owned by the application like other sockets.
+close them with the CURLOPT_CLOSESOCKETFUNCTION callback. c-ares does not use
+those functions and instead opens and closes the sockets itself. This means
+that when curl passes the c-ares socket to the CURLMOPT_SOCKETFUNCTION it is
+not owned by the application like other sockets.
 
 See [curl issue 2734](https://github.com/curl/curl/issues/2734)
 
@@ -409,10 +409,10 @@ capabilities returned from the CAPABILITY command.
 ## SASL based authentication mechanisms
 
 Currently the LDAP module only supports `ldap_simple_bind_s()` in order to
-bind to an LDAP server. However, this function sends username and password
-details using the simple authentication mechanism (as clear text). However, it
-should be possible to use `ldap_bind_s()` instead specifying the security
-context information ourselves.
+bind to an LDAP server. This function sends username and password details
+using the simple authentication mechanism (as clear text). It should be
+possible to use `ldap_bind_s()` instead specifying the security context
+information ourselves.
 
 ## `CURLOPT_SSL_CTX_FUNCTION` for LDAPS
 

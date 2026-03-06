@@ -3520,9 +3520,9 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
 #endif
   }
   else {
-    /* We have decided that we want a new connection. However, we may not
-       be able to do that if we have reached the limit of how many
-       connections we are allowed to open. */
+    /* We have decided that we want a new connection. We may not be able to do
+       that if we have reached the limit of how many connections we are
+       allowed to open. */
     DEBUGF(infof(data, "new connection, bits.close=%d", needle->bits.close));
 
     if(waitpipe) {

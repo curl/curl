@@ -20,9 +20,9 @@ libcurl-security - security considerations when using libcurl
 The libcurl project takes security seriously. The library is written with
 caution and precautions are taken to mitigate many kinds of risks encountered
 while operating with potentially malicious servers on the Internet. It is a
-powerful library, however, which allows application writers to make trade-offs
-between ease of writing and exposure to potential risky operations. If used
-the right way, you can use libcurl to transfer data pretty safely.
+powerful library that allows application writers to make trade-offs between
+ease of writing and exposure to potential risky operations. If used the right
+way, you can use libcurl to transfer data pretty safely.
 
 Many applications are used in closed networks where users and servers can
 (possibly) be trusted, but many others are used on arbitrary servers and are
@@ -287,9 +287,9 @@ When first realizing this, the curl team tried to filter out such attempts in
 order to protect applications for inadvertent probes of for example internal
 networks etc. This resulted in CVE-2019-15601 and the associated security fix.
 
-However, we have since been made aware of the fact that the previous fix was far
-from adequate as there are several other ways to accomplish more or less the
-same thing: accessing a remote host over the network instead of the local file
+We have since been made aware of the fact that the previous fix was far from
+adequate as there are several other ways to accomplish more or less the same
+thing: accessing a remote host over the network instead of the local file
 system.
 
 The conclusion we have come to is that this is a weakness or feature in the

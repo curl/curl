@@ -233,10 +233,10 @@ parts of the program of which it is part.
 
 A special part of the global constant environment is the identity of the
 memory allocator. curl_global_init(3) selects the system default memory
-allocator, but you can use curl_global_init_mem(3) to supply one of your
-own. However, there is no way to use curl_global_init_mem(3) in a
-modular program -- all modules in the program that might use libcurl would
-have to agree on one allocator.
+allocator, but you can use curl_global_init_mem(3) to supply one of your own.
+There is no way to use curl_global_init_mem(3) in a modular program -- all
+modules in the program that might use libcurl would have to agree on one
+allocator.
 
 There is a failsafe in libcurl that makes it usable in simple situations
 without you having to worry about the global constant environment at all:

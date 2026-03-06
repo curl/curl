@@ -3288,11 +3288,10 @@ static CURLcode http_header_c(struct Curl_easy *data,
     HD_VAL(hd, hdlen, "Content-Encoding:") : NULL;
   if(v) {
     /*
-     * Process Content-Encoding. Look for the values: identity,
-     * gzip, deflate, compress, x-gzip and x-compress. x-gzip and
-     * x-compress are the same as gzip and compress. (Sec 3.5 RFC
-     * 2616). zlib cannot handle compress. However, errors are
-     * handled further down when the response body is processed
+     * Process Content-Encoding. Look for the values: identity, gzip, deflate,
+     * compress, x-gzip and x-compress. x-gzip and x-compress are the same as
+     * gzip and compress. (Sec 3.5 RFC 2616). zlib cannot handle compress.
+     * Errors are handled further down when the response body is processed
      */
     return Curl_build_unencoding_stack(data, v, FALSE);
   }

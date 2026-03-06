@@ -41,9 +41,9 @@ after a 303 redirect. The value **CURL_REDIR_POST_ALL** is a convenience
 define that sets all three bits.
 
 The non-RFC behavior is ubiquitous in web browsers, so the library does the
-conversion by default to maintain consistency. However, a server may require a
-POST to remain a POST after such a redirection. This option is meaningful only
-when setting CURLOPT_FOLLOWLOCATION(3).
+conversion by default to maintain consistency. A server may require a POST to
+remain a POST after such a redirection. This option is meaningful only when
+setting CURLOPT_FOLLOWLOCATION(3).
 
 # DEFAULT
 
