@@ -3230,6 +3230,14 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
        handles the case when the application asks libcurl to run the timeout
        prematurely. */
     memset(&multi->last_expire_ts, 0, sizeof(multi->last_expire_ts));
+
+    /* Applications may set `socket_cb` *after* having added transfers
+     * first. *Then* kick off processing with a
+     * curl_multi_socket_action(TIMEOUT) afterwards. Make sure our
+     * admin handle registers its pollset with the callbacks present. */
+    mresult = multi_assess_wakeup(multi);
+    if(mresult)
+      goto out;
   }
 
   multi_mark_expired_as_dirty(multi, multi_now(multi));
