@@ -630,8 +630,8 @@ static void multi_done_locked(struct connectdata *conn,
   data->state.done = TRUE; /* called now! */
   data->state.recent_conn_id = conn->connection_id;
 
-  Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
-  Curl_resolv_unlink(data, &data->state.dns[1]);
+  Curl_dns_entry_unlink(data, &data->state.dns[0]); /* done with this */
+  Curl_dns_entry_unlink(data, &data->state.dns[1]);
   Curl_dnscache_prune(data);
 
   if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {

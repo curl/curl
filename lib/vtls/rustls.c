@@ -961,10 +961,16 @@ init_config_builder_ech(struct Curl_easy *data,
   }
   else {
     if(connssl->peer.hostname) {
-      dns = Curl_dnscache_get(data, connssl->peer.hostname,
-                              connssl->peer.port, data->conn->ip_version);
+      result = Curl_dnscache_get(data, connssl->peer.hostname,
+                                 connssl->peer.port, data->conn->ip_version,
+                                 &dns);
     }
     if(!dns) {
+      if(result) {
+        failf(data, "ECH: could not resolve %s:%d",
+              connssl->peer.hostname, connssl->peer.port);
+        return result;
+      }
       failf(data, "rustls: ECH requested but no DNS info available");
       result = CURLE_SSL_CONNECT_ERROR;
       goto cleanup;
@@ -994,7 +1000,7 @@ cleanup:
     curlx_free(ech_config);
   }
   if(dns) {
-    Curl_resolv_unlink(data, &dns);
+    Curl_dns_entry_unlink(data, &dns);
   }
   return result;
 }

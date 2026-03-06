@@ -342,7 +342,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
   if(result || !dns) {
     failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.", sx->hostname);
     if(dns)
-      Curl_resolv_unlink(data, &dns);
+      Curl_dns_entry_unlink(data, &dns);
     return CURLPX_RESOLVE_HOST;
   }
 
@@ -368,12 +368,12 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
                              (unsigned char *)&saddr_in->sin_addr.s_addr, 4,
                              &nwritten);
 
-    Curl_resolv_unlink(data, &dns); /* not used anymore from now on */
+    Curl_dns_entry_unlink(data, &dns); /* not used anymore from now on */
     if(result || (nwritten != 4))
       return CURLPX_SEND_REQUEST;
   }
   else {
-    Curl_resolv_unlink(data, &dns);
+    Curl_dns_entry_unlink(data, &dns);
     failf(data, "SOCKS4 connection to %s not supported", sx->hostname);
     return CURLPX_RESOLVE_HOST;
   }
@@ -942,7 +942,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
 
 out:
   if(dns)
-    Curl_resolv_unlink(data, &dns);
+    Curl_dns_entry_unlink(data, &dns);
   *done = (presult == CURLPX_OK);
   return presult;
 }

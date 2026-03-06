@@ -1385,7 +1385,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* cleanup */
 
   if(dns_entry)
-    Curl_resolv_unlink(data, &dns_entry);
+    Curl_dns_entry_unlink(data, &dns_entry);
   if(result) {
     ftp_state(data, ftpc, FTP_STOP);
   }
