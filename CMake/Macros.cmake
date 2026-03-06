@@ -260,12 +260,12 @@ macro(curl_collect_target_link_options _target)
   if(_val)
     list(APPEND _libdirs ${_val})
   endif()
-  # LOCATION is empty for interface library targets and safe to ignore.
-  # Explicitly skip this query to avoid CMake v3.18 and older erroring out.
-  get_target_property(_val ${_target} TYPE)
-  if(NOT "${_val}" STREQUAL "INTERFACE_LIBRARY")
-    get_target_property(_val ${_target} IMPORTED)
-    if(_val)
+  get_target_property(_val ${_target} IMPORTED)
+  if(_val)
+    # LOCATION is empty for interface library targets and safe to ignore.
+    # Explicitly skip this query to avoid CMake v3.18 and older erroring out.
+    get_target_property(_val ${_target} TYPE)
+    if(NOT "${_val}" STREQUAL "INTERFACE_LIBRARY")
       get_target_property(_val ${_target} LOCATION)
       if(_val)
         list(APPEND _libs ${_val})
