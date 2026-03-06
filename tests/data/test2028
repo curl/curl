@@ -31,7 +31,7 @@ This is not the real page!
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Digest realm="testrealm", nonce="2"
 WWW-Authenticate: NTLM
 
@@ -85,7 +85,7 @@ This is not the real page!
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 WWW-Authenticate: Digest realm="testrealm", nonce="5"
 
@@ -118,7 +118,7 @@ This is still not the real page!
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 WWW-Authenticate: Digest realm="testrealm", nonce="7"
 
@@ -167,7 +167,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="1"
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Digest realm="testrealm", nonce="2"
 WWW-Authenticate: NTLM
 
@@ -194,7 +194,7 @@ WWW-Authenticate: NTLM
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 WWW-Authenticate: Digest realm="testrealm", nonce="5"
 
@@ -208,7 +208,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 WWW-Authenticate: Digest realm="testrealm", nonce="7"
 

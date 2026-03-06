@@ -36,7 +36,7 @@ This is still not the real page!
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 
 This is a ungood password page!
@@ -97,7 +97,7 @@ This is still not the real page!
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 
 This is a ungood password page!
@@ -128,7 +128,7 @@ This is still not the real page!
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 
 This is a ungood password page!
@@ -174,7 +174,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 
 This is a ungood password page!
@@ -199,7 +199,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 
 This is a ungood password page!
@@ -212,7 +212,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: NTLM
 
 This is a ungood password page!
