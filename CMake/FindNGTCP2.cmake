@@ -76,12 +76,7 @@ endif()
 set(_tried_pkgconfig FALSE)
 if(NOT DEFINED NGTCP2_INCLUDE_DIR AND
    NOT DEFINED NGTCP2_LIBRARY)
-  if(CURL_USE_PKGCONFIG)
-    find_package(PkgConfig QUIET)
-    pkg_check_modules(_ngtcp2 ${_ngtcp2_pc_requires})
-    set(_tried_pkgconfig TRUE)
-  endif()
-  if(NOT _ngtcp2_FOUND AND CURL_USE_CMAKECONFIG)
+  if(CURL_USE_CMAKECONFIG)
     find_package(ngtcp2 CONFIG QUIET)
     # Skip using it if the crypto library target is not available
     if(ngtcp2_CONFIG AND
@@ -89,6 +84,11 @@ if(NOT DEFINED NGTCP2_INCLUDE_DIR AND
        NOT TARGET ngtcp2::${_crypto_library_lower})
       unset(ngtcp2_CONFIG)
     endif()
+  endif()
+  if(NOT ngtcp2_CONFIG AND CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_ngtcp2 ${_ngtcp2_pc_requires})
+    set(_tried_pkgconfig TRUE)
   endif()
 endif()
 

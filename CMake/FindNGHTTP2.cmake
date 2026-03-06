@@ -39,12 +39,12 @@ set(_nghttp2_pc_requires "libnghttp2")
 
 if(NOT DEFINED NGHTTP2_INCLUDE_DIR AND
    NOT DEFINED NGHTTP2_LIBRARY)
-  if(CURL_USE_PKGCONFIG)
+  if(CURL_USE_CMAKECONFIG)
+    find_package(nghttp2 CONFIG QUIET)
+  endif()
+  if(NOT nghttp2_CONFIG AND CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_check_modules(_nghttp2 ${_nghttp2_pc_requires})
-  endif()
-  if(NOT _nghttp2_FOUND AND CURL_USE_CMAKECONFIG)
-    find_package(nghttp2 CONFIG QUIET)
   endif()
 endif()
 

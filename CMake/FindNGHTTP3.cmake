@@ -39,12 +39,12 @@ set(_nghttp3_pc_requires "libnghttp3")
 
 if(NOT DEFINED NGHTTP3_INCLUDE_DIR AND
    NOT DEFINED NGHTTP3_LIBRARY)
-  if(CURL_USE_PKGCONFIG)
+  if(CURL_USE_CMAKECONFIG)
+    find_package(nghttp3 CONFIG QUIET)
+  endif()
+  if(NOT nghttp3_CONFIG AND CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_check_modules(_nghttp3 ${_nghttp3_pc_requires})
-  endif()
-  if(NOT _nghttp3_FOUND AND CURL_USE_CMAKECONFIG)
-    find_package(nghttp3 CONFIG QUIET)
   endif()
 endif()
 
