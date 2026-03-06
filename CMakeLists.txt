@@ -386,7 +386,7 @@ if(WIN32)
 endif()
 
 # Override to force-disable or force-enable the use of CMake Configs.
-if(MSVC)
+if(MSVC AND NOT VCPKG_TOOLCHAIN AND NOT CMAKE_CROSSCOMPILING)
   set(_curl_use_cmakeconfig_default ON)
 else()
   set(_curl_use_cmakeconfig_default OFF)
