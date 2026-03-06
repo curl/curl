@@ -385,6 +385,17 @@ if(WIN32)
   endif()
 endif()
 
+# Override to force-disable or force-enable the use of CMake Configs.
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19 AND MSVC)
+  set(_curl_use_cmakeconfig_default ON)
+else()
+  set(_curl_use_cmakeconfig_default OFF)
+endif()
+option(CURL_USE_CMAKECONFIG "Enable detecting dependencies via CMake Config" ${_curl_use_cmakeconfig_default})
+if(CURL_USE_CMAKECONFIG AND CMAKE_VERSION VERSION_LESS 3.19)
+  message(WARNING "CMake Config support requires CMake 3.19 or newer.")
+endif()
+
 # Override to force-disable or force-enable the use of pkg-config.
 if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")) OR
    VCPKG_TOOLCHAIN OR
@@ -394,12 +405,6 @@ else()
   set(_curl_use_pkgconfig_default OFF)
 endif()
 option(CURL_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_curl_use_pkgconfig_default})
-if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
-  set(_curl_use_cmakeconfig_default ON)
-else()
-  set(_curl_use_cmakeconfig_default OFF)
-endif()
-option(CURL_USE_CMAKECONFIG "Enable detecting dependencies via CMake Config" ${_curl_use_cmakeconfig_default})
 
 # Initialize variables collecting system and dependency libs.
 set(CURL_NETWORK_AND_TIME_LIBS "")
