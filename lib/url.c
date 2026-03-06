@@ -590,28 +590,14 @@ static bool proxy_info_matches(const struct proxy_info *data,
 {
   if((data->proxytype == needle->proxytype) &&
      (data->port == needle->port) &&
-     curl_strequal(data->host.name, needle->host.name))
+     curl_strequal(data->host.name, needle->host.name)) {
+
+    if(Curl_timestrcmp(data->user, needle->user) ||
+       Curl_timestrcmp(data->passwd, needle->passwd))
+      return FALSE;
     return TRUE;
-
+  }
   return FALSE;
-}
-
-static bool socks_proxy_info_matches(const struct proxy_info *data,
-                                     const struct proxy_info *needle)
-{
-  if(!proxy_info_matches(data, needle))
-    return FALSE;
-
-  /* the user information is case-sensitive
-     or at least it is not defined as case-insensitive
-     see https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.1 */
-
-  /* curl_strequal does a case insensitive comparison,
-     so do not use it here! */
-  if(Curl_timestrcmp(data->user, needle->user) ||
-     Curl_timestrcmp(data->passwd, needle->passwd))
-    return FALSE;
-  return TRUE;
 }
 #endif
 
@@ -923,7 +909,7 @@ static bool url_match_proxy_use(struct connectdata *conn,
     return FALSE;
 
   if(m->needle->bits.socksproxy &&
-     !socks_proxy_info_matches(&m->needle->socks_proxy, &conn->socks_proxy))
+     !proxy_info_matches(&m->needle->socks_proxy, &conn->socks_proxy))
     return FALSE;
 
   if(m->needle->bits.httpproxy) {
