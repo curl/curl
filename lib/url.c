@@ -545,7 +545,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->oauth_bearer);
   Curl_safefree(conn->host.rawalloc); /* hostname buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* hostname buffer */
-  Curl_safefree(conn->hostname_resolve);
   Curl_safefree(conn->secondaryhostname);
   Curl_safefree(conn->localdev);
   Curl_ssl_conn_config_cleanup(conn);
@@ -3146,12 +3145,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
     eport = conn->bits.conn_to_port ? conn->conn_to_port : conn->remote_port;
   }
 
-  /* Resolve target host right on */
-  conn->hostname_resolve = curlx_strdup(ehost->name);
-  if(!conn->hostname_resolve)
-    return CURLE_OUT_OF_MEMORY;
-
-  result = Curl_resolv_timeout(data, conn->hostname_resolve,
+  result = Curl_resolv_timeout(data, ehost->name,
                                eport, conn->ip_version,
                                pdns, timeout_ms);
   DEBUGASSERT(!result || !*pdns);
@@ -3237,9 +3231,6 @@ static void url_conn_reuse_adjust(struct Curl_easy *data,
 
   conn->conn_to_port = needle->conn_to_port;
   conn->remote_port = needle->remote_port;
-  curlx_free(conn->hostname_resolve);
-  conn->hostname_resolve = needle->hostname_resolve;
-  needle->hostname_resolve = NULL;
 }
 
 static void conn_meta_freeentry(void *p)
