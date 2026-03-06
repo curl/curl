@@ -347,7 +347,7 @@ Details via CMake
 ## Dependencies
 
 - `CURL_BROTLI`:                            Use brotli (`ON`, `OFF` or `AUTO`). Default: `AUTO`
-- `CURL_USE_CMAKECONFIG`:                   Enable detecting dependencies via CMake Config. Default: `OFF`
+- `CURL_USE_CMAKECONFIG`:                   Enable detecting dependencies via CMake Config. Default: `ON` for Windows if not cross-compiling.
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
