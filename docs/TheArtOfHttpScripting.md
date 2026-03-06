@@ -201,10 +201,9 @@ Example, send two POSTs:
 
 Sometimes you need to operate on several URLs in a single command line and do
 different HTTP methods on each. For this, you might enjoy the
-[`--next`](https://curl.se/docs/manpage.html#-:) option. It is basically a
-separator that separates a bunch of options from the next. All the URLs
-before `--next` get the same method and get all the POST data merged into
-one.
+[`--next`](https://curl.se/docs/manpage.html#-:) option. It is a separator
+that separates a bunch of options from the next. All the URLs before `--next`
+get the same method and get all the POST data merged into one.
 
 When curl reaches the `--next` on the command line, it resets the method and
 the POST data and allow a new set.

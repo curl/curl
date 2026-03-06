@@ -430,10 +430,10 @@ can imagine.
 
 ## What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
-curl adheres to the HTTP spec, which basically means you can play with *any*
-protocol that is built on top of HTTP. Protocols such as SOAP, WebDAV and
-XML-RPC are all such ones. You can use `-X` to set custom requests and -H to
-set custom headers (or replace internally generated ones).
+curl adheres to the HTTP spec, which means you can play with *any* protocol
+that is built on top of HTTP. Protocols such as SOAP, WebDAV and XML-RPC are
+all such ones. You can use `-X` to set custom requests and -H to set custom
+headers (or replace internally generated ones).
 
 Using libcurl of course also works and you would use the proper library
 options to do the same.
@@ -1329,9 +1329,9 @@ their projects, no matter what license they already have in use.
 ## What are my obligations when using libcurl in my commercial apps?
 
 Next to none. All you need to adhere to is the MIT-style license (stated in
-the COPYING file) which basically says you have to include the copyright
-notice in *all copies* and that you may not use the copyright holder's name
-when promoting your software.
+the COPYING file) which says you have to include the copyright notice in *all
+copies* and that you may not use the copyright holder's name when promoting
+your software.
 
 You do not have to release any of your source code.
 

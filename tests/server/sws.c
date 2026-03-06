@@ -1984,7 +1984,7 @@ static int test_sws(int argc, const char *argv[])
   int keepalive_secs = 5;
   const char *protocol_type = "HTTP";
 
-  /* a default CONNECT port is basically pointless but still ... */
+  /* a default CONNECT port is pointless, but still ... */
   size_t socket_idx;
 
   pidname = ".http.pid";

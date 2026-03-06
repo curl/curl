@@ -92,8 +92,8 @@ pings to keep such ones alive even when not actively doing transfers on them.
 
 Given a URL that for example contains spaces, libcurl could have an option
 that would try somewhat harder than it does now and convert spaces to %20 and
-perhaps URL encoded byte values over 128 etc (basically do what the redirect
-following code already does).
+perhaps URL encoded byte values over 128 etc (do what the redirect following
+code already does).
 
 [curl issue 514](https://github.com/curl/curl/issues/514)
 
@@ -880,12 +880,11 @@ See [curl issue 6150](https://github.com/curl/curl/issues/6150)
 ## `-J` and `-O` with %-encoded filenames
 
 `-J`/`--remote-header-name` does not decode %-encoded filenames. RFC 6266
-details how it should be done. The can of worm is basically that we have no
-charset handling in curl and ASCII >=128 is a challenge for us. Not to mention
-that decoding also means that we need to check for nastiness that is
-attempted, like `../` sequences and the like. Probably everything to the left
-of any embedded slashes should be cut off. See
-https://curl.se/bug/view.cgi?id=1294
+details how it should be done. The can of worm is that we have no charset
+handling in curl and ASCII >=128 is a challenge for us. Not to mention that
+decoding also means that we need to check for nastiness that is attempted,
+like `../` sequences and the like. Probably everything to the left of any
+embedded slashes should be cut off. See https://curl.se/bug/view.cgi?id=1294
 
 `-O` also does not decode %-encoded names, and while it has even less
 information about the charset involved the process is similar to the `-J`

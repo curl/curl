@@ -574,8 +574,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   /*
    * Set user-agent. Used for HTTP, but since we can attempt to tunnel
-   * basically anything through an HTTP proxy we cannot limit this based on
-   * protocol.
+   * anything through an HTTP proxy we cannot limit this based on protocol.
    */
   if(!result && data->set.str[STRING_USERAGENT]) {
     curlx_free(data->state.aptr.uagent);

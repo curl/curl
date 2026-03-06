@@ -3099,11 +3099,10 @@ typedef enum {
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
-/* The 'CURLVERSION_NOW' is the symbolic name meant to be used by
-   basically all programs ever that want to get version information. It is
-   meant to be a built-in version number for what kind of struct the caller
-   expects. If the struct ever changes, we redefine the NOW to another enum
-   from above. */
+/* The 'CURLVERSION_NOW' is the symbolic name meant to be used by programs
+   that want to get version information. It is meant to be a built-in
+   version number for what kind of struct the caller expects. If the struct
+   ever changes, we redefine the NOW to another enum from above. */
 #define CURLVERSION_NOW CURLVERSION_TWELFTH
 
 struct curl_version_info_data {
