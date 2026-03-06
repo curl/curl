@@ -41,6 +41,11 @@ if(NOT DEFINED LIBSSH2_INCLUDE_DIR AND
    NOT DEFINED LIBSSH2_LIBRARY)
   if(CURL_USE_CMAKECONFIG)
     find_package(libssh2 CONFIG QUIET)
+    if(libssh2_CONFIG AND
+       NOT TARGET libssh2::libssh2_static AND
+       NOT TARGET libssh2::libssh2)  # Skip using if older than v1.11.0
+      unset(libssh2_CONFIG)
+    endif()
   endif()
   if(NOT libssh2_CONFIG AND CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
