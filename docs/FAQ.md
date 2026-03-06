@@ -561,7 +561,7 @@ the first path part. List the `/tmp` directory like this:
 
     curl ftp://ftp.example.com/%2ftmp/
 
-The second way is nonstandard but more readable; start the path section of the
+The second way is non-standard but more readable; start the path section of the
 URL with a slash:
 
     curl ftp://ftp.example.com//tmp/
