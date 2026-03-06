@@ -67,8 +67,9 @@ code, we switched over to the MPL license to restrict the effects of
 "copyleft".
 
 November: configure script and reported successful compiles on several
-major operating systems. The never-quite-understood -F option was added and
-curl could now simulate quite a lot of a browser. TELNET support was added.
+major operating systems. The often-misunderstood -F option was added, and
+curl could now simulate significant browser functionality. TELNET support was
+added.
 
 curl 5 was released in December 1998 and introduced the first ever curl man
 page. People started making Linux RPM packages out of it.

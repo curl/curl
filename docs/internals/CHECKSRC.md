@@ -131,11 +131,11 @@ warnings are:
 
 ### Extended warnings
 
-Some warnings are quite computationally expensive to perform, so they are
-turned off by default. To enable these warnings, place a `.checksrc` file in
-the directory where they should be activated with commands to enable the
-warnings you are interested in. The format of the file is to enable one
-warning per line like so: `enable <EXTENDEDWARNING>`
+Some warnings are computationally expensive to perform, so they are turned off
+by default. To enable these warnings, place a `.checksrc` file in the directory
+where they should be activated with commands to enable the warnings you are
+interested in. The format of the file is to enable one warning per line like
+so: `enable <EXTENDEDWARNING>`
 
 Currently these are the extended warnings which can be enabled:
 

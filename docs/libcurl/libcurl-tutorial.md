@@ -291,11 +291,11 @@ a better understanding why the server behaves the way it does. Include headers
 in the normal body output with CURLOPT_HEADER(3) set 1.
 
 Of course, there are bugs left. We need to know about them to be able to fix
-them, so we are quite dependent on your bug reports. When you do report
-suspected bugs in libcurl, please include as many details as you possibly can:
-a protocol dump that CURLOPT_VERBOSE(3) produces, library version, as
-much as possible of your code that uses libcurl, operating system name and
-version, compiler name and version etc.
+them, so we are dependent on your bug reports. When you do report suspected
+bugs in libcurl, please include as many details as you possibly can: a protocol
+dump that CURLOPT_VERBOSE(3) produces, library version, as much as possible of
+your code that uses libcurl, operating system name and version, compiler name
+and version etc.
 
 If CURLOPT_VERBOSE(3) is not enough, you increase the level of debug
 data your application receive by using the CURLOPT_DEBUGFUNCTION(3).
@@ -377,8 +377,8 @@ char * to a string in the format "user:password". In a manner like this:
 
 Another case where name and password might be needed at times, is for those
 users who need to authenticate themselves to a proxy they use. libcurl offers
-another option for this, the CURLOPT_PROXYUSERPWD(3). It is used quite similar
-to the CURLOPT_USERPWD(3) option like this:
+another option for this, the CURLOPT_PROXYUSERPWD(3). Its use is similar to the
+CURLOPT_USERPWD(3) option, like this:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
@@ -826,8 +826,8 @@ libcurl supports SOCKS and HTTP proxies. When a given URL is wanted, libcurl
 asks the proxy for it instead of trying to connect to the actual remote host
 identified in the URL.
 
-If you are using a SOCKS proxy, you may find that libcurl does not quite support
-all operations through it.
+If you are using a SOCKS proxy, you may find that libcurl does not support all
+operations through it.
 
 For HTTP proxies: the fact that the proxy is an HTTP proxy puts certain
 restrictions on what can actually happen. A requested URL that might not be a
