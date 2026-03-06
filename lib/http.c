@@ -705,6 +705,7 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
     if(!proxy && data->set.str[STRING_BEARER] &&
+       Curl_auth_allowed_to_host(data) &&
        !Curl_checkheaders(data, STRCONST("Authorization"))) {
       auth = "Bearer";
       result = http_output_bearer(data);
