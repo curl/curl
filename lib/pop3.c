@@ -1475,7 +1475,7 @@ static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(data->conn, "POP3 done with bad status");
+    connclose(data->conn, "POP3 done with ungood status");
     result = status;         /* use the already set error code */
   }
 
@@ -1615,7 +1615,7 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   /* We cannot send quit unconditionally. If this connection is stale or
-     bad in any way, sending quit and waiting around here will make the
+     ungood in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to. */
 
   if(!dead_connection && conn->bits.protoconnstart &&

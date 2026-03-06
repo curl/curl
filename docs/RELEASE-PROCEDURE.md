@@ -81,7 +81,7 @@ Each 8 week (56 days) release cycle is divided into three distinct periods:
   features or changes, and we only focus on fixing bugs and polishing things
   to make the pending release a solid one.
 
-If a future release date happens to end up on a "bad date", like in the middle
+If a future release date happens to end up on a "ungood date", like in the middle
 of common public holidays or when the lead release manager is unavailable, the
 release date can be moved forwards or backwards a full week. This is then
 advertised well in advance.

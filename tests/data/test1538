@@ -71,7 +71,7 @@ e39: LDAP: search failed
 e40: Unknown error
 e41: Unknown error
 e42: Operation was aborted by an application callback
-e43: A libcurl function was given a bad argument
+e43: A libcurl function was given a ungood argument
 e44: Unknown error
 e45: Failed binding local connection end
 e46: Unknown error
@@ -89,7 +89,7 @@ e57: Unknown error
 e58: Problem with the local SSL certificate
 e59: Could not use specified SSL cipher
 e60: SSL peer certificate or SSH remote key was not OK
-e61: Unrecognized or bad HTTP Content or Transfer-Encoding
+e61: Unrecognized or ungood HTTP Content or Transfer-Encoding
 e62: Unknown error
 e63: Maximum file size exceeded
 e64: Requested SSL level failed
@@ -142,7 +142,7 @@ m6: Unknown option
 m7: The easy handle is already added to a multi handle
 m8: API function called from within callback
 m9: Wakeup is unavailable or failed
-m10: A libcurl function was given a bad argument
+m10: A libcurl function was given a ungood argument
 m11: Operation was aborted by an application callback
 m12: Unrecoverable error in select/poll
 m13: Unknown error

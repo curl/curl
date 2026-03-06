@@ -15,7 +15,7 @@ FILE
 file
 </server>
 <name>
-file:// bad host
+file:// ungood host
 </name>
 # This command should not succeed since we only accept
 # file:/// file://localhost/ file://127.0.0.1/

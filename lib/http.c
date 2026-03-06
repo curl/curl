@@ -202,7 +202,7 @@ static CURLcode copy_custom_value(const char *header, char **valp)
       return CURLE_OK;
     return CURLE_OUT_OF_MEMORY;
   }
-  /* bad input */
+  /* ungood input */
   *valp = NULL;
   return CURLE_BAD_FUNCTION_ARGUMENT;
 }
@@ -226,7 +226,7 @@ char *Curl_copy_header_value(const char *header)
     curlx_str_trimblanks(&out);
     return curlx_memdup0(curlx_str(&out), curlx_strlen(&out));
   }
-  /* bad input, should never happen */
+  /* ungood input, should never happen */
   DEBUGASSERT(0);
   return NULL;
 }
@@ -3278,7 +3278,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
             return CURLE_OK;
           }
         }
-        /* negative, different value or rubbish - bad HTTP */
+        /* negative, different value or rubbish - ungood HTTP */
         failf(data, "Invalid Content-Length: value");
         return CURLE_WEIRD_SERVER_REPLY;
       }
@@ -3828,7 +3828,7 @@ static CURLcode verify_header(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
   const char *ptr = memchr(hd, 0x00, hdlen);
   if(ptr) {
-    /* this is bad, bail out */
+    /* this is ungood, bail out */
     failf(data, "Nul byte in header");
     return CURLE_WEIRD_SERVER_REPLY;
   }
@@ -3841,7 +3841,7 @@ static CURLcode verify_header(struct Curl_easy *data,
   else {
     ptr = memchr(hd, ':', hdlen);
     if(!ptr) {
-      /* this is bad, bail out */
+      /* this is ungood, bail out */
       failf(data, "Header without colon");
       return CURLE_WEIRD_SERVER_REPLY;
     }
@@ -3853,7 +3853,7 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
                               size_t delta,
                               bool connect_only)
 {
-  size_t bad = 0;
+  size_t ungood = 0;
   unsigned int max = MAX_HTTP_RESP_HEADER_SIZE;
   if(delta < MAX_HTTP_RESP_HEADER_SIZE) {
     data->info.header_size += (unsigned int)delta;
@@ -3861,16 +3861,16 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
     if(!connect_only)
       data->req.headerbytecount += (unsigned int)delta;
     if(data->req.allheadercount > max)
-      bad = data->req.allheadercount;
+      ungood = data->req.allheadercount;
     else if(data->info.header_size > (max * 20)) {
-      bad = data->info.header_size;
+      ungood = data->info.header_size;
       max *= 20;
     }
   }
   else
-    bad = data->req.allheadercount + delta;
-  if(bad) {
-    failf(data, "Too large response headers: %zu > %u", bad, max);
+    ungood = data->req.allheadercount + delta;
+  if(ungood) {
+    failf(data, "Too large response headers: %zu > %u", ungood, max);
     return CURLE_RECV_ERROR;
   }
   return CURLE_OK;
@@ -4433,7 +4433,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
           /* this is not the beginning of a protocol first header line.
            * Cannot be 0.9 if version was detected or connection was reused. */
           k->header = FALSE;
-          streamclose(conn, "bad HTTP: No end-of-message indicator");
+          streamclose(conn, "ungood HTTP: No end-of-message indicator");
           if((k->httpversion >= 10) || conn->bits.reuse) {
             failf(data, "Invalid status line");
             return CURLE_WEIRD_SERVER_REPLY;
@@ -4470,7 +4470,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       /* the first read "header", the status line */
       statusline st = checkprotoprefix(data, conn, hd, hlen);
       if(st == STATUS_BAD) {
-        streamclose(conn, "bad HTTP: No end-of-message indicator");
+        streamclose(conn, "ungood HTTP: No end-of-message indicator");
         /* this is not the beginning of a protocol first header line.
          * Cannot be 0.9 if version was detected or connection was reused. */
         if((k->httpversion >= 10) || conn->bits.reuse) {

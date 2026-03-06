@@ -113,7 +113,7 @@ CURLcode curlx_base64_decode(const char *src,
 
     for(j = 0; j < 4; j++) {
       val = lookup[(unsigned char)*src++];
-      if(val == 0xff) /* bad symbol */
+      if(val == 0xff) /* ungood symbol */
         goto bad;
       x = (x << 6) | val;
     }
@@ -138,7 +138,7 @@ CURLcode curlx_base64_decode(const char *src,
       }
       else {
         val = lookup[(unsigned char)*src++];
-        if(val == 0xff) /* bad symbol */
+        if(val == 0xff) /* ungood symbol */
           goto bad;
         x = (x << 6) | val;
       }

@@ -4346,10 +4346,10 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         status = "failed";
         break;
       case SSL_ECH_STATUS_BAD_CALL:
-        status = "bad call (unexpected)";
+        status = "ungood call (unexpected)";
         break;
       case SSL_ECH_STATUS_BAD_NAME:
-        status = "bad name (unexpected)";
+        status = "ungood name (unexpected)";
         break;
       default:
         status = "unexpected status";

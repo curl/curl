@@ -30,7 +30,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-Variable using 64dec with bad base64
+Variable using 64dec with ungood base64
 </name>
 <command>
 --variable what=not-base64-data --expand-url "http://%HOSTIP:%HTTPPORT/{{what:64dec}}/%TESTNUMBER" -g

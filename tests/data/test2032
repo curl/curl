@@ -23,7 +23,7 @@ Content-Length: 29
 WWW-Authenticate: NTLM
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 </data100>
 
 <!-- NTLM auth -->

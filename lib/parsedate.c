@@ -394,7 +394,7 @@ static int parsedate(const char *date, time_t *output)
         }
       }
       if(!found)
-        return PARSEDATE_FAIL; /* bad string */
+        return PARSEDATE_FAIL; /* ungood string */
 
       date += len;
     }

@@ -18,7 +18,7 @@ FAILURE
 http
 </features>
 <name>
-HTTP, urlglob retrieval with bad range
+HTTP, urlglob retrieval with ungood range
 </name>
 <command option="no-output">
 "http://a-site-never-accessed.example.org/[2-1]" -o "%LOGDIR/weee#1.dump" --stderr -
@@ -31,7 +31,7 @@ HTTP, urlglob retrieval with bad range
 3
 </errorcode>
 <stdout mode="text">
-curl: (3) bad range in URL position 47:
+curl: (3) ungood range in URL position 47:
 http://a-site-never-accessed.example.org/[2-1]
                                               ^
 </stdout>

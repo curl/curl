@@ -52,7 +52,7 @@ If this is received, the location following worked
 http
 </server>
 <name>
-HTTP redirect with bad hostname separation and slash in parameters
+HTTP redirect with ungood hostname separation and slash in parameters
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT?oh=what-weird=test/%TESTNUMBER -L

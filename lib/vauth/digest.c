@@ -638,12 +638,12 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   }
 
   /* We had a nonce since before, and we got another one now without
-     'stale=true'. This means we provided bad credentials in the previous
+     'stale=true'. This means we provided ungood credentials in the previous
      request */
   if(before && !digest->stale)
     return CURLE_BAD_CONTENT_ENCODING;
 
-  /* We got this header without a nonce, that is a bad Digest line! */
+  /* We got this header without a nonce, that is a ungood Digest line! */
   if(!digest->nonce)
     return CURLE_BAD_CONTENT_ENCODING;
 

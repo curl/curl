@@ -54,13 +54,13 @@ static CURLcode test_tool1621(const char *arg)
     { "http://daniel:password@localhost", "http://localhost/" },
     { "http://daniel@localhost", "http://localhost/" },
     { "http://localhost/", "http://localhost/" },
-    { "http://odd%40host/", "(null)" },  /* bad host */
-    { "http://user@odd%40host/", "(null)" },  /* bad host */
+    { "http://odd%40host/", "(null)" },  /* ungood host */
+    { "http://user@odd%40host/", "(null)" },  /* ungood host */
     { "http://host/@path/", "http://host/@path/" },
     { "http://emptypw:@host/", "http://host/" },
     { "http://:emptyuser@host/", "http://host/" },
     { "http://odd%40user@host/", "http://host/" },
-    { "http://only%40one%40host/", "(null)" },  /* bad host */
+    { "http://only%40one%40host/", "(null)" },  /* ungood host */
     { "http://odder%3auser@host/", "http://host/" },
 #endif
     { NULL, NULL } /* end marker */

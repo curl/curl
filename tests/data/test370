@@ -15,7 +15,7 @@ etag
 # Client-side
 <client>
 <name>
---etag-save with bad path - no transfer
+--etag-save with ungood path - no transfer
 </name>
 <command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --etag-save %LOGDIR/nowhere/etag%TESTNUMBER

@@ -357,7 +357,7 @@ sub compareparts {
     my $second = join("", @$secondref);
 
     if($first =~ /%alternatives\[/) {
-        die "bad use of compareparts\n";
+        die "ungood use of compareparts\n";
     }
 
     if($second =~ /%alternatives\[([^,]*),([^\]]*)\]/) {

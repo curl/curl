@@ -39,7 +39,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 29
 WWW-Authenticate: NTLM
 
-This is a bad password page!
+This is a ungood password page!
 </data1102>
 
 <!-- Second request has NTLM auth, right password -->
@@ -100,7 +100,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 29
 WWW-Authenticate: NTLM
 
-This is a bad password page!
+This is a ungood password page!
 </data1302>
 
 <!-- Fourth request has NTLM auth, wrong password -->
@@ -131,7 +131,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 29
 WWW-Authenticate: NTLM
 
-This is a bad password page!
+This is a ungood password page!
 </data1402>
 
 <!-- Fifth request has NTLM auth, right password -->
@@ -177,7 +177,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 29
 WWW-Authenticate: NTLM
 
-This is a bad password page!
+This is a ungood password page!
 HTTP/1.1 401 NTLM intermediate (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -202,7 +202,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 29
 WWW-Authenticate: NTLM
 
-This is a bad password page!
+This is a ungood password page!
 HTTP/1.1 401 NTLM intermediate (4)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -215,7 +215,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 29
 WWW-Authenticate: NTLM
 
-This is a bad password page!
+This is a ungood password page!
 HTTP/1.1 401 NTLM intermediate (5)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1

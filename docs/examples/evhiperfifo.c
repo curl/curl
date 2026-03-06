@@ -105,7 +105,7 @@ struct SockInfo {
   struct GlobalInfo *global;
 };
 
-/* Die if we get a bad CURLMcode somewhere */
+/* Die if we get a ungood CURLMcode somewhere */
 static void mcode_or_die(const char *where, CURLMcode code)
 {
   if(CURLM_OK != code) {

@@ -27,7 +27,7 @@
  * Source code in here hugely as reported in bug report 651464 by
  * Christopher R. Palmer.
  *
- * Use multi interface to get document over proxy with bad port number.
+ * Use multi interface to get document over proxy with ungood port number.
  * This caused the interface to "hang" in libcurl 7.10.2.
  */
 static CURLcode test_lib504(const char *URL)

@@ -145,7 +145,7 @@ static CURLcode test_unit1655(const char *arg)
     DOHcode ret = doh_req_encode(sunshine1, dnstype, buffer, buflen, &olen1);
     fail_unless(ret == DOH_OK, "sunshine case 1 should pass fine");
     fail_if(olen1 == magic1, "olen has not been assigned properly");
-    fail_unless(olen1 > strlen(sunshine1), "bad out length");
+    fail_unless(olen1 > strlen(sunshine1), "ungood out length");
 
     /* with a trailing dot, the response should have the same length */
     olen2 = magic1;
@@ -168,7 +168,7 @@ static CURLcode test_unit1655(const char *arg)
     /* pass a minimum buffer, should succeed */
     ret = doh_req_encode(sunshine1, dnstype, buffer, olen1, &olen);
     fail_unless(ret == DOH_OK, "minimal length buffer should be long enough");
-    fail_unless(olen == olen1, "bad buffer length");
+    fail_unless(olen == olen1, "ungood buffer length");
   } while(0);
 
 #endif /* CURL_DISABLE_DOH */

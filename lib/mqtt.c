@@ -558,7 +558,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   curl_off_t postfieldsize = data->set.postfieldsize;
 
   if(!payload) {
-    DEBUGF(infof(data, "mqtt_publish without payload, return bad arg"));
+    DEBUGF(infof(data, "mqtt_publish without payload, return ungood arg"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   if(!curlx_sotouz_fits(postfieldsize, &payloadlen)) {
@@ -614,7 +614,7 @@ static int mqtt_decode_len(size_t *lenp, const unsigned char *buf,
 
   for(i = 0; (i < buflen) && (encoded & 128); i++) {
     if(i == 4)
-      return 1; /* bad size */
+      return 1; /* ungood size */
     encoded = buf[i];
     len += (encoded & 127) * mult;
     mult *= 128;

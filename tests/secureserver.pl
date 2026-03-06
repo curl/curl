@@ -370,7 +370,7 @@ if($tstunnel_windows) {
     # new process to the parent waiting perl.exe and sh.exe processes.
 
     # exec() should never return back here to this process. We protect
-    # ourselves by calling die() just in case something goes really bad.
+    # ourselves by calling die() just in case something goes really ungood.
     die "error: exec() has returned";
 }
 

@@ -126,8 +126,8 @@ static void data_priority_cleanup(struct Curl_easy *data);
 #endif
 
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has more
- * than a few bytes to play with. Do not let it become too small or bad things
- * will happen.
+ * than a few bytes to play with. Do not let it become too small or ungood
+ * things will happen.
  */
 #if READBUFFER_SIZE < READBUFFER_MIN
 # error READBUFFER_SIZE is too small

@@ -528,7 +528,7 @@ static void printsub(struct Curl_easy *data,
       }
       if(length >= 2)
         length -= 2;
-      else /* bad input */
+      else /* ungood input */
         return;
     }
     if(length <= 1) {

@@ -98,7 +98,7 @@ static CURLcode test_unit1302(const char *arg)
     { "\x10", 1, "EA", 2 },
   };
 
-  /* bad decode inputs */
+  /* ungood decode inputs */
   struct etest badecode[] = {
     { "", 0, "", 0 },         /* no dats means error */
     { "", 0, "a", 1 },        /* data is too short */
@@ -118,9 +118,9 @@ static CURLcode test_unit1302(const char *arg)
     { "", 0, "_abcd", 5 },    /* contains illegal base64 character */
     { "", 0, "abcd-", 5 },    /* contains illegal base64 character */
     { "", 0, "abcd_", 5 },    /* contains illegal base64 character */
-    { "", 0, "aWlpaWlpaQ==-", 17 }, /* bad character after padding */
-    { "", 0, "aWlpaWlpaQ==_", 17 }, /* bad character after padding */
-    { "", 0, "aWlpaWlpaQ== ", 17 }, /* bad character after padding */
+    { "", 0, "aWlpaWlpaQ==-", 17 }, /* ungood character after padding */
+    { "", 0, "aWlpaWlpaQ==_", 17 }, /* ungood character after padding */
+    { "", 0, "aWlpaWlpaQ== ", 17 }, /* ungood character after padding */
     { "", 0, "aWlpaWlpaQ=", 15 } /* unaligned size, missing a padding char */
   };
 
@@ -190,7 +190,7 @@ static CURLcode test_unit1302(const char *arg)
     /* then verify decode with illegal inputs */
     result = curlx_base64_decode(e->output, &decoded, &dlen);
     if(result != CURLE_BAD_CONTENT_ENCODING) {
-      curl_mfprintf(stderr, "Test %u URL bad decoded badly. "
+      curl_mfprintf(stderr, "Test %u URL ungood decoded badly. "
                     "Returned '%d', expected '%d'\n",
                     i, (int)result, CURLE_BAD_CONTENT_ENCODING);
       unitfail++;

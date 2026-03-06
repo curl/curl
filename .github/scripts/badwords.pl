@@ -8,8 +8,8 @@
 # If separator is '=', the string will be compared case sensitively.
 # If separator is ':', the check is done case insensitively.
 #
-# To add white listed uses of bad words that are removed before checking for
-# the bad ones:
+# To add white listed uses of ungood words that are removed before checking for
+# the ungood ones:
 #
 # ---(accepted word)
 #
@@ -104,7 +104,7 @@ sub file {
                     next;
                 }
 
-                print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
+                print STDERR  "$f:$l:$c: error: found ungood word \"$w\"\n";
                 printf STDERR " %4d | %s\n", $l, $in;
                 printf STDERR "      | %*s^%s\n", length($p), " ",
                     "~" x (length($w)-1);

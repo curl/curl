@@ -657,7 +657,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
               host, af, myhost, h_af);
         Curl_resolv_unlink(data, &h); /* this will NULL, potential free h */
         if(af != h_af) {
-          /* bad IP version combo, signal the caller to try another address
+          /* ungood IP version combo, signal the caller to try another address
              family if available */
           return CURLE_UNSUPPORTED_PROTOCOL;
         }

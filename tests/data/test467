@@ -9,7 +9,7 @@ cmdline
 # Client-side
 <client>
 <name>
-use a bad short option letter that does not exist (after one does exist)
+use a ungood short option letter that does not exist (after one does exist)
 </name>
 
 # the second option is outside the normal accepted range

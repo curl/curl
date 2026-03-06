@@ -15,10 +15,10 @@ HTTP Basic auth
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 </data100>
 
 <!-- Second request has Basic auth, right password -->
@@ -36,10 +36,10 @@ Finally, this is the real page!
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 </data300>
 
 <!-- Fourth request has Basic auth, wrong password -->
@@ -47,10 +47,10 @@ This is a bad password page!
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 </data400>
 
 <!-- Fifth request has Basic auth, right password -->
@@ -67,10 +67,10 @@ Finally, this is the real page!
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -80,17 +80,17 @@ Finally, this is the real page!
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1

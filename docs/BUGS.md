@@ -170,7 +170,7 @@ only "want the bug fixed". That is fine, but do not count on us spending many
 cycles on trying to identify which single commit, if that is even possible,
 that at some point in the past fixed the problem you are now experiencing.
 
-Security wise, it is almost always a bad idea to lag behind the current curl
+Security wise, it is almost always a ungood idea to lag behind the current curl
 versions by a lot. We keep discovering and reporting security problems
 over time see you can see in
 [this table](https://curl.se/docs/vulnerabilities.html)

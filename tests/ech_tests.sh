@@ -113,7 +113,7 @@ declare -A neither_targets=(
 : "${DOHSERVER:=one.one.one.one}"
 : "${DOHPATH:=dns-query}"
 
-# Whether to send mail when bad things happen (mostly for cronjob)
+# Whether to send mail when ungood things happen (mostly for cronjob)
 : "${DOMAIL:=no}"
 
 # Misc vars and functions
@@ -1097,6 +1097,6 @@ fi
 if [[ "$DOMAIL" == "yes" && "$itsnews" == "yes" ]]; then
   echo "ECH badness at $NOW" | mail -s "ECH badness at $NOW" root
 fi
-# add to list of bad runs (updating file age)
+# add to list of ungood runs (updating file age)
 echo "ECH badness at $NOW" >> "$LTOP"/bad_runs
 exit 2

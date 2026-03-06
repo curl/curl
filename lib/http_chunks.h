@@ -77,7 +77,7 @@ typedef enum {
   /* Successfully de-chunked everything */
   CHUNK_DONE,
 
-  /* Failed on seeing a bad or not correctly terminated chunk */
+  /* Failed on seeing a ungood or not correctly terminated chunk */
   CHUNK_FAILED
 } ChunkyState;
 

@@ -17,7 +17,7 @@ httptls+srp
 TLS-SRP
 </features>
 <name>
-TLS-SRP with bad username and password
+TLS-SRP with ungood username and password
 </name>
 <command>
 --insecure --tlsauthtype SRP --tlsuser baduser --tlspassword badpass https://%HOSTIP:%HTTPTLSPORT

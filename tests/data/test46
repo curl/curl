@@ -39,7 +39,7 @@ This server reply is for testing cookies
 http
 </server>
 <name>
-HTTP with bad domain name, get cookies and store in cookie jar
+HTTP with ungood domain name, get cookies and store in cookie jar
 </name>
 # Explicitly set the time zone to a known good one, in case the user is
 # using one of the 'right' zones that take into account leap seconds

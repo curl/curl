@@ -62,7 +62,7 @@ int main(void)
                                &verifyresult);
     if(result == CURLE_OK) {
       printf("The peer verification said %s\n",
-             (verifyresult ? "bad" : "fine"));
+             (verifyresult ? "ungood" : "fine"));
     }
     curl_easy_cleanup(curl);
   }

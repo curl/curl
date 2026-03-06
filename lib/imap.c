@@ -2008,7 +2008,7 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(conn, "IMAP done with bad status"); /* marked for closure */
+    connclose(conn, "IMAP done with ungood status"); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only &&
@@ -2200,7 +2200,7 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
 
   if(imapc) {
     /* We cannot send quit unconditionally. If this connection is stale or
-       bad in any way (pingpong has pending data to send),
+       ungood in any way (pingpong has pending data to send),
        sending quit and waiting around here will make the
        disconnect wait in vain and cause more problems than we need to. */
     if(!dead_connection && conn->bits.protoconnstart &&

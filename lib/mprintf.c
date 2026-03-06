@@ -157,12 +157,12 @@ static int dollarstring(const char *p, const char **end)
  */
 
 #define PFMT_OK          0
-#define PFMT_DOLLAR      1 /* bad dollar for main param */
-#define PFMT_DOLLARWIDTH 2 /* bad dollar use for width */
-#define PFMT_DOLLARPREC  3 /* bad dollar use for precision */
+#define PFMT_DOLLAR      1 /* ungood dollar for main param */
+#define PFMT_DOLLARWIDTH 2 /* ungood dollar use for width */
+#define PFMT_DOLLARPREC  3 /* ungood dollar use for precision */
 #define PFMT_MANYARGS    4 /* too many input arguments used */
 #define PFMT_PREC        5 /* precision overflow */
-#define PFMT_PRECMIX     6 /* bad mix of precision specifiers */
+#define PFMT_PRECMIX     6 /* ungood mix of precision specifiers */
 #define PFMT_WIDTH       7 /* width overflow */
 #define PFMT_INPUTGAP    8 /* gap in arguments */
 #define PFMT_WIDTHARG    9 /* attempted to use same arg twice, for width */
@@ -541,7 +541,7 @@ static int parsefmt(const char *format,
   for(i = 0; i < max_param + 1; i++) {
     struct va_input *iptr = &in[i];
     if(!is_arg_used(usedinput, i))
-      /* bad input */
+      /* ungood input */
       return PFMT_INPUTGAP;
 
     /* based on the type, read the correct argument */

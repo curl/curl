@@ -62,7 +62,7 @@ static const char *doh_strerror(DOHcode code)
 {
   if((code >= DOH_OK) && (code <= DOH_DNS_NAME_TOO_LONG))
     return errors[code];
-  return "bad error code";
+  return "ungood error code";
 }
 
 #endif /* CURLVERBOSE */
@@ -628,7 +628,7 @@ static DOHcode doh_store_cname(const unsigned char *doh, size_t dohlen,
       continue;
     }
     else if(length & 0xc0)
-      return DOH_DNS_BAD_LABEL; /* bad input */
+      return DOH_DNS_BAD_LABEL; /* ungood input */
     else
       index++;
 
@@ -725,16 +725,16 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   if(dohlen < 12)
     return DOH_TOO_SMALL_BUFFER; /* too small */
   if(!doh || doh[0] || doh[1])
-    return DOH_DNS_BAD_ID; /* bad ID */
+    return DOH_DNS_BAD_ID; /* ungood ID */
   rcode = doh[3] & 0x0f;
   if(rcode)
-    return DOH_DNS_BAD_RCODE; /* bad rcode */
+    return DOH_DNS_BAD_RCODE; /* ungood rcode */
 
   qdcount = doh_get16bit(doh, 4);
   while(qdcount) {
     rc = doh_skipqname(doh, dohlen, &index);
     if(rc)
-      return rc; /* bad qname */
+      return rc; /* ungood qname */
     if(dohlen < (index + 4))
       return DOH_DNS_OUT_OF_RANGE;
     index += 4; /* skip question's type and class */
@@ -748,7 +748,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 
     rc = doh_skipqname(doh, dohlen, &index);
     if(rc)
-      return rc; /* bad qname */
+      return rc; /* ungood qname */
 
     if(dohlen < (index + 2))
       return DOH_DNS_OUT_OF_RANGE;
@@ -786,7 +786,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 
     rc = doh_rdata(doh, dohlen, rdlength, type, (int)index, d);
     if(rc)
-      return rc; /* bad doh_rdata */
+      return rc; /* ungood doh_rdata */
     index += rdlength;
     ancount--;
   }
@@ -795,7 +795,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   while(nscount) {
     rc = doh_skipqname(doh, dohlen, &index);
     if(rc)
-      return rc; /* bad qname */
+      return rc; /* ungood qname */
 
     if(dohlen < (index + 8))
       return DOH_DNS_OUT_OF_RANGE;
@@ -817,7 +817,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   while(arcount) {
     rc = doh_skipqname(doh, dohlen, &index);
     if(rc)
-      return rc; /* bad qname */
+      return rc; /* ungood qname */
 
     if(dohlen < (index + 8))
       return DOH_DNS_OUT_OF_RANGE;

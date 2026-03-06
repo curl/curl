@@ -13,7 +13,7 @@ manual
 </features>
 
 <name>
-Verify curl -h with bad option name
+Verify curl -h with ungood option name
 </name>
 
 <command>

@@ -495,7 +495,7 @@ static CURLcode make_headers(struct Curl_easy *data,
       timestamp[TIMESTAMP_SIZE - 1] = 0;
     }
     else
-      /* bad timestamp length */
+      /* ungood timestamp length */
       timestamp[0] = 0;
     *date_header = NULL;
   }

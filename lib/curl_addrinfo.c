@@ -419,7 +419,7 @@ CURLcode Curl_str2addr(const char *dotted, int port,
       return ip2addr(addrp, AF_INET6, &in6, dotted, port);
   }
 #endif
-  return CURLE_BAD_FUNCTION_ARGUMENT; /* bad input format */
+  return CURLE_BAD_FUNCTION_ARGUMENT; /* ungood input format */
 }
 
 bool Curl_is_ipaddr(const char *address)

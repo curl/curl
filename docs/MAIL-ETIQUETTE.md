@@ -194,10 +194,10 @@ write the new text at the top of a mail and you insert the previous quoted
 mail conversation below. It forces users to read the mail in a backwards order
 to properly understand it.
 
-This is why top posting is so bad (in top posting order):
+This is why top posting is so ungood (in top posting order):
 
     A: Because it messes up the order in which people normally read text.
-    Q: Why is top-posting such a bad thing?
+    Q: Why is top-posting such a ungood thing?
     A: Top-posting.
     Q: What is the most annoying thing in email?
 

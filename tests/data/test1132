@@ -31,7 +31,7 @@ mqtt
 mqtt
 </server>
 <name>
-MQTT CONNACK with bad Remaining Length
+MQTT CONNACK with ungood Remaining Length
 </name>
 <command option="binary-trace">
 mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER

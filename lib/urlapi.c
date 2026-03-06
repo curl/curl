@@ -455,7 +455,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
     /* letters from the second string are not ok */
     len = strcspn(hostname, " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%");
     if(hlen != len)
-      /* hostname with bad content */
+      /* hostname with ungood content */
       return CURLUE_BAD_HOSTNAME;
   }
   return CURLUE_OK;
@@ -1968,9 +1968,9 @@ nomem:
         /* Skip hostname check, it is allowed to be empty. */
       }
       else {
-        bool bad = FALSE;
+        bool ungood = FALSE;
         if(!n)
-          bad = TRUE; /* empty hostname is not okay */
+          ungood = TRUE; /* empty hostname is not okay */
         else if(!urlencode) {
           /* if the hostname part was not URL encoded here, it was set ready
              URL encoded so we need to decode it to check */
@@ -1979,12 +1979,12 @@ nomem:
           CURLcode result =
             Curl_urldecode(newp, n, &decoded, &dlen, REJECT_CTRL);
           if(result || hostname_check(u, decoded, dlen))
-            bad = TRUE;
+            ungood = TRUE;
           curlx_free(decoded);
         }
         else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
-          bad = TRUE;
-        if(bad) {
+          ungood = TRUE;
+        if(ungood) {
           curlx_dyn_free(&enc);
           return CURLUE_BAD_HOSTNAME;
         }

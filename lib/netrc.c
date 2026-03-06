@@ -214,7 +214,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           tok_end++;
         }
         if(escape || !endquote) {
-          /* bad syntax, get out */
+          /* ungood syntax, get out */
           retcode = NETRC_SYNTAX_ERROR;
           goto out;
         }

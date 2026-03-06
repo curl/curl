@@ -315,7 +315,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   size_t chlglen = strlen(chlg);
 
   /* We had an input token before so if there is another one now that means we
-     provided bad credentials in the previous request or it is stale. */
+     provided ungood credentials in the previous request or it is stale. */
   if(digest->input_token) {
     bool stale = FALSE;
     const char *p = chlg;

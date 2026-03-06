@@ -87,7 +87,7 @@ static CURLcode test_unit1606(const char *arg)
   fail_unless(runawhile(easy, 60, 60, 40, 0) == 60, "wrong log speed timeout");
   fail_unless(runawhile(easy, 50, 50, 40, 0) == 50, "wrong log speed timeout");
   fail_unless(runawhile(easy, 40, 40, 40, 0) == 99, "should not time out");
-  fail_unless(runawhile(easy, 10, 50, 100, 2) == 36, "bad timeout");
+  fail_unless(runawhile(easy, 10, 50, 100, 2) == 36, "ungood timeout");
 
   UNITTEST_END(t1606_stop(easy))
 }

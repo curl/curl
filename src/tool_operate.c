@@ -1006,7 +1006,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
       if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
       if(sc == SANITIZE_ERR_INVALID_PATH)
-        errorf("bad output filename");
+        errorf("ungood output filename");
       return result;
     }
     else if(result) {
@@ -1026,12 +1026,12 @@ static CURLcode setup_outfile(struct OperationConfig *config,
       if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
       if(sc == SANITIZE_ERR_INVALID_PATH)
-        warnf("bad output filename");
+        warnf("ungood output filename");
       return result;
     }
     else if(result) {
-      /* bad globbing */
-      warnf("bad output glob");
+      /* ungood globbing */
+      warnf("ungood output glob");
       return result;
     }
     if(!*per->outfile) {

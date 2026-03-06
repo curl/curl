@@ -3673,7 +3673,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     ftpc->ctl_valid = FALSE;
     ftpc->cwdfail = TRUE; /* set this TRUE to prevent us to remember the
                              current path, as this connection is going */
-    connclose(conn, "FTP ended with bad error code");
+    connclose(conn, "FTP ended with ungood error code");
     result = status;      /* use the already set error code */
     break;
   }
@@ -3691,7 +3691,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
-    ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+    ftpc->ctl_valid = FALSE; /* mark control connection as ungood */
     connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
     curlx_free(ftpc->prevpath);
     ftpc->prevpath = NULL; /* no path remembering */
@@ -3731,7 +3731,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       if(result) {
         failf(data, "Failure sending ABOR command: %s",
               curl_easy_strerror(result));
-        ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+        ftpc->ctl_valid = FALSE; /* mark control connection as ungood */
         connclose(conn, "ABOR command failed"); /* connection closure */
       }
     }
@@ -3752,7 +3752,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
 
     if(!nread && (result == CURLE_OPERATION_TIMEDOUT)) {
       failf(data, "control connection looks dead");
-      ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+      ftpc->ctl_valid = FALSE; /* mark control connection as ungood */
       connclose(conn, "Timeout or similar in FTP DONE operation"); /* close */
     }
 
@@ -4269,7 +4269,7 @@ static CURLcode ftp_quit(struct Curl_easy *data,
     if(result) {
       failf(data, "Failure sending QUIT command: %s",
             curl_easy_strerror(result));
-      ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+      ftpc->ctl_valid = FALSE; /* mark control connection as ungood */
       connclose(data->conn, "QUIT command failed"); /* mark for closure */
       ftp_state(data, ftpc, FTP_STOP);
       return result;
@@ -4299,7 +4299,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   if(!ftpc)
     return CURLE_FAILED_INIT;
   /* We cannot send quit unconditionally. If this connection is stale or
-     bad in any way, sending quit and waiting around here will make the
+     ungood in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to.
 
      ftp_quit() will check the state of ftp->ctl_valid. If it is ok it

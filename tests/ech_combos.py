@@ -36,7 +36,7 @@ def CombinationRepetitionUtil(chosen, arr, badarr, index,
     # Current combination is ready,
     # print it
     if index == r:
-        # figure out if result should be good or bad and
+        # figure out if result should be good or ungood and
         # print prefix, assuming $turl does support ECH so
         # should work if given "positive" parameters
         res = 1

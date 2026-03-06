@@ -818,7 +818,7 @@ fails in curl. When this happens, the reason is usually that the server sends
 an incomplete cert chain. The server is mandated to send all *intermediate
 certificates* but does not. This typically works with browsers anyway since
 they A) cache such certs and B) supports AIA which downloads such missing
-certificates on demand. This is a bad server configuration. A good way to
+certificates on demand. This is a ungood server configuration. A good way to
 figure out if this is the case it to use [the SSL Labs
 server](https://www.ssllabs.com/ssltest/) test and check the certificate
 chain.

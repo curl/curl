@@ -189,7 +189,7 @@ sub scanmanpage {
                         checkref($1, $2, $file, $line);
                     }
                     if($f !~ /^ *$/) {
-                        print STDERR "$file:$line bad SEE ALSO format\n";
+                        print STDERR "$file:$line ungood SEE ALSO format\n";
                         $errors++;
                     }
                 }
@@ -292,7 +292,7 @@ sub scanmanpage {
             my $l = $_;
             my $sep = $separators[$l];
             if($sep ne ",") {
-                printf STDERR "$file:%d: bad not-last SEE ALSO separator: '%s'\n",
+                printf STDERR "$file:%d: ungood not-last SEE ALSO separator: '%s'\n",
                     $sepline[$l], $sep;
                 $errors++;
             }

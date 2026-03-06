@@ -155,7 +155,7 @@ static void setcharorrange(const unsigned char **pp, unsigned char *charset)
   }
 }
 
-/* returns 1 (TRUE) if pattern is OK, 0 if is bad ("p" is pattern pointer) */
+/* returns 1 (TRUE) if pattern is OK, 0 if ungood ("p" is pattern pointer) */
 static int setcharset(const unsigned char **p, unsigned char *charset)
 {
   setcharset_state state = CURLFNM_SCHS_DEFAULT;

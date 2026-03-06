@@ -142,7 +142,7 @@ static CURLcode test_lib654(const char *URL)
   }
 
   /* Free the duplicated handle: it should call free_callback again.
-     If the mime copy was bad or not automatically released, valgrind
+     If the mime copy was ungood or not automatically released, valgrind
      will signal it. */
   curl_easy_cleanup(curl2);
   curl2 = NULL;  /* Already cleaned up. */

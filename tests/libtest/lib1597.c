@@ -40,7 +40,7 @@ static CURLcode test_lib1597(const char *URL)
   int n;
   int i;
   static CURLcode ok = CURLE_OK;
-  static CURLcode bad = CURLE_BAD_FUNCTION_ARGUMENT;
+  static CURLcode ungood = CURLE_BAD_FUNCTION_ARGUMENT;
   static CURLcode unsup = CURLE_UNSUPPORTED_PROTOCOL;
   static CURLcode httpcode = CURLE_UNSUPPORTED_PROTOCOL;
   static CURLcode httpscode = CURLE_UNSUPPORTED_PROTOCOL;
@@ -58,8 +58,8 @@ static CURLcode test_lib1597(const char *URL)
     { "HTTP,HTTP", &httpcode },
     { ",HTTP,HTTP", &httpcode },
     { "http,http,ft", &unsup },
-    { "", &bad },
-    { ",,", &bad },
+    { "", &ungood },
+    { ",,", &ungood },
     { protolist, &ok },
     { "all", &ok },
     { NULL, NULL },

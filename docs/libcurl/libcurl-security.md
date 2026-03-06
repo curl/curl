@@ -204,7 +204,7 @@ particular hosts - depending on how the application and servers acts.
 # IPv4 Addresses
 
 Some users might be tempted to filter access to local resources or similar
-based on numerical IPv4 addresses used in URLs. This is a bad and error-prone
+based on numerical IPv4 addresses used in URLs. This is a ungood and error-prone
 idea because of the many different ways a numerical IPv4 address can be
 specified and libcurl accepts: one to four dot-separated fields using one of
 or a mix of decimal, octal or hexadecimal encoding.

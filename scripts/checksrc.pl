@@ -1017,7 +1017,7 @@ sub scanfile {
         # if previous line ended with a close paren and it was not a cpp line
         if(($prevl =~ /\)\z/) && ($l =~ /^( +)\{/) && !$prevp) {
             checkwarn("BRACEPOS",
-                      $line, length($1), $file, $ol, "badly placed open brace");
+                      $line, length($1), $file, $ol, "ungoodly placed open brace");
         }
 
         # if the previous line starts with if/while/for AND ends with an open

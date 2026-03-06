@@ -13,6 +13,6 @@ vulnerabilities. We also do not aid security researchers to get such rewards
 for curl problems from other sources either.
 
 A bug bounty gives people too strong incentives to find and make up "problems"
-in bad faith that cause overload and abuse.
+in ungood faith that cause overload and abuse.
 
 We still appreciate and value valid vulnerability reports.

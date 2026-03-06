@@ -97,7 +97,7 @@ Function not found. A required LDAP function was not found.
 ## 42
 Aborted by callback. An application told curl to abort the operation.
 ## 43
-Internal error. A function was called with a bad parameter.
+Internal error. A function was called with a ungood parameter.
 ## 45
 Interface error. A specified outgoing interface could not be used.
 ## 47

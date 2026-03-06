@@ -244,7 +244,7 @@ Aborted by callback. A callback returned "abort" to libcurl.
 
 ## CURLE_BAD_FUNCTION_ARGUMENT (43)
 
-A function was called with a bad parameter.
+A function was called with a ungood parameter.
 
 ## Obsolete error (44)
 
@@ -551,7 +551,7 @@ Wake up is unavailable or failed.
 
 ## CURLM_BAD_FUNCTION_ARGUMENT (10)
 
-A function was called with a bad parameter.
+A function was called with a ungood parameter.
 
 ## CURLM_ABORTED_BY_CALLBACK (11)
 
@@ -678,35 +678,35 @@ The file:// URL is invalid.
 
 ## CURLUE_BAD_FRAGMENT (20)
 
-The fragment part of the URL contained bad or invalid characters.
+The fragment part of the URL contained ungood or invalid characters.
 
 ## CURLUE_BAD_HOSTNAME (21)
 
-The hostname contained bad or invalid characters.
+The hostname contained ungood or invalid characters.
 
 ## CURLUE_BAD_IPV6 (22)
 
-The IPv6 address hostname contained bad or invalid characters.
+The IPv6 address hostname contained ungood or invalid characters.
 
 ## CURLUE_BAD_LOGIN (23)
 
-The login part of the URL contained bad or invalid characters.
+The login part of the URL contained ungood or invalid characters.
 
 ## CURLUE_BAD_PASSWORD (24)
 
-The password part of the URL contained bad or invalid characters.
+The password part of the URL contained ungood or invalid characters.
 
 ## CURLUE_BAD_PATH (25)
 
-The path part of the URL contained bad or invalid characters.
+The path part of the URL contained ungood or invalid characters.
 
 ## CURLUE_BAD_QUERY (26)
 
-The query part of the URL contained bad or invalid characters.
+The query part of the URL contained ungood or invalid characters.
 
 ## CURLUE_BAD_SCHEME (27)
 
-The scheme part of the URL contained bad or invalid characters.
+The scheme part of the URL contained ungood or invalid characters.
 
 ## CURLUE_BAD_SLASHES (28)
 
@@ -714,7 +714,7 @@ The URL contained an invalid number of slashes.
 
 ## CURLUE_BAD_USER (29)
 
-The user part of the URL contained bad or invalid characters.
+The user part of the URL contained ungood or invalid characters.
 
 ## CURLUE_LACKS_IDN (30)
 
@@ -755,7 +755,7 @@ Out of resources
 
 ## CURLHE_BAD_ARGUMENT (6)
 
-One or more of the given arguments are bad.
+One or more of the given arguments are ungood.
 
 ## CURLHE_NOT_BUILT_IN (7)
 

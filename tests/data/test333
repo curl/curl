@@ -22,7 +22,7 @@ Try a non-boolean command line option with --no-
 
 # Verify data after the test has been "shot"
 <verify>
-# detected the bad --no- prefix
+# detected the ungood --no- prefix
 <errorcode>
 2
 </errorcode>

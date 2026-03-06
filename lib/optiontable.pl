@@ -70,7 +70,7 @@ sub add {
     $type{$name} = $typestr;
     push @names, $name;
     if($num < $lastnum) {
-        print STDERR "ERROR: $optstr has bad number: $num < $lastnum\n";
+        print STDERR "ERROR: $optstr has ungood number: $num < $lastnum\n";
         exit 2;
     }
     else {

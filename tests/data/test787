@@ -17,7 +17,7 @@ HTTP
 http
 </server>
 <name>
---variable with a file byte range, bad range
+--variable with a file byte range, ungood range
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[15-14]@%LOGDIR/fooo" --expand-data '{{name}}'

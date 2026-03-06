@@ -2,6 +2,6 @@
 #
 # SPDX-License-Identifier: curl
 #
-# whitelisted uses of bad words
+# whitelisted uses of ungood words
 # file:[line]:rule
 docs/FAQ.md::\bwill\b

@@ -95,7 +95,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
 
       if test "$PKGTEST" != "yes"; then
         if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
-          AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+          AC_MSG_ERROR([$PREFIX_OPENSSL is a ungood --with-openssl prefix!])
         fi
       fi
 

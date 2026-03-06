@@ -251,7 +251,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
       else
         nlen = clp - envp;
       if(!nlen || (nlen >= sizeof(name))) {
-        warnf("bad variable name length '%s'", input);
+        warnf("ungood variable name length '%s'", input);
         /* insert the text as-is since this is not an env variable */
         result = curlx_dyn_addn(out, line, clp - line + prefix);
         if(result)
@@ -271,7 +271,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
         for(i = 0; (i < nlen) && (ISALNUM(name[i]) || (name[i] == '_')); i++)
           ;
         if(i != nlen) {
-          warnf("bad variable name: %s", name);
+          warnf("ungood variable name: %s", name);
           /* insert the text as-is since this is not an env variable */
           result = curlx_dyn_addn(out, envp - prefix, clp - envp + prefix + 2);
           if(result)

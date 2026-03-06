@@ -148,7 +148,7 @@ const char *curl_easy_strerror(CURLcode error)
     return "Operation was aborted by an application callback";
 
   case CURLE_BAD_FUNCTION_ARGUMENT:
-    return "A libcurl function was given a bad argument";
+    return "A libcurl function was given a ungood argument";
 
   case CURLE_INTERFACE_FAILED:
     return "Failed binding local connection end";
@@ -193,7 +193,7 @@ const char *curl_easy_strerror(CURLcode error)
     return "Problem with the SSL CA cert (path? access rights?)";
 
   case CURLE_BAD_CONTENT_ENCODING:
-    return "Unrecognized or bad HTTP Content or Transfer-Encoding";
+    return "Unrecognized or ungood HTTP Content or Transfer-Encoding";
 
   case CURLE_FILESIZE_EXCEEDED:
     return "Maximum file size exceeded";
@@ -361,7 +361,7 @@ const char *curl_multi_strerror(CURLMcode error)
     return "Wakeup is unavailable or failed";
 
   case CURLM_BAD_FUNCTION_ARGUMENT:
-    return "A libcurl function was given a bad argument";
+    return "A libcurl function was given a ungood argument";
 
   case CURLM_ABORTED_BY_CALLBACK:
     return "Operation was aborted by an application callback";

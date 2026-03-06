@@ -262,7 +262,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
     }
     if(!(form->flags & HTTPPOST_PTRNAME)) {
       /* Note that there is small risk that form->name is NULL here if the app
-         passed in a bad combo, so we check for that. */
+         passed in a ungood combo, so we check for that. */
       if(FormInfoCopyField(&form->name, form->namelength))
         return CURL_FORMADD_MEMORY;
     }

@@ -58,7 +58,7 @@ question about it but the syntax does not have to be a published RFC. It could
 be enough if it is already in use by other implementations.
 
 If you make up the syntax in order to be able to propose it to curl, then you
-are in a bad place. URLs are designed and defined for interoperability. There
+are in a ungood place. URLs are designed and defined for interoperability. There
 should at least be a good chance that other clients and servers can be
 implemented supporting the same URL syntax and work the same or similar way.
 

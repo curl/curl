@@ -531,7 +531,7 @@ static void async_ares_hostbyname_cb(void *user_data,
         purposes. For example, ARES_ENODATA is what we expect when there is
         no IPv6 entry for a domain name, and that is not a reason to get more
         aggressive in our timeouts for the other response. Other errors are
-        either a result of bad input (which should affect all parallel
+        either a result of ungood input (which should affect all parallel
         requests), local or network conditions, non-definitive server
         responses, or us cancelling the request. */
      && (status == ARES_SUCCESS || status == ARES_ENOTFOUND)) {
@@ -861,7 +861,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
   case ARES_ENODATA:
   case ARES_EBADSTR:
   default:
-    DEBUGF(infof(data, "bad servers set"));
+    DEBUGF(infof(data, "ungood servers set"));
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   }
@@ -910,7 +910,7 @@ CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data)
   }
   else {
     if(curlx_inet_pton(AF_INET, local_ip4, &a4) != 1) {
-      DEBUGF(infof(data, "bad DNS IPv4 address"));
+      DEBUGF(infof(data, "ungood DNS IPv4 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
@@ -940,7 +940,7 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data)
   }
   else {
     if(curlx_inet_pton(AF_INET6, local_ip6, a6) != 1) {
-      DEBUGF(infof(data, "bad DNS IPv6 address"));
+      DEBUGF(infof(data, "ungood DNS IPv6 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }

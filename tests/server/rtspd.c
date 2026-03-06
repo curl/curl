@@ -112,7 +112,7 @@ static const char *docquit_rtsp = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 static const char *docconnect =
   "HTTP/1.1 200 Mighty fine indeed" END_OF_HEADERS;
 
-/* sent as reply to a "bad" CONNECT */
+/* sent as reply to a "ungood" CONNECT */
 static const char *docbadconnect =
   "HTTP/1.1 501 Forbidden you fool" END_OF_HEADERS;
 
@@ -367,8 +367,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
         if(req->prot_version == 10)
           req->open = FALSE; /* HTTP 1.0 closes connection by default */
 
-        if(!strncmp(doc, "bad", 3))
-          /* if the hostname starts with bad, we fake an error here */
+        if(!strncmp(doc, "ungood", 3))
+          /* if the hostname starts with ungood, we fake an error here */
           req->testno = DOCNUMBER_BADCONNECT;
         else if(!strncmp(doc, "test", 4)) {
           /* if the hostname starts with test, the port number used in the
@@ -790,7 +790,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       buffer = docconnect;
       break;
     case DOCNUMBER_BADCONNECT:
-      logmsg("Replying to a bad CONNECT");
+      logmsg("Replying to a ungood CONNECT");
       buffer = docbadconnect;
       break;
     case DOCNUMBER_404:

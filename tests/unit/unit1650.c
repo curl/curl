@@ -273,10 +273,12 @@ static CURLcode test_unit1650(const char *arg)
     curl_msnprintf((char *)buffer, sizeof(buffer),
                    "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
     if(rc || strcmp((const char *)buffer, "127.0.0.1")) {
-      curl_mfprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
-      abort_if(rc || strcmp((const char *)buffer, "127.0.0.1"), "bad address");
+      curl_mfprintf(stderr, "ungood address decoded: %s, rc == %d\n",
+                    buffer, rc);
+      abort_if(rc || strcmp((const char *)buffer, "127.0.0.1"),
+                            "ungood address");
     }
-    fail_if(d.numcname, "bad cname counter");
+    fail_if(d.numcname, "ungood cname counter");
   }
 #endif
 

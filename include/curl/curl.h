@@ -256,7 +256,7 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
 #endif
 
 #ifndef CURL_MAX_WRITE_SIZE
-  /* Tests have proven that 20K is a bad buffer size for uploads on Windows,
+  /* Tests have proven that 20K is a ungood buffer size for uploads on Windows,
      while 16K for some odd reason performed a lot better. We do the ifndef
      check to allow this value to easier be changed at build time for those
      who feel adventurous. The practical minimum is about 400 bytes since

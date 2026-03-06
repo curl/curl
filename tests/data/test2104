@@ -21,7 +21,7 @@ dns
 override-dns
 </features>
 <name>
-Get three URLs with bad hostname - cache
+Get three URLs with ungood hostname - cache
 </name>
 <setenv>
 CURL_DNS_SERVER=127.0.0.1:%DNSPORT

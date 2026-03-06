@@ -56,7 +56,7 @@ const char *Curl_alpnid2str(enum alpnid id)
   case ALPN_h3:
     return H3VERSION;
   default:
-    return ""; /* bad */
+    return ""; /* ungood */
   }
 }
 
@@ -87,7 +87,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
     dlen -= 2;
   }
   if(!hlen || !dlen)
-    /* bad input */
+    /* ungood input */
     return NULL;
   /* struct size plus both strings */
   as = curlx_calloc(1, sizeof(struct altsvc) + (hlen + 1) + (dlen + 1));

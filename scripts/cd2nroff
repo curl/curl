@@ -250,7 +250,7 @@ sub single {
         }
         elsif(/^See-also: */i) {
             if($seealso[0]) {
-                print STDERR "$f:$line:1:ERROR: bad See-Also, needs list\n";
+                print STDERR "$f:$line:1:ERROR: ungood See-Also, needs list\n";
                 return 2;
             }
             $list = 1; # 1 for see-also

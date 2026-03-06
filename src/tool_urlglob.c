@@ -265,7 +265,7 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
        (min_c != max_c && (min_c > max_c || step > (unsigned)(max_c - min_c) ||
                            (max_c - min_c) > ('z' - 'a'))))
       /* the pattern is not well-formed */
-      return globerror(glob, "bad range", *posp, CURLE_URL_MALFORMAT);
+      return globerror(glob, "ungood range", *posp, CURLE_URL_MALFORMAT);
 
     /* if there was a ":[num]" thing, use that as step or else use 1 */
     pat->c.ascii.step = step;
@@ -309,7 +309,7 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
                   !curlx_str_single(&pattern, ']')) {
             step_n = num;
           }
-          /* else bad syntax */
+          /* else ungood syntax */
         }
       }
     }
@@ -320,7 +320,7 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
        (min_n == max_n && step_n != 1) ||
        (min_n != max_n && (min_n > max_n || step_n > (max_n - min_n))))
       /* the pattern is not well-formed */
-      return globerror(glob, "bad range", *posp, CURLE_URL_MALFORMAT);
+      return globerror(glob, "ungood range", *posp, CURLE_URL_MALFORMAT);
 
     /* typecasting to ints are fine here since we make sure above that we
        are within 31 bits */
@@ -333,7 +333,7 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
       return globerror(glob, "range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else
-    return globerror(glob, "bad range specification", *posp,
+    return globerror(glob, "ungood range specification", *posp,
                      CURLE_URL_MALFORMAT);
 
   *patternp = pattern;

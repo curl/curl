@@ -25,10 +25,10 @@ Finally, this is the real page!
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
+Content-Length: 32
 WWW-Authenticate: Basic realm="testrealm"
 
-This is a bad password page!
+This is a ungood password page!
 </data200>
 
 </reply>
@@ -63,7 +63,7 @@ Accept: */*
 </protocol>
 <stdout>
 Finally, this is the real page!
-This is a bad password page!
+This is a ungood password page!
 </stdout>
 </verify>
 </testcase>

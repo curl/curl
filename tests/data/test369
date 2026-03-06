@@ -25,7 +25,7 @@ hej
 http
 </server>
 <name>
---etag-save with bad path then working transfer
+--etag-save with ungood path then working transfer
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save %LOGDIR/nowhere/etag%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER --include --output %LOGDIR/curl%TESTNUMBER.out

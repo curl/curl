@@ -25,7 +25,7 @@
 
 static CURLcode test_lib2306(const char *URL)
 {
-  /* first a fine GET response, then a bad one */
+  /* first a fine GET response, then a ungood one */
   CURL *curl;
   CURLcode result = CURLE_OK;
 

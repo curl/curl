@@ -1727,7 +1727,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   Curl_safefree(smtp->custom);
 
   if(status) {
-    connclose(conn, "SMTP done with bad status"); /* marked for closure */
+    connclose(conn, "SMTP done with ungood status"); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&
@@ -1905,7 +1905,7 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   /* We cannot send quit unconditionally. If this connection is stale or
-     bad in any way, sending quit and waiting around here will make the
+     ungood in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to. */
 
   if(!dead_connection && conn->bits.protoconnstart &&

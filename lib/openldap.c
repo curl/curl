@@ -168,15 +168,15 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
   static const char * const url_errs[] = {
     "success",
     "out of memory",
-    "bad parameter",
+    "ungood parameter",
     "unrecognized scheme",
     "unbalanced delimiter",
-    "bad URL",
-    "bad host or port",
-    "bad or missing attributes",
-    "bad or missing scope",
-    "bad or missing filter",
-    "bad or missing extensions"
+    "ungood URL",
+    "ungood host or port",
+    "ungood or missing attributes",
+    "ungood or missing scope",
+    "ungood or missing filter",
+    "ungood or missing extensions"
   };
 
   *ludp = NULL;

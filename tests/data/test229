@@ -21,7 +21,7 @@ REPLY ACCT 532 bluah!
 ftp
 </server>
 <name>
-FTP RETR with bad ACCT
+FTP RETR with ungood ACCT
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-account "one count"

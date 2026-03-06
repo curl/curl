@@ -14,7 +14,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-CURLOPT_OPENSOCKETFUNCTION returns bad socket
+CURLOPT_OPENSOCKETFUNCTION returns ungood socket
 </name>
 </client>
 

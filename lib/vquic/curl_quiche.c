@@ -412,7 +412,8 @@ static int cb_each_header(uint8_t *name, size_t name_len,
                            curlx_dyn_len(&ctx->h1hdr), FALSE);
     }
     else
-      CURL_TRC_CF(x->data, x->cf, "[%" PRIu64 "] ignore %zu bytes bad header",
+      CURL_TRC_CF(x->data, x->cf, "[%" PRIu64
+                  "] ignore %zu bytes ungood header",
                   stream->id, value_len + name_len);
   }
 

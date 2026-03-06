@@ -566,9 +566,9 @@ parse_cookie_header(struct Curl_easy *data,
         else {
           /*
            * We did not get a tailmatch and then the attempted set domain is
-           * not a domain to which the current host belongs. Mark as bad.
+           * not a domain to which the current host belongs. Mark as ungood.
            */
-          infof(data, "skipped cookie with bad tailmatch domain: %s",
+          infof(data, "skipped cookie with ungood tailmatch domain: %s",
                 curlx_str(&val));
           return CURLE_OK;
         }
@@ -596,7 +596,7 @@ parse_cookie_header(struct Curl_easy *data,
           co->expires = CURL_OFF_T_MAX;
           break;
         default:
-          /* negative or otherwise bad, expire */
+          /* negative or otherwise ungood, expire */
           co->expires = 1;
           break;
         case STRE_OK:

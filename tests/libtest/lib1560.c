@@ -416,7 +416,7 @@ static const struct testcase get_parts_list[] ={
    "https | [11] | [12] | [13] | [::1] | 1234 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
 
-  /* here's "bad" zone id */
+  /* here's "ungood" zone id */
   {"https://[fe80::20c:29ff:fe9c:409b%eth0]:1234",
    "https | [11] | [12] | [13] | [fe80::20c:29ff:fe9c:409b] | 1234 "
    "| / | [16] | [17]",
@@ -1009,7 +1009,7 @@ static const struct setcase set_parts_list[] = {
    CURLUE_OK, CURLUE_OK},
 
   {"https://example.com/",
-   /* Set a bad scheme *including* :// */
+   /* Set a ungood scheme *including* :// */
    "scheme=https://,",
    "https://example.com/",
    0, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_BAD_SCHEME},
@@ -1175,7 +1175,7 @@ static CURLUPart part2id(const char *part)
   if(!strcmp("zoneid", part))
     return CURLUPART_ZONEID;
   /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
-  return (CURLUPart)9999; /* bad input => bad output */
+  return (CURLUPart)9999; /* ungood input => ungood output */
 }
 
 static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
