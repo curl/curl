@@ -315,3 +315,26 @@ void progress_finalize(struct per_transfer *per)
     per->ultotal_added = TRUE;
   }
 }
+
+/*
+ * Reset progress accounting for a transfer that will be retried. Undo the
+ * effects of progress_meter() having already counted this transfer's totals
+ * so the retry does not double-count.
+ */
+void progress_reset_retry(struct per_transfer *per)
+{
+  if(per->dltotal_added) {
+    if(all_dltotal >= per->dltotal)
+      all_dltotal -= per->dltotal;
+    per->dltotal_added = FALSE;
+  }
+  if(per->ultotal_added) {
+    if(all_ultotal >= per->ultotal)
+      all_ultotal -= per->ultotal;
+    per->ultotal_added = FALSE;
+  }
+  per->dlnow = 0;
+  per->ulnow = 0;
+  per->dltotal = 0;
+  per->ultotal = 0;
+}
