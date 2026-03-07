@@ -516,6 +516,7 @@ typedef int (*curl_prereq_callback)(void *clientp,
  */
 
 typedef enum {
+  CURLE_SIGNED = -1, /* to ensure signed type, never use! */
   CURLE_OK = 0,
   CURLE_UNSUPPORTED_PROTOCOL,    /* 1 */
   CURLE_FAILED_INIT,             /* 2 */
@@ -3054,7 +3055,8 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      void *userptr);
 
 typedef enum {
-  CURLSHE_OK,  /* all is fine */
+  CURLSHE_SIGNED = -1, /* to ensure signed type, never use! */
+  CURLSHE_OK = 0,  /* all is fine */
   CURLSHE_BAD_OPTION, /* 1 */
   CURLSHE_IN_USE,     /* 2 */
   CURLSHE_INVALID,    /* 3 */
