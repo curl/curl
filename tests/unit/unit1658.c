@@ -46,7 +46,7 @@ static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
 {
   char *p = rrbuffer;
   const char *pend = rrbuffer + sizeof(rrbuffer);
-  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)result);
+  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", result);
   p += strlen(rrbuffer);
 
   if(rr) {
