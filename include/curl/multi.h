@@ -87,7 +87,8 @@ typedef enum {
 #define CURLPIPE_MULTIPLEX 2L
 
 typedef enum {
-  CURLMSG_NONE, /* first, not used */
+  CURLMSG_SIGNED = -1, /* to ensure signed type, never use! */
+  CURLMSG_NONE = 0, /* first, not used */
   CURLMSG_DONE, /* This easy handle has completed. 'result' contains
                    the CURLcode of the transfer */
   CURLMSG_LAST /* last, not used */

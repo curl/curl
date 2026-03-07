@@ -404,6 +404,7 @@ const char *curl_share_strerror(CURLSHcode error)
   case CURLSHE_NOT_BUILT_IN:
     return "Feature not enabled in this library";
 
+  case CURLSHE_SIGNED:
   case CURLSHE_LAST:
     break;
   }
@@ -517,6 +518,7 @@ const char *curl_url_strerror(CURLUcode error)
   case CURLUE_TOO_LARGE:
     return "A value or data field is larger than allowed";
 
+  case CURLUE_SIGNED:
   case CURLUE_LAST:
     break;
   }
