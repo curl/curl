@@ -53,21 +53,21 @@ proxy
 HTTPS reuse a proxy with different credentials
 </name>
 <command>
-https://example.com.%TESTNUMBER:%HTTPSPORT/path/%TESTNUMBER --proxy http://user1:pwd1@%HOSTIP:%PROXYPORT --insecure --next https://example.com.%TESTNUMBER:%HTTPSPORT/path/%TESTNUMBER0002 --proxy http://user2:pwd2@%HOSTIP:%PROXYPORT --insecure
+https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://user1:pwd1@%HOSTIP:%PROXYPORT --insecure --next https://example.com:%HTTPSPORT/path/%TESTNUMBER0002 --proxy http://user2:pwd2@%HOSTIP:%PROXYPORT --insecure
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
-CONNECT example.com.%TESTNUMBER:%HTTPSPORT HTTP/1.1
-Host: example.com.%TESTNUMBER:%HTTPSPORT
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
 Proxy-Authorization: Basic %b64[user1:pwd1]b64%
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-CONNECT example.com.%TESTNUMBER:%HTTPSPORT HTTP/1.1
-Host: example.com.%TESTNUMBER:%HTTPSPORT
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
 Proxy-Authorization: Basic %b64[user2:pwd2]b64%
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
@@ -75,12 +75,12 @@ Proxy-Connection: Keep-Alive
 </proxy>
 <protocol crlf="headers">
 GET /path/%TESTNUMBER HTTP/1.1
-Host: example.com.%TESTNUMBER:%HTTPSPORT
+Host: example.com:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 GET /path/%TESTNUMBER0002 HTTP/1.1
-Host: example.com.%TESTNUMBER:%HTTPSPORT
+Host: example.com:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
