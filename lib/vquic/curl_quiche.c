@@ -337,7 +337,7 @@ static void cf_quiche_write_hd(struct Curl_cfilter *cf,
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu "
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu "
                   "bytes of headers", stream->id, stream->xfer_result, blen);
   }
 }
@@ -389,14 +389,14 @@ static int cb_each_header(uint8_t *name, size_t name_len,
     if(!result)
       cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->h1hdr),
                          curlx_dyn_len(&ctx->h1hdr), FALSE);
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] status: %s",
+    CURL_TRC_CF(data, cf, "[%" PRIu64 "] status: %s",
                 stream->id, curlx_dyn_ptr(&ctx->h1hdr));
   }
   else {
     if(is_valid_h3_header(value, value_len) &&
        is_valid_h3_header(name, name_len)) {
       /* store as an HTTP1-style header */
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s",
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] header: %.*s: %.*s",
                   stream->id, (int)name_len, name,
                   (int)value_len, value);
       curlx_dyn_reset(&ctx->h1hdr);
@@ -458,7 +458,7 @@ static void cf_quiche_flush_body(struct Curl_cfilter *cf,
         data, (const char *)buf, blen, FALSE);
       Curl_bufq_skip(&ctx->writebuf, blen);
       if(stream->xfer_result) {
-        CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu bytes"
+        CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu bytes"
                     " of data", stream->id, stream->xfer_result, blen);
       }
     }
@@ -866,7 +866,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
                     vquic_h3_err_str(stream->error3));
         return CURLE_OK;
     }
-    failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
+    failf(data, "HTTP/3 stream %" PRIu64 " reset by server (error 0x%" PRIx64
           " %s)", stream->id, stream->error3,
           vquic_h3_err_str(stream->error3));
     result = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
