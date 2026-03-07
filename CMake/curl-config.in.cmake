@@ -57,7 +57,7 @@ if("@HAVE_LIBZ@")
 endif()
 
 set(_curl_cmake_module_path_save ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
+list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(_curl_libs "")
 
@@ -160,33 +160,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/@TARGETS_EXPORT_NAME@.cmake")
 
 # Alias for either shared or static library
 if(NOT TARGET @PROJECT_NAME@::@LIB_NAME@)
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.11 AND CMAKE_VERSION VERSION_LESS 3.18)
-    set_target_properties(@PROJECT_NAME@::@LIB_SELECTED@ PROPERTIES IMPORTED_GLOBAL TRUE)
-  endif()
   add_library(@PROJECT_NAME@::@LIB_NAME@ ALIAS @PROJECT_NAME@::@LIB_SELECTED@)
-endif()
-
-if(TARGET @PROJECT_NAME@::@LIB_STATIC@)
-  # CMake before CMP0099 (CMake 3.17 2020-03-20) did not propagate libdirs to
-  # targets. It expected libs to have an absolute filename. As a workaround,
-  # manually apply dependency libdirs, for CMake consumers without this policy.
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
-    cmake_policy(GET CMP0099 _has_CMP0099)  # https://cmake.org/cmake/help/latest/policy/CMP0099.html
-  endif()
-  if(NOT _has_CMP0099 AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.13 AND _curl_libs)
-    set(_curl_libdirs "")
-    foreach(_curl_lib IN LISTS _curl_libs)
-      if(TARGET "${_curl_lib}")
-        get_target_property(_curl_libdir "${_curl_lib}" INTERFACE_LINK_DIRECTORIES)
-        if(_curl_libdir)
-          list(APPEND _curl_libdirs "${_curl_libdir}")
-        endif()
-      endif()
-    endforeach()
-    if(_curl_libdirs)
-      target_link_directories(@PROJECT_NAME@::@LIB_STATIC@ INTERFACE ${_curl_libdirs})
-    endif()
-  endif()
 endif()
 
 # For compatibility with CMake's FindCURL.cmake
