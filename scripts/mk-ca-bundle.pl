@@ -317,9 +317,6 @@ if(!$opt_n) {
             my $refs = "&sha=$2";
             my $path = $3;
             if(open(my $fh, '-|', 'curl', '--user-agent', 'curl',
-                                          '--fail', '--silent', '--show-error',
-                                          '--connect-timeout', '15', '--max-time', '60',
-                                          '--retry', '6', '--retry-connrefused',
                                           '--header', 'X-GitHub-Api-Version: 2022-11-28',
                                           "https://api.github.com/repos/mozilla-firefox/firefox/commits?path=$path$refs")) {
                 $out = do { local $/; <$fh> };
@@ -346,10 +343,7 @@ if(!$opt_n) {
                 push @opts, '--proto', '=https' if !$opt_k;
                 push @opts, '-s' if $opt_q;
                 my $out = '';
-                if(open(my $fh, '-|', 'curl', '--fail', '--silent', '--show-error',
-                                              '--connect-timeout', '15', '--max-time', '60',
-                                              '--retry', '6', '--retry-connrefused',
-                                              '--location', '--write-out', '%{response_code}',
+                if(open(my $fh, '-|', 'curl', '--location', '--write-out', '%{response_code}',
                                               (@opts), '--output', $txt, $url)) {
                     $out = <$fh>;  # read first line
                     chomp $out;
