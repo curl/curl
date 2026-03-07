@@ -1042,7 +1042,13 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
 
 /* to figure out the type of the socket safely, remove the possibly ORed
    bits before comparing */
+#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
 #define SOCKTYPE(x) (x &~ (SOCK_CLOEXEC|SOCK_NONBLOCK))
+#elif define(SOCK_NONBLOCK)
+#define SOCKTYPE(x) (x &~ (SOCK_NONBLOCK)
+#else
+#define SOCKTYPE(x) (x)
+#endif
 
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
