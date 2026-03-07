@@ -316,8 +316,7 @@ if(!$opt_n) {
             my $slug = $1;
             my $refs = "&sha=$2";
             my $path = $3;
-            if(open(my $fh, '-|', 'curl', '--user-agent', 'curl',
-                                          '--header', 'X-GitHub-Api-Version: 2022-11-28',
+            if(open(my $fh, '-|', 'curl', '-A', 'curl', '-H', 'X-GitHub-Api-Version: 2022-11-28',
                                           "https://api.github.com/repos/mozilla-firefox/firefox/commits?path=$path$refs")) {
                 $out = do { local $/; <$fh> };
                 close $fh;
