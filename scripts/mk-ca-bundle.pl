@@ -60,7 +60,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.31';
+my $version = '1.32';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -301,7 +301,35 @@ my $oldhash = oldhash($crt);
 
 report "SHA256 of old file: $oldhash";
 
+my $filedate_iso = '';
+
 if(!$opt_n) {
+    report "Using URL: $url";
+
+    my $sha = '';
+    if($opt_d ne 'ref') {
+        report "Determining latest commit and timestamp for the remote file ...";
+
+        my $out = '';
+        # https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt
+        if($url =~ /^https:\/\/raw.githubusercontent.com\/([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+)\/(refs\/heads\/[a-z]+)(\/.+)$/) {
+            my $slug = $1;
+            my $refs = "&sha=$2";
+            my $path = $3;
+            if(open(my $fh, '-|', 'curl', '-A', 'curl', '-H', 'X-GitHub-Api-Version: 2022-11-28',
+                                          "https://api.github.com/repos/mozilla-firefox/firefox/commits?path=$path$refs")) {
+                $out = do { local $/; <$fh> };
+                close $fh;
+            }
+            if($out) {
+                use JSON::PP;
+                my $json = decode_json($out);
+                $sha = $json->[0]->{sha};
+                $filedate_iso = $json->[0]->{commit}->{committer}->{date};
+            }
+        }
+    }
+
     report "Downloading $txt ...";
 
     # If we have an HTTPS URL then use curl
@@ -373,8 +401,19 @@ if(!$opt_n) {
     }
 }
 
-my $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
-my $datesrc = "as of";
+my $filedate;
+my $datesrc;
+
+if($filedate_iso) {
+    my $time = Time::Piece->strptime($filedate_iso, '%Y-%m-%dT%H:%M:%SZ');
+    $filedate = $time->epoch;
+    $datesrc = "last updated on";
+    utime($filedate, $filedate, $txt);
+}
+if(!$filedate) {
+    $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
+    $datesrc = "as of";
+}
 if(!$filedate) {
     # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
     $filedate = time();
@@ -654,6 +693,7 @@ while(<TXT>) {
 }
 close(TXT) or die "Could not close $txt: $!\n";
 close(CRT) or die "Could not close $crt.~: $!\n";
+utime($filedate, $filedate, "$crt.~");
 unless($stdout) {
     if($opt_b && -e $crt) {
         my $bk = 1;
