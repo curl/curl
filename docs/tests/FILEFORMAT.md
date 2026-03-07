@@ -465,7 +465,10 @@ What server(s) this test case requires/uses. Available servers:
 - `telnet`
 - `tftp`
 
-Give only one per line. Servers that require a special server certificate can
+Give only one per line. If a test does not require any servers, the `<server>`
+subsection should be omitted.
+
+Servers that require a special server certificate can
 have the PEM certificate filename (found in the `certs` directory) appended to
 the server name separated by a space.
 
