@@ -24,8 +24,8 @@
  *
  ***************************************************************************/
 
-#define ISLOWHEXALHA(x) (((x) >= 'a') && ((x) <= 'f'))
-#define ISUPHEXALHA(x)  (((x) >= 'A') && ((x) <= 'F'))
+#define ISLOWHEXALPHA(x) (((x) >= 'a') && ((x) <= 'f'))
+#define ISUPHEXALPHA(x)  (((x) >= 'A') && ((x) <= 'F'))
 
 #define ISLOWCNTRL(x) ((unsigned char)(x) <= 0x1f)
 #define IS7F(x)       ((x) == 0x7f)
@@ -36,7 +36,7 @@
 #define ISGRAPH(x)  (ISLOWPRINT(x) || (((x) > ' ') && ((x) <= 0x7e)))
 #define ISCNTRL(x)  (ISLOWCNTRL(x) || IS7F(x))
 #define ISALPHA(x)  (ISLOWER(x) || ISUPPER(x))
-#define ISXDIGIT(x) (ISDIGIT(x) || ISLOWHEXALHA(x) || ISUPHEXALHA(x))
+#define ISXDIGIT(x) (ISDIGIT(x) || ISLOWHEXALPHA(x) || ISUPHEXALPHA(x))
 #define ISODIGIT(x) (((x) >= '0') && ((x) <= '7'))
 #define ISALNUM(x)  (ISDIGIT(x) || ISLOWER(x) || ISUPPER(x))
 #define ISUPPER(x)  (((x) >= 'A') && ((x) <= 'Z'))
