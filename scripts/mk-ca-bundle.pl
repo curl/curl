@@ -309,6 +309,8 @@ my $oldhash = oldhash($crt);
 
 report "SHA256 of old file: $oldhash";
 
+my $filedate_iso = '';
+
 if(!$opt_n) {
     report "Using URL: $url";
 
@@ -335,6 +337,7 @@ if(!$opt_n) {
                 use JSON::PP;
                 my $json = decode_json($out);
                 $sha = $json->[0]->{sha};
+                $filedate_iso = $json->[0]->{commit}->{committer}->{date};
             }
         }
     }
@@ -431,14 +434,15 @@ if(!$opt_n && $opt_d eq 'ref') {
     if($out) {
         use JSON::PP;
         my $json = decode_json($out);
-        my $filedate_iso = $json->{commit}->{committer}->{date};
-        if($filedate_iso) {
-            my $time = Time::Piece->strptime($filedate_iso, '%Y-%m-%dT%H:%M:%SZ');
-            $filedate = $time->epoch;
-            $datesrc = "last updated on";
-            utime($filedate, $filedate, $txt);
-        }
+        $filedate_iso = $json->{commit}->{committer}->{date};
     }
+}
+
+if($filedate_iso) {
+    my $time = Time::Piece->strptime($filedate_iso, '%Y-%m-%dT%H:%M:%SZ');
+    $filedate = $time->epoch;
+    $datesrc = "last updated on";
+    utime($filedate, $filedate, $txt);
 }
 if(!$filedate) {
     $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
