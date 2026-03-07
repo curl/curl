@@ -61,7 +61,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.31';
+my $version = '1.32';
 
 $opt_w = 76; # default base64 encoded lines length
 
