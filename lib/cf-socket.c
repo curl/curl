@@ -1044,7 +1044,7 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
    bits before comparing */
 #if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
 #define SOCKTYPE(x) (x &~ (SOCK_CLOEXEC|SOCK_NONBLOCK))
-#elif define(SOCK_NONBLOCK)
+#elif defined(SOCK_NONBLOCK)
 #define SOCKTYPE(x) (x &~ (SOCK_NONBLOCK)
 #else
 #define SOCKTYPE(x) (x)
