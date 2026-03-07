@@ -308,7 +308,7 @@ if(!$opt_n) {
 
     my $sha = '';
     if($opt_d ne 'ref') {
-        report "Determining latest commit for the remote file ...";
+        report "Determining latest commit and timestamp for the remote file ...";
 
         my $out = '';
         # https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt
