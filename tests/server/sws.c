@@ -1130,7 +1130,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
                     sizeof(req->reqbuf) - req->offset);
         if(got > 0) {
           req->offset += got;
-          logmsg("Got %zu bytes from client", got);
+          logmsg("Got %zd bytes from client", got);
         }
 
         if((got == -1) &&
