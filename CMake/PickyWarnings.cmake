@@ -329,6 +329,7 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
         list(APPEND _picky_enable
           -Warith-conversion               #             gcc 10.0
+            -Wno-error=arith-conversion    #             gcc 10.0                             # extra hits with -Wsign-conversion
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.2  g++ 11.0
         )
       endif()
