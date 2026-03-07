@@ -516,6 +516,7 @@ typedef int (*curl_prereq_callback)(void *clientp,
  */
 
 typedef enum {
+  CURLE_SIGNED = -1, /* to ensure signed type, never use! */
   CURLE_OK = 0,
   CURLE_UNSUPPORTED_PROTOCOL,    /* 1 */
   CURLE_FAILED_INIT,             /* 2 */
@@ -2605,7 +2606,8 @@ struct curl_forms {
  *
  ***************************************************************************/
 typedef enum {
-  CURL_FORMADD_OK             CURL_DEPRECATED(7.56.0, ""), /* 1st, no error */
+  CURL_FORMADD_SIGNED = -1, /* to ensure signed type, never use! */
+  CURL_FORMADD_OK             CURL_DEPRECATED(7.56.0, "") = 0, /* 1st, no error */
 
   CURL_FORMADD_MEMORY         CURL_DEPRECATED(7.56.0, ""),
   CURL_FORMADD_OPTION_TWICE   CURL_DEPRECATED(7.56.0, ""),
@@ -3054,7 +3056,8 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      void *userptr);
 
 typedef enum {
-  CURLSHE_OK,  /* all is fine */
+  CURLSHE_SIGNED = -1, /* to ensure signed type, never use! */
+  CURLSHE_OK = 0,  /* all is fine */
   CURLSHE_BAD_OPTION, /* 1 */
   CURLSHE_IN_USE,     /* 2 */
   CURLSHE_INVALID,    /* 3 */
