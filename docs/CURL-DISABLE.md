@@ -161,9 +161,9 @@ Disable the SHA-512/256 hash algorithm.
 
 Disable the shuffle DNS feature
 
-## `CURL_DISABLE_SMB`
+## `CURL_ENABLE_SMB`
 
-Disable the SMB(S) protocols
+Enable the SMB(S) protocols
 
 ## `CURL_DISABLE_SMTP`
 

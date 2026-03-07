@@ -42,6 +42,11 @@ general.
 
 TLS-SRP support gets removed in August 2026.
 
+## SMB goes opt-in
+
+The SMB protocol has weak security and is rarely used these days. After curl
+8.19.0 it goes opt-in.
+
 ## Past removals
 
 - axTLS (removed in 7.63.0)
