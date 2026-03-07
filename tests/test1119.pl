@@ -179,8 +179,10 @@ for my $e (sort @syms) {
     # *_LAST and *_LASTENTRY are just suffix for the placeholders used for the
     # last entry in many enum series.
     #
+    # *_SIGNED is a suffix to make enums a signed type.
+    #
 
-    if($e =~ /(OBSOLETE|CURLE_RESERVED|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z|^CURL_TEMP_)/) {
+    if($e =~ /(OBSOLETE|CURLE_RESERVED|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z|_SIGNED\z|^CURL_TEMP_)/) {
         $ignored++;
         next;
     }
