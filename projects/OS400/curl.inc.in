@@ -366,6 +366,13 @@
       *
      d CURL_PUSH_OK    c                   0
      d CURL_PUSH_DENY  c                   1
+     d CURL_PUSH_ERROROUT...
+     d                 c                   2
+      *
+     d CURLMNOTIFY_INFO_READ...
+     d                 c                   0
+     d CURLMNOTIFY_EASY_DONE...
+     d                 c                   1
       *
      d CURLPAUSE_RECV  c                   X'00000001'
      d CURLPAUSE_RECV_CONT...
@@ -1085,6 +1092,9 @@
      d                 c                   X'10000000'
      d  CURLPROTO_GOPHERS...
      d                 c                   X'20000000'
+     d  CURLPROTO_MQTTS...
+     d                 c                   X'40000000'
+     d  CURLPROTO_ALL  c                   X'FFFFFFFF'
       *
      d CURLoption      s             10i 0 based(######ptr######)               Enum
      d  CURLOPT_WRITEDATA...
@@ -2201,6 +2211,33 @@
      d                 c                   10015
      d  CURLMOPT_MAX_CONCURRENT_STREAMS...
      d                 c                   10016
+     d  CURLMOPT_NETWORK_CHANGED...
+     d                 c                   10017
+     d  CURLMOPT_NOTIFYFUNCTION...
+     d                 c                   20018
+     d  CURLMOPT_NOTIFYDATA...
+     d                 c                   10019
+      *
+     d CURLMinfo_offt  s             10i 0 based(######ptr######)               Enum
+     d  CURLMINFO_NONE...
+     d                 c                   0
+     d  CURLMINFO_XFERS_CURRENT...
+     d                 c                   1
+     d  CURLMINFO_XFERS_RUNNING...
+     d                 c                   2
+     d  CURLMINFO_XFERS_PENDING...
+     d                 c                   3
+     d  CURLMINFO_XFERS_DONE...
+     d                 c                   4
+     d  CURLMINFO_XFERS_ADDED...
+     d                 c                   5
+      *
+      * Definition of bits for the CURLMOPT_NETWORK_CHANGED argument.
+      *
+     d CURLMNWC_CLEAR_CONNS...
+     d                 c                   x'00000001'
+     d CURLMNWC_CLEAR_DNS...
+     d                 c                   x'00000002'
       *
       * Bitmask bits for CURLMOPT_PIPELINING.
       *
@@ -2635,6 +2672,9 @@
      d                 s               *   based(######ptr######) procptr
       *
      d curl_ws_write_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_notify_callback...
      d                 s               *   based(######ptr######) procptr
       *
       **************************************************************************
@@ -3128,6 +3168,25 @@
      d                 pr              *   extproc('curl_multi_get_handles')    CURL **
      d  multi_handle                   *   value                                CURLM *
       *
+     d curl_multi_get_offt...
+     d                 pr                  extproc('curl_multi_get_offt')
+     d                                     like(CURLMcode)
+     d  multi_handle                   *   value                                CURLM *
+     d  info                               value like(CURLMinfo_offt)
+     d  pvalue                             like(curl_off_t)
+      *
+     d curl_multi_notify_disable...
+     d                 pr                  extproc('curl_multi_notify_disable')
+     d                                     like(CURLMcode)
+     d  multi_handle                   *   value                                CURLM *
+     d  notification                 10i 0 value
+      *
+     d curl_multi_notify_enable...
+     d                 pr                  extproc('curl_multi_notify_enable')
+     d                                     like(CURLMcode)
+     d  multi_handle                   *   value                                CURLM *
+     d  notification                 10i 0 value
+      *
      d curl_url        pr              *   extproc('curl_url')                  CURLU *
       *
      d curl_url_cleanup...
@@ -3186,6 +3245,12 @@
       *
      d curl_ws_meta    pr              *   extproc('curl_ws_meta')              curl_ws_frame *
      d  curl                           *   value                                CURL *
+      *
+     d curl_ws_start   pr                  extproc('curl_ws_start')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  flags                        10u 0 value
+     d  frame_len                          value like(curl_off_t)
       *
      d curl_easy_header...
      d                 pr                  extproc('curl_easy_header')          curl_header *
