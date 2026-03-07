@@ -671,7 +671,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   memset(sau, 0, sizeof(struct sockaddr_un));
   sau->sun_family = AF_UNIX;
   if(len >= sizeof(sau->sun_path) - 1) {
-    logmsg("Too long unix socket domain path (%zd)", len);
+    logmsg("Too long unix socket domain path (%zu)", len);
     return -1;
   }
   curlx_strcopy(sau->sun_path, sizeof(sau->sun_path), unix_socket, len);
