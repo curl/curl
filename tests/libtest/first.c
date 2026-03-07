@@ -294,5 +294,5 @@ int main(int argc, const char **argv)
 
   /* Regular program status codes are limited to 0..127 and 126 and 127 have
    * special meanings by the shell, so limit a normal return code to 125 */
-  return (int)result <= 125 ? (int)result : 125;
+  return result <= 125 ? result : 125;
 }
