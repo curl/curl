@@ -564,7 +564,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   DEBUGASSERT(conn->scheme);
   DEBUGASSERT(dns);
 
-  Curl_resolv_unlink(data, &data->state.dns[sockindex]);
+  Curl_dns_entry_unlink(data, &data->state.dns[sockindex]);
   data->state.dns[sockindex] = dns;
 
 #ifndef CURL_DISABLE_HTTP
@@ -588,7 +588,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
   if(result)
-    Curl_resolv_unlink(data, &data->state.dns[sockindex]);
+    Curl_dns_entry_unlink(data, &data->state.dns[sockindex]);
   return result;
 }
 
