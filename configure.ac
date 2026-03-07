@@ -4535,16 +4535,16 @@ AC_ARG_ENABLE(ntlm,
 AS_HELP_STRING([--enable-ntlm],[Enable NTLM support])
 AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
 [ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_NTLM, 1, [to disable NTLM support])
-    CURL_DISABLE_NTLM=1
+  yes)
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(CURL_ENABLE_NTLM, 1, [enable NTLM support])
+    CURL_ENABLE_NTLM=1
     ;;
   *)
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
     ;;
   esac ],
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
 )
 
 dnl ************************************************************
@@ -5201,7 +5201,7 @@ fi
 
 use_curl_ntlm_core=no
 
-if test "$CURL_DISABLE_NTLM" != "1"; then
+if test "$CURL_ENABLE_NTLM" = "1"; then
   if test "$HAVE_DES_ECB_ENCRYPT" = "1" ||
      test "$GNUTLS_ENABLED" = "1" ||
      test "$USE_WIN32_CRYPTO" = "1" ||
