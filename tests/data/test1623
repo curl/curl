@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+tool-sizeparser
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+the size parser for --limit-rate
+</name>
+<tool>
+tool%TESTNUMBER
+</tool>
+</client>
+
+<verify>
+</verify>
+</testcase>

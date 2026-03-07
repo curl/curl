@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Items to be removed from future curl releases
 
 If any of these deprecated features is a cause for concern for you, please
@@ -6,43 +12,56 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## Support for systems without 64 bit data types
+## c-ares 1.16.0
 
-curl will *require* support for a 64 bit data type (like `long long` or an
-alternative) to build. These days, few systems are used where no such type is
-around, so it is increasingly unnecessary to spend effort and time on
-maintaining this support. Also, supporting 32 bit values for some of those
-fields is complicated and hard to test.
+In March 2026, we drop support for all c-ares versions before 1.16.0.
 
-Adding this requirement will make the code simpler, easier to maintain and the
-test coverage better. It is a low price too, since virtually no users are
-still building curl on such systems.
+## RTMP
 
-`long long` was not a standard type until C99, but has been supported by C89
-compilers since the 1990s.
+RTMP in curl is powered by the 3rd party library librtmp.
 
-Starting in 8.0.0 (March 2023), the plan is to drop support.
+- RTMP is barely used by curl users (2.2% in the 2025 survey)
+- librtmp has no test cases, makes no proper releases and has not had a single
+  commit within the last year
+- librtmp parses the URL itself and requires non-compliant URLs for this
+- we have no RTMP tests
 
-Starting in 7.86.0, building curl with configure requires the additional flag
-`--with-n64-deprecated` if the `curl_off_t` type on your system is smaller
-than 8 bytes, in an attempt to highlight these plans to affected users.
+Support for RTMP in libcurl gets removed in April 2026.
 
-## NSS
+## CMake 3.17 and earlier
 
-We remove support for building curl with the NSS TLS library in August 2023.
+We remove support for CMake <3.18 in April 2026.
 
-- There are few users left who use curl+NSS
-- NSS has few users outside of curl as well (primarily Firefox)
-- NSS is harder than ever to find documentation for
-- NSS was always "best" used with Red Hat Linux when they provided additional
-  features on top of the regular NSS that is not shipped by the vanilla library
+CMake 3.18 was released on 2020-07-15.
 
-Starting in 7.82.0, building curl to use NSS configure requires the additional
-flag `--with-nss-deprecated` in an attempt to highlight these plans.
+## TLS-SRP Authentication
 
-## past removals
+Transport Layer Security Secure Remote Password is a TLS feature that does not
+work with TLS 1.3 or QUIC and is virtually unused by curl users and in
+general.
 
- - Pipelining
- - axTLS
- - PolarSSL
- - NPN
+TLS-SRP support gets removed in August 2026.
+
+## Past removals
+
+- axTLS (removed in 7.63.0)
+- Pipelining (removed in 7.65.0)
+- PolarSSL (removed in 7.69.0)
+- NPN (removed in 7.86.0)
+- Support for systems without 64-bit data types (removed in 8.0.0)
+- NSS (removed in 8.3.0)
+- gskit (removed in 8.3.0)
+- MinGW v1 (removed in 8.4.0)
+- NTLM_WB (removed in 8.8.0)
+- space-separated `NOPROXY` patterns (removed in 8.9.0)
+- hyper (removed in 8.12.0)
+- Support for Visual Studio 2005 and older (removed in 8.13.0)
+- Secure Transport (removed in 8.15.0)
+- BearSSL (removed in 8.15.0)
+- msh3 (removed in 8.16.0)
+- winbuild build system (removed in 8.17.0)
+- Windows CE (removed in 8.18.0)
+- Support for Visual Studio 2008 (removed in 8.18.0)
+- OpenSSL 1.1.1 and older (removed in 8.18.0)
+- Support for Windows XP (removed in 8.19.0)
+- OpenSSL-QUIC (removed in 8.19.0)

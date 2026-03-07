@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,14 +26,17 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
-  char *location;
-  long response_code;
+  CURLcode result;
+
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -41,23 +44,24 @@ int main(void)
 
     /* example.com is redirected, figure out the redirection! */
 
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     else {
-      res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-      if((res == CURLE_OK) &&
-         ((response_code / 100) != 3)) {
+      long response_code;
+      result = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+      if((result == CURLE_OK) && ((response_code / 100) != 3)) {
         /* a redirect implies a 3xx response code */
         fprintf(stderr, "Not a redirect.\n");
       }
       else {
-        res = curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &location);
+        const char *location;
+        result = curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &location);
 
-        if((res == CURLE_OK) && location) {
+        if((result == CURLE_OK) && location) {
           /* This is the new absolute URL that you could redirect to, even if
            * the Location: response header may have been a relative URL. */
           printf("Redirected to: %s\n", location);
@@ -68,5 +72,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  return 0;
+  curl_global_cleanup();
+  return (int)result;
 }

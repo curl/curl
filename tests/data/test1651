@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,17 +7,20 @@ x509
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 x509 parsing
- </name>
+</name>
+
+<verify>
+<limits>
+Allocations: 14000
+</limits>
+</verify>
+
 </client>
 </testcase>

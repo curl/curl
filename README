@@ -15,7 +15,8 @@ README
   available to be used by your software. Read the libcurl.3 man page to
   learn how.
 
-  You find answers to the most frequent questions we get in the FAQ document.
+  You find answers to the most frequent questions we get in the FAQ.md
+  document.
 
   Study the COPYING file for distribution terms.
 
@@ -32,24 +33,18 @@ WEBSITE
 
   Visit the curl website for the latest news and downloads:
 
-        https://curl.se/
+  https://curl.se/
 
 GIT
 
   To download the latest source code off the GIT server, do this:
 
-    git clone https://github.com/curl/curl.git
+  git clone https://github.com/curl/curl
 
   (you will get a directory named curl created, filled with the source code)
 
 SECURITY PROBLEMS
 
-  Report suspected security problems via our HackerOne page and not in public.
+  Report suspected security problems privately and not in public.
 
-    https://hackerone.com/curl
-
-NOTICE
-
-  Curl contains pieces of source code that is Copyright (c) 1998, 1999
-  Kungliga Tekniska Högskolan. This notice is included here to comply with the
-  distribution terms.
+  https://curl.se/dev/vuln-disclosure.html

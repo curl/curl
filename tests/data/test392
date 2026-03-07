@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ secure
 </info>
 
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -27,24 +28,25 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP secure cookies over localhost
- </name>
+</name>
 
 <setenv>
 TZ=GMT
 </setenv>
- <command>
-http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
+<command>
+-4 http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
 </command>
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
+<features>
+cookies
+local-http
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPPORT
 User-Agent: curl/%VERSION

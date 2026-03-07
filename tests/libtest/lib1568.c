@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2021 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,32 +21,34 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testtrace.h"
-#include "memdebug.h"
-
-int test(char *URL)
+static CURLcode test_lib1568(const char *URL)
 {
-  CURLcode ret;
-  CURL *hnd;
-  curl_global_init(CURL_GLOBAL_ALL);
+  CURLcode result = TEST_ERR_MAJOR_BAD;
+  CURL *curl;
+  curl_off_t port;
 
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_URL, URL);
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
-  curl_easy_setopt(hnd, CURLOPT_USERPWD, "testuser:testpass");
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "lib1568");
-  curl_easy_setopt(hnd, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
-  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_PORT, strtol(libtest_arg2, NULL, 10));
+  if(curlx_str_number(&libtest_arg2, &port, 0xffff))
+    return result;
 
-  ret = curl_easy_perform(hnd);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK)
+    return result;
 
-  curl_easy_cleanup(hnd);
-  hnd = NULL;
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+  curl_easy_setopt(curl, CURLOPT_USERPWD, "testuser:testpass");
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "lib1568");
+  curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
+  curl_easy_setopt(curl, CURLOPT_PORT, (long)port);
+
+  result = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
 
   curl_global_cleanup();
-  return (int)ret;
+  return result;
 }

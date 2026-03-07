@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,115 +22,128 @@
 #
 ###########################################################################
 include(CheckCSourceCompiles)
-# The begin of the sources (macros and includes)
-set(_source_epilogue "#undef inline")
+include(CheckCSourceRuns)
+include(CheckTypeSize)
 
-macro(add_header_include check header)
-  if(${check})
-    set(_source_epilogue "${_source_epilogue}\n#include <${header}>")
+# #include header if condition is true
+macro(curl_add_header_include _check _header)
+  if(${_check})
+    set(_source_epilogue "${_source_epilogue}
+      #include <${_header}>")
   endif()
 endmacro()
 
-set(signature_call_conv)
-if(HAVE_WINDOWS_H)
-  add_header_include(HAVE_WINSOCK2_H "winsock2.h")
-  add_header_include(HAVE_WINDOWS_H "windows.h")
-  set(_source_epilogue
-      "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif")
-  set(signature_call_conv "PASCAL")
-  if(HAVE_LIBWS2_32)
-    set(CMAKE_REQUIRED_LIBRARIES ws2_32)
+set(_cmake_try_compile_target_type_save ${CMAKE_TRY_COMPILE_TARGET_TYPE})
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
+if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
+  cmake_push_check_state()
+  set(CMAKE_EXTRA_INCLUDE_FILES "")
+  if(WIN32)
+    set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+  else()
+    set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
   endif()
-else()
-  add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
-  add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
+  check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
+  set(HAVE_STRUCT_SOCKADDR_STORAGE ${HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE})
+  cmake_pop_check_state()
 endif()
 
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-
+set(_source_epilogue "#undef inline")
 check_c_source_compiles("${_source_epilogue}
-  int main(void) {
-    int flag = MSG_NOSIGNAL;
-    (void)flag;
+  #ifdef _MSC_VER
+  #include <winsock2.h>
+  #endif
+  #ifndef _WIN32
+  #include <sys/time.h>
+  #endif
+  #include <time.h>
+  int main(void)
+  {
+    struct timeval ts;
+    ts.tv_sec  = 0;
+    ts.tv_usec = 0;
+    (void)ts;
     return 0;
-  }" HAVE_MSG_NOSIGNAL)
+  }" HAVE_STRUCT_TIMEVAL)
 
-if(NOT HAVE_WINDOWS_H)
-  add_header_include(HAVE_SYS_TIME_H "sys/time.h")
-  add_header_include(TIME_WITH_SYS_TIME "time.h")
-  add_header_include(HAVE_TIME_H "time.h")
-endif()
-check_c_source_compiles("${_source_epilogue}
-int main(void) {
-  struct timeval ts;
-  ts.tv_sec  = 0;
-  ts.tv_usec = 0;
-  (void)ts;
-  return 0;
-}" HAVE_STRUCT_TIMEVAL)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})
+unset(_cmake_try_compile_target_type_save)
 
-if(HAVE_WINDOWS_H)
-  set(CMAKE_EXTRA_INCLUDE_FILES winsock2.h)
-else()
-  set(CMAKE_EXTRA_INCLUDE_FILES)
-  if(HAVE_SYS_SOCKET_H)
-    set(CMAKE_EXTRA_INCLUDE_FILES sys/socket.h)
-  endif()
+# Detect HAVE_GETADDRINFO_THREADSAFE
+
+if(WIN32)
+  set(HAVE_GETADDRINFO_THREADSAFE ${HAVE_GETADDRINFO})
+elseif(NOT HAVE_GETADDRINFO)
+  set(HAVE_GETADDRINFO_THREADSAFE FALSE)
+elseif(APPLE OR
+       CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
+       CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "HP-UX" OR
+       CMAKE_SYSTEM_NAME STREQUAL "MidnightBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "NetBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+  set(HAVE_GETADDRINFO_THREADSAFE TRUE)
+elseif(BSD OR CMAKE_SYSTEM_NAME MATCHES "BSD")
+  set(HAVE_GETADDRINFO_THREADSAFE FALSE)
 endif()
 
-check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
-if(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
-  set(HAVE_STRUCT_SOCKADDR_STORAGE 1)
-endif()
+if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
+  set(_source_epilogue "#undef inline
+    #ifndef _WIN32
+    #include <sys/socket.h>
+    #include <sys/time.h>
+    #endif")
+  curl_add_header_include(HAVE_NETDB_H "netdb.h")
+  check_c_source_compiles("${_source_epilogue}
+    int main(void)
+    {
+    #ifndef h_errno
+      #error force compilation error
+    #endif
+      return 0;
+    }" HAVE_H_ERRNO)
 
-unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
-
-if(NOT CMAKE_CROSSCOMPILING)
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    # only try this on non-apple platforms
-
-    # if not cross-compilation...
-    include(CheckCSourceRuns)
-    set(CMAKE_REQUIRED_FLAGS "")
-    if(HAVE_SYS_POLL_H)
-      set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
-    elseif(HAVE_POLL_H)
-      set(CMAKE_REQUIRED_FLAGS "-DHAVE_POLL_H")
-    endif()
-    check_c_source_runs("
-      #include <stdlib.h>
-      #include <sys/time.h>
-
-      #ifdef HAVE_SYS_POLL_H
-      #  include <sys/poll.h>
-      #elif  HAVE_POLL_H
-      #  include <poll.h>
-      #endif
-
+  if(NOT HAVE_H_ERRNO)
+    check_c_source_compiles("${_source_epilogue}
       int main(void)
       {
-          if(0 != poll(0, 0, 10)) {
-            return 1; /* fail */
-          }
-          else {
-            /* detect the 10.12 poll() breakage */
-            struct timeval before, after;
-            int rc;
-            size_t us;
+        h_errno = 2;
+        return h_errno != 0 ? 1 : 0;
+      }" HAVE_H_ERRNO_ASSIGNABLE)
 
-            gettimeofday(&before, NULL);
-            rc = poll(NULL, 0, 500);
-            gettimeofday(&after, NULL);
-
-            us = (after.tv_sec - before.tv_sec) * 1000000 +
-              (after.tv_usec - before.tv_usec);
-
-            if(us < 400000) {
-              return 1;
-            }
-          }
+    if(NOT HAVE_H_ERRNO_ASSIGNABLE)
+      check_c_source_compiles("${_source_epilogue}
+        int main(void)
+        {
+        #if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
+        #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
+        #else
+          #error force compilation error
+        #endif
           return 0;
-    }" HAVE_POLL_FINE)
+        }" HAVE_H_ERRNO_SBS_ISSUE_7)
+    endif()
+  endif()
+
+  if(HAVE_H_ERRNO OR HAVE_H_ERRNO_ASSIGNABLE OR HAVE_H_ERRNO_SBS_ISSUE_7)
+    set(HAVE_GETADDRINFO_THREADSAFE TRUE)
   endif()
 endif()
 
+if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+  set(_source_epilogue "#undef inline")
+  curl_add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
+  check_c_source_compiles("${_source_epilogue}
+    #include <sys/time.h>
+    #include <time.h>
+    int main(void)
+    {
+      struct timespec ts;
+      (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+      return 0;
+    }" HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+endif()
+
+unset(_source_epilogue)

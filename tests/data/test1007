@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,36 +8,42 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
 tftp
 </server>
- <name>
+<features>
+verbose-strings
+</features>
+<name>
 TFTP send with invalid permission on server
- </name>
- <command>
--T log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//invalid-file
+</name>
+<command>
+-T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//invalid-file -sS
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 This data will not be sent
 </file>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <errorcode>
 69
 </errorcode>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
 opcode = 2
 mode = octet
 tsize = 27
 blksize = 512
-timeout = 6
 filename = /invalid-file
 </protocol>
+<stderr mode="text">
+curl: (69) TFTP: Access Violation
+</stderr>
 </verify>
 </testcase>

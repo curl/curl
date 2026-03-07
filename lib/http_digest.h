@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
 /* this is for digest header input */
 CURLcode Curl_input_digest(struct Curl_easy *data,
@@ -39,6 +39,6 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 
 void Curl_http_auth_cleanup_digest(struct Curl_easy *data);
 
-#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_CRYPTO_AUTH */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_DIGEST_AUTH */
 
 #endif /* HEADER_CURL_HTTP_DIGEST_H */

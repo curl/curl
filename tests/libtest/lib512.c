@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,20 +21,18 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "memdebug.h"
+#include "first.h"
 
 /* Test case code based on source in a bug report filed by James Bursa on
    28 Apr 2004 */
 
-int test(char *URL)
+static CURLcode test_lib512(const char *URL)
 {
-  CURLcode code;
+  CURLcode result;
   int rc = 99;
 
-  code = curl_global_init(CURL_GLOBAL_ALL);
-  if(code == CURLE_OK) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result == CURLE_OK) {
     CURL *curl = curl_easy_init();
     if(curl) {
       CURL *curl2;
@@ -45,11 +43,11 @@ int test(char *URL)
       curl2 = curl_easy_duphandle(curl);
       if(curl2) {
 
-        code = curl_easy_setopt(curl2, CURLOPT_URL, URL);
-        if(code == CURLE_OK) {
+        result = curl_easy_setopt(curl2, CURLOPT_URL, URL);
+        if(result == CURLE_OK) {
 
-          code = curl_easy_perform(curl2);
-          if(code == CURLE_OK)
+          result = curl_easy_perform(curl2);
+          if(result == CURLE_OK)
             rc = 0;
           else
             rc = 1;
@@ -72,5 +70,5 @@ int test(char *URL)
   else
     rc = 5;
 
-  return rc;
+  return (CURLcode)rc;
 }

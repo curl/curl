@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,10 +26,8 @@
 #include "tool_setup.h"
 
 #ifdef USE_MANUAL
+void showhelp(const char *trigger, const char *arg, const char *endarg);
 void hugehelp(void);
-#else
-/* do nothing if not there */
-#define hugehelp()
 #endif
 
 #endif /* HEADER_CURL_TOOL_HUGEHELP_H */

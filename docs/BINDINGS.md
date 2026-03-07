@@ -1,14 +1,20 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 libcurl bindings
 ================
 
- Creative people have written bindings or interfaces for various environments
- and programming languages. Using one of these allows you to take advantage of
- curl powers from within your favourite language or system.
+Creative people have written bindings or interfaces for various environments
+and programming languages. Using one of these allows you to take advantage of
+curl powers from within your favorite language or system.
 
- This is a list of all known interfaces as of this writing.
+This is a list of all known interfaces as of this writing.
 
- The bindings listed below are not part of the curl/libcurl distribution
- archives, but must be downloaded and installed separately.
+The bindings listed below are not part of the curl/libcurl distribution
+archives, but must be downloaded and installed separately.
 
 <!-- markdown-link-check-disable -->
 
@@ -16,9 +22,9 @@ libcurl bindings
 
 [Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-C++: [curlpp](https://github.com/jpbarrette/curlpp/) Written by Jean-Philippe Barrette-LaPierre,
-[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
-Requests](https://github.com/libcpr/cpr) by Huu Nguyen
+C++: [curlpp](https://github.com/jpbarrette/curlpp) Written by Jean-Philippe Barrette-LaPierre,
+[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and
+[C++ Requests](https://github.com/libcpr/cpr) by Huu Nguyen
 
 [Ch](https://chcurl.sourceforge.net/) Written by Stephen Nestinger and Jonathan Rogado
 
@@ -37,11 +43,13 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 [Euphoria](https://web.archive.org/web/20050204080544/rays-web.com/eulibcurl.htm) Written by Ray Smith
 
-[Falcon](http://www.falconpl.org/project_docs/curl/)
+[Falcon](https://web.archive.org/web/20240130001835/www.falconpl.org/project_docs/curl/)
 
 [Ferite](https://web.archive.org/web/20150102192018/ferite.org/) Written by Paul Querna
 
-[Gambas](https://gambas.sourceforge.net/)
+[Fortran](https://github.com/interkosmos/fortran-curl) Written by Philipp Engel
+
+[Gambas](https://gambaswiki.org/website/en/main.html)
 
 [glib/GTK+](https://web.archive.org/web/20100526203452/atterer.net/glibcurl) Written by Richard Atterer
 
@@ -53,9 +61,9 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Haskell](https://hackage.haskell.org/package/curl) Written by Galois, Inc
 
-[Hollywood](https://www.hollywood-mal.com/download.html) hURL by Andreas Falkenhahn
+[Hollywood](https://web.archive.org/web/20250116185836/www.hollywood-mal.com/download.html) hURL by Andreas Falkenhahn
 
-[Java](https://github.com/pjlegato/curl-java)
+[Java](https://github.com/covers1624/curl4j)
 
 [Julia](https://github.com/JuliaWeb/LibCURL.jl) Written by Amit Murthy
 
@@ -63,9 +71,11 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Lisp](https://common-lisp.net/project/cl-curl/) Written by Liam Healy
 
-Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](https://github.com/Lua-cURL) by Jürgen Hötzel
+[LibQurl](https://github.com/Qriist/LibQurl) a feature rich AutoHotKey v2 (AHKv2) wrapper around libcurl.
 
-[Mono](https://web.archive.org/web/20070606064500/https://forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
+Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-curl](https://github.com/Lua-cURL) by Jürgen Hötzel
+
+[Mono](https://web.archive.org/web/20070606064500/forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
 
 [.NET](https://sourceforge.net/projects/libcurl-net/) libcurl-net by Jeffrey Phillips
 
@@ -88,11 +98,13 @@ Bailiff and Bálint Szilakszi,
 
 [PostgreSQL](https://github.com/pramsey/pgsql-http) - HTTP client for PostgreSQL
 
-[PostgreSQL](https://github.com/RekGRpth/pg_curl) - cURL client for PostgreSQL
+[PostgreSQL](https://github.com/RekGRpth/pg_curl) - curl client for PostgreSQL
 
-[PureBasic](https://www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
+[PureBasic](https://web.archive.org/web/20250325015028/www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
 
-[Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
+[Python](https://github.com/pycurl/pycurl) PycURL by Kjetil Jacobsen
+
+[Python](https://pypi.org/project/pymcurl/) mcurl by Ganesh Viswanathan
 
 [Q](https://q-lang.sourceforge.net/) The libcurl module is part of the default install
 
@@ -100,7 +112,7 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxcurl.sourceforge.net/) Written Mark Hessling
 
-[Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+[Ring](https://ring-lang.github.io/doc1.24/libcurl.html) RingLibCurl by Mahmoud Fayed
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
@@ -109,7 +121,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [Rust](https://github.com/alexcrichton/curl-rust) curl-rust - by Carl Lerche
 
-[Scheme](http://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
+[Scheme](https://metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
 
 [Scilab](https://help.scilab.org/docs/current/fr_FR/getURL.html) binding by Sylvestre Ledru
 
@@ -123,6 +135,8 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [Tcl](https://web.archive.org/web/20160826011806/mirror.yellow5.com/tclcurl/) Tclcurl by Andrés García
 
+[Vibe](https://github.com/ttytm/vibe) HTTP requests through libcurl in V
+
 [Visual Basic](https://sourceforge.net/projects/libcurl-vb/) libcurl-vb by Jeffrey Phillips
 
 [Visual Foxpro](https://web.archive.org/web/20130730181523/www.ctl32.com.ar/libcurl.asp) by Carlos Alloatti
@@ -132,3 +146,5 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 [XBLite](https://web.archive.org/web/20060426150418/perso.wanadoo.fr/xblite/libraries.html) Written by David Szafranski
 
 [Xojo](https://github.com/charonn0/RB-libcURL) Written by Andrew Lambert
+
+[Zig](https://github.com/jiacai2050/zig-curl) Written by Jiacai Liu, both easy and multi API are supported.

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,66 +21,47 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
+#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) || \
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
 #include "curl_get_line.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /*
- * Curl_get_line() makes sure to only return complete whole lines that fit in
- * 'len' bytes and end with a newline.
+ * Curl_get_line() returns only complete whole lines that end with newline.
+ * When 'eof' is set TRUE, the last line has been read.
  */
-char *Curl_get_line(char *buf, int len, FILE *input)
+CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof)
 {
-  bool partial = FALSE;
+  CURLcode result;
+  char buffer[128];
+  curlx_dyn_reset(buf);
   while(1) {
-    char *b = fgets(buf, len, input);
+    size_t rlen;
+    const char *b = fgets(buffer, sizeof(buffer), input);
 
-    if(b) {
-      size_t rlen = strlen(b);
+    *eof = feof(input);
 
-      if(!rlen)
-        break;
-
-      if(b[rlen-1] == '\n') {
-        /* b is \n terminated */
-        if(partial) {
-          partial = FALSE;
-          continue;
-        }
-        return b;
-      }
-      else if(feof(input)) {
-        if(partial)
-          /* Line is already too large to return, ignore rest */
-          break;
-
-        if(rlen + 1 < (size_t) len) {
-          /* b is EOF terminated, insert missing \n */
-          b[rlen] = '\n';
-          b[rlen + 1] = '\0';
-          return b;
-        }
-        else
-          /* Maximum buffersize reached + EOF
-           * This line is impossible to add a \n to so we'll ignore it
-           */
-          break;
-      }
-      else
-        /* Maximum buffersize reached */
-        partial = TRUE;
+    rlen = b ? strlen(b) : 0;
+    if(rlen) {
+      result = curlx_dyn_addn(buf, b, rlen);
+      if(result)
+        /* too long line or out of memory */
+        return result;
     }
-    else
-      break;
+    /* now check the full line */
+    rlen = curlx_dyn_len(buf);
+    b = curlx_dyn_ptr(buf);
+    if(rlen && (b[rlen - 1] == '\n'))
+      /* LF at end of the line */
+      return CURLE_OK; /* all good */
+    if(*eof)
+      /* append a newline */
+      return curlx_dyn_addn(buf, "\n", 1);
+    /* otherwise get next line to append */
   }
-  return NULL;
+  /* UNREACHABLE */
 }
 
 #endif /* if not disabled */

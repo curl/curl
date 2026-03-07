@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,40 +8,32 @@ NOBODY
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data sendzero="yes">
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP quote remove file with NOBODY
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -I -Q "rm %PWD/log/file%TESTNUMBER.txt" sftp://%HOSTIP:%SSHPORT --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -I -Q "rm %SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt" sftp://%HOSTIP:%SSHPORT --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/log/test%TESTNUMBER.txt
-</postcheck>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Dummy test file for remove test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
-<protocol>
-</protocol>
+<postcheck>
+%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/test%TESTNUMBER.txt
+</postcheck>
 </verify>
 </testcase>

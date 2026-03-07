@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,12 +7,10 @@ multi
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -22,27 +21,26 @@ lib%TESTNUMBER
 </tool>
 
 # based on bug report #1184
- <name>
+<name>
 SMTP with multi interface and CURLE_ABORTED_BY_CALLBACK
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<%TESTNUMBER-realuser@example.com>
-RCPT TO:<%TESTNUMBER-recipient@example.com>
+MAIL FROM:%LT%TESTNUMBER-realuser@example.com%GT
+RCPT TO:%LT%TESTNUMBER-recipient@example.com%GT
 DATA
 </protocol>
 <upload>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_PROXY
 
-#include "inet_pton.h"
-#include "strcase.h"
+#include "curlx/inet_pton.h"
 #include "noproxy.h"
+#include "curlx/strparse.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -53,9 +52,9 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
     /* strange input */
     return FALSE;
 
-  if(1 != Curl_inet_pton(AF_INET, ipv4, &address))
+  if(curlx_inet_pton(AF_INET, ipv4, &address) != 1)
     return FALSE;
-  if(1 != Curl_inet_pton(AF_INET, network, &check))
+  if(curlx_inet_pton(AF_INET, network, &check) != 1)
     return FALSE;
 
   if(bits && (bits != 32)) {
@@ -63,41 +62,42 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
     unsigned int haddr = htonl(address);
     unsigned int hcheck = htonl(check);
 #if 0
-    fprintf(stderr, "Host %s (%x) network %s (%x) bits %u mask %x => %x\n",
-            ipv4, haddr, network, hcheck, bits, mask,
-            (haddr ^ hcheck) & mask);
+    curl_mfprintf(stderr, "Host %s (%x) network %s (%x) "
+                  "bits %u mask %x => %x\n",
+                  ipv4, haddr, network, hcheck, bits, mask,
+                  (haddr ^ hcheck) & mask);
 #endif
     if((haddr ^ hcheck) & mask)
       return FALSE;
     return TRUE;
   }
-  return (address == check);
+  return address == check;
 }
 
 UNITTEST bool Curl_cidr6_match(const char *ipv6,
                                const char *network,
                                unsigned int bits)
 {
-#ifdef ENABLE_IPV6
-  int bytes;
-  int rest;
+#ifdef USE_IPV6
+  unsigned int bytes;
+  unsigned int rest;
   unsigned char address[16];
   unsigned char check[16];
 
   if(!bits)
     bits = 128;
 
-  bytes = bits/8;
+  bytes = bits / 8;
   rest = bits & 0x07;
-  if(1 != Curl_inet_pton(AF_INET6, ipv6, address))
-    return FALSE;
-  if(1 != Curl_inet_pton(AF_INET6, network, check))
-    return FALSE;
   if((bytes > 16) || ((bytes == 16) && rest))
+    return FALSE;
+  if(curlx_inet_pton(AF_INET6, ipv6, address) != 1)
+    return FALSE;
+  if(curlx_inet_pton(AF_INET6, network, check) != 1)
     return FALSE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
-  if(rest && !((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))
+  if(rest && ((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))
     return FALSE;
 
   return TRUE;
@@ -115,14 +115,74 @@ enum nametype {
   TYPE_IPV6
 };
 
+static bool match_host(const char *token, size_t tokenlen,
+                       const char *name, size_t namelen)
+{
+  bool match = FALSE;
+
+  /* ignore trailing dots in the token to check */
+  if(token[tokenlen - 1] == '.')
+    tokenlen--;
+
+  if(tokenlen && (*token == '.')) {
+    /* ignore leading token dot as well */
+    token++;
+    tokenlen--;
+  }
+  /* A: example.com matches 'example.com'
+     B: www.example.com matches 'example.com'
+     C: nonexample.com DOES NOT match 'example.com'
+  */
+  if(tokenlen == namelen)
+    /* case A, exact match */
+    match = curl_strnequal(token, name, namelen);
+  else if(tokenlen < namelen) {
+    /* case B, tailmatch domain */
+    match = (name[namelen - tokenlen - 1] == '.') &&
+            curl_strnequal(token, name + (namelen - tokenlen), tokenlen);
+  }
+  /* case C passes through, not a match */
+  return match;
+}
+
+static bool match_ip(int type, const char *token, size_t tokenlen,
+                     const char *name)
+{
+  char *slash;
+  unsigned int bits = 0;
+  char checkip[128];
+  if(tokenlen >= sizeof(checkip))
+    /* this cannot match */
+    return FALSE;
+  /* copy the check name to a temp buffer */
+  memcpy(checkip, token, tokenlen);
+  checkip[tokenlen] = 0;
+
+  slash = strchr(checkip, '/');
+  /* if the slash is part of this token, use it */
+  if(slash) {
+    curl_off_t value;
+    const char *p = &slash[1];
+    if(curlx_str_number(&p, &value, 128) || *p)
+      return FALSE;
+    /* a too large value is rejected in the cidr function below */
+    bits = (unsigned int)value;
+    *slash = 0; /* null-terminate there */
+  }
+  if(type == TYPE_IPV6)
+    return Curl_cidr6_match(name, checkip, bits);
+  else
+    return Curl_cidr4_match(name, checkip, bits);
+}
+
 /****************************************************************
-* Checks if the host is in the noproxy list. returns TRUE if it matches and
-* therefore the proxy should NOT be used.
-****************************************************************/
+ * Checks if the host is in the noproxy list. returns TRUE if it matches and
+ * therefore the proxy should NOT be used.
+ ****************************************************************/
 bool Curl_check_noproxy(const char *name, const char *no_proxy)
 {
   /*
-   * If we don't have a hostname at all, like for example with a FILE
+   * If we do not have a hostname at all, like for example with a FILE
    * transfer, we have nothing to interrogate the noproxy list with.
    */
   if(!name || name[0] == '\0')
@@ -136,48 +196,33 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
   if(no_proxy && no_proxy[0]) {
     const char *p = no_proxy;
     size_t namelen;
+    char address[16];
     enum nametype type = TYPE_HOST;
-    char hostip[128];
     if(!strcmp("*", no_proxy))
       return TRUE;
 
-    /* NO_PROXY was specified and it wasn't just an asterisk */
+    /* NO_PROXY was specified and it was not only an asterisk */
 
-    if(name[0] == '[') {
-      char *endptr;
-      /* IPv6 numerical address */
-      endptr = strchr(name, ']');
-      if(!endptr)
-        return FALSE;
-      name++;
-      namelen = endptr - name;
-      if(namelen >= sizeof(hostip))
-        return FALSE;
-      memcpy(hostip, name, namelen);
-      hostip[namelen] = 0;
-      name = hostip;
+    /* Check if name is an IP address; if not, assume it being a hostname. */
+    namelen = strlen(name);
+    if(curlx_inet_pton(AF_INET, name, &address) == 1)
+      type = TYPE_IPV4;
+#ifdef USE_IPV6
+    else if(curlx_inet_pton(AF_INET6, name, &address) == 1)
       type = TYPE_IPV6;
-    }
+#endif
     else {
-      unsigned int address;
-      namelen = strlen(name);
-      if(1 == Curl_inet_pton(AF_INET, name, &address))
-        type = TYPE_IPV4;
-      else {
-        /* ignore trailing dots in the host name */
-        if(name[namelen - 1] == '.')
-          namelen--;
-      }
+      /* ignore trailing dots in the hostname */
+      if(name[namelen - 1] == '.')
+        namelen--;
     }
 
     while(*p) {
       const char *token;
       size_t tokenlen = 0;
-      bool match = FALSE;
 
       /* pass blanks */
-      while(*p && ISBLANK(*p))
-        p++;
+      curlx_str_passblanks(&p);
 
       token = p;
       /* pass over the pattern */
@@ -187,67 +232,26 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       }
 
       if(tokenlen) {
-        switch(type) {
-        case TYPE_HOST:
-          /* ignore trailing dots in the token to check */
-          if(token[tokenlen - 1] == '.')
-            tokenlen--;
+        bool match = FALSE;
+        if(type == TYPE_HOST)
+          match = match_host(token, tokenlen, name, namelen);
+        else
+          match = match_ip(type, token, tokenlen, name);
 
-          if(tokenlen && (*token == '.')) {
-            /* ignore leading token dot as well */
-            token++;
-            tokenlen--;
-          }
-          /* A: example.com matches 'example.com'
-             B: www.example.com matches 'example.com'
-             C: nonexample.com DOES NOT match 'example.com'
-          */
-          if(tokenlen == namelen)
-            /* case A, exact match */
-            match = strncasecompare(token, name, namelen);
-          else if(tokenlen < namelen) {
-            /* case B, tailmatch domain */
-            match = (name[namelen - tokenlen - 1] == '.') &&
-              strncasecompare(token, name + (namelen - tokenlen),
-                              tokenlen);
-          }
-          /* case C passes through, not a match */
-          break;
-        case TYPE_IPV4:
-          /* FALLTHROUGH */
-        case TYPE_IPV6: {
-          const char *check = token;
-          char *slash;
-          unsigned int bits = 0;
-          char checkip[128];
-          if(tokenlen >= sizeof(checkip))
-            /* this cannot match */
-            break;
-          /* copy the check name to a temp buffer */
-          memcpy(checkip, check, tokenlen);
-          checkip[tokenlen] = 0;
-          check = checkip;
-
-          slash = strchr(check, '/');
-          /* if the slash is part of this token, use it */
-          if(slash) {
-            bits = atoi(slash + 1);
-            *slash = 0; /* null terminate there */
-          }
-          if(type == TYPE_IPV6)
-            match = Curl_cidr6_match(name, check, bits);
-          else
-            match = Curl_cidr4_match(name, check, bits);
-          break;
-        }
-        }
         if(match)
           return TRUE;
-      } /* if(tokenlen) */
+      }
+
+      /* pass blanks after pattern */
+      curlx_str_passblanks(&p);
+      /* if not a comma, this ends the loop */
+      if(*p != ',')
+        break;
+      /* pass any number of commas */
       while(*p == ',')
         p++;
     } /* while(*p) */
-  } /* NO_PROXY was specified and it wasn't just an asterisk */
+  } /* NO_PROXY was specified and it was not only an asterisk */
 
   return FALSE;
 }

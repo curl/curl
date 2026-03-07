@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,10 +7,9 @@ QUERY
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 iSearch results		error.host	1
 0Query query succeeded	/foo	foo.bar.invalid	70
 0Selector /the/search/engine	/bar	bar.foo.invalid	70
@@ -22,18 +22,17 @@ iSearch results		error.host	1
 <server>
 gopher
 </server>
- <name>
+<name>
 Gopher query
- </name>
- <command>
+</name>
+<command>
 "gopher://%HOSTIP:%GOPHERPORT/7/the/search/engine%09query%20succeeded/%TESTNUMBER"
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 /the/search/engine	query succeeded/%TESTNUMBER
 </protocol>
 </verify>

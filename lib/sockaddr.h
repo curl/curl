@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,14 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 struct Curl_sockaddr_storage {
   union {
     struct sockaddr sa;
     struct sockaddr_in sa_in;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     struct sockaddr_in6 sa_in6;
 #endif
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE

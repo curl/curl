@@ -1,0 +1,5 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+impacket>=0.11.0,<=0.13.0

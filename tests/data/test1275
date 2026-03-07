@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,19 +7,14 @@ markdown
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify capital letters after period in markdown files
 </name>
 
 <command type="perl">
-%SRCDIR/markdown-uppercase.pl %SRCDIR/..
+%SRCDIR/test1275.pl %SRCDIR/..
 </command>
 </client>
 

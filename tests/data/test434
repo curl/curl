@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP
 </keywords>
 </info>
 
-#
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -17,9 +17,8 @@ Content-Type: text/1
 </data>
 </reply>
 
-#
 <client>
-<file name="log/config%TESTNUMBER" nonewline="yes">
+<file name="%LOGDIR/config%TESTNUMBER" nonewline="yes">
 url = %HOSTIP:%HTTPPORT/%TESTNUMBER
 </file>
 <server>
@@ -29,13 +28,12 @@ http
 -K with a single line without newline
 </name>
 <command>
--K log/config%TESTNUMBER
+-K %LOGDIR/config%TESTNUMBER
 </command>
 </client>
 
-#
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

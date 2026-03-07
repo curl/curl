@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+script
+documentation
+managen
+</keywords>
+</info>
+
+# Client-side
+<client>
+
+<name>
+managen makes ASCII page
+</name>
+
+<file name="%LOGDIR/mainpage.idx">
+_header.md
+%options
+_footer.md
+</file>
+
+<file1 name="%LOGDIR/_header.md">
+%includetext %SRCDIR/data/data%TESTNUMBER-1.md%
+</file1>
+<file2 name="%LOGDIR/option1.md">
+%includetext %SRCDIR/data/data%TESTNUMBER-2.md%
+</file2>
+<file3 name="%LOGDIR/option2.md">
+%includetext %SRCDIR/data/data%TESTNUMBER-3.md%
+</file3>
+<file4 name="%LOGDIR/_footer.md">
+%includetext %SRCDIR/data/data%TESTNUMBER-4.md%
+</file4>
+
+<command type="perl">
+%SRCDIR/../scripts/managen -I %SRCDIR/../include -d %LOGDIR ascii option1.md option2.md
+</command>
+</client>
+
+<verify>
+<stderr>
+option1.md:19:1:WARN: see-also a non-existing option: include
+option1.md:19:1:WARN: see-also a non-existing option: silent
+option1.md:19:1:WARN: see-also a non-existing option: trace
+option1.md:19:1:WARN: see-also a non-existing option: trace-ascii
+WARN: option1.md mutexes a non-existing option: trace
+WARN: option1.md mutexes a non-existing option: trace-ascii
+option2.md:15:1:WARN: see-also a non-existing option: proto-default
+</stderr>
+<stdout>
+%includetext %SRCDIR/data/data%TESTNUMBER-stdout.txt%
+
+</stdout>
+</verify>
+
+</testcase>

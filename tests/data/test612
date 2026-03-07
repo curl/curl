@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ post-quote
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -14,34 +14,26 @@ Dummy test file for remove test
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP post-quote remove file
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file%TESTNUMBER.txt -Q "-rm %PWD/log/file%TESTNUMBER.txt" sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/upload.%TESTNUMBER  --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt -Q "-rm %SFTP_PWD/%LOGDIR/upload.%TESTNUMBER" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/upload.%TESTNUMBER --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/log/test%TESTNUMBER.txt
-</postcheck>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Dummy test file for remove test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<upload>
-Dummy test file for remove test
-</upload>
-<valgrind>
-disable
-</valgrind>
+<postcheck>
+%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/upload.%TESTNUMBER
+</postcheck>
 </verify>
 </testcase>

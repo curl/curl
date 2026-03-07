@@ -1,14 +1,10 @@
-# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 
-*.a
-*.nlm
-*.res
-config-win32.h
 curl
-curl_config.h
-curl_config.h.in
-stamp-h2
+tool_ca_embed.c
 tool_hugehelp.c
-tool_version.h.dist
+curltool_unity.c
+libcurltool_unity.c
+curlinfo

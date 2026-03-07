@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -16,7 +17,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Location: /want/data/%TESTNUMBER0002
 Server: test-server/fake
 Set-Cookie: test=true; domain=127.0.0.1; path=/; expires=Thu Jan  1 00:00:00 GMT 1970;
-Set-Cookie: test2=true; domain=127.0.0.1; path=/; expires=Fri Feb 13 11:56:27 GMT 2037;
+Set-Cookie: test2=true; domain=127.0.0.1; path=/; expires=Fri Feb 13 11:56:27 GMT 2525;
 Connection: close
 
 This server reply is for testing a set-cookie
@@ -37,7 +38,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Location: /want/data/%TESTNUMBER0002
 Server: test-server/fake
 Set-Cookie: test=true; domain=127.0.0.1; path=/; expires=Thu Jan  1 00:00:00 GMT 1970;
-Set-Cookie: test2=true; domain=127.0.0.1; path=/; expires=Fri Feb 13 11:56:27 GMT 2037;
+Set-Cookie: test2=true; domain=127.0.0.1; path=/; expires=Fri Feb 13 11:56:27 GMT 2525;
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose
@@ -55,20 +56,21 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookie expiry date at Jan 1 00:00:00 GMT 1970
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x %HOSTIP:%HTTPPORT -c log/cookies%TESTNUMBER.jar
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x %HOSTIP:%HTTPPORT -c %LOGDIR/cookies%TESTNUMBER.jar
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

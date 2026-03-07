@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,15 +9,14 @@ RFC2195
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 AUTH CRAM-MD5
-REPLY AUTHENTICATE + PDE5NzIuOTg3NjU0MzIxQGN1cmw+
-REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== A002 OK AUTHENTICATE completed
+REPLY AUTHENTICATE + %b64[%3c1972.987654321@curl%3e]b64%
+REPLY %b64[user 7031725599fdbb5d412689aa323e3e0b]b64% A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -27,7 +27,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -35,22 +34,22 @@ imap
 </server>
 <features>
 crypto
+digest
 </features>
- <name>
+<name>
 IMAP CRAM-MD5 authentication
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE CRAM-MD5
-dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
+%b64[user 7031725599fdbb5d412689aa323e3e0b]b64%
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT

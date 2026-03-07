@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,7 +12,7 @@ httponly
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
@@ -26,17 +27,20 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, use cookies with localhost
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want?hoge=fuga -b non-existing -H "Host: localhost"
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: localhost
 User-Agent: curl/%VERSION

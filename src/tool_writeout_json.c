@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,68 +23,87 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#define ENABLE_CURLX_PRINTF
-
-/* use our own printf() functions */
-#include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_writeout_json.h"
 #include "tool_writeout.h"
 
-void jsonWriteString(FILE *stream, const char *in, bool lowercase)
-{
-  const char *i = in;
-  const char *in_end = in + strlen(in);
+#define MAX_JSON_STRING 100000
 
-  fputc('\"', stream);
-  for(; i < in_end; i++) {
+/* provide the given string in dynbuf as a quoted json string, but without the
+   outer quotes. The buffer is not inited by this function.
+
+   Return 0 on success, non-zero on error.
+*/
+int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
+{
+  const unsigned char *i = (const unsigned char *)in;
+  const unsigned char *in_end = &i[len];
+  CURLcode result = CURLE_OK;
+
+  for(; (i < in_end) && !result; i++) {
     switch(*i) {
     case '\\':
-      fputs("\\\\", stream);
+      result = curlx_dyn_addn(out, "\\\\", 2);
       break;
     case '\"':
-      fputs("\\\"", stream);
+      result = curlx_dyn_addn(out, "\\\"", 2);
       break;
     case '\b':
-      fputs("\\b", stream);
+      result = curlx_dyn_addn(out, "\\b", 2);
       break;
     case '\f':
-      fputs("\\f", stream);
+      result = curlx_dyn_addn(out, "\\f", 2);
       break;
     case '\n':
-      fputs("\\n", stream);
+      result = curlx_dyn_addn(out, "\\n", 2);
       break;
     case '\r':
-      fputs("\\r", stream);
+      result = curlx_dyn_addn(out, "\\r", 2);
       break;
     case '\t':
-      fputs("\\t", stream);
+      result = curlx_dyn_addn(out, "\\t", 2);
       break;
     default:
-      if (*i < 32) {
-        fprintf(stream, "u%04x", *i);
-      }
+      if(*i < 32)
+        result = curlx_dyn_addf(out, "\\u%04x", *i);
       else {
-        char out = *i;
-        if(lowercase && (out >= 'A' && out <= 'Z'))
-          /* do not use tolower() since that's locale specific */
-          out |= ('a' - 'A');
-        fputc(out, stream);
+        char o = (char)*i;
+        if(lowercase && (o >= 'A' && o <= 'Z'))
+          /* do not use tolower() since that is locale specific */
+          o |= ('a' - 'A');
+        result = curlx_dyn_addn(out, &o, 1);
       }
       break;
     }
   }
-  fputc('\"', stream);
+  if(result)
+    return (int)result;
+  return 0;
+}
+
+void jsonWriteString(FILE *stream, const char *in, bool lowercase)
+{
+  struct dynbuf out;
+  curlx_dyn_init(&out, MAX_JSON_STRING);
+
+  if(!jsonquoted(in, strlen(in), &out, lowercase)) {
+    fputc('\"', stream);
+    if(curlx_dyn_len(&out))
+      fputs(curlx_dyn_ptr(&out), stream);
+    fputc('\"', stream);
+  }
+  curlx_dyn_free(&out);
 }
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
+                     size_t nentries,
                      struct per_transfer *per, CURLcode per_result)
 {
-  int i;
+  size_t i;
 
   fputs("{", stream);
 
-  for(i = 0; mappings[i].name != NULL; i++) {
+  for(i = 0; i < nentries; i++) {
     if(mappings[i].writefunc &&
        mappings[i].writefunc(stream, &mappings[i], per, per_result, true))
       fputs(",", stream);
@@ -92,15 +111,10 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 
   /* The variables are sorted in alphabetical order but as a special case
      curl_version (which is not actually a --write-out variable) is last. */
-  fprintf(stream, "\"curl_version\":");
+  curl_mfprintf(stream, "\"curl_version\":");
   jsonWriteString(stream, curl_version(), FALSE);
-  fprintf(stream, "}");
+  curl_mfprintf(stream, "}");
 }
-
-#ifdef _MSC_VER
-/* warning C4706: assignment within conditional expression */
-#pragma warning(disable:4706)
-#endif
 
 void headerJSON(FILE *stream, struct per_transfer *per)
 {
@@ -109,12 +123,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
 
   fputc('{', stream);
   while((header = curl_easy_nextheader(per->curl, CURLH_HEADER, -1,
-                                       prev))) {
-    if(prev)
-      fputs(",\n", stream);
-    jsonWriteString(stream, header->name, TRUE);
-    fputc(':', stream);
-    prev = header;
+                                       prev)) != NULL) {
     if(header->amount > 1) {
       if(!header->index) {
         /* act on the 0-index entry and pull the others in, then output in a
@@ -122,23 +131,32 @@ void headerJSON(FILE *stream, struct per_transfer *per)
         size_t a = header->amount;
         size_t i = 0;
         char *name = header->name;
+        if(prev)
+          fputs(",\n", stream);
+        jsonWriteString(stream, header->name, TRUE);
+        fputc(':', stream);
+        prev = header;
         fputc('[', stream);
         do {
           jsonWriteString(stream, header->value, FALSE);
           if(++i >= a)
             break;
           fputc(',', stream);
-          if(curl_easy_header(per->curl, name, i, CURLH_HEADER,
-                              -1, &header))
+          if(curl_easy_header(per->curl, name, i, CURLH_HEADER, -1, &header))
             break;
         } while(1);
+        fputc(']', stream);
       }
-      fputc(']', stream);
     }
     else {
+      if(prev)
+        fputs(",\n", stream);
+      jsonWriteString(stream, header->name, TRUE);
+      fputc(':', stream);
       fputc('[', stream);
       jsonWriteString(stream, header->value, FALSE);
       fputc(']', stream);
+      prev = header;
     }
   }
   fputs("\n}", stream);

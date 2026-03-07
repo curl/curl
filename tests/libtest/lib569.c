@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,44 +21,38 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-#include "memdebug.h"
+#include "first.h"
 
-/* build request url */
-static char *suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
+#include "testutil.h"
 
 /*
  * Test Session ID capture
  */
-int test(char *URL)
+static CURLcode test_lib569(const char *URL)
 {
-  int res;
+  CURLcode result;
   CURL *curl;
   char *stream_uri = NULL;
-  char *rtsp_session_id;
   int request = 1;
   int i;
 
-  FILE *idfile = fopen(libtest_arg2, "wb");
+  FILE *idfile = curlx_fopen(libtest_arg2, "wb");
   if(!idfile) {
-    fprintf(stderr, "couldn't open the Session ID File\n");
+    curl_mfprintf(stderr, "Could not open the Session ID File\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    fclose(idfile);
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    curlx_fclose(idfile);
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    fclose(idfile);
+    curlx_fclose(idfile);
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -69,47 +63,50 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
-  res = curl_easy_perform(curl);
-  if(res != (int)CURLE_BAD_FUNCTION_ARGUMENT) {
-    fprintf(stderr, "This should have failed. "
-            "Cannot setup without a Transport: header");
-    res = TEST_ERR_MAJOR_BAD;
+  result = curl_easy_perform(curl);
+  if(result != CURLE_BAD_FUNCTION_ARGUMENT) {
+    curl_mfprintf(stderr, "This should have failed. "
+                  "Cannot setup without a Transport: header");
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   /* Go through the various Session IDs */
   for(i = 0; i < 3; i++) {
-    stream_uri = suburl(URL, request++);
+    const char *rtsp_session_id;
+    stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
-      res = TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
     test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
-    free(stream_uri);
+    curl_free(stream_uri);
     stream_uri = NULL;
 
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
     test_setopt(curl, CURLOPT_RTSP_TRANSPORT,
                 "Fake/NotReal/JustATest;foo=baz");
-    res = curl_easy_perform(curl);
-    if(res)
+    result = curl_easy_perform(curl);
+    if(result)
       goto test_cleanup;
 
     curl_easy_getinfo(curl, CURLINFO_RTSP_SESSION_ID, &rtsp_session_id);
-    fprintf(idfile, "Got Session ID: [%s]\n", rtsp_session_id);
+    curl_mfprintf(idfile, "Got Session ID: [%s]\n", rtsp_session_id);
     rtsp_session_id = NULL;
 
-    stream_uri = suburl(URL, request++);
+    stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
-      res = TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
     test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
-    free(stream_uri);
+    curl_free(stream_uri);
     stream_uri = NULL;
 
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_TEARDOWN);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    if(result)
+      goto test_cleanup;
 
     /* Clear for the next go-round */
     test_setopt(curl, CURLOPT_RTSP_SESSION_ID, NULL);
@@ -118,11 +115,11 @@ int test(char *URL)
 test_cleanup:
 
   if(idfile)
-    fclose(idfile);
+    curlx_fclose(idfile);
 
-  free(stream_uri);
+  curl_free(stream_uri);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

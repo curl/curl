@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,36 +21,46 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+/* <DESC>
+ * Performs an FTP upload and renames the file after a successful transfer.
+ * </DESC>
+ */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <curl/curl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#ifdef WIN32
+
+#ifdef _WIN32
 #include <io.h>
+#undef stat
+#define stat _stati64
+#undef fstat
+#define fstat _fstati64
+#define fileno _fileno
 #else
 #include <unistd.h>
 #endif
 
-/* <DESC>
- * Performs an FTP upload and renames the file just after a successful
- * transfer.
- * </DESC>
- */
+#define LOCAL_FILE     "/tmp/uploadthis.txt"
+#define UPLOAD_FILE_AS "while-uploading.txt"
+#define REMOTE_URL     "ftp://example.com/" UPLOAD_FILE_AS
+#define RENAME_FILE_TO "renamed-and-fine.txt"
 
-#define LOCAL_FILE      "/tmp/uploadthis.txt"
-#define UPLOAD_FILE_AS  "while-uploading.txt"
-#define REMOTE_URL      "ftp://example.com/"  UPLOAD_FILE_AS
-#define RENAME_FILE_TO  "renamed-and-fine.txt"
-
-/* NOTE: if you want this example to work on Windows with libcurl as a
-   DLL, you MUST also provide a read callback with CURLOPT_READFUNCTION.
-   Failing to do so will give you a crash since a DLL may not use the
-   variable's memory when passed in to it from an app like this. */
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+/* NOTE: if you want this example to work on Windows with libcurl as a DLL,
+   you MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
+   do so might give you a crash since a DLL may not use the variable's memory
+   when passed in to it from an app like this. */
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   unsigned long nread;
   /* in real-world cases, this would probably get this data differently
@@ -69,29 +79,37 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   FILE *hd_src;
   struct stat file_info;
-  unsigned long fsize;
+  curl_off_t fsize;
 
   struct curl_slist *headerlist = NULL;
-  static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
-  static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
+  static const char buf_1[] = "RNFR " UPLOAD_FILE_AS;
+  static const char buf_2[] = "RNTO " RENAME_FILE_TO;
 
-  /* get the file size of the local file */
-  if(stat(LOCAL_FILE, &file_info)) {
-    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
-    return 1;
-  }
-  fsize = (unsigned long)file_info.st_size;
-
-  printf("Local file size: %lu bytes.\n", fsize);
-
-  /* get a FILE * of the same file */
+  /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");
+  if(!hd_src) {
+    printf("Could not open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    return 2;
+  }
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  /* to get the file size */
+  if(fstat(fileno(hd_src), &file_info) != 0) {
+    fclose(hd_src);
+    return 1; /* cannot continue */
+  }
+  fsize = file_info.st_size;
+
+  printf("Local file size: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", fsize);
+
+  /* In Windows, this inits the Winsock stuff */
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK) {
+    fclose(hd_src);
+    return (int)result;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -101,7 +119,7 @@ int main(void)
     headerlist = curl_slist_append(headerlist, buf_2);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* enable uploading */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -119,15 +137,14 @@ int main(void)
        option you MUST make sure that the type of the passed-in argument is a
        curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
        make sure that to pass in a type 'long' argument. */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)fsize);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, fsize);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* clean up the FTP commands list */
     curl_slist_free_all(headerlist);
@@ -138,5 +155,5 @@ int main(void)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)result;
 }

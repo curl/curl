@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,35 +11,29 @@ non-existing host
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
 http
-ipv6
+IPv6
 </features>
-<server>
-none
-</server>
- <name>
+<name>
 HTTP-IPv6 GET with invalid --interface
- </name>
- <command>
+</name>
+<command>
 -g "http://%HOST6IP:%NOLISTENPORT/%TESTNUMBER" --interface non-existing-host.haxx.se.
 </command>
 # Ensure the IPv6 stack is operational before running this test (other tests
 # use the startup of the IPv6 test server as a substitute check for this).
 <precheck>
-./server/resolve --ipv6 ::1
+%RESOLVE --ipv6 ::1
 </precheck>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

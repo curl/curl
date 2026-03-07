@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,6 +24,17 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+
+#define KEYLOG_LABEL_MAXLEN (sizeof("CLIENT_HANDSHAKE_TRAFFIC_SECRET") - 1)
+
+#define CLIENT_RANDOM_SIZE  32
+
+/*
+ * The master secret in TLS 1.2 and before is always 48 bytes. In TLS 1.3, the
+ * secret size depends on the cipher suite's hash function which is 32 bytes
+ * for SHA-256 and 48 bytes for SHA-384.
+ */
+#define SECRET_MAXLEN       48
 
 /*
  * Opens the TLS key log file if requested by the user. The SSLKEYLOGFILE
@@ -50,7 +61,7 @@ bool Curl_tls_keylog_write(const char *label,
                            const unsigned char *secret, size_t secretlen);
 
 /*
- * Appends a line to the key log file, ensure it is terminated by a LF.
+ * Appends a line to the key log file, ensure it is terminated by an LF.
  * Returns true iff the key log file is open and a valid line was provided.
  */
 bool Curl_tls_keylog_write_line(const char *line);

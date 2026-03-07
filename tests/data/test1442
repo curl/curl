@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -19,7 +20,7 @@ file
 Check --write-out with trailing \
 </name>
 <command>
-file://localhost/%PWD/log/non-existent-file.txt --write-out '\'
+file://localhost/%FILE_PWD/%LOGDIR/non-existent-file.txt --write-out='\'
 </command>
 </client>
 

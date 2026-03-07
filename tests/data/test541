@@ -1,7 +1,9 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 FTP
+STOR
 </keywords>
 </info>
 
@@ -19,13 +21,13 @@ ftp
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 FTP upload and upload same file again without rewind
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER log/upload%TESTNUMBER
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Contents
 of
 a file
@@ -42,7 +44,7 @@ works?
 <verify>
 <upload>
 </upload>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

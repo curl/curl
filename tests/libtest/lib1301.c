@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,42 +21,42 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#define fail_unless(expr, msg)                             \
-  do {                                                     \
-    if(!(expr)) {                                          \
-      fprintf(stderr, "%s:%d Assertion '%s' failed: %s\n", \
-              __FILE__, __LINE__, #expr, msg);             \
-      return 1;                                            \
-    }                                                      \
+#define t1301_fail_unless(expr, msg)                             \
+  do {                                                           \
+    if(!(expr)) {                                                \
+      curl_mfprintf(stderr, "%s:%d Assertion '%s' FAILED: %s\n", \
+                    __FILE__, __LINE__, #expr, msg);             \
+      return TEST_ERR_FAILURE;                                   \
+    }                                                            \
   } while(0)
 
-int test(char *URL)
+static CURLcode test_lib1301(const char *URL)
 {
   int rc;
   (void)URL;
 
   rc = curl_strequal("iii", "III");
-  fail_unless(rc != 0, "return code should be non-zero");
+  t1301_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strequal("iiia", "III");
-  fail_unless(rc == 0, "return code should be zero");
+  t1301_fail_unless(rc == 0, "return code should be zero");
 
   rc = curl_strequal("iii", "IIIa");
-  fail_unless(rc == 0, "return code should be zero");
+  t1301_fail_unless(rc == 0, "return code should be zero");
 
   rc = curl_strequal("iiiA", "IIIa");
-  fail_unless(rc != 0, "return code should be non-zero");
+  t1301_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strnequal("iii", "III", 3);
-  fail_unless(rc != 0, "return code should be non-zero");
+  t1301_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strnequal("iiiABC", "IIIcba", 3);
-  fail_unless(rc != 0, "return code should be non-zero");
+  t1301_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strnequal("ii", "II", 3);
-  fail_unless(rc != 0, "return code should be non-zero");
+  t1301_fail_unless(rc != 0, "return code should be non-zero");
 
-  return 0;
+  return CURLE_OK;
 }

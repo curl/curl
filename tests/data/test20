@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,22 +10,17 @@ non-existing host
 
 # Server-side
 <reply>
-<data>
-</data>
 </reply>
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
- <name>
-attempt connect to non-existing host name
- </name>
- <command>
+<name>
+attempt connect to non-existing hostname
+</name>
+<command>
 --ipv4 non-existing-host.haxx.se.
 </command>
 </client>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -20,13 +21,13 @@ moo
 <server>
 file
 </server>
- <name>
+<name>
 basic file:// file with "127.0.0.1" hostname
- </name>
+</name>
 <command option="no-include">
-file://127.0.0.1%FILE_PWD/log/test2070.txt
+file://127.0.0.1%FILE_PWD/%LOGDIR/test2070.txt
 </command>
-<file name="log/test2070.txt">
+<file name="%LOGDIR/test2070.txt">
 foo
    bar
 bar

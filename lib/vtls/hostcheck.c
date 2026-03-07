@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,12 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#if defined(USE_OPENSSL)                                \
-  || defined(USE_GSKIT)                                 \
-  || defined(USE_SCHANNEL)
+#if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H
@@ -35,15 +32,10 @@
 #ifdef HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
+
 #include "curl_memrchr.h"
-
-#include "hostcheck.h"
-#include "strcase.h"
+#include "vtls/hostcheck.h"
 #include "hostip.h"
-
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /* check the two input strings with given length, but do not
    assume they end in nul-bytes */
@@ -52,7 +44,7 @@ static bool pmatch(const char *hostname, size_t hostlen,
 {
   if(hostlen != patternlen)
     return FALSE;
-  return strncasecompare(hostname, pattern, hostlen);
+  return curl_strnequal(hostname, pattern, hostlen);
 }
 
 /*
@@ -63,7 +55,7 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * We use the matching rule described in RFC6125, section 6.4.3.
  * https://datatracker.ietf.org/doc/html/rfc6125#section-6.4.3
  *
- * In addition: ignore trailing dots in the host names and wildcards, so that
+ * In addition: ignore trailing dots in the hostnames and wildcards, so that
  * the names are used normalized. This is what the browsers do.
  *
  * Do not allow wildcard matching on IP numbers. There are apparently
@@ -71,7 +63,12 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * apparent distinction between a name and an IP. We need to detect the use of
  * an IP address and not wildcard match on such names.
  *
+ * Only match on "*" being used for the leftmost label, not "a*", "a*b" nor
+ * "*b".
+ *
  * Return TRUE on a match. FALSE if not.
+ *
+ * @unittest: 1397
  */
 
 static bool hostmatch(const char *hostname,
@@ -79,53 +76,42 @@ static bool hostmatch(const char *hostname,
                       const char *pattern,
                       size_t patternlen)
 {
-  const char *pattern_label_end, *wildcard, *hostname_label_end;
-  size_t prefixlen, suffixlen;
+  const char *pattern_label_end;
+
+  DEBUGASSERT(pattern);
+  DEBUGASSERT(patternlen);
+  DEBUGASSERT(hostname);
+  DEBUGASSERT(hostlen);
 
   /* normalize pattern and hostname by stripping off trailing dots */
-  DEBUGASSERT(patternlen);
-  if(hostname[hostlen-1]=='.')
+  if(hostname[hostlen - 1] == '.')
     hostlen--;
-  if(pattern[patternlen-1]=='.')
+  if(pattern[patternlen - 1] == '.')
     patternlen--;
 
-  wildcard = memchr(pattern, '*', patternlen);
-  if(!wildcard)
+  if(strncmp(pattern, "*.", 2))
     return pmatch(hostname, hostlen, pattern, patternlen);
 
-  /* detect IP address as hostname and fail the match if so */
-  if(Curl_host_is_ipnum(hostname))
+  /* detect host as IP address or starting with a dot and fail if so */
+  else if(Curl_host_is_ipnum(hostname) || (hostname[0] == '.'))
     return FALSE;
 
   /* We require at least 2 dots in the pattern to avoid too wide wildcard
      match. */
   pattern_label_end = memchr(pattern, '.', patternlen);
   if(!pattern_label_end ||
-     (memrchr(pattern, '.', patternlen) == pattern_label_end) ||
-     strncasecompare(pattern, "xn--", 4))
+     (memrchr(pattern, '.', patternlen) == pattern_label_end))
     return pmatch(hostname, hostlen, pattern, patternlen);
-
-  hostname_label_end = memchr(hostname, '.', hostlen);
-  if(!hostname_label_end)
-    return FALSE;
   else {
-    size_t skiphost = hostname_label_end - hostname;
-    size_t skiplen = pattern_label_end - pattern;
-    if(!pmatch(hostname_label_end, hostlen - skiphost,
-               pattern_label_end, patternlen - skiplen))
-      return FALSE;
+    const char *hostname_label_end = memchr(hostname, '.', hostlen);
+    if(hostname_label_end) {
+      size_t skiphost = hostname_label_end - hostname;
+      size_t skiplen = pattern_label_end - pattern;
+      return pmatch(hostname_label_end, hostlen - skiphost,
+                    pattern_label_end, patternlen - skiplen);
+    }
   }
-  /* The wildcard must match at least one character, so the left-most
-     label of the hostname is at least as large as the left-most label
-     of the pattern. */
-  if(hostname_label_end - hostname < pattern_label_end - pattern)
-    return FALSE;
-
-  prefixlen = wildcard - pattern;
-  suffixlen = pattern_label_end - (wildcard + 1);
-  return strncasecompare(pattern, hostname, prefixlen) &&
-    strncasecompare(wildcard + 1, hostname_label_end - suffixlen,
-                    suffixlen) ? TRUE : FALSE;
+  return FALSE;
 }
 
 /*
@@ -139,4 +125,4 @@ bool Curl_cert_hostcheck(const char *match, size_t matchlen,
   return FALSE;
 }
 
-#endif /* OPENSSL, GSKIT or schannel+wince */
+#endif /* USE_OPENSSL || USE_SCHANNEL */

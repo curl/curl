@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,24 +27,22 @@
 /*
  * Telnet option defines. Add more here if in need.
  */
-#define CURL_TELOPT_BINARY   0  /* binary 8bit data */
-#define CURL_TELOPT_ECHO     1  /* just echo! */
-#define CURL_TELOPT_SGA      3  /* Suppress Go Ahead */
-#define CURL_TELOPT_EXOPL  255  /* EXtended OPtions List */
-#define CURL_TELOPT_TTYPE   24  /* Terminal TYPE */
-#define CURL_TELOPT_NAWS    31  /* Negotiate About Window Size */
-#define CURL_TELOPT_XDISPLOC 35 /* X DISPlay LOCation */
-
+#define CURL_TELOPT_BINARY      0   /* binary 8-bit data */
+#define CURL_TELOPT_ECHO        1   /* echo */
+#define CURL_TELOPT_SGA         3   /* Suppress Go Ahead */
+#define CURL_TELOPT_EXOPL       255 /* EXtended OPtions List */
+#define CURL_TELOPT_TTYPE       24  /* Terminal TYPE */
+#define CURL_TELOPT_NAWS        31  /* Negotiate About Window Size */
+#define CURL_TELOPT_XDISPLOC    35  /* X DISPlay LOCation */
 #define CURL_TELOPT_NEW_ENVIRON 39  /* NEW ENVIRONment variables */
 #define CURL_NEW_ENV_VAR   0
 #define CURL_NEW_ENV_VALUE 1
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 /*
  * The telnet options represented as strings
  */
-static const char * const telnetoptions[]=
-{
+static const char * const telnetoptions[] = {
   "BINARY",      "ECHO",           "RCP",           "SUPPRESS GO AHEAD",
   "NAME",        "STATUS",         "TIMING MARK",   "RCTE",
   "NAOL",        "NAOP",           "NAOCRD",        "NAOHTS",
@@ -56,12 +54,14 @@ static const char * const telnetoptions[]=
   "TERM SPEED",  "LFLOW",          "LINEMODE",      "XDISPLOC",
   "OLD-ENVIRON", "AUTHENTICATION", "ENCRYPT",       "NEW-ENVIRON"
 };
+#define CURL_TELOPT(x) telnetoptions[x]
+#else
+#define CURL_TELOPT(x) ""
 #endif
 
 #define CURL_TELOPT_MAXIMUM CURL_TELOPT_NEW_ENVIRON
 
 #define CURL_TELOPT_OK(x) ((x) <= CURL_TELOPT_MAXIMUM)
-#define CURL_TELOPT(x)    telnetoptions[x]
 
 #define CURL_NTELOPTS 40
 
@@ -75,17 +75,16 @@ static const char * const telnetoptions[]=
 #define CURL_GA   249 /* Go Ahead, reverse the line */
 #define CURL_SB   250 /* SuBnegotiation */
 #define CURL_WILL 251 /* Our side WILL use this option */
-#define CURL_WONT 252 /* Our side WON'T use this option */
+#define CURL_WONT 252 /* Our side will not use this option */
 #define CURL_DO   253 /* DO use this option! */
-#define CURL_DONT 254 /* DON'T use this option! */
+#define CURL_DONT 254 /* DO NOT use this option! */
 #define CURL_IAC  255 /* Interpret As Command */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 /*
  * Then those numbers represented as strings:
  */
-static const char * const telnetcmds[]=
-{
+static const char * const telnetcmds[] = {
   "EOF",  "SUSP",  "ABORT", "EOR",  "SE",
   "NOP",  "DMARK", "BRK",   "IP",   "AO",
   "AYT",  "EC",    "EL",    "GA",   "SB",
@@ -101,9 +100,15 @@ static const char * const telnetcmds[]=
 #define CURL_TELQUAL_INFO 2
 #define CURL_TELQUAL_NAME 3
 
-#define CURL_TELCMD_OK(x) ( ((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
-                       ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM) )
-#define CURL_TELCMD(x)    telnetcmds[(x)-CURL_TELCMD_MINIMUM]
+#define CURL_TELCMD_OK(x)                        \
+  (((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
+   ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM))
+
+#ifdef CURLVERBOSE
+#define CURL_TELCMD(x) telnetcmds[(x) - CURL_TELCMD_MINIMUM]
+#else
+#define CURL_TELCMD(x) ""
+#endif
 
 #endif /* CURL_DISABLE_TELNET */
 

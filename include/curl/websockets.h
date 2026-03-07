@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -33,15 +33,16 @@ struct curl_ws_frame {
   int flags;            /* See the CURLWS_* defines */
   curl_off_t offset;    /* the offset of this data into the frame */
   curl_off_t bytesleft; /* number of pending bytes left of the payload */
+  size_t len;           /* size of the current data chunk */
 };
 
 /* flag bits */
-#define CURLWS_TEXT       (1<<0)
-#define CURLWS_BINARY     (1<<1)
-#define CURLWS_CONT       (1<<2)
-#define CURLWS_CLOSE      (1<<3)
-#define CURLWS_PING       (1<<4)
-#define CURLWS_OFFSET     (1<<5)
+#define CURLWS_TEXT       (1 << 0)
+#define CURLWS_BINARY     (1 << 1)
+#define CURLWS_CONT       (1 << 2)
+#define CURLWS_CLOSE      (1 << 3)
+#define CURLWS_PING       (1 << 4)
+#define CURLWS_OFFSET     (1 << 5)
 
 /*
  * NAME curl_ws_recv()
@@ -53,13 +54,13 @@ struct curl_ws_frame {
  */
 CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                                   size_t *recv,
-                                  struct curl_ws_frame **metap);
+                                  const struct curl_ws_frame **metap);
 
-/* sendflags for curl_ws_send() */
-#define CURLWS_PONG       (1<<6)
+/* flags for curl_ws_send() */
+#define CURLWS_PONG       (1 << 6)
 
 /*
- * NAME curl_easy_send()
+ * NAME curl_ws_send()
  *
  * DESCRIPTION
  *
@@ -68,15 +69,29 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
  */
 CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t framesize,
-                                  unsigned int sendflags);
+                                  curl_off_t fragsize,
+                                  unsigned int flags);
+
+/*
+ * NAME curl_ws_start_frame()
+ *
+ * DESCRIPTION
+ *
+ * Buffers a websocket frame header with the given flags and length.
+ * Errors when a previous frame is not complete, e.g. not all its
+ * payload has been added.
+ */
+CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
+                                         unsigned int flags,
+                                         curl_off_t frame_len);
 
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
-#define CURLWS_RAW_MODE (1<<0)
+#define CURLWS_RAW_MODE   (1L << 0)
+#define CURLWS_NOAUTOPONG (1L << 1)
 
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(CURL *curl);
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

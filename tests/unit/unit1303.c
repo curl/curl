@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,41 +21,39 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "urldata.h"
 #include "connect.h"
-#include "memdebug.h" /* LAST include file */
 
-static struct Curl_easy *data;
-
-static CURLcode unit_setup(void)
+static CURLcode t1303_setup(struct Curl_easy **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  data = curl_easy_init();
-  if(!data) {
+  *easy = curl_easy_init();
+  if(!*easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
-  return res;
+  return result;
 }
 
-static void unit_stop(void)
+static void t1303_stop(struct Curl_easy *easy)
 {
-  curl_easy_cleanup(data);
+  curl_easy_cleanup(easy);
   curl_global_cleanup();
 }
 
 /* BASE is just a define to make us fool around with decently large number so
-   that we aren't zero-based */
+   that we are not zero-based */
 #define BASE 1000000
 
 /* macro to set the pretended current time */
 #define NOW(x,y) now.tv_sec = x; now.tv_usec = y
 /* macro to set the millisecond based timeouts to use */
-#define TIMEOUTS(x,y) data->set.timeout = x; data->set.connecttimeout = y
+#define TIMEOUTS(x,y) easy->set.timeout = x; \
+                      easy->set.connecttimeout = y
 
 /*
  * To test:
@@ -66,20 +64,24 @@ static void unit_stop(void)
  * N           various values of now
  */
 
-struct timetest {
-  int now_s;
-  int now_us;
-  int timeout_ms;
-  int connecttimeout_ms;
-  bool connecting;
-  timediff_t result;
-  const char *comment;
-};
-
-UNITTEST_START
+static CURLcode test_unit1303(const char *arg)
 {
+  struct Curl_easy *easy;
+
+  UNITTEST_BEGIN(t1303_setup(&easy))
+
   struct curltime now;
   unsigned int i;
+
+  struct timetest {
+    int now_s;
+    int now_us;
+    unsigned int timeout_ms;
+    unsigned int connecttimeout_ms;
+    bool connecting;
+    timediff_t result;
+    const char *comment;
+  };
 
   const struct timetest run[] = {
   /* both timeouts set, not connecting */
@@ -136,18 +138,21 @@ UNITTEST_START
   };
 
   /* this is the pretended start time of the transfer */
-  data->progress.t_startsingle.tv_sec = BASE;
-  data->progress.t_startsingle.tv_usec = 0;
-  data->progress.t_startop.tv_sec = BASE;
-  data->progress.t_startop.tv_usec = 0;
+  easy->progress.t_startsingle.tv_sec = BASE;
+  easy->progress.t_startsingle.tv_usec = 0;
+  easy->progress.t_startop.tv_sec = BASE;
+  easy->progress.t_startop.tv_usec = 0;
 
-  for(i = 0; i < sizeof(run)/sizeof(run[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(run); i++) {
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout =  Curl_timeleft(data, &now, run[i].connecting);
+    easy->progress.now = now;
+    easy->mstate = run[i].connecting ? MSTATE_INIT : MSTATE_DO;
+    timeout = Curl_timeleft_now_ms(easy, &now);
     if(timeout != run[i].result)
       fail(run[i].comment);
   }
+
+  UNITTEST_END(t1303_stop(easy))
 }
-UNITTEST_STOP

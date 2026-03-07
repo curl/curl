@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,19 +30,10 @@
 #define RETRY_SLEEP_DEFAULT 1000L   /* ms */
 #define RETRY_SLEEP_MAX     600000L /* ms == 10 minutes */
 
-#define MAX_PARALLEL 300 /* conservative */
+#define MAX_PARALLEL     65535
 #define PARALLEL_DEFAULT 50
 
-#ifndef STDIN_FILENO
-#  define STDIN_FILENO  fileno(stdin)
-#endif
-
-#ifndef STDOUT_FILENO
-#  define STDOUT_FILENO  fileno(stdout)
-#endif
-
-#ifndef STDERR_FILENO
-#  define STDERR_FILENO  fileno(stderr)
-#endif
+#define MAX_PARALLEL_HOST     65535
+#define PARALLEL_HOST_DEFAULT 0 /* means not used */
 
 #endif /* HEADER_CURL_TOOL_MAIN_H */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,18 +21,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_FTP
-#include "strdup.h"
+
 #include "fileinfo.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 struct fileinfo *Curl_fileinfo_alloc(void)
 {
-  return calloc(1, sizeof(struct fileinfo));
+  return curlx_calloc(1, sizeof(struct fileinfo));
 }
 
 void Curl_fileinfo_cleanup(struct fileinfo *finfo)
@@ -40,7 +37,8 @@ void Curl_fileinfo_cleanup(struct fileinfo *finfo)
   if(!finfo)
     return;
 
-  Curl_safefree(finfo->info.b_data);
-  free(finfo);
+  curlx_dyn_free(&finfo->buf);
+  curlx_free(finfo);
 }
-#endif
+
+#endif /* !CURL_DISABLE_FTP */

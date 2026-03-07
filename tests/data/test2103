@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+DNS fail
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<dns>
+A: none
+AAAA: none
+</dns>
+</reply>
+
+# Client-side
+<client>
+<server>
+dns
+</server>
+<features>
+override-dns
+</features>
+<name>
+HTTP GET with bad hostname
+</name>
+<setenv>
+CURL_DNS_SERVER=127.0.0.1:%DNSPORT
+</setenv>
+<command>
+http://examplehost.example/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# curl: (6) Could not resolve host: examplehost.example
+<errorcode>
+6
+</errorcode>
+</verify>
+</testcase>

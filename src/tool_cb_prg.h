@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,19 +29,20 @@
 #define CURL_PROGRESS_BAR   1
 
 struct ProgressData {
-  int         calls;
-  curl_off_t  prev;
-  struct timeval prevtime;
-  int         width;
-  FILE       *out;  /* where to write everything to */
-  curl_off_t  initial_size;
+  int calls;
+  curl_off_t prev;
+  struct curltime prevtime;
+  int width;
+  FILE *out;  /* where to write everything to */
+  curl_off_t initial_size;
   unsigned int tick;
   int bar;
   int barmove;
 };
 
-void progressbarinit(struct ProgressData *bar,
-                     struct OperationConfig *config);
+struct OperationConfig;
+
+void progressbarinit(struct ProgressData *bar, struct OperationConfig *config);
 
 /*
 ** callback for CURLOPT_PROGRESSFUNCTION

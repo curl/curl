@@ -1,13 +1,14 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP GET
 DOH
+httpsrr
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 
@@ -36,30 +37,28 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
 
-# requires debug so that it can use the DoH server without https
+# requires Debug so that it can use the DoH server without https
 # requires IPv6 so that we can assume and compare both DoH requests
 
 <features>
-debug
+Debug
 DoH
-ipv6
+IPv6
 </features>
- <name>
-HTTP GET using DoH
- </name>
- <command>
+<name>
+HTTP GET using DoH (with HTTPS RR)
+</name>
+<command>
 http://foo.example.com:%HTTPPORT/%TESTNUMBER --doh-url http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 
@@ -69,7 +68,32 @@ http://foo.example.com:%HTTPPORT/%TESTNUMBER --doh-url http://%HOSTIP:%HTTPPORT/
 <strippart>
 s/com\x00\x00(\x1c|\x01)/com-00-00!/g;
 </strippart>
-<protocol>
+<protocol crlf="yes">
+%if HTTPSRR
+POST /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Type: application/dns-message
+Content-Length: 33
+
+%hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Type: application/dns-message
+Content-Length: 33
+
+%hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Type: application/dns-message
+Content-Length: 47
+
+%hex[%00%00%01%00%00%01%00%00%00%00%00%00%06_%HTTPPORT%06_https%03foo%07example%03com%00%00A%00%01]hex%GET /%TESTNUMBER HTTP/1.1
+Host: foo.example.com:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+%else
 POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
@@ -87,6 +111,7 @@ Host: foo.example.com:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
+%endif
 </protocol>
 </verify>
 </testcase>

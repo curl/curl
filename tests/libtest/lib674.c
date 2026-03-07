@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,64 +21,60 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
+#include "first.h"
 
 /*
  * Get a single URL without select().
  */
 
-int test(char *URL)
+static CURLcode test_lib674(const char *URL)
 {
-  CURL *handle = NULL;
-  CURL *handle2;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURL *curl2;
+  CURLcode result = CURLE_OK;
   CURLU *urlp = NULL;
   CURLUcode uc = CURLUE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  easy_init(handle);
+  easy_init(curl);
 
   urlp = curl_url();
 
   if(!urlp) {
-    fprintf(stderr, "problem init URL api.");
+    curl_mfprintf(stderr, "problem init URL api.");
     goto test_cleanup;
   }
 
   uc = curl_url_set(urlp, CURLUPART_URL, URL, 0);
   if(uc) {
-    fprintf(stderr, "problem setting CURLUPART_URL: %s.",
-            curl_url_strerror(uc));
+    curl_mfprintf(stderr, "problem setting CURLUPART_URL: %s.",
+                  curl_url_strerror(uc));
     goto test_cleanup;
   }
 
   /* demonstrate override behavior */
 
+  easy_setopt(curl, CURLOPT_CURLU, urlp);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  easy_setopt(handle, CURLOPT_CURLU, urlp);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  result = curl_easy_perform(curl);
 
-  res = curl_easy_perform(handle);
-
-  if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+  if(result) {
+    curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
-  handle2 = curl_easy_duphandle(handle);
-  res = curl_easy_perform(handle2);
-  curl_easy_cleanup(handle2);
+  curl2 = curl_easy_duphandle(curl);
+  result = curl_easy_perform(curl2);
+  curl_easy_cleanup(curl2);
 
 test_cleanup:
 
   curl_url_cleanup(urlp);
-  curl_easy_cleanup(handle);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

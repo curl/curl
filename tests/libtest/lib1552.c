@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,21 +21,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-int test(char *URL)
+static CURLcode test_lib1552(const char *URL)
 {
-  CURL *curls = NULL;
+  CURL *curl = NULL;
   CURLM *multi = NULL;
   int still_running;
-  int i = 0;
-  int res = 0;
+  CURLcode i = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLMsg *msg;
   int counter = 3;
 
@@ -45,25 +39,26 @@ int test(char *URL)
 
   multi_init(multi);
 
-  easy_init(curls);
+  easy_init(curl);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_HEADER, 1L);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curls, CURLOPT_USERPWD, "u:s");
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_USERPWD, "u:s");
 
-  multi_add_handle(multi, curls);
+  multi_add_handle(multi, curl);
 
   multi_perform(multi, &still_running);
 
   abort_on_test_timeout();
 
   while(still_running && counter--) {
+    CURLMcode mresult;
     int num;
-    res = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
-    if(res != CURLM_OK) {
-      printf("curl_multi_wait() returned %d\n", res);
-      res = TEST_ERR_MAJOR_BAD;
+    mresult = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
+    if(mresult != CURLM_OK) {
+      curl_mprintf("curl_multi_wait() returned %d\n", mresult);
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
 
@@ -85,11 +80,11 @@ test_cleanup:
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(multi);
-  curl_easy_cleanup(curls);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  if(res)
-    i = res;
+  if(result)
+    i = result;
 
   return i; /* return the final return code */
 }

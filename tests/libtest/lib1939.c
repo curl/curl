@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,49 +21,46 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
 
-#include "test.h"
-
-#include "memdebug.h"
-
-int test(char *URL)
+static CURLcode test_lib1939(const char *URL)
 {
   CURLM *multi;
-  CURL *easy;
+  CURL *curl;
   int running_handles;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
   multi = curl_multi_init();
   if(multi) {
-    easy = curl_easy_init();
-    if(easy) {
-      CURLcode c;
-      CURLMcode m;
+    curl = curl_easy_init();
+    if(curl) {
+      CURLcode result;
+      CURLMcode mresult;
 
       /* Crash only happens when using HTTPS */
-      c = curl_easy_setopt(easy, CURLOPT_URL, URL);
-      if(!c)
+      result = curl_easy_setopt(curl, CURLOPT_URL, URL);
+      if(!result)
         /* Any old HTTP tunneling proxy will do here */
-        c = curl_easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
+        result = curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
 
-      if(!c) {
+      if(!result) {
 
-        /* We're going to drive the transfer using multi interface here,
+        /* We are going to drive the transfer using multi interface here,
            because we want to stop during the middle. */
-        m = curl_multi_add_handle(multi, easy);
+        mresult = curl_multi_add_handle(multi, curl);
 
-        if(!m)
+        if(!mresult)
           /* Run the multi handle once, just enough to start establishing an
              HTTPS connection. */
-          m = curl_multi_perform(multi, &running_handles);
+          mresult = curl_multi_perform(multi, &running_handles);
 
-        if(m)
-          fprintf(stderr, "curl_multi_perform failed\n");
+        if(mresult)
+          curl_mfprintf(stderr, "curl_multi_perform failed\n");
       }
       /* Close the easy handle *before* the multi handle. Doing it the other
          way around avoids the issue. */
-      curl_easy_cleanup(easy);
+      curl_easy_cleanup(curl);
     }
     curl_multi_cleanup(multi); /* double-free happens here */
   }

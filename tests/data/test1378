@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -23,16 +24,13 @@ ftp
 FTP DL, file without Content-Disposition inside, using -o fname
 </name>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o log/download%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl log/file%TESTNUMBER
-</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -44,13 +42,16 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/download%TESTNUMBER">
+<file1 name="%LOGDIR/download%TESTNUMBER">
 fooo
 mooo
 </file1>
 
-<file2 name="log/stdout%TESTNUMBER">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
+<notexists>
+%LOGDIR/file%TESTNUMBER
+</notexists>
 
 </verify>
 </testcase>

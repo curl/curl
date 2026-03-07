@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
@@ -33,30 +34,33 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   /* take care of the data here, ignored in this example */
   (void)data;
   (void)userp;
-  return n*l;
+  return n * l;
 }
 
 int main(void)
 {
   CURL *curl;
 
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
+
   curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
     struct curl_header *header;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    /* this example just ignores the content */
+    /* this example ignores the content */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     if(CURLHE_OK == curl_easy_header(curl, "Content-Type", 0, CURLH_HEADER,
                                      -1, &header))
@@ -69,13 +73,13 @@ int main(void)
       do {
         h = curl_easy_nextheader(curl, CURLH_HEADER, -1, prev);
         if(h)
-          printf(" %s: %s (%u)\n", h->name, h->value, (int)h->amount);
+          printf(" %s: %s (%u)\n", h->name, h->value, (unsigned int)h->amount);
         prev = h;
       } while(h);
-
     }
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return 0;
 }

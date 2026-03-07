@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # similar to test 139 but with a reversed time condition
 <info>
@@ -19,16 +20,16 @@ RETR
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP request and denied to download an older file with -z
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -z "-1 jan 2001"
 </command>
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Send email with SMTP
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /*
@@ -36,11 +35,11 @@
  */
 
 /* The libcurl options want plain addresses, the viewable headers in the mail
- * can very well get a full name as well.
+ * can get a full name as well.
  */
-#define FROM_ADDR    "<sender@example.org>"
-#define TO_ADDR      "<addressee@example.net>"
-#define CC_ADDR      "<info@example.org>"
+#define FROM_ADDR "<sender@example.org>"
+#define TO_ADDR   "<addressee@example.net>"
+#define CC_ADDR   "<info@example.org>"
 
 #define FROM_MAIL "Sender Person " FROM_ADDR
 #define TO_MAIL   "A Receiver " TO_ADDR
@@ -54,55 +53,56 @@ static const char *payload_text =
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
   "rfcpedant.example.org>\r\n"
   "Subject: SMTP example message\r\n"
-  "\r\n" /* empty line to divide headers from body, see RFC5322 */
+  "\r\n" /* empty line to divide headers from body, see RFC 5322 */
   "The body of the message starts here.\r\n"
   "\r\n"
   "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
-  "Check RFC5322.\r\n";
+  "Check RFC 5322.\r\n";
 
 struct upload_status {
   size_t bytes_read;
 };
 
-static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
   size_t room = size * nmemb;
+  size_t len;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 
   data = &payload_text[upload_ctx->bytes_read];
 
-  if(data) {
-    size_t len = strlen(data);
-    if(room < len)
-      len = room;
-    memcpy(ptr, data, len);
-    upload_ctx->bytes_read += len;
+  len = strlen(data);
+  if(room < len)
+    len = room;
+  memcpy(ptr, data, len);
+  upload_ctx->bytes_read += len;
 
-    return len;
-  }
-
-  return 0;
+  return len;
 }
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct curl_slist *recipients = NULL;
-  struct upload_status upload_ctx = { 0 };
+
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *recipients = NULL;
+    struct upload_status upload_ctx = { 0 };
+
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
-    /* Note that this option is not strictly required, omitting it will result
-     * in libcurl sending the MAIL FROM command with empty sender data. All
+    /* Note that this option is not strictly required, omitting it results in
+     * libcurl sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise,
      * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
@@ -117,34 +117,36 @@ int main(void)
     recipients = curl_slist_append(recipients, CC_ADDR);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
-    /* We are using a callback function to specify the payload (the headers and
-     * body of the message). You could just use the CURLOPT_READDATA option to
+    /* We are using a callback function to specify the payload (the headers
+     * and body of the message). You can use the CURLOPT_READDATA option to
      * specify a FILE pointer to read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* Send the message */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* Free the list of recipients */
     curl_slist_free_all(recipients);
 
-    /* curl will not send the QUIT command until you call cleanup, so you
-     * should be able to re-use this connection for additional messages
+    /* curl does not send the QUIT command until you call cleanup, so you
+     * should be able to reuse this connection for additional messages
      * (setting CURLOPT_MAIL_FROM and CURLOPT_MAIL_RCPT as required, and
      * calling curl_easy_perform() again. It may not be a good idea to keep
-     * the connection open for a very long time though (more than a few
-     * minutes may result in the server timing out the connection), and you do
-     * want to clean up in the end.
+     * the connection open for a long time though (more than a few minutes may
+     * result in the server timing out the connection), and you do want to
+     * clean up in the end.
      */
     curl_easy_cleanup(curl);
   }
 
-  return (int)res;
+  curl_global_cleanup();
+
+  return (int)result;
 }

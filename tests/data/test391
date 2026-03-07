@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -39,30 +39,28 @@ Content-Type: text/html
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
- <name>
+<name>
 --path-as-is with redirect, keeping dotdots
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/../../%TESTNUMBER --path-as-is -L
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /../../%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /../%TESTNUMBER0002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

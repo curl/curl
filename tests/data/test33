@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -20,10 +21,10 @@ HTTP/1.1 200 OK swsclose
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with resume
- </name>
-<file name="log/test%TESTNUMBER.txt">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
 012345678
 012345678
@@ -35,21 +36,20 @@ HTTP PUT with resume
 012345678
 012345678
 </file>
- <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -Tlog/test%TESTNUMBER.txt -C 50
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 50-99/100
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 50
-Expect: 100-continue
 
 012345678
 012345678

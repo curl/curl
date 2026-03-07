@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,22 +7,16 @@ FAILURE
 </keywords>
 </info>
 
-
-#
 # Client-side
 <client>
-<server>
-none
-</server>
- <name>
+<name>
 Pass in string to -C
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER -C wrong
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

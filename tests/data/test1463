@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,40 +7,30 @@ FILE
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 file
 </features>
- <name>
+<name>
 curl file category --help
- </name>
- <command>
+</name>
+<command>
 --help file
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0
 </errorcode>
 <stdout mode="text">
-Usage: curl [options...] <url>
-file: FILE protocol options
-     --create-file-mode <mode> File mode for created files
- -I, --head                    Show document info only
- -r, --range <range>           Retrieve only the bytes within RANGE
+%includetext %SRCDIR/data/data%TESTNUMBER.txt%
 </stdout>
 </verify>
 </testcase>

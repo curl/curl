@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -40,7 +40,7 @@ dnl makes errno available as a preprocessor macro.
 AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
-#include <errno.h>
+      #include <errno.h>
     ]],[[
       if(0 != errno)
         return 1;
@@ -53,27 +53,29 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
   if test "$tmp_errno" = "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#include <errno.h>
+        #include <errno.h>
       ]],[[
-#ifdef errno
-        int dummy=1;
-#else
-        force compilation error
-#endif
+        #ifdef errno
+          int dummy = 1;
+          (void)dummy;
+        #else
+          #error force compilation error
+        #endif
       ]])
     ],[
       tmp_errno="errno_macro_defined"
     ],[
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
-#define _REENTRANT
-#include <errno.h>
+          #define _REENTRANT
+          #include <errno.h>
         ]],[[
-#ifdef errno
-          int dummy=1;
-#else
-          force compilation error
-#endif
+          #ifdef errno
+            int dummy = 1;
+            (void)dummy;
+          #else
+            #error force compilation error
+          #endif
         ]])
       ],[
         tmp_errno="errno_macro_needs_reentrant"
@@ -99,15 +101,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GMTIME_R], [
   ])
   if test "$tmp_gmtime_r" = "yes"; then
     AC_EGREP_CPP([gmtime_r],[
-#include <sys/types.h>
-#include <time.h>
+      #include <sys/types.h>
+      #include <time.h>
     ],[
       tmp_gmtime_r="proto_declared"
     ],[
       AC_EGREP_CPP([gmtime_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <time.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <time.h>
       ],[
         tmp_gmtime_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -132,15 +134,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_LOCALTIME_R], [
   ])
   if test "$tmp_localtime_r" = "yes"; then
     AC_EGREP_CPP([localtime_r],[
-#include <sys/types.h>
-#include <time.h>
+      #include <sys/types.h>
+      #include <time.h>
     ],[
       tmp_localtime_r="proto_declared"
     ],[
       AC_EGREP_CPP([localtime_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <time.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <time.h>
       ],[
         tmp_localtime_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -165,50 +167,17 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRERROR_R], [
   ])
   if test "$tmp_strerror_r" = "yes"; then
     AC_EGREP_CPP([strerror_r],[
-#include <sys/types.h>
-#include <string.h>
+      #include <sys/types.h>
+      #include <string.h>
     ],[
       tmp_strerror_r="proto_declared"
     ],[
       AC_EGREP_CPP([strerror_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <string.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <string.h>
       ],[
         tmp_strerror_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
-dnl CURL_CHECK_NEED_REENTRANT_STRTOK_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function strtok_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([strtok_r])
-  ],[
-    tmp_strtok_r="yes"
-  ],[
-    tmp_strtok_r="no"
-  ])
-  if test "$tmp_strtok_r" = "yes"; then
-    AC_EGREP_CPP([strtok_r],[
-#include <sys/types.h>
-#include <string.h>
-    ],[
-      tmp_strtok_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([strtok_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <string.h>
-      ],[
-        tmp_strtok_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
       ])
     ])
@@ -231,15 +200,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R], [
   ])
   if test "$tmp_gethostbyname_r" = "yes"; then
     AC_EGREP_CPP([gethostbyname_r],[
-#include <sys/types.h>
-#include <netdb.h>
+      #include <sys/types.h>
+      #include <netdb.h>
     ],[
       tmp_gethostbyname_r="proto_declared"
     ],[
       AC_EGREP_CPP([gethostbyname_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <netdb.h>
       ],[
         tmp_gethostbyname_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -264,15 +233,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
   ])
   if test "$tmp_getprotobyname_r" = "yes"; then
     AC_EGREP_CPP([getprotobyname_r],[
-#include <sys/types.h>
-#include <netdb.h>
+      #include <sys/types.h>
+      #include <netdb.h>
     ],[
       tmp_getprotobyname_r="proto_declared"
     ],[
       AC_EGREP_CPP([getprotobyname_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <netdb.h>
       ],[
         tmp_getprotobyname_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -297,9 +266,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_STRERROR_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_STRTOK_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
@@ -394,7 +360,7 @@ _EOF
 dnl CURL_CONFIGURE_REENTRANT
 dnl -------------------------------------------------
 dnl This first checks if the preprocessor _REENTRANT
-dnl symbol is already defined. If it isn't currently
+dnl symbol is already defined. If it is not currently
 dnl defined a set of checks are performed to verify
 dnl if its definition is required to make visible to
 dnl the compiler a set of *_r functions. Finally, if
@@ -410,11 +376,12 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
     ]],[[
-#ifdef _REENTRANT
-      int dummy=1;
-#else
-      force compilation error
-#endif
+      #ifdef _REENTRANT
+        int dummy = 1;
+        (void)dummy;
+      #else
+        #error force compilation error
+      #endif
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -455,7 +422,7 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
 dnl CURL_CONFIGURE_THREAD_SAFE
 dnl -------------------------------------------------
 dnl This first checks if the preprocessor _THREAD_SAFE
-dnl symbol is already defined. If it isn't currently
+dnl symbol is already defined. If it is not currently
 dnl defined a set of checks are performed to verify
 dnl if its definition is required. Finally, if
 dnl _THREAD_SAFE is already defined or needed it takes
@@ -470,11 +437,12 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
     ]],[[
-#ifdef _THREAD_SAFE
-      int dummy=1;
-#else
-      force compilation error
-#endif
+      #ifdef _THREAD_SAFE
+        int dummy = 1;
+        (void)dummy;
+      #else
+        #error force compilation error
+      #endif
     ]])
   ],[
     AC_MSG_RESULT([yes])

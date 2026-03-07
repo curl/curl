@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,10 +9,9 @@ HTTP proxy
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -24,7 +24,6 @@ hello
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -37,19 +36,18 @@ proxy
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
- </name>
+</name>
 # first URL then proxy
- <command>
-ftp://www.example.com/moo/%TESTNUMBER http://%HOSTIP:%HTTPPORT 
+<command>
+ftp://www.example.com/moo/%TESTNUMBER http://%HOSTIP:%HTTPPORT
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://www.example.com/moo/%TESTNUMBER;type=i HTTP/1.1
 Host: www.example.com:21
 Accept: */*

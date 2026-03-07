@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,17 +7,12 @@ curlx_tvdiff
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
@@ -25,7 +21,6 @@ curlx_tvdiff
 </name>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 </verify>

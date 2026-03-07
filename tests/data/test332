@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -16,29 +17,29 @@ returned
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve with blksize 400
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-blksize 400
 </command>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
 opcode = 1
 mode = octet
 tsize = 0
 blksize = 400
-timeout = 6
 filename = /%TESTNUMBER
 </protocol>
 </verify>

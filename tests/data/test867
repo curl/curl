@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,15 +11,14 @@ RFC5034
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 AUTH CRAM-MD5
-REPLY AUTH + PDE5NzIuOTg3NjU0MzIxQGN1cmw+
-REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== +OK Login successful
+REPLY AUTH + %b64[%3c1972.987654321@curl%3e]b64%
+REPLY %b64[user 7031725599fdbb5d412689aa323e3e0b]b64% +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -29,7 +29,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -37,22 +36,22 @@ pop3
 </server>
 <features>
 crypto
+digest
 </features>
- <name>
+<name>
 POP3 CRAM-MD5 authentication
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH CRAM-MD5
-dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
+%b64[user 7031725599fdbb5d412689aa323e3e0b]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>

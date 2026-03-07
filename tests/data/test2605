@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+sftp
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+sftp
+</features>
+<name>
+Curl_ssh_range unit test
+</name>
+</client>
+</testcase>

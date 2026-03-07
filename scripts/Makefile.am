@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,42 +22,44 @@
 #
 ###########################################################################
 
-EXTRA_DIST = updatemanpages.pl coverage.sh completion.pl firefox-db2pem.sh \
- checksrc.pl mk-ca-bundle.pl
+EXTRA_DIST = coverage.sh completion.pl firefox-db2pem.sh checksrc.pl checksrc-all.pl \
+  mk-ca-bundle.pl mk-unity.pl schemetable.c cd2nroff nroff2cd cdall cd2cd managen    \
+  dmaketgz maketgz release-tools.sh verify-release cmakelint.sh mdlinkcheck          \
+  CMakeLists.txt perlcheck.sh pythonlint.sh spacecheck.pl randdisable wcurl          \
+  top-complexity extract-unit-protos .checksrc
 
-ZSH_FUNCTIONS_DIR = @ZSH_FUNCTIONS_DIR@
-FISH_FUNCTIONS_DIR = @FISH_FUNCTIONS_DIR@
-PERL = @PERL@
+dist_bin_SCRIPTS = wcurl
 
+if USE_ZSH_COMPLETION
 ZSH_COMPLETION_FUNCTION_FILENAME = _curl
+endif
+if USE_FISH_COMPLETION
 FISH_COMPLETION_FUNCTION_FILENAME = curl.fish
+endif
 
 CLEANFILES = $(ZSH_COMPLETION_FUNCTION_FILENAME) $(FISH_COMPLETION_FUNCTION_FILENAME)
 
 all-local: $(ZSH_COMPLETION_FUNCTION_FILENAME) $(FISH_COMPLETION_FUNCTION_FILENAME)
 
+if USE_ZSH_COMPLETION
 $(ZSH_COMPLETION_FUNCTION_FILENAME): completion.pl
-if CROSSCOMPILING
-	@echo "NOTICE: we can't generate zsh completion when cross-compiling!"
-else # if not cross-compiling:
-	@if ! test -x "$(PERL)"; then echo "No perl: can't install completion.pl"; exit 0; fi
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell zsh > $@
+	@PERL@ $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell zsh > $@
 endif
 
+if USE_FISH_COMPLETION
 $(FISH_COMPLETION_FUNCTION_FILENAME): completion.pl
-if CROSSCOMPILING
-	@echo "NOTICE: we can't generate fish completion when cross-compiling!"
-else # if not cross-compiling:
-	@if ! test -x "$(PERL)"; then echo "No perl: can't install completion.pl"; exit 0; fi
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell fish > $@
+	@PERL@ $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell fish > $@
 endif
 
 install-data-local:
-if CROSSCOMPILING
-	@echo "NOTICE: we can't install zsh completion when cross-compiling!"
-else # if not cross-compiling:
-	$(MKDIR_P) $(DESTDIR)$(ZSH_FUNCTIONS_DIR)
-	$(MKDIR_P) $(DESTDIR)$(FISH_FUNCTIONS_DIR)
-	$(INSTALL_DATA) $(ZSH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(ZSH_FUNCTIONS_DIR)/$(ZSH_COMPLETION_FUNCTION_FILENAME)
-	$(INSTALL_DATA) $(FISH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(FISH_FUNCTIONS_DIR)/$(FISH_COMPLETION_FUNCTION_FILENAME)
+if USE_ZSH_COMPLETION
+	$(MKDIR_P) $(DESTDIR)@ZSH_FUNCTIONS_DIR@
+	$(INSTALL_DATA) $(ZSH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)@ZSH_FUNCTIONS_DIR@/$(ZSH_COMPLETION_FUNCTION_FILENAME)
 endif
+if USE_FISH_COMPLETION
+	$(MKDIR_P) $(DESTDIR)@FISH_FUNCTIONS_DIR@
+	$(INSTALL_DATA) $(FISH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)@FISH_FUNCTIONS_DIR@/$(FISH_COMPLETION_FUNCTION_FILENAME)
+endif
+
+distclean:
+	rm -f $(CLEANFILES)

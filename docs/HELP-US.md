@@ -1,12 +1,20 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # How to get started helping out in the curl project
 
 We are always in need of more help. If you are new to the project and are
 looking for ways to contribute and help out, this document aims to give a few
 good starting points.
 
-A good idea is to start by subscribing to the [curl-library mailing
+You may subscribe to the [curl-library mailing
 list](https://lists.haxx.se/listinfo/curl-library) to keep track of the
-current discussion topics.
+current discussion topics; or if you are registered on GitHub, you can use the
+[Discussions section](https://github.com/curl/curl/discussions) on the main
+curl repository.
 
 ## Scratch your own itch
 
@@ -25,21 +33,21 @@ If you are looking for a smaller or simpler task in the project to help out
 with as an entry-point into the project, perhaps because you are a newcomer or
 even maybe not a terribly experienced developer, here's our advice:
 
- - Read through this document to get a grasp on a general approach to use
- - Consider adding a test case for something not currently tested (correctly)
- - Consider updating or adding documentation
- - One way to get started gently in the project, is to participate in an
-   existing issue/PR and help out by reproducing the issue, review the code in
-   the PR etc.
+- Read through this document to get a grasp on a general approach to use
+- Consider adding a test case for something not currently tested (correctly)
+- Consider updating or adding documentation
+- One way to get started gently in the project, is to participate in an
+  existing issue/PR and help out by reproducing the issue, review the code in
+  the PR etc.
 
 ## Help wanted
 
 In the issue tracker we occasionally mark bugs with [help
 wanted](https://github.com/curl/curl/labels/help%20wanted), as a sign that the
-bug is acknowledged to exist and that there's nobody known to work on this
+bug is acknowledged to exist and that there is nobody known to work on this
 issue for the moment. Those are bugs that are fine to "grab" and provide a
-pull request for. The complexity level of these will of course vary, so pick
-one that piques your interest.
+pull request for. The complexity level of these of course varies, so pick one
+that piques your interest.
 
 ## Work on known bugs
 
@@ -75,13 +83,12 @@ brainstorming on specific ways to do the implementation etc.
 
 You can also come up with a completely new thing you think we should do. Or
 not do. Or fix. Or add to the project. You then either bring it to the mailing
-list first to see if people will shoot down the idea at once, or you bring a
-first draft of the idea as a pull request and take the discussion there around
-the specific implementation. Either way is fine.
+list first to see if people shoot down the idea at once, or you bring a first
+draft of the idea as a pull request and take the discussion there around the
+specific implementation. Either way is fine.
 
 ## CONTRIBUTE
 
-We offer [guidelines](https://curl.se/dev/contribute.html) that are
-suitable to be familiar with before you decide to contribute to curl. If
-you are used to open source development, you will probably not find many
-surprises there.
+We offer [guidelines](https://curl.se/dev/contribute.html) that are suitable
+to be familiar with before you decide to contribute to curl. If you are used
+to open source development, you probably do not find many surprises there.

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -24,8 +24,8 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = README.md Makefile.example Makefile.inc Makefile.mk \
-  $(COMPLICATED_EXAMPLES) .checksrc
+EXTRA_DIST = CMakeLists.txt .checksrc README.md Makefile.example \
+  $(COMPLICATED_MAY_BUILD) $(COMPLICATED_EXAMPLES)
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -34,32 +34,27 @@ EXTRA_DIST = README.md Makefile.example Makefile.inc Makefile.mk \
 #
 # $(top_srcdir)/include is for libcurl's external include files
 
-AM_CPPFLAGS = -I$(top_srcdir)/include   \
-              -DCURL_DISABLE_DEPRECATION
-
-LIBDIR = $(top_builddir)/lib
-
-# Avoid libcurl obsolete stuff
-AM_CPPFLAGS += -DCURL_NO_OLDIES
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
+if DOING_NATIVE_WINDOWS
+AM_CPPFLAGS += -DWIN32_LEAN_AND_MEAN
+endif
+# Avoid libcurl obsolete stuff
+AM_CPPFLAGS += -DCURL_NO_OLDIES
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
-if USE_EXPLICIT_LIB_DEPS
-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_LIBS@
-else
-LDADD = $(LIBDIR)/libcurl.la
-endif
+LDADD = $(top_builddir)/lib/libcurl.la
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
-# Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
+# Get check_PROGRAMS, COMPLICATED_MAY_BUILD, COMPLICATED_EXAMPLES variables
 include Makefile.inc
 
 all: $(check_PROGRAMS)
@@ -71,3 +66,10 @@ CS_ = $(CS_0)
 
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(srcdir)/*.c)
+
+if NOT_CURL_CI
+if DEBUGBUILD
+# for debug builds, we scan the sources on all regular make invokes
+all-local: checksrc
+endif
+endif

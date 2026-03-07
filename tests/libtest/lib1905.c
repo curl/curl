@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,44 +21,39 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "timediff.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-int test(char *URL)
+static CURLcode test_lib1905(const char *URL)
 {
-  CURLSH *sh = NULL;
-  CURL *ch = NULL;
+  CURLSH *share = NULL;
+  CURL *curl = NULL;
   int unfinished;
-  CURLM *cm;
+  CURLM *multi;
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  cm = curl_multi_init();
-  if(!cm) {
+  multi = curl_multi_init();
+  if(!multi) {
     curl_global_cleanup();
-    return 1;
+    return TEST_ERR_MULTI;
   }
-  sh = curl_share_init();
-  if(!sh)
+  share = curl_share_init();
+  if(!share)
     goto cleanup;
 
-  curl_share_setopt(sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-  curl_share_setopt(sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
 
-  ch = curl_easy_init();
-  if(!ch)
+  curl = curl_easy_init();
+  if(!curl)
     goto cleanup;
 
-  curl_easy_setopt(ch, CURLOPT_SHARE, sh);
-  curl_easy_setopt(ch, CURLOPT_URL, URL);
-  curl_easy_setopt(ch, CURLOPT_COOKIEFILE, "log/cookies1905");
-  curl_easy_setopt(ch, CURLOPT_COOKIEJAR, "log/cookies1905");
+  curl_easy_setopt(curl, CURLOPT_SHARE, share);
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  curl_easy_setopt(curl, CURLOPT_COOKIEFILE, libtest_arg2);
+  curl_easy_setopt(curl, CURLOPT_COOKIEJAR, libtest_arg2);
 
-  curl_multi_add_handle(cm, ch);
+  curl_multi_add_handle(multi, curl);
 
   unfinished = 1;
   while(unfinished) {
@@ -70,10 +65,10 @@ int test(char *URL)
     FD_ZERO(&R);
     FD_ZERO(&W);
     FD_ZERO(&E);
-    curl_multi_perform(cm, &unfinished);
+    curl_multi_perform(multi, &unfinished);
 
-    curl_multi_fdset(cm, &R, &W, &E, &MAX);
-    curl_multi_timeout(cm, &max_tout);
+    curl_multi_fdset(multi, &R, &W, &E, &MAX);
+    curl_multi_timeout(multi, &max_tout);
 
     if(max_tout > 0) {
       curlx_mstotv(&timeout, max_tout);
@@ -86,15 +81,15 @@ int test(char *URL)
     select(MAX + 1, &R, &W, &E, &timeout);
   }
 
-  curl_easy_setopt(ch, CURLOPT_COOKIELIST, "FLUSH");
-  curl_easy_setopt(ch, CURLOPT_SHARE, NULL);
+  curl_easy_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
+  curl_easy_setopt(curl, CURLOPT_SHARE, NULL);
 
-  curl_multi_remove_handle(cm, ch);
-  cleanup:
-  curl_easy_cleanup(ch);
-  curl_share_cleanup(sh);
-  curl_multi_cleanup(cm);
+  curl_multi_remove_handle(multi, curl);
+cleanup:
+  curl_easy_cleanup(curl);
+  curl_share_cleanup(share);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return 0;
+  return CURLE_OK;
 }

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,32 +25,11 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-struct contenc_writer {
-  const struct content_encoding *handler;  /* Encoding handler. */
-  struct contenc_writer *downstream;  /* Downstream writer. */
-};
+struct Curl_cwriter;
 
-/* Content encoding writer. */
-struct content_encoding {
-  const char *name;        /* Encoding name. */
-  const char *alias;       /* Encoding name alias. */
-  CURLcode (*init_writer)(struct Curl_easy *data,
-                          struct contenc_writer *writer);
-  CURLcode (*unencode_write)(struct Curl_easy *data,
-                             struct contenc_writer *writer,
-                             const char *buf, size_t nbytes);
-  void (*close_writer)(struct Curl_easy *data,
-                       struct contenc_writer *writer);
-  size_t writersize;
-};
-
+/* returns an allocated string or NULL */
+char *Curl_get_content_encodings(void);
 
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
-                                     const char *enclist, int maybechunked);
-CURLcode Curl_unencode_write(struct Curl_easy *data,
-                             struct contenc_writer *writer,
-                             const char *buf, size_t nbytes);
-void Curl_unencode_cleanup(struct Curl_easy *data);
-char *Curl_all_content_encodings(void);
-
+                                     const char *enclist, int is_transfer);
 #endif /* HEADER_CURL_CONTENT_ENCODING_H */

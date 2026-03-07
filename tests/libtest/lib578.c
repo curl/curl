@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,48 +21,46 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "memdebug.h"
+#include "first.h"
 
 /* The size of data should be kept below MAX_INITIAL_POST_SIZE! */
-static char data[]="this is a short string.\n";
+static char t578_testdata[] = "this is a short string.\n";
 
-static size_t data_size = sizeof(data) / sizeof(char);
+static size_t data_size = CURL_ARRAYSIZE(t578_testdata);
 
-static int progress_callback(void *clientp, double dltotal, double dlnow,
-                             double ultotal, double ulnow)
+static int t578_progress_callback(void *clientp, double dltotal, double dlnow,
+                                  double ultotal, double ulnow)
 {
-  FILE *moo = fopen(libtest_arg2, "wb");
+  FILE *moo = curlx_fopen(libtest_arg2, "wb");
 
-  (void)clientp; /* UNUSED */
-  (void)dltotal; /* UNUSED */
-  (void)dlnow; /* UNUSED */
+  (void)clientp;
+  (void)dltotal;
+  (void)dlnow;
 
   if(moo) {
     if((size_t)ultotal == data_size && (size_t)ulnow == data_size)
-      fprintf(moo, "PASSED, UL data matched data size\n");
+      curl_mfprintf(moo, "PASSED, UL data matched data size\n");
     else
-      fprintf(moo, "Progress callback called with UL %f out of %f\n",
-              ulnow, ultotal);
-    fclose(moo);
+      curl_mfprintf(moo, "Progress callback called with UL %f out of %f\n",
+                    ulnow, ultotal);
+    curlx_fclose(moo);
   }
   return 0;
 }
 
-int test(char *URL)
+static CURLcode test_lib578(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -75,13 +73,11 @@ int test(char *URL)
 
   /* Set the expected POST size */
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data_size);
-  test_setopt(curl, CURLOPT_POSTFIELDS, data);
+  test_setopt(curl, CURLOPT_POSTFIELDS, t578_testdata);
 
   /* we want to use our own progress function */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-  )
+  test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t578_progress_callback);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -89,8 +85,8 @@ int test(char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -98,5 +94,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

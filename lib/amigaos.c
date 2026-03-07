@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,18 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef __AMIGA__
 
-#include <curl/curl.h>
-
 #include "hostip.h"
+#include "curl_addrinfo.h"
 #include "amigaos.h"
 
 #ifdef HAVE_PROTO_BSDSOCKET_H
-#  if defined(__amigaos4__)
+#  ifdef __amigaos4__
 #    include <bsdsocket/socketbasetags.h>
 #  elif !defined(USE_AMISSL)
 #    include <amitcp/socketbasetags.h>
@@ -41,10 +39,6 @@
 #    include <stabs.h>
 #  endif
 #endif
-
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #ifdef HAVE_PROTO_BSDSOCKET_H
 
@@ -117,15 +111,14 @@ void Curl_amiga_cleanup(void)
 
 #ifdef CURLRES_AMIGA
 /*
- * Because we need to handle the different cases in hostip4.c at run-time,
+ * Because we need to handle the different cases in hostip4.c at runtime,
  * not at compile-time, based on what was detected in Curl_amiga_init(),
  * we replace it completely with our own as to not complicate the baseline
- * code. Assumes malloc/calloc/free are thread safe because Curl_he2ai()
+ * code. Assumes malloc/calloc/free are thread-safe because Curl_he2ai()
  * allocates memory also.
  */
 
-struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
-                                          int port)
+struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port)
 {
   struct Curl_addrinfo *ai = NULL;
   struct hostent *h;
@@ -135,7 +128,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     LONG h_errnop = 0;
     struct hostent *buf;
 
-    buf = calloc(1, CURL_HOSTENT_SIZE);
+    buf = curlx_calloc(1, CURL_HOSTENT_SIZE);
     if(buf) {
       h = gethostbyname_r((STRPTR)hostname, buf,
                           (char *)buf + sizeof(struct hostent),
@@ -144,12 +137,12 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
       if(h) {
         ai = Curl_he2ai(h, port);
       }
-      free(buf);
+      curlx_free(buf);
     }
   }
   else {
-    #ifdef CURLRES_THREADED
-    /* gethostbyname() is not thread safe, so we need to reopen bsdsocket
+#ifdef CURLRES_THREADED
+    /* gethostbyname() is not thread-safe, so we need to reopen bsdsocket
      * on the thread's context
      */
     struct Library *base = OpenLibrary("bsdsocket.library", 4);
@@ -164,13 +157,13 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
       }
       CloseLibrary(base);
     }
-    #else
+#else
     /* not using threaded resolver - safe to use this as-is */
     h = gethostbyname(hostname);
     if(h) {
       ai = Curl_he2ai(h, port);
     }
-    #endif
+#endif
   }
 
   return ai;
@@ -178,12 +171,13 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #endif /* CURLRES_AMIGA */
 
 #ifdef USE_AMISSL
+#include <signal.h>
 int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
                       fd_set *errorfds, struct timeval *timeout)
 {
   int r = WaitSelect(nfds, readfds, writefds, errorfds, timeout, 0);
   /* Ensure Ctrl-C signal is actioned */
-  if((r == -1) && (SOCKERRNO == EINTR))
+  if((r == -1) && (SOCKERRNO == SOCKEINTR))
     raise(SIGINT);
   return r;
 }
@@ -195,12 +189,12 @@ int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
  */
 
 struct Library *SocketBase = NULL;
-extern int errno, h_errno;
 
 #ifdef __libnix__
 void __request(const char *msg);
+#define CURL_AMIGA_REQUEST(msg)  __request(msg)
 #else
-# define __request(msg)       Printf(msg "\n\a")
+#define CURL_AMIGA_REQUEST(msg)  Printf((const unsigned char *)(msg "\n\a"), 0)
 #endif
 
 void Curl_amiga_cleanup(void)
@@ -214,17 +208,16 @@ void Curl_amiga_cleanup(void)
 CURLcode Curl_amiga_init(void)
 {
   if(!SocketBase)
-    SocketBase = OpenLibrary("bsdsocket.library", 4);
+    SocketBase = OpenLibrary((const unsigned char *)"bsdsocket.library", 4);
 
   if(!SocketBase) {
-    __request("No TCP/IP Stack running!");
+    CURL_AMIGA_REQUEST("No TCP/IP Stack running!");
     return CURLE_FAILED_INIT;
   }
 
-  if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
-                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "curl",
-                    TAG_DONE)) {
-    __request("SocketBaseTags ERROR");
+  if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG)&errno,
+                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG)"curl", TAG_DONE)) {
+    CURL_AMIGA_REQUEST("SocketBaseTags ERROR");
     return CURLE_FAILED_INIT;
   }
 

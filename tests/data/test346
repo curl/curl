@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ proxy
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -42,13 +41,12 @@ HTTP GET over proxy with credentials using blank passwords
 </command>
 </client>
 
-#
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://remote.example/%TESTNUMBER HTTP/1.1
 Host: remote.example
-Proxy-Authorization: Basic cHVzZXI6
-Authorization: Basic c3VzZXI6
+Proxy-Authorization: Basic %b64[puser:]b64%
+Authorization: Basic %b64[suser:]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

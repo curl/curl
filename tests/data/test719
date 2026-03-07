@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ SOCKS5h
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -27,29 +27,27 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
-ipv6
+IPv6
 proxy
 </features>
 <server>
 http
 socks5
 </server>
- <name>
+<name>
 HTTP GET with IPv6 numerical via SOCKS5h
- </name>
- <command>
-http://[2200::33]:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT 
+</name>
+<command>
+http://[2200::33]:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: [2200::33]:%HTTPPORT
 User-Agent: curl/%VERSION

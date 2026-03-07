@@ -1,23 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 unittest
+noproxy
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 proxy
 </features>
- <name>
+<name>
 noproxy and cidr comparisons
- </name>
+</name>
 </client>
 <errorcode>
 0

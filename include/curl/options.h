@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -44,7 +44,7 @@ typedef enum {
 
 /* "alias" means it is provided for old programs to remain functional,
    we prefer another name */
-#define CURLOT_FLAG_ALIAS (1<<0)
+#define CURLOT_FLAG_ALIAS (1 << 0)
 
 /* The CURLOPTTYPE_* id ranges can still be used to figure out what type/size
    to use for curl_easy_setopt() for the given id */

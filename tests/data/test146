@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -19,10 +20,10 @@ this is file contents
 <server>
 ftp
 </server>
- <name>
+<name>
 persistent FTP with different paths
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/first/dir/here/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
@@ -34,7 +35,7 @@ ftp://%HOSTIP:%FTPPORT/first/dir/here/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNU
 ^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
 ^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
 </strip>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -35,7 +36,7 @@ http
 Pre-request callback for HTTP with location following
 </name>
 <tool>
-libprereq
+lib2082
 </tool>
 
 <command>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,9 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include <string.h>
+#include "first.h"
 
 /*
  * This test uses these funny custom memory callbacks for the only purpose
@@ -31,9 +29,8 @@
  * libcurl and that it works unconditionally no matter how libcurl is built,
  * nothing more.
  *
- * Do not include memdebug.h in this source file, and do not use directly
- * memory related functions in this file except those used inside custom
- * memory callbacks which should be calling 'the real thing'.
+ * Do not use directly memory related functions in this file except those used
+ * inside custom memory callbacks which should be calling 'the real thing'.
  */
 
 static int seen;
@@ -41,69 +38,75 @@ static int seen;
 static void *custom_calloc(size_t nmemb, size_t size)
 {
   seen++;
-  return (calloc)(nmemb, size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return calloc(nmemb, size);
 }
 
 static void *custom_malloc(size_t size)
 {
   seen++;
-  return (malloc)(size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return malloc(size);
 }
 
 static char *custom_strdup(const char *ptr)
 {
   seen++;
-  return (strdup)(ptr);
+  return CURLX_STRDUP_LOW(ptr);
 }
 
 static void *custom_realloc(void *ptr, size_t size)
 {
   seen++;
-  return (realloc)(ptr, size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return realloc(ptr, size);
 }
 
 static void custom_free(void *ptr)
 {
   seen++;
-  (free)(ptr);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  free(ptr);
 }
 
-
-int test(char *URL)
+static CURLcode test_lib509(const char *URL)
 {
-  unsigned char a[] = {0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
-                       0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7};
-  CURLcode res;
+  static const unsigned char a[] = {
+    0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
+    0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7
+  };
+  CURLcode result;
   CURL *curl;
   int asize;
   char *str = NULL;
   (void)URL;
 
-  res = curl_global_init_mem(CURL_GLOBAL_ALL,
-                             custom_malloc,
-                             custom_free,
-                             custom_realloc,
-                             custom_strdup,
-                             custom_calloc);
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_global_init_mem() failed\n");
+  result = curl_global_init_mem(CURL_GLOBAL_ALL,
+                                custom_malloc,
+                                custom_free,
+                                custom_realloc,
+                                custom_strdup,
+                                custom_calloc);
+  if(result != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init_mem() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_USERAGENT, "test509"); /* uses strdup() */
+  test_setopt(curl, CURLOPT_USERAGENT, "test509"); /* uses curlx_strdup() */
 
   asize = (int)sizeof(a);
-  str = curl_easy_escape(curl, (char *)a, asize); /* uses realloc() */
+  /* uses curlx_realloc() */
+  str = curl_easy_escape(curl, (const char *)a, asize);
 
   if(seen)
-    printf("Callbacks were invoked!\n");
+    curl_mprintf("Callbacks were invoked!\n");
 
 test_cleanup:
 
@@ -113,5 +116,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return result;
 }

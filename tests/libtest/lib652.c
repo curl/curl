@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,77 +21,75 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "memdebug.h"
-
-static char buffer[17000]; /* more than 16K */
-
-int test(char *URL)
+static CURLcode test_lib652(const char *URL)
 {
+  static char testbuf[17000]; /* more than 16K */
+
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   curl_mime *mime = NULL;
   curl_mimepart *part;
   struct curl_slist *recipients = NULL;
 
-  /* create a buffer with AAAA...BBBBB...CCCC...etc */
+  /* create a testbuf with AAAA...BBBBB...CCCC...etc */
   int i;
-  int size = (int)sizeof(buffer) / 10;
+  int size = (int)sizeof(testbuf) / 10;
 
-  for(i = 0; i < size ; i++)
-    memset(&buffer[i * 10], 65 + (i % 26), 10);
+  for(i = 0; i < size; i++)
+    memset(&testbuf[i * 10], 65 + (i % 26), 10);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    res = (CURLcode) TEST_ERR_MAJOR_BAD;
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   /* Build mime structure. */
   mime = curl_mime_init(curl);
   if(!mime) {
-    fprintf(stderr, "curl_mime_init() failed\n");
-    res = (CURLcode) TEST_ERR_MAJOR_BAD;
+    curl_mfprintf(stderr, "curl_mime_init() failed\n");
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   part = curl_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart() failed\n");
-    res = (CURLcode) TEST_ERR_MAJOR_BAD;
+    curl_mfprintf(stderr, "curl_mime_addpart() failed\n");
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  res = curl_mime_filename(part, "myfile.jpg");
-  if(res) {
-    fprintf(stderr, "curl_mime_filename() failed\n");
+  result = curl_mime_filename(part, "myfile.jpg");
+  if(result) {
+    curl_mfprintf(stderr, "curl_mime_filename() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_type(part, "image/jpeg");
-  if(res) {
-    fprintf(stderr, "curl_mime_type() failed\n");
+  result = curl_mime_type(part, "image/jpeg");
+  if(result) {
+    curl_mfprintf(stderr, "curl_mime_type() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_data(part, buffer, sizeof(buffer));
-  if(res) {
-    fprintf(stderr, "curl_mime_data() failed\n");
+  result = curl_mime_data(part, testbuf, sizeof(testbuf));
+  if(result) {
+    curl_mfprintf(stderr, "curl_mime_data() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_encoder(part, "base64");
-  if(res) {
-    fprintf(stderr, "curl_mime_encoder() failed\n");
+  result = curl_mime_encoder(part, "base64");
+  if(result) {
+    curl_mfprintf(stderr, "curl_mime_encoder() failed\n");
     goto test_cleanup;
   }
 
   /* Prepare recipients. */
   recipients = curl_slist_append(NULL, "someone@example.com");
   if(!recipients) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_mfprintf(stderr, "curl_slist_append() failed\n");
     goto test_cleanup;
   }
 
@@ -113,8 +111,8 @@ int test(char *URL)
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -129,5 +127,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

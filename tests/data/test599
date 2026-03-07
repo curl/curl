@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,10 +7,9 @@ HTTP POST
 chunked Transfer-Encoding
 </keywords>
 </info>
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 302 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -21,21 +21,21 @@ Content-Type: text/html
 -foo-
 </data>
 <data1>
-HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Transfer-Encoding: chunked
-Connection: close
-Content-Type: text/html
-
-32
+HTTP/1.1 200 OK%CR
+Date: Tue, 09 Nov 2010 14:49:00 GMT%CR
+Server: test-server/fake%CR
+Transfer-Encoding: chunked%CR
+Connection: close%CR
+Content-Type: text/html%CR
+%CR
+32%CR
 this data is slightly larger than the first piece
-
-0
-
+%CR
+0%CR
+%CR
 </data1>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 302 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -68,18 +68,17 @@ lib%TESTNUMBER
 
 # Bug 3510057 pointed out that when following a location to a larger chunked
 # encoded page, the first size would still be used in the progress callback
- <name>
+<name>
 HTTP GET with progress callback and redirects changing content sizes
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip%TESTNUMBER">
+<file name="%LOGDIR/ip%TESTNUMBER">
 CL -1
 </file>
 </verify>

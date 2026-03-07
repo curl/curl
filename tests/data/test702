@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 #based off  19
 <info>
@@ -30,10 +31,10 @@ socks4
 http
 proxy
 </features>
- <name>
+<name>
 Attempt connect to non-listening HTTP server via SOCKS4 proxy
- </name>
- <command>
+</name>
+<command>
 --socks4 %HOSTIP:%SOCKSPORT http://%HOSTIP:%NOLISTENPORT
 </command>
 </client>

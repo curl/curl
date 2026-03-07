@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -25,22 +26,25 @@ swsclose: booo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with simple cookie send
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -b "name=contents;name2=content2" -b name3=content3
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Cookie: name=contents;name2=content2;name3=content3
+Cookie: name=contents;name2=content2; name3=content3
 
 </protocol>
 </verify>

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -42,17 +42,16 @@ AC_BEFORE([$0],[AC_PROG_LIBTOOL])
 dnl Override Autoconf's AC_LANG_PROGRAM (C)
 dnl -------------------------------------------------
 dnl This is done to prevent compiler warning
-dnl 'function declaration isn't a prototype'
+dnl 'function declaration is not a prototype'
 dnl in function main. This requires at least
-dnl a c89 compiler and does not support K&R.
+dnl a C89 compiler and does not support K&R.
 
 m4_define([AC_LANG_PROGRAM(C)],
 [$1
-int main (void)
+int main(void)
 {
 $2
- ;
- return 0;
+  return 0;
 }])
 
 dnl Override Autoconf's AC_LANG_CALL (C)
@@ -83,9 +82,9 @@ m4_define([AC_LANG_FUNC_LINK_TRY(C)],
 [
 #define $1 innocuous_$1
 #ifdef __STDC__
-# include <limits.h>
+#  include <limits.h>
 #else
-# include <assert.h>
+#  include <assert.h>
 #endif
 #undef $1
 #ifdef __cplusplus
@@ -93,6 +92,6 @@ extern "C"
 #endif
 char $1 ();
 #if defined __stub_$1 || defined __stub___$1
-choke me
+#error force compilation error
 #endif
 ], [return $1 ();])])

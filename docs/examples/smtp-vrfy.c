@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Verify an SMTP email address
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to verify an email address from an
@@ -45,37 +44,43 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
-  struct curl_slist *recipients = NULL;
+
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *recipients = NULL;
+
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
-    /* Note that the CURLOPT_MAIL_RCPT takes a list, not a char array  */
+    /* Note that the CURLOPT_MAIL_RCPT takes a list, not a char array */
     recipients = curl_slist_append(recipients, "<recipient@example.com>");
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
     /* Perform the VRFY */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* Free the list of recipients */
     curl_slist_free_all(recipients);
 
-    /* curl will not send the QUIT command until you call cleanup, so you
-     * should be able to re-use this connection for additional requests. It
-     * may not be a good idea to keep the connection open for a very long time
-     * though (more than a few minutes may result in the server timing out the
+    /* curl does not send the QUIT command until you call cleanup, so you
+     * should be able to reuse this connection for additional requests. It may
+     * not be a good idea to keep the connection open for a long time though
+     * (more than a few minutes may result in the server timing out the
      * connection) and you do want to clean up in the end.
      */
     curl_easy_cleanup(curl);
   }
 
-  return 0;
+  curl_global_cleanup();
+
+  return (int)result;
 }

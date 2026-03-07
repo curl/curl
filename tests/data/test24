@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,7 +13,7 @@ HTTP GET
 HTTP/1.0 404 BAD BOY
 Content-Type: text/html
 
-This silly page doesn't reaaaaaly exist so you should not get it.
+This silly page does not reaaaaaly exist so you should not get it.
 </data>
 </reply>
 
@@ -21,17 +22,17 @@ This silly page doesn't reaaaaaly exist so you should not get it.
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET fail silently on HTTP error return
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail --silent --show-error
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -41,7 +42,7 @@ Accept: */*
 <errorcode>
 22
 </errorcode>
-<file2 name="log/stderr%TESTNUMBER" mode="text">
+<file2 name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 curl: (22) The requested URL returned error: 404
 </file2>
 </verify>

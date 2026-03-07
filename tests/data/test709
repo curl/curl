@@ -1,13 +1,14 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP GET
 SOCKS5
+http_proxy
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -26,7 +27,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -39,18 +39,17 @@ socks5
 <setenv>
 http_proxy=socks5://%HOSTIP:%SOCKSPORT
 </setenv>
- <name>
+<name>
 HTTP GET via SOCKS5 set in http_proxy environment variable
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

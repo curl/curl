@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,13 +11,11 @@ verbose logs
 </reply>
 
 <client>
-<server>
-none
-</server>
 
 # require HTTP so that CURLOPT_POSTFIELDS works as assumed
 <features>
 http
+verbose-strings
 </features>
 <tool>
 lib%TESTNUMBER
@@ -27,7 +26,6 @@ Set excessive URL lengths
 </name>
 </client>
 
-#
 # Verify that the test runs to completion without crashing
 <verify>
 <errorcode>
@@ -37,9 +35,12 @@ Set excessive URL lengths
 CURLOPT_URL 10000000 bytes URL == 43
 CURLOPT_POSTFIELDS 10000000 bytes data == 0
 CURLUPART_URL 10000000 bytes URL == 3 (Malformed input to a URL function)
-CURLUPART_SCHEME 10000000 bytes scheme == 27 (Bad scheme)
+CURLUPART_SCHEME 10000000 bytes scheme == 3 (Malformed input to a URL function)
 CURLUPART_USER 10000000 bytes user == 3 (Malformed input to a URL function)
 </stdout>
+<limits>
+Maximum allocated: 10010000
+</limits>
 </verify>
 
 </testcase>

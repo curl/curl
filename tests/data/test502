@@ -1,10 +1,10 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 FILE
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -26,13 +26,13 @@ file
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 simple multi file:// get
- </name>
- <command>
-file://%PWD/log/test%TESTNUMBER.txt
+</name>
+<command>
+file://%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar swsclose
 bar

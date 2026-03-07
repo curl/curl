@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+FETCH
+CUSTOMREQUEST
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="yes">
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+# listing goes to debug output, so data output is empty
+<datacheck crlf="yes">
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+imap
+</server>
+<name>
+IMAP FETCH message with custom request to get list of email.
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER' --request 'UID FETCH 1:* (FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER.FIELDS (Message-Id DATE FROM SUBJECT TO SENDER REPLY-TO CC BCC)])' -u '"user:sec"ret{'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+A001 CAPABILITY
+A002 LOGIN "\"user" "sec\"ret{"
+A003 SELECT %TESTNUMBER
+A004 UID FETCH 1:* (FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER.FIELDS (Message-Id DATE FROM SUBJECT TO SENDER REPLY-TO CC BCC)])
+A005 LOGOUT
+</protocol>
+</verify>
+</testcase>

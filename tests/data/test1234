@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,13 +13,10 @@ FAILURE
 
 # Client-side
 <client>
-<server>
-none
-</server>
- <name>
+<name>
 abusing {}-globbing
- </name>
- <command>
+</name>
+<command>
 "%HOSTIP:%NOLISTENPORT/%TESTNUMBER[0-1]{" "%HOSTIP:%NOLISTENPORT/{}{}{}{"
 </command>
 </client>

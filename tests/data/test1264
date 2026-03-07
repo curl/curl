@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,16 +13,13 @@ HTTP GET
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
- <name>
-HTTP URL with space in host name
- </name>
- <command>
+<name>
+HTTP URL with space in hostname
+</name>
+<command>
 -g "http://127.0.0.1 www.example.com/we/want/%TESTNUMBER"
 </command>
 </client>

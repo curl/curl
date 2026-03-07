@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -29,13 +30,13 @@ http
 ftp
 proxy
 </features>
- <name>
-HTTP PUT to a FTP URL with username+password - over HTTP proxy
- </name>
- <command>
--x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
+<name>
+HTTP PUT to an FTP URL with username+password - over HTTP proxy
+</name>
+<command>
+-x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -51,15 +52,14 @@ the
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1
-Host: host.com:21
-Authorization: Basic ZGFuaWVsOm15c2VjcmV0
-User-Agent: curl/%VERSION
-Accept: */*
-Proxy-Connection: Keep-Alive
-Content-Length: 78
-Expect: 100-continue
-
+PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1%CR
+Host: host.com:21%CR
+Authorization: Basic %b64[daniel:mysecret]b64%%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Proxy-Connection: Keep-Alive%CR
+Content-Length: 78%CR
+%CR
 Weird
      file
          to

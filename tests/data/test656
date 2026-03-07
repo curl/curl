@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,26 +7,21 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP retrieval with nonexistent private key file
- </name>
- <command>
---key DOES_NOT_EXIST --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/not-a-valid-file-moooo --insecure --connect-timeout 8
+</name>
+<command>
+--key DOES_NOT_EXIST --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/not-a-valid-file-moooo --insecure --connect-timeout 8
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 67
 </errorcode>

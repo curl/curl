@@ -1,27 +1,29 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
-unittest
 curl_formadd
 curl_formget
+FORM
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
-unittest
 http
-Mime
+form-api
 </features>
- <name>
-formpost unit tests
- </name>
-<file name="log/test-%TESTNUMBER">
+<name>
+formpost tests
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+%LOGDIR/test-%TESTNUMBER
+</command>
+<file name="%LOGDIR/test-%TESTNUMBER">
 Piece of the file that is to uploaded as a formpost
 </file>
 </client>

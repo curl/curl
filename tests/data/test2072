@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -21,15 +22,15 @@ moo
 file
 </server>
 <name>
-file:// with unix path resolution behavior for the case of extra slashes
+file:// with Unix path resolution behavior for the case of extra slashes
 </name>
 <command option="no-include">
-file:////%PWD/log/test%TESTNUMBER.txt
+file:////%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
 <precheck>
-perl -e "print 'Test requires a unix system' if ( $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos' || $^O eq 'msys');"
+%PERL -e "print 'Test requires a Unix system' if($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos' || $^O eq 'msys');"
 </precheck>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar

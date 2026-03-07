@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,18 +7,14 @@ DOH
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 DoH
 </features>
- <name>
-DOH
- </name>
+<name>
+DoH parsing
+</name>
 </client>
 </testcase>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -36,10 +37,10 @@ Location: http:////foo.example.com/want/%TESTNUMBER0001
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect to http://// (four slashes!)
- </name>
- <command>
+</name>
+<command>
 %HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
 <features>
@@ -49,7 +50,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 HTTP/1.0
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -18,24 +18,22 @@ Server: test-server/fake
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
- <name>
+<name>
 simple HTTP 1.0 GET
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -0
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,45 +25,21 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_WEBSOCKETS
+extern const struct Curl_scheme Curl_scheme_ws;
+extern const struct Curl_scheme Curl_scheme_wss;
 
-#ifdef USE_HYPER
-#define REQTYPE void
-#else
-#define REQTYPE struct dynbuf
-#endif
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
-/* this is the largest single fragment size we support */
-#define MAX_WS_SIZE 65535
+/* meta key for storing protocol meta at connection */
+#define CURL_META_PROTO_WS_CONN   "meta:proto:ws:conn"
 
-/* part of 'struct HTTP', when used in the 'struct SingleRequest' in the
-   Curl_easy struct */
-struct websocket {
-  bool contfragment; /* set TRUE if the previous fragment sent was not final */
-  unsigned char mask[4]; /* 32 bit mask for this connection */
-  struct Curl_easy *data; /* used for write callback handling */
-  struct dynbuf buf;
-  size_t usedbuf; /* number of leading bytes in 'buf' the most recent complete
-                     websocket frame uses */
-  struct curl_ws_frame frame; /* the struct used for frame state */
-  curl_off_t oleft; /* outstanding number of payload bytes left from the
-                       server */
-  size_t stillblen; /* number of bytes left in the buffer to deliver in
-                         the next curl_ws_recv() call */
-  char *stillb; /* the stillblen pending bytes are here */
-  curl_off_t sleft; /* outstanding number of payload bytes left to send */
-  unsigned int xori; /* xor index */
-};
-
-CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
-CURLcode Curl_ws_accept(struct Curl_easy *data);
-
-size_t Curl_ws_writecb(char *buffer, size_t size, size_t nitems, void *userp);
-void Curl_ws_done(struct Curl_easy *data);
+CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
+CURLcode Curl_ws_accept(struct Curl_easy *data,
+                        const char *mem, size_t nread);
 
 #else
-#define Curl_ws_request(x,y) CURLE_OK
-#define Curl_ws_done(x) Curl_nop_stmt
+#define Curl_ws_request(x, y) CURLE_OK
+#define Curl_ws_free(x)       Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_WS_H */

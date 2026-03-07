@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Send email with IMAP
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's IMAP
@@ -37,9 +36,9 @@
  * Note that this example requires libcurl 7.30.0 or above.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+#define FROM "<sender@example.org>"
+#define TO   "<addressee@example.net>"
+#define CC   "<info@example.org>"
 
 static const char *payload_text =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
@@ -49,23 +48,23 @@ static const char *payload_text =
   "Message-ID: "
   "<dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n"
   "Subject: IMAP example message\r\n"
-  "\r\n" /* empty line to divide headers from body, see RFC5322 */
+  "\r\n" /* empty line to divide headers from body, see RFC 5322 */
   "The body of the message starts here.\r\n"
   "\r\n"
   "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
-  "Check RFC5322.\r\n";
+  "Check RFC 5322.\r\n";
 
 struct upload_status {
   size_t bytes_read;
 };
 
-static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
   size_t room = size * nmemb;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 
@@ -75,7 +74,7 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
     size_t len = strlen(data);
     if(room < len)
       len = room;
-    memcpy(ptr, data, len);
+    memcpy(ptr, data, len); /* NOLINT(bugprone-not-null-terminated-result) */
     upload_ctx->bytes_read += len;
 
     return len;
@@ -87,7 +86,10 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -99,15 +101,13 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will create a new message 100. Note that you should perform an
-     * EXAMINE command to obtain the UID of the next message to create and a
-     * SELECT to ensure you are creating the message in the OUTBOX. */
-    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/100");
+    /* This creates a new message in folder "Sent". */
+    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/Sent");
 
     /* In this case, we are using a callback function to specify the data. You
-     * could just use the CURLOPT_READDATA option to specify a FILE pointer to
-     * read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+     * could use the CURLOPT_READDATA option to specify a FILE pointer to read
+     * from. */
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
@@ -117,16 +117,18 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
 
     /* Perform the append */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
 
-  return (int)res;
+  curl_global_cleanup();
+
+  return (int)result;
 }

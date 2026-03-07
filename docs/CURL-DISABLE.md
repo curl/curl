@@ -1,16 +1,50 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Code defines to disable features and protocols
 
 ## `CURL_DISABLE_ALTSVC`
 
 Disable support for Alt-Svc: HTTP headers.
 
+## `CURL_DISABLE_BINDLOCAL`
+
+Disable support for binding the local end of connections.
+
 ## `CURL_DISABLE_COOKIES`
 
 Disable support for HTTP cookies.
 
-## `CURL_DISABLE_CRYPTO_AUTH`
+## `CURL_DISABLE_BASIC_AUTH`
 
-Disable support for authentication methods using crypto.
+Disable support for the Basic authentication methods.
+
+## `CURL_DISABLE_BEARER_AUTH`
+
+Disable support for the Bearer authentication methods.
+
+## `CURL_DISABLE_DIGEST_AUTH`
+
+Disable support for the Digest authentication methods.
+
+## `CURL_DISABLE_KERBEROS_AUTH`
+
+Disable support for the Kerberos authentication methods.
+
+## `CURL_DISABLE_NEGOTIATE_AUTH`
+
+Disable support for the negotiate authentication methods.
+
+## `CURL_DISABLE_AWS`
+
+Disable **aws-sigv4** support.
+
+## `CURL_DISABLE_CA_SEARCH`
+
+Disable unsafe CA bundle search in PATH on Windows.
 
 ## `CURL_DISABLE_DICT`
 
@@ -24,14 +58,18 @@ Disable DNS-over-HTTPS
 
 Disable the FILE protocol
 
+## `CURL_DISABLE_FORM_API`
+
+Disable the form API
+
 ## `CURL_DISABLE_FTP`
 
 Disable the FTP (and FTPS) protocol
 
 ## `CURL_DISABLE_GETOPTIONS`
 
-Disable the `curl_easy_options` API calls that lets users get information
-about existing options to `curl_easy_setopt`.
+Disable the `curl_easy_options()` API calls that lets users get information
+about existing options to `curl_easy_setopt()`.
 
 ## `CURL_DISABLE_GOPHER`
 
@@ -106,9 +144,18 @@ Disable the built-in progress meter
 
 Disable support for proxies
 
+## `CURL_DISABLE_IPFS`
+
+Disable the IPFS/IPNS protocols. This affects the curl tool only, where
+IPFS/IPNS protocol support is implemented.
+
 ## `CURL_DISABLE_RTSP`
 
 Disable the RTSP protocol.
+
+## `CURL_DISABLE_SHA512_256`
+
+Disable the SHA-512/256 hash algorithm.
 
 ## `CURL_DISABLE_SHUFFLE_DNS`
 
@@ -135,6 +182,16 @@ Disable the TELNET protocol
 
 Disable the TFTP protocol
 
+## `CURL_DISABLE_TYPECHECK`
+
+Disable `curl_easy_setopt()`/`curl_easy_getinfo()` type checking.
+
+Useful to improve build performance for the `tests/libtest` test tool.
+
 ## `CURL_DISABLE_VERBOSE_STRINGS`
 
 Disable verbose strings and error messages.
+
+## `CURL_DISABLE_WEBSOCKETS`
+
+Disable the WebSocket protocols.

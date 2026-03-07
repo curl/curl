@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -22,31 +22,29 @@ Content-Type: text/html
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
 <name>
---etag-compare that gets a 304 back shouldn't overwrite the file
+--etag-compare that gets a 304 back should not overwrite the file
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/output%TESTNUMBER --etag-compare log/etag%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/output%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER
 </command>
-<file name="log/etag%TESTNUMBER">
+<file name="%LOGDIR/etag%TESTNUMBER">
 "123456"
 </file>
-<file1 name="log/output%TESTNUMBER">
+<file1 name="%LOGDIR/output%TESTNUMBER">
 downloaded already
 </file1>
 
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -56,7 +54,7 @@ If-None-Match: "123456"
 </protocol>
 
 # verify that the target file is untouched
-<file name="log/output%TESTNUMBER">
+<file name="%LOGDIR/output%TESTNUMBER">
 downloaded already
 </file>
 </verify>

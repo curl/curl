@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,26 +21,21 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 /* test case and code based on https://github.com/curl/curl/issues/2847 */
 
 #include "testtrace.h"
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-static char g_Data[40 * 1024]; /* POST 40KB */
 
 static int sockopt_callback(void *clientp, curl_socket_t curlfd,
                             curlsocktype purpose)
 {
 #if defined(SOL_SOCKET) && defined(SO_SNDBUF)
   int sndbufsize = 4 * 1024; /* 4KB send buffer */
-  (void) clientp;
-  (void) purpose;
+  (void)clientp;
+  (void)purpose;
   setsockopt(curlfd, SOL_SOCKET, SO_SNDBUF,
-             (const char *)&sndbufsize, sizeof(sndbufsize));
+             (char *)&sndbufsize, sizeof(sndbufsize));
 #else
   (void)clientp;
   (void)curlfd;
@@ -49,10 +44,12 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   return CURL_SOCKOPT_OK;
 }
 
-int test(char *URL)
+static CURLcode test_lib1522(const char *URL)
 {
-  CURLcode code;
-  CURLcode res;
+  static char g_Data[40 * 1024]; /* POST 40KB */
+
+  CURLcode code = TEST_ERR_MAJOR_BAD;
+  CURLcode result;
   struct curl_slist *pHeaderList = NULL;
   CURL *curl = curl_easy_init();
   memset(g_Data, 'A', sizeof(g_Data)); /* send As! */
@@ -62,9 +59,9 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, g_Data);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(g_Data));
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
-  test_setopt(curl, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
+  test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   test_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
@@ -79,23 +76,23 @@ int test(char *URL)
     curl_off_t uploadSize;
     curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &uploadSize);
 
-    printf("uploadSize = %ld\n", (long)uploadSize);
+    curl_mprintf("uploadSize = %" CURL_FORMAT_CURL_OFF_T "\n", uploadSize);
 
-    if((size_t) uploadSize == sizeof(g_Data)) {
-      printf("!!!!!!!!!! PASS\n");
+    if((size_t)uploadSize == sizeof(g_Data)) {
+      curl_mprintf("!!!!!!!!!! PASS\n");
     }
     else {
-      printf("sent %d, libcurl says %d\n",
-             (int)sizeof(g_Data), (int)uploadSize);
+      curl_mprintf("sent %zu, libcurl says %" CURL_FORMAT_CURL_OFF_T "\n",
+                   sizeof(g_Data), uploadSize);
     }
   }
   else {
-    printf("curl_easy_perform() failed. e = %d\n", code);
+    curl_mprintf("curl_easy_perform() failed. e = %d\n", code);
   }
-  test_cleanup:
+test_cleanup:
   curl_slist_free_all(pHeaderList);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return 0;
+  return code;
 }

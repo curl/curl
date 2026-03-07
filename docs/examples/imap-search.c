@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,13 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Search for new IMAP emails
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to search for new messages using
@@ -39,7 +38,10 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -54,20 +56,22 @@ int main(void)
      * this can contain a message sequence set and a number of search criteria
      * keywords including flags such as ANSWERED, DELETED, DRAFT, FLAGGED, NEW,
      * RECENT and SEEN. For more information about the search criteria please
-     * see RFC-3501 section 6.4.4.   */
+     * see RFC-3501 section 6.4.4. */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "SEARCH NEW");
 
     /* Perform the custom request */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
 
-  return (int)res;
+  curl_global_cleanup();
+
+  return (int)result;
 }

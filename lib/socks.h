@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,38 +23,34 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#ifdef CURL_DISABLE_PROXY
-#define Curl_SOCKS4(a,b,c,d,e) CURLE_NOT_BUILT_IN
-#define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
-#define Curl_SOCKS_getsock(x,y,z) 0
-#else
+#ifndef CURL_DISABLE_PROXY
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
  * blocks until all bytes amount of buffersize will be read. No more, no less.
  *
  * This is STUPID BLOCKING behavior
  */
-int Curl_blockread_all(struct Curl_easy *data,
-                       curl_socket_t sockfd,
-                       char *buf,
-                       ssize_t buffersize,
-                       ssize_t *n);
+CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            char *buf,
+                            size_t blen,
+                            size_t *pnread);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
 /*
  * This function handles the SOCKS5 GSS-API negotiation and initialization
  */
-CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
+CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                       struct Curl_easy *data);
 #endif
 
-CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
-                                   struct connectdata *conn,
-                                   int sockindex);
+CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                          struct Curl_easy *data);
 
-#endif /* CURL_DISABLE_PROXY */
+extern struct Curl_cftype Curl_cft_socks_proxy;
 
-#endif  /* HEADER_CURL_SOCKS_H */
+#endif /* !CURL_DISABLE_PROXY */
+
+#endif /* HEADER_CURL_SOCKS_H */

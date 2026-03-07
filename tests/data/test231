@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -19,13 +20,13 @@ C01234567
 <server>
 file
 </server>
- <name>
+<name>
 file:// with resume
- </name>
+</name>
 <command option="no-include">
-file://localhost%FILE_PWD/log/test%TESTNUMBER.txt -C 10
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt -C 10
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 A01234567
 B01234567
 C01234567

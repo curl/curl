@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -16,9 +17,6 @@ connect to non-listen
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 proxy
@@ -28,19 +26,19 @@ proxy
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 simple multi through local proxy without listener
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 
 # Verify data after the test has been "shot"
-# TEST_ERR_SUCCESS is errorcode 120
+# TEST_ERR_SUCCESS is errorcode 41
 <verify>
 <errorcode>
-120
+41
 </errorcode>
 </verify>
 </testcase>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,7 @@ cookies
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -20,7 +21,7 @@ Content-Length: 4
 
 boo
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
@@ -31,32 +32,35 @@ moo
 
 # Client-side
 <client>
-<file name="log/jar%TESTNUMBER.txt" mode="text">
-.host.foo.com	TRUE	/we/want/	FALSE	2147483647	test	no
+<file name="%LOGDIR/jar%TESTNUMBER.txt" mode="text">
+.host.foo.com	TRUE	/we/want/	FALSE	22147483647	test	no
 </file>
-<file name="log/jar%TESTNUMBER-2.txt" mode="text">
-.host.foo.com	TRUE	/we/want/	FALSE	2147483647	tester	yes
+<file name="%LOGDIR/jar%TESTNUMBER-2.txt" mode="text">
+.host.foo.com	TRUE	/we/want/	FALSE	22147483647	tester	yes
 </file>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookie with Max-Age=0
- </name>
+</name>
 # Explicitly set the time zone to a known good one, in case the user is
 # using one of the 'right' zones that take into account leap seconds
 # which causes the cookie expiry times to be different.
 <setenv>
 TZ=GMT
 </setenv>
- <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b log/jar%TESTNUMBER.txt -b log/jar%TESTNUMBER-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b %LOGDIR/jar%TESTNUMBER.txt -b %LOGDIR/jar%TESTNUMBER-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: host.foo.com
 User-Agent: curl/%VERSION

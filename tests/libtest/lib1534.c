@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,105 +21,110 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "memdebug.h"
+#include "first.h"
 
 /* Test CURLINFO_FILETIME */
 
-int test(char *URL)
+static CURLcode test_lib1534(const char *URL)
 {
   CURL *curl, *dupe = NULL;
   long filetime;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
 
   /* Test that a filetime is properly initialized on curl_easy_init.
-  */
+   */
 
-  res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
-  if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+  result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+  if(result) {
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(filetime != -1) {
-    fprintf(stderr, "%s:%d filetime init failed; expected -1 but is %ld\n",
-            __FILE__, __LINE__, filetime);
-    res = CURLE_FAILED_INIT;
+    curl_mfprintf(stderr,
+                  "%s:%d filetime init failed; expected -1 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_FILETIME, 1L);
 
-  res = curl_easy_perform(curl);
-  if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+  result = curl_easy_perform(curl);
+  if(result) {
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
   /* Test that a filetime is properly set after receiving an HTTP resource.
-  */
+   */
 
-  res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
-  if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+  result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+  if(result) {
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(filetime != 30) {
-    fprintf(stderr, "%s:%d filetime of http resource is incorrect; "
-            "expected 30 but is %ld\n",
-            __FILE__, __LINE__, filetime);
-    res = CURLE_HTTP_RETURNED_ERROR;
+    curl_mfprintf(stderr, "%s:%d filetime of http resource is incorrect; "
+                  "expected 30 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
+    result = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }
 
   /* Test that a filetime is properly initialized on curl_easy_duphandle.
-  */
+   */
 
   dupe = curl_easy_duphandle(curl);
   if(!dupe) {
-    fprintf(stderr, "%s:%d curl_easy_duphandle() failed\n",
-            __FILE__, __LINE__);
-    res = CURLE_FAILED_INIT;
+    curl_mfprintf(stderr, "%s:%d curl_easy_duphandle() failed\n",
+                  __FILE__, __LINE__);
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
-  res = curl_easy_getinfo(dupe, CURLINFO_FILETIME, &filetime);
-  if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+  result = curl_easy_getinfo(dupe, CURLINFO_FILETIME, &filetime);
+  if(result) {
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(filetime != -1) {
-    fprintf(stderr, "%s:%d filetime init failed; expected -1 but is %ld\n",
-            __FILE__, __LINE__, filetime);
-    res = CURLE_FAILED_INIT;
+    curl_mfprintf(stderr,
+                  "%s:%d filetime init failed; expected -1 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
-
   /* Test that a filetime is properly initialized on curl_easy_reset.
-  */
+   */
 
   curl_easy_reset(curl);
 
-  res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
-  if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+  result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+  if(result) {
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(filetime != -1) {
-    fprintf(stderr, "%s:%d filetime init failed; expected -1 but is %ld\n",
-            __FILE__, __LINE__, filetime);
-    res = CURLE_FAILED_INIT;
+    curl_mfprintf(stderr,
+                  "%s:%d filetime init failed; expected -1 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
@@ -127,5 +132,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dupe);
   curl_global_cleanup();
-  return (int)res;
+  return result;
 }

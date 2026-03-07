@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,11 +27,12 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
-static const char data[]=
+static const char data[] =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-  "Nam rhoncus odio id venenatis volutpat. Vestibulum dapibus "
+  "___ rhoncus odio id venenatis volutpat. Vestibulum dapibus "
   "bibendum ullamcorper. Maecenas finibus elit augue, vel "
   "condimentum odio maximus nec. In hac habitasse platea dictumst. "
   "Vestibulum vel dolor et turpis rutrum finibus ac at nulla. "
@@ -45,10 +46,10 @@ struct WriteThis {
   size_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *upload = (struct WriteThis *)userp;
-  size_t max = size*nmemb;
+  size_t max = size * nmemb;
 
   if(max < 1)
     return 0;
@@ -63,25 +64,25 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
     return copylen;
   }
 
-  return 0;                          /* no more data left to deliver */
+  return 0;  /* no more data left to deliver */
 }
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   struct WriteThis upload;
 
   upload.readptr = data;
   upload.sizeleft = strlen(data);
 
-  /* In windows, this will init the winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_DEFAULT);
+  /* In Windows, this inits the Winsock stuff */
+  result = curl_global_init(CURL_GLOBAL_DEFAULT);
   /* Check for errors */
-  if(res != CURLE_OK) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed: %s\n",
-            curl_easy_strerror(res));
+            curl_easy_strerror(result));
     return 1;
   }
 
@@ -99,7 +100,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* pointer to pass to our read function */
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload);
@@ -111,16 +112,16 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
                      (curl_off_t)upload.sizeleft);
 
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return 0;
+  return (int)result;
 }

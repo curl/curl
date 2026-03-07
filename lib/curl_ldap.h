@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,14 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_LDAP
-extern const struct Curl_handler Curl_handler_ldap;
+extern const struct Curl_protocol Curl_protocol_ldap;
 
-#if !defined(CURL_DISABLE_LDAPS) && \
-    ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-     (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
-extern const struct Curl_handler Curl_handler_ldaps;
-#endif
+extern const struct Curl_scheme Curl_scheme_ldap;
+extern const struct Curl_scheme Curl_scheme_ldaps;
 
-#endif
+void Curl_ldap_version(char *buf, size_t bufsz);
+
 #endif /* HEADER_CURL_LDAP_H */

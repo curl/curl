@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,11 +31,15 @@ int xferinfo_cb(void *clientp,
                 curl_off_t ultotal,
                 curl_off_t ulnow);
 
-bool progress_meter(struct GlobalConfig *global,
-                    struct timeval *start,
+bool progress_meter(CURLM *multi,
+                    struct curltime *start,
                     bool final);
+struct per_transfer;
 void progress_finalize(struct per_transfer *per);
 
-extern curl_off_t all_xfers;   /* total number */
+#ifdef UNITTESTS
+UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen);
+UNITTEST void time2str(char *r, size_t rlen, curl_off_t seconds);
+#endif
 
 #endif /* HEADER_CURL_TOOL_PROGRESS_H */

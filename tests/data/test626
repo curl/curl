@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,36 +8,30 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP invalid quote command
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "invalid-command foo bar" sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "invalid-command foo bar" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test file for rename test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
 21
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

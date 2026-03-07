@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,9 +12,6 @@ curl_easy_option
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 verify that curl_easy_setopt() rejects too long string inputs
 </name>

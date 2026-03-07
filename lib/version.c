@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,23 +21,20 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#include <curl/curl.h>
+#ifdef USE_NGHTTP2
+#include <nghttp2/nghttp2.h>
+#endif
+
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "http2.h"
 #include "vssh/ssh.h"
-#include "quic.h"
-#include "curl_printf.h"
+#include "vquic/vquic.h"
 #include "easy_lock.h"
 
 #ifdef USE_ARES
-#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
-  defined(WIN32)
-#    define CARES_STATICLIB
-#  endif
 #  include <ares.h>
 #endif
 
@@ -51,6 +48,7 @@
 
 #ifdef USE_LIBRTMP
 #include <librtmp/rtmp.h>
+#include "curl_rtmp.h"
 #endif
 
 #ifdef HAVE_LIBZ
@@ -58,7 +56,15 @@
 #endif
 
 #ifdef HAVE_BROTLI
+#if defined(__GNUC__) || defined(__clang__)
+/* Ignore -Wvla warnings in brotli headers */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvla"
+#endif
 #include <brotli/decode.h>
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 #ifdef HAVE_ZSTD
@@ -69,8 +75,8 @@
 #include <gsasl.h>
 #endif
 
-#ifdef USE_OPENLDAP
-#include <ldap.h>
+#ifndef CURL_DISABLE_LDAP
+#include "curl_ldap.h"
 #endif
 
 #ifdef HAVE_BROTLI
@@ -80,20 +86,49 @@ static void brotli_version(char *buf, size_t bufsz)
   unsigned int major = brotli_version >> 24;
   unsigned int minor = (brotli_version & 0x00FFFFFF) >> 12;
   unsigned int patch = brotli_version & 0x00000FFF;
-  (void)msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
+  (void)curl_msnprintf(buf, bufsz, "brotli/%u.%u.%u", major, minor, patch);
 }
 #endif
 
 #ifdef HAVE_ZSTD
 static void zstd_version(char *buf, size_t bufsz)
 {
-  unsigned long zstd_version = (unsigned long)ZSTD_versionNumber();
-  unsigned int major = (unsigned int)(zstd_version / (100 * 100));
-  unsigned int minor = (unsigned int)((zstd_version -
-                                       (major * 100 * 100)) / 100);
-  unsigned int patch = (unsigned int)(zstd_version -
-                                      (major * 100 * 100) - (minor * 100));
-  (void)msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
+  unsigned int version = ZSTD_versionNumber();
+  unsigned int major = version / (100 * 100);
+  unsigned int minor = (version - (major * 100 * 100)) / 100;
+  unsigned int patch = version - (major * 100 * 100) - (minor * 100);
+  (void)curl_msnprintf(buf, bufsz, "zstd/%u.%u.%u", major, minor, patch);
+}
+#endif
+
+#ifdef USE_LIBPSL
+static void psl_version(char *buf, size_t bufsz)
+{
+#if defined(PSL_VERSION_MAJOR) && (PSL_VERSION_MAJOR > 0 ||     \
+                                   PSL_VERSION_MINOR >= 11)
+  int num = psl_check_version_number(0);
+  curl_msnprintf(buf, bufsz, "libpsl/%d.%d.%d",
+                 num >> 16, (num >> 8) & 0xff, num & 0xff);
+#else
+  curl_msnprintf(buf, bufsz, "libpsl/%s", psl_get_version());
+#endif
+}
+#endif
+
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
+#define USE_IDN
+#endif
+
+#ifdef USE_IDN
+static void idn_version(char *buf, size_t bufsz)
+{
+#ifdef USE_LIBIDN2
+  curl_msnprintf(buf, bufsz, "libidn2/%s", idn2_check_version(NULL));
+#elif defined(USE_WIN32_IDN)
+  curl_msnprintf(buf, bufsz, "WinIDN");
+#elif defined(USE_APPLE_IDN)
+  curl_msnprintf(buf, bufsz, "AppleIDN");
+#endif
 }
 #endif
 
@@ -117,42 +152,42 @@ char *curl_version(void)
   char ssl_version[200];
 #endif
 #ifdef HAVE_LIBZ
-  char z_version[40];
+  char z_version[30];
 #endif
 #ifdef HAVE_BROTLI
-  char br_version[40] = "brotli/";
+  char br_version[30];
 #endif
 #ifdef HAVE_ZSTD
-  char zst_version[40] = "zstd/";
+  char zstd_ver[30];
 #endif
 #ifdef USE_ARES
-  char cares_version[40];
+  char cares_version[30];
 #endif
-#if defined(USE_LIBIDN2)
-  char idn_version[40];
+#ifdef USE_IDN
+  char idn_ver[30];
 #endif
 #ifdef USE_LIBPSL
-  char psl_version[40];
+  char psl_ver[30];
 #endif
 #ifdef USE_SSH
-  char ssh_version[40];
+  char ssh_version[30];
 #endif
-#ifdef USE_NGHTTP2
-  char h2_version[40];
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
+  char h2_version[30];
 #endif
-#ifdef ENABLE_QUIC
-  char h3_version[40];
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
+  char h3_version[30];
 #endif
 #ifdef USE_LIBRTMP
-  char rtmp_version[40];
-#endif
-#ifdef USE_HYPER
-  char hyper_buf[30];
+  char rtmp_version[30];
 #endif
 #ifdef USE_GSASL
   char gsasl_buf[30];
 #endif
-#ifdef USE_OPENLDAP
+#ifdef HAVE_GSSAPI
+  char gss_buf[40];
+#endif
+#ifndef CURL_DISABLE_LDAP
   char ldap_buf[30];
 #endif
   int i = 0;
@@ -162,8 +197,7 @@ char *curl_version(void)
   /* Override version string when environment variable CURL_VERSION is set */
   const char *debugversion = getenv("CURL_VERSION");
   if(debugversion) {
-    strncpy(out, debugversion, sizeof(out)-1);
-    out[sizeof(out)-1] = '\0';
+    curl_msnprintf(out, sizeof(out), "%s", debugversion);
     return out;
   }
 #endif
@@ -174,89 +208,66 @@ char *curl_version(void)
   src[i++] = ssl_version;
 #endif
 #ifdef HAVE_LIBZ
-  msnprintf(z_version, sizeof(z_version), "zlib/%s", zlibVersion());
+  curl_msnprintf(z_version, sizeof(z_version), "zlib/%s", zlibVersion());
   src[i++] = z_version;
 #endif
 #ifdef HAVE_BROTLI
-  brotli_version(&br_version[7], sizeof(br_version) - 7);
+  brotli_version(br_version, sizeof(br_version));
   src[i++] = br_version;
 #endif
 #ifdef HAVE_ZSTD
-  zstd_version(&zst_version[5], sizeof(zst_version) - 5);
-  src[i++] = zst_version;
+  zstd_version(zstd_ver, sizeof(zstd_ver));
+  src[i++] = zstd_ver;
 #endif
 #ifdef USE_ARES
-  msnprintf(cares_version, sizeof(cares_version),
-            "c-ares/%s", ares_version(NULL));
+  curl_msnprintf(cares_version, sizeof(cares_version),
+                 "c-ares/%s", ares_version(NULL));
   src[i++] = cares_version;
 #endif
-#ifdef USE_LIBIDN2
-  msnprintf(idn_version, sizeof(idn_version),
-            "libidn2/%s", idn2_check_version(NULL));
-  src[i++] = idn_version;
-#elif defined(USE_WIN32_IDN)
-  src[i++] = (char *)"WinIDN";
+#ifdef USE_IDN
+  idn_version(idn_ver, sizeof(idn_ver));
+  src[i++] = idn_ver;
 #endif
-
 #ifdef USE_LIBPSL
-  msnprintf(psl_version, sizeof(psl_version), "libpsl/%s", psl_get_version());
-  src[i++] = psl_version;
+  psl_version(psl_ver, sizeof(psl_ver));
+  src[i++] = psl_ver;
 #endif
-
 #ifdef USE_SSH
   Curl_ssh_version(ssh_version, sizeof(ssh_version));
   src[i++] = ssh_version;
 #endif
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   Curl_http2_ver(h2_version, sizeof(h2_version));
   src[i++] = h2_version;
 #endif
-#ifdef ENABLE_QUIC
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   Curl_quic_ver(h3_version, sizeof(h3_version));
   src[i++] = h3_version;
 #endif
 #ifdef USE_LIBRTMP
-  {
-    char suff[2];
-    if(RTMP_LIB_VERSION & 0xff) {
-      suff[0] = (RTMP_LIB_VERSION & 0xff) + 'a' - 1;
-      suff[1] = '\0';
-    }
-    else
-      suff[0] = '\0';
-
-    msnprintf(rtmp_version, sizeof(rtmp_version), "librtmp/%d.%d%s",
-              RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
-              suff);
-    src[i++] = rtmp_version;
-  }
-#endif
-#ifdef USE_HYPER
-  msnprintf(hyper_buf, sizeof(hyper_buf), "Hyper/%s", hyper_version());
-  src[i++] = hyper_buf;
+  Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+  src[i++] = rtmp_version;
 #endif
 #ifdef USE_GSASL
-  msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
-            gsasl_check_version(NULL));
+  curl_msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
+                 gsasl_check_version(NULL));
   src[i++] = gsasl_buf;
 #endif
-#ifdef USE_OPENLDAP
-  {
-    LDAPAPIInfo api;
-    api.ldapai_info_version = LDAP_API_INFO_VERSION;
-
-    if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
-      unsigned int patch = api.ldapai_vendor_version % 100;
-      unsigned int major = api.ldapai_vendor_version / 10000;
-      unsigned int minor =
-        ((api.ldapai_vendor_version - major * 10000) - patch) / 100;
-      msnprintf(ldap_buf, sizeof(ldap_buf), "%s/%u.%u.%u",
-                api.ldapai_vendor_name, major, minor, patch);
-      src[i++] = ldap_buf;
-      ldap_memfree(api.ldapai_vendor_name);
-      ber_memvfree((void **)api.ldapai_extensions);
-    }
-  }
+#ifdef HAVE_GSSAPI
+#ifdef HAVE_GSSGNU
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s",
+                 GSS_VERSION);
+#elif defined(CURL_KRB5_VERSION)
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s",
+                 CURL_KRB5_VERSION);
+#else
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5");
+#endif
+  src[i++] = gss_buf;
+#endif /* HAVE_GSSAPI */
+#ifndef CURL_DISABLE_LDAP
+  Curl_ldap_version(ldap_buf, sizeof(ldap_buf));
+  src[i++] = ldap_buf;
 #endif
 
   DEBUGASSERT(i <= VERSION_PARTS);
@@ -288,7 +299,7 @@ char *curl_version(void)
    protocol line has its own #if line to make things easier on the eye.
  */
 
-static const char * const protocols[] = {
+static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_DICT
   "dict",
 #endif
@@ -322,13 +333,16 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_LDAP
   "ldap",
 #if !defined(CURL_DISABLE_LDAPS) && \
-    ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-     (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
+  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
+   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
   "ldaps",
 #endif
 #endif
 #ifndef CURL_DISABLE_MQTT
   "mqtt",
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)
+  "mqtts",
 #endif
 #ifndef CURL_DISABLE_POP3
   "pop3",
@@ -347,14 +361,11 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
 #endif
-#if defined(USE_SSH) && !defined(USE_WOLFSSH)
-  "scp",
-#endif
 #ifdef USE_SSH
+  "scp",
   "sftp",
 #endif
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-   (SIZEOF_CURL_OFF_T > 4)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
   "smb",
 #  ifdef USE_SSL
   "smbs",
@@ -372,37 +383,52 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_TFTP
   "tftp",
 #endif
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_HTTP
+  /* WebSocket support relies on HTTP */
+#ifndef CURL_DISABLE_WEBSOCKETS
   "ws",
 #endif
-#if defined(USE_SSL) && defined(USE_WEBSOCKETS)
+#if defined(USE_SSL) && !defined(CURL_DISABLE_WEBSOCKETS)
   "wss",
+#endif
 #endif
 
   NULL
 };
 
 /*
- * Feature presence run-time check functions.
+ * Feature presence runtime check functions.
  *
  * Warning: the value returned by these should not change between
  * curl_global_init() and curl_global_cleanup() calls.
  */
 
-#if defined(USE_LIBIDN2)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 static int idn_present(curl_version_info_data *info)
 {
-  return info->libidn != NULL;
-}
+#if defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
+  (void)info;
+  return TRUE;
 #else
-#define idn_present     NULL
+  return info->libidn != NULL;
+#endif
+}
 #endif
 
-#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY)
+#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
+  !defined(CURL_DISABLE_HTTP)
 static int https_proxy_present(curl_version_info_data *info)
 {
-  (void) info;
+  (void)info;
   return Curl_ssl_supports(NULL, SSLSUPP_HTTPS_PROXY);
+}
+#endif
+
+#if defined(USE_SSL) && defined(USE_ECH)
+static int ech_present(curl_version_info_data *info)
+{
+  (void)info;
+  return Curl_ssl_supports(NULL, SSLSUPP_ECH);
 }
 #endif
 
@@ -413,7 +439,7 @@ static int https_proxy_present(curl_version_info_data *info)
  * Use FEATURE() macro to define an entry: this allows documentation check.
  */
 
-#define FEATURE(name, present, bitmask) {(name), (present), (bitmask)}
+#define FEATURE(name, present, bitmask) { (name), (present), (bitmask) }
 
 struct feat {
   const char *name;
@@ -425,6 +451,9 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_ALTSVC
   FEATURE("alt-svc",     NULL,                CURL_VERSION_ALTSVC),
 #endif
+#if defined(USE_ARES) && defined(CURLRES_THREADED) && defined(USE_HTTPSRR)
+  FEATURE("asyn-rr", NULL,             0),
+#endif
 #ifdef CURLRES_ASYNCH
   FEATURE("AsynchDNS",   NULL,                CURL_VERSION_ASYNCHDNS),
 #endif
@@ -433,6 +462,13 @@ static const struct feat features_table[] = {
 #endif
 #ifdef DEBUGBUILD
   FEATURE("Debug",       NULL,                CURL_VERSION_DEBUG),
+#endif
+#if defined(USE_SSL) && defined(USE_ECH)
+  FEATURE("ECH",         ech_present,         0),
+
+#ifndef USE_HTTPSRR
+#error "ECH enabled but not HTTPSRR, must be a config error"
+#endif
 #endif
 #ifdef USE_GSASL
   FEATURE("gsasl",       NULL,                CURL_VERSION_GSASL),
@@ -443,26 +479,29 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_HSTS
   FEATURE("HSTS",        NULL,                CURL_VERSION_HSTS),
 #endif
-#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   FEATURE("HTTP2",       NULL,                CURL_VERSION_HTTP2),
 #endif
-#if defined(ENABLE_QUIC)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   FEATURE("HTTP3",       NULL,                CURL_VERSION_HTTP3),
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY)
+#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
+  !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
 #endif
-#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#ifdef USE_HTTPSRR
+  FEATURE("HTTPSRR",     NULL,                0),
+#endif
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
   FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
 #endif
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   FEATURE("IPv6",        NULL,                CURL_VERSION_IPV6),
 #endif
 #ifdef USE_KERBEROS5
   FEATURE("Kerberos",    NULL,                CURL_VERSION_KERBEROS5),
 #endif
-#if (SIZEOF_CURL_OFF_T > 4) && \
-    ( (SIZEOF_OFF_T > 4) || defined(USE_WIN32_LARGE_FILES) )
+#if (SIZEOF_CURL_OFF_T > 4) && ((SIZEOF_OFF_T > 4) || defined(_WIN32))
   FEATURE("Largefile",   NULL,                CURL_VERSION_LARGEFILE),
 #endif
 #ifdef HAVE_LIBZ
@@ -474,18 +513,24 @@ static const struct feat features_table[] = {
 #ifdef USE_NTLM
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
 #endif
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-  defined(NTLM_WB_ENABLED)
-  FEATURE("NTLM_WB",     NULL,                CURL_VERSION_NTLM_WB),
-#endif
-#if defined(USE_LIBPSL)
+#ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
 #endif
+#ifdef USE_SSL
+#ifdef USE_APPLE_SECTRUST
+  FEATURE("AppleSecTrust", NULL,              0),
+#elif defined(CURL_CA_NATIVE)
+  FEATURE("NativeCA",    NULL,              0),
+#endif
+#endif /* USE_SSL */
 #ifdef USE_SPNEGO
   FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),
 #endif
 #ifdef USE_SSL
   FEATURE("SSL",         NULL,                CURL_VERSION_SSL),
+#endif
+#ifdef USE_SSLS_EXPORT
+  FEATURE("SSLS-EXPORT", NULL,                0),
 #endif
 #ifdef USE_WINDOWS_SSPI
   FEATURE("SSPI",        NULL,                CURL_VERSION_SSPI),
@@ -496,10 +541,7 @@ static const struct feat features_table[] = {
 #ifdef USE_TLS_SRP
   FEATURE("TLS-SRP",     NULL,                CURL_VERSION_TLSAUTH_SRP),
 #endif
-#ifdef CURLDEBUG
-  FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
-#endif
-#if defined(WIN32) && defined(UNICODE) && defined(_UNICODE)
+#if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
   FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
 #endif
 #ifdef USE_UNIX_SOCKETS
@@ -508,23 +550,21 @@ static const struct feat features_table[] = {
 #ifdef HAVE_ZSTD
   FEATURE("zstd",        NULL,                CURL_VERSION_ZSTD),
 #endif
-  {NULL,             NULL,                0}
+  {NULL,                 NULL,                0}
 };
 
-static const char *feature_names[sizeof(features_table) /
-                                 sizeof(features_table[0])] = {NULL};
-
+static const char *feature_names[CURL_ARRAYSIZE(features_table)] = { NULL };
 
 static curl_version_info_data version_info = {
   CURLVERSION_NOW,
   LIBCURL_VERSION,
   LIBCURL_VERSION_NUM,
-  OS,   /* as found by configure or set by hand at build-time */
-  0,    /* features bitmask is built at run-time */
+  CURL_OS, /* as found by configure or set by hand at build-time */
+  0,    /* features bitmask is built at runtime */
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */
   NULL, /* zlib_version */
-  protocols,
+  supported_protocols,
   NULL, /* c-ares version */
   0,    /* c-ares version numerical */
   NULL, /* libidn version */
@@ -549,7 +589,8 @@ static curl_version_info_data version_info = {
   NULL, /* zstd version */
   NULL, /* Hyper version */
   NULL, /* gsasl version */
-  feature_names
+  feature_names,
+  NULL  /* rtmp version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -558,8 +599,8 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   const struct feat *p;
   int features = 0;
 
-#if defined(USE_SSH)
-  static char ssh_buffer[80];
+#ifdef USE_SSH
+  static char ssh_buf[80];  /* 'ssh_buffer' clashes with libssh/libssh.h */
 #endif
 #ifdef USE_SSL
 #ifdef CURL_WITH_MULTI_SSL
@@ -575,7 +616,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   static char zstd_buffer[80];
 #endif
 
-  (void)stamp; /* avoid compiler warnings, we don't use this */
+  (void)stamp;
 
 #ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
@@ -599,9 +640,9 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   version_info.libidn = idn2_check_version(IDN2_VERSION);
 #endif
 
-#if defined(USE_SSH)
-  Curl_ssh_version(ssh_buffer, sizeof(ssh_buffer));
-  version_info.libssh_version = ssh_buffer;
+#ifdef USE_SSH
+  Curl_ssh_version(ssh_buf, sizeof(ssh_buf));
+  version_info.libssh_version = ssh_buf;
 #endif
 
 #ifdef HAVE_BROTLI
@@ -611,7 +652,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #endif
 
 #ifdef HAVE_ZSTD
-  version_info.zstd_ver_num = (unsigned int)ZSTD_versionNumber();
+  version_info.zstd_ver_num = ZSTD_versionNumber();
   zstd_version(zstd_buffer, sizeof(zstd_buffer));
   version_info.zstd_version = zstd_buffer;
 #endif
@@ -619,24 +660,16 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef USE_NGHTTP2
   {
     nghttp2_info *h2 = nghttp2_version(0);
-    version_info.nghttp2_ver_num = h2->version_num;
+    version_info.nghttp2_ver_num = (unsigned int)h2->version_num;
     version_info.nghttp2_version = h2->version_str;
   }
 #endif
 
-#ifdef ENABLE_QUIC
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   {
     static char quicbuffer[80];
     Curl_quic_ver(quicbuffer, sizeof(quicbuffer));
     version_info.quic_version = quicbuffer;
-  }
-#endif
-
-#ifdef USE_HYPER
-  {
-    static char hyper_buffer[30];
-    msnprintf(hyper_buffer, sizeof(hyper_buffer), "Hyper/%s", hyper_version());
-    version_info.hyper_version = hyper_buffer;
   }
 #endif
 
@@ -654,8 +687,20 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
       feature_names[n++] = p->name;
     }
 
+#ifdef DEBUGBUILD
+  features |= CURL_VERSION_CURLDEBUG; /* for compatibility */
+#endif
+
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;
+
+#ifdef USE_LIBRTMP
+  {
+    static char rtmp_version[30];
+    Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+    version_info.rtmp_version = rtmp_version;
+  }
+#endif
 
   return &version_info;
 }

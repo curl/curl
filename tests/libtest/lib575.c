@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,15 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include <fcntl.h>
-
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-#define TEST_HANG_TIMEOUT 60 * 1000
+#include "first.h"
 
 /* 3x download!
  * 1. normal
@@ -37,43 +29,43 @@
  * 3. with multi interface
  */
 
-int test(char *URL)
+static CURLcode test_lib575(const char *URL)
 {
-  CURL *handle = NULL;
-  CURL *duphandle = NULL;
-  CURLM *mhandle = NULL;
-  int res = 0;
+  CURL *curl = NULL;
+  CURL *curldupe = NULL;
+  CURLM *multi = NULL;
+  CURLcode result = CURLE_OK;
   int still_running = 0;
 
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(handle);
+  easy_init(curl);
 
-  easy_setopt(handle, CURLOPT_URL, URL);
-  easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(handle);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  res = curl_easy_perform(handle);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  duphandle = curl_easy_duphandle(handle);
-  if(!duphandle)
+  curldupe = curl_easy_duphandle(curl);
+  if(!curldupe)
     goto test_cleanup;
-  curl_easy_cleanup(handle);
-  handle = duphandle;
+  curl_easy_cleanup(curl);
+  curl = curldupe;
 
-  multi_init(mhandle);
+  multi_init(multi);
 
-  multi_add_handle(mhandle, handle);
+  multi_add_handle(multi, curl);
 
-  multi_perform(mhandle, &still_running);
+  multi_perform(multi, &still_running);
 
   abort_on_test_timeout();
 
@@ -91,7 +83,7 @@ int test(char *URL)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -99,7 +91,7 @@ int test(char *URL)
 
     abort_on_test_timeout();
 
-    multi_perform(mhandle, &still_running);
+    multi_perform(multi, &still_running);
 
     abort_on_test_timeout();
   }
@@ -108,9 +100,9 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(mhandle);
-  curl_easy_cleanup(handle);
+  curl_multi_cleanup(multi);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

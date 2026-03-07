@@ -1,9 +1,8 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
-#
 # For this test the server rejects the EPRT command,
 # code in lib591 makes use of curl_multi_timeout()
 # and server does not establish data connection.
-#
 <info>
 <keywords>
 FTP
@@ -33,13 +32,13 @@ ftp
 <tool>
 lib591
 </tool>
- <name>
+<name>
 FTP multi PORT and 421 on upload
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 log/upload%TESTNUMBER
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo for %TESTNUMBER
  upload this
 </file>
@@ -49,11 +48,11 @@ Moooooooooooo for %TESTNUMBER
 <verify>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
-s/^PORT (.*)/PORT/
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^PORT (\S*)/PORT/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
 # a 421 response must prevent further commands from being sent
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

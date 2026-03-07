@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,19 +7,14 @@ options-in-versions
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
-
- <name>
+<name>
 Verify that options-in-versions and docs/cmdline-opts are in sync
- </name>
+</name>
 
 <command type="perl">
-%SRCDIR/options-scan.pl %SRCDIR/../docs/options-in-versions %SRCDIR/../docs/cmdline-opts
+%SRCDIR/test971.pl %SRCDIR/../docs/options-in-versions %SRCDIR/../docs/cmdline-opts %SRCDIR/../docs/VERSIONS.md
 </command>
 </client>
 

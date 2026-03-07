@@ -1,0 +1,62 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+#include "first.h"
+
+static CURLcode test_lib3105(const char *URL)
+{
+  CURL *curl = NULL;
+  CURLM *multi = NULL;
+  CURLcode i = CURLE_OK;
+  CURLcode result = CURLE_OK;
+  CURLMcode mresult;
+
+  global_init(CURL_GLOBAL_ALL);
+
+  multi_init(multi);
+
+  easy_init(curl);
+
+  easy_setopt(curl, CURLOPT_URL, URL);
+
+  multi_add_handle(multi, curl);
+
+  mresult = curl_multi_remove_handle(multi, curl);
+  if(!mresult)
+    mresult = curl_multi_remove_handle(multi, curl);
+
+  if(mresult) {
+    curl_mfprintf(stderr, "%d was unexpected\n", mresult);
+    i = CURLE_FAILED_INIT;
+  }
+
+test_cleanup:
+  curl_multi_cleanup(multi);
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  if(result)
+    i = result;
+
+  return i; /* return the final return code */
+}

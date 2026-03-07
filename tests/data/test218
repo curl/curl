@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,10 +7,9 @@ HTTP PUT
 chunked Transfer-Encoding
 </keywords>
 </info>
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html
@@ -19,43 +19,36 @@ blaha
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT from a file but enforce chunked transfer-encoding
- </name>
- <command>
- -T log/file%TESTNUMBER -H "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</name>
+<command>
+-T %LOGDIR/file%TESTNUMBER -H "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
-<file name="log/file%TESTNUMBER">
+<file name="%LOGDIR/file%TESTNUMBER">
 just some tiny teeny contents
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Transfer-Encoding: chunked
-Expect: 100-continue
-
-%if hyper
-1E
-%else
-1e
-%endif
+PUT /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Transfer-Encoding: chunked%CR
+%CR
+1e%CR
 just some tiny teeny contents
-
-0
-
+%CR
+0%CR
+%CR
 </protocol>
 </verify>
 </testcase>

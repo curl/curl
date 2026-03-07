@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -20,13 +21,13 @@ REPLY SIZE 500 command not understood
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP resume upload but denied access to remote file
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/file%TESTNUMBER.txt -C -
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/file%TESTNUMBER.txt -C -
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 </file>
 </client>
@@ -34,7 +35,7 @@ Test data
 # Verify data after the test has been "shot"
 <verify>
 
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,10 +12,10 @@ FAILURE
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP %0d-code in URL's CWD part
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER%0d
 </command>
 </client>

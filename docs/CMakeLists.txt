@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,6 +21,26 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-#add_subdirectory(examples)
-add_subdirectory(libcurl)
-add_subdirectory(cmdline-opts)
+
+if(BUILD_LIBCURL_DOCS)
+  add_subdirectory(libcurl)
+endif()
+if(ENABLE_CURL_MANUAL AND BUILD_CURL_EXE)
+  add_subdirectory(cmdline-opts)
+endif()
+
+if(BUILD_MISC_DOCS)
+  foreach(_man_misc IN ITEMS "curl-config" "mk-ca-bundle" "wcurl" "runtests" "testcurl")
+    set(_man_target "${CMAKE_CURRENT_BINARY_DIR}/${_man_misc}.1")
+    add_custom_command(OUTPUT "${_man_target}"
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" "${_man_misc}.md" > "${_man_target}"
+      DEPENDS "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" "${_man_misc}.md"
+      VERBATIM
+    )
+    add_custom_target("curl-generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
+    if(NOT CURL_DISABLE_INSTALL AND NOT _man_misc STREQUAL "mk-ca-bundle")
+      install(FILES "${_man_target}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+    endif()
+  endforeach()
+endif()

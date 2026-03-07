@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,10 +33,9 @@ void Curl_amiga_cleanup(void);
 
 #else
 
-#define Curl_amiga_init() CURLE_OK
+#define Curl_amiga_init()    CURLE_OK
 #define Curl_amiga_cleanup() Curl_nop_stmt
 
 #endif
 
 #endif /* HEADER_CURL_AMIGAOS_H */
-

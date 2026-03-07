@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -13,9 +14,6 @@ curl_easy_option_by_id
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 curl_easy_option_by_name() and curl_easy_option_by_id()
 </name>

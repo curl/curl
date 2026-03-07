@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -23,14 +24,14 @@ Funny-head: yesyes swsclose
 <server>
 http
 </server>
- <name>
+<name>
 CURLOPT_CURLU and CURLOPT_PORT
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>
 
-# The tool does two requesets, the first sets CURLOPT_PORT to 1
+# The tool does two requests, the first sets CURLOPT_PORT to 1
 # the second resets the port again and expects that request to work.
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
@@ -39,7 +40,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

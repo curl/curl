@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,29 +6,26 @@
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
-!ipv6
+!IPv6
 </features>
 <server>
 http
 </server>
- <name>
+<name>
 --connect-to with IPv6 address w/o IPv6 support!
- </name>
+</name>
 <command>
 --connect-to localhost:80:[::1]:80 localhost
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 4 == CURLE_NOT_BUILT_IN

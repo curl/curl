@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -20,6 +21,10 @@ Content-Length: 0
 
 # Client-side
 <client>
+<features>
+http
+IPv6
+</features>
 <server>
 http-ipv6
 </server>
@@ -28,12 +33,16 @@ http-ipv6
 Pre-request callback for HTTP IPv6
 </name>
 <tool>
-libprereq
+lib2082
 </tool>
 
 <command>
 %HOST6IP:%HTTP6PORT/%TESTNUMBER#ipv6
 </command>
+<setenv>
+# Needed for MSYS2 to not treat the URL as a path list
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
 </client>
 
 # Verify data after the test has been "shot"

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,10 +7,9 @@ POST
 POST callback
 </keywords>
 </info>
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -30,22 +30,17 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 send HTTP POST using read callback
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<strippart>
-# remove CR that CURLOPT_TRANSFERTEXT added, when CharConv enabled:
-s/^(this is what we post to the silly web server)\r\n/$1\n/ if($has_charconv)
-</strippart>
-<protocol>
+<protocol crlf="headers">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

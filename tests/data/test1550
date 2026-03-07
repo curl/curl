@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,19 +12,13 @@ multi
 
 # Client-side
 <client>
-<server>
-none
-</server>
 # tool is what to use instead of 'curl'
 <tool>
 lib%TESTNUMBER
 </tool>
 
- <name>
-verify setting pipeling blocklisting options
- </name>
- <command>
-http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
-</command>
+<name>
+verify setting pipelining blocklisting options
+</name>
 </client>
 </testcase>

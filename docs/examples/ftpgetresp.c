@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,59 +21,79 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Similar to ftpget.c but also stores the received response-lines
  * in a separate file using our own callback!
  * </DESC>
  */
-static size_t
-write_response(void *ptr, size_t size, size_t nmemb, void *data)
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+
+#include <curl/curl.h>
+
+static size_t write_response(void *ptr, size_t size, size_t nmemb, void *data)
 {
   FILE *writehere = (FILE *)data;
   return fwrite(ptr, size, nmemb, writehere);
 }
 
-#define FTPBODY "ftp-list"
+#define FTPBODY    "ftp-list"
 #define FTPHEADERS "ftp-responses"
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   FILE *ftpfile;
   FILE *respfile;
 
-  /* local file name to store the file as */
-  ftpfile = fopen(FTPBODY, "wb"); /* b is binary, needed on win32 */
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
-  /* local file name to store the FTP server's response lines in */
-  respfile = fopen(FTPHEADERS, "wb"); /* b is binary, needed on win32 */
+  /* local filename to store the file as */
+  ftpfile = fopen(FTPBODY, "wb"); /* b is binary, needed on Windows */
+  if(!ftpfile) {
+    curl_global_cleanup();
+    return 1;
+  }
+
+  /* local filename to store the FTP server's response lines in */
+  respfile = fopen(FTPHEADERS, "wb"); /* b is binary, needed on Windows */
+  if(!respfile) {
+    fclose(ftpfile);
+    curl_global_cleanup();
+    return 1;
+  }
 
   curl = curl_easy_init();
   if(curl) {
     /* Get a file listing from sunet */
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/");
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, ftpfile);
-    /* If you intend to use this on windows with a libcurl DLL, you must use
+    /* If you intend to use this on Windows with a libcurl DLL, you must use
        CURLOPT_WRITEFUNCTION as well */
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_response);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, respfile);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
 
-  fclose(ftpfile); /* close the local file */
+  fclose(ftpfile);  /* close the local file */
   fclose(respfile); /* close the response file */
 
-  return 0;
+  curl_global_cleanup();
+
+  return (int)result;
 }

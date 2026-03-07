@@ -1,24 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 unittest
-ssl
-wildcard
+Curl_cert_hostcheck
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
-Check wildcard certificate matching function Curl_cert_hostcheck
- </name>
+<name>
+Curl_cert_hostcheck unit tests
+</name>
 </client>
-
 </testcase>

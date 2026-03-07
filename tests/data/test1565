@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -34,7 +35,7 @@ lib%TESTNUMBER
 wakeup from another thread
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

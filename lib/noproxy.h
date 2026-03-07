@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,7 +27,7 @@
 
 #ifndef CURL_DISABLE_PROXY
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 
 UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
                                const char *network, /* 1.2.3.4 address */
@@ -38,7 +38,6 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
 #endif
 
 bool Curl_check_noproxy(const char *name, const char *no_proxy);
-
 #endif
 
 #endif /* HEADER_CURL_NOPROXY_H */

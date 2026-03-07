@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,24 +23,13 @@
  * RFC2195 CRAM-MD5 authentication
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
-
-#include <curl/curl.h>
-#include "urldata.h"
+#ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include "vauth/vauth.h"
 #include "curl_hmac.h"
 #include "curl_md5.h"
-#include "warnless.h"
-#include "curl_printf.h"
-
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /*
  * Curl_auth_create_cram_md5_message()
@@ -51,7 +40,7 @@
  * Parameters:
  *
  * chlg    [in]     - The challenge.
- * userp   [in]     - The user name.
+ * userp   [in]     - The username.
  * passwdp [in]     - The user's password.
  * out     [out]    - The result storage.
  *
@@ -67,22 +56,22 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   char *response;
 
   /* Compute the digest using the password as the key */
-  ctxt = Curl_HMAC_init(Curl_HMAC_MD5,
-                        (const unsigned char *) passwdp,
+  ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
+                        (const unsigned char *)passwdp,
                         curlx_uztoui(strlen(passwdp)));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
   if(Curl_bufref_len(chlg))
-    Curl_HMAC_update(ctxt, Curl_bufref_ptr(chlg),
+    Curl_HMAC_update(ctxt, Curl_bufref_uptr(chlg),
                      curlx_uztoui(Curl_bufref_len(chlg)));
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, digest);
 
   /* Generate the response */
-  response = aprintf(
+  response = curl_maprintf(
     "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
     userp, digest[0], digest[1], digest[2], digest[3], digest[4],
     digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
@@ -94,4 +83,4 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   return CURLE_OK;
 }
 
-#endif /* !CURL_DISABLE_CRYPTO_AUTH */
+#endif /* !CURL_DISABLE_DIGEST_AUTH */

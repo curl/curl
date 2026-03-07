@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <features>
@@ -17,15 +17,14 @@ OpenSSL
 <server>
 https
 </server>
- <name>
+<name>
 simple HTTPS GET with invalid crypto engine
- </name>
- <command>
---engine invalid-crypto-engine-xyzzy -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+</name>
+<command>
+--engine invalid-crypto-engine-xyzzy --insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

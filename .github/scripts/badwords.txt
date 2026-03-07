@@ -1,0 +1,95 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+back-end:backend
+\be-mail[^/]:email
+run-time:runtime
+set-up:setup
+tool chain:toolchain
+tool-chain:toolchain
+wild-card:wildcard
+wild card:wildcard
+\bthread ?safe[^."t]:thread-safe
+\bthread ?unsafe[^."t]:thread-unsafe
+multi ?thread:multi-thread
+\bit's:it is
+aren't:are not
+can't:cannot
+could've:could have
+couldn't:could not
+didn't:did not
+doesn't:does not
+don't:do not
+haven't:have not
+i'd:I would
+i'll:I will
+i'm:I am
+i've:I have
+isn't:is not
+it'd:it would
+it'll:it will
+might've:might have
+needn't:need not
+should've:should have
+shouldn't:should not
+that's:that is
+there's:there is
+they'd:They would
+they'll:They will
+they're:They are
+they've:They have
+this'll:this will
+wasn't:was not
+we'd:we would
+we'll:we will
+we're:we are
+we've:we have
+weren't:were not
+won't:will not
+would've:would have
+wouldn't:would not
+you'd:you would
+you'll:you will
+you're:you are
+you've:you have
+ a html: an html
+ a http: an http
+ a ftp: an ftp
+ a IPv4: an IPv4
+ a IPv6: an IPv6
+ url [^=]=URL
+[^/]internet\b=Internet
+isation:ization
+[^.]\. And: Rewrite it somehow?
+^(And|So|But) = Rewrite it somehow?
+\. But: Rewrite it somehow?
+\. So : Rewrite without "so" ?
+ dir [^=]=directory
+ Dir [^=]=Directory
+sub-director:subdirector
+web page:webpage
+host name\b:hostname
+host names\b:hostnames
+[^;<]file name\b:filename
+file names\b:filenames
+\bfist\b:first
+\buser name\b:username
+\buser names\b:usernames
+\bpass phrase:passphrase
+\bwill\b:rewrite to present tense
+\b[0-9]+bit[^*"'%,]: NN-bit
+\b([02-9]|[1-9][0-9]+) bit\b: NN-bit
+[0-9]+-bits:NN bits or NN-bit
+\bvery\b:rephrase using an alternative word
+\bjust\b:rephrase using an alternative word
+\bCurl\b=curl
+\bcURL\b=curl
+\bLibcurl\b=libcurl
+\bLibCurl\b=libcurl
+---WWW::Curl
+---NET::Curl
+---Curl Corporation
+\bmanpages[^./;=&{:-]:man pages
+\bmanpage[^si./;=&{:-]:man page
+favour:favor

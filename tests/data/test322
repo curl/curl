@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -15,9 +16,9 @@ httptls+srp
 <features>
 TLS-SRP
 </features>
- <name>
+<name>
 TLS-SRP with bad password
- </name>
+</name>
 <command>
 --insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword badpass https://%HOSTIP:%HTTPTLSPORT
 </command>

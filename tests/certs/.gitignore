@@ -1,10 +1,14 @@
-# Copyright (C) 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
-EdelCurlRoot-*-ca.cacert
-EdelCurlRoot-ca.cnt
-EdelCurlRoot-ca.cnt.old
-EdelCurlRoot-ca.db
-EdelCurlRoot-ca.db.attr
-EdelCurlRoot-ca.db.attr.old
-EdelCurlRoot-ca.db.old
+test-*.crl
+test-*.crt
+test-*.csr
+test-*.der
+test-*.key*
+test-*.pem
+test-ca.cacert
+test-ca.cnt*
+test-ca.db*
+test-ca.raw*
+test-ca.srl

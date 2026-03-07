@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -23,21 +23,18 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings;
+
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
 }
 
-use strict;
-use warnings;
-
 use serverhelp qw(
     server_pidfilename
     server_logfilename
-    );
-
-use sshhelp qw(
-    exe_ext
+    server_exe
     );
 
 my $verbose = 0;     # set to 1 for debugging
@@ -73,6 +70,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--srcdir') {
         if($ARGV[1]) {
             $srcdir = $ARGV[1];
@@ -101,16 +104,20 @@ while(@ARGV) {
         $verbose = 1;
     }
     else {
-        print STDERR "\nWarning: rtspserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: rtspserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }
 
+#***************************************************************************
+# Initialize command line option dependent variables
+#
+
+if(!$pidfile) {
+    $pidfile = server_pidfilename($path, $proto, $ipvnum, $idnum);
+}
 if(!$srcdir) {
     $srcdir = $ENV{'srcdir'} || '.';
-}
-if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
@@ -118,8 +125,9 @@ if(!$logfile) {
 
 $flags .= "--pidfile \"$pidfile\" ".
     "--portfile \"$portfile\" ".
-    "--logfile \"$logfile\" ";
+    "--logfile \"$logfile\" ".
+    "--logdir \"$logdir\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;
-exec("exec server/rtspd".exe_ext('SRV')." $flags");
+exec("exec ".server_exe('rtspd')." $flags");

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,19 +29,20 @@
  * OutStruct variables keep track of information relative to curl's
  * output writing, which may take place to a standard stream or a file.
  *
- * 'filename' member is either a pointer to a file name string or NULL
+ * 'filename' member is either a pointer to a filename string or NULL
  * when dealing with a standard stream.
  *
  * 'alloc_filename' member is TRUE when string pointed by 'filename' has been
  * dynamically allocated and 'belongs' to this OutStruct, otherwise FALSE.
  *
  * 'is_cd_filename' member is TRUE when string pointed by 'filename' has been
- * set using a server-specified Content-Disposition filename, otherwise FALSE.
+ * set using a server-specified Content-Disposition or Location filename,
+ * otherwise FALSE.
  *
- * 's_isreg' member is TRUE when output goes to a regular file, this also
+ * 'regular_file' member is TRUE when output goes to a regular file, this also
  * implies that output is 'seekable' and 'appendable' and also that member
- * 'filename' points to file name's string. For any standard stream member
- * 's_isreg' will be FALSE.
+ * 'filename' points to filename's string. For any standard stream member
+ * 'regular_file' will be FALSE.
  *
  * 'fopened' member is TRUE when output goes to a regular file and it
  * has been fopen'ed, requiring it to be closed later on. In any other
@@ -57,62 +58,49 @@
  * 'init' member holds original file size or offset at which truncation is
  * taking place. Always zero unless appending to a non-empty regular file.
  *
+ * [Windows]
+ * 'utf8seq' member holds an incomplete UTF-8 sequence destined for the console
+ * until it can be completed (1-4 bytes) + NUL.
  */
-
 struct OutStruct {
   char *filename;
-  bool alloc_filename;
-  bool is_cd_filename;
-  bool s_isreg;
-  bool fopened;
   FILE *stream;
   curl_off_t bytes;
   curl_off_t init;
+#ifdef _WIN32
+  unsigned char utf8seq[5];
+#endif
+  BIT(alloc_filename);
+  BIT(is_cd_filename);
+  BIT(regular_file);
+  BIT(fopened);
+  BIT(out_null);
 };
-
-
-/*
- * InStruct variables keep track of information relative to curl's
- * input reading, which may take place from stdin or from some file.
- *
- * 'fd' member is either 'stdin' file descriptor number STDIN_FILENO
- * or a file descriptor as returned from an 'open' call for some file.
- *
- * 'config' member is a pointer to associated 'OperationConfig' struct.
- */
-
-struct InStruct {
-  int fd;
-  struct OperationConfig *config;
-  struct per_transfer *per;
-};
-
 
 /*
  * A linked list of these 'getout' nodes contain URL's to fetch,
  * as well as information relative to where URL contents should
  * be stored or which file should be uploaded.
  */
-
 struct getout {
   struct getout *next;      /* next one */
   char          *url;       /* the URL we deal with */
   char          *outfile;   /* where to store the output */
   char          *infile;    /* file to upload, if GETOUT_UPLOAD is set */
-  int            flags;     /* options - composed of GETOUT_* bits */
-  int            num;       /* which URL number in an invocation */
-};
+  curl_off_t    num;        /* which URL number in an invocation */
 
-#define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */
-#define GETOUT_URL        (1<<1)  /* set when URL is deemed done */
-#define GETOUT_USEREMOTE  (1<<2)  /* use remote file name locally */
-#define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
-#define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
+  BIT(outset);    /* when outfile is set */
+  BIT(urlset);    /* when URL is set */
+  BIT(uploadset); /* when -T is set */
+  BIT(useremote); /* use remote filename locally */
+  BIT(noupload);  /* if set, -T "" has been used */
+  BIT(noglob);    /* disable globbing for this URL */
+  BIT(out_null);  /* discard output for this URL */
+};
 
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.
  */
-
 typedef enum {
   TRACE_NONE,  /* no trace/verbose output at all */
   TRACE_BIN,   /* tcpdump inspired look */
@@ -120,26 +108,24 @@ typedef enum {
   TRACE_PLAIN  /* -v/--verbose type */
 } trace;
 
-
 /*
  * 'HttpReq' enumeration represents HTTP request types.
  */
-
 typedef enum {
-  HTTPREQ_UNSPEC,  /* first in list */
-  HTTPREQ_GET,
-  HTTPREQ_HEAD,
-  HTTPREQ_MIMEPOST,
-  HTTPREQ_SIMPLEPOST,
-  HTTPREQ_PUT
+  TOOL_HTTPREQ_UNSPEC,  /* first in list */
+  TOOL_HTTPREQ_GET,
+  TOOL_HTTPREQ_HEAD,
+  TOOL_HTTPREQ_MIMEPOST,
+  TOOL_HTTPREQ_SIMPLEPOST,
+  TOOL_HTTPREQ_PUT
 } HttpReq;
 
-
-/*
- * Complete struct declarations which have OperationConfig struct members,
- * just in case this header is directly included in some source file.
- */
-
-#include "tool_cfgable.h"
+typedef enum {
+  SANITIZE_ERR_OK = 0,           /* 0 - OK */
+  SANITIZE_ERR_INVALID_PATH,     /* 1 - the path is invalid */
+  SANITIZE_ERR_BAD_ARGUMENT,     /* 2 - bad function parameter */
+  SANITIZE_ERR_OUT_OF_MEMORY,    /* 3 - out of memory */
+  SANITIZE_ERR_LAST /* never use! */
+} SANITIZEcode;
 
 #endif /* HEADER_CURL_TOOL_SDECLS_H */

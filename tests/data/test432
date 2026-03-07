@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Derived from on https://github.com/curl/curl/issues/5120
 <info>
@@ -8,7 +9,6 @@ POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data1>
@@ -34,10 +34,9 @@ Content-Type: text/3
 </data3>
 </reply>
 
-#
 # Client-side
 <client>
-<file1 name="log/config%TESTNUMBER">
+<file1 name="%LOGDIR/config%TESTNUMBER">
 --next
 url = %HOSTIP:%HTTPPORT/%TESTNUMBER0001
 header = "a: a"
@@ -46,9 +45,9 @@ data = "a"
 url = %HOSTIP:%HTTPPORT/%TESTNUMBER0002
 header = "b: b"
 data = "b"
-config = "log/config%TESTNUMBER-c"
+config = "%LOGDIR/config%TESTNUMBER-c"
 </file1>
-<file2 name="log/config%TESTNUMBER-c">
+<file2 name="%LOGDIR/config%TESTNUMBER-c">
 --next
 url = %HOSTIP:%HTTPPORT/%TESTNUMBER0003
 header = "c: c"
@@ -58,18 +57,17 @@ data = "c"
 <server>
 http
 </server>
- <name>
+<name>
 Use -K with --next and --config from within
- </name>
- <command>
--K log/config%TESTNUMBER
+</name>
+<command>
+-K %LOGDIR/config%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

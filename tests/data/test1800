@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -32,24 +33,24 @@ http
 <features>
 http/2
 </features>
- <name>
+<name>
 HTTP/2 upgrade refused
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 </command>
 
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Connection: Upgrade, HTTP2-Settings
 Upgrade: %H2CVER
-HTTP2-Settings: AAMAAABkAAQCAAAAAAIAAAAA
+HTTP2-Settings: AAMAAABkAAQAAQAAAAIAAAAA
+Connection: Upgrade, HTTP2-Settings
 
 </protocol>
 </verify>

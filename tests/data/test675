@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,7 @@ HTTP Basic auth
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
@@ -23,9 +24,9 @@ the content would go here
 <server>
 http
 </server>
- <name>
-HTTP connection re-use and different credentials
- </name>
+<name>
+HTTP connection reuse and different credentials
+</name>
 
 <command>
 http://user1:foo1@%HOSTIP:%HTTPPORT/user1/%TESTNUMBER http://user2:foo2@%HOSTIP:%HTTPPORT/user2/%TESTNUMBER
@@ -37,16 +38,16 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /user1/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjE6Zm9vMQ==
+Authorization: Basic %b64[user1:foo1]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 
 GET /user2/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjI6Zm9vMg==
+Authorization: Basic %b64[user2:foo2]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

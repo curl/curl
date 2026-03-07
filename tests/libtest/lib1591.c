@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,35 +27,34 @@
  * from server http header
  */
 
-#include "test.h"
-#include <stdio.h>
-#include "memdebug.h"
+#include "first.h"
 
-static char data [] = "Hello Cloud!\r\n";
 static size_t consumed = 0;
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t t1591_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes curl wants */
+  static const char testdata[] = "Hello Cloud!\r\n";
 
-  if(consumed == strlen(data)) {
+  size_t amount = nmemb * size; /* Total bytes curl wants */
+
+  if(consumed == strlen(testdata)) {
     return 0;
   }
 
-  if(amount > strlen(data)-consumed) {
-    amount = strlen(data);
+  if(amount > strlen(testdata) - consumed) {
+    amount = strlen(testdata);
   }
 
   consumed += amount;
   (void)stream;
-  memcpy(ptr, data, amount);
+  memcpy(ptr, testdata, amount);
   return amount;
 }
 
 /*
  * carefully not leak memory on OOM
  */
-static int trailers_callback(struct curl_slist **list, void *userdata)
+static int t1591_trailers_callback(struct curl_slist **list, void *userdata)
 {
   struct curl_slist *nlist = NULL;
   struct curl_slist *nlist2 = NULL;
@@ -73,22 +72,21 @@ static int trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-int test(char *URL)
+static CURLcode test_lib1591(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
   /* http and proxy header list */
   struct curl_slist *hhl = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -102,11 +100,11 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-  test_setopt(curl, CURLOPT_TRAILERFUNCTION, trailers_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1591_read_cb);
+  test_setopt(curl, CURLOPT_TRAILERFUNCTION, t1591_trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -116,5 +114,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return (int)res;
+  return result;
 }

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,52 +28,38 @@
  * (test1515) nor a dead connection is detected (test1616).
  */
 
-#include "test.h"
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
+#include "first.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
+#include "testtrace.h"
 
-#define DNS_TIMEOUT 1
+#define DNS_TIMEOUT 1L
 
-#if defined(WIN32) || defined(_WIN32)
-#define sleep(sec) Sleep ((sec)*1000)
-#endif
-
-static int debug_callback(CURL *curl, curl_infotype info, char *msg,
-                          size_t len, void *ptr)
+static CURLcode do_one_request(CURLM *multi, const char *URL,
+                               const char *resolve)
 {
-  (void)curl;
-  (void)ptr;
-
-  if(info == CURLINFO_TEXT)
-    fprintf(stderr, "debug: %.*s", (int) len, msg);
-
-  return 0;
-}
-
-static int do_one_request(CURLM *m, char *URL, char *resolve)
-{
-  CURL *curls;
+  CURL *curl;
   struct curl_slist *resolve_list = NULL;
   int still_running;
-  int res = 0;
+  CURLcode result = CURLE_OK;
   CURLMsg *msg;
   int msgs_left;
 
   resolve_list = curl_slist_append(resolve_list, resolve);
 
-  easy_init(curls);
+  easy_init(curl);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_RESOLVE, resolve_list);
-  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, debug_callback);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1);
-  easy_setopt(curls, CURLOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_RESOLVE, resolve_list);
+  easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
 
-  multi_add_handle(m, curls);
-  multi_perform(m, &still_running);
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+  multi_add_handle(multi, curl);
+  multi_perform(multi, &still_running);
 
   abort_on_test_timeout();
 
@@ -88,63 +74,66 @@ static int do_one_request(CURLM *m, char *URL, char *resolve)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    multi_fdset(m, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
     select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
     abort_on_test_timeout();
-    multi_perform(m, &still_running);
+    multi_perform(multi, &still_running);
 
     abort_on_test_timeout();
   }
 
   do {
-    msg = curl_multi_info_read(m, &msgs_left);
-    if(msg && msg->msg == CURLMSG_DONE && msg->easy_handle == curls) {
-      res = msg->data.result;
+    msg = curl_multi_info_read(multi, &msgs_left);
+    if(msg && msg->msg == CURLMSG_DONE && msg->easy_handle == curl) {
+      result = msg->data.result;
       break;
     }
   } while(msg);
 
 test_cleanup:
 
-  curl_multi_remove_handle(m, curls);
-  curl_easy_cleanup(curls);
+  curl_multi_remove_handle(multi, curl);
+  curl_easy_cleanup(curl);
   curl_slist_free_all(resolve_list);
 
-  return res;
+  return result;
 }
 
-int test(char *URL)
+static CURLcode test_lib1515(const char *URL)
 {
   CURLM *multi = NULL;
-  int res = 0;
-  char *address = libtest_arg2;
-  char *port = libtest_arg3;
-  char *path = URL;
+  CURLcode result = CURLE_OK;
+  const char *path = URL;
+  const char *address = libtest_arg2;
+  const char *port = libtest_arg3;
   char dns_entry[256];
   int i;
   int count = 2;
 
-  msnprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s",
-            port, address);
+  curl_msnprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s",
+                 port, address);
 
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
+  curl_global_trace("all");
   multi_init(multi);
 
   for(i = 1; i <= count; i++) {
     char target_url[256];
-    msnprintf(target_url, sizeof(target_url),
-              "http://testserver.example.com:%s/%s%04d", port, path, i);
+    curl_msnprintf(target_url, sizeof(target_url),
+                   "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
-    res = do_one_request(multi, target_url, dns_entry);
-    if(res)
+    result = do_one_request(multi, target_url, dns_entry);
+    if(result != CURLE_OK) {
+      curl_mfprintf(stderr, "request %s failed with %d\n", target_url, result);
       goto test_cleanup;
+    }
 
     if(i < count)
-      sleep(DNS_TIMEOUT + 1);
+      curlx_wait_ms((DNS_TIMEOUT + 1) * 1000);
   }
 
 test_cleanup:
@@ -152,5 +141,5 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return (int) res;
+  return result;
 }

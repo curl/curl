@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,15 +25,12 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "tool_formparse.h"
-
 /*
  * Macros used in operate()
  */
 
-#define SETOPT_CHECK(v,opt) do {              \
-    result = (v);                             \
-  } while(0)
+/* return TRUE if the error code is "lethal" */
+bool setopt_bad(CURLcode result);
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
@@ -52,104 +49,99 @@ extern const struct NameValue setopt_nv_CURLPROXY[];
 extern const struct NameValue setopt_nv_CURL_SOCKS_PROXY[];
 extern const struct NameValue setopt_nv_CURL_HTTP_VERSION[];
 extern const struct NameValue setopt_nv_CURL_SSLVERSION[];
+extern const struct NameValue setopt_nv_CURL_SSLVERSION_MAX[];
 extern const struct NameValue setopt_nv_CURL_TIMECOND[];
 extern const struct NameValue setopt_nv_CURLFTPSSL_CCC[];
 extern const struct NameValue setopt_nv_CURLUSESSL[];
 extern const struct NameValueUnsigned setopt_nv_CURLSSLOPT[];
 extern const struct NameValue setopt_nv_CURL_NETRC[];
+extern const struct NameValue setopt_nv_CURLOPT_FOLLOWLOCATION[];
 extern const struct NameValueUnsigned setopt_nv_CURLAUTH[];
 extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 
 /* Map options to NameValue sets */
-#define setopt_nv_CURLOPT_HSTS_CTRL setopt_nv_CURLHSTS
-#define setopt_nv_CURLOPT_HTTP_VERSION setopt_nv_CURL_HTTP_VERSION
-#define setopt_nv_CURLOPT_HTTPAUTH setopt_nv_CURLAUTH
-#define setopt_nv_CURLOPT_SSLVERSION setopt_nv_CURL_SSLVERSION
-#define setopt_nv_CURLOPT_PROXY_SSLVERSION setopt_nv_CURL_SSLVERSION
-#define setopt_nv_CURLOPT_TIMECONDITION setopt_nv_CURL_TIMECOND
-#define setopt_nv_CURLOPT_FTP_SSL_CCC setopt_nv_CURLFTPSSL_CCC
-#define setopt_nv_CURLOPT_USE_SSL setopt_nv_CURLUSESSL
-#define setopt_nv_CURLOPT_SSL_OPTIONS setopt_nv_CURLSSLOPT
+#define setopt_nv_CURLOPT_HSTS_CTRL         setopt_nv_CURLHSTS
+#define setopt_nv_CURLOPT_HTTP_VERSION      setopt_nv_CURL_HTTP_VERSION
+#define setopt_nv_CURLOPT_HTTPAUTH          setopt_nv_CURLAUTH
+#define setopt_nv_CURLOPT_SSLVERSION        setopt_nv_CURL_SSLVERSION
+#define setopt_nv_CURLOPT_PROXY_SSLVERSION  setopt_nv_CURL_SSLVERSION
+#define setopt_nv_CURLOPT_TIMECONDITION     setopt_nv_CURL_TIMECOND
+#define setopt_nv_CURLOPT_FTP_SSL_CCC       setopt_nv_CURLFTPSSL_CCC
+#define setopt_nv_CURLOPT_USE_SSL           setopt_nv_CURLUSESSL
+#define setopt_nv_CURLOPT_SSL_OPTIONS       setopt_nv_CURLSSLOPT
 #define setopt_nv_CURLOPT_PROXY_SSL_OPTIONS setopt_nv_CURLSSLOPT
-#define setopt_nv_CURLOPT_NETRC setopt_nv_CURL_NETRC
-#define setopt_nv_CURLOPT_PROXYTYPE setopt_nv_CURLPROXY
-#define setopt_nv_CURLOPT_PROXYAUTH setopt_nv_CURLAUTH
-#define setopt_nv_CURLOPT_SOCKS5_AUTH setopt_nv_CURLAUTH
+#define setopt_nv_CURLOPT_NETRC             setopt_nv_CURL_NETRC
+#define setopt_nv_CURLOPT_PROXYTYPE         setopt_nv_CURLPROXY
+#define setopt_nv_CURLOPT_PROXYAUTH         setopt_nv_CURLAUTH
+#define setopt_nv_CURLOPT_SOCKS5_AUTH       setopt_nv_CURLAUTH
 
 /* Intercept setopt calls for --libcurl */
 
-CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
-                          const char *name, CURLoption tag,
+CURLcode tool_setopt_enum(CURL *curl, const char *name, CURLoption tag,
                           const struct NameValue *nv, long lval);
-CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_SSLVERSION(CURL *curl, const char *name, CURLoption tag,
+                                long lval);
+CURLcode tool_setopt_flags(CURL *curl, struct OperationConfig *config,
                            const char *name, CURLoption tag,
                            const struct NameValue *nv, long lval);
-CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_bitmask(CURL *curl,
                              const char *name, CURLoption tag,
                              const struct NameValueUnsigned *nv, long lval);
-CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_mimepost(CURL *curl, struct OperationConfig *config,
                               const char *name, CURLoption tag,
                               curl_mime *mimepost);
-CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
-                           const char *name, CURLoption tag,
+CURLcode tool_setopt_slist(CURL *curl, const char *name, CURLoption tag,
                            struct curl_slist *list);
-CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
-                     struct OperationConfig *config,
-                     const char *name, CURLoption tag, ...);
+CURLcode tool_setopt_long(CURL *curl, const char *name, CURLoption tag,
+                          long lval);
+CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
+                          curl_off_t lval);
+CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
+                         const char *name, CURLoption tag,
+                         ...) WARN_UNUSED_RESULT;
+CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 
-#define my_setopt(x,y,z) \
-  SETOPT_CHECK(tool_setopt(x, FALSE, global, config, #y, y, z), y)
+#define my_setopt_long(x, y, z)       tool_setopt_long(x, #y, y, z)
+#define my_setopt_offt(x, y, z)       tool_setopt_offt(x, #y, y, z)
+#define my_setopt_ptr(x, y, z)        tool_setopt_ptr(x, #y, y, z)
+#define my_setopt_str(x, y, z)        tool_setopt_str(x, config, #y, y, z)
+#define my_setopt_mimepost(x, y, z)   tool_setopt_mimepost(x, config, #y, y, z)
+#define my_setopt_slist(x, y, z)      tool_setopt_slist(x, #y, y, z)
+#define my_setopt_SSLVERSION(x, y, z) tool_setopt_SSLVERSION(x, #y, y, z)
+#define my_setopt_enum(x, y, z)       \
+  tool_setopt_enum(x, #y, y, setopt_nv_ ## y, z)
+#define my_setopt_bitmask(x, y, z)    \
+  tool_setopt_bitmask(x, #y, y, setopt_nv_ ## y, z)
 
-#define my_setopt_str(x,y,z) \
-  SETOPT_CHECK(tool_setopt(x, TRUE, global, config, #y, y, z), y)
-
-#define my_setopt_enum(x,y,z) \
-  SETOPT_CHECK(tool_setopt_enum(x, global, #y, y, setopt_nv_ ## y, z), y)
-
-#define my_setopt_flags(x,y,z) \
-  SETOPT_CHECK(tool_setopt_flags(x, global, #y, y, setopt_nv_ ## y, z), y)
-
-#define my_setopt_bitmask(x,y,z) \
-  SETOPT_CHECK(tool_setopt_bitmask(x, global, #y, y, setopt_nv_ ## y, z), y)
-
-#define my_setopt_mimepost(x,y,z) \
-  SETOPT_CHECK(tool_setopt_mimepost(x, global, #y, y, z), y)
-
-#define my_setopt_slist(x,y,z) \
-  SETOPT_CHECK(tool_setopt_slist(x, global, #y, y, z), y)
-
-#define res_setopt(x,y,z) tool_setopt(x, FALSE, global, config, #y, y, z)
-
-#define res_setopt_str(x,y,z) tool_setopt(x, TRUE, global, config, #y, y, z)
+/* assumes a 'result' variable to use. If the return code is benign it is left
+   in 'result' after this call, otherwise the function returns the error */
+#define MY_SETOPT_STR(x, y, z)                     \
+  do {                                             \
+    result = tool_setopt_str(x, config, #y, y, z); \
+    if(setopt_bad(result))                         \
+      return result;                               \
+  } while(0)
 
 #else /* CURL_DISABLE_LIBCURL_OPTION */
 
 /* No --libcurl, so pass options directly to library */
 
-#define my_setopt(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
+#define my_setopt_long(x, y, z)       curl_easy_setopt(x, y, (long)(z))
+#define my_setopt_offt(x, y, z)       curl_easy_setopt(x, y, (curl_off_t)(z))
+#define my_setopt_ptr(x, y, z)        curl_easy_setopt(x, y, z)
+#define my_setopt_str(x, y, z)        curl_easy_setopt(x, y, z)
+#define my_setopt_mimepost(x, y, z)   curl_easy_setopt(x, y, z)
+#define my_setopt_slist(x, y, z)      curl_easy_setopt(x, y, z)
+#define my_setopt_SSLVERSION(x, y, z) curl_easy_setopt(x, y, z)
+#define my_setopt_enum(x, y, z)       curl_easy_setopt(x, y, z)
+#define my_setopt_bitmask(x, y, z)    curl_easy_setopt(x, y, (long)(z))
 
-#define my_setopt_str(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
-
-#define my_setopt_enum(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
-
-#define my_setopt_flags(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
-
-#define my_setopt_bitmask(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
-
-#define my_setopt_mimepost(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
-
-#define my_setopt_slist(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
-
-#define res_setopt(x,y,z) curl_easy_setopt(x,y,z)
-
-#define res_setopt_str(x,y,z) curl_easy_setopt(x,y,z)
+#define MY_SETOPT_STR(x, y, z)          \
+  do {                                  \
+    result = curl_easy_setopt(x, y, z); \
+    if(setopt_bad(result))              \
+      return result;                    \
+  } while(0)
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 

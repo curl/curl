@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+cfilter
+timing-dependent
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+Debug
+http
+!win32
+</features>
+<name>
+connection filter connect/destroy unit tests
+</name>
+</client>
+</testcase>

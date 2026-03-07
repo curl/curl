@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -24,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -34,14 +33,13 @@ http
 Both --etag-compare and -save store new Etag using non-existing file
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare log/etag%TESTNUMBER --etag-save log/etag%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -49,7 +47,7 @@ Accept: */*
 If-None-Match: ""
 
 </protocol>
-<file name="log/etag%TESTNUMBER">
+<file name="%LOGDIR/etag%TESTNUMBER">
 "21025-dc7-11111"
 </file>
 </verify>

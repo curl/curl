@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2020 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,10 +31,10 @@
 #
 # $ ./scripts/release-notes.pl
 #
-# 2. Edit RELEASE-NOTES and remove all entries that don't belong.  Unused
+# 2. Edit RELEASE-NOTES and remove all entries that do not belong.  Unused
 # references below will be cleaned up in the next step. Make sure to move
 # "changes" up to the changes section. All entries will by default be listed
-# under bug-fixes as this script can't know where to put them.
+# under bug-fixes as this script cannot know where to put them.
 #
 # 3. Run the cleanup script and let it sort the entries and remove unused
 # references from lines you removed in step (2):
@@ -54,22 +54,38 @@
 #
 ################################################
 
-my $cleanup = ($ARGV[0] eq "cleanup");
+use strict;
+use warnings;
+
+my $cleanup = (@ARGV && $ARGV[0] eq "cleanup");
 my @gitlog=`git log @^{/RELEASE-NOTES:.synced}..` if(!$cleanup);
 my @releasenotes=`cat RELEASE-NOTES`;
 
 my @o; # the entire new RELEASE-NOTES
 my @refused; # [num] = [2 bits of use info]
 my @refs; # [number] = [URL]
+my %dupe;
 for my $l (@releasenotes) {
     if($l =~ /^ o .*\[(\d+)\]/) {
         # referenced, set bit 0
         $refused[$1]=1;
+        my $m = $l;
+        chomp $m;
+        $m =~ s/^ o //;
+        $m =~ s/ \[\d+\]$//;
+        $dupe{$m} = 1; # mark this as present
     }
     elsif($l =~ /^ \[(\d+)\] = (.*)/) {
         # listed in a reference, set bit 1
         $refused[$1] |= 2;
         $refs[$1] = $2;
+    }
+    # mention without reference
+    elsif($l =~ /^ o (.*)/) {
+        my $m = $l;
+        chomp $m;
+        $m =~ s/^ o //;
+        $dupe{$m} = 1; # mark this as present
     }
 }
 
@@ -88,6 +104,7 @@ sub getref {
 # 'num'
 # 'https://github.com/curl/curl/issues/6939'
 # 'https://github.com/curl/curl-www/issues/69'
+# 'https://elsewhere.example.com/discussion'
 
 sub extract {
     my ($ref)=@_;
@@ -99,11 +116,18 @@ sub extract {
         # return the plain number
         return $1;
     }
-    else {
-        # return the URL
+    elsif($ref =~ /:\/\//) {
+        # contains a '://', return the URL
         return $ref;
     }
+    # false alarm, not a valid line
 }
+
+my @fixes;
+my @closes;
+my @bug;
+my @line;
+my %moreinfo;
 
 my $short;
 my $first;
@@ -132,13 +156,16 @@ for my $l (@gitlog) {
         my $line = $1;
 
         if($line =~ /^Fixes(:|) *(.*)/i) {
-            push @fixes, extract($2);
+            my $ref = extract($2);
+            push @fixes, $ref if($ref);
         }
-        elsif($line =~ /^Clo(s|)es(:|) *(.*)/i) {
-            push @closes, extract($3);
+        elsif($line =~ /^Cl([os]+)es(:|) *(.*)/i) {
+            my $ref = extract($3);
+            push @closes, $ref if($ref);
         }
         elsif($line =~ /^Bug: (.*)/i) {
-            push @bug, extract($1);
+            my $ref = extract($1);
+            push @bug, $ref if($ref);
         }
     }
 }
@@ -149,7 +176,12 @@ if($first) {
 # call at the end of a parsed commit
 sub onecommit {
     my ($short)=@_;
-    my $ref;
+    my $ref = '';
+
+    if($dupe{$short}) {
+        # this git commit message was found in the file
+        return;
+    }
 
     if($bug[0]) {
         $ref = $bug[0];
@@ -180,9 +212,16 @@ for my $l (@releasenotes) {
         push @o, $l;
         push @o, "\n";
         for my $f (@line) {
+            if($dupe{$f}) {
+                # this item is already listed
+                next;
+            }
+
             push @o, sprintf " o %s%s\n", $f,
                 $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
-            $refused[$moreinfo{$f}]=3;
+            if($moreinfo{$f}) {
+                $refused[$moreinfo{$f}]=3;
+            }
         }
         push @o, " --- new entries are listed above this ---";
         next;

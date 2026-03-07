@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # How to do code reviews for curl
 
 Anyone and everyone is encouraged and welcome to review code submissions in
@@ -135,13 +141,13 @@ data. Where it comes from and where it goes.
 `size_t` is not a fixed size. `time_t` can be signed or unsigned and have
 different sizes. Relying on variable sizes is a red flag.
 
-Also remember that endianness and >= 32 bit accesses to unaligned addresses
+Also remember that endianness and >= 32-bit accesses to unaligned addresses
 are problematic areas.
 
 ## Integer overflows
 
-Be careful about integer overflows. Some variable types can be either 32 bit
-or 64 bit. Integer overflows must be detected and acted on *before* they
+Be careful about integer overflows. Some variable types can be either 32-bit
+or 64-bit. Integer overflows must be detected and acted on *before* they
 happen.
 
 ## Dangerous use of functions
@@ -164,5 +170,6 @@ used as input to string functions.
 Tightly coupled with a code review is making sure that the commit message is
 good. It is the responsibility of the person who merges the code to make sure
 that the commit message follows our standard (detailed in the
-[CONTRIBUTE](CONTRIBUTE.md) document). This includes making sure the PR
-identifies related issues and giving credit to reporters and helpers.
+[CONTRIBUTE](https://curl.se/dev/contribute.html) document). This includes
+making sure the PR identifies related issues and giving credit to reporters
+and helpers.

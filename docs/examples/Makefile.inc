@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,18 +21,24 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
 # These are all libcurl example programs to be test compiled
 check_PROGRAMS = \
   10-at-a-time \
+  address-scope \
   altsvc \
   anyauthput \
+  block_ip \
   certinfo \
   chkspeed \
+  connect-to \
   cookie_interface \
   debug \
+  default-scheme \
   externalsocket \
   fileupload \
+  ftp-delete \
   ftp-wildcard \
   ftpget \
   ftpgetinfo \
@@ -46,6 +52,8 @@ check_PROGRAMS = \
   getredirect \
   getreferrer \
   headerapi \
+  hsts-preload \
+  http-options \
   http-post \
   http2-download \
   http2-pushinmemory \
@@ -72,6 +80,12 @@ check_PROGRAMS = \
   imap-ssl \
   imap-store \
   imap-tls \
+  interface \
+  ipv6 \
+  keepalive \
+  localport \
+  log_failed_transfers \
+  maxconnects \
   multi-app \
   multi-debugcallback \
   multi-double \
@@ -79,6 +93,7 @@ check_PROGRAMS = \
   multi-legacy \
   multi-post \
   multi-single \
+  netrc \
   parseurl \
   persistent \
   pop3-authzid \
@@ -97,7 +112,10 @@ check_PROGRAMS = \
   postit2 \
   postit2-formadd \
   progressfunc \
+  protofeats \
+  range \
   resolve \
+  rtsp-options \
   sendrecv \
   sepheaders \
   sftpget \
@@ -115,30 +133,34 @@ check_PROGRAMS = \
   smtp-tls \
   smtp-vrfy \
   sslbackend \
+  synctime \
+  unixsocket \
   url2file \
-  urlapi
+  urlapi \
+  websocket \
+  websocket-cb \
+  websocket-updown
+
+# These examples require external dependencies that may be available during
+# the build.
+COMPLICATED_MAY_BUILD = \
+  cacertinmem.c \
+  multi-uv.c \
+  sessioninfo.c \
+  threaded.c \
+  usercertinmem.c
 
 # These examples require external dependencies that may not be commonly
-# available on POSIX systems, so don't bother attempting to compile them here.
+# available on POSIX systems, so do not bother attempting to compile them here.
 COMPLICATED_EXAMPLES = \
-  cacertinmem.c \
   crawler.c \
-  curlgtk.c \
   ephiperfifo.c \
   evhiperfifo.c \
   ghiper.c \
   hiperfifo.c \
-  href_extractor.c \
   htmltidy.c \
   htmltitle.cpp \
   multi-event.c \
-  multi-uv.c \
-  multithread.c \
-  opensslthreadlock.c \
-  sessioninfo.c \
   smooth-gtk-thread.c \
-  synctime.c \
-  threaded-ssl.c \
-  usercertinmem.c \
   version-check.pl \
   xmlstream.c

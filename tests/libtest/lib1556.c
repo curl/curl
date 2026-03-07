@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,17 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
+#include "first.h"
 
 struct headerinfo {
   size_t largest;
 };
 
-static size_t header(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t header(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t headersize = size * nmemb;
   struct headerinfo *info = (struct headerinfo *)stream;
@@ -44,12 +40,12 @@ static size_t header(void *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-int test(char *URL)
+static CURLcode test_lib1556(const char *URL)
 {
-  CURLcode code;
   CURL *curl = NULL;
-  int res = 0;
-  struct headerinfo info = {0};
+  CURLcode code;
+  CURLcode result = CURLE_OK;
+  struct headerinfo info = { 0 };
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -61,20 +57,20 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
 
   code = curl_easy_perform(curl);
-  if(CURLE_OK != code) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
-    res = TEST_ERR_MAJOR_BAD;
+  if(code != CURLE_OK) {
+    curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed, "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, code, curl_easy_strerror(code));
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
-  printf("Max = %ld\n", (long)info.largest);
+  curl_mprintf("Max = %zu\n", info.largest);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

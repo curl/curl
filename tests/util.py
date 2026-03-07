@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,10 +21,7 @@
 #
 # SPDX-License-Identifier: curl
 #
-"""Module for extracting test data from the test data folder and other utils"""
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+"""Module for extracting test data from the test data folder and other utils."""
 
 import logging
 import os
@@ -32,9 +29,7 @@ import re
 
 log = logging.getLogger(__name__)
 
-
 REPLY_DATA = re.compile("<reply>[ \t\n\r]*<data[^<]*>(.*?)</data>", re.MULTILINE | re.DOTALL)
-
 
 class ClosingFileHandler(logging.StreamHandler):
     def __init__(self, filename):
@@ -69,24 +64,23 @@ class TestData(object):
         self.data_folder = data_folder
 
     def get_test_data(self, test_number):
-        # Create the test file name
+        # Create the test filename
         filename = os.path.join(self.data_folder,
                                 "test{0}".format(test_number))
 
         log.debug("Parsing file %s", filename)
 
-        with open(filename, "rb") as f:
-            contents = f.read().decode("utf-8")
+        with open(filename, "r", encoding='us-ascii') as f:
+            contents = f.read()
 
         m = REPLY_DATA.search(contents)
         if not m:
-            raise Exception("Couldn't find a <reply><data> section")
+            raise Exception("Could not find a <reply><data> section")
 
-        # Left-strip the data so we don't get a newline before our data.
+        # Left-strip the data so we do not get a newline before our data.
         return m.group(1).lstrip()
-
 
 if __name__ == '__main__':
     td = TestData("./data")
-    data = td.get_test_data(1)
+    data = td.get_test_data(1451)
     print(data)

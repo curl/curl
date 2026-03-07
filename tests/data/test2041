@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ PEM certificate
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -20,33 +20,28 @@ MooMoo
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
 SSL
 SSLpinning
 !Schannel
+local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
- <name>
+<name>
 simple HTTPS GET with base64-sha256 public key pinning
- </name>
- <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//d6NWnt6Q9+jU//Ak49bc7+k96pcarb3XjHYM8BMPxg0= https://localhost:%HTTPSPORT/%TESTNUMBER
+</name>
+<command>
+-4 --cacert %CERTDIR/certs/test-ca.crt --pinnedpubkey sha256//%sha256b64file[%CERTDIR/certs/test-localhost.pub.der]sha256b64file% https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost because we're checking the host name
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
 User-Agent: curl/%VERSION

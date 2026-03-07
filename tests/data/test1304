@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,19 +7,19 @@ netrc
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
+netrc
 </features>
- <name>
+<name>
 netrc parsing unit tests
- </name>
-<file name="log/netrc%TESTNUMBER">
+</name>
+<command>
+%LOGDIR/netrc%TESTNUMBER
+</command>
+<file name="%LOGDIR/netrc%TESTNUMBER">
 machine example.com login admin password passwd
 machine curl.example.com login none password none
 </file>

@@ -1,13 +1,14 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP POST
+FORM
 flaky
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -17,42 +18,28 @@ flaky
 # Client-side
 <client>
 <features>
-Mime
+form-api
 </features>
 <server>
 http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib%TESTNUMBER
+lib554
 </tool>
 
- <name>
+<name>
 HTTP multi-part formpost with aborted read callback
- </name>
- <command>
+</name>
+# Add a delay to give server time to write its output since we otherwise might
+# not even give it enough time to write its lock file.
+<command delay="1">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
-</strippart>
-<protocol>
-POST /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Length: 744
-Content-Type: multipart/form-data; boundary=----------------------------
-
-------------------------------
-Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
-
-</protocol>
 # CURLE_ABORTED_BY_CALLBACK (42)
 <errorcode>
 42

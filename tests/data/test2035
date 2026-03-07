@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,34 +8,28 @@ PEM certificate
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
 SSL
 SSLpinning
+local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
- <name>
+<name>
 HTTPS wrong DER pinnedpubkey but right CN
- </name>
- <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.der https://localhost:%HTTPSPORT/%TESTNUMBER
+</name>
+<command>
+-4 --cacert %CERTDIR/certs/test-ca.crt --pinnedpubkey %CERTDIR/certs/test-localhost.der https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost because we're checking the host name
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

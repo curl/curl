@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,9 +26,7 @@
  * bug report #1871269, fixed on Jan 14 2008 before the 7.18.0 release.
  */
 
-#include "test.h"
-
-#include "memdebug.h"
+#include "first.h"
 
 #define POSTLEN 40960
 
@@ -52,35 +50,35 @@ static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
   return size;
 }
 
-#define NUM_HEADERS 8
+#define NUM_HEADERS  8
 #define SIZE_HEADERS 5000
 
-static char buf[SIZE_HEADERS + 100];
-
-int test(char *URL)
+static CURLcode test_lib553(const char *URL)
 {
+  static char testbuf[SIZE_HEADERS + 100];
+
   CURL *curl;
-  CURLcode res = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
   int i;
   struct curl_slist *headerlist = NULL, *hl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   for(i = 0; i < NUM_HEADERS; i++) {
-    int len = msnprintf(buf, sizeof(buf), "Header%d: ", i);
-    memset(&buf[len], 'A', SIZE_HEADERS);
-    buf[len + SIZE_HEADERS] = 0; /* null-terminate */
-    hl = curl_slist_append(headerlist,  buf);
+    int len = curl_msnprintf(testbuf, sizeof(testbuf), "Header%d: ", i);
+    memset(&testbuf[len], 'A', SIZE_HEADERS);
+    testbuf[len + SIZE_HEADERS] = 0; /* null-terminate */
+    hl = curl_slist_append(headerlist, testbuf);
     if(!hl)
       goto test_cleanup;
     headerlist = hl;
@@ -99,7 +97,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_READFUNCTION, myreadfunc);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -109,5 +107,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return (int)res;
+  return result;
 }

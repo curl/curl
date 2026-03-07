@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,15 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* should probably go into the public header */
 
-#include <curl/curl.h>
-
 /* generated table with all easy options */
-extern struct curl_easyoption Curl_easyopts[];
+extern const struct curl_easyoption Curl_easyopts[];
 
 #ifdef DEBUGBUILD
 int Curl_easyopts_check(void);
 #endif
-#endif
+
+#endif /* HEADER_CURL_EASYOPTIONS_H */

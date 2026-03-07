@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,84 +21,79 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
+#include "first.h"
 
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
-#include <unistd.h>
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-#define CONN_NUM 3
+#define CONN_NUM                3
 #define TIME_BETWEEN_START_SECS 2
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static CURL *pending_handles[CONN_NUM];
+static CURL *pending_curls[CONN_NUM];
 static int pending_num = 0;
-static int test_failure = 0;
+static CURLcode t1565_test_failure = CURLE_OK;
 
-static CURLM *multi = NULL;
-static const char *url;
+static CURLM *testmulti = NULL;
+static const char *t1565_url;
 
-static void *run_thread(void *ptr)
+static void *t1565_run_thread(void *ptr)
 {
-  CURL *easy = NULL;
-  int res = 0;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
   int i;
 
   (void)ptr;
 
   for(i = 0; i < CONN_NUM; i++) {
-    wait_ms(TIME_BETWEEN_START_SECS * 1000);
+    curlx_wait_ms(TIME_BETWEEN_START_SECS * 1000);
 
-    easy_init(easy);
+    easy_init(curl);
 
-    easy_setopt(easy, CURLOPT_URL, url);
-    easy_setopt(easy, CURLOPT_VERBOSE, 0L);
+    easy_setopt(curl, CURLOPT_URL, t1565_url);
+    easy_setopt(curl, CURLOPT_VERBOSE, 0L);
 
     pthread_mutex_lock(&lock);
 
-    if(test_failure) {
+    if(t1565_test_failure) {
       pthread_mutex_unlock(&lock);
       goto test_cleanup;
     }
 
-    pending_handles[pending_num] = easy;
+    pending_curls[pending_num] = curl;
     pending_num++;
-    easy = NULL;
+    curl = NULL;
 
     pthread_mutex_unlock(&lock);
 
-    res_multi_wakeup(multi);
+    res_multi_wakeup(testmulti);
   }
 
 test_cleanup:
 
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
 
   pthread_mutex_lock(&lock);
 
-  if(!test_failure)
-    test_failure = res;
+  if(!t1565_test_failure)
+    t1565_test_failure = result;
 
   pthread_mutex_unlock(&lock);
 
   return NULL;
 }
 
-int test(char *URL)
+static CURLcode test_lib1565(const char *URL)
 {
   int still_running;
   int num;
   int i;
-  int res = 0;
-  CURL *started_handles[CONN_NUM];
+  int rc;
+  CURLcode result = CURLE_OK;
+  CURL *started_curls[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
-  pthread_t tid;
+  pthread_t tid = 0;
   bool tid_valid = false;
   struct CURLMsg *message;
 
@@ -106,36 +101,38 @@ int test(char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  multi_init(multi);
+  multi_init(testmulti);
 
-  url = URL;
+  t1565_url = URL;
 
-  res = pthread_create(&tid, NULL, run_thread, NULL);
-  if(!res)
+  rc = pthread_create(&tid, NULL, t1565_run_thread, NULL);
+  if(!rc)
     tid_valid = true;
   else {
-    fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
-            __FILE__, __LINE__, res);
+    curl_mfprintf(stderr, "%s:%d Could not create thread, errno %d\n",
+                  __FILE__, __LINE__, rc);
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
   while(1) {
-    multi_perform(multi, &still_running);
+    multi_perform(testmulti, &still_running);
 
     abort_on_test_timeout();
 
-    while((message = curl_multi_info_read(multi, &num))) {
+    while((message = curl_multi_info_read(testmulti, &num))) {
       if(message->msg == CURLMSG_DONE) {
-        res = message->data.result;
-        if(res)
+        result = message->data.result;
+        if(result)
           goto test_cleanup;
-        multi_remove_handle(multi, message->easy_handle);
+        multi_remove_handle(testmulti, message->easy_handle);
         finished_num++;
       }
       else {
-        fprintf(stderr, "%s:%d Got an unexpected message from curl: %i\n",
-              __FILE__, __LINE__, (int)message->msg);
-        res = TEST_ERR_MAJOR_BAD;
+        curl_mfprintf(stderr,
+                      "%s:%d Got an unexpected message from curl: %i\n",
+                      __FILE__, __LINE__, message->msg);
+        result = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
 
@@ -145,20 +142,20 @@ int test(char *URL)
     if(CONN_NUM == finished_num)
       break;
 
-    multi_poll(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
+    multi_poll(testmulti, NULL, 0, TEST_HANG_TIMEOUT, &num);
 
     abort_on_test_timeout();
 
     pthread_mutex_lock(&lock);
 
     while(pending_num > 0) {
-      res_multi_add_handle(multi, pending_handles[pending_num - 1]);
-      if(res) {
+      res_multi_add_handle(testmulti, pending_curls[pending_num - 1]);
+      if(result) {
         pthread_mutex_unlock(&lock);
         goto test_cleanup;
       }
 
-      started_handles[started_num] = pending_handles[pending_num - 1];
+      started_curls[started_num] = pending_curls[pending_num - 1];
       started_num++;
       pending_num--;
     }
@@ -169,41 +166,41 @@ int test(char *URL)
   }
 
   if(CONN_NUM != started_num) {
-    fprintf(stderr, "%s:%d Not all connections started: %d of %d\n",
-            __FILE__, __LINE__, started_num, CONN_NUM);
+    curl_mfprintf(stderr, "%s:%d Not all connections started: %d of %d\n",
+                  __FILE__, __LINE__, started_num, CONN_NUM);
     goto test_cleanup;
   }
 
   if(CONN_NUM != finished_num) {
-    fprintf(stderr, "%s:%d Not all connections finished: %d of %d\n",
-            __FILE__, __LINE__, started_num, CONN_NUM);
+    curl_mfprintf(stderr, "%s:%d Not all connections finished: %d of %d\n",
+                  __FILE__, __LINE__, started_num, CONN_NUM);
     goto test_cleanup;
   }
 
 test_cleanup:
 
   pthread_mutex_lock(&lock);
-  if(!test_failure)
-    test_failure = res;
+  if(!t1565_test_failure)
+    t1565_test_failure = result;
   pthread_mutex_unlock(&lock);
 
   if(tid_valid)
     pthread_join(tid, NULL);
 
-  curl_multi_cleanup(multi);
+  curl_multi_cleanup(testmulti);
   for(i = 0; i < pending_num; i++)
-    curl_easy_cleanup(pending_handles[i]);
+    curl_easy_cleanup(pending_curls[i]);
   for(i = 0; i < started_num; i++)
-    curl_easy_cleanup(started_handles[i]);
+    curl_easy_cleanup(started_curls[i]);
   curl_global_cleanup();
 
-  return test_failure;
+  return t1565_test_failure;
 }
 
-#else /* without pthread, this test doesn't work */
-int test(char *URL)
+#else /* without pthread, this test does not work */
+static CURLcode test_lib1565(const char *URL)
 {
   (void)URL;
-  return 0;
+  return CURLE_OK;
 }
 #endif

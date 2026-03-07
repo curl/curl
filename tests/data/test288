@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -18,22 +19,19 @@ moo
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 file
 </features>
- <name>
+<name>
 file:// with (unsupported) proxy, authentication and range
- </name>
+</name>
 <setenv>
 all_proxy=http://fake:user@%HOSTIP:%NOLISTENPORT/
 </setenv>
 <command option="no-include">
-file://localhost%FILE_PWD/log/test%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar

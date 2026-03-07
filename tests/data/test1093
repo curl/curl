@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ mode=
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -18,29 +18,29 @@ returned
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 tftp
 </server>
- <name>
-TFTP retrieve with mode=i
- </name>
- <command>
-"tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=i" --use-ascii
+<name>
+TFTP retrieve with mode=octet
+</name>
+<command>
+"tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=octet" --use-ascii
 </command>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
 opcode = 1
 mode = octet
 tsize = 0
 blksize = 512
-timeout = 6
 filename = /%TESTNUMBER
 </protocol>
 </verify>

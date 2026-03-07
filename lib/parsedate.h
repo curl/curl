@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,16 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 extern const char * const Curl_wkday[7];
 extern const char * const Curl_month[12];
 
-CURLcode Curl_gmtime(time_t intime, struct tm *store);
-
-/* Curl_getdate_capped() differs from curl_getdate() in that this will return
+/* Curl_getdate_capped() differs from curl_getdate() in that this returns
    TIME_T_MAX in case the parsed time value was too big, instead of an
    error. */
 
-time_t Curl_getdate_capped(const char *p);
+int Curl_getdate_capped(const char *p, time_t *tp);
 
 #endif /* HEADER_CURL_PARSEDATE_H */

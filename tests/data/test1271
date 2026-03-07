@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ HTTP GET
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 This is a weirdo text message swsclose
 Content-Length: 4
 Connection: close
@@ -23,19 +24,19 @@ Moo
 <server>
 http
 </server>
- <name>
+<name>
 --write-out from file with empty file
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w @log/blank%TESTNUMBER
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w @%LOGDIR/blank%TESTNUMBER
 </command>
-<file name="log/blank%TESTNUMBER">
+<file name="%LOGDIR/blank%TESTNUMBER">
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

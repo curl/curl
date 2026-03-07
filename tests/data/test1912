@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,9 +13,6 @@ typecheck
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Cross validate that gcc-typecheck macros match the option types.
 </name>

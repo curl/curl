@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,18 +11,12 @@ CURLOPT_PROTOCOLS_STR
 </reply>
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 CURLOPT_PROTOCOLS_STR
 </name>
 <tool>
 lib%TESTNUMBER
 </tool>
-<command>
--
-</command>
 </client>
 
 <verify>

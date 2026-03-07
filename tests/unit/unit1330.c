@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,23 +21,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
-#include "memdebug.h"
-
-
-static CURLcode unit_setup(void)
+static CURLcode test_unit1330(const char *arg)
 {
-  return CURLE_OK;
+  UNITTEST_BEGIN_SIMPLE
+
+  char *ptr = curlx_malloc(1330);
+  Curl_safefree(ptr);
+
+  UNITTEST_END_SIMPLE
 }
-
-static void unit_stop(void)
-{
-}
-
-UNITTEST_START
-
-char *ptr = malloc(1330);
-Curl_safefree(ptr);
-
-UNITTEST_STOP

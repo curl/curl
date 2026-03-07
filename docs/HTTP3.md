@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # HTTP3 (and QUIC)
 
 ## Resources
@@ -9,157 +15,229 @@ book describing the protocols involved.
 
 ## QUIC libraries
 
-QUIC libraries we are experimenting with:
+QUIC libraries we are using:
 
 [ngtcp2](https://github.com/ngtcp2/ngtcp2)
 
-[quiche](https://github.com/cloudflare/quiche)
+[quiche](https://github.com/cloudflare/quiche) - **EXPERIMENTAL**
 
-[msquic](https://github.com/microsoft/msquic) & [msh3](https://github.com/nibanks/msh3)
+[OpenSSL 3.2+ QUIC](https://github.com/openssl/openssl) - **EXPERIMENTAL**
 
 ## Experimental
 
-HTTP/3 and QUIC support in curl is considered **EXPERIMENTAL** until further
-notice. It needs to be enabled at build-time.
+HTTP/3 support in curl is considered **EXPERIMENTAL** until further notice
+when built to use *quiche*. Only the *ngtcp2* backend is not experimental.
 
-Further development and tweaking of the HTTP/3 support in curl will happen in
-the master branch using pull-requests, just like ordinary changes.
+Further development and tweaking of the HTTP/3 support in curl happens in the
+master branch using pull-requests like ordinary changes.
+
+To fix before we remove the experimental label:
+
+- the used QUIC library needs to consider itself non-beta
+- it is fine to "leave" individual backends as experimental if necessary
 
 # ngtcp2 version
 
+Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3`
+and a QUIC supporting TLS library. The supported TLS libraries are covered
+below.
+
+While any version of `ngtcp2` and `nghttp3` from v1.0.0 on are expected to
+work, using the latest versions often brings functional and performance
+improvements.
+
+The build examples use `$NGHTTP3_VERSION` and `$NGTCP2_VERSION` as
+placeholders for the version you build.
+
 ## Build with OpenSSL
 
-Build (patched) OpenSSL
+OpenSSL v3.5.0+ offers APIs for integration with *ngtcp2* v1.12.0+. Earlier
+versions do not work.
 
-     % git clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl
+Build OpenSSL (version 3.5.0 or newer):
+
+     % git clone --depth 1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
-     % ./config enable-tls1_3 --prefix=<somewhere1>
+     % ./config --prefix=<somewhere1> --libdir=lib
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
-     % git clone https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
+     % git submodule update --init
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
-     % git clone https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % cd ngtcp2
+     % autoreconf -fi
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-openssl
+     % make
+     % make install
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
+     % make
+     % make install
+
+## Build with quictls
+
+OpenSSL before version 3.5 does not offer the required APIs for building a
+QUIC client. You need to use a TLS library that has such APIs and that works
+with *ngtcp2*.
+
+Build quictls (any `+quic` tagged version works):
+
+     % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
+     % cd openssl
+     % ./config enable-tls1_3 --prefix=<somewhere1> --libdir=lib
+     % make
+     % make install
+
+Build nghttp3:
+
+     % cd ..
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % git submodule update --init
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build ngtcp2:
+
+     % cd ..
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
      % make
      % make install
 
-For OpenSSL 3.0.0 or later builds on Linux for x86_64 architecture, substitute all occurrences of "/lib" with "/lib64"
-
 ## Build with GnuTLS
 
-Build GnuTLS
+Build GnuTLS:
 
-     % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
+     % git clone --depth 1 https://gitlab.com/gnutls/gnutls
      % cd gnutls
      % ./bootstrap
      % ./configure --prefix=<somewhere1>
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
-     % git clone https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
+     % git submodule update --init
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
-     % git clone https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
      % make
      % make install
 
 ## Build with wolfSSL
 
-Build wolfSSL
+Build wolfSSL:
 
-     % git clone https://github.com/wolfSSL/wolfssl.git
+     % git clone https://github.com/wolfSSL/wolfssl
      % cd wolfssl
      % autoreconf -fi
      % ./configure --prefix=<somewhere1> --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
-     % git clone https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
+     % git submodule update --init
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
-     % git clone https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
      % make
      % make install
 
 # quiche version
 
-## build
+quiche support is **EXPERIMENTAL**
+
+Since the quiche build manages its dependencies, curl can be built against the
+latest version. You are *probably* able to build against their main branch,
+but in case of problems, we recommend their latest release tag.
+
+## Build
 
 Build quiche and BoringSSL:
 
-     % git clone --recursive https://github.com/cloudflare/quiche
+     % git clone --recursive -b 0.22.0 https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
+     % ln -s libquiche.so target/release/libquiche.so.0
      % mkdir quiche/deps/boringssl/src/lib
      % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
@@ -173,73 +251,63 @@ Build curl:
      % make
      % make install
 
- If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
-
-# msh3 (msquic) version
-
-## Build Linux (with quictls fork of OpenSSL)
-
-Build msh3:
-
-     % git clone -b v0.4.0 --depth 1 --recursive https://github.com/nibanks/msh3
-     % cd msh3 && mkdir build && cd build
-     % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-     % cmake --build .
-     % cmake --install .
-
-Build curl:
-
-     % git clone https://github.com/curl/curl
-     % cd curl
-     % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-msh3=/usr/local --with-openssl
-     % make
-     % make install
-
-Run from `/usr/local/bin/curl`.
-
-## Build Windows
-
-Build msh3:
-
-     % git clone -b v0.4.0 --depth 1 --recursive https://github.com/nibanks/msh3
-     % cd msh3 && mkdir build && cd build
-     % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-     % cmake --build . --config Release
-     % cmake --install . --config Release
-
-**Note** - On Windows, Schannel will be used for TLS support by default. If
-you with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl`
-option to the generate command above. Also note that OpenSSL brings with it an
-additional set of build dependencies not specified here.
-
-Build curl (in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt)):
-
-     % git clone https://github.com/curl/curl
-     % cd curl/winbuild
-     % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
-
-**Note** - If you encounter a build error with `tool_hugehelp.c` being missing,
-rename `tool_hugehelp.c.cvs` in the same directory to `tool_hugehelp.c` and
-then run `nmake` again.
-
-Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
-directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
-`curl.exe` directory. For example:
-
-     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://www.google.com
+If `make install` results in `Permission denied` error, you need to prepend
+it with `sudo`.
 
 # `--http3`
 
-Use HTTP/3 directly:
+Use only HTTP/3:
 
-    curl --http3 https://nghttp2.org:4433/
+     % curl --http3-only https://example.org:4433/
+
+Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
+
+     % curl --http3 https://example.org:4433/
 
 Upgrade via Alt-Svc:
 
-    curl --alt-svc altsvc.cache https://quic.aiortc.org/
+     % curl --alt-svc altsvc.cache https://curl.se/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
+
+### HTTPS eyeballing
+
+With option `--http3` curl attempts earlier HTTP versions as well should the
+connect attempt via HTTP/3 fail "fast enough". This strategy is similar
+to IPv4/6 happy eyeballing where the alternate address family is used in
+parallel after a short delay.
+
+The IPv4/6 eyeballing has a default of 200ms and you may override that via
+`--happy-eyeballs-timeout-ms value`. Since HTTP/3 is still relatively new, we
+decided to use this timeout also for the HTTP eyeballing - with a slight
+twist.
+
+The `happy-eyeballs-timeout-ms` value is the **hard** timeout, meaning after
+that time expired, a TLS connection is opened in addition to negotiate HTTP/2
+or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The
+soft timeout fires, when there has been **no data at all** seen from the
+server on the HTTP/3 connection.
+
+So, without you specifying anything, the hard timeout is 200ms and the soft is
+100ms:
+
+* Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection
+  in less than 100ms.
+* When QUIC is not supported (or UDP does not work for this network path), no
+  reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
+* In the worst case, UDP replies start before 100ms, but drag on. This starts
+  the TLS+TCP connection after 200ms.
+* When the QUIC handshake fails, the TLS+TCP connection is attempted right
+  away. For example, when the QUIC server presents the wrong certificate.
+
+The whole transfer only fails, when **both** QUIC and TLS+TCP fail to
+handshake or time out.
+
+Note that all this happens in addition to IP version happy eyeballing. If the
+name resolution for the server gives more than one IP address, curl tries all
+those until one succeeds - as with all other protocols. If those IP addresses
+contain both IPv6 and IPv4, those attempts happen, delayed, in parallel (the
+actual eyeballing).
 
 ## Known Bugs
 
@@ -254,11 +322,10 @@ development and experimenting.
 
 An existing local HTTP/1.1 server that hosts files. Preferably also a few huge
 ones. You can easily create huge local files like `truncate -s=8G 8GB` - they
-are huge but do not occupy that much space on disk since they are just big
-holes.
+are huge but do not occupy that much space on disk since they are big holes.
 
-In my Debian setup I just installed **apache2**. It runs on port 80 and has a
-document root in `/var/www/html`. I can get the 8GB file from it with `curl
+In a Debian setup you can install apache2. It runs on port 80 and has a
+document root in `/var/www/html`. Download the 8GB file from apache with `curl
 localhost/8GB -o dev/null`
 
 In this description we setup and run an HTTP/3 reverse-proxy in front of the
@@ -270,42 +337,44 @@ You can select either or both of these server solutions.
 
 ### nghttpx
 
-Get, build and install **quictls**, **nghttp3** and **ngtcp2** as described
+Get, build and install quictls, nghttp3 and ngtcp2 as described
 above.
 
-Get, build and install **nghttp2**:
+Get, build and install nghttp2:
 
-    git clone https://github.com/nghttp2/nghttp2.git
-    cd nghttp2
-    autoreconf -fi
-    PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig  LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
-    make && make install
+     % git clone https://github.com/nghttp2/nghttp2
+     % cd nghttp2
+     % autoreconf -fi
+     % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
+     % make && make install
 
 Run the local h3 server on port 9443, make it proxy all traffic through to
-HTTP/1 on localhost port 80. For local toying, we can just use the test cert
-that exists in curl's test dir.
+HTTP/1 on localhost port 80. For local toying, we can use the test cert that
+exists in curl's test dir.
 
-    CERT=$CURLSRC/tests/stunnel.pem
-    $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
+     % CERT=/path/to/stunnel.pem
+     % $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
       --frontend="localhost,9443;quic"
 
 ### Caddy
 
-[Install Caddy](https://caddyserver.com/docs/install). For easiest use, the binary
-should be either in your PATH or your current directory.
+[Install Caddy](https://caddyserver.com/docs/install). For easiest use, the
+binary should be either in your PATH or your current directory.
 
 Create a `Caddyfile` with the following content:
 ~~~
 localhost:7443 {
-	respond "Hello, world! You're using {http.request.proto}"
+  respond "Hello, world! you are using {http.request.proto}"
 }
 ~~~
 
 Then run Caddy:
 
-    ./caddy start
+     % ./caddy start
 
-Making requests to `https://localhost:7443` should tell you which protocol is being used.
+Making requests to `https://localhost:7443` should tell you which protocol is
+being used.
 
-You can change the hard-coded response to something more useful by replacing `respond`
-with `reverse_proxy` or `file_server`, for example: `reverse_proxy localhost:80`
+You can change the hard-coded response to something more useful by replacing
+`respond` with `reverse_proxy` or `file_server`, for example: `reverse_proxy
+localhost:80`

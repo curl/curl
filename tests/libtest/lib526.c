@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,49 +27,39 @@
  * sharing within the multi handle all transfers are performed on the same
  * persistent connection.
  *
- * This source code is used for lib526, lib527 and lib532 with only #ifdefs
+ * This source code is used for test526, test527 and test532 with branches
  * controlling the small differences.
  *
- * - lib526 closes all easy handles after
+ * - test526 closes all easy handles after
  *   they all have transferred the file over the single connection
- * - lib527 closes each easy handle after each single transfer.
- * - lib532 uses only a single easy handle that is removed, reset and then
+ * - test527 closes each easy handle after each single transfer.
+ * - test532 uses only a single easy handle that is removed, reset and then
  *   re-added for each transfer
  *
  * Test case 526, 527 and 532 use FTP, while test 528 uses the lib526 tool but
  * with HTTP.
  */
 
-#include "test.h"
+#include "first.h"
 
-#include <fcntl.h>
-
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-#define NUM_HANDLES 4
-
-int test(char *URL)
+static CURLcode test_lib526(const char *URL)
 {
-  int res = 0;
+  CURLcode result = CURLE_OK;
   CURL *curl[NUM_HANDLES];
   int running;
-  CURLM *m = NULL;
-  int current = 0;
-  int i;
+  CURLM *multi = NULL;
+  size_t current = 0;
+  size_t i;
 
-  for(i = 0; i < NUM_HANDLES; i++)
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
     curl[i] = NULL;
 
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     easy_init(curl[i]);
     /* specify target */
     easy_setopt(curl[i], CURLOPT_URL, URL);
@@ -77,11 +67,11 @@ int test(char *URL)
     easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
   }
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_add_handle(m, curl[current]);
+  multi_add_handle(multi, curl[current]);
 
-  fprintf(stderr, "Start at URL 0\n");
+  curl_mfprintf(stderr, "Start at URL 0\n");
 
   for(;;) {
     struct timeval interval;
@@ -91,36 +81,37 @@ int test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    multi_perform(m, &running);
+    multi_perform(multi, &running);
 
     abort_on_test_timeout();
 
     if(!running) {
-#ifdef LIB527
-      /* NOTE: this code does not remove the handle from the multi handle
-         here, which would be the nice, sane and documented way of working.
-         This however tests that the API survives this abuse gracefully. */
-      curl_easy_cleanup(curl[current]);
-      curl[current] = NULL;
-#endif
-      if(++current < NUM_HANDLES) {
-        fprintf(stderr, "Advancing to URL %d\n", current);
-#ifdef LIB532
-        /* first remove the only handle we use */
-        curl_multi_remove_handle(m, curl[0]);
+      if(testnum == 527) {
+        /* NOTE: this code does not remove the handle from the multi handle
+           here, which would be the nice, sane and documented way of working.
+           This however tests that the API survives this abuse gracefully. */
+        curl_easy_cleanup(curl[current]);
+        curl[current] = NULL;
+      }
+      if(++current < CURL_ARRAYSIZE(curl)) {
+        curl_mfprintf(stderr, "Advancing to URL %zu\n", current);
+        if(testnum == 532) {
+          /* first remove the only handle we use */
+          curl_multi_remove_handle(multi, curl[0]);
 
-        /* make us re-use the same handle all the time, and try resetting
-           the handle first too */
-        curl_easy_reset(curl[0]);
-        easy_setopt(curl[0], CURLOPT_URL, URL);
-        /* go verbose */
-        easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
+          /* make us reuse the same handle all the time, and try resetting
+             the handle first too */
+          curl_easy_reset(curl[0]);
+          easy_setopt(curl[0], CURLOPT_URL, URL);
+          /* go verbose */
+          easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
 
-        /* re-add it */
-        multi_add_handle(m, curl[0]);
-#else
-        multi_add_handle(m, curl[current]);
-#endif
+          /* re-add it */
+          multi_add_handle(multi, curl[0]);
+        }
+        else {
+          multi_add_handle(multi, curl[current]);
+        }
       }
       else {
         break; /* done */
@@ -131,7 +122,7 @@ int test(char *URL)
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    multi_fdset(m, &rd, &wr, &exc, &maxfd);
+    multi_fdset(multi, &rd, &wr, &exc, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -142,45 +133,37 @@ int test(char *URL)
 
 test_cleanup:
 
-#if defined(LIB526)
+  if((testnum == 526) || (testnum == 528)) {
+    /* proper cleanup sequence - type PB */
 
-  /* test 526 and 528 */
-  /* proper cleanup sequence - type PB */
-
-  for(i = 0; i < NUM_HANDLES; i++) {
-    curl_multi_remove_handle(m, curl[i]);
-    curl_easy_cleanup(curl[i]);
-  }
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
-
-#elif defined(LIB527)
-
-  /* test 527 */
-
-  /* Upon non-failure test flow the easy's have already been cleanup'ed. In
-     case there is a failure we arrive here with easy's that have not been
-     cleanup'ed yet, in this case we have to cleanup them or otherwise these
-     will be leaked, let's use undocumented cleanup sequence - type UB */
-
-  if(res)
-    for(i = 0; i < NUM_HANDLES; i++)
+    for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
+      curl_multi_remove_handle(multi, curl[i]);
       curl_easy_cleanup(curl[i]);
+    }
+    curl_multi_cleanup(multi);
+    curl_global_cleanup();
+  }
+  else if(testnum == 527) {
+    /* Upon non-failure test flow the easy's have already been cleanup'ed. In
+       case there is a failure we arrive here with easy's that have not been
+       cleanup'ed yet, in this case we have to cleanup them or otherwise these
+       will be leaked, let's use undocumented cleanup sequence - type UB */
 
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+    if(result != CURLE_OK)
+      for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
+        curl_easy_cleanup(curl[i]);
 
-#elif defined(LIB532)
+    curl_multi_cleanup(multi);
+    curl_global_cleanup();
+  }
+  else if(testnum == 532) {
+    /* undocumented cleanup sequence - type UB */
 
-  /* test 532 */
-  /* undocumented cleanup sequence - type UB */
+    for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
+      curl_easy_cleanup(curl[i]);
+    curl_multi_cleanup(multi);
+    curl_global_cleanup();
+  }
 
-  for(i = 0; i < NUM_HANDLES; i++)
-    curl_easy_cleanup(curl[i]);
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
-
-#endif
-
-  return res;
+  return result;
 }

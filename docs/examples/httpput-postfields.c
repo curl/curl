@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,14 +27,14 @@
  */
 #include <stdio.h>
 #include <fcntl.h>
-#include <sys/stat.h>
+
 #include <curl/curl.h>
 
-static const char olivertwist[]=
+static const char olivertwist[] =
   "Among other public buildings in a certain town, which for many reasons "
   "it will be prudent to refrain from mentioning, and to which I will assign "
   "no fictitious name, there is one anciently common to most towns, great or "
-  "small: to wit, a workhouse; and in this workhouse was born; on a day and "
+  "small: to ___, a workhouse; and in this workhouse was born; on a day and "
   "date which I need not trouble myself to repeat, inasmuch as it can be of "
   "no possible consequence to the reader, in this stage of the business at "
   "all events; the item of mortality whose name is prefixed";
@@ -47,19 +47,21 @@ static const char olivertwist[]=
  * CURLOPT_POSTFIELDS to the URL given as an argument.
  */
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURL *curl;
-  CURLcode res;
-  char *url;
+  CURLcode result;
+  const char *url;
 
   if(argc < 2)
     return 1;
 
   url = argv[1];
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  /* In Windows, this inits the Winsock stuff */
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -87,11 +89,11 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
@@ -101,5 +103,5 @@ int main(int argc, char **argv)
   }
 
   curl_global_cleanup();
-  return 0;
+  return (int)result;
 }

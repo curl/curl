@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <!-- This replaces test 558 -->
 <info>
@@ -7,18 +8,14 @@ hash
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 internal hash create/destroy testing
- </name>
+</name>
 <command>
 %TESTNUMBER
 </command>

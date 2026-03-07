@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,7 @@
 
 #include <curl/curl.h>
 
-static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)stream;
   (void)ptr;
@@ -39,15 +39,17 @@ static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, wrfu);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -55,14 +57,14 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(result == CURLE_OK) {
       struct curl_certinfo *certinfo;
 
-      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &certinfo);
+      result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &certinfo);
 
-      if(!res && certinfo) {
+      if(!result && certinfo) {
         int i;
 
         printf("%d certs!\n", certinfo->num_of_certs);
@@ -72,10 +74,8 @@ int main(void)
 
           for(slist = certinfo->certinfo[i]; slist; slist = slist->next)
             printf("%s\n", slist->data);
-
         }
       }
-
     }
 
     curl_easy_cleanup(curl);
@@ -83,5 +83,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return 0;
+  return (int)result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -49,15 +50,15 @@ lib%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcgpuYW1lOnBhc3MKd29yZA==
+Authorization: Basic %b64[user%0aname:pass%0aword]b64%
 Accept: */*
 
 GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcgpuYW1lOnBhc3MKd29yZA==
+Authorization: Basic %b64[user%0aname:pass%0aword]b64%
 Accept: */*
 
 </protocol>

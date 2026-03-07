@@ -1,9 +1,8 @@
-# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 
 *pid
-*.1.dist
 configurehelp.pm
 curl_client_key
 curl_client_key.pub
@@ -18,10 +17,9 @@ curl_ssh_config
 curl_sshd_config
 ftps_stunnel.conf
 https_stunnel.conf
-log
-runtests.html
-runtests.pdf
-testcurl.html
-testcurl.pdf
+log*
 *.port
 config
+second-hsts.txt
+runtests.1
+testcurl.1

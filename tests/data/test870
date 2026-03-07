@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,15 +11,14 @@ RFC6749
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 AUTH XOAUTH2
 REPLY AUTH +
-REPLY dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB +OK Login successful
+REPLY %b64[user=user%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -29,27 +29,25 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 OAuth 2.0 (XOAUTH2) authentication
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH XOAUTH2
-dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
+%b64[user=user%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 RETR %TESTNUMBER
 QUIT
 </protocol>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,28 +7,23 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP invalid user login (password authentication)
- </name>
- <command>
--u not-a-valid-user: sftp://%HOSTIP:%SSHPORT%SSH_PWD/irrelevant-file  --insecure
+</name>
+<command>
+-u not-a-valid-user: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/irrelevant-file --insecure
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
 67
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

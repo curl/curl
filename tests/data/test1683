@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -20,7 +20,6 @@ foo
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <name>
@@ -33,29 +32,26 @@ http
 http
 </features>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/exist%TESTNUMBER --no-clobber
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/exist%TESTNUMBER --no-clobber
 </command>
-<file name="log/exist%TESTNUMBER">
+<file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same
 </file>
 <precheck>
-perl -e 'for my $i ((1..100)) { my $filename = "log/exist%TESTNUMBER.$i"; open(FH, ">", $filename) or die $!; print FH "to stay the same" ; close(FH) }'
-# python3 -c 'for i in range(1, 101): open("log/exist%TESTNUMBER.{}".format(i), mode="w").write("to stay the same")'
+%PERL -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; open(FH, "%GT", $filename) or die $!; print FH "to stay the same" ; close(FH) }'
 </precheck>
-<postcheck>
-perl -e 'for my $i ((1..100)) { my $filename = "log/exist%TESTNUMBER.$i"; open(FH, "<", $filename) or die $!; (<FH> eq "to stay the same" and <FH> eq "") or die "incorrect $filename" ; close(FH) }'
-# python3 -c 'for i in range(1, 101): assert open("log/exist%TESTNUMBER.{}".format(i), mode="r").read(17) == "to stay the same"'
-</postcheck>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
 23
 </errorcode>
-<file name="log/exist%TESTNUMBER">
+<file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same
 </file>
+<postcheck>
+%PERL -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; open(FH, "%LT", $filename) or die $!; (%LTFH%GT eq "to stay the same" and %LTFH%GT eq "") or die "incorrect $filename" ; close(FH) }'
+</postcheck>
 </verify>
 </testcase>

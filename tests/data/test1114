@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -21,10 +22,10 @@ ftp
 <tool>
 lib576
 </tool>
- <name>
-FTP wildcard download - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (DOS)
- </name>
- <command>
+<name>
+FTP wildcard download - skip/correctness/FNMATCH_FUNCTION (DOS)
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/DOS/*
 </command>
 </client>

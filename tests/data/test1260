@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,16 +13,13 @@ HTTP GET
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
- <name>
+<name>
 HTTP URL with rubbish after port number
- </name>
- <command>
+</name>
+<command>
 -g "http://[%HOSTIP]:%NOLISTENPORT:80/we/want/%TESTNUMBER" "http://%HOSTIP:%NOLISTENPORT:80/we/want/%TESTNUMBER" "http://user@example.com:80@localhost"
 </command>
 </client>

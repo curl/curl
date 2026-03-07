@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP POST
 --json
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -25,32 +25,30 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with --json x 2
- </name>
- <command>
---json '{ "drink": "coffe",' --json ' "crunch": "cookie" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H "Content-Type: drinks/hot"
+</name>
+<command>
+--json '{ "drink": "coffee",' --json ' "crunch": "cookie" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H "Content-Type: drinks/hot"
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Content-Type: drinks/hot
 Accept: application/json
-Content-Length: 40
+Content-Length: 41
 
-{ "drink": "coffe", "crunch": "cookie" }
+{ "drink": "coffee", "crunch": "cookie" }
 </protocol>
 </verify>
 </testcase>

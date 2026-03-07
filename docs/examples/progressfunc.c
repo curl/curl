@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,10 +27,11 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
-#define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3000000
-#define STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES         6000
+#define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL 3000000
+#define STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES     6000
 
 struct myprogress {
   curl_off_t lastruntime; /* type depends on version, see above */
@@ -53,14 +54,19 @@ static int xferinfo(void *p,
      be used */
   if((curtime - myp->lastruntime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL) {
     myp->lastruntime = curtime;
-    fprintf(stderr, "TOTAL TIME: %lu.%06lu\r\n",
-            (unsigned long)(curtime / 1000000),
-            (unsigned long)(curtime % 1000000));
+    fprintf(stderr, "TOTAL TIME: %" CURL_FORMAT_CURL_OFF_T
+            ".%06" CURL_FORMAT_CURL_OFF_T "\r\n",
+            curtime / 1000000,
+            curtime % 1000000);
   }
 
-  fprintf(stderr, "UP: %lu of %lu  DOWN: %lu of %lu\r\n",
-          (unsigned long)ulnow, (unsigned long)ultotal,
-          (unsigned long)dlnow, (unsigned long)dltotal);
+  fprintf(stderr,
+          "UP: "
+          "%" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T "  "
+          "DOWN: "
+          "%" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T "\r\n",
+          ulnow, ultotal,
+          dlnow, dltotal);
 
   if(dlnow > STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES)
     return 1;
@@ -70,11 +76,15 @@ static int xferinfo(void *p,
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct myprogress prog;
+
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
+    struct myprogress prog;
+
     prog.lastruntime = 0;
     prog.curl = curl;
 
@@ -85,13 +95,14 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &prog);
 
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(res != CURLE_OK)
-      fprintf(stderr, "%s\n", curl_easy_strerror(res));
+    if(result != CURLE_OK)
+      fprintf(stderr, "%s\n", curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  return (int)res;
+  curl_global_cleanup();
+  return (int)result;
 }

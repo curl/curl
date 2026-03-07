@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ SMB
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -13,7 +13,6 @@ Basic SMB test complete
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -28,12 +27,8 @@ Basic SMB request
 <command>
 -u 'curltest:curltest' smb://%HOSTIP:%SMBPORT/TESTS/%TESTNUMBER
 </command>
-<precheck>
-python3 -c "__import__('pkgutil').find_loader('impacket') or (__import__('sys').stdout.write('Test only works if Python package impacket is installed\n'), __import__('sys').exit(1))"
-</precheck>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>

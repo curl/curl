@@ -1,0 +1,11 @@
+[ ca ]
+default_ca = test
+
+[ test ]
+database = test-ca.db
+certificate = test-ca.crt
+private_key = test-ca.key
+crlnumber = test-ca.cnt
+default_md = sha256
+default_days = 365
+default_crl_days = 30

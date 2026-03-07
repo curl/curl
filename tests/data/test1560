@@ -1,17 +1,18 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 unittest
-URLAPI
+urlapi
+url
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
 <features>
 file
 https
@@ -22,11 +23,10 @@ imap
 ldap
 dict
 ftp
-ipv6
 </features>
- <name>
+<name>
 URL API
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>
@@ -34,14 +34,10 @@ lib%TESTNUMBER
 
 <verify>
 <stdout>
-we got [fe80::20c:29ff:fe9c:409b]
-we got https://[::1]/hello.html
-we got https://example.com/hello.html
-we got https://[fe80::20c:29ff:fe9c:409b%25eth0]/hello.html
-we got [fe80::20c:29ff:fe9c:409b]
-we got eth0
-we got https://[fe80::20c:29ff:fe9c:409b%25clown]/hello.html
 success
 </stdout>
+<limits>
+Allocations: 3000
+</limits>
 </verify>
 </testcase>

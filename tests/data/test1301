@@ -1,19 +1,18 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
-unittest
 curl_strequal
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
- <name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
 curl_strequal tests
- </name>
+</name>
 </client>
 </testcase>

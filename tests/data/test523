@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,10 +10,9 @@ CURLOPT_PROXY
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -25,7 +25,6 @@ hello
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -34,11 +33,11 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP GET with proxy and CURLOPT_PORT
- </name>
+</name>
 # first URL then proxy
- <command>
+<command>
 http://www.example.com:999/%TESTNUMBER http://%HOSTIP:%HTTPPORT
 </command>
 <features>
@@ -46,13 +45,12 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://www.example.com:19999/%TESTNUMBER HTTP/1.1
 Host: www.example.com:19999
-Authorization: Basic eHh4Onl5eQ==
+Authorization: Basic %b64[xxx:yyy]b64%
 Accept: */*
 Proxy-Connection: Keep-Alive
 

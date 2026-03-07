@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 /***********************************************************************
@@ -44,51 +43,18 @@
 #endif
 
 #include "urldata.h"
-#include "sendf.h"
+#include "cfilters.h"
+#include "curl_addrinfo.h"
+#include "curl_trc.h"
 #include "hostip.h"
-#include "hash.h"
-#include "share.h"
 #include "url.h"
-#include "inet_pton.h"
+#include "curlx/inet_pton.h"
 #include "connect.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+
+#ifdef CURLRES_SYNCH
 
 /*
- * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
- * been set and returns TRUE if they are OK.
- */
-bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
-{
-  if(conn->ip_version == CURL_IPRESOLVE_V6)
-    return Curl_ipv6works(data);
-
-  return TRUE;
-}
-
-#if defined(CURLRES_SYNCH)
-
-#ifdef DEBUG_ADDRINFO
-static void dump_addrinfo(struct connectdata *conn,
-                          const struct Curl_addrinfo *ai)
-{
-  printf("dump_addrinfo:\n");
-  for(; ai; ai = ai->ai_next) {
-    char buf[INET6_ADDRSTRLEN];
-    printf("    fam %2d, CNAME %s, ",
-           ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
-    Curl_printable_address(ai, buf, sizeof(buf));
-    printf("%s\n", buf);
-  }
-}
-#else
-#define dump_addrinfo(x,y) Curl_nop_stmt
-#endif
-
-/*
- * Curl_getaddrinfo() when built IPv6-enabled (non-threading and
+ * Curl_sync_getaddrinfo() when built IPv6-enabled (non-threading and
  * non-ares version).
  *
  * Returns name information about the given hostname and port number. If
@@ -96,10 +62,10 @@ static void dump_addrinfo(struct connectdata *conn,
  * to memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
-                                       const char *hostname,
-                                       int port,
-                                       int *waitp)
+struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
+                                            const char *hostname,
+                                            int port,
+                                            int ip_version)
 {
   struct addrinfo hints;
   struct Curl_addrinfo *res;
@@ -111,31 +77,30 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 #endif
   int pf = PF_INET;
 
-  *waitp = 0; /* synchronous response only */
-
-  if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
+  if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
     /* The stack seems to be IPv6-enabled */
     pf = PF_UNSPEC;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
+  hints.ai_socktype =
+    (Curl_conn_get_transport(data, data->conn) == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
 #ifndef USE_RESOLVE_ON_IPS
   /*
    * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
-   * an IPv4 address on iOS and Mac OS X.
+   * an IPv4 address on iOS and macOS.
    */
-  if((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
-     (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {
+  if((curlx_inet_pton(AF_INET, hostname, addrbuf) == 1) ||
+     (curlx_inet_pton(AF_INET6, hostname, addrbuf) == 1)) {
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
   }
 #endif
 
   if(port) {
-    msnprintf(sbuf, sizeof(sbuf), "%d", port);
+    curl_msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
   }
 
@@ -148,8 +113,6 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
   if(port) {
     Curl_addrinfo_set_port(res, port);
   }
-
-  dump_addrinfo(conn, res);
 
   return res;
 }

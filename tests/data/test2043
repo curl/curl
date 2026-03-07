@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,24 +7,19 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <features>
 Schannel
 </features>
-<server>
-none
-</server>
- <name>
+<name>
 Disable certificate revocation checks
- </name>
- <command>
+</name>
+<command>
 --ssl-no-revoke -I https://revoked.badssl.com/
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

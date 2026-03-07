@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,10 +7,9 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -40,25 +40,27 @@ lib%TESTNUMBER
 # precheck is a command line to run before the test, to see if we can execute
 # the test or not
 <precheck>
-./libtest/lib%TESTNUMBER check
+%LIBTESTS lib%TESTNUMBER check
 </precheck>
 
- <name>
+<name>
 HTTP GET with a HUGE number of file descriptors open
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<limits>
+Maximum allocated: 3200000
+</limits>
 </verify>
 </testcase>

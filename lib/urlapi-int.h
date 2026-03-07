@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,9 +28,16 @@
 size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
                             bool guess_scheme);
 
-#ifdef DEBUGBUILD
-CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
-                          bool has_scheme);
+CURLUcode Curl_url_set_authority(CURLU *u, const char *authority);
+
+CURLUcode Curl_junkscan(const char *url, size_t *urllen, bool allowspace);
+
+#ifdef UNITTESTS
+UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
+                                   bool has_scheme);
 #endif
+
+#define U_CURLU_URLDECODE (unsigned int)CURLU_URLDECODE
+#define U_CURLU_PATH_AS_IS (unsigned int)CURLU_PATH_AS_IS
 
 #endif /* HEADER_CURL_URLAPI_INT_H */

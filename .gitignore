@@ -1,4 +1,4 @@
-# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 
@@ -8,11 +8,15 @@
 *.exp
 *.la
 *.lib
+*.a
+*.res
 *.lo
 *.o
 *.obj
 *.pdb
 *.pyc
+*.orig
+*.rej
 *~
 .*.sw?
 .cproject
@@ -24,10 +28,8 @@
 /.vs
 /bld/
 /build/
-/builds/
 /stats/
 __pycache__
-CHANGES.dist
 Debug
 INSTALL
 Makefile
@@ -37,6 +39,9 @@ TAGS
 aclocal.m4
 aclocal.m4.bak
 autom4te.cache
+buildinfo.txt
+ca-bundle.crt
+certdata.txt
 compile
 config.cache
 config.guess
@@ -58,6 +63,7 @@ missing
 mkinstalldirs
 tags
 test-driver
+stamp-h*
 scripts/_curl
 scripts/curl.fish
 curl_fuzzer
@@ -65,4 +71,4 @@ curl_fuzzer_seed_corpus.zip
 libstandaloneengine.a
 tests/string
 tests/config
-
+tests/ech-log/

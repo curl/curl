@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,12 +25,8 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-const char *param2text(int res);
-
-int SetHTTPrequest(struct OperationConfig *config, HttpReq req,
-                   HttpReq *store);
-
-void customrequest_helper(struct OperationConfig *config, HttpReq req,
-                          char *method);
+const char *param2text(ParameterError error);
+int SetHTTPrequest(HttpReq req, HttpReq *store);
+void customrequest_helper(HttpReq req, const char *method);
 
 #endif /* HEADER_CURL_TOOL_HELPERS_H */

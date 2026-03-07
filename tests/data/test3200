@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,17 +7,16 @@ curl_get_line
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 curl_get_line unit tests
- </name>
+</name>
+<command>
+%LOGDIR/curl_get_line%TESTNUMBER
+</command>
 </client>
 </testcase>

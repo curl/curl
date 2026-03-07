@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,59 +30,53 @@
  * first connection and open a second.
  */
 
-#include "test.h"
-#include "testutil.h"
+#include "first.h"
+
 #include "testtrace.h"
-#include "warnless.h"
-#include "memdebug.h"
 
-#if defined(WIN32) || defined(_WIN32)
-#define sleep(sec) Sleep ((sec)*1000)
-#endif
-
-int test(char *URL)
+static CURLcode test_lib1542(const char *URL)
 {
-  CURL *easy = NULL;
-  int res = 0;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
-  res_easy_init(easy);
+  res_easy_init(curl);
 
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 0;
-  easy_setopt(easy, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = FALSE;
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* CURLOPT_MAXLIFETIME_CONN is inclusive - the connection needs to be 2
    * seconds old */
-  sleep(2);
+  curlx_wait_ms(2000);
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
-  easy_setopt(easy, CURLOPT_MAXLIFETIME_CONN, 1L);
+  easy_setopt(curl, CURLOPT_MAXLIFETIME_CONN, 1L);
 
-  res = curl_easy_perform(easy);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
 test_cleanup:
 
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

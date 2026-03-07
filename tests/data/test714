@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 #based off test 712
 <info>
@@ -11,7 +12,6 @@ proxytunnel
 CURLOPT_CONNECT_TO
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <connect>
@@ -32,7 +32,6 @@ silly content
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -46,18 +45,17 @@ http-proxy
 http
 proxy
 </features>
- <name>
+<name>
 FTP fetch with --proxy set to http:// and with --connect-to
- </name>
- <command>
-ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%FTPPORT --proxytunnel --proxy http://%HOSTIP:%PROXYPORT 
+</name>
+<command>
+ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%FTPPORT --proxytunnel --proxy http://%HOSTIP:%PROXYPORT
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

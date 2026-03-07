@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,56 +21,53 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
-#include "memdebug.h"
+#include "first.h"
 
 /*
- * From "KNOWN_BUGS" April 2009:
+  From "KNOWN_BUGS" April 2009:
 
- 59. If the CURLOPT_PORT option is used on an FTP URL like
- "ftp://example.com/file;type=A" the ";type=A" is stripped off.
-
+  59. If the CURLOPT_PORT option is used on an FTP URL like
+      "ftp://example.com/file;type=A" the ";type=A" is stripped off.
  */
 
-int test(char *URL)
+static CURLcode test_lib562(const char *URL)
 {
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  curl_off_t port;
+
+  if(curlx_str_number(&libtest_arg2, &port, 0xffff))
+    return result;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return result;
   }
 
   /* get a curl handle */
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    return result;
   }
 
   /* enable verbose */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* set port number */
-  test_setopt(curl, CURLOPT_PORT, strtol(libtest_arg2, NULL, 10));
+  test_setopt(curl, CURLOPT_PORT, (long)port);
 
   /* specify target */
   test_setopt(curl, CURLOPT_URL, URL);
 
-  /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
+  /* Now run off and do what you have been told! */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,15 +21,20 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <string.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Checks a single file's size and mtime from an FTP server.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for ctime(), fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+#include <string.h>
+
+#include <curl/curl.h>
 
 static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -37,19 +42,22 @@ static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
   (void)data;
   /* we are not interested in the headers itself,
      so we only return the size we would have saved ... */
-  return (size_t)(size * nmemb);
+  return size * nmemb;
 }
 
 int main(void)
 {
-  char ftpurl[] = "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
+  static const char ftpurl[] =
+    "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   long filetime = -1;
   curl_off_t filesize = 0;
   const char *filename = strrchr(ftpurl, '/') + 1;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -61,26 +69,28 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, throw_away);
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     /* Switch on full protocol/debug output */
-    /* curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); */
+#if 0
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+#endif
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(CURLE_OK == res) {
+    if(result == CURLE_OK) {
       /* https://curl.se/libcurl/c/curl_easy_getinfo.html */
-      res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
-      if((CURLE_OK == res) && (filetime >= 0)) {
+      result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+      if((result == CURLE_OK) && (filetime >= 0)) {
         time_t file_time = (time_t)filetime;
         printf("filetime %s: %s", filename, ctime(&file_time));
       }
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                              &filesize);
-      if((CURLE_OK == res) && (filesize>0))
+      result = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                                 &filesize);
+      if((result == CURLE_OK) && (filesize > 0))
         printf("filesize %s: %" CURL_FORMAT_CURL_OFF_T " bytes\n",
                filename, filesize);
     }
     else {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", res);
+      fprintf(stderr, "curl told us %d\n", result);
     }
 
     /* always cleanup */
@@ -89,5 +99,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return 0;
+  return (int)result;
 }

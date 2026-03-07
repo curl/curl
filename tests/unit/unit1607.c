@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,102 +21,93 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "urldata.h"
 #include "connect.h"
-#include "share.h"
+#include "curl_addrinfo.h"
 
-#include "memdebug.h" /* LAST include file */
-
-static void unit_stop(void)
+static CURLcode t1607_setup(void)
 {
-  curl_global_cleanup();
-}
-
-static CURLcode unit_setup(void)
-{
-  CURLcode res = CURLE_OK;
-
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-
-  return res;
+  return result;
 }
 
-struct testcase {
-  /* host:port:address[,address]... */
-  const char *optval;
-
-  /* lowercase host and port to retrieve the addresses from hostcache */
-  const char *host;
-  int port;
-
-  /* whether we expect a permanent or non-permanent cache entry */
-  bool permanent;
-
-  /* 0 to 9 addresses expected from hostcache */
-  const char *address[10];
-};
-
-
-/* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
-   addresses, so we have to do that as well. */
-static const char skip = 0;
-#ifdef ENABLE_IPV6
+static CURLcode test_unit1607(const char *arg)
+{
+  /* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
+     addresses, so we have to do that as well. */
+  static const char skip = 0;
+#ifdef USE_IPV6
 #define IPV6ONLY(x) x
 #else
 #define IPV6ONLY(x) &skip
 #endif
 
-/* CURLOPT_RESOLVE address parsing tests */
-static const struct testcase tests[] = {
-  /* spaces aren't allowed, for now */
-  { "test.com:80:127.0.0.1, 127.0.0.2",
-    "test.com", 80, TRUE, { NULL, }
-  },
-  { "TEST.com:80:,,127.0.0.1,,,127.0.0.2,,,,::1,,,",
-    "test.com", 80, TRUE, { "127.0.0.1", "127.0.0.2", IPV6ONLY("::1"), }
-  },
-  { "test.com:80:::1,127.0.0.1",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
-  },
-  { "test.com:80:[::1],127.0.0.1",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
-  },
-  { "test.com:80:::1",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), }
-  },
-  { "test.com:80:[::1]",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), }
-  },
-  { "test.com:80:127.0.0.1",
-    "test.com", 80, TRUE, { "127.0.0.1", }
-  },
-  { "test.com:80:,127.0.0.1",
-    "test.com", 80, TRUE, { "127.0.0.1", }
-  },
-  { "test.com:80:127.0.0.1,",
-    "test.com", 80, TRUE, { "127.0.0.1", }
-  },
-  { "test.com:0:127.0.0.1",
-    "test.com", 0, TRUE, { "127.0.0.1", }
-  },
-  { "+test.com:80:127.0.0.1,",
-    "test.com", 80, FALSE, { "127.0.0.1", }
-  },
-};
+  UNITTEST_BEGIN(t1607_setup())
 
-UNITTEST_START
-{
-  int i;
-  int testnum = sizeof(tests) / sizeof(struct testcase);
+  struct testcase {
+    /* host:port:address[,address]... */
+    const char *optval;
+
+    /* lowercase host and port to retrieve the addresses from hostcache */
+    const char *host;
+    int port;
+
+    /* whether we expect a permanent or non-permanent cache entry */
+    bool permanent;
+
+    /* 0 to 9 addresses expected from hostcache */
+    const char *address[10];
+  };
+
+  /* CURLOPT_RESOLVE address parsing tests */
+  static const struct testcase tests[] = {
+    /* spaces are not allowed, for now */
+    { "test.com:80:127.0.0.1, 127.0.0.2",
+      "test.com", 80, TRUE, { NULL, }
+    },
+    { "TEST.com:80:,,127.0.0.1,,,127.0.0.2,,,,::1,,,",
+      "test.com", 80, TRUE, { "127.0.0.1", "127.0.0.2", IPV6ONLY("::1"), }
+    },
+    { "test.com:80:::1,127.0.0.1",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
+    },
+    { "test.com:80:[::1],127.0.0.1",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
+    },
+    { "test.com:80:::1",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), }
+    },
+    { "test.com:80:[::1]",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), }
+    },
+    { "test.com:80:127.0.0.1",
+      "test.com", 80, TRUE, { "127.0.0.1", }
+    },
+    { "test.com:80:,127.0.0.1",
+      "test.com", 80, TRUE, { "127.0.0.1", }
+    },
+    { "test.com:80:127.0.0.1,",
+      "test.com", 80, TRUE, { "127.0.0.1", }
+    },
+    { "test.com:0:127.0.0.1",
+      "test.com", 0, TRUE, { "127.0.0.1", }
+    },
+    { "+test.com:80:127.0.0.1,",
+      "test.com", 80, FALSE, { "127.0.0.1", }
+    },
+  };
+
+  size_t i;
   struct Curl_multi *multi = NULL;
   struct Curl_easy *easy = NULL;
   struct curl_slist *list = NULL;
 
-  for(i = 0; i < testnum; ++i) {
-    int j;
-    int addressnum = sizeof(tests[i].address) / sizeof(*tests[i].address);
+  for(i = 0; i < CURL_ARRAYSIZE(tests); ++i) {
+    size_t j;
+    size_t addressnum = CURL_ARRAYSIZE(tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     void *entry_id;
@@ -137,18 +128,19 @@ UNITTEST_START
 
     Curl_loadhostpairs(easy);
 
-    entry_id = (void *)aprintf("%s:%d", tests[i].host, tests[i].port);
+    entry_id = (void *)curl_maprintf("%s:%d", tests[i].host, tests[i].port);
     if(!entry_id)
       goto error;
-    dns = Curl_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
-    free(entry_id);
+    dns = Curl_hash_pick(&multi->dnscache.entries,
+                         entry_id, strlen(entry_id) + 1);
+    curlx_free(entry_id);
     entry_id = NULL;
 
     addr = dns ? dns->addr : NULL;
 
     for(j = 0; j < addressnum; ++j) {
-      int port = 0;
-      char ipaddress[MAX_IPADR_LEN] = {0};
+      uint16_t port = 0;
+      char ipaddress[MAX_IPADR_LEN] = { 0 };
 
       if(!addr && !tests[i].address[j])
         break;
@@ -158,56 +150,60 @@ UNITTEST_START
 
       if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
                                    ipaddress, &port)) {
-        fprintf(stderr, "%s:%d tests[%d] failed. getaddressinfo failed.\n",
-                __FILE__, __LINE__, i);
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. "
+                      "getaddressinfo failed.\n",
+                      __FILE__, __LINE__, i);
         problem = true;
         break;
       }
 
       if(addr && !tests[i].address[j]) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "is %s but tests[%d].address[%d] is NULL.\n",
-                __FILE__, __LINE__, i, ipaddress, i, j);
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
+                      "is %s but tests[%zu].address[%zu] is NULL.\n",
+                      __FILE__, __LINE__, i, ipaddress, i, j);
         problem = true;
         break;
       }
 
       if(!addr && tests[i].address[j]) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "is NULL but tests[%d].address[%d] is %s.\n",
-                __FILE__, __LINE__, i, i, j, tests[i].address[j]);
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
+                      "is NULL but tests[%zu].address[%zu] is %s.\n",
+                      __FILE__, __LINE__, i, i, j, tests[i].address[j]);
         problem = true;
         break;
       }
 
       if(!curl_strequal(ipaddress, tests[i].address[j])) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "%s is not equal to tests[%d].address[%d] %s.\n",
-                __FILE__, __LINE__, i, ipaddress, i, j, tests[i].address[j]);
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
+                      "%s is not equal to tests[%zu].address[%zu] %s.\n",
+                      __FILE__, __LINE__, i, ipaddress, i, j,
+                      tests[i].address[j]);
         problem = true;
         break;
       }
 
       if(port != tests[i].port) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved port "
-                "for tests[%d].address[%d] is %ld but tests[%d].port is %d.\n",
-                __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved port "
+                      "for tests[%zu].address[%zu] is %d "
+                      "but tests[%zu].port is %d.\n",
+                      __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
         problem = true;
         break;
       }
 
-      if(dns->timestamp && tests[i].permanent) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is not zero "
-                "but tests[%d].permanent is TRUE\n",
-                __FILE__, __LINE__, i, i);
+      if(dns->timestamp.tv_sec && tests[i].permanent) {
+        curl_mfprintf(stderr,
+                      "%s:%d tests[%zu] failed. the timestamp is not zero "
+                      "but tests[%zu].permanent is TRUE\n",
+                      __FILE__, __LINE__, i, i);
         problem = true;
         break;
       }
 
-      if(dns->timestamp == 0 && !tests[i].permanent) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is zero "
-                "but tests[%d].permanent is FALSE\n",
-                __FILE__, __LINE__, i, i);
+      if(dns->timestamp.tv_sec == 0 && !tests[i].permanent) {
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the timestamp is zero "
+                      "but tests[%zu].permanent is FALSE\n",
+                      __FILE__, __LINE__, i, i);
         problem = true;
         break;
       }
@@ -227,9 +223,10 @@ UNITTEST_START
       continue;
     }
   }
-  error:
+error:
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
+
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP

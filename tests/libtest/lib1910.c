@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2022, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,29 +21,25 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-int test(char *URL)
+static CURLcode test_lib1910(const char *URL)
 {
-  CURLcode ret = CURLE_OK;
-  CURL *hnd;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
+  CURL *curl;
   start_test_timing();
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
-  if(hnd) {
-    curl_easy_setopt(hnd, CURLOPT_URL, URL);
-    curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(hnd, CURLOPT_USERPWD, "user\nname:pass\nword");
-    ret = curl_easy_perform(hnd);
-    curl_easy_cleanup(hnd);
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, URL);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_USERPWD, "user\nname:pass\nword");
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)ret;
+  return result;
 }

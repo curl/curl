@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,39 +7,42 @@ gzip
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data nocheck="yes">
+<data nocheck="yes" crlf="headers">
 HTTP/1.1 200 OK
+Content-Length: 6
 Transfer-Encoding: gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip
 
 -foo-
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
- <name>
+<features>
+libz
+</features>
+<name>
 Response with overly long compression chain
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS --tr-encoding
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
+TE: gzip
+Connection: TE
 
 </protocol>
 
@@ -47,7 +51,7 @@ Accept: */*
 61
 </errorcode>
 <stderr mode="text">
-curl: (61) Reject response due to 5 content encodings
+curl: (61) Reject response due to more than 5 content encodings
 </stderr>
 </verify>
 </testcase>

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,6 +22,14 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+
+use strict;
+use warnings;
+
+my %with;
+my %without;
+my %used;
+my %avail;
 
 # these options are enabled by default in the sense that they will attempt to
 # check for and use this feature without the configure flag
@@ -58,7 +66,12 @@ my %defaulton = (
     'threaded-resolver' => 1,
     'pthreads' => 1,
     'verbose' => 1,
-    'crypto-auth' => 1,
+    'basic-auth' => 1,
+    'bearer-auth' => 1,
+    'digest-auth' => 1,
+    'kerberos-auth' => 1,
+    'negotiate-auth' => 1,
+    'aws' => 1,
     'ntlm' => 1,
     'ntlm-wb' => 1,
     'tls-srp' => 1,
@@ -83,7 +96,6 @@ my %defaulton = (
     'zstd' => 1,
     'brotli' => 1,
     'random' => 1,
-    'egd-socket' => 1,
     'ca-bundle' => 1,
     'ca-path' => 1,
     'libssh2' => 1,
@@ -95,7 +107,6 @@ my %defaulton = (
     'ldap-lib' => 1,
 
     );
-
 
 sub configureopts {
     my ($opts)=@_;
@@ -159,26 +170,25 @@ scanjobs();
 print "Used configure options (with / without)\n";
 for my $w (sort keys %used) {
     printf "  %s: %d %d%s\n", $w, $with{$w}, $without{$w},
-        $defaulton{$w} ? " (auto)":"";
+        $defaulton{$w} ? " (auto)" : "";
 }
 
 print "Never used configure options\n";
 for my $w (sort keys %avail) {
     if(!$used{$w}) {
         printf "  %s%s\n", $w,
-            $defaulton{$w} ? " (auto)":"";
+            $defaulton{$w} ? " (auto)" : "";
     }
 }
 
-print "Never ENABLED configure options that aren't on by default\n";
+print "Never ENABLED configure options that are not on by default\n";
 for my $w (sort keys %avail) {
     if(!$with{$w} && !$defaulton{$w}) {
         printf "  %s\n", $w;
     }
 }
 
-
-print "ENABLED configure options that aren't available\n";
+print "ENABLED configure options that are not available\n";
 for my $w (sort keys %with) {
     if(!$avail{$w}) {
         printf "  %s\n", $w;

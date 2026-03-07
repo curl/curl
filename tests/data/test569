@@ -1,6 +1,5 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
-
-#Informational
 <info>
 <keywords>
 RTSP
@@ -66,7 +65,7 @@ lib%TESTNUMBER
 RTSP Session ID parsing
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER log/idfile%TESTNUMBER.txt
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/idfile%TESTNUMBER.txt
 </command>
 </client>
 
@@ -74,7 +73,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER log/idfile%TESTNUMBER.txt
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Transport: Fake/NotReal/JustATest;foo=baz
@@ -100,7 +99,7 @@ CSeq: 6
 Session: A
 
 </protocol>
-<file name="log/idfile%TESTNUMBER.txt">
+<file name="%LOGDIR/idfile%TESTNUMBER.txt">
 Got Session ID: [00.+1-am-aSe55ion_id\$yes-i-am\$]
 Got Session ID: [\$extraspaces]
 Got Session ID: [A]

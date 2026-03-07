@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,24 +21,19 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "memdebug.h"
-
-static char data[]=
-  "dummy";
-
-struct WriteThis {
-  char *readptr;
+struct t667_WriteThis {
+  const char *readptr;
   curl_off_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t667_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
-  int eof = !*pooh->readptr;
+  struct t667_WriteThis *pooh = (struct t667_WriteThis *)userp;
+  int eof;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   eof = pooh->sizeleft <= 0;
@@ -54,14 +49,15 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-int test(char *URL)
+static CURLcode test_lib667(const char *URL)
 {
-  CURL *easy = NULL;
+  static const char testdata[] = "dummy";
+
+  CURL *curl = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
-  CURLcode result;
-  int res = TEST_ERR_FAILURE;
-  struct WriteThis pooh;
+  CURLcode result = TEST_ERR_FAILURE;
+  struct t667_WriteThis pooh;
 
   /*
    * Check proper handling of mime encoder feature when the part read callback
@@ -69,46 +65,45 @@ int test(char *URL)
    */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  easy = curl_easy_init();
+  curl = curl_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(easy, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(easy, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(easy, CURLOPT_HEADER, 1L);
+  test_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structure. */
-  pooh.readptr = data;
-  pooh.sizeleft = (curl_off_t) strlen(data);
+  pooh.readptr = testdata;
+  pooh.sizeleft = (curl_off_t)strlen(testdata);
 
   /* Build the mime tree. */
-  mime = curl_mime_init(easy);
+  mime = curl_mime_init(curl);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field");
   curl_mime_encoder(part, "base64");
   /* Using an undefined length forces chunked transfer. */
-  curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, NULL, &pooh);
+  curl_mime_data_cb(part, (curl_off_t)-1, t667_read_cb, NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
-  test_setopt(easy, CURLOPT_MIMEPOST, mime);
+  test_setopt(curl, CURLOPT_MIMEPOST, mime);
 
   /* Send data. */
-  result = curl_easy_perform(easy);
-  if(result) {
-    fprintf(stderr, "curl_easy_perform() failed\n");
-    res = (int) result;
+  result = curl_easy_perform(curl);
+  if(result != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_easy_perform() failed\n");
   }
 
 test_cleanup:
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_mime_free(mime);
   curl_global_cleanup();
-  return res;
+  return result;
 }

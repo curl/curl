@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,22 +26,18 @@
  * size is unknown.
  */
 
-#include "test.h"
+#include "first.h"
 
-#include "memdebug.h"
-
-static char data[]="dummy";
-
-struct WriteThis {
+struct t1514_WriteThis {
   char *readptr;
   size_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1514_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t1514_WriteThis *pooh = (struct t1514_WriteThis *)userp;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   if(pooh->sizeleft) {
@@ -54,12 +50,14 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-int test(char *URL)
+static CURLcode test_lib1514(const char *URL)
 {
   CURL *curl;
   CURLcode result = CURLE_OK;
-  int res = 0;
-  struct WriteThis pooh = { data, sizeof(data)-1 };
+
+  static char testdata[] = "dummy";
+
+  struct t1514_WriteThis pooh = { testdata, sizeof(testdata) - 1 };
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -68,12 +66,13 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_POST, 1L);
   /* Purposely omit to set CURLOPT_POSTFIELDSIZE */
-  easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t1514_read_cb);
   easy_setopt(curl, CURLOPT_READDATA, &pooh);
-#ifdef LIB1539
-  /* speak HTTP 1.0 - no chunked! */
-  easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-#endif
+
+  if(testnum == 1539) {
+    /* speak HTTP 1.0 - no chunked! */
+    easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+  }
 
   result = curl_easy_perform(curl);
 
@@ -82,5 +81,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)result;
+  return result;
 }

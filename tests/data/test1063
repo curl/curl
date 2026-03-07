@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,28 +10,23 @@ FAILURE
 
 # Server-side
 <reply>
-<data>
-</data>
 </reply>
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 file
-large_file
+Largefile
 </features>
- <name>
+<name>
 Invalid large X- range on a file://
- </name>
+</name>
 # This range value is 2**32+7, which will be truncated to the valid value 7
 # if the large file support is not working correctly
- <command>
--r 4294967303- file://localhost%FILE_PWD/log/test%TESTNUMBER.txt 
+<command>
+-r 4294967303- file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 1234567890
 1234567890
 </file>

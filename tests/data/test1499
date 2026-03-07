@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+chunked Transfer-Encoding
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 funky chunky!%CR
+Server: fakeit/0.9 fakeitbad/1.0%CR
+Transfer-Encoding: chunked%CR
+Trailer: chunky-trailer%CR
+Connection: mooo%CR
+%CR
+40%CR
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%CR
+30%CR
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb%CR
+21;heresatest=moooo%CR
+cccccccccccccccccccccccccccccccc
+%CR
+0%CR
+chunky-trailer: header data%CR
+%CR
+</data>
+<datacheck>
+HTTP/1.1 200 funky chunky!%CR
+Server: fakeit/0.9 fakeitbad/1.0%CR
+Transfer-Encoding: chunked%CR
+Trailer: chunky-trailer%CR
+Connection: mooo%CR
+%CR
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
+chunky-trailer: header data%CR
+</datacheck>
+<servercmd>
+writedelay: 10
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP chunked encoding and chunked trailer, twice
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+
+</testcase>

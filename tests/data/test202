@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -16,13 +17,13 @@ FILE
 <server>
 file
 </server>
- <name>
+<name>
 two file:// URLs to stdout
- </name>
+</name>
 <command option="no-include">
-file://localhost%FILE_PWD/log/test%TESTNUMBER.txt FILE://localhost%FILE_PWD/log/test%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt FILE://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 contents in a single file
 </file>
 </client>

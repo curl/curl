@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,41 +9,38 @@ IDN
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 CAPA SMTPUTF8
 </servercmd>
-<data>
-250-Joe Smith <joe.smith@example.com>
-250-Harry Smith <harry.smith@example.com>
-250 Melvin Smith <melvin.smith@example.com>
+<data crlf="yes">
+250-Joe Smith %LTjoe.smith@example.com%GT
+250-Harry Smith %LTharry.smith@example.com%GT
+250 Melvin Smith %LTmelvin.smith@example.com%GT
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 smtp
 </server>
 <features>
-idn
+IDN
 !win32
 </features>
- <name>
+<name>
 SMTP mailing list EXPN (CUSTOMREQUEST) with SMTPUTF8 support
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 EXPN Friends SMTPUTF8
 QUIT

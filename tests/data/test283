@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,32 +8,32 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve on invalid file
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT//invalid-file --tftp-blksize 1024
 </command>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <errorcode>
 69
 </errorcode>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
 opcode = 1
 mode = octet
 tsize = 0
 blksize = 1024
-timeout = 6
 filename = /invalid-file
 </protocol>
 </verify>

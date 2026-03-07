@@ -16,6 +16,7 @@
 --append (-a)                        4.8
 --aws-sigv4                          7.75.0
 --basic                              7.10.6
+--ca-native                          8.2.0
 --cacert                             7.5
 --capath                             7.9.8
 --cert (-E)                          5.0
@@ -53,7 +54,9 @@
 --doh-cert-status                    7.76.0
 --doh-insecure                       7.76.0
 --doh-url                            7.62.0
+--dump-ca-embed                      8.10.0
 --dump-header (-D)                   5.7
+--ech                                8.8.0
 --egd-file                           7.7
 --engine                             7.9.3
 --etag-compare                       7.68.0
@@ -73,7 +76,7 @@
 --ftp-pasv                           7.11.0
 --ftp-port (-P)                      4.0
 --ftp-pret                           7.20.0
---ftp-skip-pasv-ip                   7.14.2
+--ftp-skip-pasv-ip                   7.15.0
 --ftp-ssl-ccc                        7.16.1
 --ftp-ssl-ccc-mode                   7.16.2
 --ftp-ssl-control                    7.16.0
@@ -81,6 +84,7 @@
 --globoff (-g)                       7.6
 --happy-eyeballs-timeout-ms          7.59.0
 --haproxy-protocol                   7.60.0
+--haproxy-clientip                   8.2.0
 --head (-I)                          4.0
 --header (-H)                        5.0
 --help (-h)                          4.0
@@ -93,17 +97,21 @@
 --http2                              7.33.0
 --http2-prior-knowledge              7.49.0
 --http3                              7.66.0
+--http3-only                         7.88.0
 --ignore-content-length              7.14.1
---include (-i)                       4.8
+--ip-tos                             8.9.0
+--ipfs-gateway                       8.4.0
 --insecure (-k)                      7.10
 --interface                          7.3
 --ipv4 (-4)                          7.10.8
 --ipv6 (-6)                          7.10.8
 --json                               7.82.0
 --junk-session-cookies (-j)          7.9.7
+--keepalive-cnt                      8.9.0
 --keepalive-time                     7.18.0
 --key                                7.9.3
 --key-type                           7.9.3
+--knownhosts                         8.17.0
 --krb                                7.3
 --libcurl                            7.16.1
 --limit-rate                         7.10
@@ -121,6 +129,7 @@
 --max-redirs                         7.5
 --max-time (-m)                      4.0
 --metalink                           7.27.0
+--mptcp                              8.9.0
 --negotiate                          7.10.6
 --netrc (-n)                         4.6
 --netrc-file                         7.21.5
@@ -137,11 +146,13 @@
 --ntlm                               7.10.6
 --ntlm-wb                            7.22.0
 --oauth2-bearer                      7.33.0
+--out-null                           8.16.0
 --output (-o)                        4.0
 --output-dir                         7.73.0
 --parallel (-Z)                      7.66.0
 --parallel-immediate                 7.68.0
 --parallel-max                       7.66.0
+--parallel-max-host                  8.16.0
 --pass                               7.9.3
 --path-as-is                         7.42.0
 --pinnedpubkey                       7.39.0
@@ -150,12 +161,13 @@
 --post303                            7.26.0
 --preproxy                           7.52.0
 --progress-bar (-#)                  5.10
---proto                              7.20.2
+--proto                              7.21.0
 --proto-default                      7.45.0
---proto-redir                        7.20.2
+--proto-redir                        7.21.0
 --proxy (-x)                         4.0
 --proxy-anyauth                      7.13.2
 --proxy-basic                        7.12.0
+--proxy-ca-native                    8.2.0
 --proxy-cacert                       7.52.0
 --proxy-capath                       7.52.0
 --proxy-cert                         7.52.0
@@ -164,6 +176,7 @@
 --proxy-crlfile                      7.52.0
 --proxy-digest                       7.12.0
 --proxy-header                       7.37.0
+--proxy-http2                        8.1.0
 --proxy-insecure                     7.52.0
 --proxy-key                          7.52.0
 --proxy-key-type                     7.52.0
@@ -188,6 +201,7 @@
 --range (-r)                         4.0
 --rate                               7.84.0
 --raw                                7.16.2
+--follow                             8.16.0
 --referer (-e)                       4.0
 --remote-header-name (-J)            7.20.0
 --remote-name (-O)                   4.0
@@ -206,7 +220,10 @@
 --sasl-ir                            7.31.0
 --service-name                       7.43.0
 --show-error (-S)                    5.9
+--show-headers (-i)                  4.8
 --silent (-s)                        4.0
+--sigalgs                            8.14.0
+--skip-existing                      8.10.0
 --socks4                             7.15.2
 --socks4a                            7.18.0
 --socks5                             7.18.0
@@ -223,6 +240,7 @@
 --ssl-no-revoke                      7.44.0
 --ssl-reqd                           7.20.0
 --ssl-revoke-best-effort             7.70.0
+--ssl-sessions                       8.12.0
 --sslv2 (-2)                         5.9
 --sslv3 (-3)                         5.9
 --stderr                             6.2
@@ -234,6 +252,7 @@
 --tftp-blksize                       7.20.0
 --tftp-no-options                    7.48.0
 --time-cond (-z)                     5.8
+--tls-earlydata                      8.11.0
 --tls-max                            7.54.0
 --tls13-ciphers                      7.61.0
 --tlsauthtype                        7.21.4
@@ -247,15 +266,20 @@
 --tr-encoding                        7.21.6
 --trace                              7.9.7
 --trace-ascii                        7.9.7
+--trace-config                       8.3.0
+--trace-ids                          8.2.0
 --trace-time                         7.14.0
 --unix-socket                        7.40.0
 --upload-file (-T)                   4.0
+--upload-flags                       8.13.0
 --url                                7.5
 --url-query                          7.87.0
 --use-ascii (-B)                     5.0
 --user (-u)                          4.0
 --user-agent (-A)                    4.5.1
+--variable                           8.3.0
 --verbose (-v)                       4.0
 --version (-V)                       4.0
+--vlan-priority                      8.9.0
 --write-out (-w)                     6.5
 --xattr                              7.21.3

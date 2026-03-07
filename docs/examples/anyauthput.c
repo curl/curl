@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,12 @@
  * one the server supports/wants.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -33,10 +39,12 @@
 
 #include <curl/curl.h>
 
-#ifdef WIN32
-#  define FILENO(fp) _fileno(fp)
-#else
-#  define FILENO(fp) fileno(fp)
+#ifdef _WIN32
+#undef stat
+#define stat _stati64
+#undef fstat
+#define fstat _fstati64
+#define fileno _fileno
 #endif
 
 #if LIBCURL_VERSION_NUM < 0x070c03
@@ -57,40 +65,38 @@
 /* seek callback function */
 static int my_seek(void *userp, curl_off_t offset, int origin)
 {
-  FILE *fp = (FILE *) userp;
+  FILE *fp = (FILE *)userp;
 
-  if(-1 == fseek(fp, (long) offset, origin))
-    /* couldn't seek */
+  if(fseek(fp, (long)offset, origin) == -1)
+    /* could not seek */
     return CURL_SEEKFUNC_CANTSEEK;
 
   return CURL_SEEKFUNC_OK; /* success! */
 }
 
 /* read callback function, fread() look alike */
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  ssize_t retcode;
-  unsigned long nread;
+  size_t nread;
 
-  retcode = fread(ptr, size, nmemb, stream);
+  nread = fread(ptr, size, nmemb, stream);
 
-  if(retcode > 0) {
-    nread = (unsigned long)retcode;
-    fprintf(stderr, "*** We read %lu bytes from file\n", nread);
+  if(nread > 0) {
+    fprintf(stderr, "*** We read %lu bytes from file\n", (unsigned long)nread);
   }
 
-  return retcode;
+  return nread;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   FILE *fp;
   struct stat file_info;
 
-  char *file;
-  char *url;
+  const char *file;
+  const char *url;
 
   if(argc < 3)
     return 1;
@@ -100,25 +106,35 @@ int main(int argc, char **argv)
 
   /* get the file size of the local file */
   fp = fopen(file, "rb");
-  fstat(FILENO(fp), &file_info);
+  if(!fp)
+    return 2;
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  if(fstat(fileno(fp), &file_info) != 0) {
+    fclose(fp);
+    return 1; /* cannot continue */
+  }
+
+  /* In Windows, this inits the Winsock stuff */
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK) {
+    fclose(fp);
+    return (int)result;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void *) fp);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void *)fp);
 
     /* set the seek function */
     curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
 
     /* pass the file descriptor to the seek callback as well */
-    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *) fp);
+    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *)fp);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -134,18 +150,18 @@ int main(int argc, char **argv)
 
     /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
-       data twice!!! */
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
+       data twice */
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
-    /* set user name and password for the authentication */
+    /* set username and password for the authentication */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
@@ -153,5 +169,5 @@ int main(int argc, char **argv)
   fclose(fp); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)result;
 }

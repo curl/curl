@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ Expect: 100-continue
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -31,31 +31,29 @@ Content-Type: text/html
 </data1>
 
 # we use skip to make the test server never read the full payload off
-# the socket and instead return the response at once 
+# the socket and instead return the response at once
 <servercmd>
 skip: 1053700
 </servercmd>
 </reply>
 
-#
 # Client-side
 <client>
 # 1053700 x 'x'
-<file name="log/file%TESTNUMBER">
+<file name="%LOGDIR/file%TESTNUMBER">
 %repeat[1053700 x x]%
 </file>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP POST expect 100-continue with a 404
- </name>
- <command option="no-output">
--d @log/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+</name>
+<command option="no-output">
+-d @%LOGDIR/file%TESTNUMBER --expect100-timeout 99 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
@@ -74,7 +72,7 @@ Content-Type: text/html
 
 -foo-
 </stdout>
-<protocol>
+<protocol crlf="headers">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -92,5 +90,8 @@ Content-Type: application/x-www-form-urlencoded
 Expect: 100-continue
 
 </protocol>
+<limits>
+Maximum allocated: 3200000
+</limits>
 </verify>
 </testcase>

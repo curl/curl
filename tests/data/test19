@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,23 +9,18 @@ FAILURE
 </info>
 # Server-side
 <reply>
-<data>
-</data>
 </reply>
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
- <name>
+<name>
 attempt connect to non-listening socket
- </name>
- <command>
-%HOSTIP:%NOLISTENPORT
+</name>
+<command>
+--trace-config all %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,15 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include <limits.h>
-
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-#define TEST_HANG_TIMEOUT 5 * 1000
+#include "first.h"
 
 /*
  * Test case for below scenario:
@@ -40,11 +32,11 @@
  * with function curl_multi_info_read().
  */
 
-int test(char *URL)
+static CURLcode test_lib597(const char *URL)
 {
-  CURL *easy = NULL;
+  CURL *curl = NULL;
   CURLM *multi = NULL;
-  int res = 0;
+  CURLcode result = CURLE_OK;
   int running;
   int msgs_left;
   CURLMsg *msg;
@@ -53,19 +45,19 @@ int test(char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(easy);
+  easy_init(curl);
 
   multi_init(multi);
 
   /* go verbose */
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* specify target */
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
-  easy_setopt(easy, CURLOPT_CONNECT_ONLY, 1L);
+  easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
 
-  multi_add_handle(multi, easy);
+  multi_add_handle(multi, curl);
 
   for(;;) {
     struct timeval interval;
@@ -96,12 +88,17 @@ int test(char *URL)
        -1. */
 
     if(timeout != -1L) {
-      int itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      int itimeout;
+#if LONG_MAX > INT_MAX
+      itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+#else
+      itimeout = (int)timeout;
+#endif
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
     else {
-      interval.tv_sec = TEST_HANG_TIMEOUT/1000 + 1;
+      interval.tv_sec = (TEST_HANG_TIMEOUT / 1000) - 1;
       interval.tv_usec = 0;
     }
 
@@ -112,17 +109,17 @@ int test(char *URL)
 
   msg = curl_multi_info_read(multi, &msgs_left);
   if(msg)
-    res = msg->data.result;
+    result = msg->data.result;
 
-  multi_remove_handle(multi, easy);
+  multi_remove_handle(multi, curl);
 
 test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

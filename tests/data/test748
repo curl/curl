@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+--config
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+
+<name>
+A --config file that uses -h and no URL
+</name>
+<file name="%LOGDIR/cmd">
+-h all
+</file>
+<command>
+-K %LOGDIR/cmd
+</command>
+</client>
+
+<verify>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,30 +6,27 @@ SCP
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
 scp
 </server>
- <name>
+<name>
 SCP retrieval of two files
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER:
+scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/file%TESTNUMBER.txt
+scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <stdout>
 Test data
 for ssh test

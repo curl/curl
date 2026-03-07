@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -48,16 +48,15 @@ CURL_EXTERN void curl_easy_cleanup(CURL *curl);
  *
  * DESCRIPTION
  *
- * Request internal information from the curl session with this function.  The
- * third argument MUST be a pointer to a long, a pointer to a char * or a
- * pointer to a double (as the documentation describes elsewhere).  The data
- * pointed to will be filled in accordingly and can be relied upon only if the
- * function returns CURLE_OK.  This function is intended to get used *AFTER* a
- * performed transfer, all results from this function are undefined until the
- * transfer is completed.
+ * Request internal information from the curl session with this function.
+ * The third argument MUST be pointing to the specific type of the used option
+ * which is documented in each man page of the option. The data pointed to
+ * will be filled in accordingly and can be relied upon only if the function
+ * returns CURLE_OK. This function is intended to get used *AFTER* a performed
+ * transfer, all results from this function are undefined until the transfer
+ * is completed.
  */
 CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
-
 
 /*
  * NAME curl_easy_duphandle()
@@ -67,7 +66,7 @@ CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
  * Creates a new curl session handle with the same options set for the handle
  * passed in. Duplicating a handle could only be a matter of cloning data and
  * options, internal state info and things like persistent connections cannot
- * be transferred. It is useful in multithreaded applications when you can run
+ * be transferred. It is useful in multi-threaded applications when you can run
  * curl_easy_duphandle() for each new thread to avoid a series of identical
  * curl_easy_setopt() invokes in every thread.
  */
@@ -78,8 +77,8 @@ CURL_EXTERN CURL *curl_easy_duphandle(CURL *curl);
  *
  * DESCRIPTION
  *
- * Re-initializes a CURL handle to the default values. This puts back the
- * handle to the same state as it was in when it was just created.
+ * Re-initializes a curl handle to the default values. This puts back the
+ * handle to the same state as it was in when it was created.
  *
  * It does keep: live connections, the Session ID cache, the DNS cache and the
  * cookies.
@@ -108,7 +107,6 @@ CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
 CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
                                     size_t buflen, size_t *n);
 
-
 /*
  * NAME curl_easy_upkeep()
  *
@@ -118,7 +116,7 @@ CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
  */
 CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 } /* end of extern "C" */
 #endif
 

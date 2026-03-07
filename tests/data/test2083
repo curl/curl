@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -21,7 +22,7 @@ ftp
 Pre-request callback for FTP
 </name>
 <tool>
-libprereq
+lib2082
 </tool>
 
 <command>

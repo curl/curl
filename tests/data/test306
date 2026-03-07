@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -32,28 +32,25 @@ verify
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
 SSL
-!hyper
 </features>
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS GET, receive no headers only data!
- </name>
- <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER --http0.9
+</name>
+<command>
+--insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION

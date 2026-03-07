@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ HTTP proxy Basic auth
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -24,16 +24,15 @@ contents
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
- <name>
+<name>
 HTTP over proxy with site and proxy authentication
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user testing:this
 </command>
 <features>
@@ -41,14 +40,13 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Proxy-Authorization: Basic dGVzdGluZzp0aGlz
-Authorization: Basic aWFtOm15c2VsZg==
+Proxy-Authorization: Basic %b64[testing:this]b64%
+Authorization: Basic %b64[iam:myself]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

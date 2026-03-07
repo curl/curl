@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -25,13 +26,13 @@ todelooooo lalalala yada yada, we know nothing about ranges ;-)
 <server>
 http
 </server>
- <name>
+<name>
 HTTP resume request over proxy with auth without server supporting it
- </name>
- <command option="no-output">
--x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o log/fewl%TESTNUMBER.txt -U daniel:stenberg
+</name>
+<command option="no-output">
+-x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o %LOGDIR/fewl%TESTNUMBER.txt -U daniel:stenberg
 </command>
-<file name="log/fewl%TESTNUMBER.txt">
+<file name="%LOGDIR/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>
@@ -45,10 +46,10 @@ proxy
 <errorcode>
 33
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Proxy-Authorization: Basic ZGFuaWVsOnN0ZW5iZXJn
+Proxy-Authorization: Basic %b64[daniel:stenberg]b64%
 Range: bytes=78-
 User-Agent: curl/%VERSION
 Accept: */*
@@ -57,7 +58,7 @@ Proxy-Connection: Keep-Alive
 </protocol>
 
 # the download target file must remain untouched
-<file name="log/fewl%TESTNUMBER.txt">
+<file name="%LOGDIR/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>

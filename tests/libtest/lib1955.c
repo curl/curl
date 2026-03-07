@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,25 +21,23 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "memdebug.h"
-
-int test(char *URL)
+static CURLcode test_lib1955(const char *URL)
 {
   CURL *curl;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   struct curl_slist *list = NULL;
   struct curl_slist *connect_to = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -49,7 +47,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_USERPWD, "xxx");
   test_setopt(curl, CURLOPT_HEADER, 0L);
   test_setopt(curl, CURLOPT_URL, URL);
-  list = curl_slist_append(list, "test2: 1234");
+  list = curl_slist_append(list, "test3: 1234");
   if(!list)
     goto test_cleanup;
   if(libtest_arg2) {
@@ -57,13 +55,27 @@ int test(char *URL)
   }
   test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
   curl_slist_append(list, "Content-Type: application/json");
+
+  /* 'name;' user headers with no value are used to send an empty header in the
+     format 'name:' (note the semi-colon becomes a colon). this entry should
+     show in SignedHeaders without an additional semi-colon, as any other
+     header would. eg 'foo;test2;test3' and not 'foo;test2;;test3'. */
+  curl_slist_append(list, "test2;");
+
+  /* 'name:' user headers with no value are used to signal an internal header
+     of that name should be removed and are not sent as a header. this entry
+     should not show in SignedHeaders. */
   curl_slist_append(list, "test1:");
+
+  /* 'name' user headers with no separator or value are invalid and ignored.
+     this entry should not show in SignedHeaders. */
   curl_slist_append(list, "test0");
+
   curl_slist_append(list, "test_space: t\ts  m\t   end    ");
   curl_slist_append(list, "tesMixCase: MixCase");
   test_setopt(curl, CURLOPT_HTTPHEADER, list);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -72,5 +84,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

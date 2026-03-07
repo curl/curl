@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ RETR
 # Server-side
 <reply>
 # file%TESTNUMBER contents...
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -24,31 +25,20 @@ MOOOO
 
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -O output in, using the CURL_TESTDIR variable
-<features>
-debug
-</features>
 <server>
 ftp
 </server>
 <name>
 FTP download, file with Content-Disposition inside, using -O
 </name>
-<setenv>
-CURL_TESTDIR=%PWD/log
-</setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O --output-dir %LOGDIR
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl log/name%TESTNUMBER
-</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -60,7 +50,7 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file%TESTNUMBER">
+<file1 name="%LOGDIR/file%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -72,8 +62,10 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 MOOOO
 </file1>
 
-<file2 name="log/stdout%TESTNUMBER">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
-
+<notexists>
+%LOGDIR/name%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

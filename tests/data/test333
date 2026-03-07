@@ -1,30 +1,25 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
-command-line
+cmdline
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
- <name>
+<name>
 Try a non-boolean command line option with --no-
- </name>
- <command>
+</name>
+<command>
 --no-proxy "hey" http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # detected the bad --no- prefix

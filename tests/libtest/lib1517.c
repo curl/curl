@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,25 +21,21 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "memdebug.h"
-
-static char data[]="this is what we post to the silly web server\n";
-
-struct WriteThis {
-  char *readptr;
+struct t1517_WriteThis {
+  const char *readptr;
   size_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1517_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t1517_WriteThis *pooh = (struct t1517_WriteThis *)userp;
   size_t tocopy = size * nmemb;
 
   /* Wait one second before return POST data          *
    * so libcurl will wait before sending request body */
-  wait_ms(1000);
+  curlx_wait_ms(1000);
 
   if(tocopy < 1 || !pooh->sizeleft)
     return 0;
@@ -53,24 +49,27 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return tocopy;
 }
 
-int test(char *URL)
+static CURLcode test_lib1517(const char *URL)
 {
+  static const char testdata[] =
+    "this is what we post to the silly web server\n";
+
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
-  struct WriteThis pooh;
+  struct t1517_WriteThis pooh;
 
-  pooh.readptr = data;
-  pooh.sizeleft = strlen(data);
+  pooh.readptr = testdata;
+  pooh.sizeleft = strlen(testdata);
 
   if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -85,7 +84,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1517_read_cb);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, &pooh);
@@ -96,12 +95,13 @@ int test(char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
+#if 0
   /* detect HTTP error codes >= 400 */
-  /* test_setopt(curl, CURLOPT_FAILONERROR, 1L); */
+  test_setopt(curl, CURLOPT_FAILONERROR, 1L);
+#endif
 
-
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -109,5 +109,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

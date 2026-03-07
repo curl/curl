@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -17,11 +18,7 @@ CURLOPT_HSTSREADFUNCTION
 HSTS
 http
 </features>
-<server>
-none
-</server>
 
-# require debug so that alt-svc can work over plain old HTTP
 <name>
 HSTS read/write callbacks
 </name>
@@ -36,15 +33,21 @@ http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-# 7 CURLE_COULDNT_CONNECT (expected since there's nothing listening there)
+# 7 CURLE_COULDNT_CONNECT (expected since there is nothing listening there)
 # 42 CURLE_ABORTED_BY_CALLBACK
 <errorcode>
 42
 </errorcode>
 <stdout>
+%if large-time
+[0/4] 1.example.com 25250320 01:02:03
+[1/4] 2.example.com 25250320 03:02:01
+[2/4] 3.example.com 25250319 01:02:03
+%else
 [0/4] 1.example.com 20370320 01:02:03
 [1/4] 2.example.com 20370320 03:02:01
 [2/4] 3.example.com 20370319 01:02:03
+%endif
 [3/4] 4.example.com unlimited
 First request returned 7
 Second request returned 42

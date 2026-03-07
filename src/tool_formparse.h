@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,15 +55,13 @@ struct tool_mime {
   curl_off_t origin;            /* Stdin read origin offset. */
   curl_off_t size;              /* Stdin data size. */
   curl_off_t curpos;            /* Stdin current read position. */
-  struct GlobalConfig *config;  /* For access from callback. */
 };
 
 size_t tool_mime_stdin_read(char *buffer,
                             size_t size, size_t nitems, void *arg);
 int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence);
 
-int formparse(struct OperationConfig *config,
-              const char *input,
+int formparse(const char *input,
               struct tool_mime **mimeroot,
               struct tool_mime **mimecurrent,
               bool literal_value);

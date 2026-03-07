@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,22 +23,13 @@
  * RFC6749 OAuth 2.0 Authorization Framework
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3)
-
-#include <curl/curl.h>
-#include "urldata.h"
+  !defined(CURL_DISABLE_POP3) ||                                  \
+  (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
 #include "vauth/vauth.h"
-#include "warnless.h"
-#include "curl_printf.h"
-
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /*
  * Curl_auth_create_oauth_bearer_message()
@@ -48,8 +39,8 @@
  *
  * Parameters:
  *
- * user[in]         - The user name.
- * host[in]         - The host name.
+ * user[in]         - The username.
+ * host[in]         - The hostname.
  * port[in]         - The port(when not Port 80).
  * bearer[in]       - The bearer token.
  * out[out]         - The result storage.
@@ -66,11 +57,11 @@ CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
 
   /* Generate the message */
   if(port == 0 || port == 80)
-    oauth = aprintf("n,a=%s,\1host=%s\1auth=Bearer %s\1\1", user, host,
-                    bearer);
+    oauth = curl_maprintf("n,a=%s,\1host=%s\1auth=Bearer %s\1\1", user, host,
+                          bearer);
   else
-    oauth = aprintf("n,a=%s,\1host=%s\1port=%ld\1auth=Bearer %s\1\1", user,
-                    host, port, bearer);
+    oauth = curl_maprintf("n,a=%s,\1host=%s\1port=%ld\1auth=Bearer %s\1\1",
+                          user, host, port, bearer);
   if(!oauth)
     return CURLE_OUT_OF_MEMORY;
 
@@ -86,18 +77,18 @@ CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
  *
  * Parameters:
  *
- * user[in]         - The user name.
+ * user[in]         - The username.
  * bearer[in]       - The bearer token.
  * out[out]         - The result storage.
  *
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
-                                               const char *bearer,
-                                               struct bufref *out)
+                                                const char *bearer,
+                                                struct bufref *out)
 {
   /* Generate the message */
-  char *xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
+  char *xoauth = curl_maprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
   if(!xoauth)
     return CURLE_OUT_OF_MEMORY;
 

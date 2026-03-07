@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,26 +9,23 @@ FETCH
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP with --login-options 'AUTH=dummy' (failing)
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/895/;MAILINDEX=1' -u '"user:sec"ret{' --login-options 'AUTH=dummy'
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 3 == CURLE_URL_MALFORMAT

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,19 +7,14 @@ symbols-in-versions
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
-
- <name>
+<name>
 Verify that symbols-in-versions and headers are in sync
- </name>
+</name>
 
 <command type="perl">
-%SRCDIR/symbol-scan.pl %SRCDIR/.. ../include/curl
+%SRCDIR/test1119.pl %SRCDIR/.. ../include/curl
 </command>
 </client>
 

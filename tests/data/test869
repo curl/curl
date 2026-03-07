@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,16 +11,15 @@ RFC5034
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 AUTH DIGEST-MD5
-REPLY AUTH + cmVhbG09ImN1cmwiLG5vbmNlPSI1MzAwZDE3YTFkNjk1YmQ0MTFlNGNkZjk2Zjk1NDhjMjNjZWQ2MTc1IixhbGdvcml0aG09bWQ1LXNlc3MscW9wPSJhdXRoIg==
-REPLY dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvY3VybCIscmVzcG9uc2U9YzNhMGFiZTc5NDYyNTIyNGY5Njg3YTYzMTc3ZmRhNWIscW9wPWF1dGg= +
+REPLY AUTH + %b64[realm="curl",nonce="5300d17a1d695bd411e4cdf96f9548c23ced6175",algorithm=md5-sess,qop="auth"]b64%
+REPLY %b64[username="user",realm="curl",nonce="5300d17a1d695bd411e4cdf96f9548c23ced6175",cnonce="34333231353332313633323137333231",nc="00000001",digest-uri="pop/127.0.0.1",response=18315548c7f3a37e716fa8e90dfab9b6,qop=auth]b64% + %b64[rspauth=fecb36b7086e0b95d906459efa8cc29e]b64%
 REPLY  +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -30,7 +30,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -38,24 +37,27 @@ pop3
 </server>
 <features>
 !SSPI
-debug
+Debug
 crypto
+digest
 </features>
- <name>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<name>
 POP3 DIGEST-MD5 authentication
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH DIGEST-MD5
-dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvY3VybCIscmVzcG9uc2U9YzNhMGFiZTc5NDYyNTIyNGY5Njg3YTYzMTc3ZmRhNWIscW9wPWF1dGg=
+%b64[username="user",realm="curl",nonce="5300d17a1d695bd411e4cdf96f9548c23ced6175",cnonce="34333231353332313633323137333231",nc="00000001",digest-uri="pop/127.0.0.1",response=18315548c7f3a37e716fa8e90dfab9b6,qop=auth]b64%
 
 RETR %TESTNUMBER
 QUIT

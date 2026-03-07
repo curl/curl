@@ -1,4 +1,5 @@
-<testcase><testcase>
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -6,7 +7,6 @@ HTTP POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -33,12 +33,11 @@ Funny-head: nono
 </data2>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
 Mime
-debug
+Debug
 </features>
 <server>
 http
@@ -54,7 +53,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 

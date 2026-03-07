@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -13,7 +14,7 @@ HTTP Digest auth
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data>
+<data crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
@@ -21,14 +22,14 @@ And you should ignore this data.
 </data>
 
 # then this is returned since we get no server-auth
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 401 Authorization to the remote host as well swsbounce swsclose
 WWW-Authenticate: Digest realm="realmweirdo", nonce="123456"
 
 you should ignore this data too
 </data1000>
 
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: no
 Content-Length: 15
@@ -36,7 +37,7 @@ Content-Length: 15
 Nice auth sir!
 </data1001>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
@@ -60,18 +61,19 @@ http
 !SSPI
 crypto
 proxy
+digest
 </features>
- <name>
+<name>
 HTTP with proxy-requiring-Digest to site-requiring-Digest
- </name>
- <command>
-http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:alot
+</name>
+<command>
+http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:a-lot
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 User-Agent: curl/%VERSION
@@ -88,7 +90,7 @@ Proxy-Connection: Keep-Alive
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="fb8608e00ad9239a3dedb14bc8575976"
-Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="ca87f2d768a231e2d637a55698d5c416"
+Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="bfecb43898f3db12543650d45493313b"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

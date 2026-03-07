@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,14 +23,36 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#ifdef ENABLE_QUIC
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
+struct Curl_cfilter;
+struct Curl_easy;
+struct connectdata;
+struct Curl_addrinfo;
+
+void Curl_quic_ver(char *p, size_t len);
+int Curl_vquic_init(void);
+
 CURLcode Curl_qlogdir(struct Curl_easy *data,
                       unsigned char *scid,
                       size_t scidlen,
                       int *qlogfdp);
-#endif
+
+CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
+                             struct Curl_easy *data,
+                             struct connectdata *conn,
+                             const struct Curl_addrinfo *ai,
+                             uint8_t transport);
+
+extern struct Curl_cftype Curl_cft_http3;
+
+#else
+#define Curl_vquic_init() 1
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */
+
+CURLcode Curl_conn_may_http3(struct Curl_easy *data,
+                             const struct connectdata *conn,
+                             unsigned char transport);
 
 #endif /* HEADER_CURL_VQUIC_QUIC_H */

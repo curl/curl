@@ -1,19 +1,16 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 missing URL
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 </reply>
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>
@@ -22,15 +19,11 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 simple libcurl attempt operation without URL set
- </name>
- <command>
-http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
-</command>
+</name>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

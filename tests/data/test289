@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -13,11 +14,11 @@ FAILURE
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP resume upload but denied access to local file
- </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/illegal-nonexistent-file -C -
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/illegal-nonexistent-file -C -
 </command>
 </client>
 

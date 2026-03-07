@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,58 +21,87 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the nghttp3 library
+#
+# Input variables:
+#
+# - `NGHTTP3_INCLUDE_DIR`:      Absolute path to nghttp3 include directory.
+# - `NGHTTP3_LIBRARY`:          Absolute path to `nghttp3` library.
+# - `NGHTTP3_USE_STATIC_LIBS`:  Configure for static nghttp3 libraries.
+#
+# Defines:
+#
+# - `NGHTTP3_FOUND`:            System has nghttp3.
+# - `NGHTTP3_VERSION`:          Version of nghttp3.
+# - `CURL::nghttp3`:            nghttp3 library target.
 
-#[=======================================================================[.rst:
-FindNGHTTP3
-----------
+set(_nghttp3_pc_requires "libnghttp3")
 
-Find the nghttp3 library
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``NGHTTP3_FOUND``
-  System has nghttp3
-``NGHTTP3_INCLUDE_DIRS``
-  The nghttp3 include directories.
-``NGHTTP3_LIBRARIES``
-  The libraries needed to use nghttp3
-``NGHTTP3_VERSION``
-  version of nghttp3.
-#]=======================================================================]
-
-if(UNIX)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED NGHTTP3_INCLUDE_DIR AND
+   NOT DEFINED NGHTTP3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_NGHTTP3 libnghttp3)
+  pkg_check_modules(_nghttp3 ${_nghttp3_pc_requires})
 endif()
 
-find_path(NGHTTP3_INCLUDE_DIR nghttp3/nghttp3.h
-  HINTS
-    ${PC_NGHTTP3_INCLUDEDIR}
-    ${PC_NGHTTP3_INCLUDE_DIRS}
-)
+if(_nghttp3_FOUND)
+  set(NGHTTP3_FOUND TRUE)
+  set(NGHTTP3_VERSION ${_nghttp3_VERSION})
+  if(NGHTTP3_USE_STATIC_LIBS)
+    set(_nghttp3_CFLAGS       "${_nghttp3_STATIC_CFLAGS}")
+    set(_nghttp3_INCLUDE_DIRS "${_nghttp3_STATIC_INCLUDE_DIRS}")
+    set(_nghttp3_LIBRARY_DIRS "${_nghttp3_STATIC_LIBRARY_DIRS}")
+    set(_nghttp3_LIBRARIES    "${_nghttp3_STATIC_LIBRARIES}")
+  endif()
+  message(STATUS "Found NGHTTP3 (via pkg-config): ${_nghttp3_INCLUDE_DIRS} (found version \"${NGHTTP3_VERSION}\")")
+else()
+  find_path(NGHTTP3_INCLUDE_DIR NAMES "nghttp3/nghttp3.h")
+  if(NGHTTP3_USE_STATIC_LIBS)
+    set(_nghttp3_CFLAGS "-DNGHTTP3_STATICLIB")
+    find_library(NGHTTP3_LIBRARY NAMES "nghttp3_static" "nghttp3")
+  else()
+    find_library(NGHTTP3_LIBRARY NAMES "nghttp3")
+  endif()
 
-find_library(NGHTTP3_LIBRARY NAMES nghttp3
-  HINTS
-    ${PC_NGHTTP3_LIBDIR}
-    ${PC_NGHTTP3_LIBRARY_DIRS}
-)
+  unset(NGHTTP3_VERSION CACHE)
+  if(NGHTTP3_INCLUDE_DIR AND EXISTS "${NGHTTP3_INCLUDE_DIR}/nghttp3/version.h")
+    set(_version_regex "#[\t ]*define[\t ]+NGHTTP3_VERSION[\t ]+\"([^\"]*)\"")
+    file(STRINGS "${NGHTTP3_INCLUDE_DIR}/nghttp3/version.h" _version_str REGEX "${_version_regex}")
+    string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+    set(NGHTTP3_VERSION "${_version_str}")
+    unset(_version_regex)
+    unset(_version_str)
+  endif()
 
-if(PC_NGHTTP3_VERSION)
-  set(NGHTTP3_VERSION ${PC_NGHTTP3_VERSION})
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(NGHTTP3
+    REQUIRED_VARS
+      NGHTTP3_INCLUDE_DIR
+      NGHTTP3_LIBRARY
+    VERSION_VAR
+      NGHTTP3_VERSION
+  )
+
+  if(NGHTTP3_FOUND)
+    set(_nghttp3_INCLUDE_DIRS ${NGHTTP3_INCLUDE_DIR})
+    set(_nghttp3_LIBRARIES    ${NGHTTP3_LIBRARY})
+  endif()
+
+  mark_as_advanced(NGHTTP3_INCLUDE_DIR NGHTTP3_LIBRARY)
 endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(NGHTTP3
-  REQUIRED_VARS
-    NGHTTP3_LIBRARY
-    NGHTTP3_INCLUDE_DIR
-  VERSION_VAR NGHTTP3_VERSION
-)
 
 if(NGHTTP3_FOUND)
-  set(NGHTTP3_LIBRARIES    ${NGHTTP3_LIBRARY})
-  set(NGHTTP3_INCLUDE_DIRS ${NGHTTP3_INCLUDE_DIR})
-endif()
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_nghttp3_LIBRARY_DIRS})
+  endif()
 
-mark_as_advanced(NGHTTP3_INCLUDE_DIRS NGHTTP3_LIBRARIES)
+  if(NOT TARGET CURL::nghttp3)
+    add_library(CURL::nghttp3 INTERFACE IMPORTED)
+    set_target_properties(CURL::nghttp3 PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_nghttp3_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_nghttp3_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_nghttp3_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_nghttp3_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_nghttp3_LIBRARIES}")
+  endif()
+endif()

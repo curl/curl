@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_OPENSSL
@@ -31,30 +30,132 @@
  * This header should only be needed to get included by vtls.c, openssl.c
  * and ngtcp2.c
  */
+#include <openssl/opensslv.h>
+#include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
 
 #include "urldata.h"
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */
+#endif
+
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#define HAVE_BORINGSSL_LIKE
+#endif
+
+/* OpenSSL 3.5.0+ has built-in 'SSLKEYLOGFILE' support if built with
+   'enable-sslkeylog' */
+#if OPENSSL_VERSION_NUMBER >= 0x30500000L && !defined(OPENSSL_NO_SSLKEYLOG)
+#define HAVE_KEYLOG_UPSTREAM
+#endif
+
 /*
- * In an effort to avoid using 'X509 *' here, we instead use the struct
- * x509_st version of the type so that we can forward-declare it here without
- * having to include <openssl/x509v3.h>. Including that header causes name
- * conflicts when libcurl is built with both Schannel and OpenSSL support.
+ * Whether SSL_CTX_set_keylog_callback is available.
+ * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
+ * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
+ * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
  */
-struct x509_st;
-CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              struct x509_st *server_cert);
+#ifndef LIBRESSL_VERSION_NUMBER
+#define HAVE_KEYLOG_CALLBACK
+#endif
+
+/* Check for OpenSSL 1.1.1 which has early data support. */
+#undef HAVE_OPENSSL_EARLYDATA
+#if defined(TLS1_3_VERSION) && !defined(HAVE_BORINGSSL_LIKE)
+#define HAVE_OPENSSL_EARLYDATA
+#endif
+
+struct alpn_spec;
+struct ssl_peer;
+struct Curl_ssl_session;
+
+/* Struct to hold a curl OpenSSL instance */
+struct ossl_ctx {
+  /* these ones requires specific SSL-types */
+  SSL_CTX* ssl_ctx;
+  SSL*     ssl;
+  BIO_METHOD *bio_method;
+  CURLcode io_result;       /* result of last BIO cfilter operation */
+  /* blocked writes need to retry with same length, remember it */
+  int      blocked_ssl_write_len;
+#if !defined(HAVE_KEYLOG_UPSTREAM) && !defined(HAVE_KEYLOG_CALLBACK)
+  /* Set to true once a valid keylog entry has been created to avoid dupes.
+     This is a bool and not a bitfield because it is passed by address. */
+  bool keylog_done;
+#endif
+  BIT(x509_store_setup);            /* x509 store has been set up */
+  BIT(store_is_empty);              /* no certs/paths/blobs in x509 store */
+  BIT(reused_session);              /* session-ID was reused for this */
+};
+
+size_t Curl_ossl_version(char *buffer, size_t size);
+
+typedef CURLcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        void *user_data);
+
+typedef int Curl_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid);
+typedef CURLcode Curl_ossl_init_session_reuse_cb(struct Curl_cfilter *cf,
+                                                 struct Curl_easy *data,
+                                                 struct alpn_spec *alpns,
+                                                 struct Curl_ssl_session *scs,
+                                                 bool *do_early_data);
+
+CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
+                            struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct ssl_peer *peer,
+                            const struct alpn_spec *alpns_requested,
+                            Curl_ossl_ctx_setup_cb *cb_setup,
+                            void *cb_user_data,
+                            Curl_ossl_new_session_cb *cb_new_session,
+                            void *ssl_user_data,
+                            Curl_ossl_init_session_reuse_cb *sess_reuse_cb);
+
+#ifndef HAVE_OPENSSL3
+#define SSL_get1_peer_certificate SSL_get_peer_certificate
+#endif
+
 extern const struct Curl_ssl Curl_ssl_openssl;
 
-struct ssl_ctx_st;
-CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data,
-                                   struct ssl_ctx_st *ctx, char *cert_file,
-                                   const struct curl_blob *cert_blob,
-                                   const char *cert_type, char *key_file,
-                                   const struct curl_blob *key_blob,
-                                   const char *key_type, char *key_passwd);
+/**
+ * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and
+ * easy handle `data`. Will allow reuse of a shared cache if suitable
+ * and configured.
+ */
+CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct ossl_ctx *octx);
 
-CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl);
+CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 SSL_CTX *ssl_ctx);
+
+/*
+ * Add a new session to the cache. Takes ownership of the session.
+ */
+CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               const char *ssl_peer_key,
+                               SSL_SESSION *session,
+                               int ietf_tls_id,
+                               const char *alpn,
+                               unsigned char *quic_tp,
+                               size_t quic_tp_len);
+
+/*
+ * Get the server cert, verify it and show it, etc., only call failf() if
+ * ssl config verifypeer or -host is set. Otherwise all this is for
+ * informational purposes only!
+ */
+CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct ossl_ctx *octx,
+                                   struct ssl_peer *peer);
+
+/* Report properties of a successful handshake */
+void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */

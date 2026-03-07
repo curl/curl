@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Shared between Makefile.am and CMakeLists.txt
+# Shared between CMakeLists.txt and Makefile.am
 
 man_MANS =                                      \
   CURLINFO_ACTIVESOCKET.3                       \
@@ -32,6 +32,7 @@ man_MANS =                                      \
   CURLINFO_CERTINFO.3                           \
   CURLINFO_CONDITION_UNMET.3                    \
   CURLINFO_CONNECT_TIME.3                       \
+  CURLINFO_CONN_ID.3                            \
   CURLINFO_CONNECT_TIME_T.3                     \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD.3            \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD_T.3          \
@@ -39,6 +40,7 @@ man_MANS =                                      \
   CURLINFO_CONTENT_LENGTH_UPLOAD_T.3            \
   CURLINFO_CONTENT_TYPE.3                       \
   CURLINFO_COOKIELIST.3                         \
+  CURLINFO_EARLYDATA_SENT_T.3                   \
   CURLINFO_EFFECTIVE_METHOD.3                   \
   CURLINFO_EFFECTIVE_URL.3                      \
   CURLINFO_FILETIME.3                           \
@@ -48,6 +50,7 @@ man_MANS =                                      \
   CURLINFO_HTTP_CONNECTCODE.3                   \
   CURLINFO_HTTP_VERSION.3                       \
   CURLINFO_HTTPAUTH_AVAIL.3                     \
+  CURLINFO_HTTPAUTH_USED.3                      \
   CURLINFO_LASTSOCKET.3                         \
   CURLINFO_LOCAL_IP.3                           \
   CURLINFO_LOCAL_PORT.3                         \
@@ -57,6 +60,7 @@ man_MANS =                                      \
   CURLINFO_OS_ERRNO.3                           \
   CURLINFO_PRETRANSFER_TIME.3                   \
   CURLINFO_PRETRANSFER_TIME_T.3                 \
+  CURLINFO_POSTTRANSFER_TIME_T.3                \
   CURLINFO_PRIMARY_IP.3                         \
   CURLINFO_PRIMARY_PORT.3                       \
   CURLINFO_PRIVATE.3                            \
@@ -64,6 +68,8 @@ man_MANS =                                      \
   CURLINFO_PROXY_ERROR.3                        \
   CURLINFO_PROXY_SSL_VERIFYRESULT.3             \
   CURLINFO_PROXYAUTH_AVAIL.3                    \
+  CURLINFO_PROXYAUTH_USED.3                     \
+  CURLINFO_QUEUE_TIME_T.3                       \
   CURLINFO_REDIRECT_COUNT.3                     \
   CURLINFO_REDIRECT_TIME.3                      \
   CURLINFO_REDIRECT_TIME_T.3                    \
@@ -93,6 +99,13 @@ man_MANS =                                      \
   CURLINFO_TLS_SSL_PTR.3                        \
   CURLINFO_TOTAL_TIME.3                         \
   CURLINFO_TOTAL_TIME_T.3                       \
+  CURLINFO_USED_PROXY.3                         \
+  CURLINFO_XFER_ID.3                            \
+  CURLMINFO_XFERS_ADDED.3                       \
+  CURLMINFO_XFERS_CURRENT.3                     \
+  CURLMINFO_XFERS_DONE.3                        \
+  CURLMINFO_XFERS_PENDING.3                     \
+  CURLMINFO_XFERS_RUNNING.3                     \
   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE.3          \
   CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE.3        \
   CURLMOPT_MAX_CONCURRENT_STREAMS.3             \
@@ -100,6 +113,9 @@ man_MANS =                                      \
   CURLMOPT_MAX_PIPELINE_LENGTH.3                \
   CURLMOPT_MAX_TOTAL_CONNECTIONS.3              \
   CURLMOPT_MAXCONNECTS.3                        \
+  CURLMOPT_NETWORK_CHANGED.3                    \
+  CURLMOPT_NOTIFYDATA.3                           \
+  CURLMOPT_NOTIFYFUNCTION.3                       \
   CURLMOPT_PIPELINING.3                         \
   CURLMOPT_PIPELINING_SERVER_BL.3               \
   CURLMOPT_PIPELINING_SITE_BL.3                 \
@@ -162,6 +178,7 @@ man_MANS =                                      \
   CURLOPT_DOH_SSL_VERIFYPEER.3                  \
   CURLOPT_DOH_SSL_VERIFYSTATUS.3                \
   CURLOPT_DOH_URL.3                             \
+  CURLOPT_ECH.3                                 \
   CURLOPT_EGDSOCKET.3                           \
   CURLOPT_ERRORBUFFER.3                         \
   CURLOPT_EXPECT_100_TIMEOUT_MS.3               \
@@ -186,6 +203,7 @@ man_MANS =                                      \
   CURLOPT_GSSAPI_DELEGATION.3                   \
   CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3           \
   CURLOPT_HAPROXYPROTOCOL.3                     \
+  CURLOPT_HAPROXY_CLIENT_IP.3                   \
   CURLOPT_HEADER.3                              \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
@@ -228,7 +246,7 @@ man_MANS =                                      \
   CURLOPT_MAIL_AUTH.3                           \
   CURLOPT_MAIL_FROM.3                           \
   CURLOPT_MAIL_RCPT.3                           \
-  CURLOPT_MAIL_RCPT_ALLLOWFAILS.3               \
+  CURLOPT_MAIL_RCPT_ALLOWFAILS.3                \
   CURLOPT_MAX_RECV_SPEED_LARGE.3                \
   CURLOPT_MAX_SEND_SPEED_LARGE.3                \
   CURLOPT_MAXAGE_CONN.3                         \
@@ -303,6 +321,7 @@ man_MANS =                                      \
   CURLOPT_PROXYUSERNAME.3                       \
   CURLOPT_PROXYUSERPWD.3                        \
   CURLOPT_PUT.3                                 \
+  CURLOPT_QUICK_EXIT.3                          \
   CURLOPT_QUOTE.3                               \
   CURLOPT_RANDOM_FILE.3                         \
   CURLOPT_RANGE.3                               \
@@ -328,6 +347,7 @@ man_MANS =                                      \
   CURLOPT_SEEKDATA.3                            \
   CURLOPT_SEEKFUNCTION.3                        \
   CURLOPT_SERVER_RESPONSE_TIMEOUT.3             \
+  CURLOPT_SERVER_RESPONSE_TIMEOUT_MS.3          \
   CURLOPT_SERVICE_NAME.3                        \
   CURLOPT_SHARE.3                               \
   CURLOPT_SOCKOPTDATA.3                         \
@@ -337,6 +357,8 @@ man_MANS =                                      \
   CURLOPT_SOCKS5_GSSAPI_SERVICE.3               \
   CURLOPT_SSH_AUTH_TYPES.3                      \
   CURLOPT_SSH_COMPRESSION.3                     \
+  CURLOPT_SSH_HOSTKEYDATA.3                     \
+  CURLOPT_SSH_HOSTKEYFUNCTION.3                 \
   CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.3             \
   CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256.3          \
   CURLOPT_SSH_KEYDATA.3                         \
@@ -347,12 +369,13 @@ man_MANS =                                      \
   CURLOPT_SSL_CIPHER_LIST.3                     \
   CURLOPT_SSL_CTX_DATA.3                        \
   CURLOPT_SSL_CTX_FUNCTION.3                    \
-  CURLOPT_SSL_EC_CURVES.3			\
+  CURLOPT_SSL_EC_CURVES.3                       \
   CURLOPT_SSL_ENABLE_ALPN.3                     \
   CURLOPT_SSL_ENABLE_NPN.3                      \
   CURLOPT_SSL_FALSESTART.3                      \
   CURLOPT_SSL_OPTIONS.3                         \
   CURLOPT_SSL_SESSIONID_CACHE.3                 \
+  CURLOPT_SSL_SIGNATURE_ALGORITHMS.3            \
   CURLOPT_SSL_VERIFYHOST.3                      \
   CURLOPT_SSL_VERIFYPEER.3                      \
   CURLOPT_SSL_VERIFYSTATUS.3                    \
@@ -374,6 +397,7 @@ man_MANS =                                      \
   CURLOPT_TCP_KEEPALIVE.3                       \
   CURLOPT_TCP_KEEPIDLE.3                        \
   CURLOPT_TCP_KEEPINTVL.3                       \
+  CURLOPT_TCP_KEEPCNT.3                         \
   CURLOPT_TCP_NODELAY.3                         \
   CURLOPT_TELNETOPTIONS.3                       \
   CURLOPT_TFTP_BLKSIZE.3                        \
@@ -396,6 +420,7 @@ man_MANS =                                      \
   CURLOPT_UPKEEP_INTERVAL_MS.3                  \
   CURLOPT_UPLOAD.3                              \
   CURLOPT_UPLOAD_BUFFERSIZE.3                   \
+  CURLOPT_UPLOAD_FLAGS.3                        \
   CURLOPT_URL.3                                 \
   CURLOPT_USE_SSL.3                             \
   CURLOPT_USERAGENT.3                           \

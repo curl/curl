@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ STARTTLS
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -23,10 +23,10 @@ SSL
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP require STARTTLS while preauthenticated
- </name>
-<file name="log/test%TESTNUMBER.txt">
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
       see
@@ -34,8 +34,8 @@ that FTPS
 works
   so does it?
 </file>
- <command>
---ssl-reqd --ftp-ssl-control ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt -u user:secret
+<command>
+--ssl-reqd --ftp-ssl-control ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -u user:secret
 </command>
 </client>
 
@@ -45,7 +45,7 @@ works
 <errorcode>
 64
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 AUTH SSL
 AUTH TLS
 </protocol>

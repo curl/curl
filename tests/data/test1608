@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,17 +7,14 @@ curlopt_dns_shuffle_addresses
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
+shuffle-dns
 </features>
- <name>
+<name>
 verify DNS shuffling
- </name>
+</name>
 </client>
 </testcase>

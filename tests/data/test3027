@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -24,9 +25,9 @@ data blobb
 <server>
 ftp
 </server>
- <name>
+<name>
 Get a file via FTP but 550 after MDTM command
- </name>
+</name>
 <tool>
 lib3027
 </tool>
@@ -40,7 +41,7 @@ data blobb
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

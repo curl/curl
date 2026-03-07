@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ PEM certificate
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -20,37 +20,32 @@ MooMoo
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
 SSL
 SSLpinning
 Schannel
+local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
- <name>
+<name>
 simple HTTPS GET with PEM public key pinning (Schannel variant)
- </name>
- <setenv>
-# This test is pointless if we're not using the schannel backend
+</name>
+<setenv>
+# This test is pointless if we are not using the Schannel backend
 CURL_SSL_BACKEND=schannel
- </setenv>
- <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.pem --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+</setenv>
+<command>
+-4 --cacert %CERTDIR/certs/test-ca.crt --pinnedpubkey %CERTDIR/certs/test-localhost.pub.pem --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost because we're checking the host name
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
 User-Agent: curl/%VERSION

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2021 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,28 +21,28 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testtrace.h"
-#include "memdebug.h"
-
-int test(char *URL)
+static CURLcode test_lib1569(const char *URL)
 {
-  CURLcode ret;
-  CURL *hnd;
-  curl_global_init(CURL_GLOBAL_ALL);
+  CURLcode result = CURLE_OK;
+  CURL *curl;
+  global_init(CURL_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_URL, URL);
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
+  easy_init(curl);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
-  ret = curl_easy_perform(hnd);
+  result = curl_easy_perform(curl);
+  if(result)
+    goto test_cleanup;
 
-  curl_easy_setopt(hnd, CURLOPT_URL, libtest_arg2);
-  ret = curl_easy_perform(hnd);
-  curl_easy_cleanup(hnd);
+  curl_easy_setopt(curl, CURLOPT_URL, libtest_arg2);
+  result = curl_easy_perform(curl);
 
+test_cleanup:
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return (int)ret;
+  return result;
 }

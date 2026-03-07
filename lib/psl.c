@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,50 +21,36 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #ifdef USE_LIBPSL
 
 #include "psl.h"
-#include "share.h"
-
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "progress.h"
+#include "curl_share.h"
 
 void Curl_psl_destroy(struct PslCache *pslcache)
 {
   if(pslcache->psl) {
     if(pslcache->dynamic)
-      psl_free((psl_ctx_t *) pslcache->psl);
+      psl_free((psl_ctx_t *)CURL_UNCONST(pslcache->psl));
     pslcache->psl = NULL;
     pslcache->dynamic = FALSE;
   }
-}
-
-static time_t now_seconds(void)
-{
-  struct curltime now = Curl_now();
-
-  return now.tv_sec;
 }
 
 const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
 {
   struct PslCache *pslcache = easy->psl;
   const psl_ctx_t *psl;
-  time_t now;
+  time_t now_sec;
 
   if(!pslcache)
     return NULL;
 
   Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
-  now = now_seconds();
-  if(!pslcache->psl || pslcache->expires <= now) {
+  now_sec = Curl_pgrs_now(easy)->tv_sec;
+  if(!pslcache->psl || pslcache->expires <= now_sec) {
     /* Let a chance to other threads to do the job: avoids deadlock. */
     Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);
 
@@ -72,8 +58,10 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
     Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SINGLE);
 
     /* Recheck in case another thread did the job. */
-    now = now_seconds();
-    if(!pslcache->psl || pslcache->expires <= now) {
+    if(pslcache->expires <= now_sec) {
+      now_sec = Curl_pgrs_now(easy)->tv_sec;
+    }
+    if(!pslcache->psl || pslcache->expires <= now_sec) {
       bool dynamic = FALSE;
       time_t expires = TIME_T_MAX;
 
@@ -81,7 +69,8 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
       psl = psl_latest(NULL);
       dynamic = psl != NULL;
       /* Take care of possible time computation overflow. */
-      expires = now < TIME_T_MAX - PSL_TTL? now + PSL_TTL: TIME_T_MAX;
+      expires = (now_sec < TIME_T_MAX - PSL_TTL) ?
+                (now_sec + PSL_TTL) : TIME_T_MAX;
 
       /* Only get the built-in PSL if we do not already have the "latest". */
       if(!psl && !pslcache->dynamic)
@@ -96,7 +85,7 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
         pslcache->expires = expires;
       }
     }
-    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
+    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL); /* Release exclusive lock. */
     Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
   }
   psl = pslcache->psl;

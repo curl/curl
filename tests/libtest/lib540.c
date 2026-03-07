@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,125 +27,119 @@
  * argv1 = URL
  * argv2 = proxy
  * argv3 = proxyuser:password
- * argv4 = host name to use for the custom Host: header
+ * argv4 = hostname to use for the custom Host: header
  */
 
-#include "test.h"
+#include "first.h"
 
-#include <limits.h>
+static CURL *t540_curl[2];
 
-#include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
-
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-#define PROXY libtest_arg2
-#define PROXYUSERPWD libtest_arg3
-#define HOST test_argv[4]
-
-#define NUM_HANDLES 2
-
-static CURL *eh[NUM_HANDLES];
-
-static int init(int num, CURLM *cm, const char *url, const char *userpwd,
-                struct curl_slist *headers)
+static CURLcode init(int num, CURLM *multi, const char *url,
+                     const char *userpwd, struct curl_slist *headers)
 {
-  int res = 0;
+  CURLcode result = CURLE_OK;
 
-  res_easy_init(eh[num]);
-  if(res)
+  const char *proxy = libtest_arg2;
+
+  res_easy_init(t540_curl[num]);
+  if(result)
     goto init_failed;
 
-  res_easy_setopt(eh[num], CURLOPT_URL, url);
-  if(res)
+  res_easy_setopt(t540_curl[num], CURLOPT_URL, url);
+  if(result)
     goto init_failed;
 
-  res_easy_setopt(eh[num], CURLOPT_PROXY, PROXY);
-  if(res)
+  res_easy_setopt(t540_curl[num], CURLOPT_PROXY, proxy);
+  if(result)
     goto init_failed;
 
-  res_easy_setopt(eh[num], CURLOPT_PROXYUSERPWD, userpwd);
-  if(res)
+  res_easy_setopt(t540_curl[num], CURLOPT_PROXYUSERPWD, userpwd);
+  if(result)
     goto init_failed;
 
-  res_easy_setopt(eh[num], CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
-  if(res)
+  res_easy_setopt(t540_curl[num], CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+  if(result)
     goto init_failed;
 
-  res_easy_setopt(eh[num], CURLOPT_VERBOSE, 1L);
-  if(res)
+  res_easy_setopt(t540_curl[num], CURLOPT_VERBOSE, 1L);
+  if(result)
     goto init_failed;
 
-  res_easy_setopt(eh[num], CURLOPT_HEADER, 1L);
-  if(res)
+  res_easy_setopt(t540_curl[num], CURLOPT_HEADER, 1L);
+  if(result)
     goto init_failed;
 
-  res_easy_setopt(eh[num], CURLOPT_HTTPHEADER, headers); /* custom Host: */
-  if(res)
+  /* custom Host: */
+  res_easy_setopt(t540_curl[num], CURLOPT_HTTPHEADER, headers);
+  if(result)
     goto init_failed;
 
-  res_multi_add_handle(cm, eh[num]);
-  if(res)
+  res_multi_add_handle(multi, t540_curl[num]);
+  if(result)
     goto init_failed;
 
-  return 0; /* success */
+  return CURLE_OK; /* success */
 
 init_failed:
 
-  curl_easy_cleanup(eh[num]);
-  eh[num] = NULL;
+  curl_easy_cleanup(t540_curl[num]);
+  t540_curl[num] = NULL;
 
-  return res; /* failure */
+  return result; /* failure */
 }
 
-static int loop(int num, CURLM *cm, const char *url, const char *userpwd,
-                struct curl_slist *headers)
+static CURLcode loop(int num, CURLM *multi, const char *url,
+                     const char *userpwd, struct curl_slist *headers)
 {
   CURLMsg *msg;
   long L;
   int Q, U = -1;
   fd_set R, W, E;
   struct timeval T;
-  int res = 0;
+  CURLcode result = CURLE_OK;
 
-  res = init(num, cm, url, userpwd, headers);
-  if(res)
-    return res;
+  result = init(num, multi, url, userpwd, headers);
+  if(result)
+    return result;
 
   while(U) {
 
     int M = -99;
 
-    res_multi_perform(cm, &U);
-    if(res)
-      return res;
+    res_multi_perform(multi, &U);
+    if(result)
+      return result;
 
     res_test_timedout();
-    if(res)
-      return res;
+    if(result)
+      return result;
 
     if(U) {
       FD_ZERO(&R);
       FD_ZERO(&W);
       FD_ZERO(&E);
 
-      res_multi_fdset(cm, &R, &W, &E, &M);
-      if(res)
-        return res;
+      res_multi_fdset(multi, &R, &W, &E, &M);
+      if(result)
+        return result;
 
       /* At this point, M is guaranteed to be greater or equal than -1. */
 
-      res_multi_timeout(cm, &L);
-      if(res)
-        return res;
+      res_multi_timeout(multi, &L);
+      if(result)
+        return result;
 
       /* At this point, L is guaranteed to be greater or equal than -1. */
 
       if(L != -1) {
-        int itimeout = (L > (long)INT_MAX) ? INT_MAX : (int)L;
-        T.tv_sec = itimeout/1000;
-        T.tv_usec = (itimeout%1000)*1000;
+        int itimeout;
+#if LONG_MAX > INT_MAX
+        itimeout = (L > INT_MAX) ? INT_MAX : (int)L;
+#else
+        itimeout = (int)L;
+#endif
+        T.tv_sec = itimeout / 1000;
+        T.tv_usec = (itimeout % 1000) * 1000;
       }
       else {
         T.tv_sec = 5;
@@ -153,99 +147,103 @@ static int loop(int num, CURLM *cm, const char *url, const char *userpwd,
       }
 
       res_select_test(M + 1, &R, &W, &E, &T);
-      if(res)
-        return res;
+      if(result)
+        return result;
     }
 
     while(1) {
-      msg = curl_multi_info_read(cm, &Q);
+      msg = curl_multi_info_read(multi, &Q);
       if(!msg)
         break;
       if(msg->msg == CURLMSG_DONE) {
-        int i;
-        CURL *e = msg->easy_handle;
-        fprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
-                curl_easy_strerror(msg->data.result));
-        curl_multi_remove_handle(cm, e);
-        curl_easy_cleanup(e);
-        for(i = 0; i < NUM_HANDLES; i++) {
-          if(eh[i] == e) {
-            eh[i] = NULL;
+        size_t i;
+        CURL *curl = msg->easy_handle;
+        curl_mfprintf(stderr, "R: %d - %s\n", msg->data.result,
+                      curl_easy_strerror(msg->data.result));
+        curl_multi_remove_handle(multi, curl);
+        curl_easy_cleanup(curl);
+        for(i = 0; i < CURL_ARRAYSIZE(t540_curl); i++) {
+          if(t540_curl[i] == curl) {
+            t540_curl[i] = NULL;
             break;
           }
         }
       }
       else
-        fprintf(stderr, "E: CURLMsg (%d)\n", (int)msg->msg);
+        curl_mfprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
     }
 
     res_test_timedout();
-    if(res)
-      return res;
+    if(result)
+      return result;
   }
 
-  return 0; /* success */
+  return CURLE_OK;
 }
 
-int test(char *URL)
+static CURLcode test_lib540(const char *URL)
 {
-  CURLM *cm = NULL;
+  CURLM *multi = NULL;
   struct curl_slist *headers = NULL;
   char buffer[246]; /* naively fixed-size */
-  int res = 0;
-  int i;
+  CURLcode result = CURLE_OK;
+  size_t i;
 
-  for(i = 0; i < NUM_HANDLES; i++)
-    eh[i] = NULL;
+  const char *proxyuserpws = libtest_arg3;
+  const char *host;
+
+  for(i = 0; i < CURL_ARRAYSIZE(t540_curl); i++)
+    t540_curl[i] = NULL;
 
   start_test_timing();
 
   if(test_argc < 4)
-    return 99;
+    return TEST_ERR_MAJOR_BAD;
 
-  msnprintf(buffer, sizeof(buffer), "Host: %s", HOST);
+  host = test_argv[4];
+  curl_msnprintf(buffer, sizeof(buffer), "Host: %s", host);
 
   /* now add a custom Host: header */
   headers = curl_slist_append(headers, buffer);
   if(!headers) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_mfprintf(stderr, "curl_slist_append() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(result) {
     curl_slist_free_all(headers);
-    return res;
+    return result;
   }
 
-  res_multi_init(cm);
-  if(res) {
+  res_multi_init(multi);
+  if(result) {
     curl_global_cleanup();
     curl_slist_free_all(headers);
-    return res;
+    return result;
   }
 
-  res = loop(0, cm, URL, PROXYUSERPWD, headers);
-  if(res)
+  result = loop(0, multi, URL, proxyuserpws, headers);
+  if(result)
     goto test_cleanup;
 
-  fprintf(stderr, "lib540: now we do the request again\n");
+  curl_mfprintf(stderr, "lib540: now we do the request again\n");
 
-  res = loop(1, cm, URL, PROXYUSERPWD, headers);
+  result = loop(1, multi, URL, proxyuserpws, headers);
 
 test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
-    curl_multi_remove_handle(cm, eh[i]);
-    curl_easy_cleanup(eh[i]);
+  for(i = 0; i < CURL_ARRAYSIZE(t540_curl); i++) {
+    curl_multi_remove_handle(multi, t540_curl[i]);
+    curl_easy_cleanup(t540_curl[i]);
   }
 
-  curl_multi_cleanup(cm);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   curl_slist_free_all(headers);
 
-  return res;
+  return result;
 }

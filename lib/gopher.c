@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,93 +21,22 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+#include "urldata.h"
+#include "gopher.h"
 
 #ifndef CURL_DISABLE_GOPHER
 
-#include "urldata.h"
-#include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
+#include "curl_trc.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "progress.h"
-#include "gopher.h"
 #include "select.h"
-#include "strdup.h"
-#include "vtls/vtls.h"
 #include "url.h"
 #include "escape.h"
-#include "warnless.h"
-#include "curl_printf.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
-
-/*
- * Forward declarations.
- */
-
-static CURLcode gopher_do(struct Curl_easy *data, bool *done);
-#ifdef USE_SSL
-static CURLcode gopher_connect(struct Curl_easy *data, bool *done);
-static CURLcode gopher_connecting(struct Curl_easy *data, bool *done);
-#endif
-
-/*
- * Gopher protocol handler.
- * This is also a nice simple template to build off for simple
- * connect-command-download protocols.
- */
-
-const struct Curl_handler Curl_handler_gopher = {
-  "GOPHER",                             /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  gopher_do,                            /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  PORT_GOPHER,                          /* defport */
-  CURLPROTO_GOPHER,                     /* protocol */
-  CURLPROTO_GOPHER,                     /* family */
-  PROTOPT_NONE                          /* flags */
-};
 
 #ifdef USE_SSL
-const struct Curl_handler Curl_handler_gophers = {
-  "GOPHERS",                            /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  gopher_do,                            /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  gopher_connect,                       /* connect_it */
-  gopher_connecting,                    /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  PORT_GOPHER,                          /* defport */
-  CURLPROTO_GOPHERS,                    /* protocol */
-  CURLPROTO_GOPHER,                     /* family */
-  PROTOPT_SSL                           /* flags */
-};
-
 static CURLcode gopher_connect(struct Curl_easy *data, bool *done)
 {
   (void)data;
@@ -134,13 +63,12 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   char *gopherpath;
-  char *path = data->state.up.path;
-  char *query = data->state.up.query;
-  char *sel = NULL;
-  char *sel_org = NULL;
+  const char *path = data->state.up.path;
+  const char *query = data->state.up.query;
+  const char *buf = NULL;
+  char *buf_alloc = NULL;
+  size_t nwritten, buf_len;
   timediff_t timeout_ms;
-  ssize_t amount, k;
-  size_t len;
   int what;
 
   *done = TRUE; /* unconditionally */
@@ -149,57 +77,55 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   DEBUGASSERT(path);
 
   if(query)
-    gopherpath = aprintf("%s?%s", path, query);
+    gopherpath = curl_maprintf("%s?%s", path, query);
   else
-    gopherpath = strdup(path);
+    gopherpath = curlx_strdup(path);
 
   if(!gopherpath)
     return CURLE_OUT_OF_MEMORY;
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
   if(strlen(gopherpath) <= 2) {
-    sel = (char *)"";
-    len = strlen(sel);
-    free(gopherpath);
+    buf = "";
+    buf_len = 0;
+    curlx_free(gopherpath);
   }
   else {
-    char *newp;
+    const char *newp;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
     newp = gopherpath;
     newp += 2;
 
     /* ... and finally unescape */
-    result = Curl_urldecode(newp, 0, &sel, &len, REJECT_ZERO);
-    free(gopherpath);
+    result = Curl_urldecode(newp, 0, &buf_alloc, &buf_len, REJECT_ZERO);
+    curlx_free(gopherpath);
     if(result)
       return result;
-    sel_org = sel;
+    buf = buf_alloc;
   }
 
-  k = curlx_uztosz(len);
+  for(; buf_len;) {
 
-  for(;;) {
-    /* Break out of the loop if the selector is empty because OpenSSL and/or
-       LibreSSL fail with errno 0 if this is the case. */
-    if(strlen(sel) < 1)
-      break;
-
-    result = Curl_write(data, sockfd, sel, k, &amount);
+    result = Curl_xfer_send(data, buf, buf_len, FALSE, &nwritten);
     if(!result) { /* Which may not have written it all! */
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, nwritten);
       if(result)
         break;
 
-      k -= amount;
-      sel += amount;
-      if(k < 1)
+      if(nwritten > buf_len) {
+        DEBUGASSERT(0);
+        break;
+      }
+      buf_len -= nwritten;
+      buf += nwritten;
+      if(!buf_len)
         break; /* but it did write it all */
     }
     else
       break;
 
-    timeout_ms = Curl_timeleft(data, NULL, FALSE);
+    timeout_ms = Curl_timeleft_ms(data);
     if(timeout_ms < 0) {
       result = CURLE_OPERATION_TIMEDOUT;
       break;
@@ -207,9 +133,9 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     if(!timeout_ms)
       timeout_ms = TIMEDIFF_T_MAX;
 
-    /* Don't busyloop. The entire loop thing is a work-around as it causes a
+    /* Do not busyloop. The entire loop thing is a work-around as it causes a
        BLOCKING behavior which is a NO-NO. This function should rather be
-       split up in a do and a doing piece where the pieces that aren't
+       split up in a do and a doing piece where the pieces that are not
        possible to send now will be sent in the doing function repeatedly
        until the entire request is sent.
     */
@@ -224,19 +150,94 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  free(sel_org);
+  curlx_free(buf_alloc);
 
   if(!result)
-    result = Curl_write(data, sockfd, "\r\n", 2, &amount);
+    result = Curl_xfer_send(data, "\r\n", 2, FALSE, &nwritten);
   if(result) {
     failf(data, "Failed sending Gopher request");
     return result;
   }
-  result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
   if(result)
     return result;
 
-  Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
   return CURLE_OK;
 }
+
+/*
+ * Gopher protocol handler.
+ * This is also a nice simple template to build off for simple
+ * connect-command-download protocols.
+ */
+
+static const struct Curl_protocol Curl_protocol_gopher = {
+  ZERO_NULL,                            /* setup_connection */
+  gopher_do,                            /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+};
+
+#ifdef USE_SSL
+static const struct Curl_protocol Curl_protocol_gophers = {
+  ZERO_NULL,                            /* setup_connection */
+  gopher_do,                            /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  gopher_connect,                       /* connect_it */
+  gopher_connecting,                    /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+};
+#endif
+
 #endif /* CURL_DISABLE_GOPHER */
+
+const struct Curl_scheme Curl_scheme_gopher = {
+  "gopher",                             /* scheme */
+#ifdef CURL_DISABLE_GOPHER
+  ZERO_NULL,
+#else
+  &Curl_protocol_gopher,
+#endif
+  CURLPROTO_GOPHER,                     /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
+  PROTOPT_NONE,                         /* flags */
+  PORT_GOPHER,                          /* defport */
+};
+
+const struct Curl_scheme Curl_scheme_gophers = {
+  "gophers",                            /* scheme */
+#if defined(CURL_DISABLE_GOPHER) || !defined(USE_SSL)
+  ZERO_NULL,
+#else
+  &Curl_protocol_gophers,
+#endif
+  CURLPROTO_GOPHERS,                    /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
+  PROTOPT_SSL,                          /* flags */
+  PORT_GOPHER,                          /* defport */
+};

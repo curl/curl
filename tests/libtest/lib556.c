@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,35 +21,22 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "warnless.h"
-#include "memdebug.h"
-
-/* For Windows, mainly (may be moved in a config file?) */
-#ifndef STDIN_FILENO
-  #define STDIN_FILENO 0
-#endif
-#ifndef STDOUT_FILENO
-  #define STDOUT_FILENO 1
-#endif
-#ifndef STDERR_FILENO
-  #define STDERR_FILENO 2
-#endif
-
-int test(char *URL)
+static CURLcode test_lib556(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
+  int transfers = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -58,36 +45,59 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
+again:
 
-  if(!res) {
+  result = curl_easy_perform(curl);
+
+  if(!result) {
     /* we are connected, now get an HTTP document the raw way */
-    const char *request =
-      "GET /556 HTTP/1.1\r\n"
-      "Host: ninja\r\n\r\n";
-    size_t iolen = 0;
+    char request[64];
+    const char *sbuf = request;
+    size_t sblen;
+    size_t nwritten = 0, nread = 0;
 
-    res = curl_easy_send(curl, request, strlen(request), &iolen);
+    sblen = curl_msnprintf(request, sizeof(request),
+                           "GET /%d HTTP/1.1\r\n"
+                           "Host: ninja\r\n\r\n", testnum);
 
-    if(!res) {
-      /* we assume that sending always work */
+    do {
+      char buf[1024];
 
-      do {
-        char buf[1024];
-        /* busy-read like crazy */
-        res = curl_easy_recv(curl, buf, sizeof(buf), &iolen);
-
-        if(iolen) {
-          /* send received stuff to stdout */
-          if(!write(STDOUT_FILENO, buf, iolen))
-            break;
+      if(sblen) {
+        result = curl_easy_send(curl, sbuf, sblen, &nwritten);
+        if(result && result != CURLE_AGAIN)
+          break;
+        if(nwritten > 0) {
+          sbuf += nwritten;
+          sblen -= nwritten;
         }
+      }
 
-      } while((res == CURLE_OK && iolen) || (res == CURLE_AGAIN));
-    }
+      /* busy-read like crazy */
+      result = curl_easy_recv(curl, buf, sizeof(buf), &nread);
 
-    if(iolen)
-      res = (CURLcode)TEST_ERR_FAILURE;
+      if(nread) {
+        /* send received stuff to stdout */
+        if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
+          char errbuf[STRERROR_LEN];
+          curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
+                        errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+          result = TEST_ERR_FAILURE;
+          break;
+        }
+      }
+
+    } while((result == CURLE_OK && nread) || (result == CURLE_AGAIN));
+
+    if(result && result != CURLE_AGAIN)
+      result = TEST_ERR_FAILURE;
+  }
+
+  if(testnum == 696) {
+    ++transfers;
+    /* perform the transfer a second time */
+    if(!result && transfers == 1)
+      goto again;
   }
 
 test_cleanup:
@@ -95,5 +105,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return result;
 }

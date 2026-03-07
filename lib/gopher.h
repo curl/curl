@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,12 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#ifndef CURL_DISABLE_GOPHER
-extern const struct Curl_handler Curl_handler_gopher;
-#ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_gophers;
-#endif
-#endif
+extern const struct Curl_scheme Curl_scheme_gopher;
+extern const struct Curl_scheme Curl_scheme_gophers;
 
 #endif /* HEADER_CURL_GOPHER_H */

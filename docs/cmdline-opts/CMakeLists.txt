@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,15 +21,38 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(MANPAGE "${CURL_BINARY_DIR}/docs/curl.1")
-
-# Load DPAGES and OTHERPAGES from shared file
-transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+# Get SUPPORT, DPAGES variables
+curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-add_custom_command(OUTPUT "${MANPAGE}"
-  COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/gen.pl" mainpage "${CMAKE_CURRENT_SOURCE_DIR}" > "${MANPAGE}"
-  DEPENDS ${DPAGES} ${OTHERPAGES}
+add_custom_command(OUTPUT "${CURL_MANPAGE}" "${CURL_ASCIIPAGE}"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" mainpage ${DPAGES} > "${CURL_MANPAGE}"
+  COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" ascii ${DPAGES} > "${CURL_ASCIIPAGE}"
+  DEPENDS "${PROJECT_SOURCE_DIR}/scripts/managen" ${DPAGES} ${SUPPORT}
+    "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/mainpage.idx"
   VERBATIM
 )
-add_custom_target(generate-curl.1 DEPENDS "${MANPAGE}")
+
+add_custom_target(generate-curl.1 ALL DEPENDS "${CURL_MANPAGE}")
+
+if(NOT CURL_DISABLE_INSTALL)
+  install(FILES "${CURL_MANPAGE}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+endif()
+
+if(PERL_EXECUTABLE)
+  add_custom_target(curl-listhelp
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating src/tool_listhelp.c" VERBATIM USES_TERMINAL
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" -d "${CMAKE_CURRENT_SOURCE_DIR}" listhelp ${DPAGES}
+      > "${PROJECT_SOURCE_DIR}/src/tool_listhelp.c"
+    DEPENDS "${PROJECT_SOURCE_DIR}/scripts/managen" ${DPAGES}
+  )
+  add_custom_target(curl-listcats
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating help category constants for src/tool_help.h" VERBATIM USES_TERMINAL
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" listcats ${DPAGES}
+    DEPENDS "${PROJECT_SOURCE_DIR}/scripts/managen" ${DPAGES}
+  )
+endif()

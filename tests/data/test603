@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,38 +7,32 @@ SCP upload
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 scp
 </server>
- <name>
+<name>
 SCP upload
- </name>
- <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SSH_PWD/log/upload.%TESTNUMBER --insecure
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/upload.%TESTNUMBER --insecure
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <upload>
 Test data
 for ssh upload test
 </upload>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

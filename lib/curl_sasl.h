@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,9 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include <curl/curl.h>
-
 #include "bufref.h"
 
 struct Curl_easy;
@@ -125,19 +122,15 @@ struct SASL {
   unsigned short authmechs;  /* Accepted authentication mechanisms */
   unsigned short prefmech;   /* Preferred authentication mechanism */
   unsigned short authused;   /* Auth mechanism used for the connection */
-  bool resetprefs;           /* For URL auth option parsing. */
-  bool mutual_auth;          /* Mutual authentication enabled (GSSAPI only) */
-  bool force_ir;             /* Protocol always supports initial response */
+  BIT(resetprefs);           /* For URL auth option parsing. */
+  BIT(mutual_auth);          /* Mutual authentication enabled (GSSAPI only) */
+  BIT(force_ir);             /* Protocol always supports initial response */
 };
 
 /* This is used to test whether the line starts with the given mechanism */
 #define sasl_mech_equal(line, wordlen, mech) \
-  (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
+  ((wordlen) == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
-
-/* This is used to cleanup any libraries or curl modules used by the sasl
-   functions */
-void Curl_sasl_cleanup(struct connectdata *conn, unsigned short authused);
 
 /* Convert a mechanism name to a token */
 unsigned short Curl_sasl_decode_mech(const char *ptr,
@@ -154,12 +147,14 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 /* Check if we have enough auth data and capabilities to authenticate */
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data);
 
-/* Calculate the required login details for SASL authentication  */
+/* Calculate the required login details for SASL authentication */
 CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
                          bool force_ir, saslprogress *progress);
 
-/* Continue an SASL authentication  */
+/* Continue an SASL authentication */
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
                             int code, saslprogress *progress);
+
+CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data);
 
 #endif /* HEADER_CURL_SASL_H */

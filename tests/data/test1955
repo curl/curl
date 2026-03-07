@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -32,15 +33,13 @@ Content-Length: 0
 <server>
 http
 </server>
-# this relies on the debug feature which allow to set the time
+# this relies on the Debug feature which allows tests to set the time
 <features>
 SSL
-debug
+Debug
 crypto
+aws
 </features>
-<setenv>
-CURL_FORCEHOST=1
-</setenv>
 
 <name>
 HTTP AWS_SIGV4 without X-Xxx-Content-Sha256
@@ -57,17 +56,17 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type:.*
 ^Accept:.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 GET /aws_sigv4/testapi/test HTTP/1.1
 Host: exam.ple.com:9000
-Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test0;test1;test2;test_space;x-xxx-date, Signature=779a8ff876528aece8bf03b1296702af0644a4745aa5feabb6ebb1a7bb0d907e
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test2;test3;test_space;x-xxx-date, Signature=dd39202e9fb7b836ebf2abb83b114cae11ff3b6a169f0c64b290a774a873db9d
 X-Xxx-Date: 19700101T000000Z
-test2: 1234
-test_space: t	s  m	   end    
+test3: 1234
+test2:
+test_space: t%TABs  m%TAB   end%repeat[4 x  ]%
 tesMixCase: MixCase
 
 </protocol>

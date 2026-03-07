@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,33 +21,52 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#include <curl/curl.h>
-
 #include "hash.h"
-#include "llist.h"
-#include "curl_memory.h"
 
-/* The last #include file should be: */
-#include "memdebug.h"
+/* random patterns for API verification */
+#ifdef DEBUGBUILD
+#define HASHINIT 0x7017e781
+#define ITERINIT 0x5FEDCBA9
+#endif
 
-static void
-hash_element_dtor(void *user, void *element)
+#if 0 /* useful function for debugging hashes and their contents */
+void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 {
-  struct Curl_hash *h = (struct Curl_hash *) user;
-  struct Curl_hash_element *e = (struct Curl_hash_element *) element;
+  struct Curl_hash_iterator iter;
+  struct Curl_hash_element *he;
+  size_t last_index = UINT_MAX;
 
-  if(e->ptr) {
-    h->dtor(e->ptr);
-    e->ptr = NULL;
+  if(!h)
+    return;
+
+  curl_mfprintf(stderr, "=Hash dump=\n");
+
+  Curl_hash_start_iterate(h, &iter);
+
+  he = Curl_hash_next_element(&iter);
+  while(he) {
+    if(iter.slot_index != last_index) {
+      curl_mfprintf(stderr, "index %d:", (int)iter.slot_index);
+      if(last_index != UINT_MAX) {
+        curl_mfprintf(stderr, "\n");
+      }
+      last_index = iter.slot_index;
+    }
+
+    if(func)
+      func(he->ptr);
+    else
+      curl_mfprintf(stderr, " [key=%.*s, he=%p, ptr=%p]",
+                    (int)he->key_len, (char *)he->key,
+                    (void *)he, (void *)he->ptr);
+
+    he = Curl_hash_next_element(&iter);
   }
-
-  e->key_len = 0;
-
-  free(e);
+  curl_mfprintf(stderr, "\n");
 }
+#endif
 
 /* Initializes a hash structure.
  * Return 1 on error, 0 is fine.
@@ -55,12 +74,11 @@ hash_element_dtor(void *user, void *element)
  * @unittest: 1602
  * @unittest: 1603
  */
-void
-Curl_hash_init(struct Curl_hash *h,
-               int slots,
-               hash_function hfunc,
-               comp_function comparator,
-               Curl_hash_dtor dtor)
+void Curl_hash_init(struct Curl_hash *h,
+                    size_t slots,
+                    hash_function hfunc,
+                    comp_function comparator,
+                    Curl_hash_dtor dtor)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(slots);
@@ -74,70 +92,116 @@ Curl_hash_init(struct Curl_hash *h,
   h->dtor = dtor;
   h->size = 0;
   h->slots = slots;
+#ifdef DEBUGBUILD
+  h->init = HASHINIT;
+#endif
 }
 
-static struct Curl_hash_element *
-mk_hash_element(const void *key, size_t key_len, const void *p)
+static struct Curl_hash_element *hash_elem_create(const void *key,
+                                                  size_t key_len,
+                                                  const void *p,
+                                                  Curl_hash_elem_dtor dtor)
 {
+  struct Curl_hash_element *he;
+
   /* allocate the struct plus memory after it to store the key */
-  struct Curl_hash_element *he = malloc(sizeof(struct Curl_hash_element) +
-                                        key_len);
+  he = curlx_malloc(sizeof(struct Curl_hash_element) + key_len);
   if(he) {
+    he->next = NULL;
     /* copy the key */
     memcpy(he->key, key, key_len);
     he->key_len = key_len;
-    he->ptr = (void *) p;
+    he->ptr = CURL_UNCONST(p);
+    he->dtor = dtor;
   }
   return he;
 }
 
-#define FETCH_LIST(x,y,z) &x->table[x->hash_func(y, z, x->slots)]
+static void hash_elem_clear_ptr(struct Curl_hash *h,
+                                struct Curl_hash_element *he)
+{
+  DEBUGASSERT(h);
+  DEBUGASSERT(he);
+  if(he->ptr) {
+    if(he->dtor)
+      he->dtor(he->key, he->key_len, he->ptr);
+    else
+      h->dtor(he->ptr);
+    he->ptr = NULL;
+  }
+}
+
+static void hash_elem_destroy(struct Curl_hash *h,
+                              struct Curl_hash_element *he)
+{
+  hash_elem_clear_ptr(h, he);
+  curlx_free(he);
+}
+
+static void hash_elem_unlink(struct Curl_hash *h,
+                             struct Curl_hash_element **he_anchor,
+                             struct Curl_hash_element *he)
+{
+  *he_anchor = he->next;
+  --h->size;
+}
+
+static void hash_elem_link(struct Curl_hash *h,
+                           struct Curl_hash_element **he_anchor,
+                           struct Curl_hash_element *he)
+{
+  he->next = *he_anchor;
+  *he_anchor = he;
+  ++h->size;
+}
+
+#define CURL_HASH_SLOT(x, y, z)      x->table[(x)->hash_func(y, z, (x)->slots)]
+#define CURL_HASH_SLOT_ADDR(x, y, z) &CURL_HASH_SLOT(x, y, z)
+
+void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
+                     Curl_hash_elem_dtor dtor)
+{
+  struct Curl_hash_element *he, **slot;
+
+  DEBUGASSERT(h);
+  DEBUGASSERT(h->slots);
+  DEBUGASSERT(h->init == HASHINIT);
+  if(!h->table) {
+    h->table = curlx_calloc(h->slots, sizeof(struct Curl_hash_element *));
+    if(!h->table)
+      return NULL; /* OOM */
+  }
+
+  slot = CURL_HASH_SLOT_ADDR(h, key, key_len);
+  for(he = *slot; he; he = he->next) {
+    if(h->comp_func(he->key, he->key_len, key, key_len)) {
+      /* existing key entry, overwrite by clearing old pointer */
+      hash_elem_clear_ptr(h, he);
+      he->ptr = p;
+      he->dtor = dtor;
+      return p;
+    }
+  }
+
+  he = hash_elem_create(key, key_len, p, dtor);
+  if(!he)
+    return NULL; /* OOM */
+
+  hash_elem_link(h, slot, he);
+  return p; /* return the new entry */
+}
 
 /* Insert the data in the hash. If there already was a match in the hash, that
  * data is replaced. This function also "lazily" allocates the table if
- * needed, as it isn't done in the _init function (anymore).
+ * needed, as it is not done in the _init function (anymore).
  *
  * @unittest: 1305
  * @unittest: 1602
  * @unittest: 1603
  */
-void *
-Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
+void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
 {
-  struct Curl_hash_element  *he;
-  struct Curl_llist_element *le;
-  struct Curl_llist *l;
-
-  DEBUGASSERT(h);
-  DEBUGASSERT(h->slots);
-  if(!h->table) {
-    int i;
-    h->table = malloc(h->slots * sizeof(struct Curl_llist));
-    if(!h->table)
-      return NULL; /* OOM */
-    for(i = 0; i < h->slots; ++i)
-      Curl_llist_init(&h->table[i], hash_element_dtor);
-  }
-
-  l = FETCH_LIST(h, key, key_len);
-
-  for(le = l->head; le; le = le->next) {
-    he = (struct Curl_hash_element *) le->ptr;
-    if(h->comp_func(he->key, he->key_len, key, key_len)) {
-      Curl_llist_remove(l, le, (void *)h);
-      --h->size;
-      break;
-    }
-  }
-
-  he = mk_hash_element(key, key_len, p);
-  if(he) {
-    Curl_llist_insert_next(l, l->tail, he, &he->list);
-    ++h->size;
-    return p; /* return the new entry */
-  }
-
-  return NULL; /* failure */
+  return Curl_hash_add2(h, key, key_len, p, NULL);
 }
 
 /* Remove the identified hash entry.
@@ -147,21 +211,21 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
  */
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist *l;
-
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
-    l = FETCH_LIST(h, key, key_len);
+    struct Curl_hash_element *he, **he_anchor;
 
-    for(le = l->head; le; le = le->next) {
-      struct Curl_hash_element *he = le->ptr;
+    he_anchor = CURL_HASH_SLOT_ADDR(h, key, key_len);
+    while(*he_anchor) {
+      he = *he_anchor;
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
-        Curl_llist_remove(l, le, (void *) h);
-        --h->size;
+        hash_elem_unlink(h, he_anchor, he);
+        hash_elem_destroy(h, he);
         return 0;
       }
+      he_anchor = &he->next;
     }
   }
   return 1;
@@ -171,45 +235,23 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
  *
  * @unittest: 1603
  */
-void *
-Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
+void *Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist *l;
-
   DEBUGASSERT(h);
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
+    struct Curl_hash_element *he;
     DEBUGASSERT(h->slots);
-    l = FETCH_LIST(h, key, key_len);
-    for(le = l->head; le; le = le->next) {
-      struct Curl_hash_element *he = le->ptr;
+    he = CURL_HASH_SLOT(h, key, key_len);
+    while(he) {
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
         return he->ptr;
       }
+      he = he->next;
     }
   }
-
   return NULL;
 }
-
-#if defined(DEBUGBUILD) && defined(AGGRESSIVE_TEST)
-void
-Curl_hash_apply(Curl_hash *h, void *user,
-                void (*cb)(void *user, void *ptr))
-{
-  struct Curl_llist_element  *le;
-  int                  i;
-
-  for(i = 0; i < h->slots; ++i) {
-    for(le = (h->table[i])->head;
-        le;
-        le = le->next) {
-      Curl_hash_element *el = le->ptr;
-      cb(user, el->ptr);
-    }
-  }
-}
-#endif
 
 /* Destroys all the entries in the given hash and resets its attributes,
  * prepping the given hash for [static|dynamic] deallocation.
@@ -218,17 +260,14 @@ Curl_hash_apply(Curl_hash *h, void *user,
  * @unittest: 1602
  * @unittest: 1603
  */
-void
-Curl_hash_destroy(struct Curl_hash *h)
+void Curl_hash_destroy(struct Curl_hash *h)
 {
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
-    int i;
-    for(i = 0; i < h->slots; ++i) {
-      Curl_llist_destroy(&h->table[i], (void *) h);
-    }
+    Curl_hash_clean(h);
     Curl_safefree(h->table);
   }
-  h->size = 0;
+  DEBUGASSERT(h->size == 0);
   h->slots = 0;
 }
 
@@ -236,57 +275,71 @@ Curl_hash_destroy(struct Curl_hash *h)
  *
  * @unittest: 1602
  */
-void
-Curl_hash_clean(struct Curl_hash *h)
+void Curl_hash_clean(struct Curl_hash *h)
 {
-  Curl_hash_clean_with_criterium(h, NULL, NULL);
+  if(h && h->table) {
+    struct Curl_hash_element *he, **he_anchor;
+    size_t i;
+    DEBUGASSERT(h->init == HASHINIT);
+    for(i = 0; i < h->slots; ++i) {
+      he_anchor = &h->table[i];
+      while(*he_anchor) {
+        he = *he_anchor;
+        hash_elem_unlink(h, he_anchor, he);
+        hash_elem_destroy(h, he);
+      }
+    }
+  }
+}
+
+size_t Curl_hash_count(struct Curl_hash *h)
+{
+  DEBUGASSERT(h->init == HASHINIT);
+  return h->size;
 }
 
 /* Cleans all entries that pass the comp function criteria. */
-void
-Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
-                               int (*comp)(void *, void *))
+void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
+                                    int (*comp)(void *, void *))
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist_element *lnext;
-  struct Curl_llist *list;
-  int i;
+  size_t i;
 
   if(!h || !h->table)
     return;
 
+  DEBUGASSERT(h->init == HASHINIT);
   for(i = 0; i < h->slots; ++i) {
-    list = &h->table[i];
-    le = list->head; /* get first list entry */
-    while(le) {
-      struct Curl_hash_element *he = le->ptr;
-      lnext = le->next;
+    struct Curl_hash_element *he, **he_anchor = &h->table[i];
+    while(*he_anchor) {
       /* ask the callback function if we shall remove this entry or not */
-      if(!comp || comp(user, he->ptr)) {
-        Curl_llist_remove(list, le, (void *) h);
-        --h->size; /* one less entry in the hash now */
+      if(!comp || comp(user, (*he_anchor)->ptr)) {
+        he = *he_anchor;
+        hash_elem_unlink(h, he_anchor, he);
+        hash_elem_destroy(h, he);
       }
-      le = lnext;
+      else
+        he_anchor = &(*he_anchor)->next;
     }
   }
 }
 
 size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
 {
-  const char *key_str = (const char *) key;
+  const char *key_str = (const char *)key;
   const char *end = key_str + key_length;
   size_t h = 5381;
 
   while(key_str < end) {
+    size_t j = (size_t)*key_str++;
     h += h << 5;
-    h ^= *key_str++;
+    h ^= j;
   }
 
   return (h % slots_num);
 }
 
-size_t Curl_str_key_compare(void *k1, size_t key1_len,
-                            void *k2, size_t key2_len)
+size_t curlx_str_key_compare(void *k1, size_t key1_len,
+                             void *k2, size_t key2_len)
 {
   if((key1_len == key2_len) && !memcmp(k1, k2, key1_len))
     return 1;
@@ -297,75 +350,39 @@ size_t Curl_str_key_compare(void *k1, size_t key1_len,
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter)
 {
+  DEBUGASSERT(hash->init == HASHINIT);
   iter->hash = hash;
   iter->slot_index = 0;
-  iter->current_element = NULL;
+  iter->current = NULL;
+#ifdef DEBUGBUILD
+  iter->init = ITERINIT;
+#endif
 }
 
 struct Curl_hash_element *
 Curl_hash_next_element(struct Curl_hash_iterator *iter)
 {
-  struct Curl_hash *h = iter->hash;
-
+  struct Curl_hash *h;
+  DEBUGASSERT(iter->init == ITERINIT);
+  h = iter->hash;
   if(!h->table)
     return NULL; /* empty hash, nothing to return */
 
   /* Get the next element in the current list, if any */
-  if(iter->current_element)
-    iter->current_element = iter->current_element->next;
+  if(iter->current)
+    iter->current = iter->current->next;
 
   /* If we have reached the end of the list, find the next one */
-  if(!iter->current_element) {
-    int i;
+  if(!iter->current) {
+    size_t i;
     for(i = iter->slot_index; i < h->slots; i++) {
-      if(h->table[i].head) {
-        iter->current_element = h->table[i].head;
+      if(h->table[i]) {
+        iter->current = h->table[i];
         iter->slot_index = i + 1;
         break;
       }
     }
   }
 
-  if(iter->current_element) {
-    struct Curl_hash_element *he = iter->current_element->ptr;
-    return he;
-  }
-  iter->current_element = NULL;
-  return NULL;
+  return iter->current;
 }
-
-#if 0 /* useful function for debugging hashes and their contents */
-void Curl_hash_print(struct Curl_hash *h,
-                     void (*func)(void *))
-{
-  struct Curl_hash_iterator iter;
-  struct Curl_hash_element *he;
-  int last_index = -1;
-
-  if(!h)
-    return;
-
-  fprintf(stderr, "=Hash dump=\n");
-
-  Curl_hash_start_iterate(h, &iter);
-
-  he = Curl_hash_next_element(&iter);
-  while(he) {
-    if(iter.slot_index != last_index) {
-      fprintf(stderr, "index %d:", iter.slot_index);
-      if(last_index >= 0) {
-        fprintf(stderr, "\n");
-      }
-      last_index = iter.slot_index;
-    }
-
-    if(func)
-      func(he->ptr);
-    else
-      fprintf(stderr, " [%p]", (void *)he->ptr);
-
-    he = Curl_hash_next_element(&iter);
-  }
-  fprintf(stderr, "\n");
-}
-#endif

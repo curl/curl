@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,99 +21,101 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
 
-#include "test.h"
-
-#include "memdebug.h"
-
-static const char *show[]={
-  "daTE",
-  "Server",
-  "content-type",
-  "content-length",
-  "location",
-  "set-cookie",
-  "silly-thing",
-  "fold",
-  NULL
-};
-
-#ifdef LIB1946
-#define HEADER_REQUEST 0
-#else
-#define HEADER_REQUEST -1
-#endif
-
-static void showem(CURL *easy, unsigned int type)
+static size_t t1940_write_cb(char *data, size_t n, size_t l, void *userp)
 {
+  /* take care of the data here, ignored in this example */
+  (void)data;
+  (void)userp;
+  return n * l;
+}
+
+static void t1940_showem(CURL *curl, int header_request, unsigned int type)
+{
+  static const char *testdata[] = {
+    "daTE",
+    "Server",
+    "content-type",
+    "content-length",
+    "location",
+    "set-cookie",
+    "silly-thing",
+    "fold",
+    "blank",
+    "Blank2",
+    "Test",
+    NULL
+  };
+
   int i;
   struct curl_header *header;
-  for(i = 0; show[i]; i++) {
-    if(CURLHE_OK == curl_easy_header(easy, show[i], 0, type, HEADER_REQUEST,
-                                     &header)) {
+  for(i = 0; testdata[i]; i++) {
+    if(CURLHE_OK == curl_easy_header(curl, testdata[i], 0,
+                                     type, header_request, &header)) {
       if(header->amount > 1) {
         /* more than one, iterate over them */
         size_t index = 0;
         size_t amount = header->amount;
         do {
-          printf("- %s == %s (%u/%u)\n", header->name, header->value,
-                 (int)index, (int)amount);
+          curl_mprintf("- %s == %s (%zu/%zu)\n", header->name, header->value,
+                       index, amount);
 
           if(++index == amount)
             break;
-          if(CURLHE_OK != curl_easy_header(easy, show[i], index, type,
-                                           HEADER_REQUEST, &header))
+          if(CURLHE_OK != curl_easy_header(curl, testdata[i], index,
+                                           type, header_request, &header))
             break;
         } while(1);
       }
       else {
         /* only one of this */
-        printf(" %s == %s\n", header->name, header->value);
+        curl_mprintf(" %s == %s\n", header->name, header->value);
       }
     }
   }
 }
 
-static size_t write_cb(char *data, size_t n, size_t l, void *userp)
+static CURLcode test_lib1940(const char *URL)
 {
-  /* take care of the data here, ignored in this example */
-  (void)data;
-  (void)userp;
-  return n*l;
-}
-int test(char *URL)
-{
-  CURL *easy;
+  CURL *curl = NULL;
+  CURLcode result = CURLE_OK;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-
-  easy = curl_easy_init();
-  if(easy) {
-    CURLcode res;
-    curl_easy_setopt(easy, CURLOPT_URL, URL);
-    curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
-    /* ignores any content */
-    curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
-
-    /* if there's a proxy set, use it */
-    if(libtest_arg2 && *libtest_arg2) {
-      curl_easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
-      curl_easy_setopt(easy, CURLOPT_HTTPPROXYTUNNEL, 1L);
-    }
-    res = curl_easy_perform(easy);
-    if(res) {
-      printf("badness: %d\n", (int)res);
-    }
-    showem(easy, CURLH_HEADER);
-    if(libtest_arg2 && *libtest_arg2) {
-      /* now show connect headers only */
-      showem(easy, CURLH_CONNECT);
-    }
-    showem(easy, CURLH_1XX);
-    showem(easy, CURLH_TRAILER);
-    curl_easy_cleanup(easy);
+  int header_request;
+  if(testnum == 1946) {
+    header_request = 0;
   }
+  else {
+    header_request = -1;
+  }
+
+  global_init(CURL_GLOBAL_DEFAULT);
+  easy_init(curl);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  /* ignores any content */
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1940_write_cb);
+
+  /* if there is a proxy set, use it */
+  if(libtest_arg2 && *libtest_arg2) {
+    easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
+    easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
+  }
+  result = curl_easy_perform(curl);
+  if(result)
+    goto test_cleanup;
+
+  t1940_showem(curl, header_request, CURLH_HEADER);
+  if(libtest_arg2 && *libtest_arg2) {
+    /* now show connect headers only */
+    t1940_showem(curl, header_request, CURLH_CONNECT);
+  }
+  t1940_showem(curl, header_request, CURLH_1XX);
+  t1940_showem(curl, header_request, CURLH_TRAILER);
+
+test_cleanup:
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return 0;
+  return result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -24,24 +24,22 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
- <name>
+<name>
 Send "OPTIONS *" with --request-target
- </name>
- <command>
+</name>
+<command>
 --request-target '*' -X OPTIONS http://%HOSTIP:%HTTPPORT/ -H "Testno: %TESTNUMBER"
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 OPTIONS * HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -1,0 +1,10 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+cryptography==46.0.5
+filelock==3.24.3
+psutil==7.2.2
+pytest==9.0.2
+pytest-xdist==3.8.0
+websockets==16.0

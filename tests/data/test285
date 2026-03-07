@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,19 +7,18 @@ TFTP WRQ
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP send
- </name>
- <command>
--T log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//
+</name>
+<command>
+-T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT// --connect-timeout 549 --max-time 599
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 a chunk of
 data
 sent
@@ -26,7 +26,6 @@ sent
 </file>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <upload>
@@ -40,7 +39,7 @@ opcode = 2
 mode = octet
 tsize = 32
 blksize = 512
-timeout = 6
+timeout = 10
 filename = /test%TESTNUMBER.txt
 </protocol>
 </verify>

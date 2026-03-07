@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,17 +26,12 @@
 #ifdef __VMS
 
 #if defined(__DECC) && !defined(__VAX) && \
-    defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
+  defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
 #include <unixlib.h>
 #endif
 
-#define ENABLE_CURLX_PRINTF
-#include "curlx.h"
-
 #include "curlmsg_vms.h"
 #include "tool_vms.h"
-
-#include "memdebug.h" /* keep this as LAST include */
 
 void decc$__posix_exit(int __status);
 void decc$exit(int __status);
@@ -74,7 +69,7 @@ int is_vms_shell(void)
 }
 
 /*
- * VMS has two exit() routines.  When running under a Unix style shell, then
+ * VMS has two exit() routines. When running under a Unix style shell, then
  * Unix style and the __posix_exit() routine is used.
  *
  * When running under the DCL shell, then the VMS encoded codes and decc$exit()
@@ -85,7 +80,7 @@ int is_vms_shell(void)
  * feature macro settings, and one of the exit routines is hidden at compile
  * time.
  *
- * Since we want Curl to work properly under the VMS DCL shell and Unix
+ * Since we want curl to work properly under the VMS DCL shell and Unix
  * shells under VMS, this routine should compile correctly regardless of
  * the settings.
  */
@@ -94,7 +89,7 @@ void vms_special_exit(int code, int vms_show)
 {
   int vms_code;
 
-  /* The Posix exit mode is only available after VMS 7.0 */
+  /* The POSIX exit mode is only available after VMS 7.0 */
 #if __CRTL_VER >= 70000000
   if(is_vms_shell() == 0) {
     decc$__posix_exit(code);
@@ -102,7 +97,7 @@ void vms_special_exit(int code, int vms_show)
 #endif
 
   if(code > CURL_LAST) {   /* If CURL_LAST exceeded then */
-    vms_code = CURL_LAST;  /* curlmsg.h is out of sync.  */
+    vms_code = CURL_LAST;  /* curlmsg.h is out of sync. */
   }
   else {
     vms_code = vms_cond[code] | vms_show;
@@ -111,7 +106,7 @@ void vms_special_exit(int code, int vms_show)
 }
 
 #if defined(__DECC) && !defined(__VAX) && \
-    defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
+  defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
 
 /*
  * 2004-09-19 SMS.
@@ -133,9 +128,9 @@ struct decc_feat_t {
 static const struct decc_feat_t decc_feat_array[] = {
   /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
   { "DECC$ARGV_PARSE_STYLE", 1 },
-  /* Preserve case for file names on ODS5 disks. */
+  /* Preserve case for filenames on ODS5 disks. */
   { "DECC$EFS_CASE_PRESERVE", 1 },
-  /* Enable multiple dots (and most characters) in ODS5 file names,
+  /* Enable multiple dots (and most characters) in ODS5 filenames,
      while preserving VMS-ness of ";version". */
   { "DECC$EFS_CHARSET", 1 },
   /* List terminator. */
@@ -165,14 +160,14 @@ static void decc_init(void)
     feat_index = decc$feature_get_index(decc_feat_array[i].name);
 
     if(feat_index >= 0) {
-      /* Valid item.  Collect its properties. */
+      /* Valid item. Collect its properties. */
       feat_value = decc$feature_get_value(feat_index, 1);
       feat_value_min = decc$feature_get_value(feat_index, 2);
       feat_value_max = decc$feature_get_value(feat_index, 3);
 
       if((decc_feat_array[i].value >= feat_value_min) &&
          (decc_feat_array[i].value <= feat_value_max)) {
-        /* Valid value.  Set it if necessary. */
+        /* Valid value. Set it if necessary. */
         if(feat_value != decc_feat_array[i].value) {
           sts = decc$feature_set_value(feat_index, 1,
                                        decc_feat_array[i].value);
@@ -180,16 +175,15 @@ static void decc_init(void)
       }
       else {
         /* Invalid DECC feature value. */
-        printf(" INVALID DECC FEATURE VALUE, %d: %d <= %s <= %d.\n",
-               feat_value,
-               feat_value_min, decc_feat_array[i].name, feat_value_max);
+        curl_mprintf(" INVALID DECC FEATURE VALUE, %d: %d <= %s <= %d.\n",
+                     feat_value,
+                     feat_value_min, decc_feat_array[i].name, feat_value_max);
       }
     }
     else {
       /* Invalid DECC feature name. */
-      printf(" UNKNOWN DECC FEATURE: %s.\n", decc_feat_array[i].name);
+      curl_mprintf(" UNKNOWN DECC FEATURE: %s.\n", decc_feat_array[i].name);
     }
-
   }
 }
 
@@ -198,19 +192,19 @@ static void decc_init(void)
 #pragma nostandard
 
 /* Establish the LIB$INITIALIZE PSECTs, with proper alignment and
-   other attributes.  Note that "nopic" is significant only on VAX. */
+   other attributes. Note that "nopic" is significant only on VAX. */
 #pragma extern_model save
 #pragma extern_model strict_refdef "LIB$INITIALIZ" 2, nopic, nowrt
-const int spare[8] = {0};
+const int spare[8] = { 0 };
 #pragma extern_model strict_refdef "LIB$INITIALIZE" 2, nopic, nowrt
-void (*const x_decc_init)() = decc_init;
+void (* const x_decc_init)() = decc_init;
 #pragma extern_model restore
 
 /* Fake reference to ensure loading the LIB$INITIALIZE PSECT. */
 #pragma extern_model save
 int LIB$INITIALIZE(void);
 #pragma extern_model strict_refdef
-int dmy_lib$initialize = (int) LIB$INITIALIZE;
+int dmy_lib$initialize = (int)LIB$INITIALIZE;
 #pragma extern_model restore
 
 #pragma standard
