@@ -465,7 +465,7 @@ print CRT <<EOT;
 
 EOT
 
-report "Processing '$txt' ...";
+report "Processing  '$txt' ...";
 my $caname;
 my $certnum = 0;
 my $skipnum = 0;
