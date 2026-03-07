@@ -521,8 +521,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       /* check the length of the payload */
       if((ssize_t)payload_len != (rc - 12)) {
-        logmsg("Payload length mismatch, expected %zx got %zx",
-               rc - 12, payload_len);
+        logmsg("Payload length mismatch, expected %zd got %zd",
+               rc - 12, (ssize_t)payload_len);
         goto end;
       }
       /* check the length of the client ID */
