@@ -1040,6 +1040,19 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+/* to figure out the type of the socket safely, remove the possibly ORed
+   bits before comparing */
+static int cf_socktype(int x)
+{
+#ifdef SOCK_CLOEXEC
+  x &= ~SOCK_CLOEXEC;
+#endif
+#ifdef SOCK_NONBLOCK
+  x &= ~SOCK_NONBLOCK;
+#endif
+  return x;
+}
+
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
@@ -1095,10 +1108,10 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #ifdef USE_IPV6
   is_tcp = (ctx->addr.family == AF_INET ||
             ctx->addr.family == AF_INET6) &&
-           ctx->addr.socktype == SOCK_STREAM;
+    cf_socktype(ctx->addr.socktype) == SOCK_STREAM;
 #else
   is_tcp = (ctx->addr.family == AF_INET) &&
-           ctx->addr.socktype == SOCK_STREAM;
+    cf_socktype(ctx->addr.socktype) == SOCK_STREAM;
 #endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(cf, data, ctx->sock);
@@ -1163,7 +1176,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
     }
   }
 #endif
-  ctx->sock_connected = (ctx->addr.socktype != SOCK_DGRAM);
+  ctx->sock_connected = (cf_socktype(ctx->addr.socktype) != SOCK_DGRAM);
 out:
   if(result) {
     if(ctx->sock != CURL_SOCKET_BAD) {
