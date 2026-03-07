@@ -132,8 +132,8 @@ CURL_EXTERN CURLM *curl_multi_init(void);
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
-                                            CURL *curl_handle);
+CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *m,
+                                            CURL *curl);
 
 /*
  * Name:    curl_multi_remove_handle()
@@ -142,8 +142,8 @@ CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
-                                               CURL *curl_handle);
+CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *m,
+                                               CURL *curl);
 
 /*
  * Name:    curl_multi_fdset()
@@ -154,7 +154,7 @@ CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *m,
                                        fd_set *read_fd_set,
                                        fd_set *write_fd_set,
                                        fd_set *exc_fd_set,
@@ -168,7 +168,7 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
  *
  * Returns:  CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_wait(CURLM *m,
                                       struct curl_waitfd extra_fds[],
                                       unsigned int extra_nfds,
                                       int timeout_ms,
@@ -182,7 +182,7 @@ CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
  *
  * Returns:  CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_poll(CURLM *m,
                                       struct curl_waitfd extra_fds[],
                                       unsigned int extra_nfds,
                                       int timeout_ms,
@@ -195,7 +195,7 @@ CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi_handle,
  *
  * Returns:  CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *multi_handle);
+CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *m);
 
 /*
  * Name:    curl_multi_perform()
@@ -213,7 +213,7 @@ CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *multi_handle);
  *          still have occurred problems on individual transfers even when
  *          this returns OK.
  */
-CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_perform(CURLM *m,
                                          int *running_handles);
 
 /*
@@ -226,7 +226,7 @@ CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
+CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *m);
 
 /*
  * Name:    curl_multi_info_read()
@@ -256,7 +256,7 @@ CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
  *          queue (after this read) in the integer the second argument points
  *          to.
  */
-CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
+CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *m,
                                           int *msgs_in_queue);
 
 /*
@@ -308,21 +308,21 @@ typedef int (*curl_socket_callback)(CURL *easy,      /* easy handle */
  *
  * Returns: The callback should return zero.
  */
-typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
+typedef int (*curl_multi_timer_callback)(CURLM *m,        /* multi handle */
                                          long timeout_ms, /* see above */
                                          void *userp);    /* private callback
                                                              pointer */
 
 CURL_EXTERN CURLMcode CURL_DEPRECATED(7.19.5, "Use curl_multi_socket_action()")
-curl_multi_socket(CURLM *multi_handle, curl_socket_t s, int *running_handles);
+curl_multi_socket(CURLM *m, curl_socket_t s, int *running_handles);
 
-CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *m,
                                                curl_socket_t s,
                                                int ev_bitmask,
                                                int *running_handles);
 
 CURL_EXTERN CURLMcode CURL_DEPRECATED(7.19.5, "Use curl_multi_socket_action()")
-curl_multi_socket_all(CURLM *multi_handle, int *running_handles);
+curl_multi_socket_all(CURLM *m, int *running_handles);
 
 #ifndef CURL_ALLOW_OLD_MULTI_SOCKET
 /* This macro below was added in 7.16.3 to push users who recompile to use
@@ -340,8 +340,8 @@ curl_multi_socket_all(CURLM *multi_handle, int *running_handles);
  *
  * Returns: CURLM error code.
  */
-CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *multi_handle,
-                                         long *milliseconds);
+CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *m,
+                                         long *timeout_ms);
 
 typedef enum {
   /* This is the socket callback function pointer */
@@ -425,7 +425,7 @@ typedef enum {
  *
  * Returns: CURLM error code.
  */
-CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *m,
                                         CURLMoption option, ...);
 
 /*
@@ -437,7 +437,7 @@ CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
  *
  * Returns: CURLM error code.
  */
-CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_assign(CURLM *m,
                                         curl_socket_t sockfd, void *sockp);
 
 /*
@@ -450,7 +450,7 @@ CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
  *
  * Returns: NULL on failure, otherwise a CURL **array pointer
  */
-CURL_EXTERN CURL **curl_multi_get_handles(CURLM *multi_handle);
+CURL_EXTERN CURL **curl_multi_get_handles(CURLM *m);
 
 typedef enum {
   CURLMINFO_NONE, /* first, never use this */
@@ -479,7 +479,7 @@ typedef enum {
  *
  * Returns: CULRM_OK or error when value could not be obtained.
  */
-CURL_EXTERN CURLMcode curl_multi_get_offt(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_get_offt(CURLM *m,
                                           CURLMinfo_offt info,
                                           curl_off_t *pvalue);
 
@@ -518,7 +518,7 @@ typedef int (*curl_push_callback)(CURL *parent,
  *
  * Returns: CURLMcode type, general multi error code.
  */
-CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
+CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *m,
                                          struct curl_waitfd *ufds,
                                          unsigned int size,
                                          unsigned int *fd_count);
@@ -532,15 +532,15 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
 /*
  * Callback to install via CURLMOPT_NOTIFYFUNCTION.
  */
-typedef void (*curl_notify_callback)(CURLM *multi,
+typedef void (*curl_notify_callback)(CURLM *m,
                                      unsigned int notification,
                                      CURL *easy,
                                      void *user_data);
 
-CURL_EXTERN CURLMcode curl_multi_notify_disable(CURLM *multi,
+CURL_EXTERN CURLMcode curl_multi_notify_disable(CURLM *m,
                                                 unsigned int notification);
 
-CURL_EXTERN CURLMcode curl_multi_notify_enable(CURLM *multi,
+CURL_EXTERN CURLMcode curl_multi_notify_enable(CURLM *m,
                                                unsigned int notification);
 
 #ifdef __cplusplus

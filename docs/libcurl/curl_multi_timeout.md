@@ -37,7 +37,7 @@ curl_multi_socket_action(3) function with the **sockfd** argument set
 to CURL_SOCKET_TIMEOUT, or call curl_multi_perform(3) if you are using
 the simpler and older multi interface approach.
 
-The timeout value returned in the long **timeout** points to, is in number
+The timeout value returned in the long **timeout_ms** points to, is in number
 of milliseconds at this moment. If 0, it means you should proceed immediately
 without waiting for anything. If it returns -1, there is no timeout at all set.
 

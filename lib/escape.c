@@ -33,9 +33,9 @@ struct Curl_easy;
 #include "curl_printf.h"
 
 /* for ABI-compatibility with previous versions */
-char *curl_escape(const char *string, int inlength)
+char *curl_escape(const char *string, int length)
 {
-  return curl_easy_escape(NULL, string, inlength);
+  return curl_easy_escape(NULL, string, length);
 }
 
 /* for ABI-compatibility with previous versions */
@@ -47,25 +47,25 @@ char *curl_unescape(const char *string, int length)
 /* Escapes for URL the given unescaped string of given length.
  * 'data' is ignored since 7.82.0.
  */
-char *curl_easy_escape(CURL *data, const char *string, int inlength)
+char *curl_easy_escape(CURL *curl, const char *string, int length)
 {
-  size_t length;
+  size_t len;
   struct dynbuf d;
-  (void)data;
+  (void)curl;
 
-  if(!string || (inlength < 0))
+  if(!string || (length < 0))
     return NULL;
 
-  length = (inlength ? (size_t)inlength : strlen(string));
-  if(!length)
+  len = (length ? (size_t)length : strlen(string));
+  if(!len)
     return curlx_strdup("");
 
-  if(length > SIZE_MAX / 16)
+  if(len > SIZE_MAX / 16)
     return NULL;
 
-  curlx_dyn_init(&d, (length * 3) + 1);
+  curlx_dyn_init(&d, (len * 3) + 1);
 
-  while(length--) {
+  while(len--) {
     /* treat the characters unsigned */
     unsigned char in = (unsigned char)*string++;
 
@@ -160,21 +160,22 @@ CURLcode Curl_urldecode(const char *string, size_t length,
  * If olen == NULL, no output length is stored.
  * 'data' is ignored since 7.82.0.
  */
-char *curl_easy_unescape(CURL *data, const char *string, int length, int *olen)
+char *curl_easy_unescape(CURL *curl, const char *string, int inlength,
+                         int *outlength)
 {
   char *str = NULL;
-  (void)data;
-  if(string && (length >= 0)) {
-    size_t inputlen = (size_t)length;
+  (void)curl;
+  if(string && (inlength >= 0)) {
+    size_t inputlen = (size_t)inlength;
     size_t outputlen;
     CURLcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
                                   REJECT_NADA);
     if(res)
       return NULL;
 
-    if(olen) {
+    if(outlength) {
       if(outputlen <= (size_t)INT_MAX)
-        *olen = curlx_uztosi(outputlen);
+        *outlength = curlx_uztosi(outputlen);
       else
         /* too large to return in an int, fail! */
         Curl_safefree(str);
