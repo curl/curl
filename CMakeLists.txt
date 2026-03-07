@@ -385,6 +385,14 @@ if(WIN32)
   endif()
 endif()
 
+# Override to force-disable or force-enable the use of CMake Configs.
+if(MSVC AND NOT VCPKG_TOOLCHAIN AND NOT CMAKE_CROSSCOMPILING)
+  set(_curl_use_cmakeconfig_default ON)
+else()
+  set(_curl_use_cmakeconfig_default OFF)
+endif()
+option(CURL_USE_CMAKECONFIG "Enable detecting dependencies via CMake Config" ${_curl_use_cmakeconfig_default})
+
 # Override to force-disable or force-enable the use of pkg-config.
 if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")) OR
    VCPKG_TOOLCHAIN OR
@@ -2153,26 +2161,12 @@ if(NOT CURL_DISABLE_INSTALL)
         # Assume the user will not need this information in the .pc file.
         continue()
       endif()
-      if(_lib MATCHES "CURL::")
-        # This is empty for 'CURL::*' targets and safe to ignore.
-        # Explicitly skip this query to avoid CMake v3.18 and older erroring out.
-        set(_libname "")
-      else()
-        get_target_property(_libname "${_lib}" LOCATION)
-      endif()
-      if(_libname)
-        list(APPEND _explicit_libs "${_libname}")
-      else()
-        get_target_property(_libs "${_lib}" INTERFACE_LINK_LIBRARIES)
-        if(_libs)
-          list(APPEND _explicit_libs "${_libs}")
-        endif()
-        get_target_property(_libdirs "${_lib}" INTERFACE_LINK_DIRECTORIES)
-        if(_libdirs)
-          list(APPEND _explicit_libdirs "${_libdirs}")
-        endif()
-      endif()
-      if(NOT _libname AND NOT _libs AND NOT _libdirs)
+      set(_libdirs "")
+      set(_libs "")
+      curl_collect_target_link_options("${_lib}")  # look into the target recursively
+      list(APPEND _explicit_libdirs ${_libdirs})
+      list(APPEND _explicit_libs ${_libs})
+      if(NOT _libs AND NOT _libdirs)
         message(WARNING "Bad lib in library list: ${_lib}")
       endif()
       if(_lib STREQUAL OpenSSL::SSL)
@@ -2356,6 +2350,8 @@ if(NOT CURL_DISABLE_INSTALL)
   #   TARGETS_EXPORT_NAME
   #   CURL_SUPPORTED_FEATURES_LIST
   #   CURL_SUPPORTED_PROTOCOLS_LIST
+  #   CURL_USE_CMAKECONFIG
+  #   CURL_USE_PKGCONFIG
   #   HAVE_BROTLI
   #   HAVE_GSSAPI
   #   HAVE_LIBIDN2

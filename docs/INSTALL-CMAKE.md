@@ -360,6 +360,7 @@ Details via CMake
 ## Dependencies
 
 - `CURL_BROTLI`:                            Use brotli (`ON`, `OFF` or `AUTO`). Default: `AUTO`
+- `CURL_USE_CMAKECONFIG`:                   Enable detecting dependencies via CMake Config. Default: `ON` for MSVC (except under vcpkg), if not cross-compiling.
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
@@ -397,6 +398,11 @@ Details via CMake
 - `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
 - `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
 - `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
+- `<PackageName>_DIR`:                      Absolute path to `<PackageName>` CMake Config directory. Used when `CURL_USE_CMAKECONFIG` is enabled.
+                                            Where `<PackageName>` may be:
+                                            `Libssh2`, `MbedTLS`, `NGHTTP2`, `NGHTTP3`,
+                                            `NGTCP2` 1.19.0+ (with non-fork OpenSSL only),
+                                            `Zstd` 1.4.5+.
 
 ## Dependency options (tools)
 
