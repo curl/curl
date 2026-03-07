@@ -92,7 +92,7 @@ The `#` header can be used by non-option files and it produces a
 `.SH` output.
 
 If the `#` header is used for a command line option file, that header is
-simply ignored in the generated output. It can still serve a purpose in the
+ignored in the generated output. It can still serve a purpose in the
 source file as it helps the user identify what option the file is for.
 
 ### Variables

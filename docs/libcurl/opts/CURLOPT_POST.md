@@ -41,7 +41,7 @@ you must make sure to not set CURLOPT_POSTFIELDS(3) to anything but
 NULL. When providing data with a callback, you must transmit it using chunked
 transfer-encoding or you must set the size of the data with the
 CURLOPT_POSTFIELDSIZE(3) or CURLOPT_POSTFIELDSIZE_LARGE(3)
-options. To enable chunked encoding, you simply pass in the appropriate
+options. To enable chunked encoding, pass in the appropriate
 Transfer-Encoding header, see the post-callback.c example.
 
 You can override the default POST Content-Type: header by setting your own

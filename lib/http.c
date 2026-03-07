@@ -1667,7 +1667,7 @@ CURLcode Curl_http_done(struct Curl_easy *data,
      (data->req.bytecount +
       data->req.headerbytecount -
       data->req.deductheadercount) <= 0) {
-    /* If this connection is not simply closed to be retried, AND nothing was
+    /* If this connection is not closed to be retried, AND nothing was
        read from the HTTP server (that counts), this cannot be right so we
        return an error here */
     failf(data, "Empty reply from server");
@@ -2025,7 +2025,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
       if(*cookiehost == '[') {
         char *closingbracket;
         /* since the 'cookiehost' is an allocated memory area that will be
-           freed later we cannot simply increment the pointer */
+           freed later we cannot increment the pointer */
         memmove(cookiehost, cookiehost + 1, strlen(cookiehost) - 1);
         closingbracket = strchr(cookiehost, ']');
         if(closingbracket)
@@ -4065,7 +4065,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
        * General treatment of errors when about to send data. Including :
        * "417 Expectation Failed", while waiting for 100-continue.
        *
-       * The check for close above is done simply because of something
+       * The check for close above is done because of something
        * else has already deemed the connection to get closed then
        * something else should have considered the big picture and we
        * avoid this check.

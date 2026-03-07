@@ -176,7 +176,7 @@ int tool_progress_cb(void *clientp,
     }
   }
 
-  /* simply count invokes */
+  /* count invokes */
   bar->calls++;
 
   update_width(bar);

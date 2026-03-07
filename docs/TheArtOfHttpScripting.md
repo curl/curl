@@ -471,7 +471,7 @@ include a hint about where the browser should go next to find this page, or a
 new page keeping newly generated output. The header that tells the browser to
 redirect is `Location:`.
 
-curl does not follow `Location:` headers by default, but simply displays such
+curl does not follow `Location:` headers by default, but displays such
 pages in the same manner it displays all HTTP replies. It does however
 feature an option that makes it attempt to follow the `Location:` pointers.
 
@@ -518,7 +518,7 @@ curl is to add them on the command line like:
     curl --cookie "name=Daniel" https://www.example.com
 
 Cookies are sent as common HTTP headers. This is practical as it allows curl
-to record cookies simply by recording headers. Record cookies with curl by
+to record cookies by recording headers. Record cookies with curl by
 using the [`--dump-header`](https://curl.se/docs/manpage.html#-D) (`-D`)
 option like:
 
@@ -570,7 +570,7 @@ advanced features to do secure transfers over HTTP.
 curl supports encrypted fetches when built to use a TLS library and it can be
 built to use one out of a fairly large set of libraries - `curl -V` shows
 which one your curl was built to use (if any). To get a page from an HTTPS
-server, simply run curl like:
+server, run curl like:
 
     curl https://secure.example.com
 
@@ -632,7 +632,7 @@ so on. If you use the [`--request`](https://curl.se/docs/manpage.html#-X) /
 modify curl's behavior. This means that if you for example use -d "data" to
 do a POST, you can modify the method to a `PROPFIND` with `-X` and curl still
 thinks it sends a POST. You can change the normal GET to a POST method by
-simply adding `-X POST` in a command line like:
+adding `-X POST` in a command line like:
 
     curl -X POST https://example.org/
 

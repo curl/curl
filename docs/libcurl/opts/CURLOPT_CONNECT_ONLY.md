@@ -32,7 +32,7 @@ Pass a long. If the parameter equals 1, it tells the library to perform all
 the required proxy authentication and connection setup, but no data transfer,
 and then return.
 
-The option can be used to simply test a connection to a server, but is more
+The option can be used to test a connection to a server, but is more
 useful when used with the CURLINFO_ACTIVESOCKET(3) option to
 curl_easy_getinfo(3) as the library can set up the connection and then
 the application can obtain the most recently used socket for special data

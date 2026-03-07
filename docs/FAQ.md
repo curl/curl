@@ -107,8 +107,8 @@ will agree. If you want to add more protocols, we may agree.
 If you want someone else to do all the work while you wait for us to implement
 it for you, that is not a friendly attitude. We spend a considerable time
 already on maintaining and developing curl. In order to get more out of us,
-you should consider trading in some of your time and effort in return. Simply
-go to the [GitHub repository](https://github.com/curl/curl), fork the project,
+you should consider trading in some of your time and effort in return. Go to
+the [GitHub repository](https://github.com/curl/curl), fork the project,
 and create pull requests with your proposed changes.
 
 If you write the code, chances are better that it will get into curl faster.
@@ -169,7 +169,7 @@ allows for others to learn from this (both current and future users thanks to
 the web based archives of the mailing lists), thus saving us from having to
 repeat ourselves even more. Thanks for respecting this.
 
-If you have found or simply suspect a security problem in curl or libcurl,
+If you have found or suspect a security problem in curl or libcurl,
 [submit all the details to us](https://curl.se/dev/vuln-disclosure.html). We
 keep the issue private while we investigate, confirm it, work and validate a
 fix and agree on a time schedule for publication etc. That way we produce a
@@ -329,7 +329,7 @@ support for this protocol.
 
 This could have happened if the configure script that was run at build time
 could not find all libs and include files curl requires for SSL to work. If
-the configure script fails to find them, curl is simply built without SSL
+the configure script fails to find them, curl is built without SSL
 support.
 
 To get HTTPS support into a curl that was previously built but that reports
@@ -562,7 +562,7 @@ the first path part. List the `/tmp` directory like this:
 
     curl ftp://ftp.example.com/%2ftmp/
 
-or the not-quite-kosher-but-more-readable way, by simply starting the path
+or the not-quite-kosher-but-more-readable way, by starting the path
 section of the URL with a slash:
 
     curl ftp://ftp.example.com//tmp/
@@ -685,7 +685,7 @@ them for the curl URL *globbing* system), use the `-g`/`--globoff` option:
 
 curl asks remote servers for the page you specify. If the page does not exist
 at the server, the HTTP protocol defines how the server should respond and
-that means that headers and a page will be returned. That is simply how HTTP
+that means that headers and a page will be returned. That is how HTTP
 works.
 
 By using the `--fail` option you can tell curl explicitly to not get any data
@@ -966,7 +966,7 @@ to check your authentication protected webpages (that gets a 401 back) and so
 on.
 
 The specific HTTP response code does not constitute a problem or error for
-curl. It simply sends and delivers HTTP as you asked and if that worked,
+curl. It sends and delivers HTTP as you asked and if that worked,
 everything is fine and dandy. The response code is generally providing more
 higher level error information that curl does not care about. The error was
 not in the HTTP transfer.
@@ -1049,7 +1049,7 @@ Yes, but you cannot open a FILE * and pass the pointer to a DLL and have that
 DLL use the FILE * (as the DLL and the client application cannot access each
 others' variable memory areas). If you set `CURLOPT_WRITEDATA` you must also use
 `CURLOPT_WRITEFUNCTION` as well to set a function that writes the file, even if
-that simply writes the data to the specified FILE *. Similarly, if you use
+all it does is write the data to the specified FILE *. Similarly, if you use
 `CURLOPT_READDATA` you must also specify `CURLOPT_READFUNCTION`.
 
 ## What about Keep-Alive or persistent connections?
@@ -1259,7 +1259,7 @@ proven for many years. There is no need for you to reinvent them.
 
 ## Does libcurl use threads?
 
-Put simply: no, libcurl will execute in the same thread you call it in. All
+No, libcurl will execute in the same thread you call it in. All
 callbacks will be called in the same thread as the one you call libcurl in.
 
 If you want to avoid your thread to be blocked by the libcurl call, you make

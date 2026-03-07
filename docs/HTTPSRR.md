@@ -35,7 +35,7 @@ be reused on subsequent uses of the same hostnames.
 ## limitations
 
 We have decided to work on the HTTPS RR support by following what seems to be
-(widely) used, and simply wait with implementing the details of the record
+(widely) used, and wait with implementing the details of the record
 that do not seem to be deployed. HTTPS RR is a DNS field with many odd corners
 and complexities and we might as well avoid them if no one seems to want them.
 

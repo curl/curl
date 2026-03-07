@@ -155,7 +155,7 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms)
     nfds = 0;
 
   if(!nfds)
-    /* Call ares_process() unconditionally here, even if we simply timed out
+    /* Call ares_process() unconditionally here, even if we timed out
        above, as otherwise the ares name resolve will not timeout! */
     ares_process_fd(channel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
   else {

@@ -74,7 +74,7 @@ halted. (e.g. *npt=25*)
 
 ## CURL_RTSPREQ_TEARDOWN
 
-This command terminates an RTSP session. Simply closing a connection does not
+This command terminates an RTSP session. Closing a connection does not
 terminate the RTSP session since it is valid to control an RTSP session over
 different connections.
 

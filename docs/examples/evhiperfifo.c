@@ -56,7 +56,7 @@
  * Note:
  *   For the sake of simplicity, URL length is limited to 1023 chars.
  *
- * This is purely a demo app, all retrieved data is simply discarded by
+ * This is purely a demo app, all retrieved data is discarded by
  * the write callback.
  */
 #include <errno.h>

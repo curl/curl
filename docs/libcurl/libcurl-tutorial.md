@@ -200,7 +200,7 @@ preferred URL to transfer with CURLOPT_URL(3) in a manner similar to:
 Let's assume for a while that you want to receive data as the URL identifies a
 remote resource you want to get here. Since you write a sort of application
 that needs this transfer, I assume that you would like to get the data passed
-to you directly instead of simply getting it passed to stdout. So, you write
+to you directly instead of getting it passed to stdout. So, you write
 your own function that matches this prototype:
 ~~~c
     size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
@@ -220,7 +220,7 @@ and the function that gets invoked by libcurl. libcurl itself does not touch
 the data you pass with CURLOPT_WRITEDATA(3).
 
 libcurl offers its own default internal callback that takes care of the data
-if you do not set the callback with CURLOPT_WRITEFUNCTION(3). It simply
+if you do not set the callback with CURLOPT_WRITEFUNCTION(3). It
 outputs the received data to stdout. You can have the default callback write
 the data to a different file handle by passing a 'FILE *' to a file opened for
 writing with the CURLOPT_WRITEDATA(3) option.
@@ -267,7 +267,7 @@ previous connection.
 For some protocols, downloading a file can involve a complicated process of
 logging in, setting the transfer mode, changing the current directory and
 finally transferring the file data. libcurl takes care of all that
-complication for you. Given simply the URL to a file, libcurl takes care of
+complication for you. Given the URL to a file, libcurl takes care of
 all the details needed to get the file moved from one machine to another.
 
 # Multi-threading Issues
@@ -866,7 +866,7 @@ following an old tradition and are built up as "[protocol]_proxy" (note the
 lower casing). Which makes the variable 'http_proxy' checked for a name of a
 proxy to use when the input URL is HTTP. Following the same rule, the variable
 named 'ftp_proxy' is checked for FTP URLs. Again, the proxies are always HTTP
-proxies, the different names of the variables simply allows different HTTP
+proxies, the different names of the variables allow different HTTP
 proxies to be used.
 
 The proxy environment variable contents should be in the format
@@ -1062,7 +1062,7 @@ think fit. Adding headers is this easy:
 
 ... and if you think some of the internally generated headers, such as Accept:
 or Host: do not contain the data you want them to contain, you can replace
-them by simply setting them too:
+them by setting them too:
 
 ~~~c
     headers = curl_slist_append(headers, "Accept: Agent-007");
@@ -1366,7 +1366,7 @@ on the multi_socket event based API, this description here is for the select()
 oriented one.
 
 To use this interface, you are better off if you first understand the basics
-of how to use the easy interface. The multi interface is simply a way to make
+of how to use the easy interface. The multi interface is a way to make
 multiple transfers at the same time by adding up multiple easy handles into
 a "multi stack".
 
