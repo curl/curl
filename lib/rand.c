@@ -228,12 +228,6 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd, size_t num)
   unsigned char buffer[128];
   DEBUGASSERT(num > 1);
 
-#ifdef __clang_analyzer__
-  /* This silences a scan-build warning about accessing this buffer with
-     uninitialized memory. */
-  memset(buffer, 0, sizeof(buffer));
-#endif
-
   if((num / 2 >= sizeof(buffer)) || !(num & 1)) {
     /* make sure it fits in the local buffer and that it is an odd number! */
     DEBUGF(infof(data, "invalid buffer size with Curl_rand_hex"));
