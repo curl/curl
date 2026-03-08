@@ -79,7 +79,7 @@ my @not_built_in_num = (
 #
 
 my $allowedstringerrors = <<MOO
-  switch(code) {
+  switch(result) {
   case CURLE_BAD_FUNCTION_ARGUMENT:
 MOO
     ;
@@ -137,7 +137,7 @@ MOO
 #
 
 my $allowednumerrors = <<MOO
-  switch(code) {
+  switch(result) {
   case CURLE_UNSUPPORTED_PROTOCOL:
 MOO
     ;
