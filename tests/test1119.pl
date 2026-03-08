@@ -171,7 +171,7 @@ for my $e (sort @syms) {
     #
     # CURL_TEMP_ - are defined and *undefined* again within the file
     #
-    # *_LAST and *_LASTENTRY are just prefix for the placeholders used for the
+    # *_LAST and *_LASTENTRY are just suffix for the placeholders used for the
     # last entry in many enum series.
     #
 
