@@ -300,9 +300,6 @@ static CURLcode smb_do(struct Curl_easy *data, bool *done);
 static CURLcode smb_request_state(struct Curl_easy *data, bool *done);
 static int smb_getsock(struct Curl_easy *data, struct connectdata *conn,
                        curl_socket_t *socks);
-static CURLcode smb_parse_url_path(struct Curl_easy *data,
-                                   struct smb_conn *smbc,
-                                   struct smb_request *req);
 
 /*
  * SMB handler interface
@@ -448,9 +445,7 @@ static void smb_easy_dtor(void *key, size_t klen, void *entry)
   struct smb_request *req = entry;
   (void)key;
   (void)klen;
-  /* `req->path` points to somewhere in `struct smb_conn` which is
-   * kept at the connection meta. If the connection is destroyed first,
-   * req->path points to free'd memory. */
+  Curl_safefree(req->path);
   free(req);
 }
 
@@ -464,6 +459,53 @@ static void smb_conn_dtor(void *key, size_t klen, void *entry)
   Curl_safefree(smbc->recv_buf);
   Curl_safefree(smbc->send_buf);
   free(smbc);
+}
+
+static CURLcode smb_parse_url_path(struct Curl_easy *data,
+                                   struct smb_conn *smbc,
+                                   struct smb_request *req)
+{
+  char *path;
+  char *slash, *s;
+  CURLcode result;
+
+  /* URL decode the path */
+  result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
+  if(result)
+    return result;
+
+  /* Parse the path for the share */
+  Curl_safefree(smbc->share);
+  smbc->share = strdup((*path == '/' || *path == '\\')
+                       ? path + 1 : path);
+  free(path);
+  if(!smbc->share)
+    return CURLE_OUT_OF_MEMORY;
+
+  slash = strchr(smbc->share, '/');
+  if(!slash)
+    slash = strchr(smbc->share, '\\');
+
+  /* The share must be present */
+  if(!slash) {
+    Curl_safefree(smbc->share);
+    failf(data, "missing share in URL path for SMB");
+    return CURLE_URL_MALFORMAT;
+  }
+
+  /* Parse the path for the file path converting any forward slashes into
+     backslashes */
+  *slash++ = 0;
+  for(s = slash; *s; s++) {
+    if(*s == '/')
+      *s = '\\';
+  }
+  /* keep a copy at easy struct to not share this with connection state */
+  req->path = strdup(slash);
+  if(!req->path)
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
 }
 
 /* this should setup things in the connection, not in the easy
@@ -1223,48 +1265,6 @@ static CURLcode smb_do(struct Curl_easy *data, bool *done)
   if(smbc->share)
     return CURLE_OK;
   return CURLE_URL_MALFORMAT;
-}
-
-static CURLcode smb_parse_url_path(struct Curl_easy *data,
-                                   struct smb_conn *smbc,
-                                   struct smb_request *req)
-{
-  char *path;
-  char *slash;
-  CURLcode result;
-
-  /* URL decode the path */
-  result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
-  if(result)
-    return result;
-
-  /* Parse the path for the share */
-  smbc->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
-  free(path);
-  if(!smbc->share)
-    return CURLE_OUT_OF_MEMORY;
-
-  slash = strchr(smbc->share, '/');
-  if(!slash)
-    slash = strchr(smbc->share, '\\');
-
-  /* The share must be present */
-  if(!slash) {
-    Curl_safefree(smbc->share);
-    failf(data, "missing share in URL path for SMB");
-    return CURLE_URL_MALFORMAT;
-  }
-
-  /* Parse the path for the file path converting any forward slashes into
-     backslashes */
-  *slash++ = 0;
-  req->path = slash;
-
-  for(; *slash; slash++) {
-    if(*slash == '/')
-      *slash = '\\';
-  }
-  return CURLE_OK;
 }
 
 #endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
