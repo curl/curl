@@ -118,7 +118,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
     (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
   static RTLVERIFYVERSIONINFO_FN pRtlVerifyVersionInfo;
-  static bool onetime = TRUE; /* safe because first call is during init */
+  static bool onetime = TRUE;
 
   if(onetime) {
 #if defined(__clang__) && __clang_major__ >= 16
