@@ -447,7 +447,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-    BIO_printf(mem, "%lx", X509_get_version(x));
+    BIO_printf(mem, "%lx", (unsigned long)X509_get_version(x));
     result = push_certinfo(data, mem, "Version", i);
     if(result)
       break;
