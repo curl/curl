@@ -50,19 +50,15 @@ static RTLVERIFYVERSIONINFO_FN s_pRtlVerifyVersionInfo;
 
 void curlx_verify_windows_init(void)
 {
-  static bool onetime = TRUE;
-  if(onetime) {
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
 #endif
-    s_pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo"));
+  s_pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
+    GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo"));
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif
-    onetime = FALSE;
-  }
 }
 #endif /* !CURL_WINDOWS_UWP */
 
@@ -137,8 +133,6 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   BYTE spMinorCondition;
   DWORD dwTypeMask = VER_MAJORVERSION | VER_MINORVERSION |
                      VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR;
-
-  curlx_verify_windows_init();
 
   switch(condition) {
   case VERSION_LESS_THAN:
