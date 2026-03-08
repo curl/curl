@@ -281,12 +281,10 @@
 #ifndef CURL_WINDOWS_UWP
 #define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
-#endif
 
 /* Define to use the Windows crypto library. */
-#ifndef CURL_WINDOWS_UWP
 #define USE_WIN32_CRYPTO
-#endif
+#endif /* CURL_WINDOWS_UWP */
 
 /* Define to use Unix sockets. */
 #define USE_UNIX_SOCKETS
