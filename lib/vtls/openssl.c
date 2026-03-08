@@ -311,7 +311,7 @@ static CURLcode get_pkey_rsa(struct Curl_easy *data,
 #else
   RSA_get0_key(rsa, &n, &e, NULL);
 #endif /* HAVE_EVP_PKEY_GET_PARAMS */
-  BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
+  BIO_printf(mem, "%d", (int)(n ? BN_num_bits(n) : 0));
   result = push_certinfo(data, mem, "RSA Public Key", i);
   if(!result) {
     result = print_pubkey_BN(rsa, n, i);
