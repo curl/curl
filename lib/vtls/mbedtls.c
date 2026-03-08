@@ -1228,7 +1228,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",
-                len, -nwritten);
+                len, (unsigned int)-nwritten);
     switch(nwritten) {
 #ifdef MBEDTLS_SSL_PROTO_TLS1_3
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
@@ -1389,7 +1389,7 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     char errorbuf[128];
     CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%zu) -> -0x%04X",
-                buffersize, -nread);
+                buffersize, (unsigned int)-nread);
     switch(nread) {
 #ifdef MBEDTLS_SSL_SESSION_TICKETS
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
@@ -1409,7 +1409,8 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       break;
     default:
       mbedtls_strerror(nread, errorbuf, sizeof(errorbuf));
-      failf(data, "ssl_read returned: (-0x%04X) %s", -nread, errorbuf);
+      failf(data, "ssl_read returned: (-0x%04X) %s", (unsigned int)-nread,
+            errorbuf);
       result = CURLE_RECV_ERROR;
       break;
     }
