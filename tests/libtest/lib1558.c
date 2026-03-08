@@ -47,7 +47,7 @@ static CURLcode test_lib1558(const char *URL)
     goto test_cleanup;
   }
 
-  curl_mprintf("Protocol: %lx\n", protocol);
+  curl_mprintf("Protocol: %lx\n", (unsigned long)protocol);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
