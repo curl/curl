@@ -219,7 +219,7 @@ static int my_progress_d_cb(void *userdata,
       }
 #endif
       default:
-        curl_mfprintf(stderr, "[t-%zu] info SSL_PTR backend=%d, ptr=%p\n",
+        curl_mfprintf(stderr, "[t-%zu] info SSL_PTR backend=%u, ptr=%p\n",
                       t->idx, tls->backend, tls->internals);
         break;
       }
