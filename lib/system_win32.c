@@ -27,6 +27,7 @@
 
 #include "system_win32.h"
 #include "curl_sspi.h"
+#include "curlx/timeval.h"
 
 /* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
@@ -76,7 +77,7 @@ CURLcode Curl_win32_init(long flags)
   }
 #endif
 
-  QueryPerformanceFrequency(&Curl_freq);
+  curlx_now_init();
   return CURLE_OK;
 }
 
