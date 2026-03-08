@@ -1794,7 +1794,7 @@ http_connect_cleanup:
 static void http_upgrade(struct sws_httprequest *req)
 {
   (void)req;
-  logmsg("Upgraded to ... %u", req->upgrade_request);
+  logmsg("Upgraded to ... %d", (int)req->upgrade_request);
   /* left to implement */
 }
 
