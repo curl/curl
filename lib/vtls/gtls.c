@@ -127,7 +127,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   }
 
   result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
-  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %d, %zd", blen, result, nread);
+  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %d, %zu", blen, result, nread);
   backend->gtls.io_result = result;
   if(result) {
     /* !checksrc! disable ERRNOVAR 1 */
@@ -788,7 +788,7 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
   if(when) { /* after message has been processed */
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     if(data) {
-      CURL_TRC_CF(data, cf, "handshake: %s message type %d",
+      CURL_TRC_CF(data, cf, "handshake: %s message type %u",
                   incoming ? "incoming" : "outgoing", htype);
       switch(htype) {
       case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
@@ -1614,7 +1614,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 
   if(data->set.ssl.certinfo && chain.certs) {
     if(chain.num_certs > MAX_ALLOWED_CERT_AMOUNT) {
-      failf(data, "%u certificates is more than allowed (%u)",
+      failf(data, "%u certificates is more than allowed (%d)",
             chain.num_certs, MAX_ALLOWED_CERT_AMOUNT);
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;

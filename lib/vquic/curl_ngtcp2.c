@@ -2411,7 +2411,7 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     DEBUGASSERT(data);
     if(!data)
       return 0;
-    CURL_TRC_CF(data, cf, "SSL message: %s %s [%d]",
+    CURL_TRC_CF(data, cf, "SSL message: %s %s [%u]",
                 incoming ? "<-" : "->", gtls_hs_msg_name(htype), htype);
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
