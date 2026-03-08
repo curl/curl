@@ -2005,7 +2005,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
-             curl_strequal(data->state.first_host, conn->host.name))) {
+             (curl_strequal(data->state.first_host, conn->host.name) &&
+              data->state.first_remote_port == conn->remote_port &&
+              data->state.first_remote_protocol == conn->scheme->protocol))) {
 #ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the hostname in
        order to possibly use it for cookie reasons later on. We only allow the

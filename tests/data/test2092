@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+followlocation
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 301 OK swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+Location: http://deathstar.another.galaxy:9999/go/west/%TESTNUMBER
+
+moo
+</data>
+<data1 crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+
+moo
+</data1>
+<datacheck crlf="headers">
+HTTP/1.1 301 OK swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+Location: http://deathstar.another.galaxy:9999/go/west/%TESTNUMBER
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+
+moo
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP replace Host: when following Location: to same host on a new port
+</name>
+<command>
+http://deathstar.another.galaxy/%TESTNUMBER -L -H "Host: another.visitor.stay.a.while.stay.foreeeeeever" --proxy http://%HOSTIP:%HTTPPORT
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET http://deathstar.another.galaxy/%TESTNUMBER HTTP/1.1
+Host: another.visitor.stay.a.while.stay.foreeeeeever
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://deathstar.another.galaxy:9999/go/west/%TESTNUMBER HTTP/1.1
+Host: deathstar.another.galaxy:9999
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+
+</verify>
+</testcase>
