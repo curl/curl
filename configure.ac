@@ -1267,30 +1267,28 @@ if test "$HAVE_GETHOSTBYNAME" != "1" || test "$curl_cv_winuwp" = "yes"; then
     if test "$curl_cv_winuwp" != "yes"; then
       winsock_LIB="$winsock_LIB -liphlpapi"
     fi
-    if test -n "$winsock_LIB"; then
-      my_ac_save_LIBS=$LIBS
-      LIBS="$winsock_LIB $LIBS"
-      AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
-          #ifdef _WIN32
-          #ifndef WIN32_LEAN_AND_MEAN
-          #define WIN32_LEAN_AND_MEAN
-          #endif
-          #include <winsock2.h>
-          #endif
-        ]],[[
-          gethostbyname("localhost");
-        ]])
-      ],[
-        AC_MSG_RESULT([yes])
-        HAVE_GETHOSTBYNAME="1"
-      ],[
-        AC_MSG_RESULT([no])
-        winsock_LIB=""
-        LIBS=$my_ac_save_LIBS
-      ])
-    fi
+    my_ac_save_LIBS=$LIBS
+    LIBS="$winsock_LIB $LIBS"
+    AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <winsock2.h>
+        #endif
+      ]],[[
+        gethostbyname("localhost");
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      HAVE_GETHOSTBYNAME="1"
+    ],[
+      AC_MSG_RESULT([no])
+      winsock_LIB=""
+      LIBS=$my_ac_save_LIBS
+    ])
   fi
 fi
 
