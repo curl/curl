@@ -27,6 +27,7 @@
 
 #include "curlx/version_win32.h"
 
+#ifndef CURL_WINDOWS_UWP
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
    and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */
 struct OUR_OSVERSIONINFOEXW {
@@ -42,6 +43,28 @@ struct OUR_OSVERSIONINFOEXW {
   UCHAR  wProductType;
   UCHAR  wReserved;
 };
+
+typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
+  (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
+static RTLVERIFYVERSIONINFO_FN s_pRtlVerifyVersionInfo;
+
+void curlx_verify_windows_init(void)
+{
+  static bool onetime = TRUE;
+  if(onetime) {
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
+    s_pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo"));
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
+    onetime = FALSE;
+  }
+}
+#endif /* !CURL_WINDOWS_UWP */
 
 /*
  * curlx_verify_windows_version()
@@ -115,23 +138,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   DWORD dwTypeMask = VER_MAJORVERSION | VER_MINORVERSION |
                      VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR;
 
-  typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
-    (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
-  static RTLVERIFYVERSIONINFO_FN pRtlVerifyVersionInfo;
-  static bool onetime = TRUE;
-
-  if(onetime) {
-#if defined(__clang__) && __clang_major__ >= 16
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#endif
-    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo"));
-#if defined(__clang__) && __clang_major__ >= 16
-#pragma clang diagnostic pop
-#endif
-    onetime = FALSE;
-  }
+  curlx_verify_windows_init();
 
   switch(condition) {
   case VERSION_LESS_THAN:
@@ -203,8 +210,8 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
      the real version always, so we use the Rtl variant of the function when
      possible. Note though the function signatures have underlying fundamental
      types that are the same, the return values are different. */
-  if(pRtlVerifyVersionInfo)
-    matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
+  if(s_pRtlVerifyVersionInfo)
+    matched = !s_pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
   else
     matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver, dwTypeMask, cm);
 
@@ -222,8 +229,8 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 
     cm = VerSetConditionMask(0, VER_BUILDNUMBER, buildCondition);
     dwTypeMask = VER_BUILDNUMBER;
-    if(pRtlVerifyVersionInfo)
-      matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
+    if(s_pRtlVerifyVersionInfo)
+      matched = !s_pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
     else
       matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver,
                                       dwTypeMask, cm);
