@@ -627,7 +627,7 @@ static ssize_t tunnel_send_callback(nghttp2_session *session,
   if(ts->closed && Curl_bufq_is_empty(&ts->sendbuf))
     *data_flags = NGHTTP2_DATA_FLAG_EOF;
 
-  CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback -> %zd",
+  CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback -> %zu",
               ts->stream_id, nread);
   return (nread  > SSIZE_MAX) ?
     NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nread;
@@ -675,7 +675,7 @@ static int proxy_h2_on_stream_close(nghttp2_session *session,
   if(stream_id != ctx->tunnel.stream_id)
     return 0;
 
-  CURL_TRC_CF(data, cf, "[%d] proxy_h2_on_stream_close, %s (err %d)",
+  CURL_TRC_CF(data, cf, "[%d] proxy_h2_on_stream_close, %s (err %u)",
               stream_id, nghttp2_http2_strerror(error_code), error_code);
   ctx->tunnel.closed = TRUE;
   ctx->tunnel.error = error_code;
@@ -1158,7 +1158,7 @@ static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
 
   *pnread = 0;
   if(ctx->tunnel.error) {
-    failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
+    failf(data, "HTTP/2 stream %d reset by %s (error 0x%" PRIx32
           " %s)", ctx->tunnel.stream_id,
            ctx->tunnel.reset ? "server" : "curl",
            ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
@@ -1269,7 +1269,7 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
   }
 
   result = Curl_bufq_write(&ctx->tunnel.sendbuf, buf, len, pnwritten);
-  CURL_TRC_CF(data, cf, "cf_send(), bufq_write %d, %zd", result, *pnwritten);
+  CURL_TRC_CF(data, cf, "cf_send(), bufq_write %d, %zu", result, *pnwritten);
   if(result && (result != CURLE_AGAIN))
     goto out;
 
