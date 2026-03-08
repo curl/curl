@@ -46,7 +46,6 @@ CURLX_C = \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/timeval.c \
-  ../../lib/curlx/version_win32.c \
   ../../lib/curlx/wait.c \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
