@@ -203,7 +203,7 @@ typedef struct md4_ctx MD4_CTX;
  * The MD4 transformation for all three rounds.
  */
 #define MD4_STEP(f, a, b, c, d, x, s) \
-  (a) += f((b), (c), (d)) + (x); \
+  (a) += f(b, c, d) + (x); \
   (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));
 
 /*
