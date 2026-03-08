@@ -251,8 +251,6 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 17.0))
         list(APPEND _picky_enable
           -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 17.0  # In clang-cl enums are signed ints by default
-            -Wno-error=format-signedness
-            -Wno-error=format
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.1) OR
@@ -309,8 +307,6 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Warray-bounds=2                 # clang  2.9  gcc  5.0 (clang default: -Warray-bounds)
           -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 17.0
-            -Wno-error=format-signedness
-            -Wno-error=format
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)

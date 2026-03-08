@@ -944,8 +944,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl clang 19 or later
           if test "$compiler_num" -ge "1901"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-signedness])
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=format-signedness"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=format"
           fi
           dnl clang 20 or later
           if test "$compiler_num" -ge "2001"; then
@@ -1129,8 +1127,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "500"; then
             tmp_CFLAGS="$tmp_CFLAGS -Warray-bounds=2"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-signedness])
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=format-signedness"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=format"
           fi
           #
           dnl Only gcc 6 or later
