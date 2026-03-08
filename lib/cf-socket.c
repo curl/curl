@@ -2060,7 +2060,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   CURL_TRC_CF(data, cf, "Checking for incoming on fd=%" FMT_SOCKET_T
               " ip=%s:%d", ctx->sock, ctx->ip.local_ip, ctx->ip.local_port);
   socketstate = SOCKET_READABLE(ctx->sock, 0);
-  CURL_TRC_CF(data, cf, "socket_check -> %x", socketstate);
+  CURL_TRC_CF(data, cf, "socket_check -> %x", (unsigned int)socketstate);
   switch(socketstate) {
   case -1: /* error */
     /* let's die here */

@@ -431,7 +431,7 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
           "[SOCKS] cannot complete SOCKS4 connection to %u.%u.%u.%u:%u. (%u)"
           ", request rejected or failed.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned int)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_REQUEST_FAILED;
   case 92:
     failf(data,
@@ -439,7 +439,7 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
           ", request rejected because SOCKS server cannot connect to "
           "identd on the client.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned int)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_IDENTD;
   case 93:
     failf(data,
@@ -447,14 +447,14 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
           ", request rejected because the client program and identd "
           "report different user-ids.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned int)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_IDENTD_DIFFER;
   default:
     failf(data,
           "[SOCKS] cannot complete SOCKS4 connection to %u.%u.%u.%u:%u. (%u)"
           ", Unknown.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned int)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_UNKNOWN_FAIL;
   }
 }
@@ -1292,7 +1292,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     struct ip_quadruple ipquad;
     bool is_ipv6;
     if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad))
-      infof(data, "Opened %sSOCKS connection from %s port %u to %s port %u "
+      infof(data, "Opened %sSOCKS connection from %s port %d to %s port %d "
             "(via %s port %u)",
             (sockindex == SECONDARYSOCKET) ? "2nd " : "",
             ipquad.local_ip, ipquad.local_port,
@@ -1327,11 +1327,11 @@ static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
     case SOCKS5_ST_REQ0_SEND:
     case SOCKS5_ST_AUTH_SEND:
     case SOCKS5_ST_REQ1_SEND:
-      CURL_TRC_CF(data, cf, "adjust pollset out (%d)", sx->state);
+      CURL_TRC_CF(data, cf, "adjust pollset out (%d)", (int)sx->state);
       result = Curl_pollset_set_out_only(data, ps, sock);
       break;
     default:
-      CURL_TRC_CF(data, cf, "adjust pollset in (%d)", sx->state);
+      CURL_TRC_CF(data, cf, "adjust pollset in (%d)", (int)sx->state);
       result = Curl_pollset_set_in_only(data, ps, sock);
       break;
     }
