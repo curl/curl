@@ -34,7 +34,7 @@ static CURLcode recv_any(CURL *curl)
     return result;
 
   curl_mfprintf(stderr, "recv_any: got %zu bytes rflags %x\n", rlen,
-                meta->flags);
+                (unsigned int)meta->flags);
   return CURLE_OK;
 }
 
