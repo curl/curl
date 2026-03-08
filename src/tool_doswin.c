@@ -901,6 +901,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
 CURLcode win32_init(void)
 {
+  curlx_verify_windows_init();
   curlx_now_init();
 #ifndef CURL_WINDOWS_UWP
   init_terminal();
