@@ -226,7 +226,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
       matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
     else
       matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver,
-                                      dwTypeMask, cm);
+                                     dwTypeMask, cm);
   }
 
 #endif
