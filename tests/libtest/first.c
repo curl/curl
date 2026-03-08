@@ -219,7 +219,6 @@ int main(int argc, const char **argv)
 
   memory_tracking_init();
 #ifdef _WIN32
-  curlx_verify_windows_init();
   curlx_now_init();
 #endif
 
