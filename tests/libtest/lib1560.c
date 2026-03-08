@@ -1817,41 +1817,41 @@ static int get_nothing(void)
 
     rc = curl_url_get(u, CURLUPART_SCHEME, &p, 0);
     if(rc != CURLUE_NO_SCHEME)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_HOST, &p, 0);
     if(rc != CURLUE_NO_HOST)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_USER, &p, 0);
     if(rc != CURLUE_NO_USER)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_PASSWORD, &p, 0);
     if(rc != CURLUE_NO_PASSWORD)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_OPTIONS, &p, 0);
     if(rc != CURLUE_NO_OPTIONS)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_PATH, &p, 0);
     if(rc != CURLUE_OK)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
     else
       curl_free(p);
 
     rc = curl_url_get(u, CURLUPART_QUERY, &p, 0);
     if(rc != CURLUE_NO_QUERY)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_FRAGMENT, &p, 0);
     if(rc != CURLUE_NO_FRAGMENT)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
     if(rc != CURLUE_NO_ZONEID)
-      curl_mfprintf(stderr, "unexpected return code %u on line %u\n", rc,
+      curl_mfprintf(stderr, "unexpected return code %d on line %d\n", rc,
                     __LINE__);
 
     curl_url_cleanup(u);
@@ -1884,17 +1884,17 @@ static int clear_url(void)
     for(i = 0; clear_url_list[i].in && !error; i++) {
       rc = curl_url_set(u, clear_url_list[i].part, clear_url_list[i].in, 0);
       if(rc != CURLUE_OK)
-        curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+        curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
       rc = curl_url_set(u, CURLUPART_URL, NULL, 0);
       if(rc != CURLUE_OK)
-        curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+        curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
       rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
       if(rc != clear_url_list[i].ucode ||
          (clear_url_list[i].out && strcmp(p, clear_url_list[i].out) != 0)) {
 
-        curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
+        curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
         error++;
       }
       if(rc == CURLUE_OK)
@@ -1949,7 +1949,7 @@ static int huge(void)
     rc = curl_url_set(urlp, CURLUPART_URL, total, CURLU_NON_SUPPORT_SCHEME);
     if((!i && (rc != CURLUE_BAD_SCHEME)) ||
        (i && rc)) {
-      curl_mprintf("URL %u: failed to parse [%s]\n", i, total);
+      curl_mprintf("URL %d: failed to parse [%s]\n", i, total);
       error++;
     }
 
@@ -1957,7 +1957,7 @@ static int huge(void)
     if(!rc) {
       curl_url_get(urlp, part[i], &partp, 0);
       if(!partp || strcmp(partp, &bigpart[1 - (i == 4)])) {
-        curl_mprintf("URL %u part %u: failure\n", i, part[i]);
+        curl_mprintf("URL %d part %u: failure\n", i, part[i]);
         error++;
       }
       curl_free(partp);
