@@ -809,8 +809,10 @@ static CURLcode auth_create_digest_http_message(
     char *hashthis2;
 
     result = hash(hashbuf, (const unsigned char *)"", 0);
-    if(result)
+    if(result) {
+      curlx_free(hashthis);
       goto oom;
+    }
     convert_to_ascii(hashbuf, (unsigned char *)hashed);
 
     hashthis2 = curl_maprintf("%s:%s", hashthis, hashed);
