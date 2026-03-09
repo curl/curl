@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#ifdef USE_THREADS_POSIX
-#include <pthread.h>
-#endif
-
 #include "curl_threads.h"
 
 #define THREAD_SIZE     16
@@ -66,7 +62,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   return realsize;
 }
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_THREADS
 static CURL_THREAD_RETURN_T CURL_STDCALL test_thread(void *ptr)
 #else
 static unsigned int test_thread(void *ptr)
@@ -111,7 +107,7 @@ test_cleanup:
   return 0;
 }
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_THREADS
 
 static void t3207_test_lock(CURL *curl, curl_lock_data data,
                             curl_lock_access laccess, void *useptr)

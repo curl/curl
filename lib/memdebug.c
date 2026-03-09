@@ -65,14 +65,14 @@ static struct backtrace_state *btstate;
 static char membuf[10000];
 static size_t memwidx = 0; /* write index */
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
 static bool dbg_mutex_init = 0;
 static curl_mutex_t dbg_mutex;
 #endif
 
 static bool curl_dbg_lock(void)
 {
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   if(dbg_mutex_init) {
     Curl_mutex_acquire(&dbg_mutex);
     return TRUE;
@@ -83,7 +83,7 @@ static bool curl_dbg_lock(void)
 
 static void curl_dbg_unlock(bool was_locked)
 {
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   if(was_locked)
     Curl_mutex_release(&dbg_mutex);
 #else
@@ -108,7 +108,7 @@ static void curl_dbg_cleanup(void)
     fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   if(dbg_mutex_init) {
     Curl_mutex_destroy(&dbg_mutex);
     dbg_mutex_init = FALSE;
@@ -157,7 +157,7 @@ void curl_dbg_memdebug(const char *logname)
       setbuf(curl_dbg_logfile, (char *)NULL);
 #endif
   }
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   if(!dbg_mutex_init) {
     dbg_mutex_init = TRUE;
     Curl_mutex_init(&dbg_mutex);

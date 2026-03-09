@@ -220,7 +220,7 @@
 /* ================================================================ */
 
 /* Give calloc a chance to be dragging in early, so we do not redefine */
-#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#if defined(HAVE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #  include <pthread.h>
 #endif
 
@@ -442,7 +442,7 @@
 #    if !(defined(__NEWLIB__) || \
           (defined(__CLIB2__) && defined(__THREAD_SAFE)))
        /* disable threaded resolver with clib2 - requires newlib or clib-ts */
-#      undef USE_THREADS_POSIX
+#      undef USE_RESOLV_THREADED
 #    endif
 #  endif
 #  include <exec/types.h>
@@ -685,6 +685,16 @@
 
 #endif /* _WIN32 */
 
+/* We want to use mutex when available. */
+#if defined(HAVE_THREADS_POSIX) || defined(_WIN32)
+#define USE_MUTEX
+#endif
+
+/* threaded resolver is the only feature requiring threads. */
+#ifdef USE_RESOLV_THREADED
+#define USE_THREADS
+#endif
+
 /* ---------------------------------------------------------------- */
 /*             resolver specialty compile-time defines              */
 /*         CURLRES_* defines to use in the host*.c sources          */
@@ -702,12 +712,10 @@
 #  define CURLRES_IPV4
 #endif
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_RESOLV_THREADED
 #  define CURLRES_ASYNCH
-#  define CURLRES_THREADED
-#elif defined(USE_ARES)
+#elif defined(USE_RESOLV_ARES)
 #  define CURLRES_ASYNCH
-#  define CURLRES_ARES
 /* now undef the stock libc functions to avoid them being used */
 #  undef HAVE_GETADDRINFO
 #  undef HAVE_FREEADDRINFO

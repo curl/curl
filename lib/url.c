@@ -287,11 +287,8 @@ CURLcode Curl_close(struct Curl_easy **datap)
   data_priority_cleanup(data);
 
   /* No longer a dirty share, if it exists */
-  if(data->share) {
-    Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
-    data->share->dirty--;
-    Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
-  }
+  if(Curl_share_easy_unlink(data))
+    DEBUGASSERT(0);
 
   Curl_hash_destroy(&data->meta_hash);
 #ifndef CURL_DISABLE_PROXY

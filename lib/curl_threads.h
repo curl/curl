@@ -25,7 +25,11 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_THREADS_POSIX
+#ifdef USE_MUTEX
+#ifdef HAVE_THREADS_POSIX
+#ifdef HAVE_PTHREAD_H
+#include <pthread.h>
+#endif
 #  define CURL_THREAD_RETURN_T   unsigned int
 #  define CURL_STDCALL
 #  define curl_mutex_t           pthread_mutex_t
@@ -35,7 +39,7 @@
 #  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
 #  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
-#elif defined(USE_THREADS_WIN32)
+#elif defined(_WIN32)
 #  define CURL_THREAD_RETURN_T   DWORD
 #  define CURL_STDCALL           WINAPI
 #  define curl_mutex_t           CRITICAL_SECTION
@@ -45,9 +49,12 @@
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
+#else
+#error neither HAVE_THREADS_POSIX nor _WIN32 defined
 #endif
+#endif /* USE_MUTEX */
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_THREADS
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg);
@@ -56,6 +63,6 @@ void Curl_thread_destroy(curl_thread_t *hnd);
 
 int Curl_thread_join(curl_thread_t *hnd);
 
-#endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
+#endif /* USE_THREADS */
 
 #endif /* HEADER_CURL_THREADS_H */

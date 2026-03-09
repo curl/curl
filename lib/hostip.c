@@ -86,10 +86,10 @@
  * take that into account. Hosts that are not IPv6-enabled have CURLRES_IPV4
  * defined.
  *
- * CURLRES_ARES - is defined if libcurl is built to use c-ares for
+ * USE_RESOLV_ARES - is defined if libcurl is built to use c-ares for
  * asynchronous name resolves. This can be Windows or *nix.
  *
- * CURLRES_THREADED - is defined if libcurl is built to run under (native)
+ * USE_RESOLV_THREADED - is defined if libcurl is built to run under (native)
  * Windows, and then the name resolve will be done in a new thread, and the
  * supported API will be the same as for ares-builds.
  *

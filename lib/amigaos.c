@@ -141,7 +141,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, uint16_t port)
     }
   }
   else {
-#ifdef CURLRES_THREADED
+#ifdef USE_RESOLV_THREADED
     /* gethostbyname() is not thread-safe, so we need to reopen bsdsocket
      * on the thread's context
      */

@@ -4246,15 +4246,8 @@ if test "$ipv6" = "yes" && test "$curl_cv_apple" = "yes"; then
   CURL_DARWIN_SYSTEMCONFIGURATION
 fi
 
-dnl Windows threaded resolver check
-if test "$want_threaded_resolver" = "yes" && test "$curl_cv_native_windows" = "yes"; then
-  USE_THREADS_WIN32=1
-  AC_DEFINE(USE_THREADS_WIN32, 1, [if you want Win32 threaded DNS lookup])
-  curl_res_msg="Win32 threaded"
-fi
-
 dnl detect pthreads
-if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; then
+if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"
@@ -4267,7 +4260,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
 
       LIBS=
       dnl Check for libc variants without a separate pthread lib like bionic
-      AC_CHECK_FUNC(pthread_create, [USE_THREADS_POSIX=1] )
+      AC_CHECK_FUNC(pthread_create, [HAVE_THREADS_POSIX=1] )
       LIBS="$save_LIBS"
 
       case $host in
@@ -4279,7 +4272,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
       esac
 
       dnl if it was not found without lib, search for it in pthread lib
-      if test "$USE_THREADS_POSIX" != "1"; then
+      if test "$HAVE_THREADS_POSIX" != "1"; then
         # assign PTHREAD for pkg-config use
         PTHREAD=" -pthread"
 
@@ -4302,20 +4295,32 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
             ;;
         esac
         AC_CHECK_LIB(pthread, pthread_create,
-                     [USE_THREADS_POSIX=1],
+                     [HAVE_THREADS_POSIX=1],
                      [ CFLAGS="$save_CFLAGS"])
       fi
-
-      if test "$USE_THREADS_POSIX" = "1"; then
-        AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
-        curl_res_msg="POSIX threaded"
-      fi
   ])
+  if test "$HAVE_THREADS_POSIX" = "1"; then
+    AC_DEFINE(HAVE_THREADS_POSIX, 1, [if POSIX pthreads are supported])
+  fi
 fi
 
-dnl Did we find a threading option?
-if test "$want_threaded_resolver" != "no" && test "$USE_THREADS_POSIX" != "1" && test "$USE_THREADS_WIN32" != "1"; then
-  AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
+dnl threaded resolver check
+if test "$want_threaded_resolver" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes"; then
+    USE_RESOLV_THREADED=1
+    AC_DEFINE(USE_RESOLV_THREADED, 1, [if you want threaded DNS lookup])
+    curl_res_msg="Win32 threaded"
+  elif test "$HAVE_THREADS_POSIX" = "1"; then
+    USE_RESOLV_THREADED=1
+    AC_DEFINE(USE_RESOLV_THREADED, 1, [if you want threaded DNS lookup])
+    curl_res_msg="POSIX threaded"
+  else
+    AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
+  fi
+elif test "$USE_ARES" = "1"; then
+  USE_RESOLV_ARES=1
+  AC_DEFINE(USE_RESOLV_ARES, 1, [if you want c-ares for DNS lookup])
+  curl_res_msg="c-ares"
 fi
 
 AC_CHECK_HEADER(dirent.h,
@@ -5157,7 +5162,7 @@ fi
 if test "$HAVE_ZSTD" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES zstd"
 fi
-if test "$USE_ARES" = "1" || test "$USE_THREADS_POSIX" = "1" || test "$USE_THREADS_WIN32" = "1"; then
+if test "$USE_RESOLV_ARES" = "1" || test "$USE_RESOLV_THREADED" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "$USE_ARES" = "1" && test "$want_threaded_resolver" = "yes" && test "$want_httpsrr" != "no"; then
@@ -5291,7 +5296,7 @@ fi
 
 if test "$tst_atomic" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-elif test "$USE_THREADS_POSIX" = "1" && test "$ac_cv_header_pthread_h" = "yes"; then
+elif test "$HAVE_THREADS_POSIX" = "1" && test "$ac_cv_header_pthread_h" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
 elif test "$curl_cv_native_windows" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"

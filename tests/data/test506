@@ -227,17 +227,15 @@ loaded cookies:
   .host.foo.com	TRUE	/	FALSE	%days[400]	injected	yes
 -----------------
 try SHARE_CLEANUP...
-lock:   share  [Pigs in space]: 98
-unlock: share  [Pigs in space]: 99
 SHARE_CLEANUP failed, correct
 CLEANUP
-lock:   cookie [Pigs in space]: 100
-unlock: cookie [Pigs in space]: 101
+lock:   cookie [Pigs in space]: 98
+unlock: cookie [Pigs in space]: 99
+lock:   share  [Pigs in space]: 100
+unlock: share  [Pigs in space]: 101
+SHARE_CLEANUP
 lock:   share  [Pigs in space]: 102
 unlock: share  [Pigs in space]: 103
-SHARE_CLEANUP
-lock:   share  [Pigs in space]: 104
-unlock: share  [Pigs in space]: 105
 GLOBAL_CLEANUP
 </stdout>
 <file name="%LOGDIR/jar%TESTNUMBER" mode="text">
