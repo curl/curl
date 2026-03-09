@@ -53,9 +53,7 @@ jobs:
         run: |
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
-            -r .github/scripts/requirements.txt \
-            -r tests/http/requirements.txt \
-            -r tests/requirements.txt
+            -r .github/scripts/requirements.txt
 
       - name: 'REUSE check'
         run: |
