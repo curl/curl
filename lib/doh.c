@@ -1243,8 +1243,8 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         goto error;
 
       /* we got a response, create a dns entry. */
-      dns = Curl_dnscache_mk_entry(data, &ai, dohp->host, 0,
-                                   dohp->port, FALSE);
+      dns = Curl_dnscache_mk_entry(data, &ai, dohp->host, dohp->port,
+                                   async->ip_version);
       if(!dns) {
         result = CURLE_OUT_OF_MEMORY;
         goto error;
