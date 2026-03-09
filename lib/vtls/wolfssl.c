@@ -1416,7 +1416,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
           }
           else {
             trying_ech_now = 1;
-            infof(data, "ECH: imported ECHConfigList of length %zd", elen);
+            infof(data, "ECH: imported ECHConfigList of length %zu", elen);
           }
         }
         else {

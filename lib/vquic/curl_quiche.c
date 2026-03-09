@@ -563,7 +563,7 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
 
   default:
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] recv, unhandled event %d",
-                stream->id, quiche_h3_event_type(ev));
+                stream->id, (int)quiche_h3_event_type(ev));
     break;
   }
 }
@@ -1051,7 +1051,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
       goto out;
     }
     else {
-      CURL_TRC_CF(data, cf, "send_request(%s) -> %" PRIu64,
+      CURL_TRC_CF(data, cf, "send_request(%s) -> %" PRId64,
                   Curl_bufref_ptr(&data->state.url), rv);
     }
     result = CURLE_SEND_ERROR;
