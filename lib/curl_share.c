@@ -359,6 +359,12 @@ CURLSHcode curl_share_cleanup(CURLSH *sh)
     return CURLSHE_INVALID;
 
   locked = share_lock_acquire(share, NULL);
+
+  if(share->ref_count > 1) {
+    share_lock_release(share, NULL, locked);
+    return CURLSHE_IN_USE;
+  }
+
   share_unlink(&share, NULL, locked);
   return CURLSHE_OK;
 }
