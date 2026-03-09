@@ -28,7 +28,7 @@
 #include "system_win32.h"
 #include "curl_sspi.h"
 #include "curlx/timeval.h"
-#include "curlx/version_win32.h"
+#include "curlx/version_win32.h"  /* for curlx_verify_windows_init() */
 
 /* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
