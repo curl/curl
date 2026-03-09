@@ -183,5 +183,5 @@ clean-local:
 	(cd tests && $(MAKE) clean)
 
 badwords:
-	grep -Ev '(will|But=|So=|And=|url=)' ./scripts/badwords.txt | ./scripts/badwords -a src lib include docs/examples
+	grep -Ev '^(will:|But=|So=|And=| url=)' ./scripts/badwords.txt | ./scripts/badwords -a src lib include docs/examples
 	./scripts/badwords -w ./scripts/badwords.ok '**.md' projects/OS400/README.OS400 < ./scripts/badwords.txt
