@@ -2927,6 +2927,6 @@ CURLcode curl_easy_setopt(CURL *d, CURLoption tag, ...)
 
   va_end(arg);
   if(result == CURLE_BAD_FUNCTION_ARGUMENT)
-    failf(data, "setopt 0x%x got bad argument", tag);
+    failf(data, "setopt 0x%x got bad argument", (unsigned int)tag);
   return result;
 }
