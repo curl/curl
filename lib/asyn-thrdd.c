@@ -581,8 +581,8 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     if(thrdd->addr->res) {
       struct Curl_dns_entry *dns =
         Curl_dnscache_mk_entry(data, &thrdd->addr->res,
-                               async->hostname, 0,
-                               async->port, FALSE);
+                               async->hostname, async->port,
+                               async->ip_version);
       if(!dns)
         result = CURLE_OUT_OF_MEMORY;
 
