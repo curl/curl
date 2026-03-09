@@ -17,7 +17,11 @@
 use strict;
 use warnings;
 
-my @whitelist;
+my @whitelist = (
+    # ignore what looks like URLs
+    '(^|\W)((https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&\'\(\)*+,;=]+)',
+    # ignore bolded sections
+    '\*\*(.*?)\*\*');
 my %alt;
 my %exactcase;
 my $skip_indented = 1;
@@ -45,6 +49,7 @@ if($ARGV[0] eq "-w") {
 }
 
 my @w;
+my @exact;
 while(<STDIN>) {
     chomp;
     if($_ =~ /^#/) {
@@ -55,15 +60,54 @@ while(<STDIN>) {
     }
     elsif($_ =~ /^(.*)([:=])(.*)/) {
         my ($bad, $sep, $better)=($1, $2, $3);
-        push @w, $bad;
         $alt{$bad} = $better;
         if($sep eq "=") {
-            $exactcase{$bad} = 1;
+            push @exact, $bad;
+        }
+        else {
+            push @w, $bad;
         }
     }
 }
 
+# Build a single combined regex for case-insensitive words
+my $re_ci;
+if(@w) {
+    my $pat = join('|', map { '\b'.quotemeta($_).'\b' } @w);
+    $re_ci = qr/($pat)/i;
+}
+
+# Build a single combined regex for case-sensitive (exact) words
+my $re_cs;
+if(@exact) {
+    my $pat = join('|', map { '\b'.quotemeta($_).'\b' } @exact);
+    $re_cs = qr/($pat)/;
+}
+
 my $errors = 0;
+
+sub highlight {
+    my ($p, $w, $in, $f, $l) = @_;
+
+    my $c = length($p)+1;
+    my $ch = "$f:$l:$w";
+    if($wl{$ch}) {
+        # whitelisted filename + line + word
+        return;
+    }
+    $ch = $f . "::" . $w;
+    if($wl{$ch}) {
+        # whitelisted filename + word
+        return;
+    }
+
+    print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
+    printf STDERR " %4d | %s\n", $l, $in;
+    printf STDERR "      | %*s^%s\n", length($p), " ",
+        "~" x (length($w)-1);
+    printf STDERR " maybe use \"%s\" instead?\n", $alt{$w};
+    $errors++;
+}
 
 sub file {
     my ($f) = @_;
@@ -80,36 +124,22 @@ sub file {
         $in =~ s/(\[.*\])\(.*\)/$1/g;
         # remove backticked texts
         $in =~ s/\`.*\`//g;
-        # remove whitelisted patterns
+        # remove whitelisted patterns (pre-compiled)
         for my $p (@whitelist) {
             $in =~ s/$p//g;
         }
-        foreach my $w (@w) {
-            my $case = $exactcase{$w};
-            if(($in =~ /^(.*)$w/i && !$case) ||
-               ($in =~ /^(.*)$w/ && $case) ) {
-                my $p = $1;
-                my $c = length($p)+1;
-
-                my $ch = "$f:$l:$w";
-                if($wl{$ch}) {
-                    # whitelisted filename + line + word
-                    #print STDERR "$ch found but whitelisted\n";
-                    next;
-                }
-                $ch = $f . "::" . $w;
-                if($wl{$ch}) {
-                    # whitelisted filename + word
-                    #print STDERR "$ch found but whitelisted\n";
-                    next;
-                }
-
-                print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
-                printf STDERR " %4d | %s\n", $l, $in;
-                printf STDERR "      | %*s^%s\n", length($p), " ",
-                    "~" x (length($w)-1);
-                printf STDERR " maybe use \"%s\" instead?\n", $alt{$w};
-                $errors++;
+        # case-insensitive bad words
+        if($re_ci) {
+            while($in =~ /^(.*)$re_ci/i) {
+                highlight($1, $2, $in, $f, $l);
+                last;
+            }
+        }
+        # case-sensitive (exact) bad words
+        if($re_cs) {
+            while($in =~ /^(.*)$re_cs/) {
+                highlight($1, $2, $in, $f, $l);
+                last;
             }
         }
     }
@@ -118,9 +148,18 @@ sub file {
 
 my @filemasks = @ARGV;
 open(my $git_ls_files, '-|', 'git', 'ls-files', '--', @filemasks) or die "Failed running git ls-files: $!";
+my @files;
 while(my $each = <$git_ls_files>) {
     chomp $each;
-    file($each);
+    push @files, $each;
 }
 close $git_ls_files;
+
+my $onum = scalar(@files);
+my $num;
+for my $e (@files) {
+    #printf STDERR "Complete: %d%%\r", $num++ * 100 / $onum;
+    file($e);
+}
+
 exit $errors;

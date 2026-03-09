@@ -3,17 +3,17 @@
 # SPDX-License-Identifier: curl
 #
 back-end:backend
-\be-mail[^/]:email
+e-mail:email
 run-time:runtime
 set-up:setup
 tool chain:toolchain
 tool-chain:toolchain
 wild-card:wildcard
 wild card:wildcard
-\bthread ?safe[^."t]:thread-safe
-\bthread ?unsafe[^."t]:thread-unsafe
-multi ?thread:multi-thread
-\bit's:it is
+thread safe:thread-safe
+thread unsafe:thread-unsafe
+multi thread:multi-thread
+it's:it is
 aren't:are not
 can't:cannot
 could've:could have
@@ -53,45 +53,45 @@ you'd:you would
 you'll:you will
 you're:you are
 you've:you have
- a html: an html
- a http: an http
- a ftp: an ftp
- a IPv4: an IPv4
- a IPv6: an IPv6
- url [^=]=URL
-[^/]internet\b=Internet
+a html:an html
+a http:an http
+a ftp:an ftp
+a IPv4:an IPv4
+a IPv6:an IPv6
+ url= URL
+internet=Internet
 isation:ization
-[^.]\. And: Rewrite it somehow?
-^(And|So|But) = Rewrite it somehow?
-\. But: Rewrite it somehow?
-\. So : Rewrite without "so" ?
- dir [^=]=directory
- Dir [^=]=Directory
-sub-director:subdirector
+So=Rewrite it somehow?
+And=Rewrite it somehow?
+But=Rewrite it somehow?
+sub-directory:subdirectory
 web page:webpage
-host name\b:hostname
-host names\b:hostnames
-[^;<]file name\b:filename
-file names\b:filenames
-\bfist\b:first
-\buser name\b:username
-\buser names\b:usernames
-\bpass phrase:passphrase
-\bwill\b:rewrite to present tense
-\b[0-9]+bit[^*"'%,]: NN-bit
-\b([02-9]|[1-9][0-9]+) bit\b: NN-bit
-[0-9]+-bits:NN bits or NN-bit
-\bvery\b:rephrase using an alternative word
-\bjust\b:rephrase using an alternative word
-\bCurl\b=curl
-\bcURL\b=curl
-\bLibcurl\b=libcurl
-\bLibCurl\b=libcurl
+host name:hostname
+host names:hostnames
+file name:filename
+file names:filenames
+fist:first
+user name:username
+user names:usernames
+pass phrase:passphrase
+will:rewrite to present tense
+32 bit:32-bit
+16 bit:16-bit
+64 bit:64-bit
+32-bits:32 bits
+16-bits:16 bits
+64-bits:64 bits
+very:rephrase using an alternative word
+just:rephrase using an alternative word
+Curl=curl
+cURL=curl
+Libcurl=libcurl
+LibCurl=libcurl
 ---WWW::Curl
 ---NET::Curl
 ---Curl Corporation
-\bmanpages[^./;=&{:-]:man pages
-\bmanpage[^si./;=&{:-]:man page
+manpages:man pages
+manpage:man page
 favour:favor
 basically:rephrase?
 However,:rephrase?
