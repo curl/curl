@@ -312,7 +312,7 @@ if(!$opt_n) {
 
         my $out = '';
         # https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt
-        if($url =~ /^https:\/\/raw.githubusercontent.com\/([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+)\/(refs\/heads\/[a-z]+)(\/.+)$/) {
+        if($url =~ /^https:\/\/raw.githubusercontent.com\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)\/(refs\/heads\/[a-z]+)(\/.+)$/) {
             my $slug = $1;
             my $refs = "&sha=$2";
             my $path = $3;
