@@ -182,7 +182,7 @@ static void share_unlink(struct Curl_share **pshare,
   n = share_ref_dec(share);
   if(locked)
     share_lock_release(share, data, locked);
-  if(!n)  /* last refernce gone */
+  if(!n)  /* last reference gone */
     share_destroy(share);
 }
 
