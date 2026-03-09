@@ -115,7 +115,7 @@ in the middle of things. Also, a transfer might be interested in several
 sockets at the same time (resolving, eye balling, ftp are all examples of
 those).
 
-### And Come Again
+### Come Again
 
 While transfer and connection identifiers are practically unique in a libcurl
 application, sockets are not. Operating systems are keen on reusing their

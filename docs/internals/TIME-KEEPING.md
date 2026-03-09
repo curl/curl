@@ -18,8 +18,8 @@ passed a pointer to the `struct curltime now` to functions to save them the
 calls. Passing this pointer down to all functions possibly involved was not
 done as this pollutes the internal APIs.
 
-So, some functions continued to call `curlx_now()` on their own while others
-used the passed pointer *to a timestamp in the past*. This led to a transfer
+Some functions continued to call `curlx_now()` on their own while others used
+the passed pointer *to a timestamp in the past*. This led to a transfer
 experiencing *jumps* in time, reversing cause and effect. On fast systems,
 this was mostly not noticeable. On slow machines or in CI, this led to rare
 and annoying test failures.

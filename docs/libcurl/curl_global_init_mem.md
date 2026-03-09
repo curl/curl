@@ -36,9 +36,9 @@ allows the application to set callbacks to replace the otherwise used internal
 memory functions.
 
 If you are using libcurl from multiple threads or libcurl was built with the
-threaded resolver option then the callback functions must be thread safe. The
+threaded resolver option then the callback functions must be thread-safe. The
 threaded resolver is a common build option to enable (and in some cases the
-default) so we strongly urge you to make your callback functions thread safe.
+default) so we strongly urge you to make your callback functions thread-safe.
 
 All callback arguments must be set to valid function pointers. The
 prototypes for the given callbacks must match these:
