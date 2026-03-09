@@ -228,7 +228,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     if(gss_major_status != GSS_S_CONTINUE_NEEDED)
       break;
 
-    /* analyse response */
+    /* analyze response */
 
     /*   GSS-API response looks like
      * +----+------+-----+----------------+

@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
-
 #include "urldata.h"
 #include "hsts.h"
 

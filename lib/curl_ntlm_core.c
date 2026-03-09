@@ -141,7 +141,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[4] = (char)(((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4));
   key[5] = (char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
   key[6] = (char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
-  key[7] = (char) ((key_56[6] << 1) & 0xFF);
+  key[7] = (char)((key_56[6] << 1) & 0xFF);
 }
 
 #ifdef USE_OPENSSL_DES

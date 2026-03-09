@@ -100,9 +100,9 @@ static void tcpnodelay(struct Curl_cfilter *cf,
   defined(TCP_KEEPALIVE) || defined(TCP_KEEPALIVE_THRESHOLD) || \
   defined(TCP_KEEPINTVL) || defined(TCP_KEEPALIVE_ABORT_THRESHOLD)
 #if defined(USE_WINSOCK) || \
-   (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
-   (defined(__DragonFly__) && __DragonFly_version < 500702) || \
-   (defined(_WIN32) && !defined(TCP_KEEPIDLE))
+  (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
+  (defined(__DragonFly__) && __DragonFly_version < 500702) || \
+  (defined(_WIN32) && !defined(TCP_KEEPIDLE))
 /* Solaris < 11.4, DragonFlyBSD < 500702 and Windows < 10.0.16299
  * use millisecond units. */
 #define KEEPALIVE_FACTOR(x) ((x) *= 1000)
@@ -638,7 +638,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * to take a type parameter instead.
        */
       uint8_t dns_queries = (af == AF_INET) ?
-                            CURL_DNSQ_A : (CURL_DNSQ_A|CURL_DNSQ_AAAA);
+                            CURL_DNSQ_A : (CURL_DNSQ_A | CURL_DNSQ_AAAA);
 #ifdef USE_IPV6
       if(af == AF_INET6)
         dns_queries = CURL_DNSQ_AAAA;

@@ -25,7 +25,6 @@
 
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
-
 #include "doh.h"
 #include "httpsrr.h"
 

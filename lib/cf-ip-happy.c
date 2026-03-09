@@ -123,9 +123,8 @@ static void cf_ai_iter_init(struct cf_ai_iter *iter,
   iter->n = 0;
 }
 
-static const struct Curl_addrinfo *
-cf_ai_iter_next(struct cf_ai_iter *iter,
-                struct Curl_easy *data)
+static const struct Curl_addrinfo *cf_ai_iter_next(struct cf_ai_iter *iter,
+                                                   struct Curl_easy *data)
 {
   const struct Curl_addrinfo *addr;
 

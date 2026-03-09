@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "noproxy.h"
 
 static CURLcode test_unit1614(const char *arg)

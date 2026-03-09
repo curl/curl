@@ -309,7 +309,8 @@ jobs:
               -Wl,-rpath,/home/runner/rustls/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
 
-            PKG_CONFIG_PATH: "/home/runner/wolfssl-opensslextra/lib/pkgconfig:\
+            PKG_CONFIG_PATH: "\
+              /home/runner/wolfssl-opensslextra/lib/pkgconfig:\
               /home/runner/mbedtls/lib/pkgconfig:\
               /home/runner/rustls/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig"
@@ -330,7 +331,8 @@ jobs:
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
 
-            PKG_CONFIG_PATH: "/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
+            PKG_CONFIG_PATH: "\
+              /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: >-
@@ -354,7 +356,8 @@ jobs:
             CC: clang-20
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
-            PKG_CONFIG_PATH: "/home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:\
+            PKG_CONFIG_PATH: "\
+              /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"

@@ -93,20 +93,20 @@ struct stub_gss_ctx_id_t_desc {
   char creds[250];
 };
 
-static OM_uint32
-stub_gss_init_sec_context(OM_uint32 *min,
-                          gss_cred_id_t initiator_cred_handle,
-                          struct stub_gss_ctx_id_t_desc **context,
-                          gss_name_t target_name,
-                          const gss_OID mech_type,
-                          OM_uint32 req_flags,
-                          OM_uint32 time_req,
-                          const gss_channel_bindings_t input_chan_bindings,
-                          gss_buffer_desc *input_token,
-                          gss_OID *actual_mech_type,
-                          gss_buffer_desc *output_token,
-                          OM_uint32 *ret_flags,
-                          OM_uint32 *time_rec)
+static OM_uint32 stub_gss_init_sec_context(
+  OM_uint32 *min,
+  gss_cred_id_t initiator_cred_handle,
+  struct stub_gss_ctx_id_t_desc **context,
+  gss_name_t target_name,
+  const gss_OID mech_type,
+  OM_uint32 req_flags,
+  OM_uint32 time_req,
+  const gss_channel_bindings_t input_chan_bindings,
+  gss_buffer_desc *input_token,
+  gss_OID *actual_mech_type,
+  gss_buffer_desc *output_token,
+  OM_uint32 *ret_flags,
+  OM_uint32 *time_rec)
 {
   struct stub_gss_ctx_id_t_desc *ctx = NULL;
 
@@ -283,10 +283,10 @@ stub_gss_init_sec_context(OM_uint32 *min,
   return GSS_S_CONTINUE_NEEDED;
 }
 
-static OM_uint32
-stub_gss_delete_sec_context(OM_uint32 *min,
-                            struct stub_gss_ctx_id_t_desc **context,
-                            gss_buffer_t output_token)
+static OM_uint32 stub_gss_delete_sec_context(
+  OM_uint32 *min,
+  struct stub_gss_ctx_id_t_desc **context,
+  gss_buffer_t output_token)
 {
   (void)output_token;
 

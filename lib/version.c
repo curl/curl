@@ -243,11 +243,9 @@ char *curl_version(void)
 #endif
 #ifdef HAVE_GSSAPI
 #ifdef HAVE_GSSGNU
-  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s",
-                 GSS_VERSION);
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s", GSS_VERSION);
 #elif defined(CURL_KRB5_VERSION)
-  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s",
-                 CURL_KRB5_VERSION);
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s", CURL_KRB5_VERSION);
 #else
   curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5");
 #endif
@@ -432,7 +430,7 @@ static const struct feat features_table[] = {
   FEATURE("alt-svc",     NULL,                CURL_VERSION_ALTSVC),
 #endif
 #if defined(USE_ARES) && defined(USE_RESOLV_THREADED) && defined(USE_HTTPSRR)
-  FEATURE("asyn-rr", NULL,             0),
+  FEATURE("asyn-rr",     NULL,                0),
 #endif
 #ifdef CURLRES_ASYNCH
   FEATURE("AsynchDNS",   NULL,                CURL_VERSION_ASYNCHDNS),

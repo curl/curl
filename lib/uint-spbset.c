@@ -30,15 +30,25 @@
 #define CURL_UINT32_SPBSET_MAGIC  0x70737362
 #endif
 
-/* Clear the bitset, making it empty. */
-UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset);
-
 void Curl_uint32_spbset_init(struct uint32_spbset *bset)
 {
   memset(bset, 0, sizeof(*bset));
 #ifdef DEBUGBUILD
   bset->init = CURL_UINT32_SPBSET_MAGIC;
 #endif
+}
+
+/* Clear the bitset, making it empty. */
+UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset);
+UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
+{
+  struct uint32_spbset_chunk *next, *chunk;
+
+  for(chunk = bset->head.next; chunk; chunk = next) {
+    next = chunk->next;
+    curlx_free(chunk);
+  }
+  memset(&bset->head, 0, sizeof(bset->head));
 }
 
 void Curl_uint32_spbset_destroy(struct uint32_spbset *bset)
@@ -61,19 +71,8 @@ uint32_t Curl_uint32_spbset_count(struct uint32_spbset *bset)
   return n;
 }
 
-UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
-{
-  struct uint32_spbset_chunk *next, *chunk;
-
-  for(chunk = bset->head.next; chunk; chunk = next) {
-    next = chunk->next;
-    curlx_free(chunk);
-  }
-  memset(&bset->head, 0, sizeof(bset->head));
-}
-
-static struct uint32_spbset_chunk *
-uint32_spbset_get_chunk(struct uint32_spbset *bset, uint32_t i, bool grow)
+static struct uint32_spbset_chunk *uint32_spbset_get_chunk(
+  struct uint32_spbset *bset, uint32_t i, bool grow)
 {
   struct uint32_spbset_chunk *chunk, **panchor = NULL;
   uint32_t i_offset = (i & ~CURL_UINT32_SPBSET_CH_MASK);

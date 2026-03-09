@@ -361,7 +361,6 @@ void Curl_pgrs_deliver_inc(struct Curl_easy *data, size_t delta)
   data->progress.deliver += delta;
 }
 
-
 void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta)
 {
   if(delta) {

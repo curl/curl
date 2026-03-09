@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS)
-
 #include "vtls/x509asn1.h"
 
 struct test1657_spec {

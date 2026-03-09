@@ -82,15 +82,15 @@ void Curl_async_global_cleanup(void);
 CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
                                 struct Curl_resolv_async *async);
 
-const struct Curl_addrinfo *
-Curl_async_get_ai(struct Curl_easy *data,
-                  struct Curl_resolv_async *async,
-                  int ai_family, unsigned int index);
+const struct Curl_addrinfo *Curl_async_get_ai(struct Curl_easy *data,
+                                              struct Curl_resolv_async *async,
+                                              int ai_family,
+                                              unsigned int index);
 
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *
-Curl_async_get_https(struct Curl_easy *data,
-                     struct Curl_resolv_async *async);
+const struct Curl_https_rrinfo *Curl_async_get_https(
+  struct Curl_easy *data,
+  struct Curl_resolv_async *async);
 bool Curl_async_knows_https(struct Curl_easy *data,
                             struct Curl_resolv_async *async);
 #endif /* USE_HTTPSRR */
@@ -125,7 +125,7 @@ struct async_ares_ctx {
 };
 
 void Curl_async_ares_shutdown(struct Curl_easy *data,
-                             struct Curl_resolv_async *async);
+                              struct Curl_resolv_async *async);
 void Curl_async_ares_destroy(struct Curl_easy *data,
                              struct Curl_resolv_async *async);
 
@@ -176,7 +176,7 @@ struct doh_probes;
  * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
- * On return 'entry' is assigned the resolved dns (CURLE_OK or NULL otherwise.
+ * On return 'dns' is assigned the resolved dns (CURLE_OK or NULL otherwise.
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
@@ -210,8 +210,8 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 /* convert these functions if an asynch resolver is not used */
 #define Curl_async_global_init()        CURLE_OK
 #define Curl_async_global_cleanup()     Curl_nop_stmt
-#define Curl_async_get_ai(a,b,c,d)      NULL
-#define Curl_async_await(a,b,c)         CURLE_COULDNT_RESOLVE_HOST
+#define Curl_async_get_ai(a, b, c, d)   NULL
+#define Curl_async_await(a, b, c)       CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_pollset(x, y, z)     CURLE_OK
 #endif /* !CURLRES_ASYNCH */
@@ -263,7 +263,7 @@ void Curl_async_destroy(struct Curl_easy *data,
                         struct Curl_resolv_async *async);
 
 #else /* !USE_CURL_ASYNC */
-#define Curl_async_shutdown(x,y) Curl_nop_stmt
+#define Curl_async_shutdown(x, y) Curl_nop_stmt
 #endif /* USE_CURL_ASYNC */
 
 /********** end of generic resolver interface functions *****************/

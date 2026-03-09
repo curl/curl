@@ -472,53 +472,53 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
   DEBUGASSERT(data->conn);
 
   /*
-  ** If we have not been asked to fail on error,
-  ** do not fail.
-  */
+   * If we have not been asked to fail on error,
+   * do not fail.
+   */
   if(!data->set.http_fail_on_error)
     return FALSE;
 
   /*
-  ** Any code < 400 is never terminal.
-  */
+   * Any code < 400 is never terminal.
+   */
   if(httpcode < 400)
     return FALSE;
 
   /*
-  ** A 416 response to a resume request is presumably because the file is
-  ** already completely downloaded and thus not actually a fail.
-  */
+   * A 416 response to a resume request is presumably because the file is
+   * already completely downloaded and thus not actually a fail.
+   */
   if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
      httpcode == 416)
     return FALSE;
 
   /*
-  ** Any code >= 400 that is not 401 or 407 is always
-  ** a terminal error
-  */
+   * Any code >= 400 that is not 401 or 407 is always
+   * a terminal error
+   */
   if((httpcode != 401) && (httpcode != 407))
     return TRUE;
 
   /*
-  ** All we have left to deal with is 401 and 407
-  */
+   * All we have left to deal with is 401 and 407
+   */
   DEBUGASSERT((httpcode == 401) || (httpcode == 407));
 
   /*
-  ** Examine the current authentication state to see if this is an error. The
-  ** idea is for this function to get called after processing all the headers
-  ** in a response message. If we have been to asked to authenticate
-  ** a particular stage, and we have done it, we are OK. If we are already
-  ** completely authenticated, it is not OK to get another 401 or 407.
-  **
-  ** It is possible for authentication to go stale such that the client needs
-  ** to reauthenticate. Once that info is available, use it here.
-  */
+   * Examine the current authentication state to see if this is an error. The
+   * idea is for this function to get called after processing all the headers
+   * in a response message. If we have been to asked to authenticate
+   * a particular stage, and we have done it, we are OK. If we are already
+   * completely authenticated, it is not OK to get another 401 or 407.
+   *
+   * It is possible for authentication to go stale such that the client needs
+   * to reauthenticate. Once that info is available, use it here.
+   */
 
   /*
-  ** Either we are not authenticating, or we are supposed to be authenticating
-  ** something else. This is an error.
-  */
+   * Either we are not authenticating, or we are supposed to be authenticating
+   * something else. This is an error.
+   */
   if((httpcode == 401) && !data->state.aptr.user)
     return TRUE;
 #ifndef CURL_DISABLE_PROXY
@@ -766,14 +766,14 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
  *
  * @returns CURLcode
  */
-CURLcode
-Curl_http_output_auth(struct Curl_easy *data,
-                      struct connectdata *conn,
-                      const char *request,
-                      Curl_HttpReq httpreq,
-                      const char *path,
-                      bool proxytunnel) /* TRUE if this is the request setting
-                                           up the proxy tunnel */
+CURLcode Curl_http_output_auth(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               const char *request,
+                               Curl_HttpReq httpreq,
+                               const char *path,
+                               bool proxytunnel) /* TRUE if this is
+                                                    the request setting up
+                                                    the proxy tunnel */
 {
   CURLcode result = CURLE_OK;
   struct auth *authhost;
@@ -1506,7 +1506,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     /* We are now waiting for a reply from the server or
      * a timeout on our side IFF the request has been fully sent. */
     DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE, "
-           "timeout %dms", data->set.expect_100_timeout));
+                 "timeout %dms", data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
     ctx->start = *Curl_pgrs_now(data);
     Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
@@ -4024,7 +4024,7 @@ static void http_check_auth_closure(struct Curl_easy *data,
 #endif
 }
 #else
-#define http_check_auth_closure(x,y) /* empty */
+#define http_check_auth_closure(x, y) /* empty */
 #endif
 
 /*
@@ -4603,7 +4603,7 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
 
   result = http_rw_hd(data, hd, hdlen, &tmp, 0, &consumed);
   if(!result && is_eos) {
-    result = Curl_client_write(data, (CLIENTWRITE_BODY|CLIENTWRITE_EOS),
+    result = Curl_client_write(data, (CLIENTWRITE_BODY | CLIENTWRITE_EOS),
                                &tmp, 0);
   }
   return result;

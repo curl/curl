@@ -1937,7 +1937,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   case 0:
     if((ctx->total_len >= 0) && (ctx->read_len < ctx->total_len)) {
       failf(data, "client mime read EOF fail, "
-            "only %"FMT_OFF_T"/%"FMT_OFF_T
+            "only %" FMT_OFF_T "/%" FMT_OFF_T
             " of needed bytes read", ctx->read_len, ctx->total_len);
       return CURLE_READ_ERROR;
     }
@@ -1992,7 +1992,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   }
 
   CURL_TRC_READ(data, "cr_mime_read(len=%zu, total=%" FMT_OFF_T
-                ", read=%"FMT_OFF_T") -> %d, %zu, %d",
+                ", read=%" FMT_OFF_T ") -> %d, %zu, %d",
                 blen, ctx->total_len, ctx->read_len, result, *pnread, *peos);
   return result;
 }

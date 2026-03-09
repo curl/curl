@@ -365,16 +365,14 @@
 #endif
 
 /* based on logic in "curl/mprintf.h" */
-#if (defined(__GNUC__) || defined(__clang__) ||                         \
-  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
-  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
+#if (defined(__GNUC__) || defined(__clang__) ||                 \
+     defined(__IAR_SYSTEMS_ICC__)) &&                           \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
   !defined(CURL_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(gnu_printf, fmt, arg)))
+#define CURL_PRINTF(fmt, arg) __attribute__((format(gnu_printf, fmt, arg)))
 #else
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(__printf__, fmt, arg)))
+#define CURL_PRINTF(fmt, arg) __attribute__((format(__printf__, fmt, arg)))
 #endif
 #else
 #define CURL_PRINTF(fmt, arg)
@@ -392,7 +390,7 @@
    (defined(__GNUC__) && __GNUC__ <= 14)) &&                \
   defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && \
   !defined(__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__)
-#define __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__             \
+#define __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__ \
   __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif
 
@@ -733,8 +731,7 @@
 #endif
 
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_MBEDTLS) || \
-  defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
-  defined(USE_RUSTLS)
+  defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_RUSTLS)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -750,23 +747,23 @@
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */
-#if !defined(CURL_DISABLE_NEGOTIATE_AUTH) && \
-    (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
+#if !defined(CURL_DISABLE_NEGOTIATE_AUTH) &&          \
+  (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_SPNEGO
 #endif
 
 /* Single point where USE_KERBEROS5 definition might be defined */
-#if !defined(CURL_DISABLE_KERBEROS_AUTH) && \
-    (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
+#if !defined(CURL_DISABLE_KERBEROS_AUTH) &&           \
+  (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_KERBEROS5
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
 #ifdef CURL_ENABLE_NTLM
-#  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||        \
-  defined(USE_GNUTLS) ||                                                \
-  (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) ||      \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
+#  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||   \
+  defined(USE_GNUTLS) ||                                           \
+  (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) || \
+  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||         \
   (defined(USE_WOLFSSL) && defined(HAVE_WC_DES_ECBENCRYPT))
 #    define USE_CURL_NTLM_CORE
 #  endif
@@ -819,8 +816,8 @@
 /* fallthrough attribute */
 
 #ifndef FALLTHROUGH
-#if (defined(__GNUC__) && __GNUC__ >= 7) || \
-    (defined(__clang__) && __clang_major__ >= 10)
+#if (defined(__GNUC__) && __GNUC__ >= 7) ||     \
+  (defined(__clang__) && __clang_major__ >= 10)
 #  define FALLTHROUGH()  __attribute__((fallthrough))
 #else
 #  define FALLTHROUGH()  do {} while(0)
@@ -1015,7 +1012,7 @@ struct timeval {
  * 'bool' stuff compatible with HP-UX headers.
  */
 #if defined(__hpux) && !defined(HAVE_BOOL_T)
-   typedef int bool;
+typedef int bool;
 #  define false 0
 #  define true 1
 #  define HAVE_BOOL_T
@@ -1028,10 +1025,10 @@ struct timeval {
  * global namespace though, so use bool_false and bool_true.
  */
 #ifndef HAVE_BOOL_T
-  typedef enum {
-    bool_false = 0,
-    bool_true  = 1
-  } bool;
+typedef enum {
+  bool_false = 0,
+  bool_true = 1
+} bool;
 
 /*
  * Use a define to let 'true' and 'false' use those enums. There

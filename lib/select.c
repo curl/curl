@@ -274,7 +274,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     if(ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     VERIFY_SOCK(ufds[i].fd);
-    if(ufds[i].events & (POLLIN |POLLOUT |POLLPRI |
+    if(ufds[i].events & (POLLIN | POLLOUT | POLLPRI |
                          POLLRDNORM | POLLWRNORM | POLLRDBAND)) {
       if(ufds[i].fd > maxfd)
         maxfd = ufds[i].fd;
@@ -636,9 +636,9 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
                           bool do_in, bool do_out)
 {
   return Curl_pollset_change(data, ps, sock,
-                             (do_in ? CURL_POLL_IN : 0)|
+                             (do_in ? CURL_POLL_IN : 0) |
                              (do_out ? CURL_POLL_OUT : 0),
-                             (!do_in ? CURL_POLL_IN : 0)|
+                             (!do_in ? CURL_POLL_IN : 0) |
                              (!do_out ? CURL_POLL_OUT : 0));
 }
 

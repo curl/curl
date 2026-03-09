@@ -255,7 +255,7 @@ static void my_sha256_final(unsigned char *digest, void *in)
     (a)[0] = (unsigned char)((((unsigned long)(val)) >> 24) & 0xff); \
     (a)[1] = (unsigned char)((((unsigned long)(val)) >> 16) & 0xff); \
     (a)[2] = (unsigned char)((((unsigned long)(val)) >>  8) & 0xff); \
-    (a)[3] = (unsigned char) (((unsigned long)(val)) & 0xff);        \
+    (a)[3] = (unsigned char)(((unsigned long)(val)) & 0xff);         \
   } while(0)
 
 #define WPA_PUT_BE64(a, val)                            \
@@ -486,7 +486,7 @@ CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
   result = my_sha256_init(&ctx);
   if(!result) {
     do {
-      unsigned int ilen = (unsigned int) CURLMIN(len, UINT_MAX);
+      unsigned int ilen = (unsigned int)CURLMIN(len, UINT_MAX);
       my_sha256_update(&ctx, input, ilen);
       len -= ilen;
       input += ilen;

@@ -418,7 +418,7 @@ struct SocketIFace *ISocket = NULL;
 #  else
 struct Library *SocketBase = NULL;
 #  endif
-#  define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#  define select(a, b, c, d, e)  WaitSelect(a, b, c, d, e, 0)
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(

@@ -135,7 +135,7 @@ void Curl_httpsrr_trace(struct Curl_easy *data,
 }
 
 #else
-#define httpsrr_report_addr(a,b,c,d)    Curl_nop_stmt
+#define httpsrr_report_addr(a, b, c, d) Curl_nop_stmt
 #endif /* CURLVERBOSE */
 
 CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
@@ -194,8 +194,8 @@ CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
   return result;
 }
 
-struct Curl_https_rrinfo *
-Curl_httpsrr_dup_move(struct Curl_https_rrinfo *rrinfo)
+struct Curl_https_rrinfo *Curl_httpsrr_dup_move(
+  struct Curl_https_rrinfo *rrinfo)
 {
   struct Curl_https_rrinfo *dup = curlx_memdup(rrinfo, sizeof(*rrinfo));
   if(dup)

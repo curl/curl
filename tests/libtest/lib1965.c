@@ -27,7 +27,7 @@ static CURLcode test_lib1965(const char *URL)
 {
   CURLcode result = CURLE_OK;
   CURLUcode rc;
-  const char *schemes[] = {
+  static const char *schemes[] = {
     "bad!", "bad{", "bad/", "bad\\", "a!",
     "a+123", "http-2", "http.1",
     "a+-.123", "http-+++2", "http.1--",
@@ -35,9 +35,9 @@ static CURLcode test_lib1965(const char *URL)
     "ABC2", "2CBA", "", "a",
     "aaaaaaaaaabbbbbbbbbbccccccccccdddddddddd",
     "aaaaaaaaaabbbbbbbbbbccccccccccdddddddddde",
-    NULL};
+    NULL };
   int i;
-  (void) URL;
+  (void)URL;
 
   global_init(CURL_GLOBAL_ALL);
 
