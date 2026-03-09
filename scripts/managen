@@ -787,7 +787,7 @@ sub single {
     }
     elsif($multi eq "append") {
         push @extra,
-            sprintf("${pre}%s can be used several times in a command line\n",
+            sprintf("${pre}%s can be used several times in a command line.\n",
                     manpageify($long, $manpage));
     }
     elsif($multi eq "boolean") {
