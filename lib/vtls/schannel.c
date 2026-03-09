@@ -277,7 +277,7 @@ static int get_alg_id_by_name(const char *name)
   return 0; /* not found */
 }
 
-#define NUM_CIPHERS 47 /* There are 47 options listed above */
+#define NUM_CIPHERS 47 /* There are a maximum of 47 options listed above */
 
 static CURLcode set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
                                 ALG_ID *algIds)
