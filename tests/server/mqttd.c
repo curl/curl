@@ -566,6 +566,10 @@ static curl_socket_t mqttit(curl_socket_t fd)
                topic_len, remaining_length - 5);
         goto end;
       }
+      if(topic_len > MAX_TOPIC_LENGTH) {
+        logmsg("Too large topic length, %zu", topic_len);
+        goto end;
+      }
       memcpy(topic, &buffer[4], topic_len);
       topic[topic_len] = 0;
 
