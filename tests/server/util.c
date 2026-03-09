@@ -436,7 +436,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
       break;
     }
     if(signum) {
-      logmsg("main_window_proc: %d -> %d", uMsg, signum);
+      logmsg("main_window_proc: %u -> %d", uMsg, signum);
       raise(signum);
     }
   }
