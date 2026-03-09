@@ -98,8 +98,8 @@ int main(void)
     struct upload_status upload_ctx = { 0 };
 
     /* Set username and password */
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+    curl_easy_setopt(curl, CURLOPT_USERNAME, "YOUR_USERNAME");
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, "YOUR_PASSWORD");
 
     /* This creates a new message in folder "Sent". */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/Sent");
