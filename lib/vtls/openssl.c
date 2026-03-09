@@ -2065,7 +2065,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     break;
   default:
     DEBUGASSERT(0);
-    failf(data, "unexpected ssl peer type: %u", peer->type);
+    failf(data, "unexpected ssl peer type: %d", (int)peer->type);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
