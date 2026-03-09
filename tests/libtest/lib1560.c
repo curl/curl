@@ -1957,7 +1957,7 @@ static int huge(void)
     if(!rc) {
       curl_url_get(urlp, part[i], &partp, 0);
       if(!partp || strcmp(partp, &bigpart[1 - (i == 4)])) {
-        curl_mprintf("URL %d part %u: failure\n", i, part[i]);
+        curl_mprintf("URL %d part %d: failure\n", i, (int)part[i]);
         error++;
       }
       curl_free(partp);
