@@ -46,8 +46,8 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /* Set username and password */
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+    curl_easy_setopt(curl, CURLOPT_USERNAME, "YOUR_USERNAME");
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, "YOUR_PASSWORD");
 
     /* This is the server URL */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com");
