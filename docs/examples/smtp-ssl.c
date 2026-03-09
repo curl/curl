@@ -96,8 +96,8 @@ int main(void)
     struct upload_status upload_ctx = { 0 };
 
     /* Set username and password */
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+    curl_easy_setopt(curl, CURLOPT_USERNAME, "YOUR_USERNAME");
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, "YOUR_PASSWORD");
 
     /* This is the URL for your mailserver. Note the use of smtps:// rather
      * than smtp:// to request an SSL based connection. */
