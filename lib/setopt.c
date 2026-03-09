@@ -1490,67 +1490,17 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SHARE: {
     struct Curl_share *set = va_arg(param, struct Curl_share *);
 
-    /* disconnect from old share, if any */
-    if(data->share) {
-      Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
+    /* disconnect from old share, if any and possible */
+    result = Curl_share_easy_unlink(data);
+    if(result)
+      return result;
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-      if(data->share->cookies == data->cookies)
-        data->cookies = NULL;
-#endif
-
-#ifndef CURL_DISABLE_HSTS
-      if(data->share->hsts == data->hsts)
-        data->hsts = NULL;
-#endif
-#ifdef USE_LIBPSL
-      if(data->psl == &data->share->psl)
-        data->psl = data->multi ? &data->multi->psl : NULL;
-#endif
-      if(data->share->specifier & (1 << CURL_LOCK_DATA_DNS)) {
-        Curl_dns_entry_unlink(data, &data->state.dns[0]);
-        Curl_dns_entry_unlink(data, &data->state.dns[1]);
-      }
-
-      data->share->dirty--;
-
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
-      data->share = NULL;
+    /* use new share if it set */
+    if(GOOD_SHARE_HANDLE(set)) {
+      result = Curl_share_easy_link(data, set);
+      if(result)
+        return result;
     }
-
-    if(GOOD_SHARE_HANDLE(set))
-      /* use new share if it set */
-      data->share = set;
-    if(data->share) {
-
-      Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
-
-      data->share->dirty++;
-
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-      if(data->share->cookies) {
-        /* use shared cookie list, first free own one if any */
-        Curl_cookie_cleanup(data->cookies);
-        /* enable cookies since we now use a share that uses cookies! */
-        data->cookies = data->share->cookies;
-      }
-#endif /* CURL_DISABLE_HTTP */
-#ifndef CURL_DISABLE_HSTS
-      if(data->share->hsts) {
-        /* first free the private one if any */
-        Curl_hsts_cleanup(&data->hsts);
-        data->hsts = data->share->hsts;
-      }
-#endif
-#ifdef USE_LIBPSL
-      if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
-        data->psl = &data->share->psl;
-#endif
-
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
-    }
-    /* check for host cache not needed,
-     * it will be done by curl_easy_perform */
     break;
   }
 
