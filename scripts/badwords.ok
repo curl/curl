@@ -4,4 +4,5 @@
 #
 # whitelisted uses of bad words
 # file:[line]:rule
-docs/FAQ.md::\bwill\b
+docs/FAQ.md::will
+docs/FAQ.md::Will
