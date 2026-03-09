@@ -1248,7 +1248,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
   {
     ehostname = cf->conn->host.name;
     edispname = cf->conn->host.dispname;
-    peer->port = cf->conn->remote_port;
+    peer->port = (uint16_t)cf->conn->remote_port;
   }
 
   /* hostname MUST exist and not be empty */
