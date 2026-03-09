@@ -50,6 +50,11 @@ and similar things are not supported).
 The netrc file provides credentials for a hostname independent of which
 protocol and port number that are used.
 
+When providing a username in the URL and a *.netrc* file, libcurl looks for
+and uses the password for that specific user for the given host if such an
+entry appears in the file before a "generic" `machine` entry without `login`
+specified.
+
 libcurl does not verify that the file has the correct properties set (as the
 standard Unix ftp client does). It should only be readable by user.
 
