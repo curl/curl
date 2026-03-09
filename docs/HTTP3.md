@@ -288,7 +288,7 @@ or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The
 soft timeout fires, when there has been **no data at all** seen from the
 server on the HTTP/3 connection.
 
-So, without you specifying anything, the hard timeout is 200ms and the soft is
+Without you specifying anything, the hard timeout is 200ms and the soft is
 100ms:
 
 * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection

@@ -253,14 +253,14 @@ Total number of redirects that were followed. See CURLINFO_REDIRECT_COUNT(3)
 ## CURLINFO_REDIRECT_TIME
 
 The time it took for all redirection steps include name lookup, connect,
-pretransfer and transfer before final transaction was started. So, this is
-zero if no redirection took place. As a double. See CURLINFO_REDIRECT_TIME(3)
+pretransfer and transfer before final transaction was started. This is zero if
+no redirection took place. As a double. See CURLINFO_REDIRECT_TIME(3)
 
 ## CURLINFO_REDIRECT_TIME_T
 
 The time it took for all redirection steps include name lookup, connect,
-pretransfer and transfer before final transaction was started. So, this is
-zero if no redirection took place. In number of microseconds. See
+pretransfer and transfer before final transaction was started. This is zero if
+no redirection took place. In number of microseconds. See
 CURLINFO_REDIRECT_TIME_T(3)
 
 ## CURLINFO_REDIRECT_URL

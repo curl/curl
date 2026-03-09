@@ -123,14 +123,14 @@ The filter type `cft` is a singleton, one static struct for each type of
 filter. The `ctx` is where a filter holds its specific data. That varies by
 filter type. An http-proxy filter keeps the ongoing state of the CONNECT here,
 free it after its has been established. The SSL filter keeps the `SSL*` (if
-OpenSSL is used) here until the connection is closed. So, this varies.
+OpenSSL is used) here until the connection is closed. This varies.
 
 `conn` is a reference to the connection this filter belongs to, so nothing
 extra besides the pointer itself.
 
 Several things, that before were kept in `struct connectdata`, now goes into
-the `filter->ctx` *when needed*. So, the memory footprint for connections that
-do *not* use an http proxy, or socks, or https is lower.
+the `filter->ctx` *when needed*. The memory footprint for connections that do
+*not* use an http proxy, or socks, or https is lower.
 
 As to transfer efficiency, writing and reading through a filter comes at near
 zero cost *if the filter does not transform the data*. An http proxy or socks

@@ -293,7 +293,7 @@ not do that for you. For example, if you want the data to contain a space,
 you need to replace that space with `%20`, etc. Failing to comply with this
 most likely causes your data to be received wrongly and messed up.
 
-Recent curl versions can in fact url-encode POST data for you, like this:
+Recent curl versions can in fact URL encode POST data for you, like this:
 
     curl --data-urlencode "name=I am Daniel" https://www.example.com
 

@@ -200,18 +200,23 @@ preferred URL to transfer with CURLOPT_URL(3) in a manner similar to:
 Let's assume for a while that you want to receive data as the URL identifies a
 remote resource you want to get here. Since you write a sort of application
 that needs this transfer, I assume that you would like to get the data passed
-to you directly instead of simply getting it passed to stdout. So, you write
-your own function that matches this prototype:
+to you directly instead of simply getting it passed to stdout. You write your
+own function that matches this prototype:
+
 ~~~c
     size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
 ~~~
+
 You tell libcurl to pass all data to this function by issuing a function
 similar to this:
+
 ~~~c
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
 ~~~
+
 You can control what data your callback function gets in the fourth argument
 by setting another property:
+
 ~~~c
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, &internal_struct);
 ~~~
@@ -336,7 +341,7 @@ Tell libcurl that we want to upload:
     curl_easy_setopt(handle, CURLOPT_UPLOAD, 1L);
 ~~~
 A few protocols do not behave properly when uploads are done without any prior
-knowledge of the expected file size. So, set the upload file size using the
+knowledge of the expected file size. Set the upload file size using the
 CURLOPT_INFILESIZE_LARGE(3) for all known file sizes like this[1]:
 
 ~~~c
