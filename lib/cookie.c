@@ -1111,8 +1111,24 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
         if(errno != ENOENT)
           result = CURLE_READ_ERROR;
       }
-      else
+      else {
         handle = fp;
+#ifdef __NetBSD__
+        /* NetBSD allows directories to be fopen()ed and fread() without error,
+           a V6-ism not present in more modern Unix variants. To maintain the
+           invariant that cookie_load(directory) returns an error, we must
+           explicitly check for it on NetBSD. */
+        {
+          struct stat statbuf;
+          if((curlx_fstat(fileno(fp), &statbuf) != -1) &&
+             S_ISDIR(statbuf.st_mode)) {
+            result = CURLE_READ_ERROR;
+            curlx_fclose(fp);
+            fp = NULL;
+          }
+        }
+#endif
+      }
     }
   }
 
