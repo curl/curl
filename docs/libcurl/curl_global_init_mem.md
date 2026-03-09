@@ -84,9 +84,18 @@ extern void *calloc_cb(size_t, size_t);
 
 int main(void)
 {
-  curl_global_init_mem(CURL_GLOBAL_DEFAULT, malloc_cb,
-                       free_cb, realloc_cb,
-                       strdup_cb, calloc_cb);
+  CURLcode result;
+
+  result = curl_global_init_mem(CURL_GLOBAL_DEFAULT, malloc_cb,
+                                free_cb, realloc_cb,
+                                strdup_cb, calloc_cb);
+
+  if(result == CURLE_OK) {
+
+    /* use libcurl, then before exiting... */
+
+    curl_global_cleanup();
+  }
 }
 ~~~
 

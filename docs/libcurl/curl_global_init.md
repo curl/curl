@@ -117,11 +117,16 @@ elapses.
 ~~~c
 int main(void)
 {
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  CURLcode result;
 
-  /* use libcurl, then before exiting... */
+  result = curl_global_init(CURL_GLOBAL_DEFAULT);
 
-  curl_global_cleanup();
+  if(result == CURLE_OK) {
+
+    /* use libcurl, then before exiting... */
+
+    curl_global_cleanup();
+  }
 }
 ~~~
 
