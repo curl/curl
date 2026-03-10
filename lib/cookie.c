@@ -1107,9 +1107,8 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
       if(!fp)
         infof(data, "WARNING: failed to open cookie file \"%s\"", file);
       else {
-        curlx_struct_stat statbuf;
-        if((curlx_fstat(fileno(fp), &statbuf) != -1) &&
-           S_ISDIR(statbuf.st_mode)) {
+        curlx_struct_stat stat;
+        if((curlx_fstat(fileno(fp), &stat) != -1) && S_ISDIR(stat.st_mode)) {
           curlx_fclose(fp);
           fp = NULL;
           infof(data, "WARNING: cookie filename points to a directory: \"%s\"",
