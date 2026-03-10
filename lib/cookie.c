@@ -1104,10 +1104,30 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
       fp = stdin;
     else {
       fp = curlx_fopen(file, "rb");
-      if(!fp)
+      if(!fp) {
         infof(data, "WARNING: failed to open cookie file \"%s\"", file);
-      else
+        /* Nonexistent files are explicitly supported so that, e.g., -b file -c
+           file works. Any other error represents failure */
+        if(errno != ENOENT)
+          result = CURLE_READ_ERROR;
+      }
+      else {
         handle = fp;
+#ifdef __NetBSD__
+        /* NetBSD allows directories to be fopen()ed and fread() without error,
+           a V6-ism not present in more modern Unix variants. To maintain the
+           invariant that cookie_load(directory) returns an error, we must
+           explicitly check for it on NetBSD. */
+        {
+          struct stat statbuf;
+          if((curlx_fstat(fileno(fp), &statbuf) != -1) &&
+             S_ISDIR(statbuf.st_mode)) {
+            result = CURLE_READ_ERROR;
+            fp = NULL; /* Skip read path and let fclose(handle) close file */
+          }
+        }
+#endif
+      }
     }
   }
 
