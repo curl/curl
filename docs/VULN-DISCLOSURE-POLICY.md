@@ -9,7 +9,7 @@ SPDX-License-Identifier: curl
 This document describes how security vulnerabilities are handled in the curl
 project.
 
-There is no bug-bounty and the curl project never do rewards for reported
+There is no bug-bounty and the curl project never offers rewards for reported
 vulnerabilities.
 
 ## Publishing Information
