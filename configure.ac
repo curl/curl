@@ -4247,14 +4247,8 @@ if test "$ipv6" = "yes" && test "$curl_cv_apple" = "yes"; then
   CURL_DARWIN_SYSTEMCONFIGURATION
 fi
 
-dnl Windows threads/CriticalSection support
-if test "$want_threaded_resolver" = "yes" && test "$curl_cv_native_windows" = "yes"; then
-  HAVE_THREADS_WIN32=1
-  AC_DEFINE(HAVE_THREADS_WIN32, 1, [if Win32 threads/CriticalSections are supported])
-fi
-
 dnl detect pthreads
-if test "$HAVE_THREADS_WIN32" != "1"; then
+if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"
@@ -4313,7 +4307,7 @@ fi
 
 dnl threaded resolver check
 if test "$want_threaded_resolver" = "yes"; then
-  if test "$HAVE_THREADS_WIN32" = "1"; then
+  if test "$curl_cv_native_windows" = "yes"; then
     USE_RESOLV_THREADED=1
     AC_DEFINE(USE_RESOLV_THREADED, 1, [if you want threaded DNS lookup])
     curl_res_msg="Win32 threaded"

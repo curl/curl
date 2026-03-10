@@ -94,7 +94,7 @@ int Curl_thread_join(curl_thread_t *hnd)
   return ret;
 }
 
-#elif defined(HAVE_THREADS_WIN32)
+#elif defined(_WIN32)
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
@@ -129,6 +129,6 @@ int Curl_thread_join(curl_thread_t *hnd)
 }
 
 #else
-#error neither HAVE_THREADS_POSIX nor HAVE_THREADS_WIN32 defined
+#error neither HAVE_THREADS_POSIX nor _WIN32 defined
 #endif
 #endif /* USE_THREADS */

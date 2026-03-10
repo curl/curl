@@ -39,7 +39,7 @@
 #  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
 #  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
-#elif defined(HAVE_THREADS_WIN32)
+#elif defined(_WIN32)
 #  define CURL_THREAD_RETURN_T   DWORD
 #  define CURL_STDCALL           WINAPI
 #  define curl_mutex_t           CRITICAL_SECTION
@@ -50,7 +50,7 @@
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
 #else
-#error neither HAVE_THREADS_POSIX nor HAVE_THREADS_WIN32 defined
+#error neither HAVE_THREADS_POSIX nor _WIN32 defined
 #endif
 #endif /* USE_MUTEX */
 
