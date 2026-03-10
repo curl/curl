@@ -1112,7 +1112,8 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
            S_ISDIR(statbuf.st_mode)) {
           curlx_fclose(fp);
           fp = NULL;
-          infof(data, "WARNING: cookie file is a directory \"%s\"", file);
+          infof(data, "WARNING: cookie filename points to a directory: \"%s\"",
+                file);
         }
         else
           handle = fp;
