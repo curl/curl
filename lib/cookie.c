@@ -1114,21 +1114,16 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
 #endif
       }
       else {
-        handle = fp;
-#ifdef __NetBSD__
-        /* NetBSD allows directories to be fopen()ed and fread() without error,
-           a V6-ism not present in more modern Unix variants. To maintain the
-           invariant that cookie_load(directory) returns an error, we must
-           explicitly check for it on NetBSD. */
-        {
-          struct stat statbuf;
-          if((curlx_fstat(fileno(fp), &statbuf) != -1) &&
-             S_ISDIR(statbuf.st_mode)) {
-            result = CURLE_READ_ERROR;
-            fp = NULL; /* Skip read path and let fclose(handle) close file */
-          }
+        struct stat statbuf;
+        if((curlx_fstat(fileno(fp), &statbuf) != -1) &&
+           S_ISDIR(statbuf.st_mode)) {
+          curlx_fclose(fp);
+          fp = NULL;
+          result = CURLE_READ_ERROR;
+          infof(data, "WARNING: cookie file is a directory \"%s\"", file);
         }
-#endif
+        else
+          handle = fp;
       }
     }
   }
