@@ -90,7 +90,7 @@ will:rewrite to present tense
 64-bits:64 bits
 very:rephrase using an alternative word
 just:rephrase using an alternative word
-\bsimply\b:rephrase using an alternative word
+simply:rephrase using an alternative word
 Curl=curl
 cURL=curl
 Libcurl=libcurl
