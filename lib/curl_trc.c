@@ -47,6 +47,7 @@
 static void trc_write(struct Curl_easy *data, curl_infotype type,
                       const char *ptr, size_t size)
 {
+  int save_errno = errno;
   if(data->set.verbose) {
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
@@ -70,6 +71,7 @@ static void trc_write(struct Curl_easy *data, curl_infotype type,
       }
     }
   }
+  errno = save_errno;
 }
 
 /* max length we trace before ending in '...' */
