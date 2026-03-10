@@ -175,20 +175,20 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   for(; i <= (ssl_version_max >> 16); ++i) {
     switch(i) {
     case CURL_SSLVERSION_TLSv1_0:
-      (*enabled_protocols) |= SP_PROT_TLS1_0_CLIENT;
+      *enabled_protocols |= SP_PROT_TLS1_0_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      (*enabled_protocols) |= SP_PROT_TLS1_1_CLIENT;
+      *enabled_protocols |= SP_PROT_TLS1_1_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_2:
-      (*enabled_protocols) |= SP_PROT_TLS1_2_CLIENT;
+      *enabled_protocols |= SP_PROT_TLS1_2_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_3:
 
       /* Windows Server 2022 and newer */
       if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL)) {
-        (*enabled_protocols) |= SP_PROT_TLS1_3_CLIENT;
+        *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
         break;
       }
       else { /* Windows 10 and older */
