@@ -72,34 +72,36 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 {
   NETRCcode ret = NETRC_FILE_MISSING; /* if it cannot open the file */
   FILE *file = curlx_fopen(filename, FOPEN_READTEXT);
-  struct dynbuf linebuf;
-  curlx_dyn_init(&linebuf, MAX_NETRC_LINE);
 
   if(file) {
-    CURLcode result = CURLE_OK;
-    bool eof;
-    ret = NETRC_OK;
-    do {
-      const char *line;
-      result = Curl_get_line(&linebuf, file, &eof);
-      if(!result) {
-        line = curlx_dyn_ptr(&linebuf);
-        /* skip comments on load */
-        curlx_str_passblanks(&line);
-        if(*line == '#')
-          continue;
-        result = curlx_dyn_add(filebuf, line);
-      }
-      if(result) {
-        curlx_dyn_free(filebuf);
-        ret = curl2netrc(result);
-        break;
-      }
-    } while(!eof);
-  }
-  curlx_dyn_free(&linebuf);
-  if(file)
+    curlx_struct_stat stat;
+    if((curlx_fstat(fileno(file), &stat) == -1) || !S_ISDIR(stat.st_mode)) {
+      CURLcode result = CURLE_OK;
+      bool eof;
+      struct dynbuf linebuf;
+      curlx_dyn_init(&linebuf, MAX_NETRC_LINE);
+      ret = NETRC_OK;
+      do {
+        const char *line;
+        result = Curl_get_line(&linebuf, file, &eof);
+        if(!result) {
+          line = curlx_dyn_ptr(&linebuf);
+          /* skip comments on load */
+          curlx_str_passblanks(&line);
+          if(*line == '#')
+            continue;
+          result = curlx_dyn_add(filebuf, line);
+        }
+        if(result) {
+          curlx_dyn_free(filebuf);
+          ret = curl2netrc(result);
+          break;
+        }
+      } while(!eof);
+      curlx_dyn_free(&linebuf);
+    }
     curlx_fclose(file);
+  }
   return ret;
 }
 
