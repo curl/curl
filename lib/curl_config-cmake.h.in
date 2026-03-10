@@ -646,8 +646,17 @@ ${SIZEOF_TIME_T_CODE}
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
 
+/* Define if you have Win32 threads */
+#cmakedefine HAVE_THREADS_WIN32 1
+
+/* Define if you have POSIX pthreads */
+#cmakedefine HAVE_THREADS_POSIX 1
+
 /* Define if you want to enable c-ares support */
 #cmakedefine USE_ARES 1
+
+/* Define if you want to enable c-ares DNS lookup */
+#cmakedefine USE_RESOLV_ARES 1
 
 /* Define if you want to enable threaded DNS lookup */
 #cmakedefine USE_RESOLV_THREADED 1
