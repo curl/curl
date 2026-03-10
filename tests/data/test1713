@@ -20,7 +20,10 @@ Filenames pointing to directory failing gracefully
 http://invalid.invalid/%TESTNUMBER --alt-svc %LOGDIR --cookie %LOGDIR --hsts %LOGDIR --netrc-file %LOGDIR
 </command>
 <features>
+alt-svc
 cookies
+HSTS
+netrc
 </features>
 </client>
 
