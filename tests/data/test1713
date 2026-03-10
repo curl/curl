@@ -12,14 +12,11 @@ netrc
 
 # Client-side
 <client>
-<server>
-http
-</server>
 <name>
 Filenames pointing to directory
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --alt-svc %LOGDIR --hsts %LOGDIR --netrc-file %LOGDIR
+http://invalid.invalid/%TESTNUMBER --alt-svc %LOGDIR --hsts %LOGDIR --netrc-file %LOGDIR
 </command>
 <features>
 cookies
