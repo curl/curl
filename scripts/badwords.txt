@@ -75,11 +75,18 @@ user name:username
 user names:usernames
 pass phrase:passphrase
 will:rewrite to present tense
-32 bit:32-bit
+7 bit:7-bit
+8 bit:8-bit
 16 bit:16-bit
+24 bit:24-bit
+32 bit:32-bit
+56 bit:56-bit
+63 bit:63-bit
 64 bit:64-bit
-32-bits:32 bits
+128 bit:128-bit
+8-bits:8 bits
 16-bits:16 bits
+32-bits:32 bits
 64-bits:64 bits
 very:rephrase using an alternative word
 just:rephrase using an alternative word
