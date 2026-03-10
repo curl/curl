@@ -27,7 +27,7 @@ CURLSHcode curl_share_cleanup(CURLSH *share_handle);
 # DESCRIPTION
 
 This function deletes a shared object. The share handle cannot be used anymore
-when this function has been called. The share will fail the call if it is
+when this function has been called. The share fails the call if it is
 still being used in any easy handle.
 
 Passing in a NULL pointer in *share_handle* makes this function return
