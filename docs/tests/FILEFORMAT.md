@@ -274,7 +274,7 @@ the HTTP server overrides the part number response returned for a subsequent
 request made by the same test to `previous part number + 1`. For example, if a
 test makes a request which causes the server to return `<data>` that contains
 keyword `swsbounce` then for the next response it ignores the requested part
-number and instead returns `<data1>`. And if `<data1>` contains keyword
+number and instead returns `<data1>`. If `<data1>` contains keyword
 `swsbounce` then the next response is `<data2>` and so on. This is useful for
 auth tests and similar.
 
