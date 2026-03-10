@@ -58,6 +58,8 @@ list of files to read cookies from.
 The cookies are loaded from the specified file(s) when the transfer starts,
 not when this option is set.
 
+libcurl ignores filenames which do not exist or point to a directory.
+
 # SECURITY CONCERNS
 
 This document previously mentioned how specifying a non-existing file can also

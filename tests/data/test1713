@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Alt-Svc
+cookies
+HSTS
+netrc
+</keywords>
+</info>
+
+# Client-side
+<client>
+<name>
+Filenames pointing to directory failing gracefully
+</name>
+<command>
+http://invalid.invalid/%TESTNUMBER --alt-svc %LOGDIR --cookie %LOGDIR --hsts %LOGDIR --netrc-file %LOGDIR
+</command>
+<features>
+alt-svc
+cookies
+HSTS
+netrc
+</features>
+</client>
+
+<verify>
+# 26 = CURLE_READ_ERROR
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>
