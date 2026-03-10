@@ -28,7 +28,7 @@ http
 Get same cookie page several times
 </name>
 <command>
-"http://%HOSTIP:%HTTPPORT/want/{%TESTNUMBER,%TESTNUMBER,%TESTNUMBER}" -b none -b %LOGDIR
+"http://%HOSTIP:%HTTPPORT/want/{%TESTNUMBER,%TESTNUMBER,%TESTNUMBER}" -b none
 </command>
 <features>
 cookies

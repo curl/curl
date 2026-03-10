@@ -16,7 +16,7 @@ netrc
 Filenames pointing to directory
 </name>
 <command>
-http://invalid.invalid/%TESTNUMBER --alt-svc %LOGDIR --hsts %LOGDIR --netrc-file %LOGDIR
+http://invalid.invalid/%TESTNUMBER --alt-svc %LOGDIR --cookie %LOGDIR --hsts %LOGDIR --netrc-file %LOGDIR
 </command>
 <features>
 cookies

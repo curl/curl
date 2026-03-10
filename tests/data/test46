@@ -48,7 +48,7 @@ HTTP with bad domain name, get cookies and store in cookie jar
 TZ=GMT
 </setenv>
 <command>
-domain..tld:%HTTPPORT/want/%TESTNUMBER --resolve domain..tld:%HTTPPORT:%HOSTIP -c %LOGDIR/jar%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER
+domain..tld:%HTTPPORT/want/%TESTNUMBER --resolve domain..tld:%HTTPPORT:%HOSTIP -c %LOGDIR/jar%TESTNUMBER -b %LOGDIR -b %LOGDIR/injar%TESTNUMBER
 </command>
 <file name="%LOGDIR/injar%TESTNUMBER">
 # Netscape HTTP Cookie File
