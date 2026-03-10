@@ -54,8 +54,8 @@ the Netscape format.
 
 Users often want to both read cookies from a file and write updated cookies
 back to a file, so using both --cookie and --cookie-jar in the same command
-line is common. Hence, curl silently ignores files specified with --cookie
-which do not exist.
+line is common. Hence, curl silently ignores filenames specified with
+--cookie which do not exist or point to a directory.
 
 If curl is built with PSL (**Public Suffix List**) support, it detects and
 discards cookies that are specified for such suffix domains that should not be
