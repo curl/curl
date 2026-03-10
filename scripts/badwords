@@ -20,8 +20,11 @@ use warnings;
 my @whitelist = (
     # ignore what looks like URLs
     '(^|\W)((https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&\'\(\)*+,;=]+)',
-    # ignore bolded sections
-    '\*\*(.*?)\*\*');
+    # remove bolded sections
+    '\*\*.*?\*\*',
+    # remove backticked texts
+    '\`.*?\`'
+    );
 my %alt;
 my %exactcase;
 my $skip_indented = 1;
@@ -55,7 +58,7 @@ while(<STDIN>) {
     if($_ =~ /^#/) {
         next;
     }
-    if($_ =~ /^---(.*)/) {
+    if($_ =~ /^---(.+)/) {
         push @whitelist, $1;
     }
     elsif($_ =~ /^(.*)([:=])(.*)/) {
@@ -84,6 +87,11 @@ if(@exact) {
     my $pat = join('|', map { quotemeta($_) } @exact);
     $re_cs = qr/\b($pat)\b/;
 }
+
+# Build a single combined regex for removing whitelisted content
+my $re_wl;
+my $pat = join('|', map { $_ } @whitelist);
+$re_wl = qr/($pat)/;
 
 my $errors = 0;
 
@@ -123,24 +131,20 @@ sub file {
         }
         # remove the link part
         $in =~ s/(\[.*\])\(.*\)/$1/g;
-        # remove backticked texts
-        $in =~ s/\`.*\`//g;
         # remove whitelisted patterns (pre-compiled)
-        for my $p (@whitelist) {
-            $in =~ s/$p//g;
+        if($re_wl) {
+            $in =~ s/${re_wl}//ig;
         }
         # case-insensitive bad words
         if($re_ci) {
-            while($in =~ /^(.*)$re_ci/i) {
+            if($in =~ /^(.*)$re_ci/i) {
                 highlight($1, $2, $in, $f, $l, lc($2));
-                last;
             }
         }
         # case-sensitive (exact) bad words
         if($re_cs) {
-            while($in =~ /^(.*)$re_cs/) {
+            if($in =~ /^(.*)$re_cs/) {
                 highlight($1, $2, $in, $f, $l, $2);
-                last;
             }
         }
     }
