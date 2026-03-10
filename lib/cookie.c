@@ -1114,7 +1114,7 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
 #endif
       }
       else {
-        struct stat statbuf;
+        curlx_struct_stat statbuf;
         if((curlx_fstat(fileno(fp), &statbuf) != -1) &&
            S_ISDIR(statbuf.st_mode)) {
           curlx_fclose(fp);
