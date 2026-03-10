@@ -73,15 +73,15 @@ while(<STDIN>) {
 # Build a single combined regex for case-insensitive words
 my $re_ci;
 if(@w) {
-    my $pat = join('|', map { '\b'.quotemeta($_).'\b' } @w);
-    $re_ci = qr/($pat)/i;
+    my $pat = join('|', map { quotemeta($_) } @w);
+    $re_ci = qr/\b($pat)\b/i;
 }
 
 # Build a single combined regex for case-sensitive (exact) words
 my $re_cs;
 if(@exact) {
-    my $pat = join('|', map { '\b'.quotemeta($_).'\b' } @exact);
-    $re_cs = qr/($pat)/;
+    my $pat = join('|', map { quotemeta($_) } @exact);
+    $re_cs = qr/\b($pat)\b/;
 }
 
 my $errors = 0;
