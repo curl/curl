@@ -60,11 +60,12 @@ while(<STDIN>) {
     }
     elsif($_ =~ /^(.*)([:=])(.*)/) {
         my ($bad, $sep, $better)=($1, $2, $3);
-        $alt{$bad} = $better;
         if($sep eq "=") {
+            $alt{$bad} = $better;
             push @exact, $bad;
         }
         else {
+            $alt{lc($bad)} = $better;
             push @w, $bad;
         }
     }
@@ -87,7 +88,7 @@ if(@exact) {
 my $errors = 0;
 
 sub highlight {
-    my ($p, $w, $in, $f, $l) = @_;
+    my ($p, $w, $in, $f, $l, $lookup) = @_;
 
     my $c = length($p)+1;
     my $ch = "$f:$l:$w";
@@ -105,7 +106,7 @@ sub highlight {
     printf STDERR " %4d | %s\n", $l, $in;
     printf STDERR "      | %*s^%s\n", length($p), " ",
         "~" x (length($w)-1);
-    printf STDERR " maybe use \"%s\" instead?\n", $alt{$w};
+    printf STDERR " maybe use \"%s\" instead?\n", $alt{$lookup};
     $errors++;
 }
 
@@ -131,14 +132,14 @@ sub file {
         # case-insensitive bad words
         if($re_ci) {
             while($in =~ /^(.*)$re_ci/i) {
-                highlight($1, $2, $in, $f, $l);
+                highlight($1, $2, $in, $f, $l, lc($2));
                 last;
             }
         }
         # case-sensitive (exact) bad words
         if($re_cs) {
             while($in =~ /^(.*)$re_cs/) {
-                highlight($1, $2, $in, $f, $l);
+                highlight($1, $2, $in, $f, $l, $2);
                 last;
             }
         }
