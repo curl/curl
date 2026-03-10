@@ -505,26 +505,28 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
 
   fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
-    struct dynbuf buf;
-    bool eof = FALSE;
-    curlx_dyn_init(&buf, MAX_HSTS_LINE);
-    do {
-      result = Curl_get_line(&buf, fp, &eof);
-      if(!result) {
-        const char *lineptr = curlx_dyn_ptr(&buf);
-        curlx_str_passblanks(&lineptr);
+    curlx_struct_stat stat;
+    if((curlx_fstat(fileno(fp), &stat) == -1) || !S_ISDIR(stat.st_mode)) {
+      struct dynbuf buf;
+      bool eof = FALSE;
+      curlx_dyn_init(&buf, MAX_HSTS_LINE);
+      do {
+        result = Curl_get_line(&buf, fp, &eof);
+        if(!result) {
+          const char *lineptr = curlx_dyn_ptr(&buf);
+          curlx_str_passblanks(&lineptr);
 
-        /*
-         * Skip empty or commented lines, since we know the line will have a
-         * trailing newline from Curl_get_line we can treat length 1 as empty.
-         */
-        if((*lineptr == '#') || strlen(lineptr) <= 1)
-          continue;
+          /* Skip empty or commented lines, since we know the line will have
+             a trailing newline from Curl_get_line we can treat length 1 as
+             empty. */
+          if((*lineptr == '#') || strlen(lineptr) <= 1)
+            continue;
 
-        hsts_add(h, lineptr);
-      }
-    } while(!result && !eof);
-    curlx_dyn_free(&buf); /* free the line buffer */
+          hsts_add(h, lineptr);
+        }
+      } while(!result && !eof);
+      curlx_dyn_free(&buf); /* free the line buffer */
+    }
     curlx_fclose(fp);
   }
   return result;
