@@ -1104,20 +1104,14 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
       fp = stdin;
     else {
       fp = curlx_fopen(file, "rb");
-      if(!fp) {
+      if(!fp)
         infof(data, "WARNING: failed to open cookie file \"%s\"", file);
-        /* Non-existent files are explicitly supported so that, e.g.
-           '-b file -c file' works. Any other error represents failure. */
-        if(errno != ENOENT)
-          result = CURLE_READ_ERROR;
-      }
       else {
         curlx_struct_stat statbuf;
         if((curlx_fstat(fileno(fp), &statbuf) != -1) &&
            S_ISDIR(statbuf.st_mode)) {
           curlx_fclose(fp);
           fp = NULL;
-          result = CURLE_READ_ERROR;
           infof(data, "WARNING: cookie file is a directory \"%s\"", file);
         }
         else
