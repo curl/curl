@@ -25,38 +25,12 @@
 
 #include "urldata.h"
 #include "multiif.h"
+#include "curl_threads.h"
 #include "curl_share.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
 #include "hsts.h"
 #include "url.h"
-
-CURLSH *curl_share_init(void)
-{
-  struct Curl_share *share = curlx_calloc(1, sizeof(struct Curl_share));
-  if(share) {
-    share->magic = CURL_GOOD_SHARE;
-    share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-    Curl_mutex_init(&share->lock);
-#endif
-    share->ref_count = 1;
-    Curl_dnscache_init(&share->dnscache, 23);
-    share->admin = curl_easy_init();
-    if(!share->admin) {
-      curlx_free(share);
-      return NULL;
-    }
-    /* admin handles have mid 0 */
-    share->admin->mid = 0;
-    share->admin->state.internal = TRUE;
-#ifdef DEBUGBUILD
-    if(getenv("CURL_DEBUG"))
-      share->admin->set.verbose = TRUE;
-#endif
-  }
-  return share;
-}
 
 static void share_destroy(struct Curl_share *share)
 {
@@ -84,17 +58,44 @@ static void share_destroy(struct Curl_share *share)
   Curl_psl_destroy(&share->psl);
   Curl_close(&share->admin);
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   Curl_mutex_destroy(&share->lock);
 #endif
   share->magic = 0;
   curlx_free(share);
 }
 
+CURLSH *curl_share_init(void)
+{
+  struct Curl_share *share = curlx_calloc(1, sizeof(struct Curl_share));
+  if(share) {
+    share->magic = CURL_GOOD_SHARE;
+    share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
+#ifdef USE_MUTEX
+    Curl_mutex_init(&share->lock);
+#endif
+    share->ref_count = 1;
+    Curl_dnscache_init(&share->dnscache, 23);
+    share->admin = curl_easy_init();
+    if(!share->admin) {
+      share_destroy(share);
+      return NULL;
+    }
+    /* admin handles have mid 0 */
+    share->admin->mid = 0;
+    share->admin->state.internal = TRUE;
+#ifdef DEBUGBUILD
+    if(getenv("CURL_DEBUG"))
+      share->admin->set.verbose = TRUE;
+#endif
+  }
+  return share;
+}
+
 static uint32_t share_ref_inc(struct Curl_share *share)
 {
   uint32_t n;
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
   n = ++(share->ref_count);
   share->has_been_shared = TRUE;
@@ -109,7 +110,7 @@ static uint32_t share_ref_inc(struct Curl_share *share)
 static uint32_t share_ref_dec(struct Curl_share *share)
 {
   uint32_t n;
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
   DEBUGASSERT(share->ref_count);
   n = --(share->ref_count);
@@ -123,7 +124,7 @@ static uint32_t share_ref_dec(struct Curl_share *share)
 static bool share_has_been_shared(struct Curl_share *share)
 {
   bool was_shared;
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
   was_shared = share->has_been_shared;
   Curl_mutex_release(&share->lock);
@@ -159,7 +160,7 @@ static void share_lock_release(struct Curl_share *share,
 static bool share_in_use(struct Curl_share *share)
 {
   bool in_use;
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
   in_use = (share->ref_count > 1);
   Curl_mutex_release(&share->lock);
@@ -358,13 +359,10 @@ CURLSHcode curl_share_cleanup(CURLSH *sh)
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
 
-  locked = share_lock_acquire(share, NULL);
-
-  if(share->ref_count > 1) {
-    share_lock_release(share, NULL, locked);
+  if(share_in_use(share))
     return CURLSHE_IN_USE;
-  }
 
+  locked = share_lock_acquire(share, NULL);
   share_unlink(&share, NULL, locked);
   return CURLSHE_OK;
 }

@@ -451,7 +451,7 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_ALTSVC
   FEATURE("alt-svc",     NULL,                CURL_VERSION_ALTSVC),
 #endif
-#if defined(USE_ARES) && defined(CURLRES_THREADED) && defined(USE_HTTPSRR)
+#if defined(USE_ARES) && defined(USE_RESOLV_THREADED) && defined(USE_HTTPSRR)
   FEATURE("asyn-rr", NULL,             0),
 #endif
 #ifdef CURLRES_ASYNCH

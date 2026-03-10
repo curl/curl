@@ -41,8 +41,8 @@ struct hostent;
 struct connectdata;
 struct easy_pollset;
 
-#if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
-#error cannot have both CURLRES_ARES and CURLRES_THREADED defined
+#if defined(USE_RESOLV_ARES) && defined(USE_RESOLV_THREADED)
+#error cannot have both USE_RESOLV_ARES and USE_RESOLV_THREADED defined
 #endif
 
 /*
@@ -134,7 +134,7 @@ CURLcode Curl_ares_pollset(struct Curl_easy *data,
 int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms);
 #endif
 
-#ifdef CURLRES_ARES
+#ifdef USE_RESOLV_ARES
 /* async resolving implementation using c-ares alone */
 struct async_ares_ctx {
   ares_channel channel;
@@ -168,9 +168,9 @@ CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data);
 /* Set the local ipv6 address to use by ares, from `data` settings. */
 CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data);
 
-#endif /* CURLRES_ARES */
+#endif /* USE_RESOLV_ARES */
 
-#ifdef CURLRES_THREADED
+#ifdef USE_RESOLV_THREADED
 /* async resolving implementation using POSIX threads */
 #include "curl_threads.h"
 
@@ -219,7 +219,7 @@ void Curl_async_thrdd_shutdown(struct Curl_easy *data,
 void Curl_async_thrdd_destroy(struct Curl_easy *data,
                               struct Curl_resolv_async *async);
 
-#endif /* CURLRES_THREADED */
+#endif /* USE_RESOLV_THREADED */
 
 #ifndef CURL_DISABLE_DOH
 struct doh_probes;
@@ -244,7 +244,7 @@ struct doh_probes;
 struct Curl_resolv_async {
 #ifdef CURLRES_ARES
   struct async_ares_ctx ares;
-#elif defined(CURLRES_THREADED)
+#elif defined(USE_RESOLV_THREADED)
   struct async_thrdd_ctx thrdd;
 #endif
 #ifndef CURL_DISABLE_DOH

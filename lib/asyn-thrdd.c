@@ -26,7 +26,7 @@
 /***********************************************************************
  * Only for threaded name resolves builds
  **********************************************************************/
-#ifdef CURLRES_THREADED
+#ifdef USE_RESOLV_THREADED
 
 #include "socketpair.h"
 
@@ -44,7 +44,7 @@
 #include <inet.h>
 #endif
 
-#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#if defined(HAVE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
 #endif
 
@@ -739,4 +739,4 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 
 #endif /* !HAVE_GETADDRINFO */
 
-#endif /* CURLRES_THREADED */
+#endif /* USE_RESOLV_THREADED */

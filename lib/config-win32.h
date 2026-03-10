@@ -262,15 +262,16 @@
 /* ---------------------------------------------------------------- */
 
 /*
- * Undefine both USE_ARES and USE_THREADS_WIN32 for synchronous DNS.
+ * Undefine both USE_ARES and USE_RESOLV_THREADED for synchronous DNS.
  */
 
 /* Default define to enable threaded asynchronous DNS lookups. */
-#if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && !defined(USE_THREADS_WIN32)
-#  define USE_THREADS_WIN32 1
+#if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
+    !defined(USE_RESOLV_THREADED)
+#  define USE_RESOLV_THREADED 1
 #endif
 
-#if defined(USE_ARES) && defined(USE_THREADS_WIN32)
+#if defined(USE_ARES) && defined(USE_RESOLV_THREADED)
 #  error "Only one DNS lookup specialty may be defined at most"
 #endif
 

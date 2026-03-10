@@ -22,14 +22,11 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-
-#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-#include <pthread.h>
-#endif
-
 #include "curl_threads.h"
 
-#ifdef USE_THREADS_POSIX
+#ifdef USE_THREADS
+
+#ifdef HAVE_THREADS_POSIX
 
 struct Curl_actual_call {
   unsigned int (*func)(void *);
@@ -97,7 +94,7 @@ int Curl_thread_join(curl_thread_t *hnd)
   return ret;
 }
 
-#elif defined(USE_THREADS_WIN32)
+#elif defined(HAVE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
@@ -131,4 +128,7 @@ int Curl_thread_join(curl_thread_t *hnd)
   return ret;
 }
 
-#endif /* USE_THREADS_* */
+#else
+#error neither HAVE_THREADS_POSIX nor HAVE_THREADS_WIN32 defined
+#endif
+#endif /* USE_THREADS */

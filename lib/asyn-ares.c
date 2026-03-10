@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef CURLRES_ARES
+#ifdef USE_RESOLV_ARES
 
 /***********************************************************************
  * Only for ares-enabled builds and only for functions that fulfill
@@ -966,4 +966,4 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data)
 #endif
 }
 
-#endif /* CURLRES_ARES */
+#endif /* USE_RESOLV_ARES */
