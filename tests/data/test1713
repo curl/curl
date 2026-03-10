@@ -5,6 +5,7 @@
 HTTP
 HTTP GET
 Alt-Svc
+cookies
 HSTS
 netrc
 </keywords>
@@ -13,7 +14,7 @@ netrc
 # Client-side
 <client>
 <name>
-Filenames pointing to directory
+Filenames pointing to directory failing gracefully
 </name>
 <command>
 http://invalid.invalid/%TESTNUMBER --alt-svc %LOGDIR --cookie %LOGDIR --hsts %LOGDIR --netrc-file %LOGDIR
@@ -23,8 +24,8 @@ cookies
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
+# 26 = CURLE_READ_ERROR
 <errorcode>
 26
 </errorcode>
