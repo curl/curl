@@ -938,7 +938,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 static void dupeasy_meta_freeentry(void *p)
 {
   (void)p;
-  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+  /* Always FALSE. Cannot use a 0 assert here since compilers
    * are not in agreement if they then want a NORETURN attribute or
    * not. *sigh* */
   DEBUGASSERT(p == NULL);

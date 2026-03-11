@@ -84,8 +84,8 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
 
 /**
  * Return if the pool has reached its configured limits for adding
- * the given connection. Will try to discard the oldest, idle
- * connections to make space.
+ * the given connection. Try to discard the oldest, idle connections
+ * to make space.
  */
 #define CPOOL_LIMIT_OK     0
 #define CPOOL_LIMIT_DEST   1

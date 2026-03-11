@@ -429,7 +429,7 @@ void Curl_conn_close(struct Curl_easy *data, int sockindex);
 /**
  * Shutdown the connection at `sockindex` non-blocking, using timeout
  * from `data->set.shutdowntimeout`, default DEFAULT_SHUTDOWN_TIMEOUT_MS.
- * Will return CURLE_OK and *done == FALSE if not finished.
+ * Return CURLE_OK and *done == FALSE if not finished.
  */
 CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done);
 
@@ -604,14 +604,14 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
 
 /*
  * Receive data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
- * Will return CURLE_AGAIN iff blocked on receiving.
+ * Return CURLE_AGAIN iff blocked on receiving.
  */
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
                         char *buf, size_t len, size_t *pnread);
 
 /*
  * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
- * Will return CURLE_AGAIN iff blocked on sending.
+ * Return CURLE_AGAIN iff blocked on sending.
  */
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                         const void *buf, size_t len, bool eos,

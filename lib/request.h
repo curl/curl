@@ -109,8 +109,8 @@ struct SingleRequest {
   BIT(eos_sent);      /* iff EOS has been sent to the server */
   BIT(rewind_read);   /* iff reader needs rewind at next start */
   BIT(upload_done);   /* set to TRUE when all request data has been sent */
-  BIT(upload_aborted); /* set to TRUE when upload was aborted. Will also
-                        * show `upload_done` as TRUE. */
+  BIT(upload_aborted); /* set to TRUE when upload was aborted. Also
+                        * shows `upload_done` as TRUE. */
   BIT(ignorebody);    /* we read a response-body but we ignore it! */
   BIT(http_bodyless); /* HTTP response status code is between 100 and 199,
                          204 or 304 */
@@ -207,13 +207,13 @@ bool Curl_req_sendbuf_empty(struct Curl_easy *data);
 
 /**
  * Stop sending any more request data to the server.
- * Will clear the send buffer and mark request sending as done.
+ * Clear the send buffer and mark request sending as done.
  */
 CURLcode Curl_req_abort_sending(struct Curl_easy *data);
 
 /**
  * Stop sending and receiving any more request data.
- * Will abort sending if not done.
+ * Abort sending if not done.
  */
 CURLcode Curl_req_stop_send_recv(struct Curl_easy *data);
 

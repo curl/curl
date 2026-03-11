@@ -167,7 +167,7 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
 
 /**
  * Add the headers to the given `dynbuf` in HTTP/1.1 format with
- * cr+lf line endings. Will NOT output a last empty line.
+ * CR+LF line endings. Does NOT output a last empty line.
  */
 CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf);
 
