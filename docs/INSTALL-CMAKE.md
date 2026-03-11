@@ -268,9 +268,12 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled and target supports threading.
 - `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
+- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
 - `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
 - `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export. Default: `OFF`
+- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
+- `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
 
 ## Disabling features
 
@@ -370,13 +373,10 @@ Details via CMake
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
-- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
 - `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
-- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
-- `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
 
 ## Dependency options (via CMake)
 
