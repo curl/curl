@@ -84,6 +84,9 @@
 #include "curlx/strcopy.h"
 #include "curlx/strdup.h"
 #include "vtls/apple.h"
+#ifdef USE_ECH
+#include "curlx/base64.h"
+#endif
 
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
@@ -3488,7 +3491,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   int trying_ech_now = 0;
   CURLcode result;
 
-  if(!ECH_ENABLED(data))
+  if(!CURLECH_ENABLED(data))
     return CURLE_OK;
 
   if(data->set.tls_ech & CURLECH_GREASE) {
@@ -4119,7 +4122,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
 #endif
 
   /* nothing to trace if not doing ECH */
-  if(!ECH_ENABLED(data))
+  if(!CURLECH_ENABLED(data))
     return;
 #ifndef HAVE_BORINGSSL_LIKE
   rv = SSL_ech_get1_retry_config(ssl, &rcs, &rcl);
@@ -4317,7 +4320,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     Curl_ossl_report_handshake(data, octx);
 
 #if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) && !defined(HAVE_BORINGSSL_LIKE)
-    if(ECH_ENABLED(data)) {
+    if(CURLECH_ENABLED(data)) {
       char *inner = NULL, *outer = NULL;
       const char *status = NULL;
       int rv;

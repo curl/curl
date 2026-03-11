@@ -65,6 +65,9 @@
 #include "curlx/strdup.h"
 #include "curlx/strcopy.h"
 #include "vtls/x509asn1.h"
+#ifdef USE_ECH
+#include "curlx/base64.h"
+#endif
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
@@ -1345,7 +1348,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 #endif /* HAVE_SECURE_RENEGOTIATION */
 
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
-  if(ECH_ENABLED(data)) {
+  if(CURLECH_ENABLED(data)) {
     int trying_ech_now = 0;
 
     if(data->set.str[STRING_ECH_PUBLIC]) {
