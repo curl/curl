@@ -26,7 +26,7 @@
 #include "curl_setup.h"
 
 /*
- * Prototypes for library-wide functions provided by url.c
+ * Prototypes for library-wide functions
  */
 
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
