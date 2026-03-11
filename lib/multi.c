@@ -1867,7 +1867,7 @@ static void multi_posttransfer(struct Curl_easy *data)
  * multi_follow() handles the URL redirect magic. Pass in the 'newurl' string
  * as given by the remote server and set up the new URL to request.
  *
- * This function DOES NOT FREE the given url.
+ * This function DOES NOT FREE the given URL.
  */
 static CURLcode multi_follow(struct Curl_easy *data,
                              const struct Curl_scheme *handler,
