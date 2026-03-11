@@ -710,7 +710,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   /* get the session ID data size */
   gnutls_session_get_data(session, NULL, &sdata_len);
-  if(!sdata_len) /* gnutls does this for some version combinations */
+  if(!sdata_len) /* GnuTLS does this for some version combinations */
     return CURLE_OK;
 
   sdata = curlx_malloc(sdata_len); /* get a buffer for it */
@@ -1116,7 +1116,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   Curl_alpn_copy(&alpns, alpns_requested);
 
   /* This might be a reconnect, so we check for a session ID in the cache
-     to speed up things. We need to do this before constructing the gnutls
+     to speed up things. We need to do this before constructing the GnuTLS
      session since we need to set flags depending on the kind of reuse. */
   if(conn_config->cache_session && !conn_config->verifystatus) {
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
@@ -1693,7 +1693,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 
   /* initialize an X.509 certificate structure. */
   if(gnutls_x509_crt_init(&x509_cert)) {
-    failf(data, "failed to init gnutls x509_crt");
+    failf(data, "failed to init GnuTLS x509_crt");
     *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
     result = CURLE_SSL_CONNECT_ERROR;
     goto out;
@@ -1777,7 +1777,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   if(config->issuercert) {
     gnutls_datum_t issuerp;
     if(gnutls_x509_crt_init(&x509_issuer)) {
-      failf(data, "failed to init gnutls x509_crt for issuer");
+      failf(data, "failed to init GnuTLS x509_crt for issuer");
       result = CURLE_SSL_ISSUER_ERROR;
       goto out;
     }
@@ -1890,7 +1890,7 @@ static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
       goto out;
     }
     else if(!n) {
-      /* gnutls is buggy, it *SHOULD* return the amount of bytes it took in.
+      /* GnuTLS is buggy, it *SHOULD* return the amount of bytes it took in.
        * Instead it returns 0 if everything was written. */
       n = (ssize_t)blen;
     }
