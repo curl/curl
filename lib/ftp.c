@@ -232,8 +232,8 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
       fileName = rawPath;  /* this is a full file path */
     /*
       else: ftpc->file is not used anywhere other than for operations on
-            a file. In other words, never for directory operations.
-            So we can safely leave filename as NULL here and use it as a
+            a file. In other words, never for directory operations,
+            so we can safely leave filename as NULL here and use it as a
             argument in dir/file decisions.
     */
     break;
@@ -1942,8 +1942,8 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
                behavior.
 
                In addition: asking for the size for 'TYPE A' transfers is not
-               constructive since servers do not report the converted size. So
-               skip it.
+               constructive since servers do not report the converted size.
+               Thus, skip it.
             */
             result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
             if(!result)

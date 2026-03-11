@@ -553,12 +553,12 @@ static void async_ares_hostbyname_cb(void *user_data,
        do not want to wait _too_ long or users will think requests are slow
        when IPv6 lookups do not actually work (but IPv4 ones do).
 
-       So, now that we have a usable answer (some IPv4 addresses, some IPv6
+       Now that we have a usable answer (some IPv4 addresses, some IPv6
        addresses, or "no such domain"), we start a timeout for the remaining
        pending responses. Even though it is typical that this resolved
        request came back quickly, that need not be the case. It might be that
        this completing request did not get a result from the first DNS
-       server or even the first round of the whole DNS server pool. So it
+       server or even the first round of the whole DNS server pool. This
        could already be a long time after we issued the DNS queries in
        the first place. Without modifying c-ares, we cannot know exactly
        where in its retry cycle we are. We could guess based on how much

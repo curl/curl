@@ -688,8 +688,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
           if(scope_ptr) {
             /* The "myhost" string either comes from Curl_if2ip or from
                Curl_printable_address. The latter returns only numeric scope
-               IDs and the former returns none at all. So the scope ID, if
-               present, is known to be numeric */
+               IDs and the former returns none at all. Making the scope ID,
+               if present, known to be numeric */
             curl_off_t scope_id;
             if(curlx_str_number((const char **)CURL_UNCONST(&scope_ptr),
                                 &scope_id, UINT_MAX))

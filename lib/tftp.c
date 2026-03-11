@@ -370,9 +370,9 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
       int rblock = getrpacketblock(&state->rpacket);
 
       if(rblock != state->block &&
-         /* There is a bug in tftpd-hpa that causes it to send us an ack for
-          * 65535 when the block number wraps to 0. So when we are expecting
-          * 0, also accept 65535. See
+         /* There is a bug in tftpd-hpa that causes it to send us an ACK for
+          * 65535 when the block number wraps to 0. To handle it, when we are
+          * expecting 0, also accept 65535. See
           * https://www.syslinux.org/archives/2010-September/015612.html
           * */
          !(state->block == 0 && rblock == 65535)) {
@@ -418,7 +418,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
       return CURLE_OK;
     }
 
-    /* TFTP considers data block size < 512 bytes as an end of session. So
+    /* TFTP considers data block size < 512 bytes as an end of session, so
      * in some cases we must wait for additional data to build full (512 bytes)
      * data block.
      * */
