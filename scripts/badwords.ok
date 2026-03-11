@@ -13,7 +13,5 @@ lib/::So
 lib/::will
 lib/::Will
 lib/::WILL
-lib/vssh/::will
-lib/vtls/::will
 src/::will
 src/::Will

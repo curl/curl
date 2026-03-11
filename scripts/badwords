@@ -111,10 +111,18 @@ sub highlight {
         # whitelisted filename + word
         return;
     }
-    $ch = dirname($ch) . "/" . "::" . $w;
+    my $dir = dirname($f);
+    $ch = $dir . "/" . "::" . $w;
     if($wl{$ch}) {
         # whitelisted dirname + word
         return;
+    }
+    if($dir ne dirname($dir)) {
+        $ch = dirname($dir) . "/" . "::" . $w;
+        if($wl{$ch}) {
+            # whitelisted upper dirname + word
+            return;
+        }
     }
 
     print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
