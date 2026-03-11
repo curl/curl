@@ -205,7 +205,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static int setup(struct input *t, int num, const char *upload)
 {
-  char url[256];
+  char urlup[256];
   char filename[128];
   struct stat file_info;
   curl_off_t uploadsize;
@@ -222,7 +222,7 @@ static int setup(struct input *t, int num, const char *upload)
     return 1;
   }
 
-  snprintf(url, sizeof(url), "https://localhost:8443/upload-%d", num);
+  snprintf(urlup, sizeof(urlup), "https://localhost:8443/upload-%d", num);
 
   t->in = fopen(upload, "rb");
   if(!t->in) {
@@ -257,7 +257,7 @@ static int setup(struct input *t, int num, const char *upload)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadsize);
 
     /* send in the URL to store the upload as */
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, urlup);
 
     /* upload please */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
