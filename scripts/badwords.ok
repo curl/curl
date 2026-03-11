@@ -11,7 +11,6 @@ include/curl/::will
 lib/::will
 lib/::Will
 lib/::WILL
-lib/vauth/::will
 lib/vssh/::will
 lib/vtls/::will
 src/::will
