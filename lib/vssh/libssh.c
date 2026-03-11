@@ -1347,7 +1347,7 @@ static int myssh_in_SFTP_POSTQUOTE_INIT(struct Curl_easy *data,
 }
 
 static int quote_error(struct Curl_easy *data,
-                              struct ssh_conn *sshc)
+                       struct ssh_conn *sshc)
 {
   failf(data, "Suspicious data after the command line");
   Curl_safefree(sshc->quote_path1);
