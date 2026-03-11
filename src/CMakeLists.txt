@@ -66,7 +66,7 @@ if(CURL_CA_EMBED_SET)
     list(APPEND _curl_cfiles_gen "tool_ca_embed.c")
     list(APPEND _curl_definitions "CURL_CA_EMBED")
   else()
-    message(WARNING "Perl not found. Will not embed the CA bundle.")
+    message(WARNING "Perl not found. Cannot embed the CA bundle.")
   endif()
 endif()
 

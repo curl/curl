@@ -7,4 +7,5 @@ set -eu
 
 cd "$(dirname "${0}")"/..
 
-scripts/badwords -w scripts/badwords.ok '**.md' src lib include docs/examples projects/OS400/README.OS400 < scripts/badwords.txt
+scripts/badwords -a -w scripts/badwords.ok src lib include docs/examples < scripts/badwords.txt
+scripts/badwords    -w scripts/badwords.ok '**.md' projects/OS400/README.OS400 < scripts/badwords.txt
