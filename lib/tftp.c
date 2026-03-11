@@ -175,7 +175,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
   /* Average reposting an ACK after 5 seconds */
   state->retry_max = (int)timeout / 5;
 
-  /* But bound the total number */
+  /* Bound the total number */
   if(state->retry_max < 3)
     state->retry_max = 3;
 
