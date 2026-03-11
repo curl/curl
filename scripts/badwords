@@ -113,7 +113,7 @@ sub highlight {
     }
     $ch = dirname($ch) . "/" . "::" . $w;
     if($wl{$ch}) {
-        # whitelisted basename + word
+        # whitelisted dirname + word
         return;
     }
 
