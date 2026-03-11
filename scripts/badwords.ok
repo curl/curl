@@ -8,6 +8,12 @@ docs/FAQ.md::will
 docs/FAQ.md::Will
 lib/urldata.h:: url
 include/curl/::will
+lib/::But
+lib/::So
 lib/::will
 lib/::Will
 lib/::WILL
+lib/vssh/::will
+lib/vtls/::will
+src/::will
+src/::Will
