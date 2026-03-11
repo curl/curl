@@ -680,6 +680,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   if(!ca)
     return NULL;
 
+  memset(&sa6, 0, sizeof(sa6));
   sa6.sin6_family = AF_INET6;
   sa6.sin6_port = htons(port16);
   sa6.sin6_flowinfo = 0;
