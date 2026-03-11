@@ -1400,8 +1400,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 /*
  * Curl_compareheader()
  *
- * Returns TRUE if 'headerline' contains the 'header' with given 'content'.
- * Pass headers WITH the colon.
+ * Returns TRUE if 'headerline' contains the 'header' with given 'content'
+ * (within a comma-separated list of tokens). Pass 'header' WITH the colon.
  */
 bool Curl_compareheader(const char *headerline, /* line to check */
                         const char *header, /* header keyword _with_ colon */
@@ -1435,9 +1435,20 @@ bool Curl_compareheader(const char *headerline, /* line to check */
   if(curlx_strlen(&val) >= clen) {
     size_t len;
     p = curlx_str(&val);
-    for(len = curlx_strlen(&val); len >= curlx_strlen(&val); len--, p++) {
-      if(curl_strnequal(p, content, clen))
+    for(len = curlx_strlen(&val); len >= clen;) {
+      struct Curl_str next;
+      const char *o = p;
+      /* after a match there must be a comma, space, newline or null byte */
+      if(curl_strnequal(p, content, clen) &&
+         ((p[clen] == ',') || ISBLANK(p[clen]) || ISNEWLINE(p[clen]) ||
+          !p[clen]))
         return TRUE; /* match! */
+      /* advance to the next comma */
+      if(curlx_str_until(&p, &next, MAX_HTTP_RESP_HEADER_SIZE, ',') ||
+         curlx_str_single(&p, ','))
+        break; /* no comma, get out */
+      curlx_str_passblanks(&p);
+      len -= (p - o);
     }
   }
   return FALSE; /* no match */
