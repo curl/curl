@@ -1346,7 +1346,7 @@ static int myssh_in_SFTP_POSTQUOTE_INIT(struct Curl_easy *data,
   return SSH_NO_ERROR;
 }
 
-static int return_quote_error(struct Curl_easy *data,
+static int quote_error(struct Curl_easy *data,
                               struct ssh_conn *sshc)
 {
   failf(data, "Suspicious data after the command line");
@@ -1467,7 +1467,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
       return SSH_NO_ERROR;
     }
     if(*cp)
-      return return_quote_error(data, sshc);
+      return quote_error(data, sshc);
     sshc->quote_attrs = NULL;
     myssh_to(data, sshc, SSH_SFTP_QUOTE_STAT);
     return SSH_NO_ERROR;
@@ -1490,13 +1490,13 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
       return SSH_NO_ERROR;
     }
     if(*cp)
-      return return_quote_error(data, sshc);
+      return quote_error(data, sshc);
     myssh_to(data, sshc, SSH_SFTP_QUOTE_SYMLINK);
     return SSH_NO_ERROR;
   }
   else if(!strncmp(cmd, "mkdir ", 6)) {
     if(*cp)
-      return return_quote_error(data, sshc);
+      return quote_error(data, sshc);
     /* create directory */
     myssh_to(data, sshc, SSH_SFTP_QUOTE_MKDIR);
     return SSH_NO_ERROR;
@@ -1518,27 +1518,27 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
       return SSH_NO_ERROR;
     }
     if(*cp)
-      return return_quote_error(data, sshc);
+      return quote_error(data, sshc);
     myssh_to(data, sshc, SSH_SFTP_QUOTE_RENAME);
     return SSH_NO_ERROR;
   }
   else if(!strncmp(cmd, "rmdir ", 6)) {
     /* delete directory */
     if(*cp)
-      return return_quote_error(data, sshc);
+      return quote_error(data, sshc);
     myssh_to(data, sshc, SSH_SFTP_QUOTE_RMDIR);
     return SSH_NO_ERROR;
   }
   else if(!strncmp(cmd, "rm ", 3)) {
     if(*cp)
-      return return_quote_error(data, sshc);
+      return quote_error(data, sshc);
     myssh_to(data, sshc, SSH_SFTP_QUOTE_UNLINK);
     return SSH_NO_ERROR;
   }
 #ifdef HAS_STATVFS_SUPPORT
   else if(!strncmp(cmd, "statvfs ", 8)) {
     if(*cp)
-      return return_quote_error(data, sshc);
+      return quote_error(data, sshc);
     myssh_to(data, sshc, SSH_SFTP_QUOTE_STATVFS);
     return SSH_NO_ERROR;
   }
