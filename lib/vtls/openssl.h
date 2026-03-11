@@ -121,7 +121,7 @@ extern const struct Curl_ssl Curl_ssl_openssl;
 
 /**
  * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and
- * easy handle `data`. Will allow reuse of a shared cache if suitable
+ * easy handle `data`. Allows reuse of a shared cache if suitable
  * and configured.
  */
 CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,

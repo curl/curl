@@ -16,5 +16,4 @@ lib/vauth/::will
 lib/vquic/::will
 lib/vssh/::will
 lib/vtls/::will
-lib/vtls/::Will
 src/::will
