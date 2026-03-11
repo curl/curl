@@ -40,7 +40,7 @@ FTP PORT download, no data conn and no positive preliminary reply
 s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
 
-# The protocol part does not include QUIT simply because the error is
+# The protocol part does not include QUIT because the error is
 # CURLE_OPERATION_TIMEDOUT (28) which is a generic timeout error without
 # specifically saying for which connection it concerns, and for timeouts libcurl
 # marks the control channel as "invalid". As this test case times out for the

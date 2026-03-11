@@ -91,10 +91,10 @@ Showing us a real source code example repeating your problem is the best way
 to get our attention and it greatly increases our chances to understand your
 problem and to work on a fix (if we agree it truly is a problem).
 
-Lots of problems that appear to be libcurl problems are actually just abuses
-of the libcurl API or other malfunctions in your applications. It is advised
-that you run your problematic program using a memory debug tool like valgrind
-or similar before you post memory-related or "crashing" problems to us.
+Lots of problems that appear to be libcurl problems are instead abuses of the
+libcurl API or other malfunctions in your applications. It is advised that you
+run your problematic program using a memory debug tool like valgrind or
+similar before you post memory-related or "crashing" problems to us.
 
 ## Who fixes the problems
 
@@ -106,9 +106,9 @@ All developers that take on reported bugs do this on a voluntary basis. We do
 it out of an ambition to keep curl and libcurl excellent products and out of
 pride.
 
-Please do not assume that you can just lump over something to us and it then
-magically gets fixed after some given time. Most often we need feedback and
-help to understand what you have experienced and how to repeat a problem.
+Please do not assume that you can lump over something to us and it then
+automatically gets fixed after some given time. Most often we need feedback
+and help to understand what you have experienced and how to repeat a problem.
 Then we may only be able to assist YOU to debug the problem and to track down
 the proper fix.
 
@@ -165,11 +165,10 @@ Even if you cannot immediately upgrade your application/system to run the
 latest curl version, you can most often at least run a test version or
 experimental build or similar, to get this confirmed or not.
 
-At times people insist that they cannot upgrade to a modern curl version, but
-instead, they "just want the bug fixed". That is fine, just do not count on us
-spending many cycles on trying to identify which single commit, if that is
-even possible, that at some point in the past fixed the problem you are now
-experiencing.
+At times people insist that they cannot upgrade to a modern curl version, they
+only "want the bug fixed". That is fine, but do not count on us spending many
+cycles on trying to identify which single commit, if that is even possible,
+that at some point in the past fixed the problem you are now experiencing.
 
 Security wise, it is almost always a bad idea to lag behind the current curl
 versions by a lot. We keep discovering and reporting security problems

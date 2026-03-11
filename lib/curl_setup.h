@@ -90,7 +90,7 @@
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), getenv(), sscanf() */
+#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), sscanf() */
 #endif
 #endif /* _MSC_VER */
 
@@ -708,7 +708,7 @@
 #elif defined(USE_ARES)
 #  define CURLRES_ASYNCH
 #  define CURLRES_ARES
-/* now undef the stock libc functions just to avoid them being used */
+/* now undef the stock libc functions to avoid them being used */
 #  undef HAVE_GETADDRINFO
 #  undef HAVE_FREEADDRINFO
 #else

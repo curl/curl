@@ -139,8 +139,8 @@ int main(void)
     recipients = curl_slist_append(recipients, CC_MAIL);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
-    /* We are using a callback function to specify the payload (the headers and
-     * body of the message). You could just use the CURLOPT_READDATA option to
+    /* We are using a callback function to specify the payload (the headers
+     * and body of the message). You can use the CURLOPT_READDATA option to
      * specify a FILE pointer to read from. */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);

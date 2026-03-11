@@ -493,7 +493,7 @@ static CURLcode mbed_load_cacert(struct Curl_cfilter *cf,
 
   if(ca_info_blob && verifypeer) {
 #ifdef MBEDTLS_PEM_PARSE_C
-    /* if DER or a null-terminated PEM just process using
+    /* if DER or a null-terminated PEM process using
        mbedtls_x509_crt_parse(). */
     if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER")) ||
        ((char *)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0') {
@@ -605,7 +605,7 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
 
   if(ssl_cert_blob) {
 #ifdef MBEDTLS_PEM_PARSE_C
-    /* if DER or a null-terminated PEM just process using
+    /* if DER or a null-terminated PEM process using
        mbedtls_x509_crt_parse(). */
     if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER")) ||
        ((char *)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0') {
@@ -814,6 +814,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
 #endif
 
 #if defined(MBEDTLS_SSL_SESSION_TICKETS) && \
+  defined(MBEDTLS_SSL_PROTO_TLS1_3) &&      \
   MBEDTLS_VERSION_NUMBER >= 0x03060100 &&   \
   MBEDTLS_VERSION_NUMBER < 0x04000000
   /* New in mbedTLS 3.6.1, need to enable, default is now disabled. 4.0.0

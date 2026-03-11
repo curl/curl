@@ -42,6 +42,19 @@ general.
 
 TLS-SRP support gets removed in August 2026.
 
+## SMB goes opt-in
+
+The SMB protocol has weak security and is rarely used these days. After curl
+8.19.0 SMB support becomes opt-in.
+
+## NTLM goes opt-in
+
+The NTLM authentication method has weak security and is rarely used these
+days. It has been deprecated by Microsoft and does not work over HTTP/2 or
+HTTP/3.
+
+After curl 8.19.0 NTLM support becomes opt-in.
+
 ## Past removals
 
 - axTLS (removed in 7.63.0)

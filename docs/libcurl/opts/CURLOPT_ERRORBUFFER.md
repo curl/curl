@@ -31,9 +31,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ERRORBUFFER, char *buf);
 # DESCRIPTION
 
 Pass a char pointer to a buffer that libcurl may use to store human readable
-error messages on failures or problems. This may be more helpful than just the
-return code from curl_easy_perform(3) and related functions. The buffer must
-be at least **CURL_ERROR_SIZE** bytes big.
+error messages on failures or problems. This may be more helpful than the
+single return code from curl_easy_perform(3) and related functions. The buffer
+must be at least **CURL_ERROR_SIZE** bytes big.
 
 You must keep the associated buffer available until libcurl no longer needs
 it. Failing to do so might cause odd behavior or even crashes. libcurl might

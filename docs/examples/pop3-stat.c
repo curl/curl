@@ -49,7 +49,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This is just the server URL */
+    /* This is the server URL */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com");
 
     /* Set the STAT command */

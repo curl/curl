@@ -105,7 +105,7 @@ static void rlimit_tune_steps(struct Curl_rlimit *r,
 
   /* Calculate tokens for the last step and the ones before. */
   tokens_last = tokens_total / 100;
-  if(!tokens_last) /* less than 100 total, just use 1 */
+  if(!tokens_last) /* less than 100 total, use 1 */
     tokens_last = 1;
   else if(tokens_last > CURL_RLIMIT_MIN_RATE)
     tokens_last = CURL_RLIMIT_MIN_RATE;

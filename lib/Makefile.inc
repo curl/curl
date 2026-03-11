@@ -32,6 +32,7 @@ LIB_CURLX_CFILES =      \
   curlx/inet_pton.c     \
   curlx/multibyte.c     \
   curlx/nonblock.c      \
+  curlx/snprintf.c      \
   curlx/strcopy.c       \
   curlx/strdup.c        \
   curlx/strerr.c        \

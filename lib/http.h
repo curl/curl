@@ -39,8 +39,8 @@ typedef enum {
 
 /* When redirecting transfers. */
 typedef enum {
-  FOLLOW_NONE,  /* not used within the function, just a placeholder to
-                   allow initing to this */
+  FOLLOW_NONE,  /* not used within the function, a placeholder to allow
+                   initing to this */
   FOLLOW_FAKE,  /* only records stuff, not actually following */
   FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
                    redirect following */

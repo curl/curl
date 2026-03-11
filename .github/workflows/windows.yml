@@ -258,7 +258,7 @@ jobs:
           - { build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON', install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh2', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
           - { build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON', install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
           # { build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   , config: '--without-debug --with-schannel --disable-static', install: 'mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug', image: 'windows-2025' }
+          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', cppflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug', image: 'windows-2025' }
           - { build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: 'mingw-w64-i686-libssh2', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
@@ -301,7 +301,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         env:
-          CFLAGS: '${{ matrix.cflags }}'
+          CPPFLAGS: '${{ matrix.cppflags }}'
           MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_ENV: '${{ matrix.env }}'
@@ -309,7 +309,7 @@ jobs:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           if [ "${MATRIX_TEST}" = 'uwp' ]; then
-            CPPFLAGS='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
+            CPPFLAGS+=' -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
             if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
               gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
@@ -341,7 +341,7 @@ jobs:
               false
             fi
           else
-            export CFLAGS CPPFLAGS
+            export CFLAGS
             mkdir bld && cd bld && ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libssh2 \
@@ -633,7 +633,10 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
-        run: python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+        run: |
+          if "bld/src/curl.exe" --disable -V 2>/dev/null | grep smb; then
+            python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -851,9 +854,11 @@ jobs:
             image: 'windows-11-arm'
             openssh: 'OpenSSH-Windows'
             tflags: '--min=1650'
+            # disable SMB to save 30-60 seconds by omitting prereqs, to counteract the slower test run step
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
+              -DCURL_DISABLE_SMB=ON
               -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
 
       fail-fast: false
@@ -1029,7 +1034,7 @@ jobs:
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
             sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256}" && unzip pkg.bin && rm -f pkg.bin
           fi
-          if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
+          if "bld/src/${MATRIX_TYPE}/curl.exe" --disable -V 2>/dev/null | grep smb; then
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
 

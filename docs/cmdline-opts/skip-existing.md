@@ -18,5 +18,5 @@ Example:
 
 If there is a local file present when a download is requested, the operation
 is skipped. Note that curl cannot know if the local file was previously
-downloaded fine, or if it is incomplete etc, it just knows if there is a
-filename present in the file system or not and it skips the transfer if it is.
+downloaded fine, or if it is incomplete etc, it knows if there is a filename
+present in the file system or not and it skips the transfer if it is.

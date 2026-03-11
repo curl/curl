@@ -93,7 +93,7 @@ server's certificate.
 # Windows-specific:
 # - Use NUL instead of /dev/null.
 # - OpenSSL may wait for input instead of disconnecting. Hit enter.
-# - If you do not have sed, then just copy the certificate into a file:
+# - If you do not have sed, then copy the certificate into a file:
 #   Lines from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE-----.
 #
 openssl s_client -servername www.example.com -connect www.example.com:443 \

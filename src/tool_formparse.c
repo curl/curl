@@ -821,7 +821,7 @@ int formparse(const char *input,
         SET_TOOL_MIME_PTR(part, type);
         SET_TOOL_MIME_PTR(part, encoder);
 
-        /* *contp could be '\0', so we just check with the delimiter */
+        /* *contp could be '\0', so we check with the delimiter */
       } while(sep); /* loop if there is another filename */
       part = (*mimecurrent)->subparts;  /* Set name on group. */
     }

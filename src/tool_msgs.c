@@ -55,8 +55,8 @@ static void voutf(const char *prefix, const char *fmt, va_list ap)
         cut--;
       }
       if(cut == 0)
-        /* not a single cutting position was found, just cut it at the
-           max text width then! */
+        /* not a single cutting position was found, cut it at the max text
+           width then! */
         cut = width - 1;
 
       (void)fwrite(ptr, cut + 1, 1, tool_stderr);

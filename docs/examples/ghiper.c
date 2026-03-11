@@ -50,7 +50,7 @@
  * The fifo buffer is handled almost instantly, so you can even add more URL's
  * while the previous requests are still being downloaded.
  *
- * This is purely a demo app, all retrieved data is simply discarded by
+ * This is purely a demo app, all retrieved data is discarded by
  * the write callback.
  *
  */
@@ -177,7 +177,7 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
           timeout_ms, timeout.tv_sec, timeout.tv_usec);
 
   /*
-   * if timeout_ms is -1, just delete the timer
+   * if timeout_ms is -1, delete the timer
    *
    * For other values of timeout_ms, this should set or *update* the timer to
    * the new value

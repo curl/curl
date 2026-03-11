@@ -20,8 +20,8 @@ of `llist.c`). Use the functions.
 initialized with a call to `Curl_llist_init()` before it can be used
 
 To clean up a list, call `Curl_llist_destroy()`. Since the linked lists
-themselves do not allocate memory, it can also be fine to just *not* clean up
-the list.
+themselves do not allocate memory, it can also be fine to *not* clean up the
+list.
 
 ## Add a node
 
@@ -47,9 +47,9 @@ Example: to add a `struct foobar` to a linked list. Add a node struct within
 it:
 
     struct foobar {
-       char *random;
-       struct Curl_llist_node storage; /* can be anywhere in the struct */
-       char *data;
+      char *random;
+      struct Curl_llist_node storage; /* can be anywhere in the struct */
+      char *data;
     };
 
     struct Curl_llist barlist; /* the list for foobar entries */
@@ -77,18 +77,18 @@ To iterate over a list: first get the head entry and then iterate over the
 nodes as long there is a next. Each node has an *element* associated with it,
 the custom pointer you stored there. Usually a struct pointer or similar.
 
-     struct Curl_llist_node *iter;
+    struct Curl_llist_node *iter;
 
-     /* get the first entry of the 'barlist' */
-     iter = Curl_llist_head(&barlist);
+    /* get the first entry of the 'barlist' */
+    iter = Curl_llist_head(&barlist);
 
-     while(iter) {
-       /* extract the element pointer from the node */
-       struct foobar *elem = Curl_node_elem(iter);
+    while(iter) {
+      /* extract the element pointer from the node */
+      struct foobar *elem = Curl_node_elem(iter);
 
-       /* advance to the next node in the list */
-       iter = Curl_node_next(iter);
-     }
+      /* advance to the next node in the list */
+      iter = Curl_node_next(iter);
+    }
 
 # Function overview
 

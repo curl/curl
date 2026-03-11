@@ -119,7 +119,7 @@ syntax:
 ~~~
 
 Quoted source code should start with `~~~c` and end with `~~~` while regular
-quotes can start with `~~~` or just be indented with 4 spaces.
+quotes can start with `~~~` or be indented with 4 spaces.
 
 Headers at top-level `#` get converted to `.SH`.
 
@@ -134,8 +134,7 @@ Write italics like:
     This is *italics*.
 
 Due to how man pages do not support backticks especially formatted, such
-occurrences in the source are instead just using italics in the generated
-output:
+occurrences in the source are instead using italics in the generated output:
 
     This `word` appears in italics.
 

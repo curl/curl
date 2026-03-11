@@ -287,10 +287,10 @@ static void remove_expired(struct CookieInfo *ci)
   /*
    * If the earliest expiration timestamp in the jar is in the future we can
    * skip scanning the whole jar and instead exit early as there will not be
-   * any cookies to evict. If we need to evict however, reset the
-   * next_expiration counter in order to track the next one. In case the
-   * recorded first expiration is the max offset, then perform the safe
-   * fallback of checking all cookies.
+   * any cookies to evict. If we need to evict, reset the next_expiration
+   * counter in order to track the next one. In case the recorded first
+   * expiration is the max offset, then perform the safe fallback of checking
+   * all cookies.
    */
   if(now < ci->next_expiration &&
      ci->next_expiration != CURL_OFF_T_MAX)
@@ -366,8 +366,7 @@ static bool invalid_octets(const char *ptr, size_t len)
 
 /* The maximum length we accept a date string for the 'expire' keyword. The
    standard date formats are within the 30 bytes range. This adds an extra
-   margin just to make sure it realistically works with what is used out
-   there.
+   margin to make sure it realistically works with what is used out there.
 */
 #define MAX_DATE_LENGTH 80
 
@@ -397,7 +396,7 @@ static CURLcode storecookie(struct Cookie *co, struct Curl_str *cp,
       /* No path was given in the header line, set the default */
       const char *endslash = strrchr(path, '/');
       if(endslash)
-        plen = (endslash - path + 1); /* include end slash */
+        plen = endslash - path + 1; /* include end slash */
       else
         plen = strlen(path);
     }
@@ -1314,8 +1313,8 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   if(matches) {
     /*
      * Now we need to make sure that if there is a name appearing more than
-     * once, the longest specified path version comes first. To make this
-     * the swiftest way, we just sort them all based on path length.
+     * once, the longest specified path version comes first. To make this the
+     * swiftest way, we sort them all based on path length.
      */
     struct Cookie **array;
     size_t i;

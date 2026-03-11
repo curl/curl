@@ -79,23 +79,31 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END CERTIFICATE-----\n";
 
-  BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
-  X509_STORE *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  CURLcode result = CURLE_ABORTED_BY_CALLBACK;
+  BIO *cbio = NULL;
+  X509_STORE *cts;
   ossl_valsize_t i;
   STACK_OF(X509_INFO) * inf;
 
   (void)curl;
   (void)pointer;
 
-  if(!cts || !cbio) {
-    return CURLE_ABORTED_BY_CALLBACK;
+  cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  if(!cts) {
+    printf("SSL_CTX_get_cert_store() failed\n");
+    goto out;
+  }
+
+  cbio = BIO_new_mem_buf(mypem, sizeof(mypem) - 1);
+  if(!cbio) {
+    printf("BIO_new_mem_buf() failed\n");
+    goto out;
   }
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
-
   if(!inf) {
-    BIO_free(cbio);
-    return CURLE_ABORTED_BY_CALLBACK;
+    printf("PEM_X509_INFO_read_bio() failed\n");
+    goto out;
   }
 
   for(i = 0; i < sk_X509_INFO_num(inf); i++) {
@@ -109,9 +117,15 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   }
 
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
-  BIO_free(cbio);
 
-  return CURLE_OK;
+  result = CURLE_OK;
+
+out:
+
+  if(cbio)
+    BIO_free(cbio);
+
+  return result;
 }
 
 int main(void)
@@ -164,7 +178,7 @@ int main(void)
 
     /* second try: retrieve page using cacerts' certificate -> succeeds to
      * load the certificate by installing a function doing the necessary
-     * "modifications" to the SSL CONTEXT just before link init
+     * "modifications" to the SSL CONTEXT before link init
      */
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
     result = curl_easy_perform(curl);

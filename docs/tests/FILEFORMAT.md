@@ -165,7 +165,7 @@ Available substitute variables include:
 - `%FTP6PORT` - IPv6 port number of the FTP server
 - `%FTPPORT` - Port number of the FTP server
 - `%FTPSPORT` - Port number of the FTPS server
-- `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a
+- `%FTPTIME2` - Timeout in seconds that should be sufficient to receive a
   response from the test FTP server
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
@@ -274,7 +274,7 @@ the HTTP server overrides the part number response returned for a subsequent
 request made by the same test to `previous part number + 1`. For example, if a
 test makes a request which causes the server to return `<data>` that contains
 keyword `swsbounce` then for the next response it ignores the requested part
-number and instead returns `<data1>`. And if `<data1>` contains keyword
+number and instead returns `<data1>`. If `<data1>` contains keyword
 `swsbounce` then the next response is `<data2>` and so on. This is useful for
 auth tests and similar.
 
@@ -401,7 +401,7 @@ issue.
 - `auth_required` if this is set and a POST/PUT is made without auth, the
   server does NOT wait for the full request body to get sent
 - `delay: [msecs]` - delay this amount after connection
-- `idle` - do nothing after receiving the request, just "sit idle"
+- `idle` - do nothing after receiving the request, "sit idle"
 - `stream` - continuously send data to the client, never-ending
 - `writedelay: [msecs]` delay this amount between reply packets
 - `skip: [num]` - instructs the server to ignore reading this many bytes from
@@ -465,10 +465,12 @@ What server(s) this test case requires/uses. Available servers:
 - `telnet`
 - `tftp`
 
-Give only one per line. This subsection is mandatory (use `none` if no servers
-are required). Servers that require a special server certificate can have the
-PEM certificate filename (found in the `certs` directory) appended to the
-server name separated by a space.
+Give only one per line. If a test does not require any servers, the `<server>`
+subsection should be omitted.
+
+Servers that require a special server certificate can
+have the PEM certificate filename (found in the `certs` directory) appended to
+the server name separated by a space.
 
 ### `<features>`
 A list of features that MUST be present in the client/library for this test to
@@ -587,8 +589,7 @@ Set the given environment variables to the specified value before the actual
 command is run. They are restored back to their former values again after the
 command has been run.
 
-If the variable name has no assignment, no `=`, then that variable is just
-deleted.
+If the variable name has no assignment, no `=`, then that variable is deleted.
 
 ### `<command [option="no-q/no-output/no-include/no-memdebug/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.

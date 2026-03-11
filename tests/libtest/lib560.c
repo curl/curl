@@ -24,7 +24,7 @@
 #include "first.h"
 
 /*
- * Simply download an HTTPS file!
+ * Download an HTTPS file!
  *
  * This test was added after the HTTPS-using-multi-interface with OpenSSL
  * regression of 7.19.1 to hopefully prevent this embarrassing mistake from
@@ -43,9 +43,7 @@ static CURLcode test_lib560(const char *URL)
 
   start_test_timing();
 
-  /*
-  ** curl_global_init called indirectly from curl_easy_init.
-  */
+  /* curl_global_init called indirectly from curl_easy_init */
 
   easy_init(curl);
 

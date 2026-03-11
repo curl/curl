@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-/* Test servers simply are standalone programs that do not use libcurl
+/* Test servers are standalone programs that do not use libcurl
  * library.  For convenience and to ease portability of these servers,
  * some source code files from the libcurl subdirectory are also used
  * to build the servers.  In order to achieve proper linkage of these
@@ -64,9 +64,9 @@ extern const struct entry_s s_entries[];
 
 #include <curlx/curlx.h>
 
-/* adjust for old MSVC */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#  define snprintf _snprintf
+#ifdef _WIN32
+#include <curlx/snprintf.h>
+#define snprintf curlx_win32_snprintf
 #endif
 
 #ifdef _WIN32

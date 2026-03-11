@@ -74,23 +74,20 @@
 #define CURLPROTO_WSS    0L
 #endif
 
+#define CURLPROTO_MQTTS  (1LL << 32)
+
+#define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)
+
 /* the default protocols accepting a redirect to */
 #define CURLPROTO_REDIR (CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP | \
                          CURLPROTO_FTPS)
 
-/* This should be undefined once we need bit 32 or higher */
-#define PROTO_TYPE_SMALL
-
-#ifndef PROTO_TYPE_SMALL
 typedef curl_off_t curl_prot_t;
-#else
-typedef uint32_t curl_prot_t;
-#endif
 
 /* This mask is for all the old protocols that are provided and defined in the
    public header and shall exclude protocols added since which are not exposed
    in the API */
-#define CURLPROTO_MASK   (0x3ffffff)
+#define CURLPROTO_MASK   0x3ffffff
 
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
@@ -517,8 +514,8 @@ struct Curl_scheme {
   const struct Curl_protocol *run; /* implementation */
   curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
                              specific protocol bit */
-  curl_prot_t family;     /* single bit for protocol family; basically the
-                             non-TLS name of the protocol this is */
+  curl_prot_t family;     /* single bit for protocol family; the non-TLS name
+                             of the protocol this is */
   uint32_t flags;         /* Extra particular characteristics, see PROTOPT_* */
   uint16_t defport;       /* Default port. */
 };
@@ -620,7 +617,6 @@ struct connectdata {
   struct Curl_hash meta_hash;
 
   struct hostname host;
-  char *hostname_resolve; /* hostname to resolve to address, allocated */
   char *secondaryhostname; /* secondary socket hostname (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
@@ -671,7 +667,7 @@ struct connectdata {
    * for concurrency reasons. That multi might run in another thread.
    * `attached_multi` is set by the first transfer attached and cleared
    * when the last one is detached.
-   * NEVER call anything on this multi, just check for equality. */
+   * NEVER call anything on this multi, check for equality. */
   struct Curl_multi *attached_multi;
 
   /*************** Request - specific items ************/
@@ -1268,7 +1264,7 @@ enum dupstring {
 
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
 
-  STRING_LAST /* not used, just an end-of-list marker */
+  STRING_LAST /* not used, an end-of-list marker */
 };
 
 enum dupblob {

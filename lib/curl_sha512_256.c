@@ -53,7 +53,7 @@
  * The bug was fixed in NetBSD 9.4 release, NetBSD 10.0 release,
  * NetBSD 10.99.11 development.
  * It is safe to apply the workaround even if the bug is not present, as
- * the workaround just reduces performance slightly. */
+ * the workaround reduces performance slightly. */
 #      include <sys/param.h>
 #      if  __NetBSD_Version__ <   904000000 ||  \
           (__NetBSD_Version__ >=  999000000 &&  \

@@ -820,7 +820,7 @@ typedef enum {
  * CURLAUTH_NTLM_WB      - HTTP NTLM authentication delegated to winbind helper
  * CURLAUTH_BEARER       - HTTP Bearer token authentication
  * CURLAUTH_ONLY         - Use together with a single other type to force no
- *                         authentication or just that single type
+ *                         authentication or that single type
  * CURLAUTH_ANY          - All fine types set
  * CURLAUTH_ANYSAFE      - All fine types except Basic
  */
@@ -1103,8 +1103,8 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLPROTO_SMBS    (1L << 27)
 #define CURLPROTO_MQTT    (1L << 28)
 #define CURLPROTO_GOPHERS (1L << 29)
-#define CURLPROTO_MQTTS   (1L << 30)
-#define CURLPROTO_ALL     ((unsigned long)0xffffffff) /* enable everything */
+#define CURLPROTO_ALL     ((unsigned long)0xffffffff) /* old-style enable
+                                                         "everything" */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
@@ -1249,7 +1249,7 @@ typedef enum {
   CURLOPT(CURLOPT_QUOTE, CURLOPTTYPE_SLISTPOINT, 28),
 
   /* send FILE * or void * to store headers to, if you use a callback it
-     is simply passed to the callback unmodified */
+     is passed to the callback unmodified */
   CURLOPT(CURLOPT_HEADERDATA, CURLOPTTYPE_CBPOINT, 29),
 
   /* point to a file to read the initial cookies from, also enables
@@ -2124,7 +2124,7 @@ typedef enum {
   /* Specify URL using CURL URL API. */
   CURLOPT(CURLOPT_CURLU, CURLOPTTYPE_OBJECTPOINT, 282),
 
-  /* add trailing data just after no more data is available */
+  /* add trailing data after no more data is available */
   CURLOPT(CURLOPT_TRAILERFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 283),
 
   /* pointer to be passed to HTTP_TRAILER_FUNCTION */
@@ -2356,8 +2356,8 @@ typedef enum {
                                   Unless one is set programmatically, the
                                   .netrc will be queried. */
 enum CURL_NETRC_OPTION {
-  /* we set a single member here, just to make sure we still provide the enum,
-     but the values to use are defined above with L suffixes */
+  /* we set a single member here, to make sure we still provide the enum, but
+     the values to use are defined above with L suffixes */
   CURL_NETRC_LAST = 3
 };
 
@@ -2386,7 +2386,7 @@ enum CURL_NETRC_OPTION {
 #define CURL_TLSAUTH_SRP  1L
 
 enum CURL_TLSAUTH {
-  /* we set a single member here, just to make sure we still provide the enum,
+  /* we set a single member here, to make sure we still provide the enum,
      but the values to use are defined above with L suffixes */
   CURL_TLSAUTH_LAST = 2
 };
@@ -2409,7 +2409,7 @@ enum CURL_TLSAUTH {
 #define CURL_TIMECOND_LASTMOD      3L
 
 typedef enum {
-  /* we set a single member here, just to make sure we still provide
+  /* we set a single member here, to make sure we still provide
      the enum typedef, but the values to use are defined above with L
      suffixes */
   CURL_TIMECOND_LAST = 4
@@ -3024,9 +3024,8 @@ typedef enum {
 /* Different data locks for a single share */
 typedef enum {
   CURL_LOCK_DATA_NONE = 0,
-  /*  CURL_LOCK_DATA_SHARE is used internally to say that
-   *  the locking is just made to change the internal state of the share
-   *  itself.
+  /*  CURL_LOCK_DATA_SHARE is used internally to say that the locking is made
+   *  to change the internal state of the share itself.
    */
   CURL_LOCK_DATA_SHARE,
   CURL_LOCK_DATA_COOKIE,
@@ -3100,11 +3099,10 @@ typedef enum {
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
-/* The 'CURLVERSION_NOW' is the symbolic name meant to be used by
-   basically all programs ever that want to get version information. It is
-   meant to be a built-in version number for what kind of struct the caller
-   expects. If the struct ever changes, we redefine the NOW to another enum
-   from above. */
+/* The 'CURLVERSION_NOW' is the symbolic name meant to be used by programs
+   that want to get version information. It is meant to be a built-in
+   version number for what kind of struct the caller expects. If the struct
+   ever changes, we redefine the NOW to another enum from above. */
 #define CURLVERSION_NOW CURLVERSION_TWELFTH
 
 struct curl_version_info_data {

@@ -394,7 +394,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
   VERBOSE(const char *ongoing_auth = NULL);
 
   /* We need a rewind before uploading client read data again. The
-   * checks below just influence of the upload is to be continued
+   * checks below influence of the upload is to be continued
    * or aborted early.
    * This depends on how much remains to be sent and in what state
    * the authentication is. Some auth schemes such as NTLM do not work
@@ -705,6 +705,7 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
     if(!proxy && data->set.str[STRING_BEARER] &&
+       Curl_auth_allowed_to_host(data) &&
        !Curl_checkheaders(data, STRCONST("Authorization"))) {
       auth = "Bearer";
       result = http_output_bearer(data);
@@ -974,9 +975,8 @@ static CURLcode auth_basic(struct Curl_easy *data,
   *availp |= CURLAUTH_BASIC;
   authp->avail |= CURLAUTH_BASIC;
   if(authp->picked == CURLAUTH_BASIC) {
-    /* We asked for Basic authentication but got a 40X back
-       anyway, which basically means our name+password is not
-       valid. */
+    /* We asked for Basic authentication but got a 40X back anyway, which
+       means our name+password is not valid. */
     authp->avail = CURLAUTH_NONE;
     infof(data, "Basic authentication problem, ignoring.");
     data->state.authproblem = TRUE;
@@ -993,8 +993,8 @@ static CURLcode auth_bearer(struct Curl_easy *data,
   *availp |= CURLAUTH_BEARER;
   authp->avail |= CURLAUTH_BEARER;
   if(authp->picked == CURLAUTH_BEARER) {
-    /* We asked for Bearer authentication but got a 40X back
-       anyway, which basically means our token is not valid. */
+    /* We asked for Bearer authentication but got a 40X back anyway, which
+       means our token is not valid. */
     authp->avail = CURLAUTH_NONE;
     infof(data, "Bearer authentication problem, ignoring.");
     data->state.authproblem = TRUE;
@@ -1195,7 +1195,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     }
 
     /* the URL could not be parsed for some reason, but since this is FAKE
-       mode, just duplicate the field as-is */
+       mode, duplicate the field as-is */
     follow_url = curlx_strdup(newurl);
     if(!follow_url)
       return CURLE_OUT_OF_MEMORY;
@@ -1667,7 +1667,7 @@ CURLcode Curl_http_done(struct Curl_easy *data,
      (data->req.bytecount +
       data->req.headerbytecount -
       data->req.deductheadercount) <= 0) {
-    /* If this connection is not simply closed to be retried, AND nothing was
+    /* If this connection is not closed to be retried, AND nothing was
        read from the HTTP server (that counts), this cannot be right so we
        return an error here */
     failf(data, "Empty reply from server");
@@ -2025,7 +2025,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
       if(*cookiehost == '[') {
         char *closingbracket;
         /* since the 'cookiehost' is an allocated memory area that will be
-           freed later we cannot simply increment the pointer */
+           freed later we cannot increment the pointer */
         memmove(cookiehost, cookiehost + 1, strlen(cookiehost) - 1);
         closingbracket = strchr(cookiehost, ']');
         if(closingbracket)
@@ -2418,7 +2418,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
     return CURLE_OK;
 
   /* For really small puts we do not use Expect: headers at all, and for
-     the somewhat bigger ones we allow the app to disable it. Just make
+     the somewhat bigger ones we allow the app to disable it. Make
      sure that the expect100header is always set to the preferred value
      here. */
   ptr = Curl_checkheaders(data, STRCONST("Expect"));
@@ -2641,8 +2641,8 @@ static CURLcode http_range(struct Curl_easy *data,
                         data->state.range, total_len - 1, total_len);
       }
       else {
-        /* Range was selected and then we just pass the incoming range and
-           append total size */
+        /* Range was selected and then we pass the incoming range and append
+           total size */
         data->state.aptr.rangeline =
           curl_maprintf("Content-Range: bytes %s/%" FMT_OFF_T "\r\n",
                         data->state.range, req_clen);
@@ -3185,7 +3185,7 @@ static statusline checkprotoprefix(struct Curl_easy *data,
   (((hdlen) >= (sizeof(n) - 1)) && curl_strnequal(n, hd, sizeof(n) - 1))
 
 #define HD_VAL(hd, hdlen, n) \
-  ((((hdlen) >= (sizeof(n) - 1)) && \
+  ((((hdlen) >= (sizeof(n) - 1)) && (hd) && \
     curl_strnequal(n, hd, sizeof(n) - 1)) ? ((hd) + (sizeof(n) - 1)) : NULL)
 
 /* HTTP header has field name `n` (a string constant) and contains `v`
@@ -3278,7 +3278,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
             return CURLE_OK;
           }
         }
-        /* negative, different value or just rubbish - bad HTTP */
+        /* negative, different value or rubbish - bad HTTP */
         failf(data, "Invalid Content-Length: value");
         return CURLE_WEIRD_SERVER_REPLY;
       }
@@ -3288,11 +3288,10 @@ static CURLcode http_header_c(struct Curl_easy *data,
     HD_VAL(hd, hdlen, "Content-Encoding:") : NULL;
   if(v) {
     /*
-     * Process Content-Encoding. Look for the values: identity,
-     * gzip, deflate, compress, x-gzip and x-compress. x-gzip and
-     * x-compress are the same as gzip and compress. (Sec 3.5 RFC
-     * 2616). zlib cannot handle compress. However, errors are
-     * handled further down when the response body is processed
+     * Process Content-Encoding. Look for the values: identity, gzip, deflate,
+     * compress, x-gzip and x-compress. x-gzip and x-compress are the same as
+     * gzip and compress. (Sec 3.5 RFC 2616). zlib cannot handle compress.
+     * Errors are handled further down when the response body is processed
      */
     return Curl_build_unencoding_stack(data, v, FALSE);
   }
@@ -3757,8 +3756,8 @@ static CURLcode http_statusline(struct Curl_easy *data,
    */
   if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
      k->httpcode == 416) {
-    /* "Requested Range Not Satisfiable", just proceed and
-       pretend this is no error */
+    /* "Requested Range Not Satisfiable", proceed and pretend this is no
+       error */
     k->ignorebody = TRUE; /* Avoid appending error msg to good data. */
   }
 
@@ -4065,7 +4064,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
        * General treatment of errors when about to send data. Including :
        * "417 Expectation Failed", while waiting for 100-continue.
        *
-       * The check for close above is done simply because of something
+       * The check for close above is done because of something
        * else has already deemed the connection to get closed then
        * something else should have considered the big picture and we
        * avoid this check.

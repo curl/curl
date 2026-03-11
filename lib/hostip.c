@@ -680,6 +680,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   if(!ca)
     return NULL;
 
+  memset(&sa6, 0, sizeof(sa6));
   sa6.sin6_family = AF_INET6;
   sa6.sin6_port = htons(port16);
   sa6.sin6_flowinfo = 0;
@@ -1366,7 +1367,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
           if(curlx_str_until(&host, &target, 4096, ',')) {
             if(curlx_str_single(&host, ','))
               goto err;
-            /* survive nothing but just a comma */
+            /* survive nothing but a comma */
             continue;
           }
         }

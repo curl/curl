@@ -269,6 +269,11 @@ CURLcode Curl_h1_req_parse_read(struct h1_req_parser *parser,
   size_t nread;
 
   *pnread = 0;
+
+  DEBUGASSERT(buf);
+  if(!buf)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   while(!parser->done) {
     result = next_line(parser, buf, buflen, options, &nread);
     if(result) {

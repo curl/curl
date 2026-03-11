@@ -926,7 +926,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
 out:
   if((data->set.rtspreq == RTSPREQ_RECEIVE) &&
      (rtspc->state == RTP_PARSE_SKIP)) {
-    /* In special mode RECEIVE, we just process one chunk of network
+    /* In special mode RECEIVE, we process one chunk of network
      * data, so we stop the transfer here, if we have no incomplete
      * RTP message pending. */
     data->req.download_done = TRUE;

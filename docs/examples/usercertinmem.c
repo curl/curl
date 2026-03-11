@@ -25,10 +25,11 @@
  * Use in-memory user certificate and private key and retrieve an HTTPS page.
  * </DESC>
  */
-/* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c.
- * Note that to maintain simplicity this example does not use a CA certificate
- * for peer verification.  However, some form of peer verification
- * must be used in real circumstances when a secure connection is required.
+
+/* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c. Note that
+ * to maintain simplicity this example does not use a CA certificate for peer
+ * verification. Some form of peer verification must be used in real
+ * circumstances when a secure connection is required.
  */
 
 /* Requires: USE_OPENSSL */
@@ -51,14 +52,9 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
-  X509 *cert = NULL;
-  BIO *bio = NULL;
-  BIO *kbio = NULL;
-  EVP_PKEY *pkey;
-  int ret;
-
-  const char *mypem =
-    /* replace the XXX with the actual CA certificate */
+  /** This example uses a (fake) certificate and private key **/
+  /* replace the XXX with the actual client/user certificate */
+  static const char mypem[] =
     "-----BEGIN CERTIFICATE-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
@@ -71,54 +67,68 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "-----END CERTIFICATE-----\n";
 
   /* replace the XXX with the actual private key */
-  const char *mykey =
+  static const char mykey[] =
     "-----BEGIN PRIVATE KEY-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END PRIVATE KEY-----\n";
 
+  CURLcode result = CURLE_ABORTED_BY_CALLBACK;
+  X509 *cert = NULL;
+  BIO *bio = NULL;
+  BIO *kbio = NULL;
+  EVP_PKEY *pkey = NULL;
+  int ret;
+
   (void)curl;
   (void)pointer;
 
   /* get a BIO */
-  bio = BIO_new_mem_buf(mypem, -1);
-
+  bio = BIO_new_mem_buf(mypem, sizeof(mypem) - 1);
   if(!bio) {
-    printf("BIO_new_mem_buf failed\n");
+    printf("BIO_new_mem_buf() failed\n");
+    goto out;
   }
 
   /* use it to read the PEM formatted certificate from memory into an X509
-   * structure that SSL can use
-   */
+     structure that SSL can use. */
   cert = PEM_read_bio_X509(bio, NULL, 0, NULL);
   if(!cert) {
-    printf("PEM_read_bio_X509 failed...\n");
+    printf("PEM_read_bio_X509() failed\n");
+    goto out;
   }
 
   /* tell SSL to use the X509 certificate */
   ret = SSL_CTX_use_certificate((SSL_CTX *)sslctx, cert);
   if(ret != 1) {
-    printf("Use certificate failed\n");
+    printf("SSL_CTX_use_certificate() failed\n");
+    goto out;
   }
 
   /* create a bio for the private key */
-  kbio = BIO_new_mem_buf(mykey, -1);
+  kbio = BIO_new_mem_buf(mykey, sizeof(mykey) - 1);
   if(!kbio) {
-    printf("BIO_new_mem_buf failed\n");
+    printf("BIO_new_mem_buf() failed\n");
+    goto out;
   }
 
-  pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
+  pkey = PEM_read_bio_PrivateKey(kbio, NULL, NULL, NULL);
   if(!pkey) {
-    printf("Failed EVP_PKEY_new()\n");
+    printf("PEM_read_bio_PrivateKey() failed\n");
+    goto out;
   }
 
   /* tell SSL to use the private key from memory */
   ret = SSL_CTX_use_PrivateKey((SSL_CTX *)sslctx, pkey);
   if(ret != 1) {
-    printf("Use Key failed\n");
+    printf("SSL_CTX_use_PrivateKey() failed\n");
+    goto out;
   }
 
+  result = CURLE_OK;
+
+out:
   /* free resources that have been allocated by OpenSSL functions */
   if(bio)
     BIO_free(bio);
@@ -133,7 +143,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     X509_free(cert);
 
   /* all set to go */
-  return CURLE_OK;
+  return result;
 }
 
 int main(void)
@@ -172,8 +182,8 @@ int main(void)
       printf("*** transfer failed ***\n");
 
     /* second try: retrieve page using user certificate and key -> succeeds to
-     * load the certificate and key by installing a function doing
-     * the necessary "modifications" to the SSL CONTEXT just before link init
+     * load the certificate and key by installing a function doing the
+     * necessary "modifications" to the SSL CONTEXT before link init
      */
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
     result = curl_easy_perform(curl);

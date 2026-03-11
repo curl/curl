@@ -34,7 +34,7 @@ This option sets *number* to be the remote port number to connect to,
 instead of the one specified in the URL or the default port for the used
 protocol.
 
-Usually, you just let the URL decide which port to use but this allows the
+Usually, you let the URL decide which port to use but this allows the
 application to override that.
 
 While this option accepts a 'long', a port number is an unsigned 16-bit number

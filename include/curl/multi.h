@@ -77,9 +77,8 @@ typedef enum {
   CURLM_LAST
 } CURLMcode;
 
-/* just to make code nicer when using curl_multi_socket() you can now check
-   for CURLM_CALL_MULTI_SOCKET too in the same style it works for
-   curl_multi_perform() and CURLM_CALL_MULTI_PERFORM */
+/* You can check for CURLM_CALL_MULTI_SOCKET too in the same style it works
+   for curl_multi_perform() and CURLM_CALL_MULTI_PERFORM */
 #define CURLM_CALL_MULTI_SOCKET CURLM_CALL_MULTI_PERFORM
 
 /* bitmask bits for CURLMOPT_PIPELINING */
@@ -201,13 +200,13 @@ CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *multi_handle);
 /*
  * Name:    curl_multi_perform()
  *
- * Desc:    When the app thinks there is data available for curl it calls this
+ * Desc: When the app thinks there is data available for curl it calls this
  *          function to read/write whatever there is right now. This returns
  *          as soon as the reads and writes are done. This function does not
  *          require that there actually is data available for reading or that
- *          data can be written, it can be called just in case. It returns
- *          the number of handles that still transfer data in the second
- *          argument's integer-pointer.
+ *          data can be written, it can be called. It returns the number of
+ *          handles that still transfer data in the second argument's
+ *          integer-pointer.
  *
  * Returns: CURLMcode type, general multi error code. *NOTE* that this only
  *          returns errors etc regarding the whole multi stack. There might
@@ -234,7 +233,7 @@ CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
  *
  * Desc:    Ask the multi handle if there is any messages/informationals from
  *          the individual transfers. Messages include informationals such as
- *          error code from the transfer or just the fact that a transfer is
+ *          error code from the transfer or the fact that a transfer is
  *          completed. More details on these should be written down as well.
  *
  *          Repeated calls to this function will return a new struct each
@@ -515,7 +514,7 @@ typedef int (*curl_push_callback)(CURL *parent,
  *
  * Desc:    Ask curl for fds for polling. The app can use these to poll on.
  *          We want curl_multi_perform() called as soon as one of them are
- *          ready. Passing zero size allows to get just a number of fds.
+ *          ready. Passing zero size allows to get a number of fds.
  *
  * Returns: CURLMcode type, general multi error code.
  */

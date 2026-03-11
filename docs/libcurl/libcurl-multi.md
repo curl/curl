@@ -130,13 +130,12 @@ using large numbers of simultaneous connections.
 curl_multi_socket_action(3) is then used instead of
 curl_multi_perform(3).
 
-When using this API, you add easy handles to the multi handle just as with the
+When using this API, you add easy handles to the multi handle like with the
 normal multi interface. Then you also set two callbacks with the
-CURLMOPT_SOCKETFUNCTION(3) and CURLMOPT_TIMERFUNCTION(3) options
-to curl_multi_setopt(3). They are two callback functions that libcurl
-calls with information about what sockets to wait for, and for what activity,
-and what the current timeout time is - if that expires libcurl should be
-notified.
+CURLMOPT_SOCKETFUNCTION(3) and CURLMOPT_TIMERFUNCTION(3) options to
+curl_multi_setopt(3). They are two callback functions that libcurl calls with
+information about what sockets to wait for, and for what activity, and what
+the current timeout time is - if that expires libcurl should be notified.
 
 The multi_socket API is designed to inform your application about which
 sockets libcurl is currently using and for what activities (read and/or write)

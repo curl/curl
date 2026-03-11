@@ -101,14 +101,14 @@ well at the side. curl's output can be piped into another program or
 redirected to another file for the next program to interpret.
 
 We focus on protocol related issues and improvements. If you want to do more
-magic with the supported protocols than curl currently does, chances are good
-we will agree. If you want to add more protocols, we may agree.
+with the supported protocols than curl currently does, chances are good we
+will agree. If you want to add more protocols, we may agree.
 
 If you want someone else to do all the work while you wait for us to implement
 it for you, that is not a friendly attitude. We spend a considerable time
 already on maintaining and developing curl. In order to get more out of us,
-you should consider trading in some of your time and effort in return. Simply
-go to the [GitHub repository](https://github.com/curl/curl), fork the project,
+you should consider trading in some of your time and effort in return. Go to
+the [GitHub repository](https://github.com/curl/curl), fork the project,
 and create pull requests with your proposed changes.
 
 If you write the code, chances are better that it will get into curl faster.
@@ -121,7 +121,8 @@ important and crucial. Anyone can contribute and post their changes and
 improvements and have them inserted in the main sources (of course on the
 condition that developers agree that the fixes are good).
 
-The full list of all contributors is found in the docs/THANKS file.
+The full list of all contributors is found in the
+[docs/THANKS](https://curl.se/docs/thanks.html) file.
 
 curl is developed by a community, with Daniel at the wheel.
 
@@ -168,7 +169,7 @@ allows for others to learn from this (both current and future users thanks to
 the web based archives of the mailing lists), thus saving us from having to
 repeat ourselves even more. Thanks for respecting this.
 
-If you have found or simply suspect a security problem in curl or libcurl,
+If you have found or suspect a security problem in curl or libcurl,
 [submit all the details to us](https://curl.se/dev/vuln-disclosure.html). We
 keep the issue private while we investigate, confirm it, work and validate a
 fix and agree on a time schedule for publication etc. That way we produce a
@@ -261,7 +262,7 @@ documents.
 
 Here's a rough step-by-step:
 
-1. copy a suitable lib/config-*.h file as a start to `lib/config-[youros].h`
+1. copy a suitable `lib/config-*.h` file as a start to `lib/config-[youros].h`
 2. edit `lib/config-[youros].h` to match your OS and setup
 3. edit `lib/curl_setup.h` to include `config-[youros].h` when your OS is
    detected by the preprocessor, in the style others already exist
@@ -328,7 +329,7 @@ support for this protocol.
 
 This could have happened if the configure script that was run at build time
 could not find all libs and include files curl requires for SSL to work. If
-the configure script fails to find them, curl is simply built without SSL
+the configure script fails to find them, curl is built without SSL
 support.
 
 To get HTTPS support into a curl that was previously built but that reports
@@ -425,18 +426,18 @@ about bindings on the curl-library list too, but be prepared that people on
 that list may not know anything about bindings.
 
 In December 2025 there were around **60** different [interfaces
-available](https://curl.se/libcurl/bindings.html) for just about all the
-languages you can imagine.
+available](https://curl.se/libcurl/bindings.html) for almost any language you
+can imagine.
 
 ## What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
-curl adheres to the HTTP spec, which basically means you can play with *any*
-protocol that is built on top of HTTP. Protocols such as SOAP, WebDAV and
-XML-RPC are all such ones. You can use `-X` to set custom requests and -H to
-set custom headers (or replace internally generated ones).
+curl adheres to the HTTP spec, which means you can play with *any* protocol
+that is built on top of HTTP. Protocols such as SOAP, WebDAV and XML-RPC are
+all such ones. You can use `-X` to set custom requests and -H to set custom
+headers (or replace internally generated ones).
 
-Using libcurl is of course just as good and you would just use the proper
-library options to do the same.
+Using libcurl of course also works and you would use the proper library
+options to do the same.
 
 ## How do I POST with a different Content-Type?
 
@@ -487,15 +488,14 @@ individuals have ever tried.
 
 ## Does curl support JavaScript or PAC (automated proxy config)?
 
-Many webpages do magic stuff using embedded JavaScript. curl and libcurl have
-no built-in support for that, so it will be treated just like any other
-contents.
+Many webpages do stuff using embedded JavaScript. curl and libcurl have
+no built-in support for that, so it is treated like any other contents.
 
 `.pac` files are a Netscape invention and are sometimes used by organizations
-to allow them to differentiate which proxies to use. The `.pac` contents is
-just a JavaScript program that gets invoked by the browser and that returns
-the name of the proxy to connect to. Since curl does not support JavaScript,
-it cannot support .pac proxy configuration either.
+to allow them to differentiate which proxies to use. The `.pac` contents is a
+JavaScript program that gets invoked by the browser and that returns the name
+of the proxy to connect to. Since curl does not support JavaScript, it cannot
+support .pac proxy configuration either.
 
 Some workarounds usually suggested to overcome this JavaScript dependency:
 
@@ -562,8 +562,8 @@ the first path part. List the `/tmp` directory like this:
 
     curl ftp://ftp.example.com/%2ftmp/
 
-or the not-quite-kosher-but-more-readable way, by simply starting the path
-section of the URL with a slash:
+The second way is non-standard but more readable; start the path section of the
+URL with a slash:
 
     curl ftp://ftp.example.com//tmp/
 
@@ -601,7 +601,7 @@ URL syntax which for SFTP might look similar to:
 
     curl -O -u user:password sftp://example.com/~/file.txt
 
-and for SCP it is just a different protocol prefix:
+and for SCP it is a different protocol prefix:
 
     curl -O -u user:password scp://example.com/~/file.txt
 
@@ -624,7 +624,7 @@ the protocol part with a space as in `" https://example.com/"`.
 In normal circumstances, `-X` should hardly ever be used.
 
 By default you use curl without explicitly saying which request method to use
-when the URL identifies an HTTP transfer. If you just pass in a URL like `curl
+when the URL identifies an HTTP transfer. If you pass in a URL like `curl
 https://example.com` it will use GET. If you use `-d` or `-F`, curl will use
 POST, `-I` will cause a HEAD and `-T` will make it a PUT.
 
@@ -685,7 +685,7 @@ them for the curl URL *globbing* system), use the `-g`/`--globoff` option:
 
 curl asks remote servers for the page you specify. If the page does not exist
 at the server, the HTTP protocol defines how the server should respond and
-that means that headers and a page will be returned. That is simply how HTTP
+that means that headers and a page will be returned. That is how HTTP
 works.
 
 By using the `--fail` option you can tell curl explicitly to not get any data
@@ -834,7 +834,7 @@ any modern compiler that allows for a 64-bit curl_off_t type. For older
 compilers or prior curl versions it may set a time that appears one hour off.
 This happens due to a flaw in how Windows stores and uses file modification
 times and it is not easily worked around. For more details [read
-this](https://www.codeproject.com/articles/Beating-the-Daylight-Savings-Time-Bug-and-Getting#comments-section).
+this](https://web.archive.org/web/20260105021457/www.codeproject.com/articles/Beating-the-Daylight-Savings-Time-Bug-and-Getting#comments-section).
 
 ## Redirects work in browser but not with curl
 
@@ -873,9 +873,9 @@ request body) use the `Expect: 100-continue` header. This header allows the
 server to deny the operation early so that libcurl can bail out before having
 to send any data. This is useful in authentication cases and others.
 
-However, many servers do not implement the `Expect:` stuff properly and if the
-server does not respond (positively) within 1 second libcurl will continue and
-send off the data anyway.
+Many servers do not implement the `Expect:` stuff properly and if the server
+does not respond (positively) within 1 second libcurl will continue and send
+off the data anyway.
 
 You can disable libcurl's use of the `Expect:` header the same way you disable
 any header, using `-H` / `CURLOPT_HTTPHEADER`, or by forcing it to use HTTP
@@ -929,7 +929,7 @@ In either case, curl should now be looking for the correct file.
 
 Unplugging a cable is not an error situation. The TCP/IP protocol stack was
 designed to be fault tolerant, so even though there may be a physical break
-somewhere the connection should not be affected, just possibly delayed.
+somewhere the connection should not be affected, but possibly delayed.
 Eventually, the physical break will be fixed or the data will be re-routed
 around the physical problem through another path.
 
@@ -966,7 +966,7 @@ to check your authentication protected webpages (that gets a 401 back) and so
 on.
 
 The specific HTTP response code does not constitute a problem or error for
-curl. It simply sends and delivers HTTP as you asked and if that worked,
+curl. It sends and delivers HTTP as you asked and if that worked,
 everything is fine and dandy. The response code is generally providing more
 higher level error information that curl does not care about. The error was
 not in the HTTP transfer.
@@ -1033,7 +1033,7 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 
 ## How do I fetch multiple files with libcurl?
 
-libcurl has excellent support for transferring multiple files. You should just
+libcurl has excellent support for transferring multiple files. You should
 repeatedly set new URLs with `curl_easy_setopt()` and then transfer it with
 `curl_easy_perform()`. The handle you get from curl_easy_init() is not only
 reusable, but you are even encouraged to reuse it if you can, as that will
@@ -1049,7 +1049,7 @@ Yes, but you cannot open a FILE * and pass the pointer to a DLL and have that
 DLL use the FILE * (as the DLL and the client application cannot access each
 others' variable memory areas). If you set `CURLOPT_WRITEDATA` you must also use
 `CURLOPT_WRITEFUNCTION` as well to set a function that writes the file, even if
-that simply writes the data to the specified FILE *. Similarly, if you use
+all it does is write the data to the specified FILE *. Similarly, if you use
 `CURLOPT_READDATA` you must also specify `CURLOPT_READFUNCTION`.
 
 ## What about Keep-Alive or persistent connections?
@@ -1110,7 +1110,7 @@ They are usually:
 * Adjust the system's config to check for libs in the directory where you have
   put the library (like Linux's `/etc/ld.so.conf`)
 
-`man ld.so` and`'man ld` will tell you more details
+`man ld.so` and `man ld` will tell you more details
 
 ## How does libcurl resolve hostnames?
 
@@ -1259,7 +1259,7 @@ proven for many years. There is no need for you to reinvent them.
 
 ## Does libcurl use threads?
 
-Put simply: no, libcurl will execute in the same thread you call it in. All
+No, libcurl will execute in the same thread you call it in. All
 callbacks will be called in the same thread as the one you call libcurl in.
 
 If you want to avoid your thread to be blocked by the libcurl call, you make
@@ -1274,8 +1274,8 @@ never exposed to the outside.
 # License
 
 curl and libcurl are released under an MIT/X derivative license. The license
-is liberal and should not impose a problem for your project. This section is
-just a brief summary for the cases we get the most questions.
+is liberal and should not impose a problem for your project. This section is a
+brief summary for the cases we get the most questions.
 
 We are not lawyers and this is not legal advice. You should probably consult
 one if you want true and accurate legal insights without our prejudice. Note
@@ -1330,9 +1330,9 @@ their projects, no matter what license they already have in use.
 ## What are my obligations when using libcurl in my commercial apps?
 
 Next to none. All you need to adhere to is the MIT-style license (stated in
-the COPYING file) which basically says you have to include the copyright
-notice in *all copies* and that you may not use the copyright holder's name
-when promoting your software.
+the COPYING file) which says you have to include the copyright notice in *all
+copies* and that you may not use the copyright holder's name when promoting
+your software.
 
 You do not have to release any of your source code.
 
@@ -1384,8 +1384,8 @@ PHP/CURL was initially written by Sterling Hughes.
 
 Yes.
 
-After a transfer, you just set new options in the handle and make another
-transfer. This will make libcurl reuse the same connection if it can.
+After a transfer, you set new options in the handle and make another transfer.
+This will make libcurl reuse the same connection if it can.
 
 ## Does PHP/CURL have dependencies?
 

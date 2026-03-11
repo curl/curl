@@ -40,8 +40,8 @@ or a timeout has elapsed, the application should call this function to
 read/write whatever there is to read or write right now etc.
 curl_multi_perform(3) returns as soon as the reads/writes are done. This
 function does not require that there actually is any data available for
-reading or that data can be written, it can be called just in case. It stores
-the number of handles that still transfer data in the second argument's
+reading or that data can be written, it can be called as a precaution. It
+stores the number of handles that still transfer data in the second argument's
 integer-pointer.
 
 If the amount of *running_handles* is changed from the previous call (or

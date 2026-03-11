@@ -21,7 +21,7 @@ curl_easy_pause - pause and unpause a connection
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_pause(CURL *handle, int bitmask );
+CURLcode curl_easy_pause(CURL *handle, int bitmask);
 ~~~
 
 # DESCRIPTION
@@ -32,11 +32,10 @@ most other libcurl functions, curl_easy_pause(3) can be used from within
 callbacks.
 
 A connection can be paused by using this function or by letting the read or
-the write callbacks return the proper magic return code
-(*CURL_READFUNC_PAUSE* and *CURL_WRITEFUNC_PAUSE*). A write callback
-that returns pause signals to the library that it could not take care of any
-data at all, and that data is then delivered again to the callback when the
-transfer is unpaused.
+the write callbacks return the proper return code (*CURL_READFUNC_PAUSE* and
+*CURL_WRITEFUNC_PAUSE*). A write callback that returns pause signals to the
+library that it could not take care of any data at all, and that data is then
+delivered again to the callback when the transfer is unpaused.
 
 While it may feel tempting, take care and notice that you cannot call this
 function from another thread. To unpause, you may for example call it from the
@@ -115,8 +114,8 @@ int main(void)
 
 # MEMORY USE
 
-When pausing a download transfer by returning the magic return code from a
-write callback, the read data is already in libcurl's internal buffers so it
+When pausing a download transfer by returning the appropriate return code from
+a write callback, the read data is already in libcurl's internal buffers so it
 has to keep it in an allocated buffer until the receiving is again unpaused
 using this function.
 

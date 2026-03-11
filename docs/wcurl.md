@@ -31,12 +31,12 @@ Added-in: n/a
 **wcurl** is a simple curl wrapper which lets you use curl to download files
 without having to remember any parameters.
 
-Simply call **wcurl** with a list of URLs you want to download and **wcurl**
+Call **wcurl** with a list of URLs you want to download and **wcurl**
 picks sane defaults.
 
 If you need anything more complex, you can provide any of curl's supported
-parameters via the **--curl-options** option. Just beware that you likely
-should be using curl directly if your use case is not covered.
+parameters via the **--curl-options** option. Beware that you likely should be
+using curl directly if your use case is not covered.
 
 By default, **wcurl** does:
 
@@ -92,7 +92,7 @@ URL was done by **wcurl**, e.g.: The URL contained whitespace.
 
 ## --dry-run
 
-Do not actually execute curl, just print what would be invoked.
+Do not actually execute curl, print what would be invoked.
 
 ## -V, \--version
 

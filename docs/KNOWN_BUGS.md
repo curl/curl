@@ -147,8 +147,8 @@ See [curl issue 6972](https://github.com/curl/curl/issues/6972)
 ## long paths are not fully supported on Windows
 
 curl on Windows cannot access long paths (paths longer than 260 characters).
-However, as a workaround, the Windows path prefix `\\?\` which disables all
-path interpretation may work to allow curl to access the path. For example:
+As a workaround, the Windows path prefix `\\?\` which disables all path
+interpretation may work to allow curl to access the path. For example:
 `\\?\c:\longpath`.
 
 See [curl issue 8361](https://github.com/curl/curl/issues/8361)

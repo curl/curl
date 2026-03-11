@@ -21,7 +21,7 @@ what the project and the general user population wants and expects from us.
 
 ## Legal entity
 
-There is no legal entity. The curl project is just a bunch of people scattered
+There is no legal entity. The curl project is a bunch of people scattered
 around the globe with the common goal to produce source code that creates
 great products. We are not part of any umbrella organization and we are not
 located in any specific country. We are totally independent.
@@ -61,7 +61,7 @@ they can be mentioned on the Sponsors page on the curl website.
 The curl project does not do or offer commercial support. It only hosts
 mailing lists, runs bug trackers etc to facilitate communication and work.
 
-However, Daniel works for wolfSSL and we offer commercial curl support there.
+Daniel works for wolfSSL, which offers commercial curl support.
 
 # Key roles
 
@@ -110,7 +110,7 @@ developers familiar with the curl project.
 The security team works best when it consists of a small set of active
 persons. We invite new members when the team seems to need it, and we also
 expect to retire security team members as they "drift off" from the project or
-just find themselves unable to perform their duties there.
+find themselves unable to perform their duties there.
 
 ## Core team
 

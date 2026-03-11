@@ -219,7 +219,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
 
         if test -z "$_libcurl_protocols"; then
 
-          # We do not have --protocols, so just assume that all
+          # We do not have --protocols; assume that all
           # protocols are available
           _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP"
 

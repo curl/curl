@@ -94,12 +94,12 @@ static CURLcode test_unit2604(const char *arg)
     }
     if(!result) {
       if(cp && strcmp(cp, list[i].next)) {
-        curl_mprintf("... cp points to '%s', not '%s' as expected \n",
+        curl_mprintf("... cp points to '%s', not '%s' as expected\n",
                      cp, list[i].next);
         unitfail++;
       }
       if(path && strcmp(path, list[i].expect)) {
-        curl_mprintf("... gave '%s', not '%s' as expected \n",
+        curl_mprintf("... gave '%s', not '%s' as expected\n",
                      path, list[i].expect);
         unitfail++;
       }

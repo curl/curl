@@ -92,9 +92,9 @@ The people behind libcurl have put a considerable effort to make libcurl work
 on a large amount of different operating systems and environments.
 
 You program libcurl the same way on all platforms that libcurl runs on. There
-are only a few minor details that differ. If you just make sure to write your
-code portable enough, you can create a portable program. libcurl should not
-stop you from that.
+are only a few minor details that differ. If you make sure to write your code
+portable enough, you can create a portable program. libcurl should not stop
+you from that.
 
 # Global Preparation
 
@@ -162,16 +162,16 @@ understanding.
 # Handle the Easy libcurl
 
 To use the easy interface, you must first create yourself an easy handle. You
-need one handle for each easy session you want to perform. Basically, you
-should use one handle for every thread you plan to use for transferring. You
-must never share the same handle in multiple threads.
+need one handle for each easy session you want to perform. You should use one
+handle for every thread you plan to use for transferring. You must never share
+the same handle in multiple threads.
 
 Get an easy handle with
 ~~~c
     handle = curl_easy_init();
 ~~~
 It returns an easy handle. Using that you proceed to the next step: setting
-up your preferred actions. A handle is just a logic entity for the upcoming
+up your preferred actions. A handle is a logic entity for the upcoming
 transfer or series of transfers.
 
 You set properties and options for this handle using
@@ -200,18 +200,22 @@ preferred URL to transfer with CURLOPT_URL(3) in a manner similar to:
 Let's assume for a while that you want to receive data as the URL identifies a
 remote resource you want to get here. Since you write a sort of application
 that needs this transfer, I assume that you would like to get the data passed
-to you directly instead of simply getting it passed to stdout. So, you write
-your own function that matches this prototype:
+to you directly instead of getting it passed to stdout. You write your
+own function that matches this prototype:
 ~~~c
     size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
 ~~~
+
 You tell libcurl to pass all data to this function by issuing a function
 similar to this:
+
 ~~~c
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
 ~~~
+
 You can control what data your callback function gets in the fourth argument
 by setting another property:
+
 ~~~c
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, &internal_struct);
 ~~~
@@ -220,7 +224,7 @@ and the function that gets invoked by libcurl. libcurl itself does not touch
 the data you pass with CURLOPT_WRITEDATA(3).
 
 libcurl offers its own default internal callback that takes care of the data
-if you do not set the callback with CURLOPT_WRITEFUNCTION(3). It simply
+if you do not set the callback with CURLOPT_WRITEFUNCTION(3). It
 outputs the received data to stdout. You can have the default callback write
 the data to a different file handle by passing a 'FILE *' to a file opened for
 writing with the CURLOPT_WRITEDATA(3) option.
@@ -267,7 +271,7 @@ previous connection.
 For some protocols, downloading a file can involve a complicated process of
 logging in, setting the transfer mode, changing the current directory and
 finally transferring the file data. libcurl takes care of all that
-complication for you. Given simply the URL to a file, libcurl takes care of
+complication for you. Given the URL to a file, libcurl takes care of
 all the details needed to get the file moved from one machine to another.
 
 # Multi-threading Issues
@@ -291,11 +295,11 @@ a better understanding why the server behaves the way it does. Include headers
 in the normal body output with CURLOPT_HEADER(3) set 1.
 
 Of course, there are bugs left. We need to know about them to be able to fix
-them, so we are quite dependent on your bug reports. When you do report
-suspected bugs in libcurl, please include as many details as you possibly can:
-a protocol dump that CURLOPT_VERBOSE(3) produces, library version, as
-much as possible of your code that uses libcurl, operating system name and
-version, compiler name and version etc.
+them, so we are dependent on your bug reports. When you do report suspected
+bugs in libcurl, please include as many details as you possibly can: a protocol
+dump that CURLOPT_VERBOSE(3) produces, library version, as much as possible of
+your code that uses libcurl, operating system name and version, compiler name
+and version etc.
 
 If CURLOPT_VERBOSE(3) is not enough, you increase the level of debug
 data your application receive by using the CURLOPT_DEBUGFUNCTION(3).
@@ -311,8 +315,8 @@ uploading to a remote FTP site is similar to uploading data to an HTTP server
 with a PUT request.
 
 Of course, first you either create an easy handle or you reuse one existing
-one. Then you set the URL to operate on just like before. This is the remote
-URL, that we now upload.
+one. Then you set the URL to operate on like before. This is the remote URL,
+that we now upload.
 
 Since we write an application, we most likely want libcurl to get the upload
 data by asking us for it. To make it do that, we set the read callback and the
@@ -336,7 +340,7 @@ Tell libcurl that we want to upload:
     curl_easy_setopt(handle, CURLOPT_UPLOAD, 1L);
 ~~~
 A few protocols do not behave properly when uploads are done without any prior
-knowledge of the expected file size. So, set the upload file size using the
+knowledge of the expected file size. Set the upload file size using the
 CURLOPT_INFILESIZE_LARGE(3) for all known file sizes like this[1]:
 
 ~~~c
@@ -377,8 +381,8 @@ char * to a string in the format "user:password". In a manner like this:
 
 Another case where name and password might be needed at times, is for those
 users who need to authenticate themselves to a proxy they use. libcurl offers
-another option for this, the CURLOPT_PROXYUSERPWD(3). It is used quite similar
-to the CURLOPT_USERPWD(3) option like this:
+another option for this, the CURLOPT_PROXYUSERPWD(3). Its use is similar to the
+CURLOPT_USERPWD(3) option, like this:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
@@ -620,15 +624,17 @@ handle:
 ~~~
 
 Since all options on an easy handle are "sticky", they remain the same until
-changed even if you do call curl_easy_perform(3), you may need to tell
-curl to go back to a plain GET request if you intend to do one as your next
-request. You force an easy handle to go back to GET by using the
-CURLOPT_HTTPGET(3) option:
+changed even if you do call curl_easy_perform(3), you may need to tell curl to
+go back to a plain GET request if you intend to do one as your next request.
+You force an easy handle to go back to GET by using the CURLOPT_HTTPGET(3)
+option:
+
 ~~~c
     curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
 ~~~
-Just setting CURLOPT_POSTFIELDS(3) to "" or NULL does *not* stop libcurl
-from doing a POST. It just makes it POST without any data to send!
+
+Setting CURLOPT_POSTFIELDS(3) to "" or NULL does *not* stop libcurl from doing
+a POST. It makes it POST without any data to send!
 
 # Converting from deprecated form API to MIME API
 
@@ -770,10 +776,10 @@ terminal.
 Switch on the progress meter by, oddly enough, setting
 CURLOPT_NOPROGRESS(3) to zero. This option is set to 1 by default.
 
-For most applications however, the built-in progress meter is useless and what
-instead is interesting is the ability to specify a progress callback. The
-function pointer you pass to libcurl is then called on irregular intervals
-with information about the current transfer.
+For most applications, the built-in progress meter is useless and what instead
+is interesting is the ability to specify a progress callback. The function
+pointer you pass to libcurl is then called on irregular intervals with
+information about the current transfer.
 
 Set the progress callback by using CURLOPT_PROGRESSFUNCTION(3). Pass a pointer
 to a function that matches this prototype:
@@ -792,8 +798,8 @@ CURLOPT_PROGRESSDATA(3). libcurl does not touch it.
 
 # libcurl with C++
 
-There is basically only one thing to keep in mind when using C++ instead of C
-when interfacing libcurl:
+There is only one thing to keep in mind when using C++ instead of C when
+interfacing libcurl:
 
 The callbacks CANNOT be non-static class member functions
 
@@ -824,8 +830,8 @@ libcurl supports SOCKS and HTTP proxies. When a given URL is wanted, libcurl
 asks the proxy for it instead of trying to connect to the actual remote host
 identified in the URL.
 
-If you are using a SOCKS proxy, you may find that libcurl does not quite support
-all operations through it.
+If you are using a SOCKS proxy, you may find that libcurl does not support all
+operations through it.
 
 For HTTP proxies: the fact that the proxy is an HTTP proxy puts certain
 restrictions on what can actually happen. A requested URL that might not be a
@@ -864,7 +870,7 @@ following an old tradition and are built up as "[protocol]_proxy" (note the
 lower casing). Which makes the variable 'http_proxy' checked for a name of a
 proxy to use when the input URL is HTTP. Following the same rule, the variable
 named 'ftp_proxy' is checked for FTP URLs. Again, the proxies are always HTTP
-proxies, the different names of the variables simply allows different HTTP
+proxies, the different names of the variables allow different HTTP
 proxies to be used.
 
 The proxy environment variable contents should be in the format
@@ -929,8 +935,8 @@ for such innovative actions either!
 
 ## Proxy Auto-Config
 
-Netscape first came up with this. It is basically a webpage (usually using a
-.pac extension) with a JavaScript that when executed by the browser with the
+Netscape first came up with this. It is a webpage (usually using a .pac
+extension) with a JavaScript that when executed by the browser with the
 requested URL as input, returns information to the browser on how to connect
 to the URL. The returned information might be "DIRECT" (which means no proxy
 should be used), "PROXY host:port" (to tell the browser where the proxy for
@@ -956,10 +962,10 @@ Mozilla JavaScript engine in the past.
 Re-cycling the same easy handle several times when doing multiple requests is
 the way to go.
 
-After each single curl_easy_perform(3) operation, libcurl keeps the
-connection alive and open. A subsequent request using the same easy handle to
-the same host might just be able to use the already open connection! This
-reduces network impact a lot.
+After each single curl_easy_perform(3) operation, libcurl keeps the connection
+alive and open. A subsequent request using the same easy handle to the same
+host might be able to reuse the already open connection! This reduces network
+impact a lot.
 
 Even if the connection is dropped, all connections involving SSL to the same
 host again, benefit from libcurl's session ID cache that drastically reduces
@@ -978,9 +984,9 @@ may also be added in the future.
 
 Each easy handle attempts to keep the last few connections alive for a while
 in case they are to be used again. You can set the size of this "cache" with
-the CURLOPT_MAXCONNECTS(3) option. Default is 5. There is rarely any
-point in changing this value, and if you think of changing this it is often
-just a matter of thinking again.
+the CURLOPT_MAXCONNECTS(3) option. Default is 5. There is rarely any point in
+changing this value, and if you think of changing this it is often a reason to
+think again.
 
 To force your upcoming request to not use an already existing connection, you
 can do that by setting CURLOPT_FRESH_CONNECT(3) to 1. In a similar
@@ -1025,9 +1031,9 @@ libcurl is your friend here too.
 
 ## CURLOPT_CUSTOMREQUEST
 
-If just changing the actual HTTP request keyword is what you want, like when
-GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST(3)
-is there for you. It is simple to use:
+If changing the actual HTTP request keyword is what you want, like when GET,
+HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST(3) is there for
+you. It is simple to use:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
@@ -1060,7 +1066,7 @@ think fit. Adding headers is this easy:
 
 ... and if you think some of the internally generated headers, such as Accept:
 or Host: do not contain the data you want them to contain, you can replace
-them by simply setting them too:
+them by setting them too:
 
 ~~~c
     headers = curl_slist_append(headers, "Accept: Agent-007");
@@ -1152,8 +1158,8 @@ content transfer is performed.
 ## FTP Custom CURLOPT_CUSTOMREQUEST
 
 If you do want to list the contents of an FTP directory using your own defined
-FTP command, CURLOPT_CUSTOMREQUEST(3) does just that. "NLST" is the default
-one for listing directories but you are free to pass in your idea of a good
+FTP command, CURLOPT_CUSTOMREQUEST(3) does that. "NLST" is the default one for
+listing directories but you are free to pass in your idea of a good
 alternative.
 
 # Cookies Without Chocolate Chips
@@ -1170,8 +1176,8 @@ update them. Server use cookies to "track" users and to keep "sessions".
 Cookies are sent from server to clients with the header Set-Cookie: and
 they are sent from clients to servers with the Cookie: header.
 
-To just send whatever cookie you want to a server, you can use
-CURLOPT_COOKIE(3) to set a cookie string like this:
+To send whatever cookie you want to a server, you can use CURLOPT_COOKIE(3) to
+set a cookie string like this:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
@@ -1186,16 +1192,15 @@ when you make a request, you tell libcurl to read the previous headers to
 figure out which cookies to use. Set the header file to read cookies from with
 CURLOPT_COOKIEFILE(3).
 
-The CURLOPT_COOKIEFILE(3) option also automatically enables the cookie
-parser in libcurl. Until the cookie parser is enabled, libcurl does not parse
-or understand incoming cookies and they are just be ignored. However, when the
-parser is enabled the cookies are understood and the cookies are kept in
-memory and used properly in subsequent requests when the same handle is
-used. Many times this is enough, and you may not have to save the cookies to
-disk at all. Note that the file you specify to CURLOPT_COOKIEFILE(3)
-does not have to exist to enable the parser, so a common way to just enable
-the parser and not read any cookies is to use the name of a file you know does
-not exist.
+The CURLOPT_COOKIEFILE(3) option also automatically enables the cookie parser
+in libcurl. Until the cookie parser is enabled, libcurl does not parse or
+understand incoming cookies and they are instead ignored. When the parser is
+enabled the cookies are understood and the cookies are kept in memory and used
+properly in subsequent requests when the same handle is used. Many times this
+is enough, and you may not have to save the cookies to disk at all. Note that
+the file you specify to CURLOPT_COOKIEFILE(3) does not have to exist to enable
+the parser, so a common way to enable the parser and not read any cookies is
+to use the name of a file you know does not exist.
 
 If you would rather use existing cookies that you have previously received
 with your Netscape or Mozilla browsers, you can make libcurl use that cookie
@@ -1365,14 +1370,14 @@ on the multi_socket event based API, this description here is for the select()
 oriented one.
 
 To use this interface, you are better off if you first understand the basics
-of how to use the easy interface. The multi interface is simply a way to make
+of how to use the easy interface. The multi interface is a way to make
 multiple transfers at the same time by adding up multiple easy handles into
 a "multi stack".
 
 You create the easy handles you want, one for each concurrent transfer, and
-you set all the options just like you learned above, and then you create a
-multi handle with curl_multi_init(3) and add all those easy handles to
-that multi handle with curl_multi_add_handle(3).
+you set all the options like you learned above, and then you create a multi
+handle with curl_multi_init(3) and add all those easy handles to that multi
+handle with curl_multi_add_handle(3).
 
 When you have added the handles you have for the moment (you can still add new
 ones at any time), you start the transfers by calling
@@ -1445,9 +1450,8 @@ size.
 
 ## [2]
 
-This happens on Windows machines when libcurl is built and used as a
-DLL. However, you can still do this on Windows if you link with a static
-library.
+This happens on Windows machines when libcurl is built and used as a DLL. You
+can still do this on Windows if you link with a static library.
 
 ## [3]
 

@@ -176,7 +176,7 @@ int tool_progress_cb(void *clientp,
     }
   }
 
-  /* simply count invokes */
+  /* count invokes */
   bar->calls++;
 
   update_width(bar);
@@ -226,7 +226,7 @@ void progressbarinit(struct ProgressData *bar, struct OperationConfig *config)
   memset(bar, 0, sizeof(struct ProgressData));
 
   /* pass the resume from value through to the progress function so it can
-   * display progress towards total file not just the part that is left. */
+   * display progress towards total file not the part that is left. */
   if(config->use_resume)
     bar->initial_size = config->resume_from;
 

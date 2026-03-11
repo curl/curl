@@ -708,7 +708,7 @@ How to act on redirects after POST. See CURLOPT_POSTREDIR(3)
 
 ## CURLOPT_PREQUOTE
 
-Commands to run just before transfer. See CURLOPT_PREQUOTE(3)
+Commands to run immediately before transfer. See CURLOPT_PREQUOTE(3)
 
 ## CURLOPT_PREREQDATA
 

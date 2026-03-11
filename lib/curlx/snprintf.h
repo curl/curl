@@ -1,3 +1,5 @@
+#ifndef HEADER_CURLX_SNPRINTF_H
+#define HEADER_CURLX_SNPRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,12 +23,18 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
 /* Raw snprintf() for curlx */
 
+#ifdef _WIN32
+void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
+  CURL_PRINTF(3, 4);
+#endif
+
 #ifdef WITHOUT_LIBCURL /* when built for the test servers */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)  /* adjust for old MSVC */
-#define SNPRINTF _snprintf
+#ifdef _WIN32
+#define SNPRINTF curlx_win32_snprintf
 #else
 #define SNPRINTF snprintf
 #endif
@@ -34,3 +42,4 @@
 #include <curl/mprintf.h>
 #define SNPRINTF curl_msnprintf
 #endif /* WITHOUT_LIBCURL */
+#endif /* HEADER_CURLX_SNPRINTF_H */

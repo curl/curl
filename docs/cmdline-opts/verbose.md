@@ -51,11 +51,10 @@ If you only want HTTP headers in the output, --show-headers or --dump-header
 might be more suitable options.
 
 Since curl 8.10, mentioning this option several times in the same argument
-increases the level of the trace output. However, as before, a single
---verbose or --no-verbose reverts any additions by previous `-vv` again. This
-means that `-vv -v` is equivalent to a single -v. This avoids unwanted
-verbosity when the option is mentioned in the command line *and* curl config
-files.
+increases the level of the trace output. As before, a single --verbose or
+--no-verbose reverts any additions by previous `-vv` again. This means that
+`-vv -v` is equivalent to a single -v. This avoids unwanted verbosity when the
+option is mentioned in the command line *and* curl config files.
 
 Using it twice, e.g. `-vv`, outputs time (--trace-time) and transfer ids
 (--trace-ids), as well as enabling tracing for all protocols (--trace-config

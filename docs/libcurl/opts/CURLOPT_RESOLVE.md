@@ -57,7 +57,7 @@ use your provided ADDRESS.
 
 The optional leading plus (`+`) specifies that the new entry should timeout.
 Entries added without the leading plus character never times out whereas
-entries added with `+HOST:...` times out just like ordinary DNS cache entries.
+entries added with `+HOST:...` times out like ordinary DNS cache entries.
 
 If the DNS cache already has an entry for the given host+port pair, the new
 entry overrides the former one.

@@ -6,6 +6,7 @@
 
 # https://clang.llvm.org/extra/clang-tidy/checks/list.html
 Checks:
+  - clang-analyzer-*
   - -clang-analyzer-optin.performance.Padding
   - -clang-analyzer-security.ArrayBound  # due to false positives with clang-tidy v21.1.0
   - -clang-analyzer-security.insecureAPI.bzero  # for FD_ZERO() (seen on macOS)
@@ -38,9 +39,10 @@ Checks:
   - readability-redundant-function-ptr-dereference
   - readability-redundant-parentheses
   - readability-redundant-preprocessor
+  - readability-suspicious-call-argument
   - readability-uppercase-literal-suffix
 
 CheckOptions:
   misc-header-include-cycle.IgnoredFilesList: 'curl/curl.h'
 
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '.*'  # Default in v22.1.0+

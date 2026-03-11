@@ -36,7 +36,7 @@ for my $f (@ARGV) {
     while(<F>) {
         my $l = $_;
         if($l =~ /\/* $docroot/) {
-            # just ignore preciously added refs
+            # ignore preciously added refs
         }
         elsif($l =~ /^( *).*curl_easy_setopt\([^,]*, *([^ ,]*) *,/) {
             my ($prefix, $anchor) = ($1, $2);

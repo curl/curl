@@ -247,7 +247,7 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
  *
  * If an mailbox '@' separator cannot be located then the mailbox is considered
  * to be either a local mailbox or an invalid mailbox (depending on what the
- * calling function deems it to be) then the input will simply be returned in
+ * calling function deems it to be) then the input will be returned in
  * the address part with the hostname being NULL.
  */
 static CURLcode smtp_parse_address(const char *fqma, char **address,
@@ -315,7 +315,7 @@ static CURLcode cr_eob_init(struct Curl_easy *data,
   struct cr_eob_ctx *ctx = reader->ctx;
   (void)data;
   /* The first char we read is the first on a line, as if we had
-   * read CRLF just before */
+   * read CRLF before */
   ctx->n_eob = 2;
   Curl_bufq_init2(&ctx->buf, (16 * 1024), 1, BUFQ_OPT_SOFT_LIMIT);
   return CURLE_OK;
@@ -354,7 +354,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
     ctx->read_eos = eos;
     if(nread) {
       if(!ctx->n_eob && !memchr(buf, SMTP_EOB[0], nread)) {
-        /* not in the middle of a match, no EOB start found, just pass */
+        /* not in the middle of a match, no EOB start found, pass */
         *pnread = nread;
         *peos = FALSE;
         return CURLE_OK;
@@ -403,7 +403,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
     CURL_TRC_SMTP(data, "auto-ending mail body with '\\r\\n.\\r\\n'");
     switch(ctx->n_eob) {
     case 2:
-      /* seen a CRLF at the end, just add the remainder */
+      /* seen a CRLF at the end, add the remainder */
       eob = &SMTP_EOB[2];
       break;
     case 3:
@@ -935,8 +935,8 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
       Curl_free_idnconverted_hostname(&host);
     }
     else
-      /* An invalid mailbox was provided but we will simply let the server
-         worry about that and reply with a 501 error */
+      /* An invalid mailbox was provided but we let the server worry
+         about that and reply with a 501 error */
       from = curl_maprintf("<%s>%s", address, suffix);
 
     curlx_free(address);
@@ -978,8 +978,8 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
         Curl_free_idnconverted_hostname(&host);
       }
       else
-        /* An invalid mailbox was provided but we will simply let the server
-           worry about it */
+        /* An invalid mailbox was provided but we let the server worry
+           about it */
         auth = curl_maprintf("<%s>%s", address, suffix);
       curlx_free(address);
     }
@@ -1106,8 +1106,8 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
     result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s@%s>%s",
                            address, host.name, suffix);
   else
-    /* An invalid mailbox was provided but we will simply let the server worry
-       about that and reply with a 501 error */
+    /* An invalid mailbox was provided but we let the server worry about
+       that and reply with a 501 error */
     result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s>%s",
                            address, suffix);
 

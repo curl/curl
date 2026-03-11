@@ -485,7 +485,7 @@ Select from these:
   --with-amissl
   --with-gnutls
   --with-mbedtls
-  --with-openssl (also works for BoringSSL and LibreSSL)
+  --with-openssl (also works for AWS-LC, BoringSSL and LibreSSL)
   --with-rustls
   --with-schannel
   --with-wolfssl
@@ -1267,30 +1267,28 @@ if test "$HAVE_GETHOSTBYNAME" != "1" || test "$curl_cv_winuwp" = "yes"; then
     if test "$curl_cv_winuwp" != "yes"; then
       winsock_LIB="$winsock_LIB -liphlpapi"
     fi
-    if test -n "$winsock_LIB"; then
-      my_ac_save_LIBS=$LIBS
-      LIBS="$winsock_LIB $LIBS"
-      AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
-          #ifdef _WIN32
-          #ifndef WIN32_LEAN_AND_MEAN
-          #define WIN32_LEAN_AND_MEAN
-          #endif
-          #include <winsock2.h>
-          #endif
-        ]],[[
-          gethostbyname("localhost");
-        ]])
-      ],[
-        AC_MSG_RESULT([yes])
-        HAVE_GETHOSTBYNAME="1"
-      ],[
-        AC_MSG_RESULT([no])
-        winsock_LIB=""
-        LIBS=$my_ac_save_LIBS
-      ])
-    fi
+    my_ac_save_LIBS=$LIBS
+    LIBS="$winsock_LIB $LIBS"
+    AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <winsock2.h>
+        #endif
+      ]],[[
+        gethostbyname("localhost");
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      HAVE_GETHOSTBYNAME="1"
+    ],[
+      AC_MSG_RESULT([no])
+      winsock_LIB=""
+      LIBS=$my_ac_save_LIBS
+    ])
   fi
 fi
 
@@ -2047,8 +2045,8 @@ if test "$USE_WIN32_CRYPTO" = "1" || test "$SCHANNEL_ENABLED" = "1"; then
   LIBS="-ladvapi32 -lcrypt32 $LIBS"
 fi
 
-dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
 if test "$curl_cv_native_windows" = "yes"; then
+  dnl for BCryptGenRandom()
   LIBS="-lbcrypt $LIBS"
 fi
 
@@ -4190,7 +4188,6 @@ AC_CHECK_FUNCS([\
   sendmsg \
   setlocale \
   setrlimit \
-  snprintf \
   utime \
   utimes \
 ])
@@ -4200,6 +4197,7 @@ if test "$curl_cv_native_windows" != "yes"; then
     if_nametoindex \
     realpath \
     sched_yield \
+    snprintf \
   ])
   CURL_CHECK_FUNC_INET_NTOP
   CURL_CHECK_FUNC_INET_PTON

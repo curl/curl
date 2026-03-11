@@ -58,7 +58,7 @@ struct Curl_ssl_scache_peer {
   unsigned char key_salt[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
   unsigned char key_hmac[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
   size_t max_sessions;
-  long age;                /* just a number, the higher the more recent */
+  long age;                /* a number, the higher the more recent */
   BIT(hmac_set);           /* if key_salt and key_hmac are present */
   BIT(exportable);         /* sessions for this peer can be exported */
 };
@@ -73,10 +73,9 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
                                          bool *is_local)
 {
   if(path && path[0]) {
-    /* We try to add absolute paths, so that the session key can stay
-     * valid when used in another process with different CWD. However,
-     * when a path does not exist, this does not work. Then, we add
-     * the path as is. */
+    /* We try to add absolute paths, so that the session key can stay valid
+     * when used in another process with different CWD. When a path does not
+     * exist, this does not work. Then, we add the path as is. */
 #ifdef _WIN32
     char abspath[_MAX_PATH];
     if(_fullpath(abspath, path, _MAX_PATH))
@@ -288,7 +287,7 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     goto out;
 
   *ppeer_key = curlx_dyn_take(&buf, &key_len);
-  /* we just added printable char, and dynbuf always null-terminates, no need
+  /* we added printable char, and dynbuf always null-terminates, no need
    * to track length */
 
 out:

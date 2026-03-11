@@ -568,9 +568,9 @@ void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
 
   /* Unmatched socket, we cannot act on it but we ignore this fact. In
      real-world tests it has been proved that libevent can in fact give
-     the application actions even though the socket was just previously
+     the application actions even though the socket was previously
      asked to get removed, so thus we better survive stray socket actions
-     and just move on. */
+     and move on. */
   if(entry) {
     struct Curl_easy *data;
     uint32_t mid;

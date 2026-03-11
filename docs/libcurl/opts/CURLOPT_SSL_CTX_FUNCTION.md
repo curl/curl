@@ -40,13 +40,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_FUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-This callback function gets called by libcurl just before the initialization
-of an SSL connection after having processed all other SSL related options to
-give a last chance to an application to modify the behavior of the SSL
-initialization. The *ssl_ctx* parameter is a pointer to the SSL library's
-*SSL_CTX* for OpenSSL or wolfSSL, a pointer to *mbedtls_ssl_config* for
-mbedTLS. If an error is returned from the callback no attempt to establish a
-connection is made and the perform operation returns the callback's error
+This callback function gets called by libcurl immediately before the
+initialization of an SSL connection after having processed all other SSL
+related options to give a last chance to an application to modify the behavior
+of the SSL initialization. The *ssl_ctx* parameter is a pointer to the SSL
+library's *SSL_CTX* for OpenSSL or wolfSSL, a pointer to *mbedtls_ssl_config*
+for mbedTLS. If an error is returned from the callback no attempt to establish
+a connection is made and the perform operation returns the callback's error
 code. Set the *clientp* argument passed in to this callback with the
 CURLOPT_SSL_CTX_DATA(3) option.
 

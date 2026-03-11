@@ -57,9 +57,9 @@ There should be a documented URL format. If there is an RFC for it there is no
 question about it but the syntax does not have to be a published RFC. It could
 be enough if it is already in use by other implementations.
 
-If you make up the syntax just in order to be able to propose it to curl, then
-you are in a bad place. URLs are designed and defined for interoperability.
-There should at least be a good chance that other clients and servers can be
+If you make up the syntax in order to be able to propose it to curl, then you
+are in a bad place. URLs are designed and defined for interoperability. There
+should at least be a good chance that other clients and servers can be
 implemented supporting the same URL syntax and work the same or similar way.
 
 URLs work on registered 'schemes'. There is a register of [all officially
@@ -91,8 +91,8 @@ to curl and immediately once the code had been merged, the originator vanished
 from the face of the earth. That is fine, but we need to take the necessary
 precautions so when it happens we are still fine.
 
-Our test infrastructure is powerful enough to test just about every possible
-protocol - but it might require a bit of an effort to make it happen.
+Our test infrastructure is powerful enough to test almost every protocol - but
+it might require a bit of an effort to make it happen.
 
 ## Documentation
 

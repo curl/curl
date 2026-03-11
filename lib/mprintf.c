@@ -26,6 +26,7 @@
 #include "curlx/dynbuf.h"
 #include "curl_printf.h"
 #include "curlx/strparse.h"
+#include "curlx/snprintf.h"  /* for curlx_win32_snprintf() */
 
 #define BUFFSIZE 326 /* buffer for long-to-str and float-to-str calcs, should
                         fit negative DBL_MAX (317 letters) */
@@ -223,7 +224,7 @@ static int parsefmt(const char *format,
             /* illegal combo */
             return PFMT_DOLLAR;
 
-          /* we got no positional, just get the next arg */
+          /* we got no positional, get the next arg */
           param = -1;
           use_dollar = DOLLAR_NOPE;
         }
@@ -607,9 +608,9 @@ static bool out_double(void *userp,
                        double dnum,
                        char *work, int *donep)
 {
-  char formatbuf[32] = "%";
-  char *fptr = &formatbuf[1];
-  size_t left = sizeof(formatbuf) - strlen(formatbuf);
+  char fmt[32] = "%";
+  char *fptr = &fmt[1];
+  size_t left = sizeof(fmt) - strlen(fmt);
   int flags = p->flags;
   int width = p->width;
   int prec = p->prec;
@@ -671,29 +672,23 @@ static bool out_double(void *userp,
 
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
-#ifdef HAVE_SNPRINTF
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
+#ifdef _WIN32
+  curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
+#elif defined(HAVE_SNPRINTF)
   /* !checksrc! disable BANNEDFUNC 1 */
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
-  snprintf(work, BUFFSIZE, formatbuf, dnum);
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-#ifdef _WIN32
-  /* Old versions of the Windows CRT do not terminate the snprintf output
-     buffer if it reaches the max size so we do that here. */
-  work[BUFFSIZE - 1] = 0;
-#endif
-#elif defined(_MSC_VER) && (_MSC_VER < 1900)
-  _snprintf(work, BUFFSIZE, formatbuf, dnum);
-  work[BUFFSIZE - 1] = 0;
+  snprintf(work, BUFFSIZE, fmt, dnum);
 #else
   /* float and double outputs do not work without snprintf support */
   work[0] = 0;
+#endif
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);
   while(*work) {
@@ -943,7 +938,7 @@ static bool out_pointer(void *userp,
  * All output is sent to the 'stream()' callback, one byte at a time.
  */
 
-static int formatf(void *userp, /* untouched by format(), just sent to the
+static int formatf(void *userp, /* untouched by format(), sent to the
                                    stream() function in the second argument */
                    /* function pointer called for each output character */
                    int (*stream)(unsigned char, void *),
@@ -977,7 +972,7 @@ static int formatf(void *userp, /* untouched by format(), just sent to the
         done++;
       }
       if(optr->flags & FLAGS_SUBSTR)
-        /* this is just a substring */
+        /* this is a substring */
         continue;
     }
 

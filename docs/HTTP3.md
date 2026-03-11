@@ -29,7 +29,7 @@ HTTP/3 support in curl is considered **EXPERIMENTAL** until further notice
 when built to use *quiche*. Only the *ngtcp2* backend is not experimental.
 
 Further development and tweaking of the HTTP/3 support in curl happens in the
-master branch using pull-requests, just like ordinary changes.
+master branch using pull-requests like ordinary changes.
 
 To fix before we remove the experimental label:
 
@@ -288,7 +288,7 @@ or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The
 soft timeout fires, when there has been **no data at all** seen from the
 server on the HTTP/3 connection.
 
-So, without you specifying anything, the hard timeout is 200ms and the soft is
+Without you specifying anything, the hard timeout is 200ms and the soft is
 100ms:
 
 * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection
@@ -305,9 +305,9 @@ handshake or time out.
 
 Note that all this happens in addition to IP version happy eyeballing. If the
 name resolution for the server gives more than one IP address, curl tries all
-those until one succeeds - just as with all other protocols. If those IP
-addresses contain both IPv6 and IPv4, those attempts happen, delayed, in
-parallel (the actual eyeballing).
+those until one succeeds - as with all other protocols. If those IP addresses
+contain both IPv6 and IPv4, those attempts happen, delayed, in parallel (the
+actual eyeballing).
 
 ## Known Bugs
 
@@ -322,8 +322,7 @@ development and experimenting.
 
 An existing local HTTP/1.1 server that hosts files. Preferably also a few huge
 ones. You can easily create huge local files like `truncate -s=8G 8GB` - they
-are huge but do not occupy that much space on disk since they are just big
-holes.
+are huge but do not occupy that much space on disk since they are big holes.
 
 In a Debian setup you can install apache2. It runs on port 80 and has a
 document root in `/var/www/html`. Download the 8GB file from apache with `curl
@@ -350,8 +349,8 @@ Get, build and install nghttp2:
      % make && make install
 
 Run the local h3 server on port 9443, make it proxy all traffic through to
-HTTP/1 on localhost port 80. For local toying, we can just use the test cert
-that exists in curl's test dir.
+HTTP/1 on localhost port 80. For local toying, we can use the test cert that
+exists in curl's test dir.
 
      % CERT=/path/to/stunnel.pem
      % $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \

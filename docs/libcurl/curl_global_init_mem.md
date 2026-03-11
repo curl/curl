@@ -36,9 +36,9 @@ allows the application to set callbacks to replace the otherwise used internal
 memory functions.
 
 If you are using libcurl from multiple threads or libcurl was built with the
-threaded resolver option then the callback functions must be thread safe. The
+threaded resolver option then the callback functions must be thread-safe. The
 threaded resolver is a common build option to enable (and in some cases the
-default) so we strongly urge you to make your callback functions thread safe.
+default) so we strongly urge you to make your callback functions thread-safe.
 
 All callback arguments must be set to valid function pointers. The
 prototypes for the given callbacks must match these:
@@ -84,9 +84,18 @@ extern void *calloc_cb(size_t, size_t);
 
 int main(void)
 {
-  curl_global_init_mem(CURL_GLOBAL_DEFAULT, malloc_cb,
-                       free_cb, realloc_cb,
-                       strdup_cb, calloc_cb);
+  CURLcode result;
+
+  result = curl_global_init_mem(CURL_GLOBAL_DEFAULT, malloc_cb,
+                                free_cb, realloc_cb,
+                                strdup_cb, calloc_cb);
+
+  if(result == CURLE_OK) {
+
+    /* use libcurl, then before exiting... */
+
+    curl_global_cleanup();
+  }
 }
 ~~~
 

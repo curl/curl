@@ -369,7 +369,7 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(type == CURL_ASN1_UTF8_STRING) {
-    /* Just copy. */
+    /* copy. */
     if(inlength)
       result = curlx_dyn_addn(to, from, inlength);
   }
@@ -443,6 +443,8 @@ static CURLcode encodeOID(struct dynbuf *store,
     do {
       if(x & 0xFF000000)
         return CURLE_OK;
+      else if(beg == end)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       y = *(const unsigned char *)beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
@@ -473,8 +475,8 @@ static CURLcode OID2str(struct dynbuf *store,
           result = curlx_dyn_add(store, op->textoid);
         else
           result = curlx_dyn_add(store, curlx_dyn_ptr(&buf));
-        curlx_dyn_free(&buf);
       }
+      curlx_dyn_free(&buf);
     }
     else
       result = encodeOID(store, beg, end);
@@ -979,7 +981,12 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
      * ECC public key is all the data, a value of type BIT STRING mapped to
      * OCTET STRING and should not be parsed as an ASN.1 value.
      */
-    const size_t len = ((pubkey->end - pubkey->beg - 2) * 4);
+    const size_t dlen = pubkey->end - pubkey->beg;
+    size_t len;
+    if(dlen < 2)
+      /* too small */
+      return 1;
+    len = (dlen - 2) * 4;
     if(!certnum)
       infof(data, "   ECC Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {

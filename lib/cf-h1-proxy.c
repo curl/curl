@@ -206,9 +206,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   int http_minor;
   CURLcode result;
 
-  /* This only happens if we have looped here due to authentication
-     reasons, and we do not really use the newly cloned URL here
-     then. Just free it. */
+  /* This only happens if we have looped here due to authentication reasons,
+     and we do not really use the newly cloned URL here then. Free it. */
   Curl_safefree(data->req.newurl);
 
   result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
@@ -468,7 +467,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       /* This means we are currently ignoring a response-body */
 
       if(ts->cl) {
-        /* A Content-Length based body: simply count down the counter
+        /* A Content-Length based body: count down the counter
            and make sure to break out of the loop when we are done! */
         ts->cl--;
         if(ts->cl <= 0) {

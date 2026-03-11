@@ -44,7 +44,6 @@
 static const char *get_winsock_error(int err, char *buf, size_t len)
 {
   VERBOSE(const char *p);
-  VERBOSE(size_t alen);
 
   if(!len)
     return NULL;
@@ -221,8 +220,7 @@ static const char *get_winsock_error(int err, char *buf, size_t len)
   default:
     return NULL;
   }
-  alen = strlen(p);
-  curlx_strcopy(buf, len, p, alen);
+  curlx_strcopy(buf, len, p, strlen(p));
   return buf;
 #endif
 }

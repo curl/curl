@@ -169,3 +169,23 @@ class TestProxyAuth:
             '--negotiate', '--proxy-user', 'proxy:proxy'
         ])
         r1.check_response(count=1, http_status=200)
+
+    def test_13_10_tunnels_mixed_auth(self, env: Env, httpd, configures_httpd):
+        self.httpd_configure(env, httpd)
+        curl = CurlClient(env=env)
+        url1 = f'http://localhost:{env.http_port}/data.json?1'
+        url2 = f'http://localhost:{env.http_port}/data.json?2'
+        url3 = f'http://localhost:{env.http_port}/data.json?3'
+        xargs1 = curl.get_proxy_args(proxys=False, tunnel=True)
+        xargs1.extend(['--proxy-user', 'proxy:proxy']) # good auth
+        xargs2 = curl.get_proxy_args(proxys=False, tunnel=True)
+        xargs2.extend(['--proxy-user', 'ungood:ungood']) # bad auth
+        xargs3 = curl.get_proxy_args(proxys=False, tunnel=True)
+        # no auth
+        r = curl.http_download(urls=[url1, url2, url3], alpn_proto='http/1.1', with_stats=True,
+                               url_options={url1: xargs1, url2: xargs2, url3: xargs3})
+        # only url1 succeeds, others fail, no connection reuse
+        assert r.stats[0]['http_code'] == 200, f'{r.dump_logs()}'
+        assert r.stats[1]['http_code'] == 0, f'{r.dump_logs()}'
+        assert r.stats[2]['http_code'] == 0, f'{r.dump_logs()}'
+        assert r.total_connects == 3, f'{r.dump_logs()}'

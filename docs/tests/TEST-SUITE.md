@@ -194,8 +194,8 @@ ensure that the memory log file is properly written even if curl crashes.
 
 If a test case fails, you can conveniently get the script to invoke the
 debugger (gdb) for you with the server running and the same command line
-parameters that failed. Just invoke `runtests.pl <test number> -g` and then
-just type 'run' in the debugger to perform the command through the debugger.
+parameters that failed. Invoke `runtests.pl <test number> -g` and then
+type 'run' in the debugger to perform the command through the debugger.
 
 ### Logs
 
@@ -275,10 +275,10 @@ New tests are added by finding a free number in `tests/data/Makefile.am`.
 
 ## Write tests
 
-Here's a quick description on writing test cases. We basically have three
-kinds of tests: the ones that test the curl tool, the ones that build small
-applications and test libcurl directly and the unit tests that test
-individual (possibly internal) functions.
+Here's a quick description on writing test cases. We have three kinds of
+tests: the ones that test the curl tool, the ones that build small
+applications and test libcurl directly and the unit tests that test individual
+(possibly internal) functions.
 
 ### test data
 
@@ -286,9 +286,9 @@ Each test has a master file that controls all the test data. What to read,
 what the protocol exchange should look like, what exit code to expect and
 what command line arguments to use etc.
 
-These files are `tests/data/test[num]` where `[num]` is just a unique
-identifier described above, and the XML-like file format of them is
-described in the separate [`FILEFORMAT`](FILEFORMAT.md) document.
+These files are `tests/data/test[num]` where `[num]` is a unique identifier
+described above, and the XML-like file format of them is described in the
+separate [`FILEFORMAT`](FILEFORMAT.md) document.
 
 ### curl tests
 

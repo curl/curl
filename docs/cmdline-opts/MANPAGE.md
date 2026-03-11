@@ -10,7 +10,7 @@
 output from the set of sources files in this directory.
 
 The `mainpage.idx` file lists all files that are rendered in that order to
-produce the output. The magic `%options` keyword inserts all command line
+produce the output. The special `%options` keyword inserts all command line
 options documented.
 
 The `%options` documentation is created with one source file for each
@@ -92,7 +92,7 @@ The `#` header can be used by non-option files and it produces a
 `.SH` output.
 
 If the `#` header is used for a command line option file, that header is
-simply ignored in the generated output. It can still serve a purpose in the
+ignored in the generated output. It can still serve a purpose in the
 source file as it helps the user identify what option the file is for.
 
 ### Variables

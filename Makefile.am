@@ -181,3 +181,6 @@ tidy:
 
 clean-local:
 	(cd tests && $(MAKE) clean)
+
+badwords:
+	$(top_srcdir)/scripts/badwords-all

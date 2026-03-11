@@ -83,8 +83,7 @@ a cryptographic hash of the salt and **session_key**. The salt is generated
 for every session individually. Storing **shmac** is recommended when
 placing session tickets in a file, for example.
 
-A third party may brute-force known hostnames, but cannot just "grep" for
-them.
+A third party may brute-force known hostnames, but cannot "grep" for them.
 
 ## Session Data
 

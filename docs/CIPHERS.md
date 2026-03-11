@@ -110,10 +110,9 @@ TLS 1.2 cipher suites with curl it is recommended that you use OpenSSL names
 as these are most widely recognized by the supported SSL backends.
 
 The complete list of cipher suites that may be considered for the `--ciphers`
-option is extensive, it consists of more than 300 ciphers suites. However,
-nowadays for most of them their usage is discouraged, and support for a lot of
-them have been removed from the various SSL backends, if ever implemented at
-all.
+option is extensive, it consists of more than 300 ciphers suites. Nowadays,
+most of them are discouraged, and support for a lot of them has been removed
+from the various SSL backends, if ever implemented at all.
 
 A shortened list (based on [recommendations by
 Mozilla](https://wiki.mozilla.org/Security/Server_Side_TLS)) of cipher suites,

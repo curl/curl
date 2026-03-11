@@ -86,7 +86,7 @@ static char *vms_translate_path(const char *path)
   char *test_str;
 
   /* See if the result is in VMS format, if not, we are done */
-  /* Assume that this is a PATH, not just some data */
+  /* Assume that this is a PATH, not some data */
   test_str = strpbrk(path, ":[<^");
   if(!test_str) {
     return (char *)path;
@@ -165,7 +165,7 @@ static struct passwd *vms_getpwuid(uid_t uid)
     return my_passwd;
   }
 
-  /* If no changes needed just return it */
+  /* If no changes needed, return it */
   if(unix_path == my_passwd->pw_dir) {
     return my_passwd;
   }

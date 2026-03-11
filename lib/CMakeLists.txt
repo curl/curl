@@ -42,7 +42,7 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
 )
 
 if(CURL_BUILD_TESTING)
-  # special libcurlu library just for unittests
+  # special libcurlu library for unittests
   add_library(curlu STATIC EXCLUDE_FROM_ALL ${HHEADERS} ${CSOURCES})
   target_compile_definitions(curlu PUBLIC "CURL_STATICLIB" "UNITTESTS")
   target_link_libraries(curlu PUBLIC ${CURL_LIBS})

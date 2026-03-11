@@ -376,9 +376,7 @@ static void smb_easy_dtor(void *key, size_t klen, void *entry)
   struct smb_request *req = entry;
   (void)key;
   (void)klen;
-  /* `req->path` points to somewhere in `struct smb_conn` which is
-   * kept at the connection meta. If the connection is destroyed first,
-   * req->path points to free'd memory. */
+  Curl_safefree(req->path);
   curlx_free(req);
 }
 
@@ -399,7 +397,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
                                    struct smb_request *req)
 {
   char *path;
-  char *slash;
+  char *slash, *s;
   CURLcode result;
 
   /* URL decode the path */
@@ -408,6 +406,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
     return result;
 
   /* Parse the path for the share */
+  Curl_safefree(smbc->share);
   smbc->share = curlx_strdup((*path == '/' || *path == '\\')
                              ? path + 1 : path);
   curlx_free(path);
@@ -428,12 +427,15 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
   /* Parse the path for the file path converting any forward slashes into
      backslashes */
   *slash++ = 0;
-  req->path = slash;
-
-  for(; *slash; slash++) {
-    if(*slash == '/')
-      *slash = '\\';
+  for(s = slash; *s; s++) {
+    if(*s == '/')
+      *s = '\\';
   }
+  /* keep a copy at easy struct to not share this with connection state */
+  req->path = curlx_strdup(slash);
+  if(!req->path)
+    return CURLE_OUT_OF_MEMORY;
+
   return CURLE_OK;
 }
 

@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_PUBLIC_KEYFILE,
 
 Pass a char pointer pointing to a *filename* for your public key. If not used,
 libcurl defaults to **$HOME/.ssh/id_dsa.pub** if the HOME environment variable
-is set, and just "id_dsa.pub" in the current directory if HOME is not set.
+is set, and "id_dsa.pub" in the current directory if HOME is not set.
 
 If NULL (or an empty string) is passed to this option, libcurl passes no
 public key to the SSH library, which then rather derives it from the private

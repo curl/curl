@@ -1,0 +1,170 @@
+#!/usr/bin/env perl
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+# bad[:=]correct
+#
+# If separator is '=', the string will be compared case sensitively.
+# If separator is ':', the check is done case insensitively.
+#
+# To add white listed uses of bad words that are removed before checking for
+# the bad ones:
+#
+# ---(accepted word)
+#
+
+use strict;
+use warnings;
+
+my @whitelist = (
+    # ignore what looks like URLs
+    '(^|\W)((https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&\'\(\)*+,;=]+)',
+    # remove bolded sections
+    '\*\*.*?\*\*',
+    # remove backticked texts
+    '\`.*?\`'
+    );
+my %alt;
+my %exactcase;
+my $skip_indented = 1;
+
+if($ARGV[0] eq "-a") {
+    shift @ARGV;
+    $skip_indented = 0;
+}
+my %wl;
+if($ARGV[0] eq "-w") {
+    shift @ARGV;
+    my $file = shift @ARGV;
+    open(W, "<$file") or die "Cannot open '$file': $!";
+    while(<W>) {
+        if(/^#/) {
+            # allow #-comments
+            next;
+        }
+        if(/^([^:]*):(\d*):(.*)/) {
+            $wl{"$1:$2:$3"}=1;
+            #print STDERR "whitelisted $1:$2:$3\n";
+        }
+    }
+    close(W);
+}
+
+my @w;
+my @exact;
+while(<STDIN>) {
+    chomp;
+    if($_ =~ /^#/) {
+        next;
+    }
+    if($_ =~ /^---(.+)/) {
+        push @whitelist, $1;
+    }
+    elsif($_ =~ /^(.*)([:=])(.*)/) {
+        my ($bad, $sep, $better)=($1, $2, $3);
+        if($sep eq "=") {
+            $alt{$bad} = $better;
+            push @exact, $bad;
+        }
+        else {
+            $alt{lc($bad)} = $better;
+            push @w, $bad;
+        }
+    }
+}
+
+# Build a single combined regex for case-insensitive words
+my $re_ci;
+if(@w) {
+    my $pat = join('|', map { quotemeta($_) } @w);
+    $re_ci = qr/\b($pat)\b/i;
+}
+
+# Build a single combined regex for case-sensitive (exact) words
+my $re_cs;
+if(@exact) {
+    my $pat = join('|', map { quotemeta($_) } @exact);
+    $re_cs = qr/\b($pat)\b/;
+}
+
+# Build a single combined regex for removing whitelisted content
+my $re_wl;
+my $pat = join('|', map { $_ } @whitelist);
+$re_wl = qr/($pat)/;
+
+my $errors = 0;
+
+sub highlight {
+    my ($p, $w, $in, $f, $l, $lookup) = @_;
+
+    my $c = length($p)+1;
+    my $ch = "$f:$l:$w";
+    if($wl{$ch}) {
+        # whitelisted filename + line + word
+        return;
+    }
+    $ch = $f . "::" . $w;
+    if($wl{$ch}) {
+        # whitelisted filename + word
+        return;
+    }
+
+    print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
+    printf STDERR " %4d | %s\n", $l, $in;
+    printf STDERR "      | %*s^%s\n", length($p), " ",
+        "~" x (length($w)-1);
+    printf STDERR " maybe use \"%s\" instead?\n", $alt{$lookup};
+    $errors++;
+}
+
+sub file {
+    my ($f) = @_;
+    my $l = 0;
+    open(F, "<$f");
+    while(<F>) {
+        my $in = $_;
+        $l++;
+        chomp $in;
+        if($skip_indented && $in =~ /^    /) {
+            next;
+        }
+        # remove the link part
+        $in =~ s/(\[.*\])\(.*\)/$1/g;
+        # remove whitelisted patterns (pre-compiled)
+        if($re_wl) {
+            $in =~ s/${re_wl}//ig;
+        }
+        # case-insensitive bad words
+        if($re_ci) {
+            if($in =~ /^(.*)$re_ci/i) {
+                highlight($1, $2, $in, $f, $l, lc($2));
+            }
+        }
+        # case-sensitive (exact) bad words
+        if($re_cs) {
+            if($in =~ /^(.*)$re_cs/) {
+                highlight($1, $2, $in, $f, $l, $2);
+            }
+        }
+    }
+    close(F);
+}
+
+my @filemasks = @ARGV;
+open(my $git_ls_files, '-|', 'git', 'ls-files', '--', @filemasks) or die "Failed running git ls-files: $!";
+my @files;
+while(my $each = <$git_ls_files>) {
+    chomp $each;
+    push @files, $each;
+}
+close $git_ls_files;
+
+my $onum = scalar(@files);
+my $num;
+for my $e (@files) {
+    #printf STDERR "Complete: %d%%\r", $num++ * 100 / $onum;
+    file($e);
+}
+
+exit $errors;

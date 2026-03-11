@@ -374,9 +374,9 @@ curl supports SMB version 1 (only)
 
 The path part of an SMTP request specifies the hostname to present during
 communication with the mail server. If the path is omitted, then libcurl
-attempts to resolve the local computer's hostname. However, this may not
-return the fully qualified domain name that is required by some mail servers
-and specifying this path allows you to set an alternative name, such as your
+attempts to resolve the local computer's hostname. This may not return the
+fully qualified domain name that is required by some mail servers and
+specifying this path allows you to set an alternative name, such as your
 machine's fully qualified domain name, which you might have obtained from an
 external function such as gethostname or getaddrinfo.
 

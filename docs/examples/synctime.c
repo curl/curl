@@ -45,7 +45,7 @@
  *    so there is no way to get an accurate time.
  * 4. This software could only provide an accuracy of +- a few seconds,
  *    as Round-Trip delay time is not taken into consideration.
- *    Compensation of network, firewall/proxy delay cannot be simply divide
+ *    Compensation of network, firewall/proxy delay cannot be done by dividing
  *    the Round-Trip delay time by half.
  * 5. Win32 SetSystemTime() API sets your computer clock according to
  *    GMT/UTC time. Therefore your computer timezone must be properly set.
@@ -274,7 +274,7 @@ int main(int argc, const char *argv[])
     time_t tt_gmt;
     double tzonediffFloat;
     int tzonediffWord;
-    char timeBuf[61];
+    char timeBuf[61] = "";
     char tzoneBuf[16];
 
     SyncTime_CURL_Init(curl, conf.http_proxy, conf.proxy_user);

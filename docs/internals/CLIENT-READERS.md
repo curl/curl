@@ -134,8 +134,8 @@ they need it and give `FALSE` of none does.
 
 Many protocols need to know the amount of bytes delivered by the client
 readers in advance. They may invoke `Curl_creader_total_length(data)` to
-retrieve that. However, not all reader chains know the exact value beforehand.
-In that case, the call returns `-1` for "unknown".
+retrieve that. Not all reader chains know the exact value beforehand. In that
+case, the call returns `-1` for "unknown".
 
 Even if the length of the "raw" data is known, the length that is send may
 not. Example: with option `--crlf` the uploaded content undergoes line-end

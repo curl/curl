@@ -193,7 +193,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       done = FALSE;
       break;
     case Z_BUF_ERROR:
-      /* No more data to flush: just exit loop. */
+      /* No more data to flush: exit loop. */
       break;
     case Z_STREAM_END:
       result = process_trailer(data, zp);
@@ -622,6 +622,9 @@ char *Curl_get_content_encodings(void)
         result = curlx_dyn_add(&enc, ce->name);
     }
   }
+  if(!result && !curlx_dyn_len(&enc))
+    result = curlx_dyn_add(&enc, CONTENT_ENCODING_DEFAULT);
+
   if(!result)
     return curlx_dyn_ptr(&enc);
   return NULL;

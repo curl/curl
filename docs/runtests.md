@@ -136,14 +136,14 @@ Force the test to run even if mentioned in DISABLED.
 
 Run the given test(s) with gdb. This is best used on a single test case and
 curl built --disable-shared. This then fires up gdb with command line set to
-run the specified test case. Simply (set a break-point and) type 'run' to
+run the specified test case. Set a break-point if needed and type 'run' to
 start.
 
 ## `-gl`
 
 Run the given test(s) with lldb. This is best used on a single test case and
 curl built --disable-shared. This then fires up lldb with command line set to
-run the specified test case. Simply (set a break-point and) type 'run' to
+run the specified test case. Set a break-point if needed and type 'run' to
 start.
 
 ## `-gw`
@@ -313,7 +313,7 @@ use.
 
 The test script checks most of these by itself to determine when it is safe to
 attempt to run each test. Those which cannot be run due to failed requirements
-are simply skipped and listed at the completion of all test cases. In some
+are skipped and listed at the completion of all test cases. In some
 unusual configurations, the test script cannot make the correct determination
 for all tests. In these cases, the problematic tests can be skipped using the
 "!keyword" skip feature documented earlier.

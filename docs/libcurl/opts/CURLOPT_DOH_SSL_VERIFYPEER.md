@@ -64,9 +64,9 @@ is done independently of the CURLOPT_DOH_SSL_VERIFYPEER(3) option.
 
 **WARNING:** disabling verification of the certificate allows bad guys to
 man-in-the-middle the communication without you knowing it. Disabling
-verification makes the communication insecure. Just having encryption on a
-transfer is not enough as you cannot be sure that you are communicating with
-the correct end-point.
+verification makes the communication insecure. Having encryption on a transfer
+is not enough as you cannot be sure that you are communicating with the
+correct end-point.
 
 # DEFAULT
 

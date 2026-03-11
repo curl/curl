@@ -22,8 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Performs an FTP upload and renames the file just after a successful
- * transfer.
+ * Performs an FTP upload and renames the file after a successful transfer.
  * </DESC>
  */
 #ifdef _MSC_VER

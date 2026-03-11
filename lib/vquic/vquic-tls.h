@@ -53,7 +53,7 @@ struct curl_tls_ctx {
  * Callback passed to `Curl_vquic_tls_init()` that can
  * do early initializations on the not otherwise configured TLS
  * instances created. This varies by TLS backend:
- * - openssl/wolfssl: SSL_CTX* has just been created
+ * - openssl/wolfssl: SSL_CTX* has been created
  * - gnutls: gtls_client_init() has run
  */
 typedef CURLcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,

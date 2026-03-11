@@ -512,10 +512,14 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
   }
 
 #ifdef DEBUGBUILD
-  if(getenv("CURL_FN_SANITIZE_BAD"))
+  if(getenv("CURL_FN_SANITIZE_BAD")) {
+    curlx_free(target);
     return SANITIZE_ERR_INVALID_PATH;
-  if(getenv("CURL_FN_SANITIZE_OOM"))
+  }
+  if(getenv("CURL_FN_SANITIZE_OOM")) {
+    curlx_free(target);
     return SANITIZE_ERR_OUT_OF_MEMORY;
+  }
 #endif
 
   *sanitized = target;
@@ -897,6 +901,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
 CURLcode win32_init(void)
 {
+  curlx_verify_windows_init();
   curlx_now_init();
 #ifndef CURL_WINDOWS_UWP
   init_terminal();

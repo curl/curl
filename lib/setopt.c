@@ -359,8 +359,8 @@ CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
 static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
 {
   /*
-   * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...)
-   * Would this be better if the RTSPREQ_* were just moved into here?
+   * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...) Would this be
+   * better if the RTSPREQ_* were moved into here?
    */
   Curl_RtspReq rtspreq = RTSPREQ_NONE;
   switch(arg) {
@@ -1374,7 +1374,7 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
      * Entries added this way will remain in the cache until explicitly
      * removed or the handle is cleaned up.
      *
-     * Prefix the HOST with plus sign (+) to have the entry expire just like
+     * Prefix the HOST with plus sign (+) to have the entry expire like
      * automatically added entries.
      *
      * Prefix the HOST with dash (-) to _remove_ the entry from the cache.
@@ -2050,10 +2050,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     return Curl_setstropt(&s->str[STRING_CUSTOMREQUEST], ptr);
 
-    /* we do not set
-       s->method = HTTPREQ_CUSTOM;
-       here, we continue as if we were using the already set type
-       and this just changes the actual request keyword */
+    /* we do not set s->method = HTTPREQ_CUSTOM; here, we continue as if we
+       were using the already set type and this changes the actual request
+       keyword */
   case CURLOPT_SERVICE_NAME:
     /*
      * Set authentication service name for DIGEST-MD5, Kerberos 5 and SPNEGO
@@ -2366,7 +2365,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     else
       /* make a NULL argument reset to default */
-      s->allowed_protocols = (curl_prot_t)CURLPROTO_ALL;
+      s->allowed_protocols = (curl_prot_t)CURLPROTO_64ALL;
     break;
   case CURLOPT_REDIR_PROTOCOLS_STR:
     if(ptr) {

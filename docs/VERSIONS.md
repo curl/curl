@@ -31,10 +31,10 @@ It means that after release 1.2.3, we can release 2.0.0 if something really
 big has been made, 1.3.0 if not that big changes were made or 1.2.4 if only
 bugs were fixed.
 
-Bumping, as in increasing the number with 1, is unconditionally only
-affecting one of the numbers (except the ones to the right of it, that may be
-set to zero). 1 becomes 2, 3 becomes 4, 9 becomes 10, 88 becomes 89 and 99
-becomes 100. So, after 1.2.9 comes 1.2.10. After 3.99.3, 3.100.0 might come.
+Bumping, as in increasing the number with 1, is unconditionally only affecting
+one of the numbers (except the ones to the right of it, that may be set to
+zero). 1 becomes 2, 3 becomes 4, 9 becomes 10, 88 becomes 89 and 99
+becomes 100. After 1.2.9 comes 1.2.10. After 3.99.3, 3.100.0 might come.
 
 All original curl source release archives are named according to the libcurl
 version (not according to the curl client version that, as said before, might
@@ -68,7 +68,8 @@ dates. The tool was called `httpget` before 2.0, `urlget` before 4.0 then
 `curl` since 4.0. `libcurl` and `curl` are always released in sync, using the
 same version numbers.
 
-- 8.19.0: pending
+- 8.20.0: pending
+- 8.19.0: March 11, 2026
 - 8.18.0: January 7, 2026
 - 8.17.0: November 5, 2025
 - 8.16.0: September 10, 2025

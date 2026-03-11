@@ -63,7 +63,7 @@
 #define H2_CONN_WINDOW_SIZE     (10 * 1024 * 1024)
 /* on receiving from TLS, we prep for holding a full stream window */
 #define H2_NW_RECV_CHUNKS       (H2_CONN_WINDOW_SIZE / H2_CHUNK_SIZE)
-/* on send into TLS, we just want to accumulate small frames */
+/* on send into TLS, we want to accumulate small frames */
 #define H2_NW_SEND_CHUNKS       1
 /* this is how much we want "in flight" for a stream, unthrottled */
 #define H2_STREAM_WINDOW_SIZE_MAX   (10 * 1024 * 1024)
@@ -525,8 +525,8 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
 }
 
 /*
- * The server may send us data at any point (e.g. PING frames). Therefore,
- * we cannot assume that an HTTP/2 socket is dead just because it is readable.
+ * The server may send us data at any point (e.g. PING frames). Therefore, we
+ * cannot assume that an HTTP/2 socket is dead because it is readable.
  *
  * Check the lower filters first and, if successful, peek at the socket
  * and distinguish between closed and data.
@@ -677,7 +677,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name)
   size_t i;
   /* Verify that we got a good easy handle in the push header struct,
      mostly to detect rubbish input fast(er). Also empty header name
-     is just a rubbish too. We have to allow ":" at the beginning of
+     is rubbish too. We have to allow ":" at the beginning of
      the header, but header == ":" must be rejected. If we have ':' in
      the middle of header, it could be matched in middle of the value,
      this is because we do prefix match.*/
@@ -1889,10 +1889,9 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   while(!ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
     stream = H2_STREAM_CTX(ctx, data);
     if(stream && (stream->closed || !data_max_bytes)) {
-      /* We would like to abort here and stop processing, so that
-       * the transfer loop can handle the data/close here. However,
-       * this may leave data in underlying buffers that will not
-       * be consumed. */
+      /* We would like to abort here and stop processing, so that the transfer
+       * loop can handle the data/close here. This may leave data in
+       * underlying buffers that will not be consumed. */
       if(!cf->next || !cf->next->cft->has_data_pending(cf->next, data))
         Curl_multi_mark_dirty(data);
       break;

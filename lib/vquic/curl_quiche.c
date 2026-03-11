@@ -60,7 +60,7 @@
 
 #define H3_STREAM_WINDOW_SIZE  (1024 * 128)
 #define H3_STREAM_CHUNK_SIZE   (1024 * 16)
-/* Receive and Send max number of chunks just follows from the
+/* Receive and Send max number of chunks follows from the
  * chunk size and window size */
 #define H3_STREAM_RECV_CHUNKS \
   (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
@@ -126,7 +126,7 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
 static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
-    /* quiche just freed it */
+    /* quiche freed it */
     ctx->tls.ossl.ssl = NULL;
     Curl_vquic_tls_cleanup(&ctx->tls);
     Curl_ssl_peer_cleanup(&ctx->peer);
@@ -337,7 +337,7 @@ static void cf_quiche_write_hd(struct Curl_cfilter *cf,
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu "
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu "
                   "bytes of headers", stream->id, stream->xfer_result, blen);
   }
 }
@@ -389,14 +389,14 @@ static int cb_each_header(uint8_t *name, size_t name_len,
     if(!result)
       cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->h1hdr),
                          curlx_dyn_len(&ctx->h1hdr), FALSE);
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] status: %s",
+    CURL_TRC_CF(data, cf, "[%" PRIu64 "] status: %s",
                 stream->id, curlx_dyn_ptr(&ctx->h1hdr));
   }
   else {
     if(is_valid_h3_header(value, value_len) &&
        is_valid_h3_header(name, name_len)) {
       /* store as an HTTP1-style header */
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s",
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] header: %.*s: %.*s",
                   stream->id, (int)name_len, name,
                   (int)value_len, value);
       curlx_dyn_reset(&ctx->h1hdr);
@@ -458,7 +458,7 @@ static void cf_quiche_flush_body(struct Curl_cfilter *cf,
         data, (const char *)buf, blen, FALSE);
       Curl_bufq_skip(&ctx->writebuf, blen);
       if(stream->xfer_result) {
-        CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu bytes"
+        CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu bytes"
                     " of data", stream->id, stream->xfer_result, blen);
       }
     }
@@ -866,7 +866,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
                     vquic_h3_err_str(stream->error3));
         return CURLE_OK;
     }
-    failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
+    failf(data, "HTTP/3 stream %" PRIu64 " reset by server (error 0x%" PRIx64
           " %s)", stream->id, stream->error3,
           vquic_h3_err_str(stream->error3));
     result = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
@@ -1124,7 +1124,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        * server. If the server has send us a final response, we should
        * silently discard the send data.
        * This happens for example on redirects where the server, instead
-       * of reading the full request body just closed the stream after
+       * of reading the full request body closed the stream after
        * sending the 30x response.
        * This is sort of a race: had the transfer loop called recv first,
        * it would see the response and stop/discard sending on its own- */

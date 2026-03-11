@@ -43,6 +43,11 @@ typedef enum {
   PLATFORM_WINNT
 } PlatformIdentifier;
 
+#ifdef CURL_WINDOWS_UWP
+#define curlx_verify_windows_init() Curl_nop_stmt
+#else
+void curlx_verify_windows_init(void);
+#endif
 /* This is used to verify if we are running on a specific Windows version */
 bool curlx_verify_windows_version(const unsigned int majorVersion,
                                   const unsigned int minorVersion,

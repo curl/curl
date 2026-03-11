@@ -368,6 +368,32 @@ out:
   return result;
 }
 
+static timediff_t async_ares_poll_timeout(struct async_ares_ctx *ares,
+                                          timediff_t timeout_ms)
+{
+  struct timeval *ares_calced, time_buf, max_timeout;
+  int itimeout_ms;
+
+#if TIMEDIFF_T_MAX > INT_MAX
+    itimeout_ms = (timeout_ms > INT_MAX) ? INT_MAX :
+                   ((timeout_ms < 0) ? -1 : (int)timeout_ms);
+#else
+    itimeout_ms = (int)timeout_ms;
+#endif
+  max_timeout.tv_sec = itimeout_ms / 1000;
+  max_timeout.tv_usec = (itimeout_ms % 1000) * 1000;
+
+  /* c-ares tells us the shortest timeout of any operation on channel */
+  ares_calced = ares_timeout(ares->channel, &max_timeout, &time_buf);
+  /* use the timeout period ares returned to us above if less than one
+     second is left, otherwise use 1000ms to make sure the progress callback
+     gets called frequent enough */
+  if(!ares_calced->tv_sec)
+    return (timediff_t)(ares_calced->tv_usec / 1000);
+  else
+    return 1000;
+}
+
 /*
  * Curl_async_await()
  *
@@ -383,67 +409,44 @@ CURLcode Curl_async_await(struct Curl_easy *data,
                           struct Curl_dns_entry **dns)
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
+  struct curltime start = *Curl_pgrs_now(data);
   CURLcode result = CURLE_OK;
-  timediff_t timeout_ms;
 
   DEBUGASSERT(dns);
   *dns = NULL; /* clear on entry */
 
-  timeout_ms = Curl_timeleft_ms(data);
-  if(timeout_ms < 0) {
-    /* already expired! */
-    connclose(data->conn, "Timed out before name resolve started");
-    return CURLE_OPERATION_TIMEDOUT;
-  }
-  if(!timeout_ms)
-    timeout_ms = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve */
-
-  /* Wait for the name resolve query to complete. */
+  /* Wait for the name resolve query to complete or time out. */
   while(!result) {
-    struct timeval *real_timeout, time_buf, max_timeout;
-    int itimeout_ms;
-    timediff_t call_timeout_ms;
+    timediff_t timeout_ms;
 
-#if TIMEDIFF_T_MAX > INT_MAX
-    itimeout_ms = (timeout_ms > INT_MAX) ? INT_MAX : (int)timeout_ms;
-#else
-    itimeout_ms = (int)timeout_ms;
-#endif
+    timeout_ms = Curl_timeleft_ms(data);
+    if(!timeout_ms) { /* no applicable timeout from `data`*/
+      timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &start);
+      if(elapsed_ms < (CURL_TIMEOUT_RESOLVE * 1000))
+        timeout_ms = (CURL_TIMEOUT_RESOLVE * 1000) - elapsed_ms;
+      else
+        timeout_ms = -1;
+    }
 
-    max_timeout.tv_sec = itimeout_ms / 1000;
-    max_timeout.tv_usec = (itimeout_ms % 1000) * 1000;
+    if(timeout_ms < 0) {
+      result = CURLE_OPERATION_TIMEDOUT;
+      break;
+    }
 
-    real_timeout = ares_timeout(ares->channel, &max_timeout, &time_buf);
-
-    /* use the timeout period ares returned to us above if less than one
-       second is left, otherwise just use 1000ms to make sure the progress
-       callback gets called frequent enough */
-    if(!real_timeout->tv_sec)
-      call_timeout_ms = (timediff_t)(real_timeout->tv_usec / 1000);
-    else
-      call_timeout_ms = 1000;
-
-    if(Curl_ares_perform(ares->channel, call_timeout_ms) < 0)
-      return CURLE_UNRECOVERABLE_POLL;
+    if(Curl_ares_perform(ares->channel,
+                         async_ares_poll_timeout(ares, timeout_ms)) < 0) {
+      result = CURLE_UNRECOVERABLE_POLL;
+      break;
+    }
 
     result = Curl_async_is_resolved(data, dns);
     if(result || data->state.async.done)
       break;
 
-    if(Curl_pgrsUpdate(data))
+    if(Curl_pgrsUpdate(data)) {
       result = CURLE_ABORTED_BY_CALLBACK;
-    else {
-      struct curltime now = curlx_now(); /* update in loop */
-      timediff_t elapsed_ms = curlx_ptimediff_ms(&now, Curl_pgrs_now(data));
-      if(elapsed_ms <= 0)
-        timeout_ms -= 1; /* always deduct at least 1 */
-      else if(elapsed_ms > timeout_ms)
-        timeout_ms = -1;
-      else
-        timeout_ms -= elapsed_ms;
+      break;
     }
-    if(timeout_ms < 0)
-      result = CURLE_OPERATION_TIMEDOUT;
   }
 
   /* Operation complete, if the lookup was successful we now have the entry
@@ -544,12 +547,11 @@ static void async_ares_hostbyname_cb(void *user_data,
        talking to a pool of DNS servers that can only successfully resolve
        IPv4 address, for example).
 
-       it is also possible that the other request could always just take
-       longer because it needs more time or only the second DNS server can
-       fulfill it successfully. But, to align with the philosophy of Happy
-       Eyeballs, we do not want to wait _too_ long or users will think
-       requests are slow when IPv6 lookups do not actually work (but IPv4
-       ones do).
+       it is also possible that the other request could always take longer
+       because it needs more time or only the second DNS server can fulfill it
+       successfully. But, to align with the philosophy of Happy Eyeballs, we
+       do not want to wait _too_ long or users will think requests are slow
+       when IPv6 lookups do not actually work (but IPv4 ones do).
 
        So, now that we have a usable answer (some IPv4 addresses, some IPv6
        addresses, or "no such domain"), we start a timeout for the remaining
@@ -557,24 +559,23 @@ static void async_ares_hostbyname_cb(void *user_data,
        request came back quickly, that need not be the case. It might be that
        this completing request did not get a result from the first DNS
        server or even the first round of the whole DNS server pool. So it
-       could already be quite some time after we issued the DNS queries in
+       could already be a long time after we issued the DNS queries in
        the first place. Without modifying c-ares, we cannot know exactly
        where in its retry cycle we are. We could guess based on how much
        time has gone by, but it does not really matter. Happy Eyeballs tells
-       us that, given usable information in hand, we simply do not want to
+       us that, given usable information in hand, we do not want to
        wait "too much longer" after we get a result.
 
-       We simply wait an additional amount of time equal to the default
-       c-ares query timeout. That is enough time for a typical parallel
-       response to arrive without being "too long". Even on a network
-       where one of the two types of queries is failing or timing out
-       constantly, this will usually mean we wait a total of the default
-       c-ares timeout (5 seconds) plus the round trip time for the successful
-       request, which seems bearable. The downside is that c-ares might race
-       with us to issue one more retry just before we give up, but it seems
-       better to "waste" that request instead of trying to guess the perfect
-       timeout to prevent it. After all, we do not even know where in the
-       c-ares retry cycle each request is.
+       We wait an additional amount of time equal to the default c-ares
+       query timeout. That is enough time for a typical parallel response to
+       arrive without being "too long". Even on a network where one of the two
+       types of queries is failing or timing out constantly, this will usually
+       mean we wait a total of the default c-ares timeout (5 seconds) plus the
+       round trip time for the successful request, which seems bearable. The
+       downside is that c-ares might race with us to issue one more retry
+       before we give up, but it seems better to "waste" that request instead
+       of trying to guess the perfect timeout to prevent it. After all, we do
+       not even know where in the c-ares retry cycle each request is.
     */
     ares->happy_eyeballs_dns_time = *Curl_pgrs_now(data);
     Curl_expire(data, HAPPY_EYEBALLS_DNS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS_DNS);
@@ -845,7 +846,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
   }
 
 #ifdef HAVE_CARES_SERVERS_CSV
-  /* if channel is not there, this is just a parameter check */
+  /* if channel is not there, this is a parameter check */
   if(ares->channel)
 #ifdef HAVE_CARES_PORTS_CSV
     ares_result = ares_set_servers_ports_csv(ares->channel, servers);
@@ -888,7 +889,7 @@ CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data)
   if(!interf)
     interf = "";
 
-  /* if channel is not there, this is just a parameter check */
+  /* if channel is not there, this is a parameter check */
   if(ares->channel)
     ares_set_local_dev(ares->channel, interf);
 
@@ -917,7 +918,7 @@ CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data)
     }
   }
 
-  /* if channel is not there yet, this is just a parameter check */
+  /* if channel is not there yet, this is a parameter check */
   if(ares->channel)
     ares_set_local_ip4(ares->channel, ntohl(a4.s_addr));
 
@@ -947,7 +948,7 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data)
     }
   }
 
-  /* if channel is not there, this is just a parameter check */
+  /* if channel is not there, this is a parameter check */
   if(ares->channel)
     ares_set_local_ip6(ares->channel, a6);
 

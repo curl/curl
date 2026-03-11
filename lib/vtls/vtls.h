@@ -249,7 +249,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 
 #else /* if not USE_SSL */
 
-/* When SSL support is not present, just define away these function calls */
+/* When SSL support is not present, define away these function calls */
 #define Curl_ssl_init() 1
 #define Curl_ssl_cleanup() Curl_nop_stmt
 #define Curl_ssl_close_all(x) Curl_nop_stmt

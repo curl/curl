@@ -29,8 +29,7 @@ The default *output* name is **ca-bundle.crt**. By setting it to '-' (a single
 dash) you get the output sent to STDOUT instead of a file.
 
 The PEM format this scripts uses for output makes the result readily available
-for use by just about all OpenSSL or GnuTLS powered applications, such as curl
-and others.
+for use by OpenSSL or GnuTLS powered applications, such as curl and others.
 
 # OPTIONS
 

@@ -254,10 +254,10 @@ void clear_advisor_read_lock(const char *filename)
   int res;
 
   /*
-  ** Log all removal failures. Even those due to file not existing.
-  ** This allows to detect if unexpectedly the file has already been
-  ** removed by a process different than the one that should do this.
-  */
+   * Log all removal failures. Even those due to file not existing.
+   * This allows to detect if unexpectedly the file has already been
+   * removed by a process different than the one that should do this.
+   */
 
   do {
     res = unlink(filename);

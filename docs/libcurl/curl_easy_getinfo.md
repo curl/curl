@@ -20,7 +20,7 @@ curl_easy_getinfo - extract information from a curl handle
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
 ~~~
 
 # DESCRIPTION
@@ -196,16 +196,15 @@ In microseconds. (Added in 8.10.0) See CURLINFO_POSTTRANSFER_TIME_T(3)
 
 ## CURLINFO_PRETRANSFER_TIME
 
-The time it took from the start until the file transfer is just about to
-begin. This includes all pre-transfer commands and negotiations that are
-specific to the particular protocol(s) involved. See
-CURLINFO_PRETRANSFER_TIME(3)
+The time it took from the start until the file transfer is about to begin.
+This includes all pre-transfer commands and negotiations that are specific to
+the particular protocol(s) involved. See CURLINFO_PRETRANSFER_TIME(3)
 
 ## CURLINFO_PRETRANSFER_TIME_T
 
-The time it took from the start until the file transfer is just about to
-begin. This includes all pre-transfer commands and negotiations that are
-specific to the particular protocol(s) involved. In microseconds. See
+The time it took from the start until the file transfer is about to begin.
+This includes all pre-transfer commands and negotiations that are specific to
+the particular protocol(s) involved. In microseconds. See
 CURLINFO_PRETRANSFER_TIME_T(3)
 
 ## CURLINFO_PRIMARY_IP
@@ -254,14 +253,14 @@ Total number of redirects that were followed. See CURLINFO_REDIRECT_COUNT(3)
 ## CURLINFO_REDIRECT_TIME
 
 The time it took for all redirection steps include name lookup, connect,
-pretransfer and transfer before final transaction was started. So, this is
-zero if no redirection took place. As a double. See CURLINFO_REDIRECT_TIME(3)
+pretransfer and transfer before final transaction was started. This is zero if
+no redirection took place. As a double. See CURLINFO_REDIRECT_TIME(3)
 
 ## CURLINFO_REDIRECT_TIME_T
 
 The time it took for all redirection steps include name lookup, connect,
-pretransfer and transfer before final transaction was started. So, this is
-zero if no redirection took place. In number of microseconds. See
+pretransfer and transfer before final transaction was started. This is zero if
+no redirection took place. In number of microseconds. See
 CURLINFO_REDIRECT_TIME_T(3)
 
 ## CURLINFO_REDIRECT_URL

@@ -361,8 +361,8 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     size_t keep = portptr - hostname;
 
     /* Browser behavior adaptation. If there is a colon with no digits after,
-       just cut off the name there which makes us ignore the colon and just
-       use the default port. Firefox, Chrome and Safari all do that.
+       cut off the name there which makes us ignore the colon and use the
+       default port. Firefox, Chrome and Safari all do that.
 
        Do not do it if the URL has no scheme, to make something that looks like
        a scheme not work!
@@ -1078,7 +1078,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
   }
 
   if(pathlen <= 1) {
-    /* there is no path left or just the slash, unset */
+    /* there is no path left or the slash, unset */
     path = NULL;
   }
   else {
@@ -1089,7 +1089,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
       path = u->path;
     }
     else if(flags & CURLU_URLENCODE)
-      /* it might have encoded more than just the path so cut it */
+      /* it might have encoded more than the path so cut it */
       u->path[pathlen] = 0;
 
     if(!(flags & CURLU_PATH_AS_IS)) {
@@ -1274,7 +1274,7 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
   if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
      !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
     uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
-                              flags & ~CURLU_PATH_AS_IS);
+                              flags & ~U_CURLU_PATH_AS_IS);
   }
   else
     uc = CURLUE_OUT_OF_MEMORY;
@@ -1555,7 +1555,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
   case CURLUPART_SCHEME:
     ptr = u->scheme;
     ifmissing = CURLUE_NO_SCHEME;
-    flags &= ~CURLU_URLDECODE; /* never for schemes */
+    flags &= ~U_CURLU_URLDECODE; /* never for schemes */
     if((flags & CURLU_NO_GUESS_SCHEME) && u->guessed_scheme)
       return CURLUE_NO_SCHEME;
     break;
@@ -1582,7 +1582,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
   case CURLUPART_PORT:
     ptr = u->port;
     ifmissing = CURLUE_NO_PORT;
-    flags &= ~CURLU_URLDECODE; /* never for port */
+    flags &= ~U_CURLU_URLDECODE; /* never for port */
     if(!ptr && (flags & CURLU_DEFAULT_PORT) && u->scheme) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */

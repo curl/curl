@@ -115,27 +115,16 @@ jobs:
           pyspelling --version
           pyspelling --verbose --jobs 5 --config .github/scripts/pyspelling.yaml
 
-  badwords-synopsis:
-    name: 'badwords, synopsis'
+  synopsis-man-examples:
+    name: 'synopsis, man-examples'
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-
-      - name: 'badwords'
-        run: .github/scripts/badwords.pl -w .github/scripts/badwords.ok '**.md' projects/OS400/README.OS400 < .github/scripts/badwords.txt
 
       - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
-
-  man-examples:
-    name: 'man-examples'
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
 
       - name: 'verify examples'
         run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md

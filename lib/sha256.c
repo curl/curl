@@ -275,7 +275,7 @@ static const unsigned long K[64] = {
 
 #define Sha256_Ch(x, y, z)  (z ^ (x & (y ^ z)))
 #define Sha256_Maj(x, y, z) (((x | y) & z) | (x & y))
-#define Sha256_S(x, n)      RORc((x), (n))
+#define Sha256_S(x, n)      RORc(x, n)
 #define Sha256_R(x, n)      (((x) & 0xFFFFFFFFUL) >> (n))
 
 #define Sigma0(x)         (Sha256_S(x, 2) ^ Sha256_S(x, 13) ^ Sha256_S(x, 22))
@@ -416,7 +416,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
    */
   if(md->curlen > 56) {
     while(md->curlen < 64) {
-      md->buf[md->curlen++] = (unsigned char)0;
+      md->buf[md->curlen++] = 0;
     }
     sha256_compress(md, md->buf);
     md->curlen = 0;
@@ -424,7 +424,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
 
   /* Pad up to 56 bytes of zeroes */
   while(md->curlen < 56) {
-    md->buf[md->curlen++] = (unsigned char)0;
+    md->buf[md->curlen++] = 0;
   }
 
   /* Store length */

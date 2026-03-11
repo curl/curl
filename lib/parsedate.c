@@ -387,7 +387,7 @@ static int parsedate(const char *date, time_t *output)
         }
 
         if(!found && (tzoff == -1)) {
-          /* this just must be a time zone string */
+          /* this must be a time zone string */
           tzoff = checktz(date, len);
           if(tzoff != -1)
             found = TRUE;
@@ -481,12 +481,12 @@ static int parsedate(const char *date, time_t *output)
     part++;
   }
 
-  if(-1 == secnum)
+  if(secnum == -1)
     secnum = minnum = hournum = 0; /* no time, make it zero */
 
-  if((-1 == mdaynum) ||
-     (-1 == monnum) ||
-     (-1 == yearnum))
+  if((mdaynum == -1) ||
+     (monnum == -1) ||
+     (yearnum == -1))
     /* lacks vital info, fail */
     return PARSEDATE_FAIL;
 

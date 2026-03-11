@@ -44,9 +44,8 @@ struct buf_chunk {
 /**
  * A pool for providing/keeping a number of chunks of the same size
  *
- * The same pool can be shared by many `bufq` instances. However, a pool
- * is not thread safe. All bufqs using it are supposed to operate in the
- * same thread.
+ * The same pool can be shared by many `bufq` instances. A pool is not thread
+ * safe. All bufqs using it are supposed to operate in the same thread.
  */
 struct bufc_pool {
   struct buf_chunk *spare;  /* list of available spare chunks */
@@ -77,10 +76,10 @@ void Curl_bufcp_free(struct bufc_pool *pool);
  *
  * By default, writing to a full bufq will return (-1, CURLE_AGAIN). Same
  * as reading from an empty bufq.
- * With `BUFQ_OPT_SOFT_LIMIT` set, a bufq will allow writing becond this
- * limit and use more than `max_chunks`. However it will report that it
- * is full nevertheless. This is provided for situation where writes
- * preferably never fail (except for memory exhaustion).
+ * With `BUFQ_OPT_SOFT_LIMIT` set, a bufq will allow writing beyond this limit
+ * and use more than `max_chunks`. It will report that it is full
+ * nevertheless. This is provided for situation where writes preferably never
+ * fail (except for memory exhaustion).
  *
  * By default and without a pool, a bufq will keep chunks that read
  * empty in its `spare` list. Option `BUFQ_OPT_NO_SPARES` will
@@ -197,9 +196,8 @@ bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
                        const uint8_t **pbuf, size_t *plen);
 
 /**
- * Tell the buffer queue to discard `amount` buf bytes at the head
- * of the queue. Skipping more buf than is currently buffered will
- * just empty the queue.
+ * Tell the buffer queue to discard `amount` buf bytes at the head of the
+ * queue. Skipping more buf than is currently buffered will empty the queue.
  */
 void Curl_bufq_skip(struct bufq *q, size_t amount);
 

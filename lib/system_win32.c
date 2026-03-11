@@ -27,12 +27,14 @@
 
 #include "system_win32.h"
 #include "curl_sspi.h"
+#include "curlx/timeval.h"
+#include "curlx/version_win32.h"  /* for curlx_verify_windows_init() */
 
 /* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
-     is just for Winsock at the moment. Any required Win32 initialization
+     is for Winsock at the moment. Any required Win32 initialization
      should take place after this block. */
   if(flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
@@ -76,7 +78,8 @@ CURLcode Curl_win32_init(long flags)
   }
 #endif
 
-  QueryPerformanceFrequency(&Curl_freq);
+  curlx_verify_windows_init();
+  curlx_now_init();
   return CURLE_OK;
 }
 

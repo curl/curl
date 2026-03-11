@@ -111,7 +111,7 @@ my $ACURL=$VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
 my $CURLCONFIG="../curl-config"; # curl-config from current build
 
 # Normally, all test cases should be run, but at times it is handy to
-# simply run a particular one:
+# run a particular one:
 my $TESTCASES="all";
 
 # To run specific test cases, set them like:

@@ -125,9 +125,9 @@ static void data_priority_cleanup(struct Curl_easy *data);
 #define data_priority_cleanup(x)
 #endif
 
-/* Some parts of the code (e.g. chunked encoding) assume this buffer has at
- * more than just a few bytes to play with. Do not let it become too small or
- * bad things will happen.
+/* Some parts of the code (e.g. chunked encoding) assume this buffer has more
+ * than a few bytes to play with. Do not let it become too small or bad things
+ * will happen.
  */
 #if READBUFFER_SIZE < READBUFFER_MIN
 # error READBUFFER_SIZE is too small
@@ -254,7 +254,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
                     * handle might check the magic and so might any
                     * DEBUGFUNCTION invoked for tracing */
 
-  /* freed here just in case DONE was not called */
+  /* freed here in case DONE was not called */
   Curl_req_free(&data->req, data);
 
   /* Close down all open SSL info and sessions */
@@ -400,7 +400,7 @@ void Curl_init_userdefined(struct Curl_easy *data)
 #endif
 
   set->new_file_perms = 0644;    /* Default permissions */
-  set->allowed_protocols = (curl_prot_t) CURLPROTO_ALL;
+  set->allowed_protocols = (curl_prot_t) CURLPROTO_64ALL;
   set->redir_protocols = CURLPROTO_REDIR;
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -545,7 +545,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->oauth_bearer);
   Curl_safefree(conn->host.rawalloc); /* hostname buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* hostname buffer */
-  Curl_safefree(conn->hostname_resolve);
   Curl_safefree(conn->secondaryhostname);
   Curl_safefree(conn->localdev);
   Curl_ssl_conn_config_cleanup(conn);
@@ -591,33 +590,19 @@ static bool proxy_info_matches(const struct proxy_info *data,
 {
   if((data->proxytype == needle->proxytype) &&
      (data->port == needle->port) &&
-     curl_strequal(data->host.name, needle->host.name))
+     curl_strequal(data->host.name, needle->host.name)) {
+
+    if(Curl_timestrcmp(data->user, needle->user) ||
+       Curl_timestrcmp(data->passwd, needle->passwd))
+      return FALSE;
     return TRUE;
-
+  }
   return FALSE;
-}
-
-static bool socks_proxy_info_matches(const struct proxy_info *data,
-                                     const struct proxy_info *needle)
-{
-  if(!proxy_info_matches(data, needle))
-    return FALSE;
-
-  /* the user information is case-sensitive
-     or at least it is not defined as case-insensitive
-     see https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.1 */
-
-  /* curl_strequal does a case insensitive comparison,
-     so do not use it here! */
-  if(Curl_timestrcmp(data->user, needle->user) ||
-     Curl_timestrcmp(data->passwd, needle->passwd))
-    return FALSE;
-  return TRUE;
 }
 #endif
 
 /* A connection has to have been idle for less than 'conn_max_idle_ms'
-   (the success rate is just too low after this), or created less than
+   (the success rate is too low after this), or created less than
    'conn_max_age_ms' ago, to be subject for reuse. */
 static bool conn_maxage(struct Curl_easy *data,
                         struct connectdata *conn,
@@ -924,7 +909,7 @@ static bool url_match_proxy_use(struct connectdata *conn,
     return FALSE;
 
   if(m->needle->bits.socksproxy &&
-     !socks_proxy_info_matches(&m->needle->socks_proxy, &conn->socks_proxy))
+     !proxy_info_matches(&m->needle->socks_proxy, &conn->socks_proxy))
     return FALSE;
 
   if(m->needle->bits.httpproxy) {
@@ -1411,7 +1396,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->http_proxy.proxytype = data->set.proxytype;
   conn->socks_proxy.proxytype = CURLPROXY_SOCKS4;
 
-  /* note that these two proxy bits are now just on what looks to be
+  /* note that these two proxy bits are set on what looks to be
      requested, they may be altered down the road */
   conn->bits.proxy = (data->set.str[STRING_PROXY] &&
                       *data->set.str[STRING_PROXY]);
@@ -3071,9 +3056,9 @@ static CURLcode resolve_unix(struct Curl_easy *data,
   DEBUGASSERT(unix_path);
   *pdns = NULL;
 
-  /* Unix domain sockets are local. The host gets ignored, just use the
-   * specified domain socket address. Do not cache "DNS entries". There is
-   * no DNS involved and we already have the file system path available. */
+  /* Unix domain sockets are local. The host gets ignored, use the specified
+   * domain socket address. Do not cache "DNS entries". There is no DNS
+   * involved and we already have the file system path available. */
   hostaddr = curlx_calloc(1, sizeof(struct Curl_dns_entry));
   if(!hostaddr)
     return CURLE_OUT_OF_MEMORY;
@@ -3146,12 +3131,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
     eport = conn->bits.conn_to_port ? conn->conn_to_port : conn->remote_port;
   }
 
-  /* Resolve target host right on */
-  conn->hostname_resolve = curlx_strdup(ehost->name);
-  if(!conn->hostname_resolve)
-    return CURLE_OUT_OF_MEMORY;
-
-  result = Curl_resolv_timeout(data, conn->hostname_resolve,
+  result = Curl_resolv_timeout(data, ehost->name,
                                eport, conn->ip_version,
                                pdns, timeout_ms);
   DEBUGASSERT(!result || !*pdns);
@@ -3237,9 +3217,6 @@ static void url_conn_reuse_adjust(struct Curl_easy *data,
 
   conn->conn_to_port = needle->conn_to_port;
   conn->remote_port = needle->remote_port;
-  curlx_free(conn->hostname_resolve);
-  conn->hostname_resolve = needle->hostname_resolve;
-  needle->hostname_resolve = NULL;
 }
 
 static void conn_meta_freeentry(void *p)
@@ -3543,9 +3520,9 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
 #endif
   }
   else {
-    /* We have decided that we want a new connection. However, we may not
-       be able to do that if we have reached the limit of how many
-       connections we are allowed to open. */
+    /* We have decided that we want a new connection. We may not be able to do
+       that if we have reached the limit of how many connections we are
+       allowed to open. */
     DEBUGF(infof(data, "new connection, bits.close=%d", needle->bits.close));
 
     if(waitpipe) {

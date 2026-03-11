@@ -61,7 +61,7 @@
  * enough for the purpose of this program.
  *
  * For the above reason and the specific needs of this program signals SIGHUP,
- * SIGPIPE and SIGALRM will be simply ignored on systems where this can be
+ * SIGPIPE and SIGALRM will be ignored on systems where this can be
  * done.  If possible, signals SIGINT and SIGTERM will be handled by this
  * program as an indication to cleanup and finish execution as soon as
  * possible.  This will be achieved with a single signal handler
@@ -585,7 +585,7 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 
 struct select_ws_data {
   int fd;                /* provided file descriptor  (indexed by nfd) */
-  long wsastate;         /* internal pre-select state (indexed by nfd) */
+  long wsastate;         /* internal preselect state  (indexed by nfd) */
   curl_socket_t wsasock; /* internal socket handle    (indexed by nws) */
   WSAEVENT wsaevent;     /* internal select event     (indexed by nws) */
   HANDLE signal;         /* internal thread signal    (indexed by nth) */

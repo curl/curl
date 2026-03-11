@@ -50,7 +50,7 @@ NULL
 #include <stdio.h>
 
 struct callback_data {
-   FILE *output;
+  FILE *output;
 };
 
 static long file_is_downloaded(void *ptr)
