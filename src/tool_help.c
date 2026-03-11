@@ -434,7 +434,7 @@ void tool_list_engines(void)
   curl_easy_cleanup(curl);
 }
 
-/* Output table from category in markdown-style bordered format. */
+/* Output table from category. */
 void tool_table(unsigned int category, unsigned int cols)
 {
   size_t i, d;
@@ -467,29 +467,8 @@ void tool_table(unsigned int category, unsigned int cols)
   opt_col  = max_opt  + 3;
   desc_col = max_desc + 2;
 
-  /* Top border: space + dashes(opt_col) + | + dashes(desc_col) */
-  putchar(' ');
-  for(d = 0; d < opt_col; d++)
-    putchar('-');
-  putchar('|');
-  for(d = 0; d < desc_col; d++)
-    putchar('-');
+  /* Separator for first data row. */
   putchar('\n');
-
-  /* Header row: opt header uses "    Option" so 4-space indent matches
-     long-only option entries; desc header uses " Description". */
-  curl_mprintf("|%-*s| %-*s|\n",
-               (int)opt_col,      "    Option",
-               (int)(desc_col-1), "Description");
-
-  /* Separator between header and first data row. */
-  putchar('|');
-  for(d = 0; d < opt_col; d++)
-    putchar('-');
-  putchar('|');
-  for(d = 0; d < desc_col; d++)
-    putchar('-');
-  puts("|");
 
   /* Data rows, each followed by an inner separator except the last,
      which is followed by the bottom border instead. */
@@ -501,7 +480,7 @@ void tool_table(unsigned int category, unsigned int cols)
     count++;
 
     /* Data row: one leading space before the raw opt string. */
-    curl_mprintf("| %-*s| %-*s|\n",
+    curl_mprintf(" %-*s  %-*s\n",
                  (int)(opt_col  - 1), helptext[i].opt,
                  (int)(desc_col - 1), helptext[i].desc);
 
@@ -516,21 +495,15 @@ void tool_table(unsigned int category, unsigned int cols)
 
     if(remaining) {
       /* Inner separator between data rows. */
-      putchar('|');
+      putchar(' ');
       for(d = 0; d < opt_col; d++)
         putchar('-');
-      putchar('|');
+      putchar('-');
       for(d = 0; d < desc_col; d++)
-        putchar('-');
-      puts("|");
-    }
-    else {
-      /* Bottom border: space + dashes spanning full inner width + newline.
-         The outer | positions become spaces; the middle | becomes a dash. */
-      putchar(' ');
-      for(d = 0; d < opt_col + 1 + desc_col; d++)
         putchar('-');
       putchar('\n');
     }
+    else
+      putchar('\n');
   }
 }
