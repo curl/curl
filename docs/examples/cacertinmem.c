@@ -34,15 +34,6 @@
 
 #include <curl/curl.h>
 
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic ignored "-Woverlength-strings"
-#endif
-/* Silence warning when calling sk_X509_INFO_pop_free() */
-#if defined(__clang__) && __clang_major__ >= 16
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#endif
-
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef size_t ossl_valsize_t;
 #else
@@ -116,7 +107,14 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     }
   }
 
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
 
   result = CURLE_OK;
 
