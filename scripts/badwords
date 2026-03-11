@@ -101,9 +101,20 @@ sub highlight {
     my ($p, $w, $in, $f, $l, $lookup) = @_;
 
     my $c = length($p)+1;
-    my $ch = "$f:$l:$w";
+    my $ch;
+
+    my $dir = dirname($f);
+    my $updir = dirname($dir);
+    if($dir ne $updir) {
+        $ch = $updir . "/" . "::" . $w;
+        if($wl{$ch}) {
+            # whitelisted upper dirname + word
+            return;
+        }
+    }
+    $ch = $dir . "/" . "::" . $w;
     if($wl{$ch}) {
-        # whitelisted filename + line + word
+        # whitelisted dirname + word
         return;
     }
     $ch = $f . "::" . $w;
@@ -111,18 +122,10 @@ sub highlight {
         # whitelisted filename + word
         return;
     }
-    my $dir = dirname($f);
-    $ch = $dir . "/" . "::" . $w;
+    $ch = "$f:$l:$w";
     if($wl{$ch}) {
-        # whitelisted dirname + word
+        # whitelisted filename + line + word
         return;
-    }
-    if($dir ne dirname($dir)) {
-        $ch = dirname($dir) . "/" . "::" . $w;
-        if($wl{$ch}) {
-            # whitelisted upper dirname + word
-            return;
-        }
     }
 
     print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
