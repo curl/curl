@@ -47,7 +47,7 @@ foreach(_target IN LISTS COMPLICATED_MAY_BUILD check_PROGRAMS _all)  # keep 'COM
         # CMake generates a static library for the OBJECT target. Silence these 'lib.exe' warnings:
         # warning LNK4006: main already defined in ....obj; second definition ignored
         # warning LNK4221: This object file does not define any previously undefined public symbols,
-        #                  so it will not be used by any link operation that consumes this library
+        #                  [...] not be used by any link operation that consumes this library
         if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
           set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_OPTIONS "-ignore:4006;-ignore:4221")
         else()
