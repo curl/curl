@@ -1491,7 +1491,7 @@ static CURLcode ssh_state_authlist(struct Curl_easy *data,
    * possible to get a 'generic' list (not user-specific) of authentication
    * methods, presumably with a blank username. That will not work in my
    * experience.
-   * So always specify it here.
+   * Therefore always specify it here.
    */
   struct connectdata *conn = data->conn;
   sshc->authlist = libssh2_userauth_list(sshc->ssh_session,

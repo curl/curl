@@ -505,8 +505,8 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
   /*
   ** Examine the current authentication state to see if this is an error. The
   ** idea is for this function to get called after processing all the headers
-  ** in a response message. So, if we have been to asked to authenticate a
-  ** particular stage, and we have done it, we are OK. If we are already
+  ** in a response message. If we have been to asked to authenticate
+  ** a particular stage, and we have done it, we are OK. If we are already
   ** completely authenticated, it is not OK to get another 401 or 407.
   **
   ** It is possible for authentication to go stale such that the client needs

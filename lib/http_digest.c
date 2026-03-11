@@ -125,7 +125,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  /* So IE browsers < v7 cut off the URI part at the query part when they
+  /* IE browsers < v7 cut off the URI part at the query part when they
      evaluate the MD5 and some (IIS?) servers work with them so we may need to
      do the Digest IE-style. Note that the different ways cause different MD5
      sums to get sent.

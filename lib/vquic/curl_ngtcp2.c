@@ -2018,7 +2018,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
    * This is called PMTUD (Path Maximum Transmission Unit Discovery).
    * Since a PMTUD might be rejected right on send, we do not want it
    * be followed by other packets of lesser size. Because those would
-   * also fail then. So, if we detect a PMTUD while buffering, we flush.
+   * also fail then. If we detect a PMTUD while buffering, we flush.
    */
   max_payload_size = ngtcp2_conn_get_max_tx_udp_payload_size(ctx->qconn);
   path_max_payload_size =

@@ -384,7 +384,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(result)
     return result;
 
-  /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
+  /* Good so far, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
