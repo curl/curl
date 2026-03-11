@@ -8,5 +8,5 @@ set -eu
 cd "$(dirname "${0}")"/..
 
 # we allow some extra in source code
-grep -Ev '^(will:|But=|So=|And=| url=)' scripts/badwords.txt | scripts/badwords -a src lib include docs/examples
+grep -Ev '^(will:|But=|So=|And=| url=)' scripts/badwords.txt | scripts/badwords src lib include docs/examples
 cat scripts/badwords.txt                                     | scripts/badwords -w scripts/badwords.ok '**.md' projects/OS400/README.OS400
