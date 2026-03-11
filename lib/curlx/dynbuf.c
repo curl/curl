@@ -134,7 +134,7 @@ void curlx_dyn_reset(struct dynbuf *s)
 
 /*
  * Specify the size of the tail to keep (number of bytes from the end of the
- * buffer). The rest will be dropped.
+ * buffer). The rest is dropped.
  */
 CURLcode curlx_dyn_tail(struct dynbuf *s, size_t trail)
 {
