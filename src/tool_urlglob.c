@@ -122,7 +122,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
         goto error;
       }
 
-      /* add 1 to size since it will be incremented below */
+      /* add 1 to size since it is to be incremented below */
       if(multiply(amount, size + 1)) {
         result = globerror(glob, "range overflow", 0, CURLE_URL_MALFORMAT);
         goto error;

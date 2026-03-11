@@ -845,8 +845,8 @@ CURLcode config2setopts(struct OperationConfig *config,
 
 #ifndef DEBUGBUILD
   /* On most modern OSes, exiting works thoroughly,
-     we will clean everything up via exit(), so do not bother with
-     slow cleanups. Crappy ones might need to skip this.
+     we clean everything up via exit(), so do not bother with slow
+     cleanups. Crappy ones might need to skip this.
      Note: avoid having this setopt added to the --libcurl source
      output. */
   result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);

@@ -328,7 +328,7 @@ void tool_version_info(void)
     /* we have ipfs and ipns support if libcurl has http support */
     for(builtin = built_in_protos; *builtin; ++builtin) {
       if(insert) {
-        /* update insertion so ipfs will be printed in alphabetical order */
+        /* update insertion so ipfs is printed in alphabetical order */
         if(strcmp(*builtin, "ipfs") < 0)
           insert = *builtin;
         else
