@@ -492,12 +492,10 @@ struct Curl_protocol {
   CURLcode (*write_resp_hd)(struct Curl_easy *data,
                             const char *hd, size_t hdlen, bool is_eos);
 
-  /* This function can perform various checks on the connection. See
-     CONNCHECK_* for more information about the checks that can be performed,
-     and CONNRESULT_* for the results that can be returned. */
-  uint32_t (*connection_check)(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               uint32_t checks_to_perform);
+  /* If used, this function checks for a connection managed by this
+    protocol and currently not in use, if it should be considered dead. */
+  bool (*connection_is_dead)(struct Curl_easy *data,
+                             struct connectdata *conn);
 
   /* attach() attaches this transfer to this connection */
   void (*attach)(struct Curl_easy *data, struct connectdata *conn);
@@ -553,13 +551,6 @@ struct Curl_scheme {
                                          SSL connection in the same family
                                          without having PROTOPT_SSL. */
 #define PROTOPT_CONN_REUSE (1 << 16)  /* this protocol can reuse connections */
-
-#define CONNCHECK_NONE 0                 /* No checks */
-#define CONNCHECK_ISDEAD (1 << 0)        /* Check if the connection is dead. */
-#define CONNCHECK_KEEPALIVE (1 << 1)     /* Perform any keepalive function. */
-
-#define CONNRESULT_NONE 0                /* No extra information. */
-#define CONNRESULT_DEAD (1 << 0)         /* The connection is dead. */
 
 #define TRNSPRT_NONE 0
 #define TRNSPRT_TCP  3
