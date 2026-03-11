@@ -1649,6 +1649,7 @@ static CURLUcode set_url_scheme(CURLU *u, const char *scheme,
     const char *s = scheme;
     if(ISALPHA(*s)) {
       /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
+      s++;
       while(--plen) {
         if(ISALNUM(*s) || (*s == '+') || (*s == '-') || (*s == '.'))
           s++; /* fine */
