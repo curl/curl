@@ -1973,7 +1973,7 @@ void Curl_http_method(struct Curl_easy *data,
 
 static CURLcode http_useragent(struct Curl_easy *data)
 {
-  /* The User-Agent string might have been allocated in url.c already, because
+  /* The User-Agent string might have been allocated already, because
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */

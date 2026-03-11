@@ -439,7 +439,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  /* The User-Agent string might have been allocated in url.c already, because
+  /* The User-Agent string might have been allocated already, because
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
