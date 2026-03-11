@@ -52,15 +52,6 @@
 #define PORT_MQTT   1883
 #define PORT_MQTTS  8883
 
-#ifdef USE_ECH
-/* CURLECH_ bits for the tls_ech option */
-#define CURLECH_DISABLE    (1 << 0)
-#define CURLECH_GREASE     (1 << 1)
-#define CURLECH_ENABLE     (1 << 2)
-#define CURLECH_HARD       (1 << 3)
-#define CURLECH_CLA_CFG    (1 << 4)
-#endif
-
 #ifndef CURL_DISABLE_WEBSOCKETS
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
  * the rest are internal information. If we use higher bits we only do this on
