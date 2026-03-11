@@ -42,7 +42,7 @@ static void dump(const char *text, const unsigned char *ptr,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%s, %10.10lu bytes (0x%8.8lx)\n",
+  fprintf(stderr, "%s, %010lu bytes (0x%08lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
