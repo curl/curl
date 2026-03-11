@@ -33,7 +33,7 @@
  * _LARGE_FILES in order to support files larger than 2 GB. On platforms
  * where this happens it is mandatory that these macros are defined before
  * any system header file is included, otherwise file handling function
- * prototypes will be misdeclared and curl tool may not build properly;
+ * prototypes are misdeclared and curl tool may not build properly;
  * therefore we must include curl_setup.h before curl.h when building curl.
  */
 

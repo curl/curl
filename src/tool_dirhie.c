@@ -54,7 +54,7 @@ static void show_dir_errno(const char *name)
 #endif
 #ifdef ENOSPC
   case ENOSPC:
-    errorf("No space left on the file system that will "
+    errorf("No space left on the file system that would "
            "contain the directory %s", name);
     break;
 #endif

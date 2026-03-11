@@ -73,7 +73,7 @@ retry:
   result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
   if(result == CURLE_OK) {
     /* on small PING content, this example assumes the complete
-     * PONG content arrives in one go. Larger frames will arrive
+     * PONG content arrives in one go. Larger frames arrive
      * in chunks, however. */
     if(meta->flags & CURLWS_PONG) {
       int same = 0;

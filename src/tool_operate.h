@@ -75,7 +75,7 @@ struct per_transfer {
   BIT(added); /* set TRUE when added to the multi handle */
   BIT(abort); /* when doing parallel transfers and this is TRUE then a critical
                  error (eg --fail-early) has occurred in another transfer and
-                 this transfer will be aborted in the progress callback */
+                 this transfer gets aborted in the progress callback */
   BIT(skip);  /* considered already done */
 };
 

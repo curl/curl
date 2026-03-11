@@ -255,7 +255,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* ssl context comes from schannel.
    * When extended protection is used in IIS server,
    * we have to pass a second SecBuffer to the SecBufferDesc
-   * otherwise IIS will not pass the authentication (401 response).
+   * otherwise IIS does not pass the authentication (401 response).
    * Minimum supported version is Windows 7.
    * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
    */

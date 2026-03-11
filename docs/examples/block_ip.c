@@ -127,7 +127,7 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
     return NULL;
   }
 
-  /* determine the number of bits that this IP will match against */
+  /* determine the number of bits that this IP matches against */
   cidr = strchr(ip->str, '/');
   if(cidr) {
     ip->maskbits = atoi(cidr + 1);

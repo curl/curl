@@ -152,7 +152,7 @@
 /* Indicates that 128-bit encryption is supported. */
 
 #define NTLMFLAG_NEGOTIATE_KEY_EXCHANGE          (1 << 30)
-/* Indicates that the client will provide an encrypted master key in
+/* Indicates that the client provides an encrypted master key in
    the "Session Key" field of the Type 3 message. */
 
 #define NTLMFLAG_NEGOTIATE_56                    (1 << 31)

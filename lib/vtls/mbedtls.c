@@ -518,7 +518,7 @@ static CURLcode mbed_load_cacert(struct Curl_cfilter *cf,
     }
 #else
     /* DER encoded certs do not need to be null terminated because it is a
-       binary format. So if we are not compiling with PEM_PARSE we can avoid
+       binary format. Thus, if we are not compiling with PEM_PARSE we can avoid
        the extra memory copies altogether. */
     ret = mbedtls_x509_crt_parse_der(&backend->cacert, ca_info_blob->data,
                                      ca_info_blob->len);
@@ -631,7 +631,7 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
     }
 #else
     /* DER encoded certs do not need to be null terminated because it is a
-       binary format. So if we are not compiling with PEM_PARSE we can avoid
+       binary format. Thus, if we are not compiling with PEM_PARSE we can avoid
        the extra memory copies altogether. */
     ret = mbedtls_x509_crt_parse_der(&backend->clicert, ssl_cert_blob->data,
                                      ssl_cert_blob->len);
@@ -932,8 +932,8 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni ?
                               connssl->peer.sni : connssl->peer.hostname)) {
     /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
-       the name to set in the SNI extension. So even if curl connects to a
-       host specified as an IP address, this function must be used. */
+       the name to set in the SNI extension. Thus even if curl connects to
+       a host specified as an IP address, this function must be used. */
     failf(data, "Failed to set SNI");
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -1210,7 +1210,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
   /* mbedTLS is picky when a mbedtls_ssl_write() was previously blocked.
    * It requires to be called with the same amount of bytes again, or it
-   * will lose bytes, e.g. reporting all was sent but they were not.
+   * loses bytes, e.g. reporting all was sent but they were not.
    * Remember the blocked length and use that when set. */
   if(backend->send_blocked) {
     DEBUGASSERT(backend->send_blocked_len <= len);

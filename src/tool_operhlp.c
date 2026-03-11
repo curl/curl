@@ -79,7 +79,7 @@ CURLcode urlerr_cvt(CURLUcode ucode)
 
 /*
  * Adds the filename to the URL if it does not already have one.
- * URL will be freed before return if the returned pointer is different
+ * URL is freed before return if the returned pointer is different
  */
 CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
 {

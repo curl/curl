@@ -127,7 +127,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     goto clean;
 
   /* We might have a --ipfs-gateway argument. Check it first and use it. Error
-   * if we do have something but if it is an invalid url.
+   * if we do have something but if it is an invalid URL.
    */
   if(config->ipfs_gateway) {
     if(!curl_url_set(gatewayurl, CURLUPART_URL, config->ipfs_gateway,

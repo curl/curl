@@ -35,7 +35,7 @@
  * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
  *   #define X509_NAME  ((LPCSTR)7)
  *
- * And in BoringSSL/AWC-LC's <openssl/base.h> there is:
+ * In BoringSSL/AWC-LC's <openssl/base.h> there is:
  *  typedef struct X509_name_st X509_NAME;
  *  etc.
  *
@@ -661,7 +661,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   }
 
   /* Before returning server replies to the SSL instance, we need
-   * to have setup the x509 store or verification will fail. */
+   * to have setup the x509 store or verification fails. */
   if(!octx->x509_store_setup) {
     r2 = Curl_ssl_setup_x509_store(cf, data, octx);
     if(r2) {
@@ -2141,9 +2141,9 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
         case GEN_DNS: /* name/pattern comparison */
           /* The OpenSSL man page explicitly says: "In general it cannot be
              assumed that the data returned by ASN1_STRING_data() is null
-             terminated or does not contain embedded nulls." But also that
-             "The actual format of the data will depend on the actual string
-             type itself: for example for an IA5String the data will be ASCII"
+             terminated or does not contain embedded nulls.", but also that
+             "The actual format of the data depends on the actual string
+             type itself: for example for an IA5String the data is ASCII"
 
              It has been however verified that in 0.9.6 and 0.9.7, IA5String
              is always null-terminated.
@@ -2201,7 +2201,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
         i = j;
     }
 
-    /* we have the name entry and we will now convert this to a string
+    /* we have the name entry and we now convert this to a string
        that we can use for comparison. Doing this we support BMPstring,
        UTF8, etc. */
 
@@ -2586,7 +2586,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     ssl_ver >>= 8; /* check the upper 8 bits only below */
 
     /* SSLv2 does not seem to have TLS record-type headers, so OpenSSL
-     * always pass-up content-type as 0. But the interesting message-type
+     * always pass-up content-type as 0, but the interesting message-type
      * is at 'buf[0]'.
      */
     if(ssl_ver == SSL3_VERSION_MAJOR && content_type)
@@ -2681,7 +2681,7 @@ static CURLcode ossl_set_ssl_version_min_max(struct Curl_cfilter *cf,
   case CURL_SSLVERSION_MAX_DEFAULT:  /* max selected */
   default:
     /* SSL_CTX_set_max_proto_version states that: setting the maximum to 0
-       will enable protocol versions up to the highest version supported by
+       enables protocol versions up to the highest version supported by
        the library */
     ossl_ssl_version_max = 0;
     break;
@@ -2865,7 +2865,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
   hStore = CertOpenSystemStoreA(0, win_store);
   if(hStore) {
     PCCERT_CONTEXT pContext = NULL;
-    /* The array of enhanced key usage OIDs will vary per certificate and
+    /* The array of enhanced key usage OIDs varies per certificate and
        is declared outside of the loop so that rather than malloc/free each
        iteration we can grow it with realloc, when necessary. */
     CERT_ENHKEY_USAGE *enhkey_usage = NULL;
@@ -3129,7 +3129,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
 
 #ifdef CURL_CA_FALLBACK
   if(octx->store_is_empty) {
-    /* verifying the peer without any CA certificates will not
+    /* verifying the peer without any CA certificates does not
        work so use OpenSSL's built-in default as fallback */
     X509_STORE_set_default_paths(store);
     infof(data, "  OpenSSL default paths (fallback)");
@@ -3675,7 +3675,7 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
-      /* it will be handled later with the context options */
+      /* it is handled later with the context options */
       *pmethod = TLS_client_method();
       break;
     case CURL_SSLVERSION_SSLv2:
@@ -4080,7 +4080,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 #ifdef HAVE_SSL_SET0_WBIO
   /* with OpenSSL v1.1.1 we get an alternative to SSL_set_bio() that works
    * without backward compat quirks. Every call takes one reference, so we
-   * up it and pass. SSL* then owns it and will free.
+   * up it and pass. SSL* then owns and frees it.
    * We check on the function in configure, since LibreSSL and friends
    * each have their own versions to add support for this. */
   BIO_up_ref(bio);
@@ -4440,7 +4440,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509 *cert,
     /*
      * These checks are verifying we got back the same values as when we
      * sized the buffer. it is pretty weak since they should always be the
-     * same. But it gives us something to test.
+     * same, but it gives us something to test.
      */
     if((len1 != len2) || !temp || ((temp - buff1) != len1))
       break; /* failed */
@@ -5088,7 +5088,7 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   if(octx->blocked_ssl_write_len && (octx->blocked_ssl_write_len != memlen)) {
     /* The previous SSL_write() call was blocked, using that length.
-     * We need to use that again or OpenSSL will freak out. A shorter
+     * We need to use that again or OpenSSL freaks out. A shorter
      * length should not happen and is a bug in libcurl. */
     if(octx->blocked_ssl_write_len > memlen) {
       DEBUGASSERT(0);
@@ -5240,7 +5240,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
           result = CURLE_RECV_ERROR;
         }
         else {
-          /* We should no longer get here nowadays. But handle
+          /* We should no longer get here nowadays, but handle
            * the error in case of some weirdness in the OSSL stack */
           int sockerr = SOCKERRNO;
           if(sockerr)

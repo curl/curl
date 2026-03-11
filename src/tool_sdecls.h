@@ -42,7 +42,7 @@
  * 'regular_file' member is TRUE when output goes to a regular file, this also
  * implies that output is 'seekable' and 'appendable' and also that member
  * 'filename' points to filename's string. For any standard stream member
- * 'regular_file' will be FALSE.
+ * 'regular_file' is FALSE.
  *
  * 'fopened' member is TRUE when output goes to a regular file and it
  * has been fopen'ed, requiring it to be closed later on. In any other

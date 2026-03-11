@@ -209,7 +209,7 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
   const char *slashPos = NULL;
   const char *fileName = NULL;
   CURLcode result = CURLE_OK;
-  const char *rawPath = NULL; /* url-decoded "raw" path */
+  const char *rawPath = NULL; /* URL-decoded "raw" path */
   size_t pathLen = 0;
 
   ftpc->ctl_valid = FALSE;
@@ -217,7 +217,7 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
 
   if(ftpc->rawpath)
     freedirs(ftpc);
-  /* url-decode ftp path before further evaluation */
+  /* URL-decode ftp path before further evaluation */
   result = Curl_urldecode(ftp->path, 0, &ftpc->rawpath, &pathLen, REJECT_CTRL);
   if(result) {
     failf(data, "path contains control characters");
@@ -232,8 +232,8 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
       fileName = rawPath;  /* this is a full file path */
     /*
       else: ftpc->file is not used anywhere other than for operations on
-            a file. In other words, never for directory operations.
-            So we can safely leave filename as NULL here and use it as a
+            a file. In other words, never for directory operations,
+            so we can safely leave filename as NULL here and use it as a
             argument in dir/file decisions.
     */
     break;
@@ -677,7 +677,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
      * A caution here is that the ftp_readresp() function has a cache that may
      * contain pieces of a response from the previous invoke and we need to
      * make sure we do not wait for input while there is unhandled data in
-     * that cache. But also, if the cache is there, we call ftp_readresp() and
+     * that cache. Also, if the cache is there, we call ftp_readresp() and
      * the cache was not good enough to continue we must not busy-loop around
      * this function.
      *
@@ -1559,7 +1559,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
   char *cmd;
 
   if((data->set.ftp_filemethod == FTPFILE_NOCWD) && ftp->path) {
-    /* url-decode before evaluation: e.g. paths starting/ending with %2f */
+    /* URL-decode before evaluation: e.g. paths starting/ending with %2f */
     const char *rawPath = ftpc->rawpath;
     const char *slashPos = strrchr(rawPath, '/');
     if(slashPos) {
@@ -1688,7 +1688,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
        which may not exist in the server!  The SIZE command is not in
        RFC959. */
 
-    /* 2. This used to set REST. But since we can do append, we issue no
+    /* 2. This used to set REST, but since we can do append, we issue no
        another ftp command. Skip the source file offset and APPEND the rest on
        the file instead */
 
@@ -1942,8 +1942,8 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
                behavior.
 
                In addition: asking for the size for 'TYPE A' transfers is not
-               constructive since servers do not report the converted size. So
-               skip it.
+               constructive since servers do not report the converted size.
+               Thus, skip it.
             */
             result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
             if(!result)
@@ -2382,10 +2382,10 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       else if((data->state.list_only || !ftpc->file) &&
               !(data->set.prequote)) {
         /* The specified path ends with a slash, and therefore we think this
-           is a directory that is requested, use LIST. But before that we
+           is a directory that is requested, use LIST. Before that, we also
            need to set ASCII transfer mode. */
 
-        /* But only if a body transfer was requested. */
+        /* Only if a body transfer was requested. */
         if(ftp->transfer == PPTRANSFER_BODY) {
           result = ftp_nb_type(data, ftpc, ftp, TRUE, FTP_LIST_TYPE);
           if(result)
@@ -3709,7 +3709,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
           if(data->set.ftp_filemethod == FTPFILE_NOCWD)
             pathLen = 0; /* relative path => working directory is FTP home */
           else
-            /* file is url-decoded */
+            /* file is URL-decoded */
             pathLen -= ftpc->file ? strlen(ftpc->file) : 0;
           ftpc->prevpath = curlx_memdup0(rawPath, pathLen);
         }

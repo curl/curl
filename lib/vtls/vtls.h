@@ -140,7 +140,7 @@ bool Curl_ssl_conn_config_match(struct Curl_easy *data,
                                 bool proxy);
 
 /* Update certain connection SSL config flags after they have
- * been changed on the easy handle. Will work for `verifypeer`,
+ * been changed on the easy handle. Works for `verifypeer`,
  * `verifyhost` and `verifystatus`. */
 void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
 

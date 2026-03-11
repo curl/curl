@@ -171,7 +171,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
                                 proxy */
     /* If a proxy-authorization header was used for the proxy, then we should
        make sure that it is not accidentally used for the document request
-       after we have connected. So let's free and clear it here. */
+       after we have connected. Let's thus free and clear it here. */
     Curl_safefree(data->state.aptr.proxyuserpwd);
     break;
   }

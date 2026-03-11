@@ -94,7 +94,7 @@ WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR, DWORD, LPWSTR, LPWSTR *);
  * longer than MAX_PATH then setting 'out' to "\\?\" prefix + that full path.
  *
  * For example 'in' filename255chars in current directory C:\foo\bar is
- * fixed as \\?\C:\foo\bar\filename255chars for 'out' which will tell Windows
+ * fixed as \\?\C:\foo\bar\filename255chars for 'out' which tells Windows
  * it is ok to access that filename even though the actual full path is longer
  * than 260 chars.
  *
@@ -439,7 +439,7 @@ int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES) || \
   !defined(CURL_DISABLE_ALTSVC)
 /* rename() on Windows does not overwrite, so we cannot use it here.
-   MoveFileEx() will overwrite and is usually atomic but fails when there are
+   MoveFileEx() does overwrite and is usually atomic but fails when there are
    open handles to the file. */
 int curlx_win32_rename(const char *oldpath, const char *newpath)
 {

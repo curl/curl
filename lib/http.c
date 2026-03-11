@@ -505,8 +505,8 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
   /*
   ** Examine the current authentication state to see if this is an error. The
   ** idea is for this function to get called after processing all the headers
-  ** in a response message. So, if we have been to asked to authenticate a
-  ** particular stage, and we have done it, we are OK. If we are already
+  ** in a response message. If we have been to asked to authenticate
+  ** a particular stage, and we have done it, we are OK. If we are already
   ** completely authenticated, it is not OK to get another 401 or 407.
   **
   ** It is possible for authentication to go stale such that the client needs
@@ -1973,7 +1973,7 @@ void Curl_http_method(struct Curl_easy *data,
 
 static CURLcode http_useragent(struct Curl_easy *data)
 {
-  /* The User-Agent string might have been allocated in url.c already, because
+  /* The User-Agent string might have been allocated already, because
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
@@ -2097,7 +2097,7 @@ static CURLcode http_target(struct Curl_easy *data,
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
     /* Using a proxy but does not tunnel through it */
 
-    /* The path sent to the proxy is in fact the entire URL. But if the remote
+    /* The path sent to the proxy is in fact the entire URL, but if the remote
        host is a IDN-name, we must make sure that the request we produce only
        uses the encoded hostname! */
 
@@ -4136,7 +4136,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     k->download_done = TRUE;
 
   /* If max download size is *zero* (nothing) we already have
-     nothing and can safely return ok now! But for HTTP/2, we would
+     nothing and can safely return ok now! For HTTP/2, we would
      like to call http2_handle_stream_close to properly close a
      stream. In order to do this, we keep reading until we
      close the stream. */
@@ -4545,7 +4545,7 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
 }
 
 /*
- * HTTP protocol `write_resp` implementation. Will parse headers
+ * HTTP protocol `write_resp` implementation. Parse headers
  * when not done yet and otherwise return without consuming data.
  */
 CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,

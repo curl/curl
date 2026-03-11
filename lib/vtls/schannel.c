@@ -636,7 +636,7 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
-       Schannel will not negotiate TLS 1.3 when SCHANNEL_CRED is used. */
+       Schannel does not negotiate TLS 1.3 when SCHANNEL_CRED is used. */
     ALG_ID algIds[NUM_CIPHERS];
     char *ciphers = conn_config->cipher_list;
     SCHANNEL_CRED schannel_cred = { 0 };
@@ -914,18 +914,18 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     unsigned short *list_len = NULL;
     struct alpn_proto_buf proto;
 
-    /* The first four bytes will be an unsigned int indicating number
+    /* The first four bytes is an unsigned int indicating number
        of bytes of data in the rest of the buffer. */
     extension_len = (unsigned int *)(void *)(&alpn_buffer[cur]);
     cur += (int)sizeof(unsigned int);
 
-    /* The next four bytes are an indicator that this buffer will contain
+    /* The next four bytes are an indicator that this buffer contains
        ALPN data, as opposed to NPN, for example. */
     *(unsigned int *)(void *)&alpn_buffer[cur] =
       SecApplicationProtocolNegotiationExt_ALPN;
     cur += (int)sizeof(unsigned int);
 
-    /* The next two bytes will be an unsigned short indicating the number
+    /* The next two bytes is an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
     list_len = (unsigned short *)(void *)(&alpn_buffer[cur]);
     cur += (int)sizeof(unsigned short);
@@ -1394,7 +1394,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
     case SEC_I_INCOMPLETE_CREDENTIALS:
       if(!(backend->req_flags & ISC_REQ_USE_SUPPLIED_CREDS)) {
         /* If the server has requested a client certificate, attempt to
-           continue the handshake without one. This will allow connections to
+           continue the handshake without one. This allows connections to
            servers which request a client certificate but do not require
            it. */
         backend->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
@@ -1475,7 +1475,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
   }
 
   /* Verify the hostname manually when certificate verification is disabled,
-     because in that case Schannel will not verify it. */
+     because in that case Schannel does not verify it. */
   if(!conn_config->verifypeer && conn_config->verifyhost)
     return Curl_verify_host(cf, data);
 
@@ -2028,7 +2028,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       sent. The unwritten encrypted bytes would be the first bytes to
       send on the next invocation.
       Here's the catch with this - if we tell the client that all the
-      bytes have been sent, will the client call this method again to
+      bytes have been sent, does the client call this method again to
       send the buffered data?  Looking at who calls this function, it
       seems the answer is NO.
     */

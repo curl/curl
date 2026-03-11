@@ -39,8 +39,8 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
 
 /**
  * Write the transfer raw response bytes, as received from the connection.
- * Will handle all passed bytes or return an error. By default, this will
- * write the bytes as BODY to the client. Protocols may provide a
+ * Handle all passed bytes or return an error. By default, this writes
+ * the bytes as BODY to the client. Protocols may provide a
  * "write_resp" callback in their handler to add specific treatment. E.g.
  * HTTP parses response headers and passes them differently to the client.
  * @param data     the transfer
@@ -112,7 +112,7 @@ CURLcode Curl_xfer_flush(struct Curl_easy *data);
 /**
  * Send data on the socket/connection filter designated
  * for transfer's outgoing data.
- * Will return CURLE_OK on blocking with (*pnwritten == 0).
+ * Return CURLE_OK on blocking with (*pnwritten == 0).
  */
 CURLcode Curl_xfer_send(struct Curl_easy *data,
                         const void *buf, size_t blen, bool eos,
@@ -121,7 +121,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
 /**
  * Receive data on the socket/connection filter designated
  * for transfer's incoming data.
- * Will return CURLE_AGAIN on blocking with (*pnrcvd == 0).
+ * Return CURLE_AGAIN on blocking with (*pnrcvd == 0).
  */
 CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,

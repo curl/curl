@@ -38,7 +38,7 @@ struct Curl_header_store {
 
 /*
  * Initialize header collecting for a transfer.
- * Will add a client writer that catches CLIENTWRITE_HEADER writes.
+ * Add a client writer that catches CLIENTWRITE_HEADER writes.
  */
 CURLcode Curl_headers_init(struct Curl_easy *data);
 

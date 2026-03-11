@@ -132,8 +132,8 @@ void Curl_bufq_initp(struct bufq *q, struct bufc_pool *pool,
                      size_t max_chunks, int opts);
 
 /**
- * Reset the buffer queue to be empty. Will keep any allocated buffer
- * chunks around.
+ * Reset the buffer queue to be empty. Keep any allocated buffer chunks
+ * around.
  */
 void Curl_bufq_reset(struct bufq *q);
 
@@ -243,7 +243,7 @@ CURLcode Curl_bufq_sipn(struct bufq *q, size_t max_len,
 
 /**
  * Write buf to the end of the buffer queue.
- * Will write bufq content or passed `buf` directly using the `writer`
+ * Write bufq content or passed `buf` directly using the `writer`
  * callback when it sees fit. 'buf' might get passed directly
  * on or is placed into the buffer, depending on `len` and current
  * amount buffered, chunk size, etc.

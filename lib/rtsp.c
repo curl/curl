@@ -433,7 +433,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  /* The User-Agent string might have been allocated in url.c already, because
+  /* The User-Agent string might have been allocated already, because
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
@@ -1011,7 +1011,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
      *
      * Allow any non whitespace content, up to the field separator or end of
      * line. RFC 2326 is not 100% clear on the session ID and for example
-     * gstreamer does url-encoded session ID's not covered by the standard.
+     * gstreamer does URL-encoded session ID's not covered by the standard.
      */
     end = start;
     while((*end > ' ') && (*end != ';'))

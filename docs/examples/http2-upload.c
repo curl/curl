@@ -205,7 +205,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static int setup(struct input *t, int num, const char *upload)
 {
-  char url[256];
+  char upload_url[256];
   char filename[128];
   struct stat file_info;
   curl_off_t uploadsize;
@@ -217,17 +217,18 @@ static int setup(struct input *t, int num, const char *upload)
   snprintf(filename, sizeof(filename), "dl-%d", num);
   t->out = fopen(filename, "wb");
   if(!t->out) {
-    fprintf(stderr, "error: could not open file %s for writing: %s\n",
-            upload, strerror(errno));
+    fprintf(stderr, "error: could not open file %s for writing: %s\n", upload,
+            strerror(errno));
     return 1;
   }
 
-  snprintf(url, sizeof(url), "https://localhost:8443/upload-%d", num);
+  snprintf(upload_url, sizeof(upload_url), "https://localhost:8443/upload-%d",
+           num);
 
   t->in = fopen(upload, "rb");
   if(!t->in) {
-    fprintf(stderr, "error: could not open file %s for reading: %s\n",
-            upload, strerror(errno));
+    fprintf(stderr, "error: could not open file %s for reading: %s\n", upload,
+            strerror(errno));
     fclose(t->out);
     t->out = NULL;
     return 1;
@@ -257,7 +258,7 @@ static int setup(struct input *t, int num, const char *upload)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadsize);
 
     /* send in the URL to store the upload as */
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, upload_url);
 
     /* upload please */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

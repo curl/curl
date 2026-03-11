@@ -4,5 +4,12 @@
 #
 # whitelisted uses of bad words
 # file:[line]:rule
-docs/FAQ.md::will
-docs/FAQ.md::Will
+lib/urldata.h:: url
+include/curl/::will
+lib/::But
+lib/::So
+lib/::will
+lib/::Will
+lib/::WILL
+src/::will
+src/::Will

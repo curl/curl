@@ -46,7 +46,7 @@
  * wait on, being used to delay execution. Winsock select() and poll() timeout
  * mechanisms need a valid socket descriptor in a not null file descriptor set
  * to work. Waiting indefinitely with this function is not allowed, a zero or
- * negative timeout value will return immediately. Timeout resolution,
+ * negative timeout value is returned immediately. Timeout resolution,
  * accuracy, as well as maximum supported value is system dependent, neither
  * factor is a critical issue for the intended use of this function in the
  * library.

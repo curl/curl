@@ -134,7 +134,7 @@ static bool is_pkcs11_uri(const char *string)
  * For fixed files, find out the size of the EOF block and adjust.
  *
  * For all others, have to read the entire file in, discarding the contents.
- * Most posted text files will be small, and binary files like zlib archives
+ * Most posted text files are small, and binary files like zlib archives
  * and CD/DVD images should be either a STREAM_LF format or a fixed format.
  *
  */
@@ -248,7 +248,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
     /* VMS Note:
      *
      * Reading binary from files can be a problem... Only FIXED, VAR
-     * etc WITHOUT implied CC will work. Others need a \n appended to
+     * etc WITHOUT implied CC do work. Others need a \n appended to
      * a line
      *
      * - Stat gives a size but this is UNRELIABLE in VMS. E.g.
@@ -487,7 +487,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     if(!sleeptime)
       sleeptime = per->retry_sleep;
     warnf("Problem %s. "
-          "Will retry in %ld%s%.*ld second%s. "
+          "Retrying in %ld%s%.*ld second%s. "
           "%ld retr%s left.",
           m[retry], sleeptime / 1000L,
           (sleeptime % 1000L ? "." : ""),
@@ -554,7 +554,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         /* truncate file at the position where we started appending */
 #if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
-          /* when truncate fails, we cannot append as then we will
+          /* when truncate fails, we cannot append as then we
              create something strange, bail out */
           errorf("Failed to truncate file");
           return CURLE_WRITE_ERROR;
@@ -1141,7 +1141,7 @@ static void check_stdin_upload(struct OperationConfig *config,
   if(!strcmp(per->uploadfile, ".")) {
 #if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP)
     /* non-blocking stdin behavior on Windows is challenging
-       Spawn a new thread that will read from stdin and write
+       Spawn a new thread that reads from stdin and write
        out to a socket */
     curl_socket_t f = win32_stdin_read_thread();
 
@@ -1344,7 +1344,7 @@ static CURLcode create_single(struct OperationConfig *config,
       }
 
       if(config->resume_from_current)
-        config->resume_from = -1; /* -1 will then force get-it-yourself */
+        config->resume_from = -1; /* -1 then forces get-it-yourself */
     }
 
     if(!outs->out_null && output_expected(per->url, per->uploadfile) &&
@@ -1489,7 +1489,7 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
       return result;
 
     /* parallel connect means that we do not set PIPEWAIT since pipewait
-       will make libcurl prefer multiplexing */
+       makes libcurl prefer multiplexing */
     (void)curl_easy_setopt(per->curl, CURLOPT_PIPEWAIT,
                            global->parallel_connect ? 0L : 1L);
     (void)curl_easy_setopt(per->curl, CURLOPT_PRIVATE, per);
@@ -1746,7 +1746,7 @@ static CURLcode parallel_event(struct parastate *s)
   }
 
   /* We need to cleanup the multi here, since the uv context lives on the
-   * stack and will be gone. multi_cleanup can trigger events! */
+   * stack and about to be gone. multi_cleanup can trigger events! */
   curl_multi_cleanup(s->multi);
 
 #if DEBUG_UV

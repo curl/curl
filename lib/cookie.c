@@ -347,7 +347,7 @@ static bool bad_domain(const char *domain, size_t len)
 
   cookie-octet    = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
 
-  But Firefox and Chrome as of June 2022 accept space, comma and double-quotes
+  Yet, Firefox and Chrome as of June 2022 accept space, comma and double-quotes
   fine. The prime reason for filtering out control bytes is that some HTTP
   servers return 400 for requests that contain such.
 */

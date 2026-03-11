@@ -1439,8 +1439,8 @@ static ParameterError parse_range(struct OperationConfig *config,
   }
   if(!curlx_str_number(&nextarg, &value, CURL_OFF_T_MAX) &&
      curlx_str_single(&nextarg, '-')) {
-    /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
-       (and will not actually be range by definition). The man page previously
+    /* Specifying a range WITHOUT A DASH does create an illegal HTTP range
+       (and does not actually be range by definition). The man page previously
        claimed that to be a good way, why this code is added to work-around
        it. */
     char buffer[32];
@@ -1529,7 +1529,7 @@ static ParameterError parse_verbose(bool toggle)
     if(!global->trace_set && set_trace_config("-all"))
       return PARAM_NO_MEM;
   }
-  /* the '%' thing here will cause the trace get sent to stderr */
+  /* the '%' thing here causes the trace get sent to stderr */
   switch(global->verbosity) {
   case 0:
     global->verbosity = 1;
@@ -2789,7 +2789,7 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_FTP_PORT: /* --ftp-port */
     /* This makes the FTP sessions use PORT instead of PASV */
     /* use <eth0> or <192.168.10.10> style addresses. Anything except
-       this will make us try to get the "default" address.
+       this makes us try to get the "default" address.
        NOTE: this is a changed behavior since the released 4.1!
      */
     err = getstr(&config->ftpport, nextarg, DENY_BLANK);

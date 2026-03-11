@@ -869,7 +869,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     }
 
     /*
-     * Otherwise we will assume it is PEM and try to decode it after placing
+     * Otherwise we assume it is PEM and try to decode it after placing
      * null-terminator
      */
     pem_read = pubkey_pem_to_der(curlx_dyn_ptr(&buf), &pem_ptr, &pem_len);

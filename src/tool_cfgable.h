@@ -214,7 +214,7 @@ struct OperationConfig {
                         by using the default behavior for -o, -O, and -J.
                         If those options would have overwritten files, like
                         -o and -O would, then overwrite them. In the case of
-                        -J, this will not overwrite any files. */
+                        -J, this does not overwrite any files. */
     CLOBBER_NEVER, /* If the file exists, always fail */
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;

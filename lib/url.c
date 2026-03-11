@@ -100,7 +100,7 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
-/* And now for the protocols */
+/* Now for the protocols */
 #include "ftp.h"
 #include "dict.h"
 #include "telnet.h"
@@ -458,7 +458,7 @@ void Curl_init_userdefined(struct Curl_easy *data)
 static void easy_meta_freeentry(void *p)
 {
   (void)p;
-  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+  /* Always FALSE. Cannot use a 0 assert here since compilers
    * are not in agreement if they then want a NORETURN attribute or
    * not. *sigh* */
   DEBUGASSERT(p == NULL);
@@ -2083,7 +2083,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   proxyinfo = sockstype ? &conn->socks_proxy : &conn->http_proxy;
   proxyinfo->proxytype = (unsigned char)proxytype;
 
-  /* Is there a username and password given in this proxy url? */
+  /* Is there a username and password given in this proxy URL? */
   uc = curl_url_get(uhp, CURLUPART_USER, &proxyuser, CURLU_URLDECODE);
   if(uc && (uc != CURLUE_NO_USER)) {
     result = Curl_uc_to_curlcode(uc);
@@ -3204,7 +3204,7 @@ static void url_conn_reuse_adjust(struct Curl_easy *data,
 static void conn_meta_freeentry(void *p)
 {
   (void)p;
-  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+  /* Always FALSE. Cannot use a 0 assert here since compilers
    * are not in agreement if they then want a NORETURN attribute or
    * not. *sigh* */
   DEBUGASSERT(p == NULL);
