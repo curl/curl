@@ -7,19 +7,13 @@ curl_url_set
 </keywords>
 </info>
 
-
-# Client-side
 <client>
-
 <name>
 curl_url_set() different schemes
 </name>
 <tool>
 lib%TESTNUMBER
 </tool>
-
-<command>
-</command>
 </client>
 
 # Verify data after the test has been "shot"

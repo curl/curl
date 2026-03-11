@@ -50,8 +50,6 @@ static CURLcode test_lib1965(const char *URL)
     curl_url_cleanup(url);
   }
 
-
   curl_global_cleanup();
-
   return result;
 }
