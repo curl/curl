@@ -100,7 +100,7 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
-/* And now for the protocols */
+/* Now for the protocols */
 #include "ftp.h"
 #include "dict.h"
 #include "telnet.h"

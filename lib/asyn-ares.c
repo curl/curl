@@ -26,9 +26,9 @@
 #ifdef CURLRES_ARES
 
 /***********************************************************************
- * Only for ares-enabled builds
- * And only for functions that fulfill the asynch resolver backend API
- * as defined in asyn.h, nothing else belongs in this file!
+ * Only for ares-enabled builds and only for functions that fulfill
+ * the asynch resolver backend API as defined in asyn.h,
+ * nothing else belongs in this file!
  **********************************************************************/
 
 #ifdef HAVE_NETINET_IN_H

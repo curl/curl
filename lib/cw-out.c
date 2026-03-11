@@ -350,8 +350,8 @@ static CURLcode cw_out_append(struct cw_out_ctx *ctx,
   }
 
   /* if we do not have a buffer, or it is of another type, make a new one.
-   * And for CW_OUT_HDS always make a new one, so we "replay" headers
-   * exactly as they came in */
+   * For CW_OUT_HDS always make a new one, so we "replay" headers exactly
+   * as they came in */
   if(!ctx->buf || (ctx->buf->type != otype) || (otype == CW_OUT_HDS)) {
     struct cw_out_buf *cwbuf = cw_out_buf_create(otype);
     if(!cwbuf)

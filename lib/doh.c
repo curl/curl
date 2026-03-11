@@ -1049,7 +1049,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
  * https://datatracker.ietf.org/doc/html/rfc1035#section-3.1
  *
  * The input buffer pointer will be modified so it points to after the end of
- * the DNS name encoding on output. (And that is why it is an "unsigned char
+ * the DNS name encoding on output. (that is why it is an "unsigned char
  * **" :-)
  */
 static CURLcode doh_decode_rdata_name(const unsigned char **buf,
