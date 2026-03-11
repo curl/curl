@@ -126,19 +126,13 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
 /*
  * Function to check on various aspects of a connection.
  */
-static uint32_t rtsp_conncheck(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               uint32_t checks_to_perform)
+static bool rtsp_conn_is_dead(struct Curl_easy *data,
+                              struct connectdata *conn)
 {
-  unsigned int ret_val = CONNRESULT_NONE;
-
-  if(checks_to_perform & CONNCHECK_ISDEAD) {
-    bool input_pending;
-    if(!Curl_conn_is_alive(data, conn, &input_pending))
-      ret_val |= CONNRESULT_DEAD;
-  }
-
-  return ret_val;
+  bool input_pending;
+  /* Contrary to default handling, this protocol allows pending
+   * input on an unused connection. */
+  return !Curl_conn_is_alive(data, conn, &input_pending);
 }
 
 static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
@@ -1072,7 +1066,7 @@ static const struct Curl_protocol Curl_protocol_rtsp = {
   ZERO_NULL,                            /* disconnect */
   rtsp_rtp_write_resp,                  /* write_resp */
   rtsp_rtp_write_resp_hd,               /* write_resp_hd */
-  rtsp_conncheck,                       /* connection_check */
+  rtsp_conn_is_dead,                    /* connection_is_dead */
   ZERO_NULL,                            /* attach connection */
   Curl_http_follow,                     /* follow */
 };
