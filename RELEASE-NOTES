@@ -4,13 +4,13 @@ curl and libcurl 8.19.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3618
+ Contributors:                 3619
 
 This release includes the following changes:
 
- o BUG-BOUNTY.md: we stop the bug-bounty end of Jan 2026 [23]
+ o we stopped the bug bounty [23]
  o cmake: add `CURL_BUILD_EVERYTHING` option [51]
- o mqtt: initial support for MQTTS [81]
+ o initial support for MQTTS [81]
  o tool: support fractions for --limit-rate and --max-filesize [79]
  o tool_cb_hdr: with -J, use the redirect name as a backup [147]
  o vquic: drop support for OpenSSL-QUIC [80]
@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o altsvc: only accept 17 byte dates from files [22]
  o asyn-ares: abort with OOM error when Curl_dnscache_mk_entry fails [107]
  o async-ares: blocking resolve timeout handling, better [239]
+ o badwords: move into ./scripts, speed up [187]
  o build: add missing `GENERATEDCERTS` files [210]
  o build: adjust minimum version for some clang picky warnings [211]
  o build: check `MSG_NOSIGNAL` directly, drop detection and interim macro [26]
@@ -84,6 +85,7 @@ This release includes the following bugfixes:
  o config-plan9: set `HAVE_STDINT_H` again [17]
  o config2setopts: acknowledge OOM error from CURLOPT_MIMEPOST [120]
  o config2setopts: fix for --disable-aws build configuration [34]
+ o configure: drop always true `if` check (Windows) [250]
  o content_encoding: return 'identity' if none other exists [235]
  o curl: add -I and -i to -h important [135]
  o curl: limit Windows-specific code to Windows builds, other tidy-ups [48]
@@ -98,6 +100,7 @@ This release includes the following bugfixes:
  o CURLINFO_CONTENT_LENGTH_DOWNLOAD_T.md: fix available protocols [97]
  o curlx: drop unused `curlx_saferealloc()` [161]
  o digest: escape double quotes and backslashes in realm and nonce [83]
+ o digest: fix memory leak in auth_create_digest_http_message() [263]
  o digest: handle quotes in the path [50]
  o docs/INSTALL: update configure details [45]
  o docs/libcurl: unify WARNING use [89]
@@ -110,6 +113,7 @@ This release includes the following bugfixes:
  o docs: drop basically [229]
  o docs: explicitly call out Slowloris as not a security flaw [6]
  o docs: fix grammar nitpicks [128]
+ o docs: handle error in `curl_global_init*` examples [204]
  o docs: replace instances of the vague qualifier 'quite' [171]
  o docs: reword explanation of --variable option [150]
  o docs: some nitpicks [277]
@@ -200,6 +204,8 @@ This release includes the following bugfixes:
  o proxy-auth: additional tests [232]
  o pytest: remove 03_02 [127]
  o quiche: use PRIu64 for outputting the stream id [184]
+ o rand: drop impossible preprocessor branches (wincrypt) [246]
+ o rand: drop scan-build silencer [245]
  o ratelimit: download finetune [16]
  o request.h: rename parameter 'buf' to 'req' in Curl_req_send [219]
  o REUSE: drop broken reference to `MAIL-ETIQUETTE` [59]
@@ -272,9 +278,11 @@ This release includes the following bugfixes:
  o VULN-DISCLOSURE-POLICY.md: use hackerone [202]
  o winapi: use FormatMessageA instead of FormatMessageW [115]
  o windows: `USE_WINSOCK` to guard winsock2 code (where missing) [133]
+ o windows: determine `RtlVerifyVersionInfo` address on global init [258]
  o windows: tidy up `wincrypt.h` / BoringSSL/AWS-LC coexist workaround [203]
  o wolfssl: fix build without USE_BIO_CHAIN [27]
  o ws/tftp: include header file even when protocol disabled [194]
+ o x509asn1: make encodeOID stop on too long input [199]
 
 This release includes the following known bugs:
 
@@ -290,7 +298,7 @@ Planned upcoming removals include:
  o RTMP support
  o SMB support becomes opt-in
  o Support for c-ares versions before 1.16.0
- o Support for Windows XP/2003
+ o Support for CMake 3.17 and earlier
  o TLS-SRP support
 
  See https://curl.se/dev/deprecate.html
@@ -305,18 +313,18 @@ advice from friends like these:
   Daniel Gustafsson, Daniel Lublin, Daniel Stenberg, Daniel Wade,
   Daniil Gentili, David Korczynski, dbalsom, dEajL3kA, dependabot[bot],
   Dexter Gerig, Diogo Correia, Florian Imdahl, Frank Buss, gudyuu on hackerone,
-  Hamza Bensliman, Itay Bookstein, Jacek Migacz, James Fuller, Jan Macku,
-  jhauga, Joshua Vandaële, Juan Belon, Kai Pastor, Maksim Ściepanienka,
-  Marcel Raad, Max Dymond, Megamouse on github, Michał Antoniak,
-  Muhamad Arga Reksapati, Nathan-M-code on github, Natris on github,
-  nono303 on github, Nuno Goncalves, Patrick Monnerat, Paul Howarth,
-  programmerlexi on github, Randall S. Becker, Ray Satiro, renovate[bot],
-  Rudi Heitbaum, sammydono on github, Samuel Henrique, Sascha Frinken,
-  spectreglobalsec on hackerone, Spenser Black, Stefan Eissing,
+  Hamza Bensliman, huanghuihui0904, Itay Bookstein, Jacek Migacz, James Fuller,
+  Jan Macku, jhauga, John Rodriguez, Joshua Vandaële, Juan Belon, Kai Pastor,
+  Maksim Ściepanienka, Marcel Raad, Max Dymond, Megamouse on github,
+  Michał Antoniak, Muhamad Arga Reksapati, Nathan-M-code on github,
+  Natris on github, nono303 on github, Nuno Goncalves, Patrick Monnerat,
+  Paul Howarth, programmerlexi on github, Randall S. Becker, Ray Satiro,
+  renovate[bot], Rudi Heitbaum, sammydono on github, Samuel Henrique,
+  Sascha Frinken, spectreglobalsec on hackerone, Spenser Black, Stefan Eissing,
   tawmoto on github, Tenant HellTower, Thibault de Villèle,
-  Tim Friedrich Brüggemann, Tomáš Malý, tommy, Valerie Snyder, Val S.,
-  Viktor Szakats, Wyuer on github, xmoezzz on github, z2_, Zhicheng Chen, Йоте
-  (76 contributors)
+  Tim Friedrich Brüggemann, Tomáš Malý, tommy, Valerie Snyder, Viktor Szakats,
+  Wyuer on github, xmoezzz on github, z2_, Zhicheng Chen, Йоте
+  (77 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -506,6 +514,7 @@ References to bug reports and discussions on issues:
  [184] = https://curl.se/bug/?i=20849
  [185] = https://curl.se/bug/?i=20601
  [186] = https://curl.se/bug/?i=20742
+ [187] = https://curl.se/bug/?i=20869
  [188] = https://curl.se/bug/?i=20595
  [189] = https://curl.se/bug/?i=20587
  [190] = https://curl.se/bug/?i=20677
@@ -517,10 +526,12 @@ References to bug reports and discussions on issues:
  [196] = https://curl.se/bug/?i=20569
  [197] = https://curl.se/bug/?i=20573
  [198] = https://curl.se/bug/?i=20577
+ [199] = https://curl.se/bug/?i=20871
  [200] = https://curl.se/bug/?i=20679
  [201] = https://curl.se/bug/?i=20736
  [202] = https://curl.se/bug/?i=20683
  [203] = https://curl.se/bug/?i=20567
+ [204] = https://curl.se/bug/?i=20866
  [205] = https://curl.se/bug/?i=20720
  [206] = https://curl.se/bug/?i=20731
  [207] = https://curl.se/bug/?i=20730
@@ -560,17 +571,22 @@ References to bug reports and discussions on issues:
  [241] = https://curl.se/bug/?i=20838
  [242] = https://curl.se/bug/?i=20829
  [243] = https://curl.se/bug/?i=20828
+ [245] = https://curl.se/bug/?i=20860
+ [246] = https://curl.se/bug/?i=20859
  [247] = https://curl.se/bug/?i=20813
  [248] = https://curl.se/bug/?i=20807
  [249] = https://curl.se/bug/?i=20800
+ [250] = https://curl.se/bug/?i=20858
  [253] = https://curl.se/bug/?i=20797
  [254] = https://curl.se/bug/?i=20729
  [255] = https://curl.se/bug/?i=20753
  [256] = https://curl.se/bug/?i=20796
  [257] = https://curl.se/bug/?i=20793
+ [258] = https://curl.se/bug/?i=20853
  [260] = https://curl.se/bug/?i=20789
  [261] = https://curl.se/bug/?i=20790
  [262] = https://curl.se/bug/?i=20791
+ [263] = https://curl.se/bug/?i=20862
  [264] = https://curl.se/bug/?i=20788
  [268] = https://curl.se/bug/?i=20779
  [275] = https://curl.se/bug/?i=20774
