@@ -1210,7 +1210,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
   /* mbedTLS is picky when a mbedtls_ssl_write() was previously blocked.
    * It requires to be called with the same amount of bytes again, or it
-   * will lose bytes, e.g. reporting all was sent but they were not.
+   * loses bytes, e.g. reporting all was sent but they were not.
    * Remember the blocked length and use that when set. */
   if(backend->send_blocked) {
     DEBUGASSERT(backend->send_blocked_len <= len);

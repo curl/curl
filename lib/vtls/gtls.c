@@ -304,7 +304,7 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
 
 #define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:" \
   "-CTYPE-ALL:+CTYPE-X509"
-/* If GnuTLS was compiled without support for SRP it will error out if SRP is
+/* If GnuTLS was compiled without support for SRP it errors out if SRP is
    requested in the priority string, so treat it specially
  */
 #define GNUTLS_SRP "+SRP"
@@ -818,7 +818,7 @@ static CURLcode gtls_set_priority(struct Curl_cfilter *cf,
 #ifdef USE_GNUTLS_SRP
   if(conn_config->username) {
     /* Only add SRP to the cipher list if SRP is requested. Otherwise
-     * GnuTLS will disable TLS 1.3 support. */
+     * GnuTLS disables TLS 1.3 support. */
     result = curlx_dyn_add(&buf, priority);
     if(!result)
       result = curlx_dyn_add(&buf, ":" GNUTLS_SRP);
@@ -1178,7 +1178,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
 #endif
 
   /* convert the ALPN string from our arguments to a list of strings that
-   * gnutls wants and will convert internally back to this string for sending
+   * GnuTLS wants and does convert internally back to this string for sending
    * to the server. nice. */
   if(!gtls_alpns_count && alpns.count) {
     size_t i;
@@ -1579,7 +1579,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   long * const certverifyresult = &ssl_config->certverifyresult;
 
   (void)cf;
-  /* This function will return the peer's raw certificate (chain) as sent by
+  /* This function returns the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for
      X.509). In case of a X.509 then a certificate list may be present. The
      first certificate in the list is the peer's certificate, following the
@@ -1637,7 +1637,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   if(config->verifypeer) {
     bool verified = FALSE;
     unsigned int verify_status = 0;
-    /* This function will try to verify the peer's certificate and return
+    /* This function tries to verify the peer's certificate and return
        its status (trusted, invalid etc.). The value of status should be
        one or more of the gnutls_certificate_status_t enumerated elements
        bitwise or'd. To avoid denial of service attacks some default
@@ -1796,7 +1796,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
           config->issuercert ? config->issuercert : "none");
   }
 
-  /* This function will check if the given certificate's subject matches the
+  /* This function checks if the given certificate's subject matches the
      given hostname. This is a basic implementation of the matching described
      in RFC2818 (HTTPS), which takes into account wildcards, and the subject
      alternative name PKIX extension. Returns non zero on success, and zero on

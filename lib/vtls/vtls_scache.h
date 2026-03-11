@@ -52,7 +52,7 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
 /* Create a key from peer and TLS configuration information that is
  * unique for how the connection filter wants to establish a TLS
  * connection to the peer.
- * If the filter is a TLS proxy filter, it will use the proxy relevant
+ * If the filter is a TLS proxy filter, it uses the proxy relevant
  * information.
  * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to

@@ -294,8 +294,8 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
  *    we get either an error or EAGAIN/EWOULDBLOCK.
  *
  * it is okay to call this function with plainbuf == NULL and plainlen == 0.
- * In that case, it will not read anything into Rustls' plaintext input buffer.
- * It will only drain Rustls' plaintext output buffer into the socket.
+ * In that case, it does not read anything into Rustls' plaintext input buffer.
+ * It only drains Rustls' plaintext output buffer into the socket.
  */
 static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *plainbuf, size_t plainlen,
@@ -1117,7 +1117,7 @@ static void cr_set_negotiated_alpn(struct Curl_cfilter *cf,
 
 /* Given an established network connection, do a TLS handshake.
  *
- * This function will set `*done` to true once the handshake is complete.
+ * This function sets `*done` to true once the handshake is complete.
  * This function never reads the value of `*done*`.
  */
 static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,

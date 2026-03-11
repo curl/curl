@@ -109,7 +109,7 @@
  * Availability note:
  * The TLS 1.3 secret callback (wolfSSL_set_tls13_secret_cb) was added in
  * wolfSSL 4.4.0, but requires the -DHAVE_SECRET_CALLBACK build option. If that
- * option is not set, then TLS 1.3 will not be logged.
+ * option is not set, then TLS 1.3 is not logged.
  * For TLS 1.2 and before, we use wolfSSL_get_keys().
  * wolfSSL_get_client_random and wolfSSL_get_keys require OPENSSL_EXTRA
  * (--enable-opensslextra or --enable-all).
@@ -1730,7 +1730,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     else if(DOMAIN_NAME_MISMATCH == detail) {
       /* There is no easy way to override only the CN matching.
-       * This will enable the override of both mismatching SubjectAltNames
+       * This enables the override of both mismatching SubjectAltNames
        * as also mismatching CN fields */
       failf(data, " subject alt name(s) or common name do not match \"%s\"",
             connssl->peer.dispname);
@@ -2142,8 +2142,8 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
   }
 
   if(ssl_connect_3 == connssl->connecting_state) {
-    /* Once the handshake has errored, it stays in that state and will
-     * error again on every call. */
+    /* Once the handshake has errored, it stays in that state and
+     * errors again on every call. */
     if(wssl->hs_result) {
       result = wssl->hs_result;
       goto out;

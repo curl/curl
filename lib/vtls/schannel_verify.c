@@ -262,7 +262,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
 
   /*
    * Read the CA file completely into memory before parsing it. This
-   * optimizes for the common case where the CA file will be relatively
+   * optimizes for the common case where the CA file is relatively
    * small ( < 1 MiB ).
    */
   ca_file_handle = curlx_CreateFile(ca_file,
@@ -366,7 +366,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 #ifndef CERT_NAME_SEARCH_ALL_NAMES_FLAG
 #define CERT_NAME_SEARCH_ALL_NAMES_FLAG 0x2
 #endif
-    /* CertGetNameString will provide the 8-bit character string without
+    /* CertGetNameString provides the 8-bit character string without
      * any decoding */
     DWORD name_flags =
       CERT_NAME_DISABLE_IE4_UTF8_FLAG | CERT_NAME_SEARCH_ALL_NAMES_FLAG;
@@ -572,7 +572,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
       goto cleanup;
     }
 
-    /* CertGetNameString guarantees that the returned name will not contain
+    /* CertGetNameString guarantees that the returned name does not contain
      * embedded null bytes. This appears to be undocumented behavior.
      */
     cert_hostname_buff = (LPTSTR)curlx_malloc(len * sizeof(TCHAR));
@@ -763,7 +763,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       else
         engine_config.cbSize = sizeof(struct cert_chain_engine_config_win7);
 
-      /* CertCreateCertificateChainEngine will check the expected size of the
+      /* CertCreateCertificateChainEngine checks the expected size of the
        * CERT_CHAIN_ENGINE_CONFIG structure and fail if the specified size
        * does not match the expected size. When this occurs, it indicates that
        * CAINFO is not supported on the version of Windows in use.

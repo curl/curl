@@ -130,7 +130,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
     if(!ssl_config->no_revoke) {
       if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
-        /* Even without this set, validation will seemingly-unavoidably fail
+        /* Even without this set, validation seemingly-unavoidably fails
          * for certificates that trustd already knows to be revoked.
          * This policy further allows trustd to consult CRLs and OCSP data
          * to determine revocation status (which it may then cache). */
@@ -142,7 +142,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * of a cert being NOT REVOKED. Which not in general available for
          * certificates on the Internet.
          * It seems that applications using this policy are expected to PIN
-         * their certificate public keys or verification will fail.
+         * their certificate public keys or verification fails.
          * This does not seem to be what we want here. */
         if(!ssl_config->revoke_best_effort) {
           revocation_flags |= kSecRevocationRequirePositiveResponse;
