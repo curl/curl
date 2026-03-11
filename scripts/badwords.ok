@@ -7,3 +7,14 @@
 docs/FAQ.md::will
 docs/FAQ.md::Will
 lib/urldata.h:: url
+include/curl/::will
+lib/::will
+lib/::Will
+lib/::WILL
+lib/curlx/::will
+lib/vauth/::will
+lib/vquic/::will
+lib/vssh/::will
+lib/vtls/::will
+lib/vtls/::Will
+src/::will

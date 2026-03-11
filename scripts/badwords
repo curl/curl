@@ -17,6 +17,8 @@
 use strict;
 use warnings;
 
+use File::Basename;
+
 my @whitelist = (
     # ignore what looks like URLs
     '(^|\W)((https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&\'\(\)*+,;=]+)',
@@ -107,6 +109,11 @@ sub highlight {
     $ch = $f . "::" . $w;
     if($wl{$ch}) {
         # whitelisted filename + word
+        return;
+    }
+    $ch = dirname($ch) . "/" . "::" . $w;
+    if($wl{$ch}) {
+        # whitelisted basename + word
         return;
     }
 
