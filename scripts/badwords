@@ -104,6 +104,11 @@ sub highlight {
     my $ch;
 
     my $dir = dirname($f);
+    $ch = $dir . "/" . "::" . $w;
+    if($wl{$ch}) {
+        # whitelisted dirname + word
+        return;
+    }
     my $updir = dirname($dir);
     if($dir ne $updir) {
         $ch = $updir . "/" . "::" . $w;
@@ -111,11 +116,6 @@ sub highlight {
             # whitelisted upper dirname + word
             return;
         }
-    }
-    $ch = $dir . "/" . "::" . $w;
-    if($wl{$ch}) {
-        # whitelisted dirname + word
-        return;
     }
     $ch = $f . "::" . $w;
     if($wl{$ch}) {
