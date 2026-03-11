@@ -75,8 +75,8 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
 
 #ifdef USE_WINSOCK
   /* Winsock select() must not be called with an fd_set that contains zero
-     fd flags, or it will return WSAEINVAL. But, it also cannot be called
-     with no fd_sets at all!  From the documentation:
+     fd flags, or it will return WSAEINVAL. It also cannot be called with
+     no fd_sets at all!  From the documentation:
 
      Any two of the parameters, readfds, writefds, or exceptfds, can be
      given as null. At least one must be non-null, and any non-null

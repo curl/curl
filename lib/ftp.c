@@ -677,7 +677,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
      * A caution here is that the ftp_readresp() function has a cache that may
      * contain pieces of a response from the previous invoke and we need to
      * make sure we do not wait for input while there is unhandled data in
-     * that cache. But also, if the cache is there, we call ftp_readresp() and
+     * that cache. Also, if the cache is there, we call ftp_readresp() and
      * the cache was not good enough to continue we must not busy-loop around
      * this function.
      *
@@ -1688,7 +1688,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
        which may not exist in the server!  The SIZE command is not in
        RFC959. */
 
-    /* 2. This used to set REST. But since we can do append, we issue no
+    /* 2. This used to set REST, but since we can do append, we issue no
        another ftp command. Skip the source file offset and APPEND the rest on
        the file instead */
 
@@ -2382,10 +2382,10 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       else if((data->state.list_only || !ftpc->file) &&
               !(data->set.prequote)) {
         /* The specified path ends with a slash, and therefore we think this
-           is a directory that is requested, use LIST. But before that we
+           is a directory that is requested, use LIST. Before that, we also
            need to set ASCII transfer mode. */
 
-        /* But only if a body transfer was requested. */
+        /* Only if a body transfer was requested. */
         if(ftp->transfer == PPTRANSFER_BODY) {
           result = ftp_nb_type(data, ftpc, ftp, TRUE, FTP_LIST_TYPE);
           if(result)

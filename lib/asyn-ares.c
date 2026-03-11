@@ -549,7 +549,7 @@ static void async_ares_hostbyname_cb(void *user_data,
 
        it is also possible that the other request could always take longer
        because it needs more time or only the second DNS server can fulfill it
-       successfully. But, to align with the philosophy of Happy Eyeballs, we
+       successfully. Yet, to align with the philosophy of Happy Eyeballs, we
        do not want to wait _too_ long or users will think requests are slow
        when IPv6 lookups do not actually work (but IPv4 ones do).
 
