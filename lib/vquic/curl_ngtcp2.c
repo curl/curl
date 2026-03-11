@@ -2257,7 +2257,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
 
   if(Curl_bufq_is_empty(&ctx->q.sendbuf)) {
     /* Sent everything off. ngtcp2 seems to have no support for graceful
-     * shutdowns. So, we are done. */
+     * shutdowns. We are done. */
     CURL_TRC_CF(data, cf, "shutdown completely sent off, done");
     *done = TRUE;
     result = CURLE_OK;

@@ -1426,7 +1426,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       k->keepon |= KEEP_SEND;
     }
 
-    /* And pass any additional data to the writers */
+    /* Then pass any additional data to the writers */
     if(nread) {
       result = Curl_client_write(data, CLIENTWRITE_BODY, mem, nread);
       if(result)

@@ -2138,7 +2138,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
         case GEN_DNS: /* name/pattern comparison */
           /* The OpenSSL man page explicitly says: "In general it cannot be
              assumed that the data returned by ASN1_STRING_data() is null
-             terminated or does not contain embedded nulls." But also that
+             terminated or does not contain embedded nulls.", but also that
              "The actual format of the data depends on the actual string
              type itself: for example for an IA5String the data is ASCII"
 
@@ -2583,7 +2583,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     ssl_ver >>= 8; /* check the upper 8 bits only below */
 
     /* SSLv2 does not seem to have TLS record-type headers, so OpenSSL
-     * always pass-up content-type as 0. But the interesting message-type
+     * always pass-up content-type as 0, but the interesting message-type
      * is at 'buf[0]'.
      */
     if(ssl_ver == SSL3_VERSION_MAJOR && content_type)
@@ -4437,7 +4437,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509 *cert,
     /*
      * These checks are verifying we got back the same values as when we
      * sized the buffer. it is pretty weak since they should always be the
-     * same. But it gives us something to test.
+     * same, but it gives us something to test.
      */
     if((len1 != len2) || !temp || ((temp - buff1) != len1))
       break; /* failed */
@@ -5237,7 +5237,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
           result = CURLE_RECV_ERROR;
         }
         else {
-          /* We should no longer get here nowadays. But handle
+          /* We should no longer get here nowadays, but handle
            * the error in case of some weirdness in the OSSL stack */
           int sockerr = SOCKERRNO;
           if(sockerr)

@@ -939,8 +939,8 @@ static CURLcode cf_quiche_send_body(struct Curl_cfilter *cf,
   rv = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
                            (uint8_t *)CURL_UNCONST(buf), len, eos);
   if(rv == QUICHE_H3_ERR_DONE || (rv == 0 && len > 0)) {
-    /* Blocked on flow control and should HOLD sending. But when do we open
-     * again? */
+    /* Blocked on flow control and should HOLD sending.
+       When do we open again? */
     if(!quiche_conn_stream_writable(ctx->qconn, stream->id, len)) {
       CURL_TRC_CF(data, cf, "[%" PRIu64 "] send_body(len=%zu) "
                   "-> window exhausted", stream->id, len);
