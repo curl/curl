@@ -487,7 +487,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     if(!sleeptime)
       sleeptime = per->retry_sleep;
     warnf("Problem %s. "
-          "Will retry in %ld%s%.*ld second%s. "
+          "Retrying in %ld%s%.*ld second%s. "
           "%ld retr%s left.",
           m[retry], sleeptime / 1000L,
           (sleeptime % 1000L ? "." : ""),
