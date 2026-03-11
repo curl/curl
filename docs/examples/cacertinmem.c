@@ -34,9 +34,6 @@
 
 #include <curl/curl.h>
 
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic ignored "-Woverlength-strings"
-#endif
 /* Silence warning when calling sk_X509_INFO_pop_free() */
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
