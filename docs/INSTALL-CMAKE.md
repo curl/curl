@@ -247,7 +247,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `SHARE_LIB_OBJECT`:                       Build shared and static libcurl in a single pass (requires CMake 3.12 or newer). Default: `ON` for Windows
 - `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
 
-## CA bundle options
+## Root CA options
 
 - `CURL_CA_BUNDLE`:                         Absolute path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_EMBED`:                          Absolute path to the CA bundle to embed in the curl tool. Default: (disabled)
@@ -257,6 +257,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_CA_PATH`:                           Absolute path to a directory containing CA certificates stored individually.
                                             Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
+- `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification. Default: `OFF`
 
 ## Enabling features
 
@@ -370,7 +371,6 @@ Details via CMake
 - `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
 - `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
-- `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification. Default: `OFF`
 - `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
