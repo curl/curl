@@ -561,9 +561,11 @@ if(PERL_EXECUTABLE)
   add_custom_target(curl-lint
     COMMENT "Running lint checks" VERBATIM USES_TERMINAL
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/badwords-all"
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl"
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
     DEPENDS
+      "${PROJECT_SOURCE_DIR}/scripts/badwords-all" "${PROJECT_SOURCE_DIR}/scripts/badwords"
       "${PROJECT_SOURCE_DIR}/scripts/checksrc-all.pl" "${PROJECT_SOURCE_DIR}/scripts/checksrc.pl"
       "${PROJECT_SOURCE_DIR}/scripts/spacecheck.pl"
   )
