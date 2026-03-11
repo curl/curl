@@ -657,7 +657,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
 
   while(!*ftpcodep && !result) {
     /* check and reset timeout value every lap */
-    timediff_t timeout = Curl_pp_state_timeout(data, pp);
+    timediff_t timeout = Curl_pp_state_timeleft_ms(data, pp);
     timediff_t interval_ms;
 
     if(timeout <= 0) {

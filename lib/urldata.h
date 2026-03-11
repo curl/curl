@@ -120,9 +120,6 @@ typedef curl_off_t curl_prot_t;
 /* length of longest IPv6 address string including the trailing null */
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
-/* Default FTP/IMAP etc response timeout in milliseconds */
-#define RESP_TIMEOUT (60 * 1000)
-
 /* Max string input length is a precaution against abuse and to detect junk
    input easier and better. */
 #define CURL_MAX_INPUT_LENGTH 8000000
