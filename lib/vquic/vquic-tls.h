@@ -72,7 +72,7 @@ typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
  * @param ctx              the TLS context to initialize
  * @param cf               the connection filter involved
  * @param data             the transfer involved
- * @param peer             the peer that will be connected to
+ * @param peer             the peer to be connected to
  * @param alpns            the ALPN specifications to negotiate, may be NULL
  * @param cb_setup         optional callback for early TLS config
  * @param cb_user_data     user_data param for callback

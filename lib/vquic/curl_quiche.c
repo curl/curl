@@ -481,7 +481,7 @@ static void cf_quiche_recv_body(struct Curl_cfilter *cf,
     return;
 
   /* Even when the transfer has already errored, we need to receive
-   * the data from quiche, as quiche will otherwise get stuck and
+   * the data from quiche, as quiche otherwise gets stuck and
    * raise events to receive over and over again. */
   cb_ctx.cf = cf;
   cb_ctx.data = data;
@@ -779,7 +779,7 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
       else
         failf(data, "connection closed by server");
       /* Connection timed out, expire all transfers belonging to it
-       * as will not get any more POLL events here. */
+       * as it does not get any more POLL events here. */
       cf_quiche_expire_conn_closed(cf, data);
       return CURLE_SEND_ERROR;
     }

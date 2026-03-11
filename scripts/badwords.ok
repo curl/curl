@@ -13,7 +13,6 @@ lib/::Will
 lib/::WILL
 lib/curlx/::will
 lib/vauth/::will
-lib/vquic/::will
 lib/vssh/::will
 lib/vtls/::will
 src/::will

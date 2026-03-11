@@ -183,7 +183,7 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   const ngtcp2_transport_params *rp;
   /* Peer should have sent us its transport parameters. If it
-   * announces a positive `max_idle_timeout` it will close the
+   * announces a positive `max_idle_timeout` it closes the
    * connection when it does not hear from us for that time.
    *
    * Some servers use this as a keep-alive timer at a rather low
@@ -2043,7 +2043,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
       ++pktcnt;
       if(pktcnt == 1) {
         /* first packet in buffer. This is either of a known, "good"
-         * payload size or it is a PMTUD. We will see. */
+         * payload size or it is a PMTUD. We shall see. */
         gsolen = nread;
       }
       else if(nread > gsolen ||
@@ -2859,7 +2859,7 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
     goto out;
 
   /* We do not announce a max idle timeout, but when the peer does
-   * it will close the connection when it expires. */
+   * it closes the connection when it expires. */
   rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
   if(rp && rp->max_idle_timeout) {
     timediff_t idletime_ms =
