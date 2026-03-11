@@ -1017,7 +1017,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
      *
      * Allow any non whitespace content, up to the field separator or end of
      * line. RFC 2326 is not 100% clear on the session ID and for example
-     * gstreamer does url-encoded session ID's not covered by the standard.
+     * gstreamer does URL-encoded session ID's not covered by the standard.
      */
     end = start;
     while((*end > ' ') && (*end != ';'))

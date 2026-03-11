@@ -209,7 +209,7 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
   const char *slashPos = NULL;
   const char *fileName = NULL;
   CURLcode result = CURLE_OK;
-  const char *rawPath = NULL; /* url-decoded "raw" path */
+  const char *rawPath = NULL; /* URL-decoded "raw" path */
   size_t pathLen = 0;
 
   ftpc->ctl_valid = FALSE;
@@ -217,7 +217,7 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
 
   if(ftpc->rawpath)
     freedirs(ftpc);
-  /* url-decode ftp path before further evaluation */
+  /* URL-decode ftp path before further evaluation */
   result = Curl_urldecode(ftp->path, 0, &ftpc->rawpath, &pathLen, REJECT_CTRL);
   if(result) {
     failf(data, "path contains control characters");
@@ -1559,7 +1559,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
   char *cmd;
 
   if((data->set.ftp_filemethod == FTPFILE_NOCWD) && ftp->path) {
-    /* url-decode before evaluation: e.g. paths starting/ending with %2f */
+    /* URL-decode before evaluation: e.g. paths starting/ending with %2f */
     const char *rawPath = ftpc->rawpath;
     const char *slashPos = strrchr(rawPath, '/');
     if(slashPos) {
@@ -3709,7 +3709,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
           if(data->set.ftp_filemethod == FTPFILE_NOCWD)
             pathLen = 0; /* relative path => working directory is FTP home */
           else
-            /* file is url-decoded */
+            /* file is URL-decoded */
             pathLen -= ftpc->file ? strlen(ftpc->file) : 0;
           ftpc->prevpath = curlx_memdup0(rawPath, pathLen);
         }
