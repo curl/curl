@@ -86,7 +86,7 @@ curl is not a program for a single operating system. curl exists, compiles,
 builds and runs under a wide range of operating systems, including all modern
 Unixes (and a bunch of older ones too), Windows, Amiga, OS/2, macOS, QNX etc.
 
-## When will you make curl do ... ?
+## When would you make curl do ... ?
 
 We love suggestions of what to change in order to make curl and libcurl
 better. We do however believe in a few rules when it comes to the future of
@@ -102,7 +102,7 @@ redirected to another file for the next program to interpret.
 
 We focus on protocol related issues and improvements. If you want to do more
 with the supported protocols than curl currently does, chances are good we
-will agree. If you want to add more protocols, we may agree.
+would agree. If you want to add more protocols, we may agree.
 
 If you want someone else to do all the work while you wait for us to implement
 it for you, that is not a friendly attitude. We spend a considerable time
@@ -111,7 +111,7 @@ you should consider trading in some of your time and effort in return. Go to
 the [GitHub repository](https://github.com/curl/curl), fork the project,
 and create pull requests with your proposed changes.
 
-If you write the code, chances are better that it will get into curl faster.
+If you write the code, chances are better that it gets into curl faster.
 
 ## Who makes curl?
 
@@ -135,7 +135,7 @@ not controlled by nor supervised in any way by the curl project.
 We get help from companies. Haxx provides website, bandwidth, mailing lists
 etc, GitHub hosts [the primary git repository](https://github.com/curl/curl)
 and other services like the bug tracker. Also again, some companies have
-sponsored certain parts of the development in the past and I hope some will
+sponsored certain parts of the development in the past and I hope some
 continue to do so in the future.
 
 If you want to [support our project](https://curl.se/sponsors.html), consider
@@ -153,7 +153,7 @@ Our project name curl has been in effective use since 1998. We were not the
 first computer related project to use the name *curl* and do not claim any
 rights to the name.
 
-We recognize that we will be living in parallel with curl.com and wish them
+We recognize that we are living in parallel with curl.com and wish them
 every success.
 
 ## I have a problem, who do I mail?
@@ -248,8 +248,8 @@ An incomprehensible description of the two numbers above is available on
 We strongly encourage you to submit changes and improvements directly as [pull
 requests on GitHub](https://github.com/curl/curl/pulls).
 
-If you for any reason cannot or will not deal with GitHub, send your patch to
-the curl-library mailing list. We are many subscribers there and there are
+If you cannot or choose not to engage with with GitHub, send your patch
+to the curl-library mailing list. We are many subscribers there and there are
 lots of people who can review patches, comment on them and receive them
 properly.
 
@@ -304,7 +304,7 @@ library comparison](https://curl.se/docs/ssl-compared.html).
 The curl tool that is shipped as an integrated component of Windows 10 and
 Windows 11 is managed by Microsoft. If you were to delete the file or replace
 it with a newer version downloaded from [the curl
-website](https://curl.se/windows/), then Windows Update will cease to work on
+website](https://curl.se/windows/), then Windows Update ceases to work on
 your system.
 
 There is no way to independently force an upgrade of the curl.exe that is part
@@ -346,7 +346,7 @@ option.
 
 You cannot arbitrarily use `-F` or `-d`, the choice between `-F` or `-d`
 depends on the HTTP operation you need curl to do and what the web server that
-will receive your post expects.
+receives your post expects.
 
 If the form you are trying to submit uses the type 'multipart/form-data',
 then and only then you must use the -F type. In all the most common cases,
@@ -448,7 +448,7 @@ To make a simple HTTP POST with `text/xml` as content-type, do something like:
 
 ## Why do FTP-specific features over HTTP proxy fail?
 
-Because when you use an HTTP proxy, the protocol spoken on the network will be
+Because when you use an HTTP proxy, the protocol spoken on the network is
 HTTP, even if you specify an FTP URL. This effectively means that you normally
 cannot use FTP-specific features such as FTP upload and FTP quote etc.
 
@@ -480,8 +480,8 @@ single quotes. To escape inner double quotes seems to require a
 backslash-backtick escape sequence and the outer quotes as double quotes.
 
 Please study the documentation for your particular environment. Examples in
-the curl docs will use a mix of both of these as shown above. You must adjust
-them to work in your environment.
+the curl docs use a mix of both of these as shown above. You must adjust them
+to work in your environment.
 
 Remember that curl works and runs on more operating systems than most single
 individuals have ever tried.
@@ -585,7 +585,7 @@ but use the target IP address in the URL:
     curl --header "Host: www.example.com" https://somewhere.example/
 
 You can also opt to add faked hostname entries to curl with the --resolve
-option. That has the added benefit that things like redirects will also work
+option. That has the added benefit to make things like redirects also work
 properly. The above operation would instead be done as:
 
     curl --resolve www.example.com:80:127.0.0.1 https://www.example.com/
@@ -615,8 +615,8 @@ how to speak that protocol) or if it was explicitly disabled. curl can be
 built to only support a given set of protocols, and the rest would then be
 disabled or not supported.
 
-Note that this error will also occur if you pass a wrongly spelled protocol
-part as in `htpts://example.com` or as in the less evident case if you prefix
+Note that this error also occurs if you pass a wrongly spelled protocol part
+as in `htpts://example.com` or as in the less evident case if you prefix
 the protocol part with a space as in `" https://example.com/"`.
 
 ## curl `-X` gives me HTTP problems
@@ -625,8 +625,8 @@ In normal circumstances, `-X` should hardly ever be used.
 
 By default you use curl without explicitly saying which request method to use
 when the URL identifies an HTTP transfer. If you pass in a URL like `curl
-https://example.com` it will use GET. If you use `-d` or `-F`, curl will use
-POST, `-I` will cause a HEAD and `-T` will make it a PUT.
+https://example.com` it uses GET. If you use `-d` or `-F`, curl uses POST,
+`-I` causes a HEAD and `-T` makes it a PUT.
 
 If for whatever reason you are not happy with these default choices that curl
 does for you, you can override those request methods by specifying `-X
@@ -643,8 +643,7 @@ the actual string sent in the request, but that may of course trigger a
 different set of events.
 
 Accordingly, by using `-XPOST` on a command line that for example would follow
-a 303 redirect, you will effectively prevent curl from behaving correctly. Be
-aware.
+a 303 redirect, you effectively prevent curl from behaving correctly. Be aware.
 
 # Running
 
@@ -685,8 +684,7 @@ them for the curl URL *globbing* system), use the `-g`/`--globoff` option:
 
 curl asks remote servers for the page you specify. If the page does not exist
 at the server, the HTTP protocol defines how the server should respond and
-that means that headers and a page will be returned. That is how HTTP
-works.
+that means that headers and a page get returned. That is how HTTP works.
 
 By using the `--fail` option you can tell curl explicitly to not get any data
 if the HTTP return code does not say success.
@@ -708,7 +706,7 @@ The request requires user authentication.
 ### 403 Forbidden
 
 The server understood the request, but is refusing to fulfill it.
-Authorization will not help and the request SHOULD NOT be repeated.
+Authorization cannot help and the request SHOULD NOT be repeated.
 
 ### 404 Not Found
 
@@ -749,9 +747,8 @@ This problem has two sides:
 The first part is to avoid having clear-text passwords in the command line so
 that they do not appear in *ps* outputs and similar. That is easily avoided by
 using the `-K` option to tell curl to read parameters from a file or stdin to
-which you can pass the secret info. curl itself will also attempt to hide the
-given password by blanking out the option - this does not work on all
-platforms.
+which you can pass the secret info. curl itself also attempts to hide the given
+password by blanking out the option - this does not work on all platforms.
 
 To keep the passwords in your account secret from the rest of the world is
 not a task that curl addresses. You could of course encrypt them somehow to
@@ -842,7 +839,7 @@ curl supports HTTP redirects well (see a previous question above). Browsers
 generally support at least two other ways to perform redirects that curl does
 not:
 
-Meta tags. You can write an HTML tag that will cause the browser to redirect
+Meta tags. You can write an HTML tag that causes the browser to redirect
 to another given URL after a certain time.
 
 JavaScript. You can write a JavaScript program embedded in an HTML page that
@@ -858,13 +855,13 @@ curl supports FTPS (sometimes known as FTP-SSL) both implicit and explicit
 mode.
 
 When a URL is used that starts with `FTPS://`, curl assumes implicit SSL on
-the control connection and will therefore immediately connect and try to speak
+the control connection and therefore immediately connects and tries to speak
 SSL. `FTPS://` connections default to port 990.
 
 To use explicit FTPS, you use an `FTP://` URL and the `--ssl-reqd` option (or
 one of its related flavors). This is the most common method, and the one
-mandated by RFC 4217. This kind of connection will then of course use the
-standard FTP port 21 by default.
+mandated by RFC 4217. This kind of connection then of course uses the standard
+FTP port 21 by default.
 
 ## My HTTP POST or PUT requests are slow
 
@@ -874,7 +871,7 @@ server to deny the operation early so that libcurl can bail out before having
 to send any data. This is useful in authentication cases and others.
 
 Many servers do not implement the `Expect:` stuff properly and if the server
-does not respond (positively) within 1 second libcurl will continue and send
+does not respond (positively) within 1 second libcurl continues and sends
 off the data anyway.
 
 You can disable libcurl's use of the `Expect:` header the same way you disable
@@ -883,8 +880,8 @@ any header, using `-H` / `CURLOPT_HTTPHEADER`, or by forcing it to use HTTP
 
 ## Non-functional connect timeouts
 
-In most Windows setups having a timeout longer than 21 seconds make no
-difference, as it will only send 3 TCP SYN packets and no more. The second
+In most Windows setups having a timeout longer than 21 seconds makes no
+difference, as it only sends 3 TCP SYN packets and no more. The second
 packet sent three seconds after the first and the third six seconds after
 the second. No more than three packets are sent, no matter how long the
 timeout is set.
@@ -894,8 +891,8 @@ page](https://support.microsoft.com/topic/hotfix-enables-the-configuration-of-th
 
 Also, even on non-Windows systems there may run a firewall or anti-virus
 software or similar that accepts the connection but does not actually do
-anything else. This will make (lib)curl to consider the connection connected
-and thus the connect timeout will not trigger.
+anything else. This makes (lib)curl to consider the connection connected
+and thus the connect timeout does not trigger.
 
 ## file:// URLs containing drive letters (Windows, NetWare)
 
@@ -904,15 +901,15 @@ format:
 
     file://D:/blah.txt
 
-you will find that even if `D:\blah.txt` does exist, curl returns a 'file not
+you find that even if `D:\blah.txt` does exist, curl returns a 'file not
 found' error.
 
 According to [RFC 1738](https://datatracker.ietf.org/doc/html/rfc1738),
 `file://` URLs must contain a host component, but it is ignored by most
 implementations. In the above example, `D:` is treated as the host component,
 and is taken away. Thus, curl tries to open `/blah.txt`. If your system is
-installed to drive C:, that will resolve to `C:\blah.txt`, and if that does
-not exist you will get the not found error.
+installed to drive C:, that resolves to `C:\blah.txt`, and if that does
+not exist you get the not found error.
 
 To fix this problem, use `file://` URLs with *three* leading slashes:
 
@@ -930,8 +927,8 @@ In either case, curl should now be looking for the correct file.
 Unplugging a cable is not an error situation. The TCP/IP protocol stack was
 designed to be fault tolerant, so even though there may be a physical break
 somewhere the connection should not be affected, but possibly delayed.
-Eventually, the physical break will be fixed or the data will be re-routed
-around the physical problem through another path.
+Eventually, the physical break gets fixed or the data re-routed around
+the physical problem through another path.
 
 In such cases, the TCP/IP stack is responsible for detecting when the network
 connection is irrevocably lost. Since with some protocols it is perfectly
@@ -942,12 +939,12 @@ in the TCP/IP stack which makes it periodically probe the connection to make
 sure it is still available to send data. That should reliably detect any
 TCP/IP network failure.
 
-TCP keep alive will not detect the network going down before the TCP/IP
+TCP keep alive does not detect the network going down before the TCP/IP
 connection is established (e.g. during a DNS lookup) or using protocols that
 do not use TCP. To handle those situations, curl offers a number of timeouts
-on its own. `--speed-limit`/`--speed-time` will abort if the data transfer
-rate falls too low, and `--connect-timeout` and `--max-time` can be used to
-put an overall timeout on the connection phase or the entire transfer.
+on its own. `--speed-limit`/`--speed-time` aborts if the data transfer rate
+falls too low, and `--connect-timeout` and `--max-time` can be used to put
+an overall timeout on the connection phase or the entire transfer.
 
 A libcurl-using application running in a known physical environment (e.g. an
 embedded device with only a single network connection) may want to act
@@ -959,8 +956,8 @@ OS-specific mechanism, then signaling libcurl to abort.
 
 Correct. Unless you use `-f` (`--fail`) or `--fail-with-body`.
 
-When doing HTTP transfers, curl will perform exactly what you are asking it to
-do and if successful it will not return an error. You can use curl to test
+When doing HTTP transfers, curl performs exactly what you are asking it to
+do and if successful it does not return an error. You can use curl to test
 your web server's "file not found" page (that gets 404 back), you can use it
 to check your authentication protected webpages (that gets a 401 back) and so
 on.
@@ -986,9 +983,9 @@ extract the exact response code that was returned in the response.
 Yes.
 
 We have written the libcurl code specifically adjusted for multi-threaded
-programs. libcurl will use thread-safe functions instead of non-safe ones if
-your system has such. Note that you must never share the same handle in
-multiple threads.
+programs. libcurl uses thread-safe functions instead of non-safe ones if your
+system has such. Note that you must never share the same handle in multiple
+threads.
 
 There may be some exceptions to thread safety depending on how libcurl was
 built. Please review [the guidelines for thread
@@ -1004,7 +1001,7 @@ whatever you want. You do not have to write the received data to a file.
 
 One solution to this problem could be to have a pointer to a struct that you
 pass to the callback function. You set the pointer using the CURLOPT_WRITEDATA
-option. Then that pointer will be passed to the callback instead of a FILE *
+option. Then that pointer is passed to the callback instead of a FILE *
 to a file:
 
 ~~~c
@@ -1036,8 +1033,8 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 libcurl has excellent support for transferring multiple files. You should
 repeatedly set new URLs with `curl_easy_setopt()` and then transfer it with
 `curl_easy_perform()`. The handle you get from curl_easy_init() is not only
-reusable, but you are even encouraged to reuse it if you can, as that will
-enable libcurl to use persistent connections.
+reusable, but you are even encouraged to reuse it if you can, as that
+enables libcurl to use persistent connections.
 
 ## Does libcurl do Winsock initialization on Win32 systems?
 
@@ -1055,15 +1052,15 @@ all it does is write the data to the specified FILE *. Similarly, if you use
 ## What about Keep-Alive or persistent connections?
 
 curl and libcurl have excellent support for persistent connections when
-transferring several files from the same server. curl will attempt to reuse
+transferring several files from the same server. curl attempts to reuse
 connections for all URLs specified on the same command line/config file, and
-libcurl will reuse connections for all transfers that are made using the same
+libcurl reuses connections for all transfers that are made using the same
 libcurl handle.
 
 When you use the easy interface the connection cache is kept within the easy
-handle. If you instead use the multi interface, the connection cache will be
-kept within the multi handle and will be shared among all the easy handles
-that are used within the same multi handle.
+handle. If you instead use the multi interface, the connection cache is kept
+within the multi handle and shared among all the easy handles that are used
+within the same multi handle.
 
 ## Link errors when building libcurl on Windows
 
@@ -1076,7 +1073,7 @@ options to the command line compiler. `/MD` (linking against `MSVCRT.dll`)
 seems to be the most commonly used option.
 
 When building an application that uses the static libcurl library, you must
-add `-DCURL_STATICLIB` to your `CFLAGS`. Otherwise the linker will look for
+add `-DCURL_STATICLIB` to your `CFLAGS`. Otherwise the linker looks for
 dynamic import symbols. If you are using Visual Studio, you need to instead
 add `CURL_STATICLIB` in the "Preprocessor Definitions" section.
 
@@ -1110,14 +1107,14 @@ They are usually:
 * Adjust the system's config to check for libs in the directory where you have
   put the library (like Linux's `/etc/ld.so.conf`)
 
-`man ld.so` and `man ld` will tell you more details
+`man ld.so` and `man ld` tells you more details
 
 ## How does libcurl resolve hostnames?
 
 libcurl supports a large number of name resolve functions. One of them is
-picked at build-time and will be used unconditionally. Thus, if you want to
-change name resolver function you must rebuild libcurl and tell it to use a
-different function.
+picked at build-time and used unconditionally. Thus, if you want to change
+name resolver function you must rebuild libcurl and tell it to use
+a different function.
 
 ### The non-IPv6 resolver
 
@@ -1151,7 +1148,7 @@ set `CURLOPT_WRITEDATA` to a different FILE * handle.
 ## How do I make libcurl not receive the whole HTTP response?
 
 You make the write callback (or progress callback) return an error and libcurl
-will then abort the transfer.
+then aborts the transfer.
 
 ## Can I make libcurl fake or hide my real IP address?
 
@@ -1160,21 +1157,21 @@ imply sending IP packets with a made-up source address, and then you normally
 get a problem with receiving the packet sent back as they would then not be
 routed to you.
 
-If you use a proxy to access remote sites, the sites will not see your local
+If you use a proxy to access remote sites, the sites do not see your local
 IP address but instead the address of the proxy.
 
 Also note that on many networks NATs or other IP-munging techniques are used
 that makes you see and use a different IP address locally than what the remote
-server will see you coming from. You may also consider using
+server is seeing you coming from. You may also consider using
 [Tor](https://www.torproject.org/).
 
 ## How do I stop an ongoing transfer?
 
 With the easy interface you make sure to return the correct error code from
 one of the callbacks, but none of them are instant. There is no function you
-can call from another thread or similar that will stop it immediately.
+can call from another thread or similar that stops it immediately.
 Instead, you need to make sure that one of the callbacks you use returns an
-appropriate value that will stop the transfer. Suitable callbacks that you can
+appropriate value that stops the transfer. Suitable callbacks that you can
 do this with include the progress callback, the read callback and the write
 callback.
 
@@ -1204,7 +1201,7 @@ curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
 
 ## How do I get an FTP directory listing?
 
-If you end the FTP URL you request with a slash, libcurl will provide you with
+If you end the FTP URL you request with a slash, libcurl provides you with
 a directory listing of that given directory. You can also set
 `CURLOPT_CUSTOMREQUEST` to alter what exact listing command libcurl would use
 to list the files.
@@ -1212,7 +1209,7 @@ to list the files.
 The follow-up question tends to be how is a program supposed to parse the
 directory listing. How does it know what's a file and what's a directory and
 what's a symlink etc. If the FTP server supports the `MLSD` command then it
-will return data in a machine-readable format that can be parsed for type. The
+returns data in a machine-readable format that can be parsed for type. The
 types are specified by RFC 3659 section 7.5.1. If `MLSD` is not supported then
 you have to work with what you are given. The `LIST` output format is entirely
 at the server's own liking and the `NLST` output does not reveal any types and
@@ -1259,17 +1256,17 @@ proven for many years. There is no need for you to reinvent them.
 
 ## Does libcurl use threads?
 
-No, libcurl will execute in the same thread you call it in. All
-callbacks will be called in the same thread as the one you call libcurl in.
+No, libcurl executes in the same thread you call it in. All callbacks are
+called in the same thread as the one you call libcurl in.
 
 If you want to avoid your thread to be blocked by the libcurl call, you make
-sure you use the non-blocking multi API which will do transfers
+sure you use the non-blocking multi API which does transfers
 asynchronously - still in the same single thread.
 
-libcurl will potentially internally use threads for name resolving, if it was
-built to work like that, but in those cases it will create the child threads
-by itself and they will only be used and then killed internally by libcurl and
-never exposed to the outside.
+libcurl does potentially internally use threads for name resolving, if it was
+built to work like that, but in those cases it creates the child threads by
+itself and they are only used and then killed internally by libcurl and never
+exposed to the outside.
 
 # License
 
@@ -1385,7 +1382,7 @@ PHP/CURL was initially written by Sterling Hughes.
 Yes.
 
 After a transfer, you set new options in the handle and make another transfer.
-This will make libcurl reuse the same connection if it can.
+This makes libcurl reuse the same connection if it can.
 
 ## Does PHP/CURL have dependencies?
 
@@ -1407,12 +1404,12 @@ long time even necessary to make things work on otherwise considered modern
 platforms such as Windows. Today, we do not really know how many users that
 still require the use of a C89 compiler.
 
-We will continue to use C89 for as long as nobody brings up a strong enough
-reason for us to change our minds. The core developers of the project do not
-feel restricted by this and we are not convinced that going C99 will offer us
-enough of a benefit to warrant the risk of cutting off a share of users.
+We continue to use C89 for as long as nobody brings up a strong enough reason
+for us to change our minds. The core developers of the project do not feel
+restricted by this and we are not convinced that going C99 offers us enough
+of a benefit to warrant the risk of cutting off a share of users.
 
-## Will curl be rewritten?
+## Would curl be rewritten?
 
 In one go: no. Little by little over time? Sure.
 
@@ -1424,7 +1421,7 @@ Some the most important properties in curl are maintaining the API and ABI for
 libcurl and keeping the behavior for the command line tool. As long as we can
 do that, everything else is up for discussion. To maintain the ABI, we
 probably have to maintain a certain amount of code in C, and to remain rock
-stable, we will never risk anything by rewriting a lot of things in one go.
+stable, we never risk anything by rewriting a lot of things in one go.
 That said, we can certainly offer more and more optional backends written in
 other languages, as long as those backends can be plugged in at build-time.
 Backends can be written in any language, but should probably provide APIs
