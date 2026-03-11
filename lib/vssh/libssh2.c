@@ -405,7 +405,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
       rc = CURLKHSTAT_REJECT;
 
     switch(rc) {
-    default: /* unknown return codes will equal reject */
+    default: /* unknown return codes is the same as reject */
     case CURLKHSTAT_REJECT:
       myssh_to(data, sshc, SSH_SESSION_FREE);
       FALLTHROUGH();
@@ -545,8 +545,8 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
       infof(data, "SSH MD5 fingerprint: %s", md5buffer);
     }
 
-    /* This does NOT verify the length of 'pubkey_md5' separately, which will
-       make the comparison below fail unless it is exactly 32 characters */
+    /* This does NOT verify the length of 'pubkey_md5' separately, which
+       makes the comparison below fail unless it is exactly 32 characters */
     if(!fingerprint || !curl_strequal(md5buffer, pubkey_md5)) {
       if(fingerprint) {
         failf(data,
@@ -600,7 +600,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
 }
 
 /*
- * ssh_force_knownhost_key_type() will check the known hosts file and try to
+ * ssh_force_knownhost_key_type() checks the known hosts file and try to
  * force a specific public key type from the server if an entry is found.
  */
 static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
@@ -624,7 +624,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
     struct connectdata *conn = data->conn;
     /* lets try to find our host in the known hosts file */
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
-      /* For non-standard ports, the name will be enclosed in */
+      /* For non-standard ports, the name is enclosed in */
       /* square brackets, followed by a colon and the port */
       if(store) {
         if(store->name) {
@@ -741,8 +741,8 @@ static CURLcode sftp_quote(struct Curl_easy *data,
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never
-     can, the command will be allowed to fail without it causing any
-     aborts or cancels etc. It will cause libcurl to act as if the command
+     can, the command is allowed to fail without it causing any
+     aborts or cancels etc. It causes libcurl to act as if the command
      is successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
@@ -894,7 +894,7 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
   /*
    * NOTE!!!  libssh2 requires that the destination path is a full path
    *          that includes the destination file and name OR ends in a "/"
-   *          If this is not done the destination file will be named the
+   *          If this is not done the destination file is named the
    *          same name as the last directory in the path.
    */
 
@@ -1169,8 +1169,8 @@ static CURLcode sftp_quote_stat(struct Curl_easy *data,
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never
-     can, the command will be allowed to fail without it causing any aborts or
-     cancels etc. It will cause libcurl to act as if the command is
+     can, the command is allowed to fail without it causing any aborts or
+     cancels etc. It causes libcurl to act as if the command is
      successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
@@ -1296,7 +1296,7 @@ static CURLcode sftp_download_stat(struct Curl_easy *data,
     data->req.size = -1;
     data->req.maxdownload = -1;
     Curl_pgrsSetDownloadSize(data, -1);
-    attrs.filesize = 0; /* might be uninitialized but will be read below */
+    attrs.filesize = 0; /* might be uninitialized but is read below */
   }
   else {
     curl_off_t size = attrs.filesize;
@@ -1489,7 +1489,7 @@ static CURLcode ssh_state_authlist(struct Curl_easy *data,
    * must never change it later. Thus, always specify the correct username
    * here, even though the libssh2 docs kind of indicate that it should be
    * possible to get a 'generic' list (not user-specific) of authentication
-   * methods, presumably with a blank username. That will not work in my
+   * methods, presumably with a blank username. That does not work in my
    * experience.
    * Therefore always specify it here.
    */
@@ -1835,8 +1835,7 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
 
   /* This is the last step in the SFTP connect phase. Do note that while we
      get the homedir here, we get the "workingpath" in the DO action since the
-     homedir will remain the same between request but the working path will
-     not. */
+     homedir remains the same between request but the working path does not. */
   CURL_TRC_SSH(data, "CONNECT phase done");
   return CURLE_OK;
 }
@@ -2235,7 +2234,7 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
   curl_off_t bytecount;
 
   /*
-   * We must check the remote file; if it is a directory no values will
+   * We must check the remote file; if it is a directory no values are
    * be set in sb
    */
 
@@ -2380,7 +2379,7 @@ static CURLcode ssh_state_scp_upload_init(struct Curl_easy *data,
   /*
    * libssh2 requires that the destination path is a full path that
    * includes the destination file and name OR ends in a "/" . If this is
-   * not done the destination file will be named the same name as the last
+   * not done the destination file is named the same name as the last
    * directory in the path.
    */
   sshc->ssh_channel =
@@ -2560,7 +2559,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
 /*
  * ssh_statemachine() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
- * to will be set to TRUE if the libssh2 function returns LIBSSH2_ERROR_EAGAIN
+ * to is set to TRUE if the libssh2 function returns LIBSSH2_ERROR_EAGAIN
  * meaning it wants to be called again when the socket is ready
  */
 static CURLcode ssh_statemachine(struct Curl_easy *data,

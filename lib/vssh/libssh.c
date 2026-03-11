@@ -1306,8 +1306,8 @@ static int myssh_in_SFTP_REALPATH(struct Curl_easy *data,
 
   /* This is the last step in the SFTP connect phase. Do note that while
      we get the homedir here, we get the "workingpath" in the DO action
-     since the homedir will remain the same between request but the
-     working path will not. */
+     since the homedir remains the same between request but the
+     working path does not. */
   CURL_TRC_SSH(data, "CONNECT phase done");
   myssh_to(data, sshc, SSH_STOP);
   return SSH_NO_ERROR;
@@ -1372,8 +1372,8 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never
-     can, the command will be allowed to fail without it causing any
-     aborts or cancels etc. It will cause libcurl to act as if the command
+     can, the command is allowed to fail without it causing any
+     aborts or cancels etc. It causes libcurl to act as if the command
      is successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
@@ -1583,8 +1583,8 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never
-     can, the command will be allowed to fail without it causing any
-     aborts or cancels etc. It will cause libcurl to act as if the command
+     can, the command is allowed to fail without it causing any
+     aborts or cancels etc. It causes libcurl to act as if the command
      is successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
@@ -1844,7 +1844,7 @@ static void sshc_cleanup(struct ssh_conn *sshc)
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
- * to will be set to TRUE if the libssh function returns SSH_AGAIN
+ * to is set to TRUE if the libssh function returns SSH_AGAIN
  * meaning it wants to be called again when the socket is ready
  */
 static CURLcode myssh_statemach_act(struct Curl_easy *data,
@@ -2637,7 +2637,7 @@ static CURLcode scp_send(struct Curl_easy *data, int sockindex,
 
 #if 0
   /* The following code is misleading, mostly added as wishful thinking
-   * that libssh at some point will implement non-blocking ssh_scp_write/read.
+   * that libssh at some point would implement non-blocking ssh_scp_write/read.
    * Currently rc can only be number of bytes read or SSH_ERROR. */
   myssh_block2waitfor(conn, sshc, (rc == SSH_AGAIN));
 
@@ -2671,7 +2671,7 @@ static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
     return CURLE_SSH;
 #if 0
   /* The following code is misleading, mostly added as wishful thinking
-   * that libssh at some point will implement non-blocking ssh_scp_write/read.
+   * that libssh at some point would implement non-blocking ssh_scp_write/read.
    * Currently rc can only be SSH_OK or SSH_ERROR. */
 
   myssh_block2waitfor(conn, sshc, (nread == SSH_AGAIN));
