@@ -78,7 +78,7 @@ int _CRT_glob = 0;
  * Ensure that file descriptors 0, 1 and 2 (stdin, stdout, stderr) are
  * open before starting to run. Otherwise, the first three network
  * sockets opened by curl could be used for input sources, downloaded data
- * or error logs as they will effectively be stdin, stdout and/or stderr.
+ * or error logs as they are effectively stdin, stdout and/or stderr.
  *
  * fcntl's F_GETFD instruction returns -1 if the file descriptor is closed,
  * otherwise it returns "the file descriptor flags (which typically can only
@@ -111,7 +111,7 @@ static void memory_tracking_init(void)
     curl_free(env);
     curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called before
-       curl_dbg_memdebug() as otherwise memory tracking will log a curlx_free()
+       curl_dbg_memdebug() as otherwise memory tracking logs a curlx_free()
        without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */

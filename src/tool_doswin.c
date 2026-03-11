@@ -65,7 +65,7 @@ char **__crt0_glob_function(char *arg)
 #endif
 
 /*
- * Test if truncating a path to a file will leave at least a single character
+ * Test if truncating a path to a file leaves at least a single character
  * in the filename. Filenames suffixed by an alternate data stream cannot be
  * truncated. This performs a dry run, nothing is modified.
  *
@@ -599,7 +599,7 @@ struct curl_slist *GetLoadedModulePaths(void)
 
 #ifdef UNICODE
     /* sizeof(mod.szExePath) is the max total bytes of wchars. the max total
-       bytes of multibyte chars will not be more than twice that. */
+       bytes of multibyte chars is not more than twice that. */
     char buffer[sizeof(mod.szExePath) * 2];
     if(!WideCharToMultiByte(CP_ACP, 0, mod.szExePath, -1,
                             buffer, sizeof(buffer), NULL, NULL))
@@ -783,8 +783,8 @@ curl_socket_t win32_stdin_read_thread(void)
       errorf("curlx_calloc() error");
       break;
     }
-    /* Create the listening socket for the thread. When it starts, it will
-    * accept our connection and begin writing STDIN data to the connection. */
+    /* Create the listening socket for the thread. When it starts, it accepts
+     * our connection and begin writing STDIN data to the connection. */
     tdata->socket_l = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(tdata->socket_l == CURL_SOCKET_BAD) {
       errorf("socket() error: %d", SOCKERRNO);
@@ -822,7 +822,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
     /* Start up the thread. We do not bother keeping a reference to it
        because it runs until program termination. From here on out all reads
-       from the stdin handle or file descriptor 0 will be reading from the
+       from the stdin handle or file descriptor 0 is reading from the
        socket that is fed by the thread. */
     stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
                                 tdata, 0, NULL);

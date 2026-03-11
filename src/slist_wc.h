@@ -38,7 +38,7 @@ struct slist_wc {
  *
  * DESCRIPTION
  *
- * Appends a string to a linked list. If no list exists, it will be created
+ * Appends a string to a linked list. If no list exists, it is created
  * first. Returns the new list, after appending.
  */
 struct slist_wc *slist_wc_append(struct slist_wc *list, const char *data);

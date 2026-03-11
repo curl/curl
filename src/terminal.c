@@ -37,7 +37,7 @@
 
 /*
  * get_terminal_columns() returns the number of columns in the current
- * terminal. It will return 79 on failure. Also, the number can be big.
+ * terminal. It returns 79 on failure. Also, the number can be big.
  */
 unsigned int get_terminal_columns(void)
 {
@@ -71,7 +71,7 @@ unsigned int get_terminal_columns(void)
          GetConsoleScreenBufferInfo(stderr_hnd, &console_info)) {
         /*
          * Do not use +1 to get the true screen-width since writing a
-         * character at the right edge will cause a line wrap.
+         * character at the right edge causes a line wrap.
          */
         cols = (int)(console_info.srWindow.Right - console_info.srWindow.Left);
       }

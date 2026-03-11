@@ -11,4 +11,3 @@ include/curl/::will
 lib/::will
 lib/::Will
 lib/::WILL
-src/::will

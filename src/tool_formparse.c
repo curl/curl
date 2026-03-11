@@ -690,14 +690,14 @@ static int get_param_part(char endchar,
  * 'name=foo;headers=@headerfile' or why not
  * 'name=@filemame;headers=@headerfile'
  *
- * To upload a file, but to fake the filename that will be included in the
+ * To upload a file, but to fake the filename that is included in the
  * formpost, do like this:
  *
  * 'name=@filename;filename=/dev/null' or quote the faked filename like:
  * 'name=@filename;filename="play, play, and play.txt"'
  *
  * If filename/path contains ',' or ';', it must be quoted by double-quotes,
- * else curl will fail to figure out the correct filename. if the filename
+ * else curl fails to figure out the correct filename. if the filename
  * tobe quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
  *
  ***************************************************************************/
@@ -716,8 +716,8 @@ int formparse(const char *input,
               struct tool_mime **mimecurrent,
               bool literal_value)
 {
-  /* input MUST be a string in the format 'name=contents' and we will
-     build a linked list with the info */
+  /* input MUST be a string in the format 'name=contents' and we build
+     a linked list with the info */
   char *name = NULL;
   char *contents = NULL;
   char *contp;
