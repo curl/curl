@@ -1449,7 +1449,11 @@ bool Curl_compareheader(const char *headerline, /* line to check */
       if(curlx_str_until(&p, &next, MAX_HTTP_RESP_HEADER_SIZE, ',') ||
          curlx_str_single(&p, ','))
         break; /* no comma, get out */
-      curlx_str_passblanks(&p);
+
+      /* if there are more dummy commas, move over them as well */
+      do
+        curlx_str_passblanks(&p);
+      while(!curlx_str_single(&p, ','));
       len -= (p - o);
     }
   }
