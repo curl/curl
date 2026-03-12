@@ -132,7 +132,7 @@ static void memory_tracking_init(void)
 ** curl tool main function.
 */
 #ifdef _UNICODE
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
 /* GCC does not know about wmain() */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 }
 
 #ifdef _UNICODE
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 #endif
