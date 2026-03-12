@@ -34,7 +34,7 @@
  * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
  * may change the sign of the result [-Wsign-conversion]
  */
-#ifdef __GNUC__
+#ifdef __GNUC__  /* keep outside functions and without push/pop for GCC <4.6 */
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #elif defined(_MSC_VER)
 #pragma warning(disable:4127)  /* conditional expression is constant */
