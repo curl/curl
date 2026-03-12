@@ -2853,6 +2853,7 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
 
 #ifdef USE_WIN32_CRYPTO
 static CURLcode ossl_win_load_store(struct Curl_easy *data,
+                                    struct Curl_cfilter *cf,
                                     const char *win_store,
                                     X509_STORE *store,
                                     bool *padded)
@@ -2870,6 +2871,8 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
        iteration we can grow it with realloc, when necessary. */
     CERT_ENHKEY_USAGE *enhkey_usage = NULL;
     DWORD enhkey_usage_size = 0;
+    VERBOSE(size_t total = 0);
+    VERBOSE(size_t imported = 0);
 
     /* This loop makes a best effort to import all valid certificates from
        the MS root store. If a certificate cannot be imported it is
@@ -2886,8 +2889,10 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
       if(!pContext)
         break;
 
+      VERBOSE(++total);
+
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-      else {
+      {
         char cert_name[256];
         if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
                                NULL, cert_name, sizeof(cert_name)))
@@ -2975,6 +2980,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
          such as duplicate certificate, which is allowed by MS but not
          OpenSSL. */
       if(X509_STORE_add_cert(store, x509) == 1) {
+        VERBOSE(++imported);
 #ifdef DEBUGBUILD
         infof(data, "SSL: Imported cert");
 #endif
@@ -2986,6 +2992,10 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
     curlx_free(enhkey_usage);
     CertFreeCertificateContext(pContext);
     CertCloseStore(hStore, 0);
+
+    CURL_TRC_CF(data, cf,
+                "ossl_win_load_store() found: %zu imported: %zu certs in %s.",
+                total, imported, win_store);
 
     if(result)
       return result;
@@ -3014,7 +3024,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
   *padded = FALSE;
   for(i = 0; i < CURL_ARRAYSIZE(win_stores); ++i) {
     bool store_added = FALSE;
-    result = ossl_win_load_store(data, win_stores[i], store, &store_added);
+    result = ossl_win_load_store(data, cf, win_stores[i], store, &store_added);
     if(result)
       return result;
     if(store_added) {
