@@ -2994,8 +2994,8 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
     CertCloseStore(hStore, 0);
 
     CURL_TRC_CF(data, cf,
-                "ossl_win_load_store() found: %zu imported: %zu certs.",
-                total, imported);
+                "ossl_win_load_store() found: %zu imported: %zu certs in %s.",
+                total, imported, win_store);
 
     if(result)
       return result;
