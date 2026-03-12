@@ -493,41 +493,6 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON'
             type: 'Release'
             tflags: 'skiprun'
-          - name: 'schannel'
-            env: '8.5.0-x86_64'
-            dir: 'mingw64'
-            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/8.5.0-9.0.0-r1/winlibs-x86_64-posix-seh-gcc-8.5.0-mingw-w64-9.0.0-r1.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Release'
-            tflags: 'skiprun'
-          - name: 'schannel'
-            env: '8.4.1-x86_64'
-            dir: 'mingw64'
-            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/8.4.1-snapshot20210401-r1/winlibs-x86_64-posix-seh-gcc-8.4.1-snapshot20210401-mingw-w64-8.0.0-r1.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Release'
-            tflags: 'skiprun'
-          - name: 'schannel'
-            env: '8.4.0-x86_64'
-            dir: 'mingw64'
-            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/8.4.0-7.0.0-r1/mingw-w64-x86_64-8.4.0-7.0.0-r1.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Release'
-            tflags: 'skiprun'
-          - name: 'schannel U'
-            env: '8.1.0-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-win32/seh/x86_64-8.1.0-release-win32-seh-rt_v6-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
-            type: 'Release'
-            tflags: 'skiprun'
-          - name: 'schannel U'
-            env: '8.1.0-x86_64-posix'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
-            type: 'Release'
-            tflags: 'skiprun'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0
             sys: 'mingw64'
             dir: 'mingw64'
@@ -548,14 +513,6 @@ jobs:
             SHA256: 12d2c62ad4527ec8a52275ea8485678dcbe20bec4716a3c7ba274f225d696085
             config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             type: 'Debug'
-            tflags: 'skiprun'
-          - name: 'schannel'  # mingw-w64 5.0
-            dir: 'mingw64'
-            env: 'x86_64'
-            ver: '5.1.0'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/5.1.0/threads-win32/seh/x86_64-5.1.0-release-win32-seh-rt_v4-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -D_CURL_SKIP_BUILD_CERTS=ON'
-            type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel !examples'  # mingw-w64 3.0
             sys: 'mingw64'
@@ -601,7 +558,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             --location --proto-redir =https "${MATRIX_URL}" --output pkg.bin
           pwd
-          7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l
+          sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${MATRIX_SHA256}" && 7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

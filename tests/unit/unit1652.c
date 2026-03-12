@@ -90,6 +90,7 @@ static CURLcode test_unit1652(const char *arg)
 
 #ifdef CURL_GNUC_DIAG
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"  /* for GCC v5 to v8 */
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
 #if __GNUC__ >= 7
 #pragma GCC diagnostic ignored "-Wformat-overflow"
