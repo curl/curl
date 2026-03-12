@@ -3057,7 +3057,8 @@ ParameterError parse_args(int argc, argv_item_t argv[])
   ParameterError err = PARAM_OK;
   struct OperationConfig *config = global->first;
 
-  for(i = 1, stillflags = TRUE; i < argc && !err; i++) {
+  stillflags = TRUE;
+  for(i = 1; i < argc && !err; i++) {
     orig_opt = convert_tchar_to_UTF8(argv[i]);
     if(!orig_opt)
       return PARAM_NO_MEM;
