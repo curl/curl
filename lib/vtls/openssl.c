@@ -2901,7 +2901,6 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
           infof(data, "SSL: Checking cert \"%s\"", cert_name);
       }
 #endif
-
       encoded_cert = (const unsigned char *)pContext->pbCertEncoded;
       if(!encoded_cert)
         continue;
