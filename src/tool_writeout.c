@@ -580,7 +580,7 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     if(!result) {
       struct tm utc;
       result = curlx_gmtime(secs, &utc);
-#ifdef __GNUC__  /* include llvm/clang though not affected as of v22 */
+#ifdef __GNUC__  /* include llvm/clang though not affected as of v22.1.0 */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
