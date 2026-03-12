@@ -88,7 +88,7 @@ static CURLcode test_unit1652(const char *arg)
 
   UNITTEST_BEGIN(t1652_setup(&easy))
 
-#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
+#ifdef CURL_GNUC_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
