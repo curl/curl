@@ -88,7 +88,7 @@ static CURLcode test_unit1652(const char *arg)
 
   UNITTEST_BEGIN(t1652_setup(&easy))
 
-#ifdef CURL_GNUC_DIAG
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"  /* for GCC v5 to v8 */
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
@@ -157,7 +157,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 3");
 
-#ifdef CURL_GNUC_DIAG
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

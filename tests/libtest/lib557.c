@@ -33,7 +33,7 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
@@ -1542,6 +1542,6 @@ static CURLcode test_lib557(const char *URL)
     return CURLE_OK;
 }
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif

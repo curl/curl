@@ -210,13 +210,13 @@ if2ip_result_t Curl_if2ip(int af,
   memcpy(req.ifr_name, interf, len + 1);
   req.ifr_addr.sa_family = AF_INET;
 
-#if defined(__GNUC__) && defined(_AIX)
+#if defined(CURL_HAVE_DIAG) && defined(_AIX)
 /* Suppress warning inside system headers */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-sign-overflow"
 #endif
   if(ioctl(dummy, SIOCGIFADDR, &req) < 0) {
-#if defined(__GNUC__) && defined(_AIX)
+#if defined(CURL_HAVE_DIAG) && defined(_AIX)
 #pragma GCC diagnostic pop
 #endif
     sclose(dummy);
