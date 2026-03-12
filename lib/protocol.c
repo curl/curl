@@ -46,7 +46,7 @@
 #include "vssh/ssh.h"
 
 
-/* All url schems known to libcurl, but not necessarily implemented
+/* All url schemes known to libcurl, but not necessarily implemented
  * by protocol handlers. */
 const struct Curl_scheme Curl_scheme_dict = {
   "dict",                               /* scheme */
