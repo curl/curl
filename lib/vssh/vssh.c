@@ -331,34 +331,3 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
 }
 
 #endif /* USE_SSH */
-
-/*
- * SFTP protocol handler.
- */
-const struct Curl_scheme Curl_scheme_sftp = {
-  "SFTP",                               /* scheme */
-#ifndef USE_SSH
-  NULL,
-#else
-  &Curl_protocol_sftp,
-#endif
-  CURLPROTO_SFTP,                       /* protocol */
-  CURLPROTO_SFTP,                       /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE,
-  PORT_SSH                              /* defport */
-};
-
-const struct Curl_scheme Curl_scheme_scp = {
-  "SCP",                                /* scheme */
-#ifndef USE_SSH
-  NULL,
-#else
-  &Curl_protocol_scp,
-#endif
-  CURLPROTO_SCP,                        /* protocol */
-  CURLPROTO_SCP,                        /* family */
-  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE,
-  PORT_SSH,                             /* defport */
-};

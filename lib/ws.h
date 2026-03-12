@@ -25,10 +25,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-extern const struct Curl_scheme Curl_scheme_ws;
-extern const struct Curl_scheme Curl_scheme_wss;
-
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+
+extern const struct Curl_protocol Curl_protocol_ws;
 
 /* meta key for storing protocol meta at connection */
 #define CURL_META_PROTO_WS_CONN   "meta:proto:ws:conn"

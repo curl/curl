@@ -23,7 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-extern const struct Curl_scheme Curl_scheme_smtp;
-extern const struct Curl_scheme Curl_scheme_smtps;
+#ifndef CURL_DISABLE_SMTP
+extern const struct Curl_protocol Curl_protocol_smtp;
+#endif
 
 #endif /* HEADER_CURL_SMTP_H */

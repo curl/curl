@@ -4456,7 +4456,7 @@ bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
 /*
  * FTP protocol.
  */
-static const struct Curl_protocol Curl_protocol_ftp = {
+const struct Curl_protocol Curl_protocol_ftp = {
   ftp_setup_connection,            /* setup_connection */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
@@ -4477,40 +4477,3 @@ static const struct Curl_protocol Curl_protocol_ftp = {
 };
 
 #endif /* CURL_DISABLE_FTP */
-
-/*
- * FTP protocol handler.
- */
-const struct Curl_scheme Curl_scheme_ftp = {
-  "ftp",                           /* scheme */
-#ifdef CURL_DISABLE_FTP
-  ZERO_NULL,
-#else
-  &Curl_protocol_ftp,
-#endif
-  CURLPROTO_FTP,                   /* protocol */
-  CURLPROTO_FTP,                   /* family */
-  PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
-  PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP |
-  PROTOPT_WILDCARD | PROTOPT_SSL_REUSE |
-  PROTOPT_CONN_REUSE, /* flags */
-  PORT_FTP,                        /* defport */
-};
-
-/*
- * FTPS protocol handler.
- */
-const struct Curl_scheme Curl_scheme_ftps = {
-  "ftps",                          /* scheme */
-#if defined(CURL_DISABLE_FTP) || !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_ftp,
-#endif
-  CURLPROTO_FTPS,                  /* protocol */
-  CURLPROTO_FTP,                   /* family */
-  PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
-  PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY | PROTOPT_WILDCARD |
-  PROTOPT_CONN_REUSE, /* flags */
-  PORT_FTPS,                       /* defport */
-};

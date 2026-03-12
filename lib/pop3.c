@@ -1692,7 +1692,7 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
 /*
  * POP3 protocol.
  */
-static const struct Curl_protocol Curl_protocol_pop3 = {
+const struct Curl_protocol Curl_protocol_pop3 = {
   pop3_setup_connection,            /* setup_connection */
   pop3_do,                          /* do_it */
   pop3_done,                        /* done */
@@ -1713,37 +1713,3 @@ static const struct Curl_protocol Curl_protocol_pop3 = {
 };
 
 #endif /* CURL_DISABLE_POP3 */
-
-/*
- * POP3 protocol handler.
- */
-const struct Curl_scheme Curl_scheme_pop3 = {
-  "pop3",                           /* scheme */
-#ifdef CURL_DISABLE_POP3
-  ZERO_NULL,
-#else
-  &Curl_protocol_pop3,
-#endif
-  CURLPROTO_POP3,                   /* protocol */
-  CURLPROTO_POP3,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE,
-  PORT_POP3,                        /* defport */
-};
-
-/*
- * POP3S protocol handler.
- */
-const struct Curl_scheme Curl_scheme_pop3s = {
-  "pop3s",                          /* scheme */
-#if defined(CURL_DISABLE_POP3) || !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_pop3,
-#endif
-  CURLPROTO_POP3S,                  /* protocol */
-  CURLPROTO_POP3,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE,
-  PORT_POP3S,                       /* defport */
-};

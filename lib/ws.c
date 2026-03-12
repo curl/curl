@@ -1915,7 +1915,7 @@ out:
   return result;
 }
 
-static const struct Curl_protocol Curl_protocol_ws = {
+const struct Curl_protocol Curl_protocol_ws = {
   ws_setup_conn,                        /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
@@ -1980,32 +1980,3 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
 }
 
 #endif /* !CURL_DISABLE_WEBSOCKETS */
-
-const struct Curl_scheme Curl_scheme_ws = {
-  "WS",                                 /* scheme */
-#ifdef CURL_DISABLE_WEBSOCKETS
-  ZERO_NULL,
-#else
-  &Curl_protocol_ws,
-#endif
-  CURLPROTO_WS,                         /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_CREDSPERREQUEST |             /* flags */
-  PROTOPT_USERPWDCTRL,
-  PORT_HTTP                             /* defport */
-}
-;
-
-const struct Curl_scheme Curl_scheme_wss = {
-  "WSS",                                /* scheme */
-#if defined(CURL_DISABLE_WEBSOCKETS) || !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_ws,
-#endif
-  CURLPROTO_WSS,                        /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
-  PROTOPT_USERPWDCTRL,
-  PORT_HTTPS                            /* defport */
-};

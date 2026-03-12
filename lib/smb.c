@@ -1208,7 +1208,7 @@ static CURLcode smb_do(struct Curl_easy *data, bool *done)
 /*
  * SMB handler interface
  */
-static const struct Curl_protocol Curl_protocol_smb = {
+const struct Curl_protocol Curl_protocol_smb = {
   smb_setup_connection,                 /* setup_connection */
   smb_do,                               /* do_it */
   ZERO_NULL,                            /* done */
@@ -1229,36 +1229,3 @@ static const struct Curl_protocol Curl_protocol_smb = {
 };
 
 #endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */
-
-/*
- * SMB handler interface
- */
-const struct Curl_scheme Curl_scheme_smb = {
-  "smb",                                /* scheme */
-#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE)
-  ZERO_NULL,
-#else
-  &Curl_protocol_smb,
-#endif
-  CURLPROTO_SMB,                        /* protocol */
-  CURLPROTO_SMB,                        /* family */
-  PROTOPT_CONN_REUSE,                   /* flags */
-  PORT_SMB,                             /* defport */
-};
-
-/*
- * SMBS handler interface
- */
-const struct Curl_scheme Curl_scheme_smbs = {
-  "smbs",                               /* scheme */
-#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE) || \
-  !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_smb,
-#endif
-  CURLPROTO_SMBS,                       /* protocol */
-  CURLPROTO_SMB,                        /* family */
-  PROTOPT_SSL | PROTOPT_CONN_REUSE,     /* flags */
-  PORT_SMBS,                            /* defport */
-};

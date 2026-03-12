@@ -598,7 +598,7 @@ out:
   return result;
 }
 
-static const struct Curl_protocol Curl_protocol_file = {
+const struct Curl_protocol Curl_protocol_file = {
   file_setup_connection,                /* setup_connection */
   file_do,                              /* do_it */
   file_done,                            /* done */
@@ -619,19 +619,3 @@ static const struct Curl_protocol Curl_protocol_file = {
 };
 
 #endif
-
-/*
- * FILE scheme handler.
- */
-const struct Curl_scheme Curl_scheme_file = {
-  "file",                               /* scheme */
-#ifdef CURL_DISABLE_FILE
-  ZERO_NULL,
-#else
-  &Curl_protocol_file,
-#endif
-  CURLPROTO_FILE,                       /* protocol */
-  CURLPROTO_FILE,                       /* family */
-  PROTOPT_NONETWORK | PROTOPT_NOURLQUERY, /* flags */
-  0                                     /* defport */
-};

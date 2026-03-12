@@ -4999,7 +4999,7 @@ void Curl_http_resp_free(struct http_resp *resp)
 /*
  * HTTP handler interface.
  */
-static const struct Curl_protocol Curl_protocol_http = {
+const struct Curl_protocol Curl_protocol_http = {
   Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
@@ -5020,37 +5020,3 @@ static const struct Curl_protocol Curl_protocol_http = {
 };
 
 #endif /* CURL_DISABLE_HTTP */
-
-/*
- * HTTP handler interface.
- */
-const struct Curl_scheme Curl_scheme_http = {
-  "http",                               /* scheme */
-#ifdef CURL_DISABLE_HTTP
-  ZERO_NULL,
-#else
-  &Curl_protocol_http,
-#endif
-  CURLPROTO_HTTP,                       /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_CREDSPERREQUEST |             /* flags */
-  PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE,
-  PORT_HTTP,                            /* defport */
-};
-
-/*
- * HTTPS handler interface.
- */
-const struct Curl_scheme Curl_scheme_https = {
-  "https",                              /* scheme */
-#if defined(CURL_DISABLE_HTTP) || !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_http,
-#endif
-  CURLPROTO_HTTPS,                      /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
-  PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE,
-  PORT_HTTPS,                           /* defport */
-};

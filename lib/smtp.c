@@ -1984,7 +1984,7 @@ out:
 /*
  * SMTP protocol handler.
  */
-static const struct Curl_protocol Curl_protocol_smtp = {
+const struct Curl_protocol Curl_protocol_smtp = {
   smtp_setup_connection,            /* setup_connection */
   smtp_do,                          /* do_it */
   smtp_done,                        /* done */
@@ -2005,37 +2005,3 @@ static const struct Curl_protocol Curl_protocol_smtp = {
 };
 
 #endif /* CURL_DISABLE_SMTP */
-
-/*
- * SMTP protocol handler.
- */
-const struct Curl_scheme Curl_scheme_smtp = {
-  "smtp",                           /* scheme */
-#ifdef CURL_DISABLE_SMTP
-  ZERO_NULL,
-#else
-  &Curl_protocol_smtp,
-#endif
-  CURLPROTO_SMTP,                   /* protocol */
-  CURLPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE,
-  PORT_SMTP,                        /* defport */
-};
-
-/*
- * SMTPS protocol handler.
- */
-const struct Curl_scheme Curl_scheme_smtps = {
-  "smtps",                          /* scheme */
-#if defined(CURL_DISABLE_SMTP) || !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_smtp,
-#endif
-  CURLPROTO_SMTPS,                  /* protocol */
-  CURLPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE,
-  PORT_SMTPS,                       /* defport */
-};

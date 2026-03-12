@@ -1001,35 +1001,3 @@ const struct Curl_protocol Curl_protocol_ldap = {
 #endif
 
 #endif /* !CURL_DISABLE_LDAP && !USE_OPENLDAP */
-
-/*
- * LDAP
- */
-const struct Curl_scheme Curl_scheme_ldap = {
-  "ldap",                               /* scheme */
-#ifdef CURL_DISABLE_LDAP
-  ZERO_NULL,
-#else
-  &Curl_protocol_ldap,
-#endif
-  CURLPROTO_LDAP,                       /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL_REUSE,                    /* flags */
-  PORT_LDAP,                            /* defport */
-};
-
-/*
- * LDAPS
- */
-const struct Curl_scheme Curl_scheme_ldaps = {
-  "ldaps",                              /* scheme */
-#if defined(CURL_DISABLE_LDAP) || !defined(HAVE_LDAP_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_ldap,
-#endif
-  CURLPROTO_LDAPS,                      /* protocol */
-  CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL,                          /* flags */
-  PORT_LDAPS,                           /* defport */
-};

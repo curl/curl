@@ -1332,7 +1332,7 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
 /*
  * TFTP protocol handler.
  */
-static const struct Curl_protocol Curl_protocol_tftp = {
+const struct Curl_protocol Curl_protocol_tftp = {
   tftp_setup_connection,                /* setup_connection */
   tftp_do,                              /* do_it */
   tftp_done,                            /* done */
@@ -1353,19 +1353,3 @@ static const struct Curl_protocol Curl_protocol_tftp = {
 };
 
 #endif
-
-/*
- * TFTP protocol handler.
- */
-const struct Curl_scheme Curl_scheme_tftp = {
-  "tftp",                               /* scheme */
-#ifdef CURL_DISABLE_TFTP
-  ZERO_NULL,
-#else
-  &Curl_protocol_tftp,
-#endif
-  CURLPROTO_TFTP,                       /* protocol */
-  CURLPROTO_TFTP,                       /* family */
-  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY, /* flags */
-  PORT_TFTP,                            /* defport */
-};

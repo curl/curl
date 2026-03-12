@@ -23,7 +23,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-extern const struct Curl_scheme Curl_scheme_gopher;
-extern const struct Curl_scheme Curl_scheme_gophers;
+#ifndef CURL_DISABLE_GOPHER
+extern const struct Curl_protocol Curl_protocol_gopher;
+extern const struct Curl_protocol Curl_protocol_gophers;
+#endif
 
 #endif /* HEADER_CURL_GOPHER_H */
