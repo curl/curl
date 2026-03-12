@@ -683,10 +683,6 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   memset(&sa6, 0, sizeof(sa6));
   sa6.sin6_family = AF_INET6;
   sa6.sin6_port = htons(port16);
-  sa6.sin6_flowinfo = 0;
-#ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-  sa6.sin6_scope_id = 0;
-#endif
 
   (void)curlx_inet_pton(AF_INET6, "::1", ipv6);
   memcpy(&sa6.sin6_addr, ipv6, sizeof(ipv6));
