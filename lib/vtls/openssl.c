@@ -2853,6 +2853,7 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
 
 #ifdef USE_WIN32_CRYPTO
 static CURLcode ossl_win_load_store(struct Curl_easy *data,
+                                    struct Curl_cfilter *cf,
                                     const char *win_store,
                                     X509_STORE *store,
                                     bool *padded)
@@ -2870,7 +2871,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
        iteration we can grow it with realloc, when necessary. */
     CERT_ENHKEY_USAGE *enhkey_usage = NULL;
     DWORD enhkey_usage_size = 0;
-    VERBOSE(size_t found = 0);
+    VERBOSE(size_t total = 0);
     VERBOSE(size_t imported = 0);
 
     /* This loop makes a best effort to import all valid certificates from
@@ -2888,6 +2889,8 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
       if(!pContext)
         break;
 
+      VERBOSE(++total);
+
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
       {
         char cert_name[256];
@@ -2898,8 +2901,6 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
           infof(data, "SSL: Checking cert \"%s\"", cert_name);
       }
 #endif
-
-      VERBOSE(++found);
 
       encoded_cert = (const unsigned char *)pContext->pbCertEncoded;
       if(!encoded_cert)
@@ -2995,7 +2996,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
 
     CURL_TRC_CF(data, cf,
                 "ossl_win_load_store() found: %zu imported: %zu certs.",
-                blen, result, nread);
+                total, imported);
 
     if(result)
       return result;
@@ -3024,7 +3025,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
   *padded = FALSE;
   for(i = 0; i < CURL_ARRAYSIZE(win_stores); ++i) {
     bool store_added = FALSE;
-    result = ossl_win_load_store(data, win_stores[i], store, &store_added);
+    result = ossl_win_load_store(data, cf, win_stores[i], store, &store_added);
     if(result)
       return result;
     if(store_added) {
