@@ -4,15 +4,28 @@ curl and libcurl 8.19.1
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3619
+ Contributors:                 3624
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
- o docs: minor wording tweaks
+ o autotools: limit checksrc target to ignore non-repo test sources [12]
  o badwords: combine the whitelisting into a single regex [1]
+ o badwords: rework exceptions, fix many of them [15]
+ o build: compiler warning silencing tidy-ups [4]
+ o configure: fix LibreSSL ngtcp2 1.15.0+ crypto lib selection logic [3]
+ o docs: minor wording tweaks
+ o examples: drop warning silencers no longer hit [14]
+ o hostip: clear the sockaddr_in6 structure before use [20]
+ o HTTP3.md: drop outdated mentions of OpenSSL-QUIC [2]
+ o http: fix Curl_compareheader for multi value headers [11]
+ o http: make Curl_compareheader handle multiple commas in header
+ o libssh2: fix error handling on quote errors [21]
+ o openssl: trace count of found / imported Windows native CA roots [8]
+ o test459: switch to mode="warn" for stderr check [5]
+ o urlapi: verify the last letter of a scheme when set explictly [16]
 
 This release includes the following known bugs:
 
@@ -36,9 +49,23 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg
-  (1 contributors)
+  Carlos Henrique Lima Melara, Daniel Stenberg, Henrique Pereira,
+  m777m0 on hackerone, Michael Hendricks, Orgad Shaneh, Otis Cui Lei,
+  Stefan Eissing, Viktor Szakats, Vladimír Marek
+  (10 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=20880
+ [2] = https://curl.se/bug/?i=20914
+ [3] = https://curl.se/bug/?i=20889
+ [4] = https://curl.se/bug/?i=20908
+ [5] = https://curl.se/bug/?i=20910
+ [8] = https://curl.se/bug/?i=20899
+ [11] = https://curl.se/bug/?i=20894
+ [12] = https://curl.se/bug/?i=20898
+ [14] = https://curl.se/bug/?i=20896
+ [15] = https://curl.se/bug/?i=20886
+ [16] = https://curl.se/bug/?i=20893
+ [20] = https://curl.se/bug/?i=20885
+ [21] = https://curl.se/bug/?i=20883
