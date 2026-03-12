@@ -8,7 +8,7 @@
 Checks:
   - clang-analyzer-*
   - -clang-analyzer-optin.performance.Padding
-  - -clang-analyzer-security.ArrayBound  # due to false positives with clang-tidy v21.1.0
+  - -clang-analyzer-security.ArrayBound  # due to false positives with clang-tidy v21.1.0+
   - -clang-analyzer-security.insecureAPI.bzero  # for FD_ZERO() (seen on macOS)
   - -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
   - -clang-diagnostic-nullability-extension
