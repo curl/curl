@@ -1609,7 +1609,7 @@ CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
-  if(CURL_WANT_RECV(data)) {
+  if(CURL_REQ_WANT_RECV(data)) {
     result = Curl_pollset_add_in(data, ps, conn->sock[FIRSTSOCKET]);
   }
 
@@ -2674,7 +2674,7 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
     if(conn->bits.close) {
       /* Abort after the headers if "follow Location" is set
          and we are set to close anyway. */
-      k->keepon &= ~KEEP_RECV;
+      CURL_REQ_CLEAR_RECV(data);
       k->done = TRUE;
       return CURLE_OK;
     }
@@ -2693,7 +2693,7 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
       infof(data, "The entire document is already downloaded");
       streamclose(conn, "already downloaded");
       /* Abort download */
-      k->keepon &= ~KEEP_RECV;
+      CURL_REQ_CLEAR_RECV(data);
       k->done = TRUE;
       return CURLE_OK;
     }
@@ -4136,7 +4136,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     if(Curl_creader_will_rewind(data) && !Curl_req_done_sending(data)) {
       /* We rewind before next send, continue sending now */
       infof(data, "Keep sending data to get tossed away");
-      k->keepon |= KEEP_SEND;
+      CURL_REQ_SET_SEND(data);
     }
   }
 

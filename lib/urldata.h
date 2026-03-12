@@ -390,19 +390,6 @@ struct hostname {
   const char *dispname; /* name to display, as 'name' might be encoded */
 };
 
-/*
- * Flags on the keepon member of the Curl_transfer_keeper
- */
-
-#define KEEP_NONE       0
-#define KEEP_RECV       (1 << 0) /* there is or may be data to read */
-#define KEEP_SEND       (1 << 1) /* there is or may be data to write */
-
-/* transfer wants to send */
-#define CURL_WANT_SEND(data) ((data)->req.keepon & KEEP_SEND)
-/* transfer wants to receive */
-#define CURL_WANT_RECV(data) ((data)->req.keepon & KEEP_RECV)
-
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 

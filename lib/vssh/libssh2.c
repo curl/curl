@@ -1054,7 +1054,7 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
   /* upload data */
   Curl_xfer_setup_send(data, FIRSTSOCKET);
 
-  /* not set by Curl_xfer_setup to preserve keepon bits */
+  /* not set by Curl_xfer_setup to preserve io_flags */
   data->conn->recv_idx = FIRSTSOCKET;
 
   /* since we do not really wait for anything at this point, we want the
@@ -1358,7 +1358,7 @@ static CURLcode sftp_download_stat(struct Curl_easy *data,
   }
   Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
 
-  /* not set by Curl_xfer_setup to preserve keepon bits */
+  /* not set by Curl_xfer_setup to preserve io_flags */
   data->conn->send_idx = 0;
 
   myssh_to(data, sshc, SSH_STOP);
@@ -2265,7 +2265,7 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
   data->req.maxdownload = (curl_off_t)sb.st_size;
   Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
 
-  /* not set by Curl_xfer_setup to preserve keepon bits */
+  /* not set by Curl_xfer_setup to preserve io_flags */
   data->conn->send_idx = 0;
 
   myssh_to(data, sshc, SSH_STOP);
@@ -2411,7 +2411,7 @@ static CURLcode ssh_state_scp_upload_init(struct Curl_easy *data,
   Curl_pgrsSetUploadSize(data, data->state.infilesize);
   Curl_xfer_setup_send(data, FIRSTSOCKET);
 
-  /* not set by Curl_xfer_setup to preserve keepon bits */
+  /* not set by Curl_xfer_setup to preserve io_flags */
   data->conn->recv_idx = FIRSTSOCKET;
 
   myssh_to(data, sshc, SSH_STOP);
@@ -3023,12 +3023,12 @@ static CURLcode ssh_pollset(struct Curl_easy *data,
   if(!sshc || (sock == CURL_SOCKET_BAD))
     return CURLE_FAILED_INIT;
 
-  waitfor = sshc->waitfor ? sshc->waitfor : data->req.keepon;
+  waitfor = sshc->waitfor ? sshc->waitfor : data->req.io_flags;
   if(waitfor) {
     int flags = 0;
-    if(waitfor & KEEP_RECV)
+    if(waitfor & REQ_IO_RECV)
       flags |= CURL_POLL_IN;
-    if(waitfor & KEEP_SEND)
+    if(waitfor & REQ_IO_SEND)
       flags |= CURL_POLL_OUT;
     DEBUGASSERT(flags);
     CURL_TRC_SSH(data, "pollset, flags=%x", flags);
@@ -3057,8 +3057,9 @@ static void ssh_block2waitfor(struct Curl_easy *data,
     dir = libssh2_session_block_directions(sshc->ssh_session);
     if(dir) {
       /* translate the libssh2 define bits into our own bit defines */
-      sshc->waitfor = ((dir & LIBSSH2_SESSION_BLOCK_INBOUND) ? KEEP_RECV : 0) |
-                      ((dir & LIBSSH2_SESSION_BLOCK_OUTBOUND) ? KEEP_SEND : 0);
+      sshc->waitfor =
+        ((dir & LIBSSH2_SESSION_BLOCK_INBOUND) ? REQ_IO_RECV : 0) |
+        ((dir & LIBSSH2_SESSION_BLOCK_OUTBOUND) ? REQ_IO_SEND : 0);
     }
   }
   if(!dir)
@@ -3519,7 +3520,7 @@ static CURLcode ssh_done(struct Curl_easy *data, CURLcode status)
   if(Curl_pgrsDone(data))
     return CURLE_ABORTED_BY_CALLBACK;
 
-  data->req.keepon = 0; /* clear all bits */
+  CURL_REQ_CLEAR_IO(data);
   return result;
 }
 

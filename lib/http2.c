@@ -1010,7 +1010,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     Curl_multi_mark_dirty(data);
     break;
   case NGHTTP2_WINDOW_UPDATE:
-    if(CURL_WANT_SEND(data) && Curl_bufq_is_empty(&stream->sendbuf)) {
+    if(CURL_REQ_WANT_SEND(data) && Curl_bufq_is_empty(&stream->sendbuf)) {
       /* need more data, force processing of transfer */
       Curl_multi_mark_dirty(data);
     }
@@ -1187,7 +1187,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
          * window and *assume* that we treat this like a WINDOW_UPDATE. Some
          * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
          * To be safe, we UNHOLD a stream in order not to stall. */
-        if(CURL_WANT_SEND(data))
+        if(CURL_REQ_WANT_SEND(data))
           Curl_multi_mark_dirty(data);
       }
       break;
@@ -1986,7 +1986,7 @@ out:
     /* pending data to send, need to be called again. Ideally, we
      * monitor the socket for POLLOUT, but when not SENDING
      * any more, we force processing of the transfer. */
-    if(!CURL_WANT_SEND(data))
+    if(!CURL_REQ_WANT_SEND(data))
       Curl_multi_mark_dirty(data);
   }
   else if(r2) {

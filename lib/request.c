@@ -132,7 +132,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->headerline = 0;
   req->offset = 0;
   req->httpcode = 0;
-  req->keepon = 0;
+  req->io_flags = 0;
   req->upgr101 = UPGR101_NONE;
   req->sendbuf_hds_len = 0;
   req->timeofdoc = 0;
@@ -256,7 +256,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
-  data->req.keepon &= ~KEEP_SEND; /* we are done sending */
+  CURL_REQ_CLEAR_SEND(data);
 
   Curl_pgrsTime(data, TIMER_POSTRANSFER);
   Curl_creader_done(data, data->req.upload_aborted);
@@ -419,22 +419,22 @@ bool Curl_req_sendbuf_empty(struct Curl_easy *data)
 bool Curl_req_want_send(struct Curl_easy *data)
 {
   /* Not done and upload not blocked and either one of
-   * - KEEP_SEND
+   * - REQ_IO_SEND
    * - request has buffered data to send
    * - connection has pending data to send */
   return !data->req.done &&
          !Curl_rlimit_is_blocked(&data->progress.ul.rlimit) &&
-         ((data->req.keepon & KEEP_SEND) ||
+         (CURL_REQ_WANT_SEND(data) ||
           !Curl_req_sendbuf_empty(data) ||
           Curl_xfer_needs_flush(data));
 }
 
 bool Curl_req_want_recv(struct Curl_easy *data)
 {
-  /* Not done and download not blocked and KEEP_RECV */
+  /* Not done and download not blocked and want RECV */
   return !data->req.done &&
          !Curl_rlimit_is_blocked(&data->progress.dl.rlimit) &&
-         (data->req.keepon & KEEP_RECV);
+         CURL_REQ_WANT_RECV(data);
 }
 
 bool Curl_req_done_sending(struct Curl_easy *data)
@@ -470,7 +470,7 @@ CURLcode Curl_req_abort_sending(struct Curl_easy *data)
   if(!data->req.upload_done) {
     Curl_bufq_reset(&data->req.sendbuf);
     data->req.upload_aborted = TRUE;
-    data->req.keepon &= ~KEEP_SEND;
+    CURL_REQ_CLEAR_SEND(data);
     return req_set_upload_done(data);
   }
   return CURLE_OK;
@@ -482,8 +482,8 @@ CURLcode Curl_req_stop_send_recv(struct Curl_easy *data)
    * We might still be paused on receive client writes though, so
    * keep those bits around. */
   CURLcode result = CURLE_OK;
-  if(data->req.keepon & KEEP_SEND)
+  if(CURL_REQ_WANT_SEND(data))
     result = Curl_req_abort_sending(data);
-  data->req.keepon &= ~(KEEP_RECV | KEEP_SEND);
+  CURL_REQ_CLEAR_IO(data);
   return result;
 }

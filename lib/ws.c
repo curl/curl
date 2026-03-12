@@ -1399,7 +1399,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     if(result)
       goto out;
     DEBUGASSERT(nread == nwritten);
-    k->keepon &= ~KEEP_RECV; /* read no more content */
+    CURL_REQ_CLEAR_RECV(data); /* read no more content */
   }
   else { /* !connect_only */
     if(data->set.method == HTTPREQ_PUT) {
@@ -1423,7 +1423,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       /* start over with sending */
       data->req.eos_read = FALSE;
       data->req.upload_done = FALSE;
-      k->keepon |= KEEP_SEND;
+      CURL_REQ_SET_SEND(data);
     }
 
     /* Then pass any additional data to the writers */

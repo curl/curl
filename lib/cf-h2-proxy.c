@@ -477,7 +477,7 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
        * window and *assume* that we treat this like a WINDOW_UPDATE. Some
        * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
        * To be safe, we UNHOLD a stream in order not to stall. */
-      if(CURL_WANT_SEND(data)) {
+      if(CURL_REQ_WANT_SEND(data)) {
         drain_tunnel(cf, data, &ctx->tunnel);
       }
       break;
@@ -512,7 +512,7 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
     }
     break;
   case NGHTTP2_WINDOW_UPDATE:
-    if(CURL_WANT_SEND(data)) {
+    if(CURL_REQ_WANT_SEND(data)) {
       drain_tunnel(cf, data, &ctx->tunnel);
     }
     break;

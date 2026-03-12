@@ -1080,7 +1080,7 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
   if(conn->scheme->run->perform_pollset)
     result = conn->scheme->run->perform_pollset(data, ps);
   else {
-    /* Default is to obey the data->req.keepon flags for send/recv */
+    /* Default is to obey the request flags for send/recv */
     if(Curl_req_want_recv(data) && CONN_SOCK_IDX_VALID(conn->recv_idx)) {
       result = Curl_pollset_add_in(data, ps, conn->sock[conn->recv_idx]);
     }
@@ -1660,7 +1660,6 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
   mresult = curl_multi_add_handle(multi, data);
   if(!mresult) {
-    struct SingleRequest *k = &data->req;
     CURLcode result;
 
     /* pass in NULL for 'conn' here since we do not want to init the
@@ -1674,7 +1673,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
     /* take this handle to the perform state right away */
     multistate(data, MSTATE_PERFORMING);
     Curl_attach_connection(data, conn);
-    k->keepon |= KEEP_RECV; /* setup to receive! */
+    CURL_REQ_SET_RECV(data);
   }
   return mresult;
 }
