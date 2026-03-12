@@ -12,6 +12,7 @@
 # the bad ones:
 #
 # ---(accepted word)
+# ---:[path]:(accepted word)
 #
 
 use strict;
@@ -37,7 +38,7 @@ use File::Basename;
 
 sub srcline {
     my ($state, $flags, $l) = @_;
-    my $line;
+    my $line = "";
 
     if(($state == 0) && ($l =~ /^ *\# *include/)) {
         # preprocessor include line
