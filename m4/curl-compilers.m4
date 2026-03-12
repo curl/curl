@@ -974,7 +974,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         #
       GNU_C)
         #
-        if test "$want_warnings" = "yes"; then
+        dnl Leave disabled for GCC <4.6, because they lack #pragma features to silence locally.
+        if test "$want_warnings" = "yes" && test "$compiler_num" -ge "406"; then
           #
           dnl Do not enable -pedantic when cross-compiling with a gcc older
           dnl than 3.0, to avoid warnings from third party system headers.
@@ -1194,16 +1195,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Avoid false positives
           tmp_CFLAGS="$tmp_CFLAGS -Wno-shadow"
           tmp_CFLAGS="$tmp_CFLAGS -Wno-unreachable-code"
-        fi
-        if test "$compiler_num" -lt "406"; then
-          dnl GCC <4.6 do not support #pragma to suppress warnings locally. Disable globally instead.
-          tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
-          if test "$compiler_num" -ge "402"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-overlength-strings"
-          fi
-          if test "$compiler_num" -ge "403"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-vla"
-          fi
         fi
         if test "$compiler_num" -ge "400" && test "$compiler_num" -lt "407"; then
           dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84685

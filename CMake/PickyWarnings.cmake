@@ -60,7 +60,9 @@ elseif(BORLAND)
 endif()
 
 if(PICKY_COMPILER)
-  if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  # Leave disabled for GCC <4.6, because they lack #pragma features to silence locally.
+  if((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.6) OR
+     CMAKE_C_COMPILER_ID MATCHES "Clang")
 
     # https://clang.llvm.org/docs/DiagnosticsReference.html
     # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
@@ -382,16 +384,6 @@ if(PICKY_COMPILER)
         # Avoid false positives
         list(APPEND _picky "-Wno-shadow")
         list(APPEND _picky "-Wno-unreachable-code")
-      endif()
-      if(CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
-        # GCC <4.6 do not support #pragma to suppress warnings locally. Disable them globally instead.
-        list(APPEND _picky "-Wno-format-nonliteral")
-        if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
-          list(APPEND _picky "-Wno-overlength-strings")
-        endif()
-        if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.3)
-          list(APPEND _picky "-Wno-vla")
-        endif()
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.0 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
         list(APPEND _picky "-Wno-missing-field-initializers")  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=36750
