@@ -10,6 +10,7 @@ Curl_compareheader
 <client>
 <features>
 unittest
+http
 </features>
 <name>
 Curl_compareheader unit test
