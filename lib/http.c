@@ -1402,6 +1402,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
  *
  * Returns TRUE if 'headerline' contains the 'header' with given 'content'
  * (within a comma-separated list of tokens). Pass 'header' WITH the colon.
+ *
+ * @unittest: 1625
  */
 bool Curl_compareheader(const char *headerline, /* line to check */
                         const char *header, /* header keyword _with_ colon */
