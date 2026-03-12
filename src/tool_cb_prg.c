@@ -200,12 +200,12 @@ int tool_progress_cb(void *clientp,
     memset(line, '#', num);
     line[num] = '\0';
     curl_msnprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
     curl_mfprintf(bar->out, format, line, percent);
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
   }
