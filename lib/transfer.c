@@ -303,15 +303,15 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
      * we should read the EOS. Which may arrive as meta data after
      * the bytes. Not taking it in might lead to RST of streams. */
     if((!is_multiplex && data->req.download_done) || is_eos) {
-      data->req.keepon &= ~KEEP_RECV;
+      CURL_REQ_CLEAR_RECV(data);
     }
     /* if we stopped receiving, leave the loop */
-    if(!(k->keepon & KEEP_RECV))
+    if(!CURL_REQ_WANT_RECV(data))
       break;
 
   } while(maxloops--);
 
-  if(!is_eos && !rate_limited && CURL_WANT_RECV(data) &&
+  if(!is_eos && !rate_limited && CURL_REQ_WANT_RECV(data) &&
      (!rcvd_eagain || data_pending(data, rcvd_eagain))) {
     /* Did not read until EAGAIN/EOS or there is still data pending
      * in buffers. Mark as read-again via simulated SELECT results. */
@@ -319,7 +319,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, mark as dirty");
   }
 
-  if(((k->keepon & (KEEP_RECV | KEEP_SEND)) == KEEP_SEND) &&
+  if(!CURL_REQ_WANT_RECV(data) && CURL_REQ_WANT_SEND(data) &&
      (conn->bits.close || is_multiplex)) {
     /* When we have read the entire thing and the close bit is set, the server
        may now close the connection. If there is now any kind of sending going
@@ -340,9 +340,7 @@ out:
  */
 static CURLcode sendrecv_ul(struct Curl_easy *data)
 {
-  /* We should not get here when the sending is already done. It
-   * probably means that someone set `data-req.keepon |= KEEP_SEND`
-   * when it should not. */
+  /* We should not get here when the sending is already done. */
   DEBUGASSERT(!Curl_req_done_sending(data));
 
   if(!Curl_req_done_sending(data))
@@ -366,7 +364,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
 
   /* We go ahead and do a read if we have a readable socket or if the stream
      was rewound (in which case we have data in a buffer) */
-  if(k->keepon & KEEP_RECV) {
+  if(CURL_REQ_WANT_RECV(data)) {
     result = sendrecv_dl(data, k);
     if(result || data->req.done)
       goto out;
@@ -383,7 +381,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
   if(result)
     goto out;
 
-  if(k->keepon) {
+  if(CURL_REQ_WANT_IO(data)) {
     if(Curl_timeleft_ms(data) < 0) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
@@ -419,7 +417,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
   }
 
   /* If there is nothing more to send/recv, the request is done */
-  if((k->keepon & (KEEP_RECV | KEEP_SEND)) == 0)
+  if(!CURL_REQ_WANT_IO(data))
     data->req.done = TRUE;
 
   result = Curl_pgrsUpdate(data);
@@ -710,14 +708,11 @@ static void xfer_setup(
 
   /* we want header and/or body, if neither then do not do this! */
   if(conn->scheme->run->write_resp_hd || !data->req.no_body) {
-
     if(conn->recv_idx != -1)
-      k->keepon |= KEEP_RECV;
-
+      CURL_REQ_SET_RECV(data);
     if(conn->send_idx != -1)
-      k->keepon |= KEEP_SEND;
+      CURL_REQ_SET_SEND(data);
   }
-
   CURL_TRC_M(data, "xfer_setup: recv_idx=%d, send_idx=%d",
              conn->recv_idx, conn->send_idx);
 }
@@ -868,8 +863,8 @@ CURLcode Curl_xfer_send_close(struct Curl_easy *data)
 
 bool Curl_xfer_is_blocked(struct Curl_easy *data)
 {
-  bool want_send = (data->req.keepon & KEEP_SEND);
-  bool want_recv = (data->req.keepon & KEEP_RECV);
+  bool want_send = CURL_REQ_WANT_SEND(data);
+  bool want_recv = CURL_REQ_WANT_RECV(data);
   if(!want_send)
     return want_recv && Curl_xfer_recv_is_paused(data);
   else if(!want_recv)

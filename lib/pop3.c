@@ -1075,7 +1075,6 @@ static CURLcode pop3_write(struct Curl_easy *data, const char *str,
 {
   /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;
-  struct SingleRequest *k = &data->req;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
   bool strip_dot = FALSE;
@@ -1185,7 +1184,7 @@ static CURLcode pop3_write(struct Curl_easy *data, const char *str,
     message as per RFC-1939, sect. 3 */
     result = Curl_client_write(data, CLIENTWRITE_BODY, POP3_EOB, 2);
 
-    k->keepon &= ~KEEP_RECV;
+    CURL_REQ_CLEAR_RECV(data);
     pop3c->eob = 0;
 
     return result;

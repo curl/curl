@@ -31,6 +31,24 @@
 /* forward declarations */
 struct UserDefined;
 
+/* Bits on the io_flags member of SingleRequest */
+#define REQ_IO_RECV       (1 << 0) /* there is or may be data to read */
+#define REQ_IO_SEND       (1 << 1) /* there is or may be data to write */
+
+/* Low level request receive/send io_flags checks. */
+#define CURL_REQ_WANT_SEND(d)  ((d)->req.io_flags & REQ_IO_SEND)
+#define CURL_REQ_WANT_RECV(d)  ((d)->req.io_flags & REQ_IO_RECV)
+#define CURL_REQ_WANT_IO(d)    ((d)->req.io_flags & (REQ_IO_RECV|REQ_IO_SEND))
+/* Low level request receive/send io_flags manipulations. */
+#define CURL_REQ_SET_SEND(d)  ((d)->req.io_flags |= REQ_IO_SEND)
+#define CURL_REQ_SET_RECV(d)  ((d)->req.io_flags |= REQ_IO_RECV)
+#define CURL_REQ_CLEAR_SEND(d) \
+  ((d)->req.io_flags &= (uint8_t)~REQ_IO_SEND)
+#define CURL_REQ_CLEAR_RECV(d) \
+  ((d)->req.io_flags &= (uint8_t)~REQ_IO_RECV)
+#define CURL_REQ_CLEAR_IO(d)  \
+  ((d)->req.io_flags &= (uint8_t)~(REQ_IO_RECV|REQ_IO_SEND))
+
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, send the body now */
   EXP100_AWAITING_CONTINUE,   /* waiting for the 100 Continue header */
@@ -59,6 +77,8 @@ struct SingleRequest {
                              -1 means unlimited */
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
+  curl_off_t offset;            /* possible resume offset read from the
+                                   Content-Range: header */
 
   struct curltime start;         /* transfer started at this time */
   unsigned int headerbytecount;  /* received server headers (not CONNECT
@@ -72,11 +92,8 @@ struct SingleRequest {
                                      in a CURLE_GOT_NOTHING error code */
   int headerline;               /* counts header lines to better track the
                                    first one */
-  curl_off_t offset;            /* possible resume offset read from the
-                                   Content-Range: header */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
-  int keepon;
   unsigned char httpversion_sent; /* Version in request (09, 10, 11, etc.) */
   unsigned char httpversion;    /* Version in response (09, 10, 11, etc.) */
   enum upgrade101 upgr101;      /* 101 upgrade state */
@@ -94,6 +111,7 @@ struct SingleRequest {
                        header data */
   char *newurl;     /* Set to the new URL to use when a redirect or a retry is
                        wanted */
+  uint8_t io_flags; /* REQ_IO_RECV | REQ_IO_SEND */
 
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
