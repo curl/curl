@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: curl
 #
+# whitelisted uses of bad words (case insensitive) can be done in two ways,
+# globally and per-file.
+#
+# ---[word]
+# ---:[file]:[word]
+#
 back-end:backend
 e-mail:email
 run-time:runtime
@@ -95,11 +101,14 @@ Curl=curl
 cURL=curl
 Libcurl=libcurl
 LibCurl=libcurl
----WWW::Curl
----NET::Curl
----Curl Corporation
 manpages:man pages
 manpage:man page
 favour:favor
 basically:rephrase?
 However,:rephrase?
+---WWW::Curl
+---NET::Curl
+---Curl Corporation
+---:include/curl/:will
+---:lib/:will
+---:src/:will

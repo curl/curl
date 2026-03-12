@@ -27,7 +27,7 @@ EXTRA_DIST = coverage.sh completion.pl firefox-db2pem.sh checksrc.pl          \
   cdall cd2cd managen dmaketgz maketgz release-tools.sh verify-release        \
   cmakelint.sh mdlinkcheck CMakeLists.txt perlcheck.sh pythonlint.sh          \
   spacecheck.pl randdisable wcurl top-complexity extract-unit-protos          \
-  .checksrc badwords badwords-all badwords.ok badwords.txt
+  .checksrc badwords badwords-all badwords.txt
 
 dist_bin_SCRIPTS = wcurl
 
