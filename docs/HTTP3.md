@@ -21,12 +21,10 @@ QUIC libraries we are using:
 
 [quiche](https://github.com/cloudflare/quiche) - **EXPERIMENTAL**
 
-[OpenSSL 3.2+ QUIC](https://github.com/openssl/openssl) - **EXPERIMENTAL**
-
 ## Experimental
 
-HTTP/3 support in curl is considered **EXPERIMENTAL** until further notice
-when built to use *quiche*. Only the *ngtcp2* backend is not experimental.
+HTTP/3 support using *quiche* in curl is considered **EXPERIMENTAL** until
+further notice*. Only the *ngtcp2* backend is not experimental.
 
 Further development and tweaking of the HTTP/3 support in curl happens in the
 master branch using pull-requests like ordinary changes.
