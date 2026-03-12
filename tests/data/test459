@@ -53,7 +53,7 @@ Content-Type: application/x-www-form-urlencoded
 
 arg
 </protocol>
-<stderr mode="text">
+<stderr mode="warn">
 Warning: %LOGDIR/config:1 Option 'data' uses argument with unquoted whitespace.%SP
 Warning: This may cause side-effects. Consider double quotes.
 </stderr>
