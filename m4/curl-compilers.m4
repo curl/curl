@@ -1195,9 +1195,15 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -Wno-shadow"
           tmp_CFLAGS="$tmp_CFLAGS -Wno-unreachable-code"
         fi
-        if test "$compiler_num" -ge "402" && test "$compiler_num" -lt "406"; then
+        if test "$compiler_num" -lt "406"; then
           dnl GCC <4.6 do not support #pragma to suppress warnings locally. Disable globally instead.
-          tmp_CFLAGS="$tmp_CFLAGS -Wno-overlength-strings"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
+          if test "$compiler_num" -ge "402"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-overlength-strings"
+          fi
+          if test "$compiler_num" -ge "403"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-vla"
+          fi
         fi
         if test "$compiler_num" -ge "400" && test "$compiler_num" -lt "407"; then
           dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84685
