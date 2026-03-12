@@ -69,13 +69,6 @@ CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
 void Curl_conn_meta_remove(struct connectdata *conn, const char *key);
 void *Curl_conn_meta_get(struct connectdata *conn, const char *key);
 
-/* Get protocol handler for a URI scheme
- * @param scheme URI scheme, case-insensitive
- * @return NULL of handler not found
- */
-const struct Curl_scheme *Curl_get_scheme(const char *scheme);
-const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len);
-
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */

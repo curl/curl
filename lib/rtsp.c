@@ -1051,7 +1051,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 /*
  * RTSP handler interface.
  */
-static const struct Curl_protocol Curl_protocol_rtsp = {
+const struct Curl_protocol Curl_protocol_rtsp = {
   rtsp_setup_connection,                /* setup_connection */
   rtsp_do,                              /* do_it */
   rtsp_done,                            /* done */
@@ -1072,19 +1072,3 @@ static const struct Curl_protocol Curl_protocol_rtsp = {
 };
 
 #endif /* CURL_DISABLE_RTSP */
-
-/*
- * RTSP handler interface.
- */
-const struct Curl_scheme Curl_scheme_rtsp = {
-  "rtsp",                               /* scheme */
-#ifdef CURL_DISABLE_RTSP
-  ZERO_NULL,
-#else
-  &Curl_protocol_rtsp,
-#endif
-  CURLPROTO_RTSP,                       /* protocol */
-  CURLPROTO_RTSP,                       /* family */
-  PROTOPT_CONN_REUSE,                   /* flags */
-  PORT_RTSP,                            /* defport */
-};

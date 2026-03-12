@@ -964,7 +964,7 @@ static CURLcode mqtts_connecting(struct Curl_easy *data, bool *done)
 /*
  * MQTTS protocol.
  */
-static const struct Curl_protocol Curl_protocol_mqtts = {
+const struct Curl_protocol Curl_protocol_mqtts = {
   mqtt_setup_conn,                    /* setup_connection */
   mqtt_do,                            /* do_it */
   mqtt_done,                          /* done */
@@ -989,7 +989,7 @@ static const struct Curl_protocol Curl_protocol_mqtts = {
 /*
  * MQTT protocol.
  */
-static const struct Curl_protocol Curl_protocol_mqtt = {
+const struct Curl_protocol Curl_protocol_mqtt = {
   mqtt_setup_conn,                    /* setup_connection */
   mqtt_do,                            /* do_it */
   mqtt_done,                          /* done */
@@ -1010,32 +1010,3 @@ static const struct Curl_protocol Curl_protocol_mqtt = {
 };
 
 #endif /* CURL_DISABLE_MQTT */
-
-const struct Curl_scheme Curl_scheme_mqtts = {
-  "mqtts",                            /* scheme */
-#if defined(CURL_DISABLE_MQTT) || !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_mqtts,
-#endif
-  CURLPROTO_MQTTS,                    /* protocol */
-  CURLPROTO_MQTT,                     /* family */
-  PROTOPT_SSL,                        /* flags */
-  PORT_MQTTS,                         /* defport */
-};
-
-/*
- * MQTT protocol.
- */
-const struct Curl_scheme Curl_scheme_mqtt = {
-  "mqtt",                             /* scheme */
-#ifdef CURL_DISABLE_MQTT
-  ZERO_NULL,
-#else
-  &Curl_protocol_mqtt,
-#endif
-  CURLPROTO_MQTT,                     /* protocol */
-  CURLPROTO_MQTT,                     /* family */
-  PROTOPT_NONE,                       /* flags */
-  PORT_MQTT,                          /* defport */
-};

@@ -2302,7 +2302,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
 /*
  * IMAP protocol.
  */
-static const struct Curl_protocol Curl_protocol_imap = {
+const struct Curl_protocol Curl_protocol_imap = {
   imap_setup_connection,            /* setup_connection */
   imap_do,                          /* do_it */
   imap_done,                        /* done */
@@ -2323,38 +2323,3 @@ static const struct Curl_protocol Curl_protocol_imap = {
 };
 
 #endif /* CURL_DISABLE_IMAP */
-
-/*
- * IMAP protocol handler.
- */
-const struct Curl_scheme Curl_scheme_imap = {
-  "imap",                           /* scheme */
-#ifdef CURL_DISABLE_IMAP
-  ZERO_NULL,
-#else
-  &Curl_protocol_imap,
-#endif
-  CURLPROTO_IMAP,                   /* protocol */
-  CURLPROTO_IMAP,                   /* family */
-  PROTOPT_CLOSEACTION |             /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
-  PROTOPT_CONN_REUSE,
-  PORT_IMAP,                        /* defport */
-};
-
-/*
- * IMAPS protocol handler.
- */
-const struct Curl_scheme Curl_scheme_imaps = {
-  "imaps",                          /* scheme */
-#if defined(CURL_DISABLE_IMAP) || !defined(USE_SSL)
-  ZERO_NULL,
-#else
-  &Curl_protocol_imap,
-#endif
-  CURLPROTO_IMAPS,                  /* protocol */
-  CURLPROTO_IMAP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE,
-  PORT_IMAPS,                       /* defport */
-};

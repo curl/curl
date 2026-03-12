@@ -1569,7 +1569,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 /*
  * TELNET protocol handler.
  */
-static const struct Curl_protocol Curl_protocol_telnet = {
+const struct Curl_protocol Curl_protocol_telnet = {
   ZERO_NULL,                            /* setup_connection */
   telnet_do,                            /* do_it */
   telnet_done,                          /* done */
@@ -1590,19 +1590,3 @@ static const struct Curl_protocol Curl_protocol_telnet = {
 };
 
 #endif /* !CURL_DISABLE_TELNET */
-
-/*
- * TELNET protocol handler.
- */
-const struct Curl_scheme Curl_scheme_telnet = {
-  "telnet",                             /* scheme */
-#ifdef CURL_DISABLE_TELNET
-  ZERO_NULL,
-#else
-  &Curl_protocol_telnet,
-#endif
-  CURLPROTO_TELNET,                     /* protocol */
-  CURLPROTO_TELNET,                     /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY,    /* flags */
-  PORT_TELNET,                          /* defport */
-};

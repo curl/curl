@@ -37,26 +37,15 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
-/* When redirecting transfers. */
-typedef enum {
-  FOLLOW_NONE,  /* not used within the function, a placeholder to allow
-                   initing to this */
-  FOLLOW_FAKE,  /* only records stuff, not actually following */
-  FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
-                   redirect following */
-  FOLLOW_REDIR /* a full true redirect */
-} followtype;
-
 #define CURL_HTTP_V1x   (1 << 0)
 #define CURL_HTTP_V2x   (1 << 1)
 #define CURL_HTTP_V3x   (1 << 2)
 /* bitmask of CURL_HTTP_V* values */
 typedef unsigned char http_majors;
 
-extern const struct Curl_scheme Curl_scheme_http;
-extern const struct Curl_scheme Curl_scheme_https;
-
 #ifndef CURL_DISABLE_HTTP
+
+extern const struct Curl_protocol Curl_protocol_http;
 
 struct dynhds;
 

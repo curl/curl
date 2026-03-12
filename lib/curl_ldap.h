@@ -25,9 +25,6 @@
  ***************************************************************************/
 extern const struct Curl_protocol Curl_protocol_ldap;
 
-extern const struct Curl_scheme Curl_scheme_ldap;
-extern const struct Curl_scheme Curl_scheme_ldaps;
-
 void Curl_ldap_version(char *buf, size_t bufsz);
 
 #endif /* HEADER_CURL_LDAP_H */

@@ -29,9 +29,6 @@
 extern const struct Curl_protocol Curl_protocol_sftp;
 extern const struct Curl_protocol Curl_protocol_scp;
 
-extern const struct Curl_scheme Curl_scheme_sftp;
-extern const struct Curl_scheme Curl_scheme_scp;
-
 #ifdef USE_SSH
 
 #ifdef USE_LIBSSH2

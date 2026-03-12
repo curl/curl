@@ -44,6 +44,7 @@
 #include "fileinfo.h"
 #include "llist.h"
 #include "ftp.h"
+#include "ftp-int.h"
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
 #include "multiif.h"

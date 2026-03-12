@@ -275,7 +275,7 @@ error:
 /*
  * DICT protocol
  */
-static const struct Curl_protocol Curl_protocol_dict = {
+const struct Curl_protocol Curl_protocol_dict = {
   ZERO_NULL,                            /* setup_connection */
   dict_do,                              /* do_it */
   ZERO_NULL,                            /* done */
@@ -296,19 +296,3 @@ static const struct Curl_protocol Curl_protocol_dict = {
 };
 
 #endif /* CURL_DISABLE_DICT */
-
-/*
- * DICT protocol handler.
- */
-const struct Curl_scheme Curl_scheme_dict = {
-  "dict",                               /* scheme */
-#ifdef CURL_DISABLE_DICT
-  ZERO_NULL,
-#else
-  &Curl_protocol_dict,
-#endif
-  CURLPROTO_DICT,                       /* protocol */
-  CURLPROTO_DICT,                       /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY,    /* flags */
-  PORT_DICT,                            /* defport */
-};
