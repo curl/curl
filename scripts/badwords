@@ -36,7 +36,7 @@ use File::Basename;
 # 1 - include preprocessor line, ignore strings
 
 sub srcline {
-    my ($col, $state, $flags, $l) = @_;
+    my ($state, $flags, $l) = @_;
     my $line;
 
     if(($state == 0) && ($l =~ /^ *\# *include/)) {
@@ -151,7 +151,7 @@ sub sourcecode {
     open(F, "<$f");
     while(<F>) {
         my $l = $_;
-        ($state, $flags, $line) = srcline(0, $state, $flags, $l);
+        ($state, $flags, $line) = srcline($state, $flags, $l);
         push @lines, $line;
     }
     close(F);
