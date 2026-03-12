@@ -16,6 +16,7 @@ codespell \
   --skip 'projects/vms/*' \
   --skip 'RELEASE-NOTES' \
   --skip 'scripts/wcurl' \
+  --skip 'tests/unit/unit1625.c' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.words' \
   --
