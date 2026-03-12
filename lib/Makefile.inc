@@ -328,6 +328,7 @@ LIB_HFILES =         \
   fileinfo.h         \
   formdata.h         \
   ftp.h              \
+  ftp-int.h          \
   ftplistparser.h    \
   functypes.h        \
   getinfo.h          \
