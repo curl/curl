@@ -173,7 +173,7 @@ checksrc:
 	(cd projects && $(MAKE) checksrc)
 
 badwords:
-	$(top_srcdir)/scripts/badwords-all
+	@PERL@ $(top_srcdir)/scripts/badwords-all
 
 lint: badwords checksrc
 	@PERL@ $(top_srcdir)/scripts/spacecheck.pl
