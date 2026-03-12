@@ -157,7 +157,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 3");
 
-#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
+#ifdef CURL_GNUC_DIAG
 #pragma GCC diagnostic pop
 #endif
 
