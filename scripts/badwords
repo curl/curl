@@ -19,6 +19,145 @@ use warnings;
 
 use File::Basename;
 
+#
+## States
+#
+# 0 - default, initial state
+# 1 - there was a slash
+# 2 - quoted string
+# 3 - // comment
+# 4 - /* comment
+# 5 - asterisk found within a /* comment
+# 6 - #include line
+# 7 - backslash in a string
+#
+## Flags
+#
+# 1 - include preprocessor line, ignore strings
+
+sub srcline {
+    my ($col, $state, $flags, $l) = @_;
+    my $line;
+
+    if(($state == 0) && ($l =~ /^ *\# *include/)) {
+        # preprocessor include line
+        $flags |= 1;
+    }
+    else {
+        # not preprocessor
+        $flags &= ~1;
+    }
+
+    if($state == 3) {
+        # // ended on the prev line, go back to init
+        $state = 0;
+    }
+
+    my @c = split(//, $l);
+
+    # state machine this line
+    for my $c (@c) {
+        if($state == 1) {
+            # we had a slash
+            if($c eq "/") {
+                # // confirmed, the rest of the line is a comment
+                $line .= "//";
+                $state = 3;
+            }
+            elsif($c eq "*") {
+                # /* confirmed
+                $state = 4;
+                $line .= "/*";
+            }
+            else {
+                # back to normal
+                $line .= "  ";
+                $state = 0;
+            }
+        }
+        elsif($state == 2) {
+            # a string
+            if($c eq "\\") {
+                $line .= "\\";
+                $state = 7;
+            }
+            elsif($c eq "\"") {
+                # end of the string
+                $line .= "\"";
+                $state = 0;
+            }
+            else {
+                $line .= $c;
+            }
+        }
+        elsif($state == 3) {
+            # a // comment
+            $line .= $c;
+        }
+        elsif($state == 4) {
+            # a /* comment
+            if($c eq "*") {
+                # could be a comment close
+                $state = 5;
+            }
+            else {
+                $line .= $c;
+            }
+        }
+        elsif($state == 5) {
+            if($c eq "/") {
+                # a /* */ comment ended here */
+                $line .= "*/";
+                $state = 0;
+            }
+            else {
+                # the /* comment continues
+                $line .= "*$c";
+                $state = 4;
+            }
+        }
+        elsif($state == 7) {
+            # the prev was a backslash in a string
+            $line .= $c;
+            # switch back to normal string
+            $state = 2;
+        }
+        else {
+            if($c eq "/") {
+                $state = 1; # got a slash
+            }
+            elsif(($c eq "\"") && !($flags & 1)) {
+                # start of a string, not within a preprocessor line
+                $line .= "\"";
+                $state = 2;
+            }
+            elsif($c eq "\n") {
+                $line .= "\n";
+            }
+            else {
+                $line .= " ";
+            }
+        }
+    }
+    return $state, $flags, $line;
+}
+
+sub sourcecode {
+    my ($f) = @_;
+    my $state = 0;
+    my $flags = 0;
+    my @lines;
+    my $line;
+    open(F, "<$f");
+    while(<F>) {
+        my $l = $_;
+        ($state, $flags, $line) = srcline(0, $state, $flags, $l);
+        push @lines, $line;
+    }
+    close(F);
+    return @lines;
+}
+
 my @whitelist = (
     # ignore what looks like URLs
     '(^|\W)((https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&\'\(\)*+,;=]+)',
@@ -29,29 +168,8 @@ my @whitelist = (
     );
 my %alt;
 my %exactcase;
-my $skip_indented = 1;
 
-if($ARGV[0] eq "-a") {
-    shift @ARGV;
-    $skip_indented = 0;
-}
 my %wl;
-if($ARGV[0] eq "-w") {
-    shift @ARGV;
-    my $file = shift @ARGV;
-    open(W, "<$file") or die "Cannot open '$file': $!";
-    while(<W>) {
-        if(/^#/) {
-            # allow #-comments
-            next;
-        }
-        if(/^([^:]*):(\d*):(.*)/) {
-            $wl{"$1:$2:$3"}=1;
-            #print STDERR "whitelisted $1:$2:$3\n";
-        }
-    }
-    close(W);
-}
 
 my @w;
 my @exact;
@@ -60,7 +178,13 @@ while(<STDIN>) {
     if($_ =~ /^#/) {
         next;
     }
-    if($_ =~ /^---(.+)/) {
+    if(/^---:([^:]*):(.*)/) {
+        # whitelist file + word
+        my $word = lc($2);
+        $wl{"$1:$word"}=1;
+    }
+    elsif($_ =~ /^---(.+)/) {
+        # whitelist word
         push @whitelist, $1;
     }
     elsif($_ =~ /^(.*)([:=])(.*)/) {
@@ -104,27 +228,22 @@ sub highlight {
     my $ch;
 
     my $dir = dirname($f);
-    $ch = $dir . "/" . "::" . $w;
+    $ch = $dir . "/" . ":" . lc($w);
     if($wl{$ch}) {
         # whitelisted dirname + word
         return;
     }
     my $updir = dirname($dir);
     if($dir ne $updir) {
-        $ch = $updir . "/" . "::" . $w;
+        $ch = $updir . "/" . ":" . lc($w);
         if($wl{$ch}) {
             # whitelisted upper dirname + word
             return;
         }
     }
-    $ch = $f . "::" . $w;
+    $ch = $f . ":" . lc($w);
     if($wl{$ch}) {
         # whitelisted filename + word
-        return;
-    }
-    $ch = "$f:$l:$w";
-    if($wl{$ch}) {
-        # whitelisted filename + line + word
         return;
     }
 
@@ -136,12 +255,39 @@ sub highlight {
     $errors++;
 }
 
+sub document {
+    my ($f) = @_;
+    my @lines;
+    open(F, "<$f");
+    while(<F>) {
+        push @lines, $_;
+    }
+    close(F);
+    return @lines;
+}
+
 sub file {
     my ($f) = @_;
     my $l = 0;
-    open(F, "<$f");
-    while(<F>) {
-        my $in = $_;
+
+    my $skip_indented = 0;
+    my $source_code = 0;
+    if($f =~ /\.[ch]$/) {
+        $source_code = 1;
+    }
+    else {
+        # markdown
+        $skip_indented = 1;
+    }
+
+    my @lines;
+    if($source_code) {
+        @lines = sourcecode($f);
+    }
+    else {
+        @lines = document($f);
+    }
+    for my $in (@lines) {
         $l++;
         chomp $in;
         if($skip_indented && $in =~ /^    /) {
@@ -166,7 +312,6 @@ sub file {
             }
         }
     }
-    close(F);
 }
 
 my @filemasks = @ARGV;
