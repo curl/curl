@@ -152,6 +152,7 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->etag_save_file);
   tool_safefree(config->etag_compare_file);
   tool_safefree(config->ssl_ec_curves);
+  tool_safefree(config->ssl_signature_algorithms);
   tool_safefree(config->request_target);
   tool_safefree(config->customrequest);
   tool_safefree(config->krblevel);
