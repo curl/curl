@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#ifndef CURL_DISABLE_HTTP
+
 #include "urldata.h"
 #include "url.h"
 
@@ -124,3 +126,11 @@ static CURLcode test_unit1625(const char *arg)
 
   return CURLE_OK;
 }
+#else
+/* for HTTP-disabled builds */
+static CURLcode test_unit1625(const char *arg)
+{
+  (void)arg;
+  return CURLE_OK;
+}
+#endif
