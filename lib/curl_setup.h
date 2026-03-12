@@ -788,6 +788,13 @@
 #  define WARN_UNUSED_RESULT
 #endif
 
+/* GCC <4.6 does not support '#pragma GCC diagnostic push' and
+   does not support 'pragma GCC diagnostic' inside functions. */
+#if defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6)))
+#define CURL_GNUC_DIAG
+#endif
+
 /* noreturn attribute */
 
 #ifndef CURL_NORETURN
