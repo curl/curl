@@ -81,9 +81,7 @@ CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
 checksrc: lib1521.c
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/$(BUNDLE).c \
-	  $(srcdir)/*.[ch])
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/$(BUNDLE).c $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C))
 
 if NOT_CURL_CI
 all-local: checksrc
