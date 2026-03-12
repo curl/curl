@@ -61,7 +61,7 @@ struct easy_pollset;
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
  * the rest are internal information. If we use higher bits we only do this on
  * platforms that have a >= 64-bit type and then we use such a type for the
- * protocol fields in the protocol handler.
+ * protocol fields in the scheme definition.
  */
 #define CURLPROTO_WS     (1L << 30)
 #define CURLPROTO_WSS    ((curl_prot_t)1 << 31)
@@ -86,7 +86,7 @@ typedef curl_off_t curl_prot_t;
 #define CURLPROTO_MASK   0x3ffffff
 
 /* Convenience defines for checking protocols or their SSL based version. Each
-   protocol handler should only ever have a single CURLPROTO_ in its protocol
+   protocol scheme should only ever have a single CURLPROTO_ in its protocol
    field. */
 #define PROTO_FAMILY_HTTP (CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_WS | \
                            CURLPROTO_WSS)
@@ -113,9 +113,8 @@ typedef enum {
 } followtype;
 
 /*
- * Specific protocol handler.
+ * Specific protocol handler, an implementation of one or more URI schemes.
  */
-
 struct Curl_protocol {
   /* Complement to setup_connection_internals(). This is done before the
      transfer "owns" the connection. */
@@ -247,9 +246,9 @@ struct Curl_scheme {
   uint16_t defport;       /* Default port. */
 };
 
-/* Get protocol handler for a URI scheme
- * @param scheme URI scheme, case-insensitive
- * @return NULL of handler not found
+/* Get scheme definition for a URI scheme name
+ * @param scheme URI scheme name, case-insensitive
+ * @return NULL if scheme is not known
  */
 const struct Curl_scheme *Curl_get_scheme(const char *scheme);
 const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len);
