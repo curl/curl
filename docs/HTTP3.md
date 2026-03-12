@@ -24,7 +24,7 @@ QUIC libraries we are using:
 ## Experimental
 
 HTTP/3 support using *quiche* in curl is considered **EXPERIMENTAL** until
-further notice*. Only the *ngtcp2* backend is not experimental.
+further notice. Only the *ngtcp2* backend is not experimental.
 
 Further development and tweaking of the HTTP/3 support in curl happens in the
 master branch using pull-requests like ordinary changes.
