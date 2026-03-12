@@ -36,15 +36,18 @@ struct UserDefined;
 #define REQ_IO_SEND       (1 << 1) /* there is or may be data to write */
 
 /* Low level request receive/send io_flags checks. */
-#define CURL_REQ_WANT_SEND(d) ((d)->req.io_flags & REQ_IO_SEND)
-#define CURL_REQ_WANT_RECV(d) ((d)->req.io_flags & REQ_IO_RECV)
-#define CURL_REQ_WANT_IO(d)   ((d)->req.io_flags & (REQ_IO_RECV|REQ_IO_SEND))
+#define CURL_REQ_WANT_SEND(d)  ((d)->req.io_flags & REQ_IO_SEND)
+#define CURL_REQ_WANT_RECV(d)  ((d)->req.io_flags & REQ_IO_RECV)
+#define CURL_REQ_WANT_IO(d)    ((d)->req.io_flags & (REQ_IO_RECV|REQ_IO_SEND))
 /* Low level request receive/send io_flags manipulations. */
-#define CURL_REQ_CLEAR_SEND(d)((d)->req.io_flags &= ~REQ_IO_SEND)
-#define CURL_REQ_CLEAR_RECV(d)((d)->req.io_flags &= ~REQ_IO_RECV)
-#define CURL_REQ_CLEAR_IO(d)  ((d)->req.io_flags &= ~(REQ_IO_RECV|REQ_IO_SEND))
 #define CURL_REQ_SET_SEND(d)  ((d)->req.io_flags |= REQ_IO_SEND)
 #define CURL_REQ_SET_RECV(d)  ((d)->req.io_flags |= REQ_IO_RECV)
+#define CURL_REQ_CLEAR_SEND(d) \
+  ((d)->req.io_flags &= (uint8_t)~REQ_IO_SEND)
+#define CURL_REQ_CLEAR_RECV(d) \
+  ((d)->req.io_flags &= (uint8_t)~REQ_IO_RECV)
+#define CURL_REQ_CLEAR_IO(d)  \
+  ((d)->req.io_flags &= (uint8_t)~(REQ_IO_RECV|REQ_IO_SEND))
 
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, send the body now */
