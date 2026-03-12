@@ -580,14 +580,14 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     if(!result) {
       struct tm utc;
       result = curlx_gmtime(secs, &utc);
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__)  /* include llvm/clang though not affected as of v22 */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
       if(curlx_dyn_len(&format) && !result &&
          strftime(output, sizeof(output), curlx_dyn_ptr(&format), &utc))
         fputs(output, stream);
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
       curlx_dyn_free(&format);
