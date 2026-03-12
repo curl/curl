@@ -18,7 +18,7 @@ Curl_compareheader unit test
 
 <verify>
 <stdout mode="text">
-16 invokes
+31 invokes
 </stdout>
 </verify>
 </testcase>

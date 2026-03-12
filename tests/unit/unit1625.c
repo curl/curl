@@ -39,10 +39,34 @@ static CURLcode test_unit1625(const char *arg)
   static const struct check1625 list[] = {
     /* basic case */
     { "Encoding: gzip, chunked", "Encoding:", "chunked", TRUE },
+    /* single value */
+    { "Encoding: chunked", "Encoding:", "chunked", TRUE },
+    /* third token */
+    { "Encoding: a, b, chunked", "Encoding:", "chunked", TRUE },
+    /* fourth token */
+    { "Encoding: a, b, c, chunked", "Encoding:", "chunked", TRUE },
+    /* in middle of three tokens */
+    { "Encoding: a, chunked, ninja", "Encoding:", "chunked", TRUE },
+    /* empty incoming header */
+    { "Encoding:", "Encoding:", "chunked", FALSE },
+    /* just spaces in header */
+    { "Encoding:   ", "Encoding:", "chunked", FALSE },
+    /* last among several with no spaces */
+    { "Encoding: ab,cd,ef,gh,ig,kl", "Encoding:", "kl", TRUE },
+    /* double commas */
+    { "Encoding: ab,,kl", "Encoding:", "kl", TRUE },
+    /* repeated commas */
+    { "Encoding: ab,cd,,,,kl", "Encoding:", "kl", TRUE },
+    /* first token of four */
+    { "Encoding: chunked, a, b, c", "Encoding:", "chunked", TRUE },
     /* different case */
     { "Encoding: gzip, chunked", "Encoding:", "CHUNKED", TRUE },
     /* another different case */
     { "Encoding: gzip, CHUNKED", "Encoding:", "chunked", TRUE },
+    /* incoming header different case */
+    { "encoDING: gzip, CHUNKED", "encoding:", "chunked", TRUE },
+    /* incoming header upper case */
+    { "ENCODING: gzip, chunked", "encoding:", "chunked", TRUE },
     /* the other value */
     { "Encoding: gzip, chunked", "Encoding:", "gzip", TRUE },
     /* without space */
@@ -65,10 +89,16 @@ static CURLcode test_unit1625(const char *arg)
     { "Encoding: gzip, chunked", "Encodin:", "chunked", FALSE },
     /* prefix only */
     { "Encoding: gzip2, chunked", "Encoding:", "gzip", FALSE },
+    /* prefix with letter */
+    { "Encoding: gzipp, chunked", "Encoding:", "gzip", FALSE },
     /* suffix only */
     { "Encoding: agzip, chunked", "Encoding:", "gzip", FALSE },
     /* not the right header */
     { "Decoding: gzip, chunked", "Encoding:", "gzip", FALSE },
+    /* hyphenated */
+    { "Encoding: super-nice", "Encoding:", "super-nice", TRUE },
+    /* hyphenated second token */
+    { "Encoding: extra-good, super-nice", "Encoding:", "super-nice", TRUE },
   };
   (void)arg;
 
