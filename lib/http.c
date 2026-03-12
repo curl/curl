@@ -214,6 +214,8 @@ static CURLcode copy_custom_value(const char *header, char **valp)
  *
  * This function MUST be used after the header has already been confirmed to
  * lead with "word:".
+ *
+ * @unittest: 1626
  */
 char *Curl_copy_header_value(const char *header)
 {
