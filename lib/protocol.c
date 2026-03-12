@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "urldata.h"
 #include "protocol.h"
 #include "strcase.h"
 

@@ -26,6 +26,10 @@
 /* This file is for lib internal stuff */
 #include "curl_setup.h"
 
+struct Curl_easy;
+struct connectdata;
+struct easy_pollset;
+
 /* Known protocol default port numbers */
 #define PORT_FTP    21
 #define PORT_FTPS   990
