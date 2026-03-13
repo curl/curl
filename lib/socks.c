@@ -790,7 +790,7 @@ static CURLproxycode socks5_req1_init(struct socks_state *sx,
 
   /* remote resolving, send what type+addr/string to resolve */
 #ifdef USE_IPV6
-  if(cf->conn->bits.ipv6_ip) {
+  if(strchr(sx->hostname, ':')) {
     desttype = 4;
     destination = ipbuf;
     destlen = 16;

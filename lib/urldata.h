@@ -338,8 +338,6 @@ struct ConnectBits {
                         that overrides the host in the URL */
   BIT(conn_to_port); /* if set, this connection has a "connect to port"
                         that overrides the port in the URL (remote port) */
-  BIT(ipv6_ip); /* we communicate with a remote site specified with pure IPv6
-                   IP address */
   BIT(ipv6);    /* we communicate with a site using an IPv6 address */
   BIT(do_more); /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */

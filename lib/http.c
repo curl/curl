@@ -2068,9 +2068,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
     }
   }
   else {
-    /* When building Host: headers, we must put the hostname within
-       [brackets] if the hostname is a plain IPv6-address. RFC2732-style. */
-    const char *host = conn->host.name;
+    /* Use the hostname as present in the URL if it was IPv6. */
+    char *host = (data->state.up.hostname[0] == '[') ?
+       data->state.up.hostname : conn->host.name;
 
     if(((conn->given->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS)) &&
         (conn->remote_port == PORT_HTTPS)) ||
@@ -2078,14 +2078,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
         (conn->remote_port == PORT_HTTP)))
       /* if(HTTPS on port 443) OR (HTTP on port 80) then do not include
          the port number in the host string */
-      aptr->host = curl_maprintf("Host: %s%s%s\r\n",
-                                 conn->bits.ipv6_ip ? "[" : "",
-                                 host, conn->bits.ipv6_ip ? "]" : "");
+      aptr->host = curl_maprintf("Host: %s\r\n", host);
     else
-      aptr->host = curl_maprintf("Host: %s%s%s:%d\r\n",
-                                 conn->bits.ipv6_ip ? "[" : "",
-                                 host, conn->bits.ipv6_ip ? "]" : "",
-                                 conn->remote_port);
+      aptr->host = curl_maprintf("Host: %s:%d\r\n", host, conn->remote_port);
 
     if(!aptr->host)
       /* without Host: we cannot make a nice request */

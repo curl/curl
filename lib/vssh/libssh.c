@@ -2422,13 +2422,9 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
-  if(conn->bits.ipv6_ip) {
-    char ipv6[MAX_IPADR_LEN];
-    curl_msnprintf(ipv6, sizeof(ipv6), "[%s]", conn->host.name);
-    rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST, ipv6);
-  }
-  else
-    rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST, conn->host.name);
+  rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST,
+                       (data->state.up.hostname[0] == '[') ?
+                       data->state.up.hostname : conn->host.name);
 
   if(rc != SSH_OK) {
     failf(data, "Could not set remote host");

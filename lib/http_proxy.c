@@ -183,10 +183,7 @@ void Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
   else
     *pport = cf->conn->remote_port;
 
-  if(*phostname != cf->conn->host.name)
-    *pipv6_ip = (strchr(*phostname, ':') != NULL);
-  else
-    *pipv6_ip = (bool)cf->conn->bits.ipv6_ip;
+  *pipv6_ip = (strchr(*phostname, ':') != NULL);
 }
 
 struct cf_proxy_ctx {
