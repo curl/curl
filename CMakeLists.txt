@@ -288,7 +288,7 @@ endif()
 option(CURL_GCC_ANALYZER "Enable GCC --analyzer option" OFF)
 if(CURL_GCC_ANALYZER AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
-  set(CURL_ANALYZE_CFLAGS "--analyzer")
+  set(CURL_ANALYZER_CFLAGS "--analyzer")
 endif()
 
 option(CURL_CODE_COVERAGE "Enable code coverage build options" OFF)
