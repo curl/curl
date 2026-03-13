@@ -300,7 +300,7 @@ jobs:
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
 
-          - name: 'gcc analyzer'
+          - name: 'gcc +analyzer'
             install_packages: libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: gsasl
