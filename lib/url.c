@@ -1889,7 +1889,7 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   }
 
 #ifdef USE_IPV6
-  /* IPv6 addresse with a scope_id (0 is default == global) have a
+  /* IPv6 addresses with a scope_id (0 is default == global) have a
    * printable representation with a '%<scope_id>' suffix. */
   if(conn->scope_id)
     conn->destination = curl_maprintf("[%s:%u]%%%d", hostname, port,
