@@ -375,6 +375,10 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
 
   (void)cf;
   DEBUGASSERT(data);
+
+  if(!data)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   stream = H2_STREAM_CTX(ctx, data);
   if(stream) {
     *pstream = stream;
