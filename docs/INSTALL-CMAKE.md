@@ -242,7 +242,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `schannel`, `rustls`
 - `CURL_DROP_UNUSED`:                       Drop unused code and data from built binaries. Default: `OFF`
 - `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
-- `CURL_GCC_ANALYZE`:                       Enable GCC `--analyzer` option. Default: `OFF`
+- `CURL_GCC_ANALYZER`:                      Enable GCC `--analyzer` option. Default: `OFF`
 - `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external). Default: `ON`
 - `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
 - `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
