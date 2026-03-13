@@ -158,7 +158,7 @@ static int setup_hx_upload(CURL *curl, const char *url, struct transfer_u *t,
   if(use_earlydata)
     curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
 
-  if(!strcmp("MIME", t->method)) {
+  if(t->method && !strcmp("MIME", t->method)) {
     curl_mimepart *part;
     t->mime = curl_mime_init(curl);
     part = curl_mime_addpart(t->mime);
