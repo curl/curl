@@ -310,7 +310,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
               -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
               -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
-              -DCMAKE_C_FLAGS=--analyzer -DCMAKE_UNITY_BUILD=OFF -DCURL_WERROR=OFF
+              -DCMAKE_C_FLAGS=--analyzer -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON -DCURL_WERROR=OFF
 
           - name: 'gcc analyzer H3 c-ares !examples'
             install_packages: libidn2-dev libssh-dev libnghttp2-dev
@@ -322,7 +322,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
-              -DCMAKE_C_FLAGS=--analyzer -DCMAKE_UNITY_BUILD=OFF -DCURL_WERROR=OFF
+              -DCMAKE_C_FLAGS=--analyzer -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON -DCURL_WERROR=OFF
 
           - name: 'address-sanitizer'
             install_packages: clang-20 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
