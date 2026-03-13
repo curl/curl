@@ -138,7 +138,7 @@ Build curl (with autotools):
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig --with-gnutls=/path/to/gnutls --with-ngtcp2 --with-nghttp3=/path/to/nghttp3
+     % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig --with-gnutls=/path/to/gnutls --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
      % make
      % make install
 
