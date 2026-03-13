@@ -1944,9 +1944,14 @@ static CURLcode cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                            char *buf, size_t len, size_t *pnread)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
+  struct h2_stream_ctx *stream;
   CURLcode result, r2;
   struct cf_call_data save;
+
+  if(!data)
+    return CURLE_HTTP2;
+
+  stream = H2_STREAM_CTX(ctx, data);
 
   *pnread = 0;
   if(!stream) {
