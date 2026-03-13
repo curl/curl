@@ -190,6 +190,9 @@ static CURLcode test_unit1609(const char *arg)
         break;
       }
 
+      if(!addr)
+        break;
+
       addr = addr->ai_next;
     }
 

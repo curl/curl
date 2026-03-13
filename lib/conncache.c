@@ -558,7 +558,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
 
-  if(!data)
+  if(!data || !data->multi)
     return kept;
 
   if(!data->multi->maxconnects) {

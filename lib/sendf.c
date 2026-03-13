@@ -1128,7 +1128,7 @@ CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
   struct cr_in_ctx *ctx;
 
   result = Curl_creader_create(&r, data, &cr_in, CURL_CR_CLIENT);
-  if(result)
+  if(result || !r)
     goto out;
   ctx = r->ctx;
   ctx->total_len = len;

@@ -1689,6 +1689,9 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   size_t nwritten;
 
+  if(!data)
+    return result;
+
   (void)ws;
   while(buflen) {
     result = Curl_xfer_send(data, buffer, buflen, FALSE, &nwritten);

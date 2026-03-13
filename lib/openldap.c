@@ -693,12 +693,18 @@ out:
 static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
                                        LDAPMessage *msg, int code)
 {
-  struct connectdata *conn = data->conn;
-  struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
+  struct connectdata *conn;
+  struct ldapconninfo *li;
   int rc;
   BerElement *ber = NULL;
   CURLcode result = CURLE_OK;
   struct berval bv, *bvals;
+
+  if(!data)
+    return CURLE_FAILED_INIT;
+
+  conn = data->conn;
+  li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
 
   if(!li)
     return CURLE_FAILED_INIT;
