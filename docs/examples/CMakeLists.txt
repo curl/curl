@@ -27,10 +27,6 @@ add_custom_target(curl-examples)
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(CURL_ANALYZE_CFLAGS)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS ${CURL_ANALYZE_CFLAGS})
-endif()
-
 set(_with_deps "")
 set(_all_src "")
 set(_all_canary "")
@@ -87,6 +83,9 @@ foreach(_target IN LISTS COMPLICATED_MAY_BUILD check_PROGRAMS _all)  # keep 'COM
   endif()
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_NETWORK_AND_TIME_LIBS} ${_more_libs})
   target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES" "$<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>")
+  if(CURL_ANALYZE_CFLAGS)
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_OPTIONS ${CURL_ANALYZE_CFLAGS})
+  endif()
   set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME "${_target}" PROJECT_LABEL "Example ${_target}" UNITY_BUILD OFF)
 endforeach()
 
