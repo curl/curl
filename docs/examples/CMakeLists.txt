@@ -27,6 +27,10 @@ add_custom_target(curl-examples)
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+if(CURL_ANALYZE_CFLAGS)
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS ${CURL_ANALYZE_CFLAGS})
+endif()
+
 set(_with_deps "")
 set(_all_src "")
 set(_all_canary "")
