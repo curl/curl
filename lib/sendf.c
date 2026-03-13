@@ -675,7 +675,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   case 0:
     if((ctx->total_len >= 0) && (ctx->read_len < ctx->total_len)) {
       failf(data, "client read function EOF fail, "
-            "only %"FMT_OFF_T"/%"FMT_OFF_T " of needed bytes read",
+            "only %" FMT_OFF_T "/%" FMT_OFF_T " of needed bytes read",
             ctx->read_len, ctx->total_len);
       result = CURLE_READ_ERROR;
       break;
@@ -729,8 +729,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     *peos = (bool)ctx->seen_eos;
     break;
   }
-  CURL_TRC_READ(data, "cr_in_read(len=%zu, total=%"FMT_OFF_T
-                ", read=%"FMT_OFF_T") -> %d, nread=%zu, eos=%d",
+  CURL_TRC_READ(data, "cr_in_read(len=%zu, total=%" FMT_OFF_T
+                ", read=%" FMT_OFF_T ") -> %d, nread=%zu, eos=%d",
                 blen, ctx->total_len, ctx->read_len, result,
                 *pnread, *peos);
   return result;
@@ -1136,7 +1136,7 @@ CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
   cl_reset_reader(data);
   result = do_init_reader_stack(data, r);
 out:
-  CURL_TRC_READ(data, "add fread reader, len=%"FMT_OFF_T " -> %d",
+  CURL_TRC_READ(data, "add fread reader, len=%" FMT_OFF_T " -> %d",
                 len, result);
   return result;
 }

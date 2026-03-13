@@ -234,7 +234,7 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {
-        result = curlx_dyn_addf(reqp, "Content-Length: %" FMT_OFF_T"\r\n",
+        result = curlx_dyn_addf(reqp, "Content-Length: %" FMT_OFF_T "\r\n",
                                 req_clen);
         if(result)
           return result;
