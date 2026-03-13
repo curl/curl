@@ -300,6 +300,30 @@ jobs:
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
 
+          - name: 'gcc analyzer'
+            install_packages: libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
+            install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
+            install_steps_brew: gsasl
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/runner/mbedtls/lib -Wl,-rpath,/home/runner/rustls/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
+            PKG_CONFIG_PATH: /home/runner/wolfssl-opensslextra/lib/pkgconfig:/home/runner/mbedtls/lib/pkgconfig:/home/runner/rustls/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
+              -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
+              -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+              -DCMAKE_C_FLAGS=--analyzer
+
+          - name: 'gcc analyzer H3 c-ares !examples'
+            install_packages: libidn2-dev libssh-dev libnghttp2-dev
+            install_steps: skiprun
+            install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
+            LDFLAGS: -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
+            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON
+              -DCURL_DISABLE_VERBOSE_STRINGS=ON
+              -DCMAKE_C_FLAGS=--analyzer
+
           - name: 'address-sanitizer'
             install_packages: clang-20 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
