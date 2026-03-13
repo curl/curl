@@ -1609,6 +1609,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   CURLU *uh;
   CURLUcode uc;
   char *hostname;
+  size_t hlen;
   bool use_set_uh = (data->set.uh && !data->state.this_is_a_follow);
 
   up_free(data); /* cleanup previous leftovers first */
@@ -1667,17 +1668,16 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     failf(data, "Too long hostname (maximum is %d)", MAX_URL_LEN);
     return CURLE_URL_MALFORMAT;
   }
+
   hostname = data->state.up.hostname;
+  hlen = hostname ? strlen(hostname) : 0;
 
   if(hostname && hostname[0] == '[') {
     /* This looks like an IPv6 address literal. See if there is an address
        scope. */
-    size_t hlen;
-    conn->bits.ipv6_ip = TRUE;
-    /* cut off the brackets! */
+    /* cut off the brackets after copying this! */
     hostname++;
-    hlen = strlen(hostname);
-    hostname[hlen - 1] = 0;
+    hlen -= 2;
 
     zonefrom_url(uh, data, conn);
   }
@@ -1686,6 +1686,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   conn->host.rawalloc = curlx_strdup(hostname ? hostname : "");
   if(!conn->host.rawalloc)
     return CURLE_OUT_OF_MEMORY;
+  conn->host.rawalloc[hlen] = 0; /* cut off for ipv6 case */
   conn->host.name = conn->host.rawalloc;
 
   /*************************************************************
@@ -2819,10 +2820,11 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
   else {
     /* check whether the URL's hostname matches */
     size_t hostname_to_match_len;
+    bool ipv6_ip = (strchr(conn->host.name, ':') != NULL);
     char *hostname_to_match = curl_maprintf("%s%s%s",
-                                            conn->bits.ipv6_ip ? "[" : "",
+                                            ipv6_ip ? "[" : "",
                                             conn->host.name,
-                                            conn->bits.ipv6_ip ? "]" : "");
+                                            ipv6_ip ? "]" : "");
     if(!hostname_to_match)
       return CURLE_OUT_OF_MEMORY;
     hostname_to_match_len = strlen(hostname_to_match);
