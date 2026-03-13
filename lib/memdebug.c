@@ -99,6 +99,7 @@ static void curl_dbg_log_locked(const char *format, ...) CURL_PRINTF(1, 2);
    _exit() comes after the atexit handlers are called. curl/curl#6620 */
 static void curl_dbg_cleanup(void)
 {
+  bool locked = curl_dbg_lock();
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
@@ -108,6 +109,7 @@ static void curl_dbg_cleanup(void)
     fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
+  curl_dbg_unlock(locked);
 #ifdef USE_MUTEX
   if(dbg_mutex_init) {
     Curl_mutex_destroy(&dbg_mutex);
