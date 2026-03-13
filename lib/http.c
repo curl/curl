@@ -2068,8 +2068,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
     }
   }
   else {
-    /* Use the hostname as present in the URL. */
-    const char *host = data->state.up.hostname;
+    /* Use the hostname as present in the URL if it was IPv6. */
+    char *host = (data->state.up.hostname[0] == '[') ?
+       data->state.up.hostname : conn->host.name;
 
     if(((conn->given->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS)) &&
         (conn->remote_port == PORT_HTTPS)) ||

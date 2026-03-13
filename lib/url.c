@@ -2818,20 +2818,14 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
     ptr++;
   }
   else {
-    /* check whether the URL's hostname matches */
-    size_t hostname_to_match_len;
-    bool ipv6_ip = (strchr(conn->host.name, ':') != NULL);
-    char *hostname_to_match = curl_maprintf("%s%s%s",
-                                            ipv6_ip ? "[" : "",
-                                            conn->host.name,
-                                            ipv6_ip ? "]" : "");
-    if(!hostname_to_match)
-      return CURLE_OUT_OF_MEMORY;
-    hostname_to_match_len = strlen(hostname_to_match);
-    host_match = curl_strnequal(ptr, hostname_to_match,
-                                hostname_to_match_len);
-    curlx_free(hostname_to_match);
-    ptr += hostname_to_match_len;
+    /* check whether the URL's hostname matches. Use the url hostname
+     * when it was an IPv6 address. Otherwise use the connection's hostname
+     * that has IDN conversion. */
+    char *hostname_to_match = (data->state.up.hostname[0] == '[') ?
+       data->state.up.hostname : conn->host.name;
+    size_t hlen = strlen(hostname_to_match);
+    host_match = curl_strnequal(ptr, hostname_to_match, hlen);
+    ptr += hlen;
 
     host_match = host_match && *ptr == ':';
     ptr++;
