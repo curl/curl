@@ -774,8 +774,11 @@
 #define USE_SSH
 #endif
 
-/* GCC <4.6 does not support '#pragma GCC diagnostic push' and
-   does not support 'pragma GCC diagnostic' inside functions. */
+/* GCC <4.6 does not support '#pragma GCC diagnostic push' and does not support
+   'pragma GCC diagnostic' inside functions.
+   Note that CURL_GNUC_DIAG is not interchangeable with __GNUC__: The latter is
+   also set by clang (but not by clang-cl), which maps itself to GCC version
+   4.2.1, leaving this macro undefined for clang. */
 #if (defined(__GNUC__) && \
   ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
 #define CURL_GNUC_DIAG
