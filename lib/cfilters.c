@@ -823,11 +823,13 @@ void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
                                 const char **phost, int *pport)
 {
   struct Curl_cfilter *cf, *cf_proxy = NULL;
+  int portarg = -1;
 
   if(!data->conn) {
     DEBUGASSERT(0);
     *phost = "";
-    *pport = -1;
+    if(pport)
+      *pport = -1;
     return;
   }
 
@@ -843,12 +845,14 @@ void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
    * to an interim host and any authentication or other things apply
    * to this interim host and port. */
   if(!cf_proxy || cf_proxy->cft->query(cf_proxy, data, CF_QUERY_HOST_PORT,
-                                       pport, CURL_UNCONST(phost))) {
+                                       &portarg, CURL_UNCONST(phost))) {
     /* Everything connected or query unsuccessful, the overall
      * connection's destination is the answer */
     *phost = data->conn->host.name;
-    *pport = data->conn->remote_port;
+    portarg = data->conn->remote_port;
   }
+  if(pport)
+    *pport = portarg;
 }
 
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
