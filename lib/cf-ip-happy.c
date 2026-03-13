@@ -662,7 +662,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
     else
 #endif
     {
-      int port;
+      uint16_t port;
       if(cf->sockindex == SECONDARYSOCKET)
         port = conn->secondary_port;
       else if(cf->conn->bits.conn_to_port)
@@ -808,8 +808,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
         bool is_ipv6;
         if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
           const char *host;
-          int port;
-          Curl_conn_get_current_host(data, cf->sockindex, &host, &port);
+          Curl_conn_get_current_host(data, cf->sockindex, &host, NULL);
           CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
                       host, ipquad.remote_ip, ipquad.remote_port);
         }

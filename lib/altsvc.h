@@ -30,7 +30,7 @@
 
 struct althost {
   char *host;
-  unsigned short port;
+  uint16_t port;
   enum alpnid alpnid;
 };
 

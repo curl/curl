@@ -415,9 +415,8 @@ static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
       data->set.str[STRING_SERVICE_NAME] :
       sctx->sasl->params->service;
     const char *hostname;
-    int port;
 
-    Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
+    Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, NULL);
 
     sctx->mech = SASL_MECH_STRING_NTLM;
     sctx->state1 = SASL_NTLM;

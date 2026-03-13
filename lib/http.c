@@ -1210,12 +1210,12 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     /* Clear auth if this redirects to a different port number or protocol,
        unless permitted */
     if(!data->set.allow_auth_to_other_hosts && (type != FOLLOW_FAKE)) {
-      int port;
+      uint16_t port;
       bool clear = FALSE;
 
       if(data->set.use_port && data->state.allow_port)
         /* a custom port is used */
-        port = (int)data->set.use_port;
+        port = data->set.use_port;
       else {
         curl_off_t value;
         char *portnum;
@@ -1228,7 +1228,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         }
         p = portnum;
         curlx_str_number(&p, &value, 0xffff);
-        port = (int)value;
+        port = (uint16_t)value;
         curlx_free(portnum);
       }
       if(port != data->info.conn_remote_port) {
@@ -2974,7 +2974,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 #ifndef CURL_DISABLE_ALTSVC
   case H1_HD_ALT_USED:
     if(conn->bits.altused && !Curl_checkheaders(data, STRCONST("Alt-Used")))
-      result = curlx_dyn_addf(req, "Alt-Used: %s:%d\r\n",
+      result = curlx_dyn_addf(req, "Alt-Used: %s:%u\r\n",
                               conn->conn_to_host.name,
                               conn->conn_to_port);
     break;

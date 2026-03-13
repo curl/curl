@@ -674,20 +674,19 @@ struct connectdata {
      that subsequent bound-requested connections are not accidentally reusing
      wrong connections. */
   char *localdev;
-  uint16_t localportrange;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
-  /* The field below gets set in connect.c:connecthost() */
-  int remote_port; /* the remote port, not the proxy port! */
-  int conn_to_port; /* the remote port to connect to. valid only if
-                       bits.conn_to_port is set */
-
   uint32_t attached_xfers; /* # of attached easy handles */
 
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
 #endif
+  /* The field below gets set in connect.c:connecthost() */
+  uint16_t remote_port; /* the remote port, not the proxy port! */
+  uint16_t conn_to_port; /* the remote port to connect to. valid only if
+                            bits.conn_to_port is set */
+  uint16_t localportrange;
   uint16_t localport;
   uint16_t secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
