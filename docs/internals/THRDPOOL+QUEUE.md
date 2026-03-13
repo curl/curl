@@ -46,7 +46,7 @@ The pool is created with providing three callback functions:
 - `return`: after processing, the work item is returned and the pool has
    no longer have any memory of it.
 
-The pool only tries to "take" new work items when signalled. Calling
+The pool only tries to "take" new work items when told to. Calling
 `Curl_thrdpool_signal(pool, n)` awakens up to `n`threads which then
 take new work items. This may cause new threads being started. The other
 time a pool thread "take"s work it when it has finished
@@ -59,7 +59,7 @@ A thread pool can be destroyed via `Curl_thrdpool_destroy(pool, join)` where
 
 The thread pool operates use a mutex and condition variables to manage
 concurrency. All interactions and callback invocation are done under
-the pool's mutex lock, *except* the "process" calloback which is invoked
+the pool's mutex lock, *except* the "process" callback which is invoked
 unlocked.
 
 To avoid deadlocks, no callback must invoked other pool functions. Also,
@@ -104,7 +104,7 @@ the queue. Calling `Curl_thrdq_recv()` delivers processed items back.
 
 The thread queue operates use a mutex and condition variables to manage
 concurrency. All interactions and callback invocation are done under
-the queue's mutex lock, *except* the "process" calloback which is invoked
+the queue's mutex lock, *except* the "process" callback which is invoked
 unlocked.
 
 Users of a thread queue should not hold any reference to work items sent
