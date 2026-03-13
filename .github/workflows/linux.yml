@@ -174,11 +174,11 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
-          - name: 'openssl libssh2 sync-resolver valgrind 1'
+          - name: 'openssl libssh2 sync-resolver valgrind 1 +analyzer'
             image: ubuntu-24.04-arm
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             tflags: '--min=920 1 to 950'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON -DCURL_WERROR=OFF
 
           - name: 'openssl libssh2 sync-resolver valgrind 2'
             image: ubuntu-24.04-arm
@@ -197,11 +197,11 @@ jobs:
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh2 --enable-debug --disable-verbose
 
-          - name: 'openssl -O3 libssh valgrind 1 +analyzer'
+          - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--min=920 1 to 950'
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_GCC_ANALYZER=ON -DCURL_WERROR=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl -O3 libssh valgrind 2'
             install_packages: libssh-dev valgrind
