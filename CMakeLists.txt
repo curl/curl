@@ -273,7 +273,7 @@ if(CURL_CLANG_TIDY)
     set(PICKY_COMPILER OFF)  # Do a best effort and skip passing non-clang warning options to clang-tidy.
     # This lets through warning options enabled via CURL_WERROR=ON, affecting lib and src.
   endif()
-  set(CURL_DISABLE_TYPECHECK ON)  # to improve performance (1.4x) and avoid potential interference.
+  set(CURL_DISABLE_TYPECHECK ON)  # to improve performance (1.4x), avoid potential interference and bugprone-macro-parentheses.
   set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}")
   list(APPEND CMAKE_C_CLANG_TIDY "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy.yml")
   if(CURL_WERROR)
