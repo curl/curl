@@ -31,7 +31,7 @@
 /* forward declarations */
 struct UserDefined;
 
-/* Flags on the io_flags member of the Curl_transfer_keeper */
+/* Bits on the io_flags member of SingleRequest */
 #define REQ_IO_RECV       (1 << 0) /* there is or may be data to read */
 #define REQ_IO_SEND       (1 << 1) /* there is or may be data to write */
 
