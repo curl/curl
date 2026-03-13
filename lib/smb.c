@@ -1062,6 +1062,11 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
       break;
     }
     smb_m = (const struct smb_nt_create_response *)msg;
+    if(smb_m->word_count != SMB_WC_NT_CREATE_ANDX) {
+      req->result = CURLE_RECV_ERROR;
+      next_state = SMB_TREE_DISCONNECT;
+      break;
+    }
     req->fid = smb_swap16(smb_m->fid);
     data->req.offset = 0;
     if(data->state.upload) {
@@ -1086,6 +1091,11 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
 
   case SMB_DOWNLOAD:
     if(h->status || smbc->got < sizeof(struct smb_header) + 15) {
+      req->result = CURLE_RECV_ERROR;
+      next_state = SMB_CLOSE;
+      break;
+    }
+    if(((unsigned char *)msg)[sizeof(struct smb_header)] != SMB_WC_READ_ANDX) {
       req->result = CURLE_RECV_ERROR;
       next_state = SMB_CLOSE;
       break;
@@ -1115,6 +1125,11 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
 
   case SMB_UPLOAD:
     if(h->status || smbc->got < sizeof(struct smb_header) + 7) {
+      req->result = CURLE_UPLOAD_FAILED;
+      next_state = SMB_CLOSE;
+      break;
+    }
+    if(((unsigned char *)msg)[sizeof(struct smb_header)] != SMB_WC_WRITE_ANDX) {
       req->result = CURLE_UPLOAD_FAILED;
       next_state = SMB_CLOSE;
       break;
