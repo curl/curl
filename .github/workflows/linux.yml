@@ -300,6 +300,20 @@ jobs:
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
 
+          - name: 'gcc analyzer gcc-15'
+            install_packages: gcc-15 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
+            install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
+            install_steps_brew: gsasl
+            CC: gcc-15
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/runner/mbedtls/lib -Wl,-rpath,/home/runner/rustls/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
+            PKG_CONFIG_PATH: /home/runner/wolfssl-opensslextra/lib/pkgconfig:/home/runner/mbedtls/lib/pkgconfig:/home/runner/rustls/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
+            generate: >-
+              -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
+              -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON
+              -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+              -DCMAKE_C_FLAGS=--analyzer -DCMAKE_UNITY_BUILD=OFF -DCURL_WERROR=OFF
+              -DCMAKE_C_COMPILER=gcc-15
+
           - name: 'gcc analyzer'
             install_packages: libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
