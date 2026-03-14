@@ -288,7 +288,9 @@ endif()
 option(CURL_GCC_ANALYZER "Enable GCC --analyzer option" OFF)
 if(CURL_GCC_ANALYZER AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0)
   set(CURL_DISABLE_TYPECHECK ON)  # to improve performance (1.1x).
+  # https://gcc.gnu.org/onlinedocs/gcc/Static-Analyzer-Options.html
   set(CURL_ANALYZER_CFLAGS "-fanalyzer")
+  # disable checks causing false positives (only)
   list(APPEND CURL_ANALYZER_CFLAGS "-Wno-analyzer-fd-leak" "-Wno-analyzer-fd-use-without-check" "-Wno-analyzer-file-leak")
   list(APPEND CURL_ANALYZER_CFLAGS "-Wno-analyzer-malloc-leak")
 endif()
