@@ -125,7 +125,7 @@ if(CURL_CLANG_TIDY)
   set_target_properties(${EXE_NAME} PROPERTIES UNITY_BUILD OFF)
 endif()
 if(CURL_ANALYZER_CFLAGS)
-  set_target_properties(${EXE_NAME} PROPERTIES UNITY_BUILD OFF)
+  set_target_properties(${EXE_NAME} PROPERTIES UNITY_BUILD ON)  # to avoid memleak false positive
   set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_OPTIONS ${CURL_ANALYZER_CFLAGS})
 endif()
 
