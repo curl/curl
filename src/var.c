@@ -213,7 +213,9 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
   curlx_dyn_init(out, MAX_EXPAND_CONTENT);
   do {
     envp = strstr(line, "{{");
-    if((envp > line) && envp && envp[-1] == '\\') {
+    if(!envp)
+      break;
+    if((envp > line) && envp[-1] == '\\') {
       /* preceding backslash, we want this verbatim */
 
       /* insert the text up to this point, minus the backslash */
@@ -227,7 +229,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
         return PARAM_NO_MEM;
       line = &envp[2];
     }
-    else if(envp) {
+    else {
       char name[MAX_VAR_LEN];
       size_t nlen;
       size_t i;
@@ -320,8 +322,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
       }
       line = &clp[2];
     }
-
-  } while(envp);
+  } while(1);
   if(added && *line) {
     /* add the "suffix" as well */
     result = curlx_dyn_add(out, line);
