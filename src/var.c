@@ -213,7 +213,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
   curlx_dyn_init(out, MAX_EXPAND_CONTENT);
   do {
     envp = strstr(line, "{{");
-    if(envp && (envp > line) && envp[-1] == '\\') {
+    if((envp > line) && envp && envp[-1] == '\\') {
       /* preceding backslash, we want this verbatim */
 
       /* insert the text up to this point, minus the backslash */
