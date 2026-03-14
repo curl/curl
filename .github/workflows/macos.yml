@@ -317,7 +317,7 @@ jobs:
           - name: 'aws-lc +analyzer'
             compiler: gcc-15
             install: aws-lc
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/aws-lc -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON -DCURL_GCC_ANALYZER=ON -DCURL_WERROR=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/aws-lc -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON -DCURL_GCC_ANALYZER=ON
           - name: 'Rustls'
             compiler: clang
             install: rustls-ffi
