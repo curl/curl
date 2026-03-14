@@ -178,7 +178,7 @@ jobs:
             image: ubuntu-24.04-arm
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             tflags: '--min=920 1 to 950'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON -DCURL_WERROR=OFF
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON
 
           - name: 'openssl libssh2 sync-resolver valgrind 2'
             image: ubuntu-24.04-arm
