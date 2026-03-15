@@ -346,6 +346,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
+      CURL_TRACE_PKG_CONFIG: '1'
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
     strategy:
