@@ -377,6 +377,7 @@ jobs:
               --enable-unity
 
           - name: 'libressl'
+            # Intentionally using '--with-ngtcp2=<path>' to test this way of configuration, in addition to '--with-ngtcp2' + 'PKG_CONFIG_PATH' in other jobs.
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1790'
             generate: >-
