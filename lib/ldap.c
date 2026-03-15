@@ -388,7 +388,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   }
 
 #ifdef USE_WIN32_LDAP
-  ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
   rc = ldap_win_bind(data, server, user, passwd);
 #else
   rc = ldap_simple_bind_s(server, user, passwd);
