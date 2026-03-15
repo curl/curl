@@ -303,9 +303,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   if(ldap_ssl)
     server = ldap_sslinit(host, (curl_ldap_num_t)ipquad.remote_port, 1);
   else
-#else
-    server = ldap_init(host, (curl_ldap_num_t)ipquad.remote_port);
 #endif
+    server = ldap_init(host, (curl_ldap_num_t)ipquad.remote_port);
   if(!server) {
     failf(data, "LDAP: cannot setup connect to %s:%u",
           conn->host.dispname, ipquad.remote_port);
