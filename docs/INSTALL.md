@@ -135,6 +135,10 @@ curl can be built to use a whole range of libraries to provide various useful
 services, and configure tries to auto-detect a decent default. If you want to
 alter it, you can select how to deal with each individual library.
 
+To debug the build itself, you can set the environment variable
+`CURL_TRACE_PKG_CONFIG` to a non-empty value to enable detailed trace
+information and verbose errors from `pkg-config` module detection invocations.
+
 ## Select TLS backend
 
 These options are provided to select the TLS backend to use.

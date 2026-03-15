@@ -1326,6 +1326,29 @@ AC_DEFUN([CURL_EXPORT_PCDIR], [
   fi
 ])
 
+dnl CURL_TRACE_PCDIR ($module, [$pcdir])
+dnl ------------------------
+dnl show pkg-config module lookup details, along with a detailed errors
+dnl message in case of failure. Supports both pkg-config and pkgconf.
+dnl
+
+AC_DEFUN([CURL_TRACE_PCDIR], [
+  dnl Example pkgconf line:
+  dnl   libpkgconf/pkg.c:746 [pkgconf_pkg_t *pkgconf_pkg_try_specific_path(pkgconf_client_t *, [...]*)]: trying path: /usr/local/lib/pkgconfig for libngtcp2_crypto_gnutls
+  dnl Rest of strings are for catching classic pkg-config lines.
+  trc=`CURL_EXPORT_PCDIR([$2]) dnl
+    $PKGCONFIG --exists --debug $1 2>&1 | $EGREP '(trying path:|Adding directory|Looking for|Scanning directory|Cannot open directory)' | $SED 's/^.*trying path:/trying path:/'`
+  msg=`CURL_EXPORT_PCDIR([$2]) dnl
+    $PKGCONFIG --exists --print-errors $1 2>&1`
+  if test -n "$msg"; then
+    trc=`echo "$trc"; echo '==== error:'; echo "$msg"`
+  fi
+  AC_MSG_NOTICE([pkg-config --exists $1 trace:
+---- begin
+${trc}
+---- end])
+])
+
 dnl CURL_CHECK_PKGCONFIG ($module, [$pcdir])
 dnl ------------------------
 dnl search for the pkg-config tool. Set the PKGCONFIG variable to hold the
@@ -1354,10 +1377,16 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
     if test -z "$itexists"; then
       dnl pkg-config does not have info about the given module! set the
       dnl variable to 'no'
-      PKGCONFIG="no"
       AC_MSG_RESULT([no])
+      if test -n "$CURL_TRACE_PKG_CONFIG$CURL_CI"; then
+        CURL_TRACE_PCDIR([$1], [$2])
+      fi
+      PKGCONFIG="no"
     else
       AC_MSG_RESULT([found])
+      if test -n "$CURL_TRACE_PKG_CONFIG"; then
+        CURL_TRACE_PCDIR([$1], [$2])
+      fi
     fi
   fi
 ])
