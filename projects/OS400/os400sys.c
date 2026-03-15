@@ -218,7 +218,7 @@ static char *buffer_undef(localkey_t key, long size)
        * buffer headers. */
       locbufs = calloc((size_t)LK_LAST, sizeof(*locbufs));
       if(!locbufs) {
-        pthread_mutex_unlock(&mutex); /* For symetry: will probably fail. */
+        pthread_mutex_unlock(&mutex); /* For symmetry: will probably fail. */
         return (char *)NULL;
       }
       else
