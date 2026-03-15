@@ -448,6 +448,7 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
   data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
+  curlx_free(data->state.async.hostname);
   data->state.async.hostname = curlx_strdup(hostname);
   if(!data->state.async.hostname)
     return CURLE_OUT_OF_MEMORY;
