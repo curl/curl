@@ -2167,7 +2167,7 @@ if(NOT CURL_DISABLE_INSTALL)
       if(NOT _libs AND NOT _libdirs)
         message(WARNING "Bad lib in library list: ${_lib}")
       endif()
-      if(_lib STREQUAL OpenSSL::SSL)
+      if(_lib STREQUAL OpenSSL::SSL AND NOT HAVE_BORINGSSL)  # BoringSSL does not provide openssl.pc
         set(_modules "openssl")
       elseif(_lib STREQUAL ZLIB::ZLIB)
         set(_modules "zlib")

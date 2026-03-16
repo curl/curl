@@ -260,7 +260,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
     ],[
       AC_MSG_RESULT([yes])
       ssl_msg="AWS-LC"
-      OPENSSL_IS_BORINGSSL=1
+      OPENSSL_IS_AWSLC=1
     ],[
       AC_MSG_RESULT([no])
     ])
@@ -325,7 +325,9 @@ if test "x$OPT_OPENSSL" != "xno"; then
       fi
     fi
     check_for_ca_bundle=1
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
+    if test "$OPENSSL_IS_BORINGSSL" != "1"; then  dnl BoringSSL does not provide openssl.pc
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
+    fi
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
