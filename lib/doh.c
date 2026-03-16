@@ -510,6 +510,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
     result = doh_probe_run(data, CURL_DNS_TYPE_HTTPS,
                            qname ? qname : async->hostname,
                            data->set.str[STRING_DOH], data->multi,
+                           async->id,
                            &dohp->probe_resp[DOH_SLOT_HTTPS_RR].probe_mid);
     curlx_free(qname);
     if(result)
