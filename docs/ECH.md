@@ -247,42 +247,42 @@ moment:
 
 - We could easily add code to make use of an `alpn=` value found in an HTTPS
   RR, passing that on to OpenSSL for use as the "inner" ALPN value, but have
-yet to do that.
+  yet to do that.
 
 Current limitations (more interesting than the above):
 
 - Only the first HTTPS RR value retrieved is actually processed as described
   above, that could be extended in future, though picking the "right" HTTPS RR
-could be non-trivial if multiple RRs are published - matching IP address hints
-versus A/AAAA values might be a good basis for that. Last I checked though,
-browsers supporting ECH did not handle multiple HTTPS RRs well, though that
-needs re-checking as it has been a while.
+  could be non-trivial if multiple RRs are published - matching IP address
+  hints versus A/AAAA values might be a good basis for that. Last I checked
+  though, browsers supporting ECH did not handle multiple HTTPS RRs well, though
+  that needs re-checking as it has been a while.
 
 - It is unclear how one should handle any IP address hints found in an HTTPS RR.
   It may be that a bit of consideration of how "multi-CDN" deployments might
-emerge would provide good answers there, but for now, it is not clear how best
-curl might handle those values when present in the DNS.
+  emerge would provide good answers there, but for now, it is not clear how best
+  curl might handle those values when present in the DNS.
 
 - The SVCB/HTTPS RR specification supports a new "CNAME at apex" indirection
   ("aliasMode") - the current code takes no account of that at all. One could
-envisage implementing the equivalent of following CNAMEs in such cases, but
-it is not clear if that'd be a good plan. (As of now, chrome browsers do not seem
-to have any support for that "aliasMode" and we have not checked Firefox for that
-recently.)
+  envisage implementing the equivalent of following CNAMEs in such cases, but
+  it is not clear if that'd be a good plan. (As of now, chrome browsers do not
+  seem to have any support for that "aliasMode" and we have not checked Firefox
+  for that recently.)
 
 - We have not investigated what related changes or additions might be needed
   for applications using libcurl, as opposed to use of curl as a command line
-tool.
+  tool.
 
 - We have not yet implemented tests as part of the usual curl test harness as
-doing so would seem to require re-implementing an ECH-enabled server as part
-of the curl test harness. For now, we have a `./tests/ech_test.sh` script
-that attempts ECH with various test servers and with many combinations of the
-allowed command line options. While that is a useful test and has find issues,
-it is not comprehensive and we are not (as yet) sure what would be the right
-level of coverage. When running that script you should not have a
-`$HOME/.curlrc` file that affects ECH or some of the negative tests could
-produce spurious failures.
+  doing so would seem to require re-implementing an ECH-enabled server as part
+  of the curl test harness. For now, we have a `./tests/ech_test.sh` script
+  that attempts ECH with various test servers and with many combinations of the
+  allowed command line options. While that is a useful test and has find
+  issues, it is not comprehensive and we are not (as yet) sure what would be
+  the right level of coverage. When running that script you should not have a
+  `$HOME/.curlrc` file that affects ECH or some of the negative tests could
+  produce spurious failures.
 
 ## Building with cmake
 
@@ -453,7 +453,7 @@ In another window:
 
 ```sh
 cd $HOME/code/curl/
-./src/curl -vvv --insecure --connect-to foo.example.com:8443:localhost:8443  --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
+./src/curl -vvv --insecure --connect-to foo.example.com:8443:localhost:8443 --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
 ```
 
 ### Automated use of `retry_configs` not supported so far...
