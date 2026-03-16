@@ -61,6 +61,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
       struct dynbuf fbuffer;
+      char *newfile;
       curlx_dyn_init(&fbuffer, 1025);
       /* !checksrc! disable ERRNOVAR 1 */
       while(fd == -1 && /* have not successfully opened a file */
@@ -78,8 +79,11 @@ bool tool_create_output_file(struct OutStruct *outs,
           /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
-      outs->filename = curlx_dyn_ptr(&fbuffer); /* remember the new one */
-      outs->alloc_filename = TRUE;
+      newfile = curlx_dyn_ptr(&fbuffer); /* remember the new one */
+      if(newfile) {
+        outs->filename = newfile;
+        outs->alloc_filename = TRUE;
+      }
     }
     /* An else statement to not overwrite existing files and not retry with
        new numbered names (which would cover
