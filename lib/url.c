@@ -2746,7 +2746,7 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
     ptr++;
   }
   else {
-    /* check whether the URL's hostname matches. Use the url hostname
+    /* check whether the URL's hostname matches. Use the URL hostname
      * when it was an IPv6 address. Otherwise use the connection's hostname
      * that has IDN conversion. */
     char *hostname_to_match = (data->state.up.hostname[0] == '[') ?
