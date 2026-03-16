@@ -32,7 +32,7 @@ case "$OPT_WOLFSSL" in
     wolfpkg=""
     ;;
   *)
-    wolfpkg="$withval/lib/pkgconfig"
+    wolfpkg="$OPT_WOLFSSL/lib/pkgconfig"
     ;;
 esac
 
