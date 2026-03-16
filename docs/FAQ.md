@@ -248,7 +248,7 @@ An incomprehensible description of the two numbers above is available on
 We strongly encourage you to submit changes and improvements directly as [pull
 requests on GitHub](https://github.com/curl/curl/pulls).
 
-If you cannot or choose not to engage with with GitHub, send your patch
+If you cannot or choose not to engage with GitHub, send your patch
 to the curl-library mailing list. We are many subscribers there and there are
 lots of people who can review patches, comment on them and receive them
 properly.
