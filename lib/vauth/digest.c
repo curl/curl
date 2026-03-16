@@ -470,7 +470,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     curl_msnprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
 
-  /* escape double quotes and backslashes in the realm and nonce as
+  /* escape double quotes and backslashes in the username, realm and nonce as
      necessary */
   qrealm = auth_digest_string_quoted(realm);
   qnonce = auth_digest_string_quoted(nonce);
