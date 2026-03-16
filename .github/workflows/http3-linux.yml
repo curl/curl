@@ -354,7 +354,7 @@ jobs:
       matrix:
         build:
           - name: 'openssl'
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1640'
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
@@ -362,7 +362,7 @@ jobs:
 
           - name: 'openssl ='
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1640'
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
@@ -379,7 +379,7 @@ jobs:
           - name: 'libressl'
             install_steps: skipall
             # Intentionally using '--with-ngtcp2=<path>' to test this way of configuration, in addition to bare '--with-ngtcp2' + 'PKG_CONFIG_PATH' in other jobs.
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/libressl/build/lib
               --with-openssl=/home/runner/libressl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ssls-export
@@ -387,7 +387,7 @@ jobs:
 
           - name: 'libressl BARE'
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/libressl/build/lib
               --with-openssl=/home/runner/libressl/build --with-ngtcp2= --enable-ssls-export
@@ -401,14 +401,14 @@ jobs:
 
           - name: 'awslc'
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/awslc/build/lib
               --with-openssl=/home/runner/awslc/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'awslc ='
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/awslc/build/lib
               --with-openssl=/home/runner/awslc/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ssls-export
@@ -422,14 +422,14 @@ jobs:
 
           - name: 'boringssl'
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2=/home/runner/ngtcp2-boringssl/build --enable-ssls-export
 
           - name: 'boringssl BARE'
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2 --enable-ssls-export
@@ -444,7 +444,7 @@ jobs:
           - name: 'gnutls'
             install_packages: libp11-kit-dev libssh-dev
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib -Wl,-rpath,/home/runner/nettle/build/lib64 -Wl,-rpath,/home/runner/ngtcp2/build/lib
             configure: >-
               --with-gnutls=/home/runner/gnutls/build --with-ngtcp2=/home/runner/ngtcp2/build --with-libssh --enable-ssls-export
@@ -452,7 +452,7 @@ jobs:
           - name: 'gnutls BARE'
             install_packages: libp11-kit-dev libssh-dev
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib -Wl,-rpath,/home/runner/nettle/build/lib64 -Wl,-rpath,/home/runner/ngtcp2/build/lib
             configure: >-
               --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --with-libssh --enable-ssls-export
@@ -469,7 +469,7 @@ jobs:
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
               --with-wolfssl=/home/runner/wolfssl/build --with-ngtcp2 --enable-ech --with-libssh2 --enable-ssls-export
@@ -478,7 +478,7 @@ jobs:
           - name: 'wolfssl ='
             install_packages: libssh2-1-dev
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
               --with-wolfssl=/home/runner/wolfssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --with-libssh2 --enable-ssls-export
