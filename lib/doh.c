@@ -213,44 +213,55 @@ static void doh_probe_done(struct Curl_easy *data,
 {
   struct Curl_resolv_async *async = data->state.async;
   struct doh_probes *dohp = async ? async->doh : NULL;
-  DEBUGASSERT(dohp);
-  if(dohp) {
-    struct doh_request *doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
-    int i;
+  struct doh_request *doh_req = NULL;
+  int i;
 
-    for(i = 0; i < DOH_SLOT_COUNT; ++i) {
-      if(dohp->probe_resp[i].probe_mid == doh->mid)
-        break;
-    }
-    if(i >= DOH_SLOT_COUNT) {
-      failf(data, "unknown sub request done");
-      return;
-    }
+  if(!dohp) {
+    DEBUGASSERT(0);
+    return;
+  }
 
-    dohp->pending--;
-    infof(doh, "a DoH request is completed, %u to go", dohp->pending);
-    dohp->probe_resp[i].result = result;
-    /* We expect either the meta data still to exist or the sub request
-     * to have already failed. */
-    DEBUGASSERT(doh_req || result);
-    if(doh_req) {
-      if(!result) {
-        dohp->probe_resp[i].dnstype = doh_req->dnstype;
-        result = curlx_dyn_addn(&dohp->probe_resp[i].body,
-                                curlx_dyn_ptr(&doh_req->resp_body),
-                                curlx_dyn_len(&doh_req->resp_body));
-        curlx_dyn_free(&doh_req->resp_body);
-      }
-      Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
-    }
+  doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
+  /* A DoH response may arrive for a resolve operation already cancelled. */
+  if(doh_req && (doh_req->async_id != async->id)) {
+    CURL_TRC_DNS(data, "ignoring DoH response from a previous resolve");
+    return;
+  }
 
-    if(result)
-      infof(doh, "DoH request %s", curl_easy_strerror(result));
+  for(i = 0; i < DOH_SLOT_COUNT; ++i) {
+    if(dohp->probe_resp[i].probe_mid == doh->mid)
+      break;
+  }
+  /* We really should have found the slot where to store the response */
+  if(i >= DOH_SLOT_COUNT) {
+    DEBUGASSERT(0);
+    failf(data, "DoH: unknown sub request done");
+    return;
+  }
 
-    if(!dohp->pending) {
-      /* DoH completed, run the transfer picking up the results */
-      Curl_multi_mark_dirty(data);
+  dohp->pending--;
+  infof(doh, "a DoH request is completed, %u to go", dohp->pending);
+  dohp->probe_resp[i].result = result;
+  /* We expect either the meta data still to exist or the sub request
+   * to have already failed. */
+  DEBUGASSERT(doh_req || result);
+  if(doh_req) {
+    if(!result) {
+      dohp->probe_resp[i].dnstype = doh_req->dnstype;
+      result = curlx_dyn_addn(&dohp->probe_resp[i].body,
+                              curlx_dyn_ptr(&doh_req->resp_body),
+                              curlx_dyn_len(&doh_req->resp_body));
+      curlx_dyn_free(&doh_req->resp_body);
     }
+    Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
+  }
+
+  if(result)
+    infof(doh, "DoH request %s", curl_easy_strerror(result));
+
+  if(!dohp->pending) {
+    /* DoH completed, run the transfer picking up the results */
+    Curl_multi_mark_dirty(data);
   }
 }
 
@@ -279,6 +290,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
                               DNStype dnstype,
                               const char *host,
                               const char *url, CURLM *multi,
+                              uint32_t async_id,
                               uint32_t *pmid)
 {
   struct Curl_easy *doh = NULL;
@@ -292,6 +304,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   doh_req = curlx_calloc(1, sizeof(*doh_req));
   if(!doh_req)
     return CURLE_OUT_OF_MEMORY;
+  doh_req->async_id = async_id;
   doh_req->dnstype = dnstype;
   curlx_dyn_init(&doh_req->resp_body, DYN_DOH_RESPONSE);
 
@@ -466,7 +479,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
   /* create IPv4 DoH request */
   result = doh_probe_run(data, CURL_DNS_TYPE_A,
                          async->hostname, data->set.str[STRING_DOH],
-                         data->multi,
+                         data->multi, async->id,
                          &dohp->probe_resp[DOH_SLOT_IPV4].probe_mid);
   if(result)
     goto error;
@@ -477,7 +490,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
     /* create IPv6 DoH request */
     result = doh_probe_run(data, CURL_DNS_TYPE_AAAA,
                            async->hostname, data->set.str[STRING_DOH],
-                           data->multi,
+                           data->multi, async->id,
                            &dohp->probe_resp[DOH_SLOT_IPV6].probe_mid);
     if(result)
       goto error;

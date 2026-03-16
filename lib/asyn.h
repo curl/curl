@@ -250,6 +250,7 @@ struct Curl_resolv_async {
 #ifndef CURL_DISABLE_DOH
   struct doh_probes *doh; /* DoH specific data for this request */
 #endif
+  uint32_t id; /* unique id per easy handle of the resolve operation */
    /* what is being resolved */
   uint16_t port;
   uint8_t ip_version;
