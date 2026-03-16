@@ -10,4 +10,4 @@ use File::Basename;
 
 chdir dirname(__FILE__) . "/..";
 
-system("scripts/badwords '**.md' projects/OS400/README.OS400 src lib include docs/examples < scripts/badwords.txt");
+exit system("scripts/badwords '**.md' projects/OS400/README.OS400 src lib include docs/examples < scripts/badwords.txt") >> 8;
