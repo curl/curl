@@ -515,12 +515,11 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
   }
 
   CURL_TRC_DNS(data, "[async] queueing %s", item->description);
+  /* queue takes ownership of `item` in any outcome */
   result = Curl_thrdq_send(data->multi->resolv_thrdq, item,
                            async_item_description(item), async->timeout_ms);
-  if(!result) {
-    item = NULL;
+  if(!result)
     async->thrdd.queued = TRUE;
-  }
 #ifdef CURLVERBOSE
   Curl_thrdq_trace(data->multi->resolv_thrdq, data, &Curl_trc_feat_dns);
 #endif
@@ -532,8 +531,6 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 #endif
 
 out:
-  if(item)
-    async_thrdd_item_free(item);
   if(result)
     CURL_TRC_DNS(data, "[async] error queueing %s:%d -> %d",
                  async->hostname, async->port, result);

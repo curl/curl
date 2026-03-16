@@ -79,7 +79,7 @@ void Curl_thrdq_stat(struct curl_thrdq *tqueue,
                      uint64_t *pnprocessed); /* total items processed */
 
 /* Send "item" onto the queue. The caller needs to clear any reference
- * to "item" on success, e.g. the queue takes ownership.
+ * to "item" on success or failure, e.g. the queue takes ownership.
  * `description` is an optional string describing the item for tracing
  * purposes. It needs to have the same lifetime as `item`.
  * Returns CURLE_AGAIN when the queue has already been full.

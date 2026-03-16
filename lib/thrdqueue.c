@@ -304,6 +304,7 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
+    item = NULL;
     Curl_llist_append(&tqueue->sendq, qitem, &qitem->node);
     result = CURLE_OK;
     signals = Curl_llist_count(&tqueue->sendq);
@@ -314,6 +315,8 @@ out:
   /* Signal thread pool unlocked to void deadlocks */
   if(!result && signals)
     result = Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
+  if(item) /* was not queued */
+    tqueue->fn_free(item);
   return result;
 }
 
