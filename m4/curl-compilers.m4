@@ -1191,6 +1191,18 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             fi
           fi
         fi
+        if test "$compiler_num" -ge "400" && test "$compiler_num" -lt "407"; then
+          dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84685
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-field-initializers"
+        fi
+        if test "$compiler_num" -ge "403" && test "$compiler_num" -lt "408"; then
+          dnl Avoid false positives
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-type-limits"
+        fi
+        if test "$compiler_num" -ge "501" && test "$compiler_num" -lt "505"; then
+          dnl Avoid false positives
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-conversion"
+        fi
         ;;
         #
       HP_UX_C)

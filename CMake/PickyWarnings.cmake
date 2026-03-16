@@ -378,6 +378,18 @@ if(PICKY_COMPILER)
         list(APPEND _picky "${_ccopt}")
       endif()
     endforeach()
+
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.0 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
+        list(APPEND _picky "-Wno-missing-field-initializers")  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=36750
+      endif()
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
+        list(APPEND _picky "-Wno-type-limits")  # Avoid false positives
+      endif()
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.1 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 5.5)
+        list(APPEND _picky "-Wno-conversion")  # Avoid false positives
+      endif()
+    endif()
   elseif(MSVC AND MSVC_VERSION LESS_EQUAL 1950)  # Skip for untested/unreleased newer versions
     list(APPEND _picky "-Wall")
     list(APPEND _picky "-wd4061")  # enumerator 'A' in switch of enum 'B' is not explicitly handled by a case label
