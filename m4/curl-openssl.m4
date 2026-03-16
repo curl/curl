@@ -325,7 +325,9 @@ if test "x$OPT_OPENSSL" != "xno"; then
       fi
     fi
     check_for_ca_bundle=1
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
+    if test "$OPENSSL_IS_BORINGSSL" != "1"; then  dnl BoringSSL does not provide openssl.pc
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
+    fi
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
