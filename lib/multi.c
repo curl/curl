@@ -307,10 +307,24 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
     goto error;
 #endif
 
+#ifdef CURLRES_THREADED
+  if(xfer_table_size < CURL_XFER_TABLE_SIZE) { /* easy multi */
+    if(Curl_async_thrdd_multi_init(multi, 0, 2, 10))
+      goto error;
+  }
+  else { /* real multi handle */
+    if(Curl_async_thrdd_multi_init(multi, 0, 20, 2000))
+      goto error;
+  }
+#endif
+
   return multi;
 
 error:
 
+#ifdef CURLRES_THREADED
+  Curl_async_thrdd_multi_destroy(multi, TRUE);
+#endif
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
   Curl_dnscache_destroy(&multi->dnscache);
@@ -2522,6 +2536,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
+#ifdef CURLRES_THREADED
+    Curl_async_thrdd_multi_process(multi);
+#endif
     Curl_cshutdn_perform(&multi->cshutdn, multi->admin, sigpipe_ctx);
     return CURLM_OK;
   }
@@ -2951,6 +2968,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       } while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry));
     }
 
+#ifdef CURLRES_THREADED
+    Curl_async_thrdd_multi_destroy(multi, TRUE);
+#endif
     Curl_cpool_destroy(&multi->cpool);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {

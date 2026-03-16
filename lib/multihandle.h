@@ -109,6 +109,9 @@ struct Curl_multi {
 
   struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
+#ifdef CURLRES_THREADED
+  struct curl_thrdq *resolv_thrdq;
+#endif
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
