@@ -205,7 +205,7 @@ static void doh_print_buf(struct Curl_easy *data,
 #endif
 
 /* called from multi when a sub transfer, e.g. doh probe, is done.
- * This looks up the the probe response at its meta CURL_EZM_DOH_PROBE
+ * This looks up the probe response at its meta CURL_EZM_DOH_PROBE
  * and copies the response body over to the struct at the master's
  * meta at CURL_EZM_DOH_MASTER. */
 static void doh_probe_done(struct Curl_easy *data,
