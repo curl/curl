@@ -521,7 +521,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache nettle'
-        if: ${{ matrix.build.name == 'gnutls' }}
+        if: ${{ contains(matrix.build.name, 'gnutls') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-nettle
         env:
@@ -532,7 +532,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
-        if: ${{ matrix.build.name == 'gnutls' }}
+        if: ${{ contains(matrix.build.name, 'gnutls') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-gnutls
         env:
@@ -543,7 +543,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache wolfssl'
-        if: ${{ matrix.build.name == 'wolfssl' }}
+        if: ${{ contains(matrix.build.name, 'wolfssl') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-wolfssl
         env:
@@ -594,7 +594,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache quiche'
-        if: ${{ matrix.build.name == 'quiche' }}
+        if: ${{ contains(matrix.build.name, 'quiche') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-quiche
         env:
@@ -604,7 +604,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true' }}
+        if: ${{ contains(matrix.build.name, 'quiche') && steps.cache-quiche.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth 1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
