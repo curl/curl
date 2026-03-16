@@ -356,6 +356,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char *spn         = NULL;
   char *qrealm;
   char *qnonce;
+  char *quserp;
 
   /* Decode the challenge message */
   CURLcode result = auth_decode_digest_md5_message(chlg,
@@ -473,16 +474,18 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
      necessary */
   qrealm = auth_digest_string_quoted(realm);
   qnonce = auth_digest_string_quoted(nonce);
-  if(qrealm && qnonce)
+  quserp = auth_digest_string_quoted(userp);
+  if(qrealm && qnonce && quserp)
     /* Generate the response */
     response = curl_maprintf("username=\"%s\",realm=\"%s\",nonce=\"%s\","
                              "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\","
                              "response=%s,qop=%s",
-                             userp, qrealm, qnonce,
+                             quserp, qrealm, qnonce,
                              cnonce, nonceCount, spn, resp_hash_hex, qop);
 
   curlx_free(qrealm);
   curlx_free(qnonce);
+  curlx_free(quserp);
   curlx_free(spn);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
