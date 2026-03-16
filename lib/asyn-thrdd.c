@@ -279,10 +279,6 @@ static CURLcode async_rr_start(struct Curl_easy *data,
 }
 #endif
 
-/*
- * Until we gain a way to signal the resolver threads to stop early, we must
- * simply wait for them and ignore their results.
- */
 void Curl_async_thrdd_shutdown(struct Curl_easy *data,
                               struct Curl_resolv_async *async)
 {

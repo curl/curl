@@ -422,6 +422,8 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
 #ifdef USE_CURL_ASYNC
   if(data->state.async)
     Curl_async_destroy(data);
+#else
+  (void)timeout_ms;
 #endif
 
 #ifndef CURL_DISABLE_DOH
@@ -536,7 +538,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     respwait = TRUE;
 #else
     respwait = FALSE; /* no async waiting here */
-    addr = Curl_sync_getaddrinfo(data, hostname, port, ip_version);
+    addr = Curl_sync_getaddrinfo(data, hostname, port, ip_version, transport);
     if(addr)
       result = CURLE_OK;
 #endif
