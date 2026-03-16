@@ -370,7 +370,7 @@ jobs:
 
           - name: 'openssl'
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON
@@ -394,7 +394,7 @@ jobs:
               --enable-unity
 
           - name: 'libressl'
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON
@@ -414,7 +414,7 @@ jobs:
               --with-openssl=/home/runner/awslc/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ssls-export
 
           - name: 'awslc'
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
@@ -435,7 +435,7 @@ jobs:
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'boringssl'
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1790'
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
@@ -459,7 +459,7 @@ jobs:
 
           - name: 'gnutls'
             install_packages: libp11-kit-dev libssh-dev
-            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
             tflags: '--min=1840'
             generate: >-
@@ -486,7 +486,7 @@ jobs:
 
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
-            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1840'
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
