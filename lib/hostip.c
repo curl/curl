@@ -51,6 +51,7 @@
 #include "httpsrr.h"
 #include "url.h"
 #include "multiif.h"
+#include "progress.h"
 #include "doh.h"
 #include "select.h"
 #include "strcase.h"
