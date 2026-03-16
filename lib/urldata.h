@@ -720,6 +720,7 @@ struct UrlState {
   struct Curl_dns_entry *dns[2]; /* DNS to connect FIRST/SECONDARY */
 #ifdef USE_CURL_ASYNC
   struct Curl_resolv_async *async;  /* asynchronous name resolver data */
+  uint32_t next_async_id; /* id of the next async resolve operation */
 #endif
 
 #ifdef USE_OPENSSL

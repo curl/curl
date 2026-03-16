@@ -383,6 +383,9 @@ static CURLcode hostip_async_new(struct Curl_easy *data,
   if(!async)
     return CURLE_OUT_OF_MEMORY;
 
+  /* Even if this wraps (unlikely), it will be in time so far apart
+   * that it does not matter for all practical purposes. */
+  async->id = data->state.next_async_id++;
   async->port = port;
   async->ip_version = ip_version;
   if(hostlen)

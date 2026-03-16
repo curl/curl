@@ -88,6 +88,7 @@ struct doh_request {
   struct curl_slist *req_hds;
   struct dynbuf resp_body;
   size_t req_body_len;
+  uint32_t async_id; /* transfer specific id of the resolve operation */
   DNStype dnstype;
 };
 
