@@ -2408,31 +2408,6 @@ end:
 
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
-#ifdef SSL2_VERSION_MAJOR  /* OpenSSL 1.0.2, LibreSSL <=3.9.2 */
-  if(ssl_ver == SSL2_VERSION_MAJOR) {
-    switch(msg) {
-    case SSL2_MT_ERROR:
-      return "Error";
-    case SSL2_MT_CLIENT_HELLO:
-      return "Client hello";
-    case SSL2_MT_CLIENT_MASTER_KEY:
-      return "Client key";
-    case SSL2_MT_CLIENT_FINISHED:
-      return "Client finished";
-    case SSL2_MT_SERVER_HELLO:
-      return "Server hello";
-    case SSL2_MT_SERVER_VERIFY:
-      return "Server verify";
-    case SSL2_MT_SERVER_FINISHED:
-      return "Server finished";
-    case SSL2_MT_REQUEST_CERTIFICATE:
-      return "Request CERT";
-    case SSL2_MT_CLIENT_CERTIFICATE:
-      return "Client CERT";
-    }
-  }
-  else
-#endif
   if(ssl_ver == SSL3_VERSION_MAJOR) {
     switch(msg) {
     case SSL3_MT_HELLO_REQUEST:
@@ -2531,11 +2506,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     return;
 
   switch(ssl_ver) {
-#ifdef SSL2_VERSION /* removed in recent versions */
-  case SSL2_VERSION:
-    verstr = "SSLv2";
-    break;
-#endif
 #ifdef SSL3_VERSION
   case SSL3_VERSION:
     verstr = "SSLv3";
