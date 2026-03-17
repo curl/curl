@@ -911,7 +911,7 @@ bool Curl_xfer_is_secure(struct Curl_easy *data)
   if(data->conn) {
     scheme = data->conn->scheme;
     /* if we are connected, but not use SSL, the transfer is not secure.
-     * This covers an insecured http:// proxy that is not tunneling.
+     * This covers an insecure http:// proxy that is not tunneling.
      * We enforce tunneling for such cases, but better be sure here. */
     if(Curl_conn_is_connected(data->conn, FIRSTSOCKET) &&
        !Curl_conn_is_ssl(data->conn, FIRSTSOCKET))
