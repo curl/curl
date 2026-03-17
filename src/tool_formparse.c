@@ -464,6 +464,10 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
       break;
     }
   }
+  if(error && !err) {
+    errorf("Failed to read field headers");
+    err = -1;
+  }
   curlx_dyn_free(&line);
   return err;
 }
