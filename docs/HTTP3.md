@@ -51,7 +51,7 @@ placeholders for the version you build.
 
 OpenSSL v3.5.0+ requires *ngtcp2* v1.12.0+. Earlier versions do not work.
 
-Build OpenSSL (v3.5.0+) or forks LibreSSL, AWS-LC, BoringSSL or quictls:
+Build OpenSSL (v3.5.0+) or fork LibreSSL, AWS-LC, BoringSSL or quictls:
 
      # Instructions for OpenSSL v3.5.0+
      % git clone --depth 1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
