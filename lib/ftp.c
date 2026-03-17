@@ -3079,8 +3079,16 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
             break; /* get out of this loop */
           }
         }
-        else
+        else {
+          if(((unsigned char)*ptr < 0x20) || (*ptr == 0x7f)) {
+            /* reject paths containing control characters to prevent
+               injection attacks when the path is later used in CWD */
+            curlx_dyn_free(&out);
+            failf(data, "FTP server returned path with control characters");
+            return CURLE_FTP_WEIRD_SERVER_REPLY;
+          }
           result = curlx_dyn_addn(&out, ptr, 1);
+        }
         if(result)
           return result;
       }
