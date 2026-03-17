@@ -41,6 +41,9 @@ class TestErrors:
     # download 1 file, check that we get CURLE_PARTIAL_FILE
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_05_01_partial_1(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and env.curl_uses_lib('quiche') and \
+                not env.curl_lib_version_at_least('quiche', '0.24.8'):
+            pytest.skip("quiche issue #2277 not fixed")
         count = 1
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
