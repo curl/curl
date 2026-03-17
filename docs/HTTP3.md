@@ -92,51 +92,6 @@ Build curl:
      % make
      % make install
 
-## Build with quictls
-
-OpenSSL before version 3.5 does not offer the required APIs for building a
-QUIC client. You need to use a TLS library that has such APIs and that works
-with *ngtcp2*.
-
-Build quictls (any `+quic` tagged version works):
-
-     % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
-     % cd openssl
-     % ./config enable-tls1_3 --prefix=/path/to/quictls --libdir=lib
-     % make
-     % make install
-
-Build nghttp3:
-
-     % cd ..
-     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
-     % cd nghttp3
-     % git submodule update --init
-     % autoreconf -fi
-     % ./configure --prefix=/path/to/nghttp3 --enable-lib-only
-     % make
-     % make install
-
-Build ngtcp2:
-
-     % cd ..
-     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
-     % cd ngtcp2
-     % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/quictls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/quictls/lib" --prefix=/path/to/ngtcp2 --enable-lib-only
-     % make
-     % make install
-
-Build curl:
-
-     % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
-     % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/quictls/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/quictls/lib" --with-openssl=/path/to/quictls --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
-     % make
-     % make install
-
 ## Build with GnuTLS
 
 Build GnuTLS:
