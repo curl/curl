@@ -32,7 +32,7 @@
 #include "curl_gssapi.h"
 #include "curl_trc.h"
 
-#if defined(CURL_GNUC_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -288,7 +288,7 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->havemultiplerequests = FALSE;
 }
 
-#if defined(CURL_GNUC_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 

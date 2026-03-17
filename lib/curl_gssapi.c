@@ -55,7 +55,7 @@
 #define CURL_ALIGN8
 #endif
 
-#if defined(CURL_GNUC_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -441,7 +441,7 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
 }
 #endif /* CURLVERBOSE */
 
-#if defined(CURL_GNUC_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 

@@ -35,7 +35,7 @@
 #include "socks.h"
 #include "curlx/strdup.h"
 
-#if defined(CURL_GNUC_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -526,7 +526,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-#if defined(CURL_GNUC_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 
