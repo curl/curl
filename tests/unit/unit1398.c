@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
@@ -195,6 +195,6 @@ static CURLcode test_unit1398(const char *arg)
   UNITTEST_END_SIMPLE
 }
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
