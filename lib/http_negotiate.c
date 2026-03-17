@@ -29,6 +29,7 @@
 #include "cfilters.h"
 #include "curl_trc.h"
 #include "http_negotiate.h"
+#include "transfer.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "curlx/strparse.h"
