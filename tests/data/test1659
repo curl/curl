@@ -8,6 +8,9 @@ FILE
 </info>
 
 <client>
+<features>
+file
+</features>
 <name>
 --connect-to when using file:// URL
 </name>
