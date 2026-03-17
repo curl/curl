@@ -2296,7 +2296,6 @@ CURLcode operate(int argc, argv_item_t argv[])
     if(found_curlrc) {
       /* After parse_args so notef knows the verbosity */
       notef("Read config file from '%s'", curlrc_path);
-      curlx_free(curlrc_path);
     }
     if(err) {
       result = CURLE_OK;
@@ -2394,7 +2393,7 @@ CURLcode operate(int argc, argv_item_t argv[])
         errorf("out of memory");
     }
   }
-
+  curlx_free(curlrc_path);
   varcleanup();
 
   return result;
