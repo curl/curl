@@ -47,13 +47,13 @@ improvements.
 The build examples use `$NGHTTP3_VERSION` and `$NGTCP2_VERSION` as
 placeholders for the version you build.
 
-## Build with OpenSSL
+## Build with OpenSSL or fork
 
-OpenSSL v3.5.0+ offers APIs for integration with *ngtcp2* v1.12.0+. Earlier
-versions do not work.
+OpenSSL v3.5.0+ requires *ngtcp2* v1.12.0+. Earlier versions do not work.
 
-Build OpenSSL (version 3.5.0 or newer):
+Build OpenSSL (v3.5.0+) or forks LibreSSL, AWS-LC, BoringSSL or quictls:
 
+     # Instructions for OpenSSL v3.5.0+
      % git clone --depth 1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
      % ./config --prefix=/path/to/openssl --libdir=lib
@@ -77,6 +77,7 @@ Build ngtcp2:
      % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
+     # Change --with-openssl to --with-boringssl for AWS-LC and BoringSSL
      % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --prefix=/path/to/ngtcp2 --enable-lib-only --with-openssl
      % make
      % make install
