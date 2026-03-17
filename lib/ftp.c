@@ -3082,11 +3082,7 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
         }
         else {
           if(ISCNTRL(*ptr)) {
-            /* \r or \n means the quote was never closed - treat as
-               a missing closing quote and stop extracting the path */
-            if(*ptr == '\r' || *ptr == '\n')
-              break;
-            /* other control characters have no business in a path */
+            /* control characters have no business in a path */
             curlx_dyn_free(&out);
             return CURLE_WEIRD_SERVER_REPLY;
           }
