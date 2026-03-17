@@ -263,7 +263,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   *buf = '\0';
 
 #ifdef _WIN32
-  if((!strerror_s(buf, buflen, err) || !strcmp(buf, "Unknown error")) &&
+  if((strerror_s(buf, buflen, err) || !strcmp(buf, "Unknown error")) &&
 #ifdef USE_WINSOCK
      !get_winsock_error(err, buf, buflen) &&
 #endif
