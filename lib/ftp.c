@@ -2196,6 +2196,12 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     }
   }
 
+  DEBUGASSERT(newhost);
+  curlx_free(conn->secondaryhostname);
+  conn->secondary_port = newport;
+  conn->secondaryhostname = newhost;
+  newhost = NULL;
+
   result = Curl_conn_setup(data, conn, SECONDARYSOCKET, dns,
                            conn->bits.ftp_use_data_ssl ?
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
@@ -2203,10 +2209,8 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   if(result) {
     if((result != CURLE_OUT_OF_MEMORY) &&
        (ftpc->count1 == 0) && (ftpcode == 229)) {
-      curlx_free(newhost);
-      return ftp_epsv_disable(data, ftpc, conn);
+      result = ftp_epsv_disable(data, ftpc, conn);
     }
-
     goto error;
   }
 
@@ -2223,17 +2227,10 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
      */
     char buf[256];
     Curl_printable_address(dns->addr, buf, sizeof(buf));
-    infof(data, "Connecting to %s (%s) port %d", newhost, buf, connectport);
+    infof(data, "Connecting to %s (%s) port %d",
+          conn->secondaryhostname, buf, connectport);
   }
 #endif
-
-  curlx_free(conn->secondaryhostname);
-  conn->secondary_port = newport;
-  conn->secondaryhostname = curlx_strdup(newhost);
-  if(!conn->secondaryhostname) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto error;
-  }
 
   conn->bits.do_more = TRUE;
   ftp_state(data, ftpc, FTP_STOP); /* this phase is completed */
