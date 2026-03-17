@@ -903,3 +903,25 @@ CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
   Curl_pgrsRecvPause(data, enable);
   return result;
 }
+
+bool Curl_xfer_is_secure(struct Curl_easy *data)
+{
+  const struct Curl_scheme *scheme = NULL;
+
+  if(data->conn) {
+    scheme = data->conn->scheme;
+    /* if we are connected, but not use SSL, the transfer is not secure.
+     * This covers an insecured http:// proxy that is not tunneling.
+     * We enforce tunneling for such cases, but better be sure here. */
+    if(Curl_conn_is_connected(data->conn, FIRSTSOCKET) &&
+       !Curl_conn_is_ssl(data->conn, FIRSTSOCKET))
+      return FALSE;
+  }
+  else if(data->info.conn_scheme) { /* was connected once */
+    scheme = Curl_get_scheme(data->info.conn_scheme);
+  }
+  else { /* never connected (yet?) */
+    DEBUGASSERT(0); /* not implemented, would need to parse url */
+  }
+  return scheme ? (scheme->flags & PROTOPT_SSL) : FALSE;
+}
