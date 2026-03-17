@@ -85,12 +85,12 @@ void logmsg(const char *msg, ...)
 
   va_start(ap, msg);
 /* Suppress for builds where CURL_PRINTF() is not set */
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
   vsnprintf(buffer, sizeof(buffer), msg, ap);
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
   va_end(ap);
