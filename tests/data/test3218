@@ -3,13 +3,15 @@
 <info>
 <keywords>
 FTP
+PASV
+RETR
 FAILURE
 </keywords>
 </info>
 # Server-side
 <reply>
 <servercmd>
-REPLY PWD 257 "just one
+REPLY PWD 257 %hex["/%0d"]hex%
 </servercmd>
 </reply>
 
@@ -19,10 +21,10 @@ REPLY PWD 257 "just one
 ftp
 </server>
 <name>
-FTP with unclosed quote in PWD response
+FTP with CR control character in PWD response path
 </name>
 <command>
-ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

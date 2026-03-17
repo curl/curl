@@ -68,6 +68,7 @@
 #include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curl_ctype.h"
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -3076,10 +3077,18 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
             break; /* get out of this loop */
           }
         }
-        else
+        else {
+          if(ISCNTRL(*ptr)) {
+            /* control characters have no business in a path */
+            curlx_dyn_free(&out);
+            return CURLE_WEIRD_SERVER_REPLY;
+          }
           result = curlx_dyn_addn(&out, ptr, 1);
-        if(result)
+        }
+        if(result) {
+          curlx_dyn_free(&out);
           return result;
+        }
       }
     }
     if(entry_extracted) {
