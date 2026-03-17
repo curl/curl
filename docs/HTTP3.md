@@ -82,7 +82,7 @@ Build ngtcp2:
      % make
      % make install
 
-Build curl:
+Build curl (with autotools):
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -91,6 +91,14 @@ Build curl:
      % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --with-openssl=/path/to/openssl --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
      % make
      % make install
+
+Build curl (with CMake):
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DOPENSSL_ROOT_DIR=/path/to/openssl -DUSE_NGTCP2=ON
+     % cmake --build bld
 
 ## Build with GnuTLS
 
@@ -124,7 +132,7 @@ Build ngtcp2:
      % make
      % make install
 
-Build curl:
+Build curl (with autotools):
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -133,6 +141,14 @@ Build curl:
      % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig --with-gnutls=/path/to/gnutls --with-ngtcp2 --with-nghttp3=/path/to/nghttp3
      % make
      % make install
+
+Build curl (with CMake):
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
+     % cmake --build bld
 
 ## Build with wolfSSL
 
@@ -166,7 +182,7 @@ Build ngtcp2:
      % make
      % make install
 
-Build curl:
+Build curl (with autotools):
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -175,6 +191,14 @@ Build curl:
      % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig --with-wolfssl=/path/to/wolfssl --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
      % make
      % make install
+
+Build curl (with CMake):
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
+     % cmake --build bld
 
 # quiche version
 
