@@ -4,7 +4,8 @@ curl and libcurl 8.19.1
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3624
+ Authors:                      1455
+ Contributors:                 3631
 
 This release includes the following changes:
 
@@ -12,20 +13,55 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o autotools: limit checksrc target to ignore non-repo test sources [12]
+ o badwords-all: exit with correct code on errors [50]
  o badwords: combine the whitelisting into a single regex [1]
+ o badwords: detect the the and with with [51]
+ o badwords: only check comments and strings in source code [61]
  o badwords: rework exceptions, fix many of them [15]
  o build: compiler warning silencing tidy-ups [4]
+ o build: drop `openssl` module dependency for BoringSSL from `libcurl.pc` [33]
+ o cmake: resolve imported targets recursively when generating `libcurl.pc` [45]
+ o cmake: rework binutils ld hack to not read `LOCATION` property [41]
+ o configure: fix `--with-ngtcp2=<path>` option for crypto libs [26]
  o configure: fix LibreSSL ngtcp2 1.15.0+ crypto lib selection logic [3]
+ o configure: prefer dependency-specific variables over `$withval` [35]
+ o curl-wolfssl.m4: fix to use the correct value for pkg-config directory [36]
+ o curl_ctype.h: fix spelling in a couple of locally used macros [28]
+ o curl_get_line: error out on read errors [9]
+ o curl_get_line: fix potential infinite loop when filename is a directory [46]
+ o digest: pass in the user name quoted (as well) [34]
+ o docs/lib: fix typos [53]
  o docs: minor wording tweaks
+ o doh: fix memory-leak when doing a second DoH resolve [55]
  o examples: drop warning silencers no longer hit [14]
+ o ftp: do not strdup DATA hostname [29]
  o hostip: clear the sockaddr_in6 structure before use [20]
  o HTTP3.md: drop outdated mentions of OpenSSL-QUIC [2]
  o http: fix Curl_compareheader for multi value headers [11]
  o http: make Curl_compareheader handle multiple commas in header
+ o imap: reset the UIDVALIDITY state between transfers [7]
+ o ldap: drop duplicate `ldap_set_option()` on Windows [42]
+ o ldap: fix to initialize cleartext connection on Windows [49]
  o libssh2: fix error handling on quote errors [21]
+ o mk-ca-bundle.pl: make generated timestamps deterministic [44]
+ o netrc: find login-less password when user is given in URL [6]
+ o openssl: drop obsolete SSLv2 logic [27]
  o openssl: trace count of found / imported Windows native CA roots [8]
+ o os400sys: fix typo in comment (symetry -> symmetry) [58]
+ o pytest: add additional quiche check for flaky test_05_01 [22]
+ o strerr: correct the strerror_s() return code condition [25]
  o test459: switch to mode="warn" for stderr check [5]
+ o tool_cb_wrt: fix no-clobber error handling [39]
+ o tool_cfgable: free the SSL signature algorithms [62]
+ o tool_ipfs: accept IPFS gateway URL without set port number [13]
+ o tool_operate: fix minor memory-leak on early error [23]
+ o tool_urlglob: fix memory-leak on glob range overflow [19]
+ o transfer: enhance secure check [10]
+ o url: use URL for url even in comments [52]
  o urlapi: verify the last letter of a scheme when set explicitly [16]
+ o urldata: connection bit ipv6_ip is wrong [59]
+ o urldata: import port types and conn destination format [57]
+ o urldata: remove trailers_state [17]
 
 This release includes the following known bugs:
 
@@ -49,10 +85,13 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Carlos Henrique Lima Melara, Daniel Stenberg, Henrique Pereira,
-  m777m0 on hackerone, Michael Hendricks, Orgad Shaneh, Otis Cui Lei,
-  Stefan Eissing, Viktor Szakats, Vladimír Marek
-  (10 contributors)
+  am-perip on hackerone, Carlos Henrique Lima Melara, crawfordxx,
+  Daniel Stenberg, Flavio Amieiro, Henrique Pereira, James Fuller,
+  lg_oled77c5pua on hackerone, m777m0 on hackerone, Martin Dürrmeier,
+  Michael Hendricks, Michael Kaufmann, Orgad Shaneh, Otis Cui Lei,
+  renovate[bot], Richard Tollerton, Stefan Eissing, Viktor Szakats,
+  Vladimír Marek, Yoshiro Yoneya
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -61,11 +100,46 @@ References to bug reports and discussions on issues:
  [3] = https://curl.se/bug/?i=20889
  [4] = https://curl.se/bug/?i=20908
  [5] = https://curl.se/bug/?i=20910
+ [6] = https://curl.se/bug/?i=20950
+ [7] = https://curl.se/bug/?i=20962
  [8] = https://curl.se/bug/?i=20899
+ [9] = https://curl.se/bug/?i=20958
+ [10] = https://curl.se/bug/?i=20951
  [11] = https://curl.se/bug/?i=20894
  [12] = https://curl.se/bug/?i=20898
+ [13] = https://curl.se/bug/?i=20957
  [14] = https://curl.se/bug/?i=20896
  [15] = https://curl.se/bug/?i=20886
  [16] = https://curl.se/bug/?i=20893
+ [17] = https://curl.se/bug/?i=20960
+ [19] = https://curl.se/bug/?i=20956
  [20] = https://curl.se/bug/?i=20885
  [21] = https://curl.se/bug/?i=20883
+ [22] = https://curl.se/bug/?i=20952
+ [23] = https://curl.se/bug/?i=20954
+ [25] = https://curl.se/bug/?i=20955
+ [26] = https://curl.se/bug/?i=18022
+ [27] = https://curl.se/bug/?i=20945
+ [28] = https://curl.se/bug/?i=20810
+ [29] = https://curl.se/bug/?i=20953
+ [33] = https://curl.se/bug/?i=20926
+ [34] = https://curl.se/bug/?i=20940
+ [35] = https://curl.se/bug/?i=20944
+ [36] = https://curl.se/bug/?i=20943
+ [39] = https://curl.se/bug/?i=20939
+ [41] = https://curl.se/bug/?i=20839
+ [42] = https://curl.se/bug/?i=20930
+ [44] = https://curl.se/bug/?i=20528
+ [45] = https://curl.se/bug/?i=20840
+ [46] = https://curl.se/bug/?i=20823
+ [49] = https://curl.se/bug/?i=20927
+ [50] = https://curl.se/bug/?i=20934
+ [51] = https://curl.se/bug/?i=20934
+ [52] = https://curl.se/bug/?i=20935
+ [53] = https://curl.se/bug/?i=20933
+ [55] = https://curl.se/bug/?i=20929
+ [57] = https://curl.se/bug/?i=20918
+ [58] = https://curl.se/bug/?i=20923
+ [59] = https://curl.se/bug/?i=20919
+ [61] = https://curl.se/bug/?i=20909
+ [62] = https://curl.se/bug/?i=20915
