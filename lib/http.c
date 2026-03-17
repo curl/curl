@@ -3219,7 +3219,7 @@ static CURLcode http_header_a(struct Curl_easy *data,
   const char *v;
   struct connectdata *conn = data->conn;
   v = (data->asi &&
-       (Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ||
+       (Curl_xfer_is_secure(data) ||
 #ifdef DEBUGBUILD
         /* allow debug builds to circumvent the HTTPS restriction */
         getenv("CURL_ALTSVC_HTTP")
@@ -3573,7 +3573,7 @@ static CURLcode http_header_s(struct Curl_easy *data,
 #ifndef CURL_DISABLE_HSTS
   /* If enabled, the header is incoming and this is over HTTPS */
   v = (data->hsts &&
-       (Curl_conn_is_ssl(conn, FIRSTSOCKET) ||
+       (Curl_xfer_is_secure(data) ||
 #ifdef DEBUGBUILD
         /* allow debug builds to circumvent the HTTPS restriction */
         getenv("CURL_HSTS_HTTP")
@@ -4906,7 +4906,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }
     else {
-      scheme = Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ? "https" : "http";
+      scheme = Curl_xfer_is_secure(data) ? "https" : "http";
     }
   }
 

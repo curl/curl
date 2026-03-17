@@ -1024,7 +1024,6 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
                                            imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
   const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
 
   (void)instate;
@@ -1076,7 +1075,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       line += wordlen;
     }
   }
-  else if(data->set.use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  else if(data->set.use_ssl && !Curl_xfer_is_secure(data)) {
     /* PREAUTH is not compatible with STARTTLS. */
     if(imapcode == IMAP_RESP_OK && imapc->tls_supported && !imapc->preauth) {
       /* Switch to TLS connection now */
