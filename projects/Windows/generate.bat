@@ -165,12 +165,12 @@ rem
     set "R02=v100"
     set "R03=VC10"
     set "R04=4.0"
-  ) else if "%1%" == "VC11" (
+  ) else if "%1" == "VC11" (
     set "R01=12.00"
     set "R02=v110"
     set "R03=VC11"
     set "R04=4.0"
-  ) else if "%1%" == "VC12" (
+  ) else if "%1" == "VC12" (
     set "R01=12.00"
     set "R02=v120"
     set "R03=VC12"
