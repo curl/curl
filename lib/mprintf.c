@@ -672,7 +672,7 @@ static bool out_double(void *userp,
 
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
@@ -687,7 +687,7 @@ static bool out_double(void *userp,
   /* float and double outputs do not work without snprintf support */
   work[0] = 0;
 #endif
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);
