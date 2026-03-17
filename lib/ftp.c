@@ -68,6 +68,7 @@
 #include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curl_ctype.h"
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -3080,9 +3081,10 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
           }
         }
         else {
-          if(((unsigned char)*ptr < 0x20) || (*ptr == 0x7f)) {
+          if(ISCNTRL(*ptr)) {
             /* do not use a path that contains control characters */
-            break;
+            curlx_dyn_free(&out);
+            return CURLE_WEIRD_SERVER_REPLY;
           }
           result = curlx_dyn_addn(&out, ptr, 1);
         }
