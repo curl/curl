@@ -1821,7 +1821,7 @@ out:
   /* Defer flushing during the connect phase so that the SETTINGS and
    * other initial frames are sent together with the first request.
    * Unless we are 'connect_only' where the request will never come. */
-  if(!cf->connected && !cf->conn->connect_only)
+  if(!cf->connected && !cf->conn->bits.connect_only)
     return CURLE_OK;
   return nw_out_flush(cf, data);
 }

@@ -250,6 +250,7 @@ typedef enum {
  * Boolean values that concerns this connection.
  */
 struct ConnectBits {
+  BIT(connect_only);
 #ifndef CURL_DISABLE_PROXY
   BIT(httpproxy);  /* if set, this transfer is done through an HTTP proxy */
   BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
@@ -480,7 +481,6 @@ struct connectdata {
    * 0 at start, then one of 09, 10, 11, etc. */
   uint8_t httpversion_seen;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
-  BIT(connect_only);
 };
 
 #ifndef CURL_DISABLE_PROXY

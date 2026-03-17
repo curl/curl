@@ -739,7 +739,7 @@ static bool url_match_connect_config(struct connectdata *conn,
                                      struct url_conn_match *m)
 {
   /* connect-only or to-be-closed connections will not be reused */
-  if(conn->connect_only || conn->bits.close || conn->bits.no_reuse)
+  if(conn->bits.connect_only || conn->bits.close || conn->bits.no_reuse)
     return FALSE;
 
   /* ip_version must match */
@@ -1402,7 +1402,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
 #endif
   conn->ip_version = data->set.ipver;
-  conn->connect_only = (bool)data->set.connect_only;
+  conn->bits.connect_only = (bool)data->set.connect_only;
   conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
