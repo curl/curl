@@ -1825,7 +1825,7 @@ if(WIN32)
     #     CryptReleaseContext() in NTLM, md4, md5, sha256, Schannel
     # for CryptDestroyKey(), CryptEncrypt(), CryptImportKey() in NTLM
     list(APPEND CURL_LIBS "advapi32")
-    # for Cert*()
+    # for Cert*() in openssl.c, Schannel
     # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
     list(APPEND CURL_LIBS "crypt32")
   endif()
