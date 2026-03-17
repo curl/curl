@@ -921,7 +921,7 @@ bool Curl_xfer_is_secure(struct Curl_easy *data)
     scheme = Curl_get_scheme(data->info.conn_scheme);
   }
   else { /* never connected (yet?) */
-    DEBUGASSERT(0); /* not implemented, would need to parse url */
+    DEBUGASSERT(0); /* not implemented, would need to parse URL */
   }
   return scheme ? (scheme->flags & PROTOPT_SSL) : FALSE;
 }
