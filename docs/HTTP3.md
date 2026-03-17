@@ -87,7 +87,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --with-openssl=/path/to/openssl --with-nghttp3=/path/to/nghttp3 --with-ngtcp2
+     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --with-openssl=/path/to/openssl --with-nghttp3=/path/to/nghttp3 --with-ngtcp2=/path/to/ngtcp2
      % make
      % make install
 
@@ -132,7 +132,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/quictls/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/quictls/lib" --with-openssl=/path/to/quictls --with-nghttp3=/path/to/nghttp3 --with-ngtcp2
+     % ./configure PKG_CONFIG_PATH=/path/to/quictls/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/quictls/lib" --with-openssl=/path/to/quictls --with-nghttp3=/path/to/nghttp3 --with-ngtcp2=/path/to/ngtcp2
      % make
      % make install
 
@@ -216,7 +216,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig --with-wolfssl=/path/to/wolfssl --with-nghttp3=/path/to/nghttp3 --with-ngtcp2
+     % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig --with-wolfssl=/path/to/wolfssl --with-nghttp3=/path/to/nghttp3 --with-ngtcp2=/path/to/ngtcp2
      % make
      % make install
 
