@@ -776,6 +776,7 @@ static CURLcode imap_perform_select(struct Curl_easy *data,
 
   /* Invalidate old information as we are switching mailboxes */
   Curl_safefree(imapc->mailbox);
+  imapc->mb_uidvalidity_set = FALSE;
 
   /* Check we have a mailbox */
   if(!imap->mailbox) {
@@ -1703,6 +1704,7 @@ static void imap_easy_reset(struct IMAP *imap)
   Curl_safefree(imap->query);
   Curl_safefree(imap->custom);
   Curl_safefree(imap->custom_params);
+  imap->uidvalidity_set = FALSE;
   /* Clear the transfer mode for the next request */
   imap->transfer = PPTRANSFER_BODY;
 }
