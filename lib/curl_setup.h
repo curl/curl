@@ -776,10 +776,10 @@
 
 /* GCC <4.6 does not support '#pragma GCC diagnostic push' and does not support
    'pragma GCC diagnostic' inside functions.
-   CURL_HAVE_DIAG is interchangeable with __GNUC__: Both are also set by clang
-   (but not clang-cl). Use it to guard pragma diagnostic push/pop in the code.
+   CURL_HAVE_DIAG is interchangeable with __GNUC__ || __clang. Use it to guard
+   pragma diagnostic push/pop throughout the code.
  */
-#if defined(__GNUC__) && (defined(__clang__) || \
+#if defined(__clang__) || (defined(__GNUC__) && \
   ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
 #define CURL_HAVE_DIAG
 #endif
