@@ -998,7 +998,7 @@ macro(curl_openssl_check_exists)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
     endif()
     if(WIN32)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL BCryptGenRandom()
     endif()
   endif()
   if(USE_WOLFSSL)
@@ -1231,7 +1231,7 @@ endif()
 if(WIN32)
   option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
   if(USE_WIN32_IDN)
-    list(APPEND CURL_LIBS "normaliz")
+    list(APPEND CURL_LIBS "normaliz")  # for IdnToAscii(), IdnToUnicode()
   endif()
 else()
   set(USE_WIN32_IDN OFF)
@@ -1810,9 +1810,9 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 if(WIN32)
   list(APPEND CURL_NETWORK_AND_TIME_LIBS "ws2_32")
   if(NOT WINDOWS_STORE)
-    list(APPEND CURL_NETWORK_AND_TIME_LIBS "iphlpapi")
+    list(APPEND CURL_NETWORK_AND_TIME_LIBS "iphlpapi")  # for if_nametoindex()
   endif()
-  list(APPEND CURL_LIBS "bcrypt")
+  list(APPEND CURL_LIBS "bcrypt")  # for BCryptGenRandom()
 
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
@@ -1821,10 +1821,16 @@ if(WIN32)
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    list(APPEND CURL_LIBS "advapi32" "crypt32")
+    # for CryptAcquireContext(), CryptCreateHash(), CryptDestroyHash(), CryptGetHashParam(), CryptHashData(),
+    #     CryptReleaseContext() in NTLM, md4, md5, sha256, Schannel
+    # for CryptDestroyKey(), CryptEncrypt(), CryptImportKey() in NTLM
+    list(APPEND CURL_LIBS "advapi32")
+    # for Cert*()
+    # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
+    list(APPEND CURL_LIBS "crypt32")
   endif()
   if(USE_WINDOWS_SSPI)
-    list(APPEND CURL_LIBS "secur32")
+    list(APPEND CURL_LIBS "secur32")  # for InitSecurityInterface()
   endif()
 endif()
 
