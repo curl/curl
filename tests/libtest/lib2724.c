@@ -56,11 +56,11 @@ static CURLcode test_lib2724(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   /* Create a WebSocket request using an easy handle that is added to a multi
-   * handle.  Send a request that isn't upgraded.  Verify that with
-   * CURLWS_UPGRD_REFUSED_OK the connection is kept open and there isn't an
-   * error.  Send another request with the same multi handle and therefore
-   * the same connection pool.  Verify that the second request succeeds and
-   * reuses the previous connection. */
+   * handle.  Send a request that isn't upgraded.  Verify that libcurl returns
+   * CURLE_WS_UPGRADE_REFUSED and that the HTTP response code is available.
+   * Send another request with the same multi handle and therefore the same
+   * connection pool.  Verify that the second request succeeds and reuses
+   * the previous connection. */
   CURL *curl_ws_refused = NULL;
   CURL *curl_http_ok = NULL;
   CURLM *multi = NULL;
@@ -86,8 +86,6 @@ static CURLcode test_lib2724(const char *URL)
   target_url[sizeof(target_url) - 1] = '\0';
   easy_setopt(curl_ws_refused, CURLOPT_URL, target_url);
   easy_setopt(curl_ws_refused, CURLOPT_VERBOSE, 1L);
-  /* Prevents a refused upgrade from being treated as an error. */
-  easy_setopt(curl_ws_refused, CURLOPT_WS_OPTIONS, CURLWS_UPGRD_REFUSED_OK);
 
   multi_add_handle(multi, curl_ws_refused);
 
@@ -99,21 +97,38 @@ static CURLcode test_lib2724(const char *URL)
   msg = curl_multi_info_read(multi, &msgs_in_queue);
   if(msg && msg->easy_handle == curl_ws_refused
      && msg->msg == CURLMSG_DONE) {
+
+    /* Verify CURLE_WS_UPGRADE_REFUSED was returned */
+    if(msg->data.result != CURLE_WS_UPGRADE_REFUSED) {
+      curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned CURLcode %d "
+                    "(%s), expected CURLE_WS_UPGRADE_REFUSED (%d).\n",
+                    (int)msg->data.result,
+                    curl_easy_strerror(msg->data.result),
+                    (int)CURLE_WS_UPGRADE_REFUSED);
+      result = TEST_ERR_FAILURE;
+      goto test_cleanup;
+    }
+
     curl_easy_getinfo(curl_ws_refused, CURLINFO_RESPONSE_CODE, &response_code);
 
-    curl_mfprintf(stderr, "Request 1 (WS Fail) completed. HTTP Code: %ld.\n",
+    curl_mfprintf(stderr, "Request 1 (WS refused) completed. "
+                  "CURLcode: %d (%s). HTTP Code: %ld.\n",
+                  (int)msg->data.result,
+                  curl_easy_strerror(msg->data.result),
                   response_code);
 
     if(response_code == 101) {
       curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned 101 "
                     "(WebSocket Upgrade).\n");
       result = TEST_ERR_FAILURE;
+      goto test_cleanup;
     }
   }
   else {
-    curl_mfprintf(stderr, "TEST FAILURE: Request 1 did not complete or"
+    curl_mfprintf(stderr, "TEST FAILURE: Request 1 did not complete or "
                   "multi_info_read failed.\n");
     result = TEST_ERR_FAILURE;
+    goto test_cleanup;
   }
 
   multi_remove_handle(multi, curl_ws_refused);
@@ -125,8 +140,8 @@ static CURLcode test_lib2724(const char *URL)
   easy_init(curl_http_ok);
 
   /* Set URL to a standard HTTP target, expected to succeed with 200 */
-  curl_msnprintf(target_url, sizeof(target_url), "http://%s:%s/path/http/2724",
-                 address, port);
+  curl_msnprintf(target_url, sizeof(target_url),
+                 "http://%s:%s/path/http/2724", address, port);
   target_url[sizeof(target_url) - 1] = '\0';
   easy_setopt(curl_http_ok, CURLOPT_URL, target_url);
   easy_setopt(curl_http_ok, CURLOPT_VERBOSE, 1L);
@@ -145,6 +160,7 @@ static CURLcode test_lib2724(const char *URL)
       curl_mfprintf(stderr, "TEST FAILURE: Request 2 transfer failed: %s\n",
                     curl_easy_strerror(msg->data.result));
       result = TEST_ERR_FAILURE;
+      goto test_cleanup;
     }
 
     curl_easy_getinfo(curl_http_ok, CURLINFO_RESPONSE_CODE, &response_code);
@@ -153,7 +169,7 @@ static CURLcode test_lib2724(const char *URL)
                   response_code);
 
     if(response_code != 200) {
-      curl_mfprintf(stderr, "TEST FAILURE: Request 2 returned %ld,"
+      curl_mfprintf(stderr, "TEST FAILURE: Request 2 returned %ld, "
                     "expected 200.\n", response_code);
       result = TEST_ERR_FAILURE;
     }

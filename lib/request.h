@@ -146,6 +146,9 @@ struct SingleRequest {
   BIT(shutdown);     /* request end will shutdown connection */
   BIT(shutdown_err_ignore); /* errors in shutdown will not fail request */
   BIT(reader_started); /* client reads have started */
+#ifndef CURL_DISABLE_WEBSOCKETS
+  BIT(ws_upgrade_refused); /* server refused the WebSocket upgrade */
+#endif
 };
 
 /**

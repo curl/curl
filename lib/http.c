@@ -4096,18 +4096,17 @@ static CURLcode http_on_response(struct Curl_easy *data,
   /* All >=200 HTTP status codes are errors when wanting WebSocket */
   if(data->req.upgr101 == UPGR101_WS) {
     CURLcode result2;
-    if(!data->set.ws_upgrd_refused_ok) {
-      failf(data, "Refused WebSocket upgrade: %d", k->httpcode);
-      result = CURLE_HTTP_RETURNED_ERROR;
-      goto out;
-    }
-    infof(data, "WebSocket upgrade refused but continuing: %d", k->httpcode);
+    infof(data, "WebSocket upgrade refused with HTTP %d", k->httpcode);
     result2 = scheme_change_ws_to_http(data);
     if(result2) {
       result = result2;
       infof(data, "Failed to switch from WebSocket to http scheme/handler");
       goto out;
     }
+    /* Continue normally so that the connection can be returned to the cache
+     * for reuse if there were no other errors.  Set a flag to return
+     * CURLE_WS_UPGRADE_REFUSED after completion. */
+    data->req.ws_upgrade_refused = TRUE;
   }
 #endif
 

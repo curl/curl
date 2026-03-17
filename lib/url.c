@@ -450,7 +450,6 @@ void Curl_init_userdefined(struct Curl_easy *data)
 #ifndef CURL_DISABLE_WEBSOCKETS
   set->ws_raw_mode = FALSE;
   set->ws_no_auto_pong = FALSE;
-  set->ws_upgrd_refused_ok = FALSE;
 #endif
 }
 
@@ -3246,9 +3245,10 @@ static CURLcode update_scheme_if_necessary(struct Curl_easy *data,
                                            struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  if(websocket_compatible_protocols(data->conn, conn)) {
-    /* Update the handler in conn to the scheme in the requested conn. */
-    result = Curl_findprotocol(data, conn, data->conn->scheme->name);
+  if(websocket_compatible_protocols(conn, data->conn)) {
+    /* Update the reused connection's handler to the WebSocket scheme
+     * requested by needle (conn). */
+    result = Curl_findprotocol(data, data->conn, conn->scheme->name);
   }
   return result;
 }
