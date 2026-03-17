@@ -1024,7 +1024,6 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
                                            imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
   const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
 
   (void)instate;

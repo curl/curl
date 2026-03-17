@@ -143,12 +143,8 @@ bool Curl_xfer_recv_is_paused(struct Curl_easy *data);
 CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable);
 CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable);
 
-/* TRUE if the transfer is secure (e.g. TLS) from us to the
- * URL's host. This covers the cases:
- * a) end-to-end TLS from libcurl to the URL host, including such
- *    a connection going through "tunnels".
- * b) TLS to an HTTP proxy that we send a 'https:' URL, trusting
- *    the proxy to use a TLS connection for it. */
+/* TRUE if the transfer is secure (e.g. TLS) from libcurl to the
+ * URL's host. */
 bool Curl_xfer_is_secure(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_TRANSFER_H */
