@@ -206,7 +206,7 @@ static void cpool_discard_conn(struct cpool *cpool,
 
   /* treat the connection as aborted in CONNECT_ONLY situations, we do
    * not know what the APP did with it. */
-  if(conn->connect_only)
+  if(conn->bits.connect_only)
     aborted = TRUE;
   conn->bits.aborted = aborted;
 
@@ -354,7 +354,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool,
     for(curr = Curl_llist_head(&bundle->conns); curr;
         curr = Curl_node_next(curr)) {
       conn = Curl_node_elem(curr);
-      if(CONN_INUSE(conn) || conn->bits.close || conn->connect_only)
+      if(CONN_INUSE(conn) || conn->bits.close || conn->bits.connect_only)
         continue;
       /* Set higher score for the age passed since the connection was used */
       score = curlx_ptimediff_ms(pnow, &conn->lastused);
@@ -665,7 +665,7 @@ void Curl_conn_terminate(struct Curl_easy *data,
 
   /* treat the connection as aborted in CONNECT_ONLY situations,
    * so no graceful shutdown is attempted. */
-  if(conn->connect_only)
+  if(conn->bits.connect_only)
     aborted = TRUE;
 
   if(data->multi) {

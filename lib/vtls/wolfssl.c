@@ -549,7 +549,7 @@ wssl_setup_session(struct Curl_cfilter *cf,
         infof(data, "SSL reusing session with ALPN '%s'",
               scs->alpn ? scs->alpn : "-");
         if(ssl_config->earlydata &&
-           !cf->conn->connect_only &&
+           !cf->conn->bits.connect_only &&
            !strcmp("TLSv1.3", wolfSSL_get_version(wss->ssl))) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb) {

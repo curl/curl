@@ -729,7 +729,7 @@ static void close_connect_only(struct connectdata *conn,
 {
   (void)userdata;
   (void)data;
-  if(conn->connect_only)
+  if(conn->bits.connect_only)
     connclose(conn, "Removing connect-only easy handle");
 }
 

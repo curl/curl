@@ -1138,7 +1138,8 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
       else {
         infof(data, "SSL reusing session with ALPN '%s'",
               scs->alpn ? scs->alpn : "-");
-        if(ssl_config->earlydata && scs->alpn && !cf->conn->connect_only) {
+        if(ssl_config->earlydata && scs->alpn &&
+           !cf->conn->bits.connect_only) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb) {
             result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);

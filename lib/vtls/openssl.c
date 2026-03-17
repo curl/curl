@@ -3441,7 +3441,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
 #ifdef HAVE_OPENSSL_EARLYDATA
             if(ssl_config->earlydata && scs->alpn &&
                SSL_SESSION_get_max_early_data(ssl_session) &&
-               !cf->conn->connect_only &&
+               !cf->conn->bits.connect_only &&
                (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
               bool do_early_data = FALSE;
               if(sess_reuse_cb) {
