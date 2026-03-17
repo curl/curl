@@ -40,6 +40,8 @@ CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof)
   while(1) {
     size_t rlen;
     const char *b = fgets(buffer, sizeof(buffer), input);
+    if(!b && ferror(input))
+      return CURLE_READ_ERROR;
 
     *eof = feof(input);
 
