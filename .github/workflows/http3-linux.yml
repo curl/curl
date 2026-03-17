@@ -354,7 +354,6 @@ jobs:
       matrix:
         build:
           - name: 'openssl'
-            install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             tflags: '--min=1640'
             configure: >-
