@@ -5,11 +5,13 @@
 FTP
 PASV
 RETR
-FAILURE
 </keywords>
 </info>
 # Server-side
 <reply>
+<data>
+we can still send data even if pwd fails!
+</data>
 <servercmd>
 REPLY PWD 257 %hex["/%03"]hex%
 </servercmd>
@@ -30,13 +32,15 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
-8
-</errorcode>
 <protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
+EPSV
+TYPE I
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+QUIT
 </protocol>
 </verify>
 </testcase>
