@@ -130,8 +130,10 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
       done = TRUE;
       FALLTHROUGH();
     case ',':
-      if(size >= 100000)
-        return globerror(glob, "range overflow", 0, CURLE_URL_MALFORMAT);
+      if(size >= 100000) {
+        result = globerror(glob, "range overflow", 0, CURLE_URL_MALFORMAT);
+        goto error;
+      }
 
       if(!palloc) {
         palloc = 5; /* a reasonable default */
