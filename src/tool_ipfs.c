@@ -167,7 +167,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   if(curl_url_get(gatewayurl, CURLUPART_HOST, &gwhost, CURLU_URLDECODE) ||
      curl_url_get(gatewayurl, CURLUPART_SCHEME, &gwscheme, CURLU_URLDECODE) ||
      curl_url_get(gatewayurl, CURLUPART_PORT, &gwport,
-                  CURLU_URLDECODE|CURLU_DEFAULT_PORT) ||
+                  CURLU_URLDECODE | CURLU_DEFAULT_PORT) ||
      curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE))
     goto clean;
 
