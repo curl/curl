@@ -779,9 +779,8 @@
    CURL_HAVE_DIAG is interchangeable with __GNUC__: Both are also set by clang
    (but not clang-cl). Use it to guard pragma diagnostic push/pop in the code.
  */
-#if defined(__GNUC__) && \
-   (((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))) || \
-    defined(__clang__))
+#if defined(__GNUC__) && (defined(__clang__) || \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
 #define CURL_HAVE_DIAG
 #endif
 
