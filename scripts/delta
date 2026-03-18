@@ -34,6 +34,8 @@ use strict;
 use warnings;
 
 use POSIX;
+use IPC::Open3;
+use File::Spec;
 use Time::Piece;
 
 my $start = $ARGV[0] || '';
@@ -64,6 +66,8 @@ my $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
 my $contribs = $acontribs - $bcontribs;
 
+open(NULL, '>', File::Spec->devnull);
+
 sub run_stdout {
     my $command = shift;
     open(my $fh, '-|', $command, @_) or die;
@@ -74,11 +78,15 @@ sub run_stdout {
 
 sub run_stdout_noerr {
     my $command = shift;
-    my $stdout = '';
-    open(NULL, '>', File::Spec->devnull);
-    my $pid = open3($stdout, \*PH, '>&NULL', $command, @_);
-    while(<PH>) {}
+    my $in = '';
+    my $pid = open3($in, \*FH, '>&NULL', $command, @_);
+    my $stdout = do { local $/; <FH> };
     waitpid($pid, 0);
+}
+
+sub wc_l {
+    my ($content) = @_;
+    return scalar(split /\n/, $content);
 }
 
 # number of setops:
@@ -94,12 +102,6 @@ sub setopts {
     close(H);
     return $opts;
 }
-
-sub wc_l {
-    my ($content) = @_;
-    return scalar(split /\n/, $content);
-}
-
 my $asetopts = setopts("<include/curl/curl.h");
 my $bsetopts = setopts("git show $start:include/curl/curl.h|");
 my $nsetopts = $asetopts - $bsetopts;
