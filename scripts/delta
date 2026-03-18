@@ -64,6 +64,14 @@ my $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
 my $contribs = $acontribs - $bcontribs;
 
+sub runstdout {
+    my $command = shift;
+    open(my $fh, '-|', $command, @_) or die;
+    my $content = do { local $/; <$fh> };
+    close($fh);
+    return $content;
+}
+
 # number of setops:
 sub setopts {
     my ($f)=@_;
