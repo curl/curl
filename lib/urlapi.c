@@ -717,9 +717,11 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
 {
   struct dynbuf out;
   CURLcode result = CURLE_OK;
+  const char *org_input = input;
+  const size_t org_clen = clen;
 
   *outp = NULL;
-  /* the path always starts with a slash, and a slash has not dot */
+  /* a single byte path cannot be cleaned up */
   if(clen < 2)
     return 0;
 
@@ -751,6 +753,16 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
         input = p + 1;
         clen = blen - 1;
       }
+      else {
+        /* restore original input */
+        input = org_input;
+        clen = org_clen;
+      }
+    }
+    else {
+      /* restore original input */
+      input = org_input;
+      clen = org_clen;
     }
   }
 
