@@ -36,6 +36,7 @@ log = logging.getLogger(__name__)
 
 
 @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+@pytest.mark.skipif(condition=Env.curl_uses_lib('c-ares'), reason="c-ares resolver skipped")
 @pytest.mark.skipif(condition=not Env.curl_has_feature('AsynchDNS'), reason="needs AsynchDNS")
 class TestResolve:
 
