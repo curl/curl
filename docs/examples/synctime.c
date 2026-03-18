@@ -114,7 +114,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-/* Remember: do not assume headers are passed on null terminated! */
+/* Remember: do not assume headers are passed on null-terminated! */
 static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
@@ -135,7 +135,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
       *TmpStr1 = 0;
       *TmpStr2 = 0;
       if(nmemb && (field[nmemb] == '\n')) {
-        field[nmemb] = 0; /* null terminated */
+        field[nmemb] = 0; /* null-terminated */
         RetVal = sscanf(field, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
                         TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
                         &SYSTime.wHour, &SYSTime.wMinute,

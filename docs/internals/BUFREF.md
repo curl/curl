@@ -101,4 +101,4 @@ char *Curl_bufref_dup(const struct bufref *br);
 ```
 
 Returns a strdup() version of the buffer. Note that this assumes that the
-bufref is null terminated.
+bufref is null-terminated.
