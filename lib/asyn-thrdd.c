@@ -434,24 +434,27 @@ CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
                                      uint32_t max_threads,
                                      uint32_t idle_time_ms)
 {
+  CURLcode result;
   DEBUGASSERT(!multi->resolv_thrdq);
+  result = Curl_thrdq_create(&multi->resolv_thrdq, "async", 0,
+                             min_threads, max_threads, idle_time_ms,
+                             async_thrdd_item_free,
+                             async_thrdd_item_process,
+                             async_thrdd_event,
+                             multi);
 #ifdef DEBUGBUILD
-  {
+  if(!result) {
     const char *p = getenv("CURL_DBG_RESOLV_MAX_THREADS");
     if(p) {
       curl_off_t l;
       if(!curlx_str_number(&p, &l, UINT32_MAX)) {
-        max_threads = (uint32_t)l;
+        result = Curl_async_thrdd_multi_set_props(
+          multi, min_threads, (uint32_t)l, idle_time_ms);
       }
     }
   }
 #endif
-  return Curl_thrdq_create(&multi->resolv_thrdq, "async", 0,
-                           min_threads, max_threads, idle_time_ms,
-                           async_thrdd_item_free,
-                           async_thrdd_item_process,
-                           async_thrdd_event,
-                           multi);
+  return result;
 }
 
 /* Tear down the thread queue, joining active threads or detaching them */
@@ -495,6 +498,15 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
 #ifdef CURLVERBOSE
   Curl_thrdq_trace(multi->resolv_thrdq, multi->admin, &Curl_trc_feat_dns);
 #endif
+}
+
+CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
+                                          uint32_t min_threads,
+                                          uint32_t max_threads,
+                                          uint32_t idle_time_ms)
+{
+  return Curl_thrdq_set_props(multi->resolv_thrdq, 0,
+                              min_threads, max_threads, idle_time_ms);
 }
 
 CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,

@@ -121,6 +121,7 @@ man_MANS =                                      \
   CURLMOPT_PIPELINING_SITE_BL.3                 \
   CURLMOPT_PUSHDATA.3                           \
   CURLMOPT_PUSHFUNCTION.3                       \
+  CURLMOPT_RESOLVE_THREADS_MAX.3                \
   CURLMOPT_SOCKETDATA.3                         \
   CURLMOPT_SOCKETFUNCTION.3                     \
   CURLMOPT_TIMERDATA.3                          \

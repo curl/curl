@@ -382,6 +382,27 @@ CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
   return Curl_thrdpool_await_idle(tqueue->tpool, timeout_ms);
 }
 
+CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
+                              uint32_t max_len,
+                              uint32_t min_threads,
+                              uint32_t max_threads,
+                              uint32_t idle_time_ms)
+{
+  CURLcode result;
+  size_t signals;
+
+  Curl_mutex_acquire(&tqueue->lock);
+  tqueue->send_max_len = max_len;
+  signals = Curl_llist_count(&tqueue->sendq);
+  Curl_mutex_release(&tqueue->lock);
+
+  result = Curl_thrdpool_set_props(tqueue->tpool, min_threads,
+                                   max_threads, idle_time_ms);
+  if(!result && signals)
+    result = Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
+  return result;
+}
+
 #ifdef CURLVERBOSE
 void Curl_thrdq_trace(struct curl_thrdq *tqueue,
                       struct Curl_easy *data,

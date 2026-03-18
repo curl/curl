@@ -202,6 +202,11 @@ CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
 void Curl_async_thrdd_multi_destroy(struct Curl_multi *multi, bool join);
 void Curl_async_thrdd_multi_process(struct Curl_multi *multi);
 
+CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
+                                          uint32_t min_threads,
+                                          uint32_t max_threads,
+                                          uint32_t idle_time_ms);
+
 #endif /* CURLRES_THREADED */
 
 #ifndef CURL_DISABLE_DOH

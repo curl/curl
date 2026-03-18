@@ -3362,6 +3362,31 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
   case CURLMOPT_NOTIFYDATA:
     multi->ntfy.ntfy_cb_data = va_arg(param, void *);
     break;
+  case CURLMOPT_RESOLVE_THREADS_MAX:
+#ifdef CURLRES_THREADED
+    uarg = va_arg(param, long);
+    if((uarg <= 0) || (uarg > UINT32_MAX))
+      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+    else {
+      CURLcode result = Curl_async_thrdd_multi_set_props(
+        multi, 0, (uint32_t)uarg, 2000);
+      switch(result) {
+      case CURLE_OK:
+        mresult = CURLM_OK;
+        break;
+      case CURLE_BAD_FUNCTION_ARGUMENT:
+        mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+        break;
+      case CURLE_OUT_OF_MEMORY:
+        mresult = CURLM_OUT_OF_MEMORY;
+        break;
+      default:
+        mresult = CURLM_INTERNAL_ERROR;
+        break;
+      }
+    }
+#endif
+    break;
   default:
     mresult = CURLM_UNKNOWN_OPTION;
     break;

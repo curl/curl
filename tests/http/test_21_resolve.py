@@ -26,6 +26,7 @@
 #
 import logging
 import os
+from datetime import timedelta
 import pytest
 
 from testenv import Env, CurlClient, LocalClient
@@ -59,7 +60,7 @@ class TestResolve:
     def test_21_02_resolv_invalid_serial(self, env: Env, delay_ms, httpd, nghttpx):
         count = 10
         run_env = os.environ.copy()
-        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = '5'
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
         r = curl.http_download(urls=urls, with_stats=True)
@@ -71,7 +72,7 @@ class TestResolve:
     def test_21_03_resolv_invalid_parallel(self, env: Env, delay_ms, httpd, nghttpx):
         count = 20
         run_env = os.environ.copy()
-        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = '5'
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
         r = curl.http_download(urls=urls, with_stats=True, extra_args=[
@@ -99,6 +100,22 @@ class TestResolve:
         r.check_exit_code(6)
         assert not os.path.exists(dfiles[0])
         assert os.path.exists(dfiles[1])
+
+    # use .invalid host name, parallel, single resolve thread
+    def test_21_05_resolv_single_thread(self, env: Env, httpd, nghttpx):
+        count = 10
+        delay_ms = 50
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
+        run_env['CURL_DBG_RESOLV_MAX_THREADS'] = '1'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
+        r = curl.http_download(urls=urls, with_stats=True, extra_args=[
+            '--parallel', '-6'
+        ])
+        r.check_exit_code(6)
+        r.check_stats(count=count, http_status=0, exitcode=6)
+        assert r.duration > timedelta(milliseconds=count * delay_ms), f'{r}'
 
     def _clean_files(self, files):
         for file in files:
