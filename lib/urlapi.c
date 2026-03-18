@@ -718,8 +718,12 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   struct dynbuf out;
   CURLcode result = CURLE_OK;
 
+  /* variables for leading dot checks */
+  const char *dinput = input;
+  size_t dlen = clen;
+
   *outp = NULL;
-  /* the path always starts with a slash, and a slash has not dot */
+  /* a single byte path cannot be cleaned up */
   if(clen < 2)
     return 0;
 
@@ -727,9 +731,9 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
 
   /*  A. If the input buffer begins with a prefix of "../" or "./", then
       remove that prefix from the input buffer; otherwise, */
-  if(is_dot(&input, &clen)) {
-    const char *p = input;
-    size_t blen = clen;
+  if(is_dot(&dinput, &dlen)) {
+    const char *p = dinput;
+    size_t blen = dlen;
 
     if(!clen)
       /* . [end] */
@@ -737,7 +741,7 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
     else if(ISSLASH(*p)) {
       /* one dot followed by a slash */
       input = p + 1;
-      clen--;
+      clen = dlen - 1;
     }
 
     /*  D. if the input buffer consists only of "." or "..", then remove
