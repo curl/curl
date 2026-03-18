@@ -134,8 +134,8 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
       char *field = ptr;
       *TmpStr1 = 0;
       *TmpStr2 = 0;
-      if(nmemb && (field[nmemb] == '\n')) {
-        field[nmemb] = 0; /* null-terminated */
+      if(nmemb && (field[nmemb - 1] == '\n')) {
+        field[nmemb - 1] = 0; /* null-terminate */
         RetVal = sscanf(field, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
                         TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
                         &SYSTime.wHour, &SYSTime.wMinute,
