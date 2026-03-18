@@ -722,45 +722,19 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   /* the path always starts with a slash, and a slash has not dot */
   if(clen < 2)
     return 0;
+  DEBUGASSERT(input[0] == '/');
+  if(input[0] != '/')
+    return 2; /* invalid input */
 
   curlx_dyn_init(&out, clen + 1);
-
-  /*  A. If the input buffer begins with a prefix of "../" or "./", then
-      remove that prefix from the input buffer; otherwise, */
-  if(is_dot(&input, &clen)) {
-    const char *p = input;
-    size_t blen = clen;
-
-    if(!clen)
-      /* . [end] */
-      goto end;
-    else if(ISSLASH(*p)) {
-      /* one dot followed by a slash */
-      input = p + 1;
-      clen--;
-    }
-
-    /*  D. if the input buffer consists only of "." or "..", then remove
-        that from the input buffer; otherwise, */
-    else if(is_dot(&p, &blen)) {
-      if(!blen)
-        /* .. [end] */
-        goto end;
-      else if(ISSLASH(*p)) {
-        /* ../ */
-        input = p + 1;
-        clen = blen - 1;
-      }
-    }
-  }
 
   while(clen && !result) { /* until end of path content */
     if(ISSLASH(*input)) {
       const char *p = &input[1];
       size_t blen = clen - 1;
-      /*  B. if the input buffer begins with a prefix of "/./" or "/.", where
-          "."  is a complete path segment, then replace that prefix with "/" in
-          the input buffer; otherwise, */
+      /*  if the input buffer begins with a prefix of "/./" or "/.", where "."
+          is a complete path segment, then replace that prefix with "/" in the
+          input buffer; otherwise, */
       if(is_dot(&p, &blen)) {
         if(!blen) { /* /. */
           result = curlx_dyn_addn(&out, "/", 1);
@@ -772,10 +746,10 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
           continue;
         }
 
-        /*  C. if the input buffer begins with a prefix of "/../" or "/..",
-            where ".." is a complete path segment, then replace that prefix
-            with "/" in the input buffer and remove the last segment and its
-            preceding "/" (if any) from the output buffer; otherwise, */
+        /*  If the input buffer begins with a prefix of "/../" or "/..", where
+          ".." is a complete path segment, then replace that prefix with "/"
+          in the input buffer and remove the last segment and its preceding
+          "/" (if any) from the output buffer; otherwise, */
         else if(is_dot(&p, &blen) && (ISSLASH(*p) || !blen)) {
           /* remove the last segment from the output buffer */
           size_t len = curlx_dyn_len(&out);
@@ -798,16 +772,16 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
       }
     }
 
-    /*  E. move the first path segment in the input buffer to the end of
-        the output buffer, including the initial "/" character (if any) and
-        any subsequent characters up to, but not including, the next "/"
-        character or the end of the input buffer. */
+    /*  Move the first path segment in the input buffer to the end of the
+        output buffer, including the initial "/" character (if any) and any
+        subsequent characters up to, but not including, the next "/" character
+        or the end of the input buffer. */
 
     result = curlx_dyn_addn(&out, input, 1);
     input++;
     clen--;
   }
-end:
+
   if(!result) {
     if(curlx_dyn_len(&out))
       *outp = curlx_dyn_ptr(&out);
@@ -927,6 +901,8 @@ static CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
     pathlen--;
   }
 #endif
+  else if(*path != '/')
+    return CURLUE_BAD_FILE_URL;
   *pathp = path;
   *pathlenp = pathlen;
   return CURLUE_OK;
