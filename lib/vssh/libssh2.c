@@ -1157,7 +1157,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
   else {
     myssh_to(data, sshc, SSH_AUTH_PASS_INIT);
   }
-  return 0;
+  return CURLE_OK;
 }
 
 static CURLcode sftp_quote_stat(struct Curl_easy *data,
