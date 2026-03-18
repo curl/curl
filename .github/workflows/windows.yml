@@ -309,7 +309,7 @@ jobs:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           if [ "${MATRIX_TEST}" = 'uwp' ]; then
-            CPPFLAGS+=' -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
+            CPPFLAGS+=' -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP -D_WIN32_WINNT=0x0a00'
             if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
               gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
@@ -325,7 +325,7 @@ jobs:
                 options='-DCMAKE_C_COMPILER=gcc'
               fi
               [ "${MATRIX_SYS}" = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
-              [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore'
               [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
