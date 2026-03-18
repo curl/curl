@@ -4136,7 +4136,9 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   else
     infof(data, "ECH: no retry_configs (rv = %d)", rv);
 #ifndef HAVE_BORINGSSL_LIKE
-  OPENSSL_free((void *)rcs);
+  OPENSSL_free(inner);
+  OPENSSL_free(rcs);
+  OPENSSL_free(outer);
 #endif
   return;
 }
