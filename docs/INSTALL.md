@@ -288,8 +288,12 @@ Once all the packages have been installed, begin the process of installing curl 
 
 </details>
 
-1. `sh configure <configure_options>`
+1. `sh configure <configure_options> --disable-shared`
 2. `make`
+
+> [!Note]
+> The `--disable-shared` flag is required to avoid libtool errors during the
+> build process on Cygwin.
 
 If any error occurs during curl installation, try:
 
