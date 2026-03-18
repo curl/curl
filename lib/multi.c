@@ -703,7 +703,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   }
 
   /* Make sure that transfer client writes are really done now. */
-  result = Curl_1st_err(result, Curl_xfer_write_done(data, premature));
+  result = Curl_1st_fatal(result, Curl_xfer_write_done(data, premature));
 
   /* Inform connection filters that this transfer is done */
   Curl_conn_ev_data_done(data, premature);

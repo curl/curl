@@ -1157,12 +1157,14 @@ CURLcode curl_easy_pause(CURL *d, int action)
   if((send_paused != send_paused_new) ||
      (send_paused_new != Curl_creader_is_paused(data))) {
     changed = TRUE;
-    result = Curl_1st_err(result, Curl_xfer_pause_send(data, send_paused_new));
+    result = Curl_1st_fatal(
+      result, Curl_xfer_pause_send(data, send_paused_new));
   }
 
   if(recv_paused != recv_paused_new) {
     changed = TRUE;
-    result = Curl_1st_err(result, Curl_xfer_pause_recv(data, recv_paused_new));
+    result = Curl_1st_fatal(
+      result, Curl_xfer_pause_recv(data, recv_paused_new));
   }
 
   /* If not completely pausing both directions now, run again in any case. */

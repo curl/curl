@@ -1461,8 +1461,8 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = CURLE_AGAIN;
 
 out:
-  result = Curl_1st_err(result, cf_progress_egress(cf, data, &pktx));
-  result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
+  result = Curl_1st_fatal(result, cf_progress_egress(cf, data, &pktx));
+  result = Curl_1st_fatal(result, check_and_set_expiry(cf, data, &pktx));
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv(blen=%zu) -> %d, %zu",
               stream ? stream->id : -1, blen, result, *pnread);
@@ -1788,7 +1788,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = cf_progress_egress(cf, data, &pktx);
 
 out:
-  result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
+  result = Curl_1st_fatal(result, check_and_set_expiry(cf, data, &pktx));
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : -1, len, result, *pnwritten);
