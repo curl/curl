@@ -258,6 +258,7 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Warray-compare                  # clang 20.1  gcc 12.0  appleclang 26.4
           -Wc++-hidden-decl                # clang 21.1            appleclang 26.4
+          -Wimplicit-int-enum-cast         # clang 21.1
           -Wjump-misses-init               # clang 21.1  gcc  4.5  appleclang 26.4
           -Wno-implicit-void-ptr-cast      # clang 21.1            appleclang 26.4
           -Wtentative-definition-compat    # clang 21.1            appleclang 26.4
