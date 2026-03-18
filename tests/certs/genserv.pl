@@ -84,9 +84,9 @@ if(!$CAPREFIX) {
     system("$OPENSSL req -config $SRCDIR/$PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret 2>$dev_null");
     system("$OPENSSL x509 -sha256 -extfile $SRCDIR/$PREFIX-ca.prm -days $DURATION " .
         "-req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-ca.raw-cacert");
-    system("$OPENSSL x509 -in $PREFIX-ca.raw-cacert -text -nameopt multiline > $PREFIX-ca.cacert");
+    system("$OPENSSL x509 -in $PREFIX-ca.raw-cacert -text -nameopt multiline -out $PREFIX-ca.cacert");
     system("$OPENSSL x509 -in $PREFIX-ca.cacert -outform der -out $PREFIX-ca.der");
-    system("$OPENSSL x509 -in $PREFIX-ca.cacert -text -nameopt multiline > $PREFIX-ca.crt");
+    system("$OPENSSL x509 -in $PREFIX-ca.cacert -text -nameopt multiline -out $PREFIX-ca.crt");
 
     print "CA root generated: $PREFIX $DURATION days $KEYSIZE\n";
 }
@@ -108,7 +108,7 @@ while(@ARGV) {
     system("$OPENSSL pkey -in $PREFIX.key -pubout -outform DER -out $PREFIX.pub.der");
     system("$OPENSSL pkey -in $PREFIX.key -pubout -outform PEM -out $PREFIX.pub.pem");
     system("$OPENSSL x509 -sha256 -extfile $SRCDIR/$PREFIX.prm -days $DURATION " .
-        "-req -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -CAcreateserial -in $PREFIX.csr > $PREFIX.crt 2>$dev_null");
+        "-req -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -CAcreateserial -in $PREFIX.csr -out $PREFIX.crt 2>$dev_null");
 
     # revoke server cert
     if(open($fh, '>', "$CAPREFIX-ca.cnt")) {
