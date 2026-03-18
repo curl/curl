@@ -175,8 +175,8 @@ my %wl;
 my @w;
 my @exact;
 my $file = shift @ARGV;
-open(ENTRIES, "<$file") or die "Cannot open '$file': $!";
-while(<ENTRIES>) {
+open(CONFIG, "<$file") or die "Cannot open '$file': $!";
+while(<CONFIG>) {
     chomp;
     if($_ =~ /^#/) {
         next;
@@ -202,7 +202,7 @@ while(<ENTRIES>) {
         }
     }
 }
-close(ENTRIES);
+close(CONFIG);
 
 # Build a single combined regex for case-insensitive words
 my $re_ci;
