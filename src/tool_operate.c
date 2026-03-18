@@ -2119,7 +2119,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
   }
 
 #ifdef _WIN32
-  if(!env) {
+  if(!config->capath && !config->cacert) {
 #ifdef CURL_CA_SEARCH_SAFE
     char *cacert = NULL;
     FILE *cafile = tool_execpath("curl-ca-bundle.crt", &cacert);
