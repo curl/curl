@@ -203,6 +203,7 @@ static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
 {
   if(ctx->h2) {
     nghttp2_session_del(ctx->h2);
+    ctx->h2 = NULL;
   }
 }
 
