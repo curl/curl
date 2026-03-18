@@ -732,7 +732,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
 #ifdef USE_HTTPSRR
-  if(port != 443) {
+  if(async->port != 443) {
     rrname = curl_maprintf("_%d._https.%s", async->port, async->hostname);
     if(!rrname)
       return CURLE_OUT_OF_MEMORY;
