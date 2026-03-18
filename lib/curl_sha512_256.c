@@ -274,6 +274,98 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 /* Bits manipulation macros and functions.
    Can be moved to other headers to reuse. */
 
+/* Optimized big-endian 64-bit load/store.
+ *
+ * On big-endian platforms the in-memory byte order already matches, so a
+ * plain memcpy (optimized by the compiler to a single load/store) is
+ * sufficient.
+ *
+ * On little-endian with GCC/Clang, __builtin_bswap64 compiles to a single
+ * instruction: bswap on x86-64, rev on AArch64, ldbrx/stdbrx on POWER.
+ * MSVC provides _byteswap_uint64 for the same purpose.
+ *
+ * The memcpy idiom is used instead of pointer casts to avoid undefined
+ * behavior from unaligned access or strict-aliasing violations -- the
+ * input data pointer is not guaranteed to be 8-byte aligned.
+ *
+ * The original byte-by-byte implementation is kept as the fallback. */
+
+/* Detect which byte-swap intrinsic is available. */
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#  define CURL_BE64_NATIVE 1
+#elif defined(__has_builtin)
+#  if __has_builtin(__builtin_bswap64)
+#    define CURL_HAVE_BSWAP64 1
+#  endif
+#endif
+
+#if !defined(CURL_BE64_NATIVE) && !defined(CURL_HAVE_BSWAP64)
+#  if defined(__GNUC__) && \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))
+#    define CURL_HAVE_BSWAP64 1
+#  elif defined(_MSC_VER)
+#    include <stdlib.h>
+#    define CURL_HAVE_MSVC_BSWAP64 1
+#  endif
+#endif
+
+/* Define the load/store helpers. */
+#if defined(CURL_BE64_NATIVE)
+
+static CURL_FORCEINLINE uint64_t curl_be64_load(const void *ptr)
+{
+  uint64_t v;
+  memcpy(&v, ptr, sizeof(v));
+  return v;
+}
+
+static CURL_FORCEINLINE void curl_be64_store(void *ptr, uint64_t val)
+{
+  memcpy(ptr, &val, sizeof(val));
+}
+
+#define CURL_GET_64BIT_BE(ptr)       curl_be64_load(ptr)
+#define CURL_PUT_64BIT_BE(ptr, val)  curl_be64_store(ptr, val)
+
+#elif defined(CURL_HAVE_BSWAP64)
+
+static CURL_FORCEINLINE uint64_t curl_be64_load(const void *ptr)
+{
+  uint64_t v;
+  memcpy(&v, ptr, sizeof(v));
+  return __builtin_bswap64(v);
+}
+
+static CURL_FORCEINLINE void curl_be64_store(void *ptr, uint64_t val)
+{
+  uint64_t tmp = __builtin_bswap64(val);
+  memcpy(ptr, &tmp, sizeof(tmp));
+}
+
+#define CURL_GET_64BIT_BE(ptr)       curl_be64_load(ptr)
+#define CURL_PUT_64BIT_BE(ptr, val)  curl_be64_store(ptr, val)
+
+#elif defined(CURL_HAVE_MSVC_BSWAP64)
+
+static CURL_FORCEINLINE uint64_t curl_be64_load(const void *ptr)
+{
+  uint64_t v;
+  memcpy(&v, ptr, sizeof(v));
+  return _byteswap_uint64(v);
+}
+
+static CURL_FORCEINLINE void curl_be64_store(void *ptr, uint64_t val)
+{
+  uint64_t tmp = _byteswap_uint64(val);
+  memcpy(ptr, &tmp, sizeof(tmp));
+}
+
+#define CURL_GET_64BIT_BE(ptr)       curl_be64_load(ptr)
+#define CURL_PUT_64BIT_BE(ptr, val)  curl_be64_store(ptr, val)
+
+#else
+/* Original byte-by-byte fallback */
+
 #define CURL_GET_64BIT_BE(ptr)                       \
   (((uint64_t)(((const uint8_t *)(ptr))[0]) << 56) | \
    ((uint64_t)(((const uint8_t *)(ptr))[1]) << 48) | \
@@ -295,6 +387,8 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
     ((uint8_t *)(ptr))[1] = (uint8_t)(((uint64_t)(val)) >> 48); \
     ((uint8_t *)(ptr))[0] = (uint8_t)(((uint64_t)(val)) >> 56); \
   } while(0)
+
+#endif /* big-endian load/store optimization */
 
 /* Defined as a function. The macro version may duplicate the binary code
  * size as each argument is used twice, so if any calculation is used
