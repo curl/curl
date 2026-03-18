@@ -3088,8 +3088,10 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
           }
           result = curlx_dyn_addn(&out, ptr, 1);
         }
-        if(result)
+        if(result) {
+          curlx_dyn_free(&out);
           return result;
+        }
       }
     }
     if(entry_extracted) {
