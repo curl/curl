@@ -420,7 +420,7 @@ static int curltest_tweak_handler(request_rec *r)
   if(x_hd_len > 0) {
     int i, hd_len = (16 * 1024);
     int n = (x_hd_len / hd_len);
-    char *hd_val = apr_palloc(r->pool, x_hd_len);
+    char *hd_val = apr_palloc(r->pool, hd_len);
     memset(hd_val, 'X', hd_len);
     hd_val[hd_len - 1] = 0;
     for(i = 0; i < n; ++i) {
