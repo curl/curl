@@ -847,7 +847,8 @@ static CURLcode append2query(struct OperationConfig *config,
       char *updated = NULL;
       uerr = curl_url_set(uh, CURLUPART_QUERY, q, CURLU_APPENDQUERY);
       if(!uerr)
-        uerr = curl_url_get(uh, CURLUPART_URL, &updated, CURLU_GUESS_SCHEME);
+        uerr = curl_url_get(uh, CURLUPART_URL, &updated,
+                            CURLU_NO_GUESS_SCHEME);
       if(uerr)
         result = urlerr_cvt(uerr);
       else {
