@@ -176,7 +176,7 @@ static int my_progress_d_cb(void *userdata,
 #ifdef USE_GNUTLS
       case CURLSSLBACKEND_GNUTLS: {
         gnutls_protocol_t v = gnutls_protocol_get_version(
-            (gnutls_session_t)tls->internals);
+          (gnutls_session_t)tls->internals);
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info GnuTLS using %s\n",
                       t->idx, gnutls_protocol_get_name(v));
