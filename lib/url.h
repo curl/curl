@@ -86,15 +86,8 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
                           struct connectdata *conn);
 
 /**
- * Always eval all arguments, return the first result != CURLE_OK.
- * A non-short-circuit evaluation.
- */
-CURLcode Curl_1st_err(CURLcode r1, CURLcode r2);
-
-/**
  * Always eval all arguments, return the first
  * result != (CURLE_OK|CURLE_AGAIN) or `r1`.
- * A non-short-circuit evaluation.
  */
 CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 

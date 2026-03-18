@@ -918,7 +918,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = CURLE_AGAIN;
 
 out:
-  result = Curl_1st_err(result, cf_flush_egress(cf, data));
+  result = Curl_1st_fatal(result, cf_flush_egress(cf, data));
   if(*pnread > 0)
     ctx->data_recvd += *pnread;
   CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_recv(len=%zu) -> %d, %zu, total=%"
@@ -1144,7 +1144,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  result = Curl_1st_err(result, cf_flush_egress(cf, data));
+  result = Curl_1st_fatal(result, cf_flush_egress(cf, data));
 
   CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : (uint64_t)~0, len,

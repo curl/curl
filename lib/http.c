@@ -4169,7 +4169,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
 out:
   if(last_hd) {
     /* if not written yet, write it now */
-    result = Curl_1st_err(
+    result = Curl_1st_fatal(
       result, http_write_header(data, last_hd, last_hd_len));
   }
   if(conn_changed) {
