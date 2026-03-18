@@ -64,12 +64,21 @@ my $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
 my $contribs = $acontribs - $bcontribs;
 
-sub runstdout {
+sub run_stdout {
     my $command = shift;
     open(my $fh, '-|', $command, @_) or die;
-    my $content = do { local $/; <$fh> };
+    my $stdout = do { local $/; <$fh> };
     close($fh);
-    return $content;
+    return $stdout;
+}
+
+sub run_stdout_noerr {
+    my $command = shift;
+    my $stdout = '';
+    open(NULL, '>', File::Spec->devnull);
+    my $pid = open3($stdout, \*PH, '>&NULL', $command, @_);
+    while(<PH>) {}
+    waitpid($pid, 0);
 }
 
 # number of setops:
@@ -85,6 +94,12 @@ sub setopts {
     close(H);
     return $opts;
 }
+
+sub wc_l {
+    my ($content) = @_;
+    return scalar(split /\n/, $content);
+}
+
 my $asetopts = setopts("<include/curl/curl.h");
 my $bsetopts = setopts("git show $start:include/curl/curl.h|");
 my $nsetopts = $asetopts - $bsetopts;
@@ -99,8 +114,8 @@ my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
 my $afiles=`git ls-files | wc -l`;
-my $deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/dev/null | wc -l`;
-my $creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null | wc -l`;
+my $deletes = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", "$start"));
+my $creates = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", "$start"));
 
 # Time since that tag
 my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # Unix timestamp
