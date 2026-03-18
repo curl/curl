@@ -30,7 +30,7 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <windows.h>
-#define sleep(s) Sleep((DWORD)(s))
+#define sleep(s) Sleep((DWORD)(s * 1000))
 #else
 #include <unistd.h>
 #endif
