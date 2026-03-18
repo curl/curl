@@ -78,7 +78,8 @@ static void voutf(const char *prefix, const char *fmt, va_list ap)
  */
 void notef(const char *fmt, ...)
 {
-  if(global->tracetype) {
+  DEBUGASSERT(global);
+  if(global && global->tracetype) {
     va_list ap;
     va_start(ap, fmt);
     voutf(NOTE_PREFIX, fmt, ap);
@@ -92,7 +93,8 @@ void notef(const char *fmt, ...)
  */
 void warnf(const char *fmt, ...)
 {
-  if(!global->silent) {
+  DEBUGASSERT(global);
+  if(global && !global->silent) {
     va_list ap;
     va_start(ap, fmt);
     voutf(WARN_PREFIX, fmt, ap);
@@ -128,7 +130,8 @@ void helpf(const char *fmt, ...)
  */
 void errorf(const char *fmt, ...)
 {
-  if(!global->silent || global->showerror) {
+  DEBUGASSERT(global);
+  if(global && (!global->silent || global->showerror)) {
     va_list ap;
     va_start(ap, fmt);
     voutf(ERROR_PREFIX, fmt, ap);

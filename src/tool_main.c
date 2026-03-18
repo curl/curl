@@ -161,13 +161,13 @@ int main(int argc, char *argv[])
   /* win32_init must be called before other init routines. */
   result = win32_init();
   if(result) {
-    errorf("(%d) Windows-specific init failed", result);
+    curl_mfprintf(tool_stderr, "(%d) Windows-specific init failed", result);
     return (int)result;
   }
 #endif
 
   if(main_checkfds()) {
-    errorf("out of file descriptors");
+    curl_mfprintf(tool_stderr, "out of file descriptors");
     return CURLE_FAILED_INIT;
   }
 
