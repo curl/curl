@@ -149,7 +149,7 @@ CURLcode curlx_base64_decode(const char *src,
     pos += 3 - padding;
   }
 
-  /* Zero terminate */
+  /* Null-terminate */
   *pos = '\0';
 
   /* Return the decoded data */
@@ -213,7 +213,7 @@ static CURLcode base64_encode(const char *table64,
     }
   }
 
-  /* Zero terminate */
+  /* Null-terminate */
   *output = '\0';
 
   /* Return the pointer to the new data (allocated memory) */
