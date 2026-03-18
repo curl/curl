@@ -294,7 +294,8 @@ typedef struct md5_ctx my_md5_ctx;
  * The check for little-endian architectures that tolerate unaligned memory
  * accesses is an optimization. Nothing will break if it does not work.
  */
-#if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
+#if defined(__i386__) || defined(__x86_64__) || \
+    defined(__vax__) || defined(__powerpc64__)
 #define MD5_SET(n) (*(const uint32_t *)(const void *)&ptr[(n) * 4])
 #define MD5_GET(n) MD5_SET(n)
 #else
