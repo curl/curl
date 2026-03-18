@@ -34,7 +34,7 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 ftp
 </server>
 <name>
-FTP with uneven quote in PWD response
+FTP with unclosed quote in PWD response
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/
@@ -43,15 +43,13 @@ ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/
 
 # Verify data after the test has been "shot"
 <verify>
+<errorcode>
+8
+</errorcode>
 <protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD test-%TESTNUMBER
-EPSV
-TYPE A
-LIST
-QUIT
 </protocol>
 </verify>
 </testcase>
