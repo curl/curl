@@ -4,7 +4,7 @@
 <keywords>
 HTTP
 -G
---proxy-default
+--proto-default
 </keywords>
 </info>
 
@@ -21,11 +21,14 @@ Funny-head: yesyes
 
 # Client-side
 <client>
+<features>
+proxy
+</features>
 <server>
 http
 </server>
 <name>
--G with --proxy-default to a scheme-less URL starting with "ftp"
+-G with --proto-default=http and scheme-less URL starting with "ftp"
 </name>
 <command>
 ftp.test --proto-default=http --resolve ftp.test:80:%HOSTIP -G -d hello -x http://%HOSTIP:%HTTPPORT/
