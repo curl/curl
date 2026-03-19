@@ -59,7 +59,7 @@ sub cmdfiles {
 sub mentions {
     my ($f) = @_;
     my @options;
-    open(my $fh, "<", "$f");
+    open(my $fh, "<", $f);
     while(<$fh>) {
         chomp;
         if(/(.*) +([0-9.]+)/) {

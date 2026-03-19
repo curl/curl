@@ -46,7 +46,7 @@ sub checkfile {
     if($f !~ /\.md\z/) {
         return;
     }
-    open(my $fh, "<", "$f");
+    open(my $fh, "<", $f);
     my $l;
     my $prevl = '';
     my $ignore = 0;

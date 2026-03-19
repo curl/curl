@@ -154,7 +154,7 @@ sub storelink {
 sub findlinks {
     my ($f) = @_;
     my $line = 1;
-    open(F, "<:crlf", "$f") ||
+    open(F, "<:crlf", $f) ||
         return;
 
     # is it a markdown extension?

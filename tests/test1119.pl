@@ -81,7 +81,7 @@ sub scanenum {
 
 sub scanheader {
     my ($f)=@_;
-    open my $h, "<", "$f";
+    open my $h, "<", $f;
     while(<$h>) {
         if(/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
             push @syms, $1;
@@ -105,7 +105,7 @@ sub scanallheaders {
 sub checkmanpage {
     my ($m) = @_;
 
-    open(my $mh, "<", "$m");
+    open(my $mh, "<", $m);
     my $line = 1;
     while(<$mh>) {
         # strip off formatting

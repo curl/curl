@@ -211,7 +211,7 @@ my $host_ip = ($ipvnum == 6) ? '::1' : '127.0.0.1';
 # Find out version info for the given stunnel binary
 #
 foreach my $veropt (('-version', '-V')) {
-    foreach my $verstr (qx("$stunnel" $veropt 2>&1)) {
+    foreach my $verstr (qx($stunnel $veropt 2>&1)) {
         if($verstr =~ /^stunnel (\d+)\.(\d+) on /) {
             $ver_major = $1;
             $ver_minor = $2;
@@ -225,7 +225,7 @@ foreach my $veropt (('-version', '-V')) {
     last if($ver_major);
 }
 if((!$ver_major) || !defined($ver_minor)) {
-    if(-x "$stunnel" && ! -d "$stunnel") {
+    if(-x $stunnel && ! -d $stunnel) {
         print "$ssltext Unknown stunnel version\n";
     }
     else {
@@ -302,7 +302,7 @@ if($stunnel_version >= 400) {
     $SIG{INT} = \&exit_signal_handler;
     $SIG{TERM} = \&exit_signal_handler;
     # stunnel configuration file
-    if(open(my $stunconf, ">", "$conffile")) {
+    if(open(my $stunconf, ">", $conffile)) {
         print $stunconf "cert = $certfile\n";
         print $stunconf "debug = $loglevel\n";
         print $stunconf "socket = $socketopt\n";
@@ -337,7 +337,7 @@ if($stunnel_version >= 400) {
         print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
         print "stunnel config at $conffile:\n";
-        open (my $writtenconf, '<', "$conffile") or die "$ssltext could not open the config file after writing\n";
+        open (my $writtenconf, '<', $conffile) or die "$ssltext could not open the config file after writing\n";
         print <$writtenconf>;
         print "\n";
         close ($writtenconf);
@@ -355,7 +355,7 @@ print STDERR "RUN: $cmd\n" if($verbose);
 #
 if($tstunnel_windows) {
     # Fake pidfile for tstunnel on Windows.
-    if(open(my $out, ">", "$pidfile")) {
+    if(open(my $out, ">", $pidfile)) {
         print $out $$ . "\n";
         close($out);
     }

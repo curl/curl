@@ -42,7 +42,7 @@ sub scan_header {
     my $incomment = 0;
     my @stringopts;
 
-    open(my $h, "<", "$f");
+    open(my $h, "<", $f);
     while(<$h>) {
         s/^\s*(.*?)\s*$/$1/;      # Trim.
         # Remove multi-line comment trail.
@@ -96,7 +96,7 @@ sub scan_wrapper_for_strings {
     my $inarmor = 0;
     my @stringopts;
 
-    open(my $h, "<", "$f");
+    open(my $h, "<", $f);
     while(<$h>) {
         if($_ =~ /(BEGIN|END) TRANSLATABLE STRING OPTIONS/) {
             $inarmor = $1 eq "BEGIN";
