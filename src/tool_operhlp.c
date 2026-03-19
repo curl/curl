@@ -140,8 +140,10 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
 
         curl_free(encfile);
 
-        if(!newpath)
+        if(!newpath) {
+          result = CURLE_OUT_OF_MEMORY;
           goto fail;
+        }
         uerr = curl_url_set(uh, CURLUPART_PATH, newpath, 0);
         curlx_free(newpath);
         if(uerr) {
@@ -157,11 +159,14 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
         *inurlp = newurl;
         result = CURLE_OK;
       }
+      else
+        result = CURLE_OUT_OF_MEMORY;
     }
     else
-      /* nothing to do */
-      result = CURLE_OK;
+      result = CURLE_OK;  /* nothing to do */
   }
+  else
+    result = CURLE_OUT_OF_MEMORY;
 fail:
   curl_url_cleanup(uh);
   curl_free(path);
