@@ -81,7 +81,6 @@ for my $f (sort keys %inc) {
     $f =~ s/\.c/.h/; # .h extension
 
     if(-f $f) {
-        $f =~ s/.*\///; # cut the path off
         print "#include \"$f\"\n";
     }
 }
