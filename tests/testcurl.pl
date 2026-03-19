@@ -190,7 +190,7 @@ sub rmtree($) {
     if($^O eq 'MSWin32') {
         foreach (glob($target)) {
             s:/:\\:g;
-            system('rd', ('/s', '/q', "$_"));
+            system('rd', ('/s', '/q', $_));
         }
     } else {
         system('rm', ('-rf', $target));
