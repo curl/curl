@@ -28,7 +28,10 @@
 
 /* The point of this function would be to return a string of the input data,
    but never longer than 5 columns (+ one zero byte).
-   Add suffix k, M, G when suitable... */
+   Add suffix k, M, G when suitable...
+
+   Unit test @1622
+*/
 UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum */
@@ -85,8 +88,11 @@ int xferinfo_cb(void *clientp,
   return 0;
 }
 
-/* Provide a time string that is 8 letters long (plus the zero byte) */
-UNITTEST void time2str(char *r, size_t rlen, curl_off_t seconds)
+/* Provide a time string that is 8 letters long (plus the zero byte)
+
+   Unit test @1622
+ */
+UNITTEST void timebuf(char *r, size_t rlen, curl_off_t seconds)
 {
   curl_off_t h;
   if(seconds <= 0) {
@@ -260,14 +266,14 @@ bool progress_meter(CURLM *multi, struct curltime *start, bool final)
     if(dlknown && speed) {
       curl_off_t est = all_dltotal / speed;
       curl_off_t left = (all_dltotal - all_dlnow) / speed;
-      time2str(time_left, sizeof(time_left), left);
-      time2str(time_total, sizeof(time_total), est);
+      timebuf(time_left, sizeof(time_left), left);
+      timebuf(time_total, sizeof(time_total), est);
     }
     else {
-      time2str(time_left, sizeof(time_left), 0);
-      time2str(time_total, sizeof(time_total), 0);
+      timebuf(time_left, sizeof(time_left), 0);
+      timebuf(time_total, sizeof(time_total), 0);
     }
-    time2str(time_spent, sizeof(time_spent), spent);
+    timebuf(time_spent, sizeof(time_spent), spent);
 
     (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED, &xfers_added);
     (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_RUNNING, &xfers_running);
