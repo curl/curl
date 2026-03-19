@@ -99,7 +99,7 @@ jobs:
           xcrun --sdk iphoneos --show-sdk-version || true
           echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l "$(brew --prefix)"/opt; echo '::endgroup::'
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') }}
@@ -362,7 +362,7 @@ jobs:
       - name: 'brew unlink openssl'
         if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') }}
         run: |
-          if [ -d /opt/homebrew/include/openssl ]; then
+          if [ -d "$(brew --prefix)"/include/openssl ]; then
             brew unlink openssl
           fi
 
@@ -376,7 +376,7 @@ jobs:
           xcrun --sdk macosx --show-sdk-version || true
           ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l "$(brew --prefix)"/opt; echo '::endgroup::'
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -434,7 +434,7 @@ jobs:
             [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
             mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              --with-libpsl=/opt/homebrew/opt/libpsl \
+              --with-libpsl="$(brew --prefix libpsl)" \
               ${MATRIX_CONFIGURE} ${options}
           fi
 
@@ -616,7 +616,7 @@ jobs:
           ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages preinstalled'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)"/opt; echo '::endgroup::'
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -630,7 +630,7 @@ jobs:
         run: |
           if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ]; then
             # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
-            /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
+            "$(brew --prefix gcc@13)"/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
           fi
 
           if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
@@ -652,7 +652,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
-              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
+              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DCURL_USE_OPENSSL=ON \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
