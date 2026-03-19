@@ -53,31 +53,31 @@ do {
     my $num = rand(scalar(@disable) - 2) + 2;
 
     my $c = 0;
-    my $arg;
+    my @arg;
     for my $d (shuffle @disable) {
-        $arg .= " $d";
+        push @arg, $d;
         if(++$c >= $num) {
             last;
         }
     }
 
     my @stls = shuffle @tls;
-    $arg.= " ".$stls[0];
+    push @arg, @stls;
 
-    system("make clean");
-    if(system("./configure $arg")) {
+    system('make', ('clean'));
+    if(system('./configure', @arg)) {
         print STDERR "configure problem\n";
-        print STDERR "./configure $arg\n";
+        print STDERR "./configure " . join(' ', @arg) . "\n";
         exit 1;
     }
-    if(system("make -sj10")) {
+    if(system('make', ('-sj10'))) {
         print STDERR "Build problem\n";
-        print STDERR "./configure $arg\n";
+        print STDERR "./configure " . join(' ', @arg) . "\n";
         exit 1;
     }
     if(system("./src/curl -V 2>/dev/null")) {
         print STDERR "Running problem\n";
-        print STDERR "./configure $arg\n";
+        print STDERR "./configure " . join(' ', @arg) . "\n";
         exit 1;
     }
 } while(1);

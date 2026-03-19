@@ -135,4 +135,4 @@ foreach my $v (keys %remove) {
 }
 
 # return the exit code from diff
-exit system("diff -u /tmp/autotools /tmp/cmake") >> 8;
+exit system('diff', ('-u', '/tmp/autotools', '/tmp/cmake')) >> 8;
