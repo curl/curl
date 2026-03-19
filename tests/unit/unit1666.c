@@ -24,7 +24,7 @@
 #include "unitcheck.h"
 
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS) || \
-  defined(USE_RUSTLS) || defined(USE_WOLFSSL)
+  defined(USE_RUSTLS)
 
 #include "vtls/x509asn1.h"
 #include "vtls/vtls.h"
