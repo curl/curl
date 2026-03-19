@@ -1161,7 +1161,7 @@ logmsg "RUN: $cmd\n" if($verbose);
 #
 if($sshdid =~ /OpenSSH-Windows/) {
     # Fake pidfile for ssh server on Windows.
-    if(open(my $out, ">", "$pidfile")) {
+    if(open(my $out, ">", $pidfile)) {
         print $out $$ . "\n";
         close($out);
     }

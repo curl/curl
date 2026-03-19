@@ -67,7 +67,7 @@ my %alias = (
 sub scanmdpage {
     my ($file, @words) = @_;
 
-    open(my $mh, "<", "$file") ||
+    open(my $mh, "<", $file) ||
         die "could not open $file";
     my @m;
     while(<$mh>) {
@@ -101,7 +101,7 @@ sub scanmdpage {
 my $r;
 
 # check for define aliases
-open($r, "<", "$curlh") ||
+open($r, "<", $curlh) ||
     die "no curl.h";
 while(<$r>) {
     if(/^\#define (CURL(OPT|INFO|MOPT)_\w+) (.*)/) {
@@ -113,7 +113,7 @@ close($r);
 my @curlopt;
 my @curlinfo;
 my @curlmopt;
-open($r, "<", "$syms") ||
+open($r, "<", $syms) ||
     die "no input file";
 while(<$r>) {
     chomp;

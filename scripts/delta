@@ -67,7 +67,7 @@ my $contribs = $acontribs - $bcontribs;
 # number of setops:
 sub setopts {
     my ($f)=@_;
-    open(H, "$f");
+    open(H, $f);
     my $opts;
     while(<H>) {
         if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/)) {

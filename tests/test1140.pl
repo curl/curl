@@ -58,7 +58,7 @@ sub manpresent {
 
 sub file {
     my ($f) = @_;
-    open(my $fh, "<", "$f") ||
+    open(my $fh, "<", $f) ||
         die "test1140.pl could not open $f";
     my $line = 1;
     while(<$fh>) {

@@ -230,7 +230,7 @@ sub loadtest {
     undef @xml;
     $xmlfile = "";
 
-    if(open(my $xmlh, "<", "$file")) {
+    if(open(my $xmlh, "<", $file)) {
         if($original) {
             binmode $xmlh, ':crlf';
         }
@@ -311,7 +311,7 @@ sub checktest {
 sub savetest {
     my ($file)=@_;
 
-    if(open(my $xmlh, ">", "$file")) {
+    if(open(my $xmlh, ">", $file)) {
         binmode $xmlh; # for crapage systems, use binary
         for(@xml) {
             print $xmlh $_;
@@ -407,7 +407,7 @@ sub compareparts {
 sub writearray {
     my ($filename, $arrayref)=@_;
 
-    open(my $temp, ">", "$filename") || die "Failure writing file";
+    open(my $temp, ">", $filename) || die "Failure writing file";
     binmode($temp,":raw");  # Cygwin fix
     for(@$arrayref) {
         print $temp $_;
@@ -422,7 +422,7 @@ sub loadarray {
     my ($filename)=@_;
     my @array;
 
-    if(open(my $temp, "<", "$filename")) {
+    if(open(my $temp, "<", $filename)) {
         while(<$temp>) {
             push @array, $_;
         }

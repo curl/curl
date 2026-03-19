@@ -86,7 +86,7 @@ sub pidfromfile {
     my $waits = 0;
     # wait at max 15 seconds for the file to exist and have valid content
     while(!$pid && ($waits <= ($timeout_sec * 10))) {
-        if(-f $pidfile && -s $pidfile && open(my $pidfh, "<", "$pidfile")) {
+        if(-f $pidfile && -s $pidfile && open(my $pidfh, "<", $pidfile)) {
             $pid = 0 + <$pidfh>;
             close($pidfh);
             $pid = 0 if($pid < 0);
@@ -137,7 +137,7 @@ sub pidexists {
                     my $filter = "PID eq $pid";
                     # https://ss64.com/nt/tasklist.html
                     my $result = `tasklist -fi \"$filter\" 2>$dev_null`;
-                    if(index($result, "$pid") != -1) {
+                    if(index($result, $pid) != -1) {
                         return -$pid;
                     }
                 }
@@ -472,7 +472,7 @@ sub set_advisor_read_lock {
     my ($filename) = @_;
 
     my $fileh;
-    if(open($fileh, ">", "$filename") && close($fileh)) {
+    if(open($fileh, ">", $filename) && close($fileh)) {
         return;
     }
     printf "Error creating lock file $filename error: $!\n";

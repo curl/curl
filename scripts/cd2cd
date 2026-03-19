@@ -89,7 +89,7 @@ sub single {
     my $salist = 0;
     my $copyright;
     my $spdx;
-    open(F, "<:crlf", "$f") ||
+    open(F, "<:crlf", $f) ||
         return 1;
     while(<F>) {
         $line++;

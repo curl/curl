@@ -412,7 +412,7 @@ readskiplist();
 readlocalfile($file);
 
 do {
-    if("$wlist" !~ / $file /) {
+    if($wlist !~ / $file /) {
         my $fullname = $file;
         $fullname = "$dir/$file" if($fullname !~ '^\.?\.?/');
         scanfile($fullname);

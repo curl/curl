@@ -216,7 +216,7 @@ sub single {
     my $title;
 
     if(defined($f)) {
-        if(!open($fh, "<:crlf", "$f")) {
+        if(!open($fh, "<:crlf", $f)) {
             print STDERR "cd2nroff failed to open '$f' for reading: $!\n";
             return 1;
         }
