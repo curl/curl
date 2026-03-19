@@ -111,9 +111,8 @@ NULL
 # EXAMPLE
 
 ~~~c
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size)
+static void dump(const char *text,
+                 FILE *stream, unsigned char *ptr, size_t size)
 {
   size_t i;
   size_t c;
@@ -143,10 +142,9 @@ void dump(const char *text,
   }
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *clientp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *clientp)
 {
   const char *text;
   (void)handle;
@@ -156,6 +154,7 @@ int my_trace(CURL *handle, curl_infotype type,
   case CURLINFO_TEXT:
     fputs("== Info: ", stderr);
     fwrite(data, size, 1, stderr);
+    return 0;
   default: /* in case a new one is introduced to shock us */
     return 0;
 

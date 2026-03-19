@@ -97,7 +97,7 @@ int main(void)
     if(result == CURLE_OK) {
       if(meta->bytesleft == 0)
         break; /* finished receiving */
-      if(meta->bytesleft > sizeof(buffer) - offset)
+      if(meta->bytesleft > (curl_off_t)(sizeof(buffer) - offset))
         result = CURLE_TOO_LARGE;
     }
 
