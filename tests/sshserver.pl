@@ -403,12 +403,9 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         # for libssh2 crypto backends that do not understand the OpenSSH (RFC4716)
         # format, e.g. WinCNG.
         # Accepted values: RFC4716, PKCS8, PEM (see also 'man ssh-keygen')
-        if($ENV{'CURL_TEST_SSH_KEY_FORMAT'}) {
-            push @sshkeygenopt, ('-m', $ENV{'CURL_TEST_SSH_KEY_FORMAT'});
-        }
-        else {
-            push @sshkeygenopt, ('-m', 'PEM');  # Use the most compatible RSA format for tests.
-        }
+        push @sshkeygenopt, '-m';
+        # Default to the most compatible RSA format, for tests.
+        push @sshkeygenopt, $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
     }
     logmsg "generating host keys...\n" if($verbose);
     if(system($sshkeygen, ('-q', '-t', 'rsa', '-f', pp($hstprvkeyf), '-C', 'curl test server', '-N', '', @sshkeygenopt))) {
