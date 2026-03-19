@@ -313,7 +313,6 @@ Or configure and build with CMake:
           -DCURL_ZLIB=ON -DBUILD_SHARED_LIBS=ON
     cmake --build build
     cmake --install build --prefix <path>
-    
 If other errors occur during `curl` installation, try:
 
 - reinstalling the required `cygwin` packages from the list above
