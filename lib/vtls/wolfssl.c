@@ -2022,7 +2022,7 @@ static CURLcode wssl_recv(struct Curl_cfilter *cf,
         CURL_TRC_CF(data, cf, "wssl_recv(len=%zu) -> AGAIN", blen);
         return CURLE_AGAIN;
       }
-      /* fall throught to default error handling below */
+      /* fall through to default error handling below */
       FALLTHROUGH();
     default:
       if(wssl->io_result == CURLE_AGAIN) {
