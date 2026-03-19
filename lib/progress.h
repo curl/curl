@@ -82,9 +82,4 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 
 void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent);
 
-#ifdef UNITTESTS
-UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
-                                  const struct curltime *pnow);
-#endif
-
 #endif /* HEADER_CURL_PROGRESS_H */

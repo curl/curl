@@ -3,7 +3,7 @@
 <info>
 <keywords>
 unittest
-Curl_x509_getASN1Element
+getASN1Element
 </keywords>
 </info>
 
@@ -13,7 +13,7 @@ Curl_x509_getASN1Element
 unittest
 </features>
 <name>
-Curl_x509_getASN1Element unit tests
+getASN1Element unit tests
 </name>
 </client>
 </testcase>

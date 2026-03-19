@@ -67,6 +67,7 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
   CURLcode result;
   struct Curl_asn1Element elem;
   const char *in;
+  const char *ptr;
 
   memset(&elem, 0, sizeof(elem));
   curlx_dyn_reset(buf);
@@ -76,7 +77,8 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
     return FALSE;
   }
   in = curlx_dyn_ptr(buf);
-  result = Curl_x509_getASN1Element(&elem, in, in + curlx_dyn_len(buf));
+  ptr = getASN1Element(&elem, in, in + curlx_dyn_len(buf));
+  result = ptr ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
                   i, spec->result_exp, result);
@@ -104,7 +106,7 @@ static CURLcode test_unit1657(const char *arg)
     if(!do_test1657(&test1657_specs[i], i, &dbuf))
       all_ok = FALSE;
   }
-  fail_unless(all_ok, "some tests of Curl_x509_getASN1Element() fails");
+  fail_unless(all_ok, "some tests of getASN1Element() fails");
 
   curlx_dyn_free(&dbuf);
   curl_global_cleanup();
@@ -117,7 +119,7 @@ static CURLcode test_unit1657(const char *arg)
 static CURLcode test_unit1657(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-  puts("not tested since Curl_x509_getASN1Element() is not built in");
+  puts("not tested since getASN1Element() is not built in");
   UNITTEST_END_SIMPLE
 }
 

@@ -43,6 +43,10 @@ extern const struct entry_s s_entries[];
 
 extern int unitfail; /* for unittests */
 
+#ifdef UNITTESTS
+#include "unitprotos.h"
+#endif
+
 #include "curlx/base64.h" /* for curlx_base64* */
 #include "curlx/dynbuf.h" /* for curlx_dyn_*() */
 #include "curlx/fopen.h" /* for curlx_f*() */

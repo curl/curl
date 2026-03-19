@@ -71,6 +71,11 @@ static const char *doh_strerror(DOHcode code)
  */
 UNITTEST DOHcode doh_req_encode(const char *host,
                                 DNStype dnstype,
+                                unsigned char *dnsp,  /* buffer */
+                                size_t len,  /* buffer size */
+                                size_t *olen);  /* output length */
+UNITTEST DOHcode doh_req_encode(const char *host,
+                                DNStype dnstype,
                                 unsigned char *dnsp, /* buffer */
                                 size_t len,   /* buffer size */
                                 size_t *olen) /* output length */
@@ -699,6 +704,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
   return DOH_OK;
 }
 
+UNITTEST void de_init(struct dohentry *d);
 UNITTEST void de_init(struct dohentry *de)
 {
   int i;
@@ -708,6 +714,10 @@ UNITTEST void de_init(struct dohentry *de)
     curlx_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
+UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
+                                 size_t dohlen,
+                                 DNStype dnstype,
+                                 struct dohentry *d);
 UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
                                  size_t dohlen,
                                  DNStype dnstype,
@@ -1025,6 +1035,7 @@ static const char *doh_type2name(DNStype dnstype)
 }
 #endif
 
+UNITTEST void de_cleanup(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d)
 {
   int i = 0;

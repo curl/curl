@@ -160,10 +160,6 @@ static const struct Curl_OID OIDtable[] = {
  * Please note there is no pretension here to rewrite a full SSL library.
  */
 
-static const char *getASN1Element(struct Curl_asn1Element *elem,
-                                  const char *beg, const char *end)
-  WARN_UNUSED_RESULT;
-
 #define CURL_ASN1_MAX_RECURSIONS    16
 
 static const char *getASN1Element_(struct Curl_asn1Element *elem,
@@ -233,8 +229,13 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   return elem->end;
 }
 
-static const char *getASN1Element(struct Curl_asn1Element *elem,
-                                  const char *beg, const char *end)
+/*
+ * unit test @1657
+ */
+UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
+                                    const char *beg, const char *end);
+UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
+                                    const char *beg, const char *end)
 {
   return getASN1Element_(elem, beg, end, 0);
 }
@@ -254,17 +255,6 @@ static const struct Curl_OID *searchOID(const char *oid)
 
   return NULL;
 }
-
-#ifdef UNITTESTS
-/* used by unit1657.c */
-CURLcode Curl_x509_getASN1Element(struct Curl_asn1Element *elem,
-                                  const char *beg, const char *end)
-{
-  if(getASN1Element(elem, beg, end))
-    return CURLE_OK;
-  return CURLE_BAD_FUNCTION_ARGUMENT;
-}
-#endif
 
 /*
  * Convert an ASN.1 Boolean value into its string representation.
@@ -427,6 +417,7 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
  *
  * @unittest 1666
  */
+UNITTEST CURLcode encodeOID(struct dynbuf *buf, const char *b, const char *e);
 UNITTEST CURLcode encodeOID(struct dynbuf *store,
                             const char *beg, const char *end)
 {
@@ -511,8 +502,13 @@ static CURLcode OID2str(struct dynbuf *store,
   return result;
 }
 
-static CURLcode GTime2str(struct dynbuf *store,
-                          const char *beg, const char *end)
+/*
+ * Unit test @1656
+ */
+UNITTEST CURLcode GTime2str(struct dynbuf *store,
+                            const char *beg, const char *end);
+UNITTEST CURLcode GTime2str(struct dynbuf *store,
+                            const char *beg, const char *end)
 {
   const char *tzp;
   const char *fracp;
@@ -588,15 +584,6 @@ static CURLcode GTime2str(struct dynbuf *store,
                         fracl ? "." : "", (int)fracl, fracp,
                         sep, (int)tzl, tzp);
 }
-
-#ifdef UNITTESTS
-/* used by unit1656.c */
-CURLcode Curl_x509_GTime2str(struct dynbuf *store,
-                             const char *beg, const char *end)
-{
-  return GTime2str(store, beg, end);
-}
-#endif
 
 /*
  * Convert an ASN.1 UTC time to a printable string.

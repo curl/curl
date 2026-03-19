@@ -25,7 +25,8 @@
  ***************************************************************************/
 #include "urldata.h"
 
-#ifndef CURL_DISABLE_DOH
+/* enums outside of the #ifdef to make the types work in unitprotos.h even on
+   builds without DoH support */
 
 typedef enum {
   DOH_OK,
@@ -52,6 +53,10 @@ typedef enum {
   CURL_DNS_TYPE_DNAME = 39,           /* RFC6672 */
   CURL_DNS_TYPE_HTTPS = 65
 } DNStype;
+
+struct dohentry; /* forward-declare for non-DoH builds */
+
+#ifndef CURL_DISABLE_DOH
 
 enum doh_slot_num {
   /* Explicit values for first two symbols so as to match hard-coded
@@ -157,21 +162,6 @@ struct dohentry {
 
 void Curl_doh_close(struct Curl_easy *data);
 void Curl_doh_cleanup(struct Curl_easy *data);
-
-#ifdef UNITTESTS
-UNITTEST DOHcode doh_req_encode(const char *host,
-                                DNStype dnstype,
-                                unsigned char *dnsp,  /* buffer */
-                                size_t len,  /* buffer size */
-                                size_t *olen);  /* output length */
-UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
-                                 size_t dohlen,
-                                 DNStype dnstype,
-                                 struct dohentry *d);
-
-UNITTEST void de_init(struct dohentry *d);
-UNITTEST void de_cleanup(struct dohentry *d);
-#endif
 
 #else /* CURL_DISABLE_DOH */
 #define Curl_doh(a, b, c, d, e)    NULL
