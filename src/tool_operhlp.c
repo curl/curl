@@ -102,7 +102,11 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
       goto out;
     }
     uerr = curl_url_get(uh, CURLUPART_QUERY, &query, 0);
-    if(!uerr && query) {
+    if(uerr) {
+      result = urlerr_cvt(uerr);
+      goto out;
+    }
+    if(query) {
       curl_free(query);
       result = CURLE_OK;
       goto out;
