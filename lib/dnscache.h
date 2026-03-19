@@ -67,6 +67,18 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
                        uint16_t port,
                        uint8_t ip_version);
 
+struct Curl_dns_entry *
+Curl_dnscache_mk_entry2(struct Curl_easy *data,
+                        struct Curl_addrinfo **paddr1,
+                        struct Curl_addrinfo **paddr2,
+                        const char *hostname,
+                        uint16_t port, uint8_t ip_version);
+
+/* Increase the ref counter and return it for storing in another place.
+ * May be called with NULL, in which case it returns NULL. */
+struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
+                                           struct Curl_dns_entry *dns);
+
 /* unlink a dns entry, frees all resources if it was the last reference.
  * Always clears `*pdns`` */
 void Curl_dns_entry_unlink(struct Curl_easy *data,

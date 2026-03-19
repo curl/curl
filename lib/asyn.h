@@ -124,6 +124,11 @@ CURLcode Curl_async_await(struct Curl_easy *data,
 CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
                                 struct Curl_resolv_async *async);
 
+const struct Curl_addrinfo *
+Curl_async_get_ai(struct Curl_easy *data,
+                  struct Curl_resolv_async *async,
+                  int ai_family, unsigned int index);
+
 #ifdef USE_ARES
 /* common functions for c-ares and threaded resolver with HTTPSRR */
 #include <ares.h>
@@ -177,7 +182,8 @@ struct async_thrdd_item;
 
 /* Context for threaded resolver */
 struct async_thrdd_ctx {
-  struct async_thrdd_item *resolved;
+  struct async_thrdd_item *res_A; /* ipv4 result */
+  struct async_thrdd_item *res_AAAA; /* ipv6 result */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;
@@ -186,7 +192,7 @@ struct async_thrdd_ctx {
     BIT(done);
   } rr;
 #endif
-  BIT(queued);
+  uint32_t queued;
   BIT(done);
 };
 
@@ -221,7 +227,7 @@ struct doh_probes;
 #define Curl_async_await(x, y, z)       CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_global_init()        CURLE_OK
 #define Curl_async_global_cleanup()     Curl_nop_stmt
-
+#define Curl_async_get_ai(a,b,c,d)      NULL
 #endif /* !CURLRES_ASYNCH */
 
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)

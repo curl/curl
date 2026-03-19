@@ -505,6 +505,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
   cf = data->conn->cfilter[sockindex];
   if(!cf) {
     *done = FALSE;
@@ -706,6 +711,18 @@ int Curl_socktype_for_transport(uint8_t transport)
     return SOCK_STREAM;
   default: /* UDP and QUIC */
     return SOCK_DGRAM;
+  }
+}
+
+int Curl_protocol_for_transport(uint8_t transport)
+{
+  switch(transport) {
+  case TRNSPRT_TCP:
+    return IPPROTO_TCP;
+  case TRNSPRT_UNIX:
+    return IPPROTO_IP;
+  default: /* UDP and QUIC */
+    return IPPROTO_UDP;
   }
 }
 

@@ -310,6 +310,7 @@ struct ConnectBits {
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
   BIT(in_cpool);     /* connection is kept in a connection pool */
+  BIT(dns_resolved); /* DNS records for connection were resolved */
 };
 
 struct hostname {
@@ -717,7 +718,6 @@ struct UrlState {
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
 
-  struct Curl_dns_entry *dns[2]; /* DNS to connect FIRST/SECONDARY */
 #ifdef USE_CURL_ASYNC
   struct Curl_resolv_async *async;  /* asynchronous name resolver data */
   uint32_t next_async_id; /* id of the next async resolve operation */

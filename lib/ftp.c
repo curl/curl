@@ -2241,6 +2241,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   ftp_state(data, ftpc, FTP_STOP); /* this phase is completed */
 
 error:
+  Curl_dns_entry_unlink(data, &dns);
   curlx_free(newhost);
   return result;
 }

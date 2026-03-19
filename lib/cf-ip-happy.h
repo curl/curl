@@ -39,7 +39,7 @@
 typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
                                       struct connectdata *conn,
-                                      const struct Curl_addrinfo *ai,
+                                      struct Curl_sockaddr_ex *addr,
                                       uint8_t transport);
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
