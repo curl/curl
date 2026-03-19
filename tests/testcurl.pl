@@ -190,10 +190,10 @@ sub rmtree($) {
     if($^O eq 'MSWin32') {
         foreach (glob($target)) {
             s:/:\\:g;
-            system("rd /s /q $_");
+            system('rd', ('/s', '/q', "$_"));
         }
     } else {
-        system("rm -rf $target");
+        system('rm', ('-rf', $target));
     }
 }
 
@@ -568,7 +568,7 @@ if($configurebuild) {
 } else {
     logit "copying files to build directory ...";
     if($^O eq 'MSWin32') {
-        system("xcopy /s /q \"$CURLDIR\" .");
+        system('xcopy', ('/s', '/q', $CURLDIR, '.'));
     }
 }
 
