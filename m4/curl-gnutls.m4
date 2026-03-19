@@ -143,10 +143,10 @@ if test "$GNUTLS_ENABLED" = "1"; then
   dnl Check which crypto backend GnuTLS uses
   dnl ---
   USE_GNUTLS_NETTLE=
-  # First check if we can detect either crypto library via transitive linking
+  dnl First check if we can detect either crypto library via transitive linking
   AC_CHECK_LIB(gnutls, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
 
-  # If not, try linking directly to both of them to see if they are available
+  dnl If not, try linking directly to both of them to see if they are available
   if test -z "$USE_GNUTLS_NETTLE"; then
 
     dnl this is with no particular path given
