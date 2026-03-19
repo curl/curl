@@ -59,7 +59,10 @@ if($ARGV[0] eq "-v") {
 my $root=$ARGV[0] || ".";
 
 # need an include directory when building out-of-tree
-my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
+my @i;
+if($ARGV[1]) {
+    push @i, ('-I', $ARGV[1]);
+}
 
 my $incdir = "$root/include/curl";
 
@@ -72,7 +75,7 @@ sub scanenums {
     my ($file)=@_;
     my $skipit = 0;
 
-    open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
+    open(H_IN, "-|", $Cpreprocessor, '-DCURL_DISABLE_DEPRECATION', @i, $file) ||
         die "Cannot preprocess $file";
     while(<H_IN>) {
         my ($line, $linenum) = ($_, $.);
@@ -119,7 +122,7 @@ sub scanenums {
 sub scanheader {
     my ($f)=@_;
     scanenums($f);
-    open H, "<$f";
+    open(H, '<', $f);
     while(<H>) {
         my ($line, $linenum) = ($_, $.);
         if(/^ *# *define +([^ \n]*)/) {

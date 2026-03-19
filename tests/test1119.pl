@@ -51,7 +51,10 @@ if(!$rc) {
 my $root=$ARGV[0] || ".";
 
 # need an include directory when building out-of-tree
-my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
+my @i;
+if($ARGV[1]) {
+    push @i, ('-I', $ARGV[1]);
+}
 
 my $verbose=0;
 my $summary=0;
@@ -66,7 +69,7 @@ my %rem;
 # included by it, which *should* be all headers
 sub scanenum {
     my ($file) = @_;
-    open my $h_in, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
+    open(my $h_in, "-|", $Cpreprocessor, @i, $file) || die "Cannot preprocess $file";
     while(<$h_in>) {
         if(/enum\s+(\S+\s+)?{/ .. /}/) {
             s/^\s+//;
@@ -81,7 +84,7 @@ sub scanenum {
 
 sub scanheader {
     my ($f)=@_;
-    open my $h, "<", "$f";
+    open(my $h, "<", $f);
     while(<$h>) {
         if(/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
             push @syms, $1;
@@ -105,7 +108,7 @@ sub scanallheaders {
 sub checkmanpage {
     my ($m) = @_;
 
-    open(my $mh, "<", "$m");
+    open(my $mh, "<", $m);
     my $line = 1;
     while(<$mh>) {
         # strip off formatting
@@ -138,7 +141,7 @@ scanallheaders();
 scanman_md_dir("$root/docs/libcurl");
 scanman_md_dir("$root/docs/libcurl/opts");
 
-open my $s, "<", "$root/docs/libcurl/symbols-in-versions";
+open(my $s, "<", "$root/docs/libcurl/symbols-in-versions");
 while(<$s>) {
     if(/(^[^ \n]+) +(.*)/) {
         my ($sym, $rest)=($1, $2);
