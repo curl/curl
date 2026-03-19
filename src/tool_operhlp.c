@@ -94,19 +94,18 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
                         CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
     if(uerr) {
       result = urlerr_cvt(uerr);
-      goto fail;
+      goto out;
     }
     uerr = curl_url_get(uh, CURLUPART_PATH, &path, 0);
     if(uerr) {
       result = urlerr_cvt(uerr);
-      goto fail;
+      goto out;
     }
     uerr = curl_url_get(uh, CURLUPART_QUERY, &query, 0);
     if(!uerr && query) {
       curl_free(query);
-      curl_free(path);
-      curl_url_cleanup(uh);
-      return CURLE_OK;
+      result = CURLE_OK;
+      goto out;
     }
     ptr = strrchr(path, '/');
     if(!ptr || !*++ptr) {
@@ -141,17 +140,17 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
         curl_free(encfile);
 
         if(!newpath)
-          goto fail;
+          goto out;
         uerr = curl_url_set(uh, CURLUPART_PATH, newpath, 0);
         curlx_free(newpath);
         if(uerr) {
           result = urlerr_cvt(uerr);
-          goto fail;
+          goto out;
         }
         uerr = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_DEFAULT_SCHEME);
         if(uerr) {
           result = urlerr_cvt(uerr);
-          goto fail;
+          goto out;
         }
         curlx_free(*inurlp);
         *inurlp = newurl;
@@ -159,10 +158,9 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
       }
     }
     else
-      /* nothing to do */
-      result = CURLE_OK;
+      result = CURLE_OK;  /* nothing to do */
   }
-fail:
+out:
   curl_url_cleanup(uh);
   curl_free(path);
   return result;
