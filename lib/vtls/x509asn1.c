@@ -160,10 +160,6 @@ static const struct Curl_OID OIDtable[] = {
  * Please note there is no pretension here to rewrite a full SSL library.
  */
 
-static const char *getASN1Element(struct Curl_asn1Element *elem,
-                                  const char *beg, const char *end)
-  WARN_UNUSED_RESULT;
-
 #define CURL_ASN1_MAX_RECURSIONS    16
 
 static const char *getASN1Element_(struct Curl_asn1Element *elem,
@@ -233,8 +229,10 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   return elem->end;
 }
 
-static const char *getASN1Element(struct Curl_asn1Element *elem,
-                                  const char *beg, const char *end)
+UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
+                                    const char *beg, const char *end);
+UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
+                                    const char *beg, const char *end)
 {
   return getASN1Element_(elem, beg, end, 0);
 }
@@ -254,17 +252,6 @@ static const struct Curl_OID *searchOID(const char *oid)
 
   return NULL;
 }
-
-#ifdef UNITTESTS
-/* used by unit1657.c */
-CURLcode Curl_x509_getASN1Element(struct Curl_asn1Element *elem,
-                                  const char *beg, const char *end)
-{
-  if(getASN1Element(elem, beg, end))
-    return CURLE_OK;
-  return CURLE_BAD_FUNCTION_ARGUMENT;
-}
-#endif
 
 /*
  * Convert an ASN.1 Boolean value into its string representation.
