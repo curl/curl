@@ -58,6 +58,9 @@
         if(curlcheck_write_cb_option(option))                           \
           if(!curlcheck_write_cb(value))                                \
             Wcurl_easy_setopt_err_write_callback();                     \
+        if((option) == CURLOPT_HEADERFUNCTION_EXTENDED)                 \
+          if(!curlcheck_write_cb_ex(value))                             \
+            Wcurl_easy_setopt_err_write_callback_ex();                  \
         if(curlcheck_curl_option(option))                               \
           if(!curlcheck_curl(value))                                    \
             Wcurl_easy_setopt_err_curl();                               \
@@ -300,6 +303,8 @@ CURLWARNING(Wcurl_easy_setopt_err_string,
             "string ('char *' or char[]) argument")
 CURLWARNING(Wcurl_easy_setopt_err_write_callback,
             "curl_easy_setopt expects a curl_write_callback argument")
+CURLWARNING(Wcurl_easy_setopt_err_write_callback_ex,
+            "curl_easy_setopt expects a curl_write_callback_ex argument")
 CURLWARNING(Wcurl_easy_setopt_err_resolver_start_callback,
             "curl_easy_setopt expects a "
             "curl_resolver_start_callback argument")
@@ -749,6 +754,29 @@ typedef size_t (*Wcurl_write_callback4)(const void *, size_t, size_t, void *);
 typedef size_t (*Wcurl_write_callback5)(const void *, size_t, size_t,
                                         const void *);
 typedef size_t (*Wcurl_write_callback6)(const void *, size_t, size_t, FILE *);
+
+/* evaluates to true if expr is of type curl_write_callback_ex or "similar" */
+#define curlcheck_write_cb_ex(expr)                                     \
+  (curlcheck_NULL(expr) ||                                              \
+   curlcheck_cb_compatible((expr), curl_write_callback_ex) ||           \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback_ex1) ||         \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback_ex2) ||         \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback_ex3) ||         \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback_ex4) ||         \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback_ex5) ||         \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback_ex6))
+typedef size_t (*Wcurl_write_callback_ex1)(char *, size_t, size_t,
+                                           unsigned int, void *);
+typedef size_t (*Wcurl_write_callback_ex2)(const char *, size_t, size_t,
+                                           unsigned int, const void *);
+typedef size_t (*Wcurl_write_callback_ex3)(const char *, size_t, size_t,
+                                           unsigned int, FILE *);
+typedef size_t (*Wcurl_write_callback_ex4)(const void *, size_t, size_t,
+                                           unsigned int, void *);
+typedef size_t (*Wcurl_write_callback_ex5)(const void *, size_t, size_t,
+                                           unsigned int, const void *);
+typedef size_t (*Wcurl_write_callback_ex6)(const void *, size_t, size_t,
+                                           unsigned int, FILE *);
 
 /* evaluates to true if expr is of type curl_ioctl_callback or "similar" */
 #define curlcheck_ioctl_cb(expr)                                        \
