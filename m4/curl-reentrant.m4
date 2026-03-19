@@ -22,8 +22,8 @@
 #
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 10
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 10
 
 dnl Note 1
 dnl ------

@@ -4293,26 +4293,26 @@ AC_DEFUN([CURL_ATOMIC],[
   ])
 ])
 
-# Rewrite inspired by the functionality once provided by
-# AX_COMPILE_CHECK_SIZEOF. Uses the switch() "trick" to find the size of the
-# given type.
-#
-# This code fails to compile:
-#
-#   switch() { case 0: case 0: }
-#
-# By making the second case number a boolean check, it fails to compile the
-# test code when the boolean is false and thus creating a zero, making it a
-# duplicated case label. If the boolean equals true, it becomes a one, the
-# code compiles and we know it was a match.
-#
-# The check iterates over all possible sizes and stops as soon it compiles
-# error-free.
-#
-# Usage:
-#
-#   CURL_SIZEOF(TYPE, [HEADERS])
-#
+dnl Rewrite inspired by the functionality once provided by
+dnl AX_COMPILE_CHECK_SIZEOF. Uses the switch() "trick" to find the size of the
+dnl given type.
+dnl
+dnl This code fails to compile:
+dnl
+dnl   switch() { case 0: case 0: }
+dnl
+dnl By making the second case number a boolean check, it fails to compile the
+dnl test code when the boolean is false and thus creating a zero, making it a
+dnl duplicated case label. If the boolean equals true, it becomes a one, the
+dnl code compiles and we know it was a match.
+dnl
+dnl The check iterates over all possible sizes and stops as soon it compiles
+dnl error-free.
+dnl
+dnl Usage:
+dnl
+dnl    CURL_SIZEOF(TYPE, [HEADERS])
+dnl
 
 AC_DEFUN([CURL_SIZEOF], [
   dnl The #define name to make autoheader put the name in curl_config.h.in
