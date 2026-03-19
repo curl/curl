@@ -233,58 +233,56 @@ If you get linkage errors read section 5.7 of the FAQ document.
 
 ## Cygwin
 
-Almost identical to the Unix installation. Essentially run the configure script in the
-curl source tree root with `sh configure`, then run `make`.
+Almost identical to the Unix installation. Download the `curl` source code,
+then essentially run the configure script in the curl source tree root with
+`sh configure`, then run `make`.
 
-To expand on building with `cygwin` first ensure it is in your path, and there are no
-conflicting tools (*i.e. Chocolatey with sed package*). If so move `cygwin` ahead of any items
-in your path that would conflict with `cygwin` commands, making sure you have the `sh`
-executable in `/bin/` or you see the configure fail toward the end.
+To expand on building with `cygwin` first ensure it is in your path, and
+there are no conflicting tools (*i.e. Chocolatey with sed package*). If so
+move `cygwin` ahead of any items in your path that would conflict with
+`cygwin` commands, making sure you have the `sh` executable in `/bin/` or
+you see the configure fail toward the end.
 
-Download the setup installer from
-[`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
-packages are needed for the install. For more on installing packages visit
+Download the setup installer from [`cygwin`](https://cygwin.com/) to begin.
+Additional `cygwin` packages are needed for the install. For more on
+installing packages visit
 [`cygwin setup`](https://cygwin.com/faq/faq.html#faq.setup.cli).
 
-Either run setup-x86_64.exe, then search and select packages individually, or try:
+Either run `setup-x86_64.exe`, then search and select packages individually,
+or try:
 
-    setup-x86_64.exe -P binutils -P gcc-core -P libpsl-devel -P libtool -P perl -P make
+    setup-x86_64.exe --no-admin -q -I -P binutils,gcc-core,libpsl-devel,libtool,perl,make
 
-If the latter, matching packages should appear in the install rows (*is fickle though*) after selecting
-the download site i.e. `https://mirrors.kernel.org/`. In either case, follow the GUI prompts
-until you reach the "Select Packages" window; then select packages, click next, and finish
-the `cygwin` package installation.
-
-Download the latest version of the `cygwin` packages required (*and suggested*) for a successful install:
+Expand the below details to show the list of required packages for a
+successful `cygwin` install:
 
 <details>
     <summary>Package List</summary>
 
 ```
-  binutil - required
-  gcc-core - required
-  libpsl-devel - required
-  libtool - required
-  perl - required
-  make - required
-  - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
-    ln -s /usr/bin/make /usr/bin/gmake
+binutils
+gcc-core
+libpsl-devel
+libtool
+perl
+make
 ```
 
 </details>
 
-Once all the packages have been installed, begin the process of installing curl from the source code:
+Once all the packages have been installed, begin the process of installing
+curl from the source code:
 
 <details>
     <summary>configure_options</summary>
 
 ```
-    --with-gnutls
-    --with-mbedtls
-    --with-openssl (also works for OpenSSL forks)
-    --with-rustls
-    --with-wolfssl
-    --without-ssl
+--with-gnutls
+--with-mbedtls
+--with-openssl (also works for OpenSSL forks)
+--with-rustls
+--with-wolfssl
+--without-ssl
 ```
 
 </details>
@@ -292,11 +290,16 @@ Once all the packages have been installed, begin the process of installing curl 
 1. `sh configure <configure_options>`
 2. `make`
 
-If any error occurs during curl installation, try:
+> [!Note]
+> If an error occurs during the installation, then try:
 
-- reinstalling the required `cygwin` packages from the list above
-- temporarily move `cygwin` to the top of your path
-- install all of the suggested `cygwin` packages
+- Use `cmake` to configure and/or build
+- Use `ninja` to build (***much** faster*)
+- Reinstalling the required `cygwin` packages from the list above without
+  passing `-I` to `setup-x86_64`
+- Temporarily move `cygwin` to the top of your path
+- Install all of the `cygwin` build packages using
+  `setup-x86_64 --build-depends curl`
 
 ## MS-DOS
 
