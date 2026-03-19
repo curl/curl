@@ -108,7 +108,7 @@ sub scanenums {
                ($_ !~ /^\d+$/) &&
                ($_ !~ /^[ \t]*$/)) {
                 if($verbose) {
-                    print "Source: $Cpreprocessor $i$file\n";
+                    print "Source: $Cpreprocessor " . join(' ', @i) . "\n";
                     print "Symbol: $_\n";
                     print "Line #$linenum: $line\n\n";
                 }
