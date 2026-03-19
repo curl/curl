@@ -435,6 +435,9 @@ UNITTEST CURLcode encodeOID(struct dynbuf *store,
   uint32_t y;
   CURLcode result = CURLE_OK;
 
+  if(end <= beg)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   /* Process the first two numbers. The initial digit cannot be larger than
      2 */
   y = *(const unsigned char *)beg++;

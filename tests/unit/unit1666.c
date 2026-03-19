@@ -72,7 +72,7 @@ static CURLcode test_unit1666(const char *arg)
   UNITTEST_BEGIN_SIMPLE
 
   static const struct test_1666 test_specs[] = {
-    { "", 0, "0.0", CURLE_OK },
+    { "", 0, "", CURLE_BAD_FUNCTION_ARGUMENT },
     { "\x81", 0, "", CURLE_BAD_FUNCTION_ARGUMENT },
     { OID("\x8F\xFF\xFF\xFF\x7F"), "2.4294967215", CURLE_OK },
     { OID("\x90\x80\x80\x80\x00"), "", CURLE_BAD_FUNCTION_ARGUMENT },
@@ -107,7 +107,6 @@ static CURLcode test_unit1666(const char *arg)
     { OID("\x50"), "2.0", CURLE_OK },
     { OID("\x7f"), "2.47", CURLE_OK },
     { OID("\xff\x7f"), "2.16303", CURLE_OK },
-    { OID(""), "0.0", CURLE_OK },
     { OID("\xff"), "", CURLE_BAD_FUNCTION_ARGUMENT },
     { OID("\xff\x80\x01"), "2.2080689", CURLE_OK },
     { OID("\xff\x80\x80\x01"), "2.266338225", CURLE_OK },
