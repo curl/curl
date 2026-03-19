@@ -291,7 +291,7 @@ Once all the packages have been installed, begin the process of installing curl 
 1. `sh configure <configure_options>`
 2. `make`
 
-#### Note
+**Note**
 
 If an error like:
 
@@ -301,19 +301,20 @@ If an error like:
     make[1]: *** [Makefile:1656: all] Error 2
     make: *** [Makefile:608: all-recursive] Error 1
 
-occurs, then do a `make clean`; and try:
+occurs, then do a `make clean` and try:
 
-    sh congifure <configure_options> --disable-shared
+    sh configure <configure_options> --disable-shared
     make
 
-    # Or configure and build with cmake like:
+Or configure and build with CMake:
+
     cmake -S . -B build -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Release -DCURL_USE_OPENSSL=ON \
           -DCURL_ZLIB=ON -DBUILD_SHARED_LIBS=ON
     cmake --build build
     cmake --install build --prefix <path>
-
-If any error occurs during curl installation, try:
+    
+If other errors occur during `curl` installation, try:
 
 - reinstalling the required `cygwin` packages from the list above
 - temporarily move `cygwin` to the top of your path
