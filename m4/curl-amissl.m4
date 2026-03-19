@@ -45,7 +45,7 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
       test "amissl" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
       AMISSL_ENABLED=1
       OPENSSL_ENABLED=1
-      # Use AmiSSL's built-in ca bundle
+      dnl Use AmiSSL's built-in ca bundle
       check_for_ca_bundle=1
       with_ca_fallback=yes
       LIBS="-lamisslstubs -lamisslauto $LIBS"
