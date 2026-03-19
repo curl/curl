@@ -22,8 +22,8 @@
 #
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 5
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 5
 
 dnl **********************************************************************
 dnl Check for OpenSSL libraries and headers
@@ -85,7 +85,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
       fi
 
       if test "$PKGTEST" != "yes"; then
-        # try lib64 instead
+        dnl try lib64 instead
         OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
         if test -f "$OPENSSL_PCDIR/openssl.pc"; then
           AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
@@ -114,13 +114,13 @@ if test "x$OPT_OPENSSL" != "xno"; then
     CURL_CHECK_PKGCONFIG(openssl, [$OPENSSL_PCDIR])
 
     if test "$PKGCONFIG" != "no"; then
-      SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR])
         $PKGCONFIG --libs-only-l --libs-only-other openssl 2>/dev/null`
 
-      SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR])
         $PKGCONFIG --libs-only-L openssl 2>/dev/null`
 
-      SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR])
         $PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
@@ -153,12 +153,12 @@ if test "x$OPT_OPENSSL" != "xno"; then
       LDFLAGSPC="$CLEANLDFLAGSPC -L$LIB_OPENSSL"
     fi
     if test "$PKGCONFIG" = "no" && test -n "$PREFIX_OPENSSL"; then
-      # only set this if pkg-config was not used
+      dnl only set this if pkg-config was not used
       CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
     fi
-    # Linking previously failed, try extra paths from --with-openssl or
-    # pkg-config.  Use a different function name to avoid reusing the earlier
-    # cached result.
+    dnl Linking previously failed, try extra paths from --with-openssl or
+    dnl pkg-config.  Use a different function name to avoid reusing the earlier
+    dnl cached result.
     AC_CHECK_LIB(crypto, HMAC_Init_ex,[
       HAVECRYPTO="yes"
       LIBS="-lcrypto $LIBS"], [

@@ -22,8 +22,8 @@
 #
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 19
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 19
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -73,7 +73,7 @@ dnl --enable-ares or --disable-ares, and
 dnl set shell variable want_ares as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_ARES], [
-  AC_BEFORE([$0],[CURL_CHECK_LIB_ARES])dnl
+  AC_BEFORE([$0],[CURL_CHECK_LIB_ARES])
   AC_MSG_CHECKING([whether to enable c-ares for DNS lookups])
   OPT_ARES="default"
   AC_ARG_ENABLE(ares,
@@ -108,8 +108,8 @@ dnl --enable-debug or --disable-debug, and set shell
 dnl variable want_debug value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
-  AC_BEFORE([$0],[CURL_CHECK_OPTION_WARNINGS])dnl
-  AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
+  AC_BEFORE([$0],[CURL_CHECK_OPTION_WARNINGS])
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])
   AC_MSG_CHECKING([whether to enable debug build options])
   OPT_DEBUG_BUILD="default"
   AC_ARG_ENABLE(debug,
@@ -140,8 +140,8 @@ dnl --enable-optimize or --disable-optimize, and set
 dnl shell variable want_optimize value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_OPTIMIZE], [
-  AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
-  AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
+  AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])
   AC_MSG_CHECKING([whether to enable compiler optimizer])
   OPT_COMPILER_OPTIMIZE="default"
   AC_ARG_ENABLE(optimize,
@@ -196,7 +196,7 @@ dnl --enable-symbol-hiding or --disable-symbol-hiding,
 dnl setting shell variable want_symbol_hiding value.
 
 AC_DEFUN([CURL_CHECK_OPTION_SYMBOL_HIDING], [
-  AC_BEFORE([$0],[CURL_CHECK_COMPILER_SYMBOL_HIDING])dnl
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER_SYMBOL_HIDING])
   AC_MSG_CHECKING([whether to enable hiding of library internal symbols])
   OPT_SYMBOL_HIDING="default"
   AC_ARG_ENABLE(symbol-hiding,
@@ -236,7 +236,7 @@ dnl --disable-rt and set shell variable dontwant_rt
 dnl as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_RT], [
-  AC_BEFORE([$0], [CURL_CHECK_LIB_THREADS])dnl
+  AC_BEFORE([$0], [CURL_CHECK_LIB_THREADS])
   AC_MSG_CHECKING([whether to disable dependency on -lrt])
   OPT_RT="default"
   AC_ARG_ENABLE(rt,
@@ -268,9 +268,9 @@ dnl --enable-warnings or --disable-warnings, and set
 dnl shell variable want_warnings as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_WARNINGS], [
-  AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
-  AC_BEFORE([$0],[CURL_CHECK_OPTION_WERROR])dnl
-  AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
+  AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])
+  AC_BEFORE([$0],[CURL_CHECK_OPTION_WERROR])
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])
   AC_MSG_CHECKING([whether to enable strict compiler warnings])
   OPT_COMPILER_WARNINGS="default"
   AC_ARG_ENABLE(warnings,
@@ -302,7 +302,7 @@ dnl --enable-werror or --disable-werror, and set
 dnl shell variable want_werror as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_WERROR], [
-  AC_BEFORE([$0],[CURL_CHECK_COMPILER])dnl
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER])
   AC_MSG_CHECKING([whether to enable compiler warnings as errors])
   OPT_COMPILER_WERROR="default"
   AC_ARG_ENABLE(werror,
@@ -332,10 +332,10 @@ dnl -------------------------------------------------
 dnl Check for how to set a socket into non-blocking state.
 
 AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
-  AC_REQUIRE([CURL_CHECK_FUNC_FCNTL])dnl
-  AC_REQUIRE([CURL_CHECK_FUNC_IOCTLSOCKET])dnl
-  AC_REQUIRE([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL])dnl
-  #
+  AC_REQUIRE([CURL_CHECK_FUNC_FCNTL])
+  AC_REQUIRE([CURL_CHECK_FUNC_IOCTLSOCKET])
+  AC_REQUIRE([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL])
+
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
@@ -391,7 +391,7 @@ dnl When c-ares library support has been requested, performs necessary checks
 dnl and adjustments needed to enable support of this library.
 
 AC_DEFUN([CURL_CHECK_LIB_ARES], [
-  #
+
   if test "$want_ares" = "yes"; then
     dnl c-ares library support has been requested
     clean_CPPFLAGS="$CPPFLAGS"
@@ -435,12 +435,11 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
         ares_LIBS="-lcares"
       fi
     fi
-    #
+
     CPPFLAGS="$clean_CPPFLAGS $ares_CPPFLAGS"
     LDFLAGS="$clean_LDFLAGS $ares_LDFLAGS"
     LDFLAGSPC="$clean_LDFLAGSPC $ares_LDFLAGS"
     LIBS="$ares_LIBS $clean_LIBS"
-    #
 
     dnl check if c-ares new enough, 1.16.0 or newer
     AC_CHECK_FUNC([ares_getaddrinfo],
@@ -452,7 +451,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       LDFLAGS="$clean_LDFLAGS"
       LDFLAGSPC="$clean_LDFLAGSPC"
       LIBS="$clean_LIBS"
-      # prevent usage
+      dnl prevent usage
       want_ares="no"
     ])
 
