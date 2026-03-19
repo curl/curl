@@ -306,6 +306,14 @@ static curl_hstsread_callback hstsreadcb;
 static curl_hstswrite_callback hstswritecb;
 static curl_resolver_start_callback resolver_start_cb;
 static curl_prereq_callback prereqcb;
+static curl_conv_callback conv_from_network_cb;
+static curl_conv_callback conv_to_network_cb;
+static curl_conv_callback conv_from_utf8_cb;
+
+typedef size_t (*interleave_callback)(void *ptr, size_t size, size_t nmemb,
+                                      void *userdata);
+
+static interleave_callback interleavecb;
 
 /* long options that are okay to return
    CURLE_BAD_FUNCTION_ARGUMENT */
@@ -355,10 +363,6 @@ static CURLcode test_lib1521(const char *URL)
   CURL *dep = NULL;
   CURLSH *share = NULL;
   char errorbuffer[CURL_ERROR_SIZE];
-  void *conv_from_network_cb = NULL;
-  void *conv_to_network_cb = NULL;
-  void *conv_from_utf8_cb = NULL;
-  void *interleavecb = NULL;
   const char *stringpointerextra = "moooo";
   struct curl_slist *slist = NULL;
   struct curl_httppost *httppost = NULL;
