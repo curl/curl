@@ -427,6 +427,7 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
  *
  * @unittest 1666
  */
+UNITTEST CURLcode encodeOID(struct dynbuf *buf, const char *b, const char *e);
 UNITTEST CURLcode encodeOID(struct dynbuf *store,
                             const char *beg, const char *end)
 {

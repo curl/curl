@@ -44,8 +44,6 @@ void Curl_uint32_hash_init(struct uint_hash *h,
                            uint32_t slots,
                            Curl_uint32_hash_dtor *dtor);
 void Curl_uint32_hash_destroy(struct uint_hash *h);
-void Curl_uint32_hash_clear(struct uint_hash *h);
-
 bool Curl_uint32_hash_set(struct uint_hash *h, uint32_t id, void *value);
 bool Curl_uint32_hash_remove(struct uint_hash *h, uint32_t id);
 void *Curl_uint32_hash_get(struct uint_hash *h, uint32_t id);

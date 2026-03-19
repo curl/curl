@@ -25,7 +25,7 @@
 
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS) || \
   defined(USE_RUSTLS)
-
+#include "unitprotos.h"
 #include "vtls/x509asn1.h"
 #include "vtls/vtls.h"
 

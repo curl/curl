@@ -77,9 +77,6 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
                          const char *beg, const char *end);
 
 #ifdef UNITTESTS
-UNITTEST CURLcode encodeOID(struct dynbuf *store,
-                            const char *beg, const char *end);
-
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS) || \
   defined(USE_RUSTLS)
 

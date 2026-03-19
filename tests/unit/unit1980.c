@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
+#include "unitprotos.h"
 
 #include "http_aws_sigv4.h"
 

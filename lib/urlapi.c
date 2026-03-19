@@ -333,6 +333,8 @@ out:
 }
 
 UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
+                                   bool has_scheme);
+UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
                                    bool has_scheme)
 {
   const char *portptr;

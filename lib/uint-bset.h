@@ -56,9 +56,6 @@ CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax);
 /* Destroy the bitset, freeing all resources. */
 void Curl_uint32_bset_destroy(struct uint32_bset *bset);
 
-/* Get the bitset capacity, e.g. can hold numbers from 0 to capacity - 1. */
-uint32_t Curl_uint32_bset_capacity(struct uint32_bset *bset);
-
 /* Get the cardinality of the bitset, e.g. numbers present in the set. */
 uint32_t Curl_uint32_bset_count(struct uint32_bset *bset);
 

@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
+#include "unitprotos.h"
 #include "urldata.h"
 #include "curl/urlapi.h"
 #include "urlapi-int.h"

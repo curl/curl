@@ -130,6 +130,8 @@ static void pgrs_speedinit(struct Curl_easy *data)
  * @unittest: 1606
  */
 UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
+                                  const struct curltime *pnow);
+UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
                                   const struct curltime *pnow)
 {
   if(!data->set.low_speed_time || !data->set.low_speed_limit ||

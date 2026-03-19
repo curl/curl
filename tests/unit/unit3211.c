@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
+#include "unitprotos.h"
 #include "urldata.h"
 #include "uint-bset.h"
 #include "curl_trc.h"

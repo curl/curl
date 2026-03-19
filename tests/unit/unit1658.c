@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
+#include "unitprotos.h"
 
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
@@ -35,12 +36,6 @@ static CURLcode t1658_setup(void)
   curl_global_init(CURL_GLOBAL_ALL);
   return CURLE_OK;
 }
-
-extern CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
-                                        const unsigned char *cp, size_t len,
-                                        struct Curl_https_rrinfo **hrr);
-extern void doh_print_httpsrr(struct Curl_easy *data,
-                              struct Curl_https_rrinfo *hrr);
 
 /*
  * The idea here is that we pass one DNS packet at the time to the decoder. we
