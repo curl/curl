@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #ifndef CURL_DISABLE_SHUFFLE_DNS
-#include "unitprotos.h"
 #include "urldata.h"
 #include "curl_addrinfo.h"
 

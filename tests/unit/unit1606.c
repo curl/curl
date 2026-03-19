@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "unitprotos.h"
 #include "progress.h"
 #include "urldata.h"
 

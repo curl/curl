@@ -26,7 +26,6 @@
 #include "urldata.h"
 #include "uint-table.h"
 #include "curl_trc.h"
-#include "unitprotos.h"
 
 #define TBL_SIZE 100
 

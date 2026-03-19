@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "unitprotos.h"
 
 static CURLcode test_unit1636(const char *arg)
 {
