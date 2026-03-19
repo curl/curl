@@ -375,7 +375,7 @@ static CURLcode test_lib1521(const char *URL)
   curl_socket_t sockfd;
   const struct curl_certinfo *certinfo;
   struct curl_tlssessioninfo *tlssession;
-  struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0};
+  struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0 };
   CURLcode result = CURLE_OK;
   (void)URL;
   global_init(CURL_GLOBAL_ALL);
