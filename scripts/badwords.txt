@@ -113,6 +113,5 @@ with with:with
 ---WWW::Curl
 ---NET::Curl
 ---Curl Corporation
----:include/curl/:will
 ---:lib/:will
 ---:src/:will
