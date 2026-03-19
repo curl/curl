@@ -229,6 +229,9 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   return elem->end;
 }
 
+/*
+ * unit test @1657
+ */
 UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
                                     const char *beg, const char *end);
 UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
@@ -499,8 +502,13 @@ static CURLcode OID2str(struct dynbuf *store,
   return result;
 }
 
-static CURLcode GTime2str(struct dynbuf *store,
-                          const char *beg, const char *end)
+/*
+ * Unit test @1656
+ */
+UNITTEST CURLcode GTime2str(struct dynbuf *store,
+                            const char *beg, const char *end);
+UNITTEST CURLcode GTime2str(struct dynbuf *store,
+                            const char *beg, const char *end)
 {
   const char *tzp;
   const char *fracp;
@@ -576,15 +584,6 @@ static CURLcode GTime2str(struct dynbuf *store,
                         fracl ? "." : "", (int)fracl, fracp,
                         sep, (int)tzl, tzp);
 }
-
-#ifdef UNITTESTS
-/* used by unit1656.c */
-CURLcode Curl_x509_GTime2str(struct dynbuf *store,
-                             const char *beg, const char *end)
-{
-  return GTime2str(store, beg, end);
-}
-#endif
 
 /*
  * Convert an ASN.1 UTC time to a printable string.
