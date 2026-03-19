@@ -80,7 +80,7 @@ sub add {
 
 my $fl;
 my $file = shift @ARGV;
-open(CURL_H, "<$file") or die;
+open(CURL_H, '<', $file) or die;
 while(<CURL_H>) {
     my $l = $_;
     if($fl) {
