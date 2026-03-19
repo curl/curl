@@ -35,7 +35,7 @@ if test "x$OPT_RUSTLS" != "xno"; then
   CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
 
-  ## NEW CODE
+  dnl NEW CODE
 
   dnl use pkg-config unless we have been given a path
   dnl even then, try pkg-config first
@@ -62,7 +62,7 @@ if test "x$OPT_RUSTLS" != "xno"; then
       fi
 
       if test "$PKGTEST" != "yes"; then
-        # try lib64 instead
+        dnl try lib64 instead
         RUSTLS_PCDIR="$PREFIX_RUSTLS/lib64/pkgconfig"
         if test -f "$RUSTLS_PCDIR/rustls.pc"; then
           AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$RUSTLS_PCDIR"])
