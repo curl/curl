@@ -2461,7 +2461,7 @@ sub startservers {
         elsif($what eq "gopher-ipv6") {
             if($run{'gopher-ipv6'} &&
                !responsive_http_server("gopher", $verbose, "ipv6",
-                                       protoport("gopher"))) {
+                                       protoport("gopher6"))) {
                 if(stopserver('gopher-ipv6')) {
                     return ("failed stopping unresponsive GOPHER-IPv6 server", 3);
                 }
