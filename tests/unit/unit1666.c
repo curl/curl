@@ -73,6 +73,7 @@ static CURLcode test_unit1666(const char *arg)
 
   static const struct test_1666 test_specs[] = {
     { "", 0, "0.0", CURLE_OK },
+    { "\x81", 0, "", CURLE_BAD_FUNCTION_ARGUMENT },
     { OID("\x8F\xFF\xFF\xFF\x7F"), "2.4294967215", CURLE_OK },
     { OID("\x90\x80\x80\x80\x00"), "", CURLE_BAD_FUNCTION_ARGUMENT },
     { OID("\x88\x80\x80\x80\x4F"), "2.2147483647", CURLE_OK },

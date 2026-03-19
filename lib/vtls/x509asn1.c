@@ -452,7 +452,7 @@ UNITTEST CURLcode encodeOID(struct dynbuf *store,
       /* reject leading 0x80 padding */
       return CURLE_BAD_FUNCTION_ARGUMENT;
     do {
-      if((t & 0xFE000000) || (beg == end))
+      if((t & 0xFE000000) || (beg >= end))
         return CURLE_BAD_FUNCTION_ARGUMENT;
       y = *(const unsigned char *)beg++;
       t = (t << 7) | (y & 0x7F);
