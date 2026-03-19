@@ -896,7 +896,6 @@ CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data)
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
-  (void)interf;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
@@ -925,7 +924,6 @@ CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data)
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
-  (void)local_ip4;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
