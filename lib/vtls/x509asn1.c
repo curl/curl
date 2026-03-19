@@ -417,33 +417,62 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
 }
 
 /*
- * Convert an ASN.1 OID into its dotted string representation.
+ * Convert an ASN.1 OID into its dotted string representation. Each field is
+ * limited to unsigned 32-bit values.
+ *
+ * A minor limitation is in the second number, which can be no larger than 32
+ * bits - 80 == 4294967215.
  *
  * Return error code.
+ *
+ * @unittest 1666
  */
-static CURLcode encodeOID(struct dynbuf *store,
-                          const char *beg, const char *end)
+UNITTEST CURLcode encodeOID(struct dynbuf *buf, const char *b, const char *e);
+UNITTEST CURLcode encodeOID(struct dynbuf *store,
+                            const char *beg, const char *end)
 {
-  unsigned int x;
-  unsigned int y;
+  uint32_t x;
+  uint32_t y;
   CURLcode result = CURLE_OK;
 
-  /* Process the first two numbers. */
+  /* Process the first two numbers. The initial digit cannot be larger than
+     2 */
   y = *(const unsigned char *)beg++;
-  x = y / 40;
-  y -= x * 40;
+  if(y <= 80)
+    x = y / 40;
+  else
+    x = 2;
+  result = curlx_dyn_addf(store, "%u", x);
+  if(result)
+    return result;
 
-  result = curlx_dyn_addf(store, "%u.%u", x, y);
+  if(y & 0x80) {
+    uint32_t t = (y & 0x7f); /* the second number */
+    if(!t)
+      /* reject leading 0x80 padding */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    do {
+      if((t & 0xFE000000) || (beg == end))
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      y = *(const unsigned char *)beg++;
+      t = (t << 7) | (y & 0x7F);
+    } while(y & 0x80);
+    y = t;
+  }
+
+  result = curlx_dyn_addf(store, ".%u", y - (x * 40));
   if(result)
     return result;
 
   /* Process the trailing numbers. */
-  while(beg < end) {
+  while((beg < end) && !result) {
     x = 0;
+    y = 0;
     do {
-      if(x & 0xFF000000)
+      /* 0x80 as the first value is invalid since it only adds padding */
+      if((y & 0x80) && !x)
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      else if(beg == end)
+      else if((x & 0xFE000000) || (beg == end))
         return CURLE_BAD_FUNCTION_ARGUMENT;
       y = *(const unsigned char *)beg++;
       x = (x << 7) | (y & 0x7F);
@@ -460,26 +489,22 @@ static CURLcode encodeOID(struct dynbuf *store,
  */
 
 static CURLcode OID2str(struct dynbuf *store,
-                        const char *beg, const char *end, bool symbolic)
+                        const char *beg, const char *end)
 {
   CURLcode result = CURLE_OK;
   if(beg < end) {
-    if(symbolic) {
-      struct dynbuf buf;
-      curlx_dyn_init(&buf, CURL_X509_STR_MAX);
-      result = encodeOID(&buf, beg, end);
+    struct dynbuf buf;
+    curlx_dyn_init(&buf, CURL_X509_STR_MAX);
+    result = encodeOID(&buf, beg, end);
 
-      if(!result) {
-        const struct Curl_OID *op = searchOID(curlx_dyn_ptr(&buf));
-        if(op)
-          result = curlx_dyn_add(store, op->textoid);
-        else
-          result = curlx_dyn_add(store, curlx_dyn_ptr(&buf));
-      }
-      curlx_dyn_free(&buf);
+    if(!result) {
+      const struct Curl_OID *op = searchOID(curlx_dyn_ptr(&buf));
+      if(op)
+        result = curlx_dyn_add(store, op->textoid);
+      else
+        result = curlx_dyn_add(store, curlx_dyn_ptr(&buf));
     }
-    else
-      result = encodeOID(store, beg, end);
+    curlx_dyn_free(&buf);
   }
   return result;
 }
@@ -647,7 +672,7 @@ static CURLcode ASN1tostr(struct dynbuf *store,
     result = curlx_dyn_addn(store, "", 1);
     break;
   case CURL_ASN1_OBJECT_IDENTIFIER:
-    result = OID2str(store, elem->beg, elem->end, TRUE);
+    result = OID2str(store, elem->beg, elem->end);
     break;
   case CURL_ASN1_UTC_TIME:
     result = UTime2str(store, elem->beg, elem->end);
@@ -905,7 +930,7 @@ static CURLcode dumpAlgo(struct dynbuf *store,
     if(!p)
       return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  return OID2str(store, oid.beg, oid.end, TRUE);
+  return OID2str(store, oid.beg, oid.end);
 }
 
 /*
