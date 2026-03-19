@@ -246,26 +246,29 @@ Additional `cygwin` packages are needed for the install. For more on
 installing packages visit
 [`cygwin setup`](https://cygwin.com/faq/faq.html#faq.setup.cli).
 
-Either run setup-x86_64.exe, then search and select packages individually, or try:
+Either run `setup-x86_64.exe`, then search and select packages individually, or try:
 
     setup-x86_64.exe --no-admin -q -I -P binutils,gcc-core,libpsl-devel,libtool,perl,make
 
-The below details list the required (*and suggested*) packages for a
-successful `cygwin` install
+Expand the below details to show the list of required packages for a
+successful `cygwin` install:
 
 <details>
     <summary>Package List</summary>
 
 ```
-  binutil - required
-  gcc-core - required
-  libpsl-devel - required
-  libtool - required
-  perl - required
-  make - required
-  - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
-    ln -s /usr/bin/make /usr/bin/gmake
+  binutils
+  gcc-core
+  libpsl-devel
+  libtool
+  perl
+  make
 ```
+
+> **Note**
+> If there is an error regarding `make`, open the cygwin terminal, and run:
+
+    ln -s /usr/bin/make /usr/bin/gmake
 
 </details>
 
@@ -293,38 +296,36 @@ curl from the source code:
 > If an error occurs during the installation, do a `make clean` and try:
 
 - `sh configure <configure_options> --disable-shared`
-- Use `cmake` to configure and build
+- Use `cmake` to configure and/or build
+- Use `ninja` to build
 - Reinstalling the required `cygwin` packages from the list above without
  passing `-I` to `setup-x86_64`
 - Temporarily move `cygwin` to the top of your path
 - Install all of the `cygwin` build packages using
  `setup-x86_64 --build-depends curl`
 
-The below details illustrate resolving an install error:
+The details below illustrate using `cmake` and `ninja` (***much** faster*):
 
 <details>
-    <summary>Example Error Resolution</summary>
+    <summary>Cygwin Ninja Install</summary>
 
-An error like:
+    # Install dependencies
+    setup-x86_64 --no-admin -q -I -P cmake,ninja
 
-    ../libtool: eval: line 1890: syntax error near unexpected token `|'
-    ../libtool: eval: line 1890: `/usr/bin/nm -B  .libs/libcurl_la-altsvc.o
-    make[2]: *** [Makefile:1893: libcurl.la] Error 2
-    make[1]: *** [Makefile:1656: all] Error 2
-    make: *** [Makefile:608: all-recursive] Error 1
+    # Configure with `cmake`
+    cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release
 
-occurs, then do a `make clean` and try:
+    # Now your ninja
+    ninja
 
-    sh configure <configure_options> --disable-shared
-    make
+> **Note**
+> If an error occurs during or after the installation, then try:
 
-Or configure and build with CMake like:
-
-    cmake -S . -B build -G "Unix Makefiles" \
-          -DCMAKE_BUILD_TYPE=Release -DCURL_USE_OPENSSL=ON \
-          -DCURL_ZLIB=ON -DBUILD_SHARED_LIBS=ON
-    cmake --build build
-    cmake --install build --prefix <path>
+- Retry with `disable-shared`, running:
+  - `rm -rf CMakeFiles CMakeCache.txt`
+  - `cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF`
+- Copy `libcurl-4.dll` next to the executable, running:
+  - `cp lib/libcurl-4.dll src/`
 
 </details>
 
