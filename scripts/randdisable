@@ -67,17 +67,17 @@ do {
     system('make', ('clean'));
     if(system('./configure', @arg)) {
         print STDERR "configure problem\n";
-        print STDERR "./configure $arg\n";
+        print STDERR "./configure " . join(' ', @arg) . "\n";
         exit 1;
     }
     if(system('make', ('-sj10'))) {
         print STDERR "Build problem\n";
-        print STDERR "./configure $arg\n";
+        print STDERR "./configure " . join(' ', @arg) . "\n";
         exit 1;
     }
     if(system("./src/curl -V 2>/dev/null")) {
         print STDERR "Running problem\n";
-        print STDERR "./configure $arg\n";
+        print STDERR "./configure " . join(' ', @arg) . "\n";
         exit 1;
     }
 } while(1);
