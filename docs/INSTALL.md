@@ -303,7 +303,7 @@ If an error like:
 
 occurs, then do a `make clean`; and try:
 
-    sh congifure <configure_options> --disable-shared`
+    sh congifure <configure_options> --disable-shared
     make
 
     # Or configure and build with cmake like:
