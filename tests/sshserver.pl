@@ -811,7 +811,7 @@ if($error) {
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
 #
-if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
+if(system("\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1")) {
     logmsg "sshd configuration file $sshdconfig failed verification\n";
     display_sshdlog();
     display_sshdconfig();
