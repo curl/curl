@@ -221,8 +221,8 @@ CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
  *
  * Desc:    Cleans up and removes a whole multi stack. It does not free or
  *          touch any individual easy handles in any way. We need to define
- *          in what state those handles will be if this function is called
- *          in the middle of a transfer.
+ *          in what state those handles are going to be if this function is
+ *          called in the middle of a transfer.
  *
  * Returns: CURLMcode type, general multi error code.
  */
@@ -236,19 +236,19 @@ CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
  *          error code from the transfer or the fact that a transfer is
  *          completed. More details on these should be written down as well.
  *
- *          Repeated calls to this function will return a new struct each
- *          time, until a special "end of msgs" struct is returned as a signal
- *          that there is no more to get at this point.
+ *          Repeated calls to this function return a new struct each time,
+ *          until a special "end of msgs" struct is returned as a signal that
+ *          there is no more to get at this point.
  *
- *          The data the returned pointer points to will not survive calling
+ *          The data the returned pointer points to does not survive calling
  *          curl_multi_cleanup().
  *
  *          The 'CURLMsg' struct is meant to be simple and only contain basic
- *          information. If more involved information is wanted, we will
- *          provide the particular "transfer handle" in that struct and that
+ *          information. If more involved information is wanted, we provide
+ *          the particular "transfer handle" in that struct and that
  *          should/could/would be used in subsequent curl_easy_getinfo() calls
  *          (or similar). The point being that we must never expose complex
- *          structs to applications, as then we will undoubtably get backwards
+ *          structs to applications, as then we undoubtably get backwards
  *          compatibility problems in the future.
  *
  * Returns: A pointer to a filled-in struct, or NULL if it failed or ran out
@@ -369,11 +369,11 @@ typedef enum {
   CURLOPT(CURLMOPT_MAX_PIPELINE_LENGTH, CURLOPTTYPE_LONG, 8),
 
   /* a connection with a content-length longer than this
-     will not be considered for pipelining */
+     is not considered for pipelining */
   CURLOPT(CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, CURLOPTTYPE_OFF_T, 9),
 
   /* a connection with a chunk length longer than this
-     will not be considered for pipelining */
+     is not considered for pipelining */
   CURLOPT(CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, CURLOPTTYPE_OFF_T, 10),
 
   /* a list of site names(+port) that are blocked from pipelining */
@@ -409,13 +409,13 @@ typedef enum {
 /* Definition of bits for the CURLMOPT_NETWORK_CHANGED argument: */
 
 /* - CURLMNWC_CLEAR_CONNS tells libcurl to prevent further reuse of existing
-   connections. Connections that are idle will be closed. Ongoing transfers
-   will continue with the connection they have. */
+   connections. Connections that are idle are closed. Ongoing transfers
+   do continue with the connection they have. */
 #define CURLMNWC_CLEAR_CONNS (1L << 0)
 
 /* - CURLMNWC_CLEAR_DNS tells libcurl to prevent further reuse of existing
-   connections. Connections that are idle will be closed. Ongoing transfers
-   will continue with the connection they have. */
+   connections. Connections that are idle are closed. Ongoing transfers
+   do continue with the connection they have. */
 #define CURLMNWC_CLEAR_DNS (1L << 0)
 
 /*

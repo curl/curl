@@ -40,8 +40,8 @@
 #define LIBCURL_VERSION_MINOR 19
 #define LIBCURL_VERSION_PATCH 1
 /* This is the numeric version of the libcurl version number, meant for easier
-   parsing and comparisons by programs. The LIBCURL_VERSION_NUM define will
-   always follow this syntax:
+   parsing and comparisons by programs. The LIBCURL_VERSION_NUM define always
+   follows this syntax:
 
          0xXXYYZZ
 

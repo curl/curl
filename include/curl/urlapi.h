@@ -114,7 +114,7 @@ CURL_EXTERN CURLU *curl_url(void);
 
 /*
  * curl_url_cleanup() frees the CURLU handle and related resources used for
- * the URL parsing. It will not free strings previously returned with the URL
+ * the URL parsing. It does not free strings previously returned with the URL
  * API.
  */
 CURL_EXTERN void curl_url_cleanup(CURLU *handle);
@@ -135,7 +135,7 @@ CURL_EXTERN CURLUcode curl_url_get(const CURLU *handle, CURLUPart what,
 
 /*
  * curl_url_set() sets a specific part of the URL in a CURLU handle. Returns
- * error code. The passed in string will be copied. Passing a NULL instead of
+ * error code. The passed in string is copied. Passing a NULL instead of
  * a part string, clears that part.
  */
 CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,

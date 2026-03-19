@@ -37,8 +37,8 @@
  *       order to work around gcc bug #32061. It affects only gcc 4.3.x/4.4.x
  *       when compiling with -Wlogical-op.
  *
- * To add an option that uses the same type as an existing option, you will
- * need to extend the appropriate _curl_*_option macro
+ * To add an option that uses the same type as an existing option, you need
+ * to extend the appropriate _curl_*_option macro
  */
 
 #define curl_easy_setopt(handle, option, value)                         \
@@ -856,7 +856,7 @@ typedef CURLcode (*Wcurl_ssl_ctx_callback4)(CURL *, const void *,
                                             const void *);
 #ifdef HEADER_SSL_H
 /* hack: if we included OpenSSL's ssl.h, we know about SSL_CTX
- * this will of course break if we are included before OpenSSL headers...
+ * this of course breaks if we are included before OpenSSL headers...
  */
 typedef CURLcode (*Wcurl_ssl_ctx_callback5)(CURL *, SSL_CTX *, void *);
 typedef CURLcode (*Wcurl_ssl_ctx_callback6)(CURL *, SSL_CTX *, const void *);
