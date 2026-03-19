@@ -266,9 +266,11 @@ successful `cygwin` install:
 ```
 
 > **Note**
-> If there is an error regarding `make`, open the cygwin terminal, and run:
+> If there is an error regarding `make`, open the `cygwin` terminal, and run:
 
-    ln -s /usr/bin/make /usr/bin/gmake
+```bash
+ln -s /usr/bin/make /usr/bin/gmake
+```
 
 </details>
 
@@ -322,10 +324,17 @@ The details below illustrate using `cmake` and `ninja` (***much** faster*):
 > If an error occurs during or after the installation, then try:
 
 - Retry with `disable-shared`, running:
-  - `rm -rf CMakeFiles CMakeCache.txt`
-  - `cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF`
+
+```bash
+rm -rf CMakeFiles CMakeCache.txt
+cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+```
+
 - Copy `libcurl-4.dll` next to the executable, running:
-  - `cp lib/libcurl-4.dll src/`
+
+```bash
+cp lib/libcurl-4.dll src/
+```
 
 </details>
 
