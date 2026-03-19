@@ -22,8 +22,8 @@
 #
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 67
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 67
 
 dnl CURL_CHECK_COMPILER
 dnl -------------------------------------------------
