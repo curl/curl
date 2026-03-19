@@ -35,7 +35,7 @@ if(!@files || $files[0] eq "-h") {
 }
 
 sub testcompile {
-    my $rc = system("gcc -c test.c -W -Wall -pedantic -Werror -I include -DCURL_DISABLE_TYPECHECK -DCURL_ALLOW_OLD_MULTI_SOCKET") >> 8;
+    my $rc = system("gcc -c test.c -I include -W -Wall -pedantic -Werror -DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_TYPECHECK") >> 8;
     return $rc;
 }
 
