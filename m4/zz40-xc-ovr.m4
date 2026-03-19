@@ -41,18 +41,18 @@ dnl Private macro.
 
 AC_DEFUN([_XC_CFG_PRE_PREAMBLE],
 [
-## -------------------------------- ##
+dnl --------------------------------
 @%:@@%:@  [XC_CONFIGURE_PREAMBLE] ver: []dnl
 XC_CONFIGURE_PREAMBLE_VER_MAJOR.[]dnl
-XC_CONFIGURE_PREAMBLE_VER_MINOR  ##
-## -------------------------------- ##
+XC_CONFIGURE_PREAMBLE_VER_MINOR
+dnl --------------------------------
 
 xc_configure_preamble_ver_major='XC_CONFIGURE_PREAMBLE_VER_MAJOR'
 xc_configure_preamble_ver_minor='XC_CONFIGURE_PREAMBLE_VER_MINOR'
 
-#
-# Set IFS to space, tab and newline.
-#
+dnl
+dnl Set IFS to space, tab and newline.
+dnl
 
 xc_space=' '
 xc_tab='	'
@@ -60,9 +60,9 @@ xc_newline='
 '
 IFS="$xc_space$xc_tab$xc_newline"
 
-#
-# Set internationalization behavior variables.
-#
+dnl
+dnl Set internationalization behavior variables.
+dnl
 
 LANG='C'
 LC_ALL='C'
@@ -71,9 +71,9 @@ export LANG
 export LC_ALL
 export LANGUAGE
 
-#
-# Some useful variables.
-#
+dnl
+dnl Some useful variables.
+dnl
 
 xc_msg_warn='configure: WARNING:'
 xc_msg_abrt='Can not continue.'
@@ -91,9 +91,9 @@ dnl is available, otherwise aborts execution.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-#
-# Verify that 'echo' command is available, otherwise abort.
-#
+dnl
+dnl Verify that 'echo' command is available, otherwise abort.
+dnl
 
 xc_tst_str='unknown'
 (`echo "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
@@ -102,7 +102,7 @@ case "x$xc_tst_str" in @%:@ ((
     :
     ;;
   *)
-    # Try built-in echo, and fail.
+    dnl Try built-in echo, and fail.
     echo "$xc_msg_err 'echo' command not found. $xc_msg_abrt" >&2
     exit 1
     ;;
@@ -120,9 +120,9 @@ dnl is available, otherwise aborts execution.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_TEST],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-#
-# Verify that 'test' command is available, otherwise abort.
-#
+dnl
+dnl Verify that 'test' command is available, otherwise abort.
+dnl
 
 xc_tst_str='unknown'
 (`test -n "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
@@ -148,9 +148,9 @@ dnl is set, otherwise aborts execution.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_VAR_PATH],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
-#
-# Verify that 'PATH' variable is set, otherwise abort.
-#
+dnl
+dnl Verify that 'PATH' variable is set, otherwise abort.
+dnl
 
 xc_tst_str='unknown'
 (`test -n "$PATH" >/dev/null 2>&1`) && xc_tst_str='success'
@@ -176,9 +176,9 @@ dnl is available, otherwise aborts execution.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-#
-# Verify that 'expr' command is available, otherwise abort.
-#
+dnl
+dnl Verify that 'expr' command is available, otherwise abort.
+dnl
 
 xc_tst_str='unknown'
 xc_tst_str=`expr "$xc_tst_str" : '.*' 2>/dev/null`
@@ -208,9 +208,9 @@ dnl proper 'sed' this early, that should be done later.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_SED],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-#
-# Verify that 'sed' utility is found within 'PATH', otherwise abort.
-#
+dnl
+dnl Verify that 'sed' utility is found within 'PATH', otherwise abort.
+dnl
 
 xc_tst_str='unknown'
 xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
@@ -241,9 +241,9 @@ dnl proper 'grep' this early, that should be done later.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-#
-# Verify that 'grep' utility is found within 'PATH', otherwise abort.
-#
+dnl
+dnl Verify that 'grep' utility is found within 'PATH', otherwise abort.
+dnl
 
 xc_tst_str='unknown'
 (`echo "$xc_tst_str" 2>/dev/null \
@@ -270,9 +270,9 @@ dnl is found within 'PATH', otherwise aborts execution.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_TR],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-#
-# Verify that 'tr' utility is found within 'PATH', otherwise abort.
-#
+dnl
+dnl Verify that 'tr' utility is found within 'PATH', otherwise abort.
+dnl
 
 xc_tst_str="${xc_tab}98s7u6c5c4e3s2s10"
 xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
@@ -299,9 +299,9 @@ dnl is found within 'PATH', otherwise aborts execution.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_WC],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
-#
-# Verify that 'wc' utility is found within 'PATH', otherwise abort.
-#
+dnl
+dnl Verify that 'wc' utility is found within 'PATH', otherwise abort.
+dnl
 
 xc_tst_str='unknown unknown unknown unknown'
 xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
@@ -328,9 +328,9 @@ dnl is found within 'PATH', otherwise aborts execution.
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
-#
-# Verify that 'cat' utility is found within 'PATH', otherwise abort.
-#
+dnl
+dnl Verify that 'cat' utility is found within 'PATH', otherwise abort.
+dnl
 
 xc_tst_str='unknown'
 xc_tst_str=`cat <<_EOT 2>/dev/null \
@@ -369,11 +369,11 @@ dnl overrides the auto-detected one.
 AC_DEFUN([_XC_CFG_PRE_CHECK_PATH_SEPARATOR],
 [dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
-#
-# Auto-detect and set 'PATH_SEPARATOR', unless it is already non-empty set.
-#
+dnl
+dnl Auto-detect and set 'PATH_SEPARATOR', unless it is already non-empty set.
+dnl
 
-# Directory count in 'PATH' when using a colon separator.
+dnl Directory count in 'PATH' when using a colon separator.
 xc_tst_dirs_col='x'
 xc_tst_prev_IFS=$IFS; IFS=':'
 for xc_tst_dir in $PATH; do
@@ -383,7 +383,7 @@ done
 IFS=$xc_tst_prev_IFS
 xc_tst_dirs_col=`expr "$xc_tst_dirs_col" : '.*'`
 
-# Directory count in 'PATH' when using a semicolon separator.
+dnl Directory count in 'PATH' when using a semicolon separator.
 xc_tst_dirs_sem='x'
 xc_tst_prev_IFS=$IFS; IFS=';'
 for xc_tst_dir in $PATH; do
@@ -394,23 +394,23 @@ IFS=$xc_tst_prev_IFS
 xc_tst_dirs_sem=`expr "$xc_tst_dirs_sem" : '.*'`
 
 if test "$xc_tst_dirs_sem" -eq "$xc_tst_dirs_col"; then
-  # When both counting methods give the same result we do not want to
-  # chose one over the other, and consider auto-detection not possible.
+  dnl When both counting methods give the same result we do not want to
+  dnl chose one over the other, and consider auto-detection not possible.
   if test -z "$PATH_SEPARATOR"; then
-    # User should provide the correct 'PATH_SEPARATOR' definition.
-    # Until then, guess that it is colon!
+    dnl User should provide the correct 'PATH_SEPARATOR' definition.
+    dnl Until then, guess that it is colon!
     echo "$xc_msg_warn path separator not determined, guessing colon" >&2
     PATH_SEPARATOR=':'
   fi
 else
-  # Separator with the greater directory count is the auto-detected one.
+  dnl Separator with the greater directory count is the auto-detected one.
   if test "$xc_tst_dirs_sem" -gt "$xc_tst_dirs_col"; then
     xc_tst_auto_separator=';'
   else
     xc_tst_auto_separator=':'
   fi
   if test -z "$PATH_SEPARATOR"; then
-    # Use the auto-detected one when not already set.
+    dnl Use the auto-detected one when not already set.
     PATH_SEPARATOR=$xc_tst_auto_separator
   elif test "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
     echo "$xc_msg_warn 'PATH_SEPARATOR' does not match auto-detected one." >&2
@@ -636,17 +636,17 @@ AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])dnl
 dnl
 AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
 dnl
-#
-# Check that 'XC_CONFIGURE_PREAMBLE' has already run.
-#
+dnl
+dnl Check that 'XC_CONFIGURE_PREAMBLE' has already run.
+dnl
 
 if test -z "$xc_configure_preamble_result"; then
   AC_MSG_ERROR([xc_configure_preamble_result not set (internal problem)])
 fi
 
-#
-# Check that 'PATH_SEPARATOR' has already been set.
-#
+dnl
+dnl Check that 'PATH_SEPARATOR' has already been set.
+dnl
 
 if test -z "$xc_PATH_SEPARATOR"; then
   AC_MSG_ERROR([xc_PATH_SEPARATOR not set (internal problem)])

@@ -20,7 +20,7 @@
 #
 #---------------------------------------------------------------------------
 
-# serial 1
+dnl serial 1
 
 
 dnl _XC_LIBTOOL_PREAMBLE
@@ -33,22 +33,22 @@ dnl libtool code is actually used in script.
 
 m4_define([_XC_LIBTOOL_PREAMBLE],
 [dnl
-# ------------------------------------ #
-#  Determine libtool default behavior  #
-# ------------------------------------ #
+dnl ------------------------------------
+dnl  Determine libtool default behavior
+dnl ------------------------------------
 
-#
-# Default behavior is to enable shared and static libraries on systems
-# where libtool knows how to build both library versions, and does not
-# require separate configuration and build runs for each flavor.
-#
+dnl
+dnl Default behavior is to enable shared and static libraries on systems
+dnl where libtool knows how to build both library versions, and does not
+dnl require separate configuration and build runs for each flavor.
+dnl
 
 xc_lt_want_enable_shared='yes'
 xc_lt_want_enable_static='yes'
 
-#
-# User may have disabled shared or static libraries.
-#
+dnl
+dnl User may have disabled shared or static libraries.
+dnl
 case "x$enable_shared" in @%:@ (
   xno)
     xc_lt_want_enable_shared='no'
@@ -64,12 +64,12 @@ if test "$xc_lt_want_enable_shared" = "no" &&
   AC_MSG_ERROR([can not disable shared and static libraries simultaneously])
 fi
 
-#
-# Default behavior on systems that require independent configuration
-# and build runs for shared and static is to enable shared libraries
-# and disable static ones. On these systems option '--disable-shared'
-# must be used in order to build a proper static library.
-#
+dnl
+dnl Default behavior on systems that require independent configuration
+dnl and build runs for shared and static is to enable shared libraries
+dnl and disable static ones. On these systems option '--disable-shared'
+dnl must be used in order to build a proper static library.
+dnl
 
 if test "$xc_lt_want_enable_shared" = "yes" &&
    test "$xc_lt_want_enable_static" = "yes"; then
@@ -80,25 +80,25 @@ if test "$xc_lt_want_enable_shared" = "yes" &&
   esac
 fi
 
-#
-# Make libtool aware of current shared and static library preferences
-# taking in account that, depending on host characteristics, libtool
-# may modify these option preferences later in this configure script.
-#
+dnl
+dnl Make libtool aware of current shared and static library preferences
+dnl taking in account that, depending on host characteristics, libtool
+dnl may modify these option preferences later in this configure script.
+dnl
 
 enable_shared=$xc_lt_want_enable_shared
 enable_static=$xc_lt_want_enable_static
 
-#
-# Default behavior is to build PIC objects for shared libraries and
-# non-PIC objects for static libraries.
-#
+dnl
+dnl Default behavior is to build PIC objects for shared libraries and
+dnl non-PIC objects for static libraries.
+dnl
 
 xc_lt_want_with_pic='default'
 
-#
-# User may have specified PIC preference.
-#
+dnl
+dnl User may have specified PIC preference.
+dnl
 
 case "x$with_pic" in @%:@ ((
   xno)
@@ -109,13 +109,13 @@ case "x$with_pic" in @%:@ ((
     ;;
 esac
 
-#
-# Default behavior on some systems where building a shared library out
-# of non-PIC compiled objects will fail with following linker error
-# "relocation R_X86_64_32 can not be used when making a shared object"
-# is to build PIC objects even for static libraries. This behavior may
-# be overridden using 'configure --disable-shared --without-pic'.
-#
+dnl
+dnl Default behavior on some systems where building a shared library out
+dnl of non-PIC compiled objects will fail with following linker error
+dnl "relocation R_X86_64_32 can not be used when making a shared object"
+dnl is to build PIC objects even for static libraries. This behavior may
+dnl be overridden using 'configure --disable-shared --without-pic'.
+dnl
 
 if test "$xc_lt_want_with_pic" = "default"; then
   case $host_cpu in @%:@ (
@@ -151,9 +151,9 @@ dnl use when generating configure script.
 
 m4_define([_XC_LIBTOOL_BODY],
 [dnl
-## ----------------------- ##
-##  Start of libtool code  ##
-## ----------------------- ##
+dnl -----------------------
+dnl  Start of libtool code
+dnl -----------------------
 m4_ifdef([LT_INIT],
 [dnl
 LT_INIT([win32-dll])
@@ -161,9 +161,9 @@ LT_INIT([win32-dll])
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 ])dnl
-## --------------------- ##
-##  End of libtool code  ##
-## --------------------- ##
+dnl ---------------------
+dnl  End of libtool code
+dnl ---------------------
 dnl
 m4_define([$0], [])[]dnl
 ])

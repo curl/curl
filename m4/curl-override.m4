@@ -24,8 +24,8 @@
 #***************************************************************************
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 7
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 7
 
 dnl CURL_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
