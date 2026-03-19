@@ -232,29 +232,26 @@ If you get linkage errors read section 5.7 of the FAQ document.
 
 ## Cygwin
 
-Almost identical to the Unix installation. Essentially run the configure script in the
-curl source tree root with `sh configure`, then run `make`.
+Almost identical to the Unix installation. Essentially run the configure
+script in the curl source tree root with `sh configure`, then run `make`.
 
-To expand on building with `cygwin` first ensure it is in your path, and there are no
-conflicting tools (*i.e. Chocolatey with sed package*). If so move `cygwin` ahead of any items
-in your path that would conflict with `cygwin` commands, making sure you have the `sh`
-executable in `/bin/` or you see the configure fail toward the end.
+To expand on building with `cygwin` first ensure it is in your path, and
+there are no conflicting tools (*i.e. Chocolatey with sed package*). If so
+move `cygwin` ahead of any items in your path that would conflict with
+`cygwin` commands, making sure you have the `sh` executable in `/bin/` or
+you see the configure fail toward the end.
 
-Download the setup installer from
-[`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
-packages are needed for the install. For more on installing packages visit
+Download the setup installer from [`cygwin`](https://cygwin.com/) to begin.
+Additional `cygwin` packages are needed for the install. For more on
+installing packages visit
 [`cygwin setup`](https://cygwin.com/faq/faq.html#faq.setup.cli).
 
 Either run setup-x86_64.exe, then search and select packages individually, or try:
 
-    setup-x86_64.exe -P binutils -P gcc-core -P libpsl-devel -P libtool -P perl -P make
+    setup-x86_64.exe --no-admin -q -I -P binutils,gcc-core,libpsl-devel,libtool,perl,make
 
-If the latter, matching packages should appear in the install rows (*is fickle though*) after selecting
-the download site i.e. `https://mirrors.kernel.org/`. In either case, follow the GUI prompts
-until you reach the "Select Packages" window; then select packages, click next, and finish
-the `cygwin` package installation.
-
-Download the latest version of the `cygwin` packages required (*and suggested*) for a successful install:
+The below details list the required (*and suggested*) packages for a
+successful `cygwin` install
 
 <details>
     <summary>Package List</summary>
@@ -272,7 +269,8 @@ Download the latest version of the `cygwin` packages required (*and suggested*) 
 
 </details>
 
-Once all the packages have been installed, begin the process of installing curl from the source code:
+Once all the packages have been installed, begin the process of installing
+curl from the source code:
 
 <details>
     <summary>configure_options</summary>
@@ -291,12 +289,26 @@ Once all the packages have been installed, begin the process of installing curl 
 1. `sh configure <configure_options>`
 2. `make`
 
-**Note**
+> [!Note]
+> If an error occurs during the installation, do a `make clean` and try:
 
-If an error like:
+- `sh configure <configure_options> --disable-shared`
+- Use `cmake` to configure and build
+- Reinstalling the required `cygwin` packages from the list above without
+ passing `-I` to `setup-x86_64`
+- Temporarily move `cygwin` to the top of your path
+- Install all of the `cygwin` build packages using
+ `setup-x86_64 --build-depends curl`
+
+The below details illustrate resolving an install error:
+
+<details>
+    <summary>Example Error Resolution</summary>
+
+An error like:
 
     ../libtool: eval: line 1890: syntax error near unexpected token `|'
-    ../libtool: eval: line 1890: `/usr/bin/nm -B  .libs/libcurl_la-altsvc.o ...
+    ../libtool: eval: line 1890: `/usr/bin/nm -B  .libs/libcurl_la-altsvc.o
     make[2]: *** [Makefile:1893: libcurl.la] Error 2
     make[1]: *** [Makefile:1656: all] Error 2
     make: *** [Makefile:608: all-recursive] Error 1
@@ -306,18 +318,15 @@ occurs, then do a `make clean` and try:
     sh configure <configure_options> --disable-shared
     make
 
-Or configure and build with CMake:
+Or configure and build with CMake like:
 
     cmake -S . -B build -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Release -DCURL_USE_OPENSSL=ON \
           -DCURL_ZLIB=ON -DBUILD_SHARED_LIBS=ON
     cmake --build build
     cmake --install build --prefix <path>
-If other errors occur during `curl` installation, try:
 
-- reinstalling the required `cygwin` packages from the list above
-- temporarily move `cygwin` to the top of your path
-- install all of the suggested `cygwin` packages
+</details>
 
 ## MS-DOS
 
