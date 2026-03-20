@@ -48,9 +48,4 @@ CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
 
 extern struct Curl_cftype Curl_cft_ip_happy;
 
-#ifdef UNITTESTS
-void Curl_debug_set_transport_provider(uint8_t transport,
-                                       cf_ip_connect_create *cf_create);
-#endif
-
 #endif /* HEADER_CURL_IP_HAPPY_H */

@@ -222,19 +222,24 @@ CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line)
 #ifdef UNITTESTS
 /* used by unit2602.c */
 
-bool Curl_dynhds_contains(struct dynhds *dynhds,
-                          const char *name, size_t namelen)
+UNITTEST bool Curl_dynhds_contains(struct dynhds *dynhds,
+                                   const char *name, size_t namelen);
+UNITTEST bool Curl_dynhds_contains(struct dynhds *dynhds,
+                                   const char *name, size_t namelen)
 {
   return !!Curl_dynhds_get(dynhds, name, namelen);
 }
 
-bool Curl_dynhds_ccontains(struct dynhds *dynhds, const char *name)
+UNITTEST bool Curl_dynhds_ccontains(struct dynhds *dynhds, const char *name);
+UNITTEST bool Curl_dynhds_ccontains(struct dynhds *dynhds, const char *name)
 {
   return Curl_dynhds_contains(dynhds, name, strlen(name));
 }
 
-size_t Curl_dynhds_count_name(struct dynhds *dynhds,
-                              const char *name, size_t namelen)
+UNITTEST size_t Curl_dynhds_count_name(struct dynhds *dynhds,
+                                       const char *name, size_t namelen);
+UNITTEST size_t Curl_dynhds_count_name(struct dynhds *dynhds,
+                                       const char *name, size_t namelen)
 {
   size_t n = 0;
   if(dynhds->hds_len) {
@@ -248,21 +253,18 @@ size_t Curl_dynhds_count_name(struct dynhds *dynhds,
   return n;
 }
 
-size_t Curl_dynhds_ccount_name(struct dynhds *dynhds, const char *name)
+UNITTEST size_t Curl_dynhds_ccount_name(struct dynhds *dynhds,
+                                        const char *name);
+UNITTEST size_t Curl_dynhds_ccount_name(struct dynhds *dynhds,
+                                        const char *name)
 {
   return Curl_dynhds_count_name(dynhds, name, strlen(name));
 }
 
-CURLcode Curl_dynhds_set(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen)
-{
-  Curl_dynhds_remove(dynhds, name, namelen);
-  return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
-}
-
-size_t Curl_dynhds_remove(struct dynhds *dynhds,
-                          const char *name, size_t namelen)
+UNITTEST size_t Curl_dynhds_remove(struct dynhds *dynhds,
+                                   const char *name, size_t namelen);
+UNITTEST size_t Curl_dynhds_remove(struct dynhds *dynhds,
+                                   const char *name, size_t namelen)
 {
   size_t n = 0;
   if(dynhds->hds_len) {
@@ -287,12 +289,24 @@ size_t Curl_dynhds_remove(struct dynhds *dynhds,
   return n;
 }
 
-size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name)
+UNITTEST CURLcode Curl_dynhds_set(struct dynhds *dynhds,
+                                  const char *name, size_t namelen,
+                                  const char *value, size_t valuelen);
+UNITTEST CURLcode Curl_dynhds_set(struct dynhds *dynhds,
+                                  const char *name, size_t namelen,
+                                  const char *value, size_t valuelen)
+{
+  Curl_dynhds_remove(dynhds, name, namelen);
+  return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
+}
+
+UNITTEST size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name);
+UNITTEST size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name)
 {
   return Curl_dynhds_remove(dynhds, name, strlen(name));
 }
 
-#endif
+#endif /* UNITTESTS */
 
 CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
 {

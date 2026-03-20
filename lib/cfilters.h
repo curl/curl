@@ -565,10 +565,6 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
                               struct connectdata *conn,
                               int sockindex);
 
-#ifdef UNITTESTS
-void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
-#endif
-
 /**
  * Get the remote hostname and port that the connection is currently
  * talking to (or will talk to).
