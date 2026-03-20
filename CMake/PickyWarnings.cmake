@@ -351,7 +351,7 @@ if(PICKY_COMPILER)
       endif()
     endif()
 
-    #
+    # Assemble list of flags
 
     set(_picky_skipped "")
     foreach(_ccopt IN LISTS _picky_enable)
