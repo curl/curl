@@ -256,12 +256,6 @@ jobs:
             install_steps: pytest
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCMAKE_C_STANDARD=90
             macos-version-min: '10.15'
-          - name: 'OpenSSL SecTrust Intel'
-            image: macos-15-intel
-            compiler: clang
-            install: libnghttp3 libngtcp2
-            install_steps: pytest
-            configure: --enable-debug --with-openssl=/usr/local/opt/openssl --with-ngtcp2 --with-apple-sectrust
           - name: 'OpenSSL SecTrust'
             compiler: clang
             install: libnghttp3 libngtcp2
