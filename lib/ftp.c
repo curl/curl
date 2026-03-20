@@ -2489,24 +2489,27 @@ static CURLcode ftp_state_port_resp(struct Curl_easy *data,
   return result;
 }
 
-static int twodigit(const char *p)
+/* return TRUE on error, FALSE on success */
+static bool twodigit(const char *p, int *val)
 {
-  return ((p[0] - '0') * 10) + (p[1] - '0');
+  if(!ISDIGIT(p[0]) || !ISDIGIT(p[1]))
+    return TRUE;
+  /* curlx_hexval() works fine here since we make sure it is decimal above */
+  *val = curlx_hexval(p[0]) * 10 + curlx_hexval(p[1]);
+  return FALSE;
 }
 
 static bool ftp_213_date(const char *p, int *year, int *month, int *day,
                          int *hour, int *minute, int *second)
 {
-  size_t len = strlen(p);
-  if(len < 14)
+  int century;
+  if((strlen(p) < 14) || twodigit(&p[0], &century) || twodigit(&p[2], year) ||
+     twodigit(&p[4], month) || twodigit(&p[6], day) ||
+     twodigit(&p[8], hour) || twodigit(&p[10], minute) ||
+     twodigit(&p[12], second))
     return FALSE;
-  *year = (twodigit(&p[0]) * 100) + twodigit(&p[2]);
-  *month = twodigit(&p[4]);
-  *day = twodigit(&p[6]);
-  *hour = twodigit(&p[8]);
-  *minute = twodigit(&p[10]);
-  *second = twodigit(&p[12]);
 
+  *year += century * 100;
   if((*month > 12) || (*day > 31) || (*hour > 23) || (*minute > 59) ||
      (*second > 60))
     return FALSE;
