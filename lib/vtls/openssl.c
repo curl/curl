@@ -5255,14 +5255,18 @@ out:
   return result;
 }
 
-static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
+static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
+                                         int sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;
+  int mdnid, pknid, secbits;
+  uint32_t flags;
+  EVP_PKEY *pkey = NULL;
+  const char *pkey_type = NULL;
+  bool no_digest_acceptable = FALSE;
   const EVP_MD *algo_type = NULL;
-#ifdef HAVE_OPENSSL3
-  EVP_MD *algo_ref = NULL;
-#endif
+  const char *algo_name = NULL;
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
@@ -5294,79 +5298,80 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     /* No server certificate, do not do channel binding */
     return CURLE_OK;
 
-#ifdef HAVE_OPENSSL3
-  {
-    /* OpenSSL 3 has ciphers where it does not know the "NID" for.
-     * This may happen when ciphers com from the new "providers"
-     * and has happened for PQC algorithms. Try to get the "digest"
-     * cipher from the cert without using NIDs first. Fallback to
-     * the original, non-openssl3 way of doing this. */
-    const X509_ALGOR *sig_algo;
-    const ASN1_OBJECT *digest_oid;
-    char algo_txt[128];
+  pkey = X509_get0_pubkey(cert);
+  pkey_type = pkey ? EVP_PKEY_get0_type_name(pkey) : NULL;
 
-    X509_get0_signature(NULL, &sig_algo, cert);
-    X509_ALGOR_get0(&digest_oid, NULL, NULL, sig_algo);
-    OBJ_obj2txt(algo_txt, sizeof(algo_txt), digest_oid, 0);
-    algo_type = algo_ref = EVP_MD_fetch(data->state.libctx, algo_txt, NULL);
-    if(!algo_type)
-      infof(data, "Could not find digest algorithm '%s'", algo_txt);
-    else if(EVP_MD_is_a(algo_type, "SHA1") || EVP_MD_is_a(algo_type, "MD5")) {
-      /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
-      EVP_MD_free(algo_ref);
-      algo_type = algo_ref = EVP_MD_fetch(data->state.libctx, "SHA-256", NULL);
-      if(!algo_type) {
-        infof(data, "Could not fetch SHA-256 algorithm");
-        result = CURLE_SSL_INVALIDCERTSTATUS;
-        goto error;
-      }
-    }
+  if(!X509_get_signature_info(cert, &mdnid, &pknid, &secbits, &flags)) {
+    failf(data, "certificate signature algorithm not recognized");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
   }
-#endif /* HAVE_OPENSSL3 */
 
-  if(!algo_type) {
-    int algo_nid;
-    if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
-      failf(data,
-            "Unable to find digest NID for certificate signature algorithm");
-      result = CURLE_SSL_INVALIDCERTSTATUS;
-      goto error;
-    }
-
-    /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
-    if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
+  if(mdnid != NID_undef) {
+    if(mdnid == NID_md5 || mdnid == NID_sha1) {
       algo_type = EVP_sha256();
     }
-    else {
-      algo_type = EVP_get_digestbynid(algo_nid);
-      if(!algo_type) {
-        const char *algo_name = OBJ_nid2sn(algo_nid);
-        failf(data, "Could not find digest algorithm %s (NID %d)",
-              algo_name ? algo_name : "(null)", algo_nid);
-        result = CURLE_SSL_INVALIDCERTSTATUS;
-        goto error;
-      }
+    else
+      algo_type = EVP_get_digestbynid(mdnid);
+  }
+  else if(pkey && !EVP_PKEY_is_a(pkey, OBJ_nid2sn(pknid))) {
+    /* The cert's pkey is different from the algorithm used to sign
+     * the certificate. Since the reported `mdnid` is undefined, there
+     * is no digest algorithm available here. This happens in PQC
+     * and is accepted, resulting in no addition to the binding. */
+    no_digest_acceptable = TRUE;
+  }
+  else if(pkey) {
+    /* cert's pkey type is the same as the cert signer (or same family).
+     * Ask for the mandatory/advisory digest algorithm for the pkey.
+     */
+    char mdname[128] = "";
+    int rc = EVP_PKEY_get_default_digest_name(pkey, mdname, sizeof(mdname));
+    bool md_is_undef = !strcmp(mdname, "UNDEF");
+
+    if(rc == 2 && md_is_undef) {
+      /* OpenSSL declares "undef" the *mandatory* digest for this key.
+       * This is some PQC shit, accept it, no addition to binding. */
+      no_digest_acceptable = TRUE;
     }
+    else if(rc > 0 && mdname[0] != '\0' && !md_is_undef) {
+      infof(data, "Digest algorithm : %s%s (derived from public key %s)"
+            ", but unavailable",
+            mdname, rc == 2 ? " [mandatory]" : " [advisory]",
+            pkey_type);
+    }
+  }
+
+  if(!algo_type) {
+    if(no_digest_acceptable) {
+      infof(data, "certificate exposes no signing digest algorithm, "
+            "nothing to add to channel binding");
+      result = CURLE_OK;
+      goto out;
+    }
+    /* unacceptable, something is wrong, fail */
+    algo_name = OBJ_nid2sn(mdnid);
+    failf(data, "Unable to find digest algorithm %s (NID %d) "
+          "for channel binding", algo_name ? algo_name : "(null)", mdnid);
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
   }
 
   if(!X509_digest(cert, algo_type, buf, &length)) {
-    failf(data, "X509_digest() failed");
+    failf(data, "X509_digest() failed for channel binding");
     result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
+    goto out;
   }
 
   /* Append "tls-server-end-point:" */
   result = curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1);
   if(result)
-    goto error;
+    goto out;
 
   /* Append digest */
   result = curlx_dyn_addn(binding, buf, length);
 
-error:
-#ifdef HAVE_OPENSSL3
-  EVP_MD_free(algo_ref);
-#endif
+out:
   X509_free(cert);
   return result;
 }
