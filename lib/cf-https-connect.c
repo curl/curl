@@ -678,7 +678,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
       size_t i;
       for(i = 0; i < CURL_ARRAYSIZE(rr->alpns) &&
                  alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
-        enum alpnid alpn = rr->alpns[i];
+        enum alpnid alpn = (enum alpnid)rr->alpns[i];
         if(cf_https_alpns_contain(alpn, alpn_ids, alpn_count))
           continue;
         switch(alpn) {
