@@ -74,7 +74,7 @@ if test "x$OPT_GNUTLS" != "xno"; then
         addlib=-lgnutls
         addld=-L$OPT_GNUTLS/lib$libsuff
         addcflags=-I$OPT_GNUTLS/include
-        version="" # we just do not know
+        version=""   dnl we just do not know
         gtlslib=$OPT_GNUTLS/lib$libsuff
       fi
     fi

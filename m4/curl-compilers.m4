@@ -834,12 +834,12 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-default"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-enum"                    # Not used because this basically disallows default case
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-enum"                    dnl Not used because this basically disallows default case
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [old-style-definition])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    # Not practical
-          # tmp_CFLAGS="$tmp_CFLAGS -Wno-error=unused-macros"
+        dnl CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    dnl Not practical
+        dnl tmp_CFLAGS="$tmp_CFLAGS -Wno-error=unused-macros"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
           fi
 
@@ -852,8 +852,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 2.9 or later
           if test "$compiler_num" -ge "209"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         # Not used because we cannot change public structs
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"         # Triggered by typecheck-gcc.h with clang 14+, dependency headers
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         dnl Not used because we cannot change public structs
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"         dnl Triggered by typecheck-gcc.h with clang 14+, dependency headers
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
           fi
 
@@ -865,8 +865,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 3.1 or later
           if test "$compiler_num" -ge "301"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-non-iso])
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-covered-switch-default"    # Annoying to fix or silence
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  # Triggered by standard headers, and curl/curl.h (in rare combinations)
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-covered-switch-default"    dnl Annoying to fix or silence
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  dnl Triggered by standard headers, and curl/curl.h (in rare combinations)
           fi
 
           dnl Only clang 3.2 or later
@@ -897,7 +897,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 3.5 or later
           if test "$compiler_num" -ge "305"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pragmas])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code-break])  # Not used: Silent in "unity" builds
+         dnl CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code-break])  dnl Not used: Silent in "unity" builds
           fi
 
           dnl Only clang 3.6 or later
@@ -921,14 +921,14 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           fi
           dnl clang 10 or later
           if test "$compiler_num" -ge "1000"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"  # we have silencing markup for clang 10.0 and above only
+            tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"  dnl we have silencing markup for clang 10.0 and above only
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [xor-used-as-pow])
           fi
           dnl clang 13 or later
           if test "$compiler_num" -ge "1300"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type])
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [reserved-identifier]) # Keep it before -Wno-reserved-macro-identifier
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-reserved-macro-identifier"  # Sometimes such external macros need to be set
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [reserved-identifier]) dnl Keep it before -Wno-reserved-macro-identifier
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-reserved-macro-identifier"  dnl Sometimes such external macros need to be set
           fi
           dnl clang 16 or later
           if test "$compiler_num" -ge "1600"; then
@@ -936,7 +936,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           fi
           dnl clang 17 or later
           if test "$compiler_num" -ge "1700"; then
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or above
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  dnl with Apple clang it requires 16.0 or above
           fi
           dnl clang 19 or later
           if test "$compiler_num" -ge "1901"; then
@@ -954,7 +954,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wno-implicit-void-ptr-cast"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [tentative-definition-compat])
             if test "$curl_cv_native_windows" = "yes"; then
-              tmp_CFLAGS="$tmp_CFLAGS -Wno-c++-keyword"  # `wchar_t` triggers it on Windows
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-c++-keyword"  dnl `wchar_t` triggers it on Windows
             else
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [c++-keyword])
             fi
@@ -1063,17 +1063,17 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
               *-*-msys*)
                 ;;
               *)
-                CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])  # Seen to clash with libtool-generated stub code
+                CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])  dnl Seen to clash with libtool-generated stub code
                 ;;
             esac
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         # Not used because we cannot change public structs
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         dnl Not used because we cannot change public structs
             tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-default"
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-enum"                    # Not used because this basically disallows default case
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-enum"                    dnl Not used because this basically disallows default case
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pragmas])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    # Not practical
-          # tmp_CFLAGS="$tmp_CFLAGS -Wno-error=unused-macros"
+        dnl CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    dnl Not practical
+        dnl tmp_CFLAGS="$tmp_CFLAGS -Wno-error=unused-macros"
           fi
 
           dnl Only gcc 4.2 or later
