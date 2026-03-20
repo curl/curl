@@ -86,7 +86,6 @@ static CURLcode test_unit1627(const char *arg)
       curl_mprintf("Input: %s is not lowercase: %s\n", buffer, get->name);
       break;
     }
-
   }
   for(j = 0; j < CURL_ARRAYSIZE(notokay); j++) {
     const struct Curl_scheme *get = Curl_get_scheme(notokay[j]);
