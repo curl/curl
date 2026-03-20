@@ -593,6 +593,9 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
   }
   else {
     dns->timestamp = *Curl_pgrs_now(data);
+    if(!dns->timestamp.tv_sec && !dns->timestamp.tv_usec)
+      /* unlikely event, but... */
+      dns->timestamp.tv_sec = 1;
   }
   dns->hostport = port;
   if(hostlen)
