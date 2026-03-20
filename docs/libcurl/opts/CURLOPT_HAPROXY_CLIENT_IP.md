@@ -28,7 +28,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPROXY_CLIENT_IP,
 # DESCRIPTION
 
 When this parameter is set to a valid IPv4 or IPv6 numerical address in its
-printable ascii string version, the library sends this as the client address
+printable ASCII string version, the library sends this as the client address
 in the HAProxy PROXY protocol v1 header at beginning of the connection.
 
 This option is an alternative to CURLOPT_HAPROXYPROTOCOL(3) as that one cannot
