@@ -311,6 +311,7 @@ The details below illustrate using `cmake` and `ninja` (***much** faster*):
 <details>
     <summary>Cygwin Ninja Install</summary>
 
+```bash
     # Install dependencies
     setup-x86_64 --no-admin -q -I -P cmake,ninja
 
@@ -319,6 +320,7 @@ The details below illustrate using `cmake` and `ninja` (***much** faster*):
 
     # Now your ninja
     ninja
+```
 
 > **Note**
 > If an error occurs during or after the installation, then try:
