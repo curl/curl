@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
+
 #include "uint-hash.h"
 
 static void t1616_mydtor(uint32_t id, void *elem)
