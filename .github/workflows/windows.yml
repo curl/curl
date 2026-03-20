@@ -990,7 +990,7 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --verbose
 
       - name: 'curl -V'
         timeout-minutes: 1
@@ -1005,7 +1005,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps --verbose
 
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}

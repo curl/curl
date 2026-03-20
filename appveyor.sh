@@ -98,7 +98,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     false
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --verbose
   [[ "${CMAKE_GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
   [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
@@ -125,7 +125,7 @@ fi
 # build tests
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps --verbose
 fi
 
 # build examples
