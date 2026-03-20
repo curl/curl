@@ -222,6 +222,9 @@ CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line)
 #ifdef UNITTESTS
 /* used by unit2602.c */
 
+/**
+ * Return TRUE iff one or more headers with the given name exist.
+ */
 UNITTEST bool Curl_dynhds_contains(struct dynhds *dynhds,
                                    const char *name, size_t namelen);
 UNITTEST bool Curl_dynhds_contains(struct dynhds *dynhds,
@@ -236,6 +239,10 @@ UNITTEST bool Curl_dynhds_ccontains(struct dynhds *dynhds, const char *name)
   return Curl_dynhds_contains(dynhds, name, strlen(name));
 }
 
+/**
+ * Return how often the given name appears in `dynhds`.
+ * Names are case-insensitive.
+ */
 UNITTEST size_t Curl_dynhds_count_name(struct dynhds *dynhds,
                                        const char *name, size_t namelen);
 UNITTEST size_t Curl_dynhds_count_name(struct dynhds *dynhds,
@@ -253,6 +260,10 @@ UNITTEST size_t Curl_dynhds_count_name(struct dynhds *dynhds,
   return n;
 }
 
+/**
+ * Return how often the given null-terminated name appears in `dynhds`.
+ * Names are case-insensitive.
+ */
 UNITTEST size_t Curl_dynhds_ccount_name(struct dynhds *dynhds,
                                         const char *name);
 UNITTEST size_t Curl_dynhds_ccount_name(struct dynhds *dynhds,
@@ -261,6 +272,10 @@ UNITTEST size_t Curl_dynhds_ccount_name(struct dynhds *dynhds,
   return Curl_dynhds_count_name(dynhds, name, strlen(name));
 }
 
+/**
+ * Remove all entries with the given name.
+ * Returns number of entries removed.
+ */
 UNITTEST size_t Curl_dynhds_remove(struct dynhds *dynhds,
                                    const char *name, size_t namelen);
 UNITTEST size_t Curl_dynhds_remove(struct dynhds *dynhds,
@@ -289,6 +304,11 @@ UNITTEST size_t Curl_dynhds_remove(struct dynhds *dynhds,
   return n;
 }
 
+/**
+ * Set the give header name and value, replacing any entries with
+ * the same name. The header is added at the end of all (remaining)
+ * entries.
+ */
 UNITTEST CURLcode Curl_dynhds_set(struct dynhds *dynhds,
                                   const char *name, size_t namelen,
                                   const char *value, size_t valuelen);
