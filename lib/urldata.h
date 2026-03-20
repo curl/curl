@@ -576,7 +576,7 @@ struct Progress {
 
   curl_off_t speed_amount[CURL_SPEED_RECORDS];
   struct curltime speed_time[CURL_SPEED_RECORDS];
-  uint8_t speeder_c;
+  uint32_t speeder_c;
   BIT(hide);
   BIT(ul_size_known);
   BIT(dl_size_known);
