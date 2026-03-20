@@ -307,7 +307,7 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
     ftpc->file = fileName;
   else
     ftpc->file = NULL; /* instead of point to a zero byte,
-                            we make it a NULL pointer */
+                          we make it a NULL pointer */
 
   if(data->state.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
     /* We need a filename when uploading. Return error! */
