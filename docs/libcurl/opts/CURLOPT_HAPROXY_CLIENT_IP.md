@@ -27,9 +27,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPROXY_CLIENT_IP,
 
 # DESCRIPTION
 
-When this parameter is set to a valid IPv4 or IPv6 numerical address, the
-library sends this address as client address in the HAProxy PROXY protocol v1
-header at beginning of the connection.
+When this parameter is set to a valid IPv4 or IPv6 numerical address in its
+printable ascii string version, the library sends this as the client address
+in the HAProxy PROXY protocol v1 header at beginning of the connection.
 
 This option is an alternative to CURLOPT_HAPROXYPROTOCOL(3) as that one cannot
 use a specified address.
@@ -39,6 +39,9 @@ previous ones. Set it to NULL to disable its use again.
 
 The application does not have to keep the string around after setting this
 option.
+
+As with most libcurl options, the user of this option must make sure that the
+*correct* data (address) is passed on. libcurl does little to no verification.
 
 Note that if you want to send a *different* HAProxy client IP in a subsequent
 request, you need to make sure that it is done over a fresh connection as
