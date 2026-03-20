@@ -641,7 +641,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   CURLcode result;
 
   result = cf_ip_ballers_run(&ctx->ballers, cf, data,
-                             ctx->dns_resolved, connected);
+                             (bool)ctx->dns_resolved, connected);
 
   if(!result)
     return CURLE_OK;
