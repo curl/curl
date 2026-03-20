@@ -767,6 +767,10 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   struct cf_ip_happy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
 
+  /* -Werror=null-dereference finds false positives suddenly. */
+  if(!data)
+    return CURLE_FAILED_INIT;
+
   CURL_TRC_CF(data, cf, "connect() start");
   if(cf->connected) {
     *done = TRUE;
