@@ -214,7 +214,8 @@ struct Curl_llist_node *Curl_llist_head(struct Curl_llist *list)
 #ifdef UNITTESTS
 /* Curl_llist_tail() returns the last 'struct Curl_llist_node *', which
    might be NULL */
-struct Curl_llist_node *Curl_llist_tail(struct Curl_llist *list)
+UNITTEST struct Curl_llist_node *Curl_llist_tail(struct Curl_llist *list);
+UNITTEST struct Curl_llist_node *Curl_llist_tail(struct Curl_llist *list)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
@@ -248,16 +249,15 @@ struct Curl_llist_node *Curl_node_next(struct Curl_llist_node *n)
 }
 
 #ifdef UNITTESTS
-
 /* Curl_node_prev() returns the previous element in a list from a given
    Curl_llist_node */
-struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n)
+UNITTEST struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n);
+UNITTEST struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n)
 {
   DEBUGASSERT(n);
   DEBUGASSERT(n->_init == NODEINIT);
   return VERIFYNODE(n->_prev);
 }
-
 #endif
 
 struct Curl_llist *Curl_node_llist(struct Curl_llist_node *n)
