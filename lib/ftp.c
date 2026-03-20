@@ -2495,7 +2495,7 @@ static bool twodigit(const char *p, int *val)
   if(!ISDIGIT(p[0]) || !ISDIGIT(p[1]))
     return TRUE;
   /* curlx_hexval() works fine here since we make sure it is decimal above */
-  *val = curlx_hexval(p[0]) * 10 + curlx_hexval(p[1]);
+  *val = (curlx_hexval(p[0]) * 10) + curlx_hexval(p[1]);
   return FALSE;
 }
 
