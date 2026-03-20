@@ -78,6 +78,7 @@ void Curl_initinfo(struct Curl_easy *data)
 
   info->conn_scheme = 0;
   info->conn_protocol = 0;
+  info->used_proxy = 0;
 
 #ifdef USE_SSL
   Curl_ssl_free_certinfo(data);
