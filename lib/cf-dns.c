@@ -513,8 +513,8 @@ Curl_conn_dns_get_ai(struct Curl_easy *data,
 
 #ifdef USE_HTTPSRR
 /* Return the HTTPS-RR info from the first "resolve" filter at the
- * connection. If the DNS resolving is not done yet or if there just
- * is not HTTPS-RR info, returns NULL.
+ * connection. If the DNS resolving is not done yet or if there
+ * is no HTTPS-RR info, returns NULL.
  */
 const struct Curl_https_rrinfo *
 Curl_conn_dns_get_https(struct Curl_easy *data, int sockindex)

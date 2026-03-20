@@ -266,7 +266,7 @@ CURLcode Curl_socket_addr_from_ai(struct Curl_sockaddr_ex *addr,
                                   uint8_t transport)
 {
   /*
-   * The Curl_sockaddr_ex structure is basically libcurl's external API
+   * The Curl_sockaddr_ex structure is libcurl's external API
    * curl_sockaddr structure with enough space available to directly hold
    * any protocol-specific address structures. The variable declared here
    * will be used to pass / receive data to/from the fopensocket callback
