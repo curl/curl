@@ -28,6 +28,7 @@
 #include "cfilters.h"
 #include "multiif.h"
 
+#include "cf-dns.h"
 #include "cf-socket.h"
 #include "connect.h"
 #include "http2.h"
@@ -278,6 +279,19 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
   }
 }
 
+void Curl_trc_feat_infof(struct Curl_easy *data,
+                         struct curl_trc_feat *feat,
+                         const char *fmt, ...)
+{
+  DEBUGASSERT(feat);
+  if(Curl_trc_ft_is_verbose(data, feat)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, feat, NULL, 0, fmt, ap);
+    va_end(ap);
+  }
+}
+
 static const char * const Curl_trc_timer_names[] = {
   "100_TIMEOUT",
   "ASYNC_NAME",
@@ -336,7 +350,6 @@ static const char * const Curl_trc_mstate_names[] = {
   "PENDING",
   "SETUP",
   "CONNECT",
-  "RESOLVING",
   "CONNECTING",
   "PROTOCONNECT",
   "PROTOCONNECTING",
@@ -535,6 +548,7 @@ struct trc_cft_def {
 };
 
 static struct trc_cft_def trc_cfts[] = {
+  { &Curl_cft_dns,            TRC_CT_NETWORK },
   { &Curl_cft_tcp,            TRC_CT_NETWORK },
   { &Curl_cft_udp,            TRC_CT_NETWORK },
   { &Curl_cft_unix,           TRC_CT_NETWORK },

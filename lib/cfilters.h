@@ -345,6 +345,9 @@ bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
 unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
                                          struct Curl_easy *data);
 
+int Curl_socktype_for_transport(uint8_t transport);
+int Curl_protocol_for_transport(uint8_t transport);
+
 const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
                                              struct Curl_easy *data);
 

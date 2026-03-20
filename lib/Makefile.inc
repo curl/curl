@@ -149,6 +149,7 @@ LIB_CFILES =         \
   asyn-thrdd.c       \
   bufq.c             \
   bufref.c           \
+  cf-dns.c           \
   cf-h1-proxy.c      \
   cf-h2-proxy.c      \
   cf-haproxy.c       \
@@ -181,6 +182,7 @@ LIB_CFILES =         \
   cw-out.c           \
   cw-pause.c         \
   dict.c             \
+  dnscache.c         \
   doh.c              \
   dynhds.c           \
   easy.c             \
@@ -259,6 +261,8 @@ LIB_CFILES =         \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
+  thrdpool.c         \
+  thrdqueue.c        \
   transfer.c         \
   uint-bset.c        \
   uint-hash.c        \
@@ -276,6 +280,7 @@ LIB_HFILES =         \
   asyn.h             \
   bufq.h             \
   bufref.h           \
+  cf-dns.h           \
   cf-h1-proxy.h      \
   cf-h2-proxy.h      \
   cf-haproxy.h       \
@@ -316,6 +321,7 @@ LIB_HFILES =         \
   cw-out.h           \
   cw-pause.h         \
   dict.h             \
+  dnscache.h         \
   doh.h              \
   dynhds.h           \
   easy_lock.h        \
@@ -388,6 +394,8 @@ LIB_HFILES =         \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
+  thrdpool.h         \
+  thrdqueue.h        \
   transfer.h         \
   uint-bset.h        \
   uint-hash.h        \

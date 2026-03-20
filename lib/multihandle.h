@@ -27,7 +27,7 @@
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
-#include "hostip.h"
+#include "dnscache.h"
 #include "multi_ev.h"
 #include "multi_ntfy.h"
 #include "psl.h"
@@ -53,7 +53,6 @@ typedef enum {
   MSTATE_PENDING,      /* no connections, waiting for one */
   MSTATE_SETUP,        /* start a new transfer */
   MSTATE_CONNECT,      /* resolve/connect has been sent off */
-  MSTATE_RESOLVING,    /* awaiting the resolve to finalize */
   MSTATE_CONNECTING,   /* awaiting the TCP connect to finalize */
   MSTATE_PROTOCONNECT, /* initiate protocol connect procedure */
   MSTATE_PROTOCONNECTING, /* completing the protocol-specific connect phase */
@@ -71,7 +70,7 @@ typedef enum {
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#ifndef CURL_DISABLE_SOCKETPAIR
+#if !defined(CURL_DISABLE_SOCKETPAIR) && !defined(USE_WINSOCK)
 #define ENABLE_WAKEUP
 #endif
 
@@ -109,6 +108,9 @@ struct Curl_multi {
 
   struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
+#ifdef CURLRES_THREADED
+  struct curl_thrdq *resolv_thrdq;
+#endif
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
@@ -160,12 +162,11 @@ struct Curl_multi {
 
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* Winsock event used for waits */
-#else
+#endif
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for
                                    wakeup 0 is used for read, 1 is used
                                    for write */
-#endif
 #endif
   unsigned int max_concurrent_streams;
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of

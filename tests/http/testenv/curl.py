@@ -630,6 +630,7 @@ class CurlClient:
                  with_dtrace: bool = False,
                  with_perf: bool = False,
                  with_flame: bool = False,
+                 force_resolv: bool = True,
                  socks_args: Optional[List[str]] = None):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
@@ -659,6 +660,7 @@ class CurlClient:
         self._silent = silent
         self._run_env = run_env
         self._server_addr = server_addr if server_addr else '127.0.0.1'
+        self._force_resolv = force_resolv
         self._rmrf(self._run_dir)
         self._mkpath(self._run_dir)
 
@@ -1086,7 +1088,6 @@ class CurlClient:
     def _raw(self, urls, intext='', timeout=None, options=None, insecure=False,
              alpn_proto: Optional[str] = None,
              url_options=None,
-             force_resolve=True,
              with_stats=False,
              with_headers=True,
              def_tracing=True,
@@ -1094,9 +1095,8 @@ class CurlClient:
              with_tcpdump=False):
         args = self._complete_args(
             urls=urls, timeout=timeout, options=options, insecure=insecure,
-            alpn_proto=alpn_proto, force_resolve=force_resolve,
-            with_headers=with_headers, def_tracing=def_tracing,
-            url_options=url_options)
+            alpn_proto=alpn_proto, with_headers=with_headers,
+            def_tracing=def_tracing, url_options=url_options)
         r = self._run(args, intext=intext, with_stats=with_stats,
                       with_profile=with_profile, with_tcpdump=with_tcpdump)
         if r.exit_code == 0 and with_headers:
@@ -1104,8 +1104,7 @@ class CurlClient:
         return r
 
     def _complete_args(self, urls, timeout=None, options=None,
-                       insecure=False, force_resolve=True,
-                       alpn_proto: Optional[str] = None,
+                       insecure=False, alpn_proto: Optional[str] = None,
                        url_options=None,
                        with_headers: bool = True,
                        def_tracing: bool = True):
@@ -1115,6 +1114,8 @@ class CurlClient:
 
         if options is not None and '--resolve' in options:
             force_resolve = False
+        else:
+            force_resolve = self._force_resolv
 
         args = [self._curl, "-s", "--path-as-is"]
         if 'CURL_TEST_EVENT' in os.environ:
