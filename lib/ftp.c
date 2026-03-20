@@ -1063,6 +1063,7 @@ static CURLcode ftp_port_resolve_host(struct Curl_easy *data,
 
   *resp = NULL;
   result = Curl_resolv_blocking(data, host, 0, conn->ip_version,
+                                Curl_conn_get_transport(data, conn),
                                 dns_entryp);
   if(result)
     failf(data, "failed to resolve the address provided to PORT: %s", host);
@@ -1387,7 +1388,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* cleanup */
 
   if(dns_entry)
-    Curl_resolv_unlink(data, &dns_entry);
+    Curl_dns_entry_unlink(data, &dns_entry);
   if(result) {
     ftp_state(data, ftpc, FTP_STOP);
   }
@@ -2163,6 +2164,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     (void)Curl_resolv_blocking(data, host_name, ipquad.remote_port,
                                is_ipv6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_V4,
+                               Curl_conn_get_transport(data, conn),
                                &dns);
     /* we connect to the proxy's port */
     connectport = (unsigned short)ipquad.remote_port;
@@ -2187,7 +2189,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
         goto error;
     }
 
-    (void)Curl_resolv_blocking(data, newhost, newport, conn->ip_version, &dns);
+    (void)Curl_resolv_blocking(data, newhost, newport, conn->ip_version,
+                               Curl_conn_get_transport(data, conn),
+                               &dns);
     connectport = newport; /* we connect to the remote port */
 
     if(!dns) {
