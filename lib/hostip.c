@@ -801,11 +801,10 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   return hostip_resolv(data, hostname, port, ip_version, TRUE, entry);
 }
 
-
-#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_take_result(struct Curl_easy *data,
                                  struct Curl_dns_entry **pdns)
 {
+#ifdef USE_CURL_ASYNC
   struct Curl_resolv_async *async = data->state.async;
   CURLcode result;
 
@@ -848,8 +847,12 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data,
   }
 
   return result;
-}
+#else
+  (void)data;
+  (void)pdns;
+  return CURLE_NOT_BUILT_IN;
 #endif
+}
 
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps)

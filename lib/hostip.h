@@ -106,12 +106,8 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
                              struct Curl_dns_entry **entry,
                              timediff_t timeoutms);
 
-#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_take_result(struct Curl_easy *data,
                                  struct Curl_dns_entry **pdns);
-#else
-#define Curl_resolv_take_result(x, y) CURLE_NOT_BUILT_IN
-#endif
 
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
