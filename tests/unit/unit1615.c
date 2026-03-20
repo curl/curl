@@ -23,7 +23,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "curl_sha512_256.h"
 
 static CURLcode test_unit1615(const char *arg)

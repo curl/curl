@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "splay.h"
 
 static void splayprint(struct Curl_tree *t, int d, char output)
