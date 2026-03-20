@@ -118,9 +118,6 @@ CURLcode Curl_async_get_impl(struct Curl_easy *data,
 
 struct async_thrdd_item {
   struct Curl_addrinfo *res;
-#ifdef HAVE_GETADDRINFO
-  struct addrinfo hints;
-#endif
 #ifdef CURLVERBOSE
   char description[CURL_ASYN_ITEM_DESC_LEN];
 #endif
@@ -156,7 +153,7 @@ async_thrdd_item_create(struct Curl_easy *data,
 {
   size_t hostlen = strlen(hostname);
   struct async_thrdd_item *item;
-  VERBOSE(const char *qtype = "A");
+  VERBOSE(const char *qtype);
 
   item = curlx_calloc(1, sizeof(*item) + hostlen);
   if(!item)
@@ -170,28 +167,9 @@ async_thrdd_item_create(struct Curl_easy *data,
   item->mid = data->mid;
   item->async_id = async_id;
 
-#ifdef HAVE_GETADDRINFO
-  {
-    int pf = PF_INET;
-#ifdef CURLRES_IPV6
-    if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
-      /* The stack seems to be IPv6-enabled */
-      if(ip_version == CURL_IPRESOLVE_V6)
-        pf = PF_INET6;
-      else
-        pf = PF_UNSPEC;
-    }
-#endif /* CURLRES_IPV6 */
-    item->hints.ai_family = pf;
-    item->hints.ai_socktype = Curl_socktype_for_transport(transport);
 #ifdef CURLVERBOSE
-    qtype = (pf == PF_UNSPEC) ? "A+AAAA":
-            ((pf == PF_INET6) ? "AAAA" : "A");
-#endif
-  }
-#endif /* HAVE_GETADDRINFO */
-
-#ifdef CURLVERBOSE
+  qtype = (ip_version == CURL_IPRESOLVE_WHATEVER) ? "A+AAAA":
+          ((ip_version == CURL_IPRESOLVE_V6) ? "AAAA" : "A");
   curl_msnprintf(item->description, sizeof(item->description),
                  "[%" FMT_OFF_T "/%d] %s %s:%u",
                  data->id, item->async_id, qtype, item->hostname, item->port);
@@ -246,8 +224,7 @@ static CURLcode async_rr_start(struct Curl_easy *data,
 
   DEBUGASSERT(!thrdd->rr.channel);
   if(async->port != 443) {
-    rrname = curl_maprintf("_%d_.https.%s",
-                           async->port, data->conn->host.name);
+    rrname = curl_maprintf("_%d_.https.%s", async->port, async->hostname);
     if(!rrname)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -272,10 +249,11 @@ static CURLcode async_rr_start(struct Curl_easy *data,
   thrdd->rr.hinfo.port = -1;
   thrdd->rr.hinfo.rrname = rrname;
   ares_query_dnsrec(thrdd->rr.channel,
-                    rrname ? rrname : data->conn->host.name, ARES_CLASS_IN,
+                    rrname ? rrname : async->hostname, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
                     async_thrdd_rr_done, data, NULL);
-  CURL_TRC_DNS(data, "Issued HTTPS-RR request for %s", data->conn->host.name);
+  CURL_TRC_DNS(data, "Issued HTTPS-RR request for %s",
+               rrname ? rrname : async->hostname);
   return CURLE_OK;
 }
 #endif
@@ -355,22 +333,33 @@ CURLcode Curl_async_await(struct Curl_easy *data,
 static void async_thrdd_item_process(void *arg)
 {
   struct async_thrdd_item *item = arg;
+  struct addrinfo hints;
   char service[12];
+  int pf = PF_INET;
   int rc;
 
 #ifdef DEBUGBUILD
-    if(item->delay_ms) {
-      curlx_wait_ms(item->delay_ms);
-    }
-    if(item->delay_fail_ms) {
-      curlx_wait_ms(item->delay_fail_ms);
-      return;
-    }
+  if(item->delay_ms) {
+    curlx_wait_ms(item->delay_ms);
+  }
+  if(item->delay_fail_ms) {
+    curlx_wait_ms(item->delay_fail_ms);
+    return;
+  }
 #endif
+
+  memset(&hints, 0, sizeof(hints));
+#ifdef CURLRES_IPV6
+  if(item->ip_version != CURL_IPRESOLVE_V4) {
+    pf = (item->ip_version == CURL_IPRESOLVE_V6) ? PF_INET6 : PF_UNSPEC;
+  }
+#endif
+  hints.ai_family = pf;
+  hints.ai_socktype = Curl_socktype_for_transport(item->transport);
+
   curl_msnprintf(service, sizeof(service), "%d", item->port);
 
-  rc = Curl_getaddrinfo_ex(item->hostname, service,
-                           &item->hints, &item->res);
+  rc = Curl_getaddrinfo_ex(item->hostname, service, &hints, &item->res);
   if(rc) {
     item->sock_error = SOCKERRNO ? SOCKERRNO : rc;
     if(item->sock_error == 0)
