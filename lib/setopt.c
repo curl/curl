@@ -2357,26 +2357,26 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 #endif /* USE_LIBSSH2 */
 #endif /* USE_SSH */
   case CURLOPT_PROTOCOLS_STR:
-    if(ptr) {
+    if(!ptr)
+      /* reset to default */
+      s->allowed_protocols = (curl_prot_t) CURLPROTO_64ALL;
+    else {
       curl_prot_t protos;
       result = protocol2num(ptr, &protos);
       if(!result)
         s->allowed_protocols = protos;
     }
-    else
-      /* make a NULL argument reset to default */
-      s->allowed_protocols = (curl_prot_t)CURLPROTO_64ALL;
     break;
   case CURLOPT_REDIR_PROTOCOLS_STR:
-    if(ptr) {
+    if(!ptr)
+      /* reset to default */
+      s->redir_protocols = CURLPROTO_REDIR;
+    else {
       curl_prot_t protos;
       result = protocol2num(ptr, &protos);
       if(!result)
         s->redir_protocols = protos;
     }
-    else
-      /* make a NULL argument reset to default */
-      s->redir_protocols = (curl_prot_t)CURLPROTO_REDIR;
     break;
   case CURLOPT_DEFAULT_PROTOCOL:
     /* Set the protocol to use when the URL does not include any protocol */
