@@ -290,10 +290,10 @@ static NETRCcode netrc_hostvalid(struct netrc_state *ns, const char *tok)
     if(ns->found & FOUND_PASSWORD &&
       /* a password was provided for this host */
 
-       ((!ns->specific_login || ns->our_login) ||
+       (!ns->specific_login || ns->our_login ||
         /* either there was no specific login to search for, or this
            is the specific one we wanted */
-        (ns->specific_login && !(ns->found & FOUND_LOGIN)))) {
+        !(ns->found & FOUND_LOGIN))) {
       /* or we look for a specific login, but that was not specified */
 
       ns->done = TRUE;
