@@ -35,8 +35,10 @@
 
 #ifdef UNITTESTS
 /* used by unit2600.c */
-UNITTEST void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
-UNITTEST void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+UNITTEST void Curl_cf_def_close(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
+UNITTEST void Curl_cf_def_close(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
 {
   cf->connected = FALSE;
   if(cf->next)
