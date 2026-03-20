@@ -25,6 +25,7 @@
 
 #include "urldata.h"
 #include "url.h"
+#include "strcase.h"
 
 static CURLcode test_unit1627(const char *arg)
 {
@@ -68,6 +69,7 @@ static CURLcode test_unit1627(const char *arg)
   (void)arg;
 
   for(i = 0; i < CURL_ARRAYSIZE(okay); i++) {
+    char buffer[32];
     const struct Curl_scheme *get = Curl_get_scheme(okay[i]);
     if(get) {
       /* verify that we got the correct scheme */
@@ -78,6 +80,13 @@ static CURLcode test_unit1627(const char *arg)
       curl_mprintf("Input: %s, expected okay\n", okay[i]);
       break;
     }
+    Curl_strntolower(buffer, okay[i], strlen(okay[i]));
+    buffer[ strlen(okay[i]) ] = 0;
+    if(strcmp(buffer, get->name)) {
+      curl_mprintf("Input: %s is not lowercase: %s\n", buffer, get->name);
+      break;
+    }
+
   }
   for(j = 0; j < CURL_ARRAYSIZE(notokay); j++) {
     const struct Curl_scheme *get = Curl_get_scheme(notokay[j]);
