@@ -481,6 +481,7 @@ Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
                    int ai_family,
                    unsigned int index)
 {
+  (void)data;
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
