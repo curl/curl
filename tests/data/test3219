@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+define
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+CURLPROTO_MASK checks
+</name>
+</client>
+
+</testcase>
