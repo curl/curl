@@ -248,7 +248,6 @@ struct Curl_llist_node *Curl_node_next(struct Curl_llist_node *n)
 }
 
 #ifdef UNITTESTS
-
 /* Curl_node_prev() returns the previous element in a list from a given
    Curl_llist_node */
 struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n)
@@ -257,7 +256,6 @@ struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n)
   DEBUGASSERT(n->_init == NODEINIT);
   return VERIFYNODE(n->_prev);
 }
-
 #endif
 
 struct Curl_llist *Curl_node_llist(struct Curl_llist_node *n)
