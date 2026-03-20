@@ -356,8 +356,11 @@ static void async_thrdd_item_process(void *arg)
 #endif
   hints.ai_family = pf;
   hints.ai_socktype = Curl_socktype_for_transport(item->transport);
-
-  curl_msnprintf(service, sizeof(service), "%d", item->port);
+  hints.ai_protocol = Curl_protocol_for_transport(item->transport);
+  /* Without service and flags, resolvers might lookup up in more
+   * places than we want them to, causing a delay. */
+  hints.ai_flags |= AI_NUMERICSERV;
+  curl_msnprintf(service, sizeof(service), "%u", item->port);
 
   rc = Curl_getaddrinfo_ex(item->hostname, service, &hints, &item->res);
   if(rc) {
