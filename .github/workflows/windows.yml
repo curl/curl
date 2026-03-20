@@ -431,6 +431,7 @@ jobs:
             fi
             if [[ "${TFLAGS}" = *'-t'* ]]; then
               TFLAGS+=' !2300'  # Leaks memory and file handle via tool_doswin.c / win32_stdin_read_thread()
+              export CURL_TEST_NO_TASKKILL=1  # experiment to see if it reduces flaky failures
             fi
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
