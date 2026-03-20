@@ -24,7 +24,6 @@
 #include "first.h"
 
 #ifdef BUILDING_LIBCURL
-#include "urldata.h"
 #include "unitprotos.h"
 #endif
 

@@ -25,6 +25,11 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+struct connectdata;
+struct Curl_addrinfo;
+struct Curl_cfilter;
+struct Curl_easy;
+
 /**
  * Create a cfilter for making an "ip" connection to the
  * given address, using parameters from `conn`. The "ip" connection
