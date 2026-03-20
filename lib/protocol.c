@@ -359,7 +359,7 @@ const struct Curl_scheme Curl_scheme_rtsp = {
 };
 
 const struct Curl_scheme Curl_scheme_sftp = {
-  "SFTP",                               /* scheme */
+  "sftp",                               /* scheme */
 #ifndef USE_SSH
   NULL,
 #else
@@ -373,7 +373,7 @@ const struct Curl_scheme Curl_scheme_sftp = {
 };
 
 const struct Curl_scheme Curl_scheme_scp = {
-  "SCP",                                /* scheme */
+  "scp",                                /* scheme */
 #ifndef USE_SSH
   NULL,
 #else
@@ -468,7 +468,7 @@ const struct Curl_scheme Curl_scheme_tftp = {
 };
 
 const struct Curl_scheme Curl_scheme_ws = {
-  "WS",                                 /* scheme */
+  "ws",                                 /* scheme */
 #if defined(CURL_DISABLE_WEBSOCKETS) || defined(CURL_DISABLE_HTTP)
   ZERO_NULL,
 #else
@@ -482,7 +482,7 @@ const struct Curl_scheme Curl_scheme_ws = {
 };
 
 const struct Curl_scheme Curl_scheme_wss = {
-  "WSS",                                /* scheme */
+  "wss",                                /* scheme */
 #if defined(CURL_DISABLE_WEBSOCKETS) || defined(CURL_DISABLE_HTTP) || \
     !defined(USE_SSL)
   ZERO_NULL,
