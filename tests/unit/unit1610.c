@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "curl_sha256.h"
 
 static CURLcode t1610_setup(void)

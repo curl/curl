@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "vtls/cipher_suite.h"
 
 static CURLcode test_unit3205(const char *arg)

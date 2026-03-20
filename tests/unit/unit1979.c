@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "http_aws_sigv4.h"
 
 static CURLcode test_unit1979(const char *arg)
