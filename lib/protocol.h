@@ -57,7 +57,6 @@ struct easy_pollset;
 #define PORT_MQTT   1883
 #define PORT_MQTTS  8883
 
-#ifndef CURL_DISABLE_WEBSOCKETS
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
  * the rest are internal information. If we use higher bits we only do this on
  * platforms that have a >= 64-bit type and then we use such a type for the
@@ -65,11 +64,6 @@ struct easy_pollset;
  */
 #define CURLPROTO_WS     (1L << 30)
 #define CURLPROTO_WSS    ((curl_prot_t)1 << 31)
-#else
-#define CURLPROTO_WS     0L
-#define CURLPROTO_WSS    0L
-#endif
-
 #define CURLPROTO_MQTTS  (1LL << 32)
 
 #define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)

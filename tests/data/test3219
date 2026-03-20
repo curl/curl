@@ -7,8 +7,10 @@ define
 </keywords>
 </info>
 
-# Client-side
 <client>
+<features>
+unittest
+</features>
 <name>
 CURLPROTO_MASK checks
 </name>
