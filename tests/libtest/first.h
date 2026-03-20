@@ -43,7 +43,7 @@ extern const struct entry_s s_entries[];
 
 extern int unitfail; /* for unittests */
 
-#ifdef UNITTESTS
+#if defined(UNITTESTS) && defined(BUILDING_LIBCURL)
 #include "unitprotos.h"
 #endif
 
