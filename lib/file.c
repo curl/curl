@@ -108,6 +108,8 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
   (void)conn;
   /* allocate the FILE specific struct */
   filep = curlx_calloc(1, sizeof(*filep));
+  if(filep)
+    filep->fd = -1;
   if(!filep ||
      Curl_meta_set(data, CURL_META_FILE_EASY, filep, file_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
