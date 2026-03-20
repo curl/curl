@@ -122,7 +122,7 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   mac-clang:
-    name: 'macOS clang (x86_64)'
+    name: 'macOS clang cares (x86_64)'
     runs-on: macos-latest
     timeout-minutes: 10
     env:
@@ -137,7 +137,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-unitybatch-mac-x64'
+          export CW_CONFIG='-main-werror-cares-unitybatch-mac-x64'
           export CW_REVISION="${GITHUB_SHA}"
           sh -c ./_ci-mac-homebrew.sh
 
