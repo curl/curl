@@ -83,7 +83,7 @@ typedef curl_off_t curl_prot_t;
 /* This mask is for all the old protocols that are provided and defined in the
    public header and shall exclude protocols added since which are not exposed
    in the API */
-#define CURLPROTO_MASK   0x3ffffff
+#define CURLPROTO_MASK   0x3fffffff
 
 /* Convenience defines for checking protocols or their SSL based version. Each
    protocol scheme should only ever have a single CURLPROTO_ in its protocol
