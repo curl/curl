@@ -193,7 +193,7 @@ sub pidterm {
                         system($cmd);
                     }
                     else {
-                        print "`taskkill disabled via CURL_TEST_NO_TASKKILL.\n";
+                        print "taskkill disabled via CURL_TEST_NO_TASKKILL.\n";
                     }
                 }
                 return;
@@ -244,7 +244,7 @@ sub pidkill {
                         system($cmd);
                     }
                     else {
-                        print "`taskkill disabled via CURL_TEST_NO_TASKKILL.\n";
+                        print "taskkill disabled via CURL_TEST_NO_TASKKILL.\n";
                     }
                 }
                 return;
