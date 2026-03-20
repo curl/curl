@@ -166,6 +166,8 @@ void curlx_pnow(struct curltime *pnow)
    */
   pnow->tv_sec = time(NULL);
   pnow->tv_usec = 0;
+  if(!pnow->tv_sec) /* avoid a `now` fully zero */
+    pnow->tv_usec = 1;
 }
 
 #endif
