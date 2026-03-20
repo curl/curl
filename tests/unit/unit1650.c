@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "doh.h"
 
 static CURLcode test_unit1650(const char *arg)

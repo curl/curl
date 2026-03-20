@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "tool_xattr.h"
 
 static CURLcode test_tool1621(const char *arg)
