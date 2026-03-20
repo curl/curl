@@ -5297,6 +5297,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
     /* No server certificate, do not do channel binding */
     return CURLE_OK;
 
+#ifdef HAVE_OPENSSL3
   pkey = X509_get0_pubkey(cert);
 
   if(!X509_get_signature_info(cert, &mdnid, &pknid, &secbits, &flags)) {
@@ -5312,7 +5313,6 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
     else
       algo_type = EVP_get_digestbynid(mdnid);
   }
-#ifdef HAVE_OPENSSL3
   else if(pkey && !EVP_PKEY_is_a(pkey, OBJ_nid2sn(pknid))) {
     /* The cert's pkey is different from the algorithm used to sign
      * the certificate. Since the reported `mdnid` is undefined, there
@@ -5339,7 +5339,32 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
             mdname, rc == 2 ? " [mandatory]" : " [advisory]");
     }
   }
-#endif
+
+#else /* HAVE_OPENSSL3 */
+
+  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &mdnid, NULL)) {
+    failf(data,
+          "Unable to find digest NID for certificate signature algorithm");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
+  if(mdnid == NID_md5 || mdnid == NID_sha1) {
+    algo_type = EVP_sha256();
+  }
+  else {
+    algo_type = EVP_get_digestbynid(mdnid);
+    if(!algo_type) {
+      algo_name = OBJ_nid2sn(mdnid);
+      failf(data, "Could not find digest algorithm %s (NID %d)",
+            algo_name ? algo_name : "(null)", mdnid);
+      result = CURLE_SSL_INVALIDCERTSTATUS;
+      goto out;
+    }
+  }
+
+#endif /* HAVE_OPENSSL3, else */
 
   if(!algo_type) {
     if(no_digest_acceptable) {
