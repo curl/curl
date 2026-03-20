@@ -5263,7 +5263,6 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   int mdnid, pknid, secbits;
   uint32_t flags;
   EVP_PKEY *pkey = NULL;
-  const char *pkey_type = NULL;
   bool no_digest_acceptable = FALSE;
   const EVP_MD *algo_type = NULL;
   const char *algo_name = NULL;
@@ -5299,7 +5298,6 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
     return CURLE_OK;
 
   pkey = X509_get0_pubkey(cert);
-  pkey_type = pkey ? EVP_PKEY_get0_type_name(pkey) : NULL;
 
   if(!X509_get_signature_info(cert, &mdnid, &pknid, &secbits, &flags)) {
     failf(data, "certificate signature algorithm not recognized");
@@ -5314,6 +5312,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
     else
       algo_type = EVP_get_digestbynid(mdnid);
   }
+#ifdef HAVE_OPENSSL3
   else if(pkey && !EVP_PKEY_is_a(pkey, OBJ_nid2sn(pknid))) {
     /* The cert's pkey is different from the algorithm used to sign
      * the certificate. Since the reported `mdnid` is undefined, there
@@ -5335,12 +5334,12 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
       no_digest_acceptable = TRUE;
     }
     else if(rc > 0 && mdname[0] != '\0' && !md_is_undef) {
-      infof(data, "Digest algorithm : %s%s (derived from public key %s)"
+      infof(data, "Digest algorithm : %s%s (derived from public key)"
             ", but unavailable",
-            mdname, rc == 2 ? " [mandatory]" : " [advisory]",
-            pkey_type);
+            mdname, rc == 2 ? " [mandatory]" : " [advisory]");
     }
   }
+#endif
 
   if(!algo_type) {
     if(no_digest_acceptable) {
