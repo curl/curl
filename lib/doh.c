@@ -711,7 +711,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
   return DOH_OK;
 }
 
-UNITTEST void de_init(struct dohentry *d);
+UNITTEST void de_init(struct dohentry *de);
 UNITTEST void de_init(struct dohentry *de)
 {
   int i;
