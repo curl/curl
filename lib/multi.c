@@ -3328,6 +3328,11 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
   }
   case CURLMOPT_NETWORK_CHANGED: {
     long val = va_arg(param, long);
+    if(val & CURLMNWC_CLEAR_ALL)
+      /* In the beginning, all values available to set were 1 by mistake. We
+         converted this to mean "all", thus setting all the bits
+         automatically */
+      val = CURLMNWC_CLEAR_DNS | CURLMNWC_CLEAR_CONNS;
     if(val & CURLMNWC_CLEAR_DNS) {
       Curl_dnscache_clear(multi->admin);
     }
