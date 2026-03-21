@@ -868,7 +868,7 @@ static int push_promise(struct Curl_cfilter *cf,
                                               newstream->id,
                                               newhandle);
     if(rv) {
-      infof(data, "failed to set user_data for stream %u",
+      infof(data, "failed to set user_data for stream %d",
             newstream->id);
       DEBUGASSERT(0);
       discard_newhandle(cf, newhandle);
@@ -1104,7 +1104,7 @@ int Curl_nghttp2_fr_print(const nghttp2_frame *frame, char *buffer,
       memcpy(scratch, frame->goaway.opaque_data, len);
     scratch[len] = '\0';
     return curl_msnprintf(buffer, blen,
-                          "FRAME[GOAWAY, error=%d, reason='%s', "
+                          "FRAME[GOAWAY, error=%u, reason='%s', "
                           "last_stream=%d]", frame->goaway.error_code,
                           scratch, frame->goaway.last_stream_id);
   }
@@ -1139,7 +1139,7 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
   if((frame->hd.type == NGHTTP2_GOAWAY) && !ctx->sent_goaway) {
     /* A GOAWAY not initiated by us, but by nghttp2 itself on detecting
      * a protocol error on the connection */
-    failf(data, "nghttp2 shuts down connection with error %d: %s",
+    failf(data, "nghttp2 shuts down connection with error %u: %s",
           frame->goaway.error_code,
           nghttp2_http2_strerror(frame->goaway.error_code));
   }
@@ -1177,7 +1177,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
           session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
         ctx->enable_push = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_ENABLE_PUSH) != 0;
-        CURL_TRC_CF(data, cf, "[0] MAX_CONCURRENT_STREAMS: %d",
+        CURL_TRC_CF(data, cf, "[0] MAX_CONCURRENT_STREAMS: %u",
                     ctx->max_concurrent_streams);
         CURL_TRC_CF(data, cf, "[0] ENABLE_PUSH: %s",
                     ctx->enable_push ? "TRUE" : "false");
@@ -1202,7 +1202,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       ctx->goaway_error = frame->goaway.error_code;
       ctx->remote_max_sid = frame->goaway.last_stream_id;
       if(data) {
-        infof(data, "received GOAWAY, error=%u, last_stream=%u",
+        infof(data, "received GOAWAY, error=%u, last_stream=%d",
               ctx->goaway_error, ctx->remote_max_sid);
         Curl_multi_connchanged(data->multi);
       }
@@ -1332,7 +1332,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     stream->reset = TRUE;
 
   if(stream->error)
-    CURL_TRC_CF(data_s, cf, "[%d] RESET: %s (err %d)",
+    CURL_TRC_CF(data_s, cf, "[%d] RESET: %s (err %u)",
               stream_id, nghttp2_http2_strerror(error_code), error_code);
   else
     CURL_TRC_CF(data_s, cf, "[%d] CLOSED", stream_id);
@@ -1341,7 +1341,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   /* remove `data_s` from the nghttp2 stream */
   rv = nghttp2_session_set_stream_user_data(session, stream_id, 0);
   if(rv) {
-    infof(data_s, "http/2: failed to clear user_data for stream %u",
+    infof(data_s, "http/2: failed to clear user_data for stream %d",
           stream_id);
     DEBUGASSERT(0);
   }
@@ -1510,7 +1510,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       cf_h2_header_error(cf, data_s, stream, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
-    hlen = curl_msnprintf(buffer, sizeof(buffer), HTTP_PSEUDO_STATUS ":%u\r",
+    hlen = curl_msnprintf(buffer, sizeof(buffer), HTTP_PSEUDO_STATUS ":%d\r",
                           stream->status_code);
     result = Curl_headers_push(data_s, buffer, hlen, CURLH_PSEUDO);
     if(result) {
@@ -1697,7 +1697,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
         stream->close_handled = TRUE;
         return CURLE_OK;
     }
-    failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
+    failf(data, "HTTP/2 stream %d reset by %s (error 0x%" PRIx32
           " %s)", stream->id, stream->reset_by_server ? "server" : "curl",
            stream->error, nghttp2_http2_strerror(stream->error));
     return stream->error ? CURLE_HTTP2_STREAM :
@@ -2041,7 +2041,7 @@ static CURLcode cf_h2_body_send(struct Curl_cfilter *cf,
       return CURLE_OK;
     }
     /* Server closed before we got a response, this is an error */
-    infof(data, "stream %u closed", stream->id);
+    infof(data, "stream %d closed", stream->id);
     return CURLE_SEND_ERROR;
   }
 
@@ -2141,7 +2141,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   }
 
   if(stream_id < 0) {
-    CURL_TRC_CF(data, cf, "send: nghttp2_submit_request error (%s)%u",
+    CURL_TRC_CF(data, cf, "send: nghttp2_submit_request error (%s)%d",
                 nghttp2_strerror(stream_id), stream_id);
     result = CURLE_SEND_ERROR;
     goto out;
@@ -2241,7 +2241,7 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* if the stream has been closed in egress handling (nghttp2 does that
    * when it does not like the headers, for example */
   if(stream && stream->closed) {
-    infof(data, "stream %u closed", stream->id);
+    infof(data, "stream %d closed", stream->id);
     result = CURLE_SEND_ERROR;
     goto out;
   }
@@ -2450,7 +2450,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
     rc = nghttp2_session_set_stream_user_data(ctx->h2, stream->id,
                                               data);
     if(rc) {
-      infof(data, "http/2: failed to set user_data for stream %u",
+      infof(data, "http/2: failed to set user_data for stream %d",
             stream->id);
       DEBUGASSERT(0);
     }

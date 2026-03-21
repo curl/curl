@@ -200,7 +200,7 @@ static int my_progress_d_cb(void *userdata,
           (struct rustls_connection *)tls->internals);
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info rustls TLS version 0x%x\n",
-                      t->idx, v);
+                      t->idx, (unsigned int)v);
         break;
       }
 #endif
@@ -215,13 +215,13 @@ static int my_progress_d_cb(void *userdata,
         assert(sspi_status == SEC_E_OK);
         (void)sspi_status;
         curl_mfprintf(stderr, "[t-%zu] info Schannel TLS version 0x%08lx\n",
-                      t->idx, info.dwProtocol);
+                      t->idx, (unsigned long)info.dwProtocol);
         break;
       }
 #endif
       default:
         curl_mfprintf(stderr, "[t-%zu] info SSL_PTR backend=%d, ptr=%p\n",
-                      t->idx, tls->backend, tls->internals);
+                      t->idx, (int)tls->backend, tls->internals);
         break;
       }
     }

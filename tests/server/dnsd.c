@@ -282,7 +282,7 @@ static int send_response(curl_socket_t sock,
     for(a = 0; a < ancount_a; a++) {
       const unsigned char *store = ipv4_pref;
       add_answer(bytes, &i, store, sizeof(ipv4_pref), QTYPE_A);
-      logmsg("Sending back A (%x) '%s'", QTYPE_A,
+      logmsg("Sending back A (%x) '%s'", (unsigned int)QTYPE_A,
              curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf)));
     }
     break;
@@ -291,7 +291,7 @@ static int send_response(curl_socket_t sock,
     for(a = 0; a < ancount_aaaa; a++) {
       const unsigned char *store = ipv6_pref;
       add_answer(bytes, &i, store, sizeof(ipv6_pref), QTYPE_AAAA);
-      logmsg("Sending back AAAA (%x) '%s'", QTYPE_AAAA,
+      logmsg("Sending back AAAA (%x) '%s'", (unsigned int)QTYPE_AAAA,
              curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf)));
     }
     break;

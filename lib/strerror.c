@@ -404,6 +404,7 @@ const char *curl_share_strerror(CURLSHcode error)
   case CURLSHE_NOT_BUILT_IN:
     return "Feature not enabled in this library";
 
+  case CURLSHE_SIGNED:
   case CURLSHE_LAST:
     break;
   }
@@ -517,6 +518,7 @@ const char *curl_url_strerror(CURLUcode error)
   case CURLUE_TOO_LARGE:
     return "A value or data field is larger than allowed";
 
+  case CURLUE_SIGNED:
   case CURLUE_LAST:
     break;
   }
@@ -647,14 +649,15 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
                    "SEC_E_ILLEGAL_MESSAGE (0x%08lx) - This error usually "
                    "occurs when a fatal SSL/TLS alert is received (e.g. "
                    "handshake failed). More detail may be available in "
-                   "the Windows System event log.", err);
+                   "the Windows System event log.", (unsigned long)err);
   }
   else {
     char msgbuf[256];
     if(curlx_get_winapi_error((DWORD)err, msgbuf, sizeof(msgbuf)))
-      curl_msnprintf(buf, buflen, "%s (0x%08lx) - %s", txt, err, msgbuf);
+      curl_msnprintf(buf, buflen, "%s (0x%08lx) - %s", txt, (unsigned long)err,
+                     msgbuf);
     else
-      curl_msnprintf(buf, buflen, "%s (0x%08lx)", txt, err);
+      curl_msnprintf(buf, buflen, "%s (0x%08lx)", txt, (unsigned long)err);
   }
 #else /* CURLVERBOSE */
   if(err == SEC_E_OK)

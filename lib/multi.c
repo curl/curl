@@ -1176,7 +1176,8 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
       break;
 
     default:
-      failf(data, "multi_getsock: unexpected multi state %d", data->mstate);
+      failf(data, "multi_getsock: unexpected multi state %d",
+            (int)data->mstate);
       DEBUGASSERT(0);
       break;
     }
@@ -1610,7 +1611,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     timeout_ms = (int)timeout_internal;
 
   if(data)
-    CURL_TRC_M(data, "multi_wait(fds=%d, timeout=%d) tinternal=%ld",
+    CURL_TRC_M(data, "multi_wait(fds=%u, timeout=%d) tinternal=%ld",
                cpfds.n, timeout_ms, timeout_internal);
 
 #ifdef USE_WINSOCK
