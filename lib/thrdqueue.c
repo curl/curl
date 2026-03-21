@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_THREADS
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
@@ -409,4 +409,4 @@ void Curl_thrdq_trace(struct curl_thrdq *tqueue,
 }
 #endif
 
-#endif /* USE_THREADS && CURLRES_THREADED */
+#endif /* USE_THREADS */
