@@ -2499,8 +2499,14 @@ static bool twodigit(const char *p, int *val)
   return FALSE;
 }
 
-static bool ftp_213_date(const char *p, int *year, int *month, int *day,
-                         int *hour, int *minute, int *second)
+/*
+ * Unittest @1668
+ */
+
+UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,
+                           int *hour, int *minute, int *second);
+UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,
+                           int *hour, int *minute, int *second)
 {
   int century;
   if((strlen(p) < 14) || twodigit(&p[0], &century) || twodigit(&p[2], year) ||
