@@ -26,6 +26,7 @@
 #include "curl_setup.h"
 
 #include "hash.h"
+#include "curlx/timeval.h"
 
 struct addrinfo;
 struct hostent;
