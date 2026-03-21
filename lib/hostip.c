@@ -801,7 +801,6 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   return hostip_resolv(data, hostname, port, ip_version, TRUE, entry);
 }
 
-
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_take_result(struct Curl_easy *data,
                                  struct Curl_dns_entry **pdns)

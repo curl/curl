@@ -132,7 +132,6 @@ size_t feature_count;
  * the latter is not returned by curl_version_info(), it is built from
  * the returned features bit mask.
  */
-
 CURLcode get_libcurl_info(void)
 {
   CURLcode result = CURLE_OK;
@@ -197,7 +196,6 @@ CURLcode get_libcurl_info(void)
  * a given protocol and thus allows comparing pointers rather than strings.
  * In addition, the returned pointer is not deallocated until the program ends.
  */
-
 const char *proto_token(const char *proto)
 {
   const char * const *builtin;
