@@ -147,7 +147,7 @@ static CURLcode test_unit3300(const char *arg)
    * No memory leak should be reported. if the wait is too short on
    * a slow system, thread sanitizer will freak out as memdebug will
    * be called by threads after main thread shut down. */
-  curlx_wait_ms(2000);
+  curlx_wait_ms(1000);
 #endif
 
   UNITTEST_END_SIMPLE
