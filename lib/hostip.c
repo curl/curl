@@ -873,8 +873,6 @@ CURLcode Curl_resolv_pollset(struct Curl_easy *data,
  * Curl_resolver_error() calls failf() with the appropriate message after a
  * resolve error
  */
-
-#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail)
 {
   struct connectdata *conn = data->conn;
@@ -895,4 +893,3 @@ CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail)
         detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
   return result;
 }
-#endif /* USE_CURL_ASYNC */
