@@ -105,6 +105,8 @@ class TestEyeballs:
     # check timers when trying 3 unresponsive addresses
     @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'),
                         reason='curl lacks ipv6 support')
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('AsynchDNS'),
+                        reason='curl lacks async DNS support')
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     def test_06_13_timers(self, env: Env):
         curl = CurlClient(env=env)
