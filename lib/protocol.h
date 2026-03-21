@@ -50,9 +50,6 @@ struct easy_pollset;
 #define PORT_SMTP   25
 #define PORT_SMTPS  465 /* sometimes called SSMTP */
 #define PORT_RTSP   554
-#define PORT_RTMP   1935
-#define PORT_RTMPT  PORT_HTTP
-#define PORT_RTMPS  PORT_HTTPS
 #define PORT_GOPHER 70
 #define PORT_MQTT   1883
 #define PORT_MQTTS  8883
@@ -264,12 +261,6 @@ extern const struct Curl_scheme Curl_scheme_mqtt;
 extern const struct Curl_scheme Curl_scheme_mqtts;
 extern const struct Curl_scheme Curl_scheme_pop3;
 extern const struct Curl_scheme Curl_scheme_pop3s;
-extern const struct Curl_scheme Curl_scheme_rtmp;
-extern const struct Curl_scheme Curl_scheme_rtmpe;
-extern const struct Curl_scheme Curl_scheme_rtmpt;
-extern const struct Curl_scheme Curl_scheme_rtmpte;
-extern const struct Curl_scheme Curl_scheme_rtmps;
-extern const struct Curl_scheme Curl_scheme_rtmpts;
 extern const struct Curl_scheme Curl_scheme_rtsp;
 extern const struct Curl_scheme Curl_scheme_scp;
 extern const struct Curl_scheme Curl_scheme_sftp;

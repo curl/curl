@@ -16,18 +16,6 @@ how your use case cannot be satisfied properly using a workaround.
 
 In March 2026, we drop support for all c-ares versions before 1.16.0.
 
-## RTMP
-
-RTMP in curl is powered by the 3rd party library librtmp.
-
-- RTMP is barely used by curl users (2.2% in the 2025 survey)
-- librtmp has no test cases, makes no proper releases and has not had a single
-  commit within the last year
-- librtmp parses the URL itself and requires non-compliant URLs for this
-- we have no RTMP tests
-
-Support for RTMP in libcurl gets removed in April 2026.
-
 ## TLS-SRP Authentication
 
 Transport Layer Security Secure Remote Password is a TLS feature that does not
@@ -72,4 +60,5 @@ After curl 8.19.0 NTLM support becomes opt-in.
 - OpenSSL 1.1.1 and older (removed in 8.18.0)
 - Support for Windows XP (removed in 8.19.0)
 - OpenSSL-QUIC (removed in 8.19.0)
-- CMake 3.17 and older (removed in 8.21.0)
+- CMake 3.17 and older (removed in 8.20.0)
+- RTMP (removed in 8.20.0)

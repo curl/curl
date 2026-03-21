@@ -369,14 +369,6 @@ POP3:
               lib/pop3.*\
               }"
 
-RTMP:
-  - all:
-      - changed-files:
-          - any-glob-to-all-files: "{\
-              CMake/FindLibrtmp.cmake,\
-              lib/curl_rtmp.*\
-              }"
-
 RTSP:
   - all:
       - changed-files:

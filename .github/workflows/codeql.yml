@@ -74,7 +74,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
-            libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev libwolfssl-dev
+            libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -110,7 +110,7 @@ jobs:
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix c-ares)/lib/pkgconfig:$(brew --prefix mbedtls)/lib/pkgconfig:$(brew --prefix rustls-ffi)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
             cmake -B _bld1 -G Ninja -DCURL_DISABLE_TYPECHECK=ON -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DCURL_USE_WOLFSSL=ON \
-              -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON \
+              -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON \
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
             cmake --build _bld1
             cmake --build _bld1 --target testdeps
@@ -121,7 +121,7 @@ jobs:
             cmake -B _bld2 -G Ninja -DCURL_DISABLE_TYPECHECK=ON -DCURL_WERROR=ON \
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR="$(brew --prefix openssl)" -DUSE_NGTCP2=ON \
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON \
-              -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+              -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
             cmake --build _bld2
             cmake --build _bld2 --target testdeps
             cmake --build _bld2 --target curl-examples-build
