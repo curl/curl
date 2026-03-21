@@ -52,8 +52,8 @@ static bool test1668(const struct test_1668 *spec, size_t i)
                    year, month, day, hour, minute, second);
     if(strcmp(buffer, spec->out)) {
       curl_mfprintf(stderr,
-                    "test %zu: got '%s' expected '%s'\n", i,
-                    spec->in, spec->out);
+                    "test %zu: (from input %s) got '%s' expected '%s'\n", i,
+                    spec->in, buffer, spec->out);
       ok = FALSE;
     }
   }
@@ -84,7 +84,7 @@ static CURLcode test_unit1668(const char *arg)
     { "19980320110234", "1998-03-20 11:02:34", TRUE },
     { "19980320114204", "1998-03-20 11:42:04", TRUE },
     { "19980320114230", "1998-03-20 11:42:30", TRUE },
-    /* too invalid times are not accepted accepted */
+    /* not all invalid times are accepted */
     { "19980320256565", "", FALSE },
     { "19980320236565", "", FALSE },
     { "19980320235865", "", FALSE },
@@ -93,31 +93,31 @@ static CURLcode test_unit1668(const char *arg)
     { ":9980231114234", "", FALSE },
     { "a9980231114234", "", FALSE },
     { "1:980231114234", "", FALSE },
-    { "1:980231114234", "", FALSE },
+    { "1a980231114234", "", FALSE },
     { "19:80231114234", "", FALSE },
-    { "19:80231114234", "", FALSE },
+    { "19b80231114234", "", FALSE },
     { "199:0231114234", "", FALSE },
-    { "199:0231114234", "", FALSE },
+    { "199c0231114234", "", FALSE },
     { "1998:231114234", "", FALSE },
-    { "1998:231114234", "", FALSE },
+    { "1998d231114234", "", FALSE },
     { "19980:31114234", "", FALSE },
-    { "19980:31114234", "", FALSE },
+    { "19980e31114234", "", FALSE },
     { "199802:1114234", "", FALSE },
-    { "199802:1114234", "", FALSE },
+    { "199802f1114234", "", FALSE },
     { "1998023:114234", "", FALSE },
-    { "1998023:114234", "", FALSE },
+    { "1998023/114234", "", FALSE },
     { "19980231:14234", "", FALSE },
-    { "19980231:14234", "", FALSE },
+    { "19980231x14234", "", FALSE },
     { "199802311:4234", "", FALSE },
-    { "199802311:4234", "", FALSE },
+    { "199802311z4234", "", FALSE },
     { "1998023111:234", "", FALSE },
-    { "1998023111:234", "", FALSE },
+    { "1998023111&234", "", FALSE },
     { "19980231114:34", "", FALSE },
-    { "19980231114:34", "", FALSE },
+    { "19980231114#34", "", FALSE },
     { "199802311142:4", "", FALSE },
-    { "199802311142:4", "", FALSE },
+    { "199802311142!4", "", FALSE },
     { "1998023111423:", "", FALSE },
-    { "1998023111423:", "", FALSE },
+    { "1998023111423@", "", FALSE },
 
     { "19980320114234--", "1998-03-20 11:42:34", TRUE },
     { " 19980320114234", "", FALSE },
@@ -137,6 +137,14 @@ static CURLcode test_unit1668(const char *arg)
     { "20260320114234.123", "2026-03-20 11:42:34", TRUE },
     { "30260320114234.123", "3026-03-20 11:42:34", TRUE },
     { "40260320114234.123", "4026-03-20 11:42:34", TRUE },
+    { "19980320114234\xff", "1998-03-20 11:42:34", TRUE },
+    { "1998\x7e""320114234\xff", "", FALSE },
+    { "1998\x7f""320114234\xff", "", FALSE },
+    { "1998\x80""320114234\xff", "", FALSE },
+    { "1998\x81""320114234\xff", "", FALSE },
+    { "1998\x82""320114234\xff", "", FALSE },
+    { "\xcc", "", FALSE },
+    { "\x55", "", FALSE },
   };
 
   size_t i;
@@ -147,9 +155,6 @@ static CURLcode test_unit1668(const char *arg)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* the real code uses CURL_X509_STR_MAX for maximum size, but we set a
-     smaller one here so that we can test running into the limit a little
-     easier */
   for(i = 0; i < CURL_ARRAYSIZE(test_specs); ++i) {
     if(!test1668(&test_specs[i], i))
       all_ok = FALSE;
