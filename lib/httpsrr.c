@@ -32,7 +32,7 @@
 #include "curlx/strdup.h"
 
 static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
-                                    enum alpnid *alpns)
+                                    unsigned char *alpns)
 {
   /*
    * The wire-format value for "alpn" consists of at least one alpn-id
@@ -58,7 +58,7 @@ static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
         /* this ALPN id is already stored */
         ;
       else
-        alpns[idnum++] = id;
+        alpns[idnum++] = (unsigned char)id;
     }
     cp += tlen;
     len -= tlen;

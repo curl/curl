@@ -31,8 +31,6 @@
 
 #ifdef USE_HTTPSRR
 
-#include "hostip.h"  /* for enum alpnid */
-
 #define CURL_MAXLEN_host_name 253
 #define MAX_HTTPSRR_ALPNS     4
 
@@ -51,7 +49,7 @@ struct Curl_https_rrinfo {
   size_t echconfiglist_len;
   unsigned char *ipv6hints; /* keytag = 6 */
   size_t ipv6hints_len;
-  enum alpnid alpns[MAX_HTTPSRR_ALPNS]; /* keytag = 1 */
+  unsigned char alpns[MAX_HTTPSRR_ALPNS]; /* keytag = 1 */
   /* store parsed alpnid entries in the array, end with ALPN_none */
   int port; /* -1 means not set */
   uint16_t priority;
