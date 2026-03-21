@@ -72,4 +72,4 @@ After curl 8.19.0 NTLM support becomes opt-in.
 - OpenSSL 1.1.1 and older (removed in 8.18.0)
 - Support for Windows XP (removed in 8.19.0)
 - OpenSSL-QUIC (removed in 8.19.0)
-- CMake 3.17 and older (removed in 8.21.0)
+- CMake 3.17 and older (removed in 8.20.0)
