@@ -115,7 +115,7 @@ struct ldap_urldesc {
 
 static curl_ldap_num_t ldap_url_parse_low(struct Curl_easy *data,
                                           const struct connectdata *conn,
-                                          LDAPURLDesc **ludp);
+                                          LDAPURLDesc **ludpp);
 static void ldap_free_urldesc_low(LDAPURLDesc *ludp);
 
 #undef ldap_free_urldesc

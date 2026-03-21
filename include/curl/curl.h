@@ -2695,7 +2695,7 @@ CURL_EXTERN char *curl_version(void);
  * %XX versions). This function returns a new allocated string or NULL if an
  * error occurred.
  */
-CURL_EXTERN char *curl_easy_escape(CURL *handle,
+CURL_EXTERN char *curl_easy_escape(CURL *curl,
                                    const char *string,
                                    int length);
 
@@ -2714,9 +2714,9 @@ CURL_EXTERN char *curl_escape(const char *string,
  * Conversion Note: On non-ASCII platforms the ASCII %XX codes are
  * converted into the host encoding.
  */
-CURL_EXTERN char *curl_easy_unescape(CURL *handle,
+CURL_EXTERN char *curl_easy_unescape(CURL *curl,
                                      const char *string,
-                                     int length,
+                                     int inlength,
                                      int *outlength);
 
 /* the previous version */
@@ -3075,9 +3075,8 @@ typedef enum {
 } CURLSHoption;
 
 CURL_EXTERN CURLSH *curl_share_init(void);
-CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option,
-                                         ...);
-CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *share);
+CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...);
+CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *sh);
 
 /****************************************************************************
  * Structures for querying information about the curl library at runtime.
@@ -3245,10 +3244,10 @@ CURL_EXTERN const char *curl_share_strerror(CURLSHcode error);
  * DESCRIPTION
  *
  * The curl_easy_pause function pauses or unpauses transfers. Select the new
- * state by setting the bitmask, use the convenience defines below.
+ * state by setting the action bitmask, use the convenience defines below.
  *
  */
-CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
+CURL_EXTERN CURLcode curl_easy_pause(CURL *curl, int action);
 
 #define CURLPAUSE_RECV      (1 << 0)
 #define CURLPAUSE_RECV_CONT 0
@@ -3267,7 +3266,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
  * The curl_easy_ssls_import function adds a previously exported SSL session
  * to the SSL session cache of the easy handle (or the underlying share).
  */
-CURL_EXTERN CURLcode curl_easy_ssls_import(CURL *handle,
+CURL_EXTERN CURLcode curl_easy_ssls_import(CURL *curl,
                                            const char *session_key,
                                            const unsigned char *shmac,
                                            size_t shmac_len,
@@ -3276,7 +3275,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_import(CURL *handle,
 
 /* This is the curl_ssls_export_cb callback prototype. It
  * is passed to curl_easy_ssls_export() to extract SSL sessions/tickets. */
-typedef CURLcode curl_ssls_export_cb(CURL *handle,
+typedef CURLcode curl_ssls_export_cb(CURL *curl,
                                      void *userptr,
                                      const char *session_key,
                                      const unsigned char *shmac,
@@ -3298,7 +3297,7 @@ typedef CURLcode curl_ssls_export_cb(CURL *handle,
  * callback.
  *
  */
-CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
+CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *curl,
                                            curl_ssls_export_cb *export_fn,
                                            void *userptr);
 
