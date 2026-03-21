@@ -178,7 +178,7 @@ CURLcode Curl_cond_timedwait(pthread_cond_t *c, pthread_mutex_t *m,
     ++ts.tv_sec;
     usec %= 1000000;
   }
-  ts.tv_nsec = usec * 1000;
+  ts.tv_nsec = (long)usec * 1000;
 
   rc = pthread_cond_timedwait(c, m, &ts);
   if(rc == SOCKETIMEDOUT)
