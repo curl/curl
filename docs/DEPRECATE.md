@@ -62,4 +62,3 @@ After curl 8.19.0 NTLM support becomes opt-in.
 - OpenSSL-QUIC (removed in 8.19.0)
 - CMake 3.17 and older (removed in 8.20.0)
 - RTMP (removed in 8.20.0)
-
