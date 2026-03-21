@@ -690,7 +690,7 @@
 #define USE_MUTEX
 #endif
 
-/* So far, threaded resolver is the only feature requiring threads. */
+/* threaded resolver is the only feature requiring threads. */
 #ifdef USE_RESOLV_THREADED
 #define USE_THREADS
 #endif
