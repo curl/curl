@@ -637,7 +637,7 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
 
   DEBUGASSERT(hostname && *hostname);
   DEBUGASSERT(timeoutms > 0);
-  DEBUGASSERT(data->set.no_signal);
+  DEBUGASSERT(!data->set.no_signal);
 #ifndef CURL_DISABLE_DOH
   DEBUGASSERT(!data->set.doh);
 #endif
@@ -783,7 +783,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     return CURLE_OPERATION_TIMEDOUT;
 
 #ifdef USE_ALARM_TIMEOUT
-  if(timeoutms && !data->set.no_signal) {
+  if(timeoutms && data->set.no_signal) {
     /* Cannot use ALARM when signals are disabled */
     timeoutms = 0;
   }
