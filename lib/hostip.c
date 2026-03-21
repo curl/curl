@@ -959,7 +959,6 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                        timeout_ms, TRUE, presolv_id, entry);
 }
 
-
 #ifdef USE_CURL_ASYNC
 
 struct Curl_resolv_async *Curl_async_get(struct Curl_easy *data,
