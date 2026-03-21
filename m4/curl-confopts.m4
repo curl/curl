@@ -442,28 +442,11 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     LIBS="$ares_LIBS $clean_LIBS"
     #
 
-    dnl check if c-ares new enough
-    AC_MSG_CHECKING([that c-ares is good and recent enough])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-        #include <ares.h>
-        /* set of dummy functions in case c-ares was built with debug */
-        void curl_dofree(void);   void curl_dofree(void) {}
-        void curl_sclose(void);   void curl_sclose(void) {}
-        void curl_domalloc(void); void curl_domalloc(void) {}
-        void curl_docalloc(void); void curl_docalloc(void) {}
-        void curl_socket(void);   void curl_socket(void) {}
-      ]],[[
-        ares_channel channel;
-        ares_cancel(channel); /* added in 1.2.0 */
-        ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
-        ares_dup(&channel, channel); /* added in 1.6.0 */
-      ]])
+    dnl check if c-ares new enough, 1.16.0 or newer
+    AC_CHECK_FUNC([ares_getaddrinfo],
+    [
     ],[
-      AC_MSG_RESULT([yes])
-    ],[
-      AC_MSG_RESULT([no])
-      AC_MSG_ERROR([c-ares library defective or too old])
+      AC_MSG_ERROR([c-ares library is defective or too old])
       dnl restore initial settings
       CPPFLAGS="$clean_CPPFLAGS"
       LDFLAGS="$clean_LDFLAGS"
