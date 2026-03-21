@@ -64,6 +64,7 @@ use strict;
 use warnings;
 
 use Cwd;
+use File::Path;
 use File::Spec;
 
 # Turn on warnings (equivalent to -w, which cannot be used with /usr/bin/env)
@@ -184,18 +185,6 @@ if(($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
 $ENV{LC_ALL}="C" if(($ENV{LC_ALL}) && ($ENV{LC_ALL} !~ /^C$/));
 $ENV{LC_CTYPE}="C" if(($ENV{LC_CTYPE}) && ($ENV{LC_CTYPE} !~ /^C$/));
 $ENV{LANG}="C";
-
-sub rmtree($) {
-    my $target = $_[0];
-    if($^O eq 'MSWin32') {
-        foreach (glob($target)) {
-            s:/:\\:g;
-            system('rd', ('/s', '/q', $_));
-        }
-    } else {
-        system('rm', ('-rf', $target));
-    }
-}
 
 sub grepfile($$) {
     my ($target, $fn) = @_;
@@ -392,8 +381,8 @@ $buildlogname="buildlog-$$";
 $buildlog="$pwd/$buildlogname";
 
 # remove any previous left-overs
-rmtree "build-*";
-rmtree "buildlog-*";
+foreach(glob("build-*")) { rmtree $_; }
+foreach(glob("buildlog-*")) { rmtree $_; }
 
 # this is to remove old build logs that ended up in the wrong dir
 foreach(glob("$CURLDIR/buildlog-*")) { unlink $_; }
