@@ -77,16 +77,16 @@ if(!$CAPREFIX) {
     $PREFIX = $CAPREFIX;
     $DURATION = 6000;
 
-    if(system("$OPENSSL genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve " .
-        "-out $PREFIX-ca.key -pass pass:secret") != 0) {
+    if(system($OPENSSL, ('genpkey', '-algorithm', 'EC', '-pkeyopt', "ec_paramgen_curve:$KEYSIZE", '-pkeyopt', 'ec_param_enc:named_curve',
+        '-out', "$PREFIX-ca.key", '-pass', 'pass:secret')) != 0) {
         opensslfail();
     }
-    system("$OPENSSL req -config $SRCDIR/$PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret 2>$dev_null");
-    system("$OPENSSL x509 -sha256 -extfile $SRCDIR/$PREFIX-ca.prm -days $DURATION " .
-        "-req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-ca.raw-cacert");
-    system("$OPENSSL x509 -in $PREFIX-ca.raw-cacert -text -nameopt multiline > $PREFIX-ca.cacert");
-    system("$OPENSSL x509 -in $PREFIX-ca.cacert -outform der -out $PREFIX-ca.der");
-    system("$OPENSSL x509 -in $PREFIX-ca.cacert -text -nameopt multiline > $PREFIX-ca.crt");
+    system($OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX-ca.prm", '-new', '-key', "$PREFIX-ca.key", '-out', "$PREFIX-ca.csr", '-passin', 'pass:secret'));  # 2>/dev/null
+    system($OPENSSL, ('x509', '-sha256', '-extfile', "$SRCDIR/$PREFIX-ca.prm", '-days', $DURATION,
+        '-req', '-signkey', "$PREFIX-ca.key", '-in', "$PREFIX-ca.csr", '-out', "$PREFIX-ca.raw-cacert"));
+    system($OPENSSL, ('x509', '-in', "$PREFIX-ca.raw-cacert", '-text', '-nameopt', 'multiline', '-out', "$PREFIX-ca.cacert"));
+    system($OPENSSL, ('x509', '-in', "$PREFIX-ca.cacert", '-outform', 'der', '-out', "$PREFIX-ca.der"));
+    system($OPENSSL, ('x509', '-in', "$PREFIX-ca.cacert", '-text', '-nameopt', 'multiline', '-out', "$PREFIX-ca.crt"));
 
     print "CA root generated: $PREFIX $DURATION days $KEYSIZE\n";
 }
@@ -100,26 +100,26 @@ while(@ARGV) {
     $PREFIX =~ s/\.prm$//;
 
     # pseudo-secrets
-    system("$OPENSSL genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve " .
-        "-out $PREFIX.keyenc -pass pass:secret");
-    system("$OPENSSL req -config $SRCDIR/$PREFIX.prm -new -key $PREFIX.keyenc -out $PREFIX.csr -passin pass:secret 2>$dev_null");
-    system("$OPENSSL pkey -in $PREFIX.keyenc -out $PREFIX.key -passin pass:secret");
+    system($OPENSSL, ('genpkey', '-algorithm', 'EC', '-pkeyopt', "ec_paramgen_curve:$KEYSIZE", '-pkeyopt', 'ec_param_enc:named_curve',
+        '-out', "$PREFIX.keyenc", '-pass', 'pass:secret'));
+    system($OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX.prm", '-new', '-key', "$PREFIX.keyenc", '-out', "$PREFIX.csr", '-passin', 'pass:secret'));  # 2>/dev/null
+    system($OPENSSL, ('pkey', '-in', "$PREFIX.keyenc", '-out', "$PREFIX.key", '-passin', 'pass:secret'));
 
-    system("$OPENSSL pkey -in $PREFIX.key -pubout -outform DER -out $PREFIX.pub.der");
-    system("$OPENSSL pkey -in $PREFIX.key -pubout -outform PEM -out $PREFIX.pub.pem");
-    system("$OPENSSL x509 -sha256 -extfile $SRCDIR/$PREFIX.prm -days $DURATION " .
-        "-req -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -CAcreateserial -in $PREFIX.csr > $PREFIX.crt 2>$dev_null");
+    system($OPENSSL, ('pkey', '-in', "$PREFIX.key", '-pubout', '-outform', 'DER', '-out', "$PREFIX.pub.der"));
+    system($OPENSSL, ('pkey', '-in', "$PREFIX.key", '-pubout', '-outform', 'PEM', '-out', "$PREFIX.pub.pem"));
+    system($OPENSSL, ('x509', '-sha256', '-extfile', "$SRCDIR/$PREFIX.prm", '-days', $DURATION,
+        '-req', '-CA', "$CAPREFIX-ca.cacert", '-CAkey', "$CAPREFIX-ca.key", '-CAcreateserial', '-in', "$PREFIX.csr", '-out', "$PREFIX.crt"));  # 2>/dev/null
 
     # revoke server cert
     if(open($fh, '>', "$CAPREFIX-ca.cnt")) {
         print $fh '01';
         close($fh);
     }
-    system("$OPENSSL ca -config $SRCDIR/$CAPREFIX-ca.cnf -revoke $PREFIX.crt 2>$dev_null");
+    system($OPENSSL, ('ca', '-config', "$SRCDIR/$CAPREFIX-ca.cnf", '-revoke', "$PREFIX.crt"));  # 2>/dev/null
 
     # issue CRL
-    system("$OPENSSL ca -config $SRCDIR/$CAPREFIX-ca.cnf -gencrl -out $PREFIX.crl 2>$dev_null");
-    system("$OPENSSL x509 -in $PREFIX.crt -outform der -out $PREFIX.der");
+    system($OPENSSL, ('ca', '-config', "$SRCDIR/$CAPREFIX-ca.cnf", '-gencrl', '-out', "$PREFIX.crl"));  # 2>/dev/null
+    system($OPENSSL, ('x509', '-in', "$PREFIX.crt", '-outform', 'der', '-out', "$PREFIX.der"));
 
     # concatenate all together now
     open($fh, '>', "$PREFIX.pem") and close($fh);
