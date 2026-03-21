@@ -40,7 +40,6 @@ CMAKE_DIST =                                     \
   CMake/FindLibgsasl.cmake                       \
   CMake/FindLibidn2.cmake                        \
   CMake/FindLibpsl.cmake                         \
-  CMake/FindLibrtmp.cmake                        \
   CMake/FindLibssh.cmake                         \
   CMake/FindLibssh2.cmake                        \
   CMake/FindLibuv.cmake                          \
