@@ -26,7 +26,7 @@
 #include "curl_setup.h"
 #include "curlx/timediff.h"
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_THREADS
 
 struct Curl_easy;
 struct curl_trc_feat;
@@ -116,6 +116,6 @@ void Curl_thrdq_trace(struct curl_thrdq *tqueue,
                       struct curl_trc_feat *feat);
 #endif
 
-#endif /* USE_THREADS && CURLRES_THREADED */
+#endif /* USE_THREADS */
 
 #endif /* HEADER_CURL_THRDQUEUE_H */
