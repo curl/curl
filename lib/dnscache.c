@@ -373,8 +373,6 @@ static int num_addresses(const struct Curl_addrinfo *addr)
   return i;
 }
 
-UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                                    struct Curl_addrinfo **addr);
 /*
  * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
@@ -387,6 +385,8 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
  *
  * @unittest: 1608
  */
+UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
+                                    struct Curl_addrinfo **addr);
 UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     struct Curl_addrinfo **addr)
 {

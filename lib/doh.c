@@ -1114,11 +1114,10 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   return CURLE_OK;
 }
 
+/* @unittest 1658 */
 UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                           const unsigned char *cp, size_t len,
                                           struct Curl_https_rrinfo **hrr);
-
-/* @unittest 1658 */
 UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                           const unsigned char *cp, size_t len,
                                           struct Curl_https_rrinfo **hrr)
