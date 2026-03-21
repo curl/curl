@@ -1021,6 +1021,31 @@ static bool url_match_auth(struct connectdata *conn,
   return TRUE;
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+/* Return true if the scheme/protocol/family of `conn` can be used to upgrade
+ * to the websocket scheme of `needle` */
+static bool websocket_compatible_protocols(struct connectdata *needle,
+                                           struct connectdata *conn)
+{
+  /* WebSockets can upgrade an HTTP/1.1 connection */
+  if(!(get_protocol_family(conn->scheme) & PROTO_FAMILY_HTTP) &&
+     Curl_conn_http_version(NULL, conn) != 11) {
+    return FALSE;
+  }
+
+  /* `ws` must use `http` and `wss` must use `https` */
+  if(curl_strequal(needle->scheme->name, "ws") &&
+     conn->scheme->protocol & CURLPROTO_HTTP) {
+    return TRUE;
+  }
+  else if(curl_strequal(needle->scheme->name, "wss") &&
+          conn->scheme->protocol & CURLPROTO_HTTPS) {
+    return TRUE;
+  }
+  return FALSE;
+}
+#endif
+
 static bool url_match_destination(struct connectdata *conn,
                                   struct url_conn_match *m)
 {
@@ -1031,7 +1056,11 @@ static bool url_match_destination(struct connectdata *conn,
      || !m->needle->bits.httpproxy || m->needle->bits.tunnel_proxy
 #endif
     ) {
-    if(!curl_strequal(m->needle->scheme->name, conn->scheme->name)) {
+    if(!curl_strequal(m->needle->scheme->name, conn->scheme->name)
+#ifndef CURL_DISABLE_WEBSOCKETS
+       && !websocket_compatible_protocols(m->needle, conn)
+#endif
+      ) {
       /* `needle` and `conn` do not have the same scheme... */
       if(get_protocol_family(conn->scheme) != m->needle->scheme->protocol) {
         /* and `conn`s protocol family is not the protocol `needle` wants.
@@ -1429,9 +1458,9 @@ error:
   return NULL;
 }
 
-static CURLcode findprotocol(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             const char *protostr)
+CURLcode Curl_findprotocol(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           const char *protostr)
 {
   const struct Curl_scheme *p = Curl_get_scheme(protostr);
 
@@ -1644,7 +1673,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
 #endif
 
-  result = findprotocol(data, conn, data->state.up.scheme);
+  result = Curl_findprotocol(data, conn, data->state.up.scheme);
   if(result)
     return result;
 
@@ -3132,6 +3161,22 @@ static void conn_meta_freeentry(void *p)
   DEBUGASSERT(p == NULL);
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+/* If the scheme needs to be updated due to a reused conn.  At the moment only
+ * if a websocket is reusing an http connection. */
+static CURLcode update_scheme_if_necessary(struct Curl_easy *data,
+                                           struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  if(websocket_compatible_protocols(conn, data->conn)) {
+    /* Update the reused connection's handler to the WebSocket scheme
+     * requested by needle (conn). */
+    result = Curl_findprotocol(data, data->conn, conn->scheme->name);
+  }
+  return result;
+}
+#endif
+
 static CURLcode url_create_needle(struct Curl_easy *data,
                                   struct connectdata **pneedle)
 {
@@ -3388,12 +3433,12 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
 
   /*************************************************************
    * Reuse of existing connection is not allowed when
-   * - connect_only is set or
+   * - connect_only is set (unless for WebSocket) or
    * - reuse_fresh is set and this is not a follow-up request
    *   (like with HTTP followlocation)
    *************************************************************/
   if((!data->set.reuse_fresh || data->state.followlocation) &&
-     !data->set.connect_only) {
+     (!data->set.connect_only || data->set.connect_only_ws)) {
     /* Ok, try to find and attach an existing one */
     url_attach_existing(data, needle, &waitpipe);
   }
@@ -3406,6 +3451,13 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
                                  Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
     conn->bits.reuse = TRUE;
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+    result = update_scheme_if_necessary(data, needle);
+    if(result)
+      goto out;
+#endif
+
     url_conn_reuse_adjust(data, needle);
 
 #ifndef CURL_DISABLE_PROXY
