@@ -195,6 +195,9 @@ static NETRCcode netrc_get_token(const char **tokp,
   if(*statep == MACDEF) {
     if((*tok == '\n') || (*tok == '\r'))
       *statep = NOTHING; /* end of macro definition */
+    *lineend = TRUE;
+    *tokp = tok;
+    return NETRC_OK;
   }
 
   if(!*tok || (*tok == '\n')) {
