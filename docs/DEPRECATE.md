@@ -27,6 +27,7 @@ TLS-SRP support gets removed in August 2026.
 ## SMB goes opt-in
 
 The SMB protocol has weak security and is rarely used these days. After curl
+
 8.19.0 SMB support becomes opt-in.
 
 ## NTLM goes opt-in
