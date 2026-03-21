@@ -1195,7 +1195,8 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
       break;
 
     default:
-      failf(data, "multi_getsock: unexpected multi state %d", (int)data->mstate);
+      failf(data, "multi_getsock: unexpected multi state %d",
+            (int)data->mstate);
       DEBUGASSERT(0);
       break;
     }
