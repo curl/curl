@@ -143,9 +143,7 @@ struct async_ares_ctx {
                                     parts */
   int ares_status;               /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
   CURLcode result;               /* CURLE_OK or error handling response */
-#ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
-#endif
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo hinfo;
 #endif

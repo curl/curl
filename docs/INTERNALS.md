@@ -27,7 +27,7 @@ want it to remain functional and buildable with these and later versions
 We aim to support these or later versions.
 
 - brotli       1.0.0 (2017-09-21)
-- c-ares       1.6.0 (2008-12-09)
+- c-ares       1.16.0 (2020-03-13)
 - GnuTLS       3.6.5 (2018-12-01)
 - libidn2      2.0.0 (2017-03-29)
 - LibreSSL     2.9.1 (2019-04-22)

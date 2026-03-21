@@ -39,7 +39,6 @@
 
 #ifdef USE_ARES
 #include <ares.h>
-#include <ares_version.h> /* really old c-ares did not include it by itself */
 #endif
 
 #include "urldata.h"
@@ -56,8 +55,8 @@
 
 #ifdef USE_ARES
 
-#if ARES_VERSION < 0x010600
-#error "requires c-ares 1.6.0 or newer"
+#if ARES_VERSION < 0x011000
+#error "requires c-ares 1.16.0 or newer"
 #endif
 
 /*
