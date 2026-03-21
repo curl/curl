@@ -142,9 +142,13 @@ static CURLcode test_unit3300(const char *arg)
   Curl_thrdpool_destroy(tpool, FALSE);
   fail_unless(ctx.returned < ctx.total, "pool-e returned all");
   fail_unless(ctx.taken < ctx.total, "pool-e took all");
+#ifdef DEBUGBUILD
   /* pool thread will notice destruction and should immediately abort.
-   * No memory leak should be reported. */
-  curlx_wait_ms(1000);
+   * No memory leak should be reported. if the wait is too short on
+   * a slow system, thread sanitizer will freak out as memdebug will
+   * be called by threads after main thread shut down. */
+  curlx_wait_ms(2000);
+#endif
 
   UNITTEST_END_SIMPLE
 }
