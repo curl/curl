@@ -309,10 +309,10 @@ const struct Curl_scheme Curl_scheme_scp = {
 
 const struct Curl_scheme Curl_scheme_smb = {
   "smb",                                /* scheme */
-#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE)
-  ZERO_NULL,
-#else
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
   &Curl_protocol_smb,
+#else
+  ZERO_NULL,
 #endif
   CURLPROTO_SMB,                        /* protocol */
   CURLPROTO_SMB,                        /* family */
@@ -322,11 +322,11 @@ const struct Curl_scheme Curl_scheme_smb = {
 
 const struct Curl_scheme Curl_scheme_smbs = {
   "smbs",                               /* scheme */
-#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE) || \
-  !defined(USE_SSL)
-  ZERO_NULL,
-#else
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
+  defined(USE_SSL)
   &Curl_protocol_smb,
+#else
+  ZERO_NULL,
 #endif
   CURLPROTO_SMBS,                       /* protocol */
   CURLPROTO_SMB,                        /* family */

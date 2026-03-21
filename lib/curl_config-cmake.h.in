@@ -146,7 +146,7 @@
 #cmakedefine CURL_DISABLE_SHUFFLE_DNS 1
 
 /* disables SMB */
-#cmakedefine CURL_DISABLE_SMB 1
+#cmakedefine CURL_ENABLE_SMB 1
 
 /* disables SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1

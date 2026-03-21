@@ -25,7 +25,7 @@
 #include "curl_setup.h"
 #include "urldata.h"
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>  /* for htons() */
@@ -1228,4 +1228,4 @@ const struct Curl_protocol Curl_protocol_smb = {
   ZERO_NULL,                            /* follow */
 };
 
-#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */
+#endif /* CURL_ENABLE_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */

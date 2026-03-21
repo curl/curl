@@ -857,11 +857,11 @@ jobs:
             image: 'windows-11-arm'
             openssh: 'OpenSSH-Windows'
             tflags: '--min=1650'
-            # disable SMB to save 30-60 seconds by omitting prereqs, to counteract the slower test run step
+            # leave SMB disabled to save 30-60 seconds by omitting prereqs,
+            # to counteract the slower test run step
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
-              -DCURL_DISABLE_SMB=ON
               -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
 
       fail-fast: false
