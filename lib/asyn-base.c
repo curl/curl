@@ -183,10 +183,10 @@ void Curl_async_shutdown(struct Curl_easy *data)
 {
   if(data->state.async) {
     CURL_TRC_DNS(data, "shutdown async");
-#ifdef CURLRES_ARES
+#ifdef USE_RESOLV_ARES
     Curl_async_ares_shutdown(data, data->state.async);
 #endif
-#ifdef CURLRES_THREADED
+#ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_shutdown(data, data->state.async);
 #endif
 #ifndef CURL_DISABLE_DOH
@@ -199,10 +199,10 @@ void Curl_async_destroy(struct Curl_easy *data)
 {
   if(data->state.async) {
     CURL_TRC_DNS(data, "destroy async");
-#ifdef CURLRES_ARES
+#ifdef USE_RESOLV_ARES
     Curl_async_ares_destroy(data, data->state.async);
 #endif
-#ifdef CURLRES_THREADED
+#ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_destroy(data, data->state.async);
 #endif
 #ifndef CURL_DISABLE_DOH
