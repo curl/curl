@@ -26,19 +26,10 @@ curl_version_info_data *curl_version_info(CURLversion age);
 # DESCRIPTION
 
 Returns a pointer to a filled in static struct with information about various
-features in the running version of libcurl. *age* should be set to the
-version of this functionality by the time you write your program. This way,
-libcurl always returns a proper struct that your program understands, while
-programs in the future might get a different struct. **CURLVERSION_NOW** is
-the most recent one for the library you have installed:
-~~~c
-  data = curl_version_info(CURLVERSION_NOW);
-~~~
-Applications should use this information to judge if things are possible to do
-or not, instead of using compile-time checks, as dynamic/DLL libraries can be
-changed independent of applications.
+features in the running version of libcurl. The input argument *age* has no
+use and we recommend you set it to `CURLVERSION_NOW`.
 
-This function can alter the returned static data as long as
+This function may alter the returned static data as long as
 curl_global_init(3) has not been called. It is therefore not thread-safe
 before libcurl initialization occurs.
 
@@ -111,10 +102,11 @@ typedef struct {
 } curl_version_info_data;
 ~~~
 
-*age* describes what the age of this struct is. The number depends on how
-new the libcurl you are using is. You are however guaranteed to get a struct
-that you have a matching struct for in the header, as you tell libcurl your
-"age" with the input argument.
+*age* describes what the age of this struct is. That number is different
+depending on how recent your libcurl is. The documentation above describes
+which struct fields that were added at which age. Trying to access a struct
+field that is newer than the age of your struct may cause undefined behavior
+and possibly crashes.
 
 *version* is an ASCII string for the libcurl version.
 
