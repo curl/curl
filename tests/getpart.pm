@@ -237,9 +237,7 @@ sub loadtest {
         else {
             binmode $xmlh; # for crapage systems, use binary
         }
-        while(<$xmlh>) {
-            push @xml, $_;
-        }
+        push @xml, <$xmlh>;
         close($xmlh);
         if(!@xml) {
             print STDERR "file $file is empty!\n";
@@ -423,9 +421,7 @@ sub loadarray {
     my @array;
 
     if(open(my $temp, "<", $filename)) {
-        while(<$temp>) {
-            push @array, $_;
-        }
+        push @array, <$temp>;
         close($temp);
     }
     return @array;
