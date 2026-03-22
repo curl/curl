@@ -32,7 +32,6 @@ use warnings;
 
 my $curl = shift @ARGV;
 my $opt = shift @ARGV;
-my $output = shift @ARGV;
 my $txt = shift @ARGV;
 
 my $longopt;
@@ -45,14 +44,10 @@ else {
 }
 
 # first run the help command
-system("$curl -h $opt > $output");
-my @curlout;
-open(O, "<$output");
-push @curlout, <O>;
-close(O);
+my @curlout; open(O, '-|', $curl, '-h', $opt) || die; push @curlout, <O>; close(O);
 
 # figure out the short+long option combo using -h all*/
-open(C, "$curl -h all|");
+open(C, '-|', $curl, '-h', 'all');
 if($shortopt) {
     while(<C>) {
         if(/^ +$opt, ([^ ]*)/) {

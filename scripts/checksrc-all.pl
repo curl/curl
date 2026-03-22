@@ -13,7 +13,7 @@ use Cwd 'abs_path';
 my @files;
 my $is_git = 0;
 if(system('git rev-parse --is-inside-work-tree >/dev/null 2>&1') == 0) {
-    @files = `git ls-files \"*.[ch]\"`;
+    open(O, '-|', 'git', 'ls-files', '*.[ch]') || die; push @files, <O>; close(O);
     $is_git = 1;
 }
 else {
@@ -33,7 +33,8 @@ my $anyfailed = 0;
 
 for my $dir (@dirs) {
     if($is_git) {
-        @files = `git ls-files \"$dir/*.[ch]\"`;
+        @files = ();
+        open(O, '-|', 'git', 'ls-files', "$dir/*.[ch]") || die; push @files, <O>; close(O);
         chomp(@files);
     }
     else {
