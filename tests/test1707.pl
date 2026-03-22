@@ -32,7 +32,6 @@ use warnings;
 
 my $curl = shift @ARGV;
 my $opt = shift @ARGV;
-my $output = shift @ARGV;
 my $txt = shift @ARGV;
 
 my $longopt;
@@ -45,9 +44,8 @@ else {
 }
 
 # first run the help command
-system("$curl -h $opt > $output");
 my @curlout;
-open(O, "<$output");
+open(O, '-|', $curl, '-h', $opt) || die;
 push @curlout, <O>;
 close(O);
 
