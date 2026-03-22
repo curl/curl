@@ -257,6 +257,7 @@ static CURLcode cf_gtls_handshake(struct Curl_cfilter *cf,
     return CURLE_AGAIN;
   }
   else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
+#ifdef CURLVERBOSE
     const char *strerr = NULL;
 
     if(rc == GNUTLS_E_WARNING_ALERT_RECEIVED) {
@@ -268,6 +269,7 @@ static CURLcode cf_gtls_handshake(struct Curl_cfilter *cf,
       strerr = gnutls_strerror(rc);
 
     infof(data, "gnutls_handshake() warning: %s", strerr);
+#endif
     return CURLE_AGAIN;
   }
   else if((rc < 0) && backend->gtls.io_result) {
