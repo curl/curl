@@ -22,8 +22,8 @@
 #
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 10
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 10
 
 dnl Note 1
 dnl ------
@@ -371,7 +371,7 @@ dnl tests and generated config file.
 
 AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   AC_PREREQ([2.50])dnl
-  #
+
   AC_MSG_CHECKING([if _REENTRANT is already defined])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
@@ -390,7 +390,7 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
     AC_MSG_RESULT([no])
     tmp_reentrant_initially_defined="no"
   ])
-  #
+
   if test "$tmp_reentrant_initially_defined" = "no"; then
     AC_MSG_CHECKING([if _REENTRANT is actually needed])
     CURL_CHECK_NEED_REENTRANT_SYSTEM
@@ -406,7 +406,7 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
       AC_MSG_RESULT([no])
     fi
   fi
-  #
+
   AC_MSG_CHECKING([if _REENTRANT is onwards defined])
   if test "$tmp_reentrant_initially_defined" = "yes" ||
     test "$tmp_need_reentrant" = "yes"; then
@@ -415,7 +415,6 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   else
     AC_MSG_RESULT([no])
   fi
-  #
 ])
 
 
@@ -432,7 +431,7 @@ dnl tests and generated config file.
 
 AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   AC_PREREQ([2.50])dnl
-  #
+
   AC_MSG_CHECKING([if _THREAD_SAFE is already defined])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
@@ -451,7 +450,7 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
     AC_MSG_RESULT([no])
     tmp_thread_safe_initially_defined="no"
   ])
-  #
+
   if test "$tmp_thread_safe_initially_defined" = "no"; then
     AC_MSG_CHECKING([if _THREAD_SAFE is actually needed])
     CURL_CHECK_NEED_THREAD_SAFE_SYSTEM
@@ -461,7 +460,7 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
       AC_MSG_RESULT([no])
     fi
   fi
-  #
+
   AC_MSG_CHECKING([if _THREAD_SAFE is onwards defined])
   if test "$tmp_thread_safe_initially_defined" = "yes" ||
     test "$tmp_need_thread_safe" = "yes"; then
@@ -470,5 +469,4 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   else
     AC_MSG_RESULT([no])
   fi
-  #
 ])

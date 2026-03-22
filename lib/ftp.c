@@ -307,7 +307,7 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
     ftpc->file = fileName;
   else
     ftpc->file = NULL; /* instead of point to a zero byte,
-                            we make it a NULL pointer */
+                          we make it a NULL pointer */
 
   if(data->state.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
     /* We need a filename when uploading. Return error! */
@@ -1685,17 +1685,17 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
 
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
-    /* we are about to continue the uploading of a file */
-    /* 1. get already existing file's size. We use the SIZE command for this
-       which may not exist in the server!  The SIZE command is not in
-       RFC959. */
+    /* we are about to continue the uploading of a file
+       1. get already existing file's size. We use the SIZE command for this
+          which may not exist in the server!  The SIZE command is not in
+          RFC959.
 
-    /* 2. This used to set REST, but since we can do append, we issue no
-       another ftp command. Skip the source file offset and APPEND the rest on
-       the file instead */
+       2. This used to set REST, but since we can do append, we issue no
+          another ftp command. Skip the source file offset and APPEND the rest
+          on the file instead
 
-    /* 3. pass file-size number of bytes in the source file */
-    /* 4. lower the infilesize counter */
+       3. pass file-size number of bytes in the source file
+       4. lower the infilesize counter */
     /* => transfer as usual */
     int seekerr = CURL_SEEKFUNC_OK;
 
@@ -2502,7 +2502,6 @@ static bool twodigit(const char *p, int *val)
 /*
  * Unittest @1668
  */
-
 UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,
                            int *hour, int *minute, int *second);
 UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,

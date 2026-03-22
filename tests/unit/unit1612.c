@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "curl_hmac.h"
 #include "curl_md5.h"
 

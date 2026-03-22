@@ -22,8 +22,8 @@
 #
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 19
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 19
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -335,7 +335,7 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   AC_REQUIRE([CURL_CHECK_FUNC_FCNTL])dnl
   AC_REQUIRE([CURL_CHECK_FUNC_IOCTLSOCKET])dnl
   AC_REQUIRE([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL])dnl
-  #
+
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
@@ -391,7 +391,7 @@ dnl When c-ares library support has been requested, performs necessary checks
 dnl and adjustments needed to enable support of this library.
 
 AC_DEFUN([CURL_CHECK_LIB_ARES], [
-  #
+
   if test "$want_ares" = "yes"; then
     dnl c-ares library support has been requested
     clean_CPPFLAGS="$CPPFLAGS"
@@ -435,12 +435,11 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
         ares_LIBS="-lcares"
       fi
     fi
-    #
+
     CPPFLAGS="$clean_CPPFLAGS $ares_CPPFLAGS"
     LDFLAGS="$clean_LDFLAGS $ares_LDFLAGS"
     LDFLAGSPC="$clean_LDFLAGSPC $ares_LDFLAGS"
     LIBS="$ares_LIBS $clean_LIBS"
-    #
 
     dnl check if c-ares new enough, 1.16.0 or newer
     AC_CHECK_FUNC([ares_getaddrinfo],
@@ -452,7 +451,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       LDFLAGS="$clean_LDFLAGS"
       LDFLAGSPC="$clean_LDFLAGSPC"
       LIBS="$clean_LIBS"
-      # prevent usage
+      dnl prevent usage
       want_ares="no"
     ])
 

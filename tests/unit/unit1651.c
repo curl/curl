@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "vtls/x509asn1.h"
 
 static CURLcode test_unit1651(const char *arg)

@@ -57,9 +57,9 @@ CURL_CHECK_OPTION_SSLS_EXPORT
 
 XC_CHECK_PATH_SEPARATOR
 
-#
-# save the configure arguments
-#
+dnl
+dnl save the configure arguments
+dnl
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
@@ -339,7 +339,7 @@ AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
   [request_httpd=$withval], [request_httpd=check])
 if test "x$request_httpd" = "xcheck" || test "x$request_httpd" = "xyes"; then
   if test -x "/usr/sbin/apache2"; then
-    # common location on distros (debian/ubuntu)
+    dnl common location on distros (debian/ubuntu)
     HTTPD="/usr/sbin/apache2"
     AC_PATH_PROG([APXS], [apxs])
     if test -z "$APXS"; then
@@ -389,7 +389,7 @@ AC_ARG_WITH(test-danted, [AS_HELP_STRING([--with-test-danted=PATH],
   [request_danted=$withval], [request_danted=check])
 if test "x$request_danted" = "xcheck" || test "x$request_danted" = "xyes"; then
   if test -x "/usr/sbin/danted"; then
-    # common location on distros (debian/ubuntu)
+    dnl common location on distros (debian/ubuntu)
     DANTED="/usr/sbin/danted"
   else
     AC_PATH_PROG([DANTED], [danted])
@@ -419,7 +419,7 @@ AC_ARG_WITH(test-sshd, [AS_HELP_STRING([--with-test-sshd=PATH],
   [request_sshd=$withval], [request_sshd=check])
 if test "x$request_sshd" = "xcheck" || test "x$request_sshd" = "xyes"; then
   if test -x "/usr/sbin/sshd"; then
-    # common location on distros (debian/ubuntu)
+    dnl common location on distros (debian/ubuntu)
     SSHD="/usr/sbin/sshd"
   else
     AC_PATH_PROG([SSHD], [sshd])
@@ -441,10 +441,10 @@ if test "$SSHD_ENABLED" = "no"; then
   SFTPD=""
 else
   if test -x "/usr/libexec/sftp-server"; then
-    # common location on macOS)
+    dnl common location on macOS)
     SFTPD="/usr/libexec/sftp-server"
   elif test -x "/usr/lib/openssh/sftp-server"; then
-    # common location on debian
+    dnl common location on debian
     SFTPD="/usr/lib/openssh/sftp-server"
   else
     AC_PATH_PROG([SFTPD], [sftp-server])
@@ -503,7 +503,7 @@ AC_CANONICAL_HOST
 dnl Get system canonical name
 AC_DEFINE_UNQUOTED(CURL_OS, "${host}", [cpu-machine-OS])
 
-# Silence warning: ar: 'u' modifier ignored since 'D' is the default
+dnl Silence warning: ar: 'u' modifier ignored since 'D' is the default
 AC_SUBST(AR_FLAGS, [cr])
 
 dnl This defines _ALL_SOURCE for AIX
@@ -522,9 +522,9 @@ LT_LANG([Windows Resource])
 
 AM_CONDITIONAL(NOT_CURL_CI, test -z "$CURL_CI")
 
-#
-# Automake conditionals based on libtool related checks
-#
+dnl
+dnl Automake conditionals based on libtool related checks
+dnl
 
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSION_INFO],
   [test "$xc_lt_shlib_use_version_info" = "yes"])
@@ -533,30 +533,30 @@ AM_CONDITIONAL([CURL_LT_SHLIB_USE_NO_UNDEFINED],
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_MIMPURE_TEXT],
   [test "$xc_lt_shlib_use_mimpure_text" = "yes"])
 
-#
-# Due to libtool and automake machinery limitations of not allowing
-# specifying separate CPPFLAGS or CFLAGS when compiling objects for
-# inclusion of these in shared or static libraries, we are forced to
-# build using separate configure runs for shared and static libraries
-# on systems where different CPPFLAGS or CFLAGS are mandatory in order
-# to compile objects for each kind of library. Notice that relying on
-# the '-DPIC' CFLAG that libtool provides is not valid given that the
-# user might for example choose to build static libraries with PIC.
-#
+dnl
+dnl Due to libtool and automake machinery limitations of not allowing
+dnl specifying separate CPPFLAGS or CFLAGS when compiling objects for
+dnl inclusion of these in shared or static libraries, we are forced to
+dnl build using separate configure runs for shared and static libraries
+dnl on systems where different CPPFLAGS or CFLAGS are mandatory in order
+dnl to compile objects for each kind of library. Notice that relying on
+dnl the '-DPIC' CFLAG that libtool provides is not valid given that the
+dnl user might for example choose to build static libraries with PIC.
+dnl
 
-#
-# Make our Makefile.am files use the staticlib CPPFLAG only when strictly
-# targeting a static library and not building its shared counterpart.
-#
+dnl
+dnl Make our Makefile.am files use the staticlib CPPFLAG only when strictly
+dnl targeting a static library and not building its shared counterpart.
+dnl
 
 AM_CONDITIONAL([USE_CPPFLAG_CURL_STATICLIB],
   [test "$xc_lt_build_static_only" = "yes"])
 
-#
-# Make staticlib CPPFLAG variable and its definition visible in output
-# files unconditionally, providing an empty definition unless strictly
-# targeting a static library and not building its shared counterpart.
-#
+dnl
+dnl Make staticlib CPPFLAG variable and its definition visible in output
+dnl files unconditionally, providing an empty definition unless strictly
+dnl targeting a static library and not building its shared counterpart.
+dnl
 
 LIBCURL_PC_CFLAGS_PRIVATE='-DCURL_STATICLIB'
 AC_SUBST(LIBCURL_PC_CFLAGS_PRIVATE)
@@ -605,7 +605,6 @@ CURL_SET_COMPILER_OPTIMIZE_OPTS
 CURL_SET_COMPILER_WARNING_OPTS
 
 if test "$compiler_id" = "INTEL_UNIX_C"; then
-  #
   if test "$compiler_num" -ge "1000"; then
     dnl icc 10.X or later
     CFLAGS="$CFLAGS -shared-intel"
@@ -613,7 +612,6 @@ if test "$compiler_id" = "INTEL_UNIX_C"; then
     dnl icc 9.X specific
     CFLAGS="$CFLAGS -i-dynamic"
   fi
-  #
 fi
 
 case $host in
@@ -647,17 +645,17 @@ CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH
 CURL_CHECK_COMPILER_SYMBOL_HIDING
 
 supports_unittests=yes
-# cross-compilation of unit tests static library/programs fails when
-# libcurl shared library is built. This might be due to a libtool or
-# automake issue. In this case we disable unit tests.
+dnl cross-compilation of unit tests static library/programs fails when
+dnl libcurl shared library is built. This might be due to a libtool or
+dnl automake issue. In this case we disable unit tests.
 if test "$cross_compiling" != "no" &&
    test "$enable_shared" != "no"; then
   supports_unittests=no
 fi
 
-# IRIX 6.5.24 gcc 3.3 autobuilds fail unittests library compilation due to
-# a problem related with OpenSSL headers and library versions not matching.
-# Disable unit tests while time to further investigate this is found.
+dnl IRIX 6.5.24 gcc 3.3 autobuilds fail unittests library compilation due to
+dnl a problem related with OpenSSL headers and library versions not matching.
+dnl Disable unit tests while time to further investigate this is found.
 case $host in
   mips-sgi-irix6.5)
     if test "$compiler_id" = "GNU_C"; then
@@ -666,9 +664,9 @@ case $host in
     ;;
 esac
 
-# All AIX autobuilds fails unit tests linking against unittests library
-# due to unittests library being built with no symbols or members. Libtool ?
-# Disable unit tests while time to further investigate this is found.
+dnl All AIX autobuilds fails unit tests linking against unittests library
+dnl due to unittests library being built with no symbols or members. Libtool ?
+dnl Disable unit tests while time to further investigate this is found.
 case $host_os in
   aix*)
     supports_unittests=no
@@ -677,8 +675,8 @@ esac
 
 AM_CONDITIONAL(BUILD_UNITTESTS, test "$supports_unittests" = "yes")
 
-# In order to detect support of sendmmsg() and accept4(), we need to escape the POSIX
-# jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
+dnl In order to detect support of sendmmsg() and accept4(), we need to escape the POSIX
+dnl jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
 case $host_os in
   *linux*|cygwin*|msys*|gnu*)
     CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
@@ -1257,8 +1255,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   ])
 fi
 
-# In UWP mode gethostbyname gets detected via the core libs, but some
-# code (in6addr_any) still need ws2_32, so let us detect and add it.
+dnl In UWP mode gethostbyname gets detected via the core libs, but some
+dnl code (in6addr_any) still need ws2_32, so let us detect and add it.
 if test "$HAVE_GETHOSTBYNAME" != "1" || test "$curl_cv_winuwp" = "yes"; then
   if test "$curl_cv_native_windows" = "yes"; then
     dnl This is for Winsock systems
@@ -2055,12 +2053,12 @@ case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENAB
 Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
     ;;
   x1)
-    # one SSL backend is enabled
+    dnl one SSL backend is enabled
     SSL_ENABLED="1"
     AC_MSG_NOTICE([built with one SSL backend])
     ;;
   xD)
-    # explicitly built without TLS
+    dnl explicitly built without TLS
     ;;
   xD*)
     AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
@@ -2068,7 +2066,7 @@ Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schann
 Since these are conflicting parameters, verify which is the desired one and drop the other.])
     ;;
   *)
-    # more than one SSL backend is enabled
+    dnl more than one SSL backend is enabled
     SSL_ENABLED="1"
     CURL_WITH_MULTI_SSL="1"
     AC_DEFINE(CURL_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
@@ -2893,7 +2891,7 @@ if test "$want_idn" = "yes"; then
   clean_LDFLAGSPC="$LDFLAGSPC"
   clean_LIBS="$LIBS"
   PKGCONFIG="no"
-  #
+
   if test "$want_idn_path" != "default"; then
     dnl path has been specified
     IDN_PCDIR="$want_idn_path/lib$libsuff/pkgconfig"
@@ -2926,7 +2924,7 @@ if test "$want_idn" = "yes"; then
       IDN_LIBS="-lidn2"
     fi
   fi
-  #
+
   if test "$PKGCONFIG" != "no"; then
     AC_MSG_NOTICE([pkg-config: IDN_LIBS: "$IDN_LIBS"])
     AC_MSG_NOTICE([pkg-config: IDN_LDFLAGS: "$IDN_LDFLAGS"])
@@ -2938,12 +2936,12 @@ if test "$want_idn" = "yes"; then
     AC_MSG_NOTICE([IDN_CPPFLAGS: "$IDN_CPPFLAGS"])
     AC_MSG_NOTICE([IDN_DIR: "$IDN_DIR"])
   fi
-  #
+
   CPPFLAGS="$CPPFLAGS $IDN_CPPFLAGS"
   LDFLAGS="$LDFLAGS $IDN_LDFLAGS"
   LDFLAGSPC="$LDFLAGSPC $IDN_LDFLAGS"
   LIBS="$IDN_LIBS $LIBS"
-  #
+
   AC_MSG_CHECKING([if idn2_lookup_ul can be linked])
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([idn2_lookup_ul])
@@ -2954,7 +2952,7 @@ if test "$want_idn" = "yes"; then
     AC_MSG_RESULT([no])
     tst_links_libidn="no"
   ])
-  #
+
   AC_CHECK_HEADERS(idn2.h)
 
   if test "$tst_links_libidn" = "yes"; then
@@ -2986,7 +2984,7 @@ dnl **********************************************************************
 OPT_H2="yes"
 
 if test "$disable_http" = "yes"; then
-  # without HTTP nghttp2 is no use
+  dnl without HTTP nghttp2 is no use
   OPT_H2="no"
 fi
 
@@ -3054,8 +3052,8 @@ if test "$want_nghttp2" != "no"; then
   CPPFLAGS="$CPPFLAGS $CPP_H2"
   LIBS="$LIB_H2 $LIBS"
 
-  # use nghttp2_session_get_stream_local_window_size to require nghttp2
-  # >= 1.15.0
+  dnl use nghttp2_session_get_stream_local_window_size to require nghttp2
+  dnl >= 1.15.0
   AC_CHECK_LIB(nghttp2, nghttp2_session_get_stream_local_window_size,
     [
       AC_CHECK_HEADERS(nghttp2/nghttp2.h,
@@ -3084,7 +3082,7 @@ dnl **********************************************************************
 OPT_TCP2="no"
 
 if test "$disable_http" = "yes"; then
-  # without HTTP, ngtcp2 is no use
+  dnl without HTTP, ngtcp2 is no use
   OPT_TCP2="no"
 fi
 
@@ -3532,7 +3530,7 @@ dnl **********************************************************************
 OPT_NGHTTP3="yes"
 
 if test "$USE_NGTCP2" != "1"; then
-  # without ngtcp2, nghttp3 is of no use for us
+  dnl without ngtcp2, nghttp3 is of no use for us
   OPT_NGHTTP3="no"
   want_nghttp3="no"
 fi
@@ -3562,7 +3560,7 @@ curl_http3_msg="no      (--with-nghttp3)"
 if test "$want_nghttp3" != "no"; then
 
   if test "x$USE_NGTCP2" != "x1"; then
-    # without ngtcp2, nghttp3 is of no use for us
+    dnl without ngtcp2, nghttp3 is of no use for us
     AC_MSG_ERROR([nghttp3 enabled without a QUIC library; enable ngtcp2])
   fi
 
@@ -3639,7 +3637,7 @@ dnl **********************************************************************
 OPT_QUICHE="no"
 
 if test "$disable_http" = "yes" || test "$USE_NGTCP" = "1"; then
-  # without HTTP or with ngtcp2, quiche is no use
+  dnl without HTTP or with ngtcp2, quiche is no use
   OPT_QUICHE="no"
 fi
 
@@ -3982,11 +3980,11 @@ if test "$ac_cv_sizeof_curl_off_t" -lt 8; then
   AC_MSG_ERROR([64-bit curl_off_t is required])
 fi
 
-# check for ssize_t
+dnl check for ssize_t
 AC_CHECK_TYPE(ssize_t, ,
   AC_DEFINE(ssize_t, int, [the signed version of size_t]))
 
-# check for bool type
+dnl check for bool type
 AC_CHECK_TYPE([bool],[
   AC_DEFINE(HAVE_BOOL_T, 1,
     [Define to 1 if bool is an available type.])
@@ -4000,7 +3998,7 @@ AC_CHECK_TYPE([bool],[
 ])
 
 if test "$curl_cv_native_windows" != "yes"; then
-  # check for sa_family_t
+  dnl check for sa_family_t
   AC_CHECK_TYPE(sa_family_t,
     AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),,
   [
@@ -4008,7 +4006,7 @@ if test "$curl_cv_native_windows" != "yes"; then
   ])
 fi
 
-# check for suseconds_t
+dnl check for suseconds_t
 AC_CHECK_TYPE([suseconds_t],[
   AC_DEFINE(HAVE_SUSECONDS_T, 1,
     [Define to 1 if suseconds_t is an available type.])
@@ -4192,7 +4190,7 @@ if test "$curl_cv_native_windows" != "yes"; then
 
       dnl if it was not found without lib, search for it in pthread lib
       if test "$HAVE_THREADS_POSIX" != "1"; then
-        # assign PTHREAD for pkg-config use
+        dnl assign PTHREAD for pkg-config use
         PTHREAD=" -pthread"
 
         case $host in
@@ -4313,7 +4311,7 @@ AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
       ;;
     *)
       if test "$SCHANNEL_ENABLED" = "1"; then
-        # --with-schannel implies --enable-sspi
+        dnl --with-schannel implies --enable-sspi
         AC_MSG_RESULT(yes)
       else
         AC_MSG_RESULT(no)
@@ -4321,7 +4319,7 @@ AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
       ;;
     esac ],
       if test "$SCHANNEL_ENABLED" = "1"; then
-        # --with-schannel implies --enable-sspi
+        dnl --with-schannel implies --enable-sspi
         AC_MSG_RESULT(yes)
       else
         AC_MSG_RESULT(no)
@@ -4919,9 +4917,9 @@ if test "$want_httpsrr" != "no"; then
   curl_httpsrr_msg="enabled (--disable-httpsrr)"
 else
   AC_MSG_RESULT([no])
-  # no HTTPSRR wanted
+  dnl no HTTPSRR wanted
   if test "$want_threaded_resolver" = "yes"; then
-    # and using the threaded resolver
+    dnl and using the threaded resolver
     if test "$USE_ARES" = "1"; then
       AC_MSG_ERROR([without HTTPS-RR support, asking for both threaded resolver and c-ares support is ambivalent. Please drop one of them.])
     fi

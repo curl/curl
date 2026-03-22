@@ -351,7 +351,7 @@ if(PICKY_COMPILER)
       endif()
     endif()
 
-    #
+    # Assemble list of flags
 
     set(_picky_skipped "")
     foreach(_ccopt IN LISTS _picky_enable)
@@ -431,7 +431,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   endforeach()
 endif()
 
-if(CMAKE_C_STANDARD STREQUAL 90 AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+if(CMAKE_C_STANDARD STREQUAL 90)
   if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.0) OR
      (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2))
     list(APPEND _picky "-Wno-c99-extensions")  # Avoid: warning: '_Bool' is a C99 extension

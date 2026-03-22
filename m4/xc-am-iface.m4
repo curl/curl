@@ -20,7 +20,7 @@
 #
 #---------------------------------------------------------------------------
 
-# serial 1
+dnl serial 1
 
 
 dnl _XC_AUTOMAKE_BODY
@@ -40,19 +40,18 @@ dnl ones which lack this macro.
 
 m4_define([_XC_AUTOMAKE_BODY],
 [dnl
-## --------------------------------------- ##
-##  Start of automake initialization code  ##
-## --------------------------------------- ##
+dnl ---------------------------------------
+dnl  Start of automake initialization code
+dnl ---------------------------------------
 m4_ifdef([_AM_PROG_CC_C_O],
 [
 AM_INIT_AUTOMAKE([subdir-objects])
 ],[
 AM_INIT_AUTOMAKE
 ])dnl
-## ------------------------------------- ##
-##  End of automake initialization code  ##
-## ------------------------------------- ##
-dnl
+dnl -------------------------------------
+dnl  End of automake initialization code
+dnl -------------------------------------
 m4_define([$0], [])[]dnl
 ])
 

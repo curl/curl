@@ -34,7 +34,7 @@ dnl actually be a single double-quoted string concatenating all them.
 AC_DEFUN([CURL_CHECK_DEF], [
   AC_REQUIRE([CURL_CPP_P])dnl
   OLDCPPFLAGS=$CPPFLAGS
-  # CPPPFLAG comes from CURL_CPP_P
+  dnl CPPPFLAG comes from CURL_CPP_P
   CPPFLAGS="$CPPFLAGS $CPPPFLAG"
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
   AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
@@ -233,7 +233,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
   if test "$curl_cv_header_lber_h" = "yes"; then
     AC_DEFINE_UNQUOTED(HAVE_LBER_H, 1,
       [Define to 1 if you have the lber.h header file.])
-    #
+
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         #undef inline
@@ -264,7 +264,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
     ],[
       curl_cv_need_header_lber_h="yes"
     ])
-    #
+
     case "$curl_cv_need_header_lber_h" in
       yes)
         AC_DEFINE_UNQUOTED(NEED_LBER_H, 1,
@@ -381,11 +381,11 @@ dnl before the WINLDAP default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINBER])dnl
-  #
+
   AC_MSG_CHECKING([for WINLDAP libraries])
-  #
+
   u_libs=""
-  #
+
   ifelse($1,,,[
     for x_lib in $1; do
       case "$x_lib" in
@@ -403,10 +403,10 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
       fi
     done
   ])
-  #
+
   curl_cv_save_LIBS="$LIBS"
   curl_cv_ldap_LIBS="unknown"
-  #
+
   for x_nlibs in '' "$u_libs" \
     '-lwldap32' ; do
     if test "$curl_cv_ldap_LIBS" = "unknown"; then
@@ -441,9 +441,9 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
       ])
     fi
   done
-  #
+
   LIBS="$curl_cv_save_LIBS"
-  #
+
   case X-"$curl_cv_ldap_LIBS" in
     X-unknown)
       AC_MSG_RESULT([cannot find WINLDAP libraries])
@@ -460,7 +460,6 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
       AC_MSG_RESULT([$curl_cv_ldap_LIBS])
       ;;
   esac
-  #
 ])
 
 
@@ -474,11 +473,11 @@ dnl before the default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
   AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
-  #
+
   AC_MSG_CHECKING([for LDAP libraries])
-  #
+
   u_libs=""
-  #
+
   ifelse($1,,,[
     for x_lib in $1; do
       case "$x_lib" in
@@ -496,10 +495,10 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       fi
     done
   ])
-  #
+
   curl_cv_save_LIBS="$LIBS"
   curl_cv_ldap_LIBS="unknown"
-  #
+
   for x_nlibs in '' "$u_libs" \
     '-lldap' \
     '-lldap -llber' \
@@ -552,9 +551,9 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       ])
     fi
   done
-  #
+
   LIBS="$curl_cv_save_LIBS"
-  #
+
   case X-"$curl_cv_ldap_LIBS" in
     X-unknown)
       AC_MSG_RESULT([cannot find LDAP libraries])
@@ -568,14 +567,13 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       else
         LIBS="$curl_cv_ldap_LIBS $curl_cv_save_LIBS"
       fi
-      # FIXME: Enable when ldap was detected via pkg-config
+      dnl FIXME: Enable when ldap was detected via pkg-config
       if false; then
         LIBCURL_PC_REQUIRES_PRIVATE="ldap $LIBCURL_PC_REQUIRES_PRIVATE"
       fi
       AC_MSG_RESULT([$curl_cv_ldap_LIBS])
       ;;
   esac
-  #
 ])
 
 
@@ -619,7 +617,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h)
-  #
+
   AC_MSG_CHECKING([for recv])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
@@ -646,7 +644,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
     AC_MSG_RESULT([no])
     curl_cv_recv="no"
   ])
-  #
+
   if test "$curl_cv_recv" = "yes"; then
     AC_DEFINE_UNQUOTED(HAVE_RECV, 1,
       [Define to 1 if you have the recv function.])
@@ -665,7 +663,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h)
-  #
+
   AC_MSG_CHECKING([for send])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
@@ -693,7 +691,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
     AC_MSG_RESULT([no])
     curl_cv_send="no"
   ])
-  #
+
   if test "$curl_cv_send" = "yes"; then
     AC_DEFINE_UNQUOTED(HAVE_SEND, 1,
       [Define to 1 if you have the send function.])
@@ -756,7 +754,6 @@ dnl Check if monotonic clock_gettime is available.
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_CHECK_HEADERS(sys/types.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
-  #
 
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
@@ -791,7 +788,7 @@ dnl Check if monotonic clock_gettime is available.
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
   AC_CHECK_HEADERS(sys/types.h)
   AC_MSG_CHECKING([for raw monotonic clock_gettime])
-  #
+
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
       #ifdef HAVE_SYS_TYPES_H
@@ -823,14 +820,14 @@ dnl check and prepended to LIBS any needed libraries.
 
 AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC])dnl
-  #
+
   if test "$curl_func_clock_gettime" = "yes"; then
-    #
+
     AC_MSG_CHECKING([for clock_gettime in libraries])
-    #
+
     curl_cv_save_LIBS="$LIBS"
     curl_cv_gclk_LIBS="unknown"
-    #
+
     for x_xlibs in '' '-lrt' '-lposix4' ; do
       if test "$curl_cv_gclk_LIBS" = "unknown"; then
         if test -z "$x_xlibs"; then
@@ -857,9 +854,9 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         ])
       fi
     done
-    #
+
     LIBS="$curl_cv_save_LIBS"
-    #
+
     case X-"$curl_cv_gclk_LIBS" in
       X-unknown)
         AC_MSG_RESULT([cannot find clock_gettime])
@@ -885,7 +882,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         fi
         ;;
     esac
-    #
+
     dnl only do runtime verification when not cross-compiling
     if test "$cross_compiling" != "yes" &&
       test "$curl_func_clock_gettime" = "yes"; then
@@ -916,16 +913,14 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         LIBS="$curl_cv_save_LIBS"
       ])
     fi
-    #
+
     case "$curl_func_clock_gettime" in
       yes)
         AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC, 1,
           [Define to 1 if you have the clock_gettime function and monotonic timer.])
         ;;
     esac
-    #
   fi
-  #
 ])
 
 
@@ -960,7 +955,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CONNECT], [
     fi
   done
   LIBS="$tst_connect_save_LIBS"
-  #
+
   case X-"$tst_connect_need_LIBS" in
     X-unknown)
       AC_MSG_RESULT([cannot find connect])
@@ -985,7 +980,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/select.h)
-  #
+
   AC_MSG_CHECKING([for select])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
@@ -1021,7 +1016,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
     AC_MSG_RESULT([no])
     curl_cv_select="no"
   ])
-  #
+
   if test "$curl_cv_select" = "yes"; then
     AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
       [Define to 1 if you have the select function.])
@@ -1132,7 +1127,7 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     capath="$want_capath"
     ca="no"
   elif test "$ca_native" != "no"; then
-    # native ca configured, do not look further
+    dnl native ca configured, do not look further
     ca="no"
     capath="no"
   else
@@ -1530,16 +1525,16 @@ TEST EINVAL TEST
 
     if test "$cpp_p" = "no"; then
       AC_MSG_WARN([failed to figure out cpp -P alternative])
-      # without -P
+      dnl without -P
       CPPPFLAG=""
     else
-      # with -P
+      dnl with -P
       CPPPFLAG="-P"
     fi
     dnl restore CPPFLAGS
     CPPFLAGS=$OLDCPPFLAGS
   else
-    # without -P
+    dnl without -P
     CPPPFLAG=""
   fi
 ])
