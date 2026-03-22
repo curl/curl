@@ -737,10 +737,7 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
     const char *p = dinput;
     size_t blen = dlen;
 
-    if(!clen)
-      /* . [end] */
-      goto end;
-    else if(ISSLASH(*p)) {
+    if(ISSLASH(*p)) {
       /* one dot followed by a slash */
       input = p + 1;
       clen = dlen - 1;
