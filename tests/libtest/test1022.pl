@@ -34,7 +34,7 @@ if($#ARGV != 2) {
 my $what=$ARGV[2];
 
 # Read the output of curl --version
-open(CURL, "$ARGV[1]") || die "Cannot open curl --version list in $ARGV[1]\n";
+open(CURL, $ARGV[1]) || die "Cannot open curl --version list in $ARGV[1]\n";
 $_ = <CURL>;
 chomp;
 /libcurl\/([\.\d]+((-DEV)|(-rc\d)|(-\d+))?)/;
