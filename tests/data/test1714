@@ -22,6 +22,7 @@ http
 </server>
 <features>
 telnet
+!win32
 </features>
 <name>
 TELNET download with --max-filesize
