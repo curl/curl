@@ -295,10 +295,11 @@ static CURLcode ssl_ca_setopts(struct OperationConfig *config, CURL *curl)
     MY_SETOPT_STR(curl, CURLOPT_PROXY_CAPATH,
                   (config->proxy_capath ? config->proxy_capath :
                    config->capath));
-    if(result && config->proxy_capath) {
+    if((result == CURLE_NOT_BUILT_IN) || (result == CURLE_UNKNOWN_OPTION)) {
       warnf("ignoring %s, not supported by libcurl with %s",
-            config->proxy_capath ? "--proxy-capath" : "--capath",
+            "setting the CA path for the proxy",
             ssl_backend());
+      result = CURLE_OK;
     }
   }
   if(result)
