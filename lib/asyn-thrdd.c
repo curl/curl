@@ -223,10 +223,11 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
       Curl_addrinfo_set_port(addr_ctx->res, addr_ctx->port);
     }
 
+#ifndef CURL_DISABLE_SOCKETPAIR
     Curl_mutex_acquire(&addr_ctx->mutx);
     do_abort = addr_ctx->do_abort;
     Curl_mutex_release(&addr_ctx->mutx);
-#ifndef CURL_DISABLE_SOCKETPAIR
+
     if(!do_abort) {
       /* Thread is done, notify transfer */
       int err = Curl_wakeup_signal(addr_ctx->sock_pair);
