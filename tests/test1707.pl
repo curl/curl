@@ -52,7 +52,7 @@ push @curlout, <O>;
 close(O);
 
 # figure out the short+long option combo using -h all*/
-open(C, "$curl -h all|");
+open(C, '-|', $curl, '-h', 'all');
 if($shortopt) {
     while(<C>) {
         if(/^ +$opt, ([^ ]*)/) {
