@@ -830,8 +830,8 @@ Since curl 7.53.0 this issue should be fixed as long as curl was built with
 any modern compiler that allows for a 64-bit curl_off_t type. For older
 compilers or prior curl versions it may set a time that appears one hour off.
 This happens due to a flaw in how Windows stores and uses file modification
-times and it is not easily worked around. For more details [read
-this](https://web.archive.org/web/20260105021457/www.codeproject.com/articles/Beating-the-Daylight-Savings-Time-Bug-and-Getting#comments-section).
+times and it is not easily worked around. For more details
+[read this](https://web.archive.org/web/20050715084352/codeproject.com/datetime/dstbugs.asp).
 
 ## Redirects work in browser but not with curl
 
