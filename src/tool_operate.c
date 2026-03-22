@@ -235,6 +235,10 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   else
     transfersl = p;
 
+  curlx_free(per->uploadfile);
+  curlx_free(per->outfile);
+  curlx_free(per->url);
+  curl_easy_cleanup(per->curl);
   curlx_free(per);
 
   return n;
@@ -777,12 +781,8 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   if(per->etag_save.alloc_filename)
     tool_safefree(per->etag_save.filename);
 
-  curl_easy_cleanup(per->curl);
   if(outs->alloc_filename)
     curlx_free(outs->filename);
-  curlx_free(per->url);
-  curlx_free(per->outfile);
-  curlx_free(per->uploadfile);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
   return result;
