@@ -3,7 +3,8 @@
 <info>
 <keywords>
 HTTP
-HTTP GET
+upload
+--retry
 </keywords>
 </info>
 
