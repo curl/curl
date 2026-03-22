@@ -36,9 +36,9 @@
 use strict;
 use warnings;
 
-my $unittests="";
+my @unittests;
 if(@ARGV && $ARGV[0] eq "--unit") {
-    $unittests = "tests/unit ";
+    push @unittests, 'tests/unit';
     shift @ARGV;
 }
 
@@ -167,7 +167,7 @@ my %api = (
 
 sub doublecheck {
     my ($f, $used) = @_;
-    open(F, "git grep -Fwle '$f' -- lib ${unittests}projects|");
+    open(F, '-|', 'git', 'grep', '-Fwle', $f, '--', 'lib', @unittests, 'projects');
     my @also;
     while(<F>) {
         my $e = $_;
