@@ -30,7 +30,7 @@ if($#ARGV != 0) {
     print "Usage: $0 curl-executable\n";
     exit 3;
 }
-if(!open(CURL, "$ARGV[0] -s --engine list|")) {
+if(!open(CURL, '-|', $ARGV[0], '-s', '--engine', 'list')) {
     print "Cannot get SSL engine list\n";
     exit 2;
 }
