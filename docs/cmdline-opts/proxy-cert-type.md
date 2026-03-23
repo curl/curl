@@ -19,8 +19,7 @@ Example:
 Set type of the provided client certificate when using HTTPS proxy. PEM, DER,
 ENG, PROV and P12 are recognized types.
 
-The default type depends on the TLS backend and is usually PEM. For Schannel
-it is P12. If --proxy-cert is a pkcs11: URI then ENG or PROV is the default
-type (depending on OpenSSL version).
+The default type depends on the TLS backend: PROV when using non-fork OpenSSL
+with provider support, P12 for Schannel, and PEM otherwise.
 
 Equivalent to --cert-type but used in HTTPS proxy context.

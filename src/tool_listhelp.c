@@ -364,7 +364,7 @@ const struct helptxt helptext[] = {
     "Private key filename",
     CURLHELP_TLS | CURLHELP_SFTP | CURLHELP_SCP | CURLHELP_SSH },
   { "    --key-type <type>",
-    "Private key file type (DER/PEM/ENG)",
+    "Private key file type (DER/PEM/ENG/PROV)",
     CURLHELP_TLS },
   { "    --knownhosts <file>",
     "Specify knownhosts path",

@@ -52,7 +52,8 @@ previous ones. Set it to NULL to restore to internal default.
 
 # DEFAULT
 
-"PEM"
+"PROV" when using non-fork OpenSSL with provider support,
+"PEM" otherwise.
 
 # %PROTOCOLS%
 
