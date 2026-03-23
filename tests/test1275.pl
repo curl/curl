@@ -28,7 +28,7 @@ use warnings;
 
 my $root=$ARGV[0] || "..";
 
-my @m = `git ls-files -- $root`;
+my @m; open(O, '-|', 'git', 'ls-files', '--', $root) || die; push @m, <O>; close(O);
 
 my $errors = 0;
 
