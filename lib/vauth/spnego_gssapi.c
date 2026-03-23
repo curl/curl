@@ -171,7 +171,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     gss_OID_set filtered_mechs = GSS_C_NO_OID_SET;
 
     /* Acquire default credentials for SPNEGO */
-    major_status = gss_acquire_cred(&minor_status, GSS_C_NO_NAME,
+    major_status = Curl_gss_acquire_cred(&minor_status, GSS_C_NO_NAME,
                                     GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
                                     GSS_C_INITIATE, &nego->cred, NULL, NULL);
     if(GSS_ERROR(major_status)) {
@@ -182,7 +182,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     }
 
     /* Get all available mechanisms */
-    major_status = gss_indicate_mechs(&minor_status, &available_mechs);
+    major_status = Curl_gss_indicate_mechs(&minor_status, &available_mechs);
     if(!GSS_ERROR(major_status)) {
       /* Build a set excluding NTLMSSP */
       major_status = gss_create_empty_oid_set(&minor_status, &filtered_mechs);
@@ -196,7 +196,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
           }
         }
         /* Restrict SPNEGO to only use non-NTLM mechanisms */
-        gss_set_neg_mechs(&minor_status, nego->cred, filtered_mechs);
+        Curl_gss_set_neg_mechs(&minor_status, nego->cred, filtered_mechs);
         gss_release_oid_set(&minor_status, &filtered_mechs);
       }
       gss_release_oid_set(&minor_status, &available_mechs);
@@ -247,9 +247,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     OM_uint32 inquire_major, inquire_minor;
     gss_OID mech_type = GSS_C_NO_OID;
 
-    inquire_major = gss_inquire_context(&inquire_minor, nego->context,
-                                        NULL, NULL, NULL, &mech_type,
-                                        NULL, NULL, NULL);
+    inquire_major = Curl_gss_inquire_context(&inquire_minor,
+                                             nego->context,
+                                             &mech_type);
     if(!GSS_ERROR(inquire_major) && mech_type &&
        mech_type->length == ntlmssp_oid.length &&
        !memcmp(mech_type->elements, ntlmssp_oid.elements,
@@ -352,7 +352,7 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 
   /* Free our credentials */
   if(nego->cred != GSS_C_NO_CREDENTIAL) {
-    gss_release_cred(&minor_status, &nego->cred);
+    Curl_gss_release_cred(&minor_status, &nego->cred);
     nego->cred = GSS_C_NO_CREDENTIAL;
   }
 

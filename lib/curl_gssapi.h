@@ -48,6 +48,31 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
                                       gss_ctx_id_t *context,
                                       gss_buffer_t output_token);
 
+OM_uint32 Curl_gss_inquire_context(OM_uint32 *minor_status,
+                                    gss_ctx_id_t context,
+                                    gss_OID *mech_type);
+
+OM_uint32 Curl_gss_acquire_cred(OM_uint32 *minor_status,
+                                gss_name_t desired_name,
+                                OM_uint32 time_req,
+                                gss_OID_set desired_mechs,
+                                gss_cred_usage_t cred_usage,
+                                gss_cred_id_t *output_cred_handle,
+                                gss_OID_set *actual_mechs,
+                                OM_uint32 *time_rec);
+
+OM_uint32 Curl_gss_indicate_mechs(OM_uint32 *minor_status,
+                                  gss_OID_set *mech_set);
+
+#ifdef HAVE_GSS_SET_NEG_MECHS
+OM_uint32 Curl_gss_set_neg_mechs(OM_uint32 *minor_status,
+                                 gss_cred_id_t cred_handle,
+                                 const gss_OID_set mech_set);
+#endif
+
+OM_uint32 Curl_gss_release_cred(OM_uint32 *minor_status,
+                                gss_cred_id_t *cred_handle);
+
 #ifdef CURLVERBOSE
 /* Helper to log a GSS-API error status */
 void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
