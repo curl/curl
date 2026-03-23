@@ -28,12 +28,12 @@
 #include "curl_sha512_256.h"
 
 /* The recommended order of the TLS backends:
- * 1. OpenSSL
- * 2. GnuTLS
- * 3. wolfSSL
- * 4. Schannel SSPI
- * 5. mbedTLS
- * 6. Rustls
+ * 1. USE_OPENSSL
+ * 2. USE_WOLFSSL
+ * 3. USE_GNUTLS
+ * 4. USE_MBEDTLS
+ * 5. USE_RUSTLS
+ * 6. USE_WIN32_CRYPTO
  * Skip the backend if it does not support the required algorithm */
 
 #ifdef USE_OPENSSL
