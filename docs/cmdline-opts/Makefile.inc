@@ -270,6 +270,7 @@ DPAGES = \
   socks5.md \
   speed-limit.md \
   speed-time.md \
+  spnego-fail-on-error.md \
   ssl-allow-beast.md \
   ssl-auto-client-cert.md \
   ssl-no-revoke.md \

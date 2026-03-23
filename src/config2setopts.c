@@ -947,6 +947,8 @@ CURLcode config2setopts(struct OperationConfig *config,
     my_setopt_long(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1);
   if(!config->spnego_ntlm_allowed)
     my_setopt_long(curl, CURLOPT_SPNEGO_NTLM_ALLOWED, 0);
+  if(config->spnego_fail_on_error)
+    my_setopt_long(curl, CURLOPT_SPNEGO_FAIL_ON_ERROR, 1);
   if(config->socks5_auth)
     my_setopt_bitmask(curl, CURLOPT_SOCKS5_AUTH, config->socks5_auth);
   MY_SETOPT_STR(curl, CURLOPT_SERVICE_NAME, config->service_name);
