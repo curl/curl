@@ -86,7 +86,7 @@ static CURLcode test_unit3301(const char *arg)
   UNITTEST_BEGIN_SIMPLE
   struct curl_thrdq *tqueue;
   struct unit3301_ctx ctx;
-  int i, count;
+  int i, count, done_count;
   CURLcode r;
 
   /* create and teardown queue */
@@ -99,8 +99,9 @@ static CURLcode test_unit3301(const char *arg)
   Curl_thrdq_destroy(tqueue, TRUE);
   tqueue = NULL;
   Curl_mutex_acquire(&ctx.mutex);
-  fail_unless(!ctx.ndone, "queue-a unexpected done count");
+  done_count = ctx.ndone;
   Curl_mutex_release(&ctx.mutex);
+  fail_unless(!done_count, "queue-a unexpected done count");
 
   /* create queue, have it process `count` items */
   count = 10;
@@ -133,8 +134,9 @@ static CURLcode test_unit3301(const char *arg)
   Curl_thrdq_destroy(tqueue, TRUE);
   tqueue = NULL;
   Curl_mutex_acquire(&ctx.mutex);
-  fail_unless(ctx.ndone == count, "queue-b unexpected done count");
+  done_count = ctx.ndone;
   Curl_mutex_release(&ctx.mutex);
+  fail_unless(ctx.ndone == done_count, "queue-b unexpected done count");
 
   Curl_mutex_destroy(&ctx.mutex);
   UNITTEST_END_SIMPLE
