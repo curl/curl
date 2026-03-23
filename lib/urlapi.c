@@ -1064,7 +1064,8 @@ static CURLUcode handle_query(CURLU *u, const char *query,
 }
 
 static CURLUcode handle_path(CURLU *u, const char *path,
-                             size_t pathlen, unsigned int flags)
+                             size_t pathlen, unsigned int flags,
+                             bool is_file)
 {
   CURLUcode result;
   if(pathlen && (flags & CURLU_URLENCODE)) {
@@ -1077,11 +1078,8 @@ static CURLUcode handle_path(CURLU *u, const char *path,
     path = u->path = curlx_dyn_ptr(&enc);
   }
 
-  if(pathlen <= 1) {
-    /* there is no path left or the slash, unset */
-    path = NULL;
-  }
-  else {
+  if(pathlen >= (size_t)(1 + !is_file)) {
+    /* paths for file:// scheme can be one byte, others need to be two */
     if(!u->path) {
       u->path = curlx_memdup0(path, pathlen);
       if(!u->path)
@@ -1116,6 +1114,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   size_t urllen;
   CURLUcode result = CURLUE_OK;
   struct dynbuf host;
+  bool is_file = FALSE;
 
   DEBUGASSERT(url);
 
@@ -1130,8 +1129,10 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
                                             CURLU_DEFAULT_SCHEME));
 
   /* handle the file: scheme */
-  if(schemelen && !strcmp(schemebuf, "file"))
+  if(schemelen && !strcmp(schemebuf, "file")) {
+    is_file = TRUE;
     result = parse_file(url, urllen, u, &host, &path, &pathlen);
+  }
   else {
     const char *hostp = NULL;
     size_t hostlen;
@@ -1180,7 +1181,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   }
   if(!result)
     /* the fragment and query parts are trimmed off from the path */
-    result = handle_path(u, path, pathlen, flags);
+    result = handle_path(u, path, pathlen, flags, is_file);
   if(!result) {
     u->host = curlx_dyn_ptr(&host);
     return CURLUE_OK;
