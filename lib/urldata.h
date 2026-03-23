@@ -693,8 +693,10 @@ struct UrlState {
   curl_off_t recent_conn_id; /* The most recent connection used, might no
                               * longer exist */
   struct dynbuf headerb; /* buffer to store headers in */
+#ifndef CURL_DISABLE_HSTS
   struct curl_slist *hstslist; /* list of HSTS files set by
                                   curl_easy_setopt(HSTS) calls */
+#endif
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
 
