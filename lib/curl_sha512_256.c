@@ -69,18 +69,20 @@
 #  if defined(LIBWOLFSSL_VERSION_HEX) && LIBWOLFSSL_VERSION_HEX >= 0x05000000
 #    include <wolfssl/options.h>
 #    include <wolfssl/openssl/evp.h>
-#    define USE_OPENSSL_SHA512_256          1
-#    define HAS_SHA512_256_IMPLEMENTATION   1
-#    ifdef OPENSSL_COEXIST
-#      define EVP_DigestFinal_ex    wolfSSL_EVP_DigestFinal_ex
-#      define EVP_DigestInit_ex     wolfSSL_EVP_DigestInit_ex
-#      define EVP_DigestUpdate      wolfSSL_EVP_DigestUpdate
-#      define EVP_MD_CTX            wolfSSL_EVP_MD_CTX
-#      define EVP_MD_CTX_block_size wolfSSL_EVP_MD_CTX_block_size
-#      define EVP_MD_CTX_create     wolfSSL_EVP_MD_CTX_new
-#      define EVP_MD_CTX_destroy    wolfSSL_EVP_MD_CTX_free
-#      define EVP_MD_CTX_size       wolfSSL_EVP_MD_CTX_size
-#      define EVP_sha512_256        wolfSSL_EVP_sha512_256
+#    ifndef WOLFSSL_NOSHA512_256
+#      define USE_OPENSSL_SHA512_256          1
+#      define HAS_SHA512_256_IMPLEMENTATION   1
+#      ifdef OPENSSL_COEXIST
+#        define EVP_DigestFinal_ex    wolfSSL_EVP_DigestFinal_ex
+#        define EVP_DigestInit_ex     wolfSSL_EVP_DigestInit_ex
+#        define EVP_DigestUpdate      wolfSSL_EVP_DigestUpdate
+#        define EVP_MD_CTX            wolfSSL_EVP_MD_CTX
+#        define EVP_MD_CTX_block_size wolfSSL_EVP_MD_CTX_block_size
+#        define EVP_MD_CTX_create     wolfSSL_EVP_MD_CTX_new
+#        define EVP_MD_CTX_destroy    wolfSSL_EVP_MD_CTX_free
+#        define EVP_MD_CTX_size       wolfSSL_EVP_MD_CTX_size
+#        define EVP_sha512_256        wolfSSL_EVP_sha512_256
+#      endif
 #    endif
 #  endif
 #endif
