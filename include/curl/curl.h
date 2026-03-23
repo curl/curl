@@ -2256,6 +2256,9 @@ typedef enum {
   /* allow NTLM as a sub-mechanism during SPNEGO (Negotiate) auth */
   CURLOPT(CURLOPT_SPNEGO_NTLM_ALLOWED, CURLOPTTYPE_LONG, 329),
 
+  /* fail on SPNEGO (Negotiate) authentication errors instead of continuing */
+  CURLOPT(CURLOPT_SPNEGO_FAIL_ON_ERROR, CURLOPTTYPE_LONG, 330),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

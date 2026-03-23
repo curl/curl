@@ -199,8 +199,11 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
     if(!neg_ctx->context) {
       result = Curl_input_negotiate(data, conn, proxy, "Negotiate");
       if(result == CURLE_AUTH_ERROR) {
-        /* negotiate auth failed, let's continue unauthenticated to stay
-         * compatible with the behavior before curl-7_64_0-158-g6c6035532 */
+        /* Negotiate auth failed. We will continue unauthenticated unless
+         * spnego_fail_on_error is set, in which case we fail with an error.
+         * Continuing was the behavior before curl-7_64_0-158-g6c6035532 */
+        if(data->set.spnego_fail_on_error)
+          return result;
         authp->done = TRUE;
         return CURLE_OK;
       }

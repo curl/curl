@@ -1564,6 +1564,7 @@ struct UserDefined {
 #endif
 #ifdef USE_SPNEGO
   BIT(spnego_ntlm_allowed); /* Allow NTLM inside SPNEGO negotiation */
+  BIT(spnego_fail_on_error); /* Fail on SPNEGO auth errors */
 #endif
   BIT(sasl_ir);         /* Enable/disable SASL initial response */
   BIT(tcp_keepalive);  /* use TCP keepalives */

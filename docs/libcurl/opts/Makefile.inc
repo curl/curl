@@ -356,6 +356,7 @@ man_MANS =                                      \
   CURLOPT_SOCKS5_GSSAPI_NEC.3                   \
   CURLOPT_SOCKS5_GSSAPI_SERVICE.3               \
   CURLOPT_SPNEGO_NTLM_ALLOWED.3                \
+  CURLOPT_SPNEGO_FAIL_ON_ERROR.3                \
   CURLOPT_SSH_AUTH_TYPES.3                      \
   CURLOPT_SSH_COMPRESSION.3                     \
   CURLOPT_SSH_HOSTKEYDATA.3                     \

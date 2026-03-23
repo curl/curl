@@ -636,6 +636,13 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
      */
     s->spnego_ntlm_allowed = enabled;
     break;
+  case CURLOPT_SPNEGO_FAIL_ON_ERROR:
+    /*
+     * Fail on SPNEGO authentication errors instead of continuing
+     * unauthenticated.
+     */
+    s->spnego_fail_on_error = enabled;
+    break;
 #endif
 #ifdef CURL_LIST_ONLY_PROTOCOL
   case CURLOPT_DIRLISTONLY:
