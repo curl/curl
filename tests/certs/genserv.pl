@@ -54,16 +54,9 @@ sub redir {
     my $hideerr = shift if($_[0] =~ /^2>/);
     open(my $outfd, $outfn) || die if($outfn);
     my $pid = open3(my $in, my $out, my $err = gensym, @_);
-    if(!$hideerr) {
-        while(<$err>) { print STDERR $_; };
-    }
-    if($outfn) {
-        while(<$out>) { print $outfd $_; };
-        close($outfd);
-    }
-    else {
-        while(<$out>) { print $_; };
-    }
+    if(!$hideerr) { while(<$err>) { print STDERR $_; }; }
+    if($outfn) { while(<$out>) { print $outfd $_; }; close($outfd); }
+    else { while(<$out>) { print $_; }; }
     waitpid($pid, 0);
 }
 
