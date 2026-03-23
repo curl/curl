@@ -203,7 +203,8 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 #ifdef USE_OPENSSL
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
 #else
-  ret = wolfSSL_EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
+  ret = wolfSSL_EVP_DigestFinal_ex(*ctx, digest, NULL) ?
+    CURLE_OK : CURLE_SSL_CIPHER;
 #endif
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
 
