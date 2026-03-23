@@ -47,6 +47,10 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
                                       gss_ctx_id_t *context_handle,
                                       gss_buffer_t output_token);
 
+OM_uint32 Curl_gss_inquire_context(OM_uint32 *minor_status,
+                                   gss_ctx_id_t context,
+                                   gss_OID *mech_type);
+
 /* Helper to log a GSS-API error status */
 void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor);

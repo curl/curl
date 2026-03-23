@@ -200,9 +200,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     OM_uint32 inquire_major, inquire_minor;
     gss_OID mech_type = GSS_C_NO_OID;
 
-    inquire_major = gss_inquire_context(&inquire_minor, nego->context,
-                                        NULL, NULL, NULL, &mech_type,
-                                        NULL, NULL, NULL);
+    inquire_major = Curl_gss_inquire_context(&inquire_minor,
+                                             nego->context,
+                                             &mech_type);
     if(!GSS_ERROR(inquire_major) && mech_type &&
        mech_type->length == ntlmssp_oid.length &&
        !memcmp(mech_type->elements, ntlmssp_oid.elements,

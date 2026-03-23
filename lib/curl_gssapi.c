@@ -81,7 +81,6 @@ enum min_err_code {
 
 /* libcurl is also passing this struct to these functions, which are not yet
  * stubbed:
- *   gss_inquire_context()
  *   gss_unwrap()
  *   gss_wrap()
  */
@@ -308,6 +307,48 @@ stub_gss_delete_sec_context(OM_uint32 *min,
 
   return GSS_S_COMPLETE;
 }
+
+/* NTLMSSP OID: 1.3.6.1.4.1.311.2.2.10 */
+static gss_OID_desc stub_ntlmssp_oid = {
+  10, CURL_UNCONST("\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a")
+};
+
+static OM_uint32
+stub_gss_inquire_context(OM_uint32 *min,
+                         struct stub_gss_ctx_id_t_desc *context,
+                         gss_name_t *src_name,
+                         gss_name_t *targ_name,
+                         OM_uint32 *lifetime_rec,
+                         gss_OID *mech_type,
+                         OM_uint32 *ctx_flags,
+                         int *locally_initiated,
+                         int *open_context)
+{
+  (void)src_name;
+  (void)targ_name;
+  (void)lifetime_rec;
+  (void)ctx_flags;
+  (void)locally_initiated;
+  (void)open_context;
+
+  if(!min)
+    return GSS_S_FAILURE;
+
+  if(!context) {
+    *min = STUB_GSS_INVALID_CTX;
+    return GSS_S_FAILURE;
+  }
+
+  *min = 0;
+  if(mech_type) {
+    if(context->have_ntlm && !context->have_krb5)
+      *mech_type = &stub_ntlmssp_oid;
+    else
+      *mech_type = (gss_OID)&Curl_krb5_mech_oid;
+  }
+
+  return GSS_S_COMPLETE;
+}
 #endif /* CURL_GSS_STUB */
 
 OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
@@ -382,6 +423,23 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
 #endif /* CURL_GSS_STUB */
 
   return gss_delete_sec_context(min, context, output_token);
+}
+
+OM_uint32 Curl_gss_inquire_context(OM_uint32 *minor_status,
+                                   gss_ctx_id_t context,
+                                   gss_OID *mech_type)
+{
+#ifdef CURL_GSS_STUB
+  if(getenv("CURL_STUB_GSS_CREDS"))
+    return stub_gss_inquire_context(minor_status,
+                             (struct stub_gss_ctx_id_t_desc *)context,
+                             NULL, NULL, NULL, mech_type,
+                             NULL, NULL, NULL);
+#endif /* CURL_GSS_STUB */
+
+  return gss_inquire_context(minor_status, context,
+                             NULL, NULL, NULL, mech_type,
+                             NULL, NULL, NULL);
 }
 
 #define GSS_LOG_BUFFER_LEN 1024
