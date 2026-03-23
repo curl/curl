@@ -35,8 +35,7 @@ struct unit3301_item {
 };
 
 struct unit3301_ctx {
-  curl_mutex_t mutex;
-  int ndone;
+  volatile int event;
 };
 
 static struct unit3301_item *unit3301_item_create(int id)
@@ -65,9 +64,7 @@ static void unit3301_event(const struct curl_thrdq *tqueue,
   (void)tqueue;
   switch(ev) {
   case CURL_THRDQ_EV_ITEM_DONE:
-    Curl_mutex_acquire(&ctx->mutex);
-    ctx->ndone++;
-    Curl_mutex_release(&ctx->mutex);
+    ctx->event = 1;
     break;
   default:
     break;
@@ -86,22 +83,18 @@ static CURLcode test_unit3301(const char *arg)
   UNITTEST_BEGIN_SIMPLE
   struct curl_thrdq *tqueue;
   struct unit3301_ctx ctx;
-  int i, count, done_count;
+  int i, count, nrecvd;
   CURLcode r;
 
   /* create and teardown queue */
   memset(&ctx, 0, sizeof(ctx));
-  Curl_mutex_init(&ctx.mutex);
   r = Curl_thrdq_create(&tqueue, "unit3301-a", 0, 0, 2, 1,
                         unit3301_item_free, unit3301_process, unit3301_event,
                         &ctx);
   fail_unless(!r, "queue-a create");
   Curl_thrdq_destroy(tqueue, TRUE);
   tqueue = NULL;
-  Curl_mutex_acquire(&ctx.mutex);
-  done_count = ctx.ndone;
-  Curl_mutex_release(&ctx.mutex);
-  fail_unless(!done_count, "queue-a unexpected done count");
+  fail_unless(!ctx.event, "queue-a unexpected done count");
 
   /* create queue, have it process `count` items */
   count = 10;
@@ -120,6 +113,7 @@ static CURLcode test_unit3301(const char *arg)
   r = Curl_thrdq_await_done(tqueue, 0);
   fail_unless(!r, "queue-b await done");
 
+  nrecvd = 0;
   for(i = 0; i < count; ++i) {
     void *item;
     r = Curl_thrdq_recv(tqueue, &item);
@@ -127,18 +121,15 @@ static CURLcode test_unit3301(const char *arg)
     if(item) {
       struct unit3301_item *uitem = item;
       curl_mfprintf(stderr, "received item %d\n", uitem->id);
+      ++nrecvd;
       fail_unless(uitem->processed, "queue-b recv unprocessed item");
       unit3301_item_free(item);
     }
   }
   Curl_thrdq_destroy(tqueue, TRUE);
   tqueue = NULL;
-  Curl_mutex_acquire(&ctx.mutex);
-  done_count = ctx.ndone;
-  Curl_mutex_release(&ctx.mutex);
-  fail_unless(ctx.ndone == done_count, "queue-b unexpected done count");
+  fail_unless(nrecvd == count, "queue-b unexpected done count");
 
-  Curl_mutex_destroy(&ctx.mutex);
   UNITTEST_END_SIMPLE
 }
 
