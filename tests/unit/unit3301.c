@@ -77,10 +77,8 @@ static void unit3301_event(const struct curl_thrdq *tqueue,
 static void unit3301_process(void *item)
 {
   struct unit3301_item *uitem = item;
-  curl_mfprintf(stderr, "start item %d\n", uitem->id);
   curlx_wait_ms(1);
   uitem->processed = TRUE;
-  curl_mfprintf(stderr, "end item %d\n", uitem->id);
 }
 
 static CURLcode test_unit3301(const char *arg)
@@ -127,6 +125,7 @@ static CURLcode test_unit3301(const char *arg)
     fail_unless(!r, "queue-b recv");
     if(item) {
       struct unit3301_item *uitem = item;
+      curl_mfprintf(stderr, "received item %d\n", uitem->id);
       fail_unless(uitem->processed, "queue-b recv unprocessed item");
       unit3301_item_free(item);
     }
