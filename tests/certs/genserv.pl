@@ -49,7 +49,7 @@ my $KEYSIZE = 'prime256v1';
 my $DURATION;
 my $PREFIX;
 
-sub redirs {
+sub redir {
     my $outfn = shift if($_[0] =~ /^>/);
     my $hideerr = shift if($_[0] =~ /^2>/);
     open(my $outfd, $outfn) || die if($outfn);
@@ -100,12 +100,12 @@ if(!$CAPREFIX) {
         '-out', "$PREFIX-ca.key", '-pass', 'pass:secret')) != 0) {
         opensslfail();
     }
-    redirs('2>', $OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX-ca.prm", '-new', '-key', "$PREFIX-ca.key", '-out', "$PREFIX-ca.csr", '-passin', 'pass:secret'));
+    redir('2>', $OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX-ca.prm", '-new', '-key', "$PREFIX-ca.key", '-out', "$PREFIX-ca.csr", '-passin', 'pass:secret'));
     system($OPENSSL, ('x509', '-sha256', '-extfile', "$SRCDIR/$PREFIX-ca.prm", '-days', $DURATION,
         '-req', '-signkey', "$PREFIX-ca.key", '-in', "$PREFIX-ca.csr", '-out', "$PREFIX-ca.raw-cacert"));
-    redirs(">$PREFIX-ca.cacert", $OPENSSL, ('x509', '-in', "$PREFIX-ca.raw-cacert", '-text', '-nameopt', 'multiline'));
+    redir(">$PREFIX-ca.cacert", $OPENSSL, ('x509', '-in', "$PREFIX-ca.raw-cacert", '-text', '-nameopt', 'multiline'));
     system($OPENSSL, ('x509', '-in', "$PREFIX-ca.cacert", '-outform', 'der', '-out', "$PREFIX-ca.der"));
-    redirs(">$PREFIX-ca.crt", $OPENSSL, ('x509', '-in', "$PREFIX-ca.cacert", '-text', '-nameopt', 'multiline'));
+    redir(">$PREFIX-ca.crt", $OPENSSL, ('x509', '-in', "$PREFIX-ca.cacert", '-text', '-nameopt', 'multiline'));
 
     print "CA root generated: $PREFIX $DURATION days $KEYSIZE\n";
 }
@@ -121,12 +121,12 @@ while(@ARGV) {
     # pseudo-secrets
     system($OPENSSL, ('genpkey', '-algorithm', 'EC', '-pkeyopt', "ec_paramgen_curve:$KEYSIZE", '-pkeyopt', 'ec_param_enc:named_curve',
         '-out', "$PREFIX.keyenc", '-pass', 'pass:secret'));
-    redirs('2>', $OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX.prm", '-new', '-key', "$PREFIX.keyenc", '-out', "$PREFIX.csr", '-passin', 'pass:secret'));
+    redir('2>', $OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX.prm", '-new', '-key', "$PREFIX.keyenc", '-out', "$PREFIX.csr", '-passin', 'pass:secret'));
     system($OPENSSL, ('pkey', '-in', "$PREFIX.keyenc", '-out', "$PREFIX.key", '-passin', 'pass:secret'));
 
     system($OPENSSL, ('pkey', '-in', "$PREFIX.key", '-pubout', '-outform', 'DER', '-out', "$PREFIX.pub.der"));
     system($OPENSSL, ('pkey', '-in', "$PREFIX.key", '-pubout', '-outform', 'PEM', '-out', "$PREFIX.pub.pem"));
-    redirs(">$PREFIX.crt", '2>', $OPENSSL, ('x509', '-sha256', '-extfile', "$SRCDIR/$PREFIX.prm", '-days', $DURATION,
+    redir(">$PREFIX.crt", '2>', $OPENSSL, ('x509', '-sha256', '-extfile', "$SRCDIR/$PREFIX.prm", '-days', $DURATION,
         '-req', '-CA', "$CAPREFIX-ca.cacert", '-CAkey', "$CAPREFIX-ca.key", '-CAcreateserial', '-in', "$PREFIX.csr"));
 
     # revoke server cert
@@ -134,10 +134,10 @@ while(@ARGV) {
         print $fh '01';
         close($fh);
     }
-    redirs('2>', $OPENSSL, ('ca', '-config', "$SRCDIR/$CAPREFIX-ca.cnf", '-revoke', "$PREFIX.crt"));
+    redir('2>', $OPENSSL, ('ca', '-config', "$SRCDIR/$CAPREFIX-ca.cnf", '-revoke', "$PREFIX.crt"));
 
     # issue CRL
-    redirs('2>', $OPENSSL, ('ca', '-config', "$SRCDIR/$CAPREFIX-ca.cnf", '-gencrl', '-out', "$PREFIX.crl"));
+    redir('2>', $OPENSSL, ('ca', '-config', "$SRCDIR/$CAPREFIX-ca.cnf", '-gencrl', '-out', "$PREFIX.crl"));
     system($OPENSSL, ('x509', '-in', "$PREFIX.crt", '-outform', 'der', '-out', "$PREFIX.der"));
 
     # concatenate all together now
