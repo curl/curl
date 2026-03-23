@@ -191,6 +191,29 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     return CURLE_AUTH_ERROR;
   }
 
+  /* Check if NTLM was selected and is disallowed */
+  if(!data->set.spnego_ntlm_allowed && nego->context != GSS_C_NO_CONTEXT) {
+    /* OID 1.3.6.1.4.1.311.2.2.10 (NTLMSSP) */
+    static const gss_OID_desc ntlmssp_oid = {
+      10, CURL_UNCONST("\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a")
+    };
+    OM_uint32 inquire_major, inquire_minor;
+    gss_OID mech_type = GSS_C_NO_OID;
+
+    inquire_major = gss_inquire_context(&inquire_minor, nego->context,
+                                        NULL, NULL, NULL, &mech_type,
+                                        NULL, NULL, NULL);
+    if(!GSS_ERROR(inquire_major) && mech_type &&
+       mech_type->length == ntlmssp_oid.length &&
+       !memcmp(mech_type->elements, ntlmssp_oid.elements,
+               ntlmssp_oid.length)) {
+      infof(data, "SPNEGO chose NTLM, but NTLM is not allowed");
+      gss_release_buffer(&unused_status, &output_token);
+      Curl_auth_cleanup_spnego(nego);
+      return CURLE_AUTH_ERROR;
+    }
+  }
+
   /* Free previous token */
   if(nego->output_token.length && nego->output_token.value)
     gss_release_buffer(&unused_status, &nego->output_token);

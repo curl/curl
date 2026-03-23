@@ -2253,6 +2253,9 @@ typedef enum {
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
 
+  /* allow NTLM as a sub-mechanism during SPNEGO (Negotiate) auth */
+  CURLOPT(CURLOPT_SPNEGO_NTLM_ALLOWED, CURLOPTTYPE_LONG, 329),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

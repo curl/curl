@@ -1562,6 +1562,9 @@ struct UserDefined {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   BIT(socks5_gssapi_nec); /* Flag to support NEC SOCKS5 server */
 #endif
+#ifdef USE_SPNEGO
+  BIT(spnego_ntlm_allowed); /* Allow NTLM inside SPNEGO negotiation */
+#endif
   BIT(sasl_ir);         /* Enable/disable SASL initial response */
   BIT(tcp_keepalive);  /* use TCP keepalives */
   BIT(tcp_fastopen);   /* use TCP Fast Open */

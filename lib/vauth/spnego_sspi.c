@@ -266,6 +266,29 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     }
   }
 
+  if(!data->set.spnego_ntlm_allowed) {
+    SecPkgContext_NegotiationInfo negoInfo;
+    SECURITY_STATUS qstatus;
+    negoInfo.PackageInfo = NULL;
+    qstatus = Curl_pSecFn->QueryContextAttributes(nego->context,
+                                                  SECPKG_ATTR_NEGOTIATION_INFO,
+                                                  &negoInfo);
+    if(qstatus == SEC_E_OK && negoInfo.PackageInfo) {
+      bool is_ntlm = FALSE;
+#ifdef UNICODE
+      is_ntlm = !lstrcmpiW(negoInfo.PackageInfo->Name, L"NTLM");
+#else
+      is_ntlm = !lstrcmpiA(negoInfo.PackageInfo->Name, "NTLM");
+#endif
+      Curl_pSecFn->FreeContextBuffer(negoInfo.PackageInfo);
+      if(is_ntlm) {
+        infof(data, "SPNEGO chose NTLM, but NTLM is not allowed");
+        Curl_auth_cleanup_spnego(nego);
+        return CURLE_AUTH_ERROR;
+      }
+    }
+  }
+
   nego->output_token_length = resp_buf.cbBuffer;
 
   return result;

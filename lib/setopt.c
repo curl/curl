@@ -629,6 +629,14 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
     s->socks5_gssapi_nec = enabled;
     break;
 #endif
+#ifdef USE_SPNEGO
+  case CURLOPT_SPNEGO_NTLM_ALLOWED:
+    /*
+     * Allow or disallow NTLM as a sub-mechanism during SPNEGO negotiation.
+     */
+    s->spnego_ntlm_allowed = enabled;
+    break;
+#endif
 #ifdef CURL_LIST_ONLY_PROTOCOL
   case CURLOPT_DIRLISTONLY:
     /*

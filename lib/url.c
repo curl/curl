@@ -446,6 +446,9 @@ void Curl_init_userdefined(struct Curl_easy *data)
   memset(&set->priority, 0, sizeof(set->priority));
 #endif
   set->quick_exit = 0L;
+#ifdef USE_SPNEGO
+  set->spnego_ntlm_allowed = TRUE;
+#endif
 #ifndef CURL_DISABLE_WEBSOCKETS
   set->ws_raw_mode = FALSE;
   set->ws_no_auto_pong = FALSE;
