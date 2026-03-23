@@ -70,6 +70,7 @@
 #  include <wolfssl/version.h>
 #  if defined(LIBWOLFSSL_VERSION_HEX) && LIBWOLFSSL_VERSION_HEX >= 0x05000000
 #    define USE_OPENSSL_SHA512_256          1
+#    define HAS_SHA512_256_IMPLEMENTATION   1
 #    ifdef OPENSSL_COEXIST
 #      define EVP_DigestFinal_ex    wolfSSL_EVP_DigestFinal_ex
 #      define EVP_DigestInit_ex     wolfSSL_EVP_DigestInit_ex
