@@ -727,7 +727,11 @@ static ParameterError data_urlencode(const char *nextarg,
         size = curlx_dyn_len(&dyn);
       }
       else {
-        n = enc;
+        /* make sure we return "our memory" */
+        n = curlx_strdup(enc);
+        curl_free(enc);
+        if(!n)
+          return PARAM_NO_MEM;
         size = strlen(n);
       }
       postdata = n;
