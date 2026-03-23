@@ -58,7 +58,6 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
  */
 #else
 /* disabled */
-#define Curl_parsenetrc(a, b, c, d, e, f) 1
 #define Curl_netrc_init(x)
 #define Curl_netrc_cleanup(x)
 #endif
