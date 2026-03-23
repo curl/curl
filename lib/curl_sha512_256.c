@@ -72,17 +72,6 @@
 #    ifndef WOLFSSL_NOSHA512_256
 #      define USE_OPENSSL_SHA512_256          1
 #      define HAS_SHA512_256_IMPLEMENTATION   1
-#      ifdef OPENSSL_COEXIST
-#        define EVP_DigestFinal_ex    wolfSSL_EVP_DigestFinal_ex
-#        define EVP_DigestInit_ex     wolfSSL_EVP_DigestInit_ex
-#        define EVP_DigestUpdate      wolfSSL_EVP_DigestUpdate
-#        define EVP_MD_CTX            wolfSSL_EVP_MD_CTX
-#        define EVP_MD_CTX_block_size wolfSSL_EVP_MD_CTX_block_size
-#        define EVP_MD_CTX_create     wolfSSL_EVP_MD_CTX_new
-#        define EVP_MD_CTX_destroy    wolfSSL_EVP_MD_CTX_free
-#        define EVP_MD_CTX_size       wolfSSL_EVP_MD_CTX_size
-#        define EVP_sha512_256        wolfSSL_EVP_sha512_256
-#      endif
 #    endif
 #  endif
 #endif
@@ -112,7 +101,11 @@
 /**
  * Context type used for SHA-512/256 calculations
  */
+#ifdef USE_WOLFSSL
+typedef WOLFSSL_EVP_MD_CTX *Curl_sha512_256_ctx;
+#else
 typedef EVP_MD_CTX *Curl_sha512_256_ctx;
+#endif
 
 /**
  * Initialise structure for SHA-512/256 calculation.
@@ -125,14 +118,22 @@ static CURLcode Curl_sha512_256_init(void *context)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
+#ifdef USE_WOLFSSL
+  *ctx = wolfSSL_EVP_MD_CTX_new();
+#else
   *ctx = EVP_MD_CTX_create();
+#endif
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
+#ifdef USE_WOLFSSL
+  if(wolfSSL_EVP_DigestInit_ex(*ctx, wolfSSL_EVP_sha512_256(), NULL)) {
+    /* Check whether the header and this file use the same numbers */
+    DEBUGASSERT(wolfSSL_EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
+#else
   if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
     /* Check whether the header and this file use the same numbers */
     DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
-#ifdef USE_OPENSSL  /* wolfSSL returns zero as of 2026-03 master */
     /* Check whether the block size is correct */
     DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
 #endif
@@ -141,7 +142,11 @@ static CURLcode Curl_sha512_256_init(void *context)
   }
 
   /* Cleanup */
+#ifdef USE_WOLFSSL
+  wolfSSL_EVP_MD_CTX_free(*ctx);
+#else
   EVP_MD_CTX_destroy(*ctx);
+#endif
   return CURLE_FAILED_INIT;
 }
 
@@ -159,7 +164,11 @@ static CURLcode Curl_sha512_256_update(void *context,
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
+#ifdef USE_WOLFSSL
+  if(!wolfSSL_EVP_DigestUpdate(*ctx, data, length))
+#else
   if(!EVP_DigestUpdate(*ctx, data, length))
+#endif
     return CURLE_SSL_CIPHER;
 
   return CURLE_OK;
@@ -189,10 +198,18 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
     memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
   explicit_memset(tmp_digest, 0, sizeof(tmp_digest));
 #else /* !NEED_NETBSD_SHA512_256_WORKAROUND */
+#ifdef USE_WOLFSSL
+  ret = wolfSSL_EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
+#else
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
+#endif
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
 
+#ifdef USE_WOLFSSL
+  wolfSSL_EVP_MD_CTX_free(*ctx);
+#else
   EVP_MD_CTX_destroy(*ctx);
+#endif
   *ctx = NULL;
 
   return ret;
@@ -824,18 +841,5 @@ const struct HMAC_params Curl_HMAC_SHA512_256[] = {
     CURL_SHA512_256_DIGEST_SIZE
   }
 };
-
-#if defined(USE_OPENSSL_SHA512_256) && defined(USE_WOLFSSL) && \
-  defined(OPENSSL_COEXIST)
-#  undef EVP_DigestFinal_ex
-#  undef EVP_DigestInit_ex
-#  undef EVP_DigestUpdate
-#  undef EVP_MD_CTX
-#  undef EVP_MD_CTX_block_size
-#  undef EVP_MD_CTX_create
-#  undef EVP_MD_CTX_destroy
-#  undef EVP_MD_CTX_size
-#  undef EVP_sha512_256
-#endif
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
