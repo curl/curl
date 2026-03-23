@@ -75,6 +75,7 @@
 #      define EVP_DigestFinal_ex    wolfSSL_EVP_DigestFinal_ex
 #      define EVP_DigestInit_ex     wolfSSL_EVP_DigestInit_ex
 #      define EVP_DigestUpdate      wolfSSL_EVP_DigestUpdate
+#      define EVP_MD_CTX            wolfSSL_EVP_MD_CTX
 #      define EVP_MD_CTX_block_size wolfSSL_EVP_MD_CTX_block_size
 #      define EVP_MD_CTX_create     wolfSSL_EVP_MD_CTX_new
 #      define EVP_MD_CTX_destroy    wolfSSL_EVP_MD_CTX_free
@@ -129,8 +130,10 @@ static CURLcode Curl_sha512_256_init(void *context)
   if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
     /* Check whether the header and this file use the same numbers */
     DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
+#ifdef USE_OPENSSL  /* wolfSSL returns zero as of 2026-03 master */
     /* Check whether the block size is correct */
     DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
+#endif
 
     return CURLE_OK; /* Success */
   }
@@ -825,6 +828,7 @@ const struct HMAC_params Curl_HMAC_SHA512_256[] = {
 #  undef EVP_DigestFinal_ex
 #  undef EVP_DigestInit_ex
 #  undef EVP_DigestUpdate
+#  undef EVP_MD_CTX
 #  undef EVP_MD_CTX_block_size
 #  undef EVP_MD_CTX_create
 #  undef EVP_MD_CTX_destroy
