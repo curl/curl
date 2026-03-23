@@ -254,6 +254,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   multi->multiplexing = TRUE;
   multi->max_concurrent_streams = 100;
   multi->last_timeout_ms = -1;
+#ifdef ENABLE_WAKEUP
+  multi->wakeup_pair[0] = CURL_SOCKET_BAD;
+  multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+#endif
 
   if(Curl_mntfy_resize(multi) ||
      Curl_uint32_bset_resize(&multi->process, xfer_table_size) ||
@@ -296,10 +300,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
     goto error;
 #endif
 #ifdef ENABLE_WAKEUP
-  if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0) {
-    multi->wakeup_pair[0] = CURL_SOCKET_BAD;
-    multi->wakeup_pair[1] = CURL_SOCKET_BAD;
-  }
+  /* When enabled, rely on this to work. We ignore this in previous
+   * versions, but that seems an unnecessary complication. */
+  if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0)
+    goto error;
 #endif
 
 #ifdef USE_IPV6
@@ -345,6 +349,9 @@ error:
   Curl_uint32_bset_destroy(&multi->pending);
   Curl_uint32_bset_destroy(&multi->msgsent);
   Curl_uint32_tbl_destroy(&multi->xfers);
+#ifdef ENABLE_WAKEUP
+  Curl_wakeup_destroy(multi->wakeup_pair);
+#endif
 
   curlx_free(multi);
   return NULL;
@@ -1135,8 +1142,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   /* The admin handle always listens on the wakeup socket when there
    * are transfers alive. */
   if(data->multi && (data == data->multi->admin) &&
-     data->multi->xfers_alive &&
-     (data->multi->wakeup_pair[0] != CURL_SOCKET_BAD)) {
+     data->multi->xfers_alive) {
     result = Curl_pollset_add_in(data, ps, data->multi->wakeup_pair[0]);
   }
 #endif
@@ -1365,7 +1371,7 @@ static CURLMcode multi_winsock_select(struct Curl_multi *multi,
                                       struct curl_waitfd extra_fds[],
                                       unsigned int extra_nfds,
                                       int timeout_ms,
-                                      bool wait_on_nop,
+                                      bool extrawait,
                                       int *pnevents)
 {
   CURLMcode mresult = CURLM_OK;
@@ -1394,7 +1400,7 @@ static CURLMcode multi_winsock_select(struct Curl_multi *multi,
     }
   }
 
-  if(cpfds->n || wait_on_nop) {
+  if(cpfds->n || extrawait) {
     int pollrc = 0;
 
     if(cpfds->n) {         /* pre-check with Winsock */
@@ -1475,13 +1481,14 @@ static CURLMcode multi_posix_poll(struct Curl_multi *multi,
                                   struct curl_waitfd extra_fds[],
                                   unsigned int extra_nfds,
                                   int timeout_ms,
-                                  bool wait_on_nop,
+                                  bool extrawait,
                                   int *pnevents)
 {
   CURLMcode mresult = CURLM_OK;
   int nevents = 0;
   size_t i;
 
+  (void)multi;
   if(cpfds->n) {
     int pollrc = Curl_poll(cpfds->pfds, cpfds->n, timeout_ms); /* wait... */
     if(pollrc < 0) {
@@ -1505,21 +1512,11 @@ static CURLMcode multi_posix_poll(struct Curl_multi *multi,
       extra_fds[i].revents = (short)mask;
     }
   }
-  else if(wait_on_nop) {
-    struct curltime expire_time;
-    long sleep_ms = 0;
-
-    /* Avoid busy-looping when there is nothing particular to wait for */
-    multi_timeout(multi, &expire_time, &sleep_ms);
-    if(sleep_ms) {
-      if(sleep_ms > timeout_ms)
-        sleep_ms = timeout_ms;
-      /* when there are no easy handles in the multi, this holds a -1
-         timeout */
-      else if(sleep_ms < 0)
-        sleep_ms = timeout_ms;
-      curlx_wait_ms(sleep_ms);
-    }
+  else if(extrawait) {
+    /* No fds to poll, but asked to obey timeout_ms anyway. We cannot
+     * use Curl_poll() as it, on some platforms, returns immediately
+     * without fds. */
+    curlx_wait_ms(timeout_ms);
   }
 
 out:
@@ -1536,8 +1533,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
                             unsigned int extra_nfds,
                             int timeout_ms,
                             int *ret,
-                            bool wait_on_nop) /* spend time, even if there
-                                               * is nothing to monitor */
+                            bool extrawait)  /* when no socket, wait */
 {
   size_t i;
   struct curltime expire_time;
@@ -1590,7 +1586,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   }
 
 #ifdef ENABLE_WAKEUP
-  if(wait_on_nop && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
+  /* If `extrawait` is TRUE *or* we have `extra_fds`to poll *or* we
+   * have transfer sockets to poll, we obey `timeout_ms`.
+   * Then we need to also monitor the multi's wakeup
+   * socket to catch calls to `curl_multi_wakeup()` during the wait. */
+  if(extrawait || cpfds.n || extra_nfds) {
     wakeup_idx = cpfds.n;
     if(Curl_pollfds_add_sock(&cpfds, multi->wakeup_pair[0], POLLIN)) {
       mresult = CURLM_OUT_OF_MEMORY;
@@ -1618,7 +1618,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   /* We check the internal timeout *AFTER* we collected all sockets to
    * poll. Collecting the sockets may install new timers by protocols
    * and connection filters.
-   * Use the shorter one of the internal and the caller requested timeout. */
+   * Use the shorter one of the internal and the caller requested timeout.
+   * If we are called with `!extrawait` and multi_timeout() reports no
+   * timeouts exist, do not wait. */
   multi_timeout(multi, &expire_time, &timeout_internal);
   if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
     timeout_ms = (int)timeout_internal;
@@ -1630,11 +1632,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
   mresult = multi_winsock_select(multi, &cpfds, curl_nfds,
                                  extra_fds, extra_nfds,
-                                 timeout_ms, wait_on_nop, &nevents);
+                                 timeout_ms, extrawait, &nevents);
 #else
   mresult = multi_posix_poll(multi, &cpfds, curl_nfds,
                              extra_fds, extra_nfds,
-                             timeout_ms, wait_on_nop, &nevents);
+                             timeout_ms, extrawait, &nevents);
 #endif
 
 #ifdef ENABLE_WAKEUP
@@ -1679,26 +1681,24 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      it has to be careful only to access parts of the
      Curl_multi struct that are constant */
   struct Curl_multi *multi = m;
+  CURLMcode mresult = CURLM_WAKEUP_FAILURE;
 
   /* GOOD_MULTI_HANDLE can be safely called */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-#ifdef USE_WINSOCK
-  if(WSASetEvent(multi->wsa_event))
-    return CURLM_OK;
-#endif
 #ifdef ENABLE_WAKEUP
   /* the wakeup_pair variable is only written during init and cleanup,
      making it safe to access from another thread after the init part
      and before cleanup */
-  if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
-    if(Curl_wakeup_signal(multi->wakeup_pair))
-      return CURLM_WAKEUP_FAILURE;
-    return CURLM_OK;
-  }
+  if(!Curl_wakeup_signal(multi->wakeup_pair))
+    mresult = CURLM_OK;
 #endif
-  return CURLM_WAKEUP_FAILURE;
+#ifdef USE_WINSOCK
+  if(WSASetEvent(multi->wsa_event))
+    mresult = CURLM_OK;
+#endif
+  return mresult;
 }
 
 /*
