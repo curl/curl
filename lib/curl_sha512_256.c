@@ -130,6 +130,8 @@ static CURLcode Curl_sha512_256_init(void *context)
   if(wolfSSL_EVP_DigestInit_ex(*ctx, wolfSSL_EVP_sha512_256(), NULL)) {
     /* Check whether the header and this file use the same numbers */
     DEBUGASSERT(wolfSSL_EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
+    /* wolfSSL_EVP_MD_CTX_block_size() returns zero as of 2026-03 wolfSSL
+       master */
 #else
   if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
     /* Check whether the header and this file use the same numbers */
