@@ -174,7 +174,7 @@ CURLcode Curl_cond_timedwait(pthread_cond_t *c, pthread_mutex_t *m,
 
   ts.tv_sec = now.tv_sec + (timeout_ms / 1000);
   usec = now.tv_usec + ((timeout_ms % 1000) * 1000);
-  if(usec > 1000000) {
+  if(usec >= 1000000) {
     ++ts.tv_sec;
     usec %= 1000000;
   }

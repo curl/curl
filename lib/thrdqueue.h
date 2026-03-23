@@ -70,21 +70,14 @@ CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
  */
 void Curl_thrdq_destroy(struct curl_thrdq *tqueue, bool join);
 
-/* Get information about the current queue state. Parameters may be
- * passed as NULL if caller is not interested. */
-void Curl_thrdq_stat(struct curl_thrdq *tqueue,
-                     uint32_t *pnsend, /* # of items awaitting processing */
-                     uint32_t *pnrecv, /* # of items ready for recv */
-                     uint64_t *pnscheduled, /* total items added */
-                     uint64_t *pnprocessed); /* total items processed */
-
 /* Send "item" onto the queue. The caller needs to clear any reference
  * to "item" on success, e.g. the queue takes ownership.
  * `description` is an optional string describing the item for tracing
  * purposes. It needs to have the same lifetime as `item`.
  * Returns CURLE_AGAIN when the queue has already been full.
  *
- * With`timeout_ms` != 0, items
+ * With`timeout_ms` != 0, items that get stuck that long in the send
+ * queue are removed and added to the receive queue right away.
  */
 CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
                          const char *description, timediff_t timeout_ms);

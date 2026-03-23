@@ -25,6 +25,7 @@
 
 #include "curlx/wait.h"
 #include "thrdqueue.h"
+#include "curl_threads.h"
 
 #ifdef USE_THREADS
 
@@ -34,6 +35,7 @@ struct unit3301_item {
 };
 
 struct unit3301_ctx {
+  curl_mutex_t mutex;
   int ndone;
 };
 
@@ -63,7 +65,9 @@ static void unit3301_event(const struct curl_thrdq *tqueue,
   (void)tqueue;
   switch(ev) {
   case CURL_THRDQ_EV_ITEM_DONE:
+    Curl_mutex_acquire(&ctx->mutex);
     ctx->ndone++;
+    Curl_mutex_release(&ctx->mutex);
     break;
   default:
     break;
@@ -89,13 +93,16 @@ static CURLcode test_unit3301(const char *arg)
 
   /* create and teardown queue */
   memset(&ctx, 0, sizeof(ctx));
+  Curl_mutex_init(&ctx.mutex);
   r = Curl_thrdq_create(&tqueue, "unit3301-a", 0, 0, 2, 1,
                         unit3301_item_free, unit3301_process, unit3301_event,
                         &ctx);
   fail_unless(!r, "queue-a create");
   Curl_thrdq_destroy(tqueue, TRUE);
   tqueue = NULL;
+  Curl_mutex_acquire(&ctx.mutex);
   fail_unless(!ctx.ndone, "queue-a unexpected done count");
+  Curl_mutex_release(&ctx.mutex);
 
   /* create queue, have it process `count` items */
   count = 10;
@@ -126,8 +133,11 @@ static CURLcode test_unit3301(const char *arg)
   }
   Curl_thrdq_destroy(tqueue, TRUE);
   tqueue = NULL;
+  Curl_mutex_acquire(&ctx.mutex);
   fail_unless(ctx.ndone == count, "queue-b unexpected done count");
+  Curl_mutex_release(&ctx.mutex);
 
+  Curl_mutex_destroy(&ctx.mutex);
   UNITTEST_END_SIMPLE
 }
 

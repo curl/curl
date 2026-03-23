@@ -53,7 +53,7 @@ typedef void Curl_thrdpool_return_item_cb(void *item, void *user_data);
 /* Create a new thread pool.
  * @param name         name of pool for tracing purposes
  * @param min_threads  minimum number of threads to have always running
- * @param max_threads  maximum umber of threads running, ever.
+ * @param max_threads  maximum number of threads running, ever.
  * @param idle_time_ms maximum time a thread should wait for tasks to
  *                     process before shutting down (unless the pool is
  *                     already at minimum thread count), use 0 for

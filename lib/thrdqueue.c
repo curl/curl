@@ -51,8 +51,6 @@ struct curl_thrdq {
   Curl_thrdq_item_process_cb *fn_process;
   Curl_thrdq_ev_cb *fn_event;
   void *fn_user_data;
-  uint64_t nscheduled;
-  uint64_t nprocessed;
   uint32_t send_max_len;
   BIT(aborted);
 };
@@ -112,6 +110,7 @@ static void *thrdq_tpool_take(void *user_data, const char **pdescription,
 
   Curl_mutex_acquire(&tqueue->lock);
   *pdescription = NULL;
+  *ptimeout_ms = 0;
   if(!tqueue->aborted) {
     e = Curl_llist_head(&tqueue->sendq);
     if(e) {
@@ -124,7 +123,6 @@ static void *thrdq_tpool_take(void *user_data, const char **pdescription,
         if(timeout_ms < 0) {
           /* timed out while queued, place on receive queue */
           Curl_llist_append(&tqueue->recvq, qitem, &qitem->node);
-          tqueue->nprocessed++;
           fn_event = tqueue->fn_event;
           fn_user_data = tqueue->fn_user_data;
           qitem = NULL;
@@ -165,7 +163,6 @@ static void thrdq_tpool_return(void *item, void *user_data)
   else {
     DEBUGASSERT(!Curl_node_llist(&qitem->node));
     Curl_llist_append(&tqueue->recvq, qitem, &qitem->node);
-    tqueue->nprocessed++;
     fn_event = tqueue->fn_event;
     fn_user_data = tqueue->fn_user_data;
   }
@@ -260,25 +257,6 @@ void Curl_thrdq_destroy(struct curl_thrdq *tqueue, bool join)
   thrdq_unlink(tqueue, TRUE, join);
 }
 
-void Curl_thrdq_stat(struct curl_thrdq *tqueue,
-                     uint32_t *pnsend,
-                     uint32_t *pnrecv,
-                     uint64_t *pnscheduled,
-                     uint64_t *pnprocessed)
-{
-  Curl_mutex_acquire(&tqueue->lock);
-  DEBUGASSERT(!tqueue->aborted);
-  if(pnsend)
-    *pnsend = (uint32_t)Curl_llist_count(&tqueue->sendq);
-  if(pnrecv)
-    *pnrecv = (uint32_t)Curl_llist_count(&tqueue->recvq);
-  if(pnscheduled)
-    *pnscheduled = tqueue->nscheduled;
-  if(pnprocessed)
-    *pnprocessed = tqueue->nprocessed;
-  Curl_mutex_release(&tqueue->lock);
-}
-
 CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
                          const char *description, timediff_t timeout_ms)
 {
@@ -311,7 +289,7 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
 
 out:
   Curl_mutex_release(&tqueue->lock);
-  /* Signal thread pool unlocked to void deadlocks */
+  /* Signal thread pool unlocked to avoid deadlocks */
   if(!result && signals)
     result = Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
   return result;
