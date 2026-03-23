@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>HTT
+PHTTP GET
+HTTP Negotiate auth (stub krb5)
+SPNEGO NTLM disallowed
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1>
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate RA==
+Content-Length: 15
+
+Nice auth sir!
+</data1>
+<datacheck>
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate RA==
+Content-Length: 15
+
+Nice auth sir!
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+SPNEGO with Kerberos still works when --no-spnego-ntlm-allowed is set
+</name>
+<features>
+GSS-API
+Debug
+</features>
+<setenv>
+CURL_STUB_GSS_CREDS="KRB5_Alice"
+</setenv>
+<command>
+--negotiate --no-spnego-ntlm-allowed http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Negotiate %b64["KRB5_Alice":HTTP@127.0.0.1:1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
