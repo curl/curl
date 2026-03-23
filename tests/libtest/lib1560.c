@@ -65,10 +65,15 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
 
   for(i = 0; parts[i].name; i++) {
     char *p = NULL;
+    char *z = NULL;
     size_t n;
     rc = curl_url_get(u, parts[i].part, &p, getflags);
     if(!rc && p) {
-      curl_msnprintf(bufp, len, "%s%s", buf[0] ? " | " : "", p);
+      if((parts[i].part == CURLUPART_HOST) && (p[0] == '['))
+        /* an IPv6 numerical address host, get the zone */
+        (void)curl_url_get(u, CURLUPART_ZONEID, &z, getflags);
+      curl_msnprintf(bufp, len, "%s%s%s%s", buf[0] ? " | " : "", p,
+                     z ? " ": "", z ? z : "");
     }
     else
       curl_msnprintf(bufp, len, "%s[%d]", buf[0] ? " | " : "", rc);
@@ -77,6 +82,7 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
     bufp += n;
     len -= n;
     curl_free(p);
+    curl_free(z);
   }
   if(strcmp(buf, wanted)) {
     curl_mfprintf(stderr, "in: %s\nwanted: %s\ngot:    %s\n", in, wanted, buf);
@@ -146,7 +152,71 @@ struct clearurlcase {
   CURLUcode ucode;
 };
 
-static const struct testcase get_parts_list[] ={
+static const struct testcase get_parts_list[] = {
+  { /* query and fragments with control characters */
+    "http://host/path/?\001#\002",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Control code in port number is never okay, even when URL encoding */
+    "http://host:\x1f""80/path/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Control code in scheme never okay, even when URL encoding */
+    "http\x1f://host/path/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Control code in separator never okay, even when URL encoding */
+    "http:/%1f/host/path/",
+    "", CURLU_URLENCODE, 0, CURLUE_BAD_HOSTNAME },
+  { /* Path with control characters */
+    "http://host/path\001with\002ctrl/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Path with control characters and space! */
+    "http://host/path\x7fwith space/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Ensure %2f is NOT normalized to / even if path-as-is is NOT set */
+    "http://host/path%2f..%2f/",
+    "http | [11] | [12] | [13] | host | [15] | /path%2f..%2f/ | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Set without scheme using guess, then get without it */
+    "example.com/path",
+    "[10] | [11] | [12] | [13] | example.com | [15] | /path | [16] | [17]",
+    CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK
+  },
+  { /* CURLU_GET_EMPTY: ensures empty query/fragments are returned as "" not
+       NULL */
+    "http://host/path?#",
+    "http | [11] | [12] | [13] | host | [15] | /path |  | ",
+    0, CURLU_GET_EMPTY, CURLUE_OK },
+  { /* Port number overflow ( > 65535 ) */
+    "http://host:65536/",
+    "", 0, 0, CURLUE_BAD_PORT_NUMBER },
+  { /* Port zero - often discouraged/invalid in URLs */
+    "http://host:0/",
+    "http | [11] | [12] | [13] | host | 0 | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Leading zeros in port */
+    "http://host:00080/",
+    "http | [11] | [12] | [13] | host | 80 | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Single dot host - technically valid in some contexts but often
+       rejected */
+    "http://./",
+    "http | [11] | [12] | [13] | . | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Host starting with a dash (RFC 1123 technically allows it, but many
+       parsers don't) */
+    "http://-atest/",
+    "http | [11] | [12] | [13] | -atest | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Multiple trailing dots, not okay in DNS but works in /etc/hosts */
+    "http://example.com../",
+    "http | [11] | [12] | [13] | example.com.. | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  {  /* Empty IPv6 Zone ID */
+    "http://[fe80::1%]/",
+    "", 0, 0, CURLUE_BAD_IPV6 },
+  { /* Zone ID with escaped characters */
+    "http://[fe80::1%25eth0]/",
+    "http | [11] | [12] | [13] | [fe80::1] eth0 | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
   {"curl.se",
    "[10] | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
    CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK},
@@ -413,12 +483,12 @@ static const struct testcase get_parts_list[] ={
    "http | [11] | [12] | [13] | [fd00:a41::50] | [15] | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://[::1%252]:1234",
-   "https | [11] | [12] | [13] | [::1] | 1234 | / | [16] | [17]",
+   "https | [11] | [12] | [13] | [::1] 2 | 1234 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
 
-  /* here's "bad" zone id */
+  /* non-RFC6874 (unescaped '%') zone id, still accepted/normalized */
   {"https://[fe80::20c:29ff:fe9c:409b%eth0]:1234",
-   "https | [11] | [12] | [13] | [fe80::20c:29ff:fe9c:409b] | 1234 "
+   "https | [11] | [12] | [13] | [fe80::20c:29ff:fe9c:409b] eth0 | 1234 "
    "| / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://127.0.0.1:443",
