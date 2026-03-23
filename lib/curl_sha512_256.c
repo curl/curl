@@ -76,6 +76,7 @@
 #    define EVP_MD_CTX_create     wolfSSL_EVP_MD_CTX_new
 #    define EVP_MD_CTX_destroy    wolfSSL_EVP_MD_CTX_free
 #    define EVP_MD_CTX_size       wolfSSL_EVP_MD_CTX_size
+#    define EVP_sha512_256        wolfSSL_EVP_sha512_256
 #  endif
 #endif
 
@@ -823,6 +824,7 @@ const struct HMAC_params Curl_HMAC_SHA512_256[] = {
 #  undef EVP_MD_CTX_create
 #  undef EVP_MD_CTX_destroy
 #  undef EVP_MD_CTX_size
+#  undef EVP_sha512_256
 #endif
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
