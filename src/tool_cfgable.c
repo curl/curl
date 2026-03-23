@@ -47,6 +47,7 @@ struct OperationConfig *config_alloc(void)
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
   config->tcp_nodelay = TRUE; /* enabled by default */
+  config->spnego_ntlm_allowed = TRUE; /* allowed by default */
   config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
   config->http09_allowed = FALSE;
   config->ftp_skip_ip = TRUE;

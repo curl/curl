@@ -314,6 +314,7 @@ static const struct LongShort aliases[]= {
   {"socks5-hostname",            ARG_STRG, ' ', C_SOCKS5_HOSTNAME},
   {"speed-limit",                ARG_STRG, 'Y', C_SPEED_LIMIT},
   {"speed-time",                 ARG_STRG, 'y', C_SPEED_TIME},
+  {"spnego-ntlm-allowed",        ARG_BOOL|ARG_NO, ' ', C_SPNEGO_NTLM_ALLOWED},
   {"ssl",                        ARG_BOOL|ARG_TLS, ' ', C_SSL},
   {"ssl-allow-beast",            ARG_BOOL|ARG_TLS, ' ', C_SSL_ALLOW_BEAST},
   {"ssl-auto-client-cert",       ARG_BOOL|ARG_TLS, ' ',
@@ -2160,6 +2161,9 @@ static ParameterError opt_bool(struct OperationConfig *config,
     if(config->followlocation == CURLFOLLOW_ALL)
       warnf("--follow overrides --location");
     config->followlocation = toggle ? CURLFOLLOW_OBEYCODE : 0;
+    break;
+  case C_SPNEGO_NTLM_ALLOWED: /* --spnego-ntlm-allowed */
+    config->spnego_ntlm_allowed = toggle;
     break;
   default:
     return PARAM_OPTION_UNKNOWN;

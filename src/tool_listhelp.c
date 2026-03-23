@@ -711,6 +711,9 @@ const struct helptxt helptext[] = {
   { "-y, --speed-time <seconds>",
     "Trigger 'speed-limit' abort after this time",
     CURLHELP_CONNECTION | CURLHELP_TIMEOUT },
+  { "    --no-spnego-ntlm-allowed",
+    "Disallow NTLM as SPNEGO sub-mechanism",
+    CURLHELP_AUTH | CURLHELP_HTTP },
   { "    --ssl",
     "Try enabling TLS",
     CURLHELP_TLS | CURLHELP_IMAP | CURLHELP_POP3 | CURLHELP_SMTP |

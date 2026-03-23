@@ -178,6 +178,7 @@ DPAGES = \
   no-npn.md \
   no-progress-meter.md \
   no-sessionid.md \
+  no-spnego-ntlm-allowed.md \
   noproxy.md \
   ntlm-wb.md \
   ntlm.md \

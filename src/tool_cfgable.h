@@ -278,6 +278,7 @@ struct OperationConfig {
   BIT(ftp_ssl_ccc);
   BIT(socks5_gssapi_nec);   /* The NEC reference server does not protect the
                                encryption type exchange */
+  BIT(spnego_ntlm_allowed); /* allow NTLM in SPNEGO negotiation */
   BIT(tcp_nodelay);
   BIT(tcp_fastopen);
   BIT(retry_all_errors);    /* retry on any error */
