@@ -3705,7 +3705,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       return result;
   }
 
-  if(data->set.fdebug && data->set.verbose) {
+  if(data->set.fdebug && data->set.verbose &&
+     (peer->transport != TRNSPRT_QUIC)) {
     /* the SSL trace callback is only used for verbose logging */
     SSL_CTX_set_msg_callback(octx->ssl_ctx, ossl_trace);
     SSL_CTX_set_msg_callback_arg(octx->ssl_ctx, cf);

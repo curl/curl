@@ -134,6 +134,7 @@ Config
 config
 conncache
 connectdata
+connectionless
 CookieInfo
 Coverity
 CPUs
@@ -167,6 +168,7 @@ CWE
 cyassl
 Cygwin
 daniel
+datagrams
 datatracker
 dbg
 Debian

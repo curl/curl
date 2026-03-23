@@ -57,6 +57,8 @@ HTTPS Proxy. (with OpenSSL, GnuTLS, mbedTLS, Rustls, Schannel or wolfSSL.)
 
 This uses HTTP/1 by default. Setting CURLOPT_PROXYTYPE(3) to
 **CURLPROXY_HTTPS2** allows libcurl to negotiate using HTTP/2 with proxy.
+Setting CURLOPT_PROXYTYPE(3) to **CURLPROXY_HTTPS3** allows libcurl to
+negotiate using HTTP/3 with proxy.
 
 ## socks4://
 

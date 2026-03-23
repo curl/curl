@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+capsule
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+capsule UDP decoding edge cases
+</name>
+</client>
+
+</testcase>

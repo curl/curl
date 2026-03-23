@@ -39,6 +39,10 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
                       size_t scidlen,
                       int *qlogfdp);
 
+CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
+                                   struct Curl_easy *data,
+                                   const struct Curl_addrinfo *remoteaddr);
+
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,

@@ -318,6 +318,22 @@ AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
 )
 AC_SUBST(CADDY)
 
+if test -x /usr/local/bin/h2o; then
+  H2O=/usr/local/bin/h2o
+elif test -x /usr/bin/h2o; then
+  H2O=/usr/bin/h2o
+elif test -x "`brew --prefix 2>/dev/null`/bin/h2o"; then
+  H2O=`brew --prefix`/bin/h2o
+fi
+AC_ARG_WITH(test-h2o,dnl
+AS_HELP_STRING([--with-test-h2o=PATH],[where to find h2o for testing]),
+  H2O=$withval
+  if test "x$H2O" = "xno"; then
+    H2O=""
+  fi
+)
+AC_SUBST(H2O)
+
 if test -x /usr/sbin/vsftpd; then
   VSFTPD=/usr/sbin/vsftpd
 elif test -x /usr/local/sbin/vsftpd; then
