@@ -44,8 +44,7 @@ else {
 }
 
 # first run the help command
-my @curlout;
-open(O, '-|', $curl, '-h', $opt) || die; push @curlout, <O>; close(O);
+my @curlout; open(O, '-|', $curl, '-h', $opt) || die; push @curlout, <O>; close(O);
 
 # figure out the short+long option combo using -h all*/
 open(C, '-|', $curl, '-h', 'all');
