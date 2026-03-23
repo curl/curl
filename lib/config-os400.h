@@ -259,7 +259,7 @@
 
 /* Define to 1 if OS is AIX. */
 #ifndef _ALL_SOURCE
-#  undef _ALL_SOURCE
+#define _ALL_SOURCE 1
 #endif
 
 /* ---------------------------------------------------------------- */
