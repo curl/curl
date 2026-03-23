@@ -65,10 +65,10 @@
 #    endif
 #  endif
 #elif defined(USE_WOLFSSL)
-#  include <wolfssl/options.h>
-#  include <wolfssl/openssl/evp.h>
 #  include <wolfssl/version.h>
 #  if defined(LIBWOLFSSL_VERSION_HEX) && LIBWOLFSSL_VERSION_HEX >= 0x05000000
+#    include <wolfssl/options.h>
+#    include <wolfssl/openssl/evp.h>
 #    define USE_OPENSSL_SHA512_256          1
 #    define HAS_SHA512_256_IMPLEMENTATION   1
 #    ifdef OPENSSL_COEXIST
