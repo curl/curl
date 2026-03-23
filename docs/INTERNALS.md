@@ -39,7 +39,7 @@ We aim to support these or later versions.
 - OpenLDAP     2.0 (2000-08-01)
 - OpenSSL      3.0.0 (2021-09-07)
 - Windows      Vista 6.0 (2006-11-08 - 2012-04-10)
-- wolfSSL      3.4.6 (2017-09-22)
+- wolfSSL      5.0.0 (2021-11-01)
 - zlib         1.2.5.2 (2011-12-11)
 - zstd         1.0 (2016-08-31)
 

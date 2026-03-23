@@ -33,8 +33,8 @@
 #include <wolfssl/options.h>
 #include <wolfssl/version.h>
 
-#if LIBWOLFSSL_VERSION_HEX < 0x03004006 /* wolfSSL 3.4.6 (2015) */
-#error "wolfSSL version should be at least 3.4.6"
+#if LIBWOLFSSL_VERSION_HEX < 0x05000000 /* wolfSSL 5.0.0 (2021-11-01) */
+#error "wolfSSL version should be at least 5.0.0"
 #endif
 #if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
 #error "wolfSSL 5.7.6 or newer is required to coexist with OpenSSL"
@@ -171,7 +171,6 @@ static void wssl_log_tls12_secret(WOLFSSL *ssl)
   unsigned char *ms, *sr, *cr;
   unsigned int msLen, srLen, crLen, i, x = 0;
 
-#if LIBWOLFSSL_VERSION_HEX >= 0x0300d000 /* >= 3.13.0 */
   /* wolfSSL_GetVersion is available since 3.13, we use it instead of
    * SSL_version since the latter relies on OPENSSL_ALL (--enable-opensslall or
    * --enable-all). Failing to perform this check could result in an unusable
@@ -187,7 +186,6 @@ static void wssl_log_tls12_secret(WOLFSSL *ssl)
      * is not directly usable. */
     return;
   }
-#endif
 
   if(wolfSSL_get_keys(ssl, &ms, &msLen, &sr, &srLen, &cr, &crLen) !=
      WOLFSSL_SUCCESS) {
@@ -875,8 +873,7 @@ static CURLcode wssl_add_default_ciphers(bool tls13, struct dynbuf *buf)
 }
 #endif
 
-/* 4.2.0 (2019) */
-#if LIBWOLFSSL_VERSION_HEX < 0x04002000 || !defined(OPENSSL_EXTRA)
+#ifndef OPENSSL_EXTRA
 static int wssl_legacy_CTX_set_min_proto_version(WOLFSSL_CTX *ctx, int version)
 {
   int res;
@@ -912,7 +909,7 @@ static int wssl_legacy_CTX_set_max_proto_version(WOLFSSL_CTX *ctx, int version)
 }
 #define wolfSSL_CTX_set_min_proto_version wssl_legacy_CTX_set_min_proto_version
 #define wolfSSL_CTX_set_max_proto_version wssl_legacy_CTX_set_max_proto_version
-#endif
+#endif /* OPENSSL_EXTRA */
 
 static CURLcode client_certificate(struct Curl_easy *data,
                                    struct ssl_config_data *ssl_config,
@@ -1114,11 +1111,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   DEBUGASSERT(cf->next);
   transport = Curl_conn_cf_get_transport(cf->next, data);
 
-#if LIBWOLFSSL_VERSION_HEX < 0x04002000 /* 4.2.0 (2019) */
-  req_method = wolfSSLv23_client_method();
-#else
   req_method = wolfTLS_client_method();
-#endif
   if(!req_method) {
     failf(data, "wolfSSL: could not create a client method");
     result = CURLE_OUT_OF_MEMORY;
@@ -2056,11 +2049,7 @@ static CURLcode wssl_recv(struct Curl_cfilter *cf,
 
 size_t Curl_wssl_version(char *buffer, size_t size)
 {
-#if LIBWOLFSSL_VERSION_HEX >= 0x03006000
   return curl_msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
-#elif defined(WOLFSSL_VERSION)
-  return curl_msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
-#endif
 }
 
 static int wssl_init(void)
@@ -2104,13 +2093,9 @@ static bool wssl_data_pending(struct Curl_cfilter *cf,
 void Curl_wssl_report_handshake(struct Curl_easy *data, struct wssl_ctx *wssl)
 {
   (void)wssl;
-#if (LIBWOLFSSL_VERSION_HEX >= 0x03009010)
   infof(data, "SSL connection using %s / %s",
         wolfSSL_get_version(wssl->ssl),
         wolfSSL_get_cipher_name(wssl->ssl));
-#else
-  infof(data, "SSL connected");
-#endif
 }
 
 static CURLcode wssl_connect(struct Curl_cfilter *cf,
