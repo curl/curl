@@ -40,32 +40,51 @@
 /* Please keep the SSL backend-specific #if branches in this order:
  *
  * 1. USE_OPENSSL
- * 2. USE_GNUTLS
- * 3. USE_MBEDTLS
- * 4. USE_COMMON_CRYPTO
- * 5. USE_WIN32_CRYPTO
+ * 2. USE_WOLFSSL
+ * 3. USE_GNUTLS
+ * 4. USE_MBEDTLS
+ * 5. USE_COMMON_CRYPTO
+ * 6. USE_WIN32_CRYPTO
  *
  * This ensures that the same SSL branch gets activated throughout this source
  * file even if multiple backends are enabled at the same time.
  */
 
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
+#else
+#include <wolfssl/options.h>
+#include <wolfssl/openssl/evp.h>
+#endif
 
 struct ossl_sha256_ctx {
+#ifdef USE_OPENSSL
   EVP_MD_CTX *openssl_ctx;
+#else
+  WOLFSSL_EVP_MD_CTX *openssl_ctx;
+#endif
 };
 typedef struct ossl_sha256_ctx my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+#ifdef USE_OPENSSL
   ctx->openssl_ctx = EVP_MD_CTX_create();
+#else
+  ctx->openssl_ctx = wolfSSL_EVP_MD_CTX_new();
+#endif
   if(!ctx->openssl_ctx)
     return CURLE_OUT_OF_MEMORY;
 
+#ifdef USE_OPENSSL
   if(!EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL)) {
     EVP_MD_CTX_destroy(ctx->openssl_ctx);
+#else
+  if(!wolfSSL_EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL)) {
+    wolfSSL_EVP_MD_CTX_free(ctx->openssl_ctx);
+#endif
     return CURLE_FAILED_INIT;
   }
   return CURLE_OK;
@@ -76,14 +95,23 @@ static void my_sha256_update(void *in,
                              unsigned int length)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+#ifdef USE_OPENSSL
   EVP_DigestUpdate(ctx->openssl_ctx, data, length);
+#else
+  wolfSSL_EVP_DigestUpdate(ctx->openssl_ctx, data, length);
+#endif
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+#ifdef USE_OPENSSL
   EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
   EVP_MD_CTX_destroy(ctx->openssl_ctx);
+#else
+  wolfSSL_EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
+  wolfSSL_EVP_MD_CTX_free(ctx->openssl_ctx);
+#endif
 }
 
 #elif defined(USE_GNUTLS)
