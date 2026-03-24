@@ -27,22 +27,23 @@ use strict;
 use warnings;
 
 my @tabs = (
-    '^m4/zz40-xc-ovr.m4',
+    '^m4/zz40-xc-ovr\.m4$',
     'Makefile\.(am|example)$',
     '\.sln$',
-    '^tests/data/data1706-stdout.txt',
+    '^tests/data/data1706-stdout\.txt',
     '^tests/data/test',
 );
 
 my @longline = (
-    '.github/workflows/http3-linux.yml',
-    '.github/workflows/linux.yml',
-    '.github/workflows/windows.yml',
-    '^renovate.json',
-    '^docs/DISTROS.md',
-    '^projects/Windows/tmpl',
-    '^tests/certs/srp-verifier-conf',
-    '^tests/certs/srp-verifier-db',
+    '\.github/workflows/http3-linux\.yml$',
+    '\.github/workflows/linux\.yml$',
+    '\.github/workflows/windows\.yml$',
+    '^renovate\.json$',
+    '^docs/DISTROS\.md$',
+    '^projects/Windows/tmpl/curl\.vcxproj$',
+    '^projects/Windows/tmpl/libcurl\.vcxproj$',
+    '^tests/certs/srp-verifier-conf$',
+    '^tests/certs/srp-verifier-db$',
     '^tests/data/test',
 );
 
@@ -51,10 +52,10 @@ my @need_crlf = (
 );
 
 my @double_empty_lines = (
-    '^RELEASE-NOTES',
+    '^RELEASE-NOTES$',
     '^lib/.+\.(c|h)$',
-    '^projects/OS400',
-    '^projects/vms',
+    '^projects/OS400/',
+    '^projects/vms/',
     '^tests/data/test',
     '\.(m4|py)$',
 );
@@ -66,12 +67,12 @@ my @non_ascii_allowed = (
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
 
 my @non_ascii = (
-    '^.github/scripts/pyspelling.words',
-    '^.mailmap',
-    '^RELEASE-NOTES',
-    '^docs/BINDINGS.md',
-    '^docs/THANKS',
-    '^docs/THANKS-filter',
+    '^\.github/scripts/pyspelling\.words$',
+    '^\.mailmap$',
+    '^RELEASE-NOTES$',
+    '^docs/BINDINGS\.md$',
+    '^docs/THANKS$',
+    '^docs/THANKS-filter$',
 );
 
 sub fn_match {
