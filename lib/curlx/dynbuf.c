@@ -205,7 +205,7 @@ CURLcode curlx_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 
   if(str) {
     CURLcode result = dyn_nappend(s, (const unsigned char *)str, strlen(str));
-    curlx_free(str);
+    curl_free(str);
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */

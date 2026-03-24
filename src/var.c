@@ -153,7 +153,7 @@ static ParameterError varfunc(char *c, /* content */
         /* put it in the output */
         if(curlx_dyn_addn(out, enc, elen))
           err = PARAM_NO_MEM;
-        curl_free(enc);
+        curlx_free(enc);
         if(err)
           break;
       }
@@ -173,7 +173,7 @@ static ParameterError varfunc(char *c, /* content */
         else {
           if(curlx_dyn_addn(out, enc, elen))
             err = PARAM_NO_MEM;
-          curl_free(enc);
+          curlx_free(enc);
         }
         if(err)
           break;

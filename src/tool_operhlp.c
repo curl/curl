@@ -146,7 +146,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
         if(!newpath)
           goto out;
         uerr = curl_url_set(uh, CURLUPART_PATH, newpath, 0);
-        curlx_free(newpath);
+        curl_free(newpath);
         if(uerr) {
           result = urlerr_cvt(uerr);
           goto out;
@@ -157,8 +157,13 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
           goto out;
         }
         curlx_free(*inurlp);
-        *inurlp = newurl;
-        result = CURLE_OK;
+        /* make it owned by tool memory */
+        *inurlp = curlx_strdup(newurl);
+        curl_free(newurl);
+        if(*inurlp)
+          result = CURLE_OK;
+        else
+          result = CURLE_OUT_OF_MEMORY;
       }
     }
     else

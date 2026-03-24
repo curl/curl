@@ -219,8 +219,17 @@ void config_free(struct OperationConfig *config)
  *
  * The main point is to make sure that what is returned is different than what
  * the regular memory functions return so that mixup will trigger problems.
+ *
+ * This test setup currently only works when building with a *shared* libcurl
+ * and not static, as in the latter case the tool and the library share some of
+ * the functions in incompatible ways.
  */
 
+/*
+ * This code appends this extra chunk of memory in front of every allocation
+ * done by libcurl with the only purpose to cause trouble when using the wrong
+ * free function on memory.
+ */
 struct extramem {
   size_t extra;
   union {
@@ -254,18 +263,17 @@ static void *custom_malloc(size_t wanted_size)
 static char *custom_strdup(const char *ptr)
 {
   struct extramem *m;
-  size_t size = strlen(ptr) + 1;
-  size_t sz = size + sizeof(struct extramem);
+  size_t len = strlen(ptr);
+  size_t sz = len + sizeof(struct extramem);
   m = curlx_malloc(sz);
   if(m) {
     char *p = (char *)m->mem;
     /* since strcpy is banned, we do memcpy */
-    memcpy(p, ptr, sz);
-    p[sz] = 0;
+    memcpy(p, ptr, len);
+    p[len] = 0;
     return (char *)m->mem;
   }
   return NULL;
-
 }
 
 static void *custom_realloc(void *ptr, size_t size)
@@ -273,7 +281,8 @@ static void *custom_realloc(void *ptr, size_t size)
   struct extramem *m = NULL;
   size_t sz = size + sizeof(struct extramem);
   if(ptr)
-    m = (void *)((char *)ptr - offsetof(struct extramem, mem));
+    /* if given a pointer, figure out the original */
+    ptr = (void *)((char *)ptr - offsetof(struct extramem, mem));
   m = curlx_realloc(ptr, sz);
   if(m)
     return m->mem;
@@ -315,7 +324,7 @@ CURLcode globalconf_init(void)
   global->first = global->last = config_alloc();
   if(global->first) {
     /* Perform the libcurl initialization */
-#ifdef GLOBAL_MEM
+#ifdef CURL_DEBUG_GLOBAL_MEM
     result = curl_global_init_mem(CURL_GLOBAL_ALL, custom_malloc, custom_free,
                                   custom_realloc, custom_strdup,
                                   custom_calloc);
