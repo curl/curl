@@ -811,7 +811,7 @@ static CURLcode inspect_response(struct Curl_cfilter *cf,
   }
 
   /* Seems to have failed */
-  return CURLE_RECV_ERROR;
+  return CURLE_COULDNT_CONNECT;
 }
 
 static CURLcode H2_CONNECT(struct Curl_cfilter *cf,

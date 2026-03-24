@@ -10,24 +10,19 @@ proxytunnel
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
-# this is returned first since we get no proxy-auth
 <connect crlf="headers">
-HTTP/1.1 400 Bad request
-Connection: close
+HTTP/1.1 407 Proxy Authentication Required
+Proxy-Authenticate: Special realm="none", nonce="abc123"
+Content-Length: 13
+Transfer-Encoding: chunked
+Magic-special: true
 
+some content
 </connect>
-
-<datacheck crlf="headers">
-HTTP/1.1 400 Bad request
-Connection: close
-
-</datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -36,7 +31,7 @@ http
 proxy
 </features>
 <name>
-HTTP CONNECT with proxy returning 400 and closing
+HTTP CONNECT with proxy returning Content-Length and chunked
 </name>
 <command>
 http://test.example --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -sS
@@ -53,10 +48,7 @@ Proxy-Connection: Keep-Alive
 
 </protocol>
 <errorcode>
-7
+56
 </errorcode>
-<stderr mode="text">
-curl: (7) CONNECT tunnel failed, response 400
-</stderr>
 </verify>
 </testcase>

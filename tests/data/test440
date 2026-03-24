@@ -72,7 +72,7 @@ https://this.hsts.example./%TESTNUMBER
 </stdout>
 # Proxy CONNECT aborted
 <errorcode>
-56
+7
 </errorcode>
 <limits>
 Allocations: 160

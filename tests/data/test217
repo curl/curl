@@ -49,9 +49,9 @@ User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>
-# CURLE_RECV_ERROR
+# CURLE_COULDNT_CONNECT
 <errorcode>
-56
+7
 </errorcode>
 <stdout crlf="headers">
 HTTP/1.1 405 Method Not Allowed swsclose
