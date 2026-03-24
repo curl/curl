@@ -183,7 +183,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 }
 
 #elif defined(USE_WOLFSSL)
-#include <wolfssl/options.h>
 #include <wolfssl/wolfcrypt/sha512.h>
 
 #define CURL_SHA512_256_DIGEST_SIZE WC_SHA512_256_DIGEST_SIZE
