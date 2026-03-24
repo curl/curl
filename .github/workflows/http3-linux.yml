@@ -143,7 +143,9 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
+          key: >
+            ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-
+            ${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache ngtcp2 boringssl'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
@@ -161,7 +163,9 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
+          key: >
+            ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-
+            ${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
       - id: settings
         if: >-
@@ -304,8 +308,11 @@ jobs:
             --with-openssl
           make install
           make clean
+          export PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/nettle/build/lib64/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/gnutls/build/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/wolfssl/build/lib/pkgconfig
           ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
-            PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
@@ -334,8 +341,10 @@ jobs:
           autoreconf -fi
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
+          export PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/nghttp3/build/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/ngtcp2/build/lib/pkgconfig
           ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-app --enable-http3 \
-            PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig \
             LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib \
             --with-libbrotlienc --with-libbrotlidec
           make install
@@ -407,7 +416,12 @@ jobs:
 
           - name: 'boringssl'
             tflags: '--min=1790'
-            PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: >
+              /home/runner/boringssl/build/lib/pkgconfig:
+              /home/runner/nghttp3/build/lib/pkgconfig:
+              /home/runner/ngtcp2-boringssl/build/lib/pkgconfig:
+              /home/runner/nghttp2/build/lib/pkgconfig
+
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON
@@ -424,7 +438,13 @@ jobs:
             install_packages: libp11-kit-dev libssh-dev
             tflags: '--min=1840'
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
-            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: >
+              /home/runner/nettle/build/lib64/pkgconfig:
+              /home/runner/gnutls/build/lib/pkgconfig:
+              /home/runner/nghttp3/build/lib/pkgconfig:
+              /home/runner/ngtcp2/build/lib/pkgconfig:
+              /home/runner/nghttp2/build/lib/pkgconfig
+
             generate: >-
               -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH=ON
               -DCMAKE_UNITY_BUILD=ON
@@ -469,7 +489,8 @@ jobs:
         env:
           INSTALL_PACKAGES: >-
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4 ' || '' }}
-            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server libev-dev' || '' }}
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') &&
+              'apache2 apache2-dev libnghttp2-dev vsftpd dante-server libev-dev' || '' }}
 
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
@@ -571,9 +592,11 @@ jobs:
         env:
           cache-name: cache-ngtcp2
         with:
-          path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
+          path: ~/ngtcp2/build
+          key: >
+            ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-
+            ${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache ngtcp2 boringssl'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
