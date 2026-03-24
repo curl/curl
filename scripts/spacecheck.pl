@@ -35,6 +35,9 @@ my @tabs = (
 );
 
 my @longline = (
+    '.github/workflows/http3-linux.yml',
+    '.github/workflows/linux.yml',
+    '.github/workflows/windows.yml',
     '^renovate.json',
     '^docs/DISTROS.md',
     '^projects/Windows/tmpl',
