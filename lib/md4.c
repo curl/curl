@@ -44,19 +44,29 @@
 
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
 
-#if defined(USE_WOLFSSL) && !defined(NO_MD4)
-#include <wolfssl/openssl/md4.h>
-#define VOID_MD4_INIT
-
-#ifdef OPENSSL_COEXIST
-#  define MD4_CTX    WOLFSSL_MD4_CTX
-#  define MD4_Init   wolfSSL_MD4_Init
-#  define MD4_Update wolfSSL_MD4_Update
-#  define MD4_Final  wolfSSL_MD4_Final
-#endif
-
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/md4.h>
+
+#elif defined(USE_WOLFSSL) && !defined(NO_MD4)
+#include <wolfssl/wolfcrypt/md4.h>
+
+typedef wc_Md4 MD4_CTX;
+
+static int MD4_Init(MD4_CTX *ctx)
+{
+  wc_InitMd4(ctx);
+  return 1;
+}
+
+static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
+{
+  wc_Md4Update(ctx, input, (word32)len);
+}
+
+static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
+{
+  wc_Md4Final(ctx, digest);
+}
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
@@ -425,14 +435,8 @@ CURLcode Curl_md4it(unsigned char *output,
                     const unsigned char *input, const size_t len)
 {
   MD4_CTX ctx;
-
-#ifdef VOID_MD4_INIT
-  MD4_Init(&ctx);
-#else
   if(!MD4_Init(&ctx))
     return CURLE_FAILED_INIT;
-#endif
-
   MD4_Update(&ctx, input, curlx_uztoui(len));
   MD4_Final(output, &ctx);
   return CURLE_OK;
