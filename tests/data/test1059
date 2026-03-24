@@ -42,7 +42,7 @@ ftp://test-number:%TESTNUMBER/wanted/page -p -x %HOSTIP:%HTTPPORT
 <verify>
 # The server does not implement CONNECT for ftp, so this must be a failure test
 <errorcode>
-56
+7
 </errorcode>
 <protocol crlf="headers">
 CONNECT test-number:%TESTNUMBER HTTP/1.1

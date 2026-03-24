@@ -56,7 +56,7 @@ Proxy-Connection: Keep-Alive
 
 </protocol>
 <errorcode>
-56
+7
 </errorcode>
 </verify>
 </testcase>
