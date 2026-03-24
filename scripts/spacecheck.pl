@@ -194,8 +194,8 @@ while(my $filename = <$git_ls_files>) {
     my $max = 79;
     for my $l (split(/\n/, $content)) {
         $line++;
-        if($l =~ / {$max,}/) {
-            push @err, sprintf('line %d: repeat spaces (%d > %d)', $line, length($l), $max);
+        if($l =~ /( {$max,})/) {
+            push @err, sprintf('line %d: repeat spaces (%d > %d)', $line, length($1), $max);
         }
     }
 
