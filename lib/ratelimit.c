@@ -157,8 +157,8 @@ void Curl_rlimit_init(struct Curl_rlimit *r,
   DEBUGASSERT(rate_per_sec >= 0);
   DEBUGASSERT(burst_per_sec >= rate_per_sec || !burst_per_sec);
   DEBUGASSERT(pts);
-  r->rate_per_step = rate_per_sec;
-  r->burst_per_step = burst_per_sec;
+  r->rate_per_step = r->rate_per_sec = rate_per_sec;
+  r->burst_per_step = r->burst_per_sec = burst_per_sec;
   r->step_us = CURL_US_PER_SEC;
   r->spare_us = 0;
   r->tokens = r->rate_per_step;
@@ -169,8 +169,13 @@ void Curl_rlimit_init(struct Curl_rlimit *r,
 void Curl_rlimit_start(struct Curl_rlimit *r, const struct curltime *pts,
                        int64_t total_tokens)
 {
-  r->tokens = r->rate_per_step;
+  /* A start always resets the values to initial defaults, then
+   * fine tunes the intervals for the total_tokens expected. */
+  r->rate_per_step = r->rate_per_sec;
+  r->burst_per_step = r->burst_per_sec;
+  r->step_us = CURL_US_PER_SEC;
   r->spare_us = 0;
+  r->tokens = r->rate_per_step;
   r->ts = *pts;
   rlimit_tune_steps(r, total_tokens);
 }
