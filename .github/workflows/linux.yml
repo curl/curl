@@ -74,7 +74,8 @@ jobs:
             image: ubuntu-24.04-arm
             install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
             install_steps: libressl-c-arm pytest codeset-test
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
+            LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
+            configure: --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl krb5 valgrind 1'
             image: ubuntu-24.04-arm
@@ -94,26 +95,31 @@ jobs:
             image: ubuntu-24.04-arm
             install_packages: clang
             install_steps: libressl-c-arm
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
+            CC: clang
+            LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
+            configure: --with-openssl=/home/runner/libressl --enable-debug
 
           - name: 'wolfssl-all'
             image: ubuntu-24.04-arm
             install_steps: wolfssl-all-arm
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-all/lib
+            configure: --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=780 1 to 950'
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=800 951 to 9999'
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'mbedtls gss valgrind 1'
             image: ubuntu-24.04-arm
@@ -136,7 +142,9 @@ jobs:
           - name: 'mbedtls clang'
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
             install_steps: mbedtls-latest-intel pytest
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
+            CC: clang
+            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
+            configure: --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
             install_packages: libssh2-1-dev libnghttp2-dev libuv1-dev
@@ -159,7 +167,8 @@ jobs:
 
           - name: 'awslc'
             install_steps: awslc pytest
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
+            LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
+            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
 
           - name: 'awslc'
             install_packages: libidn2-dev
@@ -254,11 +263,11 @@ jobs:
 
           - name: 'openssl i686'
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
+            CC: i686-linux-gnu-gcc-14
+            LDFLAGS: -L/usr/lib/i386-linux-gnu
+            PKG_CONFIG_PATH: /usr/lib/i386-linux-gnu/pkgconfig
             configure: >-
-              PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
-              CC=i686-linux-gnu-gcc-14
               CPPFLAGS=-I/usr/include/i386-linux-gnu
-              LDFLAGS=-L/usr/lib/i386-linux-gnu
               --host=i686-linux-gnu
               --with-openssl --with-libssh2 --with-libidn2 --enable-ares --enable-debug
 
@@ -308,36 +317,37 @@ jobs:
           - name: 'address-sanitizer'
             install_packages: clang-20 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
+            CC: clang-20
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
-            CC: clang-20
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang-20 libubsan1 libasan8 libtsan2
             install_steps: pytest
             install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
+            CC: clang-20
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
-            CC: clang-20
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
             install_packages: clang-20 libtsan2
             install_steps: pytest openssl-tsan
+            CC: clang-20
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
-            CC: clang-20
             generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON
 
           - name: 'memory-sanitizer'
             install_packages: clang-20
             install_steps: randcurl
+            CC: clang-20
             CFLAGS: -fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=memory
             LIBS: -ldl
-            configure: CC=clang-20 --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
+            configure: --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
             tflags: '--min=1480'
 
           - name: 'event-based'
@@ -371,7 +381,8 @@ jobs:
           - name: 'IntelC openssl'
             install_packages: libssl-dev
             install_steps: intelc
-            configure: CC=icc --enable-debug --with-openssl
+            CC: icc
+            configure: --enable-debug --with-openssl
 
           - name: 'Slackware !ssl gssapi gcc'
             # Flags used to build the curl Slackware package, except OpenSSL 1.1.0:
