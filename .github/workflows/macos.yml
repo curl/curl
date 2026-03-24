@@ -370,7 +370,7 @@ jobs:
           # shellcheck disable=SC2181
           while [[ $? == 0 ]]; do
             for i in 1 2 3; do
-              if brew update && brew bundle install pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL}; then
+              if brew update && brew install pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL}; then
                 break 2
               else
                 echo "Error: wait to try again: $i"
