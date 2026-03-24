@@ -21,6 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include <stddef.h>
 #include "tool_setup.h"
 
 #include "tool_cfgable.h"
@@ -206,6 +207,90 @@ void config_free(struct OperationConfig *config)
   }
 }
 
+#ifdef CURL_DEBUG_GLOBAL_MEM
+
+#ifdef CURL_MEMDEBUG
+#error "curl_global_init_mem() testing does not work with memdebug debugging"
+#endif
+
+/*
+ * This is the custom memory functions handed to curl when we run special test
+ * round to verify them.
+ *
+ * The main point is to make sure that what is returned is different than what
+ * the regular memory functions return so that mixup will trigger problems.
+ */
+
+struct extramem {
+  size_t extra;
+  union {
+    curl_off_t o;
+    double d;
+    void *p;
+  } mem[1];
+};
+
+static void *custom_calloc(size_t wanted_nmemb, size_t wanted_size)
+{
+  struct extramem *m;
+  size_t sz = wanted_size * wanted_nmemb;
+  sz += sizeof(struct extramem);
+  m = curlx_calloc(1, sz);
+  if(m)
+    return m->mem;
+  return NULL;
+}
+
+static void *custom_malloc(size_t wanted_size)
+{
+  struct extramem *m;
+  size_t sz = wanted_size + sizeof(struct extramem);
+  m = curlx_malloc(sz);
+  if(m)
+    return m->mem;
+  return NULL;
+}
+
+static char *custom_strdup(const char *ptr)
+{
+  struct extramem *m;
+  size_t size = strlen(ptr) + 1;
+  size_t sz = size + sizeof(struct extramem);
+  m = curlx_malloc(sz);
+  if(m) {
+    char *p = (char *)m->mem;
+    /* since strcpy is banned, we do memcpy */
+    memcpy(p, ptr, sz);
+    p[sz] = 0;
+    return (char *)m->mem;
+  }
+  return NULL;
+
+}
+
+static void *custom_realloc(void *ptr, size_t size)
+{
+  struct extramem *m = NULL;
+  size_t sz = size + sizeof(struct extramem);
+  if(ptr)
+    m = (void *)((char *)ptr - offsetof(struct extramem, mem));
+  m = curlx_realloc(ptr, sz);
+  if(m)
+    return m->mem;
+  return NULL;
+}
+
+static void custom_free(void *ptr)
+{
+  struct extramem *m = NULL;
+  if(ptr) {
+    m = (void *)((char *)ptr - offsetof(struct extramem, mem));
+    curlx_free(m);
+  }
+}
+
+#endif
+
 /*
  * This is the main global constructor for the app. Call this before
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
@@ -230,7 +315,13 @@ CURLcode globalconf_init(void)
   global->first = global->last = config_alloc();
   if(global->first) {
     /* Perform the libcurl initialization */
+#ifdef GLOBAL_MEM
+    result = curl_global_init_mem(CURL_GLOBAL_ALL, custom_malloc, custom_free,
+                                  custom_realloc, custom_strdup,
+                                  custom_calloc);
+#else
     result = curl_global_init(CURL_GLOBAL_DEFAULT);
+#endif
     if(!result) {
       /* Get information about libcurl */
       result = get_libcurl_info();

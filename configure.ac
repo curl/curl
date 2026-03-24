@@ -1087,6 +1087,23 @@ AS_HELP_STRING([--disable-mqtt],[Disable MQTT support]),
     AC_MSG_RESULT(no)
 )
 
+AC_MSG_CHECKING([enable curl_global_init_mem debug build])
+AC_ARG_ENABLE(init-mem-debug,
+AS_HELP_STRING([--enable-init-mem-debug],[curl_global_init_mem debug])
+AS_HELP_STRING([--disable-init-mem-debug],[]),
+[ case "$enableval" in
+  yes)
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(CURL_DEBUG_GLOBAL_MEM, 1, [curl_debug_global_mem debug build])
+    SUPPORT_FEATURES="$SUPPORT_FEATURES global-mem-debug"
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    ;;
+  esac ],
+    AC_MSG_RESULT(no)
+)
+
 dnl **********************************************************************
 dnl Check for built-in manual
 dnl **********************************************************************

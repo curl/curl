@@ -510,7 +510,13 @@ option(CURL_DISABLE_TYPECHECK "Disable curl_easy_setopt()/curl_easy_getinfo() ty
 mark_as_advanced(CURL_DISABLE_TYPECHECK)
 option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
+option(CURL_DEBUG_GLOBAL_MEM "Debug curl_global_init_mem" OFF)
+mark_as_advanced(CURL_DEBUG_GLOBAL_MEM)
 
+if(CURL_DEBUG_GLOBAL_MEM)
+  # Set it via the command-line to make it apply to the entire directory.
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DEBUG_GLOBAL_MEM")
+endif()
 if(CURL_DISABLE_TYPECHECK)
   # Set it via the command-line to make it apply to examples also.
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DISABLE_TYPECHECK")
