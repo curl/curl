@@ -46,7 +46,7 @@ int main(void)
 {
   CURLM *m = curl_multi_init();
   /* do not join threads when cleaning up this multi handle */
-  curl_multi_setopt(m, CURLOPT_QUICK_EXIT, 1L);
+  curl_multi_setopt(m, CURLMOPT_QUICK_EXIT, 1L);
 }
 ~~~
 
