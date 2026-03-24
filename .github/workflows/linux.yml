@@ -212,7 +212,10 @@ jobs:
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
             install_packages: libidn2-dev libkrb5-dev clang libssl-dev
-            configure: CC=clang --enable-static --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
+            CC: clang
+            configure: >-
+              --enable-static --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs
+              --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
             image: ubuntu-24.04-arm
