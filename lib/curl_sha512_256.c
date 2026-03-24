@@ -193,10 +193,8 @@ typedef struct wc_Sha512 Curl_sha512_256_ctx;
 static CURLcode Curl_sha512_256_init(void *context)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
   if(wc_InitSha512_256(ctx))
     return CURLE_FAILED_INIT;
-
   return CURLE_OK;
 }
 
@@ -205,20 +203,16 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        size_t length)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
   if(wc_Sha512_256Update(ctx, data, (word32)length))
     return CURLE_SSL_CIPHER;
-
   return CURLE_OK;
 }
 
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
   if(wc_Sha512_256Final(ctx, digest))
     return CURLE_SSL_CIPHER;
-
   return CURLE_OK;
 }
 
