@@ -99,7 +99,8 @@ Build curl (with CMake):
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
-     % PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DOPENSSL_ROOT_DIR=/path/to/openssl -DUSE_NGTCP2=ON
+     % PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld \
+       -DOPENSSL_ROOT_DIR=/path/to/openssl -DUSE_NGTCP2=ON
      % cmake --build bld
 
 ## Build with GnuTLS
@@ -229,7 +230,8 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
+       --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
      % make install
 

@@ -1345,7 +1345,8 @@ dnl
 
 AC_DEFUN([CURL_TRACE_PCDIR], [
   dnl Example pkgconf line:
-  dnl   libpkgconf/pkg.c:746 [pkgconf_pkg_t *pkgconf_pkg_try_specific_path(pkgconf_client_t *, [...]*)]: trying path: /usr/local/lib/pkgconfig for libngtcp2_crypto_gnutls
+  dnl   libpkgconf/pkg.c:746 [pkgconf_pkg_t *pkgconf_pkg_try_specific_path(pkgconf_client_t *, [...]*)]:
+  dnl     trying path: /usr/local/lib/pkgconfig for libngtcp2_crypto_gnutls
   dnl Rest of strings are for catching classic pkg-config lines.
   trc=`CURL_EXPORT_PCDIR([$2], [$3])
     if test -n "$PKG_CONFIG_LIBDIR"; then
@@ -1354,7 +1355,9 @@ AC_DEFUN([CURL_TRACE_PCDIR], [
     if test -n "$PKG_CONFIG_PATH"; then
       echo "PKG_CONFIG_PATH: '$PKG_CONFIG_PATH'"
     fi
-    $PKGCONFIG --exists --debug $1 2>&1 | $EGREP '(trying path:|Adding directory|Looking for|Scanning directory|Cannot open directory)' | $SED 's/^.*trying path:/trying path:/'`
+    $PKGCONFIG --exists --debug $1 2>&1 | \
+      $EGREP '(trying path:|Adding directory|Looking for|Scanning directory|Cannot open directory)' | \
+      $SED 's/^.*trying path:/trying path:/'`
   msg=`CURL_EXPORT_PCDIR([$2], [$3])
     $PKGCONFIG --exists --print-errors $1 2>&1`
   if test -n "$msg"; then

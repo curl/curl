@@ -106,13 +106,15 @@ cut-and-paste, e.g.:
 
 ```sh
 dig +short https defo.ie
-1 . ipv4hint=213.108.108.101 ech=AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA ipv6hint=2a00:c6c0:0:116:5::10
+1 . ipv4hint=213.108.108.101 ech=AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA
+  ipv6hint=2a00:c6c0:0:116:5::10
 ```
 
 Then paste the base64 encoded ECHConfigList onto the curl command line:
 
 ```sh
-LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech ecl:AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech ecl:AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA \
+  https://defo.ie/ech-check.php
 ...
 SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
 ...
@@ -124,7 +126,8 @@ If you paste in the wrong ECHConfigList (it changes hourly for `defo.ie`) you
 should get an error like this:
 
 ```sh
-LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA \
+  https://defo.ie/ech-check.php
 ...
 * OpenSSL/3.3.0: error:0A00054B:SSL routines::ech required
 ...
@@ -139,7 +142,8 @@ good value, via the `retry_configs` mechanism. You can see that value in
 the verbose output, e.g.:
 
 ```sh
-LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA \
+  https://defo.ie/ech-check.php
 ...
 * ECH: retry_configs AQD+DQA8DAAgACBvYqJy+Hgk33wh/ZLBzKSPgwxeop7gvojQzfASq7zeZQAEAAEAAQANY292ZXIuZGVmby5pZQAA/g0APEMAIAAgXkT5r4cYs8z19q5rdittyIX
   8gfQ3ENW4wj1fVoiJZBoABAABAAEADWNvdmVyLmRlZm8uaWUAAP4NADw2ACAAINXSE9EdXzEQIJZA7vpwCIQsWqsFohZARXChgPsnfI1kAAQAAQABAA1jb3Zlci5kZWZvLmllAAD+DQA8c
@@ -455,7 +459,8 @@ In another window:
 
 ```sh
 cd $HOME/code/curl/
-./src/curl -vvv --insecure --connect-to foo.example.com:8443:localhost:8443 --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
+./src/curl -vvv --insecure --connect-to foo.example.com:8443:localhost:8443 \
+  --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
 ```
 
 ### Automated use of `retry_configs` not supported so far...
