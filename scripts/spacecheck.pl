@@ -181,7 +181,7 @@ while(my $filename = <$git_ls_files>) {
 
     if(!fn_match($filename, @longline)) {
         my $line = 0;
-        my $max = 200;
+        my $max = 192;
         for my $l (split(/\n/, $content)) {
             $line++;
             if(length($l) > $max) {

@@ -78,7 +78,8 @@ Build ngtcp2:
      % cd ngtcp2
      % autoreconf -fi
      # Change --with-openssl to --with-boringssl for AWS-LC and BoringSSL
-     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --prefix=/path/to/ngtcp2 --enable-lib-only --with-openssl
+     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" \
+       --prefix=/path/to/ngtcp2 --enable-lib-only --with-openssl
      % make
      % make install
 
@@ -129,7 +130,8 @@ Build ngtcp2:
      % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/gnutls/lib" --prefix=/path/to/ngtcp2 --enable-lib-only --with-gnutls
+     % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/gnutls/lib" \
+       --prefix=/path/to/ngtcp2 --enable-lib-only --with-gnutls
      % make
      % make install
 
@@ -179,7 +181,8 @@ Build ngtcp2:
      % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/wolfssl/lib" --prefix=/path/to/ngtcp2 --enable-lib-only --with-wolfssl
+     % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/wolfssl/lib" \
+       --prefix=/path/to/ngtcp2 --enable-lib-only --with-wolfssl
      % make
      % make install
 
