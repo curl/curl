@@ -1867,6 +1867,9 @@ static CURLcode parallel_transfers(CURLSH *share)
   if(!s->multi)
     return CURLE_OUT_OF_MEMORY;
 
+#ifndef DEBUGBUILD
+  (void)curl_multi_setopt(s->multi, CURLMOPT_QUICK_EXIT, 1L);
+#endif
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYFUNCTION, mnotify);
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYDATA, s);
   (void)curl_multi_notify_enable(s->multi, CURLMNOTIFY_INFO_READ);

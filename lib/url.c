@@ -3039,7 +3039,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
   }
 
   result = Curl_resolv(data, ehost->name, eport,
-                       conn->ip_version, timeout_ms, pdns);
+                       conn->ip_version, conn->transport_wanted,
+                       timeout_ms, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
     DEBUGASSERT(*pdns);

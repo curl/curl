@@ -282,16 +282,20 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
+    item = NULL;
     Curl_llist_append(&tqueue->sendq, qitem, &qitem->node);
-    result = CURLE_OK;
     signals = Curl_llist_count(&tqueue->sendq);
+    result = CURLE_OK;
   }
 
 out:
   Curl_mutex_release(&tqueue->lock);
-  /* Signal thread pool unlocked to avoid deadlocks */
+  /* Signal thread pool unlocked to avoid deadlocks. Since we added
+   * item to the queue already, it might have been taken for processing
+   * already. Any error in signalling the pool cannot be reported to
+   * the caller since it needs to give up ownership of item. */
   if(!result && signals)
-    result = Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
+    (void)Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
   return result;
 }
 
@@ -355,6 +359,27 @@ CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
                                uint32_t timeout_ms)
 {
   return Curl_thrdpool_await_idle(tqueue->tpool, timeout_ms);
+}
+
+CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
+                              uint32_t max_len,
+                              uint32_t min_threads,
+                              uint32_t max_threads,
+                              uint32_t idle_time_ms)
+{
+  CURLcode result;
+  size_t signals;
+
+  Curl_mutex_acquire(&tqueue->lock);
+  tqueue->send_max_len = max_len;
+  signals = Curl_llist_count(&tqueue->sendq);
+  Curl_mutex_release(&tqueue->lock);
+
+  result = Curl_thrdpool_set_props(tqueue->tpool, min_threads,
+                                   max_threads, idle_time_ms);
+  if(!result && signals)
+    result = Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
+  return result;
 }
 
 #ifdef CURLVERBOSE

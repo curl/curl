@@ -109,6 +109,9 @@ struct Curl_multi {
 
   struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
+#ifdef USE_RESOLV_THREADED
+  struct curl_thrdq *resolv_thrdq;
+#endif
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
@@ -186,6 +189,7 @@ struct Curl_multi {
   BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
   BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
   BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */
+  BIT(quick_exit);             /* do not join threads on cleanup */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif

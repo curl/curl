@@ -91,6 +91,12 @@ CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads);
 CURLcode Curl_thrdpool_await_idle(struct curl_thrdpool *tpool,
                                   uint32_t timeout_ms);
 
+/* Change the properties of a threadpool. */
+CURLcode Curl_thrdpool_set_props(struct curl_thrdpool *tpool,
+                                 uint32_t min_threads,
+                                 uint32_t max_threads,
+                                 uint32_t idle_time_ms);
+
 #ifdef CURLVERBOSE
 void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
                          struct Curl_easy *data,

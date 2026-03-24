@@ -403,6 +403,12 @@ typedef enum {
   /* This is the argument passed to the notify callback */
   CURLOPT(CURLMOPT_NOTIFYDATA, CURLOPTTYPE_OBJECTPOINT, 19),
 
+  /* maximum number of threads used with threaded DNS resolver */
+  CURLOPT(CURLMOPT_RESOLVE_THREADS_MAX, CURLOPTTYPE_LONG, 20),
+
+  /* set to 1L for not joining threads when multi is cleaned up */
+  CURLOPT(CURLMOPT_QUICK_EXIT, CURLOPTTYPE_LONG, 21),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

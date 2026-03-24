@@ -121,7 +121,8 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
       tpool->fn_return(item, tpool->aborted ? NULL : tpool->fn_user_data);
     }
 
-    if(tpool->aborted)
+    if(tpool->aborted ||
+       (Curl_llist_count(&tpool->slots) > tpool->max_threads))
       goto out;
 
     tslot->idle = TRUE;
@@ -235,6 +236,63 @@ static bool thrdpool_unlink(struct curl_thrdpool *tpool, bool locked)
   return TRUE;
 }
 
+static CURLcode thrdpool_signal(struct curl_thrdpool *tpool,
+                                uint32_t nthreads)
+{
+  struct Curl_llist_node *e, *n;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(!tpool->aborted);
+  thrdpool_join_zombies(tpool);
+
+  for(e = Curl_llist_head(&tpool->slots); e && nthreads; e = n) {
+    struct thrdslot *tslot = Curl_node_elem(e);
+    n = Curl_node_next(e);
+    if(tslot->idle) {
+      Curl_cond_signal(&tslot->await);
+      --nthreads;
+    }
+    else if(!tslot->starttime.tv_sec && !tslot->starttime.tv_usec) {
+      /* starting thread, queries for work soon. */
+      --nthreads;
+    }
+  }
+
+  while(nthreads && !result &&
+        Curl_llist_count(&tpool->slots) < tpool->max_threads) {
+    result = thrdslot_start(tpool);
+    if(result)
+      break;
+    --nthreads;
+  }
+
+  return result;
+}
+
+CURLcode Curl_thrdpool_set_props(struct curl_thrdpool *tpool,
+                                 uint32_t min_threads,
+                                 uint32_t max_threads,
+                                 uint32_t idle_time_ms)
+{
+  CURLcode result = CURLE_OK;
+  size_t running;
+
+  if(!max_threads || (min_threads > max_threads))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  Curl_mutex_acquire(&tpool->lock);
+  tpool->min_threads = min_threads;
+  tpool->max_threads = max_threads;
+  tpool->idle_time_ms = idle_time_ms;
+  running = Curl_llist_count(&tpool->slots);
+  if(tpool->min_threads > running) {
+    result = thrdpool_signal(tpool, tpool->min_threads - (uint32_t)running);
+  }
+  Curl_mutex_release(&tpool->lock);
+
+  return result;
+}
+
 CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
                               const char *name,
                               uint32_t min_threads,
@@ -257,9 +315,6 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
   Curl_cond_init(&tpool->await);
   Curl_llist_init(&tpool->slots, NULL);
   Curl_llist_init(&tpool->zombies, NULL);
-  tpool->min_threads = min_threads;
-  tpool->max_threads = max_threads;
-  tpool->idle_time_ms = idle_time_ms;
   tpool->fn_take = fn_take;
   tpool->fn_process = fn_process;
   tpool->fn_return = fn_return;
@@ -269,10 +324,8 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
   if(!tpool->name)
     goto out;
 
-  if(tpool->min_threads)
-    result = Curl_thrdpool_signal(tpool, tpool->min_threads);
-  else
-    result = CURLE_OK;
+  result = Curl_thrdpool_set_props(tpool, min_threads, max_threads,
+                                   idle_time_ms);
 
 out:
   if(result && tpool) {
@@ -316,35 +369,10 @@ void Curl_thrdpool_destroy(struct curl_thrdpool *tpool, bool join)
 
 CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads)
 {
-  struct Curl_llist_node *e, *n;
-  CURLcode result = CURLE_OK;
+  CURLcode result;
 
   Curl_mutex_acquire(&tpool->lock);
-  DEBUGASSERT(!tpool->aborted);
-
-  thrdpool_join_zombies(tpool);
-
-  for(e = Curl_llist_head(&tpool->slots); e && nthreads; e = n) {
-    struct thrdslot *tslot = Curl_node_elem(e);
-    n = Curl_node_next(e);
-    if(tslot->idle) {
-      Curl_cond_signal(&tslot->await);
-      --nthreads;
-    }
-    else if(!tslot->starttime.tv_sec && !tslot->starttime.tv_usec) {
-      /* starting thread, queries for work soon. */
-      --nthreads;
-    }
-  }
-
-  while(nthreads && !result &&
-        Curl_llist_count(&tpool->slots) < tpool->max_threads) {
-    result = thrdslot_start(tpool);
-    if(result)
-      break;
-    --nthreads;
-  }
-
+  result = thrdpool_signal(tpool, nthreads);
   Curl_mutex_release(&tpool->lock);
   return result;
 }
