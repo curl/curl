@@ -357,6 +357,9 @@ void tool_version_info(void)
 #ifdef CURL_CA_EMBED
     ++feat_ext_count;
 #endif
+#ifdef CURL_DEBUG_GLOBAL_MEM
+    ++feat_ext_count;
+#endif
     feat_ext = curlx_malloc(sizeof(*feature_names) * (feat_ext_count + 1));
     if(feat_ext) {
       memcpy((void *)feat_ext, feature_names,
@@ -364,6 +367,9 @@ void tool_version_info(void)
       feat_ext_count = feature_count;
 #ifdef CURL_CA_EMBED
       feat_ext[feat_ext_count++] = "CAcert";
+#endif
+#ifdef CURL_DEBUG_GLOBAL_MEM
+      feat_ext[feat_ext_count++] = "global-mem-debug";
 #endif
       feat_ext[feat_ext_count] = NULL;
       qsort((void *)feat_ext, feat_ext_count, sizeof(*feat_ext),
