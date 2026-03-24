@@ -80,7 +80,7 @@ dnl -------------------------------------------------
 dnl Verify if compiler being used is clang.
 
 AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
-  AC_BEFORE([$0],[CURL_CHECK_COMPILER_GNU_C])dnl
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER_GNU_C])
   AC_MSG_CHECKING([if compiler is clang])
   CURL_CHECK_DEF([__clang__], [], [silent])
   if test "$curl_cv_have_def___clang__" = "yes"; then
@@ -183,8 +183,8 @@ dnl Version 4.7 =>   407
 dnl Version 9.2.1 => 900
 dnl
 AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
-  AC_REQUIRE([CURL_CHECK_COMPILER_INTEL_C])dnl
-  AC_REQUIRE([CURL_CHECK_COMPILER_CLANG])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER_INTEL_C])
+  AC_REQUIRE([CURL_CHECK_COMPILER_CLANG])
   AC_MSG_CHECKING([if compiler is GNU C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "yes" &&
@@ -266,7 +266,7 @@ dnl -------------------------------------------------
 dnl Verify if compiler being used is Intel C.
 
 AC_DEFUN([CURL_CHECK_COMPILER_INTEL_C], [
-  AC_BEFORE([$0],[CURL_CHECK_COMPILER_GNU_C])dnl
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER_GNU_C])
   AC_MSG_CHECKING([if compiler is Intel C])
   CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
   if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
@@ -300,7 +300,7 @@ dnl -------------------------------------------------
 dnl Verify if compiler being used is SGI MIPS C.
 
 AC_DEFUN([CURL_CHECK_COMPILER_SGI_MIPS_C], [
-  AC_REQUIRE([CURL_CHECK_COMPILER_SGI_MIPSPRO_C])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER_SGI_MIPSPRO_C])
   AC_MSG_CHECKING([if compiler is SGI MIPS C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([__sgi], [], [silent])
@@ -324,7 +324,7 @@ dnl -------------------------------------------------
 dnl Verify if compiler being used is SGI MIPSpro C.
 
 AC_DEFUN([CURL_CHECK_COMPILER_SGI_MIPSPRO_C], [
-  AC_BEFORE([$0],[CURL_CHECK_COMPILER_SGI_MIPS_C])dnl
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER_SGI_MIPS_C])
   AC_MSG_CHECKING([if compiler is SGI MIPSpro C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([_COMPILER_VERSION], [], [silent])
@@ -392,8 +392,8 @@ dnl headers from these locations, although on ancient
 dnl GNUC versions these warnings are not silenced.
 
 AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
-  AC_REQUIRE([CURL_CHECK_COMPILER])dnl
+  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])
+  AC_REQUIRE([CURL_CHECK_COMPILER])
   AC_MSG_CHECKING([convert -I options to -isystem])
   if test "$compiler_id" = "GNU_C" ||
      test "$compiler_id" = "CLANG" ||
@@ -512,8 +512,8 @@ dnl depend on configure's debug, optimize or warnings
 dnl options.
 
 AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
-  AC_REQUIRE([CURL_CHECK_COMPILER])dnl
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER])
+  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])
 
   if test "$compiler_id" != "unknown"; then
 
@@ -660,9 +660,9 @@ dnl Sets compiler specific options/flags which depend
 dnl on configure's debug option.
 
 AC_DEFUN([CURL_SET_COMPILER_DEBUG_OPTS], [
-  AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
-  AC_REQUIRE([CURL_CHECK_COMPILER])dnl
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
+  AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])
+  AC_REQUIRE([CURL_CHECK_COMPILER])
+  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])
 
   if test "$compiler_id" != "unknown"; then
 
@@ -697,9 +697,9 @@ dnl Sets compiler specific options/flags which depend
 dnl on configure's optimize option.
 
 AC_DEFUN([CURL_SET_COMPILER_OPTIMIZE_OPTS], [
-  AC_REQUIRE([CURL_CHECK_OPTION_OPTIMIZE])dnl
-  AC_REQUIRE([CURL_CHECK_COMPILER])dnl
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
+  AC_REQUIRE([CURL_CHECK_OPTION_OPTIMIZE])
+  AC_REQUIRE([CURL_CHECK_COMPILER])
+  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])
 
   if test "$compiler_id" != "unknown"; then
 
@@ -778,9 +778,9 @@ dnl Sets compiler options/flags which depend on
 dnl configure's warnings given option.
 
 AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
-  AC_REQUIRE([CURL_CHECK_OPTION_WARNINGS])dnl
-  AC_REQUIRE([CURL_CHECK_COMPILER])dnl
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
+  AC_REQUIRE([CURL_CHECK_OPTION_WARNINGS])
+  AC_REQUIRE([CURL_CHECK_COMPILER])
+  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])
 
   if test "$compiler_id" != "unknown"; then
 
@@ -1386,7 +1386,7 @@ dnl code file, when the source code tries to define a
 dnl type for a constant array with negative dimension.
 
 AC_DEFUN([CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
-  AC_REQUIRE([CURL_CHECK_COMPILER_HALT_ON_ERROR])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER_HALT_ON_ERROR])
   AC_MSG_CHECKING([if compiler halts on negative sized arrays])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
@@ -1412,7 +1412,7 @@ dnl result, as a compilation-time condition inside the
 dnl type definition of a constant array.
 
 AC_DEFUN([CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE], [
-  AC_REQUIRE([CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE])
   AC_MSG_CHECKING([if compiler struct member size checking works])
   tst_compiler_check_one_works="unknown"
   AC_COMPILE_IFELSE([
@@ -1477,8 +1477,8 @@ dnl shell variable supports_symbol_hiding value as appropriate, as well as
 dnl variables symbol_hiding_CFLAGS and symbol_hiding_EXTERN when supported.
 
 AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
-  AC_REQUIRE([CURL_CHECK_COMPILER])dnl
-  AC_BEFORE([$0],[CURL_CONFIGURE_SYMBOL_HIDING])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER])
+  AC_BEFORE([$0],[CURL_CONFIGURE_SYMBOL_HIDING])
   AC_MSG_CHECKING([if compiler supports hiding library internal symbols])
   supports_symbol_hiding="no"
   symbol_hiding_CFLAGS=""
@@ -1586,7 +1586,7 @@ dnl code file, when the source code tries to redefine
 dnl a prototype which does not match previous one.
 
 AC_DEFUN([CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH], [
-  AC_REQUIRE([CURL_CHECK_COMPILER_HALT_ON_ERROR])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER_HALT_ON_ERROR])
   AC_MSG_CHECKING([if compiler halts on function prototype mismatch])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
@@ -1658,7 +1658,7 @@ dnl as whitespace separated lists of words. Each word
 dnl from VALUE is removed from VARNAME when present.
 
 AC_DEFUN([CURL_VAR_STRIP], [
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
+  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])
   ac_var_stripped=""
   for word1 in $[$1]; do
     ac_var_strip_word="no"
@@ -1684,7 +1684,7 @@ dnl Add each compiler warning from NEW-WARNINGS that has not
 dnl been disabled via CFLAGS to WARNING-LIST.
 
 AC_DEFUN([CURL_ADD_COMPILER_WARNINGS], [
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
+  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])
   ac_var_added_warnings=""
   for warning in [$2]; do
     CURL_VAR_MATCH(CFLAGS, [-Wno-$warning -W$warning])

@@ -207,13 +207,13 @@ dnl See which TLS backend(s) that are requested. Just do all the
 dnl TLS AC_ARG_WITH() invokes here and do the checks later
 dnl **********************************************************************
 OPT_SCHANNEL=no
-AC_ARG_WITH(schannel,dnl
+AC_ARG_WITH(schannel,
 AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS]),
   OPT_SCHANNEL=$withval
   TLSCHOICE="Schannel")
 
 OPT_AMISSL=no
-AC_ARG_WITH(amissl,dnl
+AC_ARG_WITH(amissl,
 AS_HELP_STRING([--with-amissl],[enable Amiga native SSL/TLS (AmiSSL)]),[
   OPT_AMISSL=$withval
   TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }AmiSSL"
@@ -222,7 +222,7 @@ AS_HELP_STRING([--with-amissl],[enable Amiga native SSL/TLS (AmiSSL)]),[
 OPT_OPENSSL=no
 dnl Default to no CA bundle
 ca="no"
-AC_ARG_WITH(ssl,dnl
+AC_ARG_WITH(ssl,
 AS_HELP_STRING([--with-ssl=PATH],[old version of --with-openssl])
 AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
   OPT_SSL=$withval
@@ -234,7 +234,7 @@ AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
   fi
 ])
 
-AC_ARG_WITH(openssl,dnl
+AC_ARG_WITH(openssl,
 AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points
   to the SSL installation (default: /usr/local/ssl); when possible, set
   the PKG_CONFIG_PATH environment variable instead of using this option]),
@@ -246,7 +246,7 @@ AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points
 ])
 
 OPT_GNUTLS=no
-AC_ARG_WITH(gnutls,dnl
+AC_ARG_WITH(gnutls,
 AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root]),[
   OPT_GNUTLS=$withval
   if test "x$withval" != "xno"; then
@@ -255,7 +255,7 @@ AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to th
 ])
 
 OPT_MBEDTLS=no
-AC_ARG_WITH(mbedtls,dnl
+AC_ARG_WITH(mbedtls,
 AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root]),[
   OPT_MBEDTLS=$withval
   if test "x$withval" != "xno"; then
@@ -264,7 +264,7 @@ AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to 
 ])
 
 OPT_WOLFSSL=no
-AC_ARG_WITH(wolfssl,dnl
+AC_ARG_WITH(wolfssl,
 AS_HELP_STRING([--with-wolfssl=PATH],[where to look for wolfSSL, PATH points to the installation root (default: system lib default)]),[
   OPT_WOLFSSL=$withval
   if test "x$withval" != "xno"; then
@@ -273,7 +273,7 @@ AS_HELP_STRING([--with-wolfssl=PATH],[where to look for wolfSSL, PATH points to 
 ])
 
 OPT_RUSTLS=no
-AC_ARG_WITH(rustls,dnl
+AC_ARG_WITH(rustls,
 AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to the installation root]),[
   OPT_RUSTLS=$withval
   if test "x$withval" != "xno"; then
@@ -283,7 +283,7 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to th
 ])
 
 OPT_APPLE_SECTRUST=$curl_cv_apple
-AC_ARG_WITH(apple-sectrust,dnl
+AC_ARG_WITH(apple-sectrust,
 AS_HELP_STRING([--with-apple-sectrust],[enable Apple OS native certificate verification]),[
   OPT_APPLE_SECTRUST=$withval
 ])
@@ -293,7 +293,7 @@ AC_SUBST(PERL)
 AM_CONDITIONAL(PERL, test -n "$PERL")
 
 TEST_NGHTTPX=nghttpx
-AC_ARG_WITH(test-nghttpx,dnl
+AC_ARG_WITH(test-nghttpx,
 AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
   TEST_NGHTTPX=$withval
   if test "x$TEST_NGHTTPX" = "xno"; then
@@ -309,7 +309,7 @@ elif test -x /usr/local/bin/caddy; then
 elif test -x "`brew --prefix 2>/dev/null`/bin/caddy"; then
   CADDY=`brew --prefix`/bin/caddy
 fi
-AC_ARG_WITH(test-caddy,dnl
+AC_ARG_WITH(test-caddy,
 AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
   CADDY=$withval
   if test "x$CADDY" = "xno"; then
@@ -325,7 +325,7 @@ elif test -x /usr/local/sbin/vsftpd; then
 elif test -x "`brew --prefix 2>/dev/null`/sbin/vsftpd"; then
   VSFTPD=`brew --prefix`/sbin/vsftpd
 fi
-AC_ARG_WITH(test-vsftpd,dnl
+AC_ARG_WITH(test-vsftpd,
 AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
   VSFTPD=$withval
   if test "x$VSFTPD" = "xno"; then
@@ -1529,7 +1529,7 @@ dnl Brotli project home page: https://github.com/google/brotli
 
 dnl Default to compiler & linker defaults for BROTLI files & libraries.
 OPT_BROTLI=off
-AC_ARG_WITH(brotli,dnl
+AC_ARG_WITH(brotli,
 AS_HELP_STRING([--with-brotli=PATH],[Where to look for brotli, PATH points to the BROTLI installation;
   when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-brotli], [disable BROTLI]),
@@ -1627,7 +1627,7 @@ dnl **********************************************************************
 
 dnl Default to compiler & linker defaults for libzstd
 OPT_ZSTD=off
-AC_ARG_WITH(zstd,dnl
+AC_ARG_WITH(zstd,
 AS_HELP_STRING([--with-zstd=PATH],[Where to look for libzstd, PATH points to the libzstd installation;
   when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-zstd], [disable libzstd]),
@@ -2210,7 +2210,7 @@ dnl **********************************************************************
 
 dnl Default to compiler & linker defaults for LIBPSL files & libraries.
 OPT_LIBPSL=off
-AC_ARG_WITH(libpsl,dnl
+AC_ARG_WITH(libpsl,
 AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to the LIBPSL installation;
   when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-libpsl], [disable LIBPSL]),
@@ -2283,7 +2283,7 @@ dnl Check for libgsasl
 dnl **********************************************************************
 
 OPT_LIBGSASL=no
-AC_ARG_WITH(libgsasl,dnl
+AC_ARG_WITH(libgsasl,
 AS_HELP_STRING([--with-libgsasl=PATH],[Where to look for libgsasl, PATH points to the libgsasl installation;
   when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-libgsasl], [disable libgsasl support for SCRAM]),
@@ -2357,14 +2357,14 @@ dnl **********************************************************************
 
 dnl Default to compiler & linker defaults for libssh2 files & libraries.
 OPT_LIBSSH2=off
-AC_ARG_WITH(libssh2,dnl
+AC_ARG_WITH(libssh2,
 AS_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the libssh2 installation;
   when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh2], [enable libssh2]),
   OPT_LIBSSH2=$withval, OPT_LIBSSH2=no)
 
 OPT_LIBSSH=off
-AC_ARG_WITH(libssh,dnl
+AC_ARG_WITH(libssh,
 AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to the libssh installation;
   when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh], [enable libssh]),
@@ -2924,11 +2924,11 @@ if test "$want_idn" = "yes"; then
     IDN_PCDIR="$want_idn_path/lib$libsuff/pkgconfig"
     CURL_CHECK_PKGCONFIG(libidn2, [$IDN_PCDIR])
     if test "$PKGCONFIG" != "no"; then
-      IDN_LIBS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+      IDN_LIBS=`CURL_EXPORT_PCDIR([$IDN_PCDIR])
         $PKGCONFIG --libs-only-l libidn2 2>/dev/null`
-      IDN_LDFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+      IDN_LDFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR])
         $PKGCONFIG --libs-only-L libidn2 2>/dev/null`
-      IDN_CPPFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+      IDN_CPPFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR])
         $PKGCONFIG --cflags-only-I libidn2 2>/dev/null`
       IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/^-L//'`
     else
@@ -3052,7 +3052,7 @@ if test "$want_nghttp2" != "no"; then
       $PKGCONFIG --libs-only-l libnghttp2`
     AC_MSG_NOTICE([-l is $LIB_H2])
 
-    CPP_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path]) dnl
+    CPP_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
       $PKGCONFIG --cflags-only-I libnghttp2`
     AC_MSG_NOTICE([-I is $CPP_H2])
 
@@ -3154,7 +3154,7 @@ if test "$want_tcp2" != "no"; then
       $PKGCONFIG --libs-only-l libngtcp2`
     AC_MSG_NOTICE([-l is $LIB_TCP2])
 
-    CPP_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+    CPP_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --cflags-only-I libngtcp2`
     AC_MSG_NOTICE([-I is $CPP_TCP2])
 
@@ -3213,7 +3213,7 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && test "$HAVE_LIBR
       $PKGCONFIG --libs-only-l libngtcp2_crypto_libressl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_LIBRESSL])
 
-    CPP_NGTCP2_CRYPTO_LIBRESSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1) dnl
+    CPP_NGTCP2_CRYPTO_LIBRESSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_libressl`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_LIBRESSL])
 
@@ -3274,7 +3274,7 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && test "$HAVE_LIBR
       $PKGCONFIG --libs-only-l libngtcp2_crypto_quictls`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_QUICTLS])
 
-    CPP_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1) dnl
+    CPP_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_quictls`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_QUICTLS])
 
@@ -3333,7 +3333,7 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" &&
       $PKGCONFIG --libs-only-l libngtcp2_crypto_ossl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_OSSL])
 
-    CPP_NGTCP2_CRYPTO_OSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1) dnl
+    CPP_NGTCP2_CRYPTO_OSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_ossl`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_OSSL])
 
@@ -3393,7 +3393,7 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" &&
       $PKGCONFIG --libs-only-l libngtcp2_crypto_boringssl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_BORINGSSL])
 
-    CPP_NGTCP2_CRYPTO_BORINGSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1) dnl
+    CPP_NGTCP2_CRYPTO_BORINGSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_boringssl`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_BORINGSSL])
 
@@ -3450,7 +3450,7 @@ if test "$USE_NGTCP2" = "1" && test "$GNUTLS_ENABLED" = "1"; then
       $PKGCONFIG --libs-only-l libngtcp2_crypto_gnutls`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_GNUTLS])
 
-    CPP_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1) dnl
+    CPP_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_gnutls`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_GNUTLS])
 
@@ -3507,7 +3507,7 @@ if test "$USE_NGTCP2" = "1" && test "$WOLFSSL_ENABLED" = "1"; then
       $PKGCONFIG --libs-only-l libngtcp2_crypto_wolfssl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_WOLFSSL])
 
-    CPP_NGTCP2_CRYPTO_WOLFSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1) dnl
+    CPP_NGTCP2_CRYPTO_WOLFSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_wolfssl`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_WOLFSSL])
 
@@ -3604,7 +3604,7 @@ if test "$want_nghttp3" != "no"; then
       $PKGCONFIG --libs-only-l libnghttp3`
     AC_MSG_NOTICE([-l is $LIB_NGHTTP3])
 
-    CPP_NGHTTP3=`CURL_EXPORT_PCDIR([$want_nghttp3_path]) dnl
+    CPP_NGHTTP3=`CURL_EXPORT_PCDIR([$want_nghttp3_path])
       $PKGCONFIG --cflags-only-I libnghttp3`
     AC_MSG_NOTICE([-I is $CPP_NGHTTP3])
 
@@ -3711,7 +3711,7 @@ if test "$want_quiche" != "no"; then
       $PKGCONFIG --libs-only-l quiche`
     AC_MSG_NOTICE([-l is $LIB_QUICHE])
 
-    CPP_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path]) dnl
+    CPP_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path])
       $PKGCONFIG --cflags-only-I quiche`
     AC_MSG_NOTICE([-I is $CPP_QUICHE])
 
@@ -3804,7 +3804,7 @@ if test "$want_libuv" != "no"; then
       $PKGCONFIG --libs-only-l libuv`
     AC_MSG_NOTICE([-l is $LIB_LIBUV])
 
-    CPP_LIBUV=`CURL_EXPORT_PCDIR([$want_libuv_path]) dnl
+    CPP_LIBUV=`CURL_EXPORT_PCDIR([$want_libuv_path])
       $PKGCONFIG --cflags-only-I libuv`
     AC_MSG_NOTICE([-I is $CPP_LIBUV])
 

@@ -32,12 +32,12 @@ dnl result in a set of double-quoted strings the returned expansion will
 dnl actually be a single double-quoted string concatenating all them.
 
 AC_DEFUN([CURL_CHECK_DEF], [
-  AC_REQUIRE([CURL_CPP_P])dnl
+  AC_REQUIRE([CURL_CPP_P])
   OLDCPPFLAGS=$CPPFLAGS
   dnl CPPPFLAG comes from CURL_CPP_P
   CPPFLAGS="$CPPFLAGS $CPPPFLAG"
-  AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
-  AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
+  AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])
+  AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])
   if test -z "$SED"; then
     AC_MSG_ERROR([SED not set. Cannot continue without SED being set.])
   fi
@@ -70,8 +70,8 @@ AC_DEFUN([CURL_CHECK_DEF], [
     AS_VAR_SET(ac_Def, $tmp_exp)
     ifelse($3,,[AC_MSG_RESULT([$tmp_exp])])
   fi
-  AS_VAR_POPDEF([ac_Def])dnl
-  AS_VAR_POPDEF([ac_HaveDef])dnl
+  AS_VAR_POPDEF([ac_Def])
+  AS_VAR_POPDEF([ac_HaveDef])
   CPPFLAGS=$OLDCPPFLAGS
 ])
 
@@ -84,7 +84,7 @@ dnl default includes even if no INCLUDES argument is given. This macro
 dnl will run silently when invoked with three arguments.
 
 AC_DEFUN([CURL_CHECK_DEF_CC], [
-  AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
+  AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])
   ifelse($3,,[AC_MSG_CHECKING([for compiler definition of $1])])
   AC_COMPILE_IFELSE([
     AC_LANG_SOURCE(
@@ -109,7 +109,7 @@ AC_DEFUN([CURL_CHECK_DEF_CC], [
     AS_VAR_SET(ac_HaveDef, no)
     ifelse($3,,[AC_MSG_RESULT([no])])
   fi
-  AS_VAR_POPDEF([ac_HaveDef])dnl
+  AS_VAR_POPDEF([ac_HaveDef])
 ])
 
 
@@ -152,8 +152,8 @@ AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
 #ifndef _ALL_SOURCE
 #  undef _ALL_SOURCE
 #endif])
-  AC_BEFORE([$0], [AC_SYS_LARGEFILE])dnl
-  AC_BEFORE([$0], [CURL_CONFIGURE_REENTRANT])dnl
+  AC_BEFORE([$0], [AC_SYS_LARGEFILE])
+  AC_BEFORE([$0], [CURL_CONFIGURE_REENTRANT])
   AC_MSG_CHECKING([if OS is AIX (to define _ALL_SOURCE)])
   AC_EGREP_CPP([yes_this_is_aix],[
 #ifdef _AIX
@@ -200,7 +200,7 @@ dnl Check for compilable and valid lber.h header,
 dnl and check if it is needed even with ldap.h
 
 AC_DEFUN([CURL_CHECK_HEADER_LBER], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])
   AC_CACHE_CHECK([for lber.h], [curl_cv_header_lber_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -280,7 +280,7 @@ dnl -------------------------------------------------
 dnl Check for compilable and valid ldap.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
-  AC_REQUIRE([CURL_CHECK_HEADER_LBER])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_LBER])
   AC_CACHE_CHECK([for ldap.h], [curl_cv_header_ldap_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -327,7 +327,7 @@ dnl -------------------------------------------------
 dnl Check for compilable and valid ldap_ssl.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
-  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])
   AC_CACHE_CHECK([for ldap_ssl.h], [curl_cv_header_ldap_ssl_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -380,7 +380,7 @@ dnl whitespace separated list of libraries to check
 dnl before the WINLDAP default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINBER])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_WINBER])
 
   AC_MSG_CHECKING([for WINLDAP libraries])
 
@@ -472,7 +472,7 @@ dnl whitespace separated list of libraries to check
 dnl before the default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
-  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])
 
   AC_MSG_CHECKING([for LDAP libraries])
 
@@ -614,8 +614,8 @@ dnl -------------------------------------------------
 dnl Test if the socket recv() function is available,
 
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
   AC_CHECK_HEADERS(sys/types.h)
 
   AC_MSG_CHECKING([for recv])
@@ -660,8 +660,8 @@ dnl -------------------------------------------------
 dnl Test if the socket send() function is available,
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
   AC_CHECK_HEADERS(sys/types.h)
 
   AC_MSG_CHECKING([for send])
@@ -707,7 +707,7 @@ dnl -------------------------------------------------
 dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])
   AC_CHECK_HEADERS(sys/types.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
@@ -819,7 +819,7 @@ dnl If monotonic clock_gettime is available then,
 dnl check and prepended to LIBS any needed libraries.
 
 AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
-  AC_REQUIRE([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC])dnl
+  AC_REQUIRE([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC])
 
   if test "$curl_func_clock_gettime" = "yes"; then
 
@@ -930,8 +930,8 @@ dnl Verify if network connect function is already available
 dnl using current libraries or if another one is required.
 
 AC_DEFUN([CURL_CHECK_LIBS_CONNECT], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
   AC_MSG_CHECKING([for connect in libraries])
   tst_connect_save_LIBS="$LIBS"
   tst_connect_need_LIBS="unknown"
@@ -977,8 +977,8 @@ dnl -------------------------------------------------
 dnl Test if the socket select() function is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
-  AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
   AC_CHECK_HEADERS(sys/select.h)
 
   AC_MSG_CHECKING([for select])
@@ -1270,7 +1270,7 @@ dnl -------------------------------------------------
 dnl Check if curl's Win32 crypto lib can be used
 
 AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])
   AC_MSG_CHECKING([whether build target supports Win32 crypto API])
   curl_win32_crypto_api="no"
   if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
@@ -1385,7 +1385,7 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
 
   if test "$PKGCONFIG" != "no"; then
     AC_MSG_CHECKING([for $1 options with pkg-config])
-    dnl ask pkg-config about $1
+    # ask pkg-config about $1
     itexists=`CURL_EXPORT_PCDIR([$2], [$3]) dnl
       $PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
 
@@ -1415,7 +1415,7 @@ dnl when the configure script runs. For portability reasons, test
 dnl harness needs information on how to run the C preprocessor.
 
 AC_DEFUN([CURL_PREPARE_CONFIGUREHELP_PM], [
-  AC_REQUIRE([AC_PROG_CPP])dnl
+  AC_REQUIRE([AC_PROG_CPP])
   tmp_cpp=`eval echo "$ac_cpp" 2>/dev/null`
   if test -z "$tmp_cpp"; then
     tmp_cpp='cpp'

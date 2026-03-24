@@ -39,7 +39,7 @@ dnl is used to differentiate automake version 1.14 from older
 dnl ones which lack this macro.
 
 m4_define([_XC_AUTOMAKE_BODY],
-[dnl
+[
 dnl ---------------------------------------
 dnl  Start of automake initialization code
 dnl ---------------------------------------
@@ -48,11 +48,11 @@ m4_ifdef([_AM_PROG_CC_C_O],
 AM_INIT_AUTOMAKE([subdir-objects])
 ],[
 AM_INIT_AUTOMAKE
-])dnl
+])
 dnl -------------------------------------
 dnl  End of automake initialization code
 dnl -------------------------------------
-m4_define([$0], [])[]dnl
+m4_define([$0], [])[]
 ])
 
 
@@ -70,15 +70,15 @@ dnl generate the configure script, otherwise this option
 dnl is not used.
 
 AC_DEFUN([XC_AUTOMAKE],
-[dnl
-AC_PREREQ([2.50])dnl
-dnl
-AC_BEFORE([$0],[AM_INIT_AUTOMAKE])dnl
-dnl
+[
+AC_PREREQ([2.50])
+
+AC_BEFORE([$0],[AM_INIT_AUTOMAKE])
+
 _XC_AUTOMAKE_BODY
-dnl
+
 m4_ifdef([AM_INIT_AUTOMAKE],
-  [m4_undefine([AM_INIT_AUTOMAKE])])dnl
-dnl
-m4_define([$0], [])[]dnl
+  [m4_undefine([AM_INIT_AUTOMAKE])])
+
+m4_define([$0], [])[]
 ])

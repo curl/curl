@@ -470,7 +470,7 @@ dnl shell variable curl_disallow_alarm, then
 dnl HAVE_ALARM will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
-  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])
 
   tst_links_alarm="unknown"
   tst_proto_alarm="unknown"
@@ -555,9 +555,9 @@ dnl shell variable curl_disallow_basename, then
 dnl HAVE_BASENAME will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
-  AC_REQUIRE([CURL_INCLUDES_LIBGEN])dnl
-  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_INCLUDES_STRING])
+  AC_REQUIRE([CURL_INCLUDES_LIBGEN])
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])
 
   tst_links_basename="unknown"
   tst_proto_basename="unknown"
@@ -646,7 +646,7 @@ dnl shell variable curl_disallow_closesocket, then
 dnl HAVE_CLOSESOCKET will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
 
   tst_links_closesocket="unknown"
   tst_proto_closesocket="unknown"
@@ -736,8 +736,8 @@ dnl shell variable curl_disallow_closesocket_camel,
 dnl then HAVE_CLOSESOCKET_CAMEL will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
 
   tst_links_closesocket_camel="unknown"
   tst_compi_closesocket_camel="unknown"
@@ -813,7 +813,7 @@ dnl shell variable curl_disallow_fcntl, then
 dnl HAVE_FCNTL will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
-  AC_REQUIRE([CURL_INCLUDES_FCNTL])dnl
+  AC_REQUIRE([CURL_INCLUDES_FCNTL])
 
   tst_links_fcntl="unknown"
   tst_proto_fcntl="unknown"
@@ -962,9 +962,9 @@ dnl shell variable curl_disallow_freeaddrinfo, then
 dnl HAVE_FREEADDRINFO will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
-  AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])dnl
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])
+  AC_REQUIRE([CURL_INCLUDES_NETDB])
 
   tst_links_freeaddrinfo="unknown"
   tst_proto_freeaddrinfo="unknown"
@@ -1058,7 +1058,7 @@ dnl shell variable curl_disallow_fsetxattr, then
 dnl HAVE_FSETXATTR will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
-  AC_REQUIRE([CURL_INCLUDES_SYS_XATTR])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_XATTR])
 
   tst_links_fsetxattr="unknown"
   tst_proto_fsetxattr="unknown"
@@ -1183,12 +1183,12 @@ dnl to find out if getaddrinfo happens to be thread-safe,
 dnl defining HAVE_GETADDRINFO_THREADSAFE when true.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
-  AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])dnl
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
+  AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])
+  AC_REQUIRE([CURL_INCLUDES_STRING])
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])
+  AC_REQUIRE([CURL_INCLUDES_NETDB])
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])
 
   tst_links_getaddrinfo="unknown"
   tst_proto_getaddrinfo="unknown"
@@ -1411,7 +1411,7 @@ dnl shell variable curl_disallow_gethostbyname_r, then
 dnl HAVE_GETHOSTBYNAME_R will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
-  AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  AC_REQUIRE([CURL_INCLUDES_NETDB])
 
   tst_links_gethostbyname_r="unknown"
   tst_proto_gethostbyname_r="unknown"
@@ -1556,10 +1556,10 @@ dnl shell variable curl_disallow_gethostname, then
 dnl HAVE_GETHOSTNAME will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
-  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])
 
   tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
@@ -1692,10 +1692,10 @@ dnl shell variable curl_disallow_getpeername, then
 dnl HAVE_GETPEERNAME will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
-  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
 
   tst_links_getpeername="unknown"
   tst_proto_getpeername="unknown"
@@ -1790,10 +1790,10 @@ dnl shell variable curl_disallow_getsockname, then
 dnl HAVE_GETSOCKNAME will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
-  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
 
   tst_links_getsockname="unknown"
   tst_proto_getsockname="unknown"
@@ -1889,8 +1889,8 @@ dnl with shell variable curl_disallow_getifaddrs, then
 dnl HAVE_GETIFADDRS will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_IFADDRS])dnl
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])
+  AC_REQUIRE([CURL_INCLUDES_IFADDRS])
 
   tst_links_getifaddrs="unknown"
   tst_proto_getifaddrs="unknown"
@@ -2007,8 +2007,8 @@ dnl with shell variable curl_disallow_gmtime_r, then
 dnl HAVE_GMTIME_R will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_TIME])dnl
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])
+  AC_REQUIRE([CURL_INCLUDES_TIME])
 
   tst_links_gmtime_r="unknown"
   tst_proto_gmtime_r="unknown"
@@ -2127,8 +2127,8 @@ dnl with shell variable curl_disallow_localtime_r, then
 dnl HAVE_LOCALTIME_R will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_TIME])dnl
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])
+  AC_REQUIRE([CURL_INCLUDES_TIME])
 
   tst_links_localtime_r="unknown"
   tst_proto_localtime_r="unknown"
@@ -2247,9 +2247,9 @@ dnl with shell variable curl_disallow_inet_ntop, then
 dnl HAVE_INET_NTOP will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_ARPA_INET])dnl
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])
+  AC_REQUIRE([CURL_INCLUDES_ARPA_INET])
+  AC_REQUIRE([CURL_INCLUDES_STRING])
 
   tst_links_inet_ntop="unknown"
   tst_proto_inet_ntop="unknown"
@@ -2408,9 +2408,9 @@ dnl with shell variable curl_disallow_inet_pton, then
 dnl HAVE_INET_PTON will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_ARPA_INET])dnl
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])
+  AC_REQUIRE([CURL_INCLUDES_ARPA_INET])
+  AC_REQUIRE([CURL_INCLUDES_STRING])
 
   tst_links_inet_pton="unknown"
   tst_proto_inet_pton="unknown"
@@ -2562,7 +2562,7 @@ dnl shell variable curl_disallow_ioctl, then
 dnl curl_cv_func_ioctl is set to "yes".
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
-  AC_REQUIRE([CURL_INCLUDES_STROPTS])dnl
+  AC_REQUIRE([CURL_INCLUDES_STROPTS])
 
   tst_links_ioctl="unknown"
   tst_proto_ioctl="unknown"
@@ -2760,7 +2760,7 @@ dnl shell variable curl_disallow_ioctlsocket, then
 dnl HAVE_IOCTLSOCKET will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
 
   tst_links_ioctlsocket="unknown"
   tst_proto_ioctlsocket="unknown"
@@ -2907,7 +2907,7 @@ dnl shell variable curl_disallow_ioctlsocket_camel,
 dnl then HAVE_IOCTLSOCKET_CAMEL will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
 
   tst_links_ioctlsocket_camel="unknown"
   tst_compi_ioctlsocket_camel="unknown"
@@ -2981,7 +2981,7 @@ dnl can be compiled, and seems to work. If all of these are
 dnl true, then HAVE_IOCTLSOCKET_CAMEL_FIONBIO will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
 
   tst_compi_ioctlsocket_camel_fionbio="unknown"
   tst_allow_ioctlsocket_camel_fionbio="unknown"
@@ -3039,7 +3039,7 @@ dnl shell variable curl_disallow_memrchr, then
 dnl HAVE_MEMRCHR will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STRING])
 
   tst_links_memrchr="unknown"
   tst_macro_memrchr="unknown"
@@ -3144,7 +3144,7 @@ dnl shell variable curl_disallow_sigaction, then
 dnl HAVE_SIGACTION will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
-  AC_REQUIRE([CURL_INCLUDES_SIGNAL])dnl
+  AC_REQUIRE([CURL_INCLUDES_SIGNAL])
 
   tst_links_sigaction="unknown"
   tst_proto_sigaction="unknown"
@@ -3229,7 +3229,7 @@ dnl shell variable curl_disallow_siginterrupt, then
 dnl HAVE_SIGINTERRUPT will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
-  AC_REQUIRE([CURL_INCLUDES_SIGNAL])dnl
+  AC_REQUIRE([CURL_INCLUDES_SIGNAL])
 
   tst_links_siginterrupt="unknown"
   tst_proto_siginterrupt="unknown"
@@ -3314,7 +3314,7 @@ dnl shell variable curl_disallow_signal, then
 dnl HAVE_SIGNAL will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
-  AC_REQUIRE([CURL_INCLUDES_SIGNAL])dnl
+  AC_REQUIRE([CURL_INCLUDES_SIGNAL])
 
   tst_links_signal="unknown"
   tst_proto_signal="unknown"
@@ -3399,7 +3399,7 @@ dnl shell variable curl_disallow_sigsetjmp, then
 dnl HAVE_SIGSETJMP will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
-  AC_REQUIRE([CURL_INCLUDES_SETJMP])dnl
+  AC_REQUIRE([CURL_INCLUDES_SETJMP])
 
   tst_links_sigsetjmp="unknown"
   tst_macro_sigsetjmp="unknown"
@@ -3506,8 +3506,8 @@ dnl shell variable curl_disallow_socket, then
 dnl HAVE_SOCKET will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])
 
   tst_links_socket="unknown"
   tst_proto_socket="unknown"
@@ -3603,7 +3603,7 @@ dnl shell variable curl_disallow_socketpair, then
 dnl HAVE_SOCKETPAIR will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])
 
   tst_links_socketpair="unknown"
   tst_proto_socketpair="unknown"
@@ -3689,7 +3689,7 @@ dnl shell variable curl_disallow_strcasecmp, then
 dnl HAVE_STRCASECMP will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STRING])
 
   tst_links_strcasecmp="unknown"
   tst_proto_strcasecmp="unknown"
@@ -3773,7 +3773,7 @@ dnl shell variable curl_disallow_strcmpi, then
 dnl HAVE_STRCMPI will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STRING])
 
   tst_links_strcmpi="unknown"
   tst_proto_strcmpi="unknown"
@@ -3874,8 +3874,8 @@ dnl  error string in the provided resultbuf.
 dnl
 
 AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])
+  AC_REQUIRE([CURL_INCLUDES_STRING])
 
   tst_links_strerror_r="unknown"
   tst_proto_strerror_r="unknown"
@@ -4124,7 +4124,7 @@ dnl shell variable curl_disallow_stricmp, then
 dnl HAVE_STRICMP will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STRING])
 
   tst_links_stricmp="unknown"
   tst_proto_stricmp="unknown"
@@ -4316,7 +4316,7 @@ dnl
 
 AC_DEFUN([CURL_SIZEOF], [
   dnl The #define name to make autoheader put the name in curl_config.h.in
-  define(TYPE, translit(sizeof_$1, [a-z *], [A-Z_P]))dnl
+  define(TYPE, translit(sizeof_$1, [a-z *], [A-Z_P]))
 
   AC_MSG_CHECKING(size of $1)
   r=0

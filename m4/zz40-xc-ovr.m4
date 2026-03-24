@@ -31,8 +31,8 @@ dnl Version macros
 dnl -------------------------------------------------
 dnl Public macros.
 
-m4_define([XC_CONFIGURE_PREAMBLE_VER_MAJOR],[1])dnl
-m4_define([XC_CONFIGURE_PREAMBLE_VER_MINOR],[0])dnl
+m4_define([XC_CONFIGURE_PREAMBLE_VER_MAJOR],[1])
+m4_define([XC_CONFIGURE_PREAMBLE_VER_MINOR],[0])
 
 
 dnl _XC_CFG_PRE_PREAMBLE
@@ -42,8 +42,8 @@ dnl Private macro.
 AC_DEFUN([_XC_CFG_PRE_PREAMBLE],
 [
 dnl --------------------------------
-@%:@@%:@  [XC_CONFIGURE_PREAMBLE] ver: []dnl
-XC_CONFIGURE_PREAMBLE_VER_MAJOR.[]dnl
+@%:@@%:@  [XC_CONFIGURE_PREAMBLE] ver: []
+XC_CONFIGURE_PREAMBLE_VER_MAJOR.[]
 XC_CONFIGURE_PREAMBLE_VER_MINOR
 dnl --------------------------------
 
@@ -89,8 +89,8 @@ dnl Emits shell code that verifies that 'echo' command
 dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])
 dnl
 dnl Verify that 'echo' command is available, otherwise abort.
 dnl
@@ -118,8 +118,8 @@ dnl Emits shell code that verifies that 'test' command
 dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_TEST],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])
 dnl
 dnl Verify that 'test' command is available, otherwise abort.
 dnl
@@ -146,8 +146,8 @@ dnl Emits shell code that verifies that 'PATH' variable
 dnl is set, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_VAR_PATH],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])
 dnl
 dnl Verify that 'PATH' variable is set, otherwise abort.
 dnl
@@ -174,8 +174,8 @@ dnl Emits shell code that verifies that 'expr' command
 dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])
 dnl
 dnl Verify that 'expr' command is available, otherwise abort.
 dnl
@@ -206,8 +206,8 @@ dnl script bootstrapping itself. No fancy testing for a
 dnl proper 'sed' this early, that should be done later.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_SED],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])
 dnl
 dnl Verify that 'sed' utility is found within 'PATH', otherwise abort.
 dnl
@@ -239,8 +239,8 @@ dnl script bootstrapping itself. No fancy testing for a
 dnl proper 'grep' this early, that should be done later.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])
 dnl
 dnl Verify that 'grep' utility is found within 'PATH', otherwise abort.
 dnl
@@ -268,8 +268,8 @@ dnl Emits shell code that verifies that 'tr' utility
 dnl is found within 'PATH', otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_TR],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])
 dnl
 dnl Verify that 'tr' utility is found within 'PATH', otherwise abort.
 dnl
@@ -297,8 +297,8 @@ dnl Emits shell code that verifies that 'wc' utility
 dnl is found within 'PATH', otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_WC],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])
 dnl
 dnl Verify that 'wc' utility is found within 'PATH', otherwise abort.
 dnl
@@ -326,8 +326,8 @@ dnl Emits shell code that verifies that 'cat' utility
 dnl is found within 'PATH', otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])
 dnl
 dnl Verify that 'cat' utility is found within 'PATH', otherwise abort.
 dnl
@@ -367,8 +367,8 @@ dnl Non-empty user provided 'PATH_SEPARATOR' always
 dnl overrides the auto-detected one.
 
 AC_DEFUN([_XC_CFG_PRE_CHECK_PATH_SEPARATOR],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])
 dnl
 dnl Auto-detect and set 'PATH_SEPARATOR', unless it is already non-empty set.
 dnl
@@ -417,7 +417,7 @@ else
   fi
 fi
 xc_PATH_SEPARATOR=$PATH_SEPARATOR
-AC_SUBST([PATH_SEPARATOR])dnl
+AC_SUBST([PATH_SEPARATOR])
 ])
 
 
@@ -426,19 +426,19 @@ dnl -------------------------------------------------
 dnl Private macro.
 
 AC_DEFUN([_XC_CFG_PRE_POSTLUDE],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])dnl
-AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
-dnl
+[
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])
+AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])
+
 xc_configure_preamble_result='yes'
 ])
 
@@ -471,58 +471,58 @@ dnl script is making it override autoconf and libtool
 dnl PATH_SEPARATOR check.
 
 AC_DEFUN([XC_CONFIGURE_PREAMBLE],
-[dnl
-AC_PREREQ([2.50])dnl
-dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_PREAMBLE])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
-AC_BEFORE([$0],[_XC_CFG_PRE_POSTLUDE])dnl
-dnl
-AC_BEFORE([$0],[AC_CHECK_TOOL])dnl
-AC_BEFORE([$0],[AC_CHECK_PROG])dnl
-AC_BEFORE([$0],[AC_CHECK_TOOLS])dnl
-AC_BEFORE([$0],[AC_CHECK_PROGS])dnl
-dnl
-AC_BEFORE([$0],[AC_PATH_TOOL])dnl
-AC_BEFORE([$0],[AC_PATH_PROG])dnl
-AC_BEFORE([$0],[AC_PATH_PROGS])dnl
-dnl
-AC_BEFORE([$0],[AC_PROG_SED])dnl
-AC_BEFORE([$0],[AC_PROG_GREP])dnl
-AC_BEFORE([$0],[AC_PROG_LN_S])dnl
-AC_BEFORE([$0],[AC_PROG_MKDIR_P])dnl
-AC_BEFORE([$0],[AC_PROG_INSTALL])dnl
-AC_BEFORE([$0],[AC_PROG_MAKE_SET])dnl
-AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
-dnl
-AC_BEFORE([$0],[LT_INIT])dnl
-AC_BEFORE([$0],[AM_INIT_AUTOMAKE])dnl
-AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])dnl
-dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])dnl
-AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
-AC_REQUIRE([_XC_CFG_PRE_POSTLUDE])dnl
-dnl
-m4_pattern_forbid([^_*XC])dnl
-m4_define([$0],[])dnl
+[
+AC_PREREQ([2.50])
+
+AC_BEFORE([$0],[_XC_CFG_PRE_PREAMBLE])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_TEST])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_VAR_PATH])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_SED])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_TR])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_WC])
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])
+AC_BEFORE([$0],[_XC_CFG_PRE_CHECK_PATH_SEPARATOR])
+AC_BEFORE([$0],[_XC_CFG_PRE_POSTLUDE])
+
+AC_BEFORE([$0],[AC_CHECK_TOOL])
+AC_BEFORE([$0],[AC_CHECK_PROG])
+AC_BEFORE([$0],[AC_CHECK_TOOLS])
+AC_BEFORE([$0],[AC_CHECK_PROGS])
+
+AC_BEFORE([$0],[AC_PATH_TOOL])
+AC_BEFORE([$0],[AC_PATH_PROG])
+AC_BEFORE([$0],[AC_PATH_PROGS])
+
+AC_BEFORE([$0],[AC_PROG_SED])
+AC_BEFORE([$0],[AC_PROG_GREP])
+AC_BEFORE([$0],[AC_PROG_LN_S])
+AC_BEFORE([$0],[AC_PROG_MKDIR_P])
+AC_BEFORE([$0],[AC_PROG_INSTALL])
+AC_BEFORE([$0],[AC_PROG_MAKE_SET])
+AC_BEFORE([$0],[AC_PROG_LIBTOOL])
+
+AC_BEFORE([$0],[LT_INIT])
+AC_BEFORE([$0],[AM_INIT_AUTOMAKE])
+AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])
+
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])
+AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])
+AC_REQUIRE([_XC_CFG_PRE_POSTLUDE])
+
+m4_pattern_forbid([^_*XC])
+m4_define([$0],[])
 ])
 
 
@@ -540,13 +540,13 @@ dnl Override when using autoconf 2.53 and newer.
 dnl
 
 m4_ifdef([_AS_PATH_SEPARATOR_PREPARE],
-[dnl
-m4_undefine([_AS_PATH_SEPARATOR_PREPARE])dnl
+[
+m4_undefine([_AS_PATH_SEPARATOR_PREPARE])
 m4_defun([_AS_PATH_SEPARATOR_PREPARE],
-[dnl
-AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
-m4_define([$0],[])dnl
-])dnl
+[
+AC_REQUIRE([XC_CONFIGURE_PREAMBLE])
+m4_define([$0],[])
+])
 ])
 
 dnl
@@ -554,14 +554,14 @@ dnl Override when using autoconf 2.50 to 2.52
 dnl
 
 m4_ifdef([_AC_INIT_PREPARE_FS_SEPARATORS],
-[dnl
-m4_undefine([_AC_INIT_PREPARE_FS_SEPARATORS])dnl
+[
+m4_undefine([_AC_INIT_PREPARE_FS_SEPARATORS])
 m4_defun([_AC_INIT_PREPARE_FS_SEPARATORS],
-[dnl
-AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
+[
+AC_REQUIRE([XC_CONFIGURE_PREAMBLE])
 ac_path_separator=$PATH_SEPARATOR
-m4_define([$0],[])dnl
-])dnl
+m4_define([$0],[])
+])
 ])
 
 dnl
@@ -569,14 +569,14 @@ dnl Override when using libtool 1.4.2
 dnl
 
 m4_ifdef([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
-[dnl
-m4_undefine([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR])dnl
+[
+m4_undefine([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR])
 m4_defun([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
-[dnl
-AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
+[
+AC_REQUIRE([XC_CONFIGURE_PREAMBLE])
 lt_cv_sys_path_separator=$PATH_SEPARATOR
-m4_define([$0],[])dnl
-])dnl
+m4_define([$0],[])
+])
 ])
 
 
@@ -610,32 +610,32 @@ dnl generated configure script will be done where first
 dnl direct or indirect usage of this macro happens.
 
 AC_DEFUN([XC_CHECK_PATH_SEPARATOR],
-[dnl
-AC_PREREQ([2.50])dnl
-dnl
-AC_BEFORE([$0],[AC_CHECK_TOOL])dnl
-AC_BEFORE([$0],[AC_CHECK_PROG])dnl
-AC_BEFORE([$0],[AC_CHECK_TOOLS])dnl
-AC_BEFORE([$0],[AC_CHECK_PROGS])dnl
-dnl
-AC_BEFORE([$0],[AC_PATH_TOOL])dnl
-AC_BEFORE([$0],[AC_PATH_PROG])dnl
-AC_BEFORE([$0],[AC_PATH_PROGS])dnl
-dnl
-AC_BEFORE([$0],[AC_PROG_SED])dnl
-AC_BEFORE([$0],[AC_PROG_GREP])dnl
-AC_BEFORE([$0],[AC_PROG_LN_S])dnl
-AC_BEFORE([$0],[AC_PROG_MKDIR_P])dnl
-AC_BEFORE([$0],[AC_PROG_INSTALL])dnl
-AC_BEFORE([$0],[AC_PROG_MAKE_SET])dnl
-AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
-dnl
-AC_BEFORE([$0],[LT_INIT])dnl
-AC_BEFORE([$0],[AM_INIT_AUTOMAKE])dnl
-AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])dnl
-dnl
-AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
-dnl
+[
+AC_PREREQ([2.50])
+
+AC_BEFORE([$0],[AC_CHECK_TOOL])
+AC_BEFORE([$0],[AC_CHECK_PROG])
+AC_BEFORE([$0],[AC_CHECK_TOOLS])
+AC_BEFORE([$0],[AC_CHECK_PROGS])
+
+AC_BEFORE([$0],[AC_PATH_TOOL])
+AC_BEFORE([$0],[AC_PATH_PROG])
+AC_BEFORE([$0],[AC_PATH_PROGS])
+
+AC_BEFORE([$0],[AC_PROG_SED])
+AC_BEFORE([$0],[AC_PROG_GREP])
+AC_BEFORE([$0],[AC_PROG_LN_S])
+AC_BEFORE([$0],[AC_PROG_MKDIR_P])
+AC_BEFORE([$0],[AC_PROG_INSTALL])
+AC_BEFORE([$0],[AC_PROG_MAKE_SET])
+AC_BEFORE([$0],[AC_PROG_LIBTOOL])
+
+AC_BEFORE([$0],[LT_INIT])
+AC_BEFORE([$0],[AM_INIT_AUTOMAKE])
+AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])
+
+AC_REQUIRE([XC_CONFIGURE_PREAMBLE])
+
 dnl
 dnl Check that 'XC_CONFIGURE_PREAMBLE' has already run.
 dnl
@@ -661,7 +661,7 @@ if test "x$PATH_SEPARATOR" != "x$xc_PATH_SEPARATOR"; then
   AC_MSG_RESULT([$xc_PATH_SEPARATOR])
   AC_MSG_ERROR([path separator mismatch (internal or config.site problem)])
 fi
-dnl
-m4_pattern_forbid([^_*XC])dnl
-m4_define([$0],[])dnl
+
+m4_pattern_forbid([^_*XC])
+m4_define([$0],[])
 ])

@@ -114,13 +114,13 @@ if test "x$OPT_OPENSSL" != "xno"; then
     CURL_CHECK_PKGCONFIG(openssl, [$OPENSSL_PCDIR])
 
     if test "$PKGCONFIG" != "no"; then
-      SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR])
         $PKGCONFIG --libs-only-l --libs-only-other openssl 2>/dev/null`
 
-      SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR])
         $PKGCONFIG --libs-only-L openssl 2>/dev/null`
 
-      SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR])
         $PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])

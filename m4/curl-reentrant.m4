@@ -370,7 +370,7 @@ dnl that it is defined equally for further configure
 dnl tests and generated config file.
 
 AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
-  AC_PREREQ([2.50])dnl
+  AC_PREREQ([2.50])
 
   AC_MSG_CHECKING([if _REENTRANT is already defined])
   AC_COMPILE_IFELSE([
@@ -430,7 +430,7 @@ dnl that it is defined equally for further configure
 dnl tests and generated config file.
 
 AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
-  AC_PREREQ([2.50])dnl
+  AC_PREREQ([2.50])
 
   AC_MSG_CHECKING([if _THREAD_SAFE is already defined])
   AC_COMPILE_IFELSE([
