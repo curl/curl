@@ -34,19 +34,6 @@ my @tabs = (
     '^tests/data/test',
 );
 
-my @longline = (
-    '\.github/workflows/http3-linux\.yml$',
-    '\.github/workflows/linux\.yml$',
-    '\.github/workflows/windows\.yml$',
-    '^renovate\.json$',
-    '^docs/DISTROS\.md$',
-    '^projects/Windows/tmpl/curl\.vcxproj$',
-    '^projects/Windows/tmpl/libcurl\.vcxproj$',
-    '^tests/certs/srp-verifier-conf$',
-    '^tests/certs/srp-verifier-db$',
-    '^tests/data/test',
-);
-
 my @need_crlf = (
     '\.(bat|sln)$',
 );
@@ -58,6 +45,17 @@ my @double_empty_lines = (
     '^projects/vms/',
     '^tests/data/test',
     '\.(m4|py)$',
+);
+
+my @longline = (
+    '\.github/workflows/http3-linux\.yml$',
+    '\.github/workflows/linux\.yml$',
+    '\.github/workflows/windows\.yml$',
+    '^renovate\.json$',
+    '^docs/DISTROS\.md$',
+    '^projects/Windows/tmpl/.+\.vcxproj$',
+    '^tests/certs/srp-verifier-',
+    '^tests/data/test',
 );
 
 my @non_ascii_allowed = (
