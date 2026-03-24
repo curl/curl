@@ -56,7 +56,7 @@ Proxy-Connection: Keep-Alive
 7
 </errorcode>
 <stderr mode="text">
-curl: (7)  CONNECT tunnel failed, response 400
+curl: (7) CONNECT tunnel failed, response 400
 </stderr>
 </verify>
 </testcase>

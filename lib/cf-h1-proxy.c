@@ -645,7 +645,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
     /* a non-2xx response and we have no next URL to try. */
     Curl_safefree(data->req.newurl);
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
-    failf(data, " CONNECT tunnel failed, response %d", data->req.httpcode);
+    failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
     return CURLE_COULDNT_CONNECT;
   }
   /* 2xx response, SUCCESS! */
