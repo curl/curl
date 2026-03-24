@@ -67,7 +67,10 @@
 #endif /* USE_OPENSSL */
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_WOLFSSL)
-#  define HAS_SHA512_256_IMPLEMENTATION   1
+#  include <wolfssl/options.h>
+#  ifndef WOLFSSL_NOSHA512_256
+#    define HAS_SHA512_256_IMPLEMENTATION   1
+#  endif
 #endif
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
