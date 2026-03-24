@@ -89,8 +89,8 @@ Build curl (with autotools):
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --with-openssl=/path/to/openssl \
-       --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
+     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" \
+       --with-openssl=/path/to/openssl --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
      % make
      % make install
 
@@ -330,8 +330,8 @@ Get, build and install nghttp2:
      % cd nghttp2
      % autoreconf -fi
      % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/path/to/quictls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig \
-       LDFLAGS=-L/path/to/quictls/lib CFLAGS=-I/path/to/quictls/include ./configure --enable-maintainer-mode --prefix=/path/to/nghttp2 \
-       --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
+       LDFLAGS=-L/path/to/quictls/lib CFLAGS=-I/path/to/quictls/include ./configure --enable-maintainer-mode \
+       --prefix=/path/to/nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
      % make && make install
 
 Run the local h3 server on port 9443, make it proxy all traffic through to
