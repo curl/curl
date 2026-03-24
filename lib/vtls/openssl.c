@@ -1268,8 +1268,8 @@ static int providerload(struct Curl_easy *data,
                         const char *cert_file)
 {
 #ifdef OPENSSL_HAS_PROVIDERS
-  OSSL_STORE_INFO *info = NULL;
   X509 *cert = NULL;
+  STACK_OF(X509) *cert_chain = NULL;
   OSSL_STORE_CTX *store = NULL;
   int rc;
   char error_buffer[256];
@@ -1300,14 +1300,31 @@ static int providerload(struct Curl_easy *data,
                         sizeof(error_buffer)));
   }
 
-  info = OSSL_STORE_load(store);
-  if(info) {
-    int ossl_type = OSSL_STORE_INFO_get_type(info);
+  while(!OSSL_STORE_eof(store)) {
+    OSSL_STORE_INFO *info = OSSL_STORE_load(store);
+    /* Not really an error, keep looping */
+    if(!info) {
+      continue;
+    }
 
-    if(ossl_type == OSSL_STORE_INFO_CERT)
-      cert = OSSL_STORE_INFO_get1_CERT(info);
+    if(OSSL_STORE_INFO_get_type(info) == OSSL_STORE_INFO_CERT) {
+      /* Only load the first cert hit: when using a cert chain,
+         first one should be the right one.*/
+      if(!cert) {
+        cert = OSSL_STORE_INFO_get1_CERT(info);
+      }
+
+      /* Load all certs found in the chain. */
+      if(!cert_chain) {
+        cert_chain = sk_X509_new_null();
+      }
+      X509_add_cert(cert_chain, OSSL_STORE_INFO_get1_CERT(info),
+        X509_ADD_FLAG_DEFAULT);
+    }
+
     OSSL_STORE_INFO_free(info);
   }
+
   OSSL_STORE_close(store);
   if(!cert) {
     failf(data, "No cert found in the openssl store: %s",
@@ -1321,6 +1338,17 @@ static int providerload(struct Curl_easy *data,
 
   if(rc != 1) {
     failf(data, "unable to set client certificate [%s]",
+          ossl_strerror(ERR_get_error(), error_buffer,
+                        sizeof(error_buffer)));
+    sk_X509_pop_free(cert_chain, X509_free);
+    return 0;
+  }
+
+  rc = (int) SSL_CTX_set1_chain(ctx, cert_chain);
+  sk_X509_pop_free(cert_chain, X509_free);
+
+  if(rc != 1) {
+    failf(data, "unable to set client certificate chain [%s]",
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)));
     return 0;
