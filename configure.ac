@@ -235,7 +235,9 @@ AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
 ])
 
 AC_ARG_WITH(openssl,dnl
-AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),[
+AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points
+to the SSL installation (default: /usr/local/ssl); when possible, set
+the PKG_CONFIG_PATH environment variable instead of using this option]),[
   OPT_OPENSSL=$withval
   if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"

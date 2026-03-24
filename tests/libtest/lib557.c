@@ -1404,14 +1404,26 @@ static int test_float_formatting(void)
   /* check negative width argument when used signed, is treated as positive
      and maxes out the internal float width == 325 */
   curl_msnprintf(buf, sizeof(buf), "%*f", INT_MIN, 9.1);
-  errors += string_check(buf, "9.100000                                                                                                                                                                                                                                                                                                                             ");
+  errors += string_check(buf, "9.100000                                       "
+    "                                                                         "
+    "                                                                         "
+    "                                                                         "
+    "                                                           ");
 
   /* curl_msnprintf() limits a single float output to 325 bytes maximum
      width */
   curl_msnprintf(buf, sizeof(buf), "%*f", (1 << 30), 9.1);
-  errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");
+  errors += string_check(buf, "                                               "
+    "                                                                         "
+    "                                                                         "
+    "                                                                         "
+    "                                                   9.100000");
   curl_msnprintf(buf, sizeof(buf), "%100000f", 9.1);
-  errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");
+  errors += string_check(buf, "                                               "
+    "                                                                         "
+    "                                                                         "
+    "                                                                         "
+    "                                                   9.100000");
 
   curl_msnprintf(buf, sizeof(buf), "%f", MAXIMIZE);
   errors += strlen_check(buf, 317);
