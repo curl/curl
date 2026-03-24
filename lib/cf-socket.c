@@ -530,7 +530,8 @@ CURLcode Curl_parse_interface(const char *input,
 
 #ifndef CURL_DISABLE_BINDLOCAL
 static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
-                          curl_socket_t sockfd, int af, unsigned int scope)
+                          curl_socket_t sockfd, int af, unsigned int scope,
+                          uint8_t transport)
 {
   struct Curl_sockaddr_storage sa;
   struct sockaddr *sock = (struct sockaddr *)&sa;  /* bind to this address */
@@ -648,7 +649,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
         ip_version = CURL_IPRESOLVE_V6;
 #endif
 
-      (void)Curl_resolv_blocking(data, host, 80, ip_version, &h);
+      (void)Curl_resolv_blocking(data, host, 80, ip_version, transport, &h);
       if(h) {
         int h_af = h->addr->ai_family;
         /* convert the resolved address, sizeof myhost >= INET_ADDRSTRLEN */
@@ -1143,7 +1144,8 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
     ) {
     result = bindlocal(data, cf->conn, ctx->sock, ctx->addr.family,
-                       Curl_ipv6_scope(&ctx->addr.curl_sa_addr));
+                       Curl_ipv6_scope(&ctx->addr.curl_sa_addr),
+                       ctx->transport);
     if(result) {
       if(result == CURLE_UNSUPPORTED_PROTOCOL) {
         /* The address family is not supported on this interface.

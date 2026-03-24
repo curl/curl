@@ -307,10 +307,24 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
     goto error;
 #endif
 
+#ifdef USE_RESOLV_THREADED
+  if(xfer_table_size < CURL_XFER_TABLE_SIZE) { /* easy multi */
+    if(Curl_async_thrdd_multi_init(multi, 0, 2, 10))
+      goto error;
+  }
+  else { /* real multi handle */
+    if(Curl_async_thrdd_multi_init(multi, 0, 20, 2000))
+      goto error;
+  }
+#endif
+
   return multi;
 
 error:
 
+#ifdef USE_RESOLV_THREADED
+  Curl_async_thrdd_multi_destroy(multi, TRUE);
+#endif
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
   Curl_dnscache_destroy(&multi->dnscache);
@@ -2522,6 +2536,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
+#ifdef USE_RESOLV_THREADED
+    Curl_async_thrdd_multi_process(multi);
+#endif
     Curl_cshutdn_perform(&multi->cshutdn, multi->admin, sigpipe_ctx);
     return CURLM_OK;
   }
@@ -2951,6 +2968,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       } while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry));
     }
 
+#ifdef USE_RESOLV_THREADED
+    Curl_async_thrdd_multi_destroy(multi, !multi->quick_exit);
+#endif
     Curl_cpool_destroy(&multi->cpool);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {
@@ -3346,6 +3366,34 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     break;
   case CURLMOPT_NOTIFYDATA:
     multi->ntfy.ntfy_cb_data = va_arg(param, void *);
+    break;
+  case CURLMOPT_RESOLVE_THREADS_MAX:
+#ifdef USE_RESOLV_THREADED
+    uarg = va_arg(param, long);
+    if((uarg <= 0) || (uarg > UINT32_MAX))
+      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+    else {
+      CURLcode result = Curl_async_thrdd_multi_set_props(
+        multi, 0, (uint32_t)uarg, 2000);
+      switch(result) {
+      case CURLE_OK:
+        mresult = CURLM_OK;
+        break;
+      case CURLE_BAD_FUNCTION_ARGUMENT:
+        mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+        break;
+      case CURLE_OUT_OF_MEMORY:
+        mresult = CURLM_OUT_OF_MEMORY;
+        break;
+      default:
+        mresult = CURLM_INTERNAL_ERROR;
+        break;
+      }
+    }
+#endif
+    break;
+  case CURLMOPT_QUICK_EXIT:
+    multi->quick_exit = va_arg(param, long) ? 1 : 0;
     break;
   default:
     mresult = CURLM_UNKNOWN_OPTION;

@@ -103,6 +103,12 @@ void Curl_thrdq_clear(struct curl_thrdq *tqueue,
 CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
                                uint32_t timeout_ms);
 
+CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
+                              uint32_t max_len, /* 0 for unlimited */
+                              uint32_t min_threads,
+                              uint32_t max_threads,
+                              uint32_t idle_time_ms);
+
 #ifdef CURLVERBOSE
 void Curl_thrdq_trace(struct curl_thrdq *tqueue,
                       struct Curl_easy *data,
