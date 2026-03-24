@@ -64,16 +64,10 @@
 #      endif
 #    endif
 #  endif
-#elif defined(USE_WOLFSSL)
-#  include <wolfssl/version.h>
-#  if defined(LIBWOLFSSL_VERSION_HEX) && LIBWOLFSSL_VERSION_HEX >= 0x05000000
-#    include <wolfssl/options.h>
-#    include <wolfssl/openssl/evp.h>
-#    ifndef WOLFSSL_NOSHA512_256
-#      define USE_OPENSSL_SHA512_256          1
-#      define HAS_SHA512_256_IMPLEMENTATION   1
-#    endif
-#  endif
+#endif
+
+#if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_WOLFSSL)
+#  define HAS_SHA512_256_IMPLEMENTATION   1
 #endif
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
@@ -101,11 +95,7 @@
 /**
  * Context type used for SHA-512/256 calculations
  */
-#ifdef USE_OPENSSL
 typedef EVP_MD_CTX *Curl_sha512_256_ctx;
-#else
-typedef WOLFSSL_EVP_MD_CTX *Curl_sha512_256_ctx;
-#endif
 
 /**
  * Initialise structure for SHA-512/256 calculation.
@@ -118,36 +108,20 @@ static CURLcode Curl_sha512_256_init(void *context)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
-#ifdef USE_OPENSSL
   *ctx = EVP_MD_CTX_create();
-#else
-  *ctx = wolfSSL_EVP_MD_CTX_new();
-#endif
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
-#ifdef USE_OPENSSL
   if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
     /* Check whether the header and this file use the same numbers */
     DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
     /* Check whether the block size is correct */
     DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
-#else
-  if(wolfSSL_EVP_DigestInit_ex(*ctx, wolfSSL_EVP_sha512_256(), NULL)) {
-    /* Check whether the header and this file use the same numbers */
-    DEBUGASSERT(wolfSSL_EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
-    /* wolfSSL_EVP_MD_CTX_block_size() returns zero as of v5.9.0 */
-#endif
-
     return CURLE_OK; /* Success */
   }
 
   /* Cleanup */
-#ifdef USE_OPENSSL
   EVP_MD_CTX_destroy(*ctx);
-#else
-  wolfSSL_EVP_MD_CTX_free(*ctx);
-#endif
   return CURLE_FAILED_INIT;
 }
 
@@ -165,11 +139,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
-#ifdef USE_OPENSSL
   if(!EVP_DigestUpdate(*ctx, data, length))
-#else
-  if(!wolfSSL_EVP_DigestUpdate(*ctx, data, length))
-#endif
     return CURLE_SSL_CIPHER;
 
   return CURLE_OK;
@@ -199,22 +169,54 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
     memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
   explicit_memset(tmp_digest, 0, sizeof(tmp_digest));
 #else /* !NEED_NETBSD_SHA512_256_WORKAROUND */
-#ifdef USE_OPENSSL
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
-#else
-  ret = wolfSSL_EVP_DigestFinal_ex(*ctx, digest, NULL) ?
-    CURLE_OK : CURLE_SSL_CIPHER;
-#endif
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
 
-#ifdef USE_OPENSSL
   EVP_MD_CTX_destroy(*ctx);
-#else
-  wolfSSL_EVP_MD_CTX_free(*ctx);
-#endif
   *ctx = NULL;
 
   return ret;
+}
+
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/sha512.h>
+
+#define CURL_SHA512_256_DIGEST_SIZE WC_SHA512_256_DIGEST_SIZE
+#define CURL_SHA512_256_BLOCK_SIZE  WC_SHA512_256_BLOCK_SIZE
+
+typedef struct wc_Sha512 Curl_sha512_256_ctx;
+
+static CURLcode Curl_sha512_256_init(void *context)
+{
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+
+  if(wc_InitSha512_256(ctx))
+    return CURLE_FAILED_INIT;
+
+  return CURLE_OK;
+}
+
+static CURLcode Curl_sha512_256_update(void *context,
+                                       const unsigned char *data,
+                                       size_t length)
+{
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+
+  if(wc_Sha512_256Update(ctx, data, (word32)length))
+    return CURLE_SSL_CIPHER;
+
+  return CURLE_OK;
+}
+
+static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
+{
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+
+  if(wc_Sha512_256Final(ctx, digest))
+    return CURLE_SSL_CIPHER;
+
+  return CURLE_OK;
 }
 
 #elif defined(USE_GNUTLS_SHA512_256)
