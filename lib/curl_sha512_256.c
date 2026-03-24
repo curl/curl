@@ -31,9 +31,9 @@
  * 1. USE_OPENSSL
  * 2. USE_WOLFSSL
  * 3. USE_GNUTLS
- * 4. USE_MBEDTLS
- * 5. USE_RUSTLS
- * 6. USE_WIN32_CRYPTO
+ * 4. USE_MBEDTLS (TBD)
+ * 5. USE_RUSTLS (TBD)
+ * 6. USE_WIN32_CRYPTO (TBD)
  * Skip the backend if it does not support the required algorithm */
 
 #ifdef USE_OPENSSL
@@ -64,7 +64,7 @@
 #      endif
 #    endif
 #  endif
-#endif
+#endif /* USE_OPENSSL */
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_WOLFSSL)
 #  define HAS_SHA512_256_IMPLEMENTATION   1
@@ -117,6 +117,7 @@ static CURLcode Curl_sha512_256_init(void *context)
     DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
     /* Check whether the block size is correct */
     DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
+
     return CURLE_OK; /* Success */
   }
 
