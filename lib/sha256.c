@@ -95,8 +95,7 @@ typedef struct wc_Sha256 my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *in)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  if(wc_InitSha256(ctx))
+  if(wc_InitSha256((my_sha256_ctx *)in))
     return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
@@ -105,14 +104,12 @@ static void my_sha256_update(void *in,
                              const unsigned char *data,
                              unsigned int length)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  (void)wc_Sha256Update(ctx, data, (word32)length);
+  (void)wc_Sha256Update((my_sha256_ctx *)in, data, (word32)length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  (void)wc_Sha256Final(ctx, digest);
+  (void)wc_Sha256Final((my_sha256_ctx *)in, digest);
 }
 
 #elif defined(USE_GNUTLS)
