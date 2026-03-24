@@ -55,6 +55,8 @@ struct Curl_easy;
  */
 
 struct Curl_rlimit {
+  int64_t rate_per_sec; /* rate tokens generated per second */
+  int64_t burst_per_sec; /* burst rate of tokens per second */
   int64_t rate_per_step; /* rate tokens generated per step us */
   int64_t burst_per_step; /* burst rate of tokens per step us */
   timediff_t step_us;     /* microseconds between token increases */
