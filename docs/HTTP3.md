@@ -78,7 +78,8 @@ Build ngtcp2:
      % cd ngtcp2
      % autoreconf -fi
      # Change --with-openssl to --with-boringssl for AWS-LC and BoringSSL
-     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --prefix=/path/to/ngtcp2 --enable-lib-only --with-openssl
+     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" \
+       --prefix=/path/to/ngtcp2 --enable-lib-only --with-openssl
      % make
      % make install
 
@@ -88,7 +89,8 @@ Build curl (with autotools):
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" --with-openssl=/path/to/openssl --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
+     % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" \
+       --with-openssl=/path/to/openssl --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
      % make
      % make install
 
@@ -97,7 +99,8 @@ Build curl (with CMake):
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
-     % PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DOPENSSL_ROOT_DIR=/path/to/openssl -DUSE_NGTCP2=ON
+     % PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld \
+       -DOPENSSL_ROOT_DIR=/path/to/openssl -DUSE_NGTCP2=ON
      % cmake --build bld
 
 ## Build with GnuTLS
@@ -128,7 +131,8 @@ Build ngtcp2:
      % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/gnutls/lib" --prefix=/path/to/ngtcp2 --enable-lib-only --with-gnutls
+     % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/gnutls/lib" \
+       --prefix=/path/to/ngtcp2 --enable-lib-only --with-gnutls
      % make
      % make install
 
@@ -178,7 +182,8 @@ Build ngtcp2:
      % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
-     % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/wolfssl/lib" --prefix=/path/to/ngtcp2 --enable-lib-only --with-wolfssl
+     % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/wolfssl/lib" \
+       --prefix=/path/to/ngtcp2 --enable-lib-only --with-wolfssl
      % make
      % make install
 
@@ -225,7 +230,8 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
+       --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
      % make install
 
@@ -323,7 +329,9 @@ Get, build and install nghttp2:
      % git clone https://github.com/nghttp2/nghttp2
      % cd nghttp2
      % autoreconf -fi
-     % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
+     % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/path/to/quictls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig \
+       LDFLAGS=-L/path/to/quictls/lib CFLAGS=-I/path/to/quictls/include ./configure --enable-maintainer-mode \
+       --prefix=/path/to/nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
      % make && make install
 
 Run the local h3 server on port 9443, make it proxy all traffic through to
@@ -332,7 +340,7 @@ exists in curl's test dir.
 
      % CERT=/path/to/stunnel.pem
      % $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
-      --frontend="localhost,9443;quic"
+       --frontend="localhost,9443;quic"
 
 ### Caddy
 

@@ -173,7 +173,9 @@ sub HELP_MESSAGE() {
     print "\t-l\tprint license info about certdata.txt\n";
     print "\t-m\tinclude meta data in output\n";
     print "\t-n\tno download of certdata.txt (to use existing)\n";
-    print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. (default: $default_mozilla_trust_purposes:$default_mozilla_trust_levels)"), "\n";
+    print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. " .
+          "Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. " .
+          "(default: $default_mozilla_trust_purposes:$default_mozilla_trust_levels)"), "\n";
     print "\t\t  Valid purposes are:\n";
     print wrap("\t\t    ","\t\t    ", join(", ", "ALL", @valid_mozilla_trust_purposes)), "\n";
     print "\t\t  Valid levels are:\n";

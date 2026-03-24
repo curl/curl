@@ -235,7 +235,10 @@ AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
 ])
 
 AC_ARG_WITH(openssl,dnl
-AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),[
+AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points
+  to the SSL installation (default: /usr/local/ssl); when possible, set
+  the PKG_CONFIG_PATH environment variable instead of using this option]),
+[
   OPT_OPENSSL=$withval
   if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"
@@ -1512,7 +1515,8 @@ dnl Brotli project home page: https://github.com/google/brotli
 dnl Default to compiler & linker defaults for BROTLI files & libraries.
 OPT_BROTLI=off
 AC_ARG_WITH(brotli,dnl
-AS_HELP_STRING([--with-brotli=PATH],[Where to look for brotli, PATH points to the BROTLI installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-brotli=PATH],[Where to look for brotli, PATH points to the BROTLI installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-brotli], [disable BROTLI]),
   OPT_BROTLI=$withval)
 
@@ -1609,7 +1613,8 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for libzstd
 OPT_ZSTD=off
 AC_ARG_WITH(zstd,dnl
-AS_HELP_STRING([--with-zstd=PATH],[Where to look for libzstd, PATH points to the libzstd installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-zstd=PATH],[Where to look for libzstd, PATH points to the libzstd installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-zstd], [disable libzstd]),
   OPT_ZSTD=$withval)
 
@@ -2191,7 +2196,8 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for LIBPSL files & libraries.
 OPT_LIBPSL=off
 AC_ARG_WITH(libpsl,dnl
-AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to the LIBPSL installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to the LIBPSL installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-libpsl], [disable LIBPSL]),
   OPT_LIBPSL=$withval)
 
@@ -2263,7 +2269,8 @@ dnl **********************************************************************
 
 OPT_LIBGSASL=no
 AC_ARG_WITH(libgsasl,dnl
-AS_HELP_STRING([--with-libgsasl=PATH],[Where to look for libgsasl, PATH points to the libgsasl installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libgsasl=PATH],[Where to look for libgsasl, PATH points to the libgsasl installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-libgsasl], [disable libgsasl support for SCRAM]),
   OPT_LIBGSASL=$withval)
 
@@ -2336,13 +2343,15 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for libssh2 files & libraries.
 OPT_LIBSSH2=off
 AC_ARG_WITH(libssh2,dnl
-AS_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the libssh2 installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the libssh2 installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh2], [enable libssh2]),
   OPT_LIBSSH2=$withval, OPT_LIBSSH2=no)
 
 OPT_LIBSSH=off
 AC_ARG_WITH(libssh,dnl
-AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to the libssh installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to the libssh installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh], [enable libssh]),
   OPT_LIBSSH=$withval, OPT_LIBSSH=no)
 
@@ -2525,7 +2534,8 @@ clean_LDAP_LDFLAGS=$LDFLAGS
 clean_LDAP_LIBS=$LIBS
 OPT_LDAP=off
 AC_ARG_WITH(ldap,
-AS_HELP_STRING([--with-ldap=PATH],[Where to look for LDAP, PATH points to the LDAP installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-ldap=PATH],[Where to look for LDAP, PATH points to the LDAP installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-ldap], [disable LDAP]),
   OPT_LDAP=$withval)
 
