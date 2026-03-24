@@ -87,8 +87,18 @@ jobs:
         if: ${{ matrix.build.configure }}
         timeout-minutes: 5
         run: |
-          # shellcheck disable=SC2181,SC2034
-          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+          # shellcheck disable=SC2181
+          while [[ $? == 0 ]]; do
+            for i in 1 2 3; do
+              if brew update && brew install automake libtool; then
+                break 2
+              else
+                echo "Error: wait to try again: $i"
+                sleep 10
+              fi
+            done
+            false Too many retries
+          done
 
       - name: 'toolchain versions'
         run: |
@@ -357,9 +367,18 @@ jobs:
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
 
         run: |
-          echo pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          # shellcheck disable=SC2181,SC2034
-          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+          # shellcheck disable=SC2181
+          while [[ $? == 0 ]]; do
+            for i in 1 2 3; do
+              if brew update && brew bundle install pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL}; then
+                break 2
+              else
+                echo "Error: wait to try again: $i"
+                sleep 10
+              fi
+            done
+            false Too many retries
+          done
 
       - name: 'brew unlink openssl'
         if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') }}
@@ -604,8 +623,18 @@ jobs:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
         run: |
-          # shellcheck disable=SC2181,SC2034
-          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+          # shellcheck disable=SC2181
+          while [[ $? == 0 ]]; do
+            for i in 1 2 3; do
+              if brew update && brew install automake libtool; then
+                break 2
+              else
+                echo "Error: wait to try again: $i"
+                sleep 10
+              fi
+            done
+            false Too many retries
+          done
 
       - name: 'toolchain versions'
         run: |

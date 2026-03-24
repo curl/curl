@@ -83,8 +83,18 @@ jobs:
       - name: 'install packages'
         timeout-minutes: 2
         run: |
-          # shellcheck disable=SC2181,SC2034
-          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+          # shellcheck disable=SC2181
+          while [[ $? == 0 ]]; do
+            for i in 1 2 3; do
+              if brew update && brew install automake libtool; then
+                break 2
+              else
+                echo "Error: wait to try again: $i"
+                sleep 10
+              fi
+            done
+            false Too many retries
+          done
 
       - name: 'toolchain versions'
         run: echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
