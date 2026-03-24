@@ -127,6 +127,7 @@ EXTRA_DIST =                                     \
   TODO.md                                        \
   TheArtOfHttpScripting.md                       \
   URL-SYNTAX.md                                  \
+  VERIFY.md                                      \
   VERSIONS.md                                    \
   VULN-DISCLOSURE-POLICY.md
 
