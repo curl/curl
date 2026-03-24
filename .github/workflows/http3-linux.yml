@@ -409,9 +409,9 @@ jobs:
 
           - name: 'boringssl'
             install_steps: skipall
+            LDFLAGS: -Wl,-rpath,/home/runner/boringssl/build/lib
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
-              LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2=/home/runner/ngtcp2-boringssl/build --enable-ssls-export
 
           - name: 'boringssl'
