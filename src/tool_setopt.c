@@ -407,6 +407,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   int submimeno = 0;
   const char *data = NULL;
   const char *filename = part->filename;
+  char *escaped;
 
   /* Parts are linked in reverse order. */
   if(part->prev)
@@ -435,7 +436,9 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   case TOOLMIME_DATA:
     data = part->data;
     if(!result) {
-      char *escaped = c_escape(data, ZERO_TERMINATED);
+      escaped = c_escape(data, ZERO_TERMINATED);
+      if(!escaped)
+        return CURLE_OUT_OF_MEMORY;
       result =
         easysrc_addf(&easysrc_code,
                      "curl_mime_data(part%d, \"%s\", CURL_ZERO_TERMINATED);",
@@ -445,8 +448,10 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
     break;
 
   case TOOLMIME_FILE:
-  case TOOLMIME_FILEDATA: {
-    char *escaped = c_escape(part->data, ZERO_TERMINATED);
+  case TOOLMIME_FILEDATA:
+    escaped = c_escape(part->data, ZERO_TERMINATED);
+    if(!escaped)
+      return CURLE_OUT_OF_MEMORY;
     result =
       easysrc_addf(&easysrc_code,
                    "curl_mime_filedata(part%d, \"%s\");", mimeno, escaped);
@@ -456,7 +461,6 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
     }
     curlx_free(escaped);
     break;
-  }
 
   case TOOLMIME_STDIN:
     if(!filename)
@@ -476,28 +480,36 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   }
 
   if(!result && part->encoder) {
-    char *escaped = c_escape(part->encoder, ZERO_TERMINATED);
+    escaped = c_escape(part->encoder, ZERO_TERMINATED);
+    if(!escaped)
+      return CURLE_OUT_OF_MEMORY;
     result = easysrc_addf(&easysrc_code, "curl_mime_encoder(part%d, \"%s\");",
                           mimeno, escaped);
     curlx_free(escaped);
   }
 
   if(!result && filename) {
-    char *escaped = c_escape(filename, ZERO_TERMINATED);
+    escaped = c_escape(filename, ZERO_TERMINATED);
+    if(!escaped)
+      return CURLE_OUT_OF_MEMORY;
     result = easysrc_addf(&easysrc_code, "curl_mime_filename(part%d, \"%s\");",
                           mimeno, escaped);
     curlx_free(escaped);
   }
 
   if(!result && part->name) {
-    char *escaped = c_escape(part->name, ZERO_TERMINATED);
+    escaped = c_escape(part->name, ZERO_TERMINATED);
+    if(!escaped)
+      return CURLE_OUT_OF_MEMORY;
     result = easysrc_addf(&easysrc_code, "curl_mime_name(part%d, \"%s\");",
                           mimeno, escaped);
     curlx_free(escaped);
   }
 
   if(!result && part->type) {
-    char *escaped = c_escape(part->type, ZERO_TERMINATED);
+    escaped = c_escape(part->type, ZERO_TERMINATED);
+    if(!escaped)
+      return CURLE_OUT_OF_MEMORY;
     result = easysrc_addf(&easysrc_code, "curl_mime_type(part%d, \"%s\");",
                           mimeno, escaped);
     curlx_free(escaped);
