@@ -299,12 +299,10 @@ jobs:
               -Wl,-rpath,/home/runner/rustls/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
 
-            PKG_CONFIG_PATH: >
-              /home/runner/wolfssl-opensslextra/lib/pkgconfig:
-              /home/runner/mbedtls/lib/pkgconfig:
-              /home/runner/rustls/lib/pkgconfig:
-              /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig
-
+            PKG_CONFIG_PATH: "/home/runner/wolfssl-opensslextra/lib/pkgconfig:\
+              /home/runner/mbedtls/lib/pkgconfig:\
+              /home/runner/rustls/lib/pkgconfig:\
+              /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig"
             generate: >-
               -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
               -DCURL_USE_GSASL=ON
@@ -322,11 +320,9 @@ jobs:
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
 
-            PKG_CONFIG_PATH: >
-              /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:
-              /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:
-              /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
-
+            PKG_CONFIG_PATH: "/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
+              /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
+              /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON
@@ -348,12 +344,10 @@ jobs:
             CC: clang-20
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
-            PKG_CONFIG_PATH: >
-              /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:
-              /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:
-              /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:
-              /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
-
+            PKG_CONFIG_PATH: "/home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:\
+              /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
+              /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
+              /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
