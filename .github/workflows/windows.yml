@@ -81,12 +81,12 @@ jobs:
       matrix:
         include:
           - { name: 'openssl R',
-              build: 'autotools', platform: 'x86_64', tflags: 'skiprun'
-              config: '--with-openssl'
+              build: 'autotools', platform: 'x86_64', tflags: 'skiprun',
+              config: '--with-openssl',
               install: 'libssl-devel libssh2-devel' }
           - { name: 'openssl',
-              build: 'cmake', platform: 'x86_64', tflags: ''
-              config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON'
+              build: 'cmake', platform: 'x86_64', tflags: '',
+              config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON',
               install: 'libssl-devel libssh2-devel' }
 
       fail-fast: false
