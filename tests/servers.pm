@@ -78,7 +78,6 @@ use serverhelp qw(
     server_portfilename
     server_logfilename
     server_exe
-    server_exe_args
     );
 
 use sshhelp qw(
@@ -3171,8 +3170,6 @@ sub subvariables {
     $$thing =~ s/${prefix}VERNUM/$CURLVERNUM/g;
     $$thing =~ s/${prefix}DATE/$DATE/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
-    my $resolve_args = '(' . join(', ', map { "'" . $_ . "'" } server_exe_args('resolve', 'TOOL')) . ')';
-    $$thing =~ s/${prefix}RESOLVE_ARGS/$resolve_args/g;
     my $resolve = server_exe('resolve', 'TOOL');
     $$thing =~ s/${prefix}RESOLVE/$resolve/g;
 
