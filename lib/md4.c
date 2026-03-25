@@ -47,30 +47,29 @@
 #if defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/md4.h>
 
+/* Map directly to OpenSSL implementation */
+#define my_md4_ctx    MD4_CTX
+#define my_md4_init   MD4_Init
+#define my_md4_update MD4_Update
+#define my_md4_final  MD4_Final
+
 #elif defined(USE_WOLFSSL) && !defined(NO_MD4)
 #include <wolfssl/wolfcrypt/md4.h>
 
-#ifdef OPENSSL_COEXIST
-#  define MD4_CTX    curl_MD4_CTX
-#  define MD4_Init   curl_MD4_Init
-#  define MD4_Update curl_MD4_Update
-#  define MD4_Final  curl_MD4_Final
-#endif
+typedef Md4 my_md4_ctx;
 
-typedef Md4 MD4_CTX;
-
-static int MD4_Init(MD4_CTX *ctx)
+static int my_md4_init(my_md4_ctx *ctx)
 {
   wc_InitMd4(ctx);
   return 1;
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
 {
   wc_Md4Update(ctx, input, (word32)len);
 }
 
-static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
+static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
   wc_Md4Final(ctx, digest);
 }
@@ -85,19 +84,19 @@ static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
               (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
 #include <CommonCrypto/CommonDigest.h>
 
-typedef CC_MD4_CTX MD4_CTX;
+typedef CC_MD4_CTX my_md4_ctx;
 
-static int MD4_Init(MD4_CTX *ctx)
+static int my_md4_init(my_md4_ctx *ctx)
 {
   return CC_MD4_Init(ctx);
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
 {
   (void)CC_MD4_Update(ctx, input, (CC_LONG)len);
 }
 
-static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
+static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
   (void)CC_MD4_Final(digest, ctx);
 }
@@ -109,9 +108,9 @@ struct md4_ctx {
   HCRYPTPROV hCryptProv;
   HCRYPTHASH hHash;
 };
-typedef struct md4_ctx MD4_CTX;
+typedef struct md4_ctx my_md4_ctx;
 
-static int MD4_Init(MD4_CTX *ctx)
+static int my_md4_init(my_md4_ctx *ctx)
 {
   ctx->hCryptProv = 0;
   ctx->hHash = 0;
@@ -129,12 +128,12 @@ static int MD4_Init(MD4_CTX *ctx)
   return 1;
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
 {
   CryptHashData(ctx->hHash, (const BYTE *)input, (unsigned int)len, 0);
 }
 
-static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
+static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
   unsigned long length = 0;
 
@@ -152,20 +151,20 @@ static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 #elif defined(USE_GNUTLS)
 #include <nettle/md4.h>
 
-typedef struct md4_ctx MD4_CTX;
+typedef struct md4_ctx my_md4_ctx;
 
-static int MD4_Init(MD4_CTX *ctx)
+static int my_md4_init(my_md4_ctx *ctx)
 {
   md4_init(ctx);
   return 1;
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
 {
   md4_update(ctx, len, input);
 }
 
-static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
+static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
   md4_digest(ctx, MD4_DIGEST_SIZE, digest);
 }
@@ -204,7 +203,7 @@ struct md4_ctx {
   unsigned char buffer[64];
   uint32_t block[16];
 };
-typedef struct md4_ctx MD4_CTX;
+typedef struct md4_ctx my_md4_ctx;
 
 /*
  * The basic MD4 functions.
@@ -246,7 +245,7 @@ typedef struct md4_ctx MD4_CTX;
  * This processes one or more 64-byte data blocks, but does NOT update
  * the bit counters. There are no alignment requirements.
  */
-static const void *my_md4_body(MD4_CTX *ctx,
+static const void *my_md4_body(my_md4_ctx *ctx,
                                const void *input, unsigned long size)
 {
   const unsigned char *ptr;
@@ -337,7 +336,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
   return ptr;
 }
 
-static int MD4_Init(MD4_CTX *ctx)
+static int my_md4_init(my_md4_ctx *ctx)
 {
   ctx->a = 0x67452301;
   ctx->b = 0xefcdab89;
@@ -350,7 +349,7 @@ static int MD4_Init(MD4_CTX *ctx)
   return 1;
 }
 
-static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
 {
   uint32_t saved_lo;
   unsigned long used;
@@ -385,7 +384,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *input, unsigned long len)
   memcpy(ctx->buffer, input, len);
 }
 
-static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
+static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
   unsigned long used, available;
 
@@ -441,11 +440,11 @@ static void MD4_Final(unsigned char *digest, MD4_CTX *ctx)
 CURLcode Curl_md4it(unsigned char *output,
                     const unsigned char *input, const size_t len)
 {
-  MD4_CTX ctx;
-  if(!MD4_Init(&ctx))
+  my_md4_ctx ctx;
+  if(!my_md4_init(&ctx))
     return CURLE_FAILED_INIT;
-  MD4_Update(&ctx, input, curlx_uztoui(len));
-  MD4_Final(output, &ctx);
+  my_md4_update(&ctx, input, curlx_uztoui(len));
+  my_md4_final(output, &ctx);
   return CURLE_OK;
 }
 
