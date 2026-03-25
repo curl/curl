@@ -33,7 +33,7 @@
 /* OpenSSL 3.0.0 marks the MD4 functions as deprecated */
 #define OPENSSL_NO_MD4
 #else
-/* Cover also OPENSSL_NO_MD4 configured in openssl */
+/* Cover also OPENSSL_NO_MD4 configured in OpenSSL */
 #include <openssl/opensslconf.h>
 #endif
 #endif /* USE_OPENSSL */
