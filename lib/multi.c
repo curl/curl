@@ -299,6 +299,9 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0) {
     multi->wakeup_pair[0] = CURL_SOCKET_BAD;
     multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+    /* When enabled, rely on this to work. We ignore this in previous
+     * versions, but that seems an unnecessary complication. */
+    goto error;
   }
 #endif
 
@@ -318,6 +321,9 @@ error:
   Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
 #ifdef USE_SSL
   Curl_ssl_scache_destroy(multi->ssl_scache);
+#endif
+#ifdef ENABLE_WAKEUP
+  Curl_wakeup_destroy(multi->wakeup_pair);
 #endif
   if(multi->admin) {
     Curl_multi_ev_xfer_done(multi, multi->admin);
@@ -1121,8 +1127,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   /* The admin handle always listens on the wakeup socket when there
    * are transfers alive. */
   if(data->multi && (data == data->multi->admin) &&
-     data->multi->xfers_alive &&
-     (data->multi->wakeup_pair[0] != CURL_SOCKET_BAD)) {
+     data->multi->xfers_alive) {
     result = Curl_pollset_add_in(data, ps, data->multi->wakeup_pair[0]);
   }
 #endif
@@ -1570,8 +1575,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
    * have transfer sockets to poll, we obey `timeout_ms`.
    * Then we need to also monitor the multi's wakeup
    * socket to catch calls to `curl_multi_wakeup()` during the wait. */
-  if((extrawait || cpfds.n || extra_nfds) &&
-     (multi->wakeup_pair[0] != CURL_SOCKET_BAD)) {
+  if(extrawait || cpfds.n || extra_nfds) {
     wakeup_idx = cpfds.n;
     if(Curl_pollfds_add_sock(&cpfds, multi->wakeup_pair[0], POLLIN)) {
       mresult = CURLM_OUT_OF_MEMORY;
@@ -1672,11 +1676,8 @@ CURLMcode curl_multi_wakeup(CURLM *m)
   /* the wakeup_pair variable is only written during init and cleanup,
      making it safe to access from another thread after the init part
      and before cleanup */
-  if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
-    if(Curl_wakeup_signal(multi->wakeup_pair))
-      return CURLM_WAKEUP_FAILURE;
+  if(!Curl_wakeup_signal(multi->wakeup_pair))
     mresult = CURLM_OK;
-  }
 #endif
 #ifdef USE_WINSOCK
   if(WSASetEvent(multi->wsa_event))
