@@ -219,9 +219,8 @@ if(@exact) {
 }
 
 # Build a single combined regex for removing whitelisted content
-my $re_wl;
 my $pat = join('|', map { $_ } @whitelist);
-$re_wl = qr/($pat)/;
+my $re_wl = qr/($pat)/;
 
 my $errors = 0;
 
