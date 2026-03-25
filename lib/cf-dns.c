@@ -236,7 +236,10 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
       return result;
   }
 
-  /* sub filter chain is connected, so are we now. */
+  /* sub filter chain is connected, so are we now.
+   * Unlink the DNS entry, it is no longer needed and if it
+   * came from a SHARE in `data`, we need to release it under
+   * that one's lock. */
   DEBUGASSERT(*done);
   cf->connected = TRUE;
   Curl_async_shutdown(data);
@@ -268,6 +271,30 @@ static CURLcode cf_dns_adjust_pollset(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static CURLcode cf_dns_cntrl(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int event, int arg1, void *arg2)
+{
+  struct cf_dns_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  (void)arg1;
+  (void)arg2;
+  switch(event) {
+  case CF_CTRL_DATA_DONE:
+    if(ctx->dns) {
+      /* Should only come here when the connect attempt failed and
+       * `data` is giving up on it. On a successful connect, we already
+       * unlinked the DNS entry. */
+      Curl_dns_entry_unlink(data, &ctx->dns);
+    }
+    break;
+  default:
+    break;
+  }
+  return result;
+}
+
 struct Curl_cftype Curl_cft_dns = {
   "DNS",
   0,
@@ -280,7 +307,7 @@ struct Curl_cftype Curl_cft_dns = {
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
+  cf_dns_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,
