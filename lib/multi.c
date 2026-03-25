@@ -254,6 +254,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   multi->multiplexing = TRUE;
   multi->max_concurrent_streams = 100;
   multi->last_timeout_ms = -1;
+#ifdef ENABLE_WAKEUP
+  multi->wakeup_pair[0] = CURL_SOCKET_BAD;
+  multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+#endif
 
   if(Curl_mntfy_resize(multi) ||
      Curl_uint32_bset_resize(&multi->process, xfer_table_size) ||
@@ -296,13 +300,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
     goto error;
 #endif
 #ifdef ENABLE_WAKEUP
-  if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0) {
-    multi->wakeup_pair[0] = CURL_SOCKET_BAD;
-    multi->wakeup_pair[1] = CURL_SOCKET_BAD;
-    /* When enabled, rely on this to work. We ignore this in previous
-     * versions, but that seems an unnecessary complication. */
+  /* When enabled, rely on this to work. We ignore this in previous
+   * versions, but that seems an unnecessary complication. */
+  if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0)
     goto error;
-  }
 #endif
 
 #ifdef USE_IPV6
@@ -322,9 +323,6 @@ error:
 #ifdef USE_SSL
   Curl_ssl_scache_destroy(multi->ssl_scache);
 #endif
-#ifdef ENABLE_WAKEUP
-  Curl_wakeup_destroy(multi->wakeup_pair);
-#endif
   if(multi->admin) {
     Curl_multi_ev_xfer_done(multi, multi->admin);
     multi->admin->multi = NULL;
@@ -337,6 +335,9 @@ error:
   Curl_uint32_bset_destroy(&multi->pending);
   Curl_uint32_bset_destroy(&multi->msgsent);
   Curl_uint32_tbl_destroy(&multi->xfers);
+#ifdef ENABLE_WAKEUP
+  Curl_wakeup_destroy(multi->wakeup_pair);
+#endif
 
   curlx_free(multi);
   return NULL;
