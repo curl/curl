@@ -125,6 +125,8 @@ lock:   dns    [Pigs in space]: 0
 unlock: dns    [Pigs in space]: 1
 lock:   dns    [Pigs in space]: 2
 unlock: dns    [Pigs in space]: 3
+lock:   dns    [Pigs in space]: 4
+unlock: dns    [Pigs in space]: 5
 lock:   cookie [Pigs in space]: 16
 unlock: cookie [Pigs in space]: 17
 lock:   cookie [Pigs in space]: 18
@@ -134,8 +136,8 @@ unlock: cookie [Pigs in space]: 21
 lock:   cookie [Pigs in space]: 22
 unlock: cookie [Pigs in space]: 23
 run 1: set cookie 1, 2 and 3
-lock:   dns    [Pigs in space]: 4
-unlock: dns    [Pigs in space]: 5
+lock:   dns    [Pigs in space]: 6
+unlock: dns    [Pigs in space]: 7
 CLEANUP
 lock:   cookie [Pigs in space]: 24
 unlock: cookie [Pigs in space]: 25
@@ -150,8 +152,10 @@ lock:   cookie [Pigs in space]: 26
 unlock: cookie [Pigs in space]: 27
 lock:   cookie [Pigs in space]: 28
 unlock: cookie [Pigs in space]: 29
-lock:   dns    [Pigs in space]: 6
-unlock: dns    [Pigs in space]: 7
+lock:   dns    [Pigs in space]: 8
+unlock: dns    [Pigs in space]: 9
+lock:   dns    [Pigs in space]: 10
+unlock: dns    [Pigs in space]: 11
 lock:   cookie [Pigs in space]: 30
 unlock: cookie [Pigs in space]: 31
 lock:   cookie [Pigs in space]: 32
@@ -159,8 +163,8 @@ unlock: cookie [Pigs in space]: 33
 lock:   cookie [Pigs in space]: 34
 unlock: cookie [Pigs in space]: 35
 run 2: set cookie 4 and 5
-lock:   dns    [Pigs in space]: 8
-unlock: dns    [Pigs in space]: 9
+lock:   dns    [Pigs in space]: 12
+unlock: dns    [Pigs in space]: 13
 CLEANUP
 lock:   cookie [Pigs in space]: 36
 unlock: cookie [Pigs in space]: 37
@@ -177,8 +181,10 @@ unlock: cookie [Pigs in space]: 39
 PERFORM
 lock:   cookie [Pigs in space]: 40
 unlock: cookie [Pigs in space]: 41
-lock:   dns    [Pigs in space]: 10
-unlock: dns    [Pigs in space]: 11
+lock:   dns    [Pigs in space]: 14
+unlock: dns    [Pigs in space]: 15
+lock:   dns    [Pigs in space]: 16
+unlock: dns    [Pigs in space]: 17
 lock:   cookie [Pigs in space]: 42
 unlock: cookie [Pigs in space]: 43
 lock:   cookie [Pigs in space]: 44
@@ -190,8 +196,8 @@ unlock: cookie [Pigs in space]: 49
 lock:   cookie [Pigs in space]: 50
 unlock: cookie [Pigs in space]: 51
 run 3: overwrite cookie 1 and 4, set cookie 6 with and without tailmatch
-lock:   dns    [Pigs in space]: 12
-unlock: dns    [Pigs in space]: 13
+lock:   dns    [Pigs in space]: 18
+unlock: dns    [Pigs in space]: 19
 CLEANUP
 lock:   cookie [Pigs in space]: 52
 unlock: cookie [Pigs in space]: 53
