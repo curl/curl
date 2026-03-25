@@ -106,7 +106,7 @@ sub checkmanpage {
     my ($m) = @_;
 
     # detect global-looking 'CURL[BLABLA]_*' symbols
-    my $global_regex = '\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|' .
+    my $global_pat = '\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|' .
         'ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|'.
         '_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)';
 
@@ -115,7 +115,7 @@ sub checkmanpage {
     while(<$mh>) {
         # strip off formatting
         $_ =~ s/(^|[^A-Z0-9])[*_]+/ /;
-        while(s/$global_regex//) {
+        while(s/$global_pat//) {
             my $s = $1;
             # skip two "special" ones
             if($s !~ /(^(CURLE_OBSOLETE|CURLOPT_TEMPLATE))|_$/) {
