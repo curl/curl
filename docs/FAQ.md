@@ -886,6 +886,8 @@ packet sent three seconds after the first and the third six seconds after
 the second. No more than three packets are sent, no matter how long the
 timeout is set.
 
+Related Windows option is `TcpMaxConnectRetransmissions`.
+
 Also, even on non-Windows systems there may run a firewall or anti-virus
 software or similar that accepts the connection but does not actually do
 anything else. This makes (lib)curl to consider the connection connected
