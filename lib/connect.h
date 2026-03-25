@@ -127,6 +127,15 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 /* Set conn to allow multiplexing. */
 void Curl_conn_set_multiplex(struct connectdata *conn);
 
+#ifdef USE_UNIX_SOCKETS
+#ifndef CURL_DISABLE_PROXY
+#define UNIX_SOCKET_PREFIX "localhost"
+#endif
+const char *Curl_conn_get_unix_path(struct connectdata *conn);
+#else
+#define Curl_conn_get_unix_path(c)      NULL
+#endif
+
 extern struct Curl_cftype Curl_cft_setup;
 
 #endif /* HEADER_CURL_CONNECT_H */
