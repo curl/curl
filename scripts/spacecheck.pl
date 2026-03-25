@@ -129,7 +129,7 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($filename !~ /^[A-Za-z0-9\/._-]+$/) {
-        push @err, sprintf("filename has non-alpha and non-'/._-' character(s)");
+        push @err, sprintf("filename contains character(s) outside [A-Za-z0-9/._-]");
     }
 
     open(my $fh, '<', $filename) or die "Cannot open '$filename': $!";
@@ -213,7 +213,7 @@ while(my $filename = <$git_ls_files>) {
     for my $l (split(/\n/, $content)) {
         $line++;
         if($l =~ /( {$max_repeat_space,})/) {
-            push @err, sprintf('line %d: repeat spaces (%d > %d)', $line, length($1), $max_repeat_space);
+            push @err, sprintf('line %d: repeat spaces (%d >= %d)', $line, length($1), $max_repeat_space);
         }
     }
 
