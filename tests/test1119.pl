@@ -109,13 +109,14 @@ sub checkmanpage {
     my $global_pat = '\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|' .
         'ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|'.
         '_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)';
+    my $global_re = qr/$global_pat/;
 
     open(my $mh, "<", $m);
     my $line = 1;
     while(<$mh>) {
         # strip off formatting
         $_ =~ s/(^|[^A-Z0-9])[*_]+/ /;
-        while(s/$global_pat//) {
+        while(s/$global_re//) {
             my $s = $1;
             # skip two "special" ones
             if($s !~ /(^(CURLE_OBSOLETE|CURLOPT_TEMPLATE))|_$/) {
