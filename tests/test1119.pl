@@ -120,7 +120,7 @@ sub checkmanpage {
             my $s = $1;
             # skip two "special" ones
             if($s !~ /(^(CURLE_OBSOLETE|CURLOPT_TEMPLATE))|_$/) {
-                push @manrefs, "$1:$m:$line";
+                push @manrefs, "$s:$m:$line";
             }
         }
         $line++;
