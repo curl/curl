@@ -138,15 +138,8 @@ if test "$OPT_WOLFSSL" != "no"; then
       dnl if wolfSSL_BIO_set_shutdown is present, we have the full BIO feature set
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
                      wolfSSL_UseALPN \
-                     wolfSSL_DES_ecb_encrypt \
                      wolfSSL_BIO_new \
                      wolfSSL_BIO_set_shutdown)
-
-      dnl if this symbol is present, we want the include path to include the
-      dnl OpenSSL API root as well
-      if test "$ac_cv_func_wolfSSL_DES_ecb_encrypt" = "yes"; then
-        HAVE_WOLFSSL_DES_ECB_ENCRYPT=1
-      fi
 
       dnl if this symbol is present, we can make use of BIO filter chains
       if test "$ac_cv_func_wolfSSL_BIO_new" = "yes"; then

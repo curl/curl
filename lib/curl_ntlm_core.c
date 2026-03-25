@@ -58,7 +58,7 @@
 
 #if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
 #  define USE_OPENSSL_DES
-#elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+#elif defined(USE_WOLFSSL) && !defined(NO_DES3)
 #  define USE_OPENSSL_DES
 #elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
 #  define USE_MBEDTLS_DES
