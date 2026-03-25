@@ -423,10 +423,6 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
     if(&share->psl == data->psl)
       data->psl = data->multi ? &data->multi->psl : NULL;
 #endif
-    if(share->specifier & (1 << CURL_LOCK_DATA_DNS)) {
-      Curl_dns_entry_unlink(data, &data->state.dns[0]);
-      Curl_dns_entry_unlink(data, &data->state.dns[1]);
-    }
 
     share_unlink(&data->share, data, locked);
   }

@@ -349,6 +349,19 @@ static timediff_t async_ares_poll_timeout(struct async_ares_ctx *ares,
     return 1000;
 }
 
+const struct Curl_addrinfo *
+Curl_async_get_ai(struct Curl_easy *data,
+                  struct Curl_resolv_async *async,
+                  int ai_family, unsigned int index)
+{
+  /* Not supported by our implementation yet. */
+  (void)data;
+  (void)async;
+  (void)ai_family;
+  (void)index;
+  return NULL;
+}
+
 /*
  * Curl_async_await()
  *

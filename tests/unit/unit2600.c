@@ -161,7 +161,7 @@ static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai,
+                               struct Curl_sockaddr_ex *addr,
                                uint8_t transport)
 {
   static const struct Curl_cftype cft_test = {
@@ -195,7 +195,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->idx = test_idx++;
-  ctx->ai_family = ai->ai_family;
+  ctx->ai_family = addr->family;
   ctx->transport = transport;
   ctx->started = curlx_now();
 #ifdef USE_IPV6
