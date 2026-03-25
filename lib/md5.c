@@ -99,7 +99,7 @@ typedef wc_Md5 my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  if(!wc_InitMd5(ctx))
+  if(wc_InitMd5(ctx))
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
