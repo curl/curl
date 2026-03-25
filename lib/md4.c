@@ -51,10 +51,10 @@
 #include <wolfssl/wolfcrypt/md4.h>
 
 #ifdef OPENSSL_COEXIST
-#  define MD4_CTX    WOLFSSL_MD4_CTX
-#  define MD4_Init   wolfSSL_MD4_Init
-#  define MD4_Update wolfSSL_MD4_Update
-#  define MD4_Final  wolfSSL_MD4_Final
+#  define MD4_CTX    curl_MD4_CTX
+#  define MD4_Init   curl_MD4_Init
+#  define MD4_Update curl_MD4_Update
+#  define MD4_Final  curl_MD4_Final
 #endif
 
 typedef Md4 MD4_CTX;
