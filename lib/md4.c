@@ -55,8 +55,13 @@
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD4)
 #include <wolfssl/wolfcrypt/md4.h>
+#include <wolfssl/version.h>
 
+#if LIBWOLFSSL_VERSION_HEX >= 0x05007006
+typedef wc_Md4 my_md4_ctx;
+#else
 typedef Md4 my_md4_ctx;
+#endif
 
 static int my_md4_init(my_md4_ctx *ctx)
 {
