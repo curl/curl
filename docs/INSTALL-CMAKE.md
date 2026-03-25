@@ -393,9 +393,9 @@ Details via CMake
 - `<PackageName>_DIR`:                      Absolute path to `<PackageName>` CMake Config directory where `*.cmake` files reside.
                                             Used when `CURL_USE_CMAKECONFIG` is enabled.
                                             `<PackageName>` may be:
-                                            `Libssh2`, `MbedTLS`, `NGHTTP2`, `NGHTTP3`,
-                                            `NGTCP2` 1.19.0+ (with non-fork OpenSSL only),
-                                            `Zstd` 1.4.5+.
+                                            `c-ares`, `Libssh2`, `MbedTLS`, `NGHTTP2`, `NGHTTP3`,
+                                            `NGTCP2` for 1.19.0+ (with non-fork OpenSSL only),
+                                            `wolfssl` for 5.2.1+, `Zstd` for 1.4.5+.
 
 ## Dependency options (tools)
 
