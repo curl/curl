@@ -25,10 +25,12 @@ location (indicated with a Location: header and a 3XX response code), this
 option makes curl redo the request to the new place. If used together with
 --show-headers or --head, headers from all requested pages are shown.
 
-When authentication is provided on the command line, or when sending a cookie
-with `-H Cookie:`, curl only sends its credentials to the initial host. If a
-redirect takes curl to a different host, it does not get the credentials
-passed on. See --location-trusted on how to change this.
+When authentication is provided on the command line (for example --user or
+--oauth2-bearer), or when sending a cookie with `-H Cookie:`, curl only sends
+its credentials to the initial host. If a redirect takes curl to a different
+host, it does not get the credentials passed on. See --location-trusted on how
+to change this. When --netrc is used in combination with this option,
+credentials for the followed-to hosts may also be selected from that file.
 
 Limit the amount of redirects to follow by using the --max-redirs option.
 
@@ -44,6 +46,3 @@ The method set with --request overrides the method curl would otherwise select
 to use.
 
 Restrict which protocols a redirect is accepted to follow with --proto-redir.
-
-When --netrc is used in combination with this option, credentials for the
-followed-to hosts may also be selected from that file.
