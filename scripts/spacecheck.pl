@@ -26,6 +26,8 @@
 use strict;
 use warnings;
 
+use File::Basename;
+
 my @tabs = (
     '^m4/zz40-xc-ovr\.m4$',
     'Makefile\.(am|example)$',
@@ -104,17 +106,35 @@ sub eol_detect {
     return '';
 }
 
+my $max_repeat_space = 79;
+my $max_line_len = 192;
+my $max_path_len = 64;
+my $max_filename_len = 48;
+
 my $issues = 0;
 
 open(my $git_ls_files, '-|', 'git', 'ls-files') or die "Failed running git ls-files: $!";
 while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
+    my @err = ();
+
+    if(length($filename) > $max_path_len) {
+        push @err, sprintf('long (%d > %d) path', length($filename), $max_path_len);
+    }
+
+    my $bn = basename($filename);
+    if(length($bn) > $max_filename_len) {
+        push @err, sprintf('long (%d > %d) filename', length($bn), $max_filename_len);
+    }
+
+    if($filename !~ /^[A-Za-z0-9\/._-]+$/) {
+        push @err, sprintf("filename contains character(s) outside [A-Za-z0-9/._-]");
+    }
+
     open(my $fh, '<', $filename) or die "Cannot open '$filename': $!";
     my $content = do { local $/; <$fh> };
     close $fh;
-
-    my @err = ();
 
     if(!fn_match($filename, @tabs) &&
        $content =~ /\t/) {
@@ -181,21 +201,19 @@ while(my $filename = <$git_ls_files>) {
 
     if(!fn_match($filename, @longline)) {
         my $line = 0;
-        my $max = 192;
         for my $l (split(/\n/, $content)) {
             $line++;
-            if(length($l) > $max) {
-                push @err, sprintf('line %d: long (%d > %d) line', $line, length($l), $max);
+            if(length($l) > $max_line_len) {
+                push @err, sprintf('line %d: long (%d > %d) line', $line, length($l), $max_line_len);
             }
         }
     }
 
     my $line = 0;
-    my $max = 79;
     for my $l (split(/\n/, $content)) {
         $line++;
-        if($l =~ /( {$max,})/) {
-            push @err, sprintf('line %d: repeat spaces (%d > %d)', $line, length($1), $max);
+        if($l =~ /( {$max_repeat_space,})/) {
+            push @err, sprintf('line %d: repeat spaces (%d >= %d)', $line, length($1), $max_repeat_space);
         }
     }
 

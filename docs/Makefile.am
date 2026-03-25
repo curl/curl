@@ -68,7 +68,7 @@ INTERNALDOCS =                                   \
   internals/SCORECARD.md                         \
   internals/SPLAY.md                             \
   internals/STRPARSE.md                          \
-  internals/THRDPOOL+QUEUE.md                    \
+  internals/THRDPOOL-AND-QUEUE.md                \
   internals/TIME-KEEPING.md                      \
   internals/TLS-SESSIONS.md                      \
   internals/UINT_SETS.md                         \
