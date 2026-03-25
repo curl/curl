@@ -103,7 +103,14 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     return CURLE_OK;
   }
   curlx_fclose(*fh);
+#ifdef HAVE_GETEUID
+  /* If the existing file is not owned by the user, do not inherit
+   * its permissions at the temp file created below. The permissions
+   * might be unsuitable for holding user private data. */
+  if(sb.st_uid != geteuid())
+    sb.st_mode = 0;
 #endif
+#endif /* !_WIN32 */
   *fh = NULL;
 
   result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));
