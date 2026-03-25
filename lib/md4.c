@@ -44,13 +44,13 @@
 
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
 
-#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
+#if defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/md4.h>
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD4)
 #include <wolfssl/wolfcrypt/md4.h>
 
-typedef wc_Md4 MD4_CTX;
+typedef Md4 MD4_CTX;
 
 static int MD4_Init(MD4_CTX *ctx)
 {
