@@ -64,7 +64,8 @@ static int my_md4_init(my_md4_ctx *ctx)
   return 1;
 }
 
-static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx,
+                          const void *input, unsigned long len)
 {
   wc_Md4Update(ctx, input, (word32)len);
 }
@@ -91,7 +92,8 @@ static int my_md4_init(my_md4_ctx *ctx)
   return CC_MD4_Init(ctx);
 }
 
-static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx,
+                          const void *input, unsigned long len)
 {
   (void)CC_MD4_Update(ctx, input, (CC_LONG)len);
 }
@@ -128,7 +130,8 @@ static int my_md4_init(my_md4_ctx *ctx)
   return 1;
 }
 
-static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx,
+                          const void *input, unsigned long len)
 {
   CryptHashData(ctx->hHash, (const BYTE *)input, (unsigned int)len, 0);
 }
@@ -159,7 +162,8 @@ static int my_md4_init(my_md4_ctx *ctx)
   return 1;
 }
 
-static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx,
+                          const void *input, unsigned long len)
 {
   md4_update(ctx, len, input);
 }
@@ -349,7 +353,8 @@ static int my_md4_init(my_md4_ctx *ctx)
   return 1;
 }
 
-static void my_md4_update(my_md4_ctx *ctx, const void *input, unsigned long len)
+static void my_md4_update(my_md4_ctx *ctx,
+                          const void *input, unsigned long len)
 {
   uint32_t saved_lo;
   unsigned long used;
