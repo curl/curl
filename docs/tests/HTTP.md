@@ -49,11 +49,11 @@ You need:
    `tests/http/requirements.txt`
 2. Apache httpd and its development files. On Debian/Ubuntu, the packages
    `apache2-bin` and `apache2-dev` have these.
-3. the Apache mod_ssl, mod_http2 and mod_proxy modules. On Debian/Ubuntu, these
+3. the Apache `mod_ssl`, `mod_http2` and `mod_proxy` modules. On Debian/Ubuntu, these
    modules are part of the `apache2-bin` package, but other distributions may
    package them separately.
 4. a local `curl` project build
-5. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases are skipped
+5. optionally, `nghttpx` with HTTP/3 enabled or h3 test cases are skipped
 
 ### Configuration
 
