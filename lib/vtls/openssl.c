@@ -3561,6 +3561,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     }
   }
 #ifdef HAVE_BORINGSSL_LIKE
+  (void)peer;
   if(trying_ech_now && outername) {
     infof(data, "ECH: setting public_name not supported with BoringSSL");
     return CURLE_SSL_CONNECT_ERROR;
