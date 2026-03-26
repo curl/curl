@@ -348,7 +348,9 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        run: sudo .github/workflows/my-apt apt-get -o Dpkg::Use-Pty=0 install libfl2
+        run: |
+          echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt
+          sudo ./my-apt apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
