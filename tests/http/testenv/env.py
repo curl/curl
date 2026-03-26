@@ -233,7 +233,7 @@ class EnvConfig:
             if m:
                 self._caddy_version = m.group(1)
             else:
-                raise RuntimeError(f'Unable to determine cadd version from: {p.stdout}')
+                raise RuntimeError(f'Unable to determine caddy version from: {p.stdout}')
 
         self.vsftpd = self.config['vsftpd']['vsftpd']
         if self.vsftpd == '':

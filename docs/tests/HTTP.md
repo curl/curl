@@ -17,7 +17,7 @@ The test cases and necessary files are in `tests/http`. You can invoke
 tests.
 
 ```sh
-curl> pytest test/http
+curl> pytest tests/http
 platform darwin -- Python 3.9.15, pytest-6.2.0, py-1.10.0, pluggy-0.13.1
 rootdir: /Users/sei/projects/curl
 collected 5 items
@@ -45,11 +45,15 @@ skipping.
 
 You need:
 
-1. a recent Python, the `cryptography` module and, of course, `pytest`
-2. an apache httpd development version. On Debian/Ubuntu, the package
-   `apache2-dev` has this
-3. a local `curl` project build
-3. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases are skipped
+1. a recent Python, `pytest` and the other modules listed in
+   `tests/http/requirements.txt`
+2. Apache httpd and its development files. On Debian/Ubuntu, the packages
+   `apache2-bin` and `apache2-dev` have these.
+3. the Apache `mod_ssl`, `mod_http2` and `mod_proxy` modules. On Debian/Ubuntu, these
+   modules are part of the `apache2-bin` package, but other distributions may
+   package them separately.
+4. a local `curl` project build
+5. optionally, `nghttpx` with HTTP/3 enabled or h3 test cases are skipped
 
 ### Configuration
 
