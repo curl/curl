@@ -138,7 +138,7 @@ my $public = $apublic - $bpublic;
 
 # diffstat
 my ($fileschanged, $insertions, $deletions);
-my @diffstat = redir('git', 'diff', '--stat', "$start..");
+my @diffstat = redir('2>', 'git', 'diff', '--stat', "$start..");
 my $diffstat = $diffstat[-1];
 if($diffstat =~ /^ *(\d+) files changed, (\d+) insertions\(\+\), (\d+)/) {
     ($fileschanged, $insertions, $deletions)=($1, $2, $3);
