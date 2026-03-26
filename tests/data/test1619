@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes" crlf="headers">
+HTTP/1.1 200 OK
+ETag: W/"heyheyhey"
+Content-Length: 4
+
+yes
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+--etag-save to stdout
+</name>
+<command >
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O --etag-save -
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+W/"heyheyhey"
+</stdout>
+</verify>
+
+</testcase>

@@ -263,18 +263,23 @@ static size_t save_etag(const char *etag_h, const char *endp,
 
     if(eot >= etag_h) {
       size_t etag_length = eot - etag_h + 1;
-      /*
-       * Truncate the etag save stream, it can have an existing etag value.
-       */
+      curlx_struct_stat file;
+      int fd = fileno(etag_save->stream);
+
+      if((fd != -1) &&
+         !curlx_fstat(fd, &file) &&
+         (S_ISREG(file.st_mode))) {
+        /*
+         * Truncate regular files to avoid stale etag content.
+         */
 #ifdef HAVE_FTRUNCATE
-      if(ftruncate(fileno(etag_save->stream), 0)) {
-        return CURL_WRITEFUNC_ERROR;
-      }
+        if(ftruncate(fileno(etag_save->stream), 0))
+          return CURL_WRITEFUNC_ERROR;
 #else
-      if(fseek(etag_save->stream, 0, SEEK_SET)) {
-        return CURL_WRITEFUNC_ERROR;
-      }
+        if(fseek(etag_save->stream, 0, SEEK_SET))
+          return CURL_WRITEFUNC_ERROR;
 #endif
+      }
 
       fwrite(etag_h, 1, etag_length, etag_save->stream);
       /* terminate with newline */
