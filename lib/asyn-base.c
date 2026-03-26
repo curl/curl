@@ -120,11 +120,11 @@ timediff_t Curl_ares_timeout_ms(struct Curl_easy *data,
     return -1;
 
   async_timeout_ms = Curl_async_timeleft_ms(data, async);
-  if(async_timeout_ms > 0) {
+  if((async_timeout_ms > 0) && (async_timeout_ms < INT_MAX)) {
     struct timeval timebuf;
     struct timeval *timeout;
-    struct timeval end = { async_timeout_ms / 1000,
-                           (async_timeout_ms % 1000) * 1000 };
+    struct timeval end = { (int)async_timeout_ms / 1000,
+                           ((int)async_timeout_ms % 1000) * 1000 };
 
     timeout = ares_timeout(channel, &end, &timebuf);
     if(timeout)
