@@ -370,8 +370,10 @@ static void async_thrdd_item_process(void *arg)
    * see V4MAPPED, so set AI_ADDRCONFIG alone to get less "help". */
   hints.ai_flags = AI_ADDRCONFIG;
   curl_msnprintf(service, sizeof(service), "%u", item->port);
+#if 0
 #ifdef AI_NUMERICSERV
   hints.ai_flags |= AI_NUMERICSERV;
+#endif
 #endif
 
   rc = Curl_getaddrinfo_ex(item->hostname, service, &hints, &item->res);
