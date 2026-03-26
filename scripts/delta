@@ -102,7 +102,7 @@ sub setopts {
     close(H);
     return $opts;
 }
-my $asetopts = setopts('<', 'include/curl/curl.h');
+my $asetopts = setopts("<include/curl/curl.h");
 my $bsetopts = setopts('-|', 'git', 'show', "$start:include/curl/curl.h");
 my $nsetopts = $asetopts - $bsetopts;
 
