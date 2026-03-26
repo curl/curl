@@ -76,6 +76,7 @@ jobs:
           echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           echo '-----------------'
           ls -l
+          ls -l "$HOME"
           echo "|$PWD|"
           echo "|$HOME|"
           echo '-----------------'
