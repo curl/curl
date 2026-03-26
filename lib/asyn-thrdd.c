@@ -666,11 +666,11 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 #ifndef ENABLE_WAKEUP
     timediff_t stutter_ms, elapsed_ms;
     elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
-    if(ms < 3)
+    if(elapsed_ms < 3)
       stutter_ms = 1;
-    else if(ms <= 50)
+    else if(elapsed_ms <= 50)
       stutter_ms = ms / 3;
-    else if(ms <= 250)
+    else if(elapsed_ms <= 250)
       stutter_ms = 50;
     else
       stutter_ms = 200;
