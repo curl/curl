@@ -77,7 +77,7 @@ jobs:
           echo '-----------------'
           ls -l
           echo '-----------------'
-          sudo ./my-apt apt-get -o Dpkg::Use-Pty=0 install \
+          ./my-apt sudo apt-get -o Dpkg::Use-Pty=0 install \
             libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
             libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
