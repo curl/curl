@@ -73,7 +73,7 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          { echo '#!/bin/sh'; echo 'for i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done'; } > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+          { echo '#!/bin/sh'; echo 'for i in 1 2 3; do timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done'; } > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           echo '-----------------'
           ls -l
           ls -l "$HOME"
