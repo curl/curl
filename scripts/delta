@@ -80,8 +80,9 @@ sub redir {
 
 # number of setops:
 sub setopts {
+    my ($f)=@_;
     my $opts = 0;
-    if(open(H, @_)) {
+    if(open(H, $f)) {
         while(<H>) {
             if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/)) {
                 $opts++;
