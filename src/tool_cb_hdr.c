@@ -272,15 +272,9 @@ static size_t save_etag(const char *etag_h, const char *endp,
         /*
          * Truncate regular files to avoid stale etag content.
          */
-#ifdef HAVE_FTRUNCATE
         if(ftruncate(fileno(etag_save->stream), 0))
           return CURL_WRITEFUNC_ERROR;
-#else
-        if(fseek(etag_save->stream, 0, SEEK_SET))
-          return CURL_WRITEFUNC_ERROR;
-#endif
       }
-
       fwrite(etag_h, 1, etag_length, etag_save->stream);
       /* terminate with newline */
       fputc('\n', etag_save->stream);

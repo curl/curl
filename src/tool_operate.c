@@ -558,7 +558,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         fflush(outs->stream);
         notef("Throwing away %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
         /* truncate file at the position where we started appending */
-#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
+
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot append as then we
              create something strange, bail out */
@@ -568,11 +568,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         /* now seek to the end of the file, the position where we
            truncated the file in a large file-safe way */
         rc = fseek(outs->stream, 0, SEEK_END);
-#else
-        /* ftruncate is not available, so reposition the file to the location
-           we would have truncated it. */
-        rc = curlx_fseek(outs->stream, outs->init, SEEK_SET);
-#endif
+
         if(rc) {
           errorf("Failed seeking to end of file");
           return CURLE_WRITE_ERROR;
