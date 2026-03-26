@@ -1130,6 +1130,7 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   size_t olen;
 
+  (void)data;
   *hrr = NULL;
   if(len <= 2)
     return CURLE_BAD_FUNCTION_ARGUMENT;
