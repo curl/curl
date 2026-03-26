@@ -265,13 +265,6 @@ successful `cygwin` install:
   make
 ```
 
-> **Note**
-> If there is an error regarding `make`, open the `cygwin` terminal, and run:
-
-```bash
-ln -s /usr/bin/make /usr/bin/gmake
-```
-
 </details>
 
 Once all the packages have been installed, begin the process of installing
@@ -311,31 +304,18 @@ The details below illustrate using `cmake` and `ninja` (***much** faster*):
 <details>
     <summary>Cygwin Ninja Install</summary>
 
-```bash
-    # Install dependencies
-    setup-x86_64 --no-admin -q -I -P cmake,ninja
+```batch
+:: Install dependencies
+setup-x86_64 --no-admin -q -I -P cmake,ninja
 
-    # Configure with `cmake`
-    cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release
+:: In downloaded curl source code create and enter build directory
+mkdir build && cd build
 
-    # Now your ninja
-    ninja
-```
+:: Configure with `cmake` (point to parent source directory)
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
 
-> **Note**
-> If an error occurs during or after the installation, then try:
-
-- Retry with `disable-shared`, running:
-
-```bash
-rm -rf CMakeFiles CMakeCache.txt
-cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
-```
-
-- Copy `libcurl-4.dll` next to the executable, running:
-
-```bash
-cp lib/libcurl-4.dll src/
+:: Now your ninja
+ninja
 ```
 
 </details>
