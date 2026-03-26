@@ -76,8 +76,10 @@ jobs:
           echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt; chmod +x my-apt
           echo '-----------------'
           ls -l
+          echo "|$PWD|"
+          echo "|$HOME|"
           echo '-----------------'
-          ./my-apt sudo apt-get -o Dpkg::Use-Pty=0 install \
+          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
             libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
