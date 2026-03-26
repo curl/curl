@@ -365,15 +365,15 @@ static void async_thrdd_item_process(void *arg)
   hints.ai_family = pf;
   hints.ai_socktype = Curl_socktype_for_transport(item->transport);
   hints.ai_protocol = Curl_protocol_for_transport(item->transport);
-  /* If we leave `ai_flags == 0` then some libc implementations
-   * assume we really want (AI_V4MAPPED | AI_ADDRCONFIG). We do not want to
-   * see V4MAPPED, so set AI_ADDRCONFIG alone to get less "help". */
+#ifdef __APPLE__
+  /* If we leave `ai_flags == 0` then macOS is looking for IPV4MAPPED
+   * when doing AAAA queries. We do not want this "help". */
   hints.ai_flags = AI_ADDRCONFIG;
+#endif
+
   curl_msnprintf(service, sizeof(service), "%u", item->port);
-#if 0
 #ifdef AI_NUMERICSERV
   hints.ai_flags |= AI_NUMERICSERV;
-#endif
 #endif
 
   rc = Curl_getaddrinfo_ex(item->hostname, service, &hints, &item->res);
