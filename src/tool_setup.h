@@ -108,6 +108,14 @@ int tool_ftruncate64(int fd, curl_off_t where);
 #endif /* !HAVE_FTRUNCATE */
 #endif /* _WIN32 */
 
+#ifdef __DJGPP__
+int msdos_ftruncate(int fd, curl_off_t where);
+#undef HAVE_FTRUNCATE
+#undef ftruncate /* to be sure */
+#define ftruncate(fd, where) msdos_ftruncate(fd, where)
+#define USE_MSDOS_FTRUNCATE 1
+#endif
+
 #ifdef CURL_CA_EMBED
 extern const unsigned char curl_ca_embed[];
 #endif

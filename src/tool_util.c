@@ -96,6 +96,19 @@ int tool_ftruncate64(int fd, curl_off_t where)
 }
 #endif /* USE_TOOL_FTRUNCATE */
 
+#ifdef USE_MSDOS_FTRUNCATE
+/*
+ * Only supports 'off_t' (signed 32 bit) as file size.
+ */
+int msdos_ftruncate(int fd, curl_off_t where)
+{
+  if(where > INT_MAX)
+    return -1;
+
+  return ftruncate(fd, (off_t) where);
+}
+#endif /* USE_MSDOS_FTRUNCATE */
+
 #ifdef _WIN32
 FILE *tool_execpath(const char *filename, char **pathp)
 {
