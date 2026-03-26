@@ -669,7 +669,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
     if(elapsed_ms < 3)
       stutter_ms = 1;
     else if(elapsed_ms <= 50)
-      stutter_ms = ms / 3;
+      stutter_ms = elapsed_ms / 3;
     else if(elapsed_ms <= 250)
       stutter_ms = 50;
     else
