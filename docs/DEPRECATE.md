@@ -20,13 +20,13 @@ general.
 
 TLS-SRP support gets removed in August 2026.
 
-## SMB goes opt-in
+## drop SMB support
 
 The SMB protocol has weak security and is rarely used these days.
 
 SMB support gets removed in September 2026.
 
-## NTLM goes opt-in
+## drop NTLM support
 
 The NTLM authentication method has weak security and is rarely used these
 days. It has been deprecated by Microsoft and does not work over HTTP/2 or
