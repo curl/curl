@@ -35,6 +35,15 @@ void curlx_str_assign(struct Curl_str *out, const char *str, size_t len)
   out->len = len;
 }
 
+/* remove bytes from the end of the string, never remove more bytes than what
+   the string holds! */
+void curlx_str_trim(struct Curl_str *out, size_t len)
+{
+  DEBUGASSERT(out);
+  DEBUGASSERT(out->len >= len);
+  out->len -= len;
+}
+
 /* Get a word until the first DELIM or end of string. At least one byte long.
    return non-zero on error */
 int curlx_str_until(const char **linep, struct Curl_str *out,
