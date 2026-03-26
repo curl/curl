@@ -257,12 +257,12 @@ successful `cygwin` install:
     <summary>Package List</summary>
 
 ```
-  binutils
-  gcc-core
-  libpsl-devel
-  libtool
-  perl
-  make
+binutils
+gcc-core
+libpsl-devel
+libtool
+perl
+make
 ```
 
 </details>
@@ -274,12 +274,12 @@ curl from the source code:
     <summary>configure_options</summary>
 
 ```
-    --with-gnutls
-    --with-mbedtls
-    --with-openssl (also works for OpenSSL forks)
-    --with-rustls
-    --with-wolfssl
-    --without-ssl
+--with-gnutls
+--with-mbedtls
+--with-openssl (also works for OpenSSL forks)
+--with-rustls
+--with-wolfssl
+--without-ssl
 ```
 
 </details>
