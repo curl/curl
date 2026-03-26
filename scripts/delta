@@ -116,8 +116,8 @@ my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
 my $afiles=`git ls-files | wc -l`;
-my $deletes = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", "$start"));
-my $creates = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", "$start"));
+my $deletes = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
+my $creates = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
 
 # Time since that tag
 my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # Unix timestamp
