@@ -429,8 +429,8 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt; chmod +x my-apt
-          sudo ./my-apt apt-get -o Dpkg::Use-Pty=0 install \
+          printf '#!/bin/sh\nfor i in 1 2 3; do timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev \
             ${INSTALL_PACKAGES} \
@@ -451,8 +451,8 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo dpkg --add-architecture i386
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt; chmod +x my-apt
-          sudo ./my-apt apt-get -o Dpkg::Use-Pty=0 install \
+          printf '#!/bin/sh\nfor i in 1 2 3; do timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${MATRIX_INSTALL_PACKAGES}
@@ -792,8 +792,8 @@ jobs:
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
             sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
-          echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt; chmod +x my-apt
-          sudo ./my-apt apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          printf '#!/bin/sh\nfor i in 1 2 3; do timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
           printenv >> "$GITHUB_ENV"
 
@@ -816,8 +816,8 @@ jobs:
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
           if [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]]; then
-            echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt; chmod +x my-apt
-            sudo ./my-apt apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
+            printf '#!/bin/sh\nfor i in 1 2 3; do timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+            sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           fi
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
