@@ -112,8 +112,19 @@ my $deletes = scalar(redir('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '-
 my $creates = scalar(redir('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
 
 # Time since that tag
-my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # Unix timestamp
-my $taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
+sub tagstamp {
+    my $col = shift;
+    my $q = qr/^$start /;
+    foreach my $line (@_) {
+        if($line =~ /$q/) {
+            my @cols = split(/\|/, $line);
+            return $cols[$col - 1];
+        }
+    }
+}
+my @tagged = redir('git', 'for-each-ref', '--format=%(refname:short) | %(taggerdate:unix) | %(creatordate)', 'refs/tags/*');
+my $tagged = tagstamp(2, @tagged); # Unix timestamp
+my $taggednice = tagstamp(3, @tagged); # human readable time
 chomp $taggednice;
 my $now=POSIX::strftime("%s", localtime());
 my $elapsed=$now - $tagged; # number of seconds since tag
