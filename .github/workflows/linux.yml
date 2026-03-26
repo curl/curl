@@ -237,6 +237,15 @@ jobs:
             image: ubuntu-24.04-arm
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm
 
+          - name: 'curl_global_init_mem debug valgrind'
+            image: ubuntu-24.04-arm
+            install_packages: valgrind
+            tflags: '--min=1150'
+            configure: >-
+              --enable-init-mem-debug
+              --with-openssl --disable-debug --enable-unity
+              --enable-ntlm
+
           - name: 'openssl https-only'
             image: ubuntu-24.04-arm
             tflags: '--min=1150'
