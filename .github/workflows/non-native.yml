@@ -349,7 +349,7 @@ jobs:
     steps:
       - name: 'install packages'
         run: |
-          echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt
+          echo '#!/bin/sh\nfor i in 1 2 3; do; timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > my-apt; chmod +x my-apt
           sudo ./my-apt apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
