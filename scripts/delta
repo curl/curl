@@ -49,6 +49,17 @@ elsif($start eq "") {
     chomp $start;
 }
 
+sub redir {
+    my @out;
+    my $as_string = shift if($_[0] eq '$');
+    my $hideerr = shift if($_[0] =~ /^2>/);
+    my $pid = open3(my $in, my $out, my $err = gensym, @_);
+    if(!$hideerr) { while(<$err>) { print STDERR $_; }; }
+    push @out, <$out>;
+    waitpid($pid, 0);
+    return $as_string ? join('', @out) : @out;
+}
+
 my $commits = `git log --oneline $start.. | wc -l`;
 my $committers = `git shortlog -s $start.. | wc -l`;
 my $bcommitters = `git shortlog -s $start | wc -l`;
@@ -62,21 +73,9 @@ my $ncommitters = $acommitters - $bcommitters;
 # number of contributors right now
 my $acontribs = `./scripts/contrithanks.sh stdout | wc -l`;
 # number when the tag was set
-my $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
+my $bcontribs = redir('$', 'git', 'grep', '-h', '-c', '^[^ ]', "$start:docs/THANKS");
 # delta
 my $contribs = $acontribs - $bcontribs;
-
-sub redir {
-    my @out;
-    my $outfn = shift if($_[0] =~ /^>/);
-    my $hideerr = shift if($_[0] =~ /^2>/);
-    open(my $outfd, $outfn) || die if($outfn);
-    my $pid = open3(my $in, my $out, my $err = gensym, @_);
-    if(!$hideerr) { while(<$err>) { print STDERR $_; }; }
-    push @out, <$out>;
-    waitpid($pid, 0);
-    return @out;
-}
 
 # number of setops:
 sub setopts {
@@ -100,9 +99,9 @@ my $bsetopts = setopts('-|', 'git', 'show', "$start:include/curl/curl.h");
 my $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
-my $aoptions=`grep -c '{ *"....--' src/tool_listhelp.c`;
-my $boptions=`git grep -h -c '{ *"....--' $start:src/tool_listhelp.c 2>/dev/null`;
-my $noptions=$aoptions - $boptions;
+my $aoptions = redir('$', '2>', 'grep', '-c', '{ *"....--', 'src/tool_listhelp.c');
+my $boptions = redir('$', '2>', 'git', 'grep', '-h', '-c', '{ *"....--', "$start:src/tool_listhelp.c");
+my $noptions = $aoptions - $boptions;
 
 # current local branch
 my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
@@ -122,8 +121,8 @@ my $total=$now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
 my $totalhttpget=$now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
 
 # Number of public functions in libcurl
-my $apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
-my $bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
+my $apublic = scalar(redir('git', 'grep', '^CURL_EXTERN', '--', 'include/curl'));
+my $bpublic = scalar(redir('git', 'grep', '^CURL_EXTERN', $start, '--', 'include/curl'));
 my $public = $apublic - $bpublic;
 
 # diffstat
