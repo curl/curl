@@ -80,9 +80,9 @@ sub redir {
 
 # number of setops:
 sub setopts {
-    my ($f)=@_;
+    my $mode = shift;
     my $opts = 0;
-    if(open(H, $f)) {
+    if(open(H, $mode, @_)) {
         while(<H>) {
             if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/)) {
                 $opts++;
@@ -90,9 +90,12 @@ sub setopts {
         }
         close(H);
     }
+    else {
+        die join(' ', @_) . ": $!\n";
+    }
     return $opts;
 }
-my $asetopts = setopts("<include/curl/curl.h");
+my $asetopts = setopts('<', 'include/curl/curl.h');
 my $bsetopts = setopts('-|', 'git', 'show', "$start:include/curl/curl.h");
 my $nsetopts = $asetopts - $bsetopts;
 
