@@ -32,6 +32,7 @@ concurrency:
 permissions: {}
 
 env:
+  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   CW_NOGET: 'curl trurl'
   CW_MAP: '0'
   CW_JOBS: '5'
