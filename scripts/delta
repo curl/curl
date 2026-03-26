@@ -35,7 +35,7 @@ use warnings;
 
 use POSIX;
 use IPC::Open3;
-use File::Spec;
+use Symbol 'gensym';
 use Time::Piece;
 
 my $start = $ARGV[0] || '';
@@ -66,22 +66,16 @@ my $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
 my $contribs = $acontribs - $bcontribs;
 
-open(NULL, '>', File::Spec->devnull);
-
-sub run_stdout {
-    my $command = shift;
-    open(my $fh, '-|', $command, @_) or die;
-    my $stdout = do { local $/; <$fh> };
-    close($fh);
-    return $stdout;
-}
-
-sub run_stdout_noerr {
-    my $command = shift;
-    my $in = '';
-    my $pid = open3($in, \*FH, '>&NULL', $command, @_);
-    my $stdout = do { local $/; <FH> };
+sub redir {
+    my @out;
+    my $outfn = shift if($_[0] =~ /^>/);
+    my $hideerr = shift if($_[0] =~ /^2>/);
+    open(my $outfd, $outfn) || die if($outfn);
+    my $pid = open3(my $in, my $out, my $err = gensym, @_);
+    if(!$hideerr) { while(<$err>) { print STDERR $_; }; }
+    push @out, <$out>;
     waitpid($pid, 0);
+    return $out;
 }
 
 sub wc_l {
@@ -91,15 +85,15 @@ sub wc_l {
 
 # number of setops:
 sub setopts {
-    my ($f)=@_;
-    open(H, $f);
-    my $opts;
-    while(<H>) {
-        if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/)) {
-            $opts++;
+    my $opts = 0;
+    if(open(H, @_)) {
+        while(<H>) {
+            if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/)) {
+                $opts++;
+            }
         }
+        close(H);
     }
-    close(H);
     return $opts;
 }
 my $asetopts = setopts("<include/curl/curl.h");
@@ -108,7 +102,7 @@ my $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
 my $aoptions=`grep -c '{ *"....--' src/tool_listhelp.c`;
-my $boptions=`git grep -c '{ *"....--' $start:src/tool_listhelp.c 2>/dev/null`;
+my $boptions=`git grep -h -c '{ *"....--' $start:src/tool_listhelp.c 2>/dev/null`;
 my $noptions=$aoptions - $boptions;
 
 # current local branch
@@ -116,8 +110,8 @@ my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
 my $afiles=`git ls-files | wc -l`;
-my $deletes = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
-my $creates = wc_l(run_stdout_noerr('git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
+my $deletes = wc_l(redir('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
+my $creates = wc_l(redir('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
 
 # Time since that tag
 my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # Unix timestamp
