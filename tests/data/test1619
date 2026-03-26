@@ -9,7 +9,7 @@ HTTP GET
 
 <reply>
 <data nocheck="yes" crlf="headers">
-HTTP/1.1 200 OOK
+HTTP/1.1 200 OK
 ETag: W/"heyheyhey"
 Content-Length: 4
 
