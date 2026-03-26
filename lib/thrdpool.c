@@ -439,38 +439,38 @@ out:
 
 #ifdef CURLVERBOSE
 void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
-                         struct Curl_easy *data,
-                         struct curl_trc_feat *feat)
+                         struct Curl_easy *data)
 {
+  struct curl_trc_feat *feat = &Curl_trc_feat_threads;
   if(Curl_trc_ft_is_verbose(data, feat)) {
     struct Curl_llist_node *e;
     struct curltime now = curlx_now();
 
     Curl_mutex_acquire(&tpool->lock);
     if(!Curl_llist_count(&tpool->slots)) {
-      Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] no threads running",
+      Curl_trc_feat_infof(data, feat, "[TPOOL-%s] no threads running",
                           tpool->name);
     }
     for(e = Curl_llist_head(&tpool->slots); e; e = Curl_node_next(e)) {
       struct thrdslot *tslot = Curl_node_elem(e);
       timediff_t elapsed_ms = curlx_ptimediff_ms(&now, &tslot->starttime);
       if(!tslot->running) {
-        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: not running",
+        Curl_trc_feat_infof(data, feat, "[TPOOL-%s] [%u]: not running",
                             tpool->name, tslot->id);
       }
       else if(!tslot->starttime.tv_sec && !tslot->starttime.tv_usec) {
-        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: starting...",
+        Curl_trc_feat_infof(data, feat, "[TPOOL-%s] [%u]: starting...",
                             tpool->name, tslot->id);
       }
       else if(tslot->idle) {
-        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: idle for %"
+        Curl_trc_feat_infof(data, feat, "[TPOOL-%s] [%u]: idle for %"
                             FMT_TIMEDIFF_T "ms",
                             tpool->name, tslot->id, elapsed_ms);
       }
       else {
         timediff_t remain_ms = tslot->work_timeout_ms ?
           (tslot->work_timeout_ms - elapsed_ms) : 0;
-        Curl_trc_feat_infof(data, feat, "[%s] [TPOOL] [%u]: busy %"
+        Curl_trc_feat_infof(data, feat, "[TPOOL-%s] [%u]: busy %"
                             FMT_TIMEDIFF_T "ms, timeout in %" FMT_TIMEDIFF_T
                             "ms: %s",
                             tpool->name, tslot->id, elapsed_ms, remain_ms,

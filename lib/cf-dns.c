@@ -212,7 +212,8 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   if(!ctx->dns && !ctx->resolv_result) {
     ctx->resolv_result = Curl_resolv_take_result(data, &ctx->dns);
     if(!ctx->dns && !ctx->resolv_result)
-      CURL_TRC_CF(data, cf, "DNS resolution not complete yet");
+      CURL_TRC_CF(data, cf, "DNS resolution ongoing for %s:%u",
+                  ctx->hostname, ctx->port);
   }
 
   if(ctx->resolv_result) {

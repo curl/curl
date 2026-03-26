@@ -54,10 +54,11 @@ struct Curl_https_rrinfo {
   int port; /* -1 means not set */
   uint16_t priority;
   BIT(no_def_alpn); /* keytag = 2 */
+  BIT(mandatory); /* keytag = 0 */
+  BIT(complete); /* values have been successfully assigned */
 };
 
-CURLcode Curl_httpsrr_set(struct Curl_easy *data,
-                          struct Curl_https_rrinfo *hi,
+CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
                           uint16_t rrkey, const uint8_t *val, size_t vlen);
 
 struct Curl_https_rrinfo *
@@ -77,10 +78,17 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
 #define HTTPS_RR_CODE_IPV6            0x06
 
 #ifdef USE_ARES
-CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
-                                const ares_dns_record_t *dnsrec,
+CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
                                 struct Curl_https_rrinfo *hinfo);
 #endif /* USE_ARES */
+
+#ifdef CURLVERBOSE
+void Curl_httpsrr_trace(struct Curl_easy *data,
+                        struct Curl_https_rrinfo *hi);
+#else
+#define Curl_httpsrr_trace(a,b)     Curl_nop_stmt
+#endif
+
 #endif /* USE_HTTPSRR */
 
 #endif /* HEADER_CURL_HTTPSRR_H */

@@ -137,6 +137,10 @@ CURLcode Curl_ares_pollset(struct Curl_easy *data,
                            ares_channel channel,
                            struct easy_pollset *ps);
 
+timediff_t Curl_ares_timeout_ms(struct Curl_easy *data,
+                                struct Curl_resolv_async *async,
+                                ares_channel channel);
+
 int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms);
 #endif
 
@@ -251,8 +255,13 @@ struct Curl_resolv_async {
   uint16_t port;
   uint8_t ip_version;
   uint8_t transport;
+  BIT(with_https_rr); /* get HTTPS-RR if possible */
+  BIT(shutdown);
   char hostname[1];
 };
+
+timediff_t Curl_async_timeleft_ms(struct Curl_easy *data,
+                                  struct Curl_resolv_async *async);
 
 /*
  * Curl_async_shutdown().

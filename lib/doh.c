@@ -1157,9 +1157,10 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
       result = CURLE_WEIRD_SERVER_REPLY;
       goto err;
     }
-    result = Curl_httpsrr_set(data, lhrr, pcode, cp, plen);
+    result = Curl_httpsrr_set(lhrr, pcode, cp, plen);
     if(result)
       goto err;
+    Curl_httpsrr_trace(data, lhrr);
     cp += plen;
     len -= plen;
     expected_min_pcode = pcode + 1;

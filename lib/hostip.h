@@ -35,8 +35,7 @@
  */
 #define CURL_HOSTENT_SIZE 9000
 
-#define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
-                                    many seconds for a name resolve */
+#define CURL_TIMEOUT_RESOLVE_MS (300 * 1000)
 
 struct addrinfo;
 struct hostent;
@@ -101,12 +100,6 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               uint8_t ip_version,
                               uint8_t transport,
                               struct Curl_dns_entry **pdns);
-
-CURLcode Curl_resolv_timeout(struct Curl_easy *data,
-                             const char *hostname, int port,
-                             int ip_version,
-                             struct Curl_dns_entry **entry,
-                             timediff_t timeoutms);
 
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_take_result(struct Curl_easy *data,

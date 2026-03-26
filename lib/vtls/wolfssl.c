@@ -56,6 +56,7 @@
 #include "urldata.h"
 #include "curl_trc.h"
 #include "httpsrr.h"
+#include "cf-dns.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
 #include "vtls/vtls_scache.h"
@@ -1372,54 +1373,33 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
       }
     }
     else {
-      struct ssl_connect_data *connssl = cf->ctx;
-      struct Curl_dns_entry *dns = NULL;
+      const struct Curl_https_rrinfo *rinfo =
+        Curl_conn_dns_get_https(data, cf->sockindex);
 
-      result = Curl_dnscache_get(data, connssl->peer.hostname,
-                                 connssl->peer.port,
-                                 cf->conn->ip_version, &dns);
-      if(!dns) {
-        if(result) {
-          failf(data, "ECH: could not resolve %s:%d",
-                connssl->peer.hostname, connssl->peer.port);
-          goto out;
-        }
-        infof(data, "ECH: requested but no DNS info available");
-        if(data->set.tls_ech & CURLECH_HARD) {
-          result = CURLE_SSL_CONNECT_ERROR;
-          goto out;
-        }
-      }
-      else {
-        struct Curl_https_rrinfo *rinfo = NULL;
+      if(rinfo && rinfo->echconfiglist) {
+        unsigned char *ecl = rinfo->echconfiglist;
+        size_t elen = rinfo->echconfiglist_len;
 
-        rinfo = dns->hinfo;
-        if(rinfo && rinfo->echconfiglist) {
-          unsigned char *ecl = rinfo->echconfiglist;
-          size_t elen = rinfo->echconfiglist_len;
-
-          infof(data, "ECH: ECHConfig from DoH HTTPS RR");
-          if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
-             WOLFSSL_SUCCESS) {
-            infof(data, "ECH: wolfSSL_SetEchConfigs failed");
-            if(data->set.tls_ech & CURLECH_HARD) {
-              result = CURLE_SSL_CONNECT_ERROR;
-              goto out;
-            }
-          }
-          else {
-            trying_ech_now = 1;
-            infof(data, "ECH: imported ECHConfigList of length %ld", elen);
-          }
-        }
-        else {
-          infof(data, "ECH: requested but no ECHConfig available");
+        infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+        if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
+           WOLFSSL_SUCCESS) {
+          infof(data, "ECH: wolfSSL_SetEchConfigs failed");
           if(data->set.tls_ech & CURLECH_HARD) {
             result = CURLE_SSL_CONNECT_ERROR;
             goto out;
           }
         }
-        Curl_dns_entry_unlink(data, &dns);
+        else {
+          trying_ech_now = 1;
+          infof(data, "ECH: imported ECHConfigList of length %ld", elen);
+        }
+      }
+      else {
+        infof(data, "ECH: requested but no ECHConfig available");
+        if(data->set.tls_ech & CURLECH_HARD) {
+          result = CURLE_SSL_CONNECT_ERROR;
+          goto out;
+        }
       }
     }
 
@@ -1445,6 +1425,18 @@ out:
   }
   return result;
 }
+
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+static bool wssl_ech_need_httpsrr(struct Curl_easy *data)
+{
+  if(!CURLECH_ENABLED(data))
+    return FALSE;
+  if((data->set.tls_ech & CURLECH_GREASE) ||
+     (data->set.tls_ech & CURLECH_CLA_CFG))
+   return FALSE;
+  return TRUE;
+}
+#endif
 
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
@@ -2116,6 +2108,22 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
+#ifdef USE_ECH
+    /* if we do ECH and need the HTTPS-RR information for it,
+     * we delay the connect until it arrives or DNS resolve fails. */
+    if(wssl_ech_need_httpsrr(data) &&
+       !Curl_conn_dns_get_https(data, cf->sockindex)) {
+      result = Curl_conn_dns_result(cf->conn, cf->sockindex);
+      if(result) {
+        if(result == CURLE_AGAIN) {
+          CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
+          result = CURLE_OK;
+        }
+        return result;
+      }
+      /* DNS is fully resolved */
+    }
+#endif /* USE_ECH */
     result = wssl_connect_step1(cf, data);
     if(result)
       return result;
