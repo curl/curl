@@ -28,7 +28,11 @@ use warnings;
 
 my $root=$ARGV[0] || "..";
 
-my @m; open(O, '-|', 'git', 'ls-files', '--', $root) || die; push @m, <O>; close(O);
+my @m
+if(open(O, '-|', 'git', 'ls-files', '--', $root)) {
+    push @m, <O>;
+    close(O);
+}
 
 my $errors = 0;
 
