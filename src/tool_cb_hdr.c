@@ -263,10 +263,14 @@ static size_t save_etag(const char *etag_h, const char *endp,
 
     if(eot >= etag_h) {
       size_t etag_length = eot - etag_h + 1;
-      if(etag_save->regular_file) {
+      curlx_struct_stat file;
+      int fd = fileno(etag_save->stream);
+
+      if((fd != -1) &&
+         !curlx_fstat(fd, &file) &&
+         (S_ISREG(file.st_mode))) {
         /*
-         * Truncate regular files to avoid stale etag content. Standard
-         * streams such as stdout may be non-seekable/non-truncatable.
+         * Truncate regular files to avoid stale etag content.
          */
 #ifdef HAVE_FTRUNCATE
         if(ftruncate(fileno(etag_save->stream), 0))
