@@ -75,12 +75,11 @@ sub redir {
     if(!$hideerr) { while(<$err>) { print STDERR $_; }; }
     push @out, <$out>;
     waitpid($pid, 0);
+print "------------------\n";
+print join("\n", @out);
+print "------------------\n";
+exit 10;
     return $out;
-}
-
-sub wc_l {
-    my ($content) = @_;
-    return scalar(split /\n/, $content);
 }
 
 # number of setops:
@@ -110,8 +109,8 @@ my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
 my $afiles=`git ls-files | wc -l`;
-my $deletes = wc_l(redir('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
-my $creates = wc_l(redir('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
+my $deletes = length(redir('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
+my $creates = length(redir('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
 
 # Time since that tag
 my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # Unix timestamp
