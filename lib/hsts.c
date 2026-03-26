@@ -407,6 +407,7 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
     char dbuf[MAX_HSTS_DATELEN + 1];
     time_t expires = 0;
     const char *hp = curlx_str(&host);
+    size_t hlen;
 
     /* The date parser works on a null-terminated string. The maximum length
        is upheld by curlx_str_quotedword(). */
@@ -420,17 +421,26 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
 
     if(hp[0] == '.') {
       curlx_str_nudge(&host, 1);
+      hp = curlx_str(&host);
       subdomain = TRUE;
     }
+    hlen = curlx_strlen(&host);
+    if(hlen && (hp[hlen - 1] == '.'))
+      /* strip off any trailing dot */
+      curlx_str_trim(&host, 1);
+
     /* only add it if not already present */
     e = Curl_hsts(h, curlx_str(&host), curlx_strlen(&host), subdomain);
     if(!e)
       result = hsts_create(h, curlx_str(&host), curlx_strlen(&host),
                            subdomain, expires);
     else if(curlx_str_casecompare(&host, e->host)) {
-      /* the same hostname, use the largest expire time */
+      /* the same hostname, use the largest expire time and keep the
+         strictest subdomain policy */
       if(expires > e->expires)
         e->expires = expires;
+      if(subdomain)
+        e->includeSubDomains = TRUE;
     }
     if(result)
       return result;
