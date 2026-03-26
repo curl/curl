@@ -740,7 +740,7 @@ jobs:
       - name: 'install packages'
         env:
           MATRIX_INSTALL_PACKAGES: '${{ matrix.install_packages }}'
-        run: sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32 ${MATRIX_INSTALL_PACKAGES}
+        run: sudo .github/workflows/my-apt apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32 ${MATRIX_INSTALL_PACKAGES}
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

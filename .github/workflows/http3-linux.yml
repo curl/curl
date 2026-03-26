@@ -186,7 +186,7 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
+          sudo .github/workflows/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libbrotli-dev libzstd-dev zlib1g-dev \
             libev-dev \
@@ -489,7 +489,7 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
+          sudo .github/workflows/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind \
             ${INSTALL_PACKAGES} \

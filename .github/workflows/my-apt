@@ -1,0 +1,12 @@
+#!/bin/sh
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+
+set -eu
+
+for i in 1 2 3; do
+  timeout 60 "$@" && break
+  echo "Error: slow/hung servers, trying again: $i"
+  sleep 1
+done
