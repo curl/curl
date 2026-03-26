@@ -60,9 +60,9 @@ sub redir {
     return $as_string ? join('', @out) : @out;
 }
 
-my $commits = `git log --oneline $start.. | wc -l`;
-my $committers = `git shortlog -s $start.. | wc -l`;
-my $bcommitters = `git shortlog -s $start | wc -l`;
+my $commits = scalar(redir('git', 'log', '--oneline', "$start.."));
+my $committers = scalar(redir('git', 'shortlog', '-s', "$start.."));
+my $bcommitters = scalar(redir('git', 'shortlog', '-s', $start));
 
 my $acommits = `git log --oneline | wc -l`;
 my $acommitters = `git shortlog -s | wc -l`;
