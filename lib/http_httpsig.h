@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SHA256_H
-#define HEADER_CURL_SHA256_H
+#ifndef HEADER_CURL_HTTP_HTTPSIG_H
+#define HEADER_CURL_HTTP_HTTPSIG_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Florin Petriuc, <petriuc.florin@gmail.com>
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -26,21 +25,11 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_HTTPSIG) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH) || \
-  defined(USE_LIBSSH2) || defined(USE_SSL)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HTTPSIG)
 
-#include "curl_hmac.h"
+#include "urldata.h"
 
-extern const struct HMAC_params Curl_HMAC_SHA256;
+CURLcode Curl_output_httpsig(struct Curl_easy *data);
 
-#ifndef CURL_SHA256_DIGEST_LENGTH
-#define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
-#endif
-
-CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
-                       size_t len);
-
-#endif
-
-#endif /* HEADER_CURL_SHA256_H */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_HTTPSIG */
+#endif /* HEADER_CURL_HTTP_HTTPSIG_H */
