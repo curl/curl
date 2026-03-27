@@ -368,6 +368,9 @@ httpget
 HttpGet
 HTTPS
 https
+httpsig
+HTTPSIG
+CURLHTTPSIG
 HTTPSRR
 hyper's
 IANA
@@ -428,6 +431,7 @@ KDE
 keepalive
 Keil
 kerberos
+keyid
 Keychain
 keychain
 KiB
@@ -996,6 +1000,7 @@ WinIDN
 WinLDAP
 winsock
 Wireshark
+wolfCrypt
 wolfSSH
 wolfSSL
 ws
