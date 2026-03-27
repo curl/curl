@@ -427,7 +427,7 @@ jobs:
               /home/runner/nghttp3/build/lib/pkgconfig:\
               /home/runner/nghttp2-openssl4/build/lib/pkgconfig"
             configure: >-
-              --with-openssl=/home/runner/openssl4/build --with-ngtcp2=/home/runner/ngtcp2-openssl4/build --enable-ssls-export
+              --with-openssl=/home/runner/openssl4/build --with-ngtcp2=/home/runner/ngtcp2-openssl4/build --enable-ech --enable-ssls-export
 
           - name: 'openssl4'
             tflags: '--min=1640'
