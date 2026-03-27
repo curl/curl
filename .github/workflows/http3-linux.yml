@@ -233,7 +233,7 @@ jobs:
         run: |
           cd ~
           git clone --quiet --depth 1 -b "openssl-${OPENSSL4_VERSION}" https://github.com/openssl/openssl
-          cd openssl
+          cd openssl4
           ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
