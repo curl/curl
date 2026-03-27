@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
+
 static const char *TEST_DATA_STRING = "Test data";
 static int cb_count = 0;
 
