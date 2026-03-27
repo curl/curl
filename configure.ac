@@ -3946,9 +3946,7 @@ AC_CHECK_HEADERS(
   stdbool.h \
   sys/filio.h \
   sys/eventfd.h,
-dnl to do if not found
 [],
-dnl to do if found
 [],
 /* default includes */
 [
