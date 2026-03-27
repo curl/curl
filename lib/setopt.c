@@ -1953,6 +1953,22 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
       s->httpauth = CURLAUTH_AWS_SIGV4;
     break;
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG], ptr);
+    if(s->str[STRING_HTTPSIG])
+      s->httpauth = CURLAUTH_HTTPSIG;
+    break;
+  case CURLOPT_HTTPSIG_KEY:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEY], ptr);
+    break;
+  case CURLOPT_HTTPSIG_KEYID:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEYID], ptr);
+    break;
+  case CURLOPT_HTTPSIG_HEADERS:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_HEADERS], ptr);
+    break;
+#endif
   case CURLOPT_REFERER:
     /*
      * String to set in the HTTP Referer: field.

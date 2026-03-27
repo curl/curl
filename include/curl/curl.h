@@ -841,10 +841,13 @@ typedef enum {
 #endif
 #define CURLAUTH_BEARER       (((unsigned long)1) << 6)
 #define CURLAUTH_AWS_SIGV4    (((unsigned long)1) << 7)
+#define CURLAUTH_HTTPSIG      (((unsigned long)1) << 8)
 #define CURLAUTH_ONLY         (((unsigned long)1) << 31)
-#define CURLAUTH_ANY          ((~CURLAUTH_DIGEST_IE) & \
+#define CURLAUTH_ANY          ((~(CURLAUTH_DIGEST_IE |                  \
+                                  CURLAUTH_HTTPSIG)) &                  \
                                ((unsigned long)0xffffffff))
-#define CURLAUTH_ANYSAFE      ((~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE)) & \
+#define CURLAUTH_ANYSAFE      ((~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE | \
+                                  CURLAUTH_HTTPSIG)) &                  \
                                ((unsigned long)0xffffffff))
 
 /* all types supported by server */
@@ -2257,6 +2260,18 @@ typedef enum {
 
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
+
+  /* RFC 9421 HTTP Message Signatures */
+  CURLOPT(CURLOPT_HTTPSIG, CURLOPTTYPE_STRINGPOINT, 329),
+
+  /* Path to private key file for HTTP Message Signatures */
+  CURLOPT(CURLOPT_HTTPSIG_KEY, CURLOPTTYPE_STRINGPOINT, 330),
+
+  /* Key identifier for HTTP Message Signatures */
+  CURLOPT(CURLOPT_HTTPSIG_KEYID, CURLOPTTYPE_STRINGPOINT, 331),
+
+  /* Space-separated list of components to sign for HTTP Message Signatures */
+  CURLOPT(CURLOPT_HTTPSIG_HEADERS, CURLOPTTYPE_STRINGPOINT, 332),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -112,7 +112,7 @@ jobs:
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=815 1 to 1000'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'wolfssl-opensslextra valgrind 2'
             image: ubuntu-24.04-arm
@@ -120,7 +120,7 @@ jobs:
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=835 1001 to 9999'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'mbedtls gss valgrind 1'
             image: ubuntu-24.04-arm
@@ -618,7 +618,7 @@ jobs:
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra --enable-ed25519 \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 
@@ -640,7 +640,7 @@ jobs:
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra --enable-ed25519 \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 

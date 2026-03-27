@@ -61,6 +61,7 @@
 #include "http_ntlm.h"
 #include "http_negotiate.h"
 #include "http_aws_sigv4.h"
+#include "http_httpsig.h"
 #include "url.h"
 #include "urlapi-int.h"
 #include "curl_share.h"
@@ -372,6 +373,10 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
   else if(avail & CURLAUTH_AWS_SIGV4)
     pick->picked = CURLAUTH_AWS_SIGV4;
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  else if(avail & CURLAUTH_HTTPSIG)
+    pick->picked = CURLAUTH_HTTPSIG;
+#endif
   else {
     pick->picked = CURLAUTH_PICKNONE; /* we select to use nothing */
     picked = FALSE;
@@ -659,6 +664,15 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
   }
   else
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  if((authstatus->picked == CURLAUTH_HTTPSIG) && !proxy) {
+    auth = "HTTPSIG";
+    result = Curl_output_httpsig(data);
+    if(result)
+      return result;
+  }
+  else
+#endif
 #ifdef USE_SPNEGO
   if(authstatus->picked == CURLAUTH_NEGOTIATE) {
     auth = "Negotiate";
@@ -800,6 +814,9 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
 #ifdef USE_SPNEGO
     authhost->want & CURLAUTH_NEGOTIATE ||
     authproxy->want & CURLAUTH_NEGOTIATE ||
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+    authhost->want & CURLAUTH_HTTPSIG ||
 #endif
     data->set.str[STRING_BEARER])
     /* continue please */;

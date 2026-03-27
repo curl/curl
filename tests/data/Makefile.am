@@ -288,11 +288,16 @@ test3216 test3217 test3218 test3219 test3220 \
 \
 test3300 test3301 \
 \
-test4000 test4001
+test4000 test4001 \
+\
+test5000 test5001 test5002 test5003 test5004 test5005 test5006 test5007 \
+test5008 test5009 test5010 test5011 test5012 test5013 test5014 test5015 \
+test5016 test5017 test5018
 
 EXTRA_DIST = $(TESTCASES) DISABLED data-xml1 data320.html \
 data1461.txt data1463.txt  \
 data1400.c data1401.c data1402.c data1403.c data1404.c data1405.c data1406.c \
 data1407.c data1420.c data1465.c data1481.c \
 data1705-1.md data1705-2.md data1705-3.md data1705-4.md data1705-stdout.1 \
-data1706-1.md data1706-2.md data1706-3.md data1706-4.md data1706-stdout.txt
+data1706-1.md data1706-2.md data1706-3.md data1706-4.md data1706-stdout.txt \
+httpsig-ed25519.key httpsig-hmac-sha256.key

@@ -997,6 +997,12 @@ enum dupstring {
 #ifndef CURL_DISABLE_AWS
   STRING_AWS_SIGV4, /* Parameters for V4 signature */
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  STRING_HTTPSIG,        /* RFC 9421 algorithm (e.g. "ed25519") */
+  STRING_HTTPSIG_KEY,    /* path to private key file */
+  STRING_HTTPSIG_KEYID,  /* key identifier */
+  STRING_HTTPSIG_HEADERS, /* space-separated components to sign */
+#endif
 #ifndef CURL_DISABLE_PROXY
   STRING_HAPROXY_CLIENT_IP,     /* CURLOPT_HAPROXY_CLIENT_IP */
 #endif
