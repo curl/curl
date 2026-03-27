@@ -422,11 +422,15 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                     uint32_t *presolv_id,
                                     struct Curl_dns_entry **pdns)
 {
+#ifdef USE_CURL_ASYNC
   struct Curl_resolv_async *async = NULL;
+#endif
   struct Curl_addrinfo *addr = NULL;
   size_t hostname_len;
   CURLcode result = CURLE_OK;
 
+  (void)with_https_rr; /* not in all ifdefs */
+  (void)timeout_ms; /* not in all ifdefs */
   *presolv_id = 0;
   *pdns = NULL;
 
@@ -531,6 +535,7 @@ out:
   else if(addr)
     Curl_freeaddrinfo(addr);
 
+#ifdef USE_CURL_ASYNC
   if(async) {
     if(result == CURLE_AGAIN) { /* still need it, link */
       async->next = data->state.async;
@@ -540,6 +545,7 @@ out:
       Curl_async_destroy(data, async);
     }
   }
+#endif
   return result;
 }
 
