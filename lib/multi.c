@@ -1955,6 +1955,12 @@ static CURLcode multi_follow(struct Curl_easy *data,
 {
   if(handler && handler->run->follow)
     return handler->run->follow(data, newurl, type);
+
+  if(type == FOLLOW_RETRY)
+    /* Retries are generic and do not require protocol-specific redirect
+       handling. */
+    return CURLE_OK;
+
   return CURLE_TOO_MANY_REDIRECTS;
 }
 
