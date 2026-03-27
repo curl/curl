@@ -103,7 +103,6 @@ int toolx_ftruncate_djgpp(int fd, curl_off_t where)
   if(where > INT_MAX)
     return -1;
 
-  /* avoid using the macro for this */
   return ftruncate(fd, (off_t)where);
 }
 #endif
