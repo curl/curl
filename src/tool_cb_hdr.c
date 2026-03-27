@@ -266,15 +266,13 @@ static size_t save_etag(const char *etag_h, const char *endp,
       curlx_struct_stat file;
       int fd = fileno(etag_save->stream);
 
+      /* Truncate regular files to avoid stale etag content */
       if((fd != -1) &&
          !curlx_fstat(fd, &file) &&
-         (S_ISREG(file.st_mode))) {
-        /*
-         * Truncate regular files to avoid stale etag content.
-         */
-        if(ftruncate(fileno(etag_save->stream), 0))
-          return CURL_WRITEFUNC_ERROR;
-      }
+         (S_ISREG(file.st_mode) &&
+          ftruncate(fd, 0)))
+        return CURL_WRITEFUNC_ERROR;
+
       fwrite(etag_h, 1, etag_length, etag_save->stream);
       /* terminate with newline */
       fputc('\n', etag_save->stream);
