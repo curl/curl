@@ -81,11 +81,11 @@ void Curl_printable_address(const struct Curl_addrinfo *ip,
 
 /* Start DNS resolving for the given parameters. Returns
  * - CURLE_OK: `*pdns` is the resolved DNS entry (needs to be unlinked).
-    *          `*presolv_id` is undefined.
+    *          `*presolv_id` is 0.
  * - CURLE_AGAIN: resolve is asynchronous and not finished yet.
  *             `presolv_id` is the identifier for querying results later.
  * - other: the operation failed miserably. `*pdns` is NULL,
- *            `*presolv_id` is undefined.
+ *            `*presolv_id` is 0.
  */
 CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
@@ -137,6 +137,7 @@ Curl_resolv_get_ai(struct Curl_easy *data, uint32_t resolv_id,
 #define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
 #define Curl_resolv_get_ai(x,y,z, a)  NULL
 #define Curl_resolv_pollset(x,y)      CURLE_OK
+#define Curl_resolv_destroy(x,y)      Curl_nop_stmt
 #endif
 
 

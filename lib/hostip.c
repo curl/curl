@@ -347,12 +347,13 @@ hostip_async_new(struct Curl_easy *data,
   /* Give every async resolve operation a "unique" id. This may
    * wrap around after a long time, making collisions highly unlikely.
    * As we keep the async structs at the easy handle, chances of
-   * easy `mid plus async->id` colliding should be astronomical. */
-  async->id = data->multi->next_resolv_id;
-  if(data->multi->next_resolv_id == UINT32_MAX)
-    data->multi->next_resolv_id = 0; /* wrap around */
+   * easy `mid plus resolv->id` colliding should be astronomical.
+   * `resolv_id == 0` is never used. */
+  if(data->multi->last_resolv_id == UINT32_MAX)
+    data->multi->last_resolv_id = 1; /* wrap around */
   else
-    data->multi->next_resolv_id++;
+    data->multi->last_resolv_id++;
+  async->id = data->multi->last_resolv_id;
   async->port = port;
   async->ip_version = ip_version;
   async->transport = transport;
