@@ -40,6 +40,9 @@
 
 #define DNS_CLASS_IN 0x01
 
+static void doh_close(struct Curl_easy *data,
+                      struct Curl_resolv_async *async);
+
 #ifdef CURLVERBOSE
 static const char * const errors[] = {
   "",
@@ -57,9 +60,6 @@ static const char * const errors[] = {
   "Bad ID",
   "Name too long"
 };
-
-static void doh_close(struct Curl_easy *data,
-                      struct Curl_resolv_async *async);
 
 static const char *doh_strerror(DOHcode code)
 {

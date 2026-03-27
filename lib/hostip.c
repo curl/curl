@@ -433,7 +433,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   /* Check for "known" things to resolve ourselves. */
 #ifndef USE_RESOLVE_ON_IPS
   if(Curl_is_ipaddr(hostname)) {
-    /* test655 verifies that the annonce is done, even though there
+    /* test655 verifies that the announce is done, even though there
      * is no real resolving. So, keep doing this. */
     result = Curl_resolv_announce_start(data, NULL);
     if(result)
