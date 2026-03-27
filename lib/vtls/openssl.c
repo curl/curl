@@ -4234,8 +4234,12 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       reason = ERR_GET_REASON(errdetail);
 
       if((lib == ERR_LIB_SSL) &&
-         ((reason == SSL_R_CERTIFICATE_VERIFY_FAILED) ||
-          (reason == SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED))) {
+         ((reason == SSL_R_CERTIFICATE_VERIFY_FAILED)
+/* Missing from OpenSSL 4+ OPENSSL_NO_DEPRECATED_3_0 builds */
+#ifdef SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED
+          || (reason == SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED)
+#endif
+         )) {
         result = CURLE_PEER_FAILED_VERIFICATION;
 
         lerr = SSL_get_verify_result(octx->ssl);
