@@ -270,8 +270,14 @@ static CURLcode cf_dns_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
 {
+#ifdef USE_CURL_ASYNC
   if(!cf->connected)
     return Curl_resolv_pollset(data, ps);
+#else
+  (void)cf;
+  (void)data;
+  (void)ps;
+#endif
   return CURLE_OK;
 }
 

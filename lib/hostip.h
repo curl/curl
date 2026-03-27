@@ -134,7 +134,7 @@ Curl_resolv_get_ai(struct Curl_easy *data, uint32_t resolv_id,
 #else
 #define Curl_resolv_shutdown_all(x)   Curl_nop_stmt
 #define Curl_resolv_destroy_all(x)    Curl_nop_stmt
-#define Curl_resolv_take_result(x, y) CURLE_NOT_BUILT_IN
+#define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
 #define Curl_resolv_get_ai(x,y,z, a)  NULL
 #define Curl_resolv_pollset(x,y)      CURLE_OK
 #endif
