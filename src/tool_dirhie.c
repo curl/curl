@@ -28,9 +28,11 @@
 
 #ifdef _WIN32
 #  include <direct.h>
-#  define mkdir(x, y) _mkdir(x)
+#  define toolx_mkdir(x, y) _mkdir(x)
 #elif defined(MSDOS) && !defined(__DJGPP__)
-#  define mkdir(x, y) (mkdir)(x)
+#  define toolx_mkdir(x, y) mkdir(x)
+#else
+#  define toolx_mkdir mkdir
 #endif
 
 static void show_dir_errno(const char *name)
@@ -120,7 +122,7 @@ CURLcode create_dir_hierarchy(const char *outfile)
 
     /* Create directory. Ignore access denied error to allow traversal. */
     /* !checksrc! disable ERRNOVAR 1 */
-    if(!skip && (mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750) == -1) &&
+    if(!skip && (toolx_mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750) == -1) &&
        (errno != EACCES) && (errno != EEXIST)) {
       show_dir_errno(curlx_dyn_ptr(&dirbuf));
       result = CURLE_WRITE_ERROR;
