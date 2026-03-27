@@ -469,6 +469,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     uc = curl_url_get(data->set.uh,
                       CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
     if(uc) {
+      /* clear the pointer to not point to freed memory anymore */
+      Curl_bufref_set(&data->state.url, NULL, 0, NULL);
       failf(data, "No URL set");
       return CURLE_URL_MALFORMAT;
     }
