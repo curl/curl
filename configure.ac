@@ -3950,7 +3950,7 @@ dnl to do if not found
 [],
 dnl to do if found
 [],
-dnl default includes
+/* default includes */
 [
 #include <stdlib.h>
 #ifdef HAVE_SYS_TYPES_H
