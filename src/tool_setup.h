@@ -95,19 +95,18 @@ extern FILE *tool_stderr;
 /* set in init_terminal() */
 extern bool tool_term_has_bold;
 
-#ifndef HAVE_FTRUNCATE
+#ifndef __MINGW32__
 int toolx_ftruncate_win32(int fd, curl_off_t where);
 #define toolx_ftruncate toolx_ftruncate_win32
 #endif
 #endif /* _WIN32 */
 
 #ifdef __DJGPP__
-#undef HAVE_FTRUNCATE
 int toolx_ftruncate_djgpp(int fd, curl_off_t where);
 #define toolx_ftruncate toolx_ftruncate_djgpp
 #endif
 
-#ifdef HAVE_FTRUNCATE
+#ifndef toolx_ftruncate
 #define toolx_ftruncate ftruncate
 #endif
 

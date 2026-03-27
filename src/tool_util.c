@@ -78,8 +78,7 @@ int struplocompare4sort(const void *p1, const void *p2)
   return struplocompare(*(char * const *)p1, *(char * const *)p2);
 }
 
-#ifndef HAVE_FTRUNCATE
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 /*
  * Truncate a file handle at a 64-bit position 'where'.
  */
@@ -108,7 +107,6 @@ int toolx_ftruncate_djgpp(int fd, curl_off_t where)
   return ftruncate(fd, (off_t)where);
 }
 #endif
-#endif /* !USE_FTRUNCATE */
 
 #ifdef _WIN32
 FILE *tool_execpath(const char *filename, char **pathp)
