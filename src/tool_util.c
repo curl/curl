@@ -105,7 +105,8 @@ int msdos_ftruncate(int fd, curl_off_t where)
   if(where > INT_MAX)
     return -1;
 
-  return ftruncate(fd, (off_t) where);
+  /* avoid using the macro for this */
+  return (ftruncate)(fd, (off_t) where);
 }
 #endif /* USE_MSDOS_FTRUNCATE */
 
