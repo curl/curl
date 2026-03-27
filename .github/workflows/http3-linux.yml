@@ -38,7 +38,7 @@ env:
   # handled in renovate.json
   OPENSSL_VERSION: 3.6.1
   # manually bumped
-  OPENSSL4_VERSION: openssl-4.0.0-beta1
+  OPENSSL4_VERSION: 4.0.0-beta1
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
@@ -232,7 +232,7 @@ jobs:
         if: ${{ steps.cache-openssl4-http3-no-deprecated.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth 1 -b "openssl-${OPENSSL4_VERSION}" https://github.com/openssl/openssl
+          git clone --quiet --depth 1 -b "openssl-${OPENSSL4_VERSION}" https://github.com/openssl/openssl openssl4
           cd openssl4
           ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
