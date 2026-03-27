@@ -69,9 +69,6 @@
 /* Define to 1 if you have the freeaddrinfo function. */
 #define HAVE_FREEADDRINFO       1
 
-/* Define to 1 if you have the ftruncate function. */
-#define HAVE_FTRUNCATE                  1
-
 /* Define to 1 if you have a working getaddrinfo function. */
 #define HAVE_GETADDRINFO                1
 

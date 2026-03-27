@@ -94,26 +94,16 @@ extern FILE *tool_stderr;
 #ifdef _WIN32
 /* set in init_terminal() */
 extern bool tool_term_has_bold;
+#endif
 
-#ifndef HAVE_FTRUNCATE
-
-int tool_ftruncate64(int fd, curl_off_t where);
-
-#undef  ftruncate
-#define ftruncate(fd, where) tool_ftruncate64(fd, where)
-
-#define HAVE_FTRUNCATE 1
-#define USE_TOOL_FTRUNCATE 1
-
-#endif /* !HAVE_FTRUNCATE */
-#endif /* _WIN32 */
-
-#ifdef __DJGPP__
-int msdos_ftruncate(int fd, curl_off_t where);
-#undef HAVE_FTRUNCATE
-#undef ftruncate /* to be sure */
-#define ftruncate(fd, where) msdos_ftruncate(fd, where)
-#define USE_MSDOS_FTRUNCATE 1
+#if defined(_WIN32) && !defined(__MINGW32__)
+int toolx_ftruncate_win32(int fd, curl_off_t where);
+#define toolx_ftruncate toolx_ftruncate_win32
+#elif defined(__DJGPP__)
+int toolx_ftruncate_djgpp(int fd, curl_off_t where);
+#define toolx_ftruncate toolx_ftruncate_djgpp
+#else
+#define toolx_ftruncate ftruncate
 #endif
 
 #ifdef CURL_CA_EMBED

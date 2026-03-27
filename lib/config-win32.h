@@ -86,11 +86,6 @@
 /* Define if you have the closesocket function. */
 #define HAVE_CLOSESOCKET 1
 
-/* Define if you have the ftruncate function. */
-#ifdef __MINGW32__
-#define HAVE_FTRUNCATE 1
-#endif
-
 /* Define to 1 if you have the `getpeername' function. */
 #define HAVE_GETPEERNAME 1
 

@@ -252,9 +252,6 @@
 /* Define to 1 if you have the fseeko declaration. */
 #cmakedefine HAVE_DECL_FSEEKO 1
 
-/* Define to 1 if you have the ftruncate function. */
-#cmakedefine HAVE_FTRUNCATE 1
-
 /* Define to 1 if you have a working getaddrinfo function. */
 #cmakedefine HAVE_GETADDRINFO 1
 

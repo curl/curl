@@ -559,7 +559,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         notef("Throwing away %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
         /* truncate file at the position where we started appending */
 
-        if(ftruncate(fileno(outs->stream), outs->init)) {
+        if(toolx_ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot append as then we
              create something strange, bail out */
           errorf("Failed to truncate file");
