@@ -236,8 +236,15 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
      * Note that the consequent probes will not be sent
      * at equal intervals on Solaris, but will be sent
      * using the exponential backoff algorithm. */
-    optval = curlx_sltosi(data->set.tcp_keepcnt) *
-             curlx_sltosi(data->set.tcp_keepintvl);
+    {
+      int keepcnt = curlx_sltosi(data->set.tcp_keepcnt);
+      int keepintvl = curlx_sltosi(data->set.tcp_keepintvl);
+
+      if(keepcnt > 0 && keepintvl > (INT_MAX / keepcnt))
+        optval = INT_MAX;
+      else
+        optval = keepcnt * keepintvl;
+    }
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_ABORT_THRESHOLD,
                   (void *)&optval, sizeof(optval)) < 0) {
