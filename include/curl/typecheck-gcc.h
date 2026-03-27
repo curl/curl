@@ -496,6 +496,10 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_USERAGENT ||                                     \
    (option) == CURLOPT_USERNAME ||                                      \
    (option) == CURLOPT_AWS_SIGV4 ||                                     \
+   (option) == CURLOPT_HTTPSIG ||                                       \
+   (option) == CURLOPT_HTTPSIG_HEADERS ||                               \
+   (option) == CURLOPT_HTTPSIG_KEY ||                                   \
+   (option) == CURLOPT_HTTPSIG_KEYID ||                                 \
    (option) == CURLOPT_USERPWD ||                                       \
    (option) == CURLOPT_XOAUTH2_BEARER ||                                \
    0)

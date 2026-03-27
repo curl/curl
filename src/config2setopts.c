@@ -560,6 +560,12 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
 #ifndef CURL_DISABLE_AWS
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  MY_SETOPT_STR(curl, CURLOPT_HTTPSIG, config->httpsig);
+  MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_HEADERS, config->httpsig_headers);
+  MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEY, config->httpsig_key);
+  MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEYID, config->httpsig_keyid);
+#endif
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);
 
   if(config->proxyheaders) {
