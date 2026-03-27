@@ -519,8 +519,10 @@ static int myssh_in_SFTP_READDIR_BOTTOM(struct Curl_easy *data,
   ssh_string_free_char(sshc->readdir_tmp);
   sshc->readdir_tmp = NULL;
 
-  if(result)
+  if(result) {
     myssh_to(data, sshc, SSH_STOP);
+    sshc->actualcode = result;
+  }
   else
     myssh_to(data, sshc, SSH_SFTP_READDIR);
   return SSH_NO_ERROR;
