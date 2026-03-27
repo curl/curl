@@ -270,7 +270,7 @@ static size_t save_etag(const char *etag_h, const char *endp,
       if((fd != -1) &&
          !curlx_fstat(fd, &file) &&
          (S_ISREG(file.st_mode) &&
-          ftruncate(fd, 0)))
+          toolx_ftruncate(fd, 0)))
         return CURL_WRITEFUNC_ERROR;
 
       fwrite(etag_h, 1, etag_length, etag_save->stream);

@@ -78,11 +78,12 @@ int struplocompare4sort(const void *p1, const void *p2)
   return struplocompare(*(char * const *)p1, *(char * const *)p2);
 }
 
-#ifdef USE_TOOL_FTRUNCATE
+#ifndef HAVE_FTRUNCATE
+#ifdef _WIN32
 /*
  * Truncate a file handle at a 64-bit position 'where'.
  */
-int tool_ftruncate64(int fd, curl_off_t where)
+int toolx_ftruncate_win32(int fd, curl_off_t where)
 {
   intptr_t handle = _get_osfhandle(fd);
 
@@ -94,21 +95,20 @@ int tool_ftruncate64(int fd, curl_off_t where)
 
   return 0;
 }
-#endif /* USE_TOOL_FTRUNCATE */
-
-#ifdef USE_MSDOS_FTRUNCATE
+#elif defined(__DJGPP__)
 /*
  * Only supports 'off_t' (signed 32 bit) as file size.
  */
-int msdos_ftruncate(int fd, curl_off_t where)
+int toolx_ftruncate_djgpp(int fd, curl_off_t where)
 {
   if(where > INT_MAX)
     return -1;
 
   /* avoid using the macro for this */
-  return (ftruncate)(fd, (off_t) where);
+  return ftruncate(fd, (off_t)where);
 }
-#endif /* USE_MSDOS_FTRUNCATE */
+#endif
+#endif /* !USE_FTRUNCATE */
 
 #ifdef _WIN32
 FILE *tool_execpath(const char *filename, char **pathp)

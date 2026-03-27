@@ -96,24 +96,19 @@ extern FILE *tool_stderr;
 extern bool tool_term_has_bold;
 
 #ifndef HAVE_FTRUNCATE
-
-int tool_ftruncate64(int fd, curl_off_t where);
-
-#undef  ftruncate
-#define ftruncate(fd, where) tool_ftruncate64(fd, where)
-
-#define HAVE_FTRUNCATE 1
-#define USE_TOOL_FTRUNCATE 1
-
-#endif /* !HAVE_FTRUNCATE */
+int toolx_ftruncate_win32(int fd, curl_off_t where);
+#define toolx_ftruncate toolx_ftruncate_win32
+#endif
 #endif /* _WIN32 */
 
 #ifdef __DJGPP__
-int msdos_ftruncate(int fd, curl_off_t where);
 #undef HAVE_FTRUNCATE
-#undef ftruncate /* to be sure */
-#define ftruncate(fd, where) msdos_ftruncate(fd, where)
-#define USE_MSDOS_FTRUNCATE 1
+int toolx_ftruncate_djgpp(int fd, curl_off_t where);
+#define toolx_ftruncate toolx_ftruncate_djgpp
+#endif
+
+#ifdef HAVE_FTRUNCATE
+#define toolx_ftruncate ftruncate
 #endif
 
 #ifdef CURL_CA_EMBED
