@@ -82,7 +82,7 @@ jobs:
           cache-name: cache-openssl4-http3-no-deprecated
         with:
           path: ~/openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL4_VERSION }}
 
       - name: 'cache libressl'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
@@ -164,7 +164,7 @@ jobs:
           cache-name: cache-ngtcp2-openssl4
         with:
           path: ~/ngtcp2-openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL4_VERSION }}
 
       - name: 'cache ngtcp2 boringssl'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
@@ -581,7 +581,7 @@ jobs:
           cache-name: cache-openssl4-http3-no-deprecated
         with:
           path: ~/openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL4_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache libressl'
@@ -679,7 +679,7 @@ jobs:
           cache-name: cache-ngtcp2-openssl4
         with:
           path: ~/ngtcp2-openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL4_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2 boringssl'
