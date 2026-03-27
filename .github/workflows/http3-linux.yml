@@ -510,6 +510,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache libressl'
+        if: ${{ contains(matrix.build.name, 'libressl') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-libressl
         env:
@@ -520,6 +521,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache awslc'
+        if: ${{ contains(matrix.build.name, 'awslc') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-awslc
         env:
@@ -530,6 +532,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache boringssl'
+        if: ${{ contains(matrix.build.name, 'boringssl') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-boringssl
         env:
@@ -594,6 +597,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2 boringssl'
+        if: ${{ contains(matrix.build.name, 'boringssl') }}
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-ngtcp2-boringssl
         env:
