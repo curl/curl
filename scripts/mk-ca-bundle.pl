@@ -37,7 +37,7 @@ use Getopt::Std;
 use MIME::Base64;
 use strict;
 use warnings;
-use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_r $opt_s $opt_t $opt_u $opt_v $opt_w);
+use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
 use Time::Local;
@@ -110,7 +110,7 @@ my @valid_signature_algorithms = (
 
 $0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
-getopts('bd:fhiklmnp:qrs:tuvw:');
+getopts('bd:fhiklmnp:qs:tuvw:');
 
 if(!defined($opt_d)) {
     # to make plain "-d" use not cause warnings, and actually still work
@@ -181,7 +181,6 @@ sub HELP_MESSAGE() {
     print "\t\t  Valid levels are:\n";
     print wrap("\t\t    ","\t\t    ", join(", ", "ALL", @valid_mozilla_trust_levels)), "\n";
     print "\t-q\tbe really quiet (no progress output at all)\n";
-    print "\t-r\treproducible output\n";
     print wrap("\t","\t\t", "-s\tcomma separated list of certificate signatures/hashes to output in plain text mode. (default: $default_signature_algorithms)\n");
     print "\t\t  Valid signature algorithms are:\n";
     print wrap("\t\t    ","\t\t    ", join(", ", "ALL", @valid_signature_algorithms)), "\n";
@@ -308,29 +307,6 @@ my $filedate_iso = '';
 
 if(!$opt_n) {
     report "Using URL: $url";
-
-    if($opt_r && $opt_d ne 'ref') {
-        report "Determining latest commit and timestamp for the remote file ...";
-
-        my $out = '';
-        # https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt
-        if($url =~ /^https:\/\/raw.githubusercontent.com\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)\/(refs\/heads\/[a-z]+)(\/.+)$/) {
-            my $slug = $1;
-            my $refs = "&sha=$2";
-            my $path = $3;
-            if(open(my $fh, '-|', 'curl', '-A', 'curl', '-H', 'X-GitHub-Api-Version: 2022-11-28',
-                                          "https://api.github.com/repos/mozilla-firefox/firefox/commits?path=$path$refs")) {
-                $out = do { local $/; <$fh> };
-                close $fh;
-            }
-            if($out) {
-                use JSON::PP;
-                my $json = decode_json($out);
-                $filedate_iso = $json->[0]->{commit}->{committer}->{date};
-            }
-        }
-    }
-
     report "Downloading $txt ...";
 
     # If we have an HTTPS URL then use curl
