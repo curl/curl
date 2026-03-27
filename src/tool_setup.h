@@ -94,14 +94,12 @@ extern FILE *tool_stderr;
 #ifdef _WIN32
 /* set in init_terminal() */
 extern bool tool_term_has_bold;
+#endif
 
-#ifndef __MINGW32__
+#if defined(_WIN32) && !defined(__MINGW32__)
 int toolx_ftruncate_win32(int fd, curl_off_t where);
 #define toolx_ftruncate toolx_ftruncate_win32
-#endif
-#endif /* _WIN32 */
-
-#ifdef __DJGPP__
+#elif defined(__DJGPP__)
 int toolx_ftruncate_djgpp(int fd, curl_off_t where);
 #define toolx_ftruncate toolx_ftruncate_djgpp
 #endif
