@@ -702,7 +702,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     return CURLE_OK;
 
   /* Shut down any ongoing async resolver operation. */
-  Curl_async_shutdown(data);
+  Curl_resolv_shutdown_all(data);
 
   /* Cleanup possible redirect junk */
   Curl_safefree(data->req.newurl);

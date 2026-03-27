@@ -102,6 +102,7 @@ struct socks_state {
   const char *proxy_user;
   const char *proxy_password;
   CURLproxycode presult;
+  uint32_t resolv_id;
   unsigned char version;
   BIT(resolve_local);
   BIT(start_resolving);
@@ -326,7 +327,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version,
                          Curl_conn_cf_get_transport(cf, data),
-                         0, &dns);
+                         0, &sx->resolv_id, &dns);
     if(result == CURLE_AGAIN) {
       CURL_TRC_CF(data, cf, "SOCKS4 non-blocking resolve of %s", sx->hostname);
       return CURLPX_OK;
@@ -336,7 +337,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
   }
   else {
     /* check if we have the name resolved by now */
-    result = Curl_resolv_take_result(data, &dns);
+    result = Curl_resolv_take_result(data, sx->resolv_id, &dns);
     if(!result && !dns)
       return CURLPX_OK;
   }
@@ -857,7 +858,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version,
                          Curl_conn_cf_get_transport(cf, data),
-                         0, &dns);
+                         0, &sx->resolv_id, &dns);
     if(result == CURLE_AGAIN) {
       CURL_TRC_CF(data, cf, "SOCKS5 non-blocking resolve of %s", sx->hostname);
       return CURLPX_OK;
@@ -867,7 +868,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
   }
   else {
     /* check if we have the name resolved by now */
-    result = Curl_resolv_take_result(data, &dns);
+    result = Curl_resolv_take_result(data, sx->resolv_id, &dns);
     if(!result && !dns)
       return CURLPX_OK;
   }

@@ -76,7 +76,13 @@
 static int ares_ver = 0;
 
 static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
-                                           bool reset_on_null);
+                                           struct Curl_resolv_async *async);
+static CURLcode async_ares_set_dns_interface(struct Curl_easy *data,
+                                             struct Curl_resolv_async *async);
+static CURLcode async_ares_set_dns_local_ip4(struct Curl_easy *data,
+                                             struct Curl_resolv_async *async);
+static CURLcode async_ares_set_dns_local_ip6(struct Curl_easy *data,
+                                             struct Curl_resolv_async *async);
 
 /*
  * Curl_async_global_init() - the generic low-level asynchronous name
@@ -152,19 +158,19 @@ static CURLcode async_ares_init(struct Curl_easy *data,
     goto out;
   }
 
-  rc = async_ares_set_dns_servers(data, FALSE);
+  rc = async_ares_set_dns_servers(data, async);
   if(rc && rc != CURLE_NOT_BUILT_IN)
     goto out;
 
-  rc = Curl_async_ares_set_dns_interface(data);
+  rc = async_ares_set_dns_interface(data, async);
   if(rc && rc != CURLE_NOT_BUILT_IN)
     goto out;
 
-  rc = Curl_async_ares_set_dns_local_ip4(data);
+  rc = async_ares_set_dns_local_ip4(data, async);
   if(rc && rc != CURLE_NOT_BUILT_IN)
     goto out;
 
-  rc = Curl_async_ares_set_dns_local_ip6(data);
+  rc = async_ares_set_dns_local_ip6(data, async);
   if(rc && rc != CURLE_NOT_BUILT_IN)
     goto out;
 
@@ -176,28 +182,6 @@ out:
     ares->channel = NULL;
   }
   return rc;
-}
-
-static CURLcode async_ares_init_lazy(struct Curl_easy *data,
-                                     struct Curl_resolv_async *async)
-{
-  struct async_ares_ctx *ares = &async->ares;
-  if(!ares->channel)
-    return async_ares_init(data, async);
-  return CURLE_OK;
-}
-
-CURLcode Curl_async_get_impl(struct Curl_easy *data,
-                             struct Curl_resolv_async *async,
-                             void **impl)
-{
-  struct async_ares_ctx *ares = &async->ares;
-  CURLcode result = CURLE_OK;
-  if(!ares->channel) {
-    result = async_ares_init(data, async);
-  }
-  *impl = ares->channel;
-  return result;
 }
 
 /*
@@ -238,18 +222,14 @@ void Curl_async_ares_destroy(struct Curl_easy *data,
   async_ares_cleanup(async);
 }
 
-/*
- * Curl_async_pollset() is called when someone from the outside world
- * (using curl_multi_fdset()) wants to get our fd_set setup.
- */
-
-CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
+CURLcode Curl_async_pollset(struct Curl_easy *data,
+                            struct Curl_resolv_async *async,
+                            struct easy_pollset *ps)
 {
-  struct Curl_resolv_async *async = data->state.async;
-  struct async_ares_ctx *ares = async ? &async->ares : NULL;
+  struct async_ares_ctx *ares = &async->ares;
   CURLcode result = CURLE_OK;
 
-  if(ares && ares->channel) {
+  if(ares->channel) {
     result = Curl_ares_pollset(data, ares->channel, ps);
     if(!result) {
       timediff_t ms = Curl_ares_timeout_ms(data, async, ares->channel);
@@ -380,16 +360,19 @@ Curl_async_get_ai(struct Curl_easy *data,
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
-CURLcode Curl_async_await(struct Curl_easy *data,
-                          struct Curl_resolv_async *async,
+CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
                           struct Curl_dns_entry **pdns)
 {
-  struct async_ares_ctx *ares = &async->ares;
+  struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
+  struct async_ares_ctx *ares = async ? &async->ares : NULL;
   struct curltime start = *Curl_pgrs_now(data);
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(pdns);
   *pdns = NULL; /* clear on entry */
+
+  if(!ares)
+    return CURLE_FAILED_INIT;
 
   /* Wait for the name resolve query to complete or time out. */
   while(!result) {
@@ -553,12 +536,22 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 {
   struct async_ares_ctx *ares = &async->ares;
 
-  if(async_ares_init_lazy(data, async))
+  CURL_TRC_DNS(data, "ares getaddrinfo(%s:%u)", async->hostname, async->port);
+  if(ares->channel) {
+    DEBUGASSERT(0);
+    return CURLE_FAILED_INIT;
+  }
+
+  if(async_ares_init(data, async))
     return CURLE_FAILED_INIT;
 
   /* initial status - failed */
   ares->ares_status = ARES_ENOTFOUND;
   ares->result = CURLE_OK;
+
+  ares->result = Curl_resolv_announce_start(data, ares->channel);
+  if(ares->result)
+    return ares->result;
 
 #if defined(CURLVERBOSE) && ARES_VERSION >= 0x011800 /* >= v1.24.0 */
   if(CURL_TRC_DNS_is_verbose(data)) {
@@ -630,9 +623,8 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
  * 2. When we lazy init the ares channel and NULL means that there
  *    are no preferences and we do not reset any existing channel. */
 static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
-                                           bool reset_on_null)
+                                           struct Curl_resolv_async *async)
 {
-  struct Curl_resolv_async *async = data->state.async;
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
   CURLcode result = CURLE_NOT_BUILT_IN;
   const char *servers = data->set.str[STRING_DNS_SERVERS];
@@ -643,12 +635,8 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
     servers = getenv("CURL_DNS_SERVER");
 #endif
 
-  if(!servers) {
-    if(reset_on_null) {
-      Curl_async_destroy(data);
-    }
+  if(!servers)
     return CURLE_OK;
-  }
 
   /* if channel is not there, this is a parameter check */
   if(ares && ares->channel)
@@ -671,14 +659,9 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Curl_async_ares_set_dns_servers(struct Curl_easy *data)
+static CURLcode async_ares_set_dns_interface(struct Curl_easy *data,
+                                             struct Curl_resolv_async *async)
 {
-  return async_ares_set_dns_servers(data, TRUE);
-}
-
-CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data)
-{
-  struct Curl_resolv_async *async = data->state.async;
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
   const char *interf = data->set.str[STRING_DNS_INTERFACE];
 
@@ -692,9 +675,9 @@ CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data)
+static CURLcode async_ares_set_dns_local_ip4(struct Curl_easy *data,
+                                             struct Curl_resolv_async *async)
 {
-  struct Curl_resolv_async *async = data->state.async;
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
   struct in_addr a4;
   const char *local_ip4 = data->set.str[STRING_DNS_LOCAL_IP4];
@@ -716,10 +699,10 @@ CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data)
+static CURLcode async_ares_set_dns_local_ip6(struct Curl_easy *data,
+                                             struct Curl_resolv_async *async)
 {
 #ifdef USE_IPV6
-  struct Curl_resolv_async *async = data->state.async;
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
   unsigned char a6[INET6_ADDRSTRLEN];
   const char *local_ip6 = data->set.str[STRING_DNS_LOCAL_IP6];
@@ -742,6 +725,7 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data)
   return CURLE_OK;
 #else /* no IPv6 support */
   (void)data;
+  (void)async;
   return CURLE_NOT_BUILT_IN;
 #endif
 }

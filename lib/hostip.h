@@ -79,12 +79,13 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, uint16_t port);
 void Curl_printable_address(const struct Curl_addrinfo *ip,
                             char *buf, size_t bufsize);
 
-/*
- * Curl_resolv() returns an entry with the info for the specified host
- * and port.
- *
- * The returned data *MUST* be "released" with Curl_dns_entry_unlink() after
- * use, or we will leak memory!
+/* Start DNS resolving for the given parameters. Returns
+ * - CURLE_OK: `*pdns` is the resolved DNS entry (needs to be unlinked).
+    *          `*presolv_id` is undefined.
+ * - CURLE_AGAIN: resolve is asynchronous and not finished yet.
+ *             `presolv_id` is the identifier for querying results later.
+ * - other: the operation failed miserably. `*pdns` is NULL,
+ *            `*presolv_id` is undefined.
  */
 CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
@@ -92,6 +93,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      uint8_t ip_version,
                      uint8_t transport,
                      timediff_t timeout_ms,
+                     uint32_t *presolv_id,
                      struct Curl_dns_entry **pdns);
 
 CURLcode Curl_resolv_blocking(struct Curl_easy *data,
@@ -101,21 +103,46 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               uint8_t transport,
                               struct Curl_dns_entry **pdns);
 
+/* Announce start of a resolve operation to application callback,
+ * passing the resolver implementation (maybe NULL). */
+CURLcode Curl_resolv_announce_start(struct Curl_easy *data,
+                                    void *resolver);
+
 #ifdef USE_CURL_ASYNC
-CURLcode Curl_resolv_take_result(struct Curl_easy *data,
-                                 struct Curl_dns_entry **pdns);
-const struct Curl_addrinfo *
-Curl_resolv_get_ai(struct Curl_easy *data, int ai_family,
-                   unsigned int index);
-#else
-#define Curl_resolv_take_result(x, y) CURLE_NOT_BUILT_IN
-#define Curl_resolv_get_ai(x,y,z)     NULL
-#endif
 
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 
+/* Get the `async` struct for the given `resolv_id`, if it exists. */
+struct Curl_resolv_async *Curl_async_get(struct Curl_easy *data,
+                                         uint32_t resolv_id);
+
+/* Shut down all resolves of the given easy handle. */
+void Curl_resolv_shutdown_all(struct Curl_easy *data);
+
+/* Destroy all resolve resources of the given easy handle. */
+void Curl_resolv_destroy_all(struct Curl_easy *data);
+
+CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
+                                 struct Curl_dns_entry **pdns);
+
+void Curl_resolv_destroy(struct Curl_easy *data, uint32_t resolv_id);
+
+const struct Curl_addrinfo *
+Curl_resolv_get_ai(struct Curl_easy *data, uint32_t resolv_id,
+                   int ai_family, unsigned int index);
+#else
+#define Curl_resolv_shutdown_all(x)   Curl_nop_stmt
+#define Curl_resolv_destroy_all(x)    Curl_nop_stmt
+#define Curl_resolv_take_result(x, y) CURLE_NOT_BUILT_IN
+#define Curl_resolv_get_ai(x,y,z, a)  NULL
+#define Curl_resolv_pollset(x,y)      CURLE_OK
+#endif
+
+
 CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
+
+
 
 #ifdef CURLRES_SYNCH
 /*

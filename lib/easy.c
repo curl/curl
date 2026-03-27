@@ -1092,8 +1092,6 @@ void curl_easy_reset(CURL *d)
 
   /* clear all meta data */
   Curl_meta_reset(data);
-  /* clear any resolve data */
-  Curl_async_shutdown(data);
   /* zero out UserDefined data: */
   Curl_freeset(data);
   memset(&data->set, 0, sizeof(struct UserDefined));

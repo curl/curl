@@ -205,38 +205,40 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms)
 
 #include "doh.h"
 
-void Curl_async_shutdown(struct Curl_easy *data)
+void Curl_async_shutdown(struct Curl_easy *data,
+                         struct Curl_resolv_async *async)
 {
-  if(data->state.async) {
-    CURL_TRC_DNS(data, "shutdown async");
-    data->state.async->shutdown = TRUE;
+  if(async) {
+    CURL_TRC_DNS(data, "[%u] shutdown async", async->id);
+    async->shutdown = TRUE;
 #ifdef USE_RESOLV_ARES
-    Curl_async_ares_shutdown(data, data->state.async);
+    Curl_async_ares_shutdown(data, async);
 #endif
 #ifdef USE_RESOLV_THREADED
-    Curl_async_thrdd_shutdown(data, data->state.async);
+    Curl_async_thrdd_shutdown(data, async);
 #endif
 #ifndef CURL_DISABLE_DOH
-    Curl_doh_cleanup(data, data->state.async);
+    Curl_doh_cleanup(data, async);
 #endif
   }
 }
 
-void Curl_async_destroy(struct Curl_easy *data)
+void Curl_async_destroy(struct Curl_easy *data,
+                        struct Curl_resolv_async *async)
 {
-  if(data->state.async) {
-    CURL_TRC_DNS(data, "destroy async");
-    data->state.async->shutdown = TRUE;
+  if(async) {
+    CURL_TRC_DNS(data, "[%u] destroy async", async->id);
+    async->shutdown = TRUE;
 #ifdef USE_RESOLV_ARES
-    Curl_async_ares_destroy(data, data->state.async);
+    Curl_async_ares_destroy(data, async);
 #endif
 #ifdef USE_RESOLV_THREADED
-    Curl_async_thrdd_destroy(data, data->state.async);
+    Curl_async_thrdd_destroy(data, async);
 #endif
 #ifndef CURL_DISABLE_DOH
-    Curl_doh_cleanup(data, data->state.async);
+    Curl_doh_cleanup(data, async);
 #endif
-    Curl_safefree(data->state.async);
+    Curl_safefree(async);
   }
 }
 

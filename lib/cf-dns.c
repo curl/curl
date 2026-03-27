@@ -37,6 +37,7 @@
 struct cf_dns_ctx {
   struct Curl_dns_entry *dns;
   CURLcode resolv_result;
+  uint32_t resolv_id;
   uint16_t port;
   uint8_t ip_version;
   uint8_t transport;
@@ -169,7 +170,8 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   /* Resolve target host right on */
   CURL_TRC_CF(data, cf, "resolve host %s:%u", ctx->hostname, ctx->port);
   result = Curl_resolv(data, ctx->hostname, ctx->port, ctx->ip_version,
-                       SOCK_STREAM, timeout_ms, pdns);
+                       SOCK_STREAM, timeout_ms,
+                       &ctx->resolv_id, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
     DEBUGASSERT(*pdns);
@@ -210,7 +212,8 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   }
 
   if(!ctx->dns && !ctx->resolv_result) {
-    ctx->resolv_result = Curl_resolv_take_result(data, &ctx->dns);
+    ctx->resolv_result =
+      Curl_resolv_take_result(data, ctx->resolv_id, &ctx->dns);
     if(!ctx->dns && !ctx->resolv_result)
       CURL_TRC_CF(data, cf, "DNS resolution ongoing for %s:%u",
                   ctx->hostname, ctx->port);
@@ -243,7 +246,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
    * that one's lock. */
   DEBUGASSERT(*done);
   cf->connected = TRUE;
-  Curl_async_shutdown(data);
+  Curl_resolv_destroy(data, ctx->resolv_id);
   Curl_dns_entry_unlink(data, &ctx->dns);
   return CURLE_OK;
 }
@@ -516,7 +519,7 @@ Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
       else if(ctx->dns)
         return cf_dns_get_nth_ai(ctx->dns->addr, ai_family, index);
       else
-        return Curl_resolv_get_ai(data, ai_family, index);
+        return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
     }
   }
   return NULL;

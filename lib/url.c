@@ -239,7 +239,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
     curlx_free(data->state.range);
 
   /* release any resolve information this transfer kept */
-  Curl_async_destroy(data);
+  Curl_resolv_destroy_all(data);
 
   data->set.verbose = FALSE; /* no more calls to DEBUGFUNCTION */
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from

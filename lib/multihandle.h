@@ -175,6 +175,7 @@ struct Curl_multi {
 #ifdef DEBUGBUILD
   unsigned int now_access_count;
 #endif
+  uint32_t next_resolv_id; /* id of the next DNS resolve operation */
   BIT(ipv6_works);
   BIT(multiplexing);           /* multiplexing wanted */
   BIT(recheckstate);           /* see Curl_multi_connchanged */

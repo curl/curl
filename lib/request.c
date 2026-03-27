@@ -102,9 +102,6 @@ CURLcode Curl_req_done(struct SingleRequest *req,
   if(!aborted)
     (void)req_flush(data);
   Curl_client_reset(data);
-#ifndef CURL_DISABLE_DOH
-  Curl_doh_close(data);
-#endif
   return CURLE_OK;
 }
 
@@ -117,9 +114,8 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   if(req->sendbuf_init)
     Curl_bufq_reset(&req->sendbuf);
 
-#ifndef CURL_DISABLE_DOH
-  Curl_doh_close(data);
-#endif
+  /* clear any resolve data */
+  Curl_resolv_destroy_all(data);
   /* Can no longer memset() this struct as we need to keep some state */
   req->size = -1;
   req->maxdownload = -1;

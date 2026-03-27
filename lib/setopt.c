@@ -2386,28 +2386,16 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 #endif
 #ifdef USE_RESOLV_ARES
   case CURLOPT_DNS_SERVERS:
-    result = Curl_setstropt(&s->str[STRING_DNS_SERVERS], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_servers(data);
+    return Curl_setstropt(&s->str[STRING_DNS_SERVERS], ptr);
 
   case CURLOPT_DNS_INTERFACE:
-    result = Curl_setstropt(&s->str[STRING_DNS_INTERFACE], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_interface(data);
+    return Curl_setstropt(&s->str[STRING_DNS_INTERFACE], ptr);
 
   case CURLOPT_DNS_LOCAL_IP4:
-    result = Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP4], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_local_ip4(data);
+    return Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP4], ptr);
 
   case CURLOPT_DNS_LOCAL_IP6:
-    result = Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP6], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_local_ip6(data);
+    return Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP6], ptr);
 
 #endif
 #ifdef USE_UNIX_SOCKETS

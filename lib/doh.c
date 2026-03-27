@@ -58,6 +58,9 @@ static const char * const errors[] = {
   "Name too long"
 };
 
+static void doh_close(struct Curl_easy *data,
+                      struct Curl_resolv_async *async);
+
 static const char *doh_strerror(DOHcode code)
 {
   if((code >= DOH_OK) && (code <= DOH_DNS_NAME_TOO_LONG))
@@ -216,22 +219,24 @@ static void doh_print_buf(struct Curl_easy *data,
 static void doh_probe_done(struct Curl_easy *data,
                            struct Curl_easy *doh, CURLcode result)
 {
-  struct Curl_resolv_async *async = data->state.async;
-  struct doh_probes *dohp = async ? async->doh : NULL;
+  struct Curl_resolv_async *async = NULL;
+  struct doh_probes *dohp = NULL;
   struct doh_request *doh_req = NULL;
   int i;
 
-  if(!dohp) {
+  doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
+  if(!doh_req) {
     DEBUGASSERT(0);
     return;
   }
 
-  doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
-  /* A DoH response may arrive for a resolve operation already cancelled. */
-  if(doh_req && (doh_req->async_id != async->id)) {
-    CURL_TRC_DNS(data, "ignoring DoH response from a previous resolve");
+  async = Curl_async_get(data, doh_req->resolv_id);
+  if(!async) {
+    CURL_TRC_DNS(data, "[%u] ignoring outdated DoH response",
+                 doh_req->resolv_id);
     return;
   }
+  dohp = async->doh;
 
   for(i = 0; i < DOH_SLOT_COUNT; ++i) {
     if(dohp->probe_resp[i].probe_mid == doh->mid)
@@ -295,7 +300,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
                               DNStype dnstype,
                               const char *host,
                               const char *url, CURLM *multi,
-                              uint32_t async_id,
+                              uint32_t resolv_id,
                               uint32_t *pmid)
 {
   struct Curl_easy *doh = NULL;
@@ -309,7 +314,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   doh_req = curlx_calloc(1, sizeof(*doh_req));
   if(!doh_req)
     return CURLE_OUT_OF_MEMORY;
-  doh_req->async_id = async_id;
+  doh_req->resolv_id = resolv_id;
   doh_req->dnstype = dnstype;
   curlx_dyn_init(&doh_req->resp_body, DYN_DOH_RESPONSE);
 
@@ -1216,10 +1221,10 @@ UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
 #endif
 
 CURLcode Curl_doh_take_result(struct Curl_easy *data,
+                              struct Curl_resolv_async *async,
                               struct Curl_dns_entry **pdns)
 {
-  struct Curl_resolv_async *async = data->state.async;
-  struct doh_probes *dohp = async ? async->doh : NULL;
+  struct doh_probes *dohp = async->doh;
   CURLcode result = CURLE_OK;
   struct dohentry de;
 
@@ -1239,7 +1244,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
 
     memset(rc, 0, sizeof(rc));
     /* remove DoH handles from multi handle and close them */
-    Curl_doh_close(data);
+    doh_close(data, async);
     /* parse the responses, create the struct and return it! */
     de_init(&de);
     for(slot = 0; slot < DOH_SLOT_COUNT; slot++) {
@@ -1315,9 +1320,9 @@ error:
   return result;
 }
 
-void Curl_doh_close(struct Curl_easy *data)
+static void doh_close(struct Curl_easy *data,
+                      struct Curl_resolv_async *async)
 {
-  struct Curl_resolv_async *async = data->state.async;
   struct doh_probes *doh = async ? async->doh : NULL;
   if(doh && data->multi) {
     struct Curl_easy *probe_data;
@@ -1350,7 +1355,7 @@ void Curl_doh_cleanup(struct Curl_easy *data,
   struct doh_probes *dohp = async->doh;
   if(dohp) {
     int i;
-    Curl_doh_close(data);
+    doh_close(data, async);
     for(i = 0; i < DOH_SLOT_COUNT; ++i) {
       curlx_dyn_free(&dohp->probe_resp[i].body);
     }
