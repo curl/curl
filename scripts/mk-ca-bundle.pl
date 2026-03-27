@@ -303,8 +303,6 @@ my $oldhash = oldhash($crt);
 
 report "SHA256 of old file: $oldhash";
 
-my $filedate_iso = '';
-
 if(!$opt_n) {
     report "Using URL: $url";
     report "Downloading $txt ...";
@@ -378,19 +376,8 @@ if(!$opt_n) {
     }
 }
 
-my $filedate;
-my $datesrc;
-
-if($filedate_iso) {
-    my $time = Time::Piece->strptime($filedate_iso, '%Y-%m-%dT%H:%M:%SZ');
-    $filedate = $time->epoch;
-    $datesrc = "last updated on";
-    utime($filedate, $filedate, $txt);
-}
-if(!$filedate) {
-    $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
-    $datesrc = "as of";
-}
+my $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
+my $datesrc = "as of";
 if(!$filedate) {
     # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
     $filedate = time();
