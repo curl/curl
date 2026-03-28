@@ -29,15 +29,16 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPT_ENCODING, char *enc);
 
 Pass a char pointer argument specifying what encoding you would like.
 
-Sets the contents of the Accept-Encoding: header sent in an HTTP request, and
-enables decoding of a response when a Content-Encoding: header is received.
+Sets the contents of the `Accept-Encoding:` header sent in an HTTP request,
+and enables decoding of a response when a `Content-Encoding:` header is
+received.
 
 libcurl potentially supports several different compressed encodings depending
 on what support that has been built-in.
 
 To aid applications not having to bother about what specific algorithms this
 particular libcurl build supports, libcurl allows a zero-length string to be
-set ("") to ask for an Accept-Encoding: header to be used that contains all
+set ("") to ask for an `Accept-Encoding:` header to be used that contains all
 built-in supported encodings.
 
 Alternatively, you can specify exactly the encoding or list of encodings you
@@ -49,7 +50,7 @@ is zstd. Provide them in the string as a comma-separated list of accepted
 encodings, like: **"br, gzip, deflate"**.
 
 Set CURLOPT_ACCEPT_ENCODING(3) to NULL to explicitly disable it, which makes
-libcurl not send an Accept-Encoding: header and not decompress received
+libcurl not send an `Accept-Encoding:` header and not decompress received
 contents automatically.
 
 You can also opt to include the `Accept-Encoding:` header in your request with
@@ -60,11 +61,11 @@ Setting this option is a request, not an order; the server may or may not do
 it. It must be set (to any non-NULL value) or else any encoding done by the
 server is ignored.
 
-Servers might respond with Content-Encoding even without getting a
-Accept-Encoding: in the request. Servers might respond with a different
-Content-Encoding than what was asked for in the request.
+Servers might respond with `Content-Encoding:` even without getting a
+`Accept-Encoding:` in the request. Servers might respond with a different
+content encoding than what was asked for in the request.
 
-The Content-Length: header field servers send for a compressed response is
+The `Content-Length:` header field servers send for a compressed response is
 supposed to indicate the length of the compressed content so when auto
 decoding is enabled it may not match the sum of bytes reported by the write
 callbacks (although, sending the length of the non-compressed content is a
@@ -77,7 +78,9 @@ Using this option multiple times makes the last set string override the
 previous ones.
 
 **WARNING:** when decompressing data, even tiny transfers might be expanded
-and generate a huge amount of bytes.
+and generate a huge amount of bytes. You might want to limit using this option
+to only known and trusted sites using secure protocols, perhaps in combination
+with CURLOPT_MAXFILESIZE_LARGE(3).
 
 # HISTORY
 
