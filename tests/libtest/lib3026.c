@@ -85,7 +85,6 @@ cleanup:
 }
 
 #elif defined(HAVE_PTHREAD_H)
-#include <pthread.h>
 
 static void *t3026_run_thread(void *ptr)
 {

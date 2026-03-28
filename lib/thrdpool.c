@@ -25,10 +25,6 @@
 
 #ifdef USE_THREADS
 
-#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-#include <pthread.h>
-#endif
-
 #include "llist.h"
 #include "curl_threads.h"
 #include "curlx/timeval.h"
