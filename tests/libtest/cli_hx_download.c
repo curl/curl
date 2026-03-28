@@ -25,7 +25,7 @@
 
 #include "testtrace.h"
 
-#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
 #include <openssl/ssl.h>
 #endif
 #ifdef USE_WOLFSSL
@@ -137,7 +137,7 @@ static int my_progress_d_cb(void *userdata,
     return 1;
   }
 
-#if defined(USE_QUICHE) || defined(USE_OPENSSL) || defined(USE_WOLFSSL) || \
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL) || \
   defined(USE_GNUTLS) || defined(USE_MBEDTLS) || defined(USE_RUSTLS) || \
   defined(USE_SCHANNEL)
   if(!t->checked_ssl && dlnow > 0) {
@@ -153,7 +153,7 @@ static int my_progress_d_cb(void *userdata,
     }
     else {
       switch(tls->backend) {
-#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
       case CURLSSLBACKEND_OPENSSL: {
         const char *version = SSL_get_version((SSL *)tls->internals);
         assert(version);
