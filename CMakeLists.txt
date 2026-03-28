@@ -847,6 +847,16 @@ if(CURL_USE_OPENSSL)
   cmake_pop_check_state()
 
   if(HAVE_BORINGSSL OR HAVE_AWSLC)
+    if(NOT MSVC AND NOT ANDROID)  # BoringSSL/AWS-LC MSVC builds use native Windows threads
+      find_package(Threads)
+      if(CMAKE_USE_PTHREADS_INIT)
+        set(HAVE_THREADS_POSIX_BORINGSSL 1)
+        list(APPEND CURL_NETWORK_AND_TIME_LIBS Threads::Threads)
+        list(APPEND CMAKE_REQUIRED_LIBRARIES Threads::Threads)
+      elseif(OPENSSL_USE_STATIC_LIBS)
+        message(WARNING "BoringSSL/AWS-LC requires POSIX Threads.")
+      endif()
+    endif()
     if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
       list(APPEND CURL_LIBS "stdc++")
       list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
@@ -2345,6 +2355,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   HAVE_LIBIDN2
   #   HAVE_LIBZ ZLIB_VERSION_MAJOR
   #   HAVE_THREADS_POSIX
+  #   HAVE_THREADS_POSIX_BORINGSSL
   #   HAVE_ZSTD
   #   USE_ARES
   #   USE_BACKTRACE

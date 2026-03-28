@@ -35,7 +35,7 @@ endif()
 
 include(CMakeFindDependencyMacro)
 
-if("@HAVE_THREADS_POSIX@")
+if("@HAVE_THREADS_POSIX@" OR "@HAVE_THREADS_POSIX_BORINGSSL@")
   find_dependency(Threads)  # for Threads::Threads
 endif()
 
