@@ -27,7 +27,7 @@
  */
 #include "curl_setup.h"
 
-#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
 
 #include "urldata.h"
 #include "curl_trc.h"
@@ -513,10 +513,6 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   return result;
 }
-
-#endif /* USE_QUICHE || USE_OPENSSL */
-
-#ifdef USE_OPENSSL
 
 static int ossl_bio_cf_create(BIO *bio)
 {

@@ -39,7 +39,7 @@
 
 #include <stdio.h>
 
-#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
 #include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP */
 #endif
 
@@ -249,8 +249,7 @@ static const char *disabled[] = {
 #endif
   ,
   "cert-status: "
-#if defined(USE_GNUTLS) || \
-  ((defined(USE_QUICHE) || defined(USE_OPENSSL)) && !defined(OPENSSL_NO_OCSP))
+#if defined(USE_GNUTLS) || (defined(USE_OPENSSL) && !defined(OPENSSL_NO_OCSP))
   "ON"
 #else
   "OFF"
