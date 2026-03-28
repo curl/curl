@@ -23,9 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_OPENSSL) || \
-  defined(USE_GNUTLS) || \
-  defined(USE_WOLFSSL) || \
+#if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
   defined(USE_RUSTLS)
 
 #include "vtls/keylog.h"
