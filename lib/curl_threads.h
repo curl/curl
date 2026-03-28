@@ -27,9 +27,6 @@
 
 #ifdef USE_MUTEX
 #ifdef HAVE_THREADS_POSIX
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-#endif
 #  define CURL_THREAD_RETURN_T   unsigned int
 #  define CURL_STDCALL
 #  define curl_mutex_t           pthread_mutex_t

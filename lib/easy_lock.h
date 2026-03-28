@@ -86,8 +86,6 @@ static CURL_INLINE void curl_simple_lock_unlock(curl_simple_lock *lock)
 
 #elif defined(HAVE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 
-#include <pthread.h>
-
 #define curl_simple_lock           pthread_mutex_t
 #define CURL_SIMPLE_LOCK_INIT      PTHREAD_MUTEX_INITIALIZER
 #define curl_simple_lock_lock(m)   pthread_mutex_lock(m)
