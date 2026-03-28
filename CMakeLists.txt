@@ -646,7 +646,6 @@ endif()
 if(NOT WIN32)
   find_package(Threads)
   set(HAVE_THREADS_POSIX ${CMAKE_USE_PTHREADS_INIT})
-  set(HAVE_PTHREAD_H ${CMAKE_USE_PTHREADS_INIT})
   list(APPEND CURL_NETWORK_AND_TIME_LIBS ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
@@ -2032,7 +2031,7 @@ curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPE
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_MBEDTLS OR
                             (USE_WOLFSSL AND HAVE_WOLFSSL_BIO_NEW)))
 curl_add_if("Unicode"       ENABLE_UNICODE)
-curl_add_if("threadsafe"    HAVE_ATOMIC OR (HAVE_THREADS_POSIX AND HAVE_PTHREAD_H) OR WIN32)
+curl_add_if("threadsafe"    HAVE_ATOMIC OR HAVE_THREADS_POSIX OR WIN32)
 curl_add_if("Debug"         ENABLE_DEBUG)
 curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
 curl_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)

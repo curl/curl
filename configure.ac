@@ -4193,7 +4193,7 @@ fi
 dnl detect pthreads
 if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_HEADER(pthread.h,
-    [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
+    [
       save_CFLAGS="$CFLAGS"
       dnl When statically linking against BoringSSL, -lpthread is added to LIBS.
       dnl Make sure to that this does not pass the check below, we really want
