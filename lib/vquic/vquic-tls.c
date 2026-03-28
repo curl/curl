@@ -45,7 +45,6 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "vtls/keylog.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
 #include "vquic/vquic-tls.h"

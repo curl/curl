@@ -48,7 +48,6 @@
 #include "url.h"
 #include "bufref.h"
 #include "vtls/openssl.h"
-#include "vtls/keylog.h"
 #include "vtls/vtls.h"
 
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
