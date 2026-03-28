@@ -137,7 +137,7 @@ static int my_progress_d_cb(void *userdata,
     return 1;
   }
 
-#if defined(USE_OPENSSL) || defined(USE_WOLFSSL) || defined(USE_GNUTLS) || \
+#if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
   defined(USE_MBEDTLS) || defined(USE_RUSTLS) || defined(USE_SCHANNEL)
   if(!t->checked_ssl && dlnow > 0) {
     struct curl_tlssessioninfo *tls;
