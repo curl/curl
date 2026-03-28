@@ -220,7 +220,7 @@
 /* ================================================================ */
 
 /* Give calloc a chance to be dragging in early, so we do not redefine */
-#if defined(HAVE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#ifdef HAVE_THREADS_POSIX
 #  include <pthread.h>
 #endif
 

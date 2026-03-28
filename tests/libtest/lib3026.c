@@ -84,7 +84,7 @@ cleanup:
   return result;
 }
 
-#elif defined(HAVE_PTHREAD_H)
+#elif defined(HAVE_THREADS_POSIX)
 
 static void *t3026_run_thread(void *ptr)
 {

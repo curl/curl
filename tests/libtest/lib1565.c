@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-#ifdef HAVE_PTHREAD_H
+#ifdef HAVE_THREADS_POSIX
 
 #define CONN_NUM                3
 #define TIME_BETWEEN_START_SECS 2

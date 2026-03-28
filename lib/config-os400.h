@@ -135,9 +135,6 @@
 /* Define to 1 if you have the 'pipe' function. */
 #define HAVE_PIPE               1
 
-/* if you have <pthread.h> */
-#define HAVE_PTHREAD_H          1
-
 /* Define to 1 if you have the <pwd.h> header file. */
 #define HAVE_PWD_H              1
 

@@ -84,7 +84,7 @@ static CURL_INLINE void curl_simple_lock_unlock(curl_simple_lock *lock)
   atomic_store_explicit(lock, false, memory_order_release);
 }
 
-#elif defined(HAVE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#elif defined(HAVE_THREADS_POSIX)
 
 #define curl_simple_lock           pthread_mutex_t
 #define CURL_SIMPLE_LOCK_INIT      PTHREAD_MUTEX_INITIALIZER
