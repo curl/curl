@@ -208,13 +208,20 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
 
   if(!config->insecure_ok) {
     char *known = config->knownhosts;
-    if(!known)
-      known = findfile(".ssh/known_hosts", FALSE);
+    if(!known) {
+      char *found = findfile(".ssh/known_hosts", FALSE);
+      if(found) {
+        known = curlx_strdup(found);
+        curl_free(found);
+        if(!known)
+          return CURLE_OUT_OF_MEMORY;
+      }
+    }
     if(known) {
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
         config->knownhosts = NULL;
-        curl_free(known);
+        curlx_free(known);
         return result;
       }
       /* store it in global to avoid repeated checks */
