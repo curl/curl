@@ -479,7 +479,7 @@ UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
   }
 done:
   if(err) {
-    tool_safefree(*certname);
+    curlx_safefree(*certname);
   }
   else
     *certname_place = '\0';
@@ -709,7 +709,7 @@ static ParameterError data_urlencode(const char *nextarg,
   }
   else {
     char *enc = curl_easy_escape(NULL, postdata, (int)size);
-    tool_safefree(postdata); /* no matter if it worked or not */
+    curlx_safefree(postdata); /* no matter if it worked or not */
     if(enc) {
       char *n;
       replace_url_encoded_space_by_plus(enc);
@@ -1005,7 +1005,7 @@ static ParameterError set_data(cmdline_t cmd,
   if(!err && curlx_dyn_addn(&config->postdata, postdata, size))
     err = PARAM_NO_MEM;
 
-  tool_safefree(postdata);
+  curlx_safefree(postdata);
 
   config->postfields = curlx_dyn_ptr(&config->postdata);
   return err;
@@ -1600,7 +1600,7 @@ static ParameterError parse_writeout(struct OperationConfig *config,
         return PARAM_READ_ERROR;
       }
     }
-    tool_safefree(config->writeout);
+    curlx_safefree(config->writeout);
     err = file2string(&config->writeout, file);
     if(file && (file != stdin))
       curlx_fclose(file);
@@ -1759,7 +1759,7 @@ static ParameterError opt_none(struct OperationConfig *config,
   case C_DUMP_CA_EMBED: /* --dump-ca-embed */
     return PARAM_CA_EMBED_REQUESTED;
   case C_FTP_PASV: /* --ftp-pasv */
-    tool_safefree(config->ftpport);
+    curlx_safefree(config->ftpport);
     break;
 
   case C_HTTP1_0: /* --http1.0 */
@@ -2390,7 +2390,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&config->doh_url, nextarg, ALLOW_BLANK);
     if(!err && config->doh_url && !config->doh_url[0])
       /* if given a blank string, make it NULL again */
-      tool_safefree(config->doh_url);
+      curlx_safefree(config->doh_url);
     break;
 
   case C_CIPHERS: /* -- ciphers */
@@ -2664,7 +2664,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     if(len)
       err = getstrn(&config->referer, nextarg, len, ALLOW_BLANK);
     else
-      tool_safefree(config->referer);
+      curlx_safefree(config->referer);
   }
     break;
   case C_CERT_TYPE: /* --cert-type */

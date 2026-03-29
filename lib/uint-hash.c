@@ -204,7 +204,7 @@ void Curl_uint32_hash_destroy(struct uint_hash *h)
   DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
   if(h->table) {
     uint_hash_clear(h);
-    Curl_safefree(h->table);
+    curlx_safefree(h->table);
   }
   DEBUGASSERT(h->size == 0);
   h->slots = 0;

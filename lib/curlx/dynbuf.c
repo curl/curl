@@ -57,7 +57,7 @@ void curlx_dyn_free(struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
-  Curl_safefree(s->bufr);
+  curlx_safefree(s->bufr);
   s->leng = s->allc = 0;
 }
 

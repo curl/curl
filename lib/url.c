@@ -160,11 +160,11 @@ void Curl_freeset(struct Curl_easy *data)
   enum dupblob j;
 
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
-    Curl_safefree(data->set.str[i]);
+    curlx_safefree(data->set.str[i]);
   }
 
   for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
-    Curl_safefree(data->set.blobs[j]);
+    curlx_safefree(data->set.blobs[j]);
   }
 
   Curl_bufref_free(&data->state.referer);
@@ -172,7 +172,7 @@ void Curl_freeset(struct Curl_easy *data)
 
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   Curl_mime_cleanpart(data->set.mimepostp);
-  Curl_safefree(data->set.mimepostp);
+  curlx_safefree(data->set.mimepostp);
 #endif
 
 #ifndef CURL_DISABLE_COOKIES
@@ -185,14 +185,14 @@ void Curl_freeset(struct Curl_easy *data)
 static void up_free(struct Curl_easy *data)
 {
   struct urlpieces *up = &data->state.up;
-  Curl_safefree(up->scheme);
-  Curl_safefree(up->hostname);
-  Curl_safefree(up->port);
-  Curl_safefree(up->user);
-  Curl_safefree(up->password);
-  Curl_safefree(up->options);
-  Curl_safefree(up->path);
-  Curl_safefree(up->query);
+  curlx_safefree(up->scheme);
+  curlx_safefree(up->hostname);
+  curlx_safefree(up->port);
+  curlx_safefree(up->user);
+  curlx_safefree(up->password);
+  curlx_safefree(up->options);
+  curlx_safefree(up->path);
+  curlx_safefree(up->query);
   curl_url_cleanup(data->state.uh);
   data->state.uh = NULL;
 }
@@ -252,7 +252,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   /* Close down all open SSL info and sessions */
   Curl_ssl_close_all(data);
-  Curl_safefree(data->state.first_host);
+  curlx_safefree(data->state.first_host);
   Curl_ssl_free_certinfo(data);
 
   Curl_bufref_free(&data->state.referer);
@@ -273,9 +273,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
-  Curl_safefree(data->state.most_recent_ftp_entrypath);
-  Curl_safefree(data->info.contenttype);
-  Curl_safefree(data->info.wouldredirect);
+  curlx_safefree(data->state.most_recent_ftp_entrypath);
+  curlx_safefree(data->info.contenttype);
+  curlx_safefree(data->info.wouldredirect);
 
   data_priority_cleanup(data);
 
@@ -285,30 +285,30 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   Curl_hash_destroy(&data->meta_hash);
 #ifndef CURL_DISABLE_PROXY
-  Curl_safefree(data->state.aptr.proxyuserpwd);
+  curlx_safefree(data->state.aptr.proxyuserpwd);
 #endif
-  Curl_safefree(data->state.aptr.uagent);
-  Curl_safefree(data->state.aptr.userpwd);
-  Curl_safefree(data->state.aptr.accept_encoding);
-  Curl_safefree(data->state.aptr.rangeline);
-  Curl_safefree(data->state.aptr.ref);
-  Curl_safefree(data->state.aptr.host);
+  curlx_safefree(data->state.aptr.uagent);
+  curlx_safefree(data->state.aptr.userpwd);
+  curlx_safefree(data->state.aptr.accept_encoding);
+  curlx_safefree(data->state.aptr.rangeline);
+  curlx_safefree(data->state.aptr.ref);
+  curlx_safefree(data->state.aptr.host);
 #ifndef CURL_DISABLE_COOKIES
-  Curl_safefree(data->state.aptr.cookiehost);
+  curlx_safefree(data->state.aptr.cookiehost);
 #endif
 #ifndef CURL_DISABLE_RTSP
-  Curl_safefree(data->state.aptr.rtsp_transport);
+  curlx_safefree(data->state.aptr.rtsp_transport);
 #endif
-  Curl_safefree(data->state.aptr.user);
-  Curl_safefree(data->state.aptr.passwd);
+  curlx_safefree(data->state.aptr.user);
+  curlx_safefree(data->state.aptr.passwd);
 #ifndef CURL_DISABLE_PROXY
-  Curl_safefree(data->state.aptr.proxyuser);
-  Curl_safefree(data->state.aptr.proxypasswd);
+  curlx_safefree(data->state.aptr.proxyuser);
+  curlx_safefree(data->state.aptr.proxypasswd);
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
   Curl_mime_cleanpart(data->state.formp);
-  Curl_safefree(data->state.formp);
+  curlx_safefree(data->state.formp);
 #endif
 
   /* destruct wildcard structures if it is needed */
@@ -521,28 +521,28 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 #ifndef CURL_DISABLE_PROXY
   Curl_free_idnconverted_hostname(&conn->http_proxy.host);
   Curl_free_idnconverted_hostname(&conn->socks_proxy.host);
-  Curl_safefree(conn->http_proxy.user);
-  Curl_safefree(conn->socks_proxy.user);
-  Curl_safefree(conn->http_proxy.passwd);
-  Curl_safefree(conn->socks_proxy.passwd);
-  Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
-  Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
+  curlx_safefree(conn->http_proxy.user);
+  curlx_safefree(conn->socks_proxy.user);
+  curlx_safefree(conn->http_proxy.passwd);
+  curlx_safefree(conn->socks_proxy.passwd);
+  curlx_safefree(conn->http_proxy.host.rawalloc); /* http proxy name */
+  curlx_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name */
 #endif
-  Curl_safefree(conn->user);
-  Curl_safefree(conn->passwd);
-  Curl_safefree(conn->sasl_authzid);
-  Curl_safefree(conn->options);
-  Curl_safefree(conn->oauth_bearer);
-  Curl_safefree(conn->host.rawalloc); /* hostname buffer */
-  Curl_safefree(conn->conn_to_host.rawalloc); /* hostname buffer */
-  Curl_safefree(conn->secondaryhostname);
-  Curl_safefree(conn->localdev);
+  curlx_safefree(conn->user);
+  curlx_safefree(conn->passwd);
+  curlx_safefree(conn->sasl_authzid);
+  curlx_safefree(conn->options);
+  curlx_safefree(conn->oauth_bearer);
+  curlx_safefree(conn->host.rawalloc); /* hostname buffer */
+  curlx_safefree(conn->conn_to_host.rawalloc); /* hostname buffer */
+  curlx_safefree(conn->secondaryhostname);
+  curlx_safefree(conn->localdev);
   Curl_ssl_conn_config_cleanup(conn);
 
 #ifdef USE_UNIX_SOCKETS
-  Curl_safefree(conn->unix_domain_socket);
+  curlx_safefree(conn->unix_domain_socket);
 #endif
-  Curl_safefree(conn->destination);
+  curlx_safefree(conn->destination);
   Curl_hash_destroy(&conn->meta_hash);
 
   curlx_free(conn); /* free all the connection oriented data */
@@ -1622,7 +1622,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     /* This MUST use the IDN decoded name */
     if(Curl_hsts(data->hsts, conn->host.name, strlen(conn->host.name), TRUE)) {
       char *url;
-      Curl_safefree(data->state.up.scheme);
+      curlx_safefree(data->state.up.scheme);
       uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
       if(uc)
         return Curl_uc_to_curlcode(uc);
@@ -2025,7 +2025,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     proxyuser = NULL;
     if(result)
       goto error;
-    Curl_safefree(proxyinfo->passwd);
+    curlx_safefree(proxyinfo->passwd);
     if(!proxypasswd) {
       proxypasswd = curlx_strdup("");
       if(!proxypasswd) {
@@ -2144,7 +2144,7 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
     if(conn->http_proxy.passwd)
       result = CURLE_OK;
     else
-      Curl_safefree(conn->http_proxy.user);
+      curlx_safefree(conn->http_proxy.user);
   }
   return result;
 }
@@ -2205,15 +2205,15 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
 
   if(Curl_check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY] ?
                         data->set.str[STRING_NOPROXY] : no_proxy)) {
-    Curl_safefree(proxy);
-    Curl_safefree(socksproxy);
+    curlx_safefree(proxy);
+    curlx_safefree(socksproxy);
   }
 #ifndef CURL_DISABLE_HTTP
   else if(!proxy && !socksproxy)
     /* if the host is not in the noproxy list, detect proxy. */
     proxy = detect_proxy(data, conn);
 #endif /* CURL_DISABLE_HTTP */
-  Curl_safefree(no_proxy);
+  curlx_safefree(no_proxy);
 
 #ifdef USE_UNIX_SOCKETS
   /* For the time being do not mix proxy and Unix domain sockets. See #1274 */
@@ -2244,7 +2244,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
   if(proxy || socksproxy) {
     if(proxy) {
       result = parse_proxy(data, conn, proxy, conn->http_proxy.proxytype);
-      Curl_safefree(proxy); /* parse_proxy copies the proxy string */
+      curlx_safefree(proxy); /* parse_proxy copies the proxy string */
       if(result)
         goto out;
     }
@@ -2253,7 +2253,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
       result = parse_proxy(data, conn, socksproxy,
                            conn->socks_proxy.proxytype);
       /* parse_proxy copies the socks proxy string */
-      Curl_safefree(socksproxy);
+      curlx_safefree(socksproxy);
       if(result)
         goto out;
     }
@@ -2478,8 +2478,8 @@ static CURLcode override_login(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_NETRC
   if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
-    Curl_safefree(*userp);
-    Curl_safefree(*passwdp);
+    curlx_safefree(*userp);
+    curlx_safefree(*passwdp);
   }
   conn->bits.netrc = FALSE;
   if(data->set.use_netrc && !data->set.str[STRING_USERNAME]) {
@@ -2809,7 +2809,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     else {
       /* no "connect to host" */
       conn->bits.conn_to_host = FALSE;
-      Curl_safefree(host);
+      curlx_safefree(host);
     }
 
     if(port >= 0) {
@@ -2947,7 +2947,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 
 static void url_move_hostname(struct hostname *dest, struct hostname *src)
 {
-  Curl_safefree(dest->rawalloc);
+  curlx_safefree(dest->rawalloc);
   Curl_free_idnconverted_hostname(dest);
   *dest = *src;
   memset(src, 0, sizeof(*src));

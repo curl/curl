@@ -59,7 +59,7 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
   ret = curl_url_get(u, CURLUPART_PORT, &portnum, CURLU_NO_DEFAULT_PORT);
   fail_unless(ret != CURLUE_OK, "curl_url_get portnum returned something");
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Invalid IPv6 */
@@ -71,7 +71,7 @@ static CURLcode test_unit1653(const char *arg)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret != CURLUE_OK, "parse_port true on error");
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   u = curl_url();
@@ -87,7 +87,7 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(portnum && !strcmp(portnum, "808"), "Check portnumber");
 
   curl_free(portnum);
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with zone index and port number */
@@ -103,7 +103,7 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
   fail_unless(portnum && !strcmp(portnum, "80"), "Check portnumber");
   curl_free(portnum);
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with zone index without port number */
@@ -115,7 +115,7 @@ static CURLcode test_unit1653(const char *arg)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with port number */
@@ -131,7 +131,7 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
   fail_unless(portnum && !strcmp(portnum, "81"), "Check portnumber");
   curl_free(portnum);
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with syntax error in the port number */
@@ -143,7 +143,7 @@ static CURLcode test_unit1653(const char *arg)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret != CURLUE_OK, "parse_port true on error");
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   u = curl_url();
@@ -154,7 +154,7 @@ static CURLcode test_unit1653(const char *arg)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret != CURLUE_OK, "parse_port true on error");
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with no port after the colon, should use default if a scheme
@@ -167,7 +167,7 @@ static CURLcode test_unit1653(const char *arg)
     goto fail;
   ret = parse_port(u, ipv6port, TRUE);
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Incorrect zone index syntax, but the port extractor does not care */
@@ -183,7 +183,7 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
   fail_unless(portnum && !strcmp(portnum, "180"), "Check portnumber");
   curl_free(portnum);
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Non percent-encoded zone index */
@@ -195,7 +195,7 @@ static CURLcode test_unit1653(const char *arg)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
-  Curl_safefree(ipv6port);
+  curlx_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* No scheme and no digits following the colon - not accepted. Because that

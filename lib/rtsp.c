@@ -439,7 +439,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
      here. */
   if(Curl_checkheaders(data, STRCONST("User-Agent")) &&
      data->state.aptr.uagent) {
-    Curl_safefree(data->state.aptr.uagent);
+    curlx_safefree(data->state.aptr.uagent);
   }
   else if(!Curl_checkheaders(data, STRCONST("User-Agent")) &&
           data->set.str[STRING_USERAGENT]) {
@@ -458,7 +458,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   p_userpwd = data->state.aptr.userpwd;
 
   /* Referrer */
-  Curl_safefree(data->state.aptr.ref);
+  curlx_safefree(data->state.aptr.ref);
   if(Curl_bufref_ptr(&data->state.referer) &&
      !Curl_checkheaders(data, STRCONST("Referer")))
     data->state.aptr.ref =
@@ -542,7 +542,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
    * with basic and digest, it will be freed anyway by the next request
    */
-  Curl_safefree(data->state.aptr.userpwd);
+  curlx_safefree(data->state.aptr.userpwd);
 
   if(result)
     goto out;

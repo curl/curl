@@ -83,7 +83,7 @@ CURLcode Curl_setstropt(char **charp, const char *s)
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
 
-  Curl_safefree(*charp);
+  curlx_safefree(*charp);
 
   if(s) {
     if(strlen(s) > CURL_MAX_INPUT_LENGTH)
@@ -103,7 +103,7 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
   /* free the previous storage at `blobp' and replace by a dynamic storage
      copy of blob. If CURL_BLOB_COPY is set, the data is copied. */
 
-  Curl_safefree(*blobp);
+  curlx_safefree(*blobp);
 
   if(blob) {
     struct curl_blob *nblob;
@@ -1011,7 +1011,7 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_ENABLE_NPN:
     break;
   case CURLOPT_SSLENGINE_DEFAULT:
-    Curl_safefree(s->str[STRING_SSL_ENGINE]);
+    curlx_safefree(s->str[STRING_SSL_ENGINE]);
     result = Curl_ssl_set_engine_default(data);
     break;
   default:
@@ -1243,7 +1243,7 @@ static CURLcode setopt_long_misc(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     if(s->postfieldsize < arg &&
        s->postfields == s->str[STRING_COPYPOSTFIELDS]) {
-      Curl_safefree(s->str[STRING_COPYPOSTFIELDS]);
+      curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
       s->postfields = NULL;
     }
     s->postfieldsize = arg;
@@ -1439,7 +1439,7 @@ static CURLcode setopt_mimepost(struct Curl_easy *data, curl_mime *mimep)
     s->opt_no_body = FALSE; /* this is implied */
 #ifndef CURL_DISABLE_FORM_API
     Curl_mime_cleanpart(data->state.formp);
-    Curl_safefree(data->state.formp);
+    curlx_safefree(data->state.formp);
     data->state.mimepost = NULL;
 #endif
   }
@@ -1465,7 +1465,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     s->method = HTTPREQ_POST_FORM;
     s->opt_no_body = FALSE; /* this is implied */
     Curl_mime_cleanpart(data->state.formp);
-    Curl_safefree(data->state.formp);
+    curlx_safefree(data->state.formp);
     data->state.mimepost = NULL;
     break;
 #endif /* !CURL_DISABLE_FORM_API */
@@ -1630,12 +1630,12 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 
     /* URL decode the components */
     if(!result && u) {
-      Curl_safefree(s->str[STRING_PROXYUSERNAME]);
+      curlx_safefree(s->str[STRING_PROXYUSERNAME]);
       result = Curl_urldecode(u, 0, &s->str[STRING_PROXYUSERNAME], NULL,
                               REJECT_ZERO);
     }
     if(!result && p) {
-      Curl_safefree(s->str[STRING_PROXYPASSWORD]);
+      curlx_safefree(s->str[STRING_PROXYPASSWORD]);
       result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     }
@@ -1900,7 +1900,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     s->postfields = ptr;
     /* Release old copied data. */
-    Curl_safefree(s->str[STRING_COPYPOSTFIELDS]);
+    curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
     s->method = HTTPREQ_POST;
     break;
 #endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_MQTT */
@@ -2173,7 +2173,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * pass CURLU to set URL
      */
     Curl_bufref_free(&data->state.url);
-    Curl_safefree(s->str[STRING_SET_URL]);
+    curlx_safefree(s->str[STRING_SET_URL]);
     s->uh = (CURLU *)ptr;
     break;
   case CURLOPT_SSLCERT:
@@ -2721,7 +2721,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(s->postfieldsize < offt &&
        s->postfields == s->str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      Curl_safefree(s->str[STRING_COPYPOSTFIELDS]);
+      curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
       s->postfields = NULL;
     }
     s->postfieldsize = offt;

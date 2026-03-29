@@ -967,7 +967,7 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
 
 out:
   if(result) {
-    Curl_safefree(*pcf);
+    curlx_safefree(*pcf);
     cf_ip_happy_ctx_destroy(ctx);
   }
   return result;

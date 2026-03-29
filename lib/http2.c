@@ -154,7 +154,7 @@ static void free_push_headers(struct h2_stream_ctx *stream)
   size_t i;
   for(i = 0; i < stream->push_headers_used; i++)
     curlx_free(stream->push_headers[i]);
-  Curl_safefree(stream->push_headers);
+  curlx_safefree(stream->push_headers);
   stream->push_headers_used = 0;
 }
 
@@ -2202,7 +2202,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
 out:
   CURL_TRC_CF(data, cf, "[%d] submit -> %d, %zu",
               stream ? stream->id : -1, result, *pnwritten);
-  Curl_safefree(nva);
+  curlx_safefree(nva);
   *pstream = stream;
   Curl_dynhds_free(&h2_headers);
   return result;

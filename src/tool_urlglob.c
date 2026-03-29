@@ -50,7 +50,7 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
 
   pat->c.set.elem[0] = curlx_memdup0(fixed, len);
   if(!pat->c.set.elem[0]) {
-    tool_safefree(pat->c.set.elem);
+    curlx_safefree(pat->c.set.elem);
     return globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
   }
 
@@ -204,7 +204,7 @@ error:
   {
     size_t i;
     for(i = 0; i < size; i++)
-      tool_safefree(elem[i]);
+      curlx_safefree(elem[i]);
   }
   curlx_free(elem);
   return result;
@@ -542,11 +542,11 @@ void glob_cleanup(struct URLGlob *glob)
          (glob->pattern[i].c.set.elem)) {
         curl_off_t elem;
         for(elem = 0; elem < glob->pattern[i].c.set.size; elem++)
-          tool_safefree(glob->pattern[i].c.set.elem[elem]);
-        tool_safefree(glob->pattern[i].c.set.elem);
+          curlx_safefree(glob->pattern[i].c.set.elem[elem]);
+        curlx_safefree(glob->pattern[i].c.set.elem);
       }
     }
-    tool_safefree(glob->pattern);
+    curlx_safefree(glob->pattern);
     glob->palloc = 0;
     curlx_dyn_free(&glob->buf);
   }

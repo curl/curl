@@ -1254,8 +1254,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         curlx_free(scheme);
       }
       if(clear) {
-        Curl_safefree(data->state.aptr.user);
-        Curl_safefree(data->state.aptr.passwd);
+        curlx_safefree(data->state.aptr.user);
+        curlx_safefree(data->state.aptr.passwd);
       }
     }
   }
@@ -2020,7 +2020,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
     data->state.first_remote_port = conn->remote_port;
     data->state.first_remote_protocol = conn->scheme->protocol;
   }
-  Curl_safefree(aptr->host);
+  curlx_safefree(aptr->host);
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
@@ -2223,7 +2223,7 @@ static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
       result = Curl_getformdata(data, data->state.formp, data->set.httppost,
                                 data->state.fread_func);
       if(result) {
-        Curl_safefree(data->state.formp);
+        curlx_safefree(data->state.formp);
         return result;
       }
       data->state.mimepost = data->state.formp;
@@ -2937,7 +2937,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_ACCEPT_ENCODING:
-    Curl_safefree(data->state.aptr.accept_encoding);
+    curlx_safefree(data->state.aptr.accept_encoding);
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
        data->set.str[STRING_ENCODING])
       result = curlx_dyn_addf(req, "Accept-Encoding: %s\r\n",
@@ -2945,7 +2945,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_REFERER:
-    Curl_safefree(data->state.aptr.ref);
+    curlx_safefree(data->state.aptr.ref);
     if(Curl_bufref_ptr(&data->state.referer) &&
        !Curl_checkheaders(data, STRCONST("Referer")))
       result = curlx_dyn_addf(req, "Referer: %s\r\n",
@@ -3119,9 +3119,9 @@ out:
 
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
    * from reused connections */
-  Curl_safefree(data->state.aptr.userpwd);
+  curlx_safefree(data->state.aptr.userpwd);
 #ifndef CURL_DISABLE_PROXY
-  Curl_safefree(data->state.aptr.proxyuserpwd);
+  curlx_safefree(data->state.aptr.proxyuserpwd);
 #endif
   curlx_dyn_free(&req);
   return result;

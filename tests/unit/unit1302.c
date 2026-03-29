@@ -24,7 +24,7 @@
 #include "unitcheck.h"
 
 #include "urldata.h"
-#include "url.h" /* for Curl_safefree */
+#include "url.h" /* for curlx_safefree */
 
 struct etest {
   const char *input;
@@ -140,7 +140,7 @@ static CURLcode test_unit1302(const char *arg)
       curl_mfprintf(stderr, "Test %u encoded badly\n", i);
       unitfail++;
     }
-    Curl_safefree(out);
+    curlx_safefree(out);
 
     /* then verify decode */
     result = curlx_base64_decode(e->output, &decoded, &dlen);
@@ -160,7 +160,7 @@ static CURLcode test_unit1302(const char *arg)
       unitfail++;
     }
 
-    Curl_safefree(decoded);
+    curlx_safefree(decoded);
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(url); i++) {
@@ -179,7 +179,7 @@ static CURLcode test_unit1302(const char *arg)
                     "expected '%s'\n", i, out, e->output);
       unitfail++;
     }
-    Curl_safefree(out);
+    curlx_safefree(out);
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(badecode); i++) {

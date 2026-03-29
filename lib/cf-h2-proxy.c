@@ -105,7 +105,7 @@ static void tunnel_stream_clear(struct tunnel_stream *ts)
   Curl_http_resp_free(ts->resp);
   Curl_bufq_free(&ts->recvbuf);
   Curl_bufq_free(&ts->sendbuf);
-  Curl_safefree(ts->authority);
+  curlx_safefree(ts->authority);
   memset(ts, 0, sizeof(*ts));
   ts->state = H2_TUNNEL_INIT;
 }
@@ -158,7 +158,7 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
     /* If a proxy-authorization header was used for the proxy, then we should
        make sure that it is not accidentally used for the document request
        after we have connected. Let's thus free and clear it here. */
-    Curl_safefree(data->state.aptr.proxyuserpwd);
+    curlx_safefree(data->state.aptr.proxyuserpwd);
     break;
   }
 }
@@ -804,7 +804,7 @@ static CURLcode inspect_response(struct Curl_cfilter *cf,
       return result;
     if(data->req.newurl) {
       /* Indicator that we should try again */
-      Curl_safefree(data->req.newurl);
+      curlx_safefree(data->req.newurl);
       h2_tunnel_go_state(cf, ts, H2_TUNNEL_INIT, data);
       return CURLE_OK;
     }

@@ -325,7 +325,7 @@ void single_transfer_cleanup(void)
   struct State *state = &global->state;
   /* Free list of remaining URLs */
   glob_cleanup(&state->urlglob);
-  tool_safefree(state->uploadfile);
+  curlx_safefree(state->uploadfile);
   /* Free list of globbed upload files */
   glob_cleanup(&state->inglob);
 }
@@ -769,16 +769,16 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     curlx_fclose(per->heads.stream);
 
   if(per->heads.alloc_filename)
-    tool_safefree(per->heads.filename);
+    curlx_safefree(per->heads.filename);
 
   if(per->etag_save.fopened && per->etag_save.stream)
     curlx_fclose(per->etag_save.stream);
 
   if(per->etag_save.alloc_filename)
-    tool_safefree(per->etag_save.filename);
+    curlx_safefree(per->etag_save.filename);
 
   if(outs->alloc_filename)
-    tool_safefree(outs->filename);
+    curlx_safefree(outs->filename);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
   return result;
@@ -882,7 +882,7 @@ static CURLcode etag_compare(struct OperationConfig *config)
   if((PARAM_OK == file2string(&etag_from_file, file)) &&
      etag_from_file) {
     char *h = curl_maprintf("If-None-Match: %s", etag_from_file);
-    tool_safefree(etag_from_file);
+    curlx_safefree(etag_from_file);
     if(h) {
       /* move it to the right memory */
       header = curlx_strdup(h);
@@ -1030,7 +1030,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     SANITIZEcode sc;
     CURLcode result =
       glob_match_url(&per->outfile, storefile, &state->urlglob, &sc);
-    tool_safefree(storefile);
+    curlx_safefree(storefile);
     if(sc) {
       if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
@@ -1052,7 +1052,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
 
   if(config->output_dir && *config->output_dir) {
     char *d = curl_maprintf("%s/%s", config->output_dir, per->outfile);
-    tool_safefree(per->outfile);
+    curlx_safefree(per->outfile);
     if(d) {
       per->outfile = curlx_strdup(d); /* move to right memory */
       curl_free(d);
@@ -1233,7 +1233,7 @@ static CURLcode create_single(struct OperationConfig *config,
 
     if(state->upidx >= state->upnum) {
       state->urlnum = 0;
-      tool_safefree(state->uploadfile);
+      curlx_safefree(state->uploadfile);
       glob_cleanup(&state->inglob);
       state->upidx = 0;
       state->urlnode = u->next; /* next node */
@@ -1286,7 +1286,7 @@ static CURLcode create_single(struct OperationConfig *config,
       per->uploadfile = curlx_strdup(state->uploadfile);
       if(!per->uploadfile ||
          SetHTTPrequest(TOOL_HTTPREQ_PUT, &config->httpreq)) {
-        tool_safefree(per->uploadfile);
+        curlx_safefree(per->uploadfile);
         curl_easy_cleanup(curl);
         return CURLE_FAILED_INIT;
       }
@@ -1404,7 +1404,7 @@ static CURLcode create_single(struct OperationConfig *config,
       state->urlidx = state->urlnum = 0;
       glob_cleanup(&state->urlglob);
       state->upidx++;
-      tool_safefree(state->uploadfile); /* clear it to get the next */
+      curlx_safefree(state->uploadfile); /* clear it to get the next */
     }
     *added = TRUE;
     break;
@@ -2155,7 +2155,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
 #endif
   return CURLE_OK;
 fail:
-  Curl_safefree(config->capath);
+  curlx_safefree(config->capath);
   return result;
 }
 

@@ -242,7 +242,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
       data->info.proxyauthpicked = CURLAUTH_NTLM;
     else
       data->info.httpauthpicked = CURLAUTH_NTLM;
-    Curl_safefree(*allocuserpwd);
+    curlx_safefree(*allocuserpwd);
     authp->done = TRUE;
     break;
   }

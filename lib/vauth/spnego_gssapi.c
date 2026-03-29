@@ -171,7 +171,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                            NULL);
 
   /* Free the decoded challenge as it is not required anymore */
-  Curl_safefree(input_token.value);
+  curlx_safefree(input_token.value);
 
   nego->status = major_status;
   if(GSS_ERROR(major_status)) {

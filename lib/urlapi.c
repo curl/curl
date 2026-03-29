@@ -1739,37 +1739,37 @@ static CURLUcode urlset_clear(CURLU *u, CURLUPart what)
     memset(u, 0, sizeof(struct Curl_URL));
     break;
   case CURLUPART_SCHEME:
-    Curl_safefree(u->scheme);
+    curlx_safefree(u->scheme);
     u->guessed_scheme = FALSE;
     break;
   case CURLUPART_USER:
-    Curl_safefree(u->user);
+    curlx_safefree(u->user);
     break;
   case CURLUPART_PASSWORD:
-    Curl_safefree(u->password);
+    curlx_safefree(u->password);
     break;
   case CURLUPART_OPTIONS:
-    Curl_safefree(u->options);
+    curlx_safefree(u->options);
     break;
   case CURLUPART_HOST:
-    Curl_safefree(u->host);
+    curlx_safefree(u->host);
     break;
   case CURLUPART_ZONEID:
-    Curl_safefree(u->zoneid);
+    curlx_safefree(u->zoneid);
     break;
   case CURLUPART_PORT:
     u->portnum = 0;
-    Curl_safefree(u->port);
+    curlx_safefree(u->port);
     break;
   case CURLUPART_PATH:
-    Curl_safefree(u->path);
+    curlx_safefree(u->path);
     break;
   case CURLUPART_QUERY:
-    Curl_safefree(u->query);
+    curlx_safefree(u->query);
     u->query_present = FALSE;
     break;
   case CURLUPART_FRAGMENT:
-    Curl_safefree(u->fragment);
+    curlx_safefree(u->fragment);
     u->fragment_present = FALSE;
     break;
   default:
@@ -1847,7 +1847,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     break;
   case CURLUPART_HOST:
     storep = &u->host;
-    Curl_safefree(u->zoneid);
+    curlx_safefree(u->zoneid);
     break;
   case CURLUPART_ZONEID:
     storep = &u->zoneid;

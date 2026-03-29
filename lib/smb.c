@@ -376,7 +376,7 @@ static void smb_easy_dtor(void *key, size_t klen, void *entry)
   struct smb_request *req = entry;
   (void)key;
   (void)klen;
-  Curl_safefree(req->path);
+  curlx_safefree(req->path);
   curlx_free(req);
 }
 
@@ -385,10 +385,10 @@ static void smb_conn_dtor(void *key, size_t klen, void *entry)
   struct smb_conn *smbc = entry;
   (void)key;
   (void)klen;
-  Curl_safefree(smbc->share);
-  Curl_safefree(smbc->domain);
-  Curl_safefree(smbc->recv_buf);
-  Curl_safefree(smbc->send_buf);
+  curlx_safefree(smbc->share);
+  curlx_safefree(smbc->domain);
+  curlx_safefree(smbc->recv_buf);
+  curlx_safefree(smbc->send_buf);
   curlx_free(smbc);
 }
 
@@ -406,7 +406,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
     return result;
 
   /* Parse the path for the share */
-  Curl_safefree(smbc->share);
+  curlx_safefree(smbc->share);
   smbc->share = curlx_strdup((*path == '/' || *path == '\\')
                              ? path + 1 : path);
   curlx_free(path);
@@ -419,7 +419,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
 
   /* The share must be present */
   if(!slash) {
-    Curl_safefree(smbc->share);
+    curlx_safefree(smbc->share);
     failf(data, "missing share in URL path for SMB");
     return CURLE_URL_MALFORMAT;
   }

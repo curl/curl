@@ -1322,14 +1322,14 @@ extern curl_strdup_callback Curl_cstrdup;
 extern curl_calloc_callback Curl_ccalloc;
 
 /*
- * Curl_safefree defined as a macro to allow MemoryTracking feature
- * to log free() calls at same location where Curl_safefree is used.
+ * curlx_safefree() defined as a macro to allow MemoryTracking feature
+ * to log free() calls at same location where curlx_safefree() is used.
  * This macro also assigns NULL to given pointer when free'd.
  */
-#define Curl_safefree(ptr) \
-  do {                     \
-    curlx_free(ptr);       \
-    (ptr) = NULL;          \
+#define curlx_safefree(ptr) \
+  do {                      \
+    curlx_free(ptr);        \
+    (ptr) = NULL;           \
   } while(0)
 
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */

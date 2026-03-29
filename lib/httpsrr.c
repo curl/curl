@@ -205,11 +205,11 @@ Curl_httpsrr_dup_move(struct Curl_https_rrinfo *rrinfo)
 
 void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
 {
-  Curl_safefree(rrinfo->target);
-  Curl_safefree(rrinfo->echconfiglist);
-  Curl_safefree(rrinfo->ipv4hints);
-  Curl_safefree(rrinfo->ipv6hints);
-  Curl_safefree(rrinfo->rrname);
+  curlx_safefree(rrinfo->target);
+  curlx_safefree(rrinfo->echconfiglist);
+  curlx_safefree(rrinfo->ipv4hints);
+  curlx_safefree(rrinfo->ipv6hints);
+  curlx_safefree(rrinfo->rrname);
   rrinfo->complete = FALSE;
 }
 
@@ -261,7 +261,7 @@ CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
   }
 out:
   hinfo->complete = !result;
-  Curl_safefree(hinfo->rrname);
+  curlx_safefree(hinfo->rrname);
   return result;
 }
 
