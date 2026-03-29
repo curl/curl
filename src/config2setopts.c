@@ -214,7 +214,7 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
         config->knownhosts = NULL;
-        curl_free(known);
+        curlx_free(known);
         return result;
       }
       /* store it in global to avoid repeated checks */

@@ -187,7 +187,8 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->ftp_alternative_to_user);
   tool_safefree(config->aws_sigv4);
   tool_safefree(config->ech);
-  tool_safefree(config->ech_config);
+  curl_free(config->ech_config);
+  config->ech_config = NULL;
   tool_safefree(config->ech_public);
   tool_safefree(config->knownhosts);
 }
