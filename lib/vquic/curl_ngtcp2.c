@@ -879,9 +879,9 @@ static ngtcp2_callbacks ng_callbacks = {
 #endif
 #ifdef NGTCP2_CALLBACKS_V3  /* ngtcp2 v1.22.0+ */
   NULL, /* recv_stateless_reset2 */
-  NULL, /* get_new_connection_id2 */
+  cb_get_new_connection_id, /* get_new_connection_id2 */
   NULL, /* dcid_status2 */
-  NULL, /* get_path_challenge_data2 */
+  ngtcp2_crypto_get_path_challenge_data2_cb, /* get_path_challenge_data2 */
 #endif
 };
 
