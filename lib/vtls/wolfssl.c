@@ -1096,6 +1096,7 @@ static CURLcode wssl_init_ciphers(struct Curl_easy *data,
     }
     infof(data, "Cipher selection: %s", ciphers);
   }
+  return CURLE_OK;
 #else
   CURLcode result = CURLE_OK;
   if(conn_config->cipher_list || conn_config->cipher_list13) {
@@ -1131,8 +1132,8 @@ static CURLcode wssl_init_ciphers(struct Curl_easy *data,
     }
     curlx_dyn_free(&c);
   }
-#endif
   return result;
+#endif
 }
 
 static CURLcode wssl_init_curves(struct Curl_easy *data,
