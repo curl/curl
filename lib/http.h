@@ -185,14 +185,14 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
  *
  * @returns CURLcode
  */
-CURLcode
-Curl_http_output_auth(struct Curl_easy *data,
-                      struct connectdata *conn,
-                      const char *request,
-                      Curl_HttpReq httpreq,
-                      const char *path,
-                      bool proxytunnel); /* TRUE if this is the request setting
-                                            up the proxy tunnel */
+CURLcode Curl_http_output_auth(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               const char *request,
+                               Curl_HttpReq httpreq,
+                               const char *path,
+                               bool proxytunnel); /* TRUE if this is
+                                                     the request setting up
+                                                     the proxy tunnel */
 
 /* Decode HTTP status code string. */
 CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);

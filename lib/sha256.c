@@ -486,7 +486,7 @@ CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
   result = my_sha256_init(&ctx);
   if(!result) {
     do {
-      unsigned int ilen = (unsigned int) CURLMIN(len, UINT_MAX);
+      unsigned int ilen = (unsigned int)CURLMIN(len, UINT_MAX);
       my_sha256_update(&ctx, input, ilen);
       len -= ilen;
       input += ilen;

@@ -322,8 +322,7 @@ const struct Curl_scheme Curl_scheme_smb = {
 
 const struct Curl_scheme Curl_scheme_smbs = {
   "smbs",                               /* scheme */
-#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
-  defined(USE_SSL)
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE) && defined(USE_SSL)
   &Curl_protocol_smb,
 #else
   ZERO_NULL,
@@ -405,7 +404,7 @@ const struct Curl_scheme Curl_scheme_ws = {
 const struct Curl_scheme Curl_scheme_wss = {
   "wss",                                /* scheme */
 #if defined(CURL_DISABLE_WEBSOCKETS) || defined(CURL_DISABLE_HTTP) || \
-    !defined(USE_SSL)
+  !defined(USE_SSL)
   ZERO_NULL,
 #else
   &Curl_protocol_ws,

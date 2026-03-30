@@ -203,7 +203,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
                                        size_t length)
 {
   do {
-    word32 ilen = (word32) CURLMIN(length, UINT_MAX);
+    word32 ilen = (word32)CURLMIN(length, UINT_MAX);
     if(wc_Sha512_256Update(ctx, data, ilen))
       return CURLE_SSL_CIPHER;
     length -= ilen;

@@ -39,11 +39,11 @@ const unsigned char Curl_ldigits[] = "0123456789abcdef";
 /* Upper-case digits. */
 const unsigned char Curl_udigits[] = "0123456789ABCDEF";
 
-#define OUTCHAR(x)                                       \
-  do {                                                   \
-    if(stream((unsigned char)(x), userp))                \
-      return TRUE;                                       \
-    (*donep)++;                                          \
+#define OUTCHAR(x)                        \
+  do {                                    \
+    if(stream((unsigned char)(x), userp)) \
+      return TRUE;                        \
+    (*donep)++;                           \
   } while(0)
 
 /* Data type to read from the arglist */

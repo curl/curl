@@ -44,9 +44,9 @@
 #define ISDIGIT(x)  (((x) >= '0') && ((x) <= '9'))
 #define ISBLANK(x)  (((x) == ' ') || ((x) == '\t'))
 #define ISSPACE(x)  (ISBLANK(x) || (((x) >= 0xa) && ((x) <= 0x0d)))
-#define ISURLPUNTCS(x) (((x) == '-') || ((x) == '.') || ((x) == '_') || \
-                        ((x) == '~'))
+#define ISURLPUNTCS(x)                                           \
+  (((x) == '-') || ((x) == '.') || ((x) == '_') || ((x) == '~'))
 #define ISUNRESERVED(x) (ISALNUM(x) || ISURLPUNTCS(x))
-#define ISNEWLINE(x) (((x) == '\n') || (x) == '\r')
+#define ISNEWLINE(x)    (((x) == '\n') || (x) == '\r')
 
 #endif /* HEADER_CURL_CTYPE_H */

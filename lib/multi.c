@@ -74,7 +74,6 @@
 
 #define CURL_MULTI_HANDLE 0x000bab1e
 
-
 #ifdef DEBUGBUILD
 /* On a debug build, we want to fail hard on multi handles that
  * are not NULL, but no longer have the MAGIC touch. This gives

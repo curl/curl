@@ -129,7 +129,7 @@ uint8_t Curl_resolv_dns_queries(struct Curl_easy *data, uint8_t ip_version)
     return CURL_DNSQ_A;
   default:
     if(Curl_ipv6works(data))
-      return (CURL_DNSQ_A|CURL_DNSQ_AAAA);
+      return (CURL_DNSQ_A | CURL_DNSQ_AAAA);
     else
       return CURL_DNSQ_A;
   }
@@ -139,15 +139,15 @@ uint8_t Curl_resolv_dns_queries(struct Curl_easy *data, uint8_t ip_version)
 const char *Curl_resolv_query_str(uint8_t dns_queries)
 {
   switch(dns_queries) {
-  case (CURL_DNSQ_A|CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS):
+  case (CURL_DNSQ_A | CURL_DNSQ_AAAA | CURL_DNSQ_HTTPS):
     return "A+AAAA+HTTPS";
-  case (CURL_DNSQ_A|CURL_DNSQ_AAAA):
+  case (CURL_DNSQ_A | CURL_DNSQ_AAAA):
     return "A+AAAA";
-  case (CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS):
+  case (CURL_DNSQ_AAAA | CURL_DNSQ_HTTPS):
     return "AAAA+HTTPS";
   case (CURL_DNSQ_AAAA):
     return "AAAA";
-  case (CURL_DNSQ_A|CURL_DNSQ_HTTPS):
+  case (CURL_DNSQ_A | CURL_DNSQ_HTTPS):
     return "A+HTTPS";
   case (CURL_DNSQ_A):
     return "A";
@@ -358,13 +358,12 @@ CURLcode Curl_resolv_announce_start(struct Curl_easy *data,
 }
 
 #ifdef USE_CURL_ASYNC
-static struct Curl_resolv_async *
-hostip_async_new(struct Curl_easy *data,
-                 uint8_t dns_queries,
-                 const char *hostname,
-                 uint16_t port,
-                 uint8_t transport,
-                 timediff_t timeout_ms)
+static struct Curl_resolv_async *hostip_async_new(struct Curl_easy *data,
+                                                  uint8_t dns_queries,
+                                                  const char *hostname,
+                                                  uint16_t port,
+                                                  uint8_t transport,
+                                                  timediff_t timeout_ms)
 {
   struct Curl_resolv_async *async;
   size_t hostlen = strlen(hostname);
@@ -431,9 +430,10 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
   return result;
 }
 
-const struct Curl_addrinfo *
-Curl_resolv_get_ai(struct Curl_easy *data, uint32_t resolv_id,
-                   int ai_family, unsigned int index)
+const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
+                                               uint32_t resolv_id,
+                                               int ai_family,
+                                               unsigned int index)
 {
 #ifdef CURLRES_ASYNCH
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);

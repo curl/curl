@@ -62,20 +62,18 @@ struct Curl_dns_entry {
  *
  * Returns entry or NULL on OOM.
  */
-struct Curl_dns_entry *
-Curl_dnscache_mk_entry(struct Curl_easy *data,
-                       uint8_t dns_queries,
-                       struct Curl_addrinfo **paddr,
-                       const char *hostname,
-                       uint16_t port);
+struct Curl_dns_entry *Curl_dnscache_mk_entry(struct Curl_easy *data,
+                                              uint8_t dns_queries,
+                                              struct Curl_addrinfo **paddr,
+                                              const char *hostname,
+                                              uint16_t port);
 
-struct Curl_dns_entry *
-Curl_dnscache_mk_entry2(struct Curl_easy *data,
-                        uint8_t dns_queries,
-                        struct Curl_addrinfo **paddr1,
-                        struct Curl_addrinfo **paddr2,
-                        const char *hostname,
-                        uint16_t port);
+struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
+                                               uint8_t dns_queries,
+                                               struct Curl_addrinfo **paddr1,
+                                               struct Curl_addrinfo **paddr2,
+                                               const char *hostname,
+                                               uint16_t port);
 
 #ifdef USE_HTTPSRR
 void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
@@ -91,7 +89,6 @@ struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
  * Always clears `*pdns`` */
 void Curl_dns_entry_unlink(struct Curl_easy *data,
                            struct Curl_dns_entry **pdns);
-
 
 struct Curl_dnscache {
   struct Curl_hash entries;

@@ -757,14 +757,14 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
  *
  * @returns CURLcode
  */
-CURLcode
-Curl_http_output_auth(struct Curl_easy *data,
-                      struct connectdata *conn,
-                      const char *request,
-                      Curl_HttpReq httpreq,
-                      const char *path,
-                      bool proxytunnel) /* TRUE if this is the request setting
-                                           up the proxy tunnel */
+CURLcode Curl_http_output_auth(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               const char *request,
+                               Curl_HttpReq httpreq,
+                               const char *path,
+                               bool proxytunnel) /* TRUE if this is
+                                                    the request setting up
+                                                    the proxy tunnel */
 {
   CURLcode result = CURLE_OK;
   struct auth *authhost;
@@ -1501,7 +1501,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     /* We are now waiting for a reply from the server or
      * a timeout on our side IFF the request has been fully sent. */
     DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE, "
-           "timeout %dms", data->set.expect_100_timeout));
+                 "timeout %dms", data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
     ctx->start = *Curl_pgrs_now(data);
     Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
@@ -4025,7 +4025,7 @@ static void http_check_auth_closure(struct Curl_easy *data,
 #endif
 }
 #else
-#define http_check_auth_closure(x,y) /* empty */
+#define http_check_auth_closure(x, y) /* empty */
 #endif
 
 /*
@@ -4604,7 +4604,7 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
 
   result = http_rw_hd(data, hd, hdlen, &tmp, 0, &consumed);
   if(!result && is_eos) {
-    result = Curl_client_write(data, (CLIENTWRITE_BODY|CLIENTWRITE_EOS),
+    result = Curl_client_write(data, (CLIENTWRITE_BODY | CLIENTWRITE_EOS),
                                &tmp, 0);
   }
   return result;

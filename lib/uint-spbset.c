@@ -71,8 +71,8 @@ uint32_t Curl_uint32_spbset_count(struct uint32_spbset *bset)
   return n;
 }
 
-static struct uint32_spbset_chunk *
-uint32_spbset_get_chunk(struct uint32_spbset *bset, uint32_t i, bool grow)
+static struct uint32_spbset_chunk *uint32_spbset_get_chunk(
+  struct uint32_spbset *bset, uint32_t i, bool grow)
 {
   struct uint32_spbset_chunk *chunk, **panchor = NULL;
   uint32_t i_offset = (i & ~CURL_UINT32_SPBSET_CH_MASK);
