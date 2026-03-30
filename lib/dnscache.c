@@ -488,8 +488,12 @@ dnscache_entry_create(struct Curl_easy *data,
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses && dns->addr) {
     CURLcode result = Curl_shuffle_addr(data, &dns->addr);
-    if(result)
+    if(result) {
+      /* free without lock, we are the sole owner */
+      dnscache_entry_free(dns);
+      dns = NULL;
       goto out;
+    }
   }
 #else
   (void)data;
