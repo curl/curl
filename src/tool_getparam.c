@@ -1267,10 +1267,16 @@ static ParameterError parse_ech(struct OperationConfig *config,
         curlx_fclose(file);
       if(err)
         return err;
-      config->ech_config = curl_maprintf("ecl:%s", tmpcfg);
-      curlx_free(tmpcfg);
-      if(!config->ech_config)
-        return PARAM_NO_MEM;
+      {
+        char *tmp = curl_maprintf("ecl:%s", tmpcfg);
+        curlx_free(tmpcfg);
+        if(!tmp)
+          return PARAM_NO_MEM;
+        config->ech_config = curlx_strdup(tmp);
+        curl_free(tmp);
+        if(!config->ech_config)
+          return PARAM_NO_MEM;
+      }
     } /* file done */
   }
   else {
