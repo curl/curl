@@ -198,19 +198,19 @@ CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc)
     curl_url_cleanup(uh);
     uh = NULL;
     if(!uerr) {
-      int i;
       char *pc = NULL, *pc2 = NULL;
-      for(i = 0; i < 2; i++) {
+      do {
         pc = strrchr(path, '/');
         pc2 = strrchr(pc ? pc + 1 : path, '\\');
         if(pc2)
           pc = pc2;
-        if(pc && !pc[1] && !i) {
+        if(pc && !pc[1])
           /* if the path ends with slash, try removing the trailing one
              and get the last directory part */
           *pc = 0;
-        }
-      }
+        else
+          break;
+      } while(1);
 
       if(pc) {
         /* duplicate the string beyond the slash */
