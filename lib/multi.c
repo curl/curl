@@ -728,9 +728,12 @@ static CURLcode multi_done(struct Curl_easy *data,
   else
     result = status;
 
-  if(result != CURLE_ABORTED_BY_CALLBACK) {
-    /* avoid this if we already aborted by callback to avoid this calling
-       another callback */
+  if(data->mstate > MSTATE_CONNECTING &&
+     (result != CURLE_ABORTED_BY_CALLBACK)) {
+    /* avoid this if
+     * - the transfer has not connected
+     * - we already aborted by callback to avoid this calling another callback
+     */
     int rc = Curl_pgrsDone(data);
     if(!result && rc)
       result = CURLE_ABORTED_BY_CALLBACK;
@@ -2547,8 +2550,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case MSTATE_CONNECTING:
       /* awaiting a completion of an asynch TCP connect */
-      DEBUGASSERT(data->conn);
-      if(!Curl_xfer_recv_is_paused(data)) {
+      if(!data->conn) {
+        DEBUGASSERT(0);
+        result = CURLE_FAILED_INIT;
+        break;
+      }
+      else if(!Curl_xfer_recv_is_paused(data)) {
         result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &connected);
         if(connected && !result) {
           if(!data->conn->bits.reuse &&
@@ -2562,10 +2569,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         else if(result) {
           /* failure detected */
           CURL_TRC_M(data, "connect failed -> %d", result);
-          if(data->conn && data->conn->bits.dns_resolved) {
-            multi_posttransfer(data);
-            multi_done(data, result, TRUE);
-          }
+          multi_posttransfer(data);
+          multi_done(data, result, TRUE);
           stream_error = TRUE;
           break;
         }

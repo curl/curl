@@ -169,7 +169,7 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   /* Resolve target host right on */
   CURL_TRC_CF(data, cf, "resolve host %s:%u", ctx->hostname, ctx->port);
   result = Curl_resolv(data, ctx->hostname, ctx->port, ctx->ip_version,
-                       SOCK_STREAM, timeout_ms, pdns);
+                       ctx->transport, timeout_ms, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
     DEBUGASSERT(*pdns);
