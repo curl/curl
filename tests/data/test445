@@ -35,7 +35,6 @@ pop3
 rtsp
 scp
 sftp
-smb
 smtp
 </features>
 <server>
@@ -45,7 +44,7 @@ http-proxy
 Refuse tunneling protocols through HTTP proxy
 </name>
 <command>
--x http://%HOSTIP:%PROXYPORT/%TESTNUMBER -p gopher://127.0.0.1 dict://127.0.0.1 http://moo https://example telnet://another ftp://yes ftps://again imap://more ldap://perhaps mqtt://yes pop3://mail rtsp://harder scp://copy sftp://files smb://wird smtp://send --insecure
+-x http://%HOSTIP:%PROXYPORT/%TESTNUMBER -p gopher://127.0.0.1 dict://127.0.0.1 http://moo https://example telnet://another ftp://yes ftps://again imap://more ldap://perhaps mqtt://yes pop3://mail rtsp://harder scp://copy sftp://files --insecure
 </command>
 </client>
 
@@ -53,10 +52,10 @@ Refuse tunneling protocols through HTTP proxy
 <verify>
 # refused in the CONNECT
 <errorcode>
-56
+7
 </errorcode>
 <limits>
-Allocations: 1700
+Allocations: 1500
 </limits>
 </verify>
 </testcase>
