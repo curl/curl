@@ -810,9 +810,8 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
 }
 
 #ifdef NGTCP2_CALLBACKS_V3  /* ngtcp2 v1.22.0+ */
-static int cb_get_new_connection_id2(ngtcp2_conn *tconn,
-  ngtcp2_cid *cid, struct ngtcp2_stateless_reset_token *token, size_t cidlen,
-  void *user_data)
+static int cb_get_new_connection_id2(ngtcp2_conn *tconn, ngtcp2_cid *cid,
+  struct ngtcp2_stateless_reset_token *token, size_t cidlen, void *user_data)
 {
   CURLcode result;
   (void)tconn;
