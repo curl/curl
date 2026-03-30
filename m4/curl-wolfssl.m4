@@ -127,6 +127,9 @@ if test "$OPT_WOLFSSL" != "no"; then
       AC_MSG_NOTICE([detected wolfSSL])
       check_for_ca_bundle=1
 
+      dnl wolfssl/wolfcrypt/types.h needs SIZEOF_LONG_LONG defined!
+      CURL_SIZEOF(long long)
+
       LIBS="$addlib $LIBS"
 
       dnl is this wolfSSL providing the original QUIC API?
