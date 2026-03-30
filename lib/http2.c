@@ -1734,8 +1734,8 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
         break;
       curlx_dyn_reset(&dbuf);
       result = curlx_dyn_addf(&dbuf, "%.*s: %.*s\x0d\x0a",
-                            (int)e->namelen, e->name,
-                            (int)e->valuelen, e->value);
+                              (int)e->namelen, e->name,
+                              (int)e->valuelen, e->value);
       if(result)
         break;
       Curl_debug(data, CURLINFO_HEADER_IN, curlx_dyn_ptr(&dbuf),

@@ -26,7 +26,7 @@
 /* This file is for lib internal stuff */
 #include "curl_setup.h"
 
-#define CURL_DEFAULT_USER "anonymous"
+#define CURL_DEFAULT_USER     "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
 #if !defined(_WIN32) && !defined(MSDOS)

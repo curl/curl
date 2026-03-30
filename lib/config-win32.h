@@ -262,7 +262,7 @@
 
 /* Default define to enable threaded asynchronous DNS lookups. */
 #if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
-    !defined(USE_RESOLV_THREADED)
+  !defined(USE_RESOLV_THREADED)
 #  define USE_RESOLV_THREADED 1
 #endif
 
@@ -275,7 +275,7 @@
 /* ---------------------------------------------------------------- */
 
 #ifndef CURL_WINDOWS_UWP
-#define HAVE_LDAP_SSL 1
+#define HAVE_LDAP_SSL  1
 #define USE_WIN32_LDAP 1
 
 /* Define to use the Windows crypto library. */

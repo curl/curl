@@ -125,11 +125,11 @@ void Curl_cookie_clearall(struct CookieInfo *ci);
 void Curl_cookie_clearsess(struct CookieInfo *ci);
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
-#define Curl_cookie_list(x) NULL
+#define Curl_cookie_list(x)      NULL
 #define Curl_cookie_loadfiles(x) CURLE_OK
-#define Curl_cookie_init() NULL
-#define Curl_cookie_run(x) Curl_nop_stmt
-#define Curl_cookie_cleanup(x) Curl_nop_stmt
+#define Curl_cookie_init()       NULL
+#define Curl_cookie_run(x)       Curl_nop_stmt
+#define Curl_cookie_cleanup(x)   Curl_nop_stmt
 #define Curl_flush_cookies(x, y) Curl_nop_stmt
 #else
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup);

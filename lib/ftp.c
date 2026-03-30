@@ -3887,12 +3887,12 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
  * This is the actual DO function for FTP. Get a file/directory according to
  * the options previously setup.
  */
-static
-CURLcode ftp_perform(struct Curl_easy *data,
-                     struct ftp_conn *ftpc,
-                     struct FTP *ftp,
-                     bool *connected,  /* connect status after PASV / PORT */
-                     bool *dophase_done)
+static CURLcode ftp_perform(
+  struct Curl_easy *data,
+  struct ftp_conn *ftpc,
+  struct FTP *ftp,
+  bool *connected,  /* connect status after PASV / PORT */
+  bool *dophase_done)
 {
   /* this is FTP and no proxy */
   CURLcode result = CURLE_OK;

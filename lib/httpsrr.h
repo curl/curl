@@ -62,8 +62,8 @@ struct Curl_https_rrinfo {
 CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
                           uint16_t rrkey, const uint8_t *val, size_t vlen);
 
-struct Curl_https_rrinfo *
-Curl_httpsrr_dup_move(struct Curl_https_rrinfo *rrinfo);
+struct Curl_https_rrinfo *Curl_httpsrr_dup_move(
+  struct Curl_https_rrinfo *rrinfo);
 
 void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
 
@@ -87,7 +87,7 @@ CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
 void Curl_httpsrr_trace(struct Curl_easy *data,
                         struct Curl_https_rrinfo *hi);
 #else
-#define Curl_httpsrr_trace(a,b)     Curl_nop_stmt
+#define Curl_httpsrr_trace(a, b) Curl_nop_stmt
 #endif
 
 #endif /* USE_HTTPSRR */

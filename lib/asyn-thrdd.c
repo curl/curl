@@ -135,11 +135,11 @@ static void async_thrdd_item_destroy(struct async_thrdd_item *item)
 }
 
 /* Initialize context for threaded resolver */
-static struct async_thrdd_item *
-async_thrdd_item_create(struct Curl_easy *data,
-                        uint32_t resolv_id, uint8_t dns_queries,
-                        const char *hostname, uint16_t port,
-                        uint8_t transport)
+static struct async_thrdd_item *async_thrdd_item_create(
+  struct Curl_easy *data,
+  uint32_t resolv_id, uint8_t dns_queries,
+  const char *hostname, uint16_t port,
+  uint8_t transport)
 {
   size_t hostlen = strlen(hostname);
   struct async_thrdd_item *item;
@@ -252,7 +252,7 @@ static CURLcode async_rr_start(struct Curl_easy *data,
 #endif
 
 void Curl_async_thrdd_shutdown(struct Curl_easy *data,
-                              struct Curl_resolv_async *async)
+                               struct Curl_resolv_async *async)
 {
   Curl_async_thrdd_destroy(data, async);
 }
@@ -389,13 +389,13 @@ static void async_thrdd_item_process(void *item)
   struct async_thrdd_item *item = arg;
 
 #ifdef DEBUGBUILD
-    if(item->delay_ms) {
-      curlx_wait_ms(item->delay_ms);
-    }
-    if(item->delay_fail_ms) {
-      curlx_wait_ms(item->delay_fail_ms);
-      return;
-    }
+  if(item->delay_ms) {
+    curlx_wait_ms(item->delay_ms);
+  }
+  if(item->delay_fail_ms) {
+    curlx_wait_ms(item->delay_fail_ms);
+    return;
+  }
 #endif
   item->res = Curl_ipv4_resolve_r(item->hostname, item->port);
   if(!item->res) {
@@ -496,10 +496,9 @@ static void async_thrdd_report_item(struct Curl_easy *data,
     }
   }
 
-  infof(data, "Host %s:%u resolved IPv%c: %s",
-               item->hostname, item->port,
-               (item->dns_queries & CURL_DNSQ_AAAA) ? '6' : '4',
-               (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
+  infof(data, "Host %s:%u resolved IPv%c: %s", item->hostname, item->port,
+        (item->dns_queries & CURL_DNSQ_AAAA) ? '6' : '4',
+        (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
 out:
   curlx_dyn_free(&tmp);
 }
@@ -758,9 +757,9 @@ out:
   return result;
 }
 
-static const struct Curl_addrinfo *
-async_thrdd_get_ai(const struct Curl_addrinfo *ai,
-                   int ai_family, unsigned int index)
+static const struct Curl_addrinfo *async_thrdd_get_ai(
+  const struct Curl_addrinfo *ai,
+  int ai_family, unsigned int index)
 {
   unsigned int i = 0;
   for(i = 0; ai; ai = ai->ai_next) {
@@ -773,10 +772,10 @@ async_thrdd_get_ai(const struct Curl_addrinfo *ai,
   return NULL;
 }
 
-const struct Curl_addrinfo *
-Curl_async_get_ai(struct Curl_easy *data,
-                  struct Curl_resolv_async *async,
-                  int ai_family, unsigned int index)
+const struct Curl_addrinfo *Curl_async_get_ai(struct Curl_easy *data,
+                                              struct Curl_resolv_async *async,
+                                              int ai_family,
+                                              unsigned int index)
 {
   struct async_thrdd_ctx *thrdd = &async->thrdd;
 
@@ -797,9 +796,9 @@ Curl_async_get_ai(struct Curl_easy *data,
 }
 
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *
-Curl_async_get_https(struct Curl_easy *data,
-                     struct Curl_resolv_async *async)
+const struct Curl_https_rrinfo *Curl_async_get_https(
+  struct Curl_easy *data,
+  struct Curl_resolv_async *async)
 {
 #ifdef USE_HTTPSRR_ARES
   if(Curl_async_knows_https(data, async))
