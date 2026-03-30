@@ -37,10 +37,10 @@ void clean_getout(struct OperationConfig *config)
 
     while(node) {
       next = node->next;
-      tool_safefree(node->url);
-      tool_safefree(node->outfile);
-      tool_safefree(node->infile);
-      tool_safefree(node);
+      curlx_safefree(node->url);
+      curlx_safefree(node->outfile);
+      curlx_safefree(node->infile);
+      curlx_safefree(node);
       node = next;
     }
     config->url_list = NULL;
@@ -230,7 +230,7 @@ CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc)
       {
         char *sanitized;
         *sc = sanitize_file_name(&sanitized, *filename, 0);
-        tool_safefree(*filename);
+        curlx_safefree(*filename);
         if(*sc)
           return CURLE_BAD_FUNCTION_ARGUMENT;
         *filename = sanitized;

@@ -195,7 +195,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     goto clean;
 
   /* Free whatever it has now, rewriting is next */
-  tool_safefree(*url);
+  curlx_safefree(*url);
 
   if(curl_url_get(uh, CURLUPART_URL, &cloneurl, CURLU_URLENCODE)) {
     goto clean;

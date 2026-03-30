@@ -187,7 +187,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   if(q) {
     p = q + 1;
     if(!*p) {
-      tool_safefree(copy);
+      curlx_safefree(copy);
       return NULL;
     }
   }
@@ -199,7 +199,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   if(q) {
     p = q + 1;
     if(!*p) {
-      tool_safefree(copy);
+      curlx_safefree(copy);
       return NULL;
     }
   }
@@ -220,7 +220,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
-    tool_safefree(copy);
+    curlx_safefree(copy);
     if(sc)
       return NULL;
     copy = sanitized;
@@ -309,7 +309,7 @@ static size_t content_disposition(const char *str, const char *end,
           return CURL_WRITEFUNC_ERROR;
         }
         if(outs->alloc_filename)
-          tool_safefree(outs->filename);
+          curlx_safefree(outs->filename);
 
         if(per->config->output_dir) {
           char *f = curl_maprintf("%s/%s", per->config->output_dir,
@@ -364,7 +364,7 @@ static size_t content_disposition(const char *str, const char *end,
           return CURL_WRITEFUNC_ERROR;
         }
         if(outs->alloc_filename)
-          tool_safefree(outs->filename);
+          curlx_safefree(outs->filename);
 
         if(per->config->output_dir) {
           char *f = curl_maprintf("%s/%s", per->config->output_dir,
