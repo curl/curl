@@ -1724,7 +1724,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   /* Cleanup our per-request based variables */
-  Curl_safefree(smtp->custom);
+  curlx_safefree(smtp->custom);
 
   if(status) {
     connclose(conn, "SMTP done with bad status"); /* marked for closure */
@@ -1953,7 +1953,7 @@ static void smtp_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   Curl_pp_disconnect(&smtpc->pp);
-  Curl_safefree(smtpc->domain);
+  curlx_safefree(smtpc->domain);
   curlx_free(smtpc);
 }
 

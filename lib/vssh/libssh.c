@@ -480,7 +480,7 @@ static int myssh_in_SFTP_READDIR_LINK(struct Curl_easy *data,
     sshc->readdir_longentry = sshc->readdir_link_attrs->longname;
   }
 
-  Curl_safefree(sshc->readdir_linkPath);
+  curlx_safefree(sshc->readdir_linkPath);
 
   if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s", sshc->readdir_filename)) {
     /* Not using:
@@ -546,8 +546,8 @@ static void myssh_quote_error(struct Curl_easy *data, struct ssh_conn *sshc,
   if(cmd)
     failf(data, "%s command failed: %s", cmd,
           ssh_get_error(sshc->ssh_session));
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
   myssh_to(data, sshc, SSH_SFTP_CLOSE);
   sshc->nextstate = SSH_NO_STATE;
   sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1224,7 +1224,7 @@ static int myssh_in_SFTP_CLOSE(struct Curl_easy *data,
     sftp_close(sshc->sftp_file);
     sshc->sftp_file = NULL;
   }
-  Curl_safefree(sshp->path);
+  curlx_safefree(sshp->path);
 
   CURL_TRC_SSH(data, "SFTP DONE done");
 
@@ -1352,8 +1352,8 @@ static int quote_error(struct Curl_easy *data,
                        struct ssh_conn *sshc)
 {
   failf(data, "Suspicious data after the command line");
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
   myssh_to(data, sshc, SSH_SFTP_CLOSE);
   sshc->nextstate = SSH_NO_STATE;
   sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1462,7 +1462,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
       else
         failf(data, "Syntax error in chgrp/chmod/chown/atime/mtime: "
               "Bad second parameter");
-      Curl_safefree(sshc->quote_path1);
+      curlx_safefree(sshc->quote_path1);
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;
       sshc->actualcode = result;
@@ -1485,7 +1485,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
         failf(data, "Out of memory");
       else
         failf(data, "Syntax error in ln/symlink: Bad second parameter");
-      Curl_safefree(sshc->quote_path1);
+      curlx_safefree(sshc->quote_path1);
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;
       sshc->actualcode = result;
@@ -1513,7 +1513,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
         failf(data, "Out of memory");
       else
         failf(data, "Syntax error in rename: Bad second parameter");
-      Curl_safefree(sshc->quote_path1);
+      curlx_safefree(sshc->quote_path1);
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;
       sshc->actualcode = result;
@@ -1547,8 +1547,8 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
 #endif
 
   failf(data, "Unknown SFTP command");
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
   myssh_to(data, sshc, SSH_SFTP_CLOSE);
   sshc->nextstate = SSH_NO_STATE;
   sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1558,8 +1558,8 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
 static int myssh_in_SFTP_NEXT_QUOTE(struct Curl_easy *data,
                                     struct ssh_conn *sshc)
 {
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
 
   sshc->quote_item = sshc->quote_item->next;
 
@@ -1832,12 +1832,12 @@ static void sshc_cleanup(struct ssh_conn *sshc)
       sshc->pubkey = NULL;
     }
 
-    Curl_safefree(sshc->rsa_pub);
-    Curl_safefree(sshc->rsa);
-    Curl_safefree(sshc->quote_path1);
-    Curl_safefree(sshc->quote_path2);
+    curlx_safefree(sshc->rsa_pub);
+    curlx_safefree(sshc->rsa);
+    curlx_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path2);
     curlx_dyn_free(&sshc->readdir_buf);
-    Curl_safefree(sshc->readdir_linkPath);
+    curlx_safefree(sshc->readdir_linkPath);
     SSH_STRING_FREE_CHAR(sshc->homedir);
     sshc->initialised = FALSE;
   }
@@ -2350,7 +2350,7 @@ static void myssh_easy_dtor(void *key, size_t klen, void *entry)
   struct SSHPROTO *sshp = entry;
   (void)key;
   (void)klen;
-  Curl_safefree(sshp->path);
+  curlx_safefree(sshp->path);
   curlx_free(sshp);
 }
 

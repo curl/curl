@@ -175,9 +175,9 @@ static CURLcode getftpresponse(struct Curl_easy *data, size_t *nreadp,
 
 static void freedirs(struct ftp_conn *ftpc)
 {
-  Curl_safefree(ftpc->dirs);
+  curlx_safefree(ftpc->dirs);
   ftpc->dirdepth = 0;
-  Curl_safefree(ftpc->rawpath);
+  curlx_safefree(ftpc->rawpath);
   ftpc->file = NULL;
 }
 
@@ -4026,7 +4026,7 @@ fail:
     Curl_ftp_parselist_data_free(&ftpwc->parser);
     curlx_free(ftpwc);
   }
-  Curl_safefree(wildcard->pattern);
+  curlx_safefree(wildcard->pattern);
   wildcard->dtor = ZERO_NULL;
   wildcard->ftpwc = NULL;
   return result;
@@ -4361,7 +4361,7 @@ static void ftp_easy_dtor(void *key, size_t klen, void *entry)
   struct FTP *ftp = entry;
   (void)key;
   (void)klen;
-  Curl_safefree(ftp->pathalloc);
+  curlx_safefree(ftp->pathalloc);
   curlx_free(ftp);
 }
 
@@ -4371,11 +4371,11 @@ static void ftp_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   freedirs(ftpc);
-  Curl_safefree(ftpc->account);
-  Curl_safefree(ftpc->alternative_to_user);
-  Curl_safefree(ftpc->entrypath);
-  Curl_safefree(ftpc->prevpath);
-  Curl_safefree(ftpc->server_os);
+  curlx_safefree(ftpc->account);
+  curlx_safefree(ftpc->alternative_to_user);
+  curlx_safefree(ftpc->entrypath);
+  curlx_safefree(ftpc->prevpath);
+  curlx_safefree(ftpc->server_os);
   Curl_pp_disconnect(&ftpc->pp);
   curlx_free(ftpc);
 }
@@ -4438,7 +4438,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
     ftpc->alternative_to_user =
       curlx_strdup(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
     if(!ftpc->alternative_to_user) {
-      Curl_safefree(ftpc->account);
+      curlx_safefree(ftpc->account);
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);
       return CURLE_OUT_OF_MEMORY;
     }

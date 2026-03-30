@@ -775,7 +775,7 @@ static CURLcode imap_perform_select(struct Curl_easy *data,
   char *mailbox;
 
   /* Invalidate old information as we are switching mailboxes */
-  Curl_safefree(imapc->mailbox);
+  curlx_safefree(imapc->mailbox);
   imapc->mb_uidvalidity_set = FALSE;
 
   /* Check we have a mailbox */
@@ -1696,14 +1696,14 @@ static CURLcode imap_pollset(struct Curl_easy *data,
 
 static void imap_easy_reset(struct IMAP *imap)
 {
-  Curl_safefree(imap->mailbox);
-  Curl_safefree(imap->uid);
-  Curl_safefree(imap->mindex);
-  Curl_safefree(imap->section);
-  Curl_safefree(imap->partial);
-  Curl_safefree(imap->query);
-  Curl_safefree(imap->custom);
-  Curl_safefree(imap->custom_params);
+  curlx_safefree(imap->mailbox);
+  curlx_safefree(imap->uid);
+  curlx_safefree(imap->mindex);
+  curlx_safefree(imap->section);
+  curlx_safefree(imap->partial);
+  curlx_safefree(imap->query);
+  curlx_safefree(imap->custom);
+  curlx_safefree(imap->custom_params);
   imap->uidvalidity_set = FALSE;
   /* Clear the transfer mode for the next request */
   imap->transfer = PPTRANSFER_BODY;
@@ -2250,7 +2250,7 @@ static void imap_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_pp_disconnect(&imapc->pp);
   curlx_dyn_free(&imapc->dyn);
-  Curl_safefree(imapc->mailbox);
+  curlx_safefree(imapc->mailbox);
   curlx_free(imapc);
 }
 

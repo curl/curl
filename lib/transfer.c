@@ -501,7 +501,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
-  Curl_safefree(data->info.wouldredirect);
+  curlx_safefree(data->info.wouldredirect);
   Curl_data_priority_clear_state(data);
 
   if(data->state.httpreq == HTTPREQ_PUT)
@@ -565,8 +565,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       if(wc->state < CURLWC_INIT) {
         if(wc->ftpwc)
           wc->dtor(wc->ftpwc);
-        Curl_safefree(wc->pattern);
-        Curl_safefree(wc->path);
+        curlx_safefree(wc->pattern);
+        curlx_safefree(wc->path);
         Curl_wildcard_init(wc); /* init wildcard structures */
       }
     }

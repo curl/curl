@@ -329,8 +329,8 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->p_identity = NULL;
 
   /* Free the SPN and output token */
-  Curl_safefree(nego->spn);
-  Curl_safefree(nego->output_token);
+  curlx_safefree(nego->spn);
+  curlx_safefree(nego->output_token);
 
   /* Reset any variables */
   nego->status = 0;

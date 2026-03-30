@@ -1735,8 +1735,8 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
 out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
-    Curl_safefree(cf);
-    Curl_safefree(ctx);
+    curlx_safefree(cf);
+    curlx_safefree(ctx);
   }
 
   return result;
@@ -1896,8 +1896,8 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
 out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
-    Curl_safefree(cf);
-    Curl_safefree(ctx);
+    curlx_safefree(cf);
+    curlx_safefree(ctx);
   }
 
   return result;
@@ -1950,8 +1950,8 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
 out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
-    Curl_safefree(cf);
-    Curl_safefree(ctx);
+    curlx_safefree(cf);
+    curlx_safefree(ctx);
   }
 
   return result;
@@ -2187,8 +2187,8 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
 
 out:
   if(result) {
-    Curl_safefree(cf);
-    Curl_safefree(ctx);
+    curlx_safefree(cf);
+    curlx_safefree(ctx);
   }
   return result;
 }

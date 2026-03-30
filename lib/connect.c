@@ -462,7 +462,7 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_setup_ctx *ctx = cf->ctx;
 
   CURL_TRC_CF(data, cf, "destroy");
-  Curl_safefree(ctx);
+  curlx_safefree(ctx);
 }
 
 struct Curl_cftype Curl_cft_setup = {

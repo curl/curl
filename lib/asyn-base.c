@@ -238,7 +238,7 @@ void Curl_async_destroy(struct Curl_easy *data,
 #ifndef CURL_DISABLE_DOH
     Curl_doh_cleanup(data, async);
 #endif
-    Curl_safefree(async);
+    curlx_safefree(async);
   }
 }
 

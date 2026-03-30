@@ -427,10 +427,10 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
      (passwdp && digest->passwd && Curl_timestrcmp(passwdp, digest->passwd))) {
     if(digest->http_context) {
       Curl_pSecFn->DeleteSecurityContext(digest->http_context);
-      Curl_safefree(digest->http_context);
+      curlx_safefree(digest->http_context);
     }
-    Curl_safefree(digest->user);
-    Curl_safefree(digest->passwd);
+    curlx_safefree(digest->user);
+    curlx_safefree(digest->passwd);
   }
 
   if(digest->http_context) {
@@ -460,7 +460,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     else { /* delete the context so a new one can be made */
       infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx", status);
       Curl_pSecFn->DeleteSecurityContext(digest->http_context);
-      Curl_safefree(digest->http_context);
+      curlx_safefree(digest->http_context);
     }
   }
 
@@ -474,8 +474,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     TCHAR *spn;
 
     /* free the copy of user/passwd used to make the previous identity */
-    Curl_safefree(digest->user);
-    Curl_safefree(digest->passwd);
+    curlx_safefree(digest->user);
+    curlx_safefree(digest->passwd);
 
     if(userp && *userp) {
       /* Populate our identity structure */
@@ -515,7 +515,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       if(!digest->passwd) {
         curlx_free(output_token);
         Curl_sspi_free_identity(p_identity);
-        Curl_safefree(digest->user);
+        curlx_safefree(digest->user);
         return CURLE_OUT_OF_MEMORY;
       }
     }
@@ -595,7 +595,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       Curl_sspi_free_identity(p_identity);
       curlx_free(output_token);
 
-      Curl_safefree(digest->http_context);
+      curlx_safefree(digest->http_context);
 
       if(status == SEC_E_INSUFFICIENT_MEMORY)
         return CURLE_OUT_OF_MEMORY;
@@ -637,7 +637,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 void Curl_auth_digest_cleanup(struct digestdata *digest)
 {
   /* Free the input token */
-  Curl_safefree(digest->input_token);
+  curlx_safefree(digest->input_token);
 
   /* Reset any variables */
   digest->input_token_len = 0;
@@ -645,12 +645,12 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   /* Delete security context */
   if(digest->http_context) {
     Curl_pSecFn->DeleteSecurityContext(digest->http_context);
-    Curl_safefree(digest->http_context);
+    curlx_safefree(digest->http_context);
   }
 
   /* Free the copy of user/passwd used to make the identity for http_context */
-  Curl_safefree(digest->user);
-  Curl_safefree(digest->passwd);
+  curlx_safefree(digest->user);
+  curlx_safefree(digest->passwd);
 }
 
 #endif /* USE_WINDOWS_SSPI && !CURL_DISABLE_DIGEST_AUTH */

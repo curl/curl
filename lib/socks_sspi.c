@@ -159,7 +159,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
                                              sspi_ret_flagsp, NULL);
 
     curlx_free(sname);
-    Curl_safefree(sspi_recv_token.pvBuffer);
+    curlx_safefree(sspi_recv_token.pvBuffer);
     sspi_recv_token.cbBuffer = 0;
 
     if(check_sspi_err(data, status, "InitializeSecurityContext")) {
@@ -196,7 +196,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
       socks5_free_token(&sspi_send_token, CURLE_OK);
     sspi_send_token.cbBuffer = 0;
 
-    Curl_safefree(sspi_recv_token.pvBuffer);
+    curlx_safefree(sspi_recv_token.pvBuffer);
     sspi_recv_token.cbBuffer = 0;
 
     if(status != SEC_I_CONTINUE_NEEDED)
@@ -252,9 +252,9 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
 static CURLcode socks5_free(SecBuffer *sspi_w_token,
                             CURLcode result)
 {
-  Curl_safefree(sspi_w_token[0].pvBuffer);
-  Curl_safefree(sspi_w_token[1].pvBuffer);
-  Curl_safefree(sspi_w_token[2].pvBuffer);
+  curlx_safefree(sspi_w_token[0].pvBuffer);
+  curlx_safefree(sspi_w_token[1].pvBuffer);
+  curlx_safefree(sspi_w_token[2].pvBuffer);
   return result;
 }
 
@@ -498,7 +498,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   if(result)
     goto error;
 
-  Curl_safefree(service_name);
+  curlx_safefree(service_name);
 
   status = Curl_pSecFn->QueryCredentialsAttributes(&cred_handle,
                                                    SECPKG_CRED_ATTR_NAMES,

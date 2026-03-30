@@ -249,9 +249,9 @@ static void netrc_new_machine(struct netrc_state *ns)
   ns->keyword = NONE;
   ns->found = 0;
   ns->our_login = FALSE;
-  Curl_safefree(ns->password);
+  curlx_safefree(ns->password);
   if(!ns->specific_login)
-    Curl_safefree(ns->login);
+    curlx_safefree(ns->login);
 }
 
 /*

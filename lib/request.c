@@ -109,7 +109,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
   struct curltime t0 = { 0, 0 };
 
-  Curl_safefree(req->newurl);
+  curlx_safefree(req->newurl);
   Curl_client_reset(data);
   if(req->sendbuf_init)
     Curl_bufq_reset(&req->sendbuf);
@@ -162,7 +162,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
-  Curl_safefree(req->newurl);
+  curlx_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
   Curl_client_cleanup(data);

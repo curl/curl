@@ -1057,7 +1057,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
   }
 #ifdef USE_HTTPSRR
   for(i = 0; i < d->numhttps_rrs; i++)
-    Curl_safefree(d->https_rrs[i].val);
+    curlx_safefree(d->https_rrs[i].val);
 #endif
 }
 
@@ -1176,7 +1176,7 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   return CURLE_OK;
 err:
   Curl_httpsrr_cleanup(lhrr);
-  Curl_safefree(lhrr);
+  curlx_safefree(lhrr);
   return result;
 }
 
@@ -1360,7 +1360,7 @@ void Curl_doh_cleanup(struct Curl_easy *data,
     for(i = 0; i < DOH_SLOT_COUNT; ++i) {
       curlx_dyn_free(&dohp->probe_resp[i].body);
     }
-    Curl_safefree(async->doh);
+    curlx_safefree(async->doh);
   }
 }
 

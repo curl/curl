@@ -994,7 +994,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     char buffer[STRERROR_LEN];
-    Curl_safefree(backend->ctxt);
+    curlx_safefree(backend->ctxt);
     switch(sspi_status) {
     case SEC_E_INSUFFICIENT_MEMORY:
       failf(data, "schannel: initial InitializeSecurityContext failed: %s",
@@ -1348,7 +1348,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
       &outbuf_desc, &backend->ret_flags, NULL);
 
     /* free buffer for received handshake data */
-    Curl_safefree(inbuf[0].pvBuffer);
+    curlx_safefree(inbuf[0].pvBuffer);
 
     /* check if the handshake was incomplete */
     switch(sspi_status) {
@@ -1568,7 +1568,7 @@ static void schannel_session_free(void *sessionid)
         CertCloseStore(cred->client_cert_store, 0);
         cred->client_cert_store = NULL;
       }
-      Curl_safefree(cred);
+      curlx_safefree(cred);
     }
   }
 }
@@ -2082,7 +2082,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = CURLE_SEND_ERROR;
   }
 
-  Curl_safefree(ptr);
+  curlx_safefree(ptr);
 
   if(len == *pnwritten)
     /* Encrypted message including header, data and trailer entirely sent.
@@ -2550,7 +2550,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(backend->ctxt) {
     DEBUGF(infof(data, "schannel: clear security context handle"));
     Curl_pSecFn->DeleteSecurityContext(&backend->ctxt->ctxt_handle);
-    Curl_safefree(backend->ctxt);
+    curlx_safefree(backend->ctxt);
   }
 
   /* free SSPI Schannel API credential handle */
@@ -2563,7 +2563,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free internal buffer for received encrypted data */
   if(backend->encdata.buffer) {
-    Curl_safefree(backend->encdata.buffer);
+    curlx_safefree(backend->encdata.buffer);
     backend->encdata.length = 0;
     backend->encdata.offset = 0;
     backend->encdata_is_incomplete = FALSE;
@@ -2571,7 +2571,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free internal buffer for received decrypted data */
   if(backend->decdata.buffer) {
-    Curl_safefree(backend->decdata.buffer);
+    curlx_safefree(backend->decdata.buffer);
     backend->decdata.length = 0;
     backend->decdata.offset = 0;
   }

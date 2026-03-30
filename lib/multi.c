@@ -705,8 +705,8 @@ static CURLcode multi_done(struct Curl_easy *data,
   Curl_resolv_shutdown_all(data);
 
   /* Cleanup possible redirect junk */
-  Curl_safefree(data->req.newurl);
-  Curl_safefree(data->req.location);
+  curlx_safefree(data->req.newurl);
+  curlx_safefree(data->req.location);
 
   switch(status) {
   case CURLE_ABORTED_BY_CALLBACK:
@@ -4013,13 +4013,13 @@ void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf)
 static void multi_xfer_bufs_free(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
-  Curl_safefree(multi->xfer_buf);
+  curlx_safefree(multi->xfer_buf);
   multi->xfer_buf_len = 0;
   multi->xfer_buf_borrowed = FALSE;
-  Curl_safefree(multi->xfer_ulbuf);
+  curlx_safefree(multi->xfer_ulbuf);
   multi->xfer_ulbuf_len = 0;
   multi->xfer_ulbuf_borrowed = FALSE;
-  Curl_safefree(multi->xfer_sockbuf);
+  curlx_safefree(multi->xfer_sockbuf);
   multi->xfer_sockbuf_len = 0;
   multi->xfer_sockbuf_borrowed = FALSE;
 }

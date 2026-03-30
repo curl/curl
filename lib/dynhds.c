@@ -76,7 +76,7 @@ void Curl_dynhds_free(struct dynhds *dynhds)
       entry_free(dynhds->hds[i]);
     }
   }
-  Curl_safefree(dynhds->hds);
+  curlx_safefree(dynhds->hds);
   dynhds->hds_len = dynhds->hds_allc = dynhds->strs_len = 0;
 }
 
@@ -158,7 +158,7 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
     if(dynhds->hds) {
       memcpy(nhds, dynhds->hds,
              dynhds->hds_len * sizeof(struct dynhds_entry *));
-      Curl_safefree(dynhds->hds);
+      curlx_safefree(dynhds->hds);
     }
     dynhds->hds = nhds;
     dynhds->hds_allc = nallc;

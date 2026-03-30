@@ -52,7 +52,7 @@ void Curl_tls_keylog_open(void)
           keylog_file_fp = NULL;
         }
       }
-      Curl_safefree(keylog_file_name);
+      curlx_safefree(keylog_file_name);
     }
   }
 }

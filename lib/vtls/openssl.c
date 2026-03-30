@@ -1750,7 +1750,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data)
   }
   OSSL_LIB_CTX_free(data->state.libctx);
   data->state.libctx = NULL;
-  Curl_safefree(data->state.propq);
+  curlx_safefree(data->state.propq);
   data->state.provider_loaded = FALSE;
 }
 

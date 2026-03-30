@@ -172,7 +172,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     /* If a proxy-authorization header was used for the proxy, then we should
        make sure that it is not accidentally used for the document request
        after we have connected. Let's thus free and clear it here. */
-    Curl_safefree(data->state.aptr.proxyuserpwd);
+    curlx_safefree(data->state.aptr.proxyuserpwd);
     break;
   }
 }
@@ -208,7 +208,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
 
   /* This only happens if we have looped here due to authentication reasons,
      and we do not really use the newly cloned URL here then. Free it. */
-  Curl_safefree(data->req.newurl);
+  curlx_safefree(data->req.newurl);
 
   result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
   if(result)
@@ -643,7 +643,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   DEBUGASSERT(ts->tunnel_state == H1_TUNNEL_RESPONSE);
   if(data->info.httpproxycode / 100 != 2) {
     /* a non-2xx response and we have no next URL to try. */
-    Curl_safefree(data->req.newurl);
+    curlx_safefree(data->req.newurl);
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
     return CURLE_COULDNT_CONNECT;
@@ -690,7 +690,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   result = H1_CONNECT(cf, data, ts);
   if(result)
     goto out;
-  Curl_safefree(data->state.aptr.proxyuserpwd);
+  curlx_safefree(data->state.aptr.proxyuserpwd);
 
 out:
   *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);

@@ -138,7 +138,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
 
     if(((ctrl == REJECT_CTRL) && (in < 0x20)) ||
        ((ctrl == REJECT_ZERO) && (in == 0))) {
-      Curl_safefree(*ostring);
+      curlx_safefree(*ostring);
       return CURLE_URL_MALFORMAT;
     }
 
@@ -177,7 +177,7 @@ char *curl_easy_unescape(CURL *data, const char *string, int length, int *olen)
         *olen = curlx_uztosi(outputlen);
       else
         /* too large to return in an int, fail! */
-        Curl_safefree(str);
+        curlx_safefree(str);
     }
   }
   return str;

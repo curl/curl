@@ -348,7 +348,7 @@ CURLcode Curl_idn_encode(const char *puny, char **output)
  */
 void Curl_free_idnconverted_hostname(struct hostname *host)
 {
-  Curl_safefree(host->encalloc);
+  curlx_safefree(host->encalloc);
 }
 
 #endif /* USE_IDN */
