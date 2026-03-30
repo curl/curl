@@ -35,6 +35,10 @@ endif()
 
 include(CMakeFindDependencyMacro)
 
+if("@HAVE_THREADS_POSIX@")
+  find_package(Threads)
+endif()
+
 if("@USE_OPENSSL@")
   if("@OPENSSL_VERSION_MAJOR@")
     find_dependency(OpenSSL "@OPENSSL_VERSION_MAJOR@")
