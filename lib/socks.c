@@ -808,6 +808,10 @@ static CURLproxycode socks5_req1_init(struct socks_state *sx,
   }
   else {
     const size_t hostname_len = strlen(sx->hostname);
+    /* socks5_req0_init() already rejects hostnames longer than 255 bytes, so
+       this cast to unsigned char is safe. Assert to guard against future
+       refactoring that might remove or reorder that earlier check. */
+    DEBUGASSERT(hostname_len <= 255);
     desttype = 3;
     destination = (const unsigned char *)sx->hostname;
     destlen = (unsigned char)hostname_len; /* one byte length */
