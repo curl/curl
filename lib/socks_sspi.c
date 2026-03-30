@@ -223,6 +223,11 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
     memcpy(&us_length, socksreq + 2, sizeof(short));
     us_length = ntohs(us_length);
 
+    if(!us_length) {
+      failf(data, "Invalid zero-length SSPI authentication token.");
+      return CURLE_COULDNT_CONNECT;
+    }
+
     sspi_recv_token.cbBuffer = us_length;
     sspi_recv_token.pvBuffer = curlx_malloc(us_length);
 
@@ -399,6 +404,11 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
 
   memcpy(&us_length, socksreq + 2, sizeof(short));
   us_length = ntohs(us_length);
+
+  if(!us_length) {
+    failf(data, "Invalid zero-length SSPI encryption token.");
+    return CURLE_COULDNT_CONNECT;
+  }
 
   sspi_w_token[0].cbBuffer = us_length;
   sspi_w_token[0].pvBuffer = curlx_malloc(us_length);

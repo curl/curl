@@ -266,6 +266,13 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     memcpy(&us_length, socksreq + 2, sizeof(short));
     us_length = ntohs(us_length);
 
+    if(!us_length) {
+      failf(data, "Invalid zero-length GSS-API authentication token.");
+      gss_release_name(&gss_status, &server);
+      Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
+      return CURLE_COULDNT_CONNECT;
+    }
+
     gss_recv_token.length = us_length;
     gss_recv_token.value = curlx_malloc(gss_recv_token.length);
     if(!gss_recv_token.value) {
@@ -452,6 +459,12 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   memcpy(&us_length, socksreq + 2, sizeof(short));
   us_length = ntohs(us_length);
+
+  if(!us_length) {
+    failf(data, "Invalid zero-length GSS-API encryption token.");
+    Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
+    return CURLE_COULDNT_CONNECT;
+  }
 
   gss_recv_token.length = us_length;
   gss_recv_token.value = curlx_malloc(gss_recv_token.length);
