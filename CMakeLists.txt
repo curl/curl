@@ -645,7 +645,7 @@ endif()
 
 if(NOT WIN32)
   find_package(Threads)
-  if(Threads_FOUND)
+  if(CMAKE_USE_PTHREADS_INIT)
     set(HAVE_THREADS_POSIX 1)
     list(APPEND CURL_NETWORK_AND_TIME_LIBS Threads::Threads)
   endif()
