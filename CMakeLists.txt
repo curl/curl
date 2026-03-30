@@ -643,9 +643,11 @@ if(DOS OR AMIGA)
   set(HAVE_TIME_T_UNSIGNED 1)
 endif()
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
 if(NOT WIN32)
   find_package(Threads)
-  if(CMAKE_USE_PTHREADS_INIT)
+  if(Threads_FOUND)
     set(HAVE_THREADS_POSIX 1)
     list(APPEND CURL_NETWORK_AND_TIME_LIBS Threads::Threads)
   endif()
