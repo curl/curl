@@ -295,10 +295,10 @@ curl from the source code:
 - Use `cmake` to configure and/or build
 - Use `ninja` to build (***much** faster*)
 - Reinstalling the required `cygwin` packages from the list above without
- passing `-I` to `setup-x86_64`
+  passing `-I` to `setup-x86_64`
 - Temporarily move `cygwin` to the top of your path
 - Install all of the `cygwin` build packages using
- `setup-x86_64 --build-depends curl`
+  `setup-x86_64 --build-depends curl`
 
 ## MS-DOS
 
