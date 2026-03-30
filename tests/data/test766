@@ -5,6 +5,7 @@
 FTP
 PORT
 CURLOPT_SOCKOPTFUNCTION
+timing-dependent
 </keywords>
 </info>
 
