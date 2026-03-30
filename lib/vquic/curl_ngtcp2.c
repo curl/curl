@@ -823,7 +823,7 @@ static int cb_get_new_connection_id2(ngtcp2_conn *tconn,
     return NGTCP2_ERR_CALLBACK_FAILURE;
   cid->datalen = cidlen;
 
-  result = Curl_rand(NULL, token->data, NGTCP2_STATELESS_RESET_TOKENLEN);
+  result = Curl_rand(NULL, token->data, sizeof(token->data));
   if(result)
     return NGTCP2_ERR_CALLBACK_FAILURE;
 
