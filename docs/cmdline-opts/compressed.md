@@ -27,4 +27,6 @@ reports an error. This is a request, not an order; the server may or may not
 deliver data compressed.
 
 **WARNING**: when decompressing data, even tiny transfers might be expanded
-and generate a huge amount of bytes.
+and generate a huge amount of bytes. You might want to limit using this option
+to only known and trusted sites using secure protocols, perhaps in combination
+with --max-filesize.

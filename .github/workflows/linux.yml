@@ -801,8 +801,7 @@ jobs:
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
             sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
-          printf '#!/bin/sh\nfor i in 1 2 3; do timeout 90 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
-          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          sudo apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
           printenv >> "$GITHUB_ENV"
 
