@@ -36,7 +36,7 @@ endif()
 include(CMakeFindDependencyMacro)
 
 if("@HAVE_THREADS_POSIX@")
-  find_package(Threads)
+  find_dependency(Threads)
 endif()
 
 if("@USE_OPENSSL@")
