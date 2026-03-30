@@ -232,8 +232,9 @@ If you get linkage errors read section 5.7 of the FAQ document.
 
 ## Cygwin
 
-Almost identical to the Unix installation. Essentially run the configure
-script in the curl source tree root with `sh configure`, then run `make`.
+Almost identical to the Unix installation. Download the `curl` source code,
+then essentially run the configure script in the curl source tree root with
+`sh configure`, then run `make`.
 
 To expand on building with `cygwin` first ensure it is in your path, and
 there are no conflicting tools (*i.e. Chocolatey with sed package*). If so
@@ -246,7 +247,8 @@ Additional `cygwin` packages are needed for the install. For more on
 installing packages visit
 [`cygwin setup`](https://cygwin.com/faq/faq.html#faq.setup.cli).
 
-Either run `setup-x86_64.exe`, then search and select packages individually, or try:
+Either run `setup-x86_64.exe`, then search and select packages individually,
+or try:
 
     setup-x86_64.exe --no-admin -q -I -P binutils,gcc-core,libpsl-devel,libtool,perl,make
 
@@ -288,37 +290,16 @@ curl from the source code:
 2. `make`
 
 > [!Note]
-> If an error occurs during the installation, do a `make clean` and try:
+> If an error occurs during the installation, then try:
 
-- `sh configure <configure_options> --disable-shared`
+- Configure with `--disable-shared`
 - Use `cmake` to configure and/or build
-- Use `ninja` to build
+- Use `ninja` to build (***much** faster*)
 - Reinstalling the required `cygwin` packages from the list above without
  passing `-I` to `setup-x86_64`
 - Temporarily move `cygwin` to the top of your path
 - Install all of the `cygwin` build packages using
  `setup-x86_64 --build-depends curl`
-
-The details below illustrate using `cmake` and `ninja` (***much** faster*):
-
-<details>
-    <summary>Cygwin Ninja Install</summary>
-
-```batch
-:: Install dependencies
-setup-x86_64 --no-admin -q -I -P cmake,ninja
-
-:: In downloaded curl source code create and enter build directory
-mkdir build && cd build
-
-:: Configure with `cmake` (point to parent source directory)
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
-
-:: Now your ninja
-ninja
-```
-
-</details>
 
 ## MS-DOS
 
