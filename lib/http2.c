@@ -1488,8 +1488,11 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       stream->push_headers = headp;
     }
     h = curl_maprintf("%s:%s", name, value);
-    if(h)
-      stream->push_headers[stream->push_headers_used++] = h;
+    if(!h) {
+      free_push_headers(stream);
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+    stream->push_headers[stream->push_headers_used++] = h;
     return 0;
   }
 
