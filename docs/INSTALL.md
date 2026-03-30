@@ -292,7 +292,6 @@ curl from the source code:
 > [!Note]
 > If an error occurs during the installation, then try:
 
-- Configure with `--disable-shared`
 - Use `cmake` to configure and/or build
 - Use `ninja` to build (***much** faster*)
 - Reinstalling the required `cygwin` packages from the list above without
