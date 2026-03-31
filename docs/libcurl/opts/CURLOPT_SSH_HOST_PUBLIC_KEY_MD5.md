@@ -52,9 +52,9 @@ CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256(3). Any such changes only affect future new
 connections, not already established ones.
 
 When MD5 verification is enabled for a connection via this option, libcurl
-uses that MD5-based check instead of the known-hosts/hostkey-callback
+uses that MD5-based check instead of the knownhosts/host key callback
 verification path for that connection, so you must not assume that both the
-MD5 check and the known-hosts/hostkey-callback verification are performed for
+MD5 check and the knownhosts/host key callback verification are performed for
 the same connection.
 
 # DEFAULT
