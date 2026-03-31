@@ -332,6 +332,7 @@ static bool tailmatch(const char *full, size_t flen,
 static bool can_resolve_dns_queries(struct Curl_easy *data,
                                     uint8_t dns_queries)
 {
+  (void)data;
   if(((dns_queries & CURL_DNSQ_IP_MASK) == CURL_DNSQ_AAAA) &&
      !Curl_ipv6works(data))
     return FALSE;
