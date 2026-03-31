@@ -847,7 +847,7 @@ if(CURL_USE_OPENSSL)
   cmake_pop_check_state()
 
   if(HAVE_BORINGSSL OR HAVE_AWSLC)
-    if(NOT MSVC AND NOT ANDROID)  # They support native Windows threads with MSVC.
+    if(NOT MSVC AND NOT ANDROID)  # BoringSSL/AWS-LC MSVC builds use native Windows threads
       find_package(Threads)
       if(CMAKE_USE_PTHREADS_INIT)
         set(HAVE_THREADS_POSIX_BORINGSSL 1)
