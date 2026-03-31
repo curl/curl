@@ -54,7 +54,7 @@ extern const struct MD5_params Curl_DIGEST_MD5;
 extern const struct HMAC_params Curl_HMAC_MD5;
 
 CURLcode Curl_md5it(unsigned char *output, const unsigned char *input,
-                    const size_t len);
+                    size_t len);
 
 struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params);
 CURLcode Curl_MD5_update(struct MD5_context *context,
