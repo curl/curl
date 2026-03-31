@@ -121,6 +121,7 @@
 
 uint8_t Curl_resolv_dns_queries(struct Curl_easy *data, uint8_t ip_version)
 {
+  (void)data;
   switch(ip_version) {
   case CURL_IPRESOLVE_V6:
     return CURL_DNSQ_AAAA;
