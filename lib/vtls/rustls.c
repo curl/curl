@@ -32,6 +32,7 @@
 #include "curlx/fopen.h"
 #include "curlx/strerr.h"
 #include "urldata.h"
+#include "cf-dns.h"
 #include "curl_trc.h"
 #include "httpsrr.h"
 #include "vtls/vtls.h"
@@ -909,16 +910,26 @@ cleanup:
 }
 
 #ifdef USE_ECH
+
+static bool cr_ech_need_httpsrr(struct Curl_easy *data)
+{
+  if(!CURLECH_ENABLED(data))
+    return FALSE;
+  if((data->set.tls_ech & CURLECH_GREASE) ||
+     (data->set.tls_ech & CURLECH_CLA_CFG))
+   return FALSE;
+  return TRUE;
+}
+
 static CURLcode
 init_config_builder_ech(struct Curl_easy *data,
-                        const struct ssl_connect_data *connssl,
+                        struct Curl_cfilter *cf,
                         struct rustls_client_config_builder *builder)
 {
   const rustls_hpke *hpke = rustls_supported_hpke();
   unsigned char *ech_config = NULL;
   size_t ech_config_len = 0;
   struct Curl_dns_entry *dns = NULL;
-  struct Curl_https_rrinfo *rinfo = NULL;
   CURLcode result = CURLE_OK;
   rustls_result rr;
 
@@ -963,22 +974,9 @@ init_config_builder_ech(struct Curl_easy *data,
     }
   }
   else {
-    if(connssl->peer.hostname) {
-      result = Curl_dnscache_get(data, connssl->peer.hostname,
-                                 connssl->peer.port, data->conn->ip_version,
-                                 &dns);
-    }
-    if(!dns) {
-      if(result) {
-        failf(data, "ECH: could not resolve %s:%d",
-              connssl->peer.hostname, connssl->peer.port);
-        return result;
-      }
-      failf(data, "rustls: ECH requested but no DNS info available");
-      result = CURLE_SSL_CONNECT_ERROR;
-      goto cleanup;
-    }
-    rinfo = dns->hinfo;
+    const struct Curl_https_rrinfo *rinfo =
+      Curl_conn_dns_get_https(data, cf->sockindex);
+
     if(!rinfo || !rinfo->echconfiglist) {
       failf(data, "rustls: ECH requested but no ECHConfig available");
       result = CURLE_SSL_CONNECT_ERROR;
@@ -1075,7 +1073,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
 
 #ifdef USE_ECH
   if(CURLECH_ENABLED(data)) {
-    result = init_config_builder_ech(data, connssl, config_builder);
+    result = init_config_builder_ech(data, cf, config_builder);
     if(result != CURLE_OK && data->set.tls_ech & CURLECH_HARD) {
       rustls_client_config_builder_free(config_builder);
       return result;
@@ -1145,6 +1143,16 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CURL_TRC_CF(data, cf, "cr_connect, state=%d", connssl->state);
   *done = FALSE;
+
+#ifdef USE_ECH
+    /* if we do ECH and need the HTTPS-RR information for it,
+     * we delay the connect until it arrives or DNS resolve fails. */
+    if(cr_ech_need_httpsrr(data) &&
+       !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+      CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
+      return CURLE_OK;
+    }
+#endif /* USE_ECH */
 
   if(!backend->conn) {
     result = cr_init_backend(cf, data,

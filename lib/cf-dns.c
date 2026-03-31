@@ -37,8 +37,9 @@
 struct cf_dns_ctx {
   struct Curl_dns_entry *dns;
   CURLcode resolv_result;
+  uint32_t resolv_id;
   uint16_t port;
-  uint8_t ip_version;
+  uint8_t dns_queries;
   uint8_t transport;
   BIT(started);
   BIT(announced);
@@ -47,9 +48,8 @@ struct cf_dns_ctx {
 };
 
 static struct cf_dns_ctx *
-cf_dns_ctx_create(struct Curl_easy *data,
-                  const char *hostname, uint16_t port,
-                  uint8_t ip_version, uint8_t transport,
+cf_dns_ctx_create(struct Curl_easy *data, uint8_t dns_queries,
+                  const char *hostname, uint16_t port, uint8_t transport,
                   bool abstract_unix_socket,
                   struct Curl_dns_entry *dns)
 {
@@ -61,7 +61,7 @@ cf_dns_ctx_create(struct Curl_easy *data,
     return NULL;
 
   ctx->port = port;
-  ctx->ip_version = ip_version;
+  ctx->dns_queries = dns_queries;
   ctx->transport = transport;
   ctx->abstract_unix_socket = abstract_unix_socket;
   ctx->dns = Curl_dns_entry_link(data, dns);
@@ -168,8 +168,9 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
 
   /* Resolve target host right on */
   CURL_TRC_CF(data, cf, "resolve host %s:%u", ctx->hostname, ctx->port);
-  result = Curl_resolv(data, ctx->hostname, ctx->port, ctx->ip_version,
-                       ctx->transport, timeout_ms, pdns);
+  result = Curl_resolv(data, ctx->dns_queries,
+                       ctx->hostname, ctx->port, ctx->transport,
+                       timeout_ms, &ctx->resolv_id, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
     DEBUGASSERT(*pdns);
@@ -210,9 +211,11 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   }
 
   if(!ctx->dns && !ctx->resolv_result) {
-    ctx->resolv_result = Curl_resolv_take_result(data, &ctx->dns);
+    ctx->resolv_result =
+      Curl_resolv_take_result(data, ctx->resolv_id, &ctx->dns);
     if(!ctx->dns && !ctx->resolv_result)
-      CURL_TRC_CF(data, cf, "DNS resolution not complete yet");
+      CURL_TRC_CF(data, cf, "DNS resolution ongoing for %s:%u",
+                  ctx->hostname, ctx->port);
   }
 
   if(ctx->resolv_result) {
@@ -242,7 +245,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
    * that one's lock. */
   DEBUGASSERT(*done);
   cf->connected = TRUE;
-  Curl_async_shutdown(data);
+  Curl_resolv_destroy(data, ctx->resolv_id);
   Curl_dns_entry_unlink(data, &ctx->dns);
   return CURLE_OK;
 }
@@ -266,8 +269,14 @@ static CURLcode cf_dns_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
 {
+#ifdef USE_CURL_ASYNC
   if(!cf->connected)
     return Curl_resolv_pollset(data, ps);
+#else
+  (void)cf;
+  (void)data;
+  (void)ps;
+#endif
   return CURLE_OK;
 }
 
@@ -315,9 +324,9 @@ struct Curl_cftype Curl_cft_dns = {
 
 static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
                               struct Curl_easy *data,
+                              uint8_t dns_queries,
                               const char *hostname,
                               uint16_t port,
-                              uint8_t ip_version,
                               uint8_t transport,
                               bool abstract_unix_socket,
                               struct Curl_dns_entry *dns)
@@ -327,7 +336,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = cf_dns_ctx_create(data, hostname, port, ip_version, transport,
+  ctx = cf_dns_ctx_create(data, dns_queries, hostname, port, transport,
                           abstract_unix_socket, dns);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -347,13 +356,13 @@ out:
  * out the hostname/path and port where to connect to. */
 static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
                                    struct Curl_easy *data,
+                                   uint8_t dns_queries,
                                    uint8_t transport,
                                    struct Curl_dns_entry *dns)
 {
   struct connectdata *conn = data->conn;
   const char *hostname = NULL;
   uint16_t port = 0;
-  uint8_t ip_version = conn->ip_version;
   bool abstract_unix_socket = FALSE;
 
 #ifdef USE_UNIX_SOCKETS
@@ -391,8 +400,9 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
     DEBUGASSERT(0);
     return CURLE_FAILED_INIT;
   }
-  return cf_dns_create(pcf, data, hostname, port, ip_version,
-                          transport, abstract_unix_socket, dns);
+  return cf_dns_create(pcf, data, dns_queries,
+                       hostname, port, transport,
+                       abstract_unix_socket, dns);
 }
 
 /* Adds a "resolv" filter at the top of the connection's filter chain.
@@ -404,6 +414,7 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
 CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
+                         uint8_t dns_queries,
                          uint8_t transport,
                          struct Curl_dns_entry *dns)
 {
@@ -412,10 +423,11 @@ CURLcode Curl_cf_dns_add(struct Curl_easy *data,
 
   DEBUGASSERT(data);
   if(sockindex == FIRSTSOCKET)
-    result = cf_dns_conn_create(&cf, data, transport, dns);
+    result = cf_dns_conn_create(&cf, data, dns_queries, transport, dns);
   else if(dns) {
-    result = cf_dns_create(&cf, data, dns->hostname, dns->port,
-                           dns->ip_version, transport, FALSE, dns);
+    result = cf_dns_create(&cf, data, dns_queries,
+                           dns->hostname, dns->port, transport,
+                           FALSE, dns);
   }
   else {
     DEBUGASSERT(0);
@@ -436,16 +448,17 @@ out:
  */
 CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
+                                  uint8_t dns_queries,
                                   const char *hostname,
                                   uint16_t port,
-                                  uint8_t ip_version,
                                   uint8_t transport)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = cf_dns_create(&cf, data, hostname, port, ip_version,
-                         transport, FALSE, NULL);
+  result = cf_dns_create(&cf, data, dns_queries,
+                         hostname, port, transport,
+                         FALSE, NULL);
   if(result)
     return result;
 
@@ -515,7 +528,7 @@ Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
       else if(ctx->dns)
         return cf_dns_get_nth_ai(ctx->dns->addr, ai_family, index);
       else
-        return Curl_resolv_get_ai(data, ai_family, index);
+        return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
     }
   }
   return NULL;
@@ -548,9 +561,28 @@ Curl_conn_dns_get_https(struct Curl_easy *data, int sockindex)
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
-      return ctx->dns ? ctx->dns->hinfo : NULL;
+      if(ctx->dns)
+        return ctx->dns->hinfo;
+      else
+        return Curl_resolv_get_https(data, ctx->resolv_id);
     }
   }
   return NULL;
 }
+
+bool Curl_conn_dns_resolved_https(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &Curl_cft_dns) {
+      struct cf_dns_ctx *ctx = cf->ctx;
+      if(ctx->dns)
+        return TRUE;
+      else
+        return Curl_resolv_knows_https(data, ctx->resolv_id);
+    }
+  }
+  return FALSE;
+}
+
 #endif /* USE_HTTPSRR */

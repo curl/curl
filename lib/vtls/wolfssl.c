@@ -56,6 +56,7 @@
 #include "urldata.h"
 #include "curl_trc.h"
 #include "httpsrr.h"
+#include "cf-dns.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
 #include "vtls/vtls_scache.h"
@@ -1289,55 +1290,31 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     }
   }
   else {
-    struct ssl_connect_data *connssl = cf->ctx;
-    struct Curl_dns_entry *dns = NULL;
-    CURLcode result;
+    const struct Curl_https_rrinfo *rinfo =
+      Curl_conn_dns_get_https(data, cf->sockindex);
 
-    result = Curl_dnscache_get(data, connssl->peer.hostname,
-                               connssl->peer.port, cf->conn->ip_version,
-                               &dns);
-    if(!dns) {
-      if(result) {
-        failf(data, "ECH: could not resolve %s:%d",
-              connssl->peer.hostname,
-              connssl->peer.port);
-        return result;
-      }
-      infof(data, "ECH: requested but no DNS info"
-            " available");
-      if(data->set.tls_ech & CURLECH_HARD)
-        return CURLE_SSL_CONNECT_ERROR;
-    }
-    else {
-      struct Curl_https_rrinfo *rinfo = NULL;
+    if(rinfo && rinfo->echconfiglist) {
+      const unsigned char *ecl = rinfo->echconfiglist;
+      size_t elen = rinfo->echconfiglist_len;
 
-      rinfo = dns->hinfo;
-      if(rinfo && rinfo->echconfiglist) {
-        unsigned char *ecl = rinfo->echconfiglist;
-        size_t elen = rinfo->echconfiglist_len;
-
-        infof(data, "ECH: ECHConfig from DoH HTTPS RR");
-        if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
-           WOLFSSL_SUCCESS) {
-          infof(data, "ECH: wolfSSL_SetEchConfigs failed");
-          if(data->set.tls_ech & CURLECH_HARD) {
-            Curl_dns_entry_unlink(data, &dns);
-            return CURLE_SSL_CONNECT_ERROR;
-          }
-        }
-        else {
-          trying_ech_now = 1;
-          infof(data, "ECH: imported ECHConfigList of length %zu", elen);
-        }
-      }
-      else {
-        infof(data, "ECH: requested but no ECHConfig available");
+      infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+      if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
+         WOLFSSL_SUCCESS) {
+        infof(data, "ECH: wolfSSL_SetEchConfigs failed");
         if(data->set.tls_ech & CURLECH_HARD) {
-          Curl_dns_entry_unlink(data, &dns);
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
-      Curl_dns_entry_unlink(data, &dns);
+      else {
+        trying_ech_now = 1;
+        infof(data, "ECH: imported ECHConfigList of length %zu", elen);
+      }
+    }
+    else {
+      infof(data, "ECH: requested but no ECHConfig available");
+      if(data->set.tls_ech & CURLECH_HARD) {
+        return CURLE_SSL_CONNECT_ERROR;
+      }
     }
   }
 
@@ -1509,6 +1486,18 @@ out:
   }
   return result;
 }
+
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+static bool wssl_ech_need_httpsrr(struct Curl_easy *data)
+{
+  if(!CURLECH_ENABLED(data))
+    return FALSE;
+  if((data->set.tls_ech & CURLECH_GREASE) ||
+     (data->set.tls_ech & CURLECH_CLA_CFG))
+   return FALSE;
+  return TRUE;
+}
+#endif
 
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
@@ -2179,6 +2168,15 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+    /* if we do ECH and need the HTTPS-RR information for it,
+     * we delay the connect until it arrives or DNS resolve fails. */
+    if(wssl_ech_need_httpsrr(data) &&
+       !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+      CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
+      return CURLE_OK;
+    }
+#endif /* HAVE_WOLFSSL_CTX_GENERATEECHCONFIG */
     result = wssl_connect_step1(cf, data);
     if(result)
       return result;

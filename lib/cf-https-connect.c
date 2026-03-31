@@ -330,13 +330,6 @@ static CURLcode cf_hc_resolv(struct Curl_cfilter *cf,
      * can no longer change that. Any HTTPSRR advice for other hosts and ports
      * we need to ignore. */
     const struct Curl_https_rrinfo *rr;
-    bool need_https_rr = FALSE;
-
-    if(need_https_rr) {
-      result = Curl_conn_dns_result(cf->conn, cf->sockindex);
-      if(result)
-        return result;
-    }
 
     /* Do we have HTTPS-RR information? */
     rr = Curl_conn_dns_get_https(data, cf->sockindex);
@@ -346,7 +339,7 @@ static CURLcode cf_hc_resolv(struct Curl_cfilter *cf,
         !rr->target[0] ||
         (rr->target[0] == '.' &&
          !rr->target[1])) &&
-       (rr->port < 0 ||    /* for same port */
+       (!rr->port_set ||    /* for same port */
         rr->port == cf->conn->remote_port)) {
       for(i = 0; i < CURL_ARRAYSIZE(rr->alpns) &&
                  alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {

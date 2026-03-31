@@ -66,7 +66,7 @@ static void rrresults(struct Curl_https_rrinfo *rr, CURLcode res)
       curl_msnprintf(p, pend - p, "no-def-alpn|");
       p += strlen(p);
     }
-    if(rr->port >= 0) {
+    if(rr->port_set) {
       curl_msnprintf(p, pend - p, "port:%d|", rr->port);
       p += strlen(p);
     }

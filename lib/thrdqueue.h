@@ -29,7 +29,6 @@
 #ifdef USE_THREADS
 
 struct Curl_easy;
-struct curl_trc_feat;
 struct curl_thrdq;
 
 typedef enum {
@@ -111,8 +110,7 @@ CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
 
 #ifdef CURLVERBOSE
 void Curl_thrdq_trace(struct curl_thrdq *tqueue,
-                      struct Curl_easy *data,
-                      struct curl_trc_feat *feat);
+                      struct Curl_easy *data);
 #endif
 
 #endif /* USE_THREADS */

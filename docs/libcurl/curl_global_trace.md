@@ -142,6 +142,10 @@ Tracing of SSL Session handling, e.g. caching/import/export.
 
 Tracing of SMTP operations when this protocol is enabled in your build.
 
+## `threads`
+
+Tracing of thread queue and pools, used in threaded DNS resolving.
+
 ## `timer`
 
 Tracing of timers set for transfers.

@@ -93,7 +93,7 @@ struct doh_request {
   struct curl_slist *req_hds;
   struct dynbuf resp_body;
   size_t req_body_len;
-  uint32_t async_id; /* transfer specific id of the resolve operation */
+  uint32_t resolv_id; /* id of the resolve operation */
   DNStype dnstype;
 };
 
@@ -122,6 +122,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
                   struct Curl_resolv_async *async);
 
 CURLcode Curl_doh_take_result(struct Curl_easy *data,
+                              struct Curl_resolv_async *async,
                               struct Curl_dns_entry **dns);
 
 #define DOH_MAX_ADDR  24
@@ -163,7 +164,6 @@ struct dohentry {
 #endif
 };
 
-void Curl_doh_close(struct Curl_easy *data);
 void Curl_doh_cleanup(struct Curl_easy *data,
                       struct Curl_resolv_async *async);
 #define Curl_doh_wanted(d)  (!!(d)->set.doh)
@@ -171,7 +171,7 @@ void Curl_doh_cleanup(struct Curl_easy *data,
 
 #else /* CURL_DISABLE_DOH */
 #define Curl_doh(a, b)             NULL
-#define Curl_doh_take_result(x, y) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_doh_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_doh_wanted(d)         FALSE
 #endif /* !CURL_DISABLE_DOH */
 

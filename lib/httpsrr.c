@@ -30,6 +30,7 @@
 #include "connect.h"
 #include "curl_trc.h"
 #include "curlx/strdup.h"
+#include "curlx/inet_ntop.h"
 
 static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
                                     unsigned char *alpns)
@@ -68,25 +69,90 @@ static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
   return CURLE_OK;
 }
 
-CURLcode Curl_httpsrr_set(struct Curl_easy *data,
-                          struct Curl_https_rrinfo *hi,
+#ifdef CURLVERBOSE
+static void httpsrr_report_addr(struct Curl_easy *data, int ai_family,
+                                const uint8_t *addr, size_t total_len)
+{
+  char buf[MAX_IPADR_LEN];
+  struct dynbuf tmp;
+  size_t i, alen = (ai_family == AF_INET6) ? 16 : 4;
+  const char *sep = "";
+  bool incomplete = FALSE;
+  CURLcode result;
+
+  if(!CURL_TRC_DNS_is_verbose(data))
+    return;
+
+  curlx_dyn_init(&tmp, 1024);
+  for(i = 0; i < (total_len / alen); ++i) {
+    if(!curlx_inet_ntop(ai_family, addr + (i * alen), buf, sizeof(buf))) {
+      CURL_TRC_DNS(data, "[HTTPS-RR] error parsing address #%zu", i);
+      goto out;
+    }
+    result = curlx_dyn_addf(&tmp, "%s%s", sep, buf);
+    if(result) {
+      incomplete = TRUE;
+      break;
+    }
+    sep = ", ";
+  }
+
+  CURL_TRC_DNS(data, "[HTTPS-RR] IPv%d: %s%s",
+               (ai_family == AF_INET6) ? 6 : 4,
+               curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)",
+               incomplete ? " ..." : "");
+out:
+  curlx_dyn_free(&tmp);
+}
+
+void Curl_httpsrr_trace(struct Curl_easy *data,
+                        struct Curl_https_rrinfo *hi)
+{
+  if(!hi || !hi->complete) {
+    CURL_TRC_DNS(data, "[HTTPS-RR] not available");
+    return;
+  }
+
+  if(hi->target)
+    CURL_TRC_DNS(data, "[HTTPS-RR] target: %s", hi->target);
+  if(hi->priority)
+    CURL_TRC_DNS(data, "[HTTPS-RR] priority: %u", hi->priority);
+  if(hi->mandatory)
+    CURL_TRC_DNS(data, "[HTTPS-RR] MANDATORY present, but not supported");
+  if(hi->alpns[0])
+    CURL_TRC_DNS(data, "[HTTPS-RR] ALPN: %u %u %u %u",
+                 hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
+  if(hi->port_set)
+    CURL_TRC_DNS(data, "[HTTPS-RR] port %u", hi->port);
+  if(hi->no_def_alpn)
+    CURL_TRC_DNS(data, "[HTTPS-RR] no-def-alpn");
+  if(hi->ipv6hints_len)
+    httpsrr_report_addr(data, AF_INET6, hi->ipv6hints, hi->ipv6hints_len);
+  if(hi->ipv4hints_len)
+    httpsrr_report_addr(data, AF_INET, hi->ipv4hints, hi->ipv4hints_len);
+  if(hi->echconfiglist_len)
+    CURL_TRC_DNS(data, "[HTTPS-RR] ECH");
+}
+
+#else
+#define httpsrr_report_addr(a,b,c,d)    Curl_nop_stmt
+#endif /* CURLVERBOSE */
+
+CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
                           uint16_t rrkey, const uint8_t *val, size_t vlen)
 {
   CURLcode result = CURLE_OK;
   switch(rrkey) {
   case HTTPS_RR_CODE_MANDATORY:
-    CURL_TRC_DNS(data, "HTTPS RR MANDATORY left to implement");
+    hi->mandatory = TRUE;
     break;
   case HTTPS_RR_CODE_ALPN: /* str_list */
     result = httpsrr_decode_alpn(val, vlen, hi->alpns);
-    CURL_TRC_DNS(data, "HTTPS RR ALPN: %u %u %u %u",
-                 hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
     break;
   case HTTPS_RR_CODE_NO_DEF_ALPN:
     if(vlen) /* no data */
       return CURLE_BAD_FUNCTION_ARGUMENT;
     hi->no_def_alpn = TRUE;
-    CURL_TRC_DNS(data, "HTTPS RR no-def-alpn");
     break;
   case HTTPS_RR_CODE_IPV4: /* addr4 list */
     if(!vlen || (vlen & 3)) /* the size must be 4-byte aligned */
@@ -96,7 +162,6 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     if(!hi->ipv4hints)
       return CURLE_OUT_OF_MEMORY;
     hi->ipv4hints_len = vlen;
-    CURL_TRC_DNS(data, "HTTPS RR IPv4");
     break;
   case HTTPS_RR_CODE_ECH:
     if(!vlen)
@@ -106,7 +171,6 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     if(!hi->echconfiglist)
       return CURLE_OUT_OF_MEMORY;
     hi->echconfiglist_len = vlen;
-    CURL_TRC_DNS(data, "HTTPS RR ECH");
     break;
   case HTTPS_RR_CODE_IPV6: /* addr6 list */
     if(!vlen || (vlen & 15)) /* the size must be 16-byte aligned */
@@ -116,16 +180,15 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     if(!hi->ipv6hints)
       return CURLE_OUT_OF_MEMORY;
     hi->ipv6hints_len = vlen;
-    CURL_TRC_DNS(data, "HTTPS RR IPv6");
     break;
   case HTTPS_RR_CODE_PORT:
     if(vlen != 2)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    hi->port = (unsigned short)((val[0] << 8) | val[1]);
-    CURL_TRC_DNS(data, "HTTPS RR port %u", hi->port);
+    hi->port = (uint16_t)((val[0] << 8) | val[1]);
+    hi->port_set = TRUE;
     break;
   default:
-    CURL_TRC_DNS(data, "HTTPS RR unknown code");
+    /* unknown code */
     break;
   }
   return result;
@@ -147,12 +210,12 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
   Curl_safefree(rrinfo->ipv4hints);
   Curl_safefree(rrinfo->ipv6hints);
   Curl_safefree(rrinfo->rrname);
+  rrinfo->complete = FALSE;
 }
 
 #ifdef USE_ARES
 
-static CURLcode httpsrr_opt(struct Curl_easy *data,
-                            const ares_dns_rr_t *rr,
+static CURLcode httpsrr_opt(const ares_dns_rr_t *rr,
                             ares_dns_rr_key_t key, size_t idx,
                             struct Curl_https_rrinfo *hinfo)
 {
@@ -161,11 +224,10 @@ static CURLcode httpsrr_opt(struct Curl_easy *data,
   size_t len = 0;
 
   code = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
-  return Curl_httpsrr_set(data, hinfo, code, val, len);
+  return Curl_httpsrr_set(hinfo, code, val, len);
 }
 
-CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
-                                const ares_dns_record_t *dnsrec,
+CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
                                 struct Curl_https_rrinfo *hinfo)
 {
   CURLcode result = CURLE_OK;
@@ -188,18 +250,17 @@ CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
         result = CURLE_OUT_OF_MEMORY;
         goto out;
       }
-      CURL_TRC_DNS(data, "HTTPS RR target: %s", hinfo->target);
     }
-    CURL_TRC_DNS(data, "HTTPS RR priority: %u",
-                 ares_dns_rr_get_u16(rr, ARES_RR_HTTPS_PRIORITY));
+    hinfo->priority = ares_dns_rr_get_u16(rr, ARES_RR_HTTPS_PRIORITY);
     for(opt = 0; opt < ares_dns_rr_get_opt_cnt(rr, ARES_RR_HTTPS_PARAMS);
         opt++) {
-      result = httpsrr_opt(data, rr, ARES_RR_HTTPS_PARAMS, opt, hinfo);
+      result = httpsrr_opt(rr, ARES_RR_HTTPS_PARAMS, opt, hinfo);
       if(result)
         break;
     }
   }
 out:
+  hinfo->complete = !result;
   Curl_safefree(hinfo->rrname);
   return result;
 }
