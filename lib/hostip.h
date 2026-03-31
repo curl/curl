@@ -52,7 +52,7 @@ struct Curl_dns_entry;
 #define CURL_DNSQ_HTTPS       (1U << 2)
 
 #define CURL_DNSQ_ALL         (CURL_DNSQ_A|CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS)
-#define CURL_DNSQ_IP_MASK     (CURL_DNSQ_A|CURL_DNSQ_AAAA)
+#define CURL_DNSQ_IP(x)       (uint8_t)((x)&(CURL_DNSQ_A|CURL_DNSQ_AAAA))
 
 #ifdef CURLVERBOSE
 const char *Curl_resolv_query_str(uint8_t dns_queries);

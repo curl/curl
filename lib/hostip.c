@@ -333,8 +333,7 @@ static bool can_resolve_dns_queries(struct Curl_easy *data,
                                     uint8_t dns_queries)
 {
   (void)data;
-  if(((dns_queries & CURL_DNSQ_IP_MASK) == CURL_DNSQ_AAAA) &&
-     !Curl_ipv6works(data))
+  if((CURL_DNSQ_IP(dns_queries) == CURL_DNSQ_AAAA) && !Curl_ipv6works(data))
     return FALSE;
   return TRUE;
 }
@@ -650,7 +649,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
 #ifdef DEBUGBUILD
   CURL_TRC_DNS(data, "hostip_resolv(%s:%u, queries=%s)",
                hostname, port, Curl_resolv_query_str(dns_queries));
-  if(((dns_queries & CURL_DNSQ_IP_MASK) == CURL_DNSQ_AAAA) &&
+  if((CURL_DNSQ_IP(dns_queries) == CURL_DNSQ_AAAA) &&
      getenv("CURL_DBG_RESOLV_FAIL_IPV6")) {
     infof(data, "DEBUG fail ipv6 resolve");
     result = Curl_resolver_error(data, NULL);
