@@ -216,7 +216,7 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   int reply_ms;
   size_t i;
-
+  /* test */
   DEBUGASSERT(winner->cf);
   for(i = 0; i < ctx->baller_count; ++i)
     if(winner != &ctx->ballers[i])
