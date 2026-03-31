@@ -1118,6 +1118,8 @@ if(USE_SSLS_EXPORT)
   endif()
 endif()
 
+option(USE_PROXY_HTTP3 "Enable experimental HTTP/3 proxy support" OFF)
+
 option(USE_NGHTTP2 "Use nghttp2 library" ON)
 if(USE_NGHTTP2)
   find_package(NGHTTP2 MODULE)
@@ -1183,6 +1185,20 @@ if(USE_QUICHE)
     list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::quiche)
     check_symbol_exists("quiche_conn_set_qlog_fd" "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
     cmake_pop_check_state()
+  endif()
+endif()
+
+if(USE_PROXY_HTTP3)
+  if(CURL_DISABLE_PROXY)
+    message(FATAL_ERROR "USE_PROXY_HTTP3 requires proxy support")
+  elseif(CURL_DISABLE_HTTP)
+    message(FATAL_ERROR "USE_PROXY_HTTP3 requires HTTP support")
+  elseif(NOT USE_NGTCP2 OR NOT USE_NGHTTP3)
+    message(FATAL_ERROR "USE_PROXY_HTTP3 requires ngtcp2 + nghttp3")
+  elseif(NOT USE_OPENSSL)
+    message(FATAL_ERROR "USE_PROXY_HTTP3 currently requires OpenSSL")
+  else()
+    message(STATUS "HTTP/3 proxy support enabled (experimental)")
   endif()
 endif()
 
@@ -2038,6 +2054,7 @@ curl_add_if("NTLM"          CURL_ENABLE_NTLM AND
 curl_add_if("TLS-SRP"       USE_TLS_SRP)
 curl_add_if("HTTP2"         USE_NGHTTP2)
 curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
+curl_add_if("PROXY-HTTP3"   USE_PROXY_HTTP3)
 curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_MBEDTLS OR

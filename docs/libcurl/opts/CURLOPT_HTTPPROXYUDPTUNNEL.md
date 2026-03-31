@@ -29,6 +29,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPPROXYUDPTUNNEL, long udptunn
 
 # DESCRIPTION
 
+This feature is experimental and requires a build with HTTP/3 proxy support
+enabled.
+
 Set the **udptunnel** parameter to 1L to make libcurl tunnel operations
 through an HTTP proxy (set with CURLOPT_PROXY(3)) using CONNECT-UDP.
 

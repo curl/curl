@@ -25,3 +25,7 @@ Fails to perform the transfer if the given proxy does not support HTTP/3.
 This has no effect for any other kinds of proxies.
 
 This option is mutually exclusive with `--proxy-http2`.
+
+This feature is experimental and requires a build with HTTP/3 proxy support
+enabled. For autotools builds, use `--enable-proxy-http3`. For CMake builds,
+use `-DUSE_PROXY_HTTP3=ON`.

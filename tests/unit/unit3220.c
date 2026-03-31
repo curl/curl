@@ -27,6 +27,8 @@
 #include "bufq.h"
 #include "capsule.h"
 
+#if defined(USE_PROXY_HTTP3) && defined(USE_NGTCP2) && \
+  !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 static void queue_bytes(struct bufq *q, const unsigned char *src, size_t len)
 {
   size_t nwritten = 0;
@@ -34,8 +36,10 @@ static void queue_bytes(struct bufq *q, const unsigned char *src, size_t len)
   fail_unless(result == CURLE_OK, "queue failed");
   fail_unless(nwritten == len, "queue short write");
 }
+#endif
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if defined(USE_PROXY_HTTP3) && \
+  !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 static void check_capsule_hdr(size_t payload_len,
                               const unsigned char *expected,
                               size_t expected_len)
@@ -101,7 +105,7 @@ static void test_capsule_udp_payload_written(void)
 }
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
-#if defined(USE_NGTCP2) && \
+#if defined(USE_PROXY_HTTP3) && defined(USE_NGTCP2) && \
   !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 static void check_capsule_result(struct bufq *q,
                                  const unsigned char *capsule, size_t capslen,
@@ -227,12 +231,13 @@ static CURLcode test_unit3220(const char *arg)
 
   (void)arg;
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if defined(USE_PROXY_HTTP3) && \
+  !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
   test_capsule_encap_udp_hdr_boundaries();
   test_capsule_udp_payload_written();
 #endif
 
-#if defined(USE_NGTCP2) && \
+#if defined(USE_PROXY_HTTP3) && defined(USE_NGTCP2) && \
   !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
   test_capsule_encode_decode_roundtrip();
   test_capsule_decode_paths();

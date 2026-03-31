@@ -25,3 +25,7 @@ the proxy supports the CONNECT-UDP method and allows access to the
 requested destination.
 
 This option is mutually exclusive with `--proxytunnel`.
+
+This feature is experimental and requires a build with HTTP/3 proxy support
+enabled. For autotools builds, use `--enable-proxy-http3`. For CMake builds,
+use `-DUSE_PROXY_HTTP3=ON`.

@@ -54,6 +54,30 @@ CURL_CHECK_OPTION_RT
 CURL_CHECK_OPTION_HTTPSRR
 CURL_CHECK_OPTION_ECH
 CURL_CHECK_OPTION_SSLS_EXPORT
+AC_MSG_CHECKING([whether to enable HTTP/3 proxy support])
+OPT_PROXY_HTTP3="default"
+AC_ARG_ENABLE(proxy-http3,
+AS_HELP_STRING([--enable-proxy-http3],[Enable experimental HTTP/3 proxy support])
+AS_HELP_STRING([--disable-proxy-http3],[Disable experimental HTTP/3 proxy support]),
+  OPT_PROXY_HTTP3=$enableval)
+case "$OPT_PROXY_HTTP3" in
+  no)
+    want_proxy_http3="no"
+    curl_proxy_http3_msg="no      (--enable-proxy-http3)"
+    AC_MSG_RESULT([no])
+    ;;
+  default)
+    want_proxy_http3="no"
+    curl_proxy_http3_msg="no      (--enable-proxy-http3)"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    want_proxy_http3="yes"
+    curl_proxy_http3_msg="enabled (--disable-proxy-http3)"
+    AC_MSG_RESULT([yes])
+    ;;
+esac
+USE_PROXY_HTTP3=0
 
 XC_CHECK_PATH_SEPARATOR
 
@@ -5030,6 +5054,28 @@ if test "$want_ssls_export" != "no"; then
   fi
 fi
 
+dnl *************************************************************
+dnl check whether experimental HTTP/3 proxy support is enabled
+dnl
+if test "$want_proxy_http3" = "yes"; then
+  AC_MSG_CHECKING([whether HTTP/3 proxy support is available])
+
+  if test "$CURL_DISABLE_PROXY" = "1"; then
+    AC_MSG_ERROR([--enable-proxy-http3 requires proxy support])
+  elif test "$CURL_DISABLE_HTTP" = "1"; then
+    AC_MSG_ERROR([--enable-proxy-http3 requires HTTP support])
+  elif test "$USE_NGTCP2_H3" != "1"; then
+    AC_MSG_ERROR([--enable-proxy-http3 requires ngtcp2 + nghttp3])
+  elif test "x$OPENSSL_ENABLED" != "x1"; then
+    AC_MSG_ERROR([--enable-proxy-http3 currently requires OpenSSL])
+  else
+    AC_DEFINE(USE_PROXY_HTTP3, 1, [if HTTP/3 proxy support is available])
+    USE_PROXY_HTTP3=1
+    AC_MSG_RESULT([yes])
+    experimental="$experimental PROXY-HTTP3"
+  fi
+fi
+
 dnl ************************************************************
 dnl hiding of library internal symbols
 dnl
@@ -5141,6 +5187,10 @@ fi
 
 if test "$curl_psl_msg" = "enabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
+fi
+
+if test "$USE_PROXY_HTTP3" = "1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES PROXY-HTTP3"
 fi
 
 if test "$curl_gsasl_msg" = "enabled"; then
@@ -5487,6 +5537,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP1:            ${curl_h1_msg}
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
+  Proxy-HTTP3:      ${curl_proxy_http3_msg}
   ECH:              ${curl_ech_msg}
   HTTPS RR:         ${curl_httpsrr_msg}
   SSLS-EXPORT:      ${curl_ssls_export_msg}

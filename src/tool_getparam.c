@@ -2030,10 +2030,16 @@ static ParameterError opt_bool(struct OperationConfig *config,
     config->proxyver = toggle ? CURLPROXY_HTTPS2 : CURLPROXY_HTTPS;
     break;
   case C_PROXY_HTTP3: /* --proxy-http3 */
+#ifndef USE_PROXY_HTTP3
+    if(toggle)
+      return PARAM_LIBCURL_DOESNT_SUPPORT;
+    config->proxyver = CURLPROXY_HTTPS;
+#else
     if(!feature_httpsproxy || !feature_http3)
       return PARAM_LIBCURL_DOESNT_SUPPORT;
 
     config->proxyver = toggle ? CURLPROXY_HTTPS3 : CURLPROXY_HTTPS;
+#endif
     break;
   case C_APPEND: /* --append */
     config->ftp_append = toggle;
@@ -2174,7 +2180,15 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_PROXYUDPTUNNEL: /* --proxyudptunnel */
     /* UDP proxy tunnel for non-http protocols */
+#ifndef USE_PROXY_HTTP3
+    if(toggle)
+      return PARAM_LIBCURL_DOESNT_SUPPORT;
+    config->proxyudptunnel = FALSE;
+#else
+    if(toggle && !feature_http3)
+      return PARAM_LIBCURL_DOESNT_SUPPORT;
     config->proxyudptunnel = toggle;
+#endif
     break;
   case C_DISABLE: /* --disable */
     /* if used first, already taken care of, we do it like this so we do not

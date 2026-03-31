@@ -36,6 +36,9 @@ MARK_NEEDS_HTTPS_PROXY = pytest.mark.skipif(
 MARK_NEEDS_HTTP3 = pytest.mark.skipif(
     condition=not Env.curl_has_feature('HTTP3'),
     reason='curl lacks HTTP/3 support')
+MARK_NEEDS_PROXY_HTTP3 = pytest.mark.skipif(
+    condition=not Env.curl_has_feature('PROXY-HTTP3'),
+    reason='curl lacks experimental HTTP/3 proxy support')
 MARK_NEEDS_NGHTTP3 = pytest.mark.skipif(
     condition=not Env.curl_uses_lib('nghttp3'),
     reason='only supported with nghttp3')
@@ -52,6 +55,7 @@ MARK_NEEDS_NGHTTPX = pytest.mark.skipif(
 H3_PROXY_COMMON_MARKS = [
     MARK_NEEDS_HTTPS_PROXY,
     MARK_NEEDS_HTTP3,
+    MARK_NEEDS_PROXY_HTTP3,
     MARK_NEEDS_NGHTTP3,
 ]
 
@@ -218,6 +222,7 @@ class TestH3ProxyRuntimeGuards:
 
     pytestmark = [
         MARK_NEEDS_HTTPS_PROXY,
+        MARK_NEEDS_PROXY_HTTP3,
         pytest.mark.skipif(condition=Env.curl_uses_lib('ngtcp2'),
                            reason='guard only applies to non-ngtcp2 builds'),
     ]

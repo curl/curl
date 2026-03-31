@@ -298,6 +298,13 @@ supports HTTP NTLM
 libcurl was built with support for NTLM delegation to a winbind helper. This
 feature was removed from curl in 8.8.0.
 
+## `PROXY-HTTP3`
+
+*features* mask bit: non-existent
+
+libcurl was built with EXPERIMENTAL support for HTTP/3 proxy tunneling
+(Added in 8.20.0)
+
 ## `PSL`
 
 *features* mask bit: CURL_VERSION_PSL
