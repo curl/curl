@@ -57,14 +57,14 @@ struct HMAC_context {
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
                                     const unsigned char *key,
                                     unsigned int keylen);
-int Curl_HMAC_update(struct HMAC_context *ctxt,
-                     const unsigned char *data,
-                     unsigned int len);
+void Curl_HMAC_update(struct HMAC_context *ctxt,
+                      const unsigned char *data,
+                      unsigned int len);
 int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output);
 
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const unsigned char *key, const size_t keylen,
-                     const unsigned char *data, const size_t datalen,
+                     const unsigned char *data, size_t datalen,
                      unsigned char *output);
 
 #endif

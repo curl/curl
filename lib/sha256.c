@@ -478,14 +478,19 @@ static void my_sha256_final(unsigned char *out, void *ctx)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
-                       const size_t len)
+                       size_t len)
 {
   CURLcode result;
   my_sha256_ctx ctx;
 
   result = my_sha256_init(&ctx);
   if(!result) {
-    my_sha256_update(&ctx, input, curlx_uztoui(len));
+    do {
+      unsigned int ilen = (unsigned int) CURLMIN(len, UINT_MAX);
+      my_sha256_update(&ctx, input, ilen);
+      len -= ilen;
+      input += ilen;
+    } while(len);
     my_sha256_final(output, &ctx);
   }
   return result;

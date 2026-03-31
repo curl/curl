@@ -540,14 +540,19 @@ const struct MD5_params Curl_DIGEST_MD5 = {
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_md5it(unsigned char *output,
-                    const unsigned char *input, const size_t len)
+                    const unsigned char *input, size_t len)
 {
   CURLcode result;
   my_md5_ctx ctx;
 
   result = my_md5_init(&ctx);
   if(!result) {
-    my_md5_update(&ctx, input, curlx_uztoui(len));
+    do {
+      unsigned int ilen = (unsigned int) CURLMIN(len, UINT_MAX);
+      my_md5_update(&ctx, input, ilen);
+      input += ilen;
+      len -= len;
+    } while(len);
     my_md5_final(output, &ctx);
   }
   return result;
