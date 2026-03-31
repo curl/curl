@@ -143,17 +143,24 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
  */
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const unsigned char *key, const size_t keylen,
-                     const unsigned char *data, const size_t datalen,
+                     const unsigned char *data, size_t datalen,
                      unsigned char *output)
 {
-  struct HMAC_context *ctxt =
-    Curl_HMAC_init(hashparams, key, curlx_uztoui(keylen));
+  struct HMAC_context *ctxt;
+  if(keylen > UINT_MAX) /* unlikely to ever happen */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  ctxt = Curl_HMAC_init(hashparams, key, curlx_uztoui(keylen));
 
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  Curl_HMAC_update(ctxt, data, curlx_uztoui(datalen));
+  do {
+    unsigned int ilen = datalen & 0xffffffff;
+    Curl_HMAC_update(ctxt, data, ilen);
+    datalen -= ilen;
+    data += ilen;
+  } while(datalen);
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, output);
