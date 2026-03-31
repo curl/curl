@@ -73,7 +73,9 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          printf '#!/bin/sh\nfor i in 1 2 3; do timeout 60 "$@" && break; echo "Error: slow server, retry"; sleep 1; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+          printf '#!/bin/sh
+            while [ $? = 0 ]; do for i in 1 2 3; do timeout 45 "$@" && break; echo "Error: slow server, retry $i"; sleep 1
+            dpkg --configure -a; done; false; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
             libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
