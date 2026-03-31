@@ -54,13 +54,6 @@ This function gets called for all new connections made to a server, during the
 SSL negotiation. While *ssl_ctx* points to a newly initialized object each
 time, the pointer may still be the same as in a prior call.
 
-A connection setup with this callback can be put in the connection pool by
-libcurl and then reused in following transfers without the callback being
-called. The connection may even be selected from the pool to be used for
-transfers not using this callback. If the callback should only be valid for
-the specific transfer the callback verifies, it should be marked unsuitable
-for reuse with CURLOPT_FORBID_REUSE(3).
-
 To use this callback, a non-trivial amount of knowledge of your SSL library is
 necessary. For example, you can use this function to call library-specific
 callbacks to add additional validation code for certificates, and even to
@@ -76,6 +69,13 @@ and modify SSL details in the connection without libcurl itself knowing
 anything about it, which then subsequently can lead to libcurl unknowingly
 reusing SSL connections with different properties. To remedy this you may set
 CURLOPT_FORBID_REUSE(3) from the callback function.
+
+A connection that is set up with this callback can be put in the connection
+pool by libcurl and then reused in following transfers without the callback
+being called. The connection may even be selected from the pool to be used for
+transfers not using this callback. If the callback should only be valid for
+the specific transfer the callback verifies, it should be marked unsuitable
+for reuse with CURLOPT_FORBID_REUSE(3).
 
 If you are using DNS-over-HTTPS (DoH) via CURLOPT_DOH_URL(3) then this
 callback is also called for those transfers and the curl handle is set to an
