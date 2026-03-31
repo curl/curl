@@ -4,8 +4,8 @@ curl and libcurl 8.20.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Authors:                      1458
- Contributors:                 3636
+ Authors:                      1460
+ Contributors:                 3640
 
 This release includes the following changes:
 
@@ -29,10 +29,14 @@ This release includes the following bugfixes:
  o badwords: detect the the and with with [51]
  o badwords: only check comments and strings in source code [61]
  o badwords: rework exceptions, fix many of them [15]
+ o boringssl: fix more coexist cases with Schannel/WinCrypt [170]
  o build: assume `snprintf()` in `mprintf`, drop feature check [107]
  o build: compiler warning silencing tidy-ups [4]
  o build: drop `openssl` module dependency for BoringSSL from `libcurl.pc` [33]
+ o build: drop duplicate `pthread.h` includes [158]
+ o build: drop redundant `USE_QUICHE` guards [159]
  o build: enable `-Wimplicit-int-enum-cast` compiler warning, fix issues [84]
+ o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [132]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [63]
  o cf-socket: avoid low risk integer overflow on ancient Solaris [56]
  o cmake: add CMake Config-based dependency detection [87]
@@ -40,31 +44,39 @@ This release includes the following bugfixes:
  o cmake: document functions used from Windows system DLLs [103]
  o cmake: resolve targets recursively when generating `libcurl.pc` [45]
  o cmake: rework binutils ld hack to not read `LOCATION` property [41]
+ o cmake: silence bad library `Threads::Threads` warning [131]
+ o cmake: use `AIX` built-in variable (with CMake 4.0+) [163]
  o config2setopts: make --capath work in proxy disabled builds [113]
  o configure: fix `--with-ngtcp2=<path>` option for crypto libs [26]
  o configure: fix LibreSSL ngtcp2 1.15.0+ crypto lib selection logic [3]
  o configure: prefer dependency-specific variables over `$withval` [35]
+ o configure: remove superfluous experimental warning for HTTP/3 [169]
  o curl-wolfssl.m4: fix to use the correct value for pkg-config directory [36]
  o curl.h: replace macros with C++-friendly method to enforce 3 args [110]
  o curl_ctype.h: fix spelling in a couple of locally used macros [28]
  o curl_get_line: error out on read errors [9]
  o curl_get_line: fix potential infinite loop when filename is a directory [46]
+ o curl_ngtcp2: extend and update callbacks for 1.22.0+ [165]
  o curl_ntlm_core: drop redundant PP condition [140]
  o curl_sha512_256: support delegating to wolfSSL API [149]
  o curl_version_info.md: clarify age details [69]
  o CURLOPT_HAPROXY_CLIENT_IP.md: mention assuption on data format [96]
+ o CURLOPT_SSL_CTX_FUNCTION.md: expand on effects connection reuse [105]
  o curlx_now(), prevent zero timestamp [93]
  o DEPRECATE: fix minor release number typo
  o digest: pass in the user name quoted (as well) [34]
  o dnscache: own source file, improvements [116]
  o docs/lib: fix typos [53]
  o docs: enable more compiler warnings for C snippets, fix 3 finds [71]
+ o docs: list more dependencies for running Python HTTP tests [123]
+ o docs: mention more zip bomb precautions [166]
  o docs: minor wording tweaks
  o doh: fix memory-leak when doing a second DoH resolve [55]
  o examples/websocket: fix to sleep more on Windows [92]
  o examples: drop warning silencers no longer hit [14]
  o examples: fix typo in comment [75]
  o file: init fd to -1 to prevent close fd 0 on early failure [40]
+ o fopen: for temp files, inherit permissions only for owner [146]
  o ftp: do not strdup DATA hostname [29]
  o ftp: make the MDTM date parser stricter (again) [115]
  o ftp: reject PWD responses containing control characters [95]
@@ -76,25 +88,32 @@ This release includes the following bugfixes:
  o hostip: clear the sockaddr_in6 structure before use [20]
  o hsts: when a dupe host adds subdomains, use that [130]
  o http2: clear the h2 session at delete [99]
+ o http2: prevent secure schemes pushed over insecure connections [181]
+ o http2: return error on OOM in push headers [65]
  o HTTP3.md: drop outdated mentions of OpenSSL-QUIC [2]
  o http: fix Curl_compareheader for multi value headers [11]
  o http: make Curl_compareheader handle multiple commas in header
  o imap: reset the UIDVALIDITY state between transfers [7]
  o include: drop 'will' from public headers [73]
+ o keylog.h: replace literal number with macro in declaration [171]
+ o keylog: drop unused/redundant includes and guards [172]
  o ldap: drop duplicate `ldap_set_option()` on Windows [42]
  o ldap: fix to initialize cleartext connection on Windows [49]
  o lib: always use Curl_1st_fatal instead of Curl_1st_err [89]
  o libssh2: fix error handling on quote errors [21]
+ o libssh: propagate error back in SFTP function [178]
  o libtest: drop duplicate include [111]
  o location/follow: mention netrc [138]
  o md4, md5: switch to wolfCrypt API in wolfSSL builds [139]
  o mk-ca-bundle.pl: make generated timestamps deterministic [44]
+ o multi: fix connection retry for non-http [180]
  o multi: improve wakeup and wait code [118]
  o netrc: find login-less password when user is given in URL [6]
  o netrc: remove unused parsenetrc() macro for netrc-disabled [121]
  o netrc: skip malformed macdef lines [67]
  o openssl channel_binding: lookup digest algorithm without NID [117]
  o openssl: drop obsolete SSLv2 logic [27]
+ o openssl: fix build with 4.0.0-beta1 no-deprecated [184]
  o openssl: fix memory leaks in ECH code (OpenSSL 3) [78]
  o openssl: trace count of found / imported Windows native CA roots [8]
  o OS400: add new definitions to the ILE/RPG binding. [153]
@@ -107,11 +126,13 @@ This release includes the following bugfixes:
  o pytest: add additional quiche check for flaky test_05_01 [22]
  o rand: use `BCryptGenRandom()` in UWP builds [88]
  o ratelimit: reset on start [150]
+ o request: reset resp_trailer in new requests [186]
  o scripts: drop redundant double-quotes: `"$var"` -> `$var` (Perl) [109]
  o scripts: harden / tidy up more Perl `system()` calls [70]
  o sha256, sha512_256: switch to wolfCrypt API [147]
  o sha256: support delegating to wolfSSL API [148]
  o share: concurrency handling, easy updates [104]
+ o socks: reject zero-length GSSAPI/SSPI tokens from proxy [157]
  o src: use ftruncate() unconditionally [128]
  o sshserver.pl: harden more `system()` calls [81]
  o sshserver.pl: pass command-line to `system()` safely [82]
@@ -123,22 +144,27 @@ This release includes the following bugfixes:
  o tests/unit/README: describe how to unit test static functions [60]
  o tool: check for curlinfo->age when determining if ssh backend [77]
  o tool: fix memory mixups [106]
+ o tool: fix two more allocator mismatches [155]
  o tool_cb_hdr: only truncate etags output when regular file [129]
+ o tool_cb_rea: make waitfd() return void [168]
  o tool_cb_wrt: fix no-clobber error handling [39]
  o tool_cfgable: free the SSL signature algorithms [62]
  o tool_formparse: propagate my_get_line errors when reading headers [102]
  o tool_getparam: use correct free function for libcurl memory [68]
  o tool_ipfs: accept IPFS gateway URL without set port number [13]
  o tool_msgs: avoid null pointer deref for early errors [98]
+ o tool_operate: actually apply the --parallel-max-host limit [167]
  o tool_operate: drop the scheme-guessing in the -G handling [54]
  o tool_operate: fix condition for loading `curl-ca-bundle.crt` (Windows) [79]
  o tool_operate: fix memory-leak on failed uploads [124]
  o tool_operate: fix minor memory-leak on early error [23]
  o tool_operhlp: fix `add_file_name_to_url()` result on OOM [32]
+ o tool_operhlp: iterate through all slashes to find name [114]
  o tool_operhlp: propagate low-level OOM in `add_file_name_to_url()` [112]
  o tool_setopt: return error on OOM correctly [152]
  o tool_urlglob: fix memory-leak on glob range overflow [19]
  o top-complexity: prevent filename-based shell injection risk [101]
+ o transfer: clear the URL pointer in OOM to avoid UAF [179]
  o transfer: enable custom methods again on next transfer [30]
  o transfer: enhance secure check [10]
  o url: do not reuse a non-tls starttls connection if new requires TLS [145]
@@ -179,15 +205,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   am-perip on hackerone, Arkadi Vainbrand, Carlos Henrique Lima Melara,
-  crawfordxx, Dan Fandrich, Daniel Stenberg, Ercan Ermis, fds242 on github,
-  Flavio Amieiro, Harry Sintonen, Henrique Pereira, James Fuller,
-  Jason Stangroome, Kai Pastor, lg_oled77c5pua on hackerone,
+  crawfordxx, Dan Fandrich, Daniel Stenberg, dependabot[bot], Dexter Gerig,
+  Ercan Ermis, fds242 on github, Flavio Amieiro, Greg Kroah-Hartman,
+  Harry Sintonen, Henrique Pereira, James Fuller, Jason Stangroome, Kai Pastor,
+  Kaixuan Li, lg_oled77c5pua on hackerone, M42kL33 on hackerone,
   m777m0 on hackerone, Marcel Raad, Martin Dürrmeier, Michael Hendricks,
   Michael Kaufmann, Orgad Shaneh, Otis Cui Lei, Patrick Monnerat, Ray Satiro,
   renovate[bot], Richard Tollerton, Rob Crittenden, Scott Boudreaux,
   Sergey Fedorov, Stefan Eissing, Viktor Szakats, Vladimír Marek,
-  Yoshiro Yoneya
-  (33 contributors)
+  xkilua on hackerone, Yoshiro Yoneya
+  (39 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -255,6 +282,7 @@ References to bug reports and discussions on issues:
  [62] = https://curl.se/bug/?i=20915
  [63] = https://curl.se/bug/?i=21057
  [64] = https://curl.se/bug/?i=20911
+ [65] = https://hackerone.com/reports/3636044
  [66] = https://curl.se/bug/?i=20787
  [67] = https://curl.se/bug/?i=21049
  [68] = https://curl.se/bug/?i=21075
@@ -294,6 +322,7 @@ References to bug reports and discussions on issues:
  [102] = https://curl.se/bug/?i=20963
  [103] = https://curl.se/bug/?i=20965
  [104] = https://curl.se/bug/?i=20870
+ [105] = https://curl.se/bug/?i=21164
  [106] = https://curl.se/bug/?i=21099
  [107] = https://curl.se/bug/?i=20763
  [108] = https://curl.se/bug/?i=20407
@@ -302,6 +331,7 @@ References to bug reports and discussions on issues:
  [111] = https://curl.se/bug/?i=21046
  [112] = https://curl.se/bug/?i=21011
  [113] = https://curl.se/bug/?i=21063
+ [114] = https://curl.se/bug/?i=21165
  [115] = https://curl.se/bug/?i=21041
  [116] = https://curl.se/bug/?i=20864
  [117] = https://curl.se/bug/?i=20590
@@ -310,6 +340,7 @@ References to bug reports and discussions on issues:
  [120] = https://curl.se/bug/?i=21068
  [121] = https://curl.se/bug/?i=21067
  [122] = https://curl.se/bug/?i=21070
+ [123] = https://curl.se/bug/?i=21110
  [124] = https://curl.se/bug/?i=21062
  [125] = https://curl.se/bug/?i=21061
  [126] = https://curl.se/bug/?i=21060
@@ -317,6 +348,8 @@ References to bug reports and discussions on issues:
  [128] = https://curl.se/bug/?i=21109
  [129] = https://curl.se/bug/?i=21103
  [130] = https://curl.se/bug/?i=21108
+ [131] = https://curl.se/bug/?i=21170
+ [132] = https://curl.se/bug/?i=21167
  [133] = https://curl.se/bug/?i=21097
  [134] = https://curl.se/bug/?i=21098
  [138] = https://curl.se/bug/?i=21091
@@ -325,6 +358,7 @@ References to bug reports and discussions on issues:
  [143] = https://curl.se/bug/?i=21084
  [144] = https://curl.se/bug/?i=20936
  [145] = https://curl.se/bug/?i=21082
+ [146] = https://curl.se/bug/?i=21092
  [147] = https://curl.se/bug/?i=21090
  [148] = https://curl.se/bug/?i=21078
  [149] = https://curl.se/bug/?i=21077
@@ -332,3 +366,22 @@ References to bug reports and discussions on issues:
  [151] = https://curl.se/bug/?i=21080
  [152] = https://curl.se/bug/?i=21083
  [153] = https://curl.se/bug/?i=20672
+ [155] = https://curl.se/bug/?i=21150
+ [157] = https://curl.se/bug/?i=21159
+ [158] = https://curl.se/bug/?i=21144
+ [159] = https://curl.se/bug/?i=21135
+ [163] = https://curl.se/bug/?i=21134
+ [165] = https://curl.se/bug/?i=21152
+ [166] = https://curl.se/bug/?i=21143
+ [167] = https://curl.se/bug/?i=21147
+ [168] = https://curl.se/bug/?i=21127
+ [169] = https://curl.se/bug/?i=21139
+ [170] = https://curl.se/bug/?i=21136
+ [171] = https://curl.se/bug/?i=21141
+ [172] = https://curl.se/bug/?i=21137
+ [178] = https://curl.se/bug/?i=21122
+ [179] = https://curl.se/bug/?i=21123
+ [180] = https://curl.se/bug/?i=21121
+ [181] = https://curl.se/bug/?i=21113
+ [184] = https://curl.se/bug/?i=21119
+ [186] = https://curl.se/bug/?i=21112
