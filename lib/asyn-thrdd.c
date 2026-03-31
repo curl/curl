@@ -590,7 +590,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 
 #ifdef USE_HTTPSRR_ARES
   DEBUGASSERT(!async->thrdd.rr.channel);
-  if(async->dns_queries & CURL_DNSQ_HTTPS) {
+  if((async->dns_queries & CURL_DNSQ_HTTPS) && !async->is_ipaddr) {
     result = async_rr_start(data, async);
     if(result)
       goto out;
@@ -603,7 +603,10 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     return result;
 
 #ifdef CURL_IPRESOLVE_V6
-  if(async->dns_queries & CURL_DNSQ_AAAA) {
+  /* Do not start an AAAA query for an ipv4 address when
+   * we will start an A query for it. */
+  if((async->dns_queries & CURL_DNSQ_AAAA) &&
+     !(async->is_ipv4addr && (async->dns_queries & CURL_DNSQ_A))) {
     result = async_thrdd_query(data, async, CURL_DNSQ_AAAA);
     if(result)
       goto out;

@@ -244,6 +244,8 @@ struct Curl_resolv_async {
   uint8_t dns_responses; /* what queries had responses so far. */
   uint8_t transport;
   uint8_t queries_ongoing;
+  BIT(is_ipaddr);
+  BIT(is_ipv4addr);
   BIT(done);
   BIT(shutdown);
   char hostname[1];

@@ -529,7 +529,10 @@ static void async_ares_addrinfo_cb(void *user_data, int status, int timeouts,
     ares->temp_ai = async_ares_node2addr(ares_ai->nodes);
     ares_freeaddrinfo(ares_ai);
   }
-  async->dns_responses |= CURL_DNSQ_IP(async->dns_queries);
+  if(async->dns_queries & CURL_DNSQ_A)
+    async->dns_responses |= CURL_DNSQ_A;
+  if(async->dns_queries & CURL_DNSQ_AAAA)
+    async->dns_responses |= CURL_DNSQ_AAAA;
   async->queries_ongoing--;
 }
 

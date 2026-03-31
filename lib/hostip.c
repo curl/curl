@@ -394,8 +394,12 @@ hostip_async_new(struct Curl_easy *data,
   async->transport = transport;
   async->start = *Curl_pgrs_now(data);
   async->timeout_ms = timeout_ms;
-  if(hostlen)
+  if(hostlen) {
     memcpy(async->hostname, hostname, hostlen);
+    async->is_ipaddr = Curl_is_ipaddr(async->hostname);
+    if(async->is_ipaddr)
+      async->is_ipv4addr = Curl_is_ipv4addr(async->hostname);
+  }
 
   return async;
 }
