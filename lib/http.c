@@ -3889,136 +3889,112 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode http_on_response(struct Curl_easy *data,
-                                 const char *last_hd, size_t last_hd_len,
-                                 const char *buf, size_t blen,
-                                 size_t *pconsumed)
+/*
+ * Handle a 101 Switching Protocols response. Performs the actual protocol
+ * upgrade to HTTP/2 or WebSocket based on what was requested.
+ */
+static CURLcode http_on_101_upgrade(struct Curl_easy *data,
+                                    const char *buf, size_t blen,
+                                    size_t *pconsumed,
+                                    bool *conn_changed)
 {
   struct connectdata *conn = data->conn;
-  CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  bool conn_changed = FALSE;
 
-  (void)buf; /* not used without HTTP2 enabled */
-  *pconsumed = 0;
-
-  if(k->upgr101 == UPGR101_RECEIVED) {
-    /* supposedly upgraded to http2 now */
-    if(data->req.httpversion != 20)
-      infof(data, "Lying server, not serving HTTP/2");
-  }
-
-  if(k->httpcode < 200 && last_hd) {
-    /* Intermediate responses might trigger processing of more
-     * responses, write the last header to the client before
-     * proceeding. */
-    result = http_write_header(data, last_hd, last_hd_len);
-    last_hd = NULL; /* handled it */
-    if(result)
-      goto out;
-  }
-
-  if(k->httpcode < 100) {
-    failf(data, "Unsupported response code in HTTP response");
-    result = CURLE_UNSUPPORTED_PROTOCOL;
-    goto out;
-  }
-  else if(k->httpcode < 200) {
-    /* "A user agent MAY ignore unexpected 1xx status responses."
-     * By default, we expect to get more responses after this one. */
-    k->header = TRUE;
-    k->headerline = 0; /* restart the header line counter */
-
-    switch(k->httpcode) {
-    case 100:
-      /*
-       * We have made an HTTP PUT or POST and this is 1.1-lingo
-       * that tells us that the server is OK with this and ready
-       * to receive the data.
-       */
-      http_exp100_got100(data);
-      break;
-    case 101: {
-      int upgr101_requested = k->upgr101;
-
-      if(k->httpversion_sent != 11) {
-        /* invalid for other HTTP versions */
-        failf(data, "server sent 101 response while not talking HTTP/1.1");
-        result = CURLE_WEIRD_SERVER_REPLY;
-        goto out;
-      }
-
-      /* Whatever the success, upgrade was selected. */
-      k->upgr101 = UPGR101_RECEIVED;
-      data->conn->bits.upgrade_in_progress = FALSE;
-      conn_changed = TRUE;
-
-      /* To be fully conform, we would check the "Upgrade:" response header
-       * to mention the protocol we requested. */
-      switch(upgr101_requested) {
-      case UPGR101_H2:
-        /* Switch to HTTP/2, where we will get more responses.
-         * blen bytes in bug are already h2 protocol bytes */
-        infof(data, "Received 101, Switching to HTTP/2");
-        result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
-        if(result)
-          goto out;
-        *pconsumed += blen;
-        break;
-#ifndef CURL_DISABLE_WEBSOCKETS
-      case UPGR101_WS:
-        /* Switch to WebSocket, where we now stream ws frames.
-         * blen bytes in bug are already ws protocol bytes */
-        infof(data, "Received 101, Switching to WebSocket");
-        result = Curl_ws_accept(data, buf, blen);
-        if(result)
-          goto out;
-        *pconsumed += blen; /* ws accept handled the data */
-        break;
+#if !defined(USE_NGHTTP2) && defined(CURL_DISABLE_WEBSOCKETS)
+  (void)buf;
+  (void)blen;
+  (void)pconsumed;
+#else
+  CURLcode result;
+  int upgr101_requested = k->upgr101;
 #endif
-      default:
-        /* We silently accept this as the final response. What are we
-         * switching to if we did not ask for an Upgrade? Maybe the
-         * application provided an `Upgrade: xxx` header? */
-        k->header = FALSE;
-        break;
-      }
-      /* processed 101 */
-      break;
-    }
-    default:
-      /* The server may send us other 1xx responses, like informative
-       * 103. This have no influence on request processing and we expect
-       * to receive a final response eventually. */
-      break;
-    }
-    goto out;
+
+  if(k->httpversion_sent != 11) {
+    /* invalid for other HTTP versions */
+    failf(data, "server sent 101 response while not talking HTTP/1.1");
+    return CURLE_WEIRD_SERVER_REPLY;
   }
 
-  /* k->httpcode >= 200, final response */
+  /* Whatever the success, upgrade was selected. */
+  k->upgr101 = UPGR101_RECEIVED;
+  conn->bits.upgrade_in_progress = FALSE;
+  *conn_changed = TRUE;
+
+  /* To be fully compliant, we would check the "Upgrade:" response header to
+   * mention the protocol we requested. */
+#ifdef USE_NGHTTP2
+  if(upgr101_requested == UPGR101_H2) {
+    /* Switch to HTTP/2, where we will get more responses. blen bytes in buf
+     * are already h2 protocol bytes */
+    infof(data, "Received 101, Switching to HTTP/2");
+    result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+    if(!result)
+      *pconsumed += blen;
+    return result;
+  }
+#endif
+#ifndef CURL_DISABLE_WEBSOCKETS
+  if(upgr101_requested == UPGR101_WS) {
+    /* Switch to WebSocket, where we now stream ws frames. blen bytes in buf
+     * are already ws protocol bytes */
+    infof(data, "Received 101, Switching to WebSocket");
+    result = Curl_ws_accept(data, buf, blen);
+    if(!result)
+      *pconsumed += blen; /* ws accept handled the data */
+    return result;
+  }
+#endif
+  /* We silently accept this as the final response. What are we switching to
+   * if we did not ask for an Upgrade? Maybe the application provided an
+   * `Upgrade: xxx` header? */
   k->header = FALSE;
-  if(data->conn->bits.upgrade_in_progress) {
-    /* Asked for protocol upgrade, but it was not selected by the server */
-    data->conn->bits.upgrade_in_progress = FALSE;
-    conn_changed = TRUE;
-  }
+  return CURLE_OK;
+}
 
-  if((k->size == -1) && !k->chunk && !conn->bits.close &&
-     (k->httpversion == 11) &&
-     !(conn->scheme->protocol & CURLPROTO_RTSP) &&
-     data->state.httpreq != HTTPREQ_HEAD) {
-    /* On HTTP 1.1, when connection is not to get closed, but no
-       Content-Length nor Transfer-Encoding chunked have been
-       received, according to RFC2616 section 4.4 point 5, we
-       assume that the server will close the connection to
-       signal the end of the document. */
-    infof(data, "no chunk, no close, no size. Assume close to "
-          "signal end");
-    streamclose(conn, "HTTP: No end-of-message indicator");
-  }
+/*
+ * Handle 1xx intermediate HTTP responses. Sets up state for more
+ * headers and processes 100-continue and 101 upgrade responses.
+ */
+static CURLcode http_on_1xx_response(struct Curl_easy *data,
+                                     const char *buf, size_t blen,
+                                     size_t *pconsumed,
+                                     bool *conn_changed)
+{
+  struct SingleRequest *k = &data->req;
 
-  /* At this point we have some idea about the fate of the connection.
-     If we are closing the connection it may result auth failure. */
+  /* "A user agent MAY ignore unexpected 1xx status responses."
+   * By default, we expect to get more responses after this one. */
+  k->header = TRUE;
+  k->headerline = 0; /* restart the header line counter */
+
+  switch(k->httpcode) {
+  case 100:
+    /* We have made an HTTP PUT or POST and this is 1.1-lingo that tells us
+     * that the server is OK with this and ready to receive the data. */
+    http_exp100_got100(data);
+    break;
+  case 101:
+    return http_on_101_upgrade(data, buf, blen, pconsumed, conn_changed);
+  default:
+    /* The server may send us other 1xx responses, like informative 103. This
+     * has no influence on request processing and we expect to receive a
+     * final response eventually. */
+    break;
+  }
+  return CURLE_OK;
+}
+
+#if defined(USE_NTLM) || defined(USE_SPNEGO)
+/*
+ * Check if NTLM or SPNEGO authentication negotiation failed due to
+ * connection closure (typically on HTTP/1.0 servers).
+ */
+static void http_check_auth_closure(struct Curl_easy *data,
+                                    struct connectdata *conn)
+{
+  /* At this point we have some idea about the fate of the connection. If we
+     are closing the connection it may result auth failure. */
 #ifdef USE_NTLM
   if(conn->bits.close &&
      (((data->req.httpcode == 401) &&
@@ -4047,9 +4023,154 @@ static CURLcode http_on_response(struct Curl_easy *data,
     conn->proxy_negotiate_state = GSS_AUTHSUCC;
   }
 #endif
+}
+#else
+#define http_check_auth_closure(x,y) /* empty */
+#endif
+
+/*
+ * Handle an error response (>= 300) received while still sending the
+ * request body. Deals with 417 Expectation Failed retries, keep-sending
+ * on error, and aborting the send.
+ */
+static CURLcode http_handle_send_error(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  struct SingleRequest *k = &data->req;
+  CURLcode result = CURLE_OK;
+
+  if(!data->req.authneg && !conn->bits.close &&
+     !Curl_creader_will_rewind(data)) {
+    /*
+     * General treatment of errors when about to send data.
+     * Including: "417 Expectation Failed", while waiting for
+     * 100-continue.
+     *
+     * The check for close above is done because if something
+     * else has already deemed the connection to get closed then
+     * something else should have considered the big picture and
+     * we avoid this check.
+     */
+
+    switch(data->state.httpreq) {
+    case HTTPREQ_PUT:
+    case HTTPREQ_POST:
+    case HTTPREQ_POST_FORM:
+    case HTTPREQ_POST_MIME:
+      /* We got an error response. If this happened before the
+       * whole request body has been sent we stop sending and
+       * mark the connection for closure after we have read the
+       * entire response. */
+      if(!Curl_req_done_sending(data)) {
+        if((k->httpcode == 417) && http_exp100_is_selected(data)) {
+          /* 417 Expectation Failed - try again without the
+             Expect header */
+          if(!k->writebytecount && http_exp100_is_waiting(data)) {
+            infof(data, "Got HTTP failure 417 while waiting for a 100");
+          }
+          else {
+            infof(data, "Got HTTP failure 417 while sending data");
+            streamclose(conn, "Stop sending data before everything sent");
+            result = http_perhapsrewind(data, conn);
+            if(result)
+              return result;
+          }
+          data->state.disableexpect = TRUE;
+          Curl_req_abort_sending(data);
+          DEBUGASSERT(!data->req.newurl);
+          data->req.newurl = Curl_bufref_dup(&data->state.url);
+          if(!data->req.newurl)
+            return CURLE_OUT_OF_MEMORY;
+        }
+        else if(data->set.http_keep_sending_on_error) {
+          infof(data, "HTTP error before end of send, keep sending");
+          http_exp100_send_anyway(data);
+        }
+        else {
+          infof(data, "HTTP error before end of send, stop sending");
+          streamclose(conn, "Stop sending data before everything sent");
+          result = Curl_req_abort_sending(data);
+          if(result)
+            return result;
+        }
+      }
+      break;
+
+    default: /* default label present to avoid compiler warnings */
+      break;
+    }
+  }
+
+  if(Curl_creader_will_rewind(data) && !Curl_req_done_sending(data)) {
+    /* We rewind before next send, continue sending now */
+    infof(data, "Keep sending data to get tossed away");
+    CURL_REQ_SET_SEND(data);
+  }
+  return result;
+}
+
+static CURLcode http_on_response(struct Curl_easy *data,
+                                 const char *last_hd, size_t last_hd_len,
+                                 const char *buf, size_t blen,
+                                 size_t *pconsumed)
+{
+  struct connectdata *conn = data->conn;
+  CURLcode result = CURLE_OK;
+  struct SingleRequest *k = &data->req;
+  bool conn_changed = FALSE;
+
+  (void)buf; /* not used without HTTP2 enabled */
+  *pconsumed = 0;
+
+  if(k->upgr101 == UPGR101_RECEIVED) {
+    /* supposedly upgraded to http2 now */
+    if(data->req.httpversion != 20)
+      infof(data, "Lying server, not serving HTTP/2");
+  }
+
+  if(k->httpcode < 200 && last_hd) {
+    /* Intermediate responses might trigger processing of more responses,
+     * write the last header to the client before proceeding. */
+    result = http_write_header(data, last_hd, last_hd_len);
+    last_hd = NULL; /* handled it */
+    if(result)
+      goto out;
+  }
+
+  if(k->httpcode < 100) {
+    failf(data, "Unsupported response code in HTTP response");
+    result = CURLE_UNSUPPORTED_PROTOCOL;
+    goto out;
+  }
+  else if(k->httpcode < 200) {
+    result = http_on_1xx_response(data, buf, blen, pconsumed, &conn_changed);
+    goto out;
+  }
+
+  /* k->httpcode >= 200, final response */
+  k->header = FALSE;
+  if(conn->bits.upgrade_in_progress) {
+    /* Asked for protocol upgrade, but it was not selected */
+    conn->bits.upgrade_in_progress = FALSE;
+    conn_changed = TRUE;
+  }
+
+  if((k->size == -1) && !k->chunk && !conn->bits.close &&
+     (k->httpversion == 11) &&
+     !(conn->scheme->protocol & CURLPROTO_RTSP) &&
+     data->state.httpreq != HTTPREQ_HEAD) {
+    /* On HTTP 1.1, when connection is not to get closed, but no
+       Content-Length nor Transfer-Encoding chunked have been received,
+       according to RFC2616 section 4.4 point 5, we assume that the server
+       will close the connection to signal the end of the document. */
+    infof(data, "no chunk, no close, no size. Assume close to signal end");
+    streamclose(conn, "HTTP: No end-of-message indicator");
+  }
+
+  http_check_auth_closure(data, conn);
 
 #ifndef CURL_DISABLE_WEBSOCKETS
-  /* All >=200 HTTP status codes are errors when wanting WebSocket */
+  /* All >=200 HTTP status codes are errors when wanting ws */
   if(data->req.upgr101 == UPGR101_WS) {
     failf(data, "Refused WebSocket upgrade: %d", k->httpcode);
     result = CURLE_HTTP_RETURNED_ERROR;
@@ -4059,88 +4180,23 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   /* Check if this response means the transfer errored. */
   if(http_should_fail(data, data->req.httpcode)) {
-    failf(data, "The requested URL returned error: %d", k->httpcode);
+    failf(data, "The requested URL returned error: %d",
+          k->httpcode);
     result = CURLE_HTTP_RETURNED_ERROR;
     goto out;
   }
 
-  /* Curl_http_auth_act() checks what authentication methods
-   * that are available and decides which one (if any) to
-   * use. It will set 'newurl' if an auth method was picked. */
+  /* Curl_http_auth_act() checks what authentication methods that are
+   * available and decides which one (if any) to use. It will set 'newurl' if
+   * an auth method was picked. */
   result = Curl_http_auth_act(data);
   if(result)
     goto out;
 
   if(k->httpcode >= 300) {
-    if(!data->req.authneg && !conn->bits.close &&
-       !Curl_creader_will_rewind(data)) {
-      /*
-       * General treatment of errors when about to send data. Including :
-       * "417 Expectation Failed", while waiting for 100-continue.
-       *
-       * The check for close above is done because of something
-       * else has already deemed the connection to get closed then
-       * something else should have considered the big picture and we
-       * avoid this check.
-       *
-       */
-
-      switch(data->state.httpreq) {
-      case HTTPREQ_PUT:
-      case HTTPREQ_POST:
-      case HTTPREQ_POST_FORM:
-      case HTTPREQ_POST_MIME:
-        /* We got an error response. If this happened before the whole
-         * request body has been sent we stop sending and mark the
-         * connection for closure after we have read the entire response.
-         */
-        if(!Curl_req_done_sending(data)) {
-          if((k->httpcode == 417) && http_exp100_is_selected(data)) {
-            /* 417 Expectation Failed - try again without the Expect
-               header */
-            if(!k->writebytecount && http_exp100_is_waiting(data)) {
-              infof(data, "Got HTTP failure 417 while waiting for a 100");
-            }
-            else {
-              infof(data, "Got HTTP failure 417 while sending data");
-              streamclose(conn, "Stop sending data before everything sent");
-              result = http_perhapsrewind(data, conn);
-              if(result)
-                goto out;
-            }
-            data->state.disableexpect = TRUE;
-            Curl_req_abort_sending(data);
-            DEBUGASSERT(!data->req.newurl);
-            data->req.newurl = Curl_bufref_dup(&data->state.url);
-            if(!data->req.newurl) {
-              result = CURLE_OUT_OF_MEMORY;
-              goto out;
-            }
-          }
-          else if(data->set.http_keep_sending_on_error) {
-            infof(data, "HTTP error before end of send, keep sending");
-            http_exp100_send_anyway(data);
-          }
-          else {
-            infof(data, "HTTP error before end of send, stop sending");
-            streamclose(conn, "Stop sending data before everything sent");
-            result = Curl_req_abort_sending(data);
-            if(result)
-              goto out;
-          }
-        }
-        break;
-
-      default: /* default label present to avoid compiler warnings */
-        break;
-      }
-    }
-
-    if(Curl_creader_will_rewind(data) && !Curl_req_done_sending(data)) {
-      /* We rewind before next send, continue sending now */
-      infof(data, "Keep sending data to get tossed away");
-      CURL_REQ_SET_SEND(data);
-    }
+    result = http_handle_send_error(data);
+    if(result)
+      goto out;
   }
 
   /* If we requested a "no body", this is a good time to get
@@ -4149,11 +4205,10 @@ static CURLcode http_on_response(struct Curl_easy *data,
   if(data->req.no_body)
     k->download_done = TRUE;
 
-  /* If max download size is *zero* (nothing) we already have
-     nothing and can safely return ok now! For HTTP/2, we would
-     like to call http2_handle_stream_close to properly close a
-     stream. In order to do this, we keep reading until we
-     close the stream. */
+  /* If max download size is *zero* (nothing) we already have nothing and can
+     safely return ok now! For HTTP/2, we would like to call
+     http2_handle_stream_close to properly close a stream. In order to do
+     this, we keep reading until we close the stream. */
   if((k->maxdownload == 0) && (k->httpversion_sent < 20))
     k->download_done = TRUE;
 
@@ -4161,21 +4216,18 @@ static CURLcode http_on_response(struct Curl_easy *data,
   result = http_firstwrite(data);
 
   if(!result)
-    /* This is the last response that we get for the current request.
-     * Check on the body size and determine if the response is complete.
-     */
+    /* This is the last response that we get for the current request. Check on
+     * the body size and determine if the response is complete. */
     result = http_size(data);
 
 out:
-  if(last_hd) {
+  if(last_hd)
     /* if not written yet, write it now */
-    result = Curl_1st_fatal(
-      result, http_write_header(data, last_hd, last_hd_len));
-  }
-  if(conn_changed) {
-    /* poke the multi handle to allow any pending pipewait to retry now */
+    result = Curl_1st_fatal(result,
+                            http_write_header(data, last_hd, last_hd_len));
+  if(conn_changed)
+    /* poke the multi handle to allow pending pipewait to retry */
     Curl_multi_connchanged(data->multi);
-  }
   return result;
 }
 
