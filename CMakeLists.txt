@@ -2154,7 +2154,7 @@ if(NOT CURL_DISABLE_INSTALL)
       curl_collect_target_link_options("${_lib}")  # look into the target recursively
       list(APPEND _explicit_libdirs ${_libdirs})
       list(APPEND _explicit_libs ${_libs})
-      if(NOT _libs AND NOT _libdirs)
+      if(NOT _libs AND NOT _libdirs AND NOT _lib STREQUAL Threads::Threads)
         message(WARNING "Bad lib in library list: ${_lib}")
       endif()
       if(_lib STREQUAL OpenSSL::SSL AND NOT HAVE_BORINGSSL)  # BoringSSL does not provide openssl.pc
