@@ -145,9 +145,9 @@ jobs:
     steps:
       - name: 'install packages'
         run: |
-          printf '#!/bin/sh
-            while [ $? = 0 ]; do for i in 1 2 3; do timeout 30 "$@" && break 2; echo "Error: slow server, retry $i"; sleep 1
-            dpkg --configure -a; done; false; done' > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+          printf "#!/bin/sh
+            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 30 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
+            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
