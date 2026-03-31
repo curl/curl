@@ -68,14 +68,14 @@
  *
  */
 struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
+                                            uint8_t dns_queries,
                                             const char *hostname,
                                             uint16_t port,
-                                            uint8_t ip_version,
                                             uint8_t transport)
 {
   struct Curl_addrinfo *ai = NULL;
 
-  (void)ip_version;
+  (void)dns_queries;
   (void)transport;
 
   ai = Curl_ipv4_resolve_r(hostname, port);

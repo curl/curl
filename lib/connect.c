@@ -557,6 +557,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
+  uint8_t dns_queries;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->scheme);
@@ -580,7 +581,12 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
       goto out;
   }
 
-  result = Curl_cf_dns_add(data, conn, sockindex,
+  dns_queries = Curl_resolv_dns_queries(data, conn->ip_version);
+#ifdef USE_HTTPSRR
+  if(sockindex == FIRSTSOCKET)
+    dns_queries |= CURL_DNSQ_HTTPS;
+#endif
+  result = Curl_cf_dns_add(data, conn, sockindex, dns_queries,
                            conn->transport_wanted, dns);
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:

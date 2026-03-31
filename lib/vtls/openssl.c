@@ -37,6 +37,7 @@
 #include "curlx/inet_pton.h"
 #include "vtls/openssl.h"
 #include "connect.h"
+#include "cf-dns.h"
 #include "progress.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
@@ -3423,6 +3424,16 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
 }
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
+static bool ossl_ech_need_httpsrr(struct Curl_easy *data)
+{
+  if(!CURLECH_ENABLED(data))
+    return FALSE;
+  if((data->set.tls_ech & CURLECH_GREASE) ||
+     (data->set.tls_ech & CURLECH_CLA_CFG))
+   return FALSE;
+  return TRUE;
+}
+
 static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -3488,49 +3499,32 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     infof(data, "ECH: ECHConfig from command line");
   }
   else {
-    struct Curl_dns_entry *dns = NULL;
+    const struct Curl_https_rrinfo *rinfo =
+      Curl_conn_dns_get_https(data, cf->sockindex);
 
-    if(peer->hostname)
-      result = Curl_dnscache_get(data, peer->hostname, peer->port,
-                                 cf->conn->ip_version, &dns);
-    if(!dns) {
-      if(result) {
-        failf(data, "ECH: could not resolve %s:%d",
-              peer->hostname, peer->port);
-        return result;
-      }
-      infof(data, "ECH: requested but no DNS info available");
-      if(data->set.tls_ech & CURLECH_HARD)
-        return CURLE_SSL_CONNECT_ERROR;
-    }
-    else {
-      struct Curl_https_rrinfo *rinfo = NULL;
+    if(rinfo && rinfo->echconfiglist) {
+      unsigned char *ecl = rinfo->echconfiglist;
+      size_t elen = rinfo->echconfiglist_len;
 
-      rinfo = dns->hinfo;
-      if(rinfo && rinfo->echconfiglist) {
-        unsigned char *ecl = rinfo->echconfiglist;
-        size_t elen = rinfo->echconfiglist_len;
-
-        infof(data, "ECH: ECHConfig from DoH HTTPS RR");
-        if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
-          infof(data, "ECH: SSL_set1_ech_config_list failed");
-          if(data->set.tls_ech & CURLECH_HARD)
-            return CURLE_SSL_CONNECT_ERROR;
-        }
-        else {
-          trying_ech_now = 1;
-          infof(data, "ECH: imported ECHConfigList of length %zu", elen);
-        }
-      }
-      else {
-        infof(data, "ECH: requested but no ECHConfig available");
+      infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+      if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
+        infof(data, "ECH: SSL_set1_ech_config_list failed");
         if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
-      Curl_dns_entry_unlink(data, &dns);
+      else {
+        trying_ech_now = 1;
+        infof(data, "ECH: imported ECHConfigList of length %zu", elen);
+      }
+    }
+    else {
+      infof(data, "ECH: requested but no ECHConfig available");
+      if(data->set.tls_ech & CURLECH_HARD)
+        return CURLE_SSL_CONNECT_ERROR;
     }
   }
 #ifdef HAVE_BORINGSSL_LIKE
+  (void)peer;
   if(trying_ech_now && outername) {
     infof(data, "ECH: setting public_name not supported with BoringSSL");
     return CURLE_SSL_CONNECT_ERROR;
@@ -4949,6 +4943,15 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
+    /* if we do ECH and need the HTTPS-RR information for it,
+     * we delay the connect until it arrives or DNS resolve fails. */
+    if(ossl_ech_need_httpsrr(data) &&
+       !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+      CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
+      return CURLE_OK;
+    }
+#endif
     CURL_TRC_CF(data, cf, "ossl_connect, step1");
     result = ossl_connect_step1(cf, data);
     if(result)

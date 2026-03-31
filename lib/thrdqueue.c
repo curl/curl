@@ -380,27 +380,27 @@ CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
 
 #ifdef CURLVERBOSE
 void Curl_thrdq_trace(struct curl_thrdq *tqueue,
-                      struct Curl_easy *data,
-                      struct curl_trc_feat *feat)
+                      struct Curl_easy *data)
 {
+  struct curl_trc_feat *feat = &Curl_trc_feat_threads;
   if(Curl_trc_ft_is_verbose(data, feat)) {
     struct Curl_llist_node *e;
     struct thrdq_item *qitem;
 
-    Curl_thrdpool_trace(tqueue->tpool, data, feat);
+    Curl_thrdpool_trace(tqueue->tpool, data);
     Curl_mutex_acquire(&tqueue->lock);
     if(!Curl_llist_count(&tqueue->sendq) &&
        !Curl_llist_count(&tqueue->recvq)) {
-      Curl_trc_feat_infof(data, feat, "[%s] [QUEUE] empty", tqueue->name);
+      Curl_trc_feat_infof(data, feat, "[TQUEUE-%s] empty", tqueue->name);
     }
     for(e = Curl_llist_head(&tqueue->sendq); e; e = Curl_node_next(e)) {
       qitem = Curl_node_elem(e);
-      Curl_trc_feat_infof(data, feat, "[%s] [QUEUE] in: %s",
+      Curl_trc_feat_infof(data, feat, "[TQUEUE-%s] in: %s",
                           tqueue->name, qitem->description);
     }
     for(e = Curl_llist_head(&tqueue->recvq); e; e = Curl_node_next(e)) {
       qitem = Curl_node_elem(e);
-      Curl_trc_feat_infof(data, feat, "[%s] [QUEUE] out: %s",
+      Curl_trc_feat_infof(data, feat, "[TQUEUE-%s] out: %s",
                           tqueue->name, qitem->description);
     }
     Curl_mutex_release(&tqueue->lock);

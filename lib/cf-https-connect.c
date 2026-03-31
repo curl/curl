@@ -330,13 +330,6 @@ static CURLcode cf_hc_resolv(struct Curl_cfilter *cf,
      * can no longer change that. Any HTTPSRR advice for other hosts and ports
      * we need to ignore. */
     const struct Curl_https_rrinfo *rr;
-    bool need_https_rr = FALSE;
-
-    if(need_https_rr) {
-      result = Curl_conn_dns_result(cf->conn, cf->sockindex);
-      if(result)
-        return result;
-    }
 
     /* Do we have HTTPS-RR information? */
     rr = Curl_conn_dns_get_https(data, cf->sockindex);

@@ -99,16 +99,6 @@ void Curl_async_global_cleanup(void)
 #endif
 }
 
-CURLcode Curl_async_get_impl(struct Curl_easy *data,
-                             struct Curl_resolv_async *async,
-                             void **impl)
-{
-  (void)data;
-  (void)async;
-  *impl = NULL;
-  return CURLE_OK;
-}
-
 #ifdef CURLVERBOSE
 #define CURL_ASYN_ITEM_DESC_LEN   64
 #define async_item_description(x)   (x)->description
@@ -123,10 +113,10 @@ struct async_thrdd_item {
 #endif
   int sock_error;
   uint32_t mid;
-  uint32_t async_id;
+  uint32_t resolv_id;
   uint16_t port;
-  uint8_t ip_version;
   uint8_t transport;
+  uint8_t dns_queries;
 #ifdef DEBUGBUILD
   uint32_t delay_ms;
   uint32_t delay_fail_ms;
@@ -147,13 +137,12 @@ static void async_thrdd_item_destroy(struct async_thrdd_item *item)
 /* Initialize context for threaded resolver */
 static struct async_thrdd_item *
 async_thrdd_item_create(struct Curl_easy *data,
+                        uint32_t resolv_id, uint8_t dns_queries,
                         const char *hostname, uint16_t port,
-                        uint8_t ip_version, uint8_t transport,
-                        uint32_t async_id)
+                        uint8_t transport)
 {
   size_t hostlen = strlen(hostname);
   struct async_thrdd_item *item;
-  VERBOSE(const char *qtype);
 
   item = curlx_calloc(1, sizeof(*item) + hostlen);
   if(!item)
@@ -161,18 +150,18 @@ async_thrdd_item_create(struct Curl_easy *data,
 
   if(hostlen) /* NUL byte of name already in struct size */
     memcpy(item->hostname, hostname, hostlen);
-  item->port = port;
-  item->ip_version = ip_version;
-  item->transport = transport;
   item->mid = data->mid;
-  item->async_id = async_id;
+  item->resolv_id = resolv_id;
+  item->dns_queries = dns_queries;
+  item->port = port;
+  item->transport = transport;
 
 #ifdef CURLVERBOSE
-  qtype = (ip_version == CURL_IPRESOLVE_WHATEVER) ? "A+AAAA":
-          ((ip_version == CURL_IPRESOLVE_V6) ? "AAAA" : "A");
   curl_msnprintf(item->description, sizeof(item->description),
-                 "[%" FMT_OFF_T "/%d] %s %s:%u",
-                 data->id, item->async_id, qtype, item->hostname, item->port);
+                 "[%" FMT_OFF_T "/%u] %s %s:%u",
+                 data->id, item->resolv_id,
+                 Curl_resolv_query_str(dns_queries),
+                 item->hostname, item->port);
 #endif
 
 #ifdef DEBUGBUILD
@@ -205,14 +194,18 @@ static void async_thrdd_rr_done(void *user_data, ares_status_t status,
                                 size_t timeouts,
                                 const ares_dns_record_t *dnsrec)
 {
-  struct Curl_easy *data = user_data;
-  struct async_thrdd_ctx *thrdd = &data->state.async->thrdd;
+  struct Curl_resolv_async *async = user_data;
+  struct async_thrdd_ctx *thrdd = async ? &async->thrdd : NULL;
 
   (void)timeouts;
-  thrdd->rr.done = TRUE;
-  if((ARES_SUCCESS != status) || !dnsrec)
+  if(!thrdd)
     return;
-  thrdd->rr.result = Curl_httpsrr_from_ares(data, dnsrec, &thrdd->rr.hinfo);
+
+  async->dns_responses |= CURL_DNSQ_HTTPS;
+  async->queries_ongoing--;
+  async->done = !async->queries_ongoing;
+  if((ARES_SUCCESS == status) && dnsrec)
+    async->result = Curl_httpsrr_from_ares(dnsrec, &thrdd->rr.hinfo);
 }
 
 static CURLcode async_rr_start(struct Curl_easy *data,
@@ -251,8 +244,9 @@ static CURLcode async_rr_start(struct Curl_easy *data,
   ares_query_dnsrec(thrdd->rr.channel,
                     rrname ? rrname : async->hostname, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
-                    async_thrdd_rr_done, data, NULL);
-  CURL_TRC_DNS(data, "Issued HTTPS-RR request for %s",
+                    async_thrdd_rr_done, async, NULL);
+  async->queries_ongoing++;
+  CURL_TRC_DNS(data, "[HTTPS-RR] initiated request for %s",
                rrname ? rrname : async->hostname);
   return CURLE_OK;
 }
@@ -275,7 +269,7 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data,
                               struct Curl_resolv_async *async)
 {
   (void)data;
-  if(async->thrdd.queued && !async->thrdd.done &&
+  if(async->queries_ongoing && !async->done &&
      data->multi && data->multi->resolv_thrdq) {
     /* Remove any resolve items still queued */
     Curl_thrdq_clear(data->multi->resolv_thrdq,
@@ -298,17 +292,20 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data,
  * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  */
-CURLcode Curl_async_await(struct Curl_easy *data,
-                          struct Curl_resolv_async *async,
+CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
                           struct Curl_dns_entry **pdns)
 {
-  struct async_thrdd_ctx *thrdd = &async->thrdd;
+  struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
+  struct async_thrdd_ctx *thrdd = async ? &async->thrdd : NULL;
   timediff_t milli, ms;
 
-  CURL_TRC_DNS(data, "[async] await %s", async->hostname);
-  while(thrdd->queued && !thrdd->done) {
+  CURL_TRC_DNS(data, "await results for %s", async->hostname);
+  if(!thrdd)
+    return CURLE_FAILED_INIT;
+
+  while(async->queries_ongoing && !async->done) {
     Curl_async_thrdd_multi_process(data->multi);
-    if(thrdd->done)
+    if(async->done)
       break;
 
     ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
@@ -320,8 +317,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
       milli = 50;
     else
       milli = 200;
-    CURL_TRC_DNS(data, "[async] await, waiting %" FMT_TIMEDIFF_T "ms",
-                 milli);
+    CURL_TRC_DNS(data, "await, waiting %" FMT_TIMEDIFF_T "ms", milli);
     curlx_wait_ms(milli);
   }
   return Curl_async_take_result(data, async, pdns);
@@ -350,19 +346,23 @@ static void async_thrdd_item_process(void *arg)
 
   memset(&hints, 0, sizeof(hints));
 #ifdef CURLRES_IPV6
-  if(item->ip_version != CURL_IPRESOLVE_V4) {
-    pf = (item->ip_version == CURL_IPRESOLVE_V6) ? PF_INET6 : PF_UNSPEC;
+  if(item->dns_queries & CURL_DNSQ_AAAA) {
+    pf = (item->dns_queries & CURL_DNSQ_A) ? PF_UNSPEC : PF_INET6;
   }
 #endif
   hints.ai_family = pf;
   hints.ai_socktype = Curl_socktype_for_transport(item->transport);
   hints.ai_protocol = Curl_protocol_for_transport(item->transport);
+#ifdef __APPLE__
+  /* If we leave `ai_flags == 0` then macOS is looking for IPV4MAPPED
+   * when doing AAAA queries. We do not want this "help". */
+  hints.ai_flags = AI_ADDRCONFIG;
+#endif
+
+  curl_msnprintf(service, sizeof(service), "%u", item->port);
 #ifdef AI_NUMERICSERV
-  /* Without service and flags, resolvers might lookup up in more
-   * places than we want them to, causing a delay. */
   hints.ai_flags |= AI_NUMERICSERV;
 #endif
-  curl_msnprintf(service, sizeof(service), "%u", item->port);
 
   rc = Curl_getaddrinfo_ex(item->hostname, service, &hints, &item->res);
   if(rc) {
@@ -433,7 +433,7 @@ CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
 {
   CURLcode result;
   DEBUGASSERT(!multi->resolv_thrdq);
-  result = Curl_thrdq_create(&multi->resolv_thrdq, "async", 0,
+  result = Curl_thrdq_create(&multi->resolv_thrdq, "DNS", 0,
                              min_threads, max_threads, idle_time_ms,
                              async_thrdd_item_free,
                              async_thrdd_item_process,
@@ -471,8 +471,11 @@ static void async_thrdd_report_item(struct Curl_easy *data,
   struct dynbuf tmp;
   const char *sep = "";
   const struct Curl_addrinfo *ai = item->res;
-  int ai_family = (item->ip_version == CURL_IPRESOLVE_V6) ? AF_INET6 : AF_INET;
+  int ai_family = (item->dns_queries & CURL_DNSQ_AAAA) ? AF_INET6 : AF_INET;
   CURLcode result;
+
+  if(!Curl_trc_is_verbose(data))
+    return;
 
   curlx_dyn_init(&tmp, 1024);
   for(; ai; ai = ai->ai_next) {
@@ -489,7 +492,7 @@ static void async_thrdd_report_item(struct Curl_easy *data,
 
   infof(data, "Host %s:%u resolved IPv%c: %s",
                item->hostname, item->port,
-               (item->ip_version == CURL_IPRESOLVE_V6) ? '6' : '4',
+               (item->dns_queries & CURL_DNSQ_AAAA) ? '6' : '4',
                (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
 out:
   curlx_dyn_free(&tmp);
@@ -507,20 +510,20 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
   while(!Curl_thrdq_recv(multi->resolv_thrdq, &qitem)) {
     /* dispatch resolve result */
     struct async_thrdd_item *item = qitem;
+    struct Curl_resolv_async *async = NULL;
 
     data = Curl_multi_get_easy(multi, item->mid);
-    /* there is a chance that the original resolve was discarded and
-     * either no new, or a new resolve with a different id is ongoing. */
-    if(data && data->conn && data->state.async &&
-       (data->state.async->id == item->async_id)) {
-      struct Curl_resolv_async *async = data->state.async;
+    if(data)
+      async = Curl_async_get(data, item->resolv_id);
+    if(async) {
       struct async_thrdd_item **pdest = &async->thrdd.res_A;
 
-      --async->thrdd.queued;
-      async->thrdd.done = !async->thrdd.queued;
+      async->dns_responses |= item->dns_queries;
+      --async->queries_ongoing;
+      async->done = !async->queries_ongoing;
 
 #ifdef CURLRES_IPV6
-      if(item->ip_version == CURL_IPRESOLVE_V6)
+      if(item->dns_queries & CURL_DNSQ_AAAA)
         pdest = &async->thrdd.res_AAAA;
 #endif
       if(!*pdest) {
@@ -535,7 +538,7 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
     async_thrdd_item_free(item);
   }
 #ifdef CURLVERBOSE
-  Curl_thrdq_trace(multi->resolv_thrdq, multi->admin, &Curl_trc_feat_dns);
+  Curl_thrdq_trace(multi->resolv_thrdq, multi->admin);
 #endif
 }
 
@@ -550,25 +553,25 @@ CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
 
 static CURLcode async_thrdd_query(struct Curl_easy *data,
                                   struct Curl_resolv_async *async,
-                                  uint8_t query_version)
+                                  uint8_t dns_queries)
 {
   struct async_thrdd_item *item;
   CURLcode result;
 
-  item = async_thrdd_item_create(data, async->hostname, async->port,
-                                 query_version, async->transport,
-                                 async->id);
+  item = async_thrdd_item_create(data, async->id, dns_queries,
+                                 async->hostname, async->port,
+                                 async->transport);
   if(!item) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  CURL_TRC_DNS(data, "[async] queueing %s", item->description);
+  CURL_TRC_DNS(data, "queueing query %s", item->description);
   result = Curl_thrdq_send(data->multi->resolv_thrdq, item,
                            async_item_description(item), async->timeout_ms);
   if(result)
     goto out;
   item = NULL;
-  async->thrdd.queued++;
+  async->queries_ongoing++;
 
 out:
   if(item)
@@ -580,89 +583,84 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
                                 struct Curl_resolv_async *async)
 {
   CURLcode result = CURLE_FAILED_INIT;
+  void *resolver = NULL;
 
-  if(async->thrdd.queued || async->thrdd.done)
+  if(async->queries_ongoing || async->done)
     return CURLE_FAILED_INIT;
 
-  switch(async->ip_version) {
-#ifdef CURL_IPRESOLVE_V6
-  case CURL_IPRESOLVE_V6:
-    result = async_thrdd_query(data, async, CURL_IPRESOLVE_V6);
-    break;
+#ifdef USE_HTTPSRR_ARES
+  DEBUGASSERT(!async->thrdd.rr.channel);
+  if(async->dns_queries & CURL_DNSQ_HTTPS) {
+    result = async_rr_start(data, async);
+    if(result)
+      goto out;
+    resolver = async->thrdd.rr.channel;
+  }
 #endif
-  case CURL_IPRESOLVE_V4:
-    result = async_thrdd_query(data, async, CURL_IPRESOLVE_V4);
-    break;
-  default:
+
+  result = Curl_resolv_announce_start(data, resolver);
+  if(result)
+    return result;
+
 #ifdef CURL_IPRESOLVE_V6
-    /* When resolving IP addresses, some resolvers (e.g. macOS) will
-     * happily "embed" an IPv4 address into the IPv6 equivalent.
-     * This will then confuse FTP that has been told an IPv4 for
-     * DATA, but suddenly sees IPv6. */
-    if(Curl_ipv6works(data) &&  !Curl_is_ipv4addr(async->hostname)) {
-      result = async_thrdd_query(data, async, CURL_IPRESOLVE_V6);
-      if(result)
-        goto out;
-    }
+  if(async->dns_queries & CURL_DNSQ_AAAA) {
+    result = async_thrdd_query(data, async, CURL_DNSQ_AAAA);
+    if(result)
+      goto out;
+  }
 #endif
-    result = async_thrdd_query(data, async, CURL_IPRESOLVE_V4);
-    break;
+  if(async->dns_queries & CURL_DNSQ_A) {
+    result = async_thrdd_query(data, async, CURL_DNSQ_A);
+    if(result)
+      goto out;
   }
   if(result)
     goto out;
 
 #ifdef CURLVERBOSE
-  Curl_thrdq_trace(data->multi->resolv_thrdq, data, &Curl_trc_feat_dns);
-#endif
-
-#ifdef USE_HTTPSRR_ARES
-  DEBUGASSERT(!async->thrdd.rr.channel);
-  if(async_rr_start(data, async))
-    infof(data, "Failed HTTPS RR operation");
+  Curl_thrdq_trace(data->multi->resolv_thrdq, data);
 #endif
 
 out:
   if(result)
-    CURL_TRC_DNS(data, "[async] error queueing %s:%d -> %d",
+    CURL_TRC_DNS(data, "error queueing query %s:%d -> %d",
                  async->hostname, async->port, result);
   return result;
 }
 
-CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
+CURLcode Curl_async_pollset(struct Curl_easy *data,
+                            struct Curl_resolv_async *async,
+                            struct easy_pollset *ps)
 {
-  struct Curl_resolv_async *async = data->state.async;
-  struct async_thrdd_ctx *thrdd = async ? &async->thrdd : NULL;
+  timediff_t timeout_ms;
 
-  if(!thrdd)
-    return CURLE_OK;
+  timeout_ms = Curl_async_timeleft_ms(data, async);
 #ifdef USE_HTTPSRR_ARES
-  if(thrdd->rr.channel) {
-    CURLcode result = Curl_ares_pollset(data, thrdd->rr.channel, ps);
+  if(async->thrdd.rr.channel) {
+    CURLcode result = Curl_ares_pollset(data, async->thrdd.rr.channel, ps);
     if(result)
       return result;
+    timeout_ms = Curl_ares_timeout_ms(data, async, async->thrdd.rr.channel);
   }
 #else
   (void)ps;
 #endif
 
-  if(!thrdd->done) {
-#ifdef ENABLE_WAKEUP
-    /* The multi "wakeup" socket pair triggers result processing,
-     * no need for an extra timer. */
-  (void)data;
-#else
-    timediff_t milli;
-    timediff_t ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
-    if(ms < 3)
-      milli = 1;
-    else if(ms <= 50)
-      milli = ms / 3;
-    else if(ms <= 250)
-      milli = 50;
+  if(!async->done) {
+#ifndef ENABLE_WAKEUP
+    timediff_t stutter_ms, elapsed_ms;
+    elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
+    if(elapsed_ms < 3)
+      stutter_ms = 1;
+    else if(elapsed_ms <= 50)
+      stutter_ms = elapsed_ms / 3;
+    else if(elapsed_ms <= 250)
+      stutter_ms = 50;
     else
-      milli = 200;
-    Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
+      stutter_ms = 200;
+    timeout_ms = CURLMIN(stutter_ms, timeout_ms);
 #endif
+    Curl_expire(data, timeout_ms, EXPIRE_ASYNC_NAME);
   }
   return CURLE_OK;
 }
@@ -677,11 +675,12 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
                                 struct Curl_dns_entry **pdns)
 {
   struct async_thrdd_ctx *thrdd = &async->thrdd;
+  struct Curl_dns_entry *dns = NULL;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(pdns);
   *pdns = NULL;
-  if(!thrdd->queued && !thrdd->done) {
+  if(!async->queries_ongoing && !async->done) {
     DEBUGASSERT(0);
     return CURLE_FAILED_INIT;
   }
@@ -692,52 +691,60 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     (void)Curl_ares_perform(thrdd->rr.channel, 0);
 #endif
 
-  if(!thrdd->done)
+  if(!async->done)
     return CURLE_AGAIN;
 
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
+  if(async->result)
+    goto out;
+
   if((thrdd->res_A && thrdd->res_A->res) ||
      (thrdd->res_AAAA && thrdd->res_AAAA->res)) {
-    struct Curl_dns_entry *dns =
-      Curl_dnscache_mk_entry2(data,
-                              thrdd->res_A ? &thrdd->res_A->res : NULL,
-                              thrdd->res_AAAA ? &thrdd->res_AAAA->res : NULL,
-                              async->hostname, async->port, async->ip_version);
-    if(!dns)
+    dns = Curl_dnscache_mk_entry2(
+      data, async->dns_queries,
+      thrdd->res_A ? &thrdd->res_A->res : NULL,
+      thrdd->res_AAAA ? &thrdd->res_AAAA->res : NULL,
+      async->hostname, async->port);
+    if(!dns) {
       result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
 
 #ifdef USE_HTTPSRR_ARES
-    if(!result && thrdd->rr.channel) {
-      result = thrdd->rr.result;
-      if(!result) {
-        struct Curl_https_rrinfo *lhrr;
+    if(thrdd->rr.channel) {
+      struct Curl_https_rrinfo *lhrr = NULL;
+      if(thrdd->rr.hinfo.complete) {
         lhrr = Curl_httpsrr_dup_move(&thrdd->rr.hinfo);
-        if(!lhrr)
+        if(!lhrr) {
           result = CURLE_OUT_OF_MEMORY;
-        else
-          dns->hinfo = lhrr;
+          goto out;
+        }
       }
+      Curl_httpsrr_trace(data, lhrr);
+      Curl_dns_entry_set_https_rr(dns, lhrr);
     }
 #endif
-    if(!result && dns) {
-      CURL_TRC_DNS(data, "[async] resolving complete");
-      *pdns = dns;
-      dns = NULL;
-    }
-    Curl_dns_entry_unlink(data, &dns);
   }
 
+  if(dns) {
+    CURL_TRC_DNS(data, "resolving complete");
+    *pdns = dns;
+    dns = NULL;
+  }
 #ifdef CURLVERBOSE
-  Curl_thrdq_trace(data->multi->resolv_thrdq, data, &Curl_trc_feat_dns);
+  Curl_thrdq_trace(data->multi->resolv_thrdq, data);
 #endif
+
+out:
+  Curl_dns_entry_unlink(data, &dns);
+  Curl_async_thrdd_shutdown(data, async);
   if(!result && !*pdns)
     result = Curl_resolver_error(data, NULL);
-  Curl_async_thrdd_shutdown(data, async);
   if(result &&
      (result != CURLE_COULDNT_RESOLVE_HOST) &&
      (result != CURLE_COULDNT_RESOLVE_PROXY)) {
-    CURL_TRC_DNS(data, "[async] %s:%d: error %d",
-                 async->hostname, async->port, result);
+    CURL_TRC_DNS(data, "Error %d resolving %s:%d",
+                 result, async->hostname, async->port);
   }
   return result;
 }
@@ -779,5 +786,31 @@ Curl_async_get_ai(struct Curl_easy *data,
   }
   return NULL;
 }
+
+#ifdef USE_HTTPSRR
+const struct Curl_https_rrinfo *
+Curl_async_get_https(struct Curl_easy *data,
+                     struct Curl_resolv_async *async)
+{
+#ifdef USE_HTTPSRR_ARES
+  if(Curl_async_knows_https(data, async))
+    return &async->thrdd.rr.hinfo;
+#else
+  (void)data;
+  (void)async;
+#endif
+  return NULL;
+}
+
+bool Curl_async_knows_https(struct Curl_easy *data,
+                            struct Curl_resolv_async *async)
+{
+  (void)data;
+  if(async->dns_queries & CURL_DNSQ_HTTPS)
+    return ((async->dns_queries & CURL_DNSQ_HTTPS) || async->done);
+  return TRUE; /* we know it will never come */
+}
+
+#endif /* USE_HTTPSRR */
 
 #endif /* USE_RESOLV_THREADED */

@@ -223,6 +223,12 @@ struct curl_trc_feat Curl_trc_feat_timer = {
   "TIMER",
   CURL_LOG_LVL_NONE,
 };
+#ifdef USE_THREADS
+struct curl_trc_feat Curl_trc_feat_threads = {
+  "THREADS",
+  CURL_LOG_LVL_NONE,
+};
+#endif
 #endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -525,6 +531,9 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_write,     TRC_CT_NONE },
   { &Curl_trc_feat_dns,       TRC_CT_NETWORK },
   { &Curl_trc_feat_timer,     TRC_CT_NETWORK },
+#ifdef USE_THREADS
+  { &Curl_trc_feat_threads,   TRC_CT_NONE },
+#endif
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
 #endif

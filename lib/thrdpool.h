@@ -30,7 +30,6 @@
 
 struct curl_thrdpool;
 struct Curl_easy;
-struct curl_trc_feat;
 
 /* Invoked under thread pool lock to get an "item" to work on. Must
  * return NULL if there is nothing to do.
@@ -99,8 +98,7 @@ CURLcode Curl_thrdpool_set_props(struct curl_thrdpool *tpool,
 
 #ifdef CURLVERBOSE
 void Curl_thrdpool_trace(struct curl_thrdpool *tpool,
-                         struct Curl_easy *data,
-                         struct curl_trc_feat *feat);
+                         struct Curl_easy *data);
 #endif
 
 #endif /* USE_THREADS */

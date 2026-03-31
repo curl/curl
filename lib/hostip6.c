@@ -63,9 +63,9 @@
  * Curl_freeaddrinfo(), nothing else.
  */
 struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
+                                            uint8_t dns_queries,
                                             const char *hostname,
                                             uint16_t port,
-                                            uint8_t ip_version,
                                             uint8_t transport)
 {
   struct addrinfo hints;
@@ -78,8 +78,7 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
 #endif
   int pf = PF_INET;
 
-  if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
-    /* The stack seems to be IPv6-enabled */
+  if(dns_queries & CURL_DNSQ_AAAA)
     pf = PF_UNSPEC;
 
   memset(&hints, 0, sizeof(hints));

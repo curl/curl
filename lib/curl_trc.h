@@ -308,6 +308,9 @@ extern struct curl_trc_feat Curl_trc_feat_read;
 extern struct curl_trc_feat Curl_trc_feat_write;
 extern struct curl_trc_feat Curl_trc_feat_dns;
 extern struct curl_trc_feat Curl_trc_feat_timer;
+#ifdef USE_THREADS
+extern struct curl_trc_feat Curl_trc_feat_threads;
+#endif
 #endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS

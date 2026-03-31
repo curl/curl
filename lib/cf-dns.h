@@ -33,14 +33,15 @@ struct Curl_addrinfo;
 CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
+                         uint8_t dns_queries,
                          uint8_t transport,
                          struct Curl_dns_entry *dns);
 
 CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
+                                  uint8_t dns_queries,
                                   const char *hostname,
                                   uint16_t port,
-                                  uint8_t ip_version,
                                   uint8_t transport);
 
 CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex);
@@ -62,6 +63,10 @@ Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
 #ifdef USE_HTTPSRR
 const struct Curl_https_rrinfo *
 Curl_conn_dns_get_https(struct Curl_easy *data, int sockindex);
+bool Curl_conn_dns_resolved_https(struct Curl_easy *data, int sockindex);
+#else
+#define Curl_conn_dns_get_https(a,b)         NULL
+#define Curl_conn_dns_resolved_https(a,b)    TRUE
 #endif
 
 
