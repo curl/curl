@@ -848,9 +848,7 @@ if(CURL_USE_OPENSSL)
 
   if(HAVE_BORINGSSL OR HAVE_AWSLC)
     if(NOT MSVC AND NOT ANDROID)  # They support native Windows threads with MSVC.
-      if(WIN32)  # Detect POSIX Threads if not detected earlier.
-        find_package(Threads)
-      endif()
+      find_package(Threads)
       if(CMAKE_USE_PTHREADS_INIT)
         set(HAVE_THREADS_POSIX_BORINGSSL 1)
         list(APPEND CURL_NETWORK_AND_TIME_LIBS Threads::Threads)
