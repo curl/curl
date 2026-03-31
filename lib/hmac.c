@@ -98,13 +98,12 @@ fail:
   return NULL;
 }
 
-int Curl_HMAC_update(struct HMAC_context *ctxt,
-                     const unsigned char *data,
-                     unsigned int len)
+void Curl_HMAC_update(struct HMAC_context *ctxt,
+                      const unsigned char *data,
+                      unsigned int len)
 {
   /* Update first hash calculation. */
   ctxt->hash->hupdate(ctxt->hashctxt1, data, len);
-  return 0;
 }
 
 int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
