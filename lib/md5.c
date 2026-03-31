@@ -551,7 +551,7 @@ CURLcode Curl_md5it(unsigned char *output,
       unsigned int ilen = (unsigned int) CURLMIN(len, UINT_MAX);
       my_md5_update(&ctx, input, ilen);
       input += ilen;
-      len -= len;
+      len -= ilen;
     } while(len);
     my_md5_final(output, &ctx);
   }
