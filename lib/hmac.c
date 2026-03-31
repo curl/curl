@@ -155,7 +155,7 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
 
   /* Update the digest with the given challenge */
   do {
-    unsigned int ilen = datalen & 0xffffffff;
+    unsigned int ilen = (unsigned int) CURLMIN(datalen, UINT_MAX);
     Curl_HMAC_update(ctxt, data, ilen);
     datalen -= ilen;
     data += ilen;
