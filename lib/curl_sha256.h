@@ -38,7 +38,7 @@ extern const struct HMAC_params Curl_HMAC_SHA256;
 #endif
 
 CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
-                       const size_t len);
+                       size_t len);
 
 #endif
 
