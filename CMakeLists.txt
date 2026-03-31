@@ -1557,7 +1557,7 @@ foreach(_variable IN ITEMS
     HAVE_UNISTD_H
 )
   if(${_variable})
-    string(APPEND CURL_TEST_DEFINES " -D${_variable}")
+    list(APPEND CURL_TEST_DEFINES "-D${_variable}")
   endif()
 endforeach()
 
