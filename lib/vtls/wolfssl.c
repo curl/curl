@@ -1302,7 +1302,6 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
          WOLFSSL_SUCCESS) {
         infof(data, "ECH: wolfSSL_SetEchConfigs failed");
         if(data->set.tls_ech & CURLECH_HARD) {
-          Curl_dns_entry_unlink(data, &dns);
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
@@ -1314,11 +1313,9 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     else {
       infof(data, "ECH: requested but no ECHConfig available");
       if(data->set.tls_ech & CURLECH_HARD) {
-        Curl_dns_entry_unlink(data, &dns);
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
-    Curl_dns_entry_unlink(data, &dns);
   }
 
   if(trying_ech_now &&
