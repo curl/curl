@@ -1330,12 +1330,12 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
     memcpy(inbuf[0].pvBuffer, backend->encdata.buffer,
            backend->encdata.offset);
 
-    /* The socket must be writeable (or a poll error occurred) before we call
+    /* The socket must be writable (or a poll error occurred) before we call
        InitializeSecurityContext to continue processing the received TLS
        records. This is because that function is not idempotent and we do not
        support partial save/resume sending replies of handshake tokens. */
     if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
-      SCH_DEV(infof(data, "schannel: handshake waiting for writeable socket"));
+      SCH_DEV(infof(data, "schannel: handshake waiting for writable socket"));
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       curlx_free(inbuf[0].pvBuffer);
       return CURLE_OK;
@@ -1845,11 +1845,11 @@ static CURLcode schannel_recv_renegotiate(
      * occur if the user is waiting on the socket only in one direction.
      *
      * For example, if the user has called recv then they may not be waiting
-     * for a writeable socket and vice versa, so we block to avoid that.
+     * for a writable socket and vice versa, so we block to avoid that.
      *
      * In practice a wait is unlikely to occur. For caller recv if handshake
-     * data needs to be sent then we block for a writeable socket that should
-     * be writeable immediately except for OS resource constraints. For caller
+     * data needs to be sent then we block for a writable socket that should
+     * be writable immediately except for OS resource constraints. For caller
      * send if handshake data needs to be received then we block for a readable
      * socket, which could take some time, but it is more likely the user has
      * called recv since they had called it prior (only recv can start
@@ -1905,7 +1905,7 @@ static CURLcode schannel_recv_renegotiate(
       SCH_DEV(infof(data, "schannel: renegotiation wait until socket is"
                     "%s%s for up to %" FMT_TIMEDIFF_T " ms",
                     ((readfd != CURL_SOCKET_BAD) ? " readable" : ""),
-                    ((writefd != CURL_SOCKET_BAD) ? " writeable" : ""),
+                    ((writefd != CURL_SOCKET_BAD) ? " writable" : ""),
                     timeout_ms));
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, timeout_ms);

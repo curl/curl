@@ -1151,8 +1151,8 @@ out:
   return result;
 }
 
-static bool stream_is_writeable(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
+static bool stream_is_writable(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1180,7 +1180,7 @@ static CURLcode cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
     c_exhaust = FALSE; /* Have not found any call in quiche that tells
                           us if the connection itself is blocked */
     s_exhaust = want_send && stream && stream->opened &&
-                (stream->quic_flow_blocked || !stream_is_writeable(cf, data));
+                (stream->quic_flow_blocked || !stream_is_writable(cf, data));
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
