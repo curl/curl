@@ -49,8 +49,6 @@ static CURLcode test_unit1669(const char *arg)
               "wrong number of entries");
   curl_msnprintf(outname, sizeof(outname), "%s-out", arg);
 
-  Curl_altsvc_save(curl, asi, outname);
-
   curl_easy_cleanup(curl);
 fail:
   Curl_altsvc_cleanup(&asi);
