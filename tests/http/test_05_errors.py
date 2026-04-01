@@ -184,4 +184,3 @@ class TestErrors:
         r.check_response(http_status=401)
         # No retries on a 401
         assert r.stats[0]['num_retries'] == 0, f'{r}'
-
