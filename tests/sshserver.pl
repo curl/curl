@@ -54,6 +54,7 @@ use sshhelp qw(
     $sshlog
     $sftplog
     $sftpcmds
+    $keyalgo
     $hstprvkeyf
     $hstpubkeyf
     $hstpubmd5f
@@ -186,6 +187,14 @@ while(@ARGV) {
         if($ARGV[1]) {
             if($ARGV[1] =~ /^(\d+)$/) {
                 $port = $1;
+                shift @ARGV;
+            }
+        }
+    }
+    elsif($ARGV[0] eq '--keyalgo') {
+        if($ARGV[1]) {
+            if($ARGV[1] =~ /^(ed25519|rsa)$/) {
+                $keyalgo = $1;
                 shift @ARGV;
             }
         }
@@ -408,13 +417,13 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         push @sshkeygenopt, $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
     }
     logmsg "generating host keys...\n" if($verbose);
-    if(system($sshkeygen, ('-q', '-t', 'rsa', '-f', pp($hstprvkeyf), '-C', 'curl test server', '-N', '', @sshkeygenopt))) {
+    if(system($sshkeygen, ('-q', '-t', $keyalgo, '-f', pp($hstprvkeyf), '-C', 'curl test server', '-N', '', @sshkeygenopt))) {
         logmsg "Could not generate host key\n";
         exit 1;
     }
     display_file_top(pp($hstprvkeyf)) if($verbose);
     logmsg "generating client keys...\n" if($verbose);
-    if(system($sshkeygen, ('-q', '-t', 'rsa', '-f', pp($cliprvkeyf), '-C', 'curl test client', '-N', '', @sshkeygenopt))) {
+    if(system($sshkeygen, ('-q', '-t', $keyalgo, '-f', pp($cliprvkeyf), '-C', 'curl test client', '-N', '', @sshkeygenopt))) {
         logmsg "Could not generate client key\n";
         exit 1;
     }
@@ -604,7 +613,7 @@ if($sshdid !~ /OpenSSH-Windows/) {
     push @cfgarr, "PidFile $pidfile_config";
     push @cfgarr, '#';
 }
-if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 880)) {
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 880) && ($keyalgo eq 'rsa')) {
     push @cfgarr, 'HostKeyAlgorithms +ssh-rsa';
     push @cfgarr, 'PubkeyAcceptedKeyTypes +ssh-rsa';
 }
@@ -828,11 +837,12 @@ if(system("\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1")) {
 if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
     logmsg "generating ssh client known hosts file...\n" if($verbose);
     unlink(pp($knownhosts));
-    if(open(my $rsakeyfile, "<", pp($hstpubkeyf))) {
-        my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
-        if(close($rsakeyfile)) {
+    if(open(my $keyfile, "<", pp($hstpubkeyf))) {
+        my @hostkey = do { local $/ = ' '; <$keyfile> };
+        if(close($keyfile)) {
             if(open(my $knownhostsh, ">", pp($knownhosts))) {
-                print $knownhostsh "$listenaddr ssh-rsa $rsahostkey[1]\n";
+                my $keyalgostr = $keyalgo eq 'ed25519' ? 'ssh-ed25519' : 'ssh-rsa';
+                print $knownhostsh "$listenaddr $keyalgostr $hostkey[1]\n";
                 if(!close($knownhostsh)) {
                     $error = "Error: cannot close file $knownhosts";
                 }
