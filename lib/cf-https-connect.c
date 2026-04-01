@@ -339,7 +339,7 @@ static CURLcode cf_hc_resolv(struct Curl_cfilter *cf,
         !rr->target[0] ||
         (rr->target[0] == '.' &&
          !rr->target[1])) &&
-       (rr->port < 0 ||    /* for same port */
+       (!rr->port_set ||    /* for same port */
         rr->port == cf->conn->remote_port)) {
       for(i = 0; i < CURL_ARRAYSIZE(rr->alpns) &&
                  alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {

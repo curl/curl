@@ -3503,7 +3503,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
       Curl_conn_dns_get_https(data, cf->sockindex);
 
     if(rinfo && rinfo->echconfiglist) {
-      unsigned char *ecl = rinfo->echconfiglist;
+      const unsigned char *ecl = rinfo->echconfiglist;
       size_t elen = rinfo->echconfiglist_len;
 
       infof(data, "ECH: ECHConfig from DoH HTTPS RR");

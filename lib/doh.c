@@ -1154,7 +1154,6 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
     result = CURLE_WEIRD_SERVER_REPLY;
     goto err;
   }
-  lhrr->port = -1; /* until set */
   while(len >= 4) {
     pcode = doh_get16bit(cp, 0);
     plen = doh_get16bit(cp, 2);

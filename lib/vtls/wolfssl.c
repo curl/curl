@@ -1294,7 +1294,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
       Curl_conn_dns_get_https(data, cf->sockindex);
 
     if(rinfo && rinfo->echconfiglist) {
-      unsigned char *ecl = rinfo->echconfiglist;
+      const unsigned char *ecl = rinfo->echconfiglist;
       size_t elen = rinfo->echconfiglist_len;
 
       infof(data, "ECH: ECHConfig from DoH HTTPS RR");
@@ -2168,7 +2168,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
-#ifdef USE_ECH
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
     if(wssl_ech_need_httpsrr(data) &&
@@ -2176,7 +2176,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;
     }
-#endif /* USE_ECH */
+#endif /* HAVE_WOLFSSL_CTX_GENERATEECHCONFIG */
     result = wssl_connect_step1(cf, data);
     if(result)
       return result;

@@ -631,7 +631,6 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     }
     CURL_TRC_DNS(data, "asyn-ares: fire off query for HTTPSRR: %s",
                  rrname ? rrname : async->hostname);
-    ares->hinfo.port = -1;
     ares->hinfo.rrname = rrname;
     async->queries_ongoing++;
     ares_query_dnsrec(ares->channel,

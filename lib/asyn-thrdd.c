@@ -239,7 +239,6 @@ static CURLcode async_rr_start(struct Curl_easy *data,
 #endif
 
   memset(&thrdd->rr.hinfo, 0, sizeof(thrdd->rr.hinfo));
-  thrdd->rr.hinfo.port = -1;
   thrdd->rr.hinfo.rrname = rrname;
   ares_query_dnsrec(thrdd->rr.channel,
                     rrname ? rrname : async->hostname, ARES_CLASS_IN,
@@ -810,7 +809,7 @@ bool Curl_async_knows_https(struct Curl_easy *data,
 {
   (void)data;
   if(async->dns_queries & CURL_DNSQ_HTTPS)
-    return ((async->dns_queries & CURL_DNSQ_HTTPS) || async->done);
+    return ((async->dns_responses & CURL_DNSQ_HTTPS) || async->done);
   return TRUE; /* we know it will never come */
 }
 

@@ -122,7 +122,7 @@ void Curl_httpsrr_trace(struct Curl_easy *data,
   if(hi->alpns[0])
     CURL_TRC_DNS(data, "[HTTPS-RR] ALPN: %u %u %u %u",
                  hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
-  if(hi->port)
+  if(hi->port_set)
     CURL_TRC_DNS(data, "[HTTPS-RR] port %u", hi->port);
   if(hi->no_def_alpn)
     CURL_TRC_DNS(data, "[HTTPS-RR] no-def-alpn");
@@ -184,7 +184,8 @@ CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
   case HTTPS_RR_CODE_PORT:
     if(vlen != 2)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    hi->port = (unsigned short)((val[0] << 8) | val[1]);
+    hi->port = (uint16_t)((val[0] << 8) | val[1]);
+    hi->port_set = TRUE;
     break;
   default:
     /* unknown code */
