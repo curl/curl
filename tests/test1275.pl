@@ -71,6 +71,11 @@ sub checkfile {
             $metadata = 0;
             next;
         }
+        if($line =~ /^    /) {
+            # leading 4-space; reset previous-line context and skip checks
+            $prevl = '';
+            next;
+        }
         if($line =~ /^(\`\`\`|\~\~\~)/) {
             # start or stop ignore-mode
             $ignore ^= 1;
