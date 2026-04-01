@@ -1784,6 +1784,17 @@ sub runrtspserver {
     return (0, $rtsppid, $pid2, $port);
 }
 
+#***************************************************************************
+# Return key algorithm string
+#
+sub sshkeyalgostr {
+    my ($algo) = @_;
+    my %algomap = (
+        ecdsa => 'ecdsa-sha2-nistp256',
+    );
+    return exists $algomap{$algo} ? $algomap{$algo} : 'ssh-' . $algo;
+}
+
 #######################################################################
 # Start the ssh (scp/sftp) server
 #
@@ -1831,6 +1842,9 @@ sub runsshserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
     $flags .= "--user \"$USER\"";
+    if(defined $feature{"sshkeyalgo"}) {
+        $flags .= ' --keyalgo ' . $feature{"sshkeyalgo"};
+    }
 
     my @tports;
     my $port = getfreeport($ipvnum);
@@ -3199,6 +3213,8 @@ sub subvariables {
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
+    my $keyalgostr = sshkeyalgostr(defined $feature{"sshkeyalgo"} ? $feature{"sshkeyalgo"} : "");
+    $$thing =~ s/${prefix}SSHKEYALGO/$keyalgostr/g;
 
     # The purpose of FTPTIME2 is to provide times that can be
     # used for time-out tests and that would work on most hosts as these

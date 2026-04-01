@@ -202,6 +202,7 @@ Available substitute variables include:
 - `%SRCDIR` - Full path to the source dir
 - `%SCP_PWD` - Current directory friendly for the SSH server for the scp:// protocol
 - `%SFTP_PWD` - Current directory friendly for the SSH server for the sftp:// protocol
+- `%SSHKEYALGO` - SSH host and client key algorithm, e.g. `ssh-rsa` or `ssh-ed25519`
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
 - `%SSHSRVSHA256` - SHA256 of SSH server's public key
