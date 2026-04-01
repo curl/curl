@@ -58,7 +58,6 @@ static CURLcode test_unit1674(const char *arg)
   easy = curl_easy_init();
   if(!easy) {
     Curl_hsts_cleanup(&h);
-    curl_global_cleanup();
     abort_unless(easy, "curl_easy_init()");
   }
 
@@ -70,7 +69,6 @@ static CURLcode test_unit1674(const char *arg)
   (void)Curl_hsts_save(easy, h, savename);
   Curl_hsts_cleanup(&h);
   curl_easy_cleanup(easy);
-  curl_global_cleanup();
 
   UNITTEST_END(curl_global_cleanup())
 }
