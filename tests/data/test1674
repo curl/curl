@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+HSTS
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+HSTS
+</features>
+
+# This date is exactly "20190124 22:34:21" UTC
+<setenv>
+CURL_TIME=1548369261
+</setenv>
+<name>
+HSTS load more than 1,000 entries from file
+</name>
+
+# test 1674 renders the input file itself, then reads it
+<command>
+%LOGDIR/hsts%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<stdout>
+Number of entries: 1000
+</stdout>
+<limits>
+Allocations: 1100
+</limits>
+</verify>
+</testcase>
