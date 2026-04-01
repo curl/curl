@@ -45,6 +45,24 @@
 
 #define H3VERSION "h3"
 
+#if defined(DEBUGBUILD) || defined(UNITTESTS)
+/* to play well with debug builds, we can *set* a fixed time this will
+   return */
+static time_t altsvc_debugtime(void *unused)
+{
+  const char *timestr = getenv("CURL_TIME");
+  (void)unused;
+  if(timestr) {
+    curl_off_t val;
+    curlx_str_number(&timestr, &val, TIME_T_MAX);
+    return (time_t)val;
+  }
+  return time(NULL);
+}
+#undef time
+#define time(x) altsvc_debugtime(x)
+#endif
+
 /* Given the ALPN ID, return the name */
 const char *Curl_alpnid2str(enum alpnid id)
 {
@@ -165,22 +183,26 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
     struct altsvc *as;
     char dbuf[MAX_ALTSVC_DATELEN + 1];
     time_t expires = 0;
+    time_t now = time(NULL);
 
     /* The date parser works on a null-terminated string. The maximum length
        is upheld by curlx_str_quotedword(). */
     memcpy(dbuf, curlx_str(&date), curlx_strlen(&date));
     dbuf[curlx_strlen(&date)] = 0;
     Curl_getdate_capped(dbuf, &expires);
-    as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
-                       (size_t)srcport, (size_t)dstport);
-    if(as) {
-      as->expires = expires;
-      as->prio = 0; /* not supported, set zero */
-      as->persist = persist ? 1 : 0;
-      Curl_llist_append(&asi->list, as, &as->node);
+
+    if(now < expires) {
+      as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
+                         (size_t)srcport, (size_t)dstport);
+      if(as) {
+        as->expires = expires;
+        as->prio = 0; /* not supported, set zero */
+        as->persist = persist ? 1 : 0;
+        Curl_llist_append(&asi->list, as, &as->node);
+      }
+      else
+        return CURLE_OUT_OF_MEMORY;
     }
-    else
-      return CURLE_OUT_OF_MEMORY;
   }
 
   return CURLE_OK;
@@ -429,24 +451,6 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
     }
   }
 }
-
-#if defined(DEBUGBUILD) || defined(UNITTESTS)
-/* to play well with debug builds, we can *set* a fixed time this will
-   return */
-static time_t altsvc_debugtime(void *unused)
-{
-  const char *timestr = getenv("CURL_TIME");
-  (void)unused;
-  if(timestr) {
-    curl_off_t val;
-    curlx_str_number(&timestr, &val, TIME_T_MAX);
-    return (time_t)val;
-  }
-  return time(NULL);
-}
-#undef time
-#define time(x) altsvc_debugtime(x)
-#endif
 
 /*
  * Curl_altsvc_parse() takes an incoming alt-svc response header and stores
