@@ -147,7 +147,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     rc = ssh_get_publickey_hash(pubkey, SSH_PUBLICKEY_HASH_MD5, &hash, &hlen);
     if(rc != SSH_OK || hlen != 16) {
       failf(data,
-            "Denied establishing ssh session: md5 fingerprint not available");
+            "Denied establishing ssh session: MD5 fingerprint not available");
       goto cleanup;
     }
 
@@ -158,7 +158,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
 
     if(!curl_strequal(md5buffer, pubkey_md5)) {
       failf(data,
-            "Denied establishing ssh session: mismatch md5 fingerprint. "
+            "Denied establishing ssh session: mismatch MD5 fingerprint. "
             "Remote %s is not equal to %s", md5buffer, pubkey_md5);
       rc = SSH_ERROR;
       goto cleanup;

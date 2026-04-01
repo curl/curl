@@ -476,7 +476,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
                                        LIBSSH2_HOSTKEY_HASH_SHA256);
     if(!fingerprint) {
       failf(data,
-            "Denied establishing ssh session: sha256 fingerprint "
+            "Denied establishing ssh session: SHA256 fingerprint "
             "not available");
       myssh_to(data, sshc, SSH_SESSION_FREE);
       return CURLE_PEER_FAILED_VERIFICATION;
@@ -491,7 +491,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
     }
 
     if(!fingerprint_b64) {
-      failf(data, "sha256 fingerprint could not be encoded");
+      failf(data, "SHA256 fingerprint could not be encoded");
       myssh_to(data, sshc, SSH_SESSION_FREE);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -509,13 +509,13 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
       b64_pos++;
     }
 
-    /* Before we authenticate we check the hostkey's sha256 fingerprint
+    /* Before we authenticate we check the hostkey's SHA256 fingerprint
      * against a known fingerprint, if available.
      */
     if((pub_pos != b64_pos) ||
        strncmp(fingerprint_b64, pubkey_sha256, pub_pos)) {
       failf(data,
-            "Denied establishing ssh session: mismatch sha256 fingerprint. "
+            "Denied establishing ssh session: mismatch SHA256 fingerprint. "
             "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
       curlx_free(fingerprint_b64);
       myssh_to(data, sshc, SSH_SESSION_FREE);
@@ -550,12 +550,12 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
     if(!fingerprint || !curl_strequal(md5buffer, pubkey_md5)) {
       if(fingerprint) {
         failf(data,
-              "Denied establishing ssh session: mismatch md5 fingerprint. "
+              "Denied establishing ssh session: mismatch MD5 fingerprint. "
               "Remote %s is not equal to %s", md5buffer, pubkey_md5);
       }
       else {
         failf(data,
-              "Denied establishing ssh session: md5 fingerprint "
+              "Denied establishing ssh session: MD5 fingerprint "
               "not available");
       }
       myssh_to(data, sshc, SSH_SESSION_FREE);
