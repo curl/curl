@@ -35,7 +35,7 @@ static CURLcode test_unit1669(const char *arg)
   CURL *curl;
   CURLcode result;
   struct altsvcinfo *asi = Curl_altsvc_init();
-  abort_if(!asi, "Curl_altsvc_i");
+  abort_if(!asi, "Curl_altsvc_init");
   result = Curl_altsvc_load(asi, arg);
   fail_if(result, "Curl_altsvc_load");
   if(result)
