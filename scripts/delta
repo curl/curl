@@ -64,7 +64,7 @@ my $commits = cmd('$', 'git', 'rev-list', '--count', "$start..");
 my $committers = scalar(cmd('git', 'shortlog', '-s', "$start.."));
 my $bcommitters = scalar(cmd('git', 'shortlog', '-s', $start));
 
-my $acommits = `git log --oneline | wc -l`;
+my $acommits = cmd('$', 'git', 'rev-list', '--count', 'HEAD');
 my $acommitters = `git shortlog -s | wc -l`;
 
 # delta from now compared to before
