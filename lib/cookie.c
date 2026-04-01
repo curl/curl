@@ -461,6 +461,13 @@ parse_cookie_header(struct Curl_easy *data,
         sep = TRUE; /* a '=' was used */
         if(!curlx_str_cspn(&ptr, &val, ";\r\n"))
           curlx_str_trimblanks(&val);
+
+        /* Reject cookies with a TAB inside the value */
+        if(curlx_strlen(&val) &&
+           memchr(curlx_str(&val), '\t', curlx_strlen(&val))) {
+          infof(data, "cookie contains TAB, dropping");
+          return CURLE_OK;
+        }
       }
       else
         curlx_str_init(&val);
@@ -486,13 +493,6 @@ parse_cookie_header(struct Curl_easy *data,
            ((curlx_strlen(&name) + curlx_strlen(&val)) > MAX_NAME)) {
           infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
                 curlx_strlen(&name), curlx_strlen(&val));
-          return CURLE_OK;
-        }
-
-        /* Reject cookies with a TAB inside the value */
-        if(curlx_strlen(&val) &&
-           memchr(curlx_str(&val), '\t', curlx_strlen(&val))) {
-          infof(data, "cookie contains TAB, dropping");
           return CURLE_OK;
         }
 
