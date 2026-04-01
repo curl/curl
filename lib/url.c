@@ -3514,6 +3514,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 
   data->state.done = FALSE; /* *_done() is not called yet */
 
+  data->req.no_body = data->set.opt_no_body;
   if(data->req.no_body)
     /* in HTTP lingo, no body means using the HEAD request... */
     data->state.httpreq = HTTPREQ_HEAD;
