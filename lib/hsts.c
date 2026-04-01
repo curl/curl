@@ -91,6 +91,20 @@ void Curl_hsts_cleanup(struct hsts **hp)
   }
 }
 
+/* append the new entry to the list after possibly removing an old entry
+   first */
+static void hsts_append(struct hsts *h, struct stsentry *sts)
+{
+  if(Curl_llist_count(&h->list) == MAX_HSTS_ENTRIES) {
+    /* It's full. Remove the first entry in the list */
+    struct Curl_llist_node *e = Curl_llist_head(&h->list);
+    struct stsentry *oldsts = Curl_node_elem(e);
+    Curl_node_remove(e);
+    hsts_free(oldsts);
+  }
+  Curl_llist_append(&h->list, sts, &sts->node);
+}
+
 static CURLcode hsts_create(struct hsts *h,
                             const char *hostname,
                             size_t hlen,
@@ -111,7 +125,7 @@ static CURLcode hsts_create(struct hsts *h,
     memcpy(sts->host, hostname, hlen);
     sts->expires = expires;
     sts->includeSubDomains = subdomains;
-    Curl_llist_append(&h->list, sts, &sts->node);
+    hsts_append(h, sts);
   }
   return CURLE_OK;
 }
