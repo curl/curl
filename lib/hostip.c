@@ -542,7 +542,6 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
         goto out;
       }
     }
-    *presolv_id = async->id;
     result = Curl_doh(data, async);
     goto out;
   }
@@ -566,7 +565,6 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
       goto out;
     }
   }
-  *presolv_id = async->id;
   result = Curl_async_getaddrinfo(data, async);
   if(result == CURLE_AGAIN) {
     /* the answer might be there already. Check. */
@@ -604,7 +602,8 @@ out:
 
 #ifdef USE_CURL_ASYNC
   if(async) {
-    if(result == CURLE_AGAIN) { /* still need it, link */
+    if(result == CURLE_AGAIN) { /* still need it, link, return id. */
+      *presolv_id = async->id;
       async->next = data->state.async;
       data->state.async = async;
     }

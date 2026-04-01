@@ -298,7 +298,6 @@ CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
   struct async_thrdd_ctx *thrdd = async ? &async->thrdd : NULL;
   timediff_t milli, ms;
 
-  CURL_TRC_DNS(data, "await results for %s", async->hostname);
   if(!thrdd)
     return CURLE_FAILED_INIT;
 

@@ -99,8 +99,7 @@ void Curl_printable_address(const struct Curl_addrinfo *ip,
     *          `*presolv_id` is 0.
  * - CURLE_AGAIN: resolve is asynchronous and not finished yet.
  *             `presolv_id` is the identifier for querying results later.
- * - other: the operation failed miserably. `*pdns` is NULL,
- *            `*presolv_id` is 0.
+ * - other: the operation failed, `*pdns` is NULL, `*presolv_id` is 0.
  */
 CURLcode Curl_resolv(struct Curl_easy *data,
                      uint8_t dns_queries,
