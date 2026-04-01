@@ -48,6 +48,7 @@ CURL_TIME=1728465947
 
 <file name="%LOGDIR/input%TESTNUMBER">
 this.hsts.example "99991001 04:47:41"
+expired.example "20011001 04:47:41"
 </file>
 
 <name>

@@ -408,6 +408,7 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
     time_t expires = 0;
     const char *hp = curlx_str(&host);
     size_t hlen;
+    time_t now = time(NULL);
 
     /* The date parser works on a null-terminated string. The maximum length
        is upheld by curlx_str_quotedword(). */
@@ -418,6 +419,10 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
       expires = TIME_T_MAX;
     else
       Curl_getdate_capped(dbuf, &expires);
+
+    if(expires < now)
+      /* this entry already expired */
+      return CURLE_OK;
 
     if(hp[0] == '.') {
       curlx_str_nudge(&host, 1);
