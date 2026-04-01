@@ -196,7 +196,6 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
                          (size_t)srcport, (size_t)dstport);
       if(as) {
         as->expires = expires;
-        as->prio = 0; /* not supported, set zero */
         as->persist = persist ? 1 : 0;
         Curl_llist_append(&asi->list, as, &as->node);
       }
@@ -282,7 +281,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
                 "%s %s%s%s %u "
                 "\"%d%02d%02d "
                 "%02d:%02d:%02d\" "
-                "%u %u\n",
+                "%u 0\n", /* prio still always zero */
                 Curl_alpnid2str(as->src.alpnid),
                 src6_pre, as->src.host, src6_post,
                 as->src.port,
@@ -293,7 +292,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
 
                 stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
                 stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
-                as->persist, as->prio);
+                as->persist);
   return CURLE_OK;
 }
 
