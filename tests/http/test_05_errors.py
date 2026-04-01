@@ -143,3 +143,45 @@ class TestErrors:
         ])
         assert r.exit_code == 60, f'{r}'
         assert r.stats[0]['errormsg'] != 'CURL_DBG_SOCK_FAIL_IPV6: failed to open socket'
+
+    # Get, retry on 502
+    def test_05_06_retry_502(self, env: Env, httpd, nghttpx):
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?status=502'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--retry', '2', '--retry-all-errors', '--retry-delay', '1',
+        ])
+        r.check_response(http_status=502)
+        assert r.stats[0]['num_retries'] == 2, f'{r}'
+        # curious, since curl does the retries, it finds the previous
+        # connection in the cache and reports that no connects were done
+        assert r.stats[0]['num_connects'] == 0, f'{r}'
+
+    # Get, retry on 502 in parallel mode
+    @pytest.mark.skipif(condition=True, reason="issue #20669")
+    def test_05_07_retry_502_parallel(self, env: Env, httpd, nghttpx):
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?status=502'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--retry', '2', '--retry-all-errors', '--retry-delay', '1', '--parallel'
+        ])
+        r.check_response(http_status=502)
+        assert r.stats[0]['num_retries'] == 2, f'{r}'
+        # curious, since curl does the retries, it finds the previous
+        # connection in the cache and reports that no connects were done
+        assert r.stats[0]['num_connects'] == 0, f'{r}'
+
+    # Get, retry on 401, not happening
+    def test_05_08_retry_401(self, env: Env, httpd, nghttpx):
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?status=401'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--retry', '2', '--retry-all-errors', '--retry-delay', '1'
+        ])
+        r.check_response(http_status=401)
+        # No retries on a 401
+        assert r.stats[0]['num_retries'] == 0, f'{r}'
+
