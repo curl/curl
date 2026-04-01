@@ -72,7 +72,8 @@ sub checkfile {
             next;
         }
         if($line =~ /^    /) {
-            # leading 4-space
+            # leading 4-space; reset previous-line context and skip checks
+            $prevl = '';
             next;
         }
         if($line =~ /^(\`\`\`|\~\~\~)/) {
