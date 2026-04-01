@@ -144,6 +144,20 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
                          srcport, dstport);
 }
 
+/* append the new entry to the list after possibly removing an old entry
+   first */
+static void altsvc_append(struct altsvcinfo *asi, struct altsvc *as)
+{
+  while(Curl_llist_count(&asi->list) >= MAX_ALTSVC_ENTRIES) {
+    /* It's full. Remove the first entry in the list */
+    struct Curl_llist_node *e = Curl_llist_head(&asi->list);
+    struct altsvc *oldas = Curl_node_elem(e);
+    Curl_node_remove(e);
+    altsvc_free(oldas);
+  }
+  Curl_llist_append(&asi->list, as, &as->node);
+}
+
 /* only returns SERIOUS errors */
 static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
 {
@@ -180,7 +194,6 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
      curlx_str_newline(&line))
     ;
   else {
-    struct altsvc *as;
     char dbuf[MAX_ALTSVC_DATELEN + 1];
     time_t expires = 0;
     time_t now = time(NULL);
@@ -192,12 +205,12 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
     Curl_getdate_capped(dbuf, &expires);
 
     if(now < expires) {
-      as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
-                         (size_t)srcport, (size_t)dstport);
+      struct altsvc *as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
+                                        (size_t)srcport, (size_t)dstport);
       if(as) {
         as->expires = expires;
         as->persist = persist ? 1 : 0;
-        Curl_llist_append(&asi->list, as, &as->node);
+        altsvc_append(asi, as);
       }
       else
         return CURLE_OUT_OF_MEMORY;
@@ -594,7 +607,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             else
               as->expires = maxage + secs;
             as->persist = persist;
-            Curl_llist_append(&asi->list, as, &as->node);
+            altsvc_append(asi, as);
             infof(data, "Added alt-svc: %.*s:%d over %s",
                   (int)curlx_strlen(&dsthost), curlx_str(&dsthost),
                   dstport, Curl_alpnid2str(dstalpnid));
