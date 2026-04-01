@@ -148,7 +148,7 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
    first */
 static void altsvc_append(struct altsvcinfo *asi, struct altsvc *as)
 {
-  if(Curl_llist_count(&asi->list) == MAX_ALTSVC_ENTRIES) {
+  while(Curl_llist_count(&asi->list) >= MAX_ALTSVC_ENTRIES) {
     /* It's full. Remove the first entry in the list */
     struct Curl_llist_node *e = Curl_llist_head(&asi->list);
     struct altsvc *oldas = Curl_node_elem(e);
