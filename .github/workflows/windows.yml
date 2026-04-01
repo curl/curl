@@ -46,7 +46,7 @@ jobs:
         image: [windows-11-arm, windows-2022]  # Cannot share cache between arm and intel: https://github.com/actions/cache/issues/1622
     steps:
       - name: 'cache test prereqs (stunnel)'
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         id: cache-stunnel
         with:
           path: C:\my-stunnel
@@ -188,7 +188,7 @@ jobs:
 
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         id: cache-stunnel
         with:
           path: C:\my-stunnel
@@ -316,7 +316,7 @@ jobs:
               install: 'mingw-w64-i686-libssh2' }
       fail-fast: false
     steps:
-      - uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
+      - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -332,7 +332,7 @@ jobs:
             libpsl-devel
             ${{ matrix.install }}
 
-      - uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
+      - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -457,7 +457,7 @@ jobs:
 
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         id: cache-stunnel
         with:
           path: C:\my-stunnel
@@ -582,7 +582,7 @@ jobs:
             chkprefill: ''  # Set it once to silence actionlint
       fail-fast: false
     steps:
-      - uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
+      - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
         with:
           msystem: ${{ matrix.sys }}
           release: false
@@ -594,7 +594,7 @@ jobs:
             ${{ matrix.install }}
 
       - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         id: cache-compiler
         with:
           path: D:\my-cache
@@ -678,7 +678,7 @@ jobs:
 
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         id: cache-stunnel
         with:
           path: C:\my-stunnel
@@ -924,7 +924,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
+      - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
         with:
           msystem: ${{ matrix.arch == 'arm64' && 'clangarm64' || 'ucrt64' }}
           release: ${{ contains(matrix.image, 'arm') }}
@@ -1070,7 +1070,7 @@ jobs:
 
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         id: cache-stunnel
         with:
           path: C:\my-stunnel
