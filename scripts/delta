@@ -114,9 +114,8 @@ my $creates = scalar(cmd('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--s
 # Time since that tag
 sub tagstamp {
     my $col = shift;
-    my $q = qr/^$start /;
     foreach my $line (@_) {
-        if($line =~ /$q/) {
+        if(index($line, "$start ") == 0) {
             my @cols = split(/\|/, $line);
             return $cols[$col - 1];
         }
