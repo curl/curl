@@ -60,7 +60,7 @@ sub cmd {
     return $as_string ? join('', @out) : @out;
 }
 
-my $commits = scalar(cmd('git', 'log', '--oneline', "$start.."));
+my $commits = cmd('$', 'git', 'rev-list', '--count', "$start..");
 my $committers = scalar(cmd('git', 'shortlog', '-s', "$start.."));
 my $bcommitters = scalar(cmd('git', 'shortlog', '-s', $start));
 
