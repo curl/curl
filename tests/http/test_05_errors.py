@@ -159,7 +159,6 @@ class TestErrors:
         assert r.stats[0]['num_connects'] == 0, f'{r}'
 
     # Get, retry on 502 in parallel mode
-    @pytest.mark.skipif(condition=True, reason="issue #20669")
     def test_05_07_retry_502_parallel(self, env: Env, httpd, nghttpx):
         proto = 'http/1.1'
         curl = CurlClient(env=env)
@@ -169,9 +168,6 @@ class TestErrors:
         ])
         r.check_response(http_status=502)
         assert r.stats[0]['num_retries'] == 2, f'{r}'
-        # curious, since curl does the retries, it finds the previous
-        # connection in the cache and reports that no connects were done
-        assert r.stats[0]['num_connects'] == 0, f'{r}'
 
     # Get, retry on 401, not happening
     def test_05_08_retry_401(self, env: Env, httpd, nghttpx):

@@ -1468,6 +1468,7 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
   bool sleeping = FALSE;
   curl_off_t nxfers;
 
+  notef("check to add more parallel transfers");
   *addedp = FALSE;
   *morep = FALSE;
   mcode = curl_multi_get_offt(multi, CURLMINFO_XFERS_CURRENT, &nxfers);
@@ -1723,6 +1724,25 @@ static CURLcode parallel_event(struct parastate *s)
                            &s->still_running);
 
   while(!s->mcode && (s->still_running || s->more_transfers)) {
+
+    if(!s->still_running && s->more_transfers) {
+      curl_off_t nxfers;
+
+      result = add_parallel_transfers(s->multi, s->share,
+                                      &s->more_transfers,
+                                      &s->added_transfers);
+      if(result)
+        break;
+      if(s->more_transfers) {
+        /* None were running, still more might be added. But were any? */
+        CURLMcode mcode = curl_multi_get_offt(
+          s->multi, CURLMINFO_XFERS_CURRENT, &nxfers);
+        if(!mcode && !nxfers) {
+          /* None have been added, must be waiting on a timeout */
+          curlx_wait_ms(500);
+        }
+      }
+    }
 #if DEBUG_UV
     curl_mfprintf(tool_stderr, "parallel_event: uv_run(), "
                   "mcode=%d, %d running, %d more\n",
@@ -1800,6 +1820,7 @@ static CURLcode check_finished(struct parastate *s)
       if(retry) {
         ended->added = FALSE; /* add it again */
         /* we delay retries in full integer seconds only */
+        notef("retrying in %dsec", delay ? (int)(delay / 1000) : 0);
         ended->startat = delay ? time(NULL) + (delay / 1000) : 0;
       }
       else {
@@ -1918,6 +1939,11 @@ static CURLcode parallel_transfers(CURLSH *share)
           }
           s->wrapitup_processed = TRUE;
         }
+      }
+      else if(s->more_transfers) {
+        result = add_parallel_transfers(s->multi, s->share,
+                                        &s->more_transfers,
+                                        &s->added_transfers);
       }
 
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
