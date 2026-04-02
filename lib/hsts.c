@@ -478,6 +478,8 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
   return CURLE_OK;
 }
 
+#define MAX_HSTS_DATELEN 17
+
 /*
  * Load HSTS data from callback.
  *
@@ -495,13 +497,16 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
       e.namelen = sizeof(buffer) - 1;
       e.includeSubDomains = FALSE; /* default */
       e.expire[0] = 0;
+      e.expire[MAX_HSTS_DATELEN] = 0;
       e.name[0] = 0; /* to make it clean */
+      e.name[MAX_HSTS_HOSTLEN] = 0;
       sc = data->set.hsts_read(data, &e, data->set.hsts_read_userp);
       if(sc == CURLSTS_OK) {
         CURLcode result;
         const char *date = e.expire;
-        if(!e.name[0])
-          /* bail out if no name was stored */
+        if(!e.name[0] || e.expire[MAX_HSTS_DATE_LEN] ||
+           e.name[MAX_HSTS_HOSTLEN])
+          /* bail out if no name was stored or if a null terminator is gone */
           return CURLE_BAD_FUNCTION_ARGUMENT;
         if(!date[0])
           date = UNLIMITED;
