@@ -257,11 +257,16 @@ void Curl_async_thrdd_shutdown(struct Curl_easy *data,
   Curl_async_thrdd_destroy(data, async);
 }
 
+struct async_thrdd_match_ctx {
+  uint32_t mid;
+  uint32_t resolv_id;
+};
+
 static bool async_thrdd_match_item(void *qitem, void *match_data)
 {
-  struct Curl_easy *data = match_data;
+  struct async_thrdd_match_ctx *ctx  = match_data;
   struct async_thrdd_item *item = qitem;
-  return item->mid == data->mid;
+  return (item->mid == ctx->mid) && (item->resolv_id == ctx->resolv_id);
 }
 
 void Curl_async_thrdd_destroy(struct Curl_easy *data,
@@ -271,8 +276,11 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data,
   if(async->queries_ongoing && !async->done &&
      data->multi && data->multi->resolv_thrdq) {
     /* Remove any resolve items still queued */
+    struct async_thrdd_match_ctx mctx = {
+      data->mid, async->id
+    };
     Curl_thrdq_clear(data->multi->resolv_thrdq,
-                     async_thrdd_match_item, data);
+                     async_thrdd_match_item, &mctx);
   }
 #ifdef USE_HTTPSRR_ARES
   if(async->thrdd.rr.channel) {
