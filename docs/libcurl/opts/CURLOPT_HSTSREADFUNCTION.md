@@ -42,23 +42,26 @@ Pass a pointer to your callback function, as the prototype shows above.
 This callback function gets called by libcurl repeatedly when it populates the
 in-memory HSTS cache.
 
-Set the *clientp* argument with the CURLOPT_HSTSREADDATA(3) option
-or it is NULL.
+Set the *clientp* argument with the CURLOPT_HSTSREADDATA(3) option or it is
+NULL.
 
-When this callback is invoked, the *sts* pointer points to a populated
-struct: Copy the hostname to *name* (no longer than *namelen*
-bytes). Make it null-terminated. Set *includeSubDomains* to TRUE or
-FALSE. Set *expire* to a date stamp or a zero length string for *forever*
-(wrong date stamp format might cause the name to not get accepted)
+When this callback is invoked, the *sts* pointer points to a populated struct:
+Copy the hostname to *name* (no longer than *namelen* bytes). Make it
+null-terminated. Set *includeSubDomains* to TRUE or FALSE. Set *expire* to a
+date stamp or a zero length string for *forever* (wrong date stamp format
+might cause the name to not get accepted)
 
-The callback should return *CURLSTS_OK* if it returns a name and is
-prepared to be called again (for another host) or *CURLSTS_DONE* if it has
-no entry to return. It can also return *CURLSTS_FAIL* to signal
-error. Returning *CURLSTS_FAIL* stops the transfer from being performed
-and make *CURLE_ABORTED_BY_CALLBACK* get returned.
+The callback should return *CURLSTS_OK* if it returns a name and is prepared
+to be called again (for another host) or *CURLSTS_DONE* if it has no entry to
+return. It can also return *CURLSTS_FAIL* to signal error. Returning
+*CURLSTS_FAIL* stops the transfer from being performed and make
+*CURLE_ABORTED_BY_CALLBACK* get returned.
 
-This option does not enable HSTS, you need to use CURLOPT_HSTS_CTRL(3) to
-do that.
+This option does not enable HSTS, you need to use CURLOPT_HSTS_CTRL(3) to do
+that.
+
+The hostname provided to libcurl *should not* have a trailing dot nor leading
+dot.
 
 # DEFAULT
 
