@@ -276,9 +276,9 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data,
   if(async->queries_ongoing && !async->done &&
      data->multi && data->multi->resolv_thrdq) {
     /* Remove any resolve items still queued */
-    struct async_thrdd_match_ctx mctx = {
-      data->mid, async->id
-    };
+    struct async_thrdd_match_ctx mctx;
+    mctx.mid = data->mid;
+    mctx.resolv_id = async->id;
     Curl_thrdq_clear(data->multi->resolv_thrdq,
                      async_thrdd_match_item, &mctx);
   }
