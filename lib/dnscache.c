@@ -601,6 +601,8 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
   if(!dnscache)
     return CURLE_FAILED_INIT;
 
+  dnscache_lock(data, dnscache);
+
   /* put this new host in the cache */
   dns = dnscache_add_addr(data, dnscache, dns_queries, NULL,
                           host, strlen(host), port, FALSE);
@@ -608,10 +610,12 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
     /* release the returned reference; the cache itself will keep the
      * entry alive: */
     dns->refcount--;
+    dnscache_unlock(data, dnscache);
     CURL_TRC_DNS(data, "cache negative name resolve for %s:%d type=%s",
                  host, port, Curl_resolv_query_str(dns_queries));
     return CURLE_OK;
   }
+  dnscache_unlock(data, dnscache);
   return CURLE_OUT_OF_MEMORY;
 }
 
