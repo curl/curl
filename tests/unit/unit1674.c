@@ -63,7 +63,10 @@ static CURLcode test_unit1674(const char *arg)
 
   Curl_hsts_loadfile(easy, h, arg);
 
-  curl_mprintf("Number of entries: %zu\n", Curl_llist_count(&h->list));
+  if(Curl_llist_count(&h->list) == MAX_HSTS_ENTRIES)
+    curl_mprintf("OK\n");
+  else
+    curl_mprintf("Number of entries: %zu\n", Curl_llist_count(&h->list));
 
   curl_msnprintf(savename, sizeof(savename), "%s.save", arg);
   (void)Curl_hsts_save(easy, h, savename);
