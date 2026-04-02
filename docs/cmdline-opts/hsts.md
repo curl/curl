@@ -33,3 +33,6 @@ to access the created file.
 
 If this option is used several times, curl loads contents from all the
 files but the last one is used for saving.
+
+Since curl 8.20.0, curl keeps no more than the most recently added 10,000
+unique HSTS hostnames.

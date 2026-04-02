@@ -28,7 +28,7 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
 #include "llist.h"
 
-#define MAX_HSTS_ENTRIES 1000
+#define MAX_HSTS_ENTRIES 10000
 
 #if defined(DEBUGBUILD) || defined(UNITTESTS)
 extern time_t deltatime;

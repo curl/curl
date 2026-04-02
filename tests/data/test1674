@@ -18,7 +18,7 @@ HSTS
 CURL_TIME=1548369261
 </setenv>
 <name>
-HSTS load more than 1,000 entries from file
+HSTS load more than 10k entries from file
 </name>
 
 # test 1674 renders the input file itself, then reads it
@@ -29,10 +29,10 @@ HSTS load more than 1,000 entries from file
 
 <verify>
 <stdout>
-Number of entries: 1000
+OK
 </stdout>
 <limits>
-Allocations: 1100
+Allocations: 11000
 </limits>
 </verify>
 </testcase>
