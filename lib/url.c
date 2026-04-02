@@ -1086,12 +1086,14 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
     if(Curl_timestrcmp(m->needle->user, conn->user) ||
        Curl_timestrcmp(m->needle->passwd, conn->passwd)) {
       /* we prefer a credential match, but this is at least a connection
-         that can be reused and "upgraded" to NTLM */
-      if((conn->http_ntlm_state == NTLMSTATE_NONE)
+         that can be reused and "upgraded" to NTLM if it does
+         not have any auth ongoing. */
 #ifdef USE_SPNEGO
-         && (conn->http_negotiate_state == GSS_AUTHNONE)
+      if((conn->http_ntlm_state == NTLMSTATE_NONE)
+         && (conn->http_negotiate_state == GSS_AUTHNONE)) {
+#else
+      if(conn->http_ntlm_state == NTLMSTATE_NONE) {
 #endif
-        ) {
         m->found = conn;
       }
       return FALSE;
@@ -1116,11 +1118,7 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
                        conn->http_proxy.passwd))
       return FALSE;
   }
-  else if((conn->proxy_ntlm_state != NTLMSTATE_NONE)
-#ifdef USE_SPNEGO
-         || (conn->proxy_negotiate_state != GSS_AUTHNONE)
-#endif
-         ) {
+  else if(conn->proxy_ntlm_state != NTLMSTATE_NONE) {
     /* Proxy connection is using NTLM auth but we do not want NTLM */
     return FALSE;
   }
