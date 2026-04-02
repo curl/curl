@@ -1209,12 +1209,22 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
      * not able to find out reliably what token the connection really
      * used, nor what token in the next connect attempt will use.
      * To avoid TOCTOU attacks, do not reuse on empty credentials. */
-    if(!m->want_ntlm_http ||
-       Curl_timestrcmp(m->needle->user, conn->user) ||
-       Curl_timestrcmp(m->needle->passwd, conn->passwd))
-      return FALSE;
-    if(!url_allow_sspi_empty_creds(m->data, conn, conn->user, conn->passwd))
-      return FALSE;
+    if(m->want_ntlm_http) {
+      if(Curl_timestrcmp(m->needle->user, conn->user) ||
+         Curl_timestrcmp(m->needle->passwd, conn->passwd)) {
+        /* we prefer a credential match, but this is at least a connection
+           that can be reused and "upgraded" to NTLM if it does
+           not have any auth ongoing. */
+#ifdef USE_SPNEGO
+        if((conn->http_ntlm_state == NTLMSTATE_NONE)
+           && (conn->http_negotiate_state == GSS_AUTHNONE))
+#else
+        if(conn->http_ntlm_state == NTLMSTATE_NONE)
+#endif
+          m->found = conn;
+        return FALSE;
+      }
+    }
   }
   else if(m->want_ntlm_http) {
     /* Transfer wants NTLM, connection is not using it.
