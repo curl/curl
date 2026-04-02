@@ -40,7 +40,7 @@
 
 #define MAX_HSTS_LINE    4095
 #define MAX_HSTS_HOSTLEN 2048
-#define MAX_HSTS_DATELEN 256
+#define MAX_HSTS_DATELEN 17
 #define UNLIMITED        "unlimited"
 
 #if defined(DEBUGBUILD) || defined(UNITTESTS)
@@ -478,8 +478,6 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
   return CURLE_OK;
 }
 
-#define MAX_HSTS_DATELEN 17
-
 /*
  * Load HSTS data from callback.
  *
@@ -504,7 +502,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
       if(sc == CURLSTS_OK) {
         CURLcode result;
         const char *date = e.expire;
-        if(!e.name[0] || e.expire[MAX_HSTS_DATE_LEN] ||
+        if(!e.name[0] || e.expire[MAX_HSTS_DATELEN] ||
            e.name[MAX_HSTS_HOSTLEN])
           /* bail out if no name was stored or if a null terminator is gone */
           return CURLE_BAD_FUNCTION_ARGUMENT;
