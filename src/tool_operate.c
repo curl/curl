@@ -1468,7 +1468,6 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
   bool sleeping = FALSE;
   curl_off_t nxfers;
 
-  notef("check to add more parallel transfers");
   *addedp = FALSE;
   *morep = FALSE;
   mcode = curl_multi_get_offt(multi, CURLMINFO_XFERS_CURRENT, &nxfers);
@@ -1727,14 +1726,18 @@ static CURLcode parallel_event(struct parastate *s)
 
     if(!s->still_running && s->more_transfers) {
       curl_off_t nxfers;
-
+      /* None are running, but there may be more ready to run. Try
+       * to add more when possible. */
       s->result = add_parallel_transfers(s->multi, s->share,
                                          &s->more_transfers,
                                          &s->added_transfers);
       if(s->result)
         break;
       if(s->more_transfers) {
-        /* None were running, still more might be added. But were any? */
+        /* There are still more transfers, so not all were added. If we
+         * did not add *any*, it means there is nothing to do until time
+         * passes and a transfer becomes ready to add.
+         * Avoid busy looping by taking a small break. */
         CURLMcode mcode = curl_multi_get_offt(
           s->multi, CURLMINFO_XFERS_CURRENT, &nxfers);
         if(!mcode && !nxfers) {
