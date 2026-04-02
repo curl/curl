@@ -285,10 +285,15 @@ jobs:
               build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t --shallow=13 --min=700 951 to 9999',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON',
               install: 'mingw-w64-ucrt-x86_64-c-ares mingw-w64-ucrt-x86_64-libssh2' }
-          - { name: 'gnutls', type: 'Debug', openssh: 'OpenSSH-Windows',
+          # WARNING: libssh uses hard-coded world-writable paths (C:ProgramData/, /etc/..., ~/.ssh/)
+          #          to read its configuration from, making it vulnerable to attacks on
+          #          Windows. Do not use this component till there is a fix for these.
+          #          Holds true after CVE-2025-14821 mitigations in 0.12.0.
+          # https://github.com/curl/curl-for-win/blob/471a065705a16c61a343b15d3e4ef195e2df2f9e/libssh.sh#L6-L94
+          - { name: 'gnutls libssh', type: 'Debug', openssh: 'OpenSSH-Windows',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: ''          ,
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_ENABLE_NTLM=ON',
-              install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 unzip' }
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_ENABLE_NTLM=ON',
+              install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh unzip' }
           - { name: 'schannel R', type: 'Release', image: 'windows-11-arm',
               build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun'   ,
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON',
@@ -492,6 +497,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: ${{ contains(matrix.tflags, '-t') && 15 || 10 }}
         env:
+          MATRIX_ENV: '${{ matrix.env }}'
           MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
@@ -506,11 +512,14 @@ jobs:
               TFLAGS+=' !2300'  # Leaks memory and file handle via tool_doswin.c / win32_stdin_read_thread()
               export CURL_TEST_NO_TASKKILL=1  # experiment to see if it reduces flaky failures
             fi
+            if [[ "${MATRIX_INSTALL} " = *'-libssh '* && \
+                  "${MATRIX_ENV}" = *'x86_64'* ]]; then
+              export CURL_TEST_SSH_DISABLE_KEX=mlkem768x25519-sha256  # broken with libssh 0.12.0 Windows x64
+            fi
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-            if [[ "${MATRIX_INSTALL_MSYS2} " = *'libssh '* || \
-                  "${MATRIX_INSTALL_VCPKG} " = *'libssh '* ]]; then
+            if [[ "${MATRIX_INSTALL} " = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
