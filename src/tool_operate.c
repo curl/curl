@@ -1728,10 +1728,10 @@ static CURLcode parallel_event(struct parastate *s)
     if(!s->still_running && s->more_transfers) {
       curl_off_t nxfers;
 
-      result = add_parallel_transfers(s->multi, s->share,
-                                      &s->more_transfers,
-                                      &s->added_transfers);
-      if(result)
+      s->result = add_parallel_transfers(s->multi, s->share,
+                                         &s->more_transfers,
+                                         &s->added_transfers);
+      if(s->result)
         break;
       if(s->more_transfers) {
         /* None were running, still more might be added. But were any? */
@@ -1941,9 +1941,11 @@ static CURLcode parallel_transfers(CURLSH *share)
         }
       }
       else if(s->more_transfers) {
-        result = add_parallel_transfers(s->multi, s->share,
-                                        &s->more_transfers,
-                                        &s->added_transfers);
+        s->result = add_parallel_transfers(s->multi, s->share,
+                                           &s->more_transfers,
+                                           &s->added_transfers);
+        if(s->result)
+          break;
       }
 
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
