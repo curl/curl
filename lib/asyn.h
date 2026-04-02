@@ -114,8 +114,8 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms);
 /* async resolving implementation using c-ares alone */
 struct async_ares_ctx {
   ares_channel channel;
-  struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
-                                    parts */
+  struct Curl_addrinfo *res_A;
+  struct Curl_addrinfo *res_AAAA;
   int ares_status;               /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
   CURLcode result;               /* CURLE_OK or error handling response */
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */

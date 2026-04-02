@@ -27,21 +27,21 @@ Get three URLs with bad hostname - cache
 CURL_DNS_SERVER=127.0.0.1:%DNSPORT
 </setenv>
 <command>
-http://examplehost.example/%TESTNUMBER http://examplehost.example/%TESTNUMBER http://examplehost.example/%TESTNUMBER
+http://examplehost.invalid/%TESTNUMBER http://examplehost.invalid/%TESTNUMBER http://examplehost.invalid/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-# curl: (6) Could not resolve host: examplehost.example
+# curl: (6) Could not resolve host: examplehost.invalid
 <errorcode>
 6
 </errorcode>
 
 # Ignore HTTPS requests here
-<dns host="examplehost.example QTYPE A">
-QNAME examplehost.example QTYPE A
-QNAME examplehost.example QTYPE AAAA
+<dns host="examplehost.invalid QTYPE A">
+QNAME examplehost.invalid QTYPE A
+QNAME examplehost.invalid QTYPE AAAA
 </dns>
 </verify>
 </testcase>

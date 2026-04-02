@@ -153,6 +153,8 @@ const char *Curl_resolv_query_str(uint8_t dns_queries)
     return "A";
   case (CURL_DNSQ_HTTPS):
     return "HTTPS";
+  case 0:
+    return "-";
   default:
     DEBUGASSERT(0);
     return "???";
@@ -421,12 +423,21 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
 #endif
   result = Curl_async_take_result(data, async, pdns);
 
-  if(result == CURLE_AGAIN)
+  if(result == CURLE_AGAIN) {
+    CURL_TRC_DNS(data, "result incomplete, queries=%s, responses=%s, "
+                 "ongoing=%d", Curl_resolv_query_str(async->dns_queries),
+                 Curl_resolv_query_str(async->dns_responses),
+                 async->queries_ongoing);
     result = CURLE_OK;
-  else if(result)
+  }
+  else if(result) {
+    CURL_TRC_DNS(data, "result error %d", result);
     Curl_resolver_error(data, NULL);
-  else
+  }
+  else {
+    CURL_TRC_DNS(data, "result complete");
     DEBUGASSERT(*pdns);
+  }
 
   return result;
 }
