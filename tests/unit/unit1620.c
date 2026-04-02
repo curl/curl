@@ -100,6 +100,8 @@ static CURLcode test_unit1620(const char *arg)
   fail_unless(result == CURLE_OK, "curl_easy_setopt(CURLOPT_NOBODY) failed");
 
   dupe = (struct Curl_easy *)curl_easy_duphandle((CURL *)empty);
+  if(!dupe)
+    Curl_close(&empty);
   abort_unless(dupe, "curl_easy_duphandle() failed");
 
   result = Curl_init_do(dupe, NULL);
