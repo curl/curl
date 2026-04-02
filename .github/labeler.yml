@@ -37,7 +37,8 @@ authentication:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              docs/mk-ca-bundle.1,\
+              CMake/FindGSS.cmake,\
+              CMake/FindLibgsasl.cmake,\
               docs/libcurl/opts/CURLINFO_HTTPAUTH*,\
               docs/libcurl/opts/CURLINFO_PROXYAUTH*,\
               docs/libcurl/opts/CURLOPT_KRB*,\
@@ -47,7 +48,6 @@ authentication:
               docs/libcurl/opts/CURLOPT_USERPWD*,\
               docs/libcurl/opts/CURLOPT_XOAUTH*,\
               lib/*gssapi*,\
-              lib/*krb5*,\
               lib/*ntlm*,\
               lib/curl_sasl.*,\
               lib/http_aws*,\
@@ -64,7 +64,6 @@ build:
               **/Makefile.am,\
               **/Makefile.inc,\
               **/*.m4,\
-              **/*.mk,\
               *.m4,\
               docs/INSTALL-CMAKE.md,\
               lib/curl_config-cmake.h.in,\
@@ -148,6 +147,7 @@ cookies:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
+              CMake/FindLibpsl.cmake,\
               docs/HTTP-COOKIES.md,\
               docs/cmdline-opts/cookie*,\
               docs/cmdline-opts/junk-session-cookies.md,\
@@ -187,11 +187,10 @@ documentation:
       - changed-files:
           - any-glob-to-all-files: "{\
               .github/workflows/checkdocs.yml,\
-              .github/scripts/badwords.*,\
-              .github/scripts/cd2cd,\
-              .github/scripts/cd2nroff,\
-              .github/scripts/cdall.pl,\
-              .github/scripts/nroff2cd,\
+              .github/scripts/pyspelling*,\
+              .github/scripts/requirements-docs.txt,\
+              .github/scripts/requirements-proselint.txt,\
+              .github/scripts/typos*,\
               .github/scripts/verify-examples.pl,\
               .github/scripts/verify-synopsis.pl,\
               **/*.md,\
@@ -202,7 +201,11 @@ documentation:
               LICENSES/**,\
               README,\
               RELEASE-NOTES,\
-              scripts/cd*\
+              scripts/badwords.*,\
+              scripts/cd*,\
+              scripts/mdlinkcheck,\
+              scripts/nroff2cd,\
+              scripts/release-notes.pl\
               }"
           - all-globs-to-all-files:
               # negative matches
@@ -290,9 +293,6 @@ HTTP/3:
       - changed-files:
           - any-glob-to-all-files: "{\
               .github/workflows/http3-linux.yml,\
-              .github/workflows/ngtcp2*,\
-              .github/workflows/quiche*,\
-              .github/workflows/osslq*,\
               CMake/FindNGHTTP3.cmake,\
               CMake/FindNGTCP2.cmake,\
               docs/HTTP3.md,\
@@ -352,6 +352,7 @@ MQTT:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
+              docs/internals/MQTT.md,\
               lib/mqtt*,\
               tests/server/mqttd.c\
               }"
@@ -364,6 +365,7 @@ name lookup:
               docs/cmdline-opts/doh*,\
               docs/cmdline-opts/dns*,\
               docs/examples/resolve.c,\
+              docs/internals/THRDPOOL-AND-QUEUE.md,\
               docs/libcurl/opts/CURLINFO_NAMELOOKUP*,\
               docs/libcurl/opts/CURLOPT_DNS*,\
               docs/libcurl/opts/CURLOPT_DOH*,\
@@ -376,8 +378,10 @@ name lookup:
               lib/doh*,\
               lib/host*,\
               lib/idn*,\
-              lib/inet_pton.*,\
               lib/socketpair*,\
+              lib/thrdpool.*,\
+              lib/thrdqueue.*,\
+              tests/http/*resolve.py,\
               tests/server/dnsd.c,\
               tests/server/resolve.c\
               }"
@@ -407,7 +411,6 @@ SCP/SFTP:
           - any-glob-to-all-files: "{\
               CMake/FindLibssh.cmake,\
               CMake/FindLibssh2.cmake,\
-              CMake/FindWolfSSH.cmake,\
               docs/cmdline-opts/knownhosts.md,\
               docs/libcurl/opts/CURLOPT_SSH*,\
               docs/examples/sftp*,\
@@ -426,8 +429,9 @@ script:
               **/*.pl,\
               **/*.sh,\
               curl-config.in,\
-              docs/curl-config.1,\
-              docs/mk-ca-bundle.1,\
+              docs/curl-config.md,\
+              docs/mk-ca-bundle.md,\
+              docs/wcurl.md,\
               docs/THANKS-filter,\
               scripts/**\
               }"
@@ -521,30 +525,29 @@ WebSocket:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              docs/internals/WEBSOCKET.md*,\
+              docs/internals/WEBSOCKET.md,\
               docs/examples/websocket*,\
               docs/libcurl/curl_ws_*,\
               docs/libcurl/libcurl-ws*,\
               docs/libcurl/opts/CURLOPT_WS_*,\
               include/curl/websockets.h,\
               lib/ws.*,\
-              tests/http/clients/ws*,\
               tests/http/test_20_websockets.py,\
-              tests/http/testenv/ws*\
+              tests/http/testenv/ws*,\
+              tests/libtest/cli_ws*\
               }"
 
 Windows:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              appveyor.*,\
-              .github/workflows/cygwin.yml,\
               .github/workflows/windows.yml,\
+              appveyor.*,\
               CMake/win32-cache.cmake,\
               lib/*win32*,\
+              lib/curlx/fopen.*,\
               lib/curlx/multibyte.*,\
               lib/curlx/winapi.*,\
-              lib/rename.*,\
               lib/vtls/schannel*,\
               m4/curl-schannel.m4,\
               projects/Windows/**,\
