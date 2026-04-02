@@ -264,7 +264,7 @@ struct async_thrdd_match_ctx {
 
 static bool async_thrdd_match_item(void *qitem, void *match_data)
 {
-  struct async_thrdd_match_ctx *ctx  = match_data;
+  const struct async_thrdd_match_ctx *ctx = match_data;
   struct async_thrdd_item *item = qitem;
   return (item->mid == ctx->mid) && (item->resolv_id == ctx->resolv_id);
 }
