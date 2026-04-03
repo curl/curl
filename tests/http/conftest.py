@@ -24,17 +24,16 @@
 #
 import logging
 import os
-import sys
 import platform
+import sys
 from typing import Generator, Union
 
 import pytest
-
 from testenv.env import EnvConfig
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
-from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd, Sshd
+from testenv import Env, Httpd, Nghttpx, NghttpxFwd, NghttpxQuic, Sshd
 
 log = logging.getLogger(__name__)
 

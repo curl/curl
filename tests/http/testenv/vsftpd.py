@@ -30,9 +30,8 @@ import re
 import socket
 import subprocess
 import time
-
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import Dict, List
 
 from .curl import CurlClient, ExecResult
 from .env import Env

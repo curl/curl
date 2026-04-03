@@ -30,8 +30,8 @@ import os
 import re
 import shutil
 import subprocess
-from datetime import timedelta, datetime, timezone
-from typing import List, Any, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Any, List, Optional
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -40,9 +40,13 @@ from cryptography.hazmat.primitives._serialization import PublicFormat
 from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption, load_pem_private_key
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    load_pem_private_key,
+)
 from cryptography.x509 import ExtendedKeyUsageOID, NameOID
-
 
 EC_SUPPORTED = {}
 EC_SUPPORTED.update([(curve.name.upper(), curve) for curve in [

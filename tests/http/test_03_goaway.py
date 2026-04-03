@@ -28,10 +28,9 @@ import logging
 import time
 from datetime import timedelta
 from threading import Thread
+
 import pytest
-
-from testenv import Env, CurlClient, ExecResult
-
+from testenv import CurlClient, Env, ExecResult
 
 log = logging.getLogger(__name__)
 

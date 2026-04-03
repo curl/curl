@@ -29,10 +29,9 @@ import filecmp
 import logging
 import os
 import shutil
+
 import pytest
-
-from testenv import Env, CurlClient, VsFTPD, LocalClient
-
+from testenv import CurlClient, Env, LocalClient, VsFTPD
 
 log = logging.getLogger(__name__)
 

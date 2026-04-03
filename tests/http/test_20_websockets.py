@@ -32,11 +32,10 @@ import subprocess
 import time
 from datetime import datetime, timedelta
 from typing import Dict
+
 import pytest
-
-from testenv import Env, CurlClient, LocalClient
+from testenv import CurlClient, Env, LocalClient
 from testenv.ports import alloc_ports_and_do
-
 
 log = logging.getLogger(__name__)
 

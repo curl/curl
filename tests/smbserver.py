@@ -24,13 +24,13 @@
 """Server for testing SMB."""
 
 import argparse
+import configparser
 import logging
 import os
 import signal
 import sys
 import tempfile
 import threading
-import configparser
 
 # Import our curl test data helper
 from util import ClosingFileHandler, TestData
@@ -45,8 +45,7 @@ except ImportError:
     sys.exit(1)
 from impacket import smb as imp_smb
 from impacket import smbserver as imp_smbserver
-from impacket.nt_errors import (STATUS_ACCESS_DENIED, STATUS_NO_SUCH_FILE,
-                                STATUS_SUCCESS)
+from impacket.nt_errors import STATUS_ACCESS_DENIED, STATUS_NO_SUCH_FILE, STATUS_SUCCESS
 
 log = logging.getLogger(__name__)
 SERVER_MAGIC = "SERVER_MAGIC"

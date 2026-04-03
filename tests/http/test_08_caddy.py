@@ -29,10 +29,9 @@ import filecmp
 import logging
 import os
 import re
+
 import pytest
-
-from testenv import Env, CurlClient, Caddy, LocalClient
-
+from testenv import Caddy, CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 

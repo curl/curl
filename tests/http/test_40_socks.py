@@ -28,10 +28,9 @@ import logging
 import os
 import time
 from typing import Generator
+
 import pytest
-
-from testenv import Env, CurlClient, Dante
-
+from testenv import CurlClient, Dante, Env
 
 log = logging.getLogger(__name__)
 

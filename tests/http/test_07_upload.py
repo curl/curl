@@ -30,11 +30,10 @@ import logging
 import os
 import re
 import sys
-import pytest
 from typing import List, Union
 
-from testenv import Env, CurlClient, LocalClient, ExecResult
-
+import pytest
+from testenv import CurlClient, Env, ExecResult, LocalClient
 
 log = logging.getLogger(__name__)
 

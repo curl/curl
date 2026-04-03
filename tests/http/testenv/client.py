@@ -29,11 +29,10 @@ import os
 import shutil
 import subprocess
 from datetime import datetime
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from . import ExecResult
 from .env import Env
-
 
 log = logging.getLogger(__name__)
 

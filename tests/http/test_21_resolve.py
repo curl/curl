@@ -27,10 +27,9 @@
 import logging
 import os
 from datetime import timedelta
+
 import pytest
-
-from testenv import Env, CurlClient, LocalClient
-
+from testenv import CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 
