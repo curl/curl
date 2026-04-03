@@ -1823,7 +1823,6 @@ static CURLcode check_finished(struct parastate *s)
       if(retry) {
         ended->added = FALSE; /* add it again */
         /* we delay retries in full integer seconds only */
-        notef("retrying in %dsec", delay ? (int)(delay / 1000) : 0);
         ended->startat = delay ? time(NULL) + (delay / 1000) : 0;
       }
       else {
