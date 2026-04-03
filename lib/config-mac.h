@@ -51,7 +51,6 @@
 #define HAVE_SYS_UTIME_H        1
 #define HAVE_SYS_IOCTL_H        1
 #define HAVE_ALARM              1
-#define HAVE_FTRUNCATE          1
 #define HAVE_UTIME              1
 #define HAVE_SELECT             1
 #define HAVE_SOCKET             1

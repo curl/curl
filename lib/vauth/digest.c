@@ -1031,12 +1031,12 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
  */
 void Curl_auth_digest_cleanup(struct digestdata *digest)
 {
-  Curl_safefree(digest->nonce);
-  Curl_safefree(digest->cnonce);
-  Curl_safefree(digest->realm);
-  Curl_safefree(digest->opaque);
-  Curl_safefree(digest->qop);
-  Curl_safefree(digest->algorithm);
+  curlx_safefree(digest->nonce);
+  curlx_safefree(digest->cnonce);
+  curlx_safefree(digest->realm);
+  curlx_safefree(digest->opaque);
+  curlx_safefree(digest->qop);
+  curlx_safefree(digest->algorithm);
 
   digest->nc = 0;
   digest->algo = ALGO_MD5; /* default algorithm */

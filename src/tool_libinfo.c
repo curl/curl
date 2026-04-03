@@ -184,7 +184,8 @@ CURLcode get_libcurl_info(void)
     ++feature_count;
   }
 
-  feature_libssh2 = curlinfo->libssh_version &&
+  feature_libssh2 = curlinfo->age >= CURLVERSION_FOURTH &&
+                    curlinfo->libssh_version &&
                     !strncmp("libssh2", curlinfo->libssh_version, 7);
   return CURLE_OK;
 }

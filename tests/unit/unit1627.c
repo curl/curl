@@ -25,6 +25,7 @@
 
 #include "urldata.h"
 #include "url.h"
+#include "strcase.h"
 
 static CURLcode test_unit1627(const char *arg)
 {
@@ -34,17 +35,17 @@ static CURLcode test_unit1627(const char *arg)
     /* all upper */
     "DICT", "FILE", "FTP", "FTPS", "GOPHER", "GOPHERS", "HTTP", "HTTPS",
     "IMAP", "IMAPS", "LDAP", "LDAPS", "MQTT", "MQTTS", "POP3", "POP3S",
-    "RTMP", "RTMPS", "RTSP", "SCP", "SFTP", "SMB", "SMBS", "SMTP", "SMTPS",
+    "RTSP", "SCP", "SFTP", "SMB", "SMBS", "SMTP", "SMTPS",
     "TELNET", "TFTP", "WS", "WSS",
     /* all lower */
     "dict", "file", "ftp", "ftps", "gopher", "gophers", "http", "https",
     "imap", "imaps", "ldap", "ldaps", "mqtt", "mqtts", "pop3", "pop3s",
-    "rtmp", "rtmps", "rtsp", "scp", "sftp", "smb", "smbs", "smtp", "smtps",
+    "rtsp", "scp", "sftp", "smb", "smbs", "smtp", "smtps",
     "telnet", "tftp", "ws", "wss",
     /* mixed */
     "diCt", "fIle", "Ftp", "ftpS", "Gopher", "gOphers", "htTp", "httPs",
     "imAP", "imaPS", "LDap", "LDAps", "mQTT", "mqtTS", "pOP3", "pOP3s",
-    "rTMp", "rTMPS", "RtsP", "ScP", "SFtP", "Smb", "smBS", "sMTP", "SMTPs",
+    "RtsP", "ScP", "SFtP", "Smb", "smBS", "sMTP", "SMTPs",
     "TELNEt", "tFTP", "Ws", "wSS",
   };
   /* non-existing schemes */
@@ -68,6 +69,7 @@ static CURLcode test_unit1627(const char *arg)
   (void)arg;
 
   for(i = 0; i < CURL_ARRAYSIZE(okay); i++) {
+    char buffer[32];
     const struct Curl_scheme *get = Curl_get_scheme(okay[i]);
     if(get) {
       /* verify that we got the correct scheme */
@@ -76,6 +78,12 @@ static CURLcode test_unit1627(const char *arg)
     }
     if(!get) {
       curl_mprintf("Input: %s, expected okay\n", okay[i]);
+      break;
+    }
+    Curl_strntolower(buffer, okay[i], strlen(okay[i]));
+    buffer[ strlen(okay[i]) ] = 0;
+    if(strcmp(buffer, get->name)) {
+      curl_mprintf("Input: %s is not lowercase: %s\n", buffer, get->name);
       break;
     }
   }

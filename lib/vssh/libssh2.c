@@ -719,8 +719,8 @@ static CURLcode quote_error(struct Curl_easy *data,
                             struct ssh_conn *sshc)
 {
   failf(data, "Suspicious data after the command line");
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
   return CURLE_QUOTE_ERROR;
 }
 
@@ -808,7 +808,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     if(result) {
       if(result != CURLE_OUT_OF_MEMORY)
         failf(data, "Syntax error in %s: Bad second parameter", cmd);
-      Curl_safefree(sshc->quote_path1);
+      curlx_safefree(sshc->quote_path1);
       return result;
     }
     if(*cp)
@@ -827,7 +827,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     if(result) {
       if(result != CURLE_OUT_OF_MEMORY)
         failf(data, "Syntax error in ln/symlink: Bad second parameter");
-      Curl_safefree(sshc->quote_path1);
+      curlx_safefree(sshc->quote_path1);
       return result;
     }
     if(*cp)
@@ -850,7 +850,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     if(result) {
       if(result != CURLE_OUT_OF_MEMORY)
         failf(data, "Syntax error in rename: Bad second parameter");
-      Curl_safefree(sshc->quote_path1);
+      curlx_safefree(sshc->quote_path1);
       return result;
     }
     if(*cp)
@@ -879,8 +879,8 @@ static CURLcode sftp_quote(struct Curl_easy *data,
   }
 
   failf(data, "Unknown SFTP command");
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
   return CURLE_QUOTE_ERROR;
 }
 
@@ -1103,7 +1103,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
           if(!sshc->rsa)
             out_of_memory = TRUE;
           else if(curlx_stat(sshc->rsa, &sbuf)) {
-            Curl_safefree(sshc->rsa);
+            curlx_safefree(sshc->rsa);
           }
         }
         curlx_free(home);
@@ -1138,8 +1138,8 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
     }
 
     if(out_of_memory || !sshc->rsa) {
-      Curl_safefree(sshc->rsa);
-      Curl_safefree(sshc->rsa_pub);
+      curlx_safefree(sshc->rsa);
+      curlx_safefree(sshc->rsa_pub);
       myssh_to(data, sshc, SSH_SESSION_FREE);
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1157,7 +1157,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
   else {
     myssh_to(data, sshc, SSH_AUTH_PASS_INIT);
   }
-  return 0;
+  return CURLE_OK;
 }
 
 static CURLcode sftp_quote_stat(struct Curl_easy *data,
@@ -1266,8 +1266,8 @@ static CURLcode sftp_quote_stat(struct Curl_easy *data,
   myssh_to(data, sshc, SSH_SFTP_QUOTE_SETSTAT);
   return CURLE_OK;
 fail:
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
   return CURLE_QUOTE_ERROR;
 }
 
@@ -1535,8 +1535,8 @@ static CURLcode ssh_state_auth_pkey(struct Curl_easy *data,
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
-  Curl_safefree(sshc->rsa_pub);
-  Curl_safefree(sshc->rsa);
+  curlx_safefree(sshc->rsa_pub);
+  curlx_safefree(sshc->rsa);
 
   if(rc == 0) {
     sshc->authed = TRUE;
@@ -1891,8 +1891,8 @@ static CURLcode ssh_state_sftp_quote(struct Curl_easy *data,
 static CURLcode ssh_state_sftp_next_quote(struct Curl_easy *data,
                                           struct ssh_conn *sshc)
 {
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
 
   sshc->quote_item = sshc->quote_item->next;
 
@@ -1940,8 +1940,8 @@ static CURLcode ssh_state_sftp_quote_setstat(struct Curl_easy *data,
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
     failf(data, "Attempt to set SFTP stats for \"%s\" failed: %s",
           sshc->quote_path2, sftp_libssh2_strerror(sftperr));
-    Curl_safefree(sshc->quote_path1);
-    Curl_safefree(sshc->quote_path2);
+    curlx_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path2);
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -1967,8 +1967,8 @@ static CURLcode ssh_state_sftp_quote_symlink(struct Curl_easy *data,
     failf(data, "symlink \"%s\" to \"%s\" failed: %s",
           sshc->quote_path1, sshc->quote_path2,
           sftp_libssh2_strerror(sftperr));
-    Curl_safefree(sshc->quote_path1);
-    Curl_safefree(sshc->quote_path2);
+    curlx_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path2);
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -1990,7 +1990,7 @@ static CURLcode ssh_state_sftp_quote_mkdir(struct Curl_easy *data,
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
     failf(data, "mkdir \"%s\" failed: %s",
           sshc->quote_path1, sftp_libssh2_strerror(sftperr));
-    Curl_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path1);
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2019,8 +2019,8 @@ static CURLcode ssh_state_sftp_quote_rename(struct Curl_easy *data,
     failf(data, "rename \"%s\" to \"%s\" failed: %s",
           sshc->quote_path1, sshc->quote_path2,
           sftp_libssh2_strerror(sftperr));
-    Curl_safefree(sshc->quote_path1);
-    Curl_safefree(sshc->quote_path2);
+    curlx_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path2);
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2041,7 +2041,7 @@ static CURLcode ssh_state_sftp_quote_rmdir(struct Curl_easy *data,
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
     failf(data, "rmdir \"%s\" failed: %s",
           sshc->quote_path1, sftp_libssh2_strerror(sftperr));
-    Curl_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path1);
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2062,7 +2062,7 @@ static CURLcode ssh_state_sftp_quote_unlink(struct Curl_easy *data,
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
     failf(data, "rm \"%s\" failed: %s",
           sshc->quote_path1, sftp_libssh2_strerror(sftperr));
-    Curl_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path1);
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2086,7 +2086,7 @@ static CURLcode ssh_state_sftp_quote_statvfs(struct Curl_easy *data,
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
     failf(data, "statvfs \"%s\" failed: %s",
           sshc->quote_path1, sftp_libssh2_strerror(sftperr));
-    Curl_safefree(sshc->quote_path1);
+    curlx_safefree(sshc->quote_path1);
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2290,7 +2290,7 @@ static CURLcode ssh_state_sftp_close(struct Curl_easy *data,
     sshc->sftp_handle = NULL;
   }
 
-  Curl_safefree(sshp->path);
+  curlx_safefree(sshp->path);
 
   CURL_TRC_SSH(data, "SFTP DONE done");
 
@@ -2338,7 +2338,7 @@ static CURLcode ssh_state_sftp_shutdown(struct Curl_easy *data,
     sshc->sftp_session = NULL;
   }
 
-  Curl_safefree(sshc->homedir);
+  curlx_safefree(sshc->homedir);
 
   myssh_to(data, sshc, SSH_SESSION_DISCONNECT);
   return CURLE_OK;
@@ -2451,7 +2451,7 @@ static CURLcode ssh_state_session_disconnect(struct Curl_easy *data,
     }
   }
 
-  Curl_safefree(sshc->homedir);
+  curlx_safefree(sshc->homedir);
 
   myssh_to(data, sshc, SSH_SESSION_FREE);
   return CURLE_OK;
@@ -2547,11 +2547,11 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
   DEBUGASSERT(sshc->kh == NULL);
   DEBUGASSERT(sshc->ssh_agent == NULL);
 
-  Curl_safefree(sshc->rsa_pub);
-  Curl_safefree(sshc->rsa);
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
-  Curl_safefree(sshc->homedir);
+  curlx_safefree(sshc->rsa_pub);
+  curlx_safefree(sshc->rsa);
+  curlx_safefree(sshc->quote_path1);
+  curlx_safefree(sshc->quote_path2);
+  curlx_safefree(sshc->homedir);
 
   return CURLE_OK;
 }
@@ -3146,7 +3146,7 @@ static void myssh_easy_dtor(void *key, size_t klen, void *entry)
   struct SSHPROTO *sshp = entry;
   (void)key;
   (void)klen;
-  Curl_safefree(sshp->path);
+  curlx_safefree(sshp->path);
   curlx_dyn_free(&sshp->readdir);
   curlx_dyn_free(&sshp->readdir_link);
   curlx_free(sshp);

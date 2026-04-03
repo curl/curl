@@ -60,8 +60,8 @@ if(! -r "lib/url.c" || ! -r "lib/urldata.h") {
 }
 
 my @files;
-open(F, "git ls-files '*.c'|");
-while(<F>) {
+open(my $git, "-|", "git", "ls-files", "*.c") or die "git ls-files failed: $!";
+while(<$git>) {
     chomp $_;
     my $file = $_;
     # we cannot filter these with git so do it here
@@ -69,9 +69,11 @@ while(<F>) {
         push @files, $file;
     }
 }
+close($git);
 
-my $cmd = "$pmccabe ".join(" ", @files);
-my @output=`$cmd`;
+open(my $pmc, "-|", $pmccabe, @files) or die "pmccabe failed: $!";
+my @output = <$pmc>;
+close($pmc);
 
 # these functions can have these scores, but not higher
 my %whitelist = (

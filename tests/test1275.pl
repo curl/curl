@@ -28,7 +28,11 @@ use warnings;
 
 my $root=$ARGV[0] || "..";
 
-my @m = `git ls-files -- $root`;
+my @m;
+if(open(O, '-|', 'git', 'ls-files', '--', $root)) {
+    push @m, <O>;
+    close(O);
+}
 
 my $errors = 0;
 
@@ -46,7 +50,7 @@ sub checkfile {
     if($f !~ /\.md\z/) {
         return;
     }
-    open(my $fh, "<", "$f");
+    open(my $fh, "<", $f);
     my $l;
     my $prevl = '';
     my $ignore = 0;
@@ -65,6 +69,11 @@ sub checkfile {
                 next;
             }
             $metadata = 0;
+            next;
+        }
+        if($line =~ /^    /) {
+            # leading 4-space; reset previous-line context and skip checks
+            $prevl = '';
             next;
         }
         if($line =~ /^(\`\`\`|\~\~\~)/) {

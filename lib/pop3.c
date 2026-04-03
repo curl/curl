@@ -1479,8 +1479,8 @@ static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
   }
 
   /* Cleanup our per-request based variables */
-  Curl_safefree(pop3->id);
-  Curl_safefree(pop3->custom);
+  curlx_safefree(pop3->id);
+  curlx_safefree(pop3->custom);
 
   /* Clear the transfer mode for the next request */
   pop3->transfer = PPTRANSFER_BODY;
@@ -1627,7 +1627,7 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
   Curl_pp_disconnect(&pop3c->pp);
 
   /* Cleanup our connection based variables */
-  Curl_safefree(pop3c->apoptimestamp);
+  curlx_safefree(pop3c->apoptimestamp);
 
   return CURLE_OK;
 }
@@ -1655,8 +1655,8 @@ static void pop3_easy_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   DEBUGASSERT(pop3);
   /* Cleanup our per-request based variables */
-  Curl_safefree(pop3->id);
-  Curl_safefree(pop3->custom);
+  curlx_safefree(pop3->id);
+  curlx_safefree(pop3->custom);
   curlx_free(pop3);
 }
 
@@ -1667,7 +1667,7 @@ static void pop3_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   DEBUGASSERT(pop3c);
   Curl_pp_disconnect(&pop3c->pp);
-  Curl_safefree(pop3c->apoptimestamp);
+  curlx_safefree(pop3c->apoptimestamp);
   curlx_free(pop3c);
 }
 

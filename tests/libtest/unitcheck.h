@@ -23,6 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
+#ifdef BUILDING_LIBCURL
+#include "unitprotos.h"
+#endif
+
 /* The fail macros mark the current test step as failed, and continue */
 #define fail_if(expr, msg)                                             \
   do {                                                                 \

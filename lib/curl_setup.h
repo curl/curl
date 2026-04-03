@@ -220,7 +220,7 @@
 /* ================================================================ */
 
 /* Give calloc a chance to be dragging in early, so we do not redefine */
-#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#ifdef HAVE_THREADS_POSIX
 #  include <pthread.h>
 #endif
 
@@ -257,9 +257,6 @@
 #  endif
 #  ifndef CURL_DISABLE_RTSP
 #  define CURL_DISABLE_RTSP
-#  endif
-#  ifndef CURL_DISABLE_SMB
-#  define CURL_DISABLE_SMB
 #  endif
 #  ifndef CURL_DISABLE_SMTP
 #  define CURL_DISABLE_SMTP
@@ -442,7 +439,7 @@
 #    if !(defined(__NEWLIB__) || \
           (defined(__CLIB2__) && defined(__THREAD_SAFE)))
        /* disable threaded resolver with clib2 - requires newlib or clib-ts */
-#      undef USE_THREADS_POSIX
+#      undef USE_RESOLV_THREADED
 #    endif
 #  endif
 #  include <exec/types.h>
@@ -685,6 +682,16 @@
 
 #endif /* _WIN32 */
 
+/* We want to use mutex when available. */
+#if defined(HAVE_THREADS_POSIX) || defined(_WIN32)
+#define USE_MUTEX
+#endif
+
+/* threaded resolver is the only feature requiring threads. */
+#ifdef USE_RESOLV_THREADED
+#define USE_THREADS
+#endif
+
 /* ---------------------------------------------------------------- */
 /*             resolver specialty compile-time defines              */
 /*         CURLRES_* defines to use in the host*.c sources          */
@@ -702,12 +709,10 @@
 #  define CURLRES_IPV4
 #endif
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#ifdef USE_RESOLV_THREADED
 #  define CURLRES_ASYNCH
-#  define CURLRES_THREADED
-#elif defined(USE_ARES)
+#elif defined(USE_RESOLV_ARES)
 #  define CURLRES_ASYNCH
-#  define CURLRES_ARES
 /* now undef the stock libc functions to avoid them being used */
 #  undef HAVE_GETADDRINFO
 #  undef HAVE_FREEADDRINFO
@@ -757,7 +762,7 @@
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#ifndef CURL_DISABLE_NTLM
+#ifdef CURL_ENABLE_NTLM
 #  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||        \
   defined(USE_GNUTLS) ||                                                \
   (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) ||      \
@@ -772,6 +777,16 @@
 
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
 #define USE_SSH
+#endif
+
+/* GCC <4.6 does not support '#pragma GCC diagnostic push' and does not support
+   'pragma GCC diagnostic' inside functions.
+   Use CURL_HAVE_DIAG to guard the above in the curl codebase, instead of
+   defined(__GNUC__) || defined(__clang__).
+ */
+#if defined(__clang__) || (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
+#define CURL_HAVE_DIAG
 #endif
 
 /*
@@ -1307,14 +1322,14 @@ extern curl_strdup_callback Curl_cstrdup;
 extern curl_calloc_callback Curl_ccalloc;
 
 /*
- * Curl_safefree defined as a macro to allow MemoryTracking feature
- * to log free() calls at same location where Curl_safefree is used.
+ * curlx_safefree() defined as a macro to allow MemoryTracking feature
+ * to log free() calls at same location where curlx_safefree() is used.
  * This macro also assigns NULL to given pointer when free'd.
  */
-#define Curl_safefree(ptr) \
-  do {                     \
-    curlx_free(ptr);       \
-    (ptr) = NULL;          \
+#define curlx_safefree(ptr) \
+  do {                      \
+    curlx_free(ptr);        \
+    (ptr) = NULL;           \
   } while(0)
 
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */

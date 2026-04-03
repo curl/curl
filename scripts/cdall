@@ -35,10 +35,10 @@ sub convert {
     closedir $dh;
 
     for my $cd (@cd) {
-        my $nroff = "$cd";
+        my $nroff = $cd;
         $nroff =~ s/\.md\z/.3/;
         print "$dir/$cd = $dir/$nroff\n";
-        system("./scripts/cd2nroff -d $dir $dir/$cd");
+        system('./scripts/cd2nroff', ('-d', $dir, "$dir/$cd"));
     }
 }
 

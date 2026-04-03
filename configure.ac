@@ -165,7 +165,6 @@ curl_unix_sockets_msg="no       (--enable-unix-sockets)"
        curl_ldaps_msg="no       (--enable-ldaps)"
         curl_ipfs_msg="no       (--enable-ipfs)"
         curl_rtsp_msg="no       (--enable-rtsp)"
-        curl_rtmp_msg="no       (--with-librtmp)"
          curl_psl_msg="no       (--with-libpsl)"
       curl_altsvc_msg="enabled  (--disable-alt-svc)"
      curl_headers_msg="enabled  (--disable-headers-api)"
@@ -236,7 +235,10 @@ AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
 ])
 
 AC_ARG_WITH(openssl,dnl
-AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),[
+AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points
+  to the SSL installation (default: /usr/local/ssl); when possible, set
+  the PKG_CONFIG_PATH environment variable instead of using this option]),
+[
   OPT_OPENSSL=$withval
   if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"
@@ -1019,19 +1021,19 @@ AS_HELP_STRING([--disable-imap],[Disable IMAP support]),
 
 AC_MSG_CHECKING([whether to support smb])
 AC_ARG_ENABLE(smb,
-AS_HELP_STRING([--enable-smb],[Enable SMB/CIFS support])
-AS_HELP_STRING([--disable-smb],[Disable SMB/CIFS support]),
+AS_HELP_STRING([--enable-smb],[Enable SMB support])
+AS_HELP_STRING([--disable-smb],[Disable SMB support]),
 [ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_SMB, 1, [to disable SMB/CIFS])
-    CURL_DISABLE_SMB=1
+  yes)
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(CURL_ENABLE_SMB, 1, [to enable SMB])
+    CURL_ENABLE_SMB=1
     ;;
   *)
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
     ;;
   esac ],
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
 )
 
 AC_MSG_CHECKING([whether to support smtp])
@@ -1080,6 +1082,23 @@ AS_HELP_STRING([--disable-mqtt],[Disable MQTT support]),
     ;;
   *)
     AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(no)
+)
+
+AC_MSG_CHECKING([enable curl_global_init_mem debug build])
+AC_ARG_ENABLE(init-mem-debug,
+AS_HELP_STRING([--enable-init-mem-debug],[curl_global_init_mem debug])
+AS_HELP_STRING([--disable-init-mem-debug],[]),
+[ case "$enableval" in
+  yes)
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(CURL_DEBUG_GLOBAL_MEM, 1, [curl_debug_global_mem debug build])
+    SUPPORT_FEATURES="$SUPPORT_FEATURES global-mem-debug"
+    ;;
+  *)
+    AC_MSG_RESULT(no)
     ;;
   esac ],
     AC_MSG_RESULT(no)
@@ -1513,7 +1532,8 @@ dnl Brotli project home page: https://github.com/google/brotli
 dnl Default to compiler & linker defaults for BROTLI files & libraries.
 OPT_BROTLI=off
 AC_ARG_WITH(brotli,dnl
-AS_HELP_STRING([--with-brotli=PATH],[Where to look for brotli, PATH points to the BROTLI installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-brotli=PATH],[Where to look for brotli, PATH points to the BROTLI installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-brotli], [disable BROTLI]),
   OPT_BROTLI=$withval)
 
@@ -1610,7 +1630,8 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for libzstd
 OPT_ZSTD=off
 AC_ARG_WITH(zstd,dnl
-AS_HELP_STRING([--with-zstd=PATH],[Where to look for libzstd, PATH points to the libzstd installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-zstd=PATH],[Where to look for libzstd, PATH points to the libzstd installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-zstd], [disable libzstd]),
   OPT_ZSTD=$withval)
 
@@ -2192,7 +2213,8 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for LIBPSL files & libraries.
 OPT_LIBPSL=off
 AC_ARG_WITH(libpsl,dnl
-AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to the LIBPSL installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to the LIBPSL installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-libpsl], [disable LIBPSL]),
   OPT_LIBPSL=$withval)
 
@@ -2264,7 +2286,8 @@ dnl **********************************************************************
 
 OPT_LIBGSASL=no
 AC_ARG_WITH(libgsasl,dnl
-AS_HELP_STRING([--with-libgsasl=PATH],[Where to look for libgsasl, PATH points to the libgsasl installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libgsasl=PATH],[Where to look for libgsasl, PATH points to the libgsasl installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-libgsasl], [disable libgsasl support for SCRAM]),
   OPT_LIBGSASL=$withval)
 
@@ -2337,13 +2360,15 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for libssh2 files & libraries.
 OPT_LIBSSH2=off
 AC_ARG_WITH(libssh2,dnl
-AS_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the libssh2 installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the libssh2 installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh2], [enable libssh2]),
   OPT_LIBSSH2=$withval, OPT_LIBSSH2=no)
 
 OPT_LIBSSH=off
 AC_ARG_WITH(libssh,dnl
-AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to the libssh installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to the libssh installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh], [enable libssh]),
   OPT_LIBSSH=$withval, OPT_LIBSSH=no)
 
@@ -2526,7 +2551,8 @@ clean_LDAP_LDFLAGS=$LDFLAGS
 clean_LDAP_LIBS=$LIBS
 OPT_LDAP=off
 AC_ARG_WITH(ldap,
-AS_HELP_STRING([--with-ldap=PATH],[Where to look for LDAP, PATH points to the LDAP installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--with-ldap=PATH],[Where to look for LDAP, PATH points to the LDAP installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--without-ldap], [disable LDAP]),
   OPT_LDAP=$withval)
 
@@ -2687,86 +2713,6 @@ fi
 
 if test "$CURL_DISABLE_LDAPS" != "1"; then
   curl_ldaps_msg="enabled"
-fi
-
-dnl **********************************************************************
-dnl Check for the presence of LIBRTMP libraries and headers
-dnl **********************************************************************
-
-dnl Default to compiler & linker defaults for LIBRTMP files & libraries.
-OPT_LIBRTMP=off
-AC_ARG_WITH(librtmp,dnl
-AS_HELP_STRING([--with-librtmp=PATH],[Where to look for librtmp, PATH points to the LIBRTMP installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AS_HELP_STRING([--without-librtmp], [disable LIBRTMP]),
-  OPT_LIBRTMP=$withval)
-
-if test "x$OPT_LIBRTMP" != "xno"; then
-  dnl backup the pre-librtmp variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANLDFLAGSPC="$LDFLAGSPC"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  case "$OPT_LIBRTMP" in
-    yes)
-      dnl --with-librtmp (without path) used
-      CURL_CHECK_PKGCONFIG(librtmp)
-
-      if test "$PKGCONFIG" != "no"; then
-        LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
-        LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
-        CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
-        version=`$PKGCONFIG --modversion librtmp`
-        DIR_RTMP=`echo $LD_RTMP | $SED -e 's/^-L//'`
-      else
-        dnl To avoid link errors, we do not allow --librtmp without
-        dnl a pkgconfig file
-        AC_MSG_ERROR([--librtmp was specified but could not find librtmp pkgconfig file.])
-      fi
-      ;;
-    off)
-      dnl no --with-librtmp option given, just check default places
-      LIB_RTMP="-lrtmp"
-      ;;
-    *)
-      dnl use the given --with-librtmp spot
-      LIB_RTMP="-lrtmp"
-      PREFIX_RTMP=$OPT_LIBRTMP
-      ;;
-  esac
-
-  dnl if given with a prefix, we set -L and -I based on that
-  if test -n "$PREFIX_RTMP"; then
-    LD_RTMP=-L${PREFIX_RTMP}/lib$libsuff
-    CPP_RTMP=-I${PREFIX_RTMP}/include
-    DIR_RTMP=${PREFIX_RTMP}/lib$libsuff
-  fi
-
-  LDFLAGS="$LDFLAGS $LD_RTMP"
-  LDFLAGSPC="$LDFLAGSPC $LD_RTMP"
-  CPPFLAGS="$CPPFLAGS $CPP_RTMP"
-  LIBS="$LIB_RTMP $LIBS"
-
-  AC_CHECK_LIB(rtmp, RTMP_Init,
-    [
-      AC_CHECK_HEADERS(librtmp/rtmp.h,
-        curl_rtmp_msg="enabled (librtmp)"
-        AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
-        USE_LIBRTMP=1
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE librtmp"
-      )
-    ],
-      dnl not found, revert back to clean variables
-      LDFLAGS=$CLEANLDFLAGS
-      LDFLAGSPC=$CLEANLDFLAGSPC
-      CPPFLAGS=$CLEANCPPFLAGS
-      LIBS=$CLEANLIBS
-  )
-
-  if test "x$OPT_LIBRTMP" != "xoff" &&
-     test "$USE_LIBRTMP" != "1"; then
-    AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
-  fi
 fi
 
 dnl **********************************************************************
@@ -3709,7 +3655,6 @@ dnl **********************************************************************
 
 if test "$USE_NGTCP2" = "1" && test "$USE_NGHTTP3" = "1"; then
   USE_NGTCP2_H3=1
-  AC_MSG_NOTICE([HTTP3 support is experimental])
   curl_h3_msg="enabled (ngtcp2 + nghttp3)"
 fi
 
@@ -4141,7 +4086,6 @@ CURL_CHECK_FUNC_CLOSESOCKET_CAMEL
 CURL_CHECK_FUNC_FCNTL
 CURL_CHECK_FUNC_FREEADDRINFO
 CURL_CHECK_FUNC_FSETXATTR
-CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GETADDRINFO
 CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
@@ -4198,7 +4142,6 @@ if test "$curl_cv_native_windows" != "yes"; then
     if_nametoindex \
     realpath \
     sched_yield \
-    snprintf \
   ])
   CURL_CHECK_FUNC_INET_NTOP
   CURL_CHECK_FUNC_INET_PTON
@@ -4247,17 +4190,10 @@ if test "$ipv6" = "yes" && test "$curl_cv_apple" = "yes"; then
   CURL_DARWIN_SYSTEMCONFIGURATION
 fi
 
-dnl Windows threaded resolver check
-if test "$want_threaded_resolver" = "yes" && test "$curl_cv_native_windows" = "yes"; then
-  USE_THREADS_WIN32=1
-  AC_DEFINE(USE_THREADS_WIN32, 1, [if you want Win32 threaded DNS lookup])
-  curl_res_msg="Win32 threaded"
-fi
-
 dnl detect pthreads
-if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; then
+if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_HEADER(pthread.h,
-    [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
+    [
       save_CFLAGS="$CFLAGS"
       dnl When statically linking against BoringSSL, -lpthread is added to LIBS.
       dnl Make sure to that this does not pass the check below, we really want
@@ -4268,7 +4204,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
 
       LIBS=
       dnl Check for libc variants without a separate pthread lib like bionic
-      AC_CHECK_FUNC(pthread_create, [USE_THREADS_POSIX=1] )
+      AC_CHECK_FUNC(pthread_create, [HAVE_THREADS_POSIX=1] )
       LIBS="$save_LIBS"
 
       case $host in
@@ -4280,7 +4216,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
       esac
 
       dnl if it was not found without lib, search for it in pthread lib
-      if test "$USE_THREADS_POSIX" != "1"; then
+      if test "$HAVE_THREADS_POSIX" != "1"; then
         # assign PTHREAD for pkg-config use
         PTHREAD=" -pthread"
 
@@ -4303,20 +4239,32 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
             ;;
         esac
         AC_CHECK_LIB(pthread, pthread_create,
-                     [USE_THREADS_POSIX=1],
+                     [HAVE_THREADS_POSIX=1],
                      [ CFLAGS="$save_CFLAGS"])
       fi
-
-      if test "$USE_THREADS_POSIX" = "1"; then
-        AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
-        curl_res_msg="POSIX threaded"
-      fi
   ])
+  if test "$HAVE_THREADS_POSIX" = "1"; then
+    AC_DEFINE(HAVE_THREADS_POSIX, 1, [if POSIX pthreads are supported])
+  fi
 fi
 
-dnl Did we find a threading option?
-if test "$want_threaded_resolver" != "no" && test "$USE_THREADS_POSIX" != "1" && test "$USE_THREADS_WIN32" != "1"; then
-  AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
+dnl threaded resolver check
+if test "$want_threaded_resolver" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes"; then
+    USE_RESOLV_THREADED=1
+    AC_DEFINE(USE_RESOLV_THREADED, 1, [if you want threaded DNS lookup])
+    curl_res_msg="Win32 threaded"
+  elif test "$HAVE_THREADS_POSIX" = "1"; then
+    USE_RESOLV_THREADED=1
+    AC_DEFINE(USE_RESOLV_THREADED, 1, [if you want threaded DNS lookup])
+    curl_res_msg="POSIX threaded"
+  else
+    AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
+  fi
+elif test "$USE_ARES" = "1"; then
+  USE_RESOLV_ARES=1
+  AC_DEFINE(USE_RESOLV_ARES, 1, [if you want c-ares for DNS lookup])
+  curl_res_msg="c-ares"
 fi
 
 AC_CHECK_HEADER(dirent.h,
@@ -4534,16 +4482,16 @@ AC_ARG_ENABLE(ntlm,
 AS_HELP_STRING([--enable-ntlm],[Enable NTLM support])
 AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
 [ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_NTLM, 1, [to disable NTLM support])
-    CURL_DISABLE_NTLM=1
+  yes)
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(CURL_ENABLE_NTLM, 1, [enable NTLM support])
+    CURL_ENABLE_NTLM=1
     ;;
   *)
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
     ;;
   esac ],
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
 )
 
 dnl ************************************************************
@@ -5158,7 +5106,7 @@ fi
 if test "$HAVE_ZSTD" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES zstd"
 fi
-if test "$USE_ARES" = "1" || test "$USE_THREADS_POSIX" = "1" || test "$USE_THREADS_WIN32" = "1"; then
+if test "$USE_RESOLV_ARES" = "1" || test "$USE_RESOLV_THREADED" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "$USE_ARES" = "1" && test "$want_threaded_resolver" = "yes" && test "$want_httpsrr" != "no"; then
@@ -5200,7 +5148,7 @@ fi
 
 use_curl_ntlm_core=no
 
-if test "$CURL_DISABLE_NTLM" != "1"; then
+if test "$CURL_ENABLE_NTLM" = "1"; then
   if test "$HAVE_DES_ECB_ENCRYPT" = "1" ||
      test "$GNUTLS_ENABLED" = "1" ||
      test "$USE_WIN32_CRYPTO" = "1" ||
@@ -5292,7 +5240,7 @@ fi
 
 if test "$tst_atomic" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-elif test "$USE_THREADS_POSIX" = "1" && test "$ac_cv_header_pthread_h" = "yes"; then
+elif test "$HAVE_THREADS_POSIX" = "1" && test "$ac_cv_header_pthread_h" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
 elif test "$curl_cv_native_windows" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
@@ -5379,7 +5327,7 @@ if test "$CURL_DISABLE_IMAP" != "1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAPS"
   fi
 fi
-if test "$CURL_DISABLE_SMB" != "1" && test "$use_curl_ntlm_core" = "yes"; then
+if test "$CURL_ENABLE_SMB" = "1" && test "$use_curl_ntlm_core" = "yes"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
   if test "$SSL_ENABLED" = "1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"
@@ -5404,9 +5352,6 @@ if test "$CURL_DISABLE_IPFS" != "1"; then
 fi
 if test "$CURL_DISABLE_RTSP" != "1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
-fi
-if test "$USE_LIBRTMP" = "1"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTMP"
 fi
 if test "$CURL_DISABLE_WEBSOCKETS" != "1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WS"
@@ -5519,7 +5464,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAPS:            ${curl_ldaps_msg}
   IPFS/IPNS:        ${curl_ipfs_msg}
   RTSP:             ${curl_rtsp_msg}
-  RTMP:             ${curl_rtmp_msg}
   PSL:              ${curl_psl_msg}
   Alt-svc:          ${curl_altsvc_msg}
   Headers API:      ${curl_headers_msg}

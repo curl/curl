@@ -24,7 +24,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 extern const struct Curl_protocol Curl_protocol_smb;
 #endif
 

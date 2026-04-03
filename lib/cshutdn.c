@@ -87,14 +87,14 @@ static void cshutdn_run_once(struct Curl_easy *data,
     return;
   }
 
-  if(!conn->connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
+  if(!conn->bits.connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
     r1 = Curl_conn_shutdown(data, FIRSTSOCKET, &done1);
   else {
     r1 = CURLE_OK;
     done1 = TRUE;
   }
 
-  if(!conn->connect_only && Curl_conn_is_connected(conn, SECONDARYSOCKET))
+  if(!conn->bits.connect_only && Curl_conn_is_connected(conn, SECONDARYSOCKET))
     r2 = Curl_conn_shutdown(data, SECONDARYSOCKET, &done2);
   else {
     r2 = CURLE_OK;

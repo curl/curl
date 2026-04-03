@@ -166,8 +166,6 @@ my %knownprotos = (
     'MQTT' => 1,
     'POP3' => 1,
     'POP3S' => 1,
-    'RTMP' => 1,
-    'RTMPS' => 1,
     'RTSP' => 1,
     'SCP' => 1,
     'SFTP' => 1,
@@ -216,7 +214,7 @@ sub single {
     my $title;
 
     if(defined($f)) {
-        if(!open($fh, "<:crlf", "$f")) {
+        if(!open($fh, "<:crlf", $f)) {
             print STDERR "cd2nroff failed to open '$f' for reading: $!\n";
             return 1;
         }

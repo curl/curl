@@ -42,9 +42,9 @@ static CURLcode test_tool1622(const char *arg)
     0 /* end of list */
   };
 
-  puts("time2str");
+  puts("timebuf");
   for(i = 0, secs = 0; i < 63; i++) {
-    time2str(buffer, sizeof(buffer), secs);
+    timebuf(buffer, sizeof(buffer), secs);
     curl_mprintf("%20" FMT_OFF_T " - %s\n", secs, buffer);
     if(strlen(buffer) != 8) {
       curl_mprintf("^^ was too long!\n");

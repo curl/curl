@@ -17,7 +17,7 @@ Verify curl -h --no-clobber
 </name>
 
 <command type="perl">
-%SRCDIR/test1707.pl %CURL --no-clobber %LOGDIR/help%TESTNUMBER ../docs/cmdline-opts/curl.txt
+%SRCDIR/test1707.pl %CURL --no-clobber ../docs/cmdline-opts/curl.txt
 </command>
 </client>
 

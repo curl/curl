@@ -94,47 +94,6 @@ struct dynhds_entry *Curl_dynhds_get(struct dynhds *dynhds,
                                      const char *name, size_t namelen);
 struct dynhds_entry *Curl_dynhds_cget(struct dynhds *dynhds, const char *name);
 
-#ifdef UNITTESTS
-/* used by unit2602.c */
-
-/**
- * Return TRUE iff one or more headers with the given name exist.
- */
-bool Curl_dynhds_contains(struct dynhds *dynhds,
-                          const char *name, size_t namelen);
-bool Curl_dynhds_ccontains(struct dynhds *dynhds, const char *name);
-
-/**
- * Return how often the given name appears in `dynhds`.
- * Names are case-insensitive.
- */
-size_t Curl_dynhds_count_name(struct dynhds *dynhds,
-                              const char *name, size_t namelen);
-
-/**
- * Return how often the given null-terminated name appears in `dynhds`.
- * Names are case-insensitive.
- */
-size_t Curl_dynhds_ccount_name(struct dynhds *dynhds, const char *name);
-
-/**
- * Remove all entries with the given name.
- * Returns number of entries removed.
- */
-size_t Curl_dynhds_remove(struct dynhds *dynhds,
-                          const char *name, size_t namelen);
-size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name);
-
-/**
- * Set the give header name and value, replacing any entries with
- * the same name. The header is added at the end of all (remaining)
- * entries.
- */
-CURLcode Curl_dynhds_set(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen);
-#endif
-
 CURLcode Curl_dynhds_cset(struct dynhds *dynhds,
                           const char *name, const char *value);
 

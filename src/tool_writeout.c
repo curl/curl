@@ -461,6 +461,8 @@ static const struct writeoutvar variables[] = {
   { "remote_port", VAR_PRIMARY_PORT, CURLINFO_PRIMARY_PORT, writeLong },
   { "response_code", VAR_HTTP_CODE, CURLINFO_RESPONSE_CODE, writeLong },
   { "scheme", VAR_SCHEME, CURLINFO_SCHEME, writeString },
+  { "size_delivered", VAR_SIZE_DELIVERED, CURLINFO_SIZE_DELIVERED,
+    writeOffset },
   { "size_download", VAR_SIZE_DOWNLOAD, CURLINFO_SIZE_DOWNLOAD_T,
     writeOffset },
   { "size_header", VAR_HEADER_SIZE, CURLINFO_HEADER_SIZE, writeLong },
@@ -580,14 +582,14 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     if(!result) {
       struct tm utc;
       result = curlx_gmtime(secs, &utc);
-#ifdef __GNUC__  /* includes llvm/clang, but not affected as of v22.1.0 */
+#ifdef CURL_HAVE_DIAG /* includes llvm/clang, but not affected as of v22.1.0 */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
       if(curlx_dyn_len(&format) && !result &&
          strftime(output, sizeof(output), curlx_dyn_ptr(&format), &utc))
         fputs(output, stream);
-#ifdef __GNUC__
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
       curlx_dyn_free(&format);

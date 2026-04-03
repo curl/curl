@@ -599,7 +599,7 @@ static int mime_mem_seek(void *instream, curl_off_t offset, int whence)
 
 static void mime_mem_free(void *ptr)
 {
-  Curl_safefree(((curl_mimepart *)ptr)->data);
+  curlx_safefree(((curl_mimepart *)ptr)->data);
 }
 
 /* Named file callbacks. */
@@ -650,7 +650,7 @@ static void mime_file_free(void *ptr)
     curlx_fclose(part->fp);
     part->fp = NULL;
   }
-  Curl_safefree(part->data);
+  curlx_safefree(part->data);
 }
 
 /* Subparts callbacks. */
@@ -1071,9 +1071,9 @@ void Curl_mime_cleanpart(curl_mimepart *part)
     curl_slist_free_all(part->curlheaders);
     if(part->flags & MIME_USERHEADERS_OWNER)
       curl_slist_free_all(part->userheaders);
-    Curl_safefree(part->mimetype);
-    Curl_safefree(part->name);
-    Curl_safefree(part->filename);
+    curlx_safefree(part->mimetype);
+    curlx_safefree(part->name);
+    curlx_safefree(part->filename);
     Curl_mime_initpart(part);
   }
 }
@@ -1241,7 +1241,7 @@ CURLcode curl_mime_name(curl_mimepart *part, const char *name)
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  Curl_safefree(part->name);
+  curlx_safefree(part->name);
 
   if(name) {
     part->name = curlx_strdup(name);
@@ -1258,7 +1258,7 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  Curl_safefree(part->filename);
+  curlx_safefree(part->filename);
 
   if(filename) {
     part->filename = curlx_strdup(filename);
@@ -1350,7 +1350,7 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  Curl_safefree(part->mimetype);
+  curlx_safefree(part->mimetype);
 
   if(mimetype) {
     part->mimetype = curlx_strdup(mimetype);
@@ -1759,8 +1759,8 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
                                    filename ? "; filename=\"" : "",
                                    filename ? filename : "",
                                    filename ? "\"" : "");
-      Curl_safefree(name);
-      Curl_safefree(filename);
+      curlx_safefree(name);
+      curlx_safefree(filename);
       if(ret)
         return ret;
     }

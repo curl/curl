@@ -66,6 +66,7 @@ jobs:
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
+              -DCURL_ENABLE_NTLM=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
@@ -111,6 +112,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
+              -DCURL_ENABLE_NTLM=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
@@ -346,10 +348,14 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
+        run: |
+          printf "#!/bin/sh
+            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 30 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
+            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         id: cache-compiler
         with:
           path: ~/djgpp

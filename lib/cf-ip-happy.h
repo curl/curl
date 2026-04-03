@@ -25,6 +25,12 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+struct connectdata;
+struct Curl_addrinfo;
+struct Curl_cfilter;
+struct Curl_easy;
+struct Curl_sockaddr_ex;
+
 /**
  * Create a cfilter for making an "ip" connection to the
  * given address, using parameters from `conn`. The "ip" connection
@@ -39,7 +45,7 @@
 typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
                                       struct connectdata *conn,
-                                      const struct Curl_addrinfo *ai,
+                                      struct Curl_sockaddr_ex *addr,
                                       uint8_t transport);
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
@@ -47,10 +53,5 @@ CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   uint8_t transport);
 
 extern struct Curl_cftype Curl_cft_ip_happy;
-
-#ifdef UNITTESTS
-void Curl_debug_set_transport_provider(uint8_t transport,
-                                       cf_ip_connect_create *cf_create);
-#endif
 
 #endif /* HEADER_CURL_IP_HAPPY_H */

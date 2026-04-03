@@ -40,20 +40,12 @@ set(CURL_TEST_DEFINES "")  # Initialize global variable
 # Return result in variable: CURL_TEST_OUTPUT
 macro(curl_internal_test _curl_test)
   if(NOT DEFINED "${_curl_test}")
-    string(REPLACE ";" " " _cmake_required_definitions "${CMAKE_REQUIRED_DEFINITIONS}")
-    set(_curl_test_add_libraries "")
-    if(CMAKE_REQUIRED_LIBRARIES)
-      set(_curl_test_add_libraries
-        "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    endif()
-
     message(STATUS "Performing Test ${_curl_test}")
     try_compile(${_curl_test}
       ${PROJECT_BINARY_DIR}
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
-      CMAKE_FLAGS
-        "-DCOMPILE_DEFINITIONS:STRING=-D${_curl_test} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS} ${_cmake_required_definitions}"
-        "${_curl_test_add_libraries}"
+      COMPILE_DEFINITIONS "-D${_curl_test}" ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS} ${CMAKE_REQUIRED_DEFINITIONS}
+      LINK_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}"
       OUTPUT_VARIABLE CURL_TEST_OUTPUT)
     if(${_curl_test})
       set(${_curl_test} 1 CACHE INTERNAL "curl test")

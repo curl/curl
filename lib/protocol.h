@@ -50,14 +50,10 @@ struct easy_pollset;
 #define PORT_SMTP   25
 #define PORT_SMTPS  465 /* sometimes called SSMTP */
 #define PORT_RTSP   554
-#define PORT_RTMP   1935
-#define PORT_RTMPT  PORT_HTTP
-#define PORT_RTMPS  PORT_HTTPS
 #define PORT_GOPHER 70
 #define PORT_MQTT   1883
 #define PORT_MQTTS  8883
 
-#ifndef CURL_DISABLE_WEBSOCKETS
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
  * the rest are internal information. If we use higher bits we only do this on
  * platforms that have a >= 64-bit type and then we use such a type for the
@@ -65,11 +61,6 @@ struct easy_pollset;
  */
 #define CURLPROTO_WS     (1L << 30)
 #define CURLPROTO_WSS    ((curl_prot_t)1 << 31)
-#else
-#define CURLPROTO_WS     0L
-#define CURLPROTO_WSS    0L
-#endif
-
 #define CURLPROTO_MQTTS  (1LL << 32)
 
 #define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)
@@ -83,7 +74,7 @@ typedef curl_off_t curl_prot_t;
 /* This mask is for all the old protocols that are provided and defined in the
    public header and shall exclude protocols added since which are not exposed
    in the API */
-#define CURLPROTO_MASK   0x3ffffff
+#define CURLPROTO_MASK   0x3fffffff
 
 /* Convenience defines for checking protocols or their SSL based version. Each
    protocol scheme should only ever have a single CURLPROTO_ in its protocol
@@ -270,12 +261,6 @@ extern const struct Curl_scheme Curl_scheme_mqtt;
 extern const struct Curl_scheme Curl_scheme_mqtts;
 extern const struct Curl_scheme Curl_scheme_pop3;
 extern const struct Curl_scheme Curl_scheme_pop3s;
-extern const struct Curl_scheme Curl_scheme_rtmp;
-extern const struct Curl_scheme Curl_scheme_rtmpe;
-extern const struct Curl_scheme Curl_scheme_rtmpt;
-extern const struct Curl_scheme Curl_scheme_rtmpte;
-extern const struct Curl_scheme Curl_scheme_rtmps;
-extern const struct Curl_scheme Curl_scheme_rtmpts;
 extern const struct Curl_scheme Curl_scheme_rtsp;
 extern const struct Curl_scheme Curl_scheme_scp;
 extern const struct Curl_scheme Curl_scheme_sftp;

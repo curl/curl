@@ -26,13 +26,15 @@ Connection: close
 http
 </server>
 <name>
-netrc with no login - provided user
+netrc with no login - but provided user in URL
 </name>
 <command>
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER http://user@%HOSTIP:%HTTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >
+machine %HOSTIP password firstthis login unknown
 machine %HOSTIP password 5up3r53cr37
+machine %HOSTIP password d1ff3r3nt login anotherone
 </file>
 </client>
 

@@ -28,6 +28,8 @@
 use strict;
 use warnings;
 
+use File::Copy;
+
 my $docroot="https://curl.se/libcurl/c";
 
 for my $f (@ARGV) {
@@ -36,7 +38,7 @@ for my $f (@ARGV) {
     while(<F>) {
         my $l = $_;
         if($l =~ /\/* $docroot/) {
-            # ignore preciously added refs
+            # ignore previously added refs
         }
         elsif($l =~ /^( *).*curl_easy_setopt\([^,]*, *([^ ,]*) *,/) {
             my ($prefix, $anchor) = ($1, $2);
@@ -56,6 +58,6 @@ for my $f (@ARGV) {
     close(F);
     close(NEW);
 
-    system("mv $f $f.org");
-    system("mv $f.new $f");
+    move($f, "$f.org");
+    move("$f.new", $f);
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+encodeOID
+x509asn1
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+encodeOID unit tests
+</name>
+</client>
+</testcase>

@@ -42,7 +42,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai,
+                             struct Curl_sockaddr_ex *addr,
                              uint8_t transport);
 
 extern struct Curl_cftype Curl_cft_http3;

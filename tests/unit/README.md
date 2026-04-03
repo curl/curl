@@ -95,3 +95,35 @@ Here's an example using optional initialization and cleanup:
       UNITTEST_END(t9999_stop())
     }
 ~~~
+
+## Testing static functions
+
+Lots of internal functions are made static, and they *should* be static if
+they are private within a single source file.
+
+The curl build system provides a way to write unit tests that let us properly
+test these functions while keeping them static in release builds.
+
+A function that is static in the build but should be provided for unit testing
+needs to replace its `static` keyword with `UNITTEST` and it needs to have a
+prototype provided immediately above it.
+
+An example `add_two_integers()` function for unit testing:
+
+~~~c
+
+    UNITTEST int add_two_integers(int a, int b);
+    UNITTEST int add_two_integers(int a, int b)
+    {
+      return a + b;
+    }
+
+~~~
+
+Since the function is static and is private for this source file, it should
+not have its prototype in any header file.
+
+When building unit tests, the build system automatically generates the
+`lib/unitprotos.h` header file with all the prototypes for `UNITTEST`
+functions provided in any libcurl C source code files. (This is done by the
+`scripts/extract-unit-protos` script.)

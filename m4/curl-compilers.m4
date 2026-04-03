@@ -856,7 +856,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "209"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
             tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         # Not used because we cannot change public structs
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"         # Triggered by typecheck-gcc.h with clang 14+, dependency headers
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"         # for typecheck-gcc.h with clang 14+, dependency headers
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
           fi
           #
@@ -869,7 +869,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "301"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-non-iso])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-covered-switch-default"    # Annoying to fix or silence
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  # Triggered by curl/curl.h, standard headers
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  # for std headers, and curl/curl.h (rare combos)
           fi
           #
           dnl Only clang 3.2 or later
@@ -952,6 +952,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl clang 21 or later
           if test "$compiler_num" -ge "2101"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [c++-hidden-decl])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [implicit-int-enum-cast])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [jump-misses-init])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-implicit-void-ptr-cast"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [tentative-definition-compat])
@@ -974,7 +975,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         #
       GNU_C)
         #
-        if test "$want_warnings" = "yes"; then
+        dnl Leave disabled for GCC <4.6, because they lack #pragma features to silence locally.
+        if test "$want_warnings" = "yes" && test "$compiler_num" -ge "406"; then
           #
           dnl Do not enable -pedantic when cross-compiling with a gcc older
           dnl than 3.0, to avoid warnings from third party system headers.
@@ -1189,15 +1191,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
               tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-prototypes"
             fi
           fi
-        fi
-        if test "$compiler_num" -lt "405"; then
-          dnl Avoid false positives
-          tmp_CFLAGS="$tmp_CFLAGS -Wno-shadow"
-          tmp_CFLAGS="$tmp_CFLAGS -Wno-unreachable-code"
-        fi
-        if test "$compiler_num" -ge "402" && test "$compiler_num" -lt "406"; then
-          dnl GCC <4.6 do not support #pragma to suppress warnings locally. Disable globally instead.
-          tmp_CFLAGS="$tmp_CFLAGS -Wno-overlength-strings"
         fi
         if test "$compiler_num" -ge "400" && test "$compiler_num" -lt "407"; then
           dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84685

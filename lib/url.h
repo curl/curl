@@ -36,9 +36,7 @@ void Curl_init_userdefined(struct Curl_easy *data);
 void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of Curl_open() */
-CURLcode Curl_connect(struct Curl_easy *data,
-                      bool *asyncp,
-                      bool *protocol_done);
+CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          struct Curl_dns_entry *dns,
                          bool *protocol_done);
@@ -89,15 +87,8 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
                           struct connectdata *conn);
 
 /**
- * Always eval all arguments, return the first result != CURLE_OK.
- * A non-short-circuit evaluation.
- */
-CURLcode Curl_1st_err(CURLcode r1, CURLcode r2);
-
-/**
  * Always eval all arguments, return the first
  * result != (CURLE_OK|CURLE_AGAIN) or `r1`.
- * A non-short-circuit evaluation.
  */
 CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 

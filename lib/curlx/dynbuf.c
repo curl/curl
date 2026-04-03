@@ -57,7 +57,7 @@ void curlx_dyn_free(struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
-  Curl_safefree(s->bufr);
+  curlx_safefree(s->bufr);
   s->leng = s->allc = 0;
 }
 
@@ -205,7 +205,7 @@ CURLcode curlx_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 
   if(str) {
     CURLcode result = dyn_nappend(s, (const unsigned char *)str, strlen(str));
-    curlx_free(str);
+    curl_free(str);
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */

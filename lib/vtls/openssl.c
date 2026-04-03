@@ -27,40 +27,7 @@
  */
 #include "curl_setup.h"
 
-#if defined(USE_QUICHE) || defined(USE_OPENSSL)
-
-#ifdef USE_WIN32_CRYPTO
-#include <wincrypt.h>
-/* If <wincrypt.h> is included directly, or indirectly via <schannel.h>,
- * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
- *   #define X509_NAME  ((LPCSTR)7)
- *
- * In BoringSSL/AWC-LC's <openssl/base.h> there is:
- *  typedef struct X509_name_st X509_NAME;
- *  etc.
- *
- * The redefined symbols break these OpenSSL headers when included after
- * <wincrypt.h>.
- * The workaround is to undefine those defines here (and only here).
- *
- * For unity builds it may need to be repeated elsewhere too, e.g. in ldap.c,
- * to apply to other sources using OpenSSL includes. Each compilation unit
- * needs undefine them between the first <wincrypt.h> include and the first
- * OpenSSL include.
- *
- * OpenSSL does this in <openssl/ssl.h> and <openssl/x509v3.h>, but it
- * also does the #undef by including <openssl/ossl_typ.h>. <3.1.0 only does
- * it on the first include.
- *
- * LibreSSL automatically undefines these symbols before using them.
- */
-#undef X509_NAME
-#undef X509_EXTENSIONS
-#undef PKCS7_ISSUER_AND_SERIAL
-#undef PKCS7_SIGNER_INFO
-#undef OCSP_REQUEST
-#undef OCSP_RESPONSE
-#endif
+#ifdef USE_OPENSSL
 
 #include "urldata.h"
 #include "curl_trc.h"
@@ -70,6 +37,7 @@
 #include "curlx/inet_pton.h"
 #include "vtls/openssl.h"
 #include "connect.h"
+#include "cf-dns.h"
 #include "progress.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
@@ -546,10 +514,6 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   return result;
 }
-
-#endif /* USE_QUICHE || USE_OPENSSL */
-
-#ifdef USE_OPENSSL
 
 static int ossl_bio_cf_create(BIO *bio)
 {
@@ -1786,7 +1750,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data)
   }
   OSSL_LIB_CTX_free(data->state.libctx);
   data->state.libctx = NULL;
-  Curl_safefree(data->state.propq);
+  curlx_safefree(data->state.propq);
   data->state.provider_loaded = FALSE;
 }
 
@@ -3411,7 +3375,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
 #ifdef HAVE_OPENSSL_EARLYDATA
             if(ssl_config->earlydata && scs->alpn &&
                SSL_SESSION_get_max_early_data(ssl_session) &&
-               !cf->conn->connect_only &&
+               !cf->conn->bits.connect_only &&
                (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
               bool do_early_data = FALSE;
               if(sess_reuse_cb) {
@@ -3460,6 +3424,16 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
 }
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
+static bool ossl_ech_need_httpsrr(struct Curl_easy *data)
+{
+  if(!CURLECH_ENABLED(data))
+    return FALSE;
+  if((data->set.tls_ech & CURLECH_GREASE) ||
+     (data->set.tls_ech & CURLECH_CLA_CFG))
+   return FALSE;
+  return TRUE;
+}
+
 static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -3469,7 +3443,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   size_t ech_config_len = 0;
   char *outername = data->set.str[STRING_ECH_PUBLIC];
   int trying_ech_now = 0;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   if(!CURLECH_ENABLED(data))
     return CURLE_OK;
@@ -3525,44 +3499,32 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     infof(data, "ECH: ECHConfig from command line");
   }
   else {
-    struct Curl_dns_entry *dns = NULL;
+    const struct Curl_https_rrinfo *rinfo =
+      Curl_conn_dns_get_https(data, cf->sockindex);
 
-    if(peer->hostname)
-      dns = Curl_dnscache_get(data, peer->hostname, peer->port,
-                              cf->conn->ip_version);
-    if(!dns) {
-      infof(data, "ECH: requested but no DNS info available");
-      if(data->set.tls_ech & CURLECH_HARD)
-        return CURLE_SSL_CONNECT_ERROR;
-    }
-    else {
-      struct Curl_https_rrinfo *rinfo = NULL;
+    if(rinfo && rinfo->echconfiglist) {
+      const unsigned char *ecl = rinfo->echconfiglist;
+      size_t elen = rinfo->echconfiglist_len;
 
-      rinfo = dns->hinfo;
-      if(rinfo && rinfo->echconfiglist) {
-        unsigned char *ecl = rinfo->echconfiglist;
-        size_t elen = rinfo->echconfiglist_len;
-
-        infof(data, "ECH: ECHConfig from DoH HTTPS RR");
-        if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
-          infof(data, "ECH: SSL_set1_ech_config_list failed");
-          if(data->set.tls_ech & CURLECH_HARD)
-            return CURLE_SSL_CONNECT_ERROR;
-        }
-        else {
-          trying_ech_now = 1;
-          infof(data, "ECH: imported ECHConfigList of length %zu", elen);
-        }
-      }
-      else {
-        infof(data, "ECH: requested but no ECHConfig available");
+      infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+      if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
+        infof(data, "ECH: SSL_set1_ech_config_list failed");
         if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
-      Curl_resolv_unlink(data, &dns);
+      else {
+        trying_ech_now = 1;
+        infof(data, "ECH: imported ECHConfigList of length %zu", elen);
+      }
+    }
+    else {
+      infof(data, "ECH: requested but no ECHConfig available");
+      if(data->set.tls_ech & CURLECH_HARD)
+        return CURLE_SSL_CONNECT_ERROR;
     }
   }
 #ifdef HAVE_BORINGSSL_LIKE
+  (void)peer;
   if(trying_ech_now && outername) {
     infof(data, "ECH: setting public_name not supported with BoringSSL");
     return CURLE_SSL_CONNECT_ERROR;
@@ -4136,7 +4098,9 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   else
     infof(data, "ECH: no retry_configs (rv = %d)", rv);
 #ifndef HAVE_BORINGSSL_LIKE
-  OPENSSL_free((void *)rcs);
+  OPENSSL_free(inner);
+  OPENSSL_free(rcs);
+  OPENSSL_free(outer);
 #endif
   return;
 }
@@ -4227,8 +4191,12 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       reason = ERR_GET_REASON(errdetail);
 
       if((lib == ERR_LIB_SSL) &&
-         ((reason == SSL_R_CERTIFICATE_VERIFY_FAILED) ||
-          (reason == SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED))) {
+         ((reason == SSL_R_CERTIFICATE_VERIFY_FAILED)
+/* Missing from OpenSSL 4+ OPENSSL_NO_DEPRECATED_3_0 builds */
+#ifdef SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED
+          || (reason == SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED)
+#endif
+         )) {
         result = CURLE_PEER_FAILED_VERIFICATION;
 
         lerr = SSL_get_verify_result(octx->ssl);
@@ -4975,6 +4943,15 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
+    /* if we do ECH and need the HTTPS-RR information for it,
+     * we delay the connect until it arrives or DNS resolve fails. */
+    if(ossl_ech_need_httpsrr(data) &&
+       !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+      CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
+      return CURLE_OK;
+    }
+#endif
     CURL_TRC_CF(data, cf, "ossl_connect, step1");
     result = ossl_connect_step1(cf, data);
     if(result)
@@ -5253,13 +5230,15 @@ out:
   return result;
 }
 
-static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
+static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
+                                         int sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;
-  int algo_nid;
-  const EVP_MD *algo_type;
-  const char *algo_name;
+  int mdnid;
+  bool no_digest_acceptable = FALSE;
+  const EVP_MD *algo_type = NULL;
+  const char *algo_name = NULL;
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
@@ -5291,43 +5270,108 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
     /* No server certificate, do not do channel binding */
     return CURLE_OK;
 
-  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
+#ifdef HAVE_OPENSSL3
+  {
+    int pknid, secbits;
+    uint32_t flags;
+    EVP_PKEY *pkey = X509_get0_pubkey(cert);
+
+    if(!X509_get_signature_info(cert, &mdnid, &pknid, &secbits, &flags)) {
+      failf(data, "certificate signature algorithm not recognized");
+      result = CURLE_SSL_INVALIDCERTSTATUS;
+      goto out;
+    }
+
+    if(mdnid != NID_undef) {
+      if(mdnid == NID_md5 || mdnid == NID_sha1) {
+        algo_type = EVP_sha256();
+      }
+      else
+        algo_type = EVP_get_digestbynid(mdnid);
+    }
+    else if(pkey && !EVP_PKEY_is_a(pkey, OBJ_nid2sn(pknid))) {
+      /* The cert's pkey is different from the algorithm used to sign
+       * the certificate. Since the reported `mdnid` is undefined, there
+       * is no digest algorithm available here. This happens in PQC
+       * and is accepted, resulting in no addition to the binding. */
+      no_digest_acceptable = TRUE;
+    }
+    else if(pkey) {
+      /* cert's pkey type is the same as the cert signer (or same family).
+       * Ask for the mandatory/advisory digest algorithm for the pkey.
+       */
+      char mdname[128] = "";
+      int rc = EVP_PKEY_get_default_digest_name(pkey, mdname, sizeof(mdname));
+      bool md_is_undef = !strcmp(mdname, "UNDEF");
+
+      if(rc == 2 && md_is_undef) {
+        /* OpenSSL declares "undef" the *mandatory* digest for this key.
+         * This is some PQC shit, accept it, no addition to binding. */
+        no_digest_acceptable = TRUE;
+      }
+      else if(rc > 0 && mdname[0] != '\0' && !md_is_undef) {
+        infof(data, "Digest algorithm : %s%s (derived from public key)"
+              ", but unavailable",
+              mdname, rc == 2 ? " [mandatory]" : " [advisory]");
+      }
+    }
+  }
+#else /* HAVE_OPENSSL3 */
+
+  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &mdnid, NULL)) {
     failf(data,
           "Unable to find digest NID for certificate signature algorithm");
     result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
+    goto out;
   }
 
   /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
-  if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
+  if(mdnid == NID_md5 || mdnid == NID_sha1) {
     algo_type = EVP_sha256();
   }
   else {
-    algo_type = EVP_get_digestbynid(algo_nid);
+    algo_type = EVP_get_digestbynid(mdnid);
     if(!algo_type) {
-      algo_name = OBJ_nid2sn(algo_nid);
+      algo_name = OBJ_nid2sn(mdnid);
       failf(data, "Could not find digest algorithm %s (NID %d)",
-            algo_name ? algo_name : "(null)", algo_nid);
+            algo_name ? algo_name : "(null)", mdnid);
       result = CURLE_SSL_INVALIDCERTSTATUS;
-      goto error;
+      goto out;
     }
   }
 
-  if(!X509_digest(cert, algo_type, buf, &length)) {
-    failf(data, "X509_digest() failed");
+#endif /* HAVE_OPENSSL3, else */
+
+  if(!algo_type) {
+    if(no_digest_acceptable) {
+      infof(data, "certificate exposes no signing digest algorithm, "
+            "nothing to add to channel binding");
+      result = CURLE_OK;
+      goto out;
+    }
+    /* unacceptable, something is wrong, fail */
+    algo_name = OBJ_nid2sn(mdnid);
+    failf(data, "Unable to find digest algorithm %s (NID %d) "
+          "for channel binding", algo_name ? algo_name : "(null)", mdnid);
     result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
+    goto out;
+  }
+
+  if(!X509_digest(cert, algo_type, buf, &length)) {
+    failf(data, "X509_digest() failed for channel binding");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
   }
 
   /* Append "tls-server-end-point:" */
   result = curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1);
   if(result)
-    goto error;
+    goto out;
 
   /* Append digest */
   result = curlx_dyn_addn(binding, buf, length);
 
-error:
+out:
   X509_free(cert);
   return result;
 }

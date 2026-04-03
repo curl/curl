@@ -672,22 +672,19 @@ static bool out_double(void *userp,
 
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 #ifdef _WIN32
   curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
-#elif defined(HAVE_SNPRINTF)
+#else
   /* !checksrc! disable BANNEDFUNC 1 */
   /* !checksrc! disable LONGLINE */
   /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
   snprintf(work, BUFFSIZE, fmt, dnum);
-#else
-  /* float and double outputs do not work without snprintf support */
-  work[0] = 0;
 #endif
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);

@@ -28,6 +28,7 @@
 #include "cfilters.h"
 #include "multiif.h"
 
+#include "cf-dns.h"
 #include "cf-socket.h"
 #include "connect.h"
 #include "http2.h"
@@ -222,6 +223,12 @@ struct curl_trc_feat Curl_trc_feat_timer = {
   "TIMER",
   CURL_LOG_LVL_NONE,
 };
+#ifdef USE_THREADS
+struct curl_trc_feat Curl_trc_feat_threads = {
+  "THREADS",
+  CURL_LOG_LVL_NONE,
+};
+#endif
 #endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -274,6 +281,19 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, data->state.feat, cf->cft->name, cf->sockindex, fmt, ap);
+    va_end(ap);
+  }
+}
+
+void Curl_trc_feat_infof(struct Curl_easy *data,
+                         struct curl_trc_feat *feat,
+                         const char *fmt, ...)
+{
+  DEBUGASSERT(feat);
+  if(Curl_trc_ft_is_verbose(data, feat)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, feat, NULL, 0, fmt, ap);
     va_end(ap);
   }
 }
@@ -336,7 +356,6 @@ static const char * const Curl_trc_mstate_names[] = {
   "PENDING",
   "SETUP",
   "CONNECT",
-  "RESOLVING",
   "CONNECTING",
   "PROTOCONNECT",
   "PROTOCONNECTING",
@@ -512,6 +531,9 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_write,     TRC_CT_NONE },
   { &Curl_trc_feat_dns,       TRC_CT_NETWORK },
   { &Curl_trc_feat_timer,     TRC_CT_NETWORK },
+#ifdef USE_THREADS
+  { &Curl_trc_feat_threads,   TRC_CT_NONE },
+#endif
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
 #endif
@@ -535,6 +557,7 @@ struct trc_cft_def {
 };
 
 static struct trc_cft_def trc_cfts[] = {
+  { &Curl_cft_dns,            TRC_CT_NETWORK },
   { &Curl_cft_tcp,            TRC_CT_NETWORK },
   { &Curl_cft_udp,            TRC_CT_NETWORK },
   { &Curl_cft_unix,           TRC_CT_NETWORK },

@@ -272,22 +272,22 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
 
 static void free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
-  Curl_safefree(sslc->CApath);
-  Curl_safefree(sslc->CAfile);
-  Curl_safefree(sslc->issuercert);
-  Curl_safefree(sslc->clientcert);
-  Curl_safefree(sslc->cipher_list);
-  Curl_safefree(sslc->cipher_list13);
-  Curl_safefree(sslc->pinned_key);
-  Curl_safefree(sslc->cert_blob);
-  Curl_safefree(sslc->ca_info_blob);
-  Curl_safefree(sslc->issuercert_blob);
-  Curl_safefree(sslc->curves);
-  Curl_safefree(sslc->signature_algorithms);
-  Curl_safefree(sslc->CRLfile);
+  curlx_safefree(sslc->CApath);
+  curlx_safefree(sslc->CAfile);
+  curlx_safefree(sslc->issuercert);
+  curlx_safefree(sslc->clientcert);
+  curlx_safefree(sslc->cipher_list);
+  curlx_safefree(sslc->cipher_list13);
+  curlx_safefree(sslc->pinned_key);
+  curlx_safefree(sslc->cert_blob);
+  curlx_safefree(sslc->ca_info_blob);
+  curlx_safefree(sslc->issuercert_blob);
+  curlx_safefree(sslc->curves);
+  curlx_safefree(sslc->signature_algorithms);
+  curlx_safefree(sslc->CRLfile);
 #ifdef USE_TLS_SRP
-  Curl_safefree(sslc->username);
-  Curl_safefree(sslc->password);
+  curlx_safefree(sslc->username);
+  curlx_safefree(sslc->password);
 #endif
 }
 
@@ -520,7 +520,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
 static void cf_ctx_free(struct ssl_connect_data *ctx)
 {
   if(ctx) {
-    Curl_safefree(ctx->negotiated.alpn);
+    curlx_safefree(ctx->negotiated.alpn);
     Curl_bufq_free(&ctx->earlydata);
     curlx_free(ctx->backend);
     curlx_free(ctx);
@@ -787,7 +787,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
       encode = curlx_base64_encode(sha256sumdigest,
                                    CURL_SHA256_DIGEST_LENGTH,
                                    &cert_hash, &cert_hash_len);
-    Curl_safefree(sha256sumdigest);
+    curlx_safefree(sha256sumdigest);
 
     if(encode)
       return encode;
@@ -815,7 +815,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
       /* next one or we are at the end */
       pinned_hash = end_pos ? (end_pos + 1) : NULL;
     }
-    Curl_safefree(cert_hash);
+    curlx_safefree(cert_hash);
   }
   else {
     long filesize;
@@ -885,7 +885,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
       result = CURLE_OK;
 end:
     curlx_dyn_free(&buf);
-    Curl_safefree(pem_ptr);
+    curlx_safefree(pem_ptr);
     curlx_fclose(fp);
   }
 
@@ -1179,12 +1179,12 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
 void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
 {
-  Curl_safefree(peer->sni);
+  curlx_safefree(peer->sni);
   if(peer->dispname != peer->hostname)
     curlx_free(peer->dispname);
   peer->dispname = NULL;
-  Curl_safefree(peer->hostname);
-  Curl_safefree(peer->scache_key);
+  curlx_safefree(peer->hostname);
+  curlx_safefree(peer->scache_key);
   peer->type = CURL_SSL_PEER_DNS;
 }
 
@@ -1248,7 +1248,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
   {
     ehostname = cf->conn->host.name;
     edispname = cf->conn->host.dispname;
-    peer->port = cf->conn->remote_port;
+    peer->port = (uint16_t)cf->conn->remote_port;
   }
 
   /* hostname MUST exist and not be empty */

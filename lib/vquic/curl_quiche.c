@@ -48,7 +48,6 @@
 #include "url.h"
 #include "bufref.h"
 #include "vtls/openssl.h"
-#include "vtls/keylog.h"
 #include "vtls/vtls.h"
 
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
@@ -918,7 +917,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = CURLE_AGAIN;
 
 out:
-  result = Curl_1st_err(result, cf_flush_egress(cf, data));
+  result = Curl_1st_fatal(result, cf_flush_egress(cf, data));
   if(*pnread > 0)
     ctx->data_recvd += *pnread;
   CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_recv(len=%zu) -> %d, %zu, total=%"
@@ -1144,7 +1143,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  result = Curl_1st_err(result, cf_flush_egress(cf, data));
+  result = Curl_1st_fatal(result, cf_flush_egress(cf, data));
 
   CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : (uint64_t)~0, len,
@@ -1152,8 +1151,8 @@ out:
   return result;
 }
 
-static bool stream_is_writeable(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
+static bool stream_is_writable(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1181,7 +1180,7 @@ static CURLcode cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
     c_exhaust = FALSE; /* Have not found any call in quiche that tells
                           us if the connection itself is blocked */
     s_exhaust = want_send && stream && stream->opened &&
-                (stream->quic_flow_blocked || !stream_is_writeable(cf, data));
+                (stream->quic_flow_blocked || !stream_is_writable(cf, data));
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
@@ -1634,7 +1633,7 @@ struct Curl_cftype Curl_cft_http3 = {
 CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai)
+                               struct Curl_sockaddr_ex *addr)
 {
   struct cf_quiche_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1652,7 +1651,7 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
     goto out;
   cf->conn = conn;
 
-  result = Curl_cf_udp_create(&cf->next, data, conn, ai, TRNSPRT_QUIC);
+  result = Curl_cf_udp_create(&cf->next, data, conn, addr, TRNSPRT_QUIC);
   if(result)
     goto out;
   cf->next->conn = cf->conn;

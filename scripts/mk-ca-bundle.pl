@@ -60,7 +60,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.32';
+my $version = '1.33';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -166,14 +166,16 @@ sub HELP_MESSAGE() {
     print "\t-b\tbackup an existing version of ca-bundle.crt\n";
     print "\t-d\tspecify Mozilla tree to pull certdata.txt or custom URL\n";
     print "\t\t  Valid names are:\n";
-    print "\t\t    ", join(", ", map { ($_ =~ m/$opt_d/) ? "$_ (default)" : "$_" } sort keys %urls), "\n";
+    print "\t\t    ", join(", ", map { ($_ =~ m/$opt_d/) ? "$_ (default)" : $_ } sort keys %urls), "\n";
     print "\t-f\tforce rebuild even if certdata.txt is current\n";
     print "\t-i\tprint version info about used modules\n";
     print "\t-k\tallow URLs other than HTTPS, enable HTTP fallback (insecure)\n";
     print "\t-l\tprint license info about certdata.txt\n";
     print "\t-m\tinclude meta data in output\n";
     print "\t-n\tno download of certdata.txt (to use existing)\n";
-    print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. (default: $default_mozilla_trust_purposes:$default_mozilla_trust_levels)"), "\n";
+    print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. " .
+          "Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. " .
+          "(default: $default_mozilla_trust_purposes:$default_mozilla_trust_levels)"), "\n";
     print "\t\t  Valid purposes are:\n";
     print wrap("\t\t    ","\t\t    ", join(", ", "ALL", @valid_mozilla_trust_purposes)), "\n";
     print "\t\t  Valid levels are:\n";
@@ -301,35 +303,8 @@ my $oldhash = oldhash($crt);
 
 report "SHA256 of old file: $oldhash";
 
-my $filedate_iso = '';
-
 if(!$opt_n) {
     report "Using URL: $url";
-
-    my $sha = '';
-    if($opt_d ne 'ref') {
-        report "Determining latest commit and timestamp for the remote file ...";
-
-        my $out = '';
-        # https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt
-        if($url =~ /^https:\/\/raw.githubusercontent.com\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)\/(refs\/heads\/[a-z]+)(\/.+)$/) {
-            my $slug = $1;
-            my $refs = "&sha=$2";
-            my $path = $3;
-            if(open(my $fh, '-|', 'curl', '-A', 'curl', '-H', 'X-GitHub-Api-Version: 2022-11-28',
-                                          "https://api.github.com/repos/mozilla-firefox/firefox/commits?path=$path$refs")) {
-                $out = do { local $/; <$fh> };
-                close $fh;
-            }
-            if($out) {
-                use JSON::PP;
-                my $json = decode_json($out);
-                $sha = $json->[0]->{sha};
-                $filedate_iso = $json->[0]->{commit}->{committer}->{date};
-            }
-        }
-    }
-
     report "Downloading $txt ...";
 
     # If we have an HTTPS URL then use curl
@@ -401,19 +376,8 @@ if(!$opt_n) {
     }
 }
 
-my $filedate;
-my $datesrc;
-
-if($filedate_iso) {
-    my $time = Time::Piece->strptime($filedate_iso, '%Y-%m-%dT%H:%M:%SZ');
-    $filedate = $time->epoch;
-    $datesrc = "last updated on";
-    utime($filedate, $filedate, $txt);
-}
-if(!$filedate) {
-    $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
-    $datesrc = "as of";
-}
+my $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
+my $datesrc = "as of";
 if(!$filedate) {
     # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
     $filedate = time();
@@ -478,7 +442,7 @@ my @precert;
 my $cka_value;
 my $valid = 0;
 
-open(TXT,"$txt") or die "Could not open $txt: $!\n";
+open(TXT, $txt) or die "Could not open $txt: $!\n";
 while(<TXT>) {
     if(/\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*/) {
         print CRT;

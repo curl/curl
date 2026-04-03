@@ -25,7 +25,10 @@
  ***************************************************************************/
 #include "urldata.h"
 
-#ifndef CURL_DISABLE_DOH
+/* enums outside of the #ifdef to make the types work in unitprotos.h even on
+   builds without DoH support */
+
+struct Curl_resolv_async;
 
 typedef enum {
   DOH_OK,
@@ -52,6 +55,10 @@ typedef enum {
   CURL_DNS_TYPE_DNAME = 39,           /* RFC6672 */
   CURL_DNS_TYPE_HTTPS = 65
 } DNStype;
+
+struct dohentry; /* forward-declare for non-DoH builds */
+
+#ifndef CURL_DISABLE_DOH
 
 enum doh_slot_num {
   /* Explicit values for first two symbols so as to match hard-coded
@@ -86,6 +93,7 @@ struct doh_request {
   struct curl_slist *req_hds;
   struct dynbuf resp_body;
   size_t req_body_len;
+  uint32_t resolv_id; /* id of the resolve operation */
   DNStype dnstype;
 };
 
@@ -101,7 +109,7 @@ struct doh_response {
 struct doh_probes {
   struct doh_response probe_resp[DOH_SLOT_COUNT];
   unsigned int pending; /* still outstanding probes */
-  int port;
+  uint16_t port;
   const char *host;
 };
 
@@ -110,11 +118,12 @@ struct doh_probes {
  * name and returns a 'Curl_addrinfo *' with the address information.
  */
 
-CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
-                  int port, int ip_version);
+CURLcode Curl_doh(struct Curl_easy *data,
+                  struct Curl_resolv_async *async);
 
-CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dnsp);
+CURLcode Curl_doh_take_result(struct Curl_easy *data,
+                              struct Curl_resolv_async *async,
+                              struct Curl_dns_entry **dns);
 
 #define DOH_MAX_ADDR  24
 #define DOH_MAX_CNAME 4
@@ -155,27 +164,15 @@ struct dohentry {
 #endif
 };
 
-void Curl_doh_close(struct Curl_easy *data);
-void Curl_doh_cleanup(struct Curl_easy *data);
+void Curl_doh_cleanup(struct Curl_easy *data,
+                      struct Curl_resolv_async *async);
+#define Curl_doh_wanted(d)  (!!(d)->set.doh)
 
-#ifdef UNITTESTS
-UNITTEST DOHcode doh_req_encode(const char *host,
-                                DNStype dnstype,
-                                unsigned char *dnsp,  /* buffer */
-                                size_t len,  /* buffer size */
-                                size_t *olen);  /* output length */
-UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
-                                 size_t dohlen,
-                                 DNStype dnstype,
-                                 struct dohentry *d);
-
-UNITTEST void de_init(struct dohentry *d);
-UNITTEST void de_cleanup(struct dohentry *d);
-#endif
 
 #else /* CURL_DISABLE_DOH */
-#define Curl_doh(a, b, c, d, e)    NULL
-#define Curl_doh_is_resolved(x, y) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_doh(a, b)             NULL
+#define Curl_doh_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_doh_wanted(d)         FALSE
 #endif /* !CURL_DISABLE_DOH */
 
 #endif /* HEADER_CURL_DOH_H */

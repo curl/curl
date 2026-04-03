@@ -84,7 +84,7 @@ struct FILEPROTO {
 
 static void file_cleanup(struct FILEPROTO *file)
 {
-  Curl_safefree(file->freepath);
+  curlx_safefree(file->freepath);
   file->path = NULL;
   if(file->fd != -1) {
     curlx_close(file->fd);
@@ -108,6 +108,8 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
   (void)conn;
   /* allocate the FILE specific struct */
   filep = curlx_calloc(1, sizeof(*filep));
+  if(filep)
+    filep->fd = -1;
   if(!filep ||
      Curl_meta_set(data, CURL_META_FILE_EASY, filep, file_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -191,7 +193,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     if(actual_path[i] == '/')
       actual_path[i] = '\\';
     else if(!actual_path[i]) { /* binary zero */
-      Curl_safefree(real_path);
+      curlx_safefree(real_path);
       return CURLE_URL_MALFORMAT;
     }
 
@@ -200,7 +202,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 #else
   if(memchr(real_path, 0, real_path_len)) {
     /* binary zeroes indicate foul play */
-    Curl_safefree(real_path);
+    curlx_safefree(real_path);
     return CURLE_URL_MALFORMAT;
   }
 

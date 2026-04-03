@@ -208,13 +208,20 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
 
   if(!config->insecure_ok) {
     char *known = config->knownhosts;
-    if(!known)
-      known = findfile(".ssh/known_hosts", FALSE);
+    if(!known) {
+      char *found = findfile(".ssh/known_hosts", FALSE);
+      if(found) {
+        known = curlx_strdup(found);
+        curl_free(found);
+        if(!known)
+          return CURLE_OUT_OF_MEMORY;
+      }
+    }
     if(known) {
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
         config->knownhosts = NULL;
-        curl_free(known);
+        curlx_free(known);
         return result;
       }
       /* store it in global to avoid repeated checks */
@@ -295,10 +302,11 @@ static CURLcode ssl_ca_setopts(struct OperationConfig *config, CURL *curl)
     MY_SETOPT_STR(curl, CURLOPT_PROXY_CAPATH,
                   (config->proxy_capath ? config->proxy_capath :
                    config->capath));
-    if(result && config->proxy_capath) {
+    if((result == CURLE_NOT_BUILT_IN) || (result == CURLE_UNKNOWN_OPTION)) {
       warnf("ignoring %s, not supported by libcurl with %s",
-            config->proxy_capath ? "--proxy-capath" : "--capath",
+            "setting the CA path for the proxy",
             ssl_backend());
+      result = CURLE_OK;
     }
   }
   if(result)

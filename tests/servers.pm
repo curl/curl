@@ -360,7 +360,7 @@ sub startnew {
 
     # Ugly hack but ssh client and gnutls-serv do not support pid files
     if($fakepidfile) {
-        if(open(my $out, ">", "$pidfile")) {
+        if(open(my $out, ">", $pidfile)) {
             print $out $child . "\n";
             close($out) || die "Failure writing pidfile";
             logmsg "startnew: $pidfile faked with pid=$child\n" if($verbose);
@@ -560,7 +560,7 @@ sub verifyhttp {
 
     if($res && $verbose) {
         logmsg "RUN: curl command returned $res\n";
-        if(open(my $file, "<", "$verifylog")) {
+        if(open(my $file, "<", $verifylog)) {
             while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
             }
@@ -569,7 +569,7 @@ sub verifyhttp {
     }
 
     my $data;
-    if(open(my $file, "<", "$verifyout")) {
+    if(open(my $file, "<", $verifyout)) {
         while(my $string = <$file>) {
             $data = $string;
             last; # only want first line
@@ -703,7 +703,7 @@ sub verifyrtsp {
 
     if($res && $verbose) {
         logmsg "RUN: curl command returned $res\n";
-        if(open(my $file, "<", "$verifylog")) {
+        if(open(my $file, "<", $verifylog)) {
             while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^[ \t]*$/);
             }
@@ -712,7 +712,7 @@ sub verifyrtsp {
     }
 
     my $data;
-    if(open(my $file, "<", "$verifyout")) {
+    if(open(my $file, "<", $verifyout)) {
         while(my $string = <$file>) {
             $data = $string;
             last; # only want first line
@@ -777,7 +777,7 @@ sub verifysftp {
     my $cmd = "\"$sftp\" -b $LOGDIR/$PIDDIR/$sftpcmds -F $LOGDIR/$PIDDIR/$sftpconfig -S \"$ssh\" $ip > $sftplog 2>&1";
     my $res = runclient($cmd);
     # Search for pwd command response in log file
-    if(open(my $sftplogfile, "<", "$sftplog")) {
+    if(open(my $sftplogfile, "<", $sftplog)) {
         while(<$sftplogfile>) {
             if(/^Remote working directory: /) {
                 $verified = 1;
@@ -836,7 +836,7 @@ sub verifyhttptls {
 
     if($res && $verbose) {
         logmsg "RUN: curl command returned $res\n";
-        if(open(my $file, "<", "$verifylog")) {
+        if(open(my $file, "<", $verifylog)) {
             while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
             }
@@ -845,7 +845,7 @@ sub verifyhttptls {
     }
 
     my $data;
-    if(open(my $file, "<", "$verifyout")) {
+    if(open(my $file, "<", $verifyout)) {
         while(my $string = <$file>) {
             $data .= $string;
         }
@@ -1103,7 +1103,7 @@ sub runhttpserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1137,7 +1137,7 @@ sub runhttpserver {
     if($httppid <= 0 || !pidexists($httppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1147,7 +1147,7 @@ sub runhttpserver {
     $port = $port_or_path = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
     if(!$port) {
         logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1181,7 +1181,7 @@ sub runhttp2server {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1203,7 +1203,7 @@ sub runhttp2server {
 
     if($http2pid <= 0 || !pidexists($http2pid)) {
         # it is NOT alive
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         $http2pid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
@@ -1242,7 +1242,7 @@ sub runhttp3server {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1264,7 +1264,7 @@ sub runhttp3server {
 
     if($http3pid <= 0 || !pidexists($http3pid)) {
         # it is NOT alive
-        stopserver($server, "$pid3");
+        stopserver($server, $pid3);
         $doesntrun{$pidfile} = 1;
         $http3pid = $pid3 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
@@ -1308,7 +1308,7 @@ sub runhttpsserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1373,7 +1373,7 @@ sub runhttpsserver {
 sub runhttptlsserver {
     my ($verb, $ipv6) = @_;
     my $proto = "httptls";
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? $HOST6IP : $HOSTIP;
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = 1;
 
@@ -1392,7 +1392,7 @@ sub runhttptlsserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1413,7 +1413,7 @@ sub runhttptlsserver {
 
     if($httptlspid <= 0 || !pidexists($httptlspid)) {
         # it is NOT alive
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         $httptlspid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
@@ -1439,7 +1439,7 @@ sub runpingpongserver {
         return (4, 0, 0);
     }
 
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? $HOST6IP : $HOSTIP;
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
 
@@ -1455,7 +1455,7 @@ sub runpingpongserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1478,7 +1478,7 @@ sub runpingpongserver {
     if($ftppid <= 0 || !pidexists($ftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0);
     }
@@ -1487,7 +1487,7 @@ sub runpingpongserver {
     my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
     if(!$port) {
         logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1507,7 +1507,7 @@ sub runpingpongserver {
 #
 sub runsecureserver {
     my ($verb, $ipv6, $certfile, $proto, $clearport) = @_;
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? $HOST6IP : $HOSTIP;
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = 1;
 
@@ -1526,7 +1526,7 @@ sub runsecureserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1597,7 +1597,7 @@ sub runtftpserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1621,7 +1621,7 @@ sub runtftpserver {
     if($tftppid <= 0 || !pidexists($tftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1629,7 +1629,7 @@ sub runtftpserver {
     my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
     if(!$port) {
         logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1668,7 +1668,7 @@ sub rundnsserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1693,7 +1693,7 @@ sub rundnsserver {
     if($dnspid <= 0 || !pidexists($dnspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1701,7 +1701,7 @@ sub rundnsserver {
     my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
     if(!$port) {
         logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1741,7 +1741,7 @@ sub runrtspserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1764,7 +1764,7 @@ sub runrtspserver {
     if($rtsppid <= 0 || !pidexists($rtsppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1772,7 +1772,7 @@ sub runrtspserver {
     my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
     if(!$port) {
         logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1816,7 +1816,7 @@ sub runsshserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1848,7 +1848,7 @@ sub runsshserver {
     # zero pid2 above.
     if($sshpid <= 0 || !pidexists($sshpid)) {
         # it is NOT alive
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         $sshpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server on $port\n";
@@ -1928,7 +1928,7 @@ sub runmqttserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -1949,7 +1949,7 @@ sub runmqttserver {
     if($sockspid <= 0 || !pidexists($sockspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0);
     }
@@ -1957,7 +1957,7 @@ sub runmqttserver {
     my $mqttport = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
     if(!$mqttport) {
         logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1990,7 +1990,7 @@ sub runsocksserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -2025,7 +2025,7 @@ sub runsocksserver {
     if($sockspid <= 0 || !pidexists($sockspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -2035,7 +2035,7 @@ sub runsocksserver {
         $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
         if(!$port) {
             logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
-            stopserver($server, "$pid2");
+            stopserver($server, $pid2);
             $doesntrun{$pidfile} = 1;
             return (1, 0, 0, 0);
         }
@@ -2073,7 +2073,7 @@ sub rundictserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -2094,7 +2094,7 @@ sub rundictserver {
 
     if($dictpid <= 0 || !pidexists($dictpid)) {
         # it is NOT alive
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         $dictpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
@@ -2134,7 +2134,7 @@ sub runsmbserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -2155,7 +2155,7 @@ sub runsmbserver {
 
     if($smbpid <= 0 || !pidexists($smbpid)) {
         # it is NOT alive
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         $smbpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
@@ -2195,7 +2195,7 @@ sub runnegtelnetserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($server, "$pid");
+        stopserver($server, $pid);
     }
     unlink($pidfile) if(-f $pidfile);
 
@@ -2215,7 +2215,7 @@ sub runnegtelnetserver {
 
     if($ntelpid <= 0 || !pidexists($ntelpid)) {
         # it is NOT alive
-        stopserver($server, "$pid2");
+        stopserver($server, $pid2);
         $doesntrun{$pidfile} = 1;
         $ntelpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
@@ -2262,7 +2262,7 @@ sub responsive_http_server {
 #
 sub responsive_mqtt_server {
     my ($proto, $id, $verb, $ipv6) = @_;
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? $HOST6IP : $HOSTIP;
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
 
@@ -2276,7 +2276,7 @@ sub responsive_mqtt_server {
 sub responsive_pingpong_server {
     my ($proto, $id, $verb, $ipv6) = @_;
     my $port;
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? $HOST6IP : $HOSTIP;
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
     my $protoip = $proto . ($ipvnum == 6? '6': '');
@@ -2368,12 +2368,12 @@ sub responsive_httptls_server {
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $proto = "httptls";
     my $port = protoport($proto);
-    my $ip = "$HOSTIP";
+    my $ip = $HOSTIP;
     my $idnum = 1;
 
     if($ipvnum == 6) {
         $port = protoport("httptls6");
-        $ip = "$HOST6IP";
+        $ip = $HOST6IP;
     }
 
     return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
@@ -2461,7 +2461,7 @@ sub startservers {
         elsif($what eq "gopher-ipv6") {
             if($run{'gopher-ipv6'} &&
                !responsive_http_server("gopher", $verbose, "ipv6",
-                                       protoport("gopher"))) {
+                                       protoport("gopher6"))) {
                 if(stopserver('gopher-ipv6')) {
                     return ("failed stopping unresponsive GOPHER-IPv6 server", 3);
                 }

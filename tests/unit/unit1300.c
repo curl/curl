@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #include "llist.h"
-#include "unitprotos.h"
 
 static void test_Curl_llist_dtor(void *key, void *value)
 {

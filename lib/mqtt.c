@@ -351,8 +351,8 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 end:
   if(packet)
     curlx_free(packet);
-  Curl_safefree(data->state.aptr.user);
-  Curl_safefree(data->state.aptr.passwd);
+  curlx_safefree(data->state.aptr.user);
+  curlx_safefree(data->state.aptr.passwd);
   return result;
 }
 

@@ -59,7 +59,7 @@ sub scan_header {
     my $incomment = 0;
     my $inenum = 0;
 
-    open(my $h, "<", "$f");
+    open(my $h, "<", $f);
     while(<$h>) {
         s/^\s*(.*?)\s*$/$1/;      # Trim.
         # Remove multi-line comment trail.
@@ -151,7 +151,7 @@ sub scan_man_for_opts {
     my $opt = "";
     my $line = "";
 
-    open(my $m, "<", "$f");
+    open(my $m, "<", $f);
     while(<$m>) {
         if($_ =~ /^\./) {
             # roff directive found: end current option paragraph.
@@ -187,7 +187,7 @@ sub scan_man_page {
     my ($path, $sym, $table)=@_;
     my $version = "X";
 
-    if(open(my $fh, "<", "$path")) {
+    if(open(my $fh, "<", $path)) {
         my $section = "";
         my $line = "";
 

@@ -68,6 +68,7 @@ INTERNALDOCS =                                   \
   internals/SCORECARD.md                         \
   internals/SPLAY.md                             \
   internals/STRPARSE.md                          \
+  internals/THRDPOOL-AND-QUEUE.md                \
   internals/TIME-KEEPING.md                      \
   internals/TLS-SESSIONS.md                      \
   internals/UINT_SETS.md                         \
@@ -126,6 +127,7 @@ EXTRA_DIST =                                     \
   TODO.md                                        \
   TheArtOfHttpScripting.md                       \
   URL-SYNTAX.md                                  \
+  VERIFY.md                                      \
   VERSIONS.md                                    \
   VULN-DISCLOSURE-POLICY.md
 

@@ -175,10 +175,11 @@ endif
 
 tidy:
 	(_csources=`echo ' $(CSOURCES)' | sed -E -e 's/ +$$//' -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
-	@CLANG_TIDY@ --config-file=$(top_srcdir)/.clang-tidy.yml $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_csources -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H $(_tidy_cflags))
+	@CLANG_TIDY@ --config-file=$(top_srcdir)/.clang-tidy.yml $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_csources \
+	  -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H $(_tidy_cflags))
 
 optiontable:
-	@PERL@ $(srcdir)/optiontable.pl < $(top_srcdir)/include/curl/curl.h > $(srcdir)/easyoptions.c
+	@PERL@ $(srcdir)/optiontable.pl $(top_srcdir)/include/curl/curl.h > $(srcdir)/easyoptions.c
 
 if HAVE_WINDRES
 .rc.lo:

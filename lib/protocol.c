@@ -35,7 +35,6 @@
 #include "curl_ldap.h"
 #include "mqtt.h"
 #include "pop3.h"
-#include "curl_rtmp.h"
 #include "rtsp.h"
 #include "smb.h"
 #include "smtp.h"
@@ -267,84 +266,6 @@ const struct Curl_scheme Curl_scheme_pop3s = {
   PORT_POP3S,                       /* defport */
 };
 
-const struct Curl_scheme Curl_scheme_rtmp = {
-  "rtmp",                               /* scheme */
-#ifndef USE_LIBRTMP
-  ZERO_NULL,
-#else
-  &Curl_protocol_rtmp,
-#endif
-  CURLPROTO_RTMP,                       /* protocol */
-  CURLPROTO_RTMP,                       /* family */
-  PROTOPT_NONE,                         /* flags */
-  PORT_RTMP,                            /* defport */
-};
-
-const struct Curl_scheme Curl_scheme_rtmpt = {
-  "rtmpt",                              /* scheme */
-#ifndef USE_LIBRTMP
-  ZERO_NULL,
-#else
-  &Curl_protocol_rtmp,
-#endif
-  CURLPROTO_RTMPT,                      /* protocol */
-  CURLPROTO_RTMPT,                      /* family */
-  PROTOPT_NONE,                         /* flags */
-  PORT_RTMPT,                           /* defport */
-};
-
-const struct Curl_scheme Curl_scheme_rtmpe = {
-  "rtmpe",                              /* scheme */
-#ifndef USE_LIBRTMP
-  ZERO_NULL,
-#else
-  &Curl_protocol_rtmp,
-#endif
-  CURLPROTO_RTMPE,                      /* protocol */
-  CURLPROTO_RTMPE,                      /* family */
-  PROTOPT_NONE,                         /* flags */
-  PORT_RTMP,                            /* defport */
-};
-
-const struct Curl_scheme Curl_scheme_rtmpte = {
-  "rtmpte",                             /* scheme */
-#ifndef USE_LIBRTMP
-  ZERO_NULL,
-#else
-  &Curl_protocol_rtmp,
-#endif
-  CURLPROTO_RTMPTE,                     /* protocol */
-  CURLPROTO_RTMPTE,                     /* family */
-  PROTOPT_NONE,                         /* flags */
-  PORT_RTMPT,                           /* defport */
-};
-
-const struct Curl_scheme Curl_scheme_rtmps = {
-  "rtmps",                              /* scheme */
-#ifndef USE_LIBRTMP
-  ZERO_NULL,
-#else
-  &Curl_protocol_rtmp,
-#endif
-  CURLPROTO_RTMPS,                      /* protocol */
-  CURLPROTO_RTMP,                       /* family */
-  PROTOPT_NONE,                         /* flags */
-  PORT_RTMPS,                           /* defport */
-};
-
-const struct Curl_scheme Curl_scheme_rtmpts = {
-  "rtmpts",                             /* scheme */
-#ifndef USE_LIBRTMP
-  ZERO_NULL,
-#else
-  &Curl_protocol_rtmp,
-#endif
-  CURLPROTO_RTMPTS,                     /* protocol */
-  CURLPROTO_RTMPT,                      /* family */
-  PROTOPT_NONE,                         /* flags */
-  PORT_RTMPS,                           /* defport */
-};
-
 const struct Curl_scheme Curl_scheme_rtsp = {
   "rtsp",                               /* scheme */
 #ifdef CURL_DISABLE_RTSP
@@ -359,7 +280,7 @@ const struct Curl_scheme Curl_scheme_rtsp = {
 };
 
 const struct Curl_scheme Curl_scheme_sftp = {
-  "SFTP",                               /* scheme */
+  "sftp",                               /* scheme */
 #ifndef USE_SSH
   NULL,
 #else
@@ -373,7 +294,7 @@ const struct Curl_scheme Curl_scheme_sftp = {
 };
 
 const struct Curl_scheme Curl_scheme_scp = {
-  "SCP",                                /* scheme */
+  "scp",                                /* scheme */
 #ifndef USE_SSH
   NULL,
 #else
@@ -388,10 +309,10 @@ const struct Curl_scheme Curl_scheme_scp = {
 
 const struct Curl_scheme Curl_scheme_smb = {
   "smb",                                /* scheme */
-#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE)
-  ZERO_NULL,
-#else
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
   &Curl_protocol_smb,
+#else
+  ZERO_NULL,
 #endif
   CURLPROTO_SMB,                        /* protocol */
   CURLPROTO_SMB,                        /* family */
@@ -401,11 +322,11 @@ const struct Curl_scheme Curl_scheme_smb = {
 
 const struct Curl_scheme Curl_scheme_smbs = {
   "smbs",                               /* scheme */
-#if defined(CURL_DISABLE_SMB) || !defined(USE_CURL_NTLM_CORE) || \
-  !defined(USE_SSL)
-  ZERO_NULL,
-#else
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
+  defined(USE_SSL)
   &Curl_protocol_smb,
+#else
+  ZERO_NULL,
 #endif
   CURLPROTO_SMBS,                       /* protocol */
   CURLPROTO_SMB,                        /* family */
@@ -468,7 +389,7 @@ const struct Curl_scheme Curl_scheme_tftp = {
 };
 
 const struct Curl_scheme Curl_scheme_ws = {
-  "WS",                                 /* scheme */
+  "ws",                                 /* scheme */
 #if defined(CURL_DISABLE_WEBSOCKETS) || defined(CURL_DISABLE_HTTP)
   ZERO_NULL,
 #else
@@ -482,7 +403,7 @@ const struct Curl_scheme Curl_scheme_ws = {
 };
 
 const struct Curl_scheme Curl_scheme_wss = {
-  "WSS",                                /* scheme */
+  "wss",                                /* scheme */
 #if defined(CURL_DISABLE_WEBSOCKETS) || defined(CURL_DISABLE_HTTP) || \
     !defined(USE_SSL)
   ZERO_NULL,
@@ -510,55 +431,49 @@ const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len)
      6. make sure this function uses the same hash function that worked for
      schemetable.c
      */
-  static const struct Curl_scheme * const all_schemes[67] = {
-    &Curl_scheme_file,
-    &Curl_scheme_mqtts, NULL,
-    &Curl_scheme_gophers, NULL,
-    &Curl_scheme_rtmpe,
-    &Curl_scheme_smtp,
-    &Curl_scheme_sftp,
-    &Curl_scheme_smb,
-    &Curl_scheme_smtps,
-    &Curl_scheme_telnet,
-    &Curl_scheme_gopher,
-    &Curl_scheme_tftp, NULL, NULL, NULL,
-    &Curl_scheme_ftps,
-    &Curl_scheme_http,
-    &Curl_scheme_imap,
-    &Curl_scheme_rtmps,
-    &Curl_scheme_rtmpt, NULL, NULL, NULL,
-    &Curl_scheme_ldaps,
-    &Curl_scheme_wss,
-    &Curl_scheme_https, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    &Curl_scheme_rtsp,
-    &Curl_scheme_smbs,
-    &Curl_scheme_scp, NULL, NULL, NULL,
-    &Curl_scheme_pop3, NULL, NULL,
-    &Curl_scheme_rtmp, NULL, NULL, NULL,
-    &Curl_scheme_rtmpte, NULL, NULL, NULL,
-    &Curl_scheme_dict, NULL, NULL, NULL,
+  static const struct Curl_scheme * const all_schemes[47] = {
     &Curl_scheme_mqtt,
+    &Curl_scheme_smtp,
+    &Curl_scheme_tftp,
+    &Curl_scheme_imap, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    &Curl_scheme_ldaps,
+    &Curl_scheme_dict, NULL,
+    &Curl_scheme_file, NULL,
     &Curl_scheme_pop3s,
-    &Curl_scheme_imaps, NULL,
-    &Curl_scheme_ws, NULL,
-    &Curl_scheme_rtmpts,
-    &Curl_scheme_ldap, NULL, NULL,
     &Curl_scheme_ftp,
+    &Curl_scheme_scp,
+    &Curl_scheme_mqtts,
+    &Curl_scheme_imaps,
+    &Curl_scheme_ldap,
+    &Curl_scheme_http,
+    &Curl_scheme_smb, NULL, NULL,
+    &Curl_scheme_telnet,
+    &Curl_scheme_https,
+    &Curl_scheme_gopher,
+    &Curl_scheme_rtsp, NULL, NULL,
+    &Curl_scheme_wss, NULL,
+    &Curl_scheme_gophers,
+    &Curl_scheme_smtps,
+    &Curl_scheme_pop3,
+    &Curl_scheme_ws, NULL, NULL,
+    &Curl_scheme_sftp,
+    &Curl_scheme_ftps, NULL,
+    &Curl_scheme_smbs, NULL,
   };
 
   if(len && (len <= 7)) {
     const char *s = scheme;
     size_t l = len;
     const struct Curl_scheme *h;
-    unsigned int c = 978;
+    unsigned int c = 792;
     while(l) {
-      c <<= 5;
+      c <<= 4;
       c += (unsigned int)Curl_raw_tolower(*s);
       s++;
       l--;
     }
 
-    h = all_schemes[c % 67];
+    h = all_schemes[c % 47];
     if(h && curl_strnequal(scheme, h->name, len) && !h->name[len])
       return h;
   }

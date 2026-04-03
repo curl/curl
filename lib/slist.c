@@ -132,7 +132,7 @@ void curl_slist_free_all(struct curl_slist *list)
   item = list;
   do {
     next = item->next;
-    Curl_safefree(item->data);
+    curlx_safefree(item->data);
     curlx_free(item);
     item = next;
   } while(next);

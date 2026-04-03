@@ -33,7 +33,7 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
@@ -1404,14 +1404,26 @@ static int test_float_formatting(void)
   /* check negative width argument when used signed, is treated as positive
      and maxes out the internal float width == 325 */
   curl_msnprintf(buf, sizeof(buf), "%*f", INT_MIN, 9.1);
-  errors += string_check(buf, "9.100000                                                                                                                                                                                                                                                                                                                             ");
+  errors += string_check(buf, "9.100000                                       "
+    "                                                                         "
+    "                                                                         "
+    "                                                                         "
+    "                                                           ");
 
   /* curl_msnprintf() limits a single float output to 325 bytes maximum
      width */
   curl_msnprintf(buf, sizeof(buf), "%*f", (1 << 30), 9.1);
-  errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");
+  errors += string_check(buf, "                                               "
+    "                                                                         "
+    "                                                                         "
+    "                                                                         "
+    "                                                   9.100000");
   curl_msnprintf(buf, sizeof(buf), "%100000f", 9.1);
-  errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");
+  errors += string_check(buf, "                                               "
+    "                                                                         "
+    "                                                                         "
+    "                                                                         "
+    "                                                   9.100000");
 
   curl_msnprintf(buf, sizeof(buf), "%f", MAXIMIZE);
   errors += strlen_check(buf, 317);
@@ -1542,6 +1554,6 @@ static CURLcode test_lib557(const char *URL)
     return CURLE_OK;
 }
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif

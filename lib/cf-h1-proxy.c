@@ -172,7 +172,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     /* If a proxy-authorization header was used for the proxy, then we should
        make sure that it is not accidentally used for the document request
        after we have connected. Let's thus free and clear it here. */
-    Curl_safefree(data->state.aptr.proxyuserpwd);
+    curlx_safefree(data->state.aptr.proxyuserpwd);
     break;
   }
 }
@@ -208,7 +208,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
 
   /* This only happens if we have looped here due to authentication reasons,
      and we do not really use the newly cloned URL here then. Free it. */
-  Curl_safefree(data->req.newurl);
+  curlx_safefree(data->req.newurl);
 
   result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
   if(result)
@@ -465,17 +465,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     if(ts->keepon == KEEPON_IGNORE) {
       /* This means we are currently ignoring a response-body */
-
-      if(ts->cl) {
-        /* A Content-Length based body: count down the counter
-           and make sure to break out of the loop when we are done! */
-        ts->cl--;
-        if(ts->cl <= 0) {
-          ts->keepon = KEEPON_DONE;
-          break;
-        }
-      }
-      else if(ts->chunked_encoding) {
+      if(ts->chunked_encoding) {
         /* chunked-encoded body, so we need to do the chunked dance
            properly to know when the end of the body is reached */
         size_t consumed = 0;
@@ -489,6 +479,15 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
           /* we are done reading chunks! */
           infof(data, "chunk reading DONE");
           ts->keepon = KEEPON_DONE;
+        }
+      }
+      else if(ts->cl) {
+        /* A Content-Length based body: count down the counter
+           and make sure to break out of the loop when we are done! */
+        ts->cl--;
+        if(ts->cl <= 0) {
+          ts->keepon = KEEPON_DONE;
+          break;
         }
       }
       continue;
@@ -597,6 +596,8 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
       /* read what is there */
       CURL_TRC_CF(data, cf, "CONNECT receive");
       result = recv_CONNECT_resp(cf, data, ts, &done);
+      if(result)
+        CURL_TRC_CF(data, cf, "error receiving CONNECT response: %d", result);
       if(!result)
         result = Curl_pgrsUpdate(data);
       /* error or not complete yet. return for more multi-multi */
@@ -642,10 +643,10 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   DEBUGASSERT(ts->tunnel_state == H1_TUNNEL_RESPONSE);
   if(data->info.httpproxycode / 100 != 2) {
     /* a non-2xx response and we have no next URL to try. */
-    Curl_safefree(data->req.newurl);
+    curlx_safefree(data->req.newurl);
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
-    return CURLE_RECV_ERROR;
+    return CURLE_COULDNT_CONNECT;
   }
   /* 2xx response, SUCCESS! */
   h1_tunnel_go_state(cf, ts, H1_TUNNEL_ESTABLISHED, data);
@@ -689,7 +690,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   result = H1_CONNECT(cf, data, ts);
   if(result)
     goto out;
-  Curl_safefree(data->state.aptr.proxyuserpwd);
+  curlx_safefree(data->state.aptr.proxyuserpwd);
 
 out:
   *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);

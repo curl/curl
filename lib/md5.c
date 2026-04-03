@@ -67,14 +67,9 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   md5_digest(ctx, 16, digest);
 }
 
-#elif (defined(USE_OPENSSL) && \
-  !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)) || \
-  (defined(USE_WOLFSSL) && !defined(NO_MD5) && !defined(OPENSSL_COEXIST))
-#ifdef USE_OPENSSL
+#elif defined(USE_OPENSSL) && \
+  !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
 #include <openssl/md5.h>
-#else
-#include <wolfssl/openssl/md5.h>
-#endif
 
 typedef MD5_CTX my_md5_ctx;
 
@@ -98,27 +93,26 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD5)
-#include <wolfssl/openssl/md5.h>
+#include <wolfssl/wolfcrypt/md5.h>
 
-typedef WOLFSSL_MD5_CTX my_md5_ctx;
+typedef wc_Md5 my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  if(!wolfSSL_MD5_Init(ctx))
+  if(wc_InitMd5(ctx))
     return CURLE_OUT_OF_MEMORY;
-
   return CURLE_OK;
 }
 
 static void my_md5_update(void *ctx,
                           const unsigned char *input, unsigned int len)
 {
-  (void)wolfSSL_MD5_Update(ctx, input, len);
+  (void)wc_Md5Update(ctx, input, (word32)len);
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  (void)wolfSSL_MD5_Final(digest, ctx);
+  (void)wc_Md5Final(ctx, digest);
 }
 
 #elif defined(USE_MBEDTLS) && \
@@ -546,14 +540,19 @@ const struct MD5_params Curl_DIGEST_MD5 = {
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_md5it(unsigned char *output,
-                    const unsigned char *input, const size_t len)
+                    const unsigned char *input, size_t len)
 {
   CURLcode result;
   my_md5_ctx ctx;
 
   result = my_md5_init(&ctx);
   if(!result) {
-    my_md5_update(&ctx, input, curlx_uztoui(len));
+    do {
+      unsigned int ilen = (unsigned int) CURLMIN(len, UINT_MAX);
+      my_md5_update(&ctx, input, ilen);
+      input += ilen;
+      len -= ilen;
+    } while(len);
     my_md5_final(output, &ctx);
   }
   return result;

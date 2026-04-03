@@ -48,7 +48,7 @@ jobs:
       - name: 'maketgz'
         run: SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
@@ -74,7 +74,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: 'release-tgz'
 
@@ -98,7 +98,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: 'release-tgz'
 
@@ -124,7 +124,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: 'release-tgz'
 
@@ -148,7 +148,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: 'release-tgz'
 
@@ -169,7 +169,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: 'release-tgz'
 
@@ -191,7 +191,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: 'release-tgz'
 
@@ -217,7 +217,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: 'release-tgz'
 
@@ -267,7 +267,7 @@ jobs:
       matrix:
         image: [ubuntu-24.04-arm, macos-latest, windows-2022]
     steps:
-      - uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
+      - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
         if: ${{ contains(matrix.image, 'windows') }}
         with:
           msystem: mingw64
@@ -288,7 +288,10 @@ jobs:
             sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OLD_CMAKE_SHA256_WIN_INTEL}" && unzip -q pkg.bin && rm -f pkg.bin
             printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-win64-x64/bin/cmake.exe > ~/old-cmake-path.txt
           elif [[ "${MATRIX_IMAGE}" = *'ubuntu'* ]]; then
-            sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
+            printf "#!/bin/sh
+              while [ \$? = 0 ]; do for i in 1 2 3; do timeout 30 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
+              dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+            sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
             cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Linux-aarch64.tar.gz" --output pkg.bin
@@ -322,7 +325,8 @@ jobs:
       - name: 'via find_package (PREFER_CONFIG=ON)'
         if: ${{ contains(matrix.image, 'windows') }}
         run: |
-          export TEST_CMAKE_FLAGS_PROVIDER='-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON -DCURL_ZSTD=OFF -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a'
+          export TEST_CMAKE_FLAGS_PROVIDER='-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON -DCURL_ZSTD=OFF'
+          TEST_CMAKE_FLAGS_PROVIDER+=' -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a'
           export TEST_CMAKE_FLAGS_CONSUMER="${TEST_CMAKE_FLAGS_PROVIDER}"
           ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 

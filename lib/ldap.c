@@ -27,7 +27,7 @@
 
 #if !defined(CURL_DISABLE_LDAP) && !defined(USE_OPENLDAP)
 
-#if defined(__GNUC__) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -994,7 +994,7 @@ const struct Curl_protocol Curl_protocol_ldap = {
   ZERO_NULL,                            /* follow */
 };
 
-#if defined(__GNUC__) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 

@@ -789,7 +789,7 @@ sub EHLO_smtp {
 
         for my $am (@auth_mechs) {
             if(!$mechs) {
-                $mechs = "$am";
+                $mechs = $am;
             }
             else {
                 $mechs .= " $am";
@@ -940,7 +940,7 @@ sub DATA_smtp {
 
         logmsg "Store test number $testno in $filename\n";
 
-        open(my $file, ">", "$filename") ||
+        open(my $file, ">", $filename) ||
             return 0; # failed to open output
 
         my $line;
@@ -1290,7 +1290,7 @@ sub APPEND_imap {
 
         logmsg "Store test number $testno in $filename\n";
 
-        open(my $file, ">", "$filename") ||
+        open(my $file, ">", $filename) ||
             return 0; # failed to open output
 
         my $received = 0;
@@ -1709,7 +1709,7 @@ sub CAPA_pop3 {
 
     for my $am (@auth_mechs) {
         if(!$mechs) {
-            $mechs = "$am";
+            $mechs = $am;
         }
         else {
             $mechs .= " $am";
@@ -2399,7 +2399,7 @@ sub STOR_ftp {
 
     sendcontrol "125 Gimme gimme gimme!\r\n";
 
-    open(my $file, ">", "$filename") ||
+    open(my $file, ">", $filename) ||
         return 0; # failed to open output
 
     my $line;
@@ -2795,7 +2795,7 @@ sub nodataconn_str {
     $str = 'NODATACONN425' if($nodataconn425);
     $str = 'NODATACONN421' if($nodataconn421);
     $str = 'NODATACONN150' if($nodataconn150);
-    return "$str";
+    return $str;
 }
 
 #**********************************************************************
@@ -3085,7 +3085,7 @@ if($proto eq 'ftp') {
 $srvrname = servername_str($proto, $ipvnum, $idnum);
 $serverlogs_lockfile = "$logdir/$LOCKDIR/${srvrname}.lock";
 
-$idstr = "$idnum" if($idnum > 1);
+$idstr = $idnum if($idnum > 1);
 
 protocolsetup($proto);
 
@@ -3097,7 +3097,7 @@ startsf();
 # actual port
 if($portfile && !$port) {
     my $aport;
-    open(my $p, "<", "$portfile");
+    open(my $p, "<", $portfile);
     $aport = <$p>;
     close($p);
     $port = 0 + $aport;
@@ -3105,7 +3105,7 @@ if($portfile && !$port) {
 
 logmsg sprintf("%s server listens on port IPv${ipvnum}/${port}\n", uc($proto));
 
-open(my $pid, ">", "$pidfile");
+open(my $pid, ">", $pidfile);
 print $pid $$."\n";
 close($pid);
 

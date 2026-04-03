@@ -19,6 +19,8 @@ wild card:wildcard
 thread safe:thread-safe
 thread unsafe:thread-unsafe
 multi thread:multi-thread
+null terminated:null-terminated
+zero terminated:null-terminated
 it's:it is
 aren't:are not
 can't:cannot
@@ -111,6 +113,5 @@ with with:with
 ---WWW::Curl
 ---NET::Curl
 ---Curl Corporation
----:include/curl/:will
 ---:lib/:will
 ---:src/:will

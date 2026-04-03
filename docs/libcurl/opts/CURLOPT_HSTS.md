@@ -27,18 +27,21 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTS, char *filename);
 
 # DESCRIPTION
 
-Make the *filename* point to a filename to load an existing HSTS cache
-from, and to store the cache in when the easy handle is closed. Setting a file
-name with this option also enables HSTS for this handle (the equivalent of
-setting *CURLHSTS_ENABLE* with CURLOPT_HSTS_CTRL(3)).
+Make the *filename* point to a filename to load an existing HSTS cache from,
+and to store the cache in when the easy handle is closed. Setting a filename
+with this option also enables HSTS for this handle (the equivalent of setting
+*CURLHSTS_ENABLE* with CURLOPT_HSTS_CTRL(3)).
 
 If the given file does not exist or contains no HSTS entries at startup, the
-HSTS cache starts empty. Setting the filename to NULL allows HSTS
-without reading from or writing to any file. NULL also makes libcurl clear the
-list of files to read HSTS data from, if any such were previously set.
+HSTS cache starts empty. Setting the filename to NULL allows HSTS without
+reading from or writing to any file. NULL also makes libcurl clear the list of
+files to read HSTS data from, if any such were previously set.
 
 If this option is set multiple times, libcurl loads cache entries from each
 given file but only stores the last used name for later writing.
+
+Since libcurl 8.20.0, each in-memory HSTS cache (per easy handle or shared
+cache) holds no more than the most recently added 10,000 HSTS hostnames.
 
 # FILE FORMAT
 
@@ -62,6 +65,9 @@ currently no length or size limit.
 NULL, no filename
 
 # SECURITY CONCERNS
+
+We strongly urge users to stick to `HTTPS://` URLs, which makes this option
+unnecessary.
 
 libcurl cannot fully protect against attacks where an attacker has write
 access to the same directory where it is directed to save files. This is

@@ -60,7 +60,9 @@ elseif(BORLAND)
 endif()
 
 if(PICKY_COMPILER)
-  if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  # Leave disabled for GCC <4.6, because they lack #pragma features to silence locally.
+  if((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.6) OR
+     CMAKE_C_COMPILER_ID MATCHES "Clang")
 
     # https://clang.llvm.org/docs/DiagnosticsReference.html
     # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
@@ -147,7 +149,7 @@ if(PICKY_COMPILER)
       list(APPEND _picky_enable
         ${_picky_common_old}
         -Wconditional-uninitialized        # clang  3.0
-        -Wno-used-but-marked-unused        # clang  2.9            # Triggered by typecheck-gcc.h with clang 14+, dependency headers
+        -Wno-used-but-marked-unused        # clang  2.9            # for typecheck-gcc.h with clang 14+, dependency headers
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
         -Wformat=2                         # clang  2.7  gcc  4.8
@@ -161,7 +163,7 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
         list(APPEND _picky_enable
           -Wno-covered-switch-default      # clang  3.1            appleclang  3.1  # Annoying to fix or silence
-          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # Triggered by curl/curl.h, standard headers
+          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # for std headers, and curl/curl.h (rare combos)
         )
         if(MSVC)
           list(APPEND _picky_enable
@@ -256,6 +258,7 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Warray-compare                  # clang 20.1  gcc 12.0  appleclang 26.4
           -Wc++-hidden-decl                # clang 21.1            appleclang 26.4
+          -Wimplicit-int-enum-cast         # clang 21.1
           -Wjump-misses-init               # clang 21.1  gcc  4.5  appleclang 26.4
           -Wno-implicit-void-ptr-cast      # clang 21.1            appleclang 26.4
           -Wtentative-definition-compat    # clang 21.1            appleclang 26.4
@@ -378,15 +381,6 @@ if(PICKY_COMPILER)
     endforeach()
 
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      if(CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
-        # Avoid false positives
-        list(APPEND _picky "-Wno-shadow")
-        list(APPEND _picky "-Wno-unreachable-code")
-      endif()
-      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
-        # GCC <4.6 do not support #pragma to suppress warnings locally. Disable them globally instead.
-        list(APPEND _picky "-Wno-overlength-strings")
-      endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.0 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
         list(APPEND _picky "-Wno-missing-field-initializers")  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=36750
       endif()
@@ -436,11 +430,13 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   endforeach()
 endif()
 
-if(CMAKE_C_STANDARD STREQUAL 90 AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
-  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+if(CMAKE_C_STANDARD STREQUAL 90 AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+  if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.0) OR
+     (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2))
     list(APPEND _picky "-Wno-c99-extensions")  # Avoid: warning: '_Bool' is a C99 extension
   endif()
-  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1)
+  if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9) OR
+     (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1))
     list(APPEND _picky "-Wno-comma")  # Just silly
   endif()
 endif()

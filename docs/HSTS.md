@@ -19,6 +19,9 @@ libcurl features an in-memory cache for HSTS hosts, so that subsequent
 HTTP-only requests to a hostname present in the cache gets internally
 "redirected" to the HTTPS version.
 
+Since curl 8.20.0, libcurl keeps no more than the most recently added 10,000
+unique HSTS hostnames.
+
 ## `curl_easy_setopt()` options:
 
 - `CURLOPT_HSTS_CTRL` - enable HSTS for this easy handle

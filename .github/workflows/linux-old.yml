@@ -69,7 +69,8 @@ jobs:
           sha256sum freexian-archive-keyring_2022.06.08_all.deb && dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get -o Dpkg::Use-Pty=0 update
-          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libc-ares-dev libkrb5-dev libldap2-dev librtmp-dev stunnel4
+          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends \
+            make automake autoconf libtool ninja-build gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libkrb5-dev libldap2-dev stunnel4
           # GitHub's actions/checkout needs newer glibc and libstdc++. The latter also depends on
           # gcc-8-base, but it does not actually seem used in our situation and is not available in
           # the main repo, so force the install.
@@ -79,8 +80,8 @@ jobs:
 
       - name: 'install prereqs (cmake)'
         env:
-          CMAKE_VERSION: 3.7.0  # Earliest version supported by curl
-          CMAKE_SHA256: e075f63e6a9104b1c3d11666ae9546bc8812f7e791a49c4ce11effc063141b2a
+          CMAKE_VERSION: 3.18.0  # Earliest version supported by curl
+          CMAKE_SHA256: 4d9a9d3351161073a67e49366d701b6fa4b0343781982dc5eef08a02a750d403
         run: |
           cd ~
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
@@ -94,13 +95,13 @@ jobs:
 
       - name: 'CM build-only configure (out-of-tree)'
         run: |
-          mkdir bld-1
-          cd bld-1
-          ~/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
+          ~/cmake/bin/cmake -B bld-1 -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+            -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF
 
       - name: 'CM build-only build'
-        run: VERBOSE=1 make -C bld-1 install
+        run: |
+          ~/cmake/bin/cmake --build bld-1 --verbose
+          ~/cmake/bin/cmake --install bld-1 --verbose
 
       - name: 'CM build-only curl -V'
         run: bld-1/src/curl --disable --version
@@ -116,51 +117,52 @@ jobs:
 
       # when this job can get a libssh version 0.9.0 or later, this should get
       # that enabled again
-      - name: 'CM configure (out-of-tree, c-ares, zstd, gssapi)'
+      # when this job can get c-ares 1.16.0 or later, we can enable that
+      # again
+
+      - name: 'CM configure (out-of-tree, zstd, gssapi)'
         run: |
-          mkdir bld-cares
-          cd bld-cares
-          ~/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
+          ~/cmake/bin/cmake -B bld-oldie -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+            -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=OFF -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
       - name: 'CM configure log'
         if: ${{ !cancelled() }}
-        run: cat bld-cares/CMakeFiles/CMake*.log 2>/dev/null || true
+        run: cat bld-oldie/CMakeFiles/CMake*.log 2>/dev/null || true
 
       - name: 'CM curl_config.h'
         run: |
-          echo '::group::raw'; cat bld-cares/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld-cares/lib/curl_config.h | sort || true
+          echo '::group::raw'; cat bld-oldie/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld-oldie/lib/curl_config.h | sort || true
 
       - name: 'CM build'
-        run: make -C bld-cares
+        run: ~/cmake/bin/cmake --build bld-oldie
 
       - name: 'CM curl -V'
-        run: bld-cares/src/curl --disable --version
+        run: bld-oldie/src/curl --disable --version
 
       - name: 'CM install'
-        run: make -C bld-cares install
+        run: ~/cmake/bin/cmake --install bld-oldie
 
       - name: 'CM build tests'
-        run: make -C bld-cares testdeps
+        run: ~/cmake/bin/cmake --build bld-oldie --target testdeps
 
       - name: 'CM run tests'
-        run: make -C bld-cares test-ci
+        run: ~/cmake/bin/cmake --build bld-oldie --target test-ci
 
       - name: 'CM build examples'
-        run: make -C bld-cares curl-examples-build
+        run: ~/cmake/bin/cmake --build bld-oldie --target curl-examples-build
 
       - name: 'AM autoreconf'
         run: autoreconf -fi
 
-      - name: 'AM configure (out-of-tree, c-ares, zstd, gssapi)'
+      - name: 'AM configure (out-of-tree, zstd, gssapi)'
         run: |
           mkdir bld-am
           cd bld-am
           ../configure --prefix="$PWD"/../curl-install-am --enable-unity --enable-warnings --enable-werror --disable-shared \
             --disable-dependency-tracking --enable-option-checking=fatal \
-            --without-ssl --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp
+            --without-ssl --disable-ares --without-libssh2 --with-zstd --with-gssapi
 
       - name: 'AM configure log'
         if: ${{ !cancelled() }}

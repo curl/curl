@@ -68,7 +68,7 @@ sub memanalyze {
     $memsum = 0; # the total number of memory allocated over the lifetime
     $maxmem = 0; # the high water mark
 
-    open(my $fileh, "<", "$file") or return ();
+    open(my $fileh, "<", $file) or return ();
 
     if($showlimit) {
         while(<$fileh>) {

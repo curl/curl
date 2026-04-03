@@ -44,7 +44,7 @@ close CURL;
 my $curlconfigversion;
 
 # Read the output of curl-config --version/--vernum
-open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Cannot get curl-config --$what list\n";
+open(CURLCONFIG, '-|', 'sh', $ARGV[0], "--$what") || die "Cannot get curl-config --$what list\n";
 $_ = <CURLCONFIG>;
 chomp;
 my $filever=$_;

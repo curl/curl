@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+upload
+--retry
+</keywords>
+</info>
+
+<client>
+<name>
+HTTP retry upload with missing upload file
+</name>
+<command>
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --retry 5 --retry-all-errors --upload-file AAAAAAAAAAA
+</command>
+</client>
+
+<verify>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>

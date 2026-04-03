@@ -66,7 +66,7 @@ our %pastversion;
 sub checkmanpage {
     my ($m) = @_;
 
-    open(my $mh, "<", "$m");
+    open(my $mh, "<", $m);
     my $line = 1;
     my $title;
     my $addedin;

@@ -27,15 +27,38 @@ use strict;
 use warnings;
 
 my @proto;
+my %func;
 my %inc;
 
 sub scanfile {
     my ($file) = @_;
     open(F, "<$file") || die "$file failed";
+    my $unit = 0;
     while(<F>) {
-        if($_ =~ /^UNITTEST .*\);/) {
-            push @proto, $_;
-            $inc{$file} = 1;
+        if($_ =~ /^UNITTEST .*[* ]([a-z0-9_]+)\(/i) {
+            my $n = $1;
+            if($func{$n}) {
+                # already prototyped, this is now the function itself
+            }
+            else {
+                $func{$n} = 1;
+                push @proto, $_;
+                $inc{$file} = 1;
+                $unit = 1;
+            }
+        }
+        if($unit) {
+            if($unit != 1) {
+                push @proto, $_;
+            }
+            if($_ =~ /\);/) {
+                # end of proto
+                $unit = 0;
+            }
+            else {
+                # proto continues
+                $unit++;
+            }
         }
     }
     close(F);
@@ -81,7 +104,6 @@ for my $f (sort keys %inc) {
     $f =~ s/\.c/.h/; # .h extension
 
     if(-f $f) {
-        $f =~ s/.*\///; # cut the path off
         print "#include \"$f\"\n";
     }
 }

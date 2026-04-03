@@ -23,11 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_OPENSSL) || \
-  defined(USE_GNUTLS) || \
-  defined(USE_WOLFSSL) || \
-  (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
-  defined(USE_QUICHE) || \
+#if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
   defined(USE_RUSTLS)
 
 #include "vtls/keylog.h"
@@ -56,7 +52,7 @@ void Curl_tls_keylog_open(void)
           keylog_file_fp = NULL;
         }
       }
-      Curl_safefree(keylog_file_name);
+      curlx_safefree(keylog_file_name);
     }
   }
 }
@@ -145,4 +141,4 @@ bool Curl_tls_keylog_write(const char *label,
   return TRUE;
 }
 
-#endif /* TLS or QUIC backend */
+#endif /* TLS backend */

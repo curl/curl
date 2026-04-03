@@ -34,13 +34,13 @@ void curlx_win32_snprintf(char *buf, size_t maxlen, const char *fmt, ...)
   if(!maxlen)
     return;
   va_start(ap, fmt);
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
   /* !checksrc! disable BANNEDFUNC 1 */
   (void)vsnprintf(buf, maxlen, fmt, ap);
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
   buf[maxlen - 1] = 0;

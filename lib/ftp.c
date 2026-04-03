@@ -68,6 +68,7 @@
 #include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curl_ctype.h"
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -174,9 +175,9 @@ static CURLcode getftpresponse(struct Curl_easy *data, size_t *nreadp,
 
 static void freedirs(struct ftp_conn *ftpc)
 {
-  Curl_safefree(ftpc->dirs);
+  curlx_safefree(ftpc->dirs);
   ftpc->dirdepth = 0;
-  Curl_safefree(ftpc->rawpath);
+  curlx_safefree(ftpc->rawpath);
   ftpc->file = NULL;
 }
 
@@ -1061,8 +1062,9 @@ static CURLcode ftp_port_resolve_host(struct Curl_easy *data,
   CURLcode result;
 
   *resp = NULL;
-  result = Curl_resolv_blocking(data, host, 0, conn->ip_version,
-                                dns_entryp);
+  result = Curl_resolv_blocking(
+    data, Curl_resolv_dns_queries(data, conn->ip_version),
+    host, 0, Curl_conn_get_transport(data, conn), dns_entryp);
   if(result)
     failf(data, "failed to resolve the address provided to PORT: %s", host);
   else {
@@ -1386,7 +1388,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* cleanup */
 
   if(dns_entry)
-    Curl_resolv_unlink(data, &dns_entry);
+    Curl_dns_entry_unlink(data, &dns_entry);
   if(result) {
     ftp_state(data, ftpc, FTP_STOP);
   }
@@ -2160,9 +2162,10 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     if(result)
       goto error;
 
-    (void)Curl_resolv_blocking(data, host_name, ipquad.remote_port,
-                               is_ipv6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_V4,
-                               &dns);
+    (void)Curl_resolv_blocking(
+      data, is_ipv6 ? CURL_DNSQ_AAAA : CURL_DNSQ_A,
+      host_name, ipquad.remote_port, Curl_conn_get_transport(data, conn),
+      &dns);
     /* we connect to the proxy's port */
     connectport = (unsigned short)ipquad.remote_port;
 
@@ -2186,7 +2189,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
         goto error;
     }
 
-    (void)Curl_resolv_blocking(data, newhost, newport, conn->ip_version, &dns);
+    (void)Curl_resolv_blocking(
+      data, Curl_resolv_dns_queries(data, conn->ip_version),
+      newhost, newport, Curl_conn_get_transport(data, conn), &dns);
     connectport = newport; /* we connect to the remote port */
 
     if(!dns) {
@@ -2236,6 +2241,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   ftp_state(data, ftpc, FTP_STOP); /* this phase is completed */
 
 error:
+  Curl_dns_entry_unlink(data, &dns);
   curlx_free(newhost);
   return result;
 }
@@ -2488,24 +2494,33 @@ static CURLcode ftp_state_port_resp(struct Curl_easy *data,
   return result;
 }
 
-static int twodigit(const char *p)
+/* return TRUE on error, FALSE on success */
+static bool twodigit(const char *p, int *val)
 {
-  return ((p[0] - '0') * 10) + (p[1] - '0');
+  if(!ISDIGIT(p[0]) || !ISDIGIT(p[1]))
+    return TRUE;
+  /* curlx_hexval() works fine here since we make sure it is decimal above */
+  *val = (curlx_hexval(p[0]) * 10) + curlx_hexval(p[1]);
+  return FALSE;
 }
 
-static bool ftp_213_date(const char *p, int *year, int *month, int *day,
-                         int *hour, int *minute, int *second)
-{
-  size_t len = strlen(p);
-  if(len < 14)
-    return FALSE;
-  *year = (twodigit(&p[0]) * 100) + twodigit(&p[2]);
-  *month = twodigit(&p[4]);
-  *day = twodigit(&p[6]);
-  *hour = twodigit(&p[8]);
-  *minute = twodigit(&p[10]);
-  *second = twodigit(&p[12]);
+/*
+ * Unittest @1668
+ */
 
+UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,
+                           int *hour, int *minute, int *second);
+UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,
+                           int *hour, int *minute, int *second)
+{
+  int century;
+  if((strlen(p) < 14) || twodigit(&p[0], &century) || twodigit(&p[2], year) ||
+     twodigit(&p[4], month) || twodigit(&p[6], day) ||
+     twodigit(&p[8], hour) || twodigit(&p[10], minute) ||
+     twodigit(&p[12], second))
+    return FALSE;
+
+  *year += century * 100;
   if((*month > 12) || (*day > 31) || (*hour > 23) || (*minute > 59) ||
      (*second > 60))
     return FALSE;
@@ -2566,7 +2581,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
     /* If we asked for a time of the file and we actually got one as well,
        we "emulate" an HTTP-style header in our output. */
 
-#if defined(__GNUC__) && (defined(__DJGPP__) || defined(__AMIGA__))
+#if defined(CURL_HAVE_DIAG) && (defined(__DJGPP__) || defined(__AMIGA__))
 #pragma GCC diagnostic push
 /* 'time_t' is unsigned in MSDOS and AmigaOS. Silence:
    warning: comparison of unsigned expression in '>= 0' is always true */
@@ -2574,7 +2589,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
 #endif
     if(data->req.no_body && ftpc->file &&
        data->set.get_filetime && showtime) {
-#if defined(__GNUC__) && (defined(__DJGPP__) || defined(__AMIGA__))
+#if defined(CURL_HAVE_DIAG) && (defined(__DJGPP__) || defined(__AMIGA__))
 #pragma GCC diagnostic pop
 #endif
       char headerbuf[128];
@@ -3076,10 +3091,18 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
             break; /* get out of this loop */
           }
         }
-        else
+        else {
+          if(ISCNTRL(*ptr)) {
+            /* control characters have no business in a path */
+            curlx_dyn_free(&out);
+            return CURLE_WEIRD_SERVER_REPLY;
+          }
           result = curlx_dyn_addn(&out, ptr, 1);
-        if(result)
+        }
+        if(result) {
+          curlx_dyn_free(&out);
           return result;
+        }
       }
     }
     if(entry_extracted) {
@@ -4003,7 +4026,7 @@ fail:
     Curl_ftp_parselist_data_free(&ftpwc->parser);
     curlx_free(ftpwc);
   }
-  Curl_safefree(wildcard->pattern);
+  curlx_safefree(wildcard->pattern);
   wildcard->dtor = ZERO_NULL;
   wildcard->ftpwc = NULL;
   return result;
@@ -4338,7 +4361,7 @@ static void ftp_easy_dtor(void *key, size_t klen, void *entry)
   struct FTP *ftp = entry;
   (void)key;
   (void)klen;
-  Curl_safefree(ftp->pathalloc);
+  curlx_safefree(ftp->pathalloc);
   curlx_free(ftp);
 }
 
@@ -4348,11 +4371,11 @@ static void ftp_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   freedirs(ftpc);
-  Curl_safefree(ftpc->account);
-  Curl_safefree(ftpc->alternative_to_user);
-  Curl_safefree(ftpc->entrypath);
-  Curl_safefree(ftpc->prevpath);
-  Curl_safefree(ftpc->server_os);
+  curlx_safefree(ftpc->account);
+  curlx_safefree(ftpc->alternative_to_user);
+  curlx_safefree(ftpc->entrypath);
+  curlx_safefree(ftpc->prevpath);
+  curlx_safefree(ftpc->server_os);
   Curl_pp_disconnect(&ftpc->pp);
   curlx_free(ftpc);
 }
@@ -4415,7 +4438,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
     ftpc->alternative_to_user =
       curlx_strdup(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
     if(!ftpc->alternative_to_user) {
-      Curl_safefree(ftpc->account);
+      curlx_safefree(ftpc->account);
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);
       return CURLE_OUT_OF_MEMORY;
     }

@@ -187,7 +187,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   if(q) {
     p = q + 1;
     if(!*p) {
-      tool_safefree(copy);
+      curlx_safefree(copy);
       return NULL;
     }
   }
@@ -199,7 +199,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   if(q) {
     p = q + 1;
     if(!*p) {
-      tool_safefree(copy);
+      curlx_safefree(copy);
       return NULL;
     }
   }
@@ -220,7 +220,7 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
-    tool_safefree(copy);
+    curlx_safefree(copy);
     if(sc)
       return NULL;
     copy = sanitized;
@@ -263,18 +263,15 @@ static size_t save_etag(const char *etag_h, const char *endp,
 
     if(eot >= etag_h) {
       size_t etag_length = eot - etag_h + 1;
-      /*
-       * Truncate the etag save stream, it can have an existing etag value.
-       */
-#ifdef HAVE_FTRUNCATE
-      if(ftruncate(fileno(etag_save->stream), 0)) {
+      curlx_struct_stat file;
+      int fd = fileno(etag_save->stream);
+
+      /* Truncate regular files to avoid stale etag content */
+      if((fd != -1) &&
+         !curlx_fstat(fd, &file) &&
+         (S_ISREG(file.st_mode) &&
+          toolx_ftruncate(fd, 0)))
         return CURL_WRITEFUNC_ERROR;
-      }
-#else
-      if(fseek(etag_save->stream, 0, SEEK_SET)) {
-        return CURL_WRITEFUNC_ERROR;
-      }
-#endif
 
       fwrite(etag_h, 1, etag_length, etag_save->stream);
       /* terminate with newline */
@@ -312,12 +309,16 @@ static size_t content_disposition(const char *str, const char *end,
           return CURL_WRITEFUNC_ERROR;
         }
         if(outs->alloc_filename)
-          curlx_free(outs->filename);
+          curlx_safefree(outs->filename);
 
         if(per->config->output_dir) {
-          outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
-                                         filename);
+          char *f = curl_maprintf("%s/%s", per->config->output_dir,
+                                  filename);
           curlx_free(filename);
+          if(!f)
+            return CURL_WRITEFUNC_ERROR;
+          outs->filename = curlx_strdup(f);
+          curl_free(f);
           if(!outs->filename)
             return CURL_WRITEFUNC_ERROR;
         }
@@ -363,12 +364,16 @@ static size_t content_disposition(const char *str, const char *end,
           return CURL_WRITEFUNC_ERROR;
         }
         if(outs->alloc_filename)
-          curlx_free(outs->filename);
+          curlx_safefree(outs->filename);
 
         if(per->config->output_dir) {
-          outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
-                                         filename);
+          char *f = curl_maprintf("%s/%s", per->config->output_dir,
+                                  filename);
           curlx_free(filename);
+          if(!f)
+            return CURL_WRITEFUNC_ERROR;
+          outs->filename = curlx_strdup(f);
+          curl_free(f);
           if(!outs->filename)
             return CURL_WRITEFUNC_ERROR;
         }
@@ -397,7 +402,7 @@ static size_t content_disposition(const char *str, const char *end,
      hdrcbdata->config->show_headers) {
     /* still awaiting the Content-Disposition header, store the header in
        memory. Since it is not null-terminated, we need an extra dance. */
-    char *clone = curl_maprintf("%.*s", (int)cb, str);
+    char *clone = curlx_memdup0(str, cb);
     if(clone) {
       struct curl_slist *old = hdrcbdata->headlist;
       hdrcbdata->headlist = curl_slist_append(old, clone);

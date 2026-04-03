@@ -37,11 +37,15 @@
 
 set(_libssh2_pc_requires "libssh2")
 
-if(CURL_USE_PKGCONFIG AND
-   NOT DEFINED LIBSSH2_INCLUDE_DIR AND
+if(NOT DEFINED LIBSSH2_INCLUDE_DIR AND
    NOT DEFINED LIBSSH2_LIBRARY)
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(_libssh2 ${_libssh2_pc_requires})
+  if(CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_libssh2 ${_libssh2_pc_requires})
+  endif()
+  if(NOT _libssh2_FOUND AND CURL_USE_CMAKECONFIG)
+    find_package(libssh2 CONFIG QUIET)
+  endif()
 endif()
 
 if(_libssh2_FOUND AND _libssh2_INCLUDE_DIRS)
@@ -55,6 +59,16 @@ if(_libssh2_FOUND AND _libssh2_INCLUDE_DIRS)
     set(_libssh2_LIBRARIES    "${_libssh2_STATIC_LIBRARIES}")
   endif()
   message(STATUS "Found Libssh2 (via pkg-config): ${_libssh2_INCLUDE_DIRS} (found version \"${LIBSSH2_VERSION}\")")
+elseif(libssh2_CONFIG)
+  set(Libssh2_FOUND TRUE)
+  set(LIBSSH2_FOUND TRUE)
+  set(LIBSSH2_VERSION ${libssh2_VERSION})
+  if(LIBSSH2_USE_STATIC_LIBS)
+    set(_libssh2_LIBRARIES libssh2::libssh2_static)
+  else()
+    set(_libssh2_LIBRARIES libssh2::libssh2)
+  endif()
+  message(STATUS "Found Libssh2 (via CMake Config): ${libssh2_CONFIG} (found version \"${LIBSSH2_VERSION}\")")
 else()
   find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h")
   if(LIBSSH2_USE_STATIC_LIBS)
@@ -91,10 +105,6 @@ else()
 endif()
 
 if(LIBSSH2_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_libssh2_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::libssh2)
     add_library(CURL::libssh2 INTERFACE IMPORTED)
     set_target_properties(CURL::libssh2 PROPERTIES

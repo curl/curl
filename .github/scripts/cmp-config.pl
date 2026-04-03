@@ -53,7 +53,6 @@ my %remove = (
     '#define HAVE_LDAP_SSL 1' => 1,
     '#define HAVE_LIBBROTLIDEC 1' => 1,
     '#define HAVE_LIBPSL_H 1' => 1,
-    '#define HAVE_LIBRTMP_RTMP_H 1' => 1,
     '#define HAVE_LIBSOCKET 1' => 1,
     '#define HAVE_LIBSSH' => 1,
     '#define HAVE_LIBSSH2 1' => 1,
@@ -135,4 +134,4 @@ foreach my $v (keys %remove) {
 }
 
 # return the exit code from diff
-exit system("diff -u /tmp/autotools /tmp/cmake") >> 8;
+exit system('diff', ('-u', '/tmp/autotools', '/tmp/cmake')) >> 8;

@@ -28,3 +28,6 @@ This is subtly different than --location, as that option always set the custom
 method in all subsequent requests independent of response code.
 
 Restrict which protocols a redirect is accepted to follow with --proto-redir.
+
+When --netrc is used in combination with this option, credentials for the
+followed-to hosts may also be selected from that file.

@@ -517,7 +517,7 @@ static CURLcode mbed_load_cacert(struct Curl_cfilter *cf,
       curlx_free(newblob);
     }
 #else
-    /* DER encoded certs do not need to be null terminated because it is a
+    /* DER encoded certs do not need to be null-terminated because it is a
        binary format. Thus, if we are not compiling with PEM_PARSE we can avoid
        the extra memory copies altogether. */
     ret = mbedtls_x509_crt_parse_der(&backend->cacert, ca_info_blob->data,
@@ -630,7 +630,7 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
       curlx_free(newblob);
     }
 #else
-    /* DER encoded certs do not need to be null terminated because it is a
+    /* DER encoded certs do not need to be null-terminated because it is a
        binary format. Thus, if we are not compiling with PEM_PARSE we can avoid
        the extra memory copies altogether. */
     ret = mbedtls_x509_crt_parse_der(&backend->clicert, ssl_cert_blob->data,
@@ -1360,7 +1360,7 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef MBEDTLS_X509_CRL_PARSE_C
     mbedtls_x509_crl_free(&backend->crl);
 #endif
-    Curl_safefree(backend->ciphersuites);
+    curlx_safefree(backend->ciphersuites);
     mbedtls_ssl_config_free(&backend->config);
     mbedtls_ssl_free(&backend->ssl);
     backend->initialized = FALSE;

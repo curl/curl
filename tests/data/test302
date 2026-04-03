@@ -41,7 +41,7 @@ HTTPS GET over HTTP proxy fails
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-56
+7
 </errorcode>
 <data>
 </data>

@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "unitprotos.h"
 
 static CURLcode test_unit1395(const char *arg)
 {
@@ -37,6 +36,21 @@ static CURLcode test_unit1395(const char *arg)
   };
 
   const struct dotdot pairs[] = {
+    { "/%2f%2e%2e%2f/../a", "/a" },
+    { "/%2f%2e%2e%2f/../", "/" },
+    { "/%2f%2e%2e%2f/.", "/%2f%2e%2e%2f/" },
+    { "/%2f%2e%2e%2f/", "/%2f%2e%2e%2f/" },
+    { "/%2f%2e%2e%2f", "/%2f%2e%2e%2f" },
+    { "/%2f%2e%2e%2", "/%2f%2e%2e%2" },
+    { "/%2f%2e%2e%", "/%2f%2e%2e%" },
+    { "/%2f%2e%2e", "/%2f%2e%2e" },
+    { "/%2f%2e%2", "/%2f%2e%2" },
+    { "/%2f%2e%", "/%2f%2e%" },
+    { "/%2f%2e", "/%2f%2e" },
+    { "/%2f%2", "/%2f%2" },
+    { "/%2f%", "/%2f%" },
+    { "/%2f", "/%2f" },
+    { "/%2", "/%2" },
     { "%2f%2e%2e%2f/../a", "%2f%2e%2e%2f/a" },
     { "%2f%2e%2e%2f/../", "%2f%2e%2e%2f/" },
     { "%2f%2e%2e%2f/.", "%2f%2e%2e%2f/" },
@@ -108,6 +122,26 @@ static CURLcode test_unit1395(const char *arg)
     { "/moo/..", "/" },
     { "/..", "/" },
     { "/.", "/" },
+    { "////../a", "///a" },
+    { "/../../../../../../", "/" },
+    { "/..//..//", "//" },
+    { "/.config/../ssh", "/ssh" },
+    { "/..config/..", "/" },
+    { "/.../a", "/.../a" },
+    { "/a/%2E%2e/b", "/b" },
+    { "/a/%2e./b", "/b" },
+    { "/a/.%2e/b", "/b" },
+    { "/%2f..%2f", "/%2f..%2f" },
+    { "/a/b/.", "/a/b/" },
+    { "/a/b/..", "/a/" },
+    { "well-known", "well-known" },
+    { ".well-known", ".well-known" },
+    { "..well-known", "..well-known" },
+    { "...well-known", "...well-known" },
+    { "....well-known", "....well-known" },
+    { "%2ewell-known", "%2ewell-known" },
+    { "%2Ewell-known", "%2Ewell-known" },
+    { "../.well-known", ".well-known" },
   };
 
   for(i = 0; i < CURL_ARRAYSIZE(pairs); i++) {

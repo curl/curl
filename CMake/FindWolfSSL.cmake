@@ -45,11 +45,15 @@ endif()
 
 set(_wolfssl_pc_requires "wolfssl")
 
-if(CURL_USE_PKGCONFIG AND
-   NOT DEFINED WOLFSSL_INCLUDE_DIR AND
+if(NOT DEFINED WOLFSSL_INCLUDE_DIR AND
    NOT DEFINED WOLFSSL_LIBRARY)
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(_wolfssl ${_wolfssl_pc_requires})
+  if(CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_wolfssl ${_wolfssl_pc_requires})
+  endif()
+  if(NOT _wolfssl_FOUND AND CURL_USE_CMAKECONFIG)
+    find_package(wolfssl CONFIG QUIET)
+  endif()
 endif()
 
 if(_wolfssl_FOUND)
@@ -57,6 +61,12 @@ if(_wolfssl_FOUND)
   set(WOLFSSL_FOUND TRUE)
   set(WOLFSSL_VERSION ${_wolfssl_VERSION})
   message(STATUS "Found WolfSSL (via pkg-config): ${_wolfssl_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
+elseif(wolfssl_CONFIG)
+  set(WolfSSL_FOUND TRUE)
+  set(WOLFSSL_FOUND TRUE)
+  set(WOLFSSL_VERSION ${wolfssl_VERSION})
+  set(_wolfssl_LIBRARIES wolfssl::wolfssl)
+  message(STATUS "Found WolfSSL (via CMake Config): ${wolfssl_CONFIG} (found version \"${WOLFSSL_VERSION}\")")
 else()
   find_path(WOLFSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h")
   find_library(WOLFSSL_LIBRARY NAMES "wolfssl")
@@ -111,10 +121,6 @@ if(WOLFSSL_FOUND)
       list(APPEND _wolfssl_LIBRARIES ${MATH_LIBRARY})  # for log and pow
     endif()
     mark_as_advanced(MATH_LIBRARY)
-  endif()
-
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_wolfssl_LIBRARY_DIRS})
   endif()
 
   if(NOT TARGET CURL::wolfssl)

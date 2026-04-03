@@ -235,6 +235,10 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   else
     transfersl = p;
 
+  curlx_free(per->uploadfile);
+  curlx_free(per->outfile);
+  curlx_free(per->url);
+  curl_easy_cleanup(per->curl);
   curlx_free(per);
 
   return n;
@@ -321,7 +325,7 @@ void single_transfer_cleanup(void)
   struct State *state = &global->state;
   /* Free list of remaining URLs */
   glob_cleanup(&state->urlglob);
-  tool_safefree(state->uploadfile);
+  curlx_safefree(state->uploadfile);
   /* Free list of globbed upload files */
   glob_cleanup(&state->inglob);
 }
@@ -554,8 +558,8 @@ static CURLcode retrycheck(struct OperationConfig *config,
         fflush(outs->stream);
         notef("Throwing away %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
         /* truncate file at the position where we started appending */
-#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
-        if(ftruncate(fileno(outs->stream), outs->init)) {
+
+        if(toolx_ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot append as then we
              create something strange, bail out */
           errorf("Failed to truncate file");
@@ -564,11 +568,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         /* now seek to the end of the file, the position where we
            truncated the file in a large file-safe way */
         rc = fseek(outs->stream, 0, SEEK_END);
-#else
-        /* ftruncate is not available, so reposition the file to the location
-           we would have truncated it. */
-        rc = curlx_fseek(outs->stream, outs->init, SEEK_SET);
-#endif
+
         if(rc) {
           errorf("Failed seeking to end of file");
           return CURLE_WRITE_ERROR;
@@ -769,20 +769,16 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     curlx_fclose(per->heads.stream);
 
   if(per->heads.alloc_filename)
-    tool_safefree(per->heads.filename);
+    curlx_safefree(per->heads.filename);
 
   if(per->etag_save.fopened && per->etag_save.stream)
     curlx_fclose(per->etag_save.stream);
 
   if(per->etag_save.alloc_filename)
-    tool_safefree(per->etag_save.filename);
+    curlx_safefree(per->etag_save.filename);
 
-  curl_easy_cleanup(per->curl);
   if(outs->alloc_filename)
-    curlx_free(outs->filename);
-  curlx_free(per->url);
-  curlx_free(per->outfile);
-  curlx_free(per->uploadfile);
+    curlx_safefree(outs->filename);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
   return result;
@@ -847,12 +843,18 @@ static CURLcode append2query(struct OperationConfig *config,
       char *updated = NULL;
       uerr = curl_url_set(uh, CURLUPART_QUERY, q, CURLU_APPENDQUERY);
       if(!uerr)
-        uerr = curl_url_get(uh, CURLUPART_URL, &updated, CURLU_GUESS_SCHEME);
+        uerr = curl_url_get(uh, CURLUPART_URL, &updated,
+                            CURLU_NO_GUESS_SCHEME);
       if(uerr)
         result = urlerr_cvt(uerr);
       else {
+        /* use our new URL instead! */
         curlx_free(per->url); /* free previous URL */
-        per->url = updated; /* use our new URL instead! */
+        /* make it allocated by tool memory */
+        per->url = curlx_strdup(updated);
+        curl_free(updated);
+        if(!per->url)
+          result = CURLE_OUT_OF_MEMORY;
       }
     }
     curl_url_cleanup(uh);
@@ -879,11 +881,16 @@ static CURLcode etag_compare(struct OperationConfig *config)
 
   if((PARAM_OK == file2string(&etag_from_file, file)) &&
      etag_from_file) {
-    header = curl_maprintf("If-None-Match: %s", etag_from_file);
-    tool_safefree(etag_from_file);
+    char *h = curl_maprintf("If-None-Match: %s", etag_from_file);
+    curlx_safefree(etag_from_file);
+    if(h) {
+      /* move it to the right memory */
+      header = curlx_strdup(h);
+      curl_free(h);
+    }
   }
   else
-    header = curl_maprintf("If-None-Match: \"\"");
+    header = curlx_strdup("If-None-Match: \"\"");
 
   if(!header) {
     if(file)
@@ -894,7 +901,7 @@ static CURLcode etag_compare(struct OperationConfig *config)
 
   /* add Etag from file to list of custom headers */
   pe = add2list(&config->headers, header);
-  tool_safefree(header);
+  curlx_free(header);
 
   if(file)
     curlx_fclose(file);
@@ -1023,7 +1030,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     SANITIZEcode sc;
     CURLcode result =
       glob_match_url(&per->outfile, storefile, &state->urlglob, &sc);
-    tool_safefree(storefile);
+    curlx_safefree(storefile);
     if(sc) {
       if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
@@ -1045,10 +1052,13 @@ static CURLcode setup_outfile(struct OperationConfig *config,
 
   if(config->output_dir && *config->output_dir) {
     char *d = curl_maprintf("%s/%s", config->output_dir, per->outfile);
-    if(!d)
+    curlx_safefree(per->outfile);
+    if(d) {
+      per->outfile = curlx_strdup(d); /* move to right memory */
+      curl_free(d);
+    }
+    if(!d || !per->outfile)
       return CURLE_WRITE_ERROR;
-    curlx_free(per->outfile);
-    per->outfile = d;
   }
   /* Create the directory hierarchy, if not pre-existent to a multiple
      file output call */
@@ -1223,7 +1233,7 @@ static CURLcode create_single(struct OperationConfig *config,
 
     if(state->upidx >= state->upnum) {
       state->urlnum = 0;
-      tool_safefree(state->uploadfile);
+      curlx_safefree(state->uploadfile);
       glob_cleanup(&state->inglob);
       state->upidx = 0;
       state->urlnode = u->next; /* next node */
@@ -1276,7 +1286,7 @@ static CURLcode create_single(struct OperationConfig *config,
       per->uploadfile = curlx_strdup(state->uploadfile);
       if(!per->uploadfile ||
          SetHTTPrequest(TOOL_HTTPREQ_PUT, &config->httpreq)) {
-        tool_safefree(per->uploadfile);
+        curlx_safefree(per->uploadfile);
         curl_easy_cleanup(curl);
         return CURLE_FAILED_INIT;
       }
@@ -1394,7 +1404,7 @@ static CURLcode create_single(struct OperationConfig *config,
       state->urlidx = state->urlnum = 0;
       glob_cleanup(&state->urlglob);
       state->upidx++;
-      tool_safefree(state->uploadfile); /* clear it to get the next */
+      curlx_safefree(state->uploadfile); /* clear it to get the next */
     }
     *added = TRUE;
     break;
@@ -1866,8 +1876,13 @@ static CURLcode parallel_transfers(CURLSH *share)
   if(!s->multi)
     return CURLE_OUT_OF_MEMORY;
 
+#ifndef DEBUGBUILD
+  (void)curl_multi_setopt(s->multi, CURLMOPT_QUICK_EXIT, 1L);
+#endif
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYFUNCTION, mnotify);
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYDATA, s);
+  (void)curl_multi_setopt(s->multi, CURLMOPT_MAX_HOST_CONNECTIONS, (long)
+                          global->parallel_host);
   (void)curl_multi_notify_enable(s->multi, CURLMNOTIFY_INFO_READ);
 
   result = add_parallel_transfers(s->multi, s->share,
@@ -2119,7 +2134,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
   }
 
 #ifdef _WIN32
-  if(!env) {
+  if(!config->capath && !config->cacert) {
 #ifdef CURL_CA_SEARCH_SAFE
     char *cacert = NULL;
     FILE *cafile = tool_execpath("curl-ca-bundle.crt", &cacert);
@@ -2140,7 +2155,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
 #endif
   return CURLE_OK;
 fail:
-  Curl_safefree(config->capath);
+  curlx_safefree(config->capath);
   return result;
 }
 
@@ -2296,7 +2311,6 @@ CURLcode operate(int argc, argv_item_t argv[])
     if(found_curlrc) {
       /* After parse_args so notef knows the verbosity */
       notef("Read config file from '%s'", curlrc_path);
-      curlx_free(curlrc_path);
     }
     if(err) {
       result = CURLE_OK;
@@ -2394,7 +2408,7 @@ CURLcode operate(int argc, argv_item_t argv[])
         errorf("out of memory");
     }
   }
-
+  curlx_free(curlrc_path);
   varcleanup();
 
   return result;

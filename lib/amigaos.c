@@ -118,7 +118,7 @@ void Curl_amiga_cleanup(void)
  * allocates memory also.
  */
 
-struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port)
+struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, uint16_t port)
 {
   struct Curl_addrinfo *ai = NULL;
   struct hostent *h;
@@ -141,7 +141,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port)
     }
   }
   else {
-#ifdef CURLRES_THREADED
+#ifdef USE_RESOLV_THREADED
     /* gethostbyname() is not thread-safe, so we need to reopen bsdsocket
      * on the thread's context
      */

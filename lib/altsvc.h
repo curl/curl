@@ -28,6 +28,9 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
 #include "llist.h"
 
+/* the maximum number of alt-svc entries kept in a single cache */
+#define MAX_ALTSVC_ENTRIES 5000
+
 struct althost {
   char *host;
   uint16_t port;
@@ -39,7 +42,6 @@ struct altsvc {
   struct althost dst;
   time_t expires;
   struct Curl_llist_node node;
-  unsigned int prio;
   BIT(persist);
 };
 

@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_RTMP_H
-#define HEADER_CURL_RTMP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Howard Chu, <hyc@highlandsun.com>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,9 +21,23 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifdef USE_LIBRTMP
-extern const struct Curl_protocol Curl_protocol_rtmp;
-void Curl_rtmp_version(char *version, size_t len);
-#endif
+#include "unitcheck.h"
+#include "protocol.h"
 
-#endif /* HEADER_CURL_RTMP_H */
+static CURLcode test_unit3219(const char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
+  fail_unless((CURLPROTO_MASK & CURLPROTO_HTTP) == CURLPROTO_HTTP,
+              "mask should include HTTP");
+  fail_unless((CURLPROTO_MASK & CURLPROTO_GOPHERS) == CURLPROTO_GOPHERS,
+              "mask should include the highest public protocol bit");
+  fail_unless((CURLPROTO_MASK & CURLPROTO_WS) == 0,
+              "mask should exclude websocket protocol bits");
+  fail_unless((CURLPROTO_MASK & CURLPROTO_WSS) == 0,
+              "mask should exclude secure websocket protocol bits");
+  fail_unless((CURLPROTO_MASK & CURLPROTO_MQTTS) == 0,
+              "mask should exclude internal-only protocols");
+
+  UNITTEST_END_SIMPLE
+}

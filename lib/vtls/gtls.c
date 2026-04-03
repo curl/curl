@@ -257,6 +257,7 @@ static CURLcode cf_gtls_handshake(struct Curl_cfilter *cf,
     return CURLE_AGAIN;
   }
   else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
+#ifdef CURLVERBOSE
     const char *strerr = NULL;
 
     if(rc == GNUTLS_E_WARNING_ALERT_RECEIVED) {
@@ -268,6 +269,7 @@ static CURLcode cf_gtls_handshake(struct Curl_cfilter *cf,
       strerr = gnutls_strerror(rc);
 
     infof(data, "gnutls_handshake() warning: %s", strerr);
+#endif
     return CURLE_AGAIN;
   }
   else if((rc < 0) && backend->gtls.io_result) {
@@ -1138,7 +1140,8 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
       else {
         infof(data, "SSL reusing session with ALPN '%s'",
               scs->alpn ? scs->alpn : "-");
-        if(ssl_config->earlydata && scs->alpn && !cf->conn->connect_only) {
+        if(ssl_config->earlydata && scs->alpn &&
+           !cf->conn->bits.connect_only) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb) {
             result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
@@ -1306,7 +1309,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   if(key)
     gnutls_pubkey_deinit(key);
 
-  Curl_safefree(buff1);
+  curlx_safefree(buff1);
 
   return result;
 }

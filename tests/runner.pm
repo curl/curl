@@ -263,7 +263,7 @@ sub event_loop {
 #
 sub checktestcmd {
     my ($cmd)=@_;
-    my @testpaths=($LIBDIR . ".libs", "$LIBDIR");
+    my @testpaths=($LIBDIR . ".libs", $LIBDIR);
     return checkcmd($cmd, @testpaths);
 }
 
@@ -647,7 +647,7 @@ sub singletest_preprocess {
     @entiretest = prepro($testnum, @entiretest);
 
     # save the new version
-    open(my $fulltesth, ">", "$otest") || die "Failure writing test file";
+    open(my $fulltesth, ">", $otest) || die "Failure writing test file";
     foreach my $bytes (@entiretest) {
         print $fulltesth pack('a*', $bytes) or die "Failed to print '$bytes': $!";
     }
@@ -671,7 +671,7 @@ sub singletest_setenv {
             if($content =~ /^=(.*)/) {
                 # assign it
                 $content = $1;
-                $ENV{$var} = "$content";
+                $ENV{$var} = $content;
                 logmsg "setenv $var = $content\n" if($verbose);
             }
             else {
@@ -775,7 +775,7 @@ sub singletest_prepare {
                     mkdir $d; # 0777
                 }
             }
-            if(open(my $outfile, ">", "$filename")) {
+            if(open(my $outfile, ">", $filename)) {
                 binmode $outfile; # for crapage systems, use binary
 
                 if($fileattr{'nonewline'}) {
@@ -845,14 +845,14 @@ sub singletest_run {
     my $fail_due_event_based = $run_event_based;
     if($cmdtype eq "perl") {
         # run the command line prepended with "perl"
-        $cmdargs ="$cmd";
+        $cmdargs =$cmd;
         $CMDLINE = "$perl ";
         $tool=$CMDLINE;
         $disablevalgrind=1;
     }
     elsif($cmdtype eq "shell") {
         # run the command line prepended with "/bin/sh"
-        $cmdargs ="$cmd";
+        $cmdargs =$cmd;
         $CMDLINE = "/bin/sh ";
         $tool=$CMDLINE;
         $disablevalgrind=1;
@@ -1048,7 +1048,7 @@ sub singletest_run {
     }
     else {
         # Convert the raw result code into a more useful one
-        ($cmdres, $dumped_core) = normalize_cmdres(runclient("$CMDLINE"));
+        ($cmdres, $dumped_core) = normalize_cmdres(runclient($CMDLINE));
     }
 
     # restore contents
@@ -1152,7 +1152,7 @@ sub singletest_postcheck {
         chomp $cmd;
         if($cmd) {
             logmsg "postcheck $cmd\n" if($verbose);
-            my $rc = runclient("$cmd");
+            my $rc = runclient($cmd);
             # Must run the postcheck command in torture mode in order
             # to clean up, but the result cannot be relied upon.
             if($rc != 0 && !$torture) {

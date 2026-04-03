@@ -883,8 +883,8 @@ static void tftp_conn_dtor(void *key, size_t klen, void *entry)
   struct tftp_conn *state = entry;
   (void)key;
   (void)klen;
-  Curl_safefree(state->rpacket.data);
-  Curl_safefree(state->spacket.data);
+  curlx_safefree(state->rpacket.data);
+  curlx_safefree(state->spacket.data);
   curlx_free(state);
 }
 

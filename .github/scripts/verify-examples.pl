@@ -37,12 +37,14 @@ if(!@files || $files[0] eq "-h") {
 }
 
 sub testcompile {
-    my $rc = system("gcc -c test.c -DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_DEPRECATION -Wunused -Werror -Wall -Wno-unused-but-set-variable -I include") >> 8;
+    my $rc = system('gcc -c test.c -I include -W -Wall -pedantic -Werror ' .
+        '-Wno-unused-parameter -Wno-unused-but-set-variable ' .
+        '-DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_DEPRECATION') >> 8;
     return $rc;
 }
 
 sub checksrc {
-    my $rc = system("$check test.c") >> 8;
+    my $rc = system($check, ('test.c')) >> 8;
     return $rc;
 }
 

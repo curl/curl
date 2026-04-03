@@ -26,7 +26,6 @@
 #include "urldata.h"
 #include "uint-spbset.h"
 #include "curl_trc.h"
-#include "unitprotos.h"
 
 static void check_spbset(const char *name, const uint32_t *s, size_t slen)
 {

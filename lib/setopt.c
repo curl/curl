@@ -83,7 +83,7 @@ CURLcode Curl_setstropt(char **charp, const char *s)
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
 
-  Curl_safefree(*charp);
+  curlx_safefree(*charp);
 
   if(s) {
     if(strlen(s) > CURL_MAX_INPUT_LENGTH)
@@ -103,7 +103,7 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
   /* free the previous storage at `blobp' and replace by a dynamic storage
      copy of blob. If CURL_BLOB_COPY is set, the data is copied. */
 
-  Curl_safefree(*blobp);
+  curlx_safefree(*blobp);
 
   if(blob) {
     struct curl_blob *nblob;
@@ -1011,7 +1011,7 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_ENABLE_NPN:
     break;
   case CURLOPT_SSLENGINE_DEFAULT:
-    Curl_safefree(s->str[STRING_SSL_ENGINE]);
+    curlx_safefree(s->str[STRING_SSL_ENGINE]);
     result = Curl_ssl_set_engine_default(data);
     break;
   default:
@@ -1243,7 +1243,7 @@ static CURLcode setopt_long_misc(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     if(s->postfieldsize < arg &&
        s->postfields == s->str[STRING_COPYPOSTFIELDS]) {
-      Curl_safefree(s->str[STRING_COPYPOSTFIELDS]);
+      curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
       s->postfields = NULL;
     }
     s->postfieldsize = arg;
@@ -1439,7 +1439,7 @@ static CURLcode setopt_mimepost(struct Curl_easy *data, curl_mime *mimep)
     s->opt_no_body = FALSE; /* this is implied */
 #ifndef CURL_DISABLE_FORM_API
     Curl_mime_cleanpart(data->state.formp);
-    Curl_safefree(data->state.formp);
+    curlx_safefree(data->state.formp);
     data->state.mimepost = NULL;
 #endif
   }
@@ -1465,7 +1465,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     s->method = HTTPREQ_POST_FORM;
     s->opt_no_body = FALSE; /* this is implied */
     Curl_mime_cleanpart(data->state.formp);
-    Curl_safefree(data->state.formp);
+    curlx_safefree(data->state.formp);
     data->state.mimepost = NULL;
     break;
 #endif /* !CURL_DISABLE_FORM_API */
@@ -1490,67 +1490,17 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SHARE: {
     struct Curl_share *set = va_arg(param, struct Curl_share *);
 
-    /* disconnect from old share, if any */
-    if(data->share) {
-      Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
+    /* disconnect from old share, if any and possible */
+    result = Curl_share_easy_unlink(data);
+    if(result)
+      return result;
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-      if(data->share->cookies == data->cookies)
-        data->cookies = NULL;
-#endif
-
-#ifndef CURL_DISABLE_HSTS
-      if(data->share->hsts == data->hsts)
-        data->hsts = NULL;
-#endif
-#ifdef USE_LIBPSL
-      if(data->psl == &data->share->psl)
-        data->psl = data->multi ? &data->multi->psl : NULL;
-#endif
-      if(data->share->specifier & (1 << CURL_LOCK_DATA_DNS)) {
-        Curl_resolv_unlink(data, &data->state.dns[0]);
-        Curl_resolv_unlink(data, &data->state.dns[1]);
-      }
-
-      data->share->dirty--;
-
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
-      data->share = NULL;
+    /* use new share if it set */
+    if(GOOD_SHARE_HANDLE(set)) {
+      result = Curl_share_easy_link(data, set);
+      if(result)
+        return result;
     }
-
-    if(GOOD_SHARE_HANDLE(set))
-      /* use new share if it set */
-      data->share = set;
-    if(data->share) {
-
-      Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
-
-      data->share->dirty++;
-
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-      if(data->share->cookies) {
-        /* use shared cookie list, first free own one if any */
-        Curl_cookie_cleanup(data->cookies);
-        /* enable cookies since we now use a share that uses cookies! */
-        data->cookies = data->share->cookies;
-      }
-#endif /* CURL_DISABLE_HTTP */
-#ifndef CURL_DISABLE_HSTS
-      if(data->share->hsts) {
-        /* first free the private one if any */
-        Curl_hsts_cleanup(&data->hsts);
-        data->hsts = data->share->hsts;
-      }
-#endif
-#ifdef USE_LIBPSL
-      if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
-        data->psl = &data->share->psl;
-#endif
-
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
-    }
-    /* check for host cache not needed,
-     * it will be done by curl_easy_perform */
     break;
   }
 
@@ -1680,12 +1630,12 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 
     /* URL decode the components */
     if(!result && u) {
-      Curl_safefree(s->str[STRING_PROXYUSERNAME]);
+      curlx_safefree(s->str[STRING_PROXYUSERNAME]);
       result = Curl_urldecode(u, 0, &s->str[STRING_PROXYUSERNAME], NULL,
                               REJECT_ZERO);
     }
     if(!result && p) {
-      Curl_safefree(s->str[STRING_PROXYPASSWORD]);
+      curlx_safefree(s->str[STRING_PROXYPASSWORD]);
       result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     }
@@ -1950,7 +1900,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     s->postfields = ptr;
     /* Release old copied data. */
-    Curl_safefree(s->str[STRING_COPYPOSTFIELDS]);
+    curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
     s->method = HTTPREQ_POST;
     break;
 #endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_MQTT */
@@ -2223,7 +2173,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * pass CURLU to set URL
      */
     Curl_bufref_free(&data->state.url);
-    Curl_safefree(s->str[STRING_SET_URL]);
+    curlx_safefree(s->str[STRING_SET_URL]);
     s->uh = (CURLU *)ptr;
     break;
   case CURLOPT_SSLCERT:
@@ -2434,30 +2384,18 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     break;
 #endif
 #endif
-#ifdef CURLRES_ARES
+#ifdef USE_RESOLV_ARES
   case CURLOPT_DNS_SERVERS:
-    result = Curl_setstropt(&s->str[STRING_DNS_SERVERS], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_servers(data);
+    return Curl_setstropt(&s->str[STRING_DNS_SERVERS], ptr);
 
   case CURLOPT_DNS_INTERFACE:
-    result = Curl_setstropt(&s->str[STRING_DNS_INTERFACE], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_interface(data);
+    return Curl_setstropt(&s->str[STRING_DNS_INTERFACE], ptr);
 
   case CURLOPT_DNS_LOCAL_IP4:
-    result = Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP4], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_local_ip4(data);
+    return Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP4], ptr);
 
   case CURLOPT_DNS_LOCAL_IP6:
-    result = Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP6], ptr);
-    if(result)
-      break;
-    return Curl_async_ares_set_dns_local_ip6(data);
+    return Curl_setstropt(&s->str[STRING_DNS_LOCAL_IP6], ptr);
 
 #endif
 #ifdef USE_UNIX_SOCKETS
@@ -2783,7 +2721,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(s->postfieldsize < offt &&
        s->postfields == s->str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      Curl_safefree(s->str[STRING_COPYPOSTFIELDS]);
+      curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
       s->postfields = NULL;
     }
     s->postfieldsize = offt;

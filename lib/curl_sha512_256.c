@@ -28,12 +28,12 @@
 #include "curl_sha512_256.h"
 
 /* The recommended order of the TLS backends:
- * 1. OpenSSL
- * 2. GnuTLS
- * 3. wolfSSL
- * 4. Schannel SSPI
- * 5. mbedTLS
- * 6. Rustls
+ * 1. USE_OPENSSL
+ * 2. USE_WOLFSSL
+ * 3. USE_GNUTLS
+ * 4. USE_MBEDTLS (TBD)
+ * 5. USE_RUSTLS (TBD)
+ * 6. USE_WIN32_CRYPTO (TBD)
  * Skip the backend if it does not support the required algorithm */
 
 #ifdef USE_OPENSSL
@@ -65,6 +65,14 @@
 #    endif
 #  endif
 #endif /* USE_OPENSSL */
+
+#if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_WOLFSSL)
+#  include <wolfssl/options.h>
+#  ifndef WOLFSSL_NOSHA512_256
+#    define USE_WOLFSSL_SHA512_256          1
+#    define HAS_SHA512_256_IMPLEMENTATION   1
+#  endif
+#endif
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
 #  include <nettle/sha.h>
@@ -173,6 +181,42 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   *ctx = NULL;
 
   return ret;
+}
+
+#elif defined(USE_WOLFSSL_SHA512_256)
+#include <wolfssl/wolfcrypt/sha512.h>
+
+#define CURL_SHA512_256_DIGEST_SIZE WC_SHA512_256_DIGEST_SIZE
+#define CURL_SHA512_256_BLOCK_SIZE  WC_SHA512_256_BLOCK_SIZE
+
+typedef struct wc_Sha512 Curl_sha512_256_ctx;
+
+static CURLcode Curl_sha512_256_init(void *ctx)
+{
+  if(wc_InitSha512_256(ctx))
+    return CURLE_FAILED_INIT;
+  return CURLE_OK;
+}
+
+static CURLcode Curl_sha512_256_update(void *ctx,
+                                       const unsigned char *data,
+                                       size_t length)
+{
+  do {
+    word32 ilen = (word32) CURLMIN(length, UINT_MAX);
+    if(wc_Sha512_256Update(ctx, data, ilen))
+      return CURLE_SSL_CIPHER;
+    length -= ilen;
+    data += ilen;
+  } while(length);
+  return CURLE_OK;
+}
+
+static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
+{
+  if(wc_Sha512_256Final(ctx, digest))
+    return CURLE_SSL_CIPHER;
+  return CURLE_OK;
 }
 
 #elif defined(USE_GNUTLS_SHA512_256)

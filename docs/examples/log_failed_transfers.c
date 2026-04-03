@@ -54,7 +54,7 @@
 #endif
 
 struct mem {
-  /* 'buf' points to memory contents that is always zero terminated so that it
+  /* 'buf' points to memory contents that is always null-terminated so that it
      can be treated like a string if appropriate. 'recent' points to the most
      recent data written to 'buf'. */
   char *buf, *recent;

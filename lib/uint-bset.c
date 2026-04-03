@@ -68,6 +68,7 @@ void Curl_uint32_bset_destroy(struct uint32_bset *bset)
 }
 
 #ifdef UNITTESTS
+UNITTEST uint32_t Curl_uint32_bset_capacity(struct uint32_bset *bset);
 UNITTEST uint32_t Curl_uint32_bset_capacity(struct uint32_bset *bset)
 {
   return bset->nslots * 64;

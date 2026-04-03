@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 option(TEST_CPP "Test C++" OFF)
@@ -70,9 +70,6 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   add_subdirectory(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
-  if(CMAKE_VERSION VERSION_LESS 3.14)
-    message(FATAL_ERROR "This test requires CMake 3.14 or upper")
-  endif()
   include(FetchContent)
   option(FROM_GIT_REPO "Git URL" "https://github.com/curl/curl.git")
   option(FROM_GIT_TAG "Git tag" "master")
@@ -82,7 +79,7 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
     GIT_SHALLOW)
   set(BUILD_SHARED_LIBS ON CACHE BOOL "")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
-  FetchContent_MakeAvailable(curl)  # Requires CMake 3.14
+  FetchContent_MakeAvailable(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   include(ExternalProject)
   set(_curl_install_dir "${CMAKE_BINARY_DIR}/curl-external-install")
@@ -95,7 +92,8 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
     URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
     ${_download_extract_timestamp}
     PREFIX "${CMAKE_BINARY_DIR}/curl-external"
-    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${_curl_install_dir}" -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCURL_USE_PKGCONFIG=OFF
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${_curl_install_dir}" -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF
+      -DCURL_USE_CMAKECONFIG=OFF -DCURL_USE_PKGCONFIG=OFF
       -DCURL_ENABLE_SSL=OFF -DCURL_ENABLE_SSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_USE_LIBSSH2=OFF -DUSE_NGHTTP2=OFF
       -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF -DUSE_LIBIDN2=OFF -DENABLE_IPV6=OFF
       ${CURL_TEST_OPTS}

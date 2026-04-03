@@ -25,7 +25,7 @@
 
 #include "testtrace.h"
 
-#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
 #include <openssl/ssl.h>
 #endif
 #ifdef USE_WOLFSSL
@@ -137,9 +137,8 @@ static int my_progress_d_cb(void *userdata,
     return 1;
   }
 
-#if defined(USE_QUICHE) || defined(USE_OPENSSL) || defined(USE_WOLFSSL) || \
-  defined(USE_GNUTLS) || defined(USE_MBEDTLS) || defined(USE_RUSTLS) || \
-  defined(USE_SCHANNEL)
+#if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
+  defined(USE_MBEDTLS) || defined(USE_RUSTLS) || defined(USE_SCHANNEL)
   if(!t->checked_ssl && dlnow > 0) {
     struct curl_tlssessioninfo *tls;
     CURLcode result;
@@ -153,7 +152,7 @@ static int my_progress_d_cb(void *userdata,
     }
     else {
       switch(tls->backend) {
-#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
       case CURLSSLBACKEND_OPENSSL: {
         const char *version = SSL_get_version((SSL *)tls->internals);
         assert(version);
@@ -175,7 +174,8 @@ static int my_progress_d_cb(void *userdata,
 #endif
 #ifdef USE_GNUTLS
       case CURLSSLBACKEND_GNUTLS: {
-        int v = gnutls_protocol_get_version((gnutls_session_t)tls->internals);
+        gnutls_protocol_t v = gnutls_protocol_get_version(
+          (gnutls_session_t)tls->internals);
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info GnuTLS using %s\n",
                       t->idx, gnutls_protocol_get_name(v));
@@ -287,6 +287,7 @@ static void usage_hx_download(const char *msg)
     "  -r <host>:<port>:<addr>  resolve information\n"
     "  -T number  max concurrent connections total\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
+    "  -6 use ipv6 for resolving the FIRST url\n"
   );
 }
 
@@ -314,11 +315,12 @@ static CURLcode test_cli_hx_download(const char *URL)
   size_t max_total_conns = 0;
   int fresh_connect = 0;
   char *cafile = NULL;
+  bool first_ipv6 = FALSE;
   CURLcode result = CURLE_OK;
 
   (void)URL;
 
-  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:C:F:M:P:r:T:V:"))
+  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:C:F:M:P:r:T:V:6"))
         != -1) {
     const char *opt = coptarg;
     curl_off_t num;
@@ -389,6 +391,9 @@ static CURLcode test_cli_hx_download(const char *URL)
       }
       break;
     }
+    case '6':
+      first_ipv6 = TRUE;
+      break;
     default:
       usage_hx_download("invalid option");
       result = (CURLcode)1;
@@ -465,6 +470,8 @@ static CURLcode test_cli_hx_download(const char *URL)
       result = (CURLcode)1;
       goto cleanup;
     }
+    if(!i && first_ipv6)
+      curl_easy_setopt(t->curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
     curl_multi_add_handle(multi, t->curl);
     t->started = 1;
     ++active_transfers;

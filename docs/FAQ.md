@@ -21,8 +21,8 @@ The curl project produces two products:
 ### libcurl
 
 A client-side URL transfer library, supporting DICT, FILE, FTP, FTPS, GOPHER,
-GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3, POP3S, RTMP,
-RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
+GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3, POP3S,
+RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
 
 libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
 Kerberos, SPNEGO, HTTP form based upload, proxies, cookies, user+password
@@ -830,8 +830,8 @@ Since curl 7.53.0 this issue should be fixed as long as curl was built with
 any modern compiler that allows for a 64-bit curl_off_t type. For older
 compilers or prior curl versions it may set a time that appears one hour off.
 This happens due to a flaw in how Windows stores and uses file modification
-times and it is not easily worked around. For more details [read
-this](https://web.archive.org/web/20260105021457/www.codeproject.com/articles/Beating-the-Daylight-Savings-Time-Bug-and-Getting#comments-section).
+times and it is not easily worked around. For more details
+[read this](https://web.archive.org/web/20050715084352/codeproject.com/datetime/dstbugs.asp).
 
 ## Redirects work in browser but not with curl
 
@@ -886,8 +886,7 @@ packet sent three seconds after the first and the third six seconds after
 the second. No more than three packets are sent, no matter how long the
 timeout is set.
 
-See option `TcpMaxConnectRetransmissions` on [this
-page](https://support.microsoft.com/topic/hotfix-enables-the-configuration-of-the-tcp-maximum-syn-retransmission-amount-in-windows-7-or-windows-server-2008-r2-1b6f8352-2c5f-58bb-ead7-2cf021407c8e).
+See Windows option `TcpMaxConnectRetransmissions` for more.
 
 Also, even on non-Windows systems there may run a firewall or anti-virus
 software or similar that accepts the connection but does not actually do

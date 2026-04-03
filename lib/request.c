@@ -105,9 +105,6 @@ CURLcode Curl_req_done(struct SingleRequest *req,
   if(!aborted)
     (void)req_flush(data);
   Curl_client_reset(data);
-#ifndef CURL_DISABLE_DOH
-  Curl_doh_close(data);
-#endif
   return CURLE_OK;
 }
 
@@ -115,14 +112,13 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
   struct curltime t0 = { 0, 0 };
 
-  Curl_safefree(req->newurl);
+  curlx_safefree(req->newurl);
   Curl_client_reset(data);
   if(req->sendbuf_init)
     Curl_bufq_reset(&req->sendbuf);
 
-#ifndef CURL_DISABLE_DOH
-  Curl_doh_close(data);
-#endif
+  /* clear any resolve data */
+  Curl_resolv_destroy_all(data);
   /* Can no longer memset() this struct as we need to keep some state */
   req->size = -1;
   req->maxdownload = -1;
@@ -156,6 +152,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->ignorebody = FALSE;
   req->http_bodyless = FALSE;
   req->chunk = FALSE;
+  req->resp_trailer = FALSE;
   req->ignore_cl = FALSE;
   req->upload_chunky = FALSE;
   req->no_body = data->set.opt_no_body;
@@ -168,7 +165,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
-  Curl_safefree(req->newurl);
+  curlx_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
   Curl_client_cleanup(data);

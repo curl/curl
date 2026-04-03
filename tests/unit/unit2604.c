@@ -38,7 +38,7 @@ static CURLcode test_unit2604(const char *arg)
     CURLcode result;
   };
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
@@ -74,7 +74,7 @@ static CURLcode test_unit2604(const char *arg)
     { NULL, NULL, NULL, NULL, CURLE_OK }
   };
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
 

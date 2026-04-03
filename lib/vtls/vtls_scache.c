@@ -401,12 +401,12 @@ static void cf_ssl_scache_clear_peer(struct Curl_ssl_scache_peer *peer)
     peer->sobj = NULL;
   }
   peer->sobj_free = NULL;
-  Curl_safefree(peer->clientcert);
+  curlx_safefree(peer->clientcert);
 #ifdef USE_TLS_SRP
-  Curl_safefree(peer->srp_username);
-  Curl_safefree(peer->srp_password);
+  curlx_safefree(peer->srp_username);
+  curlx_safefree(peer->srp_password);
 #endif
-  Curl_safefree(peer->ssl_peer_key);
+  curlx_safefree(peer->ssl_peer_key);
   peer->age = 0;
   peer->hmac_set = FALSE;
 }

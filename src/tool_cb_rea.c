@@ -41,7 +41,7 @@
 /* Wait up to a number of milliseconds for socket activity. This function
    waits on read activity on a file descriptor that is not a socket which
    makes it not work with select() or poll() on Windows. */
-static bool waitfd(int waitms, int fd)
+static void waitfd(int waitms, int fd)
 {
 #ifdef HAVE_POLL
   struct pollfd set;
@@ -49,25 +49,20 @@ static bool waitfd(int waitms, int fd)
   set.fd = fd;
   set.events = POLLIN;
   set.revents = 0;
-  if(poll(&set, 1, waitms))
-    return TRUE; /* timeout */
-  return FALSE;
+  poll(&set, 1, waitms);
 #else
   fd_set bits;
   struct timeval timeout;
 
-  if(fd >= FD_SETSIZE)
-    return FALSE; /* cannot wait! */
+  if(fd < FD_SETSIZE) {
+    /* wait this long at the most */
+    timeout.tv_sec = waitms / 1000;
+    timeout.tv_usec = (int)((waitms % 1000) * 1000);
 
-  /* wait this long at the most */
-  timeout.tv_sec = waitms / 1000;
-  timeout.tv_usec = (int)((waitms % 1000) * 1000);
-
-  FD_ZERO(&bits);
-  FD_SET(fd, &bits);
-  if(!select(fd + 1, &bits, NULL, NULL, &timeout))
-    return TRUE; /* timeout */
-  return FALSE;
+    FD_ZERO(&bits);
+    FD_SET(fd, &bits);
+    select(fd + 1, &bits, NULL, NULL, &timeout);
+  }
 #endif
 }
 #endif

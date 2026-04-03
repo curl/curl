@@ -26,25 +26,36 @@
 use strict;
 use warnings;
 
+use File::Basename;
+
 my @tabs = (
-    "^m4/zz40-xc-ovr.m4",
-    "Makefile\\.(am|example)\$",
-    "\\.sln\$",
-    "^tests/data/data1706-stdout.txt",
-    "^tests/data/test",
+    '^m4/zz40-xc-ovr\.m4$',
+    'Makefile\.(am|example)$',
+    '\.sln$',
+    '^tests/data/data1706-stdout\.txt',
+    '^tests/data/test',
 );
 
 my @need_crlf = (
-    "\\.(bat|sln)\$",
+    '\.(bat|sln)$',
 );
 
 my @double_empty_lines = (
-    "RELEASE-NOTES",
-    "^lib/.+\\.(c|h)\$",
-    "^projects/OS400",
-    "^projects/vms",
-    "^tests/data/test",
-    "\\.(m4|py)\$",
+    '^RELEASE-NOTES$',
+    '^lib/.+\.(c|h)$',
+    '^projects/OS400/',
+    '^projects/vms/',
+    '^tests/data/test',
+    '\.(m4|py)$',
+);
+
+my @longline = (
+    '\.github/workflows/windows\.yml$',
+    '^renovate\.json$',
+    '^docs/DISTROS\.md$',
+    '^projects/Windows/tmpl/.+\.vcxproj$',
+    '^tests/certs/srp-verifier-',
+    '^tests/data/test',
 );
 
 my @non_ascii_allowed = (
@@ -54,12 +65,12 @@ my @non_ascii_allowed = (
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
 
 my @non_ascii = (
-    ".github/scripts/pyspelling.words",
-    ".mailmap",
-    "RELEASE-NOTES",
-    "docs/BINDINGS.md",
-    "docs/THANKS",
-    "docs/THANKS-filter",
+    '^\.github/scripts/pyspelling\.words$',
+    '^\.mailmap$',
+    '^RELEASE-NOTES$',
+    '^docs/BINDINGS\.md$',
+    '^docs/THANKS$',
+    '^docs/THANKS-filter$',
 );
 
 sub fn_match {
@@ -80,52 +91,70 @@ sub eol_detect {
     my $lf = () = $content =~ /\n/g;
 
     if($cr > 0 && $lf == 0) {
-        return "cr";
+        return 'cr';
     }
     elsif($cr == 0 && $lf > 0) {
-        return "lf";
+        return 'lf';
     }
     elsif($cr == 0 && $lf == 0) {
-        return "bin";
+        return 'bin';
     }
     elsif($cr == $lf) {
-        return "crlf";
+        return 'crlf';
     }
 
-    return "";
+    return '';
 }
+
+my $max_repeat_space = 79;
+my $max_line_len = 192;
+my $max_path_len = 64;
+my $max_filename_len = 48;
 
 my $issues = 0;
 
-open(my $git_ls_files, '-|', 'git ls-files') or die "Failed running git ls-files: $!";
+open(my $git_ls_files, '-|', 'git', 'ls-files') or die "Failed running git ls-files: $!";
 while(my $filename = <$git_ls_files>) {
     chomp $filename;
+
+    my @err = ();
+
+    if(length($filename) > $max_path_len) {
+        push @err, sprintf('long (%d > %d) path', length($filename), $max_path_len);
+    }
+
+    my $bn = basename($filename);
+    if(length($bn) > $max_filename_len) {
+        push @err, sprintf('long (%d > %d) filename', length($bn), $max_filename_len);
+    }
+
+    if($filename !~ /^[A-Za-z0-9\/._-]+$/) {
+        push @err, sprintf("filename contains character(s) outside [A-Za-z0-9/._-]");
+    }
 
     open(my $fh, '<', $filename) or die "Cannot open '$filename': $!";
     my $content = do { local $/; <$fh> };
     close $fh;
 
-    my @err = ();
-
     if(!fn_match($filename, @tabs) &&
        $content =~ /\t/) {
-        push @err, "content: has tab";
+        push @err, 'content: has tab';
     }
 
     my $eol = eol_detect($content);
 
-    if($eol eq "") {
-        push @err, "content: has mixed EOL types";
+    if($eol eq '') {
+        push @err, 'content: has mixed EOL types';
     }
 
-    if($eol ne "crlf" &&
+    if($eol ne 'crlf' &&
        fn_match($filename, @need_crlf)) {
-        push @err, "content: must use CRLF EOL for this file type";
+        push @err, 'content: must use CRLF EOL for this file type';
     }
 
-    if($eol ne "lf" && $content ne "" &&
+    if($eol ne 'lf' && $content ne '' &&
        !fn_match($filename, @need_crlf)) {
-        push @err, "content: must use LF EOL for this file type";
+        push @err, 'content: must use LF EOL for this file type';
     }
 
     if($content =~ /[ \t]\n/) {
@@ -138,14 +167,14 @@ while(my $filename = <$git_ls_files>) {
         }
     }
 
-    if($content ne "" &&
+    if($content ne '' &&
        $content !~ /\n\z/) {
-        push @err, "content: has no EOL at EOF";
+        push @err, 'content: has no EOL at EOF';
     }
 
     if($content =~ /\n\n\z/ ||
        $content =~ /\r\n\r\n\z/) {
-        push @err, "content: has multiple EOL at EOF";
+        push @err, 'content: has multiple EOL at EOF';
     }
 
     if((!fn_match($filename, @double_empty_lines) &&
@@ -159,7 +188,7 @@ while(my $filename = <$git_ls_files>) {
             $line++;
             if($l =~ /^$/) {
                 if($blank) {
-                    my $lineno = sprintf("duplicate empty line @ line %d", $line);
+                    my $lineno = sprintf('duplicate empty line @ line %d', $line);
                     push @err, $lineno;
                 }
                 $blank = 1;
@@ -170,13 +199,31 @@ while(my $filename = <$git_ls_files>) {
         }
     }
 
+    if(!fn_match($filename, @longline)) {
+        my $line = 0;
+        for my $l (split(/\n/, $content)) {
+            $line++;
+            if(length($l) > $max_line_len) {
+                push @err, sprintf('line %d: long (%d > %d) line', $line, length($l), $max_line_len);
+            }
+        }
+    }
+
+    my $line = 0;
+    for my $l (split(/\n/, $content)) {
+        $line++;
+        if($l =~ /( {$max_repeat_space,})/) {
+            push @err, sprintf('line %d: repeat spaces (%d >= %d)', $line, length($1), $max_repeat_space);
+        }
+    }
+
     my $search = $content;
     my $linepos = 0;
-    while($search =~ / "\n *" /) {
+    while($search =~ /[^ ] "\n *" [^ ]/) {
         my $part = substr($search, 0, $+[0]);
         $search = substr($search, $+[0]);
         my $line = ($part =~ tr/\n//);
-        push @err, sprintf("line %d: double spaces in folded string", $linepos + $line);
+        push @err, sprintf('line %d: double spaces in folded string', $linepos + $line);
         $linepos += $line;
     }
 
@@ -201,7 +248,7 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
-        push @err, "content: has binary contents";
+        push @err, 'content: has binary contents';
     }
 
     if($filename !~ /tests\/data/) {
@@ -214,7 +261,7 @@ while(my $filename = <$git_ls_files>) {
         my $non = $1;
         my $hex;
         for my $e (split(//, $non)) {
-            $hex .= sprintf("%s%02x", $hex ? " ": "", ord($e));
+            $hex .= sprintf('%s%02x', $hex ? ' ': '', ord($e));
         }
         my $line;
         for my $l (split(/\n/, $content)) {

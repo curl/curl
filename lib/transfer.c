@@ -59,6 +59,7 @@
 #include "hostip.h"
 #include "cfilters.h"
 #include "cw-out.h"
+#include "dnscache.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -468,6 +469,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     uc = curl_url_get(data->set.uh,
                       CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
     if(uc) {
+      /* clear the pointer to not point to freed memory anymore */
+      Curl_bufref_set(&data->state.url, NULL, 0, NULL);
       failf(data, "No URL set");
       return CURLE_URL_MALFORMAT;
     }
@@ -490,6 +493,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.requests = 0;
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
+  data->state.http_ignorecustom = FALSE; /* use custom HTTP method */
   data->state.errorbuf = FALSE; /* no error has occurred */
 #ifndef CURL_DISABLE_HTTP
   Curl_http_neg_init(data, &data->state.http_neg);
@@ -497,7 +501,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
-  Curl_safefree(data->info.wouldredirect);
+  curlx_safefree(data->info.wouldredirect);
   Curl_data_priority_clear_state(data);
 
   if(data->state.httpreq == HTTPREQ_PUT)
@@ -561,8 +565,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       if(wc->state < CURLWC_INIT) {
         if(wc->ftpwc)
           wc->dtor(wc->ftpwc);
-        Curl_safefree(wc->pattern);
-        Curl_safefree(wc->path);
+        curlx_safefree(wc->pattern);
+        curlx_safefree(wc->path);
         Curl_wildcard_init(wc); /* init wildcard structures */
       }
     }
@@ -794,7 +798,7 @@ CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos)
 {
   if(data->conn->scheme->run->write_resp_hd) {
-    DEBUGASSERT(!hd0[hdlen]); /* null terminated */
+    DEBUGASSERT(!hd0[hdlen]); /* null-terminated */
     /* protocol handlers offering this function take full responsibility
      * for writing all received download data to the client. */
     return data->conn->scheme->run->write_resp_hd(data, hd0, hdlen, is_eos);
@@ -902,4 +906,26 @@ CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
   Curl_conn_ev_data_pause(data, enable);
   Curl_pgrsRecvPause(data, enable);
   return result;
+}
+
+bool Curl_xfer_is_secure(struct Curl_easy *data)
+{
+  const struct Curl_scheme *scheme = NULL;
+
+  if(data->conn) {
+    scheme = data->conn->scheme;
+    /* if we are connected, but not use SSL, the transfer is not secure.
+     * This covers an insecure http:// proxy that is not tunneling.
+     * We enforce tunneling for such cases, but better be sure here. */
+    if(Curl_conn_is_connected(data->conn, FIRSTSOCKET) &&
+       !Curl_conn_is_ssl(data->conn, FIRSTSOCKET))
+      return FALSE;
+  }
+  else if(data->info.conn_scheme) { /* was connected once */
+    scheme = Curl_get_scheme(data->info.conn_scheme);
+  }
+  else { /* never connected (yet?) */
+    DEBUGASSERT(0); /* not implemented, would need to parse URL */
+  }
+  return scheme ? (scheme->flags & PROTOPT_SSL) : FALSE;
 }

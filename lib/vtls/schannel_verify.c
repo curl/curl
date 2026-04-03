@@ -336,7 +336,7 @@ cleanup:
   if(ca_file_handle != INVALID_HANDLE_VALUE) {
     CloseHandle(ca_file_handle);
   }
-  Curl_safefree(ca_file_buffer);
+  curlx_safefree(ca_file_buffer);
 
   return result;
 }
@@ -650,7 +650,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 cleanup:
   LocalFree(alt_name_info);
-  Curl_safefree(cert_hostname_buff);
+  curlx_safefree(cert_hostname_buff);
 
   if(pCertContextServer)
     CertFreeCertificateContext(pCertContextServer);

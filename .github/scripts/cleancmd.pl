@@ -102,6 +102,8 @@ sub process {
         # strip out https URLs, we do not want them spellchecked
         $l =~ s!https://[a-z0-9\#_/.-]+!!gi;
 
+        # strip links, both name and target
+        $l =~ s/(\[.*?\])\(.*?\)//g;
         $out .= $l;
     }
     close(F);

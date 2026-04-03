@@ -78,6 +78,7 @@ void Curl_initinfo(struct Curl_easy *data)
 
   info->conn_scheme = 0;
   info->conn_protocol = 0;
+  info->used_proxy = 0;
 
 #ifdef USE_SSL
   Curl_ssl_free_certinfo(data);
@@ -413,6 +414,9 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   switch(info) {
   case CURLINFO_FILETIME_T:
     *param_offt = (curl_off_t)data->info.filetime;
+    break;
+  case CURLINFO_SIZE_DELIVERED:
+    *param_offt = data->progress.deliver;
     break;
   case CURLINFO_SIZE_UPLOAD_T:
     *param_offt = data->progress.ul.cur_size;

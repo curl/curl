@@ -48,7 +48,7 @@ my @curl = split / /,$1;
 
 # Read the output of curl-config
 my @curl_config;
-open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Cannot get curl-config $what list\n";
+open(CURLCONFIG, '-|', 'sh', $ARGV[0], "--$what") || die "Cannot get curl-config $what list\n";
 while(<CURLCONFIG>) {
     chomp;
     $_ = lc($_) if($what eq "protocols");  # accept uppercase protocols in curl-config

@@ -118,8 +118,8 @@
 /* disables netrc parser */
 #cmakedefine CURL_DISABLE_NETRC 1
 
-/* disables NTLM support */
-#cmakedefine CURL_DISABLE_NTLM 1
+/* enables NTLM support */
+#cmakedefine CURL_ENABLE_NTLM 1
 
 /* disables date parsing */
 #cmakedefine CURL_DISABLE_PARSEDATE 1
@@ -146,7 +146,7 @@
 #cmakedefine CURL_DISABLE_SHUFFLE_DNS 1
 
 /* disables SMB */
-#cmakedefine CURL_DISABLE_SMB 1
+#cmakedefine CURL_ENABLE_SMB 1
 
 /* disables SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1
@@ -251,9 +251,6 @@
 
 /* Define to 1 if you have the fseeko declaration. */
 #cmakedefine HAVE_DECL_FSEEKO 1
-
-/* Define to 1 if you have the ftruncate function. */
-#cmakedefine HAVE_FTRUNCATE 1
 
 /* Define to 1 if you have a working getaddrinfo function. */
 #cmakedefine HAVE_GETADDRINFO 1
@@ -445,9 +442,6 @@
 /* Define to 1 if you have a working POSIX-style strerror_r function. */
 #cmakedefine HAVE_POSIX_STRERROR_R 1
 
-/* Define to 1 if you have the <pthread.h> header file */
-#cmakedefine HAVE_PTHREAD_H 1
-
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H 1
 
@@ -501,9 +495,6 @@
 
 /* Define to 1 if you have the sigsetjmp function or macro. */
 #cmakedefine HAVE_SIGSETJMP 1
-
-/* Define to 1 if you have the `snprintf' function. */
-#cmakedefine HAVE_SNPRINTF 1
 
 /* Define to 1 if struct sockaddr_in6 has the sin6_scope_id member */
 #cmakedefine HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
@@ -646,14 +637,17 @@ ${SIZEOF_TIME_T_CODE}
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
 
+/* Define if you have POSIX pthreads */
+#cmakedefine HAVE_THREADS_POSIX 1
+
 /* Define if you want to enable c-ares support */
 #cmakedefine USE_ARES 1
 
-/* Define if you want to enable POSIX threaded DNS lookup */
-#cmakedefine USE_THREADS_POSIX 1
+/* Define if you want to enable c-ares DNS lookup */
+#cmakedefine USE_RESOLV_ARES 1
 
-/* Define if you want to enable Win32 threaded DNS lookup */
-#cmakedefine USE_THREADS_WIN32 1
+/* Define if you want to enable threaded DNS lookup */
+#cmakedefine USE_RESOLV_THREADED 1
 
 /* if GnuTLS is enabled */
 #cmakedefine USE_GNUTLS 1
@@ -705,9 +699,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if AmiSSL is in use */
 #cmakedefine USE_AMISSL 1
-
-/* if librtmp/rtmpdump is in use */
-#cmakedefine USE_LIBRTMP 1
 
 /* if GSASL is in use */
 #cmakedefine USE_GSASL 1

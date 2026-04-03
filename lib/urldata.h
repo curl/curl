@@ -250,6 +250,7 @@ typedef enum {
  * Boolean values that concerns this connection.
  */
 struct ConnectBits {
+  BIT(connect_only);
 #ifndef CURL_DISABLE_PROXY
   BIT(httpproxy);  /* if set, this transfer is done through an HTTP proxy */
   BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
@@ -309,6 +310,7 @@ struct ConnectBits {
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
   BIT(in_cpool);     /* connection is kept in a connection pool */
+  BIT(dns_resolved); /* DNS records for connection were resolved */
 };
 
 struct hostname {
@@ -480,7 +482,6 @@ struct connectdata {
    * 0 at start, then one of 09, 10, 11, etc. */
   uint8_t httpversion_seen;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
-  BIT(connect_only);
 };
 
 #ifndef CURL_DISABLE_PROXY
@@ -551,6 +552,7 @@ struct Progress {
                       force redraw at next call */
   struct pgrs_dir ul;
   struct pgrs_dir dl;
+  curl_off_t deliver; /* amount of data delivered to application */
 
   curl_off_t current_speed; /* uses the currently fastest transfer */
   curl_off_t earlydata_sent;
@@ -576,7 +578,7 @@ struct Progress {
 
   curl_off_t speed_amount[CURL_SPEED_RECORDS];
   struct curltime speed_time[CURL_SPEED_RECORDS];
-  uint8_t speeder_c;
+  uint32_t speeder_c;
   BIT(hide);
   BIT(ul_size_known);
   BIT(dl_size_known);
@@ -658,13 +660,6 @@ typedef enum {
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
-typedef enum {
-  TRAILERS_NONE,
-  TRAILERS_INITIALIZED,
-  TRAILERS_SENDING,
-  TRAILERS_DONE
-} trailers_state;
-
 /*
  * One instance for each timeout an easy handle can set.
  */
@@ -699,8 +694,10 @@ struct UrlState {
   curl_off_t recent_conn_id; /* The most recent connection used, might no
                               * longer exist */
   struct dynbuf headerb; /* buffer to store headers in */
+#ifndef CURL_DISABLE_HSTS
   struct curl_slist *hstslist; /* list of HSTS files set by
                                   curl_easy_setopt(HSTS) calls */
+#endif
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
 
@@ -724,9 +721,8 @@ struct UrlState {
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
 
-  struct Curl_dns_entry *dns[2]; /* DNS to connect FIRST/SECONDARY */
 #ifdef USE_CURL_ASYNC
-  struct Curl_async async;  /* asynchronous name resolver data */
+  struct Curl_resolv_async *async;  /* asynchronous name resolver data */
 #endif
 
 #ifdef USE_OPENSSL
@@ -786,8 +782,6 @@ struct UrlState {
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout[2]; /* for external purposes */
   struct Curl_header_store *prevhead; /* the latest added header */
-  trailers_state trailers_state; /* whether we are sending trailers
-                                    and what stage are we at */
 #endif
 #ifndef CURL_DISABLE_COOKIES
   struct curl_slist *cookielist; /* list of cookie files set by

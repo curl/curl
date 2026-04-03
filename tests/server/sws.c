@@ -1127,7 +1127,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
       logmsg("wait for websocket traffic");
       do {
         got = sread(sock, reqbuf + req->offset,
-                    sizeof(req->reqbuf) - req->offset);
+                    sizeof(req->reqbuf) - 1 - req->offset);
         if(got > 0) {
           req->offset += got;
           logmsg("Got %zu bytes from client", got);

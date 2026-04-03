@@ -40,10 +40,11 @@
 /* Please keep the SSL backend-specific #if branches in this order:
  *
  * 1. USE_OPENSSL
- * 2. USE_GNUTLS
- * 3. USE_MBEDTLS
- * 4. USE_COMMON_CRYPTO
- * 5. USE_WIN32_CRYPTO
+ * 2. USE_WOLFSSL
+ * 3. USE_GNUTLS
+ * 4. USE_MBEDTLS
+ * 5. USE_COMMON_CRYPTO
+ * 6. USE_WIN32_CRYPTO
  *
  * This ensures that the same SSL branch gets activated throughout this source
  * file even if multiple backends are enabled at the same time.
@@ -84,6 +85,31 @@ static void my_sha256_final(unsigned char *digest, void *in)
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
   EVP_MD_CTX_destroy(ctx->openssl_ctx);
+}
+
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/sha256.h>
+
+typedef struct wc_Sha256 my_sha256_ctx;
+
+static CURLcode my_sha256_init(void *in)
+{
+  if(wc_InitSha256(in))
+    return CURLE_FAILED_INIT;
+  return CURLE_OK;
+}
+
+static void my_sha256_update(void *in,
+                             const unsigned char *data,
+                             unsigned int length)
+{
+  (void)wc_Sha256Update(in, data, (word32)length);
+}
+
+static void my_sha256_final(unsigned char *digest, void *in)
+{
+  (void)wc_Sha256Final(in, digest);
 }
 
 #elif defined(USE_GNUTLS)
@@ -452,14 +478,19 @@ static void my_sha256_final(unsigned char *out, void *ctx)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
-                       const size_t len)
+                       size_t len)
 {
   CURLcode result;
   my_sha256_ctx ctx;
 
   result = my_sha256_init(&ctx);
   if(!result) {
-    my_sha256_update(&ctx, input, curlx_uztoui(len));
+    do {
+      unsigned int ilen = (unsigned int) CURLMIN(len, UINT_MAX);
+      my_sha256_update(&ctx, input, ilen);
+      len -= ilen;
+      input += ilen;
+    } while(len);
     my_sha256_final(output, &ctx);
   }
   return result;

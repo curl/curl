@@ -70,6 +70,13 @@ anything about it, which then subsequently can lead to libcurl unknowingly
 reusing SSL connections with different properties. To remedy this you may set
 CURLOPT_FORBID_REUSE(3) from the callback function.
 
+A connection that is set up with this callback can be put in the connection
+pool by libcurl and then reused in following transfers without the callback
+being called. The connection may even be selected from the pool to be used for
+transfers not using this callback. If the callback should only be valid for
+the specific transfer the callback verifies, it should be marked unsuitable
+for reuse with CURLOPT_FORBID_REUSE(3).
+
 If you are using DNS-over-HTTPS (DoH) via CURLOPT_DOH_URL(3) then this
 callback is also called for those transfers and the curl handle is set to an
 internal handle. **This behavior is subject to change.** We recommend setting

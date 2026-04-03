@@ -177,9 +177,9 @@ sub dump_array {
 sub display_file {
     my $filename = $_[0];
     print "=== Start of file $filename\n";
-    if(open(my $displayfh, "<", "$filename")) {
+    if(open(my $displayfh, "<", $filename)) {
         while(my $line = <$displayfh>) {
-            print "$line";
+            print $line;
         }
         close $displayfh;
     }
@@ -192,9 +192,9 @@ sub display_file {
 sub display_file_top {
     my $filename = $_[0];
     print "=== Top of file $filename\n";
-    if(open(my $displayfh, "<", "$filename")) {
+    if(open(my $displayfh, "<", $filename)) {
         my $line = <$displayfh>;
-        print "$line";
+        print $line;
         close $displayfh;
     }
     print "=== End of file $filename\n";

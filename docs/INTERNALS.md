@@ -27,7 +27,7 @@ want it to remain functional and buildable with these and later versions
 We aim to support these or later versions.
 
 - brotli       1.0.0 (2017-09-21)
-- c-ares       1.6.0 (2008-12-09)
+- c-ares       1.16.0 (2020-03-13)
 - GnuTLS       3.6.5 (2018-12-01)
 - libidn2      2.0.0 (2017-03-29)
 - LibreSSL     2.9.1 (2019-04-22)
@@ -39,7 +39,7 @@ We aim to support these or later versions.
 - OpenLDAP     2.0 (2000-08-01)
 - OpenSSL      3.0.0 (2021-09-07)
 - Windows      Vista 6.0 (2006-11-08 - 2012-04-10)
-- wolfSSL      3.4.6 (2017-09-22)
+- wolfSSL      5.0.0 (2021-11-01)
 - zlib         1.2.5.2 (2011-12-11)
 - zstd         1.0 (2016-08-31)
 
@@ -50,7 +50,7 @@ we use a few "build tools" and we make sure that we remain functional with
 these versions:
 
 - clang-tidy     17.0.0 (2023-09-19), recommended: 19.1.0 or later (2024-09-17)
-- cmake          3.7 (2016-11-11)
+- cmake          3.18 (2020-07-15)
 - GNU autoconf   2.59 (2003-11-06)
 - GNU automake   1.7 (2002-09-25)
 - GNU libtool    1.4.2 (2001-09-11)

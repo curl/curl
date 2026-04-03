@@ -78,7 +78,7 @@ sub logmsg {
             # use \r\n for WSL shell
             $line =~ s/\r?\n$/\r\n/g;
         }
-        print "$line";
+        print $line;
     }
 }
 

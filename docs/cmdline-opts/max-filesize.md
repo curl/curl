@@ -37,3 +37,6 @@ threshold during transfer.
 Starting in curl 8.19.0, the maximum size can be specified using a fraction as
 in `2.5M` for two and a half megabytes. It only works with a period (`.`)
 delimiter, independent of what your locale might prefer.
+
+Since 8.20.0, this option also stops ongoing transfers that would reach this
+threshold due to automatic decompression using --compressed.

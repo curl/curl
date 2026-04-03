@@ -79,7 +79,9 @@ sub add {
 }
 
 my $fl;
-while(<STDIN>) {
+my $file = shift @ARGV;
+open(CURL_H, '<', $file) or die;
+while(<CURL_H>) {
     my $l = $_;
     if($fl) {
         # continued deprecation
@@ -121,6 +123,7 @@ while(<STDIN>) {
         }
     }
 }
+close(CURL_H);
 
 for my $name (sort @names) {
     my $oname = $name;

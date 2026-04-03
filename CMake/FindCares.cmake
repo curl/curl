@@ -37,11 +37,15 @@
 
 set(_cares_pc_requires "libcares")
 
-if(CURL_USE_PKGCONFIG AND
-   NOT DEFINED CARES_INCLUDE_DIR AND
+if(NOT DEFINED CARES_INCLUDE_DIR AND
    NOT DEFINED CARES_LIBRARY)
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(_cares ${_cares_pc_requires})
+  if(CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_cares ${_cares_pc_requires})
+  endif()
+  if(NOT _cares_FOUND AND CURL_USE_CMAKECONFIG)
+    find_package(c-ares CONFIG QUIET)
+  endif()
 endif()
 
 if(_cares_FOUND)
@@ -55,6 +59,16 @@ if(_cares_FOUND)
     set(_cares_LIBRARIES    "${_cares_STATIC_LIBRARIES}")
   endif()
   message(STATUS "Found Cares (via pkg-config): ${_cares_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
+elseif(c-ares_CONFIG)
+  set(Cares_FOUND TRUE)
+  set(CARES_FOUND TRUE)
+  set(CARES_VERSION ${c-ares_VERSION})
+  if(CARES_USE_STATIC_LIBS)
+    set(_cares_LIBRARIES c-ares::cares_static)
+  else()
+    set(_cares_LIBRARIES c-ares::cares)
+  endif()
+  message(STATUS "Found Cares (via CMake Config): ${c-ares_CONFIG} (found version \"${CARES_VERSION}\")")
 else()
   find_path(CARES_INCLUDE_DIR NAMES "ares.h")
   if(CARES_USE_STATIC_LIBS)
@@ -104,10 +118,6 @@ endif()
 if(CARES_FOUND)
   if(WIN32)
     list(APPEND _cares_LIBRARIES "iphlpapi")  # for if_indextoname and others
-  endif()
-
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_cares_LIBRARY_DIRS})
   endif()
 
   if(NOT TARGET CURL::cares)

@@ -37,10 +37,10 @@ void clean_getout(struct OperationConfig *config)
 
     while(node) {
       next = node->next;
-      tool_safefree(node->url);
-      tool_safefree(node->outfile);
-      tool_safefree(node->infile);
-      tool_safefree(node);
+      curlx_safefree(node->url);
+      curlx_safefree(node->outfile);
+      curlx_safefree(node->infile);
+      curlx_safefree(node);
       node = next;
     }
     config->url_list = NULL;
@@ -83,7 +83,7 @@ CURLcode urlerr_cvt(CURLUcode ucode)
  */
 CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
 {
-  CURLcode result = CURLE_URL_MALFORMAT;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   CURLUcode uerr;
   CURLU *uh = curl_url();
   char *path = NULL;
@@ -94,19 +94,22 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
                         CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
     if(uerr) {
       result = urlerr_cvt(uerr);
-      goto fail;
+      goto out;
     }
     uerr = curl_url_get(uh, CURLUPART_PATH, &path, 0);
     if(uerr) {
       result = urlerr_cvt(uerr);
-      goto fail;
+      goto out;
     }
     uerr = curl_url_get(uh, CURLUPART_QUERY, &query, 0);
+    if(uerr == CURLUE_OUT_OF_MEMORY) {
+      result = urlerr_cvt(uerr);
+      goto out;
+    }
     if(!uerr && query) {
       curl_free(query);
-      curl_free(path);
-      curl_url_cleanup(uh);
-      return CURLE_OK;
+      result = CURLE_OK;
+      goto out;
     }
     ptr = strrchr(path, '/');
     if(!ptr || !*++ptr) {
@@ -141,28 +144,32 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
         curl_free(encfile);
 
         if(!newpath)
-          goto fail;
+          goto out;
         uerr = curl_url_set(uh, CURLUPART_PATH, newpath, 0);
-        curlx_free(newpath);
+        curl_free(newpath);
         if(uerr) {
           result = urlerr_cvt(uerr);
-          goto fail;
+          goto out;
         }
         uerr = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_DEFAULT_SCHEME);
         if(uerr) {
           result = urlerr_cvt(uerr);
-          goto fail;
+          goto out;
         }
         curlx_free(*inurlp);
-        *inurlp = newurl;
-        result = CURLE_OK;
+        /* make it owned by tool memory */
+        *inurlp = curlx_strdup(newurl);
+        curl_free(newurl);
+        if(*inurlp)
+          result = CURLE_OK;
+        else
+          result = CURLE_OUT_OF_MEMORY;
       }
     }
     else
-      /* nothing to do */
-      result = CURLE_OK;
+      result = CURLE_OK;  /* nothing to do */
   }
-fail:
+out:
   curl_url_cleanup(uh);
   curl_free(path);
   return result;
@@ -191,19 +198,19 @@ CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc)
     curl_url_cleanup(uh);
     uh = NULL;
     if(!uerr) {
-      int i;
       char *pc = NULL, *pc2 = NULL;
-      for(i = 0; i < 2; i++) {
+      do {
         pc = strrchr(path, '/');
         pc2 = strrchr(pc ? pc + 1 : path, '\\');
         if(pc2)
           pc = pc2;
-        if(pc && !pc[1] && !i) {
+        if(pc && !pc[1])
           /* if the path ends with slash, try removing the trailing one
              and get the last directory part */
           *pc = 0;
-        }
-      }
+        else
+          break;
+      } while(1);
 
       if(pc) {
         /* duplicate the string beyond the slash */
@@ -223,7 +230,7 @@ CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc)
       {
         char *sanitized;
         *sc = sanitize_file_name(&sanitized, *filename, 0);
-        tool_safefree(*filename);
+        curlx_safefree(*filename);
         if(*sc)
           return CURLE_BAD_FUNCTION_ARGUMENT;
         *filename = sanitized;
