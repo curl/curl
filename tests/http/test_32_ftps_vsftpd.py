@@ -161,7 +161,7 @@ class TestFtpsVsFTPD:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")

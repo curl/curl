@@ -62,11 +62,11 @@ class TestWebsockets:
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _rmrf(self, path):
         if os.path.exists(path):
-            return shutil.rmtree(path)
+            shutil.rmtree(path)
 
     @pytest.fixture(autouse=True, scope='class')
     def ws_echo(self, env):

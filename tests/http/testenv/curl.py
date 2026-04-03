@@ -673,15 +673,15 @@ class CurlClient:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _rmrf(self, path):
         if os.path.exists(path):
-            return shutil.rmtree(path)
+            shutil.rmtree(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def get_proxy_args(self, proto: str = 'http/1.1',
                        proxys: bool = True, tunnel: bool = False,
@@ -1045,10 +1045,10 @@ class CurlClient:
                         try:
                             p.wait(timeout=ptimeout)
                             break
-                        except subprocess.TimeoutExpired:
+                        except subprocess.TimeoutExpired as e:
                             if end_at and datetime.now() >= end_at:
                                 p.kill()
-                                raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout)
+                                raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout) from e
                             profile.sample()
                             ptimeout = 0.01
                     exitcode = p.returncode
@@ -1154,7 +1154,7 @@ class CurlClient:
                 pass
             elif insecure:
                 args.append('--insecure')
-            elif active_options and ("--cacert" in active_options or \
+            elif active_options and ("--cacert" in active_options or
                     "--capath" in active_options):
                 pass
             elif u.hostname:

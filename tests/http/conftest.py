@@ -75,10 +75,9 @@ def pytest_report_header(config):
 
 @pytest.fixture(scope='session')
 def env_config(pytestconfig, testrun_uid, worker_id) -> EnvConfig:
-    env_config = EnvConfig(pytestconfig=pytestconfig,
-                           testrun_uid=testrun_uid,
-                           worker_id=worker_id)
-    return env_config
+    return EnvConfig(pytestconfig=pytestconfig,
+                     testrun_uid=testrun_uid,
+                     worker_id=worker_id)
 
 
 @pytest.fixture(scope='session', autouse=True)

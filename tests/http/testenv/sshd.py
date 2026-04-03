@@ -258,11 +258,11 @@ class Sshd:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _write_config(self):
         conf = [

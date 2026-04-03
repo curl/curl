@@ -110,7 +110,7 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
         except IOError:
             log.exception("IOError hit during request")
 
-class Negotiator(object):
+class Negotiator:
     NO_NEG = 0
     START_NEG = 1
     WILL = 2
@@ -238,7 +238,7 @@ class Negotiator(object):
         log.debug("Sending WONT %s", option_str)
         self.send_iac([NegTokens.WONT, NegOptions.to_val(option_str)])
 
-class NegBase(object):
+class NegBase:
     @classmethod
     def to_val(cls, name):
         return getattr(cls, name)
@@ -330,7 +330,7 @@ def setup_logging(options):
         stdout_handler.setLevel(logging.DEBUG)
         root_logger.addHandler(stdout_handler)
 
-class ScriptRC(object):
+class ScriptRC:
     """Enum for script return codes."""
 
     SUCCESS = 0
