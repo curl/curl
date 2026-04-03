@@ -29,8 +29,7 @@ import os
 import socket
 import subprocess
 import time
-from datetime import timedelta, datetime
-
+from datetime import datetime, timedelta
 from typing import Dict
 
 from . import CurlClient

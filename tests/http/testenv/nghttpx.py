@@ -30,11 +30,11 @@ import signal
 import socket
 import subprocess
 import time
-from typing import Optional, Dict
 from datetime import datetime, timedelta
+from typing import Dict, Optional
 
-from .env import Env, NghttpxUtil
 from .curl import CurlClient
+from .env import Env, NghttpxUtil
 from .ports import alloc_ports_and_do
 
 log = logging.getLogger(__name__)

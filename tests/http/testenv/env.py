@@ -33,13 +33,12 @@ import subprocess
 import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
 from datetime import timedelta
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 import pytest
 from filelock import FileLock
 
 from .certs import CertificateSpec, Credentials, TestCA
-
 
 log = logging.getLogger(__name__)
 

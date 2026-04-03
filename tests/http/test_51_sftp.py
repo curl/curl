@@ -28,10 +28,9 @@ import difflib
 import filecmp
 import logging
 import os
+
 import pytest
-
-from testenv import Env, CurlClient, Sshd
-
+from testenv import CurlClient, Env, Sshd
 
 log = logging.getLogger(__name__)
 

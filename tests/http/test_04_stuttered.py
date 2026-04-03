@@ -25,11 +25,10 @@
 ###########################################################################
 #
 import logging
-from typing import Tuple, List, Dict
+from typing import Dict, List, Tuple
+
 import pytest
-
-from testenv import Env, CurlClient
-
+from testenv import CurlClient, Env
 
 log = logging.getLogger(__name__)
 

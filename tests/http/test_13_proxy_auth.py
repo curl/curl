@@ -27,10 +27,9 @@
 import logging
 import os
 import re
+
 import pytest
-
-from testenv import Env, CurlClient, ExecResult
-
+from testenv import CurlClient, Env, ExecResult
 
 log = logging.getLogger(__name__)
 

@@ -32,9 +32,18 @@ import os
 import re
 import sys
 from statistics import mean
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
-from testenv import Env, Httpd, CurlClient, Caddy, ExecResult, NghttpxQuic, RunProfile, Dante
+from testenv import (
+    Caddy,
+    CurlClient,
+    Dante,
+    Env,
+    ExecResult,
+    Httpd,
+    NghttpxQuic,
+    RunProfile,
+)
 
 log = logging.getLogger(__name__)
 

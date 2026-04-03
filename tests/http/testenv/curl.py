@@ -27,22 +27,21 @@
 import json
 import logging
 import os
-import sys
-import time
-from functools import cmp_to_key
-from threading import Thread
-
-import psutil
 import re
 import shutil
 import subprocess
-from statistics import mean, fmean
-from datetime import timedelta, datetime, timezone
-from typing import List, Optional, Dict, Union, Any
+import sys
+import time
+from datetime import datetime, timedelta, timezone
+from functools import cmp_to_key
+from statistics import fmean, mean
+from threading import Thread
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
-from .env import Env
+import psutil
 
+from .env import Env
 
 log = logging.getLogger(__name__)
 
