@@ -4,8 +4,8 @@ curl and libcurl 8.20.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Authors:                      1460
- Contributors:                 3640
+ Authors:                      1461
+ Contributors:                 3643
 
 This release includes the following changes:
 
@@ -20,6 +20,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o altsvc: cap the list at 5,000 entries [183]
+ o altsvc: drop the prio field from the struct [185]
+ o altsvc: skip expired entries read from file [187]
  o asyn-ares: drop orphaned variable references [86]
  o asyn-ares: fix HTTPS-lookup when not on port 443 [100]
  o asyn-thrdd: fix clang-tidy unused value warning [125]
@@ -42,6 +45,7 @@ This release includes the following bugfixes:
  o cmake: add CMake Config-based dependency detection [87]
  o cmake: add CMake Config-based dependency detection for c-ares, wolfSSL [134]
  o cmake: document functions used from Windows system DLLs [103]
+ o cmake: enable pthreads for BoringSSL/AWS-LC [196]
  o cmake: resolve targets recursively when generating `libcurl.pc` [45]
  o cmake: rework binutils ld hack to not read `LOCATION` property [41]
  o cmake: silence bad library `Threads::Threads` warning [131]
@@ -51,6 +55,7 @@ This release includes the following bugfixes:
  o configure: fix LibreSSL ngtcp2 1.15.0+ crypto lib selection logic [3]
  o configure: prefer dependency-specific variables over `$withval` [35]
  o configure: remove superfluous experimental warning for HTTP/3 [169]
+ o cookie: fix rejection when tabs in value [189]
  o curl-wolfssl.m4: fix to use the correct value for pkg-config directory [36]
  o curl.h: replace macros with C++-friendly method to enforce 3 args [110]
  o curl_ctype.h: fix spelling in a couple of locally used macros [28]
@@ -66,11 +71,13 @@ This release includes the following bugfixes:
  o DEPRECATE: fix minor release number typo
  o digest: pass in the user name quoted (as well) [34]
  o dnscache: own source file, improvements [116]
+ o docs/cmdline-opts: tidy up retry-connrefused [190]
  o docs/lib: fix typos [53]
  o docs: enable more compiler warnings for C snippets, fix 3 finds [71]
  o docs: list more dependencies for running Python HTTP tests [123]
  o docs: mention more zip bomb precautions [166]
  o docs: minor wording tweaks
+ o docs: SSH host verification is done at connect time [197]
  o doh: fix memory-leak when doing a second DoH resolve [55]
  o examples/websocket: fix to sleep more on Windows [92]
  o examples: drop warning silencers no longer hit [14]
@@ -86,6 +93,9 @@ This release includes the following bugfixes:
  o getinfo: initialize `PureInfo` field `used_proxy` [43]
  o gnutls: fix clang-tidy warning with !verbose [126]
  o hostip: clear the sockaddr_in6 structure before use [20]
+ o HSTS: cap the list [177]
+ o hsts: make the HSTS read callback handle name dupes [141]
+ o hsts: skip expired HSTS entries read from file [188]
  o hsts: when a dupe host adds subdomains, use that [130]
  o http2: clear the h2 session at delete [99]
  o http2: prevent secure schemes pushed over insecure connections [181]
@@ -95,12 +105,16 @@ This release includes the following bugfixes:
  o http: make Curl_compareheader handle multiple commas in header
  o imap: reset the UIDVALIDITY state between transfers [7]
  o include: drop 'will' from public headers [73]
+ o INSTALL.md: update Cygwin instructions [198]
  o keylog.h: replace literal number with macro in declaration [171]
  o keylog: drop unused/redundant includes and guards [172]
  o ldap: drop duplicate `ldap_set_option()` on Windows [42]
  o ldap: fix to initialize cleartext connection on Windows [49]
+ o lib: accept larger input to md5/hmac/sha256/sha512 functions [194]
  o lib: always use Curl_1st_fatal instead of Curl_1st_err [89]
+ o lib: make resolving HTTPS DNS records reliable: [176]
  o libssh2: fix error handling on quote errors [21]
+ o libssh: path length precaution [164]
  o libssh: propagate error back in SFTP function [178]
  o libtest: drop duplicate include [111]
  o location/follow: mention netrc [138]
@@ -133,17 +147,20 @@ This release includes the following bugfixes:
  o sha256: support delegating to wolfSSL API [148]
  o share: concurrency handling, easy updates [104]
  o socks: reject zero-length GSSAPI/SSPI tokens from proxy [157]
+ o spelling: fix typos [173]
  o src: use ftruncate() unconditionally [128]
  o sshserver.pl: harden more `system()` calls [81]
  o sshserver.pl: pass command-line to `system()` safely [82]
  o strerr: correct the strerror_s() return code condition [25]
  o sws: fix potential OOB write [80]
  o synctime: fix off-by-one read and write to a read-only buffer (Windows) [85]
+ o test 766: flag as timing-dependent [136]
  o test459: switch to mode="warn" for stderr check [5]
  o testcurl.pl: replace shell commands with Perl `rmtree()` [76]
  o tests/unit/README: describe how to unit test static functions [60]
  o tool: check for curlinfo->age when determining if ssh backend [77]
  o tool: fix memory mixups [106]
+ o tool: fix retries in parallel mode [137]
  o tool: fix two more allocator mismatches [155]
  o tool_cb_hdr: only truncate etags output when regular file [129]
  o tool_cb_rea: make waitfd() return void [168]
@@ -168,6 +185,8 @@ This release includes the following bugfixes:
  o transfer: enable custom methods again on next transfer [30]
  o transfer: enhance secure check [10]
  o url: do not reuse a non-tls starttls connection if new requires TLS [145]
+ o url: improve connection reuse on negotiate [160]
+ o url: init req.no_body in DO so that it works for h2 push [161]
  o url: use the socks type for socks proxy [47]
  o url: use URL for url even in comments [52]
  o urlapi: fix handling of "file:///" [122]
@@ -204,17 +223,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  am-perip on hackerone, Arkadi Vainbrand, Carlos Henrique Lima Melara,
-  crawfordxx, Dan Fandrich, Daniel Stenberg, dependabot[bot], Dexter Gerig,
-  Ercan Ermis, fds242 on github, Flavio Amieiro, Greg Kroah-Hartman,
-  Harry Sintonen, Henrique Pereira, James Fuller, Jason Stangroome, Kai Pastor,
-  Kaixuan Li, lg_oled77c5pua on hackerone, M42kL33 on hackerone,
-  m777m0 on hackerone, Marcel Raad, Martin Dürrmeier, Michael Hendricks,
-  Michael Kaufmann, Orgad Shaneh, Otis Cui Lei, Patrick Monnerat, Ray Satiro,
-  renovate[bot], Richard Tollerton, Rob Crittenden, Scott Boudreaux,
+  Alex Hamilton, am-perip on hackerone, Arkadi Vainbrand,
+  BlackFuffey on github, Carlos Henrique Lima Melara, crawfordxx, Dan Fandrich,
+  Daniel Stenberg, dependabot[bot], Dexter Gerig, Ercan Ermis,
+  fds242 on github, Flavio Amieiro, Geeknik Labs, Greg Kroah-Hartman,
+  Harry Sintonen, Henrique Pereira, Izan on hackerone, James Fuller,
+  Jason Stangroome, John Haugabook, Kai Pastor, Kaixuan Li,
+  lg_oled77c5pua on hackerone, M42kL33 on hackerone, m777m0 on hackerone,
+  Marcel Raad, Martin Dürrmeier, Michael Hendricks, Michael Kaufmann,
+  Orgad Shaneh, Otis Cui Lei, Patrick Monnerat, Ray Satiro, renovate[bot],
+  Richard Tollerton, Rob Crittenden, Samuel Henrique, Scott Boudreaux,
   Sergey Fedorov, Stefan Eissing, Viktor Szakats, Vladimír Marek,
   xkilua on hackerone, Yoshiro Yoneya
-  (39 contributors)
+  (45 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -352,9 +373,12 @@ References to bug reports and discussions on issues:
  [132] = https://curl.se/bug/?i=21167
  [133] = https://curl.se/bug/?i=21097
  [134] = https://curl.se/bug/?i=21098
+ [136] = https://curl.se/bug/?i=21155
+ [137] = https://curl.se/bug/?i=20669
  [138] = https://curl.se/bug/?i=21091
  [139] = https://curl.se/bug/?i=21093
  [140] = https://curl.se/bug/?i=21096
+ [141] = https://curl.se/bug/?i=21201
  [143] = https://curl.se/bug/?i=21084
  [144] = https://curl.se/bug/?i=20936
  [145] = https://curl.se/bug/?i=21082
@@ -370,7 +394,10 @@ References to bug reports and discussions on issues:
  [157] = https://curl.se/bug/?i=21159
  [158] = https://curl.se/bug/?i=21144
  [159] = https://curl.se/bug/?i=21135
+ [160] = https://curl.se/bug/?i=21203
+ [161] = https://curl.se/bug/?i=21194
  [163] = https://curl.se/bug/?i=21134
+ [164] = https://curl.se/bug/?i=21193
  [165] = https://curl.se/bug/?i=21152
  [166] = https://curl.se/bug/?i=21143
  [167] = https://curl.se/bug/?i=21147
@@ -379,9 +406,22 @@ References to bug reports and discussions on issues:
  [170] = https://curl.se/bug/?i=21136
  [171] = https://curl.se/bug/?i=21141
  [172] = https://curl.se/bug/?i=21137
+ [173] = https://curl.se/bug/?i=21198
+ [176] = https://curl.se/bug/?i=21175
+ [177] = https://curl.se/bug/?i=21190
  [178] = https://curl.se/bug/?i=21122
  [179] = https://curl.se/bug/?i=21123
  [180] = https://curl.se/bug/?i=21121
  [181] = https://curl.se/bug/?i=21113
+ [183] = https://curl.se/bug/?i=21183
  [184] = https://curl.se/bug/?i=21119
+ [185] = https://curl.se/bug/?i=21188
  [186] = https://curl.se/bug/?i=21112
+ [187] = https://curl.se/bug/?i=21187
+ [188] = https://curl.se/bug/?i=21186
+ [189] = https://curl.se/bug/?i=21185
+ [190] = https://curl.se/bug/?i=21182
+ [194] = https://curl.se/bug/?i=21174
+ [196] = https://curl.se/bug/?i=21168
+ [197] = https://curl.se/bug/?i=21173
+ [198] = https://curl.se/bug/?i=20995
