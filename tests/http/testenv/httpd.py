@@ -250,11 +250,11 @@ class Httpd:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _write_config(self):
         domain1 = self.env.domain1
@@ -503,12 +503,11 @@ class Httpd:
                 '      Require user proxy',
                 '    </Proxy>',
             ]
-        else:
-            return [
-                '    <Proxy "*">',
-                '      Require ip 127.0.0.1',
-                '    </Proxy>',
-            ]
+        return [
+            '    <Proxy "*">',
+            '      Require ip 127.0.0.1',
+            '    </Proxy>',
+        ]
 
     def _get_log_level(self):
         if self.env.verbose > 3:

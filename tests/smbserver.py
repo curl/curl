@@ -349,9 +349,9 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             self.write_to_fid(fid, contents)
             return fid, filename
 
-        except Exception:
+        except Exception as e:
             log.exception("Failed to make test file")
-            raise SmbError(STATUS_NO_SUCH_FILE, "Failed to make test file")
+            raise SmbError(STATUS_NO_SUCH_FILE, "Failed to make test file") from e
 
 
 class SmbError(Exception):
@@ -360,7 +360,7 @@ class SmbError(Exception):
         self.error_code = error_code
 
 
-class ScriptRC(object):
+class ScriptRC:
     """Enum for script return codes."""
 
     SUCCESS = 0

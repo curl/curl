@@ -59,7 +59,7 @@ class ClosingFileHandler(logging.StreamHandler):
                 self.release()
         return result
 
-class TestData(object):
+class TestData:
     def __init__(self, data_folder):
         self.data_folder = data_folder
 

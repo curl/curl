@@ -157,7 +157,7 @@ def setup_logging(options):
         root_logger.addHandler(stdout_handler)
 
 
-class ScriptRC(object):
+class ScriptRC:
     """Enum for script return codes."""
 
     SUCCESS = 0

@@ -52,12 +52,11 @@ class Card:
     def fmt_size(cls, val):
         if val >= (1024*1024*1024):
             return f'{val / (1024*1024*1024):0.000f}GB'
-        elif val >= (1024 * 1024):
+        if val >= (1024 * 1024):
             return f'{val / (1024*1024):0.000f}MB'
-        elif val >= 1024:
+        if val >= 1024:
             return f'{val / 1024:0.000f}KB'
-        else:
-            return f'{val:0.000f}B'
+        return f'{val:0.000f}B'
 
     @classmethod
     def fmt_mbs(cls, val):
@@ -65,10 +64,9 @@ class Card:
             return '--'
         if val >= (1024*1024):
             return f'{val/(1024*1024):.3g} MB/s'
-        elif val >= 1024:
+        if val >= 1024:
             return f'{val / 1024:.3g} KB/s'
-        else:
-            return f'{val:.3g} B/s'
+        return f'{val:.3g} B/s'
 
     @classmethod
     def fmt_speed(cls, val):
@@ -76,10 +74,9 @@ class Card:
             return '--'
         if val >= (10*1024*1024):
             return f'{(val/(1024*1024)):.3f} MB/s'
-        elif val >= (10*1024):
+        if val >= (10*1024):
             return f'{val/1024:.3f} KB/s'
-        else:
-            return f'{val:.3f} B/s'
+        return f'{val:.3f} B/s'
 
     @classmethod
     def fmt_speed_result(cls, val, limit):
@@ -88,10 +85,9 @@ class Card:
         pct = ((val / limit) * 100) - 100
         if val >= (10*1024*1024):
             return f'{(val/(1024*1024)):.3f} MB/s, {pct:+.1f}%'
-        elif val >= (10*1024):
+        if val >= (10*1024):
             return f'{val/1024:.3f} KB/s, {pct:+.1f}%'
-        else:
-            return f'{val:.3f} B/s, {pct:+.1f}%'
+        return f'{val:.3f} B/s, {pct:+.1f}%'
 
     @classmethod
     def fmt_reqs(cls, val):
@@ -255,11 +251,11 @@ class ScoreRunner:
                 raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
             self._limit_rate_num = float(m.group(1))
             if m.group(3) == 'g':
-                self._limit_rate_num *= (1024*1024*1024)
+                self._limit_rate_num *= 1024*1024*1024
             elif m.group(3) == 'm':
-                self._limit_rate_num *= (1024*1024)
+                self._limit_rate_num *= 1024*1024
             elif m.group(3) == 'k':
-                self._limit_rate_num *= (1024)
+                self._limit_rate_num *= 1024
             elif m.group(3) == 'b':
                 pass
             else:
@@ -368,8 +364,7 @@ class ScoreRunner:
                 profiles.append(r.profile)
         if self._limit_rate:
             return Card.mk_speed_cell(samples, profiles, errors, self._limit_rate_num)
-        else:
-            return Card.mk_mbs_cell(samples, profiles, errors)
+        return Card.mk_mbs_cell(samples, profiles, errors)
 
     def dl_serial(self, url: str, count: int, nsamples: int = 1):
         samples = []
@@ -397,8 +392,7 @@ class ScoreRunner:
                 profiles.append(r.profile)
         if self._limit_rate:
             return Card.mk_speed_cell(samples, profiles, errors, self._limit_rate_num)
-        else:
-            return Card.mk_mbs_cell(samples, profiles, errors)
+        return Card.mk_mbs_cell(samples, profiles, errors)
 
     def dl_parallel(self, url: str, count: int, nsamples: int = 1):
         samples = []
@@ -431,8 +425,7 @@ class ScoreRunner:
                 profiles.append(r.profile)
         if self._limit_rate:
             return Card.mk_speed_cell(samples, profiles, errors, self._limit_rate_num)
-        else:
-            return Card.mk_mbs_cell(samples, profiles, errors)
+        return Card.mk_mbs_cell(samples, profiles, errors)
 
     def downloads(self, count: int, fsizes: List[int], meta: Dict[str, Any]) -> Dict[str, Any]:
         nsamples = meta['samples']

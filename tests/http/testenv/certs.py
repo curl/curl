@@ -101,7 +101,7 @@ class CertificateSpec:
     def name(self) -> Optional[str]:
         if self._name:
             return self._name
-        elif self.domains:
+        if self.domains:
             return self.domains[0]
         return None
 
@@ -109,9 +109,9 @@ class CertificateSpec:
     def type(self) -> Optional[str]:
         if self.domains and len(self.domains):
             return "server"
-        elif self.client:
+        if self.client:
             return "client"
-        elif self.name:
+        if self.name:
             return "ca"
         return None
 
@@ -144,10 +144,9 @@ class Credentials:
     def key_type(self):
         if isinstance(self._pkey, RSAPrivateKey):
             return f"rsa{self._pkey.key_size}"
-        elif isinstance(self._pkey, EllipticCurvePrivateKey):
+        if isinstance(self._pkey, EllipticCurvePrivateKey):
             return f"{self._pkey.curve.name}"
-        else:
-            raise Exception(f"unknown key type: {self._pkey}")
+        raise Exception(f"unknown key type: {self._pkey}")
 
     @property
     def private_key(self) -> Any:
