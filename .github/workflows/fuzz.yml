@@ -40,4 +40,4 @@ permissions: {}
 
 jobs:
   Fuzzing:
-    uses: curl/curl-fuzzer/.github/workflows/ci.yml@master  # zizmor: ignore[unpinned-uses]
+    uses: curl/curl-fuzzer/.github/workflows/ci.yml@55dc0406831781ba06e68f75839a1f9bd326252c # master # zizmor: ignore[unpinned-uses]
