@@ -89,6 +89,7 @@ use sshhelp qw(
     $sshdlog
     $sftplog
     $sftpcmds
+    $keyalgo
     display_sshdconfig
     display_sftpconfig
     display_sshdlog
@@ -97,6 +98,7 @@ use sshhelp qw(
     find_ssh
     find_sftp
     find_httptlssrv
+    sshkeyalgostr
     sshversioninfo
     );
 
@@ -3199,6 +3201,8 @@ sub subvariables {
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
+    my $keyalgostr = sshkeyalgostr($keyalgo);
+    $$thing =~ s/${prefix}SSHKEYALGO/$keyalgostr/g;
 
     # The purpose of FTPTIME2 is to provide times that can be
     # used for time-out tests and that would work on most hosts as these
