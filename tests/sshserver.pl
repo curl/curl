@@ -836,10 +836,11 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
     logmsg "generating ssh client known hosts file...\n" if($verbose);
     unlink(pp($knownhosts));
     if(open(my $keyfile, "<", pp($hstpubkeyf))) {
-        my @hostkey = do { local $/ = ' '; <$keyfile> };
+        chomp(my $line = <$keyfile>);
         if(close($keyfile)) {
             if(open(my $knownhostsh, ">", pp($knownhosts))) {
-                print $knownhostsh "$listenaddr $hostkey[0]$hostkey[1]\n";
+                my @hostkey = split /\s+/, $line;
+                print $knownhostsh "$listenaddr $hostkey[0] $hostkey[1]\n";
                 if(!close($knownhostsh)) {
                     $error = "Error: cannot close file $knownhosts";
                 }
