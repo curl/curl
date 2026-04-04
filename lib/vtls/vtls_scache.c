@@ -238,11 +238,6 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     r = cf_ssl_peer_key_add_path(&buf, "Issuer", ssl->issuercert, &is_local);
     if(r)
       goto out;
-    if(ssl->cert_blob) {
-      r = cf_ssl_peer_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
-      if(r)
-        goto out;
-    }
     if(ssl->ca_info_blob) {
       r = cf_ssl_peer_key_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
       if(r)
@@ -253,6 +248,11 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
       if(r)
         goto out;
     }
+  }
+  if(ssl->cert_blob) {
+    r = cf_ssl_peer_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
+    if(r)
+      goto out;
   }
   if(ssl->pinned_key && ssl->pinned_key[0]) {
     r = curlx_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
