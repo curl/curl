@@ -3201,7 +3201,7 @@ sub subvariables {
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
-    my $keyalgostr = sshkeyalgostr($keyalgo);
+    my $keyalgostr = sshkeyalgostr();
     $$thing =~ s/${prefix}SSHKEYALGO/$keyalgostr/g;
 
     # The purpose of FTPTIME2 is to provide times that can be
