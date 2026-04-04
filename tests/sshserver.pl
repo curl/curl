@@ -411,7 +411,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         # format, e.g. WinCNG.
         # Accepted values: RFC4716, PKCS8, PEM (see also 'man ssh-keygen')
         push @sshkeygenopt, '-m';
-        # Default to the most compatible RSA format for tests.
+        # Default to the most compatible format for tests.
         push @sshkeygenopt, $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
     }
     logmsg "generating host keys...\n" if($verbose);
