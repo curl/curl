@@ -519,8 +519,7 @@ jobs:
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-            if [[ "${MATRIX_INSTALL_MSYS2} " = *'libssh '* || \
-                  "${MATRIX_INSTALL_VCPKG} " = *'libssh '* ]]; then
+            if [[ "${MATRIX_INSTALL} " = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
