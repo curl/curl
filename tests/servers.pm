@@ -1831,8 +1831,10 @@ sub runsshserver {
     $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
-    $flags .= "--user \"$USER\" ";
-    $flags .= "--keyalgo \"" . $feature{"sshkeyalgo"} . "\"";
+    $flags .= "--user \"$USER\"";
+    if(defined $feature{"sshkeyalgo"}) {
+        $flags .= " --keyalgo \"" . $feature{"sshkeyalgo"} . "\"";
+    }
 
     my @tports;
     my $port = getfreeport($ipvnum);
