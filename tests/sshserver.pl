@@ -54,7 +54,6 @@ use sshhelp qw(
     $sshlog
     $sftplog
     $sftpcmds
-    $keyalgo
     $hstprvkeyf
     $hstpubkeyf
     $hstpubmd5f
@@ -191,14 +190,6 @@ while(@ARGV) {
             }
         }
     }
-    elsif($ARGV[0] eq '--keyalgo') {
-        if($ARGV[1]) {
-            if($ARGV[1] =~ /^(ed25519|rsa)$/) {
-                $keyalgo = $1;
-                shift @ARGV;
-            }
-        }
-    }
     else {
         print STDERR "\nWarning: sshserver.pl unknown parameter: '$ARGV[0]'\n";
     }
@@ -268,6 +259,12 @@ if(!$sshdid) {
     exit 1;
 }
 logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
+
+my $keyalgo = 'rsa';
+
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 650) && $ENV{'CURL_TEST_SSH_KEYALGO'}) {
+    $keyalgo = $ENV{'CURL_TEST_SSH_KEYALGO'};  # e.g. rsa, ecdsa, ed25591
+}
 
 #***************************************************************************
 #  ssh daemon command line options we might use and version support
@@ -589,11 +586,6 @@ push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
 
-# Use rsa in OpenSSH versions without ed25519 support
-if(($sshdid =~ /OpenSSH/) && ($sshdvernum < 650)) {
-    $keyalgo = 'rsa';
-}
-
 # AllowUsers and DenyUsers options should use lowercase on Windows
 # and do not support quotes around values for some unknown reason.
 if($sshdid =~ /OpenSSH-Windows/) {
@@ -846,7 +838,7 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
         my @hostkey = do { local $/ = ' '; <$keyfile> };
         if(close($keyfile)) {
             if(open(my $knownhostsh, ">", pp($knownhosts))) {
-                my $keyalgostr = $keyalgo eq 'ed25519' ? 'ssh-ed25519' : 'ssh-rsa';
+                my $keyalgostr = 'ssh-' . $keyalgo;  # e.g. ssh-rsa, ssh-ecdsa, ssh-ed25519
                 print $knownhostsh "$listenaddr $keyalgostr $hostkey[1]\n";
                 if(!close($knownhostsh)) {
                     $error = "Error: cannot close file $knownhosts";

@@ -627,16 +627,9 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
-                $feature{"ssh-ed25519"} = 0;
             }
             if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
-                $feature{"ssh-ed25519"} = 0;
-                if($1 =~ /([0-9]+)\.([0-9]+)/) {
-                  if($1 > 0 or ($1 == 0 and $2 >= 11)) {
-                    $feature{"ssh-ed25519"} = 1;
-                  }
-                }
                 # Detect simple cases of default libssh configuration files ending up
                 # setting `StrictHostKeyChecking no`. include files, quoted values,
                 # '=value' format not implemented.

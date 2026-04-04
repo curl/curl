@@ -1831,9 +1831,6 @@ sub runsshserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
     $flags .= "--user \"$USER\"";
-    if($feature{"ssh-ed25519"}) {
-        $flags .= " --keyalgo ed25519";
-    }
 
     my @tports;
     my $port = getfreeport($ipvnum);
