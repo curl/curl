@@ -627,11 +627,13 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
-                $feature{"sshkeyalgo"} = $ENV{'CURL_TEST_SSH_KEYALGO'} ? $ENV{'CURL_TEST_SSH_KEYALGO'} : 'rsa';
+                $feature{"sshkeyalgo"} = ($ENV{'CURL_TEST_SSH_KEYALGO'} and
+                    $ENV{'CURL_TEST_SSH_KEYALGO'} =~ /^(?:rsa|ecdsa|ed25519)$/) ? $ENV{'CURL_TEST_SSH_KEYALGO'} : 'rsa';
             }
             if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
-                $feature{"sshkeyalgo"} = $ENV{'CURL_TEST_SSH_KEYALGO'} ? $ENV{'CURL_TEST_SSH_KEYALGO'} : 'rsa';
+                $feature{"sshkeyalgo"} = ($ENV{'CURL_TEST_SSH_KEYALGO'} and
+                    $ENV{'CURL_TEST_SSH_KEYALGO'} =~ /^(?:rsa|ecdsa|ed25519)$/) ? $ENV{'CURL_TEST_SSH_KEYALGO'} : 'rsa';
                 # Detect simple cases of default libssh configuration files ending up
                 # setting `StrictHostKeyChecking no`. include files, quoted values,
                 # '=value' format not implemented.
