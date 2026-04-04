@@ -42,7 +42,7 @@ rather than immediately removing it.
 
 ## `CURLULFLAG_DRAFT`
 
-Sets the **Draft** flag for IMAP uploads. Marks the message as an uncompleted
+Sets the **Draft** flag for IMAP uploads. Marks the message as an incomplete
 composition.
 
 ## `CURLULFLAG_FLAGGED`
