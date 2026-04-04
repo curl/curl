@@ -97,7 +97,6 @@ use sshhelp qw(
     find_ssh
     find_sftp
     find_httptlssrv
-    sshkeyalgostr
     sshversioninfo
     );
 
@@ -1783,6 +1782,17 @@ sub runrtspserver {
     }
 
     return (0, $rtsppid, $pid2, $port);
+}
+
+#***************************************************************************
+# Return key algorithm string
+#
+sub sshkeyalgostr {
+    my ($algo) = @_;
+    my %algomap = (
+        ecdsa => 'ecdsa-sha2-nistp256',
+    );
+    return exists $algomap{$algo} ? $algomap{$algo} : 'ssh-' . $algo;
 }
 
 #######################################################################

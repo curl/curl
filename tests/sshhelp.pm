@@ -64,7 +64,6 @@ BEGIN {
         find_sftp
         find_sshkeygen
         find_httptlssrv
-        sshkeyalgostr
         sshversioninfo
     );
 }
@@ -354,17 +353,6 @@ sub find_httptlssrv {
         return $p if($found);
     }
     return "";
-}
-
-#***************************************************************************
-# Return key algorithm string
-#
-sub sshkeyalgostr {
-    my ($algo) = @_;
-    my %algomap = (
-        ecdsa => 'ecdsa-sha2-nistp256',
-    );
-    return exists $algomap{$algo} ? $algomap{$algo} : 'ssh-' . $algo;
 }
 
 #***************************************************************************
