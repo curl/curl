@@ -1009,6 +1009,8 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
 
     if(!nread || !memchr(buf, '\n', nread)) {
       /* nothing to convert, return this right away */
+      if(nread)
+        ctx->prev_cr = (buf[nread - 1] == '\r');
       if(ctx->read_eos)
         ctx->eos = TRUE;
       *pnread = nread;
