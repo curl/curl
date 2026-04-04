@@ -360,8 +360,8 @@ sub find_httptlssrv {
 # Return key algorithm string
 #
 sub sshkeyalgostr {
-  my ($algo) = @_;
-  return 'ssh-' . $algo;  # e.g. ssh-rsa, ssh-ecdsa, ssh-ed25519
+    my ($algo) = @_;
+    return 'ssh-' . $algo;  # e.g. ssh-rsa, ssh-ecdsa, ssh-ed25519
 }
 
 #***************************************************************************
