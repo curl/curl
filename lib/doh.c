@@ -254,17 +254,14 @@ static void doh_probe_done(struct Curl_easy *data,
   dohp->probe_resp[i].result = result;
   /* We expect either the meta data still to exist or the sub request
    * to have already failed. */
-  DEBUGASSERT(doh_req || result);
-  if(doh_req) {
-    if(!result) {
-      dohp->probe_resp[i].dnstype = doh_req->dnstype;
-      result = curlx_dyn_addn(&dohp->probe_resp[i].body,
-                              curlx_dyn_ptr(&doh_req->resp_body),
-                              curlx_dyn_len(&doh_req->resp_body));
-      curlx_dyn_free(&doh_req->resp_body);
-    }
-    Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
+  if(!result) {
+    dohp->probe_resp[i].dnstype = doh_req->dnstype;
+    result = curlx_dyn_addn(&dohp->probe_resp[i].body,
+                            curlx_dyn_ptr(&doh_req->resp_body),
+                            curlx_dyn_len(&doh_req->resp_body));
+    curlx_dyn_free(&doh_req->resp_body);
   }
+  Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
 
   if(result)
     infof(doh, "DoH request %s", curl_easy_strerror(result));
