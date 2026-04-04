@@ -241,7 +241,7 @@ test1941 test1942 test1943 test1944 test1945 test1946 test1947 test1948 \
 test1955 test1956 test1957 test1958 test1959 test1960 test1964 test1965 \
 \
 test1970 test1971 test1972 test1973 test1974 test1975 test1976 test1977 \
-test1978 test1979 test1980 test1981 \
+test1978 test1979 test1980 test1981 test1982 \
 \
 test2000 test2001 test2002 test2003 test2004 test2005 test2006 test2007 \
 test2008 \
