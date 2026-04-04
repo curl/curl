@@ -361,7 +361,10 @@ sub find_httptlssrv {
 #
 sub sshkeyalgostr {
     my ($algo) = @_;
-    return 'ssh-' . $algo;  # e.g. ssh-rsa, ssh-ecdsa, ssh-ed25519
+    my %algomap = (
+        ecdsa => 'ecdsa-sha2-nistp256',
+    );
+    return exists $algomap{$algo} ? $algomap{$algo} : 'ssh-' . $algo;
 }
 
 #***************************************************************************
