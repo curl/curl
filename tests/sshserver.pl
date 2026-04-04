@@ -589,6 +589,11 @@ push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
 
+# Use rsa in OpenSSH versions without ed25519 support
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum < 650)) {
+    $keyalgo = 'rsa';
+}
+
 # AllowUsers and DenyUsers options should use lowercase on Windows
 # and do not support quotes around values for some unknown reason.
 if($sshdid =~ /OpenSSH-Windows/) {
