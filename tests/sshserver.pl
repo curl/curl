@@ -194,7 +194,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--keyalgo') {
         if($ARGV[1]) {
-            $keyalgo = $1;
+            $keyalgo = $ARGV[1];
             shift @ARGV;
         }
     }
