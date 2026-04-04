@@ -840,7 +840,7 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
         my @hostkey = do { local $/ = ' '; <$keyfile> };
         if(close($keyfile)) {
             if(open(my $knownhostsh, ">", pp($knownhosts))) {
-                print $knownhostsh "$listenaddr ' . sshkeyalgostr($keyalgo) . ' $hostkey[1]\n";
+                print $knownhostsh "$listenaddr $hostkey[0]$hostkey[1]\n";
                 if(!close($knownhostsh)) {
                     $error = "Error: cannot close file $knownhosts";
                 }
