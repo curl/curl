@@ -73,7 +73,6 @@ use sshhelp qw(
     find_sftpsrv
     find_sftp
     find_sshkeygen
-    sshkeyalgostr
     sshversioninfo
     );
 
