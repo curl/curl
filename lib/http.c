@@ -1103,7 +1103,7 @@ static void http_switch_to_get(struct Curl_easy *data, int code)
   const char *req = data->set.str[STRING_CUSTOMREQUEST];
 
   if((req || data->state.httpreq != HTTPREQ_GET) &&
-     (data->set.http_follow_mode == CURLFOLLOW_OBEYCODE)) {
+     (data->set.http_follow_mode == CURLFOLLOW_OBEYCODE || code == 303)) {
     NOVERBOSE((void)code);
     infof(data, "Switch to GET because of %d response", code);
     data->state.http_ignorecustom = TRUE;
