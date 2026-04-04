@@ -380,6 +380,7 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 #  -N:  new passphrase   : OpenSSH 1.2.1 and later
 #  -q:  quiet keygen     : OpenSSH 1.2.1 and later
 #  -t:  key type         : OpenSSH 2.5.0 and later
+#  -m:  key format       : OpenSSH 5.6.0 and later
 #
 #  -C:  identity comment : SunSSH 1.0.0 and later
 #  -f:  key filename     : SunSSH 1.0.0 and later
