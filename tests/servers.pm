@@ -1842,8 +1842,8 @@ sub runsshserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
     $flags .= "--user \"$USER\"";
-    if(defined $feature{"sshkeyalgo"}) {
-        $flags .= " --keyalgo \"" . $feature{"sshkeyalgo"} . "\"";
+    if(defined $feature{"sshkeyalgo"} and $feature{"sshkeyalgo"} =~ /^(?:rsa|ecdsa|ed25519)$/) {
+        $flags .= " --keyalgo " . $feature{"sshkeyalgo"};
     }
 
     my @tports;
