@@ -89,7 +89,6 @@ use sshhelp qw(
     $sshdlog
     $sftplog
     $sftpcmds
-    $keyalgo
     display_sshdconfig
     display_sftpconfig
     display_sshdlog
@@ -144,6 +143,7 @@ my $USER;                  # name of the current user
 my $sshdid;                # for socks server, ssh daemon version id
 my $ftpchecktime=1;        # time it took to verify our test FTP server
 my $SERVER_TIMEOUT_SEC = 15; # time for a server to spin up
+my $keyalgo = undef;       # key algorithm
 
 # Variables shared with runtests.pl
 our $SOCKSIN="socksd-request.log"; # what curl sent to the SOCKS proxy
@@ -1825,6 +1825,8 @@ sub runsshserver {
     my $srvrname = servername_str($proto, $ipvnum, $idnum);
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
+    $keyalgo = $ENV{'CURL_TEST_SSH_KEYALGO'} ? $ENV{'CURL_TEST_SSH_KEYALGO'} : 'rsa';
+
     my $flags = "";
     $flags .= "--verbose " if($verb);
     $flags .= "--debugprotocol " if($debugprotocol);
@@ -1832,7 +1834,8 @@ sub runsshserver {
     $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
-    $flags .= "--user \"$USER\"";
+    $flags .= "--user \"$USER\" ";
+    $flags .= "--keyalgo \"$keyalgo\"";
 
     my @tports;
     my $port = getfreeport($ipvnum);
@@ -3201,7 +3204,7 @@ sub subvariables {
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
-    my $keyalgostr = sshkeyalgostr();
+    my $keyalgostr = sshkeyalgostr($keyalgo);
     $$thing =~ s/${prefix}SSHKEYALGO/$keyalgostr/g;
 
     # The purpose of FTPTIME2 is to provide times that can be

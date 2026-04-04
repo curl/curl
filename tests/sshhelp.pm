@@ -44,7 +44,6 @@ BEGIN {
         $sshlog
         $sftplog
         $sftpcmds
-        $keyalgo
         $hstprvkeyf
         $hstpubkeyf
         $hstpubmd5f
@@ -93,7 +92,6 @@ our $sshlog          = undef;                    # ssh client log file
 our $sftplog         = undef;                    # sftp client log file
 our $sftpcmds        = 'curl_sftp_cmds';         # sftp client commands batch file
 our $knownhosts      = 'curl_client_knownhosts'; # ssh knownhosts file
-our $keyalgo         = 'rsa';                    # key algo
 our $hstprvkeyf      = 'curl_host_key';          # host private key file
 our $hstpubkeyf      = 'curl_host_key.pub';      # host public key file
 our $hstpubmd5f      = 'curl_host_key.pub_md5';  # md5 hash of host public key
@@ -362,7 +360,8 @@ sub find_httptlssrv {
 # Return key algorithm string
 #
 sub sshkeyalgostr {
-  return 'ssh-' . $keyalgo;  # e.g. ssh-rsa, ssh-ecdsa, ssh-ed25519
+  my ($algo) = @_;
+  return 'ssh-' . $algo;  # e.g. ssh-rsa, ssh-ecdsa, ssh-ed25519
 }
 
 #***************************************************************************

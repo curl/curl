@@ -54,7 +54,6 @@ use sshhelp qw(
     $sshlog
     $sftplog
     $sftpcmds
-    $keyalgo
     $hstprvkeyf
     $hstpubkeyf
     $hstpubmd5f
@@ -98,6 +97,7 @@ my $listenaddr = '127.0.0.1'; # default address on which to listen
 my $ipvnum = 4;               # default IP version of listener address
 my $idnum = 1;                # default ssh daemon instance number
 my $proto = 'ssh';            # protocol the ssh daemon speaks
+my $keyalgo = 'rsa';          # key algorithm
 my $path = getcwd();          # current working directory
 my $logdir = $path .'/log';   # directory for log files
 my $piddir;                   # directory for server config files
@@ -192,6 +192,12 @@ while(@ARGV) {
             }
         }
     }
+    elsif($ARGV[0] eq '--keyalgo') {
+        if($ARGV[1]) {
+            $keyalgo = $1;
+            shift @ARGV;
+        }
+    }
     else {
         print STDERR "\nWarning: sshserver.pl unknown parameter: '$ARGV[0]'\n";
     }
@@ -261,10 +267,6 @@ if(!$sshdid) {
     exit 1;
 }
 logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
-
-if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 650) && $ENV{'CURL_TEST_SSH_KEYALGO'}) {
-    $keyalgo = $ENV{'CURL_TEST_SSH_KEYALGO'};  # e.g. rsa, ecdsa, ed25591
-}
 
 #***************************************************************************
 #  ssh daemon command line options we might use and version support
