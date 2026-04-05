@@ -315,10 +315,10 @@ jobs:
               build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   ,
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON',
               install: 'mingw-w64-x86_64-libssh2' }
-          - { name: 'schannel R', type: 'Release',
+          - { name: 'MultiSSL R', type: 'Release',
               build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun'   ,
-              config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON',
-              install: 'mingw-w64-i686-libssh2' }
+              config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_SCHANNEL=ON -DENABLE_ARES=ON -DENABLE_UNICODE=ON',
+              install: 'mingw-w64-i686-c-ares mingw-w64-i686-gnutls mingw-w64-i686-libssh2 mingw-w64-i686-openssl' }
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
@@ -611,7 +611,8 @@ jobs:
             ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             SHA256: 12d2c62ad4527ec8a52275ea8485678dcbe20bec4716a3c7ba274f225d696085
-            config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
+            config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBSSH=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
+            install: mingw-w64-i686-libssh
             type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel !examples'  # mingw-w64 3.0
