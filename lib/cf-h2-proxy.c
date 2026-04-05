@@ -1158,10 +1158,9 @@ static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
 
   *pnread = 0;
   if(ctx->tunnel.error) {
-    failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
-          " %s)", ctx->tunnel.stream_id,
-           ctx->tunnel.reset ? "server" : "curl",
-           ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
+    failf(data, "HTTP/2 stream %u reset by %s (error 0x%x %s)",
+          ctx->tunnel.stream_id, ctx->tunnel.reset ? "server" : "curl",
+          ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
     return CURLE_RECV_ERROR;
   }
 
