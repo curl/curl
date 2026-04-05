@@ -2900,21 +2900,21 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
  */
 
 #undef curl_easy_setopt
-CURLcode curl_easy_setopt(CURL *d, CURLoption tag, ...)
+CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...)
 {
   va_list arg;
   CURLcode result;
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  va_start(arg, tag);
+  va_start(arg, option);
 
-  result = Curl_vsetopt(data, tag, arg);
+  result = Curl_vsetopt(data, option, arg);
 
   va_end(arg);
   if(result == CURLE_BAD_FUNCTION_ARGUMENT)
-    failf(data, "setopt 0x%x got bad argument", tag);
+    failf(data, "setopt 0x%x got bad argument", option);
   return result;
 }

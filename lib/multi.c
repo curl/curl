@@ -454,11 +454,11 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
+CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
 {
   CURLMcode mresult;
   struct Curl_multi *multi = m;
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -776,10 +776,10 @@ static void close_connect_only(struct connectdata *conn,
     connclose(conn, "Removing connect-only easy handle");
 }
 
-CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
+CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
 {
   struct Curl_multi *multi = m;
-  struct Curl_easy *data = d;
+  struct Curl_easy *data = curl;
   bool premature;
   struct Curl_llist_node *e;
   CURLMcode mresult;
@@ -1656,22 +1656,22 @@ out:
   return mresult;
 }
 
-CURLMcode curl_multi_wait(CURLM *multi,
+CURLMcode curl_multi_wait(CURLM *m,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
                           int *ret)
 {
-  return multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, FALSE);
+  return multi_wait(m, extra_fds, extra_nfds, timeout_ms, ret, FALSE);
 }
 
-CURLMcode curl_multi_poll(CURLM *multi,
+CURLMcode curl_multi_poll(CURLM *m,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
                           int *ret)
 {
-  return multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, TRUE);
+  return multi_wait(m, extra_fds, extra_nfds, timeout_ms, ret, TRUE);
 }
 
 CURLMcode curl_multi_wakeup(CURLM *m)
@@ -3724,14 +3724,14 @@ void Curl_expire_clear(struct Curl_easy *data)
   }
 }
 
-CURLMcode curl_multi_assign(CURLM *m, curl_socket_t s,
-                            void *hashp)
+CURLMcode curl_multi_assign(CURLM *m, curl_socket_t sockfd,
+                            void *sockp)
 {
   struct Curl_multi *multi = m;
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-  return Curl_multi_ev_assign(multi, s, hashp);
+  return Curl_multi_ev_assign(multi, sockfd, sockp);
 }
 
 static void move_pending_to_connect(struct Curl_multi *multi,
