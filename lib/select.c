@@ -642,13 +642,19 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
                              (!do_out ? CURL_POLL_OUT : 0));
 }
 
+/*
+ * Return values:
+ *   -1 = system call error or fd >= FD_SETSIZE
+ *    0 = timeout
+ *    N = number of structures with non zero revent fields
+ */
 int Curl_pollset_poll(struct Curl_easy *data,
                       struct easy_pollset *ps,
                       timediff_t timeout_ms)
 {
   struct pollfd *pfds;
   unsigned int i, npfds;
-  int result;
+  int rc;
 
   (void)data;
   DEBUGASSERT(data);
@@ -677,9 +683,9 @@ int Curl_pollset_poll(struct Curl_easy *data,
     }
   }
 
-  result = Curl_poll(pfds, npfds, timeout_ms);
+  rc = Curl_poll(pfds, npfds, timeout_ms);
   curlx_free(pfds);
-  return result;
+  return rc;
 }
 
 void Curl_pollset_check(struct Curl_easy *data,
