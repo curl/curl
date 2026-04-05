@@ -316,7 +316,7 @@ const struct Curl_scheme Curl_scheme_smb = {
 #endif
   CURLPROTO_SMB,                        /* protocol */
   CURLPROTO_SMB,                        /* family */
-  PROTOPT_CONN_REUSE,                   /* flags */
+  PROTOPT_NONE,                         /* flags */
   PORT_SMB,                             /* defport */
 };
 
@@ -330,7 +330,7 @@ const struct Curl_scheme Curl_scheme_smbs = {
 #endif
   CURLPROTO_SMBS,                       /* protocol */
   CURLPROTO_SMB,                        /* family */
-  PROTOPT_SSL | PROTOPT_CONN_REUSE,     /* flags */
+  PROTOPT_SSL,                          /* flags */
   PORT_SMBS,                            /* defport */
 };
 
