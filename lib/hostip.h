@@ -88,10 +88,10 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, uint16_t port);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
- * given in the 'ip' argument. The result will be stored in the buf that is
+ * given in the 'ai' argument. The result will be stored in the buf that is
  * bufsize bytes big.
  */
-void Curl_printable_address(const struct Curl_addrinfo *ip,
+void Curl_printable_address(const struct Curl_addrinfo *ai,
                             char *buf, size_t bufsize);
 
 /* Start DNS resolving for the given parameters. Returns

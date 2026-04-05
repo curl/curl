@@ -176,7 +176,7 @@ struct doh_probes;
  * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
- * On return 'entry' is assigned the resolved dns (CURLE_OK or NULL otherwise.
+ * On return 'dns' is assigned the resolved dns (CURLE_OK or NULL otherwise.
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.

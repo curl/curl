@@ -379,7 +379,7 @@ bool Curl_async_knows_https(struct Curl_easy *data,
  * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
- * 'entry' MUST be non-NULL.
+ * 'pdns' MUST be non-NULL.
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
