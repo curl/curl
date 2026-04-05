@@ -333,6 +333,9 @@ static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs, int ip_version,
   return CURLE_OK;
 }
 
+/* Avoid unbounded socket use for hosts with many addresses. */
+#define MAX_CONCURRENT_ATTEMPTS 6
+
 static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
                                   struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
@@ -397,7 +400,8 @@ evaluate:
 #endif
     do_more = more_possible &&
       (curlx_ptimediff_ms(Curl_pgrs_now(data), &bs->last_attempt_started) >=
-       bs->attempt_delay_ms);
+       bs->attempt_delay_ms) &&
+      (ongoing < MAX_CONCURRENT_ATTEMPTS);
     if(do_more)
       CURL_TRC_CF(data, cf, "happy eyeballs timeout expired, "
                   "start next attempt");
