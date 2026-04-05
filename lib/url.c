@@ -1820,7 +1820,7 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   /* IPv6 addresses with a scope_id (0 is default == global) have a
    * printable representation with a '%<scope_id>' suffix. */
   if(conn->scope_id)
-    conn->destination = curl_maprintf("[%s:%u]%%%d", hostname, port,
+    conn->destination = curl_maprintf("[%s:%u]%%%u", hostname, port,
                                       conn->scope_id);
   else
 #endif

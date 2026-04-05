@@ -193,7 +193,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       return CURLE_OK;
     result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
     CURL_TRC_WRITE(data, "download_write header(type=%x, blen=%zu) -> %d",
-                   type, nbytes, result);
+                   (unsigned int)type, nbytes, result);
     return result;
   }
 
@@ -214,7 +214,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     /* BODY arrives although we want none, bail out */
     streamclose(data->conn, "ignoring body");
     CURL_TRC_WRITE(data, "download_write body(type=%x, blen=%zu), "
-                   "did not want a BODY", type, nbytes);
+                   "did not want a BODY", (unsigned int)type, nbytes);
     data->req.download_done = TRUE;
     if(data->info.header_size)
       /* if headers have been received, this is fine */
@@ -258,7 +258,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   if(!data->req.ignorebody && (nwrite || (type & CLIENTWRITE_EOS))) {
     result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
     CURL_TRC_WRITE(data, "download_write body(type=%x, blen=%zu) -> %d",
-                   type, nbytes, result);
+                   (unsigned int)type, nbytes, result);
     if(result)
       return result;
   }
@@ -396,7 +396,7 @@ CURLcode Curl_client_write(struct Curl_easy *data,
 
   result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, len);
   CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
-                 type, len, result);
+                 (unsigned int)type, len, result);
   return result;
 }
 

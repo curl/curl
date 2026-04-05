@@ -431,7 +431,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
     ctx->eos = TRUE;
   }
   *peos = (bool)ctx->eos;
-  DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
+  DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zu, %d",
                blen, result, *pnread, *peos));
   return result;
 }

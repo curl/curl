@@ -32,7 +32,8 @@ extern "C" {
 
 /* the error codes for the URL API */
 typedef enum {
-  CURLUE_OK,
+  CURLUE_SIGNED = -1, /* to ensure signed type, never use! */
+  CURLUE_OK = 0,
   CURLUE_BAD_HANDLE,          /* 1 */
   CURLUE_BAD_PARTPOINTER,     /* 2 */
   CURLUE_MALFORMED_INPUT,     /* 3 */

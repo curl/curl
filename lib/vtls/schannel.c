@@ -1670,7 +1670,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
 
     traverse_cert_store(ccert_context, cert_counter_callback, &certs_count);
     if(certs_count > MAX_ALLOWED_CERT_AMOUNT) {
-      failf(data, "%d certificates is more than allowed (%u)",
+      failf(data, "%d certificates is more than allowed (%d)",
             certs_count, MAX_ALLOWED_CERT_AMOUNT);
       CertFreeCertificateContext(ccert_context);
       return CURLE_SSL_CONNECT_ERROR;

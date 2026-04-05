@@ -279,7 +279,7 @@ static CURLcode get_pkey_rsa(struct Curl_easy *data,
 #else
   RSA_get0_key(rsa, &n, &e, NULL);
 #endif /* HAVE_EVP_PKEY_GET_PARAMS */
-  BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
+  BIO_printf(mem, "%d", (int)(n ? BN_num_bits(n) : 0));
   result = push_certinfo(data, mem, "RSA Public Key", i);
   if(!result) {
     result = print_pubkey_BN(rsa, n, i);
@@ -384,7 +384,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   numcerts = sk_X509_num(sk);
   if(numcerts > MAX_ALLOWED_CERT_AMOUNT) {
-    failf(data, "%d certificates is more than allowed (%u)", (int)numcerts,
+    failf(data, "%d certificates is more than allowed (%d)", (int)numcerts,
           MAX_ALLOWED_CERT_AMOUNT);
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -415,7 +415,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-    BIO_printf(mem, "%lx", X509_get_version(x));
+    BIO_printf(mem, "%lx", (unsigned long)X509_get_version(x));
     result = push_certinfo(data, mem, "Version", i);
     if(result)
       break;
@@ -2065,7 +2065,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     break;
   default:
     DEBUGASSERT(0);
-    failf(data, "unexpected ssl peer type: %d", peer->type);
+    failf(data, "unexpected ssl peer type: %d", (int)peer->type);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -2492,7 +2492,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     verstr = "TLSv1.3";
     break;
   default:
-    curl_msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
+    curl_msnprintf(unknown, sizeof(unknown), "(%x)", (unsigned int)ssl_ver);
     verstr = unknown;
     break;
   }
@@ -3371,7 +3371,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                   scs->alpn ? scs->alpn : "-");
             octx->reused_session = TRUE;
             infof(data, "SSL verify result: %lx",
-                  SSL_get_verify_result(octx->ssl));
+                  (unsigned long)SSL_get_verify_result(octx->ssl));
 #ifdef HAVE_OPENSSL_EARLYDATA
             if(ssl_config->earlydata && scs->alpn &&
                SSL_SESSION_get_max_early_data(ssl_session) &&
@@ -4762,7 +4762,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   ossl_verify = SSL_get_verify_result(octx->ssl);
   ssl_config->certverifyresult = ossl_verify;
-  infof(data, "OpenSSL verify result: %lx", ossl_verify);
+  infof(data, "OpenSSL verify result: %lx", (unsigned long)ossl_verify);
 
   verified = (ossl_verify == X509_V_OK);
   if(verified)

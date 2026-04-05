@@ -680,7 +680,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
             /* This could be the next response, no consume and return */
             if(*pconsumed) {
               DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
-                           "skipping %zd bytes of junk", *pconsumed));
+                           "skipping %zu bytes of junk", *pconsumed));
             }
             rtspc->state = RTP_PARSE_SKIP;
             rtspc->in_header = TRUE;
@@ -910,7 +910,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d, "
                "rtspc->state=%d, req.size=%" FMT_OFF_T ")",
-               blen, rtspc->in_header, data->req.done, rtspc->state,
+               blen, rtspc->in_header, data->req.done, (int)rtspc->state,
                data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY |
