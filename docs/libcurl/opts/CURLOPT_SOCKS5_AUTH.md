@@ -35,7 +35,7 @@ password with the CURLOPT_PROXYUSERPWD(3) option.
 
 The specific socks authentication method is an *access property*, it does not
 change the security context. This means that this option changes how the
-connection and access to the proxy happens when a connection is setup, but it
+connection and access to the proxy happen when a connection is set up, but it
 does not affect which proxy connections libcurl can reuse. libcurl may reuse a
 connection that was set up with a different socks authentication method. Proxy
 connection reuse still depends on other properties matching, such as the
