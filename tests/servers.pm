@@ -1843,7 +1843,7 @@ sub runsshserver {
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
     $flags .= "--user \"$USER\"";
     if(defined $feature{"sshkeyalgo"}) {
-        $flags .= " --keyalgo " . $feature{"sshkeyalgo"};
+        $flags .= ' --keyalgo ' . $feature{"sshkeyalgo"};
     }
 
     my @tports;
