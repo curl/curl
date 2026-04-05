@@ -1709,9 +1709,9 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
         stream->close_handled = TRUE;
         return CURLE_OK;
     }
-    failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
-          " %s)", stream->id, stream->reset_by_server ? "server" : "curl",
-           stream->error, nghttp2_http2_strerror(stream->error));
+    failf(data, "HTTP/2 stream %u reset by %s (error 0x%x %s)",
+          stream->id, stream->reset_by_server ? "server" : "curl",
+          stream->error, nghttp2_http2_strerror(stream->error));
     return stream->error ? CURLE_HTTP2_STREAM :
            (data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP2);
   }
