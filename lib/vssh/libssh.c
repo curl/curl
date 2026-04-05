@@ -567,7 +567,7 @@ static int myssh_in_SFTP_QUOTE_STATVFS(struct Curl_easy *data,
 #ifdef _MSC_VER
 #define CURL_LIBSSH_VFS_SIZE_MASK "I64u"
 #else
-#define CURL_LIBSSH_VFS_SIZE_MASK PRIu64
+#define CURL_LIBSSH_VFS_SIZE_MASK "llu"
 #endif
     CURLcode result = CURLE_OK;
     char *tmp = curl_maprintf("statvfs:\n"
