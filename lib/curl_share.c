@@ -281,7 +281,6 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   case CURLSHOPT_UNSHARE:
     /* this is a type this share will no longer share */
     type = va_arg(param, int);
-    share->specifier &= ~(unsigned int)(1 << type);
     switch(type) {
     case CURL_LOCK_DATA_DNS:
       break;
@@ -325,6 +324,8 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
       res = CURLSHE_BAD_OPTION;
       break;
     }
+    if(!res)
+      share->specifier &= ~(unsigned int)(1 << type);
     break;
 
   case CURLSHOPT_LOCKFUNC:
