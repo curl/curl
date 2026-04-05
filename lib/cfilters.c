@@ -832,12 +832,19 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
   return result;
 }
 
+/*
+ * Return values:
+ *   -1 = error
+ *    0 = timeout
+ *    N = number of structures with non zero revent fields
+ */
 int Curl_conn_cf_poll(struct Curl_cfilter *cf,
                       struct Curl_easy *data,
                       timediff_t timeout_ms)
 {
   struct easy_pollset ps;
-  int result;
+  int rc;
+  CURLcode result;
 
   DEBUGASSERT(cf);
   DEBUGASSERT(data);
@@ -846,9 +853,11 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
 
   result = Curl_conn_cf_adjust_pollset(cf, data, &ps);
   if(!result)
-    result = Curl_pollset_poll(data, &ps, timeout_ms);
+    rc = Curl_pollset_poll(data, &ps, timeout_ms);
+  else
+    rc = -1;
   Curl_pollset_cleanup(&ps);
-  return result;
+  return rc;
 }
 
 void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
