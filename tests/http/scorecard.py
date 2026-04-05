@@ -763,7 +763,6 @@ def run_score(args, protocol):
         for x in args.request_parallels:
             request_parallels.extend([int(s) for s in x.split(',')])
 
-
     if args.downloads or args.uploads or args.requests or args.handshakes:
         handshakes = args.handshakes
         if not args.downloads:
