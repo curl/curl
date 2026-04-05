@@ -1661,11 +1661,9 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
       myssh_quote_error(data, sshc, NULL);
       return SSH_NO_ERROR;
     }
-#if SIZEOF_TIME_T > 4
     if(date >= 0 && (curl_off_t)date > (curl_off_t)UINT_MAX)
       /* because the libssh API cannot deal with a larger value */
       date = (time_t)UINT_MAX;
-#endif
     if(!strncmp(cmd, "atime", 5))
       sshc->quote_attrs->atime = (uint32_t)date;
     else /* mtime */
