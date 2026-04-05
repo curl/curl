@@ -317,8 +317,8 @@ jobs:
               install: 'mingw-w64-x86_64-libssh2' }
           - { name: 'MultiSSL R', type: 'Release',
               build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun'   ,
-              config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_SCHANNEL=ON -DENABLE_ARES=ON -DENABLE_UNICODE=ON',
-              install: 'mingw-w64-i686-c-ares mingw-w64-i686-gnutls mingw-w64-i686-libssh2 mingw-w64-i686-mbedtls mingw-w64-i686-openssl' }
+              config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_SCHANNEL=ON -DENABLE_ARES=ON -DENABLE_UNICODE=ON',
+              install: 'mingw-w64-i686-c-ares mingw-w64-i686-gnutls mingw-w64-i686-libssh2 mingw-w64-i686-openssl' }
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
