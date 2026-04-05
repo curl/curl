@@ -43,6 +43,7 @@ except ImportError:
         'Warning: Python package impacket is required for smb testing; '
         'use pip or your package manager to install it\n')
     sys.exit(1)
+
 from impacket import smb as imp_smb
 from impacket import smbserver as imp_smbserver
 from impacket.nt_errors import STATUS_ACCESS_DENIED, STATUS_NO_SUCH_FILE, STATUS_SUCCESS
@@ -52,6 +53,7 @@ SERVER_MAGIC = "SERVER_MAGIC"
 TESTS_MAGIC = "TESTS_MAGIC"
 VERIFIED_REQ = "verifiedserver"
 VERIFIED_RSP = "WE ROOLZ: {pid}\n"
+
 
 class ShutdownHandler(threading.Thread):
     """

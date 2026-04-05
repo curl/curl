@@ -148,10 +148,12 @@ def configures_httpd(env, httpd) -> Generator[bool, None, None]:
     # include this fixture as test parameter if the test configures httpd itself
     yield True
 
+
 @pytest.fixture(scope='session')
 def configures_nghttpx(env, httpd) -> Generator[bool, None, None]:
     # include this fixture as test parameter if the test configures nghttpx itself
     yield True
+
 
 @pytest.fixture(autouse=True, scope='function')
 def server_reset(request, env, httpd, nghttpx):
