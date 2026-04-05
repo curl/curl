@@ -372,8 +372,8 @@ static CURLcode do_init_writer_stack(struct Curl_easy *data)
    The bit pattern defines to what "streams" to write to. Body and/or header.
    The defines are in sendf.h of course.
  */
-CURLcode Curl_client_write(struct Curl_easy *data,
-                           int type, const char *buf, size_t len)
+CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
+                           size_t len)
 {
   CURLcode result;
 

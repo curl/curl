@@ -57,7 +57,7 @@ struct Curl_dns_entry {
  * Create a `Curl_dns_entry` with a reference count of 1.
  * Use `Curl_dns_entry_unlink()` to release your hold on it.
  *
- * The call takes ownership of `addr`, even in case of failure, and always
+ * The call takes ownership of `paddr`, even in case of failure, and always
  * clears `*paddr`. It makes a copy of `hostname`.
  *
  * Returns entry or NULL on OOM.

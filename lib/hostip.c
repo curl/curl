@@ -111,14 +111,6 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-/*
- * Curl_printable_address() stores a printable version of the 1st address
- * given in the 'ai' argument. The result will be stored in the buf that is
- * bufsize bytes big.
- *
- * If the conversion fails, the target buffer is empty.
- */
-
 uint8_t Curl_resolv_dns_queries(struct Curl_easy *data, uint8_t ip_version)
 {
   (void)data;
@@ -162,6 +154,13 @@ const char *Curl_resolv_query_str(uint8_t dns_queries)
 }
 #endif
 
+/*
+ * Curl_printable_address() stores a printable version of the 1st address
+ * given in the 'ai' argument. The result will be stored in the buf that is
+ * bufsize bytes big.
+ *
+ * If the conversion fails, the target buffer is empty.
+ */
 void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
                             size_t bufsize)
 {
