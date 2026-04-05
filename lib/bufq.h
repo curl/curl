@@ -158,6 +158,13 @@ bool Curl_bufq_is_empty(const struct bufq *q);
 bool Curl_bufq_is_full(const struct bufq *q);
 
 /**
+ * Return the number of bytes that can still be written before the
+ * queue is full. For queues with BUFQ_OPT_SOFT_LIMIT this returns
+ * SIZE_MAX since writing is always allowed.
+ */
+size_t Curl_bufq_space(const struct bufq *q);
+
+/**
  * Write buf to the end of the buffer queue. The buf is copied
  * and the amount of copied bytes is returned.
  * CURLE_AGAIN is returned if the buffer queue is full.

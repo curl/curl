@@ -70,6 +70,7 @@ my @unsupported_protocol_num = (
 # numerical input they do not recognize as valid
 my @not_built_in_num = (
     'CURLOPT_HTTPAUTH',
+    'CURLOPT_HTTPPROXYUDPTUNNEL',
     'CURLOPT_PROXYAUTH',
     'CURLOPT_SOCKS5_AUTH',
     );

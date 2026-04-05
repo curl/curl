@@ -150,8 +150,10 @@ LIB_CFILES =         \
   bufq.c             \
   bufref.c           \
   cf-dns.c           \
+  capsule.c          \
   cf-h1-proxy.c      \
   cf-h2-proxy.c      \
+  cf-h3-proxy.c      \
   cf-haproxy.c       \
   cf-https-connect.c \
   cf-ip-happy.c      \
@@ -280,8 +282,10 @@ LIB_HFILES =         \
   bufq.h             \
   bufref.h           \
   cf-dns.h           \
+  capsule.h          \
   cf-h1-proxy.h      \
   cf-h2-proxy.h      \
+  cf-h3-proxy.h      \
   cf-haproxy.h       \
   cf-https-connect.h \
   cf-ip-happy.h      \

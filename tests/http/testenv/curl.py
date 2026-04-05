@@ -685,10 +685,15 @@ class CurlClient:
 
     def get_proxy_args(self, proto: str = 'http/1.1',
                        proxys: bool = True, tunnel: bool = False,
-                       use_ip: bool = False):
+                       tunneludp: bool = False, use_ip: bool = False):
         proxy_name = self._server_addr if use_ip else self.env.proxy_domain
         if proxys:
-            pport = self.env.pts_port(proto) if tunnel else self.env.proxys_port
+            if tunnel or tunneludp:
+                pport = self.env.pts_port(proto)
+            elif proto == 'h3':
+                pport = self.env.h3proxys_port
+            else:
+                pport = self.env.proxys_port
             xargs = [
                 '--proxy', f'https://{proxy_name}:{pport}/',
                 '--resolve', f'{proxy_name}:{pport}:{self._server_addr}',
@@ -696,6 +701,8 @@ class CurlClient:
             ]
             if proto == 'h2':
                 xargs.append('--proxy-http2')
+            elif proto == 'h3':
+                xargs.append('--proxy-http3')
         else:
             xargs = [
                 '--proxy', f'http://{proxy_name}:{self.env.proxy_port}/',
@@ -703,6 +710,8 @@ class CurlClient:
             ]
         if tunnel:
             xargs.append('--proxytunnel')
+        elif tunneludp:
+            xargs.append('--proxyudptunnel')
         return xargs
 
     def http_get(self, url: str, extra_args: Optional[List[str]] = None,

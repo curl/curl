@@ -6,6 +6,7 @@ Short: p
 Help: HTTP proxy tunnel (using CONNECT)
 Category: proxy
 Added: 7.3
+Mutexed: proxyudptunnel
 Multi: boolean
 See-also:
   - proxy
@@ -22,3 +23,5 @@ number curl wants to tunnel through to.
 
 To suppress proxy CONNECT response headers when curl is set to output headers
 use --suppress-connect-headers.
+
+This option is mutually exclusive with `--proxyudptunnel`.

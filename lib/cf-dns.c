@@ -549,6 +549,32 @@ Curl_conn_dns_get_ai(struct Curl_easy *data,
                                ai_family, index);
 }
 
+const struct Curl_addrinfo *
+Curl_conn_dns_get_ip_addr(struct Curl_easy *data,
+                          int sockindex,
+                          uint8_t ip_version)
+{
+  const struct Curl_addrinfo *addr = NULL;
+
+  if(ip_version == CURL_IPRESOLVE_V4) {
+    addr = Curl_conn_dns_get_ai(data, sockindex, AF_INET, 0);
+  }
+  else if(ip_version == CURL_IPRESOLVE_V6) {
+#ifdef USE_IPV6
+    addr = Curl_conn_dns_get_ai(data, sockindex, AF_INET6, 0);
+#endif
+  }
+  else {
+#ifdef USE_IPV6
+    addr = Curl_conn_dns_get_ai(data, sockindex, AF_INET6, 0);
+    if(!addr)
+#endif
+      addr = Curl_conn_dns_get_ai(data, sockindex, AF_INET, 0);
+  }
+
+  return addr;
+}
+
 #ifdef USE_HTTPSRR
 /* Return the HTTPS-RR info from the first "resolve" filter at the
  * connection. If the DNS resolving is not done yet or if there

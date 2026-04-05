@@ -223,6 +223,29 @@ class EnvConfig:
         self._caddy_version = None
         if len(self.caddy.strip()) == 0:
             self.caddy = None
+
+        self.h2o = self.config['h2o']['h2o']
+        if len(self.h2o.strip()) == 0:
+            self.h2o = None
+        self._h2o_version = None
+        if self.h2o is not None:
+            try:
+                p = subprocess.run(args=[self.h2o, '--version'],
+                                   capture_output=True, text=True)
+                if p.returncode != 0:
+                    # not a working h2o
+                    self.h2o = None
+                else:
+                    # h2o --version output format: "h2o version 2.3.0"
+                    m = re.search(r'h2o version (\S+)', p.stdout)
+                    if m:
+                        self._h2o_version = m.group(1)
+                    else:
+                        self.h2o = None
+            except Exception:
+                log.exception('checking h2o version')
+                self.h2o = None
+
         if self.caddy is not None:
             p = subprocess.run(args=[self.caddy, 'version'],
                                capture_output=True, text=True)
@@ -371,6 +394,10 @@ class EnvConfig:
         return self._vsftpd_version
 
     @property
+    def h2o_version(self):
+        return self._h2o_version
+
+    @property
     def tcpdmp(self) -> Optional[str]:
         return self._tcpdump
 
@@ -405,6 +432,10 @@ class Env:
     @staticmethod
     def have_h3_server() -> bool:
         return Env.CONFIG.nghttpx_with_h3
+
+    @staticmethod
+    def have_h2o() -> bool:
+        return Env.CONFIG.h2o is not None
 
     @staticmethod
     def have_ssl_curl() -> bool:
@@ -567,6 +598,10 @@ class Env:
     @staticmethod
     def caddy_version() -> str:
         return Env.CONFIG.caddy_version
+
+    @staticmethod
+    def h2o_version() -> str:
+        return Env.CONFIG.h2o_version
 
     @staticmethod
     def caddy_is_at_least(minv) -> bool:
@@ -748,9 +783,18 @@ class Env:
     def h2proxys_port(self) -> int:
         return self.CONFIG.ports['h2proxys']
 
+    @property
+    def h3proxys_port(self) -> int:
+        return self.CONFIG.ports['h3proxys']
+
     def pts_port(self, proto: str = 'http/1.1') -> int:
         # proxy tunnel port
-        return self.CONFIG.ports['h2proxys' if proto == 'h2' else 'proxys']
+        if proto == 'h3':
+            return self.CONFIG.ports['h3proxys']
+        elif proto == 'h2':
+            return self.CONFIG.ports['h2proxys']
+        else:
+            return self.CONFIG.ports['proxys']
 
     @property
     def caddy(self) -> str:
