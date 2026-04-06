@@ -284,7 +284,7 @@ jobs:
           cd "nettle-${NETTLE_VERSION}"
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
-            --disable-silent-rules --disable-static --disable-openssl --disable-documentation
+            --disable-static --disable-openssl --disable-documentation
           make install
 
       - name: 'build gnutls'
