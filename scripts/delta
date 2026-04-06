@@ -104,10 +104,10 @@ my $boptions = cmd('$', '2>', 'git', 'grep', '-h', '-c', '{ *"....--', "$start:s
 my $noptions = $aoptions - $boptions;
 
 # current local branch
-my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
+my $branch = `git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
-my $afiles=`git ls-files | wc -l`;
+my $afiles = `git ls-files | wc -l`;
 my $deletes = scalar(cmd('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
 my $creates = scalar(cmd('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
 
@@ -125,10 +125,10 @@ my @tagged = cmd('git', 'for-each-ref', '--format=%(refname:short) | %(taggerdat
 my $tagged = tagstamp(2, @tagged); # Unix timestamp
 my $taggednice = tagstamp(3, @tagged); # human readable time
 chomp $taggednice;
-my $now=POSIX::strftime("%s", localtime());
-my $elapsed=$now - $tagged; # number of seconds since tag
-my $total=$now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
-my $totalhttpget=$now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
+my $now = POSIX::strftime("%s", localtime());
+my $elapsed = $now - $tagged; # number of seconds since tag
+my $total = $now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
+my $totalhttpget = $now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
 
 # Number of public functions in libcurl
 my $apublic = scalar(cmd('git', 'grep', '^CURL_EXTERN', '--', 'include/curl'));
