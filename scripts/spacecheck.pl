@@ -199,6 +199,26 @@ while(my $filename = <$git_ls_files>) {
         }
     }
 
+    if($content =~ /\n\n\n\n/ ||
+       $content =~ /\r\n\r\n\r\n\r\n/) {
+        my $line = 0;
+        my $blank = 0;
+        for my $l (split(/\n/, $content)) {
+            chomp $l;
+            $line++;
+            if($l =~ /^$/) {
+                if($blank > 1) {
+                    my $lineno = sprintf('3 or more consecutive empty lines @ line %d', $line);
+                    push @err, $lineno;
+                }
+                $blank++;
+            }
+            else {
+                $blank = 0;
+            }
+        }
+    }
+
     if(!fn_match($filename, @longline)) {
         my $line = 0;
         for my $l (split(/\n/, $content)) {
