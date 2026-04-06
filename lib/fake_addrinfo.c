@@ -184,9 +184,9 @@ int r_getaddrinfo(const char *node,
   /* Wait until no more requests are left to be processed */
   ares_queue_wait_empty(channel, -1);
 
-  if(ctx.result) {
+  if(ctx.addr) {
     /* convert the c-ares version */
-    *res = mk_getaddrinfo(ctx.result);
+    *res = mk_getaddrinfo(ctx.addr);
     /* free the old */
     ares_freeaddrinfo(ctx.addr);
   }
