@@ -438,13 +438,12 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 
 static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
 {
-  bool result = FALSE;
   struct in_addr ia;
   int res = curlx_inet_pton(AF_INET, hostname, &ia);
   if(res) {
     ip_blob->size = sizeof(struct in_addr);
     memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
-    result = TRUE;
+    return TRUE;
   }
   else {
     struct in6_addr ia6;
@@ -452,10 +451,10 @@ static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
     if(res) {
       ip_blob->size = sizeof(struct in6_addr);
       memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));
-      result = TRUE;
+      return TRUE;
     }
   }
-  return result;
+  return FALSE;
 }
 
 static bool get_alt_name_info(struct Curl_easy *data,
@@ -463,20 +462,19 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               PCERT_ALT_NAME_INFO *alt_name_info,
                               LPDWORD alt_name_info_size)
 {
-  bool result = FALSE;
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
   CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
 
   if(!ctx) {
     failf(data, "schannel: Null certificate context.");
-    return result;
+    return FALSE;
   }
 
   cert_info = ctx->pCertInfo;
   if(!cert_info) {
     failf(data, "schannel: Null certificate info.");
-    return result;
+    return FALSE;
   }
 
   extension = CertFindExtension(szOID_SUBJECT_ALT_NAME2,
@@ -484,7 +482,7 @@ static bool get_alt_name_info(struct Curl_easy *data,
                                 cert_info->rgExtension);
   if(!extension) {
     failf(data, "schannel: CertFindExtension() returned no extension.");
-    return result;
+    return FALSE;
   }
 
   if(!CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
@@ -496,11 +494,10 @@ static bool get_alt_name_info(struct Curl_easy *data,
                           alt_name_info,
                           alt_name_info_size)) {
     failf(data, "schannel: CryptDecodeObjectEx() returned no alternate name "
-                "information.");
-    return result;
+          "information.");
+    return FALSE;
   }
-  result = TRUE;
-  return result;
+  return TRUE;
 }
 
 /* Verify the server's hostname */

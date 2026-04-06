@@ -251,7 +251,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
                                       unsigned int flags,
                                       size_t *offset) /* to the hostname */
 {
-  CURLUcode result = CURLUE_OK;
+  CURLUcode ures = CURLUE_OK;
   CURLcode ccode;
   char *userp = NULL;
   char *passwdp = NULL;
@@ -292,14 +292,14 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   if(ccode) {
     /* the only possible error from Curl_parse_login_details is out of
        memory: */
-    result = CURLUE_OUT_OF_MEMORY;
+    ures = CURLUE_OUT_OF_MEMORY;
     goto out;
   }
 
   if(userp) {
     if(flags & CURLU_DISALLOW_USER) {
       /* Option DISALLOW_USER is set and URL contains username. */
-      result = CURLUE_USER_NOT_ALLOWED;
+      ures = CURLUE_USER_NOT_ALLOWED;
       goto out;
     }
     curlx_free(u->user);
@@ -329,7 +329,7 @@ out:
   u->password = NULL;
   u->options = NULL;
 
-  return result;
+  return ures;
 }
 
 UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
@@ -659,21 +659,21 @@ out:
 /* used for HTTP/2 server push */
 CURLUcode Curl_url_set_authority(CURLU *u, const char *authority)
 {
-  CURLUcode result;
+  CURLUcode ures;
   struct dynbuf host;
 
   DEBUGASSERT(authority);
   curlx_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
 
-  result = parse_authority(u, authority, strlen(authority),
-                           CURLU_DISALLOW_USER, &host, !!u->scheme);
-  if(result)
+  ures = parse_authority(u, authority, strlen(authority),
+                         CURLU_DISALLOW_USER, &host, !!u->scheme);
+  if(ures)
     curlx_dyn_free(&host);
   else {
     curlx_free(u->host);
     u->host = curlx_dyn_ptr(&host);
   }
-  return result;
+  return ures;
 }
 
 /*
@@ -1012,16 +1012,16 @@ static CURLUcode guess_scheme(CURLU *u, struct dynbuf *host)
 static CURLUcode handle_fragment(CURLU *u, const char *fragment,
                                  size_t fraglen, unsigned int flags)
 {
-  CURLUcode result;
+  CURLUcode ures;
   u->fragment_present = TRUE;
   if(fraglen > 1) {
     /* skip the leading '#' in the copy but include the terminating null */
     if(flags & CURLU_URLENCODE) {
       struct dynbuf enc;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      result = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE);
-      if(result)
-        return result;
+      ures = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE);
+      if(ures)
+        return ures;
       u->fragment = curlx_dyn_ptr(&enc);
     }
     else {
@@ -1040,12 +1040,12 @@ static CURLUcode handle_query(CURLU *u, const char *query,
   if(qlen > 1) {
     if(flags & CURLU_URLENCODE) {
       struct dynbuf enc;
-      CURLUcode result;
+      CURLUcode ures;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
       /* skip the leading question mark */
-      result = urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE);
-      if(result)
-        return result;
+      ures = urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE);
+      if(ures)
+        return ures;
       u->query = curlx_dyn_ptr(&enc);
     }
     else {
@@ -1067,13 +1067,13 @@ static CURLUcode handle_path(CURLU *u, const char *path,
                              size_t pathlen, unsigned int flags,
                              bool is_file)
 {
-  CURLUcode result;
+  CURLUcode ures;
   if(pathlen && (flags & CURLU_URLENCODE)) {
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    result = urlencode_str(&enc, path, pathlen, TRUE, FALSE);
-    if(result)
-      return result;
+    ures = urlencode_str(&enc, path, pathlen, TRUE, FALSE);
+    if(ures)
+      return ures;
     pathlen = curlx_dyn_len(&enc);
     path = u->path = curlx_dyn_ptr(&enc);
   }
@@ -1112,7 +1112,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   char schemebuf[MAX_SCHEME_LEN + 1];
   size_t schemelen = 0;
   size_t urllen;
-  CURLUcode result = CURLUE_OK;
+  CURLUcode ures = CURLUE_OK;
   struct dynbuf host;
   bool is_file = FALSE;
 
@@ -1120,8 +1120,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
   curlx_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
 
-  result = Curl_junkscan(url, &urllen, !!(flags & CURLU_ALLOW_SPACE));
-  if(result)
+  ures = Curl_junkscan(url, &urllen, !!(flags & CURLU_ALLOW_SPACE));
+  if(ures)
     goto fail;
 
   schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf),
@@ -1131,13 +1131,13 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   /* handle the file: scheme */
   if(schemelen && !strcmp(schemebuf, "file")) {
     is_file = TRUE;
-    result = parse_file(url, urllen, u, &host, &path, &pathlen);
+    ures = parse_file(url, urllen, u, &host, &path, &pathlen);
   }
   else {
     const char *hostp = NULL;
     size_t hostlen;
-    result = parse_scheme(url, u, schemebuf, schemelen, flags, &hostp);
-    if(result)
+    ures = parse_scheme(url, u, schemebuf, schemelen, flags, &hostp);
+    if(ures)
       goto fail;
 
     /* find the end of the hostname + port number */
@@ -1147,49 +1147,49 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     /* this pathlen also contains the query and the fragment */
     pathlen = urllen - (path - url);
     if(hostlen) {
-      result = parse_authority(u, hostp, hostlen, flags, &host,
-                               u->scheme != NULL);
-      if(!result && (flags & CURLU_GUESS_SCHEME) && !u->scheme)
-        result = guess_scheme(u, &host);
+      ures = parse_authority(u, hostp, hostlen, flags, &host,
+                             u->scheme != NULL);
+      if(!ures && (flags & CURLU_GUESS_SCHEME) && !u->scheme)
+        ures = guess_scheme(u, &host);
     }
     else if(flags & CURLU_NO_AUTHORITY) {
       /* allowed to be empty. */
       if(curlx_dyn_add(&host, ""))
-        result = CURLUE_OUT_OF_MEMORY;
+        ures = CURLUE_OUT_OF_MEMORY;
     }
     else
-      result = CURLUE_NO_HOST;
+      ures = CURLUE_NO_HOST;
   }
-  if(!result) {
+  if(!ures) {
     /* The path might at this point contain a fragment and/or a query to
        handle */
     const char *fragment = strchr(path, '#');
     if(fragment) {
       size_t fraglen = pathlen - (fragment - path);
-      result = handle_fragment(u, fragment, fraglen, flags);
+      ures = handle_fragment(u, fragment, fraglen, flags);
       /* after this, pathlen still contains the query */
       pathlen -= fraglen;
     }
   }
-  if(!result) {
+  if(!ures) {
     const char *query = memchr(path, '?', pathlen);
     if(query) {
       size_t qlen = pathlen - (query - path);
-      result = handle_query(u, query, qlen, flags);
+      ures = handle_query(u, query, qlen, flags);
       pathlen -= qlen;
     }
   }
-  if(!result)
+  if(!ures)
     /* the fragment and query parts are trimmed off from the path */
-    result = handle_path(u, path, pathlen, flags, is_file);
-  if(!result) {
+    ures = handle_path(u, path, pathlen, flags, is_file);
+  if(!ures) {
     u->host = curlx_dyn_ptr(&host);
     return CURLUE_OK;
   }
 fail:
   curlx_dyn_free(&host);
   free_urlhandle(u);
-  return result;
+  return ures;
 }
 
 /*
@@ -1198,15 +1198,15 @@ fail:
 static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
                                       unsigned int flags)
 {
-  CURLUcode result;
+  CURLUcode ures;
   CURLU tmpurl;
   memset(&tmpurl, 0, sizeof(tmpurl));
-  result = parseurl(url, &tmpurl, flags);
-  if(!result) {
+  ures = parseurl(url, &tmpurl, flags);
+  if(!ures) {
     free_urlhandle(u);
     *u = tmpurl;
   }
-  return result;
+  return ures;
 }
 
 /*
