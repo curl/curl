@@ -5152,7 +5152,7 @@ if test "$CURL_ENABLE_NTLM" = "1"; then
   if test "$HAVE_DES_ECB_ENCRYPT" = "1" ||
      test "$GNUTLS_ENABLED" = "1" ||
      test "$USE_WIN32_CRYPTO" = "1" ||
-     test "$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "1" ||
+     test "$HAVE_WC_DES_ECBENCRYPT" = "1" ||
      test "$HAVE_MBEDTLS_DES_CRYPT_ECB" = "1"; then
     use_curl_ntlm_core=yes
   fi
