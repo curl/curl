@@ -162,10 +162,7 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
 #define Curl_resolv_destroy(x,y)      Curl_nop_stmt
 #endif /* USE_CURL_ASYNC, else */
 
-
 CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
-
-
 
 #ifdef CURLRES_SYNCH
 /*
@@ -178,7 +175,6 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
                                             const char *hostname,
                                             uint16_t port,
                                             uint8_t transport);
-
 #endif
 
 #ifdef USE_UNIX_SOCKETS
