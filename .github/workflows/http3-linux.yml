@@ -282,7 +282,9 @@ jobs:
             --location "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "nettle-${NETTLE_VERSION}"
+          echo '-------------------'
           autoreconf -fi
+          echo '-------------------'
           ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
             --disable-static --disable-openssl --disable-documentation
           make install
