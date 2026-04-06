@@ -162,19 +162,20 @@ static curl_off_t VmsSpecialSize(const char *name,
 static FILE *vmsfopenread(const char *file, const char *mode)
 {
   curlx_struct_stat statbuf;
-  int result;
+  int res = curlx_stat(file, &statbuf);
 
-  result = curlx_stat(file, &statbuf);
-
-  switch(statbuf.st_fab_rfm) {
-  case FAB$C_VAR:
-  case FAB$C_VFC:
-  case FAB$C_STMCR:
-    return curlx_fopen(file, FOPEN_READTEXT); /* VMS */
-    break;
-  default:
-    return curlx_fopen(file, FOPEN_READTEXT, "rfm=stmlf", "ctx=stm");
+  if(res != -1) {
+    switch(statbuf.st_fab_rfm) {
+    case FAB$C_VAR:
+    case FAB$C_VFC:
+    case FAB$C_STMCR:
+      return curlx_fopen(file, FOPEN_READTEXT); /* VMS */
+      break;
+    default:
+      return curlx_fopen(file, FOPEN_READTEXT, "rfm=stmlf", "ctx=stm");
+    }
   }
+  return NULL;
 }
 
 #define fopen_read vmsfopenread
@@ -1001,7 +1002,7 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
 {
   curl_mime *mime = (curl_mime *)instream;
   curl_mimepart *part;
-  int result = CURL_SEEKFUNC_OK;
+  int rc = CURL_SEEKFUNC_OK;
 
   if(whence != SEEK_SET || offset)
     return CURL_SEEKFUNC_CANTSEEK;    /* Only support full rewind. */
@@ -1012,13 +1013,13 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
   for(part = mime->firstpart; part; part = part->nextpart) {
     int res = mime_part_rewind(part);
     if(res != CURL_SEEKFUNC_OK)
-      result = res;
+      rc = res;
   }
 
-  if(result == CURL_SEEKFUNC_OK)
+  if(rc == CURL_SEEKFUNC_OK)
     mimesetstate(&mime->state, MIMESTATE_BEGIN, NULL);
 
-  return result;
+  return rc;
 }
 
 /* Release part content. */

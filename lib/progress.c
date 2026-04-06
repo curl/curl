@@ -632,18 +632,18 @@ static void progress_meter(struct Curl_easy *data)
 static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
 {
   if(!data->progress.hide) {
+    int rc;
     if(data->set.fxferinfo) {
-      int result;
       /* There is a callback set, call that */
       Curl_set_in_callback(data, TRUE);
-      result = data->set.fxferinfo(data->set.progress_client,
-                                   data->progress.dl.total_size,
-                                   data->progress.dl.cur_size,
-                                   data->progress.ul.total_size,
-                                   data->progress.ul.cur_size);
+      rc = data->set.fxferinfo(data->set.progress_client,
+                               data->progress.dl.total_size,
+                               data->progress.dl.cur_size,
+                               data->progress.ul.total_size,
+                               data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
-      if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result) {
+      if(rc != CURL_PROGRESSFUNC_CONTINUE) {
+        if(rc) {
           failf(data, "Callback aborted");
           return CURLE_ABORTED_BY_CALLBACK;
         }
@@ -651,17 +651,16 @@ static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
       }
     }
     else if(data->set.fprogress) {
-      int result;
       /* The older deprecated callback is set, call that */
       Curl_set_in_callback(data, TRUE);
-      result = data->set.fprogress(data->set.progress_client,
-                                   (double)data->progress.dl.total_size,
-                                   (double)data->progress.dl.cur_size,
-                                   (double)data->progress.ul.total_size,
-                                   (double)data->progress.ul.cur_size);
+      rc = data->set.fprogress(data->set.progress_client,
+                               (double)data->progress.dl.total_size,
+                               (double)data->progress.dl.cur_size,
+                               (double)data->progress.ul.total_size,
+                               (double)data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
-      if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result) {
+      if(rc != CURL_PROGRESSFUNC_CONTINUE) {
+        if(rc) {
           failf(data, "Callback aborted");
           return CURLE_ABORTED_BY_CALLBACK;
         }

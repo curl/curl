@@ -1135,7 +1135,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
     (struct rustls_ssl_backend_data *)connssl->backend;
   const struct rustls_connection *rconn = NULL;
   CURLcode tmperr = CURLE_OK;
-  int result;
+  CURLcode result;
   bool wants_read;
   bool wants_write;
 
@@ -1155,12 +1155,12 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif /* USE_ECH */
 
   if(!backend->conn) {
-    result = cr_init_backend(cf, data,
-               (struct rustls_ssl_backend_data *)connssl->backend);
+    result =
+      cr_init_backend(cf, data,
+                      (struct rustls_ssl_backend_data *)connssl->backend);
     CURL_TRC_CF(data, cf, "cr_connect, init backend -> %d", result);
-    if(result != CURLE_OK) {
+    if(result)
       return result;
-    }
     connssl->state = ssl_connection_negotiating;
   }
   rconn = backend->conn;
