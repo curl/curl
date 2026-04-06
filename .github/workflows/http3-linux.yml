@@ -284,6 +284,7 @@ jobs:
             --location "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "nettle-${NETTLE_VERSION}"
+          autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
             --disable-silent-rules --disable-static --disable-openssl --disable-documentation
           make install
@@ -296,6 +297,7 @@ jobs:
             "https://www.gnupg.org/ftp/gcrypt/gnutls/v${GNUTLS_VERSION%.*}/gnutls-${GNUTLS_VERSION}.tar.xz" --output pkg.bin
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin
           cd "gnutls-${GNUTLS_VERSION}"
+          autoreconf -fi
           # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
           ./configure --disable-dependency-tracking --prefix=/home/runner/gnutls/build \
             PKG_CONFIG_PATH=/home/runner/nettle/build/lib64/pkgconfig \
