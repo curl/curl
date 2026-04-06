@@ -276,20 +276,20 @@ jobs:
           cmake --install .
 
       - name: 'build nettle'
+        if: ${{ steps.cache-nettle.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "nettle-${NETTLE_VERSION}"
-          echo '-------------------'
           autoreconf -fi
-          echo '-------------------'
           ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
             --disable-static --disable-openssl --disable-documentation
           make install
 
       - name: 'build gnutls'
+        if: ${{ steps.cache-gnutls.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
