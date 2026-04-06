@@ -438,13 +438,12 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 
 static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
 {
-  bool ip = FALSE;
   struct in_addr ia;
   int res = curlx_inet_pton(AF_INET, hostname, &ia);
   if(res) {
     ip_blob->size = sizeof(struct in_addr);
     memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
-    ip = TRUE;
+    return TRUE;
   }
   else {
     struct in6_addr ia6;
@@ -452,10 +451,10 @@ static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
     if(res) {
       ip_blob->size = sizeof(struct in6_addr);
       memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));
-      ip = TRUE;
+      return TRUE;
     }
   }
-  return ip;
+  return FALSE;
 }
 
 static bool get_alt_name_info(struct Curl_easy *data,
