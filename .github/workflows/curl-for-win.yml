@@ -32,7 +32,6 @@ concurrency:
 permissions: {}
 
 env:
-  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   CW_NOGET: 'curl trurl'
   CW_MAP: '0'
   CW_JOBS: '5'
@@ -53,7 +52,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-unitybatch-linux-a64-x64-gcc'
+          export CW_CONFIG='-main-werror-unitybatch-nocertdata-linux-a64-x64-gcc'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           export CW_CCSUFFIX='-15'
@@ -109,7 +108,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-unitybatch-linux-musl-r64-x64'
+          export CW_CONFIG='-main-werror-unitybatch-nocertdata-linux-musl-r64-x64'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default
@@ -138,7 +137,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-cares-unitybatch-mac-x64'
+          export CW_CONFIG='-main-werror-unitybatch-nocertdata-mac-x64-cares'
           export CW_REVISION="${GITHUB_SHA}"
           sh -c ./_ci-mac-homebrew.sh
 
@@ -156,7 +155,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-unitybatch-win-x64-noWINE'
+          export CW_CONFIG='-main-werror-unitybatch-nocertdata-win-x64-noWINE'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default
@@ -183,7 +182,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-unitybatch-win-x64-gcc-zlibold-noWINE'
+          export CW_CONFIG='-main-werror-unitybatch-nocertdata-win-x64-gcc-zlibold-noWINE'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default
