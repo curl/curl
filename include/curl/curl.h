@@ -644,8 +644,7 @@ typedef enum {
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
   CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
   CURLE_ECH_REQUIRED,            /* 101 - ECH tried but failed */
-  CURLE_WS_UPGRADE_REFUSED,      /* 102 - WebSocket upgrade was refused by
-                                    server */
+  CURLE_WS_DENIED,               /* 102 - WebSocket was denied by server */
   CURL_LAST /* never use! */
 } CURLcode;
 

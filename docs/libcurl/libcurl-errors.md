@@ -488,13 +488,9 @@ A value or data field grew larger than allowed.
 
 ECH was attempted but failed.
 
-## CURLE_WS_UPGRADE_REFUSED (102)
+## CURLE_WS_DENIED (102)
 
-A WebSocket connection was requested but the server did not respond with a
-101 Switching Protocols status. The HTTP response was received successfully
-and the HTTP response code is available via curl_easy_getinfo(3) with
-CURLINFO_RESPONSE_CODE(3). The underlying HTTP connection is returned to the
-connection cache and may be reused by subsequent requests.
+A request for a WebSocket connection was denied by the server.
 
 # CURLMcode
 

@@ -57,7 +57,7 @@ static CURLcode test_lib2724(const char *URL)
 #ifndef CURL_DISABLE_WEBSOCKETS
   /* Create a WebSocket request using an easy handle that is added to a multi
    * handle.  Send a request that isn't upgraded.  Verify that libcurl returns
-   * CURLE_WS_UPGRADE_REFUSED and that the HTTP response code is available.
+   * CURLE_WS_DENIED and that the HTTP response code is available.
    * Send another request with the same multi handle and therefore the same
    * connection pool.  Verify that the second request succeeds and reuses
    * the previous connection. */
@@ -99,12 +99,12 @@ static CURLcode test_lib2724(const char *URL)
      && msg->msg == CURLMSG_DONE) {
 
     /* Verify CURLE_WS_UPGRADE_REFUSED was returned */
-    if(msg->data.result != CURLE_WS_UPGRADE_REFUSED) {
+    if(msg->data.result != CURLE_WS_DENIED) {
       curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned CURLcode %d "
-                    "(%s), expected CURLE_WS_UPGRADE_REFUSED (%d).\n",
+                    "(%s), expected CURLE_WS_DENIED (%d).\n",
                     (int)msg->data.result,
                     curl_easy_strerror(msg->data.result),
-                    (int)CURLE_WS_UPGRADE_REFUSED);
+                    (int)CURLE_WS_DENIED);
       result = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
@@ -117,8 +117,8 @@ static CURLcode test_lib2724(const char *URL)
                   curl_easy_strerror(msg->data.result),
                   response_code);
 
-    if(response_code == 101) {
-      curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned 101 "
+    if(response_code != 200) {
+      curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned non-200 "
                     "(WebSocket Upgrade).\n");
       result = TEST_ERR_FAILURE;
       goto test_cleanup;

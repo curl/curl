@@ -4226,7 +4226,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     }
     /* Continue normally so that the connection can be returned to the cache
      * for reuse if there were no other errors.  Set a flag to return
-     * CURLE_WS_UPGRADE_REFUSED after completion. */
+     * CURLE_WS_DENIED after completion. */
     data->req.ws_upgrade_refused = TRUE;
   }
 #endif

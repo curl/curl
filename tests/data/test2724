@@ -31,14 +31,11 @@ CURL_ENTROPY=12345678
 <server>
 http
 </server>
-<features>
-verbose-strings
-</features>
 <tool>
 lib%TESTNUMBER
 </tool>
 <name>
-Refused WebSocket upgrade returns CURLE_WS_UPGRADE_REFUSED and connection reused
+Refused WebSocket upgrade returns CURLE_WS_DENIED and connection reused
 </name>
 <command>
 - %HOSTIP %HTTPPORT
@@ -70,8 +67,8 @@ Accept: */*
 * WebSocket upgrade refused with HTTP 200
 * Connection #0 to host %HOSTIP:%HTTPPORT left intact
 * Refused WebSocket upgrade: 200
-Request 1 (WS refused) completed. CURLcode: 102 (WebSocket upgrade was refused by server). HTTP Code: 200.
-* Reusing existing http: connection with host 127.0.0.1
+Request 1 (WS refused) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 200.
+* Reusing existing http: connection with host %HOSTIP
 * Connection #0 to host %HOSTIP:%HTTPPORT left intact
 Request 2 (HTTP OK) completed. HTTP Code: 200.
 </file>

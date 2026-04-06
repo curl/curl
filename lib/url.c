@@ -1022,12 +1022,13 @@ static bool url_match_auth(struct connectdata *conn,
 #ifndef CURL_DISABLE_WEBSOCKETS
 /* Return true if the scheme/protocol/family of `conn` can be used to upgrade
  * to the websocket scheme of `needle` */
-static bool websocket_compatible_protocols(struct connectdata *needle,
+static bool websocket_compatible_protocols(struct Curl_easy *data,
+                                           struct connectdata *needle,
                                            struct connectdata *conn)
 {
-  /* WebSockets can upgrade an HTTP/1.1 connection */
-  if(!(get_protocol_family(conn->scheme) & PROTO_FAMILY_HTTP) &&
-     Curl_conn_http_version(NULL, conn) != 11) {
+  /* WebSockets can upgrade only an HTTP/1.1 connection */
+  if(!(get_protocol_family(conn->scheme) & PROTO_FAMILY_HTTP) ||
+     Curl_conn_http_version(data, conn) != 11) {
     return FALSE;
   }
 
@@ -1056,7 +1057,7 @@ static bool url_match_destination(struct connectdata *conn,
     ) {
     if(!curl_strequal(m->needle->scheme->name, conn->scheme->name)
 #ifndef CURL_DISABLE_WEBSOCKETS
-       && !websocket_compatible_protocols(m->needle, conn)
+       && !websocket_compatible_protocols(m->data, m->needle, conn)
 #endif
       ) {
       /* `needle` and `conn` do not have the same scheme... */
@@ -3062,7 +3063,7 @@ static CURLcode update_scheme_if_necessary(struct Curl_easy *data,
                                            struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  if(websocket_compatible_protocols(conn, data->conn)) {
+  if(websocket_compatible_protocols(data, conn, data->conn)) {
     /* Update the reused connection's handler to the WebSocket scheme
      * requested by needle (conn). */
     result = Curl_findprotocol(data, data->conn, conn->scheme->name);

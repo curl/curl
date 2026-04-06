@@ -297,8 +297,8 @@ const char *curl_easy_strerror(CURLcode error)
   case CURLE_ECH_REQUIRED:
     return "ECH attempted but failed";
 
-  case CURLE_WS_UPGRADE_REFUSED:
-    return "WebSocket upgrade was refused by server";
+  case CURLE_WS_DENIED:
+    return "WebSocket denied by server";
 
     /* error codes not used by current libcurl */
   default:

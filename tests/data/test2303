@@ -53,7 +53,7 @@ Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
 Connection: Upgrade
 
 </protocol>
-# 102 == CURLE_WS_UPGRADE_REFUSED
+# 102 == CURLE_WS_DENIED
 <errorcode>
 102
 </errorcode>
