@@ -54,25 +54,19 @@
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
 #error "mbedTLS 3.2.0 or later required"
 #endif
-#endif
+#endif /* USE_MBEDTLS */
 
 #if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
-#  define USE_OPENSSL_DES
-#elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
-#  define USE_OPENSSL_DES
-#elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
-#  define USE_MBEDTLS_DES
-#endif
 
-#ifdef USE_OPENSSL_DES
-
-#ifdef USE_OPENSSL
 #  include <openssl/des.h>
 #  ifdef OPENSSL_IS_AWSLC  /* for versions 1.2.0 to 1.30.1 */
 #    define DES_set_key_unchecked (void)DES_set_key
 #  endif
 #  define DESKEY(x) &x
-#else
+#  define USE_OPENSSL_DES
+
+#elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+
 #  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
 #  include <wolfssl/version.h>
@@ -91,17 +85,14 @@
 #  else
 #    define DESKEY(x) &x
 #  endif
-#endif
+#  define USE_WOLFSSL_DES
 
 #elif defined(USE_GNUTLS)
-
 #  include <nettle/des.h>
 #  define USE_CURL_DES_SET_ODD_PARITY
-
-#elif defined(USE_MBEDTLS_DES)
-
+#elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
 #  include <mbedtls/des.h>
-
+#  define USE_MBEDTLS_DES
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
 #  define USE_CURL_DES_SET_ODD_PARITY
@@ -173,7 +164,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (char) ((key_56[6] << 1) & 0xFF);
 }
 
-#ifdef USE_OPENSSL_DES
+#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL_DES)
 /*
  * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
@@ -313,7 +304,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#ifdef USE_OPENSSL_DES
+#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL_DES)
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -365,7 +356,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
   {
     /* Create LanManager hashed password. */
 
-#ifdef USE_OPENSSL_DES
+#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL_DES)
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
