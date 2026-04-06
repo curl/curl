@@ -1464,7 +1464,7 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
   else
     pending = cf->next->cft->has_data_pending(cf->next, data);
   CF_DATA_RESTORE(cf, save);
-  return pendig;
+  return pending;
 }
 
 static CURLcode ssl_cf_send(struct Curl_cfilter *cf,
