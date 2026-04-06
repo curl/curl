@@ -98,7 +98,7 @@ typedef bool Curl_cpool_conn_match_cb(struct connectdata *conn,
                                       void *userdata);
 
 /* Act on the result of the find, may override it. */
-typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
+typedef bool Curl_cpool_done_match_cb(void *userdata);
 
 /**
  * Find a connection in the pool matching `destination`.

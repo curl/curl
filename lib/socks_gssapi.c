@@ -106,7 +106,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   CURLcode code;
   size_t actualread;
   size_t nwritten;
-  int result;
+  CURLcode result;
   OM_uint32 gss_major_status, gss_minor_status, gss_status;
   OM_uint32 gss_ret_flags;
   int gss_conf_state, gss_enc;
