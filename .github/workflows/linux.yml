@@ -710,6 +710,7 @@ jobs:
             --location "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openldap-${OPENLDAP_VERSION}"
+          autoreconf -fi
           ./configure --prefix=/home/runner/openldap-static --enable-static --disable-shared --disable-slapd
           make install
 
