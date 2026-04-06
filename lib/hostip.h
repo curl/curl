@@ -51,8 +51,8 @@ struct Curl_dns_entry;
 #define CURL_DNSQ_AAAA        (1U << 1)
 #define CURL_DNSQ_HTTPS       (1U << 2)
 
-#define CURL_DNSQ_ALL         (CURL_DNSQ_A|CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS)
-#define CURL_DNSQ_IP(x)       (uint8_t)((x)&(CURL_DNSQ_A|CURL_DNSQ_AAAA))
+#define CURL_DNSQ_ALL         (CURL_DNSQ_A | CURL_DNSQ_AAAA | CURL_DNSQ_HTTPS)
+#define CURL_DNSQ_IP(x)       (uint8_t)((x)&(CURL_DNSQ_A | CURL_DNSQ_AAAA))
 
 #ifdef CURLVERBOSE
 const char *Curl_resolv_query_str(uint8_t dns_queries);
@@ -88,10 +88,10 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, uint16_t port);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
- * given in the 'ip' argument. The result will be stored in the buf that is
+ * given in the 'ai' argument. The result will be stored in the buf that is
  * bufsize bytes big.
  */
-void Curl_printable_address(const struct Curl_addrinfo *ip,
+void Curl_printable_address(const struct Curl_addrinfo *ai,
                             char *buf, size_t bufsize);
 
 /* Start DNS resolving for the given parameters. Returns
@@ -142,25 +142,26 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
 
 void Curl_resolv_destroy(struct Curl_easy *data, uint32_t resolv_id);
 
-const struct Curl_addrinfo *
-Curl_resolv_get_ai(struct Curl_easy *data, uint32_t resolv_id,
-                   int ai_family, unsigned int index);
+const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
+                                               uint32_t resolv_id,
+                                               int ai_family,
+                                               unsigned int index);
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *
-Curl_resolv_get_https(struct Curl_easy *data, uint32_t resolv_id);
+const struct Curl_https_rrinfo *Curl_resolv_get_https(struct Curl_easy *data,
+                                                      uint32_t resolv_id);
 bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
 #endif /* USE_HTTPSRR */
 
-#else /* USE_CURL_ASYNC */
-#define Curl_resolv_shutdown_all(x)   Curl_nop_stmt
-#define Curl_resolv_destroy_all(x)    Curl_nop_stmt
+#else /* !USE_CURL_ASYNC */
+#define Curl_resolv_shutdown_all(x)      Curl_nop_stmt
+#define Curl_resolv_destroy_all(x)       Curl_nop_stmt
 #define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
-#define Curl_resolv_get_ai(x,y,z, a)  NULL
-#define Curl_resolv_get_https(x,y)    NULL
-#define Curl_resolv_knows_https(x,y)  TRUE
-#define Curl_resolv_pollset(x,y)      CURLE_OK
-#define Curl_resolv_destroy(x,y)      Curl_nop_stmt
-#endif /* USE_CURL_ASYNC, else */
+#define Curl_resolv_get_ai(x, y, z, a)   NULL
+#define Curl_resolv_get_https(x, y)      NULL
+#define Curl_resolv_knows_https(x, y)    TRUE
+#define Curl_resolv_pollset(x, y)        CURLE_OK
+#define Curl_resolv_destroy(x, y)        Curl_nop_stmt
+#endif /* USE_CURL_ASYNC */
 
 CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
 

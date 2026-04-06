@@ -200,7 +200,7 @@ static void async_ares_cleanup(struct Curl_resolv_async *async)
 }
 
 void Curl_async_ares_shutdown(struct Curl_easy *data,
-                             struct Curl_resolv_async *async)
+                              struct Curl_resolv_async *async)
 {
   /* c-ares has a method to "cancel" operations on a channel, but
    * as reported in #18216, this does not totally reset the channel
@@ -320,10 +320,10 @@ static timediff_t async_ares_poll_timeout(struct async_ares_ctx *ares,
   int itimeout_ms;
 
 #if TIMEDIFF_T_MAX > INT_MAX
-    itimeout_ms = (timeout_ms > INT_MAX) ? INT_MAX :
-                   ((timeout_ms < 0) ? -1 : (int)timeout_ms);
+  itimeout_ms = (timeout_ms > INT_MAX) ? INT_MAX :
+                 ((timeout_ms < 0) ? -1 : (int)timeout_ms);
 #else
-    itimeout_ms = (int)timeout_ms;
+  itimeout_ms = (int)timeout_ms;
 #endif
   max_timeout.tv_sec = itimeout_ms / 1000;
   max_timeout.tv_usec = (itimeout_ms % 1000) * 1000;
@@ -339,10 +339,10 @@ static timediff_t async_ares_poll_timeout(struct async_ares_ctx *ares,
     return 1000;
 }
 
-const struct Curl_addrinfo *
-Curl_async_get_ai(struct Curl_easy *data,
-                  struct Curl_resolv_async *async,
-                  int ai_family, unsigned int index)
+const struct Curl_addrinfo *Curl_async_get_ai(struct Curl_easy *data,
+                                              struct Curl_resolv_async *async,
+                                              int ai_family,
+                                              unsigned int index)
 {
   /* Not supported by our implementation yet. */
   (void)data;
@@ -353,9 +353,9 @@ Curl_async_get_ai(struct Curl_easy *data,
 }
 
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *
-Curl_async_get_https(struct Curl_easy *data,
-                     struct Curl_resolv_async *async)
+const struct Curl_https_rrinfo *Curl_async_get_https(
+  struct Curl_easy *data,
+  struct Curl_resolv_async *async)
 {
   if(Curl_async_knows_https(data, async))
     return &async->ares.hinfo;
@@ -379,7 +379,7 @@ bool Curl_async_knows_https(struct Curl_easy *data,
  * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
- * 'entry' MUST be non-NULL.
+ * 'pdns' MUST be non-NULL.
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
@@ -443,8 +443,8 @@ CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
  * async_ares_node2addr() converts an address list provided by c-ares
  * to an internal libcurl compatible list.
  */
-static struct Curl_addrinfo *
-async_ares_node2addr(struct ares_addrinfo_node *node)
+static struct Curl_addrinfo *async_ares_node2addr(
+  struct ares_addrinfo_node *node)
 {
   /* traverse the ares_addrinfo_node list */
   struct ares_addrinfo_node *ai;

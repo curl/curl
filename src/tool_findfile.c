@@ -62,7 +62,7 @@ static const struct finder conf_list[] = {
 
 static char *checkhome(const char *home, const char *fname, bool dotscore)
 {
-  const char pref[2] = { '.', '_' };
+  static const char pref[2] = { '.', '_' };
   int i;
   for(i = 0; i < (dotscore ? 2 : 1); i++) {
     char *c;

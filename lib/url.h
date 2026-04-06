@@ -85,7 +85,7 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
 
 /**
  * Always eval all arguments, return the first
- * result != (CURLE_OK|CURLE_AGAIN) or `r1`.
+ * result != (CURLE_OK | CURLE_AGAIN) or `r1`.
  */
 CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 

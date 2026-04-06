@@ -1711,7 +1711,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
     }
     failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
           " %s)", stream->id, stream->reset_by_server ? "server" : "curl",
-           stream->error, nghttp2_http2_strerror(stream->error));
+          stream->error, nghttp2_http2_strerror(stream->error));
     return stream->error ? CURLE_HTTP2_STREAM :
            (data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP2);
   }
@@ -1734,8 +1734,8 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
         break;
       curlx_dyn_reset(&dbuf);
       result = curlx_dyn_addf(&dbuf, "%.*s: %.*s\x0d\x0a",
-                            (int)e->namelen, e->name,
-                            (int)e->valuelen, e->value);
+                              (int)e->namelen, e->name,
+                              (int)e->valuelen, e->value);
       if(result)
         break;
       Curl_debug(data, CURLINFO_HEADER_IN, curlx_dyn_ptr(&dbuf),

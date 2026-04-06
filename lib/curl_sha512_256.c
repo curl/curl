@@ -203,7 +203,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
                                        size_t length)
 {
   do {
-    word32 ilen = (word32) CURLMIN(length, UINT_MAX);
+    word32 ilen = (word32)CURLMIN(length, UINT_MAX);
     if(wc_Sha512_256Update(ctx, data, ilen))
       return CURLE_SSL_CIPHER;
     length -= ilen;
@@ -291,10 +291,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 /* ** This implementation of SHA-512/256 hash calculation was originally ** *
  * ** written by Evgeny Grin (Karlson2k) for GNU libmicrohttpd.          ** *
  * ** The author ported the code to libcurl. The ported code is provided ** *
- * ** under curl license.                                                ** *
- * ** This is a minimal version with minimal optimizations. Performance  ** *
- * ** can be significantly improved. Big-endian store and load macros    ** *
- * ** are obvious targets for optimization.                              ** */
+ * ** under curl license.                                                ** */
 
 #ifdef __GNUC__
 #  if defined(__has_attribute) && defined(__STDC_VERSION__)

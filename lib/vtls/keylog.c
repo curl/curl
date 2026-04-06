@@ -35,10 +35,8 @@ static FILE *keylog_file_fp;
 
 void Curl_tls_keylog_open(void)
 {
-  char *keylog_file_name;
-
   if(!keylog_file_fp) {
-    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
+    char *keylog_file_name = curl_getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
       keylog_file_fp = curlx_fopen(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {

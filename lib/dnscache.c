@@ -329,8 +329,6 @@ static int num_addresses(const struct Curl_addrinfo *addr)
   return i;
 }
 
-UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                                    struct Curl_addrinfo **addr);
 /*
  * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
@@ -343,6 +341,8 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
  *
  * @unittest: 1608
  */
+UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
+                                    struct Curl_addrinfo **addr);
 UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     struct Curl_addrinfo **addr)
 {
@@ -407,15 +407,15 @@ static bool dnscache_ai_has_family(struct Curl_addrinfo *ai,
   return FALSE;
 }
 
-static struct Curl_dns_entry *
-dnscache_entry_create(struct Curl_easy *data,
-                      uint8_t dns_queries,
-                      struct Curl_addrinfo **paddr1,
-                      struct Curl_addrinfo **paddr2,
-                      const char *hostname,
-                      size_t hostlen,
-                      uint16_t port,
-                      bool permanent)
+static struct Curl_dns_entry *dnscache_entry_create(
+  struct Curl_easy *data,
+  uint8_t dns_queries,
+  struct Curl_addrinfo **paddr1,
+  struct Curl_addrinfo **paddr2,
+  const char *hostname,
+  size_t hostlen,
+  uint16_t port,
+  bool permanent)
 {
   struct Curl_dns_entry *dns = NULL;
 
@@ -488,25 +488,23 @@ out:
   return dns;
 }
 
-struct Curl_dns_entry *
-Curl_dnscache_mk_entry(struct Curl_easy *data,
-                       uint8_t dns_queries,
-                       struct Curl_addrinfo **paddr,
-                       const char *hostname,
-                       uint16_t port)
+struct Curl_dns_entry *Curl_dnscache_mk_entry(struct Curl_easy *data,
+                                              uint8_t dns_queries,
+                                              struct Curl_addrinfo **paddr,
+                                              const char *hostname,
+                                              uint16_t port)
 {
   return dnscache_entry_create(data, dns_queries, paddr, NULL, hostname,
                                hostname ? strlen(hostname) : 0,
                                port, FALSE);
 }
 
-struct Curl_dns_entry *
-Curl_dnscache_mk_entry2(struct Curl_easy *data,
-                        uint8_t dns_queries,
-                        struct Curl_addrinfo **paddr1,
-                        struct Curl_addrinfo **paddr2,
-                        const char *hostname,
-                        uint16_t port)
+struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
+                                               uint8_t dns_queries,
+                                               struct Curl_addrinfo **paddr1,
+                                               struct Curl_addrinfo **paddr2,
+                                               const char *hostname,
+                                               uint16_t port)
 {
   return dnscache_entry_create(data, dns_queries, paddr1, paddr2, hostname,
                                hostname ? strlen(hostname) : 0,
@@ -530,15 +528,14 @@ void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
 }
 #endif /* USE_HTTPSRR */
 
-static struct Curl_dns_entry *
-dnscache_add_addr(struct Curl_easy *data,
-                  struct Curl_dnscache *dnscache,
-                  uint8_t dns_queries,
-                  struct Curl_addrinfo **paddr,
-                  const char *hostname,
-                  size_t hlen,
-                  uint16_t port,
-                  bool permanent)
+static struct Curl_dns_entry *dnscache_add_addr(struct Curl_easy *data,
+                                                struct Curl_dnscache *dnscache,
+                                                uint8_t dns_queries,
+                                                struct Curl_addrinfo **paddr,
+                                                const char *hostname,
+                                                size_t hlen,
+                                                uint16_t port,
+                                                bool permanent)
 {
   char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;

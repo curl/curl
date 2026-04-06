@@ -247,7 +247,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `SHARE_LIB_OBJECT`:                       Build shared and static libcurl in a single pass (requires CMake 3.12 or newer). Default: `ON` for Windows
 - `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
 
-## CA bundle options
+## Root CA options
 
 - `CURL_CA_BUNDLE`:                         Absolute path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_EMBED`:                          Absolute path to the CA bundle to embed in the curl tool. Default: (disabled)
@@ -257,6 +257,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_CA_PATH`:                           Absolute path to a directory containing CA certificates stored individually.
                                             Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
+- `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification. Default: `OFF`
 
 ## Enabling features
 
@@ -267,9 +268,12 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled and target supports threading.
 - `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
+- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
 - `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
 - `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export. Default: `OFF`
+- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
+- `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
 
 ## Disabling features
 
@@ -369,14 +373,10 @@ Details via CMake
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
-- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
-- `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification. Default: `OFF`
 - `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
-- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
-- `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
 
 ## Dependency options (via CMake)
 

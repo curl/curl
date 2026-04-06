@@ -446,21 +446,21 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
     close($rsakeyfile);
     if(!$rsahostkey[1]) {
-        logmsg "Failed parsing base64 encoded RSA host key\n";
+        logmsg "Failed parsing base64 encoded SSH host key\n";
         exit 1;
     }
     open(my $pubmd5file, ">", pp($hstpubmd5f));
     print $pubmd5file md5_hex(decode_base64($rsahostkey[1]));
     close($pubmd5file);
     if((! -e pp($hstpubmd5f)) || (! -s pp($hstpubmd5f))) {
-        logmsg "Failed writing md5 hash of RSA host key\n";
+        logmsg "Failed writing MD5 hash of SSH host key\n";
         exit 1;
     }
     open(my $pubsha256file, ">", pp($hstpubsha256f));
     print $pubsha256file sha256_base64(decode_base64($rsahostkey[1]));
     close($pubsha256file);
     if((! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f))) {
-        logmsg "Failed writing sha256 hash of RSA host key\n";
+        logmsg "Failed writing SHA256 hash of SSH host key\n";
         exit 1;
     }
 }

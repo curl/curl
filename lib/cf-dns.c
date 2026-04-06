@@ -47,11 +47,12 @@ struct cf_dns_ctx {
   char hostname[1];
 };
 
-static struct cf_dns_ctx *
-cf_dns_ctx_create(struct Curl_easy *data, uint8_t dns_queries,
-                  const char *hostname, uint16_t port, uint8_t transport,
-                  bool abstract_unix_socket,
-                  struct Curl_dns_entry *dns)
+static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
+                                            uint8_t dns_queries,
+                                            const char *hostname,
+                                            uint16_t port, uint8_t transport,
+                                            bool abstract_unix_socket,
+                                            struct Curl_dns_entry *dns)
 {
   struct cf_dns_ctx *ctx;
   size_t hlen = strlen(hostname);
@@ -393,7 +394,7 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
      * there, thus overriding any defaults that might have been set above. */
     hostname = ehost->name;
     port = conn->bits.conn_to_port ?
-            conn->conn_to_port : (uint16_t)conn->remote_port;
+      conn->conn_to_port : (uint16_t)conn->remote_port;
   }
 
   if(!hostname) {
@@ -494,9 +495,9 @@ CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex)
   return Curl_cf_dns_result(conn->cfilter[sockindex]);
 }
 
-static const struct Curl_addrinfo *
-cf_dns_get_nth_ai(const struct Curl_addrinfo *ai,
-                  int ai_family, unsigned int index)
+static const struct Curl_addrinfo *cf_dns_get_nth_ai(
+  const struct Curl_addrinfo *ai,
+  int ai_family, unsigned int index)
 {
   unsigned int i = 0;
   for(i = 0; ai; ai = ai->ai_next) {
@@ -513,11 +514,10 @@ cf_dns_get_nth_ai(const struct Curl_addrinfo *ai,
  * first "resolve" filter underneath `cf`. If the DNS resolving is
  * not done yet or if no address for the family exists, returns NULL.
  */
-const struct Curl_addrinfo *
-Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
-                   struct Curl_easy *data,
-                   int ai_family,
-                   unsigned int index)
+const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
+                                               struct Curl_easy *data,
+                                               int ai_family,
+                                               unsigned int index)
 {
   (void)data;
   for(; cf; cf = cf->next) {
@@ -538,15 +538,12 @@ Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
  * first "resolve" filter at the connection. If the DNS resolving is
  * not done yet or if no address for the family exists, returns NULL.
  */
-const struct Curl_addrinfo *
-Curl_conn_dns_get_ai(struct Curl_easy *data,
-                     int sockindex,
-                     int ai_family,
-                     unsigned int index)
+const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
+                                                 int sockindex, int ai_family,
+                                                 unsigned int index)
 {
   struct connectdata *conn = data->conn;
-  return Curl_cf_dns_get_ai(conn->cfilter[sockindex], data,
-                               ai_family, index);
+  return Curl_cf_dns_get_ai(conn->cfilter[sockindex], data, ai_family, index);
 }
 
 #ifdef USE_HTTPSRR
@@ -554,8 +551,8 @@ Curl_conn_dns_get_ai(struct Curl_easy *data,
  * connection. If the DNS resolving is not done yet or if there
  * is no HTTPS-RR info, returns NULL.
  */
-const struct Curl_https_rrinfo *
-Curl_conn_dns_get_https(struct Curl_easy *data, int sockindex)
+const struct Curl_https_rrinfo *Curl_conn_dns_get_https(struct Curl_easy *data,
+                                                        int sockindex)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   for(; cf; cf = cf->next) {

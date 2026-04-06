@@ -685,15 +685,16 @@ static int proxy_h2_on_stream_close(nghttp2_session *session,
   return 0;
 }
 
-static CURLcode proxy_h2_submit(int32_t *pstream_id,
-                                struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                nghttp2_session *h2,
-                                struct httpreq *req,
-                                const nghttp2_priority_spec *pri_spec,
-                                void *stream_user_data,
-                               nghttp2_data_source_read_callback read_callback,
-                                void *read_ctx)
+static CURLcode proxy_h2_submit(
+  int32_t *pstream_id,
+  struct Curl_cfilter *cf,
+  struct Curl_easy *data,
+  nghttp2_session *h2,
+  struct httpreq *req,
+  const nghttp2_priority_spec *pri_spec,
+  void *stream_user_data,
+  nghttp2_data_source_read_callback read_callback,
+  void *read_ctx)
 {
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
@@ -1160,8 +1161,8 @@ static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
   if(ctx->tunnel.error) {
     failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
           " %s)", ctx->tunnel.stream_id,
-           ctx->tunnel.reset ? "server" : "curl",
-           ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
+          ctx->tunnel.reset ? "server" : "curl",
+          ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
     return CURLE_RECV_ERROR;
   }
 

@@ -21,8 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stddef.h>
 #include "tool_setup.h"
+
+#include <stddef.h>
 
 #include "tool_cfgable.h"
 #include "tool_formparse.h"

@@ -47,8 +47,8 @@ static void *curl_thread_create_thunk(void *arg)
   return 0;
 }
 
-curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
-                                 (CURL_STDCALL *func) (void *), void *arg)
+curl_thread_t Curl_thread_create(
+  CURL_THREAD_RETURN_T(CURL_STDCALL *func)(void *), void *arg)
 {
   curl_thread_t t = curlx_malloc(sizeof(pthread_t));
   struct Curl_actual_call *ac = NULL;
@@ -97,8 +97,8 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #elif defined(_WIN32)
 
-curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
-                                 (CURL_STDCALL *func) (void *), void *arg)
+curl_thread_t Curl_thread_create(
+  CURL_THREAD_RETURN_T(CURL_STDCALL *func)(void *), void *arg)
 {
   curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
   if(!t) {
@@ -163,13 +163,13 @@ CURLcode Curl_cond_timedwait(pthread_cond_t *c, pthread_mutex_t *m,
    * that will be most likely in the past, as far as POSIX abstime is
    * concerned. */
 #ifdef HAVE_GETTIMEOFDAY
-    struct timeval tv;
-    (void)gettimeofday(&tv, NULL);
-    now.tv_sec = tv.tv_sec;
-    now.tv_usec = (int)tv.tv_usec;
+  struct timeval tv;
+  (void)gettimeofday(&tv, NULL);
+  now.tv_sec = tv.tv_sec;
+  now.tv_usec = (int)tv.tv_usec;
 #else
-    now.tv_sec = time(NULL);
-    now.tv_usec = 0;
+  now.tv_sec = time(NULL);
+  now.tv_usec = 0;
 #endif
 
   ts.tv_sec = now.tv_sec + (timeout_ms / 1000);
