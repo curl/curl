@@ -204,6 +204,7 @@ jobs:
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
       - name: 'install build prereqs'
+        if: ${{ steps.settings.outputs.needs-build == 'true' }}
         run: |
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
