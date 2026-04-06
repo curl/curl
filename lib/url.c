@@ -1305,7 +1305,7 @@ static bool url_attach_existing(struct Curl_easy *data,
                                 bool *waitpipe)
 {
   struct url_conn_match match;
-  bool result;
+  bool success;
 
   DEBUGASSERT(!data->conn);
   memset(&match, 0, sizeof(match));
@@ -1340,13 +1340,13 @@ static bool url_attach_existing(struct Curl_easy *data,
 
   /* Find a connection in the pool that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
-  result = Curl_cpool_find(data, needle->destination,
-                           url_match_conn, url_match_result, &match);
+  success = Curl_cpool_find(data, needle->destination,
+                            url_match_conn, url_match_result, &match);
 
   /* wait_pipe is TRUE if we encounter a bundle that is undecided. There
    * is no matching connection then, yet. */
   *waitpipe = (bool)match.wait_pipe;
-  return result;
+  return success;
 }
 
 /*

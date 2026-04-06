@@ -3170,13 +3170,13 @@ static statusline checkhttpprefix(struct Curl_easy *data,
 static statusline checkrtspprefix(struct Curl_easy *data,
                                   const char *s, size_t len)
 {
-  statusline result = STATUS_BAD;
+  statusline status = STATUS_BAD;
   statusline onmatch = len >= 5 ? STATUS_DONE : STATUS_UNKNOWN;
   (void)data;
   if(checkprefixmax("RTSP/", s, len))
-    result = onmatch;
+    status = onmatch;
 
-  return result;
+  return status;
 }
 #endif /* CURL_DISABLE_RTSP */
 

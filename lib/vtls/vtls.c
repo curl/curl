@@ -1455,16 +1455,16 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
-  bool result;
+  bool pending;
 
   CF_DATA_SAVE(save, cf, data);
   if(connssl->ssl_impl->data_pending &&
      connssl->ssl_impl->data_pending(cf, data))
-    result = TRUE;
+    pending = TRUE;
   else
-    result = cf->next->cft->has_data_pending(cf->next, data);
+    pending = cf->next->cft->has_data_pending(cf->next, data);
   CF_DATA_RESTORE(cf, save);
-  return result;
+  return pendig;
 }
 
 static CURLcode ssl_cf_send(struct Curl_cfilter *cf,

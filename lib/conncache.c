@@ -600,7 +600,7 @@ bool Curl_cpool_find(struct Curl_easy *data,
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct cpool_bundle *bundle;
-  bool result = FALSE;
+  bool found = FALSE;
 
   DEBUGASSERT(cpool);
   DEBUGASSERT(conn_cb);
@@ -619,17 +619,17 @@ bool Curl_cpool_find(struct Curl_easy *data,
       curr = Curl_node_next(curr);
 
       if(conn_cb(conn, userdata)) {
-        result = TRUE;
+        found = TRUE;
         break;
       }
     }
   }
 
   if(done_cb) {
-    result = done_cb(userdata);
+    found = done_cb(userdata);
   }
   CPOOL_UNLOCK(cpool, data);
-  return result;
+  return found;
 }
 
 void Curl_conn_terminate(struct Curl_easy *data,
