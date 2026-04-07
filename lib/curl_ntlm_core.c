@@ -172,7 +172,7 @@ static void setup_des_key(const unsigned char *key_56, Des *des)
   byte key[8];
 
   /* Expand the 56-bit key to 64 bits */
-  extend_key_56_to_64(key_56, (char *)&key);
+  extend_key_56_to_64(key_56, (char *)key);
 
   /* Set the key */
   wc_Des_SetKey(des, key, NULL, 0);
