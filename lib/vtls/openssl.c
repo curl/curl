@@ -3424,7 +3424,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
 }
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
-static bool ossl_ech_need_httpsrr(struct Curl_easy *data)
+bool Curl_ossl_need_httpsrr(struct Curl_easy *data)
 {
   if(!CURLECH_ENABLED(data))
     return FALSE;
@@ -3506,7 +3506,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
       const unsigned char *ecl = rinfo->echconfiglist;
       size_t elen = rinfo->echconfiglist_len;
 
-      infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+      infof(data, "ECH: ECHConfig from HTTPS RR");
       if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
         infof(data, "ECH: SSL_set1_ech_config_list failed");
         if(data->set.tls_ech & CURLECH_HARD)
@@ -3550,7 +3550,13 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
 
   return CURLE_OK;
 }
-#endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST */
+#else /* HAVE_SSL_SET1_ECH_CONFIG_LIST */
+bool Curl_ossl_need_httpsrr(struct Curl_easy *data)
+{
+  (void)data;
+  return FALSE;
+}
+#endif /* else HAVE_SSL_SET1_ECH_CONFIG_LIST */
 
 static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                               struct Curl_cfilter *cf,
@@ -4943,15 +4949,11 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
-#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
-    /* if we do ECH and need the HTTPS-RR information for it,
-     * we delay the connect until it arrives or DNS resolve fails. */
-    if(ossl_ech_need_httpsrr(data) &&
+    if(Curl_ossl_need_httpsrr(data) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
-      CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
+      CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
       return CURLE_OK;
     }
-#endif
     CURL_TRC_CF(data, cf, "ossl_connect, step1");
     result = ossl_connect_step1(cf, data);
     if(result)

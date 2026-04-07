@@ -1297,7 +1297,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
       const unsigned char *ecl = rinfo->echconfiglist;
       size_t elen = rinfo->echconfiglist_len;
 
-      infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+      infof(data, "ECH: ECHConfig from HTTPS RR");
       if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
          WOLFSSL_SUCCESS) {
         infof(data, "ECH: wolfSSL_SetEchConfigs failed");
@@ -1487,17 +1487,20 @@ out:
   return result;
 }
 
-#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
-static bool wssl_ech_need_httpsrr(struct Curl_easy *data)
+bool Curl_wssl_need_httpsrr(struct Curl_easy *data)
 {
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
   if(!CURLECH_ENABLED(data))
     return FALSE;
   if((data->set.tls_ech & CURLECH_GREASE) ||
      (data->set.tls_ech & CURLECH_CLA_CFG))
    return FALSE;
   return TRUE;
-}
+#else
+  (void)data;
+  return FALSE;
 #endif
+}
 
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
@@ -2171,7 +2174,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
-    if(wssl_ech_need_httpsrr(data) &&
+    if(Curl_wssl_need_httpsrr(data) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;

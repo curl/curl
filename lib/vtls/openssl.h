@@ -147,6 +147,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             void *ssl_user_data,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb);
 
+/* Is a resolved HTTPS-RR needed for initializing OpenSSL? */
+bool Curl_ossl_need_httpsrr(struct Curl_easy *data);
+
 #ifndef HAVE_OPENSSL3
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif

@@ -52,6 +52,7 @@
 #include "rand.h"
 #include "multiif.h"
 #include "cfilters.h"
+#include "cf-dns.h"
 #include "cf-socket.h"
 #include "connect.h"
 #include "progress.h"
@@ -2594,6 +2595,18 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   return result;
 }
 
+static bool cf_ngtcp2_need_httpsrr(struct Curl_easy *data)
+{
+#ifdef USE_OPENSSL
+  return Curl_ossl_need_httpsrr(data);
+#elif defined(USE_WOLFSSL)
+  return Curl_wssl_need_httpsrr(data);
+#else
+  (void)data;
+  return FALSE;
+#endif
+}
+
 /*
  * Might be called twice for happy eyeballs.
  */
@@ -2708,8 +2721,14 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  pktx_init(&pktx, cf, data);
 
+  if(cf_ngtcp2_need_httpsrr(data) &&
+     !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+    CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
+    return CURLE_OK;
+  }
+
+  pktx_init(&pktx, cf, data);
   CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->qconn) {
