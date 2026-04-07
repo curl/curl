@@ -2045,6 +2045,8 @@ static int myssh_in_SFTP_CREATE_DIRS_MKDIR(struct Curl_easy *data,
 
   rc = sftp_mkdir(sshc->sftp_session, sshp->path,
                   (mode_t)data->set.new_directory_perms);
+  if(rc == SSH_AGAIN)
+    return rc;
   *sshc->slash_pos = '/';
   ++sshc->slash_pos;
   if(rc < 0) {
