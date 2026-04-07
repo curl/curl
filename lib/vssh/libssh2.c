@@ -2639,7 +2639,8 @@ static CURLcode ssh_state_sftp_trans_init(struct Curl_easy *data,
   if(data->state.upload)
     myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
   else if(sshp) {
-    if(sshp->path[strlen(sshp->path) - 1] == '/')
+    size_t plen = strlen(sshp->path);
+    if(plen && (sshp->path[strlen(sshp->path) - 1] == '/'))
       myssh_to(data, sshc, SSH_SFTP_READDIR_INIT);
     else
       myssh_to(data, sshc, SSH_SFTP_DOWNLOAD_INIT);
