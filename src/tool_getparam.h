@@ -317,8 +317,10 @@ typedef enum {
 #define ARG_BOOL 1 /* accepts a --no-[name] prefix */
 #define ARG_STRG 2 /* requires an argument */
 #define ARG_FILE 3 /* requires an argument, usually a filename */
+#define ARG_SECS 4 /* requires a time in seconds */
+#define ARG_UNUM 5 /* requires a positive (unsigned) number */
 
-#define ARG_TYPEMASK 0x03
+#define ARG_TYPEMASK 0x07
 #define ARGTYPE(x)   ((x) & ARG_TYPEMASK)
 
 #define ARG_DEPR  0x10 /* deprecated option */
