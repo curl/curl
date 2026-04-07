@@ -29,10 +29,12 @@ import pytest
 pytest.register_assert_rewrite("testenv.env", "testenv.curl", "testenv.caddy",
                                "testenv.httpd", "testenv.nghttpx")
 
+# This import must be first to avoid circular imports
+from .curl import CurlClient, ExecResult, RunProfile  # noqa: I001
+
 from .caddy import Caddy
 from .certs import Credentials, TestCA
 from .client import LocalClient
-from .curl import CurlClient, ExecResult, RunProfile
 from .dante import Dante
 from .env import Env
 from .httpd import Httpd
