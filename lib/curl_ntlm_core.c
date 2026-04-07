@@ -147,11 +147,11 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (char) ((key_56[6] << 1) & 0xFF);
 }
 
+#ifdef USE_OPENSSL_DES
 /*
  * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
  */
-#ifdef USE_OPENSSL_DES
 static void setup_des_key(const unsigned char *key_56, DES_key_schedule *ks)
 {
   DES_cblock key;
