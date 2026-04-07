@@ -1964,11 +1964,9 @@ static int myssh_in_SFTP_FILETIME(struct Curl_easy *data,
                                   struct SSHPROTO *sshp)
 {
   sftp_attributes attrs;
-  if(!sshp) {
-    sshc->actualcode = CURLE_FAILED_INIT;
-    myssh_to(data, sshc, SSH_STOP);
-    return SSH_ERROR;
-  }
+  if(!sshp)
+    return myssh_to_ERROR(data, sshc, CURLE_FAILED_INIT);
+
   attrs = sftp_stat(sshc->sftp_session, sshp->path);
   if(attrs) {
     data->info.filetime = attrs->mtime;
@@ -1983,9 +1981,11 @@ static int myssh_in_SFTP_TRANS_INIT(struct Curl_easy *data,
                                     struct ssh_conn *sshc,
                                     struct SSHPROTO *sshp)
 {
+  if(!sshp)
+    return myssh_to_ERROR(data, sshc, CURLE_FAILED_INIT);
   if(data->state.upload)
     myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
-  else if(sshp) {
+  else {
     size_t path_len = strlen(sshp->path);
 
     if(path_len && sshp->path[path_len - 1] == '/')
@@ -1993,23 +1993,17 @@ static int myssh_in_SFTP_TRANS_INIT(struct Curl_easy *data,
     else
       myssh_to(data, sshc, SSH_SFTP_DOWNLOAD_INIT);
   }
-  else {
-    sshc->actualcode = CURLE_FAILED_INIT;
-    myssh_to(data, sshc, SSH_STOP);
-    return SSH_ERROR;
-  }
-  return SSH_NO_ERROR;
+
+ return SSH_NO_ERROR;
 }
 
 static int myssh_in_SFTP_CREATE_DIRS_INIT(struct Curl_easy *data,
                                           struct ssh_conn *sshc,
                                           struct SSHPROTO *sshp)
 {
-  if(!sshp) {
-    sshc->actualcode = CURLE_FAILED_INIT;
-    myssh_to(data, sshc, SSH_STOP);
-    return SSH_ERROR;
-  }
+  if(!sshp)
+    return myssh_to_ERROR(data, sshc, CURLE_FAILED_INIT);
+
   if(strlen(sshp->path) > 1) {
     sshc->slash_pos = sshp->path + 1; /* ignore the leading '/' */
     myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS);
@@ -2024,12 +2018,10 @@ static int myssh_in_SFTP_CREATE_DIRS(struct Curl_easy *data,
                                      struct ssh_conn *sshc,
                                      struct SSHPROTO *sshp)
 {
+  if(!sshp)
+    return myssh_to_ERROR(data, sshc, CURLE_FAILED_INIT);
+
   sshc->slash_pos = strchr(sshc->slash_pos, '/');
-  if(!sshp) {
-    sshc->actualcode = CURLE_FAILED_INIT;
-    myssh_to(data, sshc, SSH_STOP);
-    return SSH_ERROR;
-  }
   if(sshc->slash_pos) {
     *sshc->slash_pos = 0;
 
@@ -2048,11 +2040,9 @@ static int myssh_in_SFTP_CREATE_DIRS_MKDIR(struct Curl_easy *data,
   int rc;
   int err;
   /* 'mode' - parameter is preliminary - default to 0644 */
-  if(!sshp) {
-    sshc->actualcode = CURLE_FAILED_INIT;
-    myssh_to(data, sshc, SSH_STOP);
-    return SSH_ERROR;
-  }
+  if(!sshp)
+    return myssh_to_ERROR(data, sshc, CURLE_FAILED_INIT);
+
   rc = sftp_mkdir(sshc->sftp_session, sshp->path,
                   (mode_t)data->set.new_directory_perms);
   *sshc->slash_pos = '/';
@@ -2081,11 +2071,9 @@ static int myssh_in_SCP_UPLOAD_INIT(struct Curl_easy *data,
                                     struct SSHPROTO *sshp)
 {
   int rc;
-  if(!sshp) {
-    sshc->actualcode = CURLE_FAILED_INIT;
-    myssh_to(data, sshc, SSH_STOP);
-    return SSH_ERROR;
-  }
+  if(!sshp)
+    return myssh_to_ERROR(data, sshc, CURLE_FAILED_INIT);
+
   rc = ssh_scp_init(sshc->scp_session);
   if(rc != SSH_OK) {
     const char *err_msg = ssh_get_error(sshc->ssh_session);
