@@ -95,7 +95,7 @@ struct Curl_dnscache {
 };
 
 /* init a new dns cache */
-void Curl_dnscache_init(struct Curl_dnscache *dns, size_t hashsize);
+void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size);
 
 void Curl_dnscache_destroy(struct Curl_dnscache *dns);
 
