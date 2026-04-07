@@ -64,7 +64,7 @@
 #  endif
 #  define USE_OPENSSL_DES
 
-#elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+#elif defined(USE_WOLFSSL) && defined(HAVE_WC_DES_ECBENCRYPT)
 
 #  include <wolfssl/options.h>
 #  include <wolfssl/wolfcrypt/des3.h>
