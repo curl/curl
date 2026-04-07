@@ -133,8 +133,7 @@ if test "$OPT_WOLFSSL" != "no"; then
       AC_CHECK_FUNCS([wolfSSL_set_quic_use_legacy_codepoint], [QUIC_ENABLED=yes])
 
       dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
-      dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
-      dnl layer
+      dnl wc_Des_EcbEncrypt is needed for NTLM support.
       dnl if wolfSSL_BIO_set_shutdown is present, we have the full BIO feature set
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
                      wolfSSL_UseALPN \
