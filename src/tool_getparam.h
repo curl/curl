@@ -318,7 +318,7 @@ typedef enum {
 #define ARG_STRG 2 /* requires an argument */
 #define ARG_FILE 3 /* requires an argument, usually a filename */
 #define ARG_SECS 4 /* requires a time in seconds */
-#define ARG_UNUM 5 /* requires a positive (unsigned) number */
+#define ARG_UNUM 5 /* requires a non-negative number */
 
 #define ARG_TYPEMASK 0x07
 #define ARGTYPE(x)   ((x) & ARG_TYPEMASK)
