@@ -2997,9 +2997,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       struct dynbuf nbuf;
       bool replaced;
 
-      if((ARGTYPE(a->desc) != ARG_STRG) &&
-         (ARGTYPE(a->desc) != ARG_FILE)) {
-        /* --expand on an option that is not a string or a filename */
+      if(ARGTYPE(a->desc) < ARG_STRG) {
+        /* --expand on an option that does not take an argument */
         err = PARAM_EXPAND_ERROR;
         goto error;
       }
