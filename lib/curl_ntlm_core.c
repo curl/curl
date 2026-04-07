@@ -49,13 +49,6 @@
      in NTLM type-3 messages.
  */
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-#error "mbedTLS 3.2.0 or later required"
-#endif
-#endif /* USE_MBEDTLS */
-
 #if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
 
 #  include <openssl/des.h>
@@ -74,6 +67,10 @@
 #  include <nettle/des.h>
 #  define USE_CURL_DES_SET_ODD_PARITY
 #elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
+#  include <mbedtls/version.h>
+#  if MBEDTLS_VERSION_NUMBER < 0x03020000
+#  error "mbedTLS 3.2.0 or later required"
+#  endif
 #  include <mbedtls/des.h>
 #  define USE_MBEDTLS_DES
 #elif defined(USE_OS400CRYPTO)
