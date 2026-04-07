@@ -72,7 +72,6 @@
 #  ifdef OPENSSL_COEXIST
 #    define DES_key_schedule      WOLFSSL_DES_key_schedule
 #    define DES_cblock            WOLFSSL_DES_cblock
-#    define DES_set_odd_parity    wolfSSL_DES_set_odd_parity
 #    define DES_set_key           wolfSSL_DES_set_key
 #    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
 #    define DES_ecb_encrypt       wolfSSL_DES_ecb_encrypt
@@ -85,6 +84,7 @@
 #    define DESKEY(x) &x
 #  endif
 #  define USE_WOLFSSL_DES
+#  define USE_CURL_DES_SET_ODD_PARITY
 
 #elif defined(USE_GNUTLS)
 #  include <nettle/des.h>
@@ -191,7 +191,7 @@ static void setup_des_key(const unsigned char *key_56, DES_key_schedule *ks)
   extend_key_56_to_64(key_56, (char *)&key);
 
   /* Set the key parity to odd */
-  DES_set_odd_parity(&key);
+  curl_des_set_odd_parity((unsigned char *)&key, sizeof(key));
 
   /* Set the key */
   DES_set_key_unchecked(&key, ks);
