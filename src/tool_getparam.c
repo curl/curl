@@ -97,7 +97,7 @@ static const struct LongShort aliases[]= {
   {"compressed",                 ARG_BOOL, ' ', C_COMPRESSED},
   {"compressed-ssh",             ARG_BOOL, ' ', C_COMPRESSED_SSH},
   {"config",                     ARG_FILE, 'K', C_CONFIG},
-  {"connect-timeout",            ARG_STRG, ' ', C_CONNECT_TIMEOUT},
+  {"connect-timeout",            ARG_SECS, ' ', C_CONNECT_TIMEOUT},
   {"connect-to",                 ARG_STRG, ' ', C_CONNECT_TO},
   {"continue-at",                ARG_STRG, 'C', C_CONTINUE_AT},
   {"cookie",                     ARG_STRG, 'b', C_COOKIE},
@@ -134,7 +134,7 @@ static const struct LongShort aliases[]= {
   {"epsv",                       ARG_BOOL, ' ', C_EPSV},
   {"etag-compare",               ARG_FILE, ' ', C_ETAG_COMPARE},
   {"etag-save",                  ARG_FILE, ' ', C_ETAG_SAVE},
-  {"expect100-timeout",          ARG_STRG, ' ', C_EXPECT100_TIMEOUT},
+  {"expect100-timeout",          ARG_SECS, ' ', C_EXPECT100_TIMEOUT},
   {"fail",                       ARG_BOOL, 'f', C_FAIL},
   {"fail-early",                 ARG_BOOL, ' ', C_FAIL_EARLY},
   {"fail-with-body",             ARG_BOOL, ' ', C_FAIL_WITH_BODY},
@@ -158,7 +158,7 @@ static const struct LongShort aliases[]= {
   {"ftp-ssl-reqd",               ARG_BOOL|ARG_TLS, ' ', C_FTP_SSL_REQD},
   {"get",                        ARG_BOOL, 'G', C_GET},
   {"globoff",                    ARG_BOOL, 'g', C_GLOBOFF},
-  {"happy-eyeballs-timeout-ms",  ARG_STRG, ' ', C_HAPPY_EYEBALLS_TIMEOUT_MS},
+  {"happy-eyeballs-timeout-ms",  ARG_UNUM, ' ', C_HAPPY_EYEBALLS_TIMEOUT_MS},
   {"haproxy-clientip",           ARG_STRG, ' ', C_HAPROXY_CLIENTIP},
   {"haproxy-protocol",           ARG_BOOL, ' ', C_HAPROXY_PROTOCOL},
   {"head",                       ARG_BOOL, 'I', C_HEAD},
@@ -187,8 +187,8 @@ static const struct LongShort aliases[]= {
   {"json",                       ARG_STRG, ' ', C_JSON},
   {"junk-session-cookies",       ARG_BOOL, 'j', C_JUNK_SESSION_COOKIES},
   {"keepalive",                  ARG_BOOL|ARG_NO, ' ', C_KEEPALIVE},
-  {"keepalive-cnt",              ARG_STRG, ' ', C_KEEPALIVE_CNT},
-  {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
+  {"keepalive-cnt",              ARG_UNUM, ' ', C_KEEPALIVE_CNT},
+  {"keepalive-time",             ARG_UNUM, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
   {"key-type",                   ARG_STRG|ARG_TLS, ' ', C_KEY_TYPE},
   {"knownhosts",                 ARG_FILE, ' ', C_KNOWNHOSTS},
@@ -208,7 +208,7 @@ static const struct LongShort aliases[]= {
   {"manual",                     ARG_BOOL, 'M', C_MANUAL},
   {"max-filesize",               ARG_STRG, ' ', C_MAX_FILESIZE},
   {"max-redirs",                 ARG_STRG, ' ', C_MAX_REDIRS},
-  {"max-time",                   ARG_STRG, 'm', C_MAX_TIME},
+  {"max-time",                   ARG_SECS, 'm', C_MAX_TIME},
   {"metalink",                   ARG_BOOL|ARG_DEPR, ' ', C_METALINK},
   {"mptcp",                      ARG_BOOL, ' ', C_MPTCP},
   {"negotiate",                  ARG_BOOL, ' ', C_NEGOTIATE},
@@ -226,8 +226,8 @@ static const struct LongShort aliases[]= {
   {"output-dir",                 ARG_STRG, ' ', C_OUTPUT_DIR},
   {"parallel",                   ARG_BOOL, 'Z', C_PARALLEL},
   {"parallel-immediate",         ARG_BOOL, ' ', C_PARALLEL_IMMEDIATE},
-  {"parallel-max",               ARG_STRG, ' ', C_PARALLEL_MAX},
-  {"parallel-max-host",          ARG_STRG, ' ', C_PARALLEL_HOST},
+  {"parallel-max",               ARG_UNUM, ' ', C_PARALLEL_MAX},
+  {"parallel-max-host",          ARG_UNUM, ' ', C_PARALLEL_HOST},
   {"pass",                       ARG_STRG|ARG_CLEAR, ' ', C_PASS},
   {"path-as-is",                 ARG_BOOL, ' ', C_PATH_AS_IS},
   {"pinnedpubkey",               ARG_STRG|ARG_TLS, ' ', C_PINNEDPUBKEY},
@@ -288,11 +288,11 @@ static const struct LongShort aliases[]= {
   {"request",                    ARG_STRG, 'X', C_REQUEST},
   {"request-target",             ARG_STRG, ' ', C_REQUEST_TARGET},
   {"resolve",                    ARG_STRG, ' ', C_RESOLVE},
-  {"retry",                      ARG_STRG, ' ', C_RETRY},
+  {"retry",                      ARG_UNUM, ' ', C_RETRY},
   {"retry-all-errors",           ARG_BOOL, ' ', C_RETRY_ALL_ERRORS},
   {"retry-connrefused",          ARG_BOOL, ' ', C_RETRY_CONNREFUSED},
-  {"retry-delay",                ARG_STRG, ' ', C_RETRY_DELAY},
-  {"retry-max-time",             ARG_STRG, ' ', C_RETRY_MAX_TIME},
+  {"retry-delay",                ARG_SECS, ' ', C_RETRY_DELAY},
+  {"retry-max-time",             ARG_SECS, ' ', C_RETRY_MAX_TIME},
   {"sasl-authzid",               ARG_STRG, ' ', C_SASL_AUTHZID},
   {"sasl-ir",                    ARG_BOOL, ' ', C_SASL_IR},
   {"service-name",               ARG_STRG, ' ', C_SERVICE_NAME},
@@ -311,8 +311,8 @@ static const struct LongShort aliases[]= {
   {"socks5-gssapi-nec",          ARG_BOOL, ' ', C_SOCKS5_GSSAPI_NEC},
   {"socks5-gssapi-service",      ARG_STRG, ' ', C_SOCKS5_GSSAPI_SERVICE},
   {"socks5-hostname",            ARG_STRG, ' ', C_SOCKS5_HOSTNAME},
-  {"speed-limit",                ARG_STRG, 'Y', C_SPEED_LIMIT},
-  {"speed-time",                 ARG_STRG, 'y', C_SPEED_TIME},
+  {"speed-limit",                ARG_UNUM, 'Y', C_SPEED_LIMIT},
+  {"speed-time",                 ARG_UNUM, 'y', C_SPEED_TIME},
   {"ssl",                        ARG_BOOL|ARG_TLS, ' ', C_SSL},
   {"ssl-allow-beast",            ARG_BOOL|ARG_TLS, ' ', C_SSL_ALLOW_BEAST},
   {"ssl-auto-client-cert",       ARG_BOOL|ARG_TLS, ' ',
@@ -334,7 +334,7 @@ static const struct LongShort aliases[]= {
   {"test-duphandle",             ARG_BOOL, ' ', C_TEST_DUPHANDLE},
   {"test-event",                 ARG_BOOL, ' ', C_TEST_EVENT},
 #endif
-  {"tftp-blksize",               ARG_STRG, ' ', C_TFTP_BLKSIZE},
+  {"tftp-blksize",               ARG_UNUM, ' ', C_TFTP_BLKSIZE},
   {"tftp-no-options",            ARG_BOOL, ' ', C_TFTP_NO_OPTIONS},
   {"time-cond",                  ARG_STRG, 'z', C_TIME_COND},
   {"tls-earlydata",              ARG_BOOL|ARG_TLS, ' ', C_TLS_EARLYDATA},
@@ -365,7 +365,7 @@ static const struct LongShort aliases[]= {
   {"variable",                   ARG_STRG, ' ', C_VARIABLE},
   {"verbose",                    ARG_BOOL, 'v', C_VERBOSE},
   {"version",                    ARG_BOOL, 'V', C_VERSION},
-  {"vlan-priority",              ARG_STRG, ' ', C_VLAN_PRIORITY},
+  {"vlan-priority",              ARG_UNUM, ' ', C_VLAN_PRIORITY},
 #ifdef USE_WATT32
   {"wdebug",                     ARG_BOOL, ' ', C_WDEBUG},
 #endif
@@ -2348,6 +2348,106 @@ static ParameterError opt_file(struct OperationConfig *config,
   return err;
 }
 
+/* options that accept unsigned numbers */
+static ParameterError opt_unum(struct OperationConfig *config,
+                               const struct LongShort *a,
+                               const char *nextarg)
+{
+  ParameterError err = PARAM_OK;
+  long val;
+  err = str2unum(&val, nextarg);
+  if(err)
+    return err;
+  switch(a->cmd) {
+  case C_VLAN_PRIORITY: /* --vlan-priority */
+    if(val > 7)
+      return PARAM_NUMBER_TOO_LARGE;
+    config->vlan_priority = val;
+    break;
+  case C_RETRY: /* --retry */
+    config->req_retry = val;
+    break;
+  case C_KEEPALIVE_TIME: /* --keepalive-time */
+    config->alivetime = val;
+    break;
+  case C_KEEPALIVE_CNT: /* --keepalive-cnt */
+    config->alivecnt = val;
+    break;
+  case C_TFTP_BLKSIZE: /* --tftp-blksize */
+    config->tftp_blksize = val;
+    break;
+  case C_HAPPY_EYEBALLS_TIMEOUT_MS: /* --happy-eyeballs-timeout-ms */
+    config->happy_eyeballs_timeout_ms = val;
+    /* 0 is a valid value for this timeout */
+    break;
+  case C_SPEED_TIME: /* --speed-time */
+    /* low speed time */
+    config->low_speed_time = val;
+    if(!config->low_speed_limit)
+      config->low_speed_limit = 1;
+    break;
+  case C_SPEED_LIMIT: /* --speed-limit */
+    /* low speed limit */
+    config->low_speed_limit = val;
+    if(!config->low_speed_time)
+      config->low_speed_time = 30;
+    break;
+  case C_PARALLEL_HOST: /* --parallel-max-host */
+    if(val > MAX_PARALLEL_HOST)
+      global->parallel_host = MAX_PARALLEL_HOST;
+    else if(val < 1)
+      global->parallel_host = PARALLEL_HOST_DEFAULT;
+    else
+      global->parallel_host = (unsigned short)val;
+    break;
+  case C_PARALLEL_MAX:  /* --parallel-max */
+    if(val > MAX_PARALLEL)
+      global->parallel_max = MAX_PARALLEL;
+    else if(val < 1)
+      global->parallel_max = PARALLEL_DEFAULT;
+    else
+      global->parallel_max = (unsigned short)val;
+    break;
+  default:
+    DEBUGASSERT(0);
+    return PARAM_OPTION_UNKNOWN;
+  }
+  return err;
+}
+
+/* handle options that accept seconds */
+static ParameterError opt_secs(struct OperationConfig *config,
+                               const struct LongShort *a,
+                               const char *nextarg)
+{
+  long val;
+  ParameterError err = secs2ms(&val, nextarg);
+  if(err)
+    return err;
+  switch(a->cmd) {
+  case C_CONNECT_TIMEOUT: /* --connect-timeout */
+    config->connecttimeout_ms = val;
+    break;
+  case C_RETRY_DELAY: /* --retry-delay */
+    config->retry_delay_ms = val;
+    break;
+  case C_RETRY_MAX_TIME: /* --retry-max-time */
+    config->retry_maxtime_ms = val;
+    break;
+  case C_EXPECT100_TIMEOUT: /* --expect100-timeout */
+    config->expect100timeout_ms = val;
+    break;
+  case C_MAX_TIME: /* --max-time */
+    /* specified max time */
+    config->timeout_ms = val;
+    break;
+  default:
+    DEBUGASSERT(0);
+    return PARAM_OPTION_UNKNOWN;
+  }
+  return err;
+}
+
 /* opt_string handles string options */
 static ParameterError opt_string(struct OperationConfig *config,
                                  const struct LongShort *a,
@@ -2355,7 +2455,6 @@ static ParameterError opt_string(struct OperationConfig *config,
 {
   ParameterError err = PARAM_OK;
   curl_off_t value;
-  long val;
   static const char *redir_protos[] = {
     "http",
     "https",
@@ -2382,9 +2481,6 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_OAUTH2_BEARER: /* --oauth2-bearer */
     config->authtype |= CURLAUTH_BEARER;
     return getstr(&config->oauth_bearer, nextarg, DENY_BLANK);
-
-  case C_CONNECT_TIMEOUT: /* --connect-timeout */
-    return secs2ms(&config->connecttimeout_ms, nextarg);
 
   case C_DOH_URL: /* --doh-url */
     err = getstr(&config->doh_url, nextarg, ALLOW_BLANK);
@@ -2486,18 +2582,6 @@ static ParameterError opt_string(struct OperationConfig *config,
       err = str2unummax(&config->ip_tos, nextarg, 0xFF);
     break;
   }
-  case C_VLAN_PRIORITY: /* --vlan-priority */
-    err = str2unummax(&config->vlan_priority, nextarg, 7);
-    break;
-  case C_RETRY: /* --retry */
-    err = str2unum(&config->req_retry, nextarg);
-    break;
-  case C_RETRY_DELAY: /* --retry-delay */
-    err = secs2ms(&config->retry_delay_ms, nextarg);
-    break;
-  case C_RETRY_MAX_TIME: /* --retry-max-time */
-    err = secs2ms(&config->retry_maxtime_ms, nextarg);
-    break;
   case C_FTP_ACCOUNT: /* --ftp-account */
     err = getstr(&config->ftp_account, nextarg, DENY_BLANK);
     break;
@@ -2518,12 +2602,6 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&global->libcurl, nextarg, DENY_BLANK);
 #endif
     break;
-  case C_KEEPALIVE_TIME: /* --keepalive-time */
-    err = str2unum(&config->alivetime, nextarg);
-    break;
-  case C_KEEPALIVE_CNT: /* --keepalive-cnt */
-    err = str2unum(&config->alivecnt, nextarg);
-    break;
   case C_NOPROXY: /* --noproxy */
     /* This specifies the noproxy list */
     err = getstr(&config->noproxy, nextarg, ALLOW_BLANK);
@@ -2532,9 +2610,6 @@ static ParameterError opt_string(struct OperationConfig *config,
     /* http 1.0 proxy */
     err = getstr(&config->proxy, nextarg, DENY_BLANK);
     config->proxyver = CURLPROXY_HTTP_1_0;
-    break;
-  case C_TFTP_BLKSIZE: /* --tftp-blksize */
-    err = str2unum(&config->tftp_blksize, nextarg);
     break;
   case C_MAIL_FROM: /* --mail-from */
     err = getstr(&config->mail_from, nextarg, DENY_BLANK);
@@ -2575,9 +2650,6 @@ static ParameterError opt_string(struct OperationConfig *config,
     if(!err)
       err = check_protocol(config->proto_default);
     break;
-  case C_EXPECT100_TIMEOUT: /* --expect100-timeout */
-    err = secs2ms(&config->expect100timeout_ms, nextarg);
-    break;
   case C_CONNECT_TO: /* --connect-to */
     err = add2list(&config->connect_to, nextarg);
     break;
@@ -2587,10 +2659,6 @@ static ParameterError opt_string(struct OperationConfig *config,
       errorf("--tls-max set lower than minimum accepted version");
       err = PARAM_BAD_USE;
     }
-    break;
-  case C_HAPPY_EYEBALLS_TIMEOUT_MS: /* --happy-eyeballs-timeout-ms */
-    err = str2unum(&config->happy_eyeballs_timeout_ms, nextarg);
-    /* 0 is a valid value for this timeout */
     break;
   case C_TRACE_CONFIG: /* --trace-config */
     global->trace_set = TRUE;
@@ -2789,10 +2857,6 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_PROXY_HEADER: /* --proxy-header */
     err = parse_header(config, (cmdline_t)a->cmd, nextarg);
     break;
-  case C_MAX_TIME: /* --max-time */
-    /* specified max time */
-    err = secs2ms(&config->timeout_ms, nextarg);
-    break;
   case C_OUTPUT_DIR: /* --output-dir */
     err = getstr(&config->output_dir, nextarg, DENY_BLANK);
     break;
@@ -2841,40 +2905,6 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_REQUEST: /* --request */
     /* set custom request */
     err = getstr(&config->customrequest, nextarg, DENY_BLANK);
-    break;
-  case C_SPEED_TIME: /* --speed-time */
-    /* low speed time */
-    err = str2unum(&config->low_speed_time, nextarg);
-    if(!err && !config->low_speed_limit)
-      config->low_speed_limit = 1;
-    break;
-  case C_SPEED_LIMIT: /* --speed-limit */
-    /* low speed limit */
-    err = str2unum(&config->low_speed_limit, nextarg);
-    if(!err && !config->low_speed_time)
-      config->low_speed_time = 30;
-    break;
-  case C_PARALLEL_HOST: /* --parallel-max-host */
-    err = str2unum(&val, nextarg);
-    if(err)
-      break;
-    if(val > MAX_PARALLEL_HOST)
-      global->parallel_host = MAX_PARALLEL_HOST;
-    else if(val < 1)
-      global->parallel_host = PARALLEL_HOST_DEFAULT;
-    else
-      global->parallel_host = (unsigned short)val;
-    break;
-  case C_PARALLEL_MAX:  /* --parallel-max */
-    err = str2unum(&val, nextarg);
-    if(err)
-      break;
-    if(val > MAX_PARALLEL)
-      global->parallel_max = MAX_PARALLEL;
-    else if(val < 1)
-      global->parallel_max = PARALLEL_DEFAULT;
-    else
-      global->parallel_max = (unsigned short)val;
     break;
   case C_TIME_COND: /* --time-cond */
     err = parse_time_cond(config, nextarg);
@@ -2966,9 +2996,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       struct dynbuf nbuf;
       bool replaced;
 
-      if((ARGTYPE(a->desc) != ARG_STRG) &&
-         (ARGTYPE(a->desc) != ARG_FILE)) {
-        /* --expand on an option that is not a string or a filename */
+      if(ARGTYPE(a->desc) < ARG_STRG) {
+        /* --expand on an option that does not take an argument */
         err = PARAM_EXPAND_ERROR;
         goto error;
       }
@@ -3030,10 +3059,24 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf("The argument '%s' starts with a Unicode character. "
               "Maybe ASCII was intended?", nextarg);
       }
-      if(ARGTYPE(a->desc) == ARG_FILE)
+      switch(ARGTYPE(a->desc)) {
+      case ARG_FILE:
         err = opt_file(config, a, nextarg, max_recursive);
-      else /* if(ARGTYPE(a->desc) == ARG_STRG) */
+        break;
+      case ARG_STRG:
         err = opt_string(config, a, nextarg);
+        break;
+      case ARG_SECS:
+        err = opt_secs(config, a, nextarg);
+        break;
+      case ARG_UNUM:
+        err = opt_unum(config, a, nextarg);
+        break;
+      default:
+        DEBUGASSERT(0);
+        err = PARAM_OPTION_UNKNOWN;
+        break;
+      }
       if(a->desc & ARG_CLEAR)
         cleanarg(CURL_UNCONST(nextarg));
     }
