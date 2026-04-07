@@ -1994,7 +1994,7 @@ static int myssh_in_SFTP_TRANS_INIT(struct Curl_easy *data,
       myssh_to(data, sshc, SSH_SFTP_DOWNLOAD_INIT);
   }
 
- return SSH_NO_ERROR;
+  return SSH_NO_ERROR;
 }
 
 static int myssh_in_SFTP_CREATE_DIRS_INIT(struct Curl_easy *data,
