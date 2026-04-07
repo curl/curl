@@ -1801,10 +1801,15 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
   /*
    * Get the "home" directory
    */
-  int rc = libssh2_sftp_symlink_ex(sshc->sftp_session,
-                                   ".", curlx_uztoui(strlen(".")),
-                                   sshp->readdir_filename, CURL_PATH_MAX,
-                                   LIBSSH2_SFTP_REALPATH);
+  int rc;
+
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  rc = libssh2_sftp_symlink_ex(sshc->sftp_session, ".",
+                               curlx_uztoui(strlen(".")),
+                               sshp->readdir_filename, CURL_PATH_MAX,
+                               LIBSSH2_SFTP_REALPATH);
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
@@ -1844,7 +1849,12 @@ static CURLcode ssh_state_sftp_quote_init(struct Curl_easy *data,
                                           struct ssh_conn *sshc,
                                           struct SSHPROTO *sshp)
 {
-  CURLcode result = Curl_getworkingpath(data, sshc->homedir, &sshp->path);
+  CURLcode result;
+
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  result = Curl_getworkingpath(data, sshc->homedir, &sshp->path);
   if(result) {
     myssh_to(data, sshc, SSH_STOP);
     return result;
@@ -1880,7 +1890,12 @@ static CURLcode ssh_state_sftp_quote(struct Curl_easy *data,
                                      struct SSHPROTO *sshp)
 {
   /* Send quote commands */
-  CURLcode result = sftp_quote(data, sshc, sshp);
+  CURLcode result;
+
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  result = sftp_quote(data, sshc, sshp);
   if(result) {
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
@@ -1916,7 +1931,12 @@ static CURLcode ssh_state_sftp_quote_stat(struct Curl_easy *data,
                                           struct SSHPROTO *sshp,
                                           bool *blockp)
 {
-  CURLcode result = sftp_quote_stat(data, sshc, sshp, blockp);
+  CURLcode result;
+
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  result = sftp_quote_stat(data, sshc, sshp, blockp);
   if(result) {
     myssh_to(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
@@ -1928,11 +1948,15 @@ static CURLcode ssh_state_sftp_quote_setstat(struct Curl_easy *data,
                                              struct ssh_conn *sshc,
                                              struct SSHPROTO *sshp)
 {
-  int rc =
-    libssh2_sftp_stat_ex(sshc->sftp_session, sshc->quote_path2,
-                         curlx_uztoui(strlen(sshc->quote_path2)),
-                         LIBSSH2_SFTP_SETSTAT,
-                         &sshp->quote_attrs);
+  int rc;
+
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshc->quote_path2,
+                            curlx_uztoui(strlen(sshc->quote_path2)),
+                            LIBSSH2_SFTP_SETSTAT,
+                            &sshp->quote_attrs);
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
@@ -2139,9 +2163,14 @@ static CURLcode ssh_state_sftp_create_dirs_mkdir(struct Curl_easy *data,
                                                  struct SSHPROTO *sshp)
 {
   /* 'mode' - parameter is preliminary - default to 0644 */
-  int rc = libssh2_sftp_mkdir_ex(sshc->sftp_session, sshp->path,
-                                 curlx_uztoui(strlen(sshp->path)),
-                                 (long)data->set.new_directory_perms);
+  int rc;
+
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  rc = libssh2_sftp_mkdir_ex(sshc->sftp_session, sshp->path,
+                             curlx_uztoui(strlen(sshp->path)),
+                             (long)data->set.new_directory_perms);
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
@@ -2169,6 +2198,9 @@ static CURLcode ssh_state_sftp_readdir_init(struct Curl_easy *data,
                                             struct ssh_conn *sshc,
                                             struct SSHPROTO *sshp)
 {
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
   Curl_pgrsSetDownloadSize(data, -1);
   if(data->req.no_body) {
     myssh_to(data, sshc, SSH_STOP);
@@ -2203,13 +2235,16 @@ static CURLcode ssh_state_sftp_readdir_link(struct Curl_easy *data,
                                             struct SSHPROTO *sshp)
 {
   CURLcode result;
-  int rc =
-    libssh2_sftp_symlink_ex(sshc->sftp_session,
-                            curlx_dyn_ptr(&sshp->readdir_link),
-                            (unsigned int)
-                            curlx_dyn_len(&sshp->readdir_link),
-                            sshp->readdir_filename,
-                            CURL_PATH_MAX, LIBSSH2_SFTP_READLINK);
+  int rc;
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  rc = libssh2_sftp_symlink_ex(sshc->sftp_session,
+                               curlx_dyn_ptr(&sshp->readdir_link),
+                               (unsigned int)
+                               curlx_dyn_len(&sshp->readdir_link),
+                               sshp->readdir_filename,
+                               CURL_PATH_MAX, LIBSSH2_SFTP_READLINK);
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
@@ -2232,7 +2267,10 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
                                             struct SSHPROTO *sshp)
 {
   curl_off_t bytecount;
+  libssh2_struct_stat sb;
 
+  if(!sshp)
+    return CURLE_FAILED_INIT;
   /*
    * We must check the remote file; if it is a directory no values are
    * be set in sb
@@ -2243,7 +2281,6 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
    */
 
   /* get a fresh new channel from the ssh layer */
-  libssh2_struct_stat sb;
   memset(&sb, 0, sizeof(libssh2_struct_stat));
   sshc->ssh_channel = libssh2_scp_recv2(sshc->ssh_session, sshp->path, &sb);
   if(!sshc->ssh_channel) {
@@ -2277,6 +2314,8 @@ static CURLcode ssh_state_sftp_close(struct Curl_easy *data,
                                      struct SSHPROTO *sshp)
 {
   int rc = 0;
+  if(!sshp)
+    return CURLE_FAILED_INIT;
   if(sshc->sftp_handle) {
     rc = libssh2_sftp_close(sshc->sftp_handle);
     if(rc == LIBSSH2_ERROR_EAGAIN)
@@ -2348,6 +2387,8 @@ static CURLcode ssh_state_sftp_download_init(struct Curl_easy *data,
                                              struct ssh_conn *sshc,
                                              struct SSHPROTO *sshp)
 {
+  if(!sshp)
+    return CURLE_FAILED_INIT;
   /*
    * Work on getting the specified file
    */
@@ -2376,6 +2417,8 @@ static CURLcode ssh_state_scp_upload_init(struct Curl_easy *data,
                                           struct ssh_conn *sshc,
                                           struct SSHPROTO *sshp)
 {
+  if(!sshp)
+    return CURLE_FAILED_INIT;
   /*
    * libssh2 requires that the destination path is a full path that
    * includes the destination file and name OR ends in a "/" . If this is
@@ -2556,6 +2599,307 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static CURLcode ssh_state_sftp_getinfo(struct Curl_easy *data,
+                                       struct ssh_conn *sshc)
+{
+  if(data->set.get_filetime)
+    myssh_to(data, sshc, SSH_SFTP_FILETIME);
+  else
+    myssh_to(data, sshc, SSH_SFTP_TRANS_INIT);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_sftp_filetime(struct Curl_easy *data,
+                                        struct ssh_conn *sshc,
+                                        struct SSHPROTO *sshp)
+{
+  LIBSSH2_SFTP_ATTRIBUTES attrs;
+  int rc;
+
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshp->path,
+                            curlx_uztoui(strlen(sshp->path)),
+                            LIBSSH2_SFTP_STAT, &attrs);
+  if(rc == LIBSSH2_ERROR_EAGAIN)
+    return CURLE_AGAIN;
+
+  if(rc == 0)
+    data->info.filetime = (time_t)attrs.mtime;
+
+  myssh_to(data, sshc, SSH_SFTP_TRANS_INIT);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_sftp_trans_init(struct Curl_easy *data,
+                                          struct ssh_conn *sshc,
+                                          struct SSHPROTO *sshp)
+{
+  if(data->state.upload)
+    myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
+  else if(sshp) {
+    size_t plen = strlen(sshp->path);
+    if(plen && (sshp->path[plen - 1] == '/'))
+      myssh_to(data, sshc, SSH_SFTP_READDIR_INIT);
+    else
+      myssh_to(data, sshc, SSH_SFTP_DOWNLOAD_INIT);
+  }
+  else
+    return CURLE_FAILED_INIT;
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_sftp_upload_init(struct Curl_easy *data,
+                                           struct ssh_conn *sshc,
+                                           struct SSHPROTO *sshp,
+                                           bool *block)
+{
+  CURLcode result;
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+  result = sftp_upload_init(data, sshc, sshp, block);
+  if(result) {
+    myssh_to(data, sshc, SSH_SFTP_CLOSE);
+    sshc->nextstate = SSH_NO_STATE;
+  }
+  return result;
+}
+
+static CURLcode ssh_state_sftp_create_dirs_init(struct Curl_easy *data,
+                                                struct ssh_conn *sshc,
+                                                struct SSHPROTO *sshp)
+{
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+  if(strlen(sshp->path) > 1) {
+    sshc->slash_pos = sshp->path + 1; /* ignore the leading '/' */
+    myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS);
+  }
+  else
+    myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_sftp_create_dirs(struct Curl_easy *data,
+                                           struct ssh_conn *sshc,
+                                           struct SSHPROTO *sshp)
+{
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+  sshc->slash_pos = strchr(sshc->slash_pos, '/');
+  if(sshc->slash_pos) {
+    *sshc->slash_pos = 0;
+    infof(data, "Creating directory '%s'", sshp->path);
+    myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS_MKDIR);
+    return CURLE_OK;
+  }
+  myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_sftp_readdir(struct Curl_easy *data,
+                                       struct ssh_conn *sshc,
+                                       struct SSHPROTO *sshp,
+                                       bool *block)
+{
+  CURLcode result;
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+  result = sftp_readdir(data, sshc, sshp, block);
+  if(result)
+    myssh_to(data, sshc, SSH_SFTP_CLOSE);
+  return result;
+}
+
+static CURLcode ssh_state_sftp_readdir_bottom(struct Curl_easy *data,
+                                              struct ssh_conn *sshc,
+                                              struct SSHPROTO *sshp)
+{
+  CURLcode result;
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+
+  result = curlx_dyn_addn(&sshp->readdir, "\n", 1);
+  if(!result)
+    result = Curl_client_write(data, CLIENTWRITE_BODY,
+                               curlx_dyn_ptr(&sshp->readdir),
+                               curlx_dyn_len(&sshp->readdir));
+  if(result) {
+    curlx_dyn_free(&sshp->readdir);
+    myssh_to(data, sshc, SSH_STOP);
+  }
+  else {
+    curlx_dyn_reset(&sshp->readdir);
+    myssh_to(data, sshc, SSH_SFTP_READDIR);
+  }
+  return result;
+}
+
+static CURLcode ssh_state_sftp_readdir_done(struct Curl_easy *data,
+                                            struct ssh_conn *sshc)
+{
+  if(libssh2_sftp_closedir(sshc->sftp_handle) ==
+     LIBSSH2_ERROR_EAGAIN)
+    return CURLE_AGAIN;
+
+  sshc->sftp_handle = NULL;
+
+  /* no data to transfer */
+  Curl_xfer_setup_nop(data);
+  myssh_to(data, sshc, SSH_STOP);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_sftp_download_stat(struct Curl_easy *data,
+                                             struct ssh_conn *sshc,
+                                             struct SSHPROTO *sshp,
+                                             bool *block)
+{
+  CURLcode result;
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+  result = sftp_download_stat(data, sshc, sshp, block);
+  if(result) {
+    myssh_to(data, sshc, SSH_SFTP_CLOSE);
+    sshc->nextstate = SSH_NO_STATE;
+  }
+  return result;
+}
+
+static CURLcode ssh_state_scp_trans_init(struct Curl_easy *data,
+                                         struct ssh_conn *sshc,
+                                         struct SSHPROTO *sshp)
+{
+  CURLcode result;
+  if(!sshp)
+    return CURLE_FAILED_INIT;
+  result = Curl_getworkingpath(data, sshc->homedir,
+                               &sshp->path);
+  if(result) {
+    myssh_to(data, sshc, SSH_STOP);
+    return result;
+  }
+
+  if(data->state.upload) {
+    if(data->state.infilesize < 0) {
+      failf(data, "SCP requires a known file size for upload");
+      myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+      return CURLE_UPLOAD_FAILED;
+    }
+    myssh_to(data, sshc, SSH_SCP_UPLOAD_INIT);
+  }
+  else
+    myssh_to(data, sshc, SSH_SCP_DOWNLOAD_INIT);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_scp_done(struct Curl_easy *data,
+                                   struct ssh_conn *sshc)
+{
+  if(data->state.upload)
+    myssh_to(data, sshc, SSH_SCP_SEND_EOF);
+  else
+    myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_scp_send_eof(struct Curl_easy *data,
+                                       struct ssh_conn *sshc)
+{
+  if(sshc->ssh_channel) {
+    int rc = libssh2_channel_send_eof(sshc->ssh_channel);
+    if(rc == LIBSSH2_ERROR_EAGAIN)
+      return CURLE_AGAIN;
+    if(rc) {
+      char *err_msg = NULL;
+      (void)libssh2_session_last_error(sshc->ssh_session,
+                                       &err_msg, NULL, 0);
+      infof(data,
+            "Failed to send libssh2 channel EOF: %d %s",
+            rc, err_msg);
+    }
+  }
+  myssh_to(data, sshc, SSH_SCP_WAIT_EOF);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_scp_wait_eof(struct Curl_easy *data,
+                                       struct ssh_conn *sshc)
+{
+  if(sshc->ssh_channel) {
+    int rc = libssh2_channel_wait_eof(sshc->ssh_channel);
+    if(rc == LIBSSH2_ERROR_EAGAIN)
+      return CURLE_AGAIN;
+    if(rc) {
+      char *err_msg = NULL;
+      (void)libssh2_session_last_error(sshc->ssh_session,
+                                       &err_msg, NULL, 0);
+      infof(data, "Failed to get channel EOF: %d %s",
+            rc, err_msg);
+    }
+  }
+  myssh_to(data, sshc, SSH_SCP_WAIT_CLOSE);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_scp_wait_close(struct Curl_easy *data,
+                                         struct ssh_conn *sshc)
+{
+  if(sshc->ssh_channel) {
+    int rc =
+      libssh2_channel_wait_closed(sshc->ssh_channel);
+    if(rc == LIBSSH2_ERROR_EAGAIN)
+      return CURLE_AGAIN;
+    if(rc) {
+      char *err_msg = NULL;
+      (void)libssh2_session_last_error(sshc->ssh_session,
+                                       &err_msg, NULL, 0);
+      infof(data, "Channel failed to close: %d %s",
+            rc, err_msg);
+    }
+  }
+  myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_scp_channel_free(
+  struct Curl_easy *data,
+  struct ssh_conn *sshc)
+{
+  if(sshc->ssh_channel) {
+    int rc = libssh2_channel_free(sshc->ssh_channel);
+    if(rc == LIBSSH2_ERROR_EAGAIN)
+      return CURLE_AGAIN;
+    if(rc < 0) {
+      char *err_msg = NULL;
+      (void)libssh2_session_last_error(sshc->ssh_session,
+                                       &err_msg, NULL, 0);
+      infof(data,
+            "Failed to free libssh2 scp subsystem: %d %s",
+            rc, err_msg);
+    }
+    sshc->ssh_channel = NULL;
+  }
+  CURL_TRC_SSH(data, "SCP DONE phase complete");
+  myssh_to(data, sshc, SSH_STOP);
+  return CURLE_OK;
+}
+
+static CURLcode ssh_state_session_free(struct Curl_easy *data,
+                                       struct ssh_conn *sshc)
+{
+  CURLcode result = sshc_cleanup(sshc, data, FALSE);
+  struct connectdata *conn = data->conn;
+  if(result)
+    return result;
+  memset(sshc, 0, sizeof(struct ssh_conn));
+  connclose(conn, "SSH session free");
+  sshc->state = SSH_SESSION_FREE; /* current */
+  myssh_to(data, sshc, SSH_STOP);
+  return CURLE_OK;
+}
+
 /*
  * ssh_statemachine() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
@@ -2568,7 +2912,6 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
                                  bool *block)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
   *block = 0; /* we are not blocking by default */
 
   do {
@@ -2646,13 +2989,11 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_REALPATH:
-      result = sshp ? ssh_state_sftp_realpath(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_realpath(data, sshc, sshp);
       break;
 
     case SSH_SFTP_QUOTE_INIT:
-      result = sshp ? ssh_state_sftp_quote_init(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_quote_init(data, sshc, sshp);
       break;
 
     case SSH_SFTP_POSTQUOTE_INIT:
@@ -2660,8 +3001,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_QUOTE:
-      result = sshp ? ssh_state_sftp_quote(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_quote(data, sshc, sshp);
       break;
 
     case SSH_SFTP_NEXT_QUOTE:
@@ -2669,13 +3009,11 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_QUOTE_STAT:
-      result = sshp ? ssh_state_sftp_quote_stat(data, sshc, sshp, block) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_quote_stat(data, sshc, sshp, block);
       break;
 
     case SSH_SFTP_QUOTE_SETSTAT:
-      result = sshp ? ssh_state_sftp_quote_setstat(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_quote_setstat(data, sshc, sshp);
       break;
 
     case SSH_SFTP_QUOTE_SYMLINK:
@@ -2703,160 +3041,63 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_GETINFO:
-      if(data->set.get_filetime) {
-        myssh_to(data, sshc, SSH_SFTP_FILETIME);
-      }
-      else {
-        myssh_to(data, sshc, SSH_SFTP_TRANS_INIT);
-      }
+      result = ssh_state_sftp_getinfo(data, sshc);
       break;
 
-    case SSH_SFTP_FILETIME: {
-      LIBSSH2_SFTP_ATTRIBUTES attrs;
-      int rc;
-
-      if(!sshp) {
-        result = CURLE_FAILED_INIT;
-        break;
-      }
-      rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshp->path,
-                                curlx_uztoui(strlen(sshp->path)),
-                                LIBSSH2_SFTP_STAT, &attrs);
-      if(rc == LIBSSH2_ERROR_EAGAIN) {
-        result = CURLE_AGAIN;
-        break;
-      }
-      if(rc == 0) {
-        data->info.filetime = (time_t)attrs.mtime;
-      }
-
-      myssh_to(data, sshc, SSH_SFTP_TRANS_INIT);
+    case SSH_SFTP_FILETIME:
+      result = ssh_state_sftp_filetime(data, sshc, sshp);
       break;
-    }
 
     case SSH_SFTP_TRANS_INIT:
-      if(data->state.upload)
-        myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
-      else if(sshp) {
-        if(sshp->path[strlen(sshp->path) - 1] == '/')
-          myssh_to(data, sshc, SSH_SFTP_READDIR_INIT);
-        else
-          myssh_to(data, sshc, SSH_SFTP_DOWNLOAD_INIT);
-      }
-      else
-        result = CURLE_FAILED_INIT;
+      result = ssh_state_sftp_trans_init(data, sshc, sshp);
       break;
 
     case SSH_SFTP_UPLOAD_INIT:
-      result = sshp ? sftp_upload_init(data, sshc, sshp, block) :
-               CURLE_FAILED_INIT;
-      if(result) {
-        myssh_to(data, sshc, SSH_SFTP_CLOSE);
-        sshc->nextstate = SSH_NO_STATE;
-      }
+      result = ssh_state_sftp_upload_init(data, sshc, sshp, block);
       break;
 
     case SSH_SFTP_CREATE_DIRS_INIT:
-      if(!sshp)
-        result = CURLE_FAILED_INIT;
-      else if(strlen(sshp->path) > 1) {
-        sshc->slash_pos = sshp->path + 1; /* ignore the leading '/' */
-        myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS);
-      }
-      else {
-        myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
-      }
+      result = ssh_state_sftp_create_dirs_init(data, sshc, sshp);
       break;
 
     case SSH_SFTP_CREATE_DIRS:
-      if(!sshp) {
-        result = CURLE_FAILED_INIT;
-        break;
-      }
-      sshc->slash_pos = strchr(sshc->slash_pos, '/');
-      if(sshc->slash_pos) {
-        *sshc->slash_pos = 0;
-
-        infof(data, "Creating directory '%s'", sshp->path);
-        myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS_MKDIR);
-        break;
-      }
-      myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
+      result = ssh_state_sftp_create_dirs(data, sshc, sshp);
       break;
 
     case SSH_SFTP_CREATE_DIRS_MKDIR:
-      result = sshp ? ssh_state_sftp_create_dirs_mkdir(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_create_dirs_mkdir(data, sshc, sshp);
       break;
 
     case SSH_SFTP_READDIR_INIT:
-      result = sshp ? ssh_state_sftp_readdir_init(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_readdir_init(data, sshc, sshp);
       break;
 
     case SSH_SFTP_READDIR:
-      result = sshp ? sftp_readdir(data, sshc, sshp, block) :
-               CURLE_FAILED_INIT;
-      if(result) {
-        myssh_to(data, sshc, SSH_SFTP_CLOSE);
-      }
+      result = ssh_state_sftp_readdir(data, sshc, sshp, block);
       break;
 
     case SSH_SFTP_READDIR_LINK:
-      result = sshp ? ssh_state_sftp_readdir_link(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_readdir_link(data, sshc, sshp);
       break;
 
     case SSH_SFTP_READDIR_BOTTOM:
-      if(!sshp) {
-        result = CURLE_FAILED_INIT;
-        break;
-      }
-      result = curlx_dyn_addn(&sshp->readdir, "\n", 1);
-      if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                   curlx_dyn_ptr(&sshp->readdir),
-                                   curlx_dyn_len(&sshp->readdir));
-
-      if(result) {
-        curlx_dyn_free(&sshp->readdir);
-        myssh_to(data, sshc, SSH_STOP);
-      }
-      else {
-        curlx_dyn_reset(&sshp->readdir);
-        myssh_to(data, sshc, SSH_SFTP_READDIR);
-      }
+      result = ssh_state_sftp_readdir_bottom(data, sshc, sshp);
       break;
 
     case SSH_SFTP_READDIR_DONE:
-      if(libssh2_sftp_closedir(sshc->sftp_handle) == LIBSSH2_ERROR_EAGAIN)
-        result = CURLE_AGAIN;
-      else {
-        sshc->sftp_handle = NULL;
-
-        /* no data to transfer */
-        Curl_xfer_setup_nop(data);
-        myssh_to(data, sshc, SSH_STOP);
-      }
+      result = ssh_state_sftp_readdir_done(data, sshc);
       break;
 
     case SSH_SFTP_DOWNLOAD_INIT:
-      result = sshp ? ssh_state_sftp_download_init(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_download_init(data, sshc, sshp);
       break;
 
     case SSH_SFTP_DOWNLOAD_STAT:
-      result = sshp ? sftp_download_stat(data, sshc, sshp, block) :
-               CURLE_FAILED_INIT;
-      if(result) {
-        myssh_to(data, sshc, SSH_SFTP_CLOSE);
-        sshc->nextstate = SSH_NO_STATE;
-      }
+      result = ssh_state_sftp_download_stat(data, sshc, sshp, block);
       break;
 
     case SSH_SFTP_CLOSE:
-      result = sshp ? ssh_state_sftp_close(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_sftp_close(data, sshc, sshp);
       break;
 
     case SSH_SFTP_SHUTDOWN:
@@ -2864,114 +3105,35 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
 
     case SSH_SCP_TRANS_INIT:
-      result = sshp ? Curl_getworkingpath(data, sshc->homedir, &sshp->path) :
-               CURLE_FAILED_INIT;
-      if(result) {
-        myssh_to(data, sshc, SSH_STOP);
-        break;
-      }
-
-      if(data->state.upload) {
-        if(data->state.infilesize < 0) {
-          failf(data, "SCP requires a known file size for upload");
-          result = CURLE_UPLOAD_FAILED;
-          myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
-          break;
-        }
-        myssh_to(data, sshc, SSH_SCP_UPLOAD_INIT);
-      }
-      else {
-        myssh_to(data, sshc, SSH_SCP_DOWNLOAD_INIT);
-      }
+      result = ssh_state_scp_trans_init(data, sshc, sshp);
       break;
 
     case SSH_SCP_UPLOAD_INIT:
-      result = sshp ? ssh_state_scp_upload_init(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_scp_upload_init(data, sshc, sshp);
       break;
 
     case SSH_SCP_DOWNLOAD_INIT:
-      result = sshp ? ssh_state_scp_download_init(data, sshc, sshp) :
-               CURLE_FAILED_INIT;
+      result = ssh_state_scp_download_init(data, sshc, sshp);
       break;
 
     case SSH_SCP_DONE:
-      if(data->state.upload)
-        myssh_to(data, sshc, SSH_SCP_SEND_EOF);
-      else
-        myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+      result = ssh_state_scp_done(data, sshc);
       break;
 
     case SSH_SCP_SEND_EOF:
-      if(sshc->ssh_channel) {
-        int rc = libssh2_channel_send_eof(sshc->ssh_channel);
-        if(rc == LIBSSH2_ERROR_EAGAIN) {
-          result = CURLE_AGAIN;
-          break;
-        }
-        if(rc) {
-          char *err_msg = NULL;
-          (void)libssh2_session_last_error(sshc->ssh_session,
-                                           &err_msg, NULL, 0);
-          infof(data, "Failed to send libssh2 channel EOF: %d %s",
-                rc, err_msg);
-        }
-      }
-      myssh_to(data, sshc, SSH_SCP_WAIT_EOF);
+      result = ssh_state_scp_send_eof(data, sshc);
       break;
 
     case SSH_SCP_WAIT_EOF:
-      if(sshc->ssh_channel) {
-        int rc = libssh2_channel_wait_eof(sshc->ssh_channel);
-        if(rc == LIBSSH2_ERROR_EAGAIN) {
-          result = CURLE_AGAIN;
-          break;
-        }
-        if(rc) {
-          char *err_msg = NULL;
-          (void)libssh2_session_last_error(sshc->ssh_session,
-                                           &err_msg, NULL, 0);
-          infof(data, "Failed to get channel EOF: %d %s", rc, err_msg);
-        }
-      }
-      myssh_to(data, sshc, SSH_SCP_WAIT_CLOSE);
+      result = ssh_state_scp_wait_eof(data, sshc);
       break;
 
     case SSH_SCP_WAIT_CLOSE:
-      if(sshc->ssh_channel) {
-        int rc = libssh2_channel_wait_closed(sshc->ssh_channel);
-        if(rc == LIBSSH2_ERROR_EAGAIN) {
-          result = CURLE_AGAIN;
-          break;
-        }
-        if(rc) {
-          char *err_msg = NULL;
-          (void)libssh2_session_last_error(sshc->ssh_session,
-                                           &err_msg, NULL, 0);
-          infof(data, "Channel failed to close: %d %s", rc, err_msg);
-        }
-      }
-      myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+      result = ssh_state_scp_wait_close(data, sshc);
       break;
 
     case SSH_SCP_CHANNEL_FREE:
-      if(sshc->ssh_channel) {
-        int rc = libssh2_channel_free(sshc->ssh_channel);
-        if(rc == LIBSSH2_ERROR_EAGAIN) {
-          result = CURLE_AGAIN;
-          break;
-        }
-        if(rc < 0) {
-          char *err_msg = NULL;
-          (void)libssh2_session_last_error(sshc->ssh_session,
-                                           &err_msg, NULL, 0);
-          infof(data, "Failed to free libssh2 scp subsystem: %d %s",
-                rc, err_msg);
-        }
-        sshc->ssh_channel = NULL;
-      }
-      CURL_TRC_SSH(data, "SCP DONE phase complete");
-      myssh_to(data, sshc, SSH_STOP);
+      result = ssh_state_scp_channel_free(data, sshc);
       break;
 
     case SSH_SESSION_DISCONNECT:
@@ -2979,14 +3141,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
 
     case SSH_SESSION_FREE:
-      result = sshc_cleanup(sshc, data, FALSE);
-      if(result)
-        break;
-      /* the code we are about to return */
-      memset(sshc, 0, sizeof(struct ssh_conn));
-      connclose(conn, "SSH session free");
-      sshc->state = SSH_SESSION_FREE; /* current */
-      myssh_to(data, sshc, SSH_STOP);
+      result = ssh_state_session_free(data, sshc);
       break;
 
     case SSH_QUIT:
