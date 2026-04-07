@@ -13,6 +13,7 @@ Checks:
   - -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
   - -clang-diagnostic-nullability-extension
   - bugprone-assert-side-effect
+  - bugprone-assignment-in-if-condition
   - bugprone-chained-comparison
   - bugprone-dynamic-static-initializers
   - bugprone-macro-parentheses
