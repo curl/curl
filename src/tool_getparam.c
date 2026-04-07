@@ -2421,22 +2421,26 @@ static ParameterError opt_secs(struct OperationConfig *config,
                                const struct LongShort *a,
                                const char *nextarg)
 {
-  ParameterError err = PARAM_OK;
+  long val;
+  ParameterError err = secs2ms(&val, nextarg);
+  if(err)
+    return err;
   switch(a->cmd) {
   case C_CONNECT_TIMEOUT: /* --connect-timeout */
-    return secs2ms(&config->connecttimeout_ms, nextarg);
+    config->connecttimeout_ms = val;
+    break;
   case C_RETRY_DELAY: /* --retry-delay */
-    err = secs2ms(&config->retry_delay_ms, nextarg);
+    config->retry_delay_ms = val;
     break;
   case C_RETRY_MAX_TIME: /* --retry-max-time */
-    err = secs2ms(&config->retry_maxtime_ms, nextarg);
+    config->retry_maxtime_ms = val;
     break;
   case C_EXPECT100_TIMEOUT: /* --expect100-timeout */
-    err = secs2ms(&config->expect100timeout_ms, nextarg);
+    config->expect100timeout_ms = val;
     break;
   case C_MAX_TIME: /* --max-time */
     /* specified max time */
-    err = secs2ms(&config->timeout_ms, nextarg);
+    config->timeout_ms = val;
     break;
   default:
     DEBUGASSERT(0);
