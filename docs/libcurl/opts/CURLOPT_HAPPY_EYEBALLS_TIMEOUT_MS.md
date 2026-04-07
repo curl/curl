@@ -65,6 +65,12 @@ anything back). That took 3 times the happy eyeballs timeout, so 600ms
 in the default setting. When any of those four report a success, that
 socket is used for the transfer and the other three are closed.
 
+There is a limit on the number of sockets opened for connect attempts. When
+that limit is reached and more addresses are available, the oldest
+attempt is discarded. This limit is currently 6. With the default
+happy eyeball timeout of 200ms, this closes attempts after 1 second
+*as long as there are more addresses to try*.
+
 There are situations where connect attempts fail, but the failure is
 considered being inconclusive. The QUIC protocol may encounter this.
 When a QUIC server restarts, it may send replies indicating that it
