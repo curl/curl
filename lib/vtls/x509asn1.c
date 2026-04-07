@@ -160,7 +160,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   b = (unsigned char)*beg++;
   if(!(b & 0x80))
     len = b;
-  else if(!(b &= 0x7F)) {
+  else if(!(b & 0x7F)) {
     /* Unspecified length. Since we have all the data, we can determine the
        effective length by skipping element until an end element is found. */
     if(!elem->constructed)
@@ -176,9 +176,10 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
     elem->end = beg;
     return beg + 1;
   }
-  else if((unsigned)b > (size_t)(end - beg))
+  else if((unsigned)(b & 0x7F) > (size_t)(end - beg))
     return NULL; /* Does not fit in source. */
   else {
+    b &= 0x7F;
     /* Get long length. */
     len = 0;
     do {
