@@ -67,22 +67,7 @@
 #elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
 
 #  include <wolfssl/options.h>
-#  include <wolfssl/openssl/des.h>
-#  include <wolfssl/version.h>
-#  ifdef OPENSSL_COEXIST
-#    define DES_key_schedule      WOLFSSL_DES_key_schedule
-#    define DES_cblock            WOLFSSL_DES_cblock
-#    define DES_set_key           wolfSSL_DES_set_key
-#    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
-#    define DES_ecb_encrypt       wolfSSL_DES_ecb_encrypt
-#    define DESKEY(x)             ((WOLFSSL_DES_key_schedule *)(x))
-#    if LIBWOLFSSL_VERSION_HEX >= 0x05007006
-#      define DES_ENCRYPT WC_DES_ENCRYPT
-#      define DES_DECRYPT WC_DES_DECRYPT
-#    endif
-#  else
-#    define DESKEY(x) &x
-#  endif
+#  include <wolfssl/wolfcrypt/des3.h>
 #  define USE_WOLFSSL_DES
 #  define USE_CURL_DES_SET_ODD_PARITY
 
@@ -183,9 +168,9 @@ static void setup_des_key(const unsigned char *key_56, DES_key_schedule *ks)
 }
 
 #elif defined(USE_WOLFSSL_DES)
-static void setup_des_key(const unsigned char *key_56, DES_key_schedule *ks)
+static void setup_des_key(const unsigned char *key_56, Des *des)
 {
-  DES_cblock key;
+  byte key[8];
 
   /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, (char *)&key);
@@ -194,7 +179,7 @@ static void setup_des_key(const unsigned char *key_56, DES_key_schedule *ks)
   curl_des_set_odd_parity((unsigned char *)&key, sizeof(key));
 
   /* Set the key */
-  DES_set_key_unchecked(&key, ks);
+  wc_Des_SetKey(des, key, NULL, 0);
 }
 
 #elif defined(USE_GNUTLS)
@@ -329,19 +314,16 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(plaintext),
                   (DES_cblock *)(results + 16), &ks, DES_ENCRYPT);
 #elif defined(USE_WOLFSSL_DES)
-  DES_key_schedule ks;
-
-  setup_des_key(keys, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(plaintext),
-                  (DES_cblock *)results, DESKEY(ks), DES_ENCRYPT);
-
-  setup_des_key(keys + 7, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(plaintext),
-                  (DES_cblock *)(results + 8), DESKEY(ks), DES_ENCRYPT);
-
-  setup_des_key(keys + 14, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(plaintext),
-                  (DES_cblock *)(results + 16), DESKEY(ks), DES_ENCRYPT);
+  Des des;
+  setup_des_key(keys, &des);
+  wc_Des_EcbEncrypt(&des, (byte *)results, plaintext,
+                    DES_KEY_SIZE);
+  setup_des_key(keys + 7, &des);
+  wc_Des_EcbEncrypt(&des, (byte *)(results + 8), (const byte *)plaintext,
+                    DES_KEY_SIZE);
+  setup_des_key(keys + 14, &des);
+  wc_Des_EcbEncrypt(&des, (byte *)(results + 16), (const byte *)plaintext,
+                    DES_KEY_SIZE);
 #elif defined(USE_GNUTLS)
   struct des_ctx des;
   setup_des_key(keys, &des);
@@ -390,15 +372,13 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(magic),
                     (DES_cblock *)(lmbuffer + 8), &ks, DES_ENCRYPT);
 #elif defined(USE_WOLFSSL_DES)
-    DES_key_schedule ks;
-
-    setup_des_key(pw, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(magic),
-                    (DES_cblock *)lmbuffer, DESKEY(ks), DES_ENCRYPT);
-
-    setup_des_key(pw + 7, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(magic),
-                    (DES_cblock *)(lmbuffer + 8), DESKEY(ks), DES_ENCRYPT);
+    Des des;
+    setup_des_key(pw, &des);
+    wc_Des_EcbEncrypt(&des, (byte *)lmbuffer, (const byte *)magic,
+                      DES_KEY_SIZE);
+    setup_des_key(pw + 7, &des);
+    wc_Des_EcbEncrypt(&des, (byte *)(lmbuffer + 8), (const byte *)magic,
+                      DES_KEY_SIZE);
 #elif defined(USE_GNUTLS)
     struct des_ctx des;
     setup_des_key(pw, &des);
