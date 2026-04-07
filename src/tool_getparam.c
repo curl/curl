@@ -2355,42 +2355,44 @@ static ParameterError opt_unum(struct OperationConfig *config,
 {
   ParameterError err = PARAM_OK;
   long val;
+  err = str2unum(&val, nextarg);
+  if(err)
+    return err;
   switch(a->cmd) {
   case C_VLAN_PRIORITY: /* --vlan-priority */
-    err = str2unummax(&config->vlan_priority, nextarg, 7);
+    if(val > 7)
+      return PARAM_NUMBER_TOO_LARGE;
+    config->vlan_priority = val;
     break;
   case C_RETRY: /* --retry */
-    err = str2unum(&config->req_retry, nextarg);
+    config->req_retry = val;
     break;
   case C_KEEPALIVE_TIME: /* --keepalive-time */
-    err = str2unum(&config->alivetime, nextarg);
+    config->alivetime = val;
     break;
   case C_KEEPALIVE_CNT: /* --keepalive-cnt */
-    err = str2unum(&config->alivecnt, nextarg);
+    config->alivecnt = val;
     break;
   case C_TFTP_BLKSIZE: /* --tftp-blksize */
-    err = str2unum(&config->tftp_blksize, nextarg);
+    config->tftp_blksize = val;
     break;
   case C_HAPPY_EYEBALLS_TIMEOUT_MS: /* --happy-eyeballs-timeout-ms */
-    err = str2unum(&config->happy_eyeballs_timeout_ms, nextarg);
+    config->happy_eyeballs_timeout_ms = val;
     /* 0 is a valid value for this timeout */
     break;
   case C_SPEED_TIME: /* --speed-time */
     /* low speed time */
-    err = str2unum(&config->low_speed_time, nextarg);
-    if(!err && !config->low_speed_limit)
+    config->low_speed_time = val;
+    if(!config->low_speed_limit)
       config->low_speed_limit = 1;
     break;
   case C_SPEED_LIMIT: /* --speed-limit */
     /* low speed limit */
-    err = str2unum(&config->low_speed_limit, nextarg);
-    if(!err && !config->low_speed_time)
+    config->low_speed_limit = val;
+    if(!config->low_speed_time)
       config->low_speed_time = 30;
     break;
   case C_PARALLEL_HOST: /* --parallel-max-host */
-    err = str2unum(&val, nextarg);
-    if(err)
-      break;
     if(val > MAX_PARALLEL_HOST)
       global->parallel_host = MAX_PARALLEL_HOST;
     else if(val < 1)
@@ -2399,9 +2401,6 @@ static ParameterError opt_unum(struct OperationConfig *config,
       global->parallel_host = (unsigned short)val;
     break;
   case C_PARALLEL_MAX:  /* --parallel-max */
-    err = str2unum(&val, nextarg);
-    if(err)
-      break;
     if(val > MAX_PARALLEL)
       global->parallel_max = MAX_PARALLEL;
     else if(val < 1)
