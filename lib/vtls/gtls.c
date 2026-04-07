@@ -206,7 +206,7 @@ static gnutls_datum_t load_file(const char *file)
   if(fseek(f, 0, SEEK_END) != 0)
     goto out;
   filelen = ftell(f);
-  if(filelen < 0 || (size_t)filelen > UINT_MAX)
+  if(filelen < 0 || filelen > CURL_MAX_INPUT_LENGTH)
     goto out;
   if(fseek(f, 0, SEEK_SET) != 0)
     goto out;
