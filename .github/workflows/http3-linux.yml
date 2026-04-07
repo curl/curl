@@ -427,7 +427,8 @@ jobs:
           - name: 'openssl4'
             install_steps: skipall
             LDFLAGS: -Wl,-rpath,/home/runner/openssl4/build/lib
-            PKG_CONFIG_PATH: "/home/runner/openssl4/build/lib/pkgconfig:\
+            PKG_CONFIG_PATH: "\
+              /home/runner/openssl4/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
               /home/runner/nghttp2-openssl4/build/lib/pkgconfig"
             configure: >-
@@ -435,7 +436,8 @@ jobs:
 
           - name: 'openssl4'
             tflags: '--min=1640'
-            PKG_CONFIG_PATH: "/home/runner/openssl4/build/lib/pkgconfig:\
+            PKG_CONFIG_PATH: "\
+              /home/runner/openssl4/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
               /home/runner/ngtcp2-openssl4/build/lib/pkgconfig:\
               /home/runner/nghttp2/build/lib/pkgconfig"
@@ -483,7 +485,8 @@ jobs:
 
           - name: 'boringssl'
             tflags: '--min=1790'
-            PKG_CONFIG_PATH: "/home/runner/boringssl/build/lib/pkgconfig:\
+            PKG_CONFIG_PATH: "\
+              /home/runner/boringssl/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
               /home/runner/ngtcp2-boringssl/build/lib/pkgconfig:\
               /home/runner/nghttp2/build/lib/pkgconfig"
@@ -503,7 +506,8 @@ jobs:
             install_packages: libp11-kit-dev libssh-dev
             tflags: '--min=1840'
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
-            PKG_CONFIG_PATH: "/home/runner/nettle/build/lib64/pkgconfig:\
+            PKG_CONFIG_PATH: "\
+              /home/runner/nettle/build/lib64/pkgconfig:\
               /home/runner/gnutls/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
               /home/runner/ngtcp2/build/lib/pkgconfig:\
