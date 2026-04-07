@@ -31,19 +31,19 @@ Checks:
   - bugprone-suspicious-missing-comma
   - bugprone-suspicious-realloc-usage
   - bugprone-suspicious-semicolon
-# - bugprone-unchecked-string-to-number-conversion  # needs converting sscanf to strtol or curlx_str_*
+  # bugprone-unchecked-string-to-number-conversion  # needs converting sscanf to strtol or curlx_str_*
   - misc-const-correctness
   - misc-header-include-cycle
-# - misc-redundant-expression  # undesired hits due to system macros, e.g. due to POLLIN == POLLRDNORM | POLLRDBAND, then or-ing all three
+  # misc-redundant-expression  # undesired hits due to system macros, e.g. due to POLLIN == POLLRDNORM | POLLRDBAND, then or-ing all three
   - portability-*
   - readability-duplicate-include
-# - readability-else-after-return
-# - readability-enum-initial-value
-# - readability-function-cognitive-complexity
+  # readability-else-after-return
+  # readability-enum-initial-value
+  # readability-function-cognitive-complexity
   - readability-inconsistent-declaration-parameter-name
-# - readability-misleading-indentation  # too many false positives and oddball/conditional source
+  # readability-misleading-indentation  # too many false positives and oddball/conditional source
   - readability-named-parameter
-# - readability-redundant-casting  # false positives in types that change from platform to platform, even with IgnoreTypeAliases: true
+  # readability-redundant-casting  # false positives in types that change from platform to platform, even with IgnoreTypeAliases: true
   - readability-redundant-control-flow
   - readability-redundant-declaration
   - readability-redundant-function-ptr-dereference
