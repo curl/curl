@@ -164,33 +164,33 @@ static const struct tzinfo tz[] = {
      RFC 1123) had their signs wrong. Here we use the correct signs to match
      actual military usage.
    */
-  { "A",   1 * 60 },           /* Alpha */
-  { "B",   2 * 60 },           /* Bravo */
-  { "C",   3 * 60 },           /* Charlie */
-  { "D",   4 * 60 },           /* Delta */
-  { "E",   5 * 60 },           /* Echo */
-  { "F",   6 * 60 },           /* Foxtrot */
-  { "G",   7 * 60 },           /* Golf */
-  { "H",   8 * 60 },           /* Hotel */
-  { "I",   9 * 60 },           /* India */
+  { "A", -1 * 60 },          /* Alpha */
+  { "B", -2 * 60 },          /* Bravo */
+  { "C", -3 * 60 },          /* Charlie */
+  { "D", -4 * 60 },          /* Delta */
+  { "E", -5 * 60 },          /* Echo */
+  { "F", -6 * 60 },          /* Foxtrot */
+  { "G", -7 * 60 },          /* Golf */
+  { "H", -8 * 60 },          /* Hotel */
+  { "I", -9 * 60 },          /* India */
   /* "J", Juliet is not used as a timezone, to indicate the observer's local
      time */
-  { "K",  10 * 60 },           /* Kilo */
-  { "L",  11 * 60 },           /* Lima */
-  { "M",  12 * 60 },           /* Mike */
-  { "N",  -1 * 60 },           /* November */
-  { "O",  -2 * 60 },           /* Oscar */
-  { "P",  -3 * 60 },           /* Papa */
-  { "Q",  -4 * 60 },           /* Quebec */
-  { "R",  -5 * 60 },           /* Romeo */
-  { "S",  -6 * 60 },           /* Sierra */
-  { "T",  -7 * 60 },           /* Tango */
-  { "U",  -8 * 60 },           /* Uniform */
-  { "V",  -9 * 60 },           /* Victor */
-  { "W", -10 * 60 },           /* Whiskey */
-  { "X", -11 * 60 },           /* X-ray */
-  { "Y", -12 * 60 },           /* Yankee */
-  { "Z", 0 },                  /* Zulu, zero meridian, a.k.a. UTC */
+  { "K", -10 * 60 },         /* Kilo */
+  { "L", -11 * 60 },         /* Lima */
+  { "M", -12 * 60 },         /* Mike */
+  { "N", 1 * 60 },           /* November */
+  { "O", 2 * 60 },           /* Oscar */
+  { "P", 3 * 60 },           /* Papa */
+  { "Q", 4 * 60 },           /* Quebec */
+  { "R", 5 * 60 },           /* Romeo */
+  { "S", 6 * 60 },           /* Sierra */
+  { "T", 7 * 60 },           /* Tango */
+  { "U", 8 * 60 },           /* Uniform */
+  { "V", 9 * 60 },           /* Victor */
+  { "W", 10 * 60 },          /* Whiskey */
+  { "X", 11 * 60 },          /* X-ray */
+  { "Y", 12 * 60 },          /* Yankee */
+  { "Z", 0 },                /* Zulu, zero meridian, a.k.a. UTC */
 };
 
 /* returns:
@@ -266,6 +266,9 @@ enum assume {
   DATE_TIME
 };
 
+/* (1969 / 4) - (1969 / 100) + (1969 / 400) = 492 - 19 + 4 = 477 */
+#define LEAP_DAYS_BEFORE_1969 477
+
 /*
  * time2epoch: time stamp to seconds since epoch in GMT time zone. Similar to
  * mktime but for GMT only.
@@ -273,16 +276,15 @@ enum assume {
 static time_t time2epoch(int sec, int min, int hour,
                          int mday, int mon, int year)
 {
-  static const int month_days_cumulative[12] = {
+  static const int cumulative_days[12] = {
     0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
   };
-  int leap_days = year - (mon <= 1);
-  leap_days = ((leap_days / 4) - (leap_days / 100) + (leap_days / 400)
-               - (1969 / 4) + (1969 / 100) - (1969 / 400));
-  return ((((((((time_t)(year - 1970) * 365)
-    + leap_days + month_days_cumulative[mon] + mday - 1) * 24)
-    + hour) * 60)
-    + min) * 60) + sec;
+  int y = year - (mon <= 1);
+  int leap_days = (y / 4) - (y / 100) + (y / 400) - LEAP_DAYS_BEFORE_1969;
+  time_t days = (time_t)(year - 1970) * 365 + leap_days +
+    cumulative_days[mon] + mday - 1;
+
+  return (((days * 24 + hour) * 60 + min) * 60) + sec;
 }
 
 /* Returns the value of a single-digit or two-digit decimal number, return
