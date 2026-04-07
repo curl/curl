@@ -62,7 +62,6 @@
 #  ifdef OPENSSL_IS_AWSLC  /* for versions 1.2.0 to 1.30.1 */
 #    define DES_set_key_unchecked (void)DES_set_key
 #  endif
-#  define DESKEY(x) &x
 #  define USE_OPENSSL_DES
 
 #elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
@@ -318,17 +317,17 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
 #ifdef USE_OPENSSL_DES
   DES_key_schedule ks;
 
-  setup_des_key(keys, DESKEY(ks));
+  setup_des_key(keys, &ks);
   DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(plaintext),
-                  (DES_cblock *)results, DESKEY(ks), DES_ENCRYPT);
+                  (DES_cblock *)results, &ks, DES_ENCRYPT);
 
-  setup_des_key(keys + 7, DESKEY(ks));
+  setup_des_key(keys + 7, &ks);
   DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(plaintext),
-                  (DES_cblock *)(results + 8), DESKEY(ks), DES_ENCRYPT);
+                  (DES_cblock *)(results + 8), &ks, DES_ENCRYPT);
 
-  setup_des_key(keys + 14, DESKEY(ks));
+  setup_des_key(keys + 14, &ks);
   DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(plaintext),
-                  (DES_cblock *)(results + 16), DESKEY(ks), DES_ENCRYPT);
+                  (DES_cblock *)(results + 16), &ks, DES_ENCRYPT);
 #elif defined(USE_WOLFSSL_DES)
   DES_key_schedule ks;
 
@@ -383,13 +382,13 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
 #ifdef USE_OPENSSL_DES
     DES_key_schedule ks;
 
-    setup_des_key(pw, DESKEY(ks));
+    setup_des_key(pw, &ks);
     DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(magic),
-                    (DES_cblock *)lmbuffer, DESKEY(ks), DES_ENCRYPT);
+                    (DES_cblock *)lmbuffer, &ks, DES_ENCRYPT);
 
-    setup_des_key(pw + 7, DESKEY(ks));
+    setup_des_key(pw + 7, &ks);
     DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(magic),
-                    (DES_cblock *)(lmbuffer + 8), DESKEY(ks), DES_ENCRYPT);
+                    (DES_cblock *)(lmbuffer + 8), &ks, DES_ENCRYPT);
 #elif defined(USE_WOLFSSL_DES)
     DES_key_schedule ks;
 
