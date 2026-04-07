@@ -24,6 +24,7 @@ no upgrade
 <features>
 Debug
 ws
+verbose-strings
 </features>
 <setenv>
 CURL_ENTROPY=12345678
