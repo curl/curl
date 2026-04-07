@@ -124,7 +124,7 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_test_ctx *ctx = cf->ctx;
   current_tr->ongoing--;
-  infof(data, "%04dms: cf[%s] destroyed, now %d ongoing",
+  infof(data, "%04dms: cf[%s] destroyed, now %u ongoing",
         (int)curlx_timediff_ms(curlx_now(), current_tr->started),
         ctx->id, current_tr->ongoing);
   curlx_free(ctx);
@@ -226,7 +226,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   if(ctx->stats->creations == 1)
     ctx->stats->first_created = created_at;
   ctx->stats->last_created = created_at;
-  infof(data, "%04dms: cf[%s] created, now %d ongoing",
+  infof(data, "%04dms: cf[%s] created, now %u ongoing",
         (int)created_at, ctx->id, current_tr->ongoing);
 
   result = Curl_cf_create(&cf, &cft_test, ctx);
@@ -304,7 +304,7 @@ static void check_result(const struct test_case *tc, struct test_result *tr)
     }
   }
   if(tr->max_concurrent != tc->max_concurrent) {
-    curl_msprintf(msg, "%d: expected max %d ongoing, but reported %d",
+    curl_msprintf(msg, "%d: expected max %u ongoing, but reported %u",
                   tc->id, tc->max_concurrent, tr->max_concurrent);
     fail(msg);
   }

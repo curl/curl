@@ -68,7 +68,7 @@ socket is used for the transfer and the other three are closed.
 There is a limit on the number of sockets opened for connect attempts. When
 that limit is reached and more addresses are available, the oldest
 attempt is discarded. This limit is currently 6. With the default
-happy eyeball timeout of 200ms, this closes attempts after 1 second
+happy eyeballs timeout of 200ms, this closes attempts after 1.2 seconds
 *as long as there are more addresses to try*.
 
 There are situations where connect attempts fail, but the failure is
