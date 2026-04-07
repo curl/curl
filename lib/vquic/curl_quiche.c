@@ -32,6 +32,7 @@
 #include "uint-hash.h"
 #include "urldata.h"
 #include "cfilters.h"
+#include "cf-dns.h"
 #include "cf-socket.h"
 #include "curl_trc.h"
 #include "rand.h"
@@ -1378,6 +1379,12 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
+  if(Curl_ossl_need_httpsrr(data) &&
+     !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+    CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
+    return CURLE_OK;
+  }
+
   vquic_ctx_update_time(&ctx->q, Curl_pgrs_now(data));
 
   if(!ctx->qconn) {
