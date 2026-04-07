@@ -209,7 +209,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
           printf "#!/bin/sh
-            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 60 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
+            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 60 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sudo systemctl restart networking
             dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
@@ -559,7 +559,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
           printf "#!/bin/sh
-            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 45 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
+            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 45 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sudo systemctl restart networking
             dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
