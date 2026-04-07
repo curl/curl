@@ -316,14 +316,11 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
 #elif defined(USE_WOLFSSL_DES)
   Des des;
   setup_des_key(keys, &des);
-  wc_Des_EcbEncrypt(&des, (byte *)results, plaintext,
-                    DES_KEY_SIZE);
+  wc_Des_EcbEncrypt(&des, (byte *)results, plaintext, DES_KEY_SIZE);
   setup_des_key(keys + 7, &des);
-  wc_Des_EcbEncrypt(&des, (byte *)(results + 8), (const byte *)plaintext,
-                    DES_KEY_SIZE);
+  wc_Des_EcbEncrypt(&des, (byte *)(results + 8), plaintext, DES_KEY_SIZE);
   setup_des_key(keys + 14, &des);
-  wc_Des_EcbEncrypt(&des, (byte *)(results + 16), (const byte *)plaintext,
-                    DES_KEY_SIZE);
+  wc_Des_EcbEncrypt(&des, (byte *)(results + 16), plaintext, DES_KEY_SIZE);
 #elif defined(USE_GNUTLS)
   struct des_ctx des;
   setup_des_key(keys, &des);
@@ -374,11 +371,9 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
 #elif defined(USE_WOLFSSL_DES)
     Des des;
     setup_des_key(pw, &des);
-    wc_Des_EcbEncrypt(&des, (byte *)lmbuffer, (const byte *)magic,
-                      DES_KEY_SIZE);
+    wc_Des_EcbEncrypt(&des, (byte *)lmbuffer, magic, DES_KEY_SIZE);
     setup_des_key(pw + 7, &des);
-    wc_Des_EcbEncrypt(&des, (byte *)(lmbuffer + 8), (const byte *)magic,
-                      DES_KEY_SIZE);
+    wc_Des_EcbEncrypt(&des, (byte *)(lmbuffer + 8), magic, DES_KEY_SIZE);
 #elif defined(USE_GNUTLS)
     struct des_ctx des;
     setup_des_key(pw, &des);
