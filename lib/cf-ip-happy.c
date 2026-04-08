@@ -958,7 +958,7 @@ static void cf_ip_happy_destroy(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_ip_happy = {
   "HAPPY-EYEBALLS",
-  0,
+  CF_TYPE_SETUP,
   CURL_LOG_LVL_NONE,
   cf_ip_happy_destroy,
   cf_ip_happy_connect,

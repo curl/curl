@@ -306,7 +306,7 @@ static CURLcode cf_dns_cntrl(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_dns = {
   "DNS",
-  0,
+  CF_TYPE_SETUP,
   CURL_LOG_LVL_NONE,
   cf_dns_destroy,
   cf_dns_connect,

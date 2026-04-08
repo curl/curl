@@ -392,7 +392,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
 struct Curl_cftype Curl_cft_http_proxy = {
   "HTTP-PROXY",
   CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
-  0,
+  CF_TYPE_SETUP,
   http_proxy_cf_destroy,
   http_proxy_cf_connect,
   http_proxy_cf_close,
