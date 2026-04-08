@@ -491,6 +491,24 @@ static void conn_report_connect_stats(struct Curl_cfilter *cf,
   }
 }
 
+static void conn_remove_setup_filters(struct Curl_easy *data,
+                                      int sockindex)
+{
+  struct Curl_cfilter **anchor = &data->conn->cfilter[sockindex];
+  while(*anchor) {
+    struct Curl_cfilter *cf = *anchor;
+    if(cf->connected && (cf->cft->flags & CF_TYPE_SETUP)) {
+      *anchor = cf->next;
+      cf->next = NULL;
+      CURL_TRC_CF(data, cf, "removing connected setup filter");
+      cf->cft->destroy(cf, data);
+      curlx_free(cf);
+    }
+    else
+      anchor = &cf->next;
+  }
+}
+
 CURLcode Curl_conn_connect(struct Curl_easy *data,
                            int sockindex,
                            bool blocking,
@@ -544,6 +562,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       conn_report_connect_stats(cf, data);
       data->conn->keepalive = *Curl_pgrs_now(data);
       VERBOSE(result = cf_verboseconnect(data, cf));
+      conn_remove_setup_filters(data, sockindex);
       goto out;
     }
     else if(result) {

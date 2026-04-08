@@ -743,7 +743,7 @@ static void cf_hc_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 struct Curl_cftype Curl_cft_http_connect = {
   "HTTPS-CONNECT",
-  0,
+  CF_TYPE_SETUP,
   CURL_LOG_LVL_NONE,
   cf_hc_destroy,
   cf_hc_connect,
