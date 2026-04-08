@@ -108,89 +108,82 @@ static const char * const weekday[] = {
 
 struct tzinfo {
   char name[5];
-  int offset; /* +/- in minutes */
+  int16_t offset; /* +/- in minutes */
 };
 
-/* Here's a bunch of frequently used time zone names. These were supported
-   by the old getdate parser. */
 #define tDAYZONE (-60)         /* offset for daylight savings time */
+
+/* alpha-sorted list of time zones */
 static const struct tzinfo tz[] = {
-  { "GMT",     0 },            /* Greenwich Mean */
-  { "UT",      0 },            /* Universal Time */
-  { "UTC",     0 },            /* Universal (Coordinated) */
-  { "WET",     0 },            /* Western European */
-  { "BST",     0 + tDAYZONE }, /* British Summer */
-  { "WAT",    60 },            /* West Africa */
-  { "AST",   240 },            /* Atlantic Standard */
+  { "A", -1 * 60 },            /* Alpha */
   { "ADT",   240 + tDAYZONE }, /* Atlantic Daylight */
-  { "EST",   300 },            /* Eastern Standard */
-  { "EDT",   300 + tDAYZONE }, /* Eastern Daylight */
-  { "CST",   360 },            /* Central Standard */
-  { "CDT",   360 + tDAYZONE }, /* Central Daylight */
-  { "MST",   420 },            /* Mountain Standard */
-  { "MDT",   420 + tDAYZONE }, /* Mountain Daylight */
-  { "PST",   480 },            /* Pacific Standard */
-  { "PDT",   480 + tDAYZONE }, /* Pacific Daylight */
-  { "YST",   540 },            /* Yukon Standard */
-  { "YDT",   540 + tDAYZONE }, /* Yukon Daylight */
-  { "HST",   600 },            /* Hawaii Standard */
-  { "HDT",   600 + tDAYZONE }, /* Hawaii Daylight */
-  { "CAT",   600 },            /* Central Alaska */
   { "AHST",  600 },            /* Alaska-Hawaii Standard */
-  { "NT",    660 },            /* Nome */ /* spellchecker:disable-line */
-  { "IDLW",  720 },            /* International Date Line West */
+  { "AST",   240 },            /* Atlantic Standard */
+  { "B", -2 * 60 },            /* Bravo */
+  { "BST",     0 + tDAYZONE }, /* British Summer */
+  { "C", -3 * 60 },            /* Charlie */
+  { "CAT",   600 },            /* Central Alaska */
+  { "CCT",  -480 },            /* China Coast, USSR Zone 7 */
+  { "CDT",   360 + tDAYZONE }, /* Central Daylight */
+  { "CEST",  -60 + tDAYZONE }, /* Central European Summer */
   { "CET",   -60 },            /* Central European */
+  { "CST",   360 },            /* Central Standard */
+  { "D", -4 * 60 },            /* Delta */
+  { "E", -5 * 60 },            /* Echo */
+  { "EADT", -600 + tDAYZONE }, /* Eastern Australian Daylight */
+  { "EAST", -600 },            /* Eastern Australian Standard */
+  { "EDT",   300 + tDAYZONE }, /* Eastern Daylight */
+  { "EET",  -120 },            /* Eastern Europe, USSR Zone 1 */
+  { "EST",   300 },            /* Eastern Standard */
+  { "F", -6 * 60 },            /* Foxtrot */
+  { "FST",   -60 + tDAYZONE }, /* French Summer */
+  { "FWT",   -60 },            /* French Winter */
+  { "G", -7 * 60 },            /* Golf */
+  { "GMT",     0 },            /* Greenwich Mean */
+  { "GST",  -600 },            /* Guam Standard, USSR Zone 9 */
+  { "H", -8 * 60 },            /* Hotel */
+  { "HDT",   600 + tDAYZONE }, /* Hawaii Daylight */
+  { "HST",   600 },            /* Hawaii Standard */
+  { "I", -9 * 60 },            /* India */
+  { "IDLE", -720 },            /* International Date Line East */
+  { "IDLW",  720 },            /* International Date Line West */
+  { "JST",  -540 },            /* Japan Standard, USSR Zone 8 */
+  { "K", -10 * 60 },           /* Kilo */
+  { "L", -11 * 60 },           /* Lima */
+  { "M", -12 * 60 },           /* Mike */
+  { "MDT",   420 + tDAYZONE }, /* Mountain Daylight */
+  { "MEST",  -60 + tDAYZONE }, /* Middle European Summer */
+  { "MESZ",  -60 + tDAYZONE }, /* Middle European Summer */
   { "MET",   -60 },            /* Middle European */
   { "MEWT",  -60 },            /* Middle European Winter */
-  { "MEST",  -60 + tDAYZONE }, /* Middle European Summer */
-  { "CEST",  -60 + tDAYZONE }, /* Central European Summer */
-  { "MESZ",  -60 + tDAYZONE }, /* Middle European Summer */
-  { "FWT",   -60 },            /* French Winter */
-  { "FST",   -60 + tDAYZONE }, /* French Summer */
-  { "EET",  -120 },            /* Eastern Europe, USSR Zone 1 */
-  { "WAST", -420 }, /* spellchecker:disable-line */
-                               /* West Australian Standard */
-  { "WADT", -420 + tDAYZONE }, /* West Australian Daylight */
-  { "CCT",  -480 },            /* China Coast, USSR Zone 7 */
-  { "JST",  -540 },            /* Japan Standard, USSR Zone 8 */
-  { "EAST", -600 },            /* Eastern Australian Standard */
-  { "EADT", -600 + tDAYZONE }, /* Eastern Australian Daylight */
-  { "GST",  -600 },            /* Guam Standard, USSR Zone 9 */
-  { "NZT",  -720 },            /* New Zealand */
-  { "NZST", -720 },            /* New Zealand Standard */
+  { "MST",   420 },            /* Mountain Standard */
+  { "N",      60 },            /* November */
+  { "NT",    660 },            /* Nome */ /* spellchecker:disable-line */
   { "NZDT", -720 + tDAYZONE }, /* New Zealand Daylight */
-  { "IDLE", -720 },            /* International Date Line East */
-  /* Next up: Military timezone names. RFC822 allowed these, but (as noted in
-     RFC 1123) had their signs wrong. Here we use the correct signs to match
-     actual military usage.
-   */
-  { "A", -1 * 60 },          /* Alpha */
-  { "B", -2 * 60 },          /* Bravo */
-  { "C", -3 * 60 },          /* Charlie */
-  { "D", -4 * 60 },          /* Delta */
-  { "E", -5 * 60 },          /* Echo */
-  { "F", -6 * 60 },          /* Foxtrot */
-  { "G", -7 * 60 },          /* Golf */
-  { "H", -8 * 60 },          /* Hotel */
-  { "I", -9 * 60 },          /* India */
-  /* "J", Juliet is not used as a timezone, to indicate the observer's local
-     time */
-  { "K", -10 * 60 },         /* Kilo */
-  { "L", -11 * 60 },         /* Lima */
-  { "M", -12 * 60 },         /* Mike */
-  { "N", 1 * 60 },           /* November */
-  { "O", 2 * 60 },           /* Oscar */
-  { "P", 3 * 60 },           /* Papa */
-  { "Q", 4 * 60 },           /* Quebec */
-  { "R", 5 * 60 },           /* Romeo */
-  { "S", 6 * 60 },           /* Sierra */
-  { "T", 7 * 60 },           /* Tango */
-  { "U", 8 * 60 },           /* Uniform */
-  { "V", 9 * 60 },           /* Victor */
-  { "W", 10 * 60 },          /* Whiskey */
-  { "X", 11 * 60 },          /* X-ray */
-  { "Y", 12 * 60 },          /* Yankee */
-  { "Z", 0 },                /* Zulu, zero meridian, a.k.a. UTC */
+  { "NZST", -720 },            /* New Zealand Standard */
+  { "NZT",  -720 },            /* New Zealand */
+  { "O",  2 * 60 },            /* Oscar */
+  { "P",  3 * 60 },            /* Papa */
+  { "PDT",   480 + tDAYZONE }, /* Pacific Daylight */
+  { "PST",   480 },            /* Pacific Standard */
+  { "Q",  4 * 60 },            /* Quebec */
+  { "R",  5 * 60 },            /* Romeo */
+  { "S",  6 * 60 },            /* Sierra */
+  { "T",  7 * 60 },            /* Tango */
+  { "U",  8 * 60 },            /* Uniform */
+  { "UT",      0 },            /* Universal Time */
+  { "UTC",     0 },            /* Universal (Coordinated) */
+  { "V",  9 * 60 },            /* Victor */
+  { "W", 10 * 60 },            /* Whiskey */
+  { "WADT", -420 + tDAYZONE }, /* West Australian Daylight */
+  { "WAST", -420 },            /* West Australian Standard */
+  { "WAT",    60 },            /* West Africa */
+  { "WET",     0 },            /* Western European */
+  { "X", 11 * 60 },            /* X-ray */
+  { "Y", 12 * 60 },            /* Yankee */
+  { "YDT",   540 + tDAYZONE }, /* Yukon Daylight */
+  { "YST",   540 },            /* Yukon Standard */
+  { "Z",       0 },            /* Zulu, zero meridian, a.k.a. UTC */
 };
 
 /* returns:
@@ -233,22 +226,25 @@ static int checkmonth(const char *check, size_t len)
   return -1; /* return the offset or -1, no real offset is -1 */
 }
 
-/* return the time zone offset between GMT and the input one, in number
-   of seconds or -1 if the timezone was not found/legal */
+static int tzcompare(const void *m1, const void *m2)
+{
+  const struct tzinfo *tz1 = m1;
+  const struct tzinfo *tz2 = m2;
+  return strcmp(tz1->name, tz2->name);
+}
 
+/* return the time zone offset between GMT and the input one, in number of
+   seconds or -1 if the timezone was not found/legal */
 static int checktz(const char *check, size_t len)
 {
-  unsigned int i;
-  const struct tzinfo *what = tz;
-  if(len > 4) /* longer than any valid timezone */
-    return -1;
-
-  for(i = 0; i < CURL_ARRAYSIZE(tz); i++) {
-    size_t ilen = strlen(what->name);
-    if((ilen == len) &&
-       curl_strnequal(check, what->name, len))
+  if(len <= 4) {
+    const struct tzinfo *what;
+    struct tzinfo find = { };
+    memcpy(find.name, check, len);
+    what = bsearch(&find, tz, CURL_ARRAYSIZE(tz), sizeof(struct tzinfo *),
+                   tzcompare);
+    if(what)
       return what->offset * 60;
-    what++;
   }
   return -1;
 }
